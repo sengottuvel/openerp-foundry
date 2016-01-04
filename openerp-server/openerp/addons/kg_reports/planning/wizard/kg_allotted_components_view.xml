@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<openerp>
+    <data>
+        
+        <record id="r_form_v_allotted_components" model="ir.ui.view">
+            <field name="name">kg.allotted.components.form</field>
+            <field name="model">kg.allotted.components</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Allotted Components Statement">
+                   <group col="4" fill="0" height="500">	
+						<notebook tabpos="up" colspan="4">
+						<page string="Filters" name="filters">										
+							<field name="date_from"/>							
+							<field name="date_to" />
+						    <field name="division_id"/>					     
+						</page>	    
+                                                                         
+                    </notebook>     
+                     <separator colspan="4"/>
+						<group col="4" colspan="4">
+							<button name="create_report" string="Generate" type="object" icon="gtk-ok"/>
+						</group>
+						</group>
+                </form>
+            </field>
+        </record>
+        
+        
+        
+        <report string="Allotted Components Statement"
+		model="kg.allotted.components"
+		auto="True"
+		name="jasper_allotted_components_report"
+		rml="kg_reports/planning/report/kg_allotted_components_report.jrxml"
+		id="allottedcomponentsreport" 
+		menu="False"
+		/>
+		
+       <record id="rma_allotted_components" model="ir.actions.act_window">  
+            <field name="name">Allotted Components</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">kg.allotted.components</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+            
+
+      
+
+    </data>
+</openerp>

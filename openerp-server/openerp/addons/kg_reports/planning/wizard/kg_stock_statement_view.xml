@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<openerp>
+    <data>
+        
+        <record id="r_form_v_stock_statement" model="ir.ui.view">
+            <field name="name">kg.stock.statement.form</field>
+            <field name="model">kg.stock.statement</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Stock Statement Report">
+                   <group col="4" fill="0" height="500">	
+						<notebook tabpos="up" colspan="4">
+						<page string="Filters" name="filters">							
+							<field name="as_on_date"/>
+						    <field name="division_id"/>					     
+						</page>	      
+                                                                         
+                    </notebook>     
+                     <separator colspan="4"/>
+						<group col="4" colspan="4">
+							<button name="create_report" string="Generate" type="object" icon="gtk-ok"/>
+						</group>
+						</group>
+                </form>
+            </field>
+        </record>
+        
+        
+        
+        <report string="Stock Statement Report"
+		model="kg.stock.statement"
+		auto="True"
+		name="jasper_stock_statement_report"
+		rml="kg_reports/planning/report/kg_stock_statement_report.jrxml"
+		id="stockstatementreport" 
+		menu="False"
+		/>
+		
+       <record id="rma_stock_statement" model="ir.actions.act_window">  
+            <field name="name">Stock Statement</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">kg.stock.statement</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+            
+
+      
+
+    </data>
+</openerp>

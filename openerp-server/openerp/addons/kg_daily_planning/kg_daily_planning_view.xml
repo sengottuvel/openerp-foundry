@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_daily_planning" model="ir.ui.view">
+			<field name="name">Daily Planning Entry Form</field>
+			<field name="model">kg.daily.planning</field>
+			<field name="arch" type="xml">
+				<form string="Planning (BOM)" version="7.0">
+					<header>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible': [('flag_cancel','=',False)]}"
+							 class="oe_highlight" confirm="Are you sure to proceed ?"/>
+					</header>
+					<sheet>
+						<group>
+							<group>
+								<field name="name"/>
+								<field name="division_id"  attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="note" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="flag_cancel" invisible="1"/>
+							</group>											
+							<group>
+								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="location" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="active" invisible="1"/>
+								<field name="flag_planning" invisible="1"/>
+								<field name="state" style="width: 30%%" class="att_state_change"/>
+							</group>					
+						</group>
+						<group string="Remarks" attrs="{'invisible': [('flag_cancel','=',False)]}">
+							<group>
+								<field name="cancel_remark" attrs="{'invisible': [('flag_cancel','=',False)], 'readonly': [('state','in',['cancel'])]}"/>
+							</group>
+						</group>
+						<notebook>
+							<page string="Planning Details" attrs="{'invisible': [('flag_planning','!=',True)]}">
+								<group>
+									<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['cancel'])]}">
+										<tree string="Planning Details" colors="gray:state == 'cancel'">					
+											<field name="order_ref_no"/>
+											<field name="type" />
+											<field name="pump_model_id"/>
+											<field name="pattern_id"/>
+											<field name="part_name_id"/>
+											<field name="moc_id" />
+											<field name="schedule_qty" />
+											<field name="stock_qty" />
+											<field name="qty"/>
+											<field name="state" invisible="1"/>
+										</tree>
+									</field>
+								</group>
+							</page>
+							<page string="Weekly Schedule Items" >
+								<field name="schedule_line_ids" attrs="{'readonly': [('state','in',['confirmed'])]}">
+									<tree string = "Schedule Items" create="false">
+										<field name="header_id" readonly="1"/>
+										<field name="schedule_date" readonly="1"/>
+										<field name="order_ref_no" readonly="1"/>
+										<field name="pump_model_id" readonly="1"/>
+										<field name="pattern_id" readonly="1"/>
+										<field name="part_name_id" readonly="1"/>
+										<field name="type" readonly="1"/>
+										<field name="moc_id" readonly="1"/>
+										<field name="qty" readonly="1"/>
+									</tree>
+								</field>
+								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
+							</page>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+										<field name="cancel_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+										<field name="update_user_id"/>
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+										<field name="cancel_date" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_daily_planning" model="ir.ui.view">
+			<field name="name">Daily Planning Entry Tree</field>
+			<field name="model">kg.daily.planning</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';black:state == 'confirmed'" 
+								toolbar="True" string="Daily Planning Entry Tree">					
+					<field name="name"/>
+					<field name="entry_date"/>
+					<field name="division_id"/>
+					<field name="location" invisible="1"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	
+	<!-- Child class Tree View Start -->
+		
+	<record id="t_tree_v_daily_planning_details" model="ir.ui.view">
+		<field name="name">Planning Details</field>
+		<field name="model">ch.daily.planning.details</field>
+		<field eval="8" name="priority"/>
+		<field name="arch" type="xml">
+			<tree string="Planning Details" colors="gray:state == 'cancel'">					
+				<field name="order_ref_no"/>
+				<field name="type" />
+				<field name="pump_model_id"/>
+				<field name="pattern_id"/>
+				<field name="part_name_id"/>
+				<field name="moc_id" />
+				<field name="schedule_qty" />
+				<field name="stock_qty" />
+				<field name="qty"/>
+				<field name="state" invisible="1"/>
+			</tree>
+		</field>
+	</record>
+		
+	<!-- Child Class Tree View End -->
+	
+	
+	<!-- Child class Tree View Start (Progress View) -->
+		
+	<record id="t_tree_v_daily_planning_details_progress" model="ir.ui.view">
+		<field name="name">Planning Details</field>
+		<field name="model">ch.daily.planning.details</field>
+		<field eval="8" name="priority"/>
+		<field name="arch" type="xml">
+			<tree string="Planning Details" colors="gray:state == 'cancel'">					
+				<field name="header_id" string="Planning No"/>
+				<field name="planning_date" string="Planning Date"/>
+				<field name="order_ref_no"/>
+				<field name="type" />
+				<field name="pump_model_id"/>
+				<field name="pattern_id"/>
+				<field name="part_name_id"/>
+				<field name="moc_id" />
+				<field name="schedule_qty" />
+				<field name="stock_qty" invisible="1"/>
+				<field name="qty"/>
+				<field name="state" invisible="1"/>
+				<field name="transac_state"/>
+			</tree>
+		</field>
+	</record>
+		
+	<!-- Child Class Tree View End -->
+	
+	
+	<!-- Child Class Form View Start -->
+
+	<record id="t_form_v_daily_planning_details" model="ir.ui.view">
+		<field name="name">Planning Details</field>
+		<field name="model">ch.daily.planning.details</field>
+		<field name="arch" type="xml">			
+			<form string="Planning Details">
+				<group>
+					<group>
+						<field name="order_ref_no"/>
+						<field name="pattern_id"/>
+						<field name="type" />
+						<field name="schedule_qty" />
+						<field name="qty" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}" on_change="onchange_planning_qty(schedule_qty,qty)"/>
+						<field name="cancel_remark" attrs="{'invisible': [('transac_state','in',['in_draft','complete'])], 'readonly': [('state','in',['cancel'])]}"/>
+						<field name="state" invisible="1"/>
+						<field name="transac_state" invisible="1"/>
+					</group>
+					
+					<group>
+						<field name="pump_model_id"/>
+						<field name="part_name_id"/>
+						<field name="moc_id" />
+						<field name="stock_qty" />
+						<field name="note" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+						<field name="line_status" invisible="1"/>
+					</group>
+					<group attrs="{'invisible': [('transac_state','in',['in_draft','cancel','complete'])]}">
+						<button name="entry_cancel" type="object" string="Cancel" states="confirmed" class="oe_highlight" />
+					</group>
+				</group>
+				
+				<newline/>
+				
+				<group string="Allocation Details" attrs="{'invisible': [('line_status','in',['planning'])]}">
+					<field name="line_ids" colspan="4" nolabel="1"  attrs="{'readonly': [('transac_state','in',['in_plan','sent_for_qc','sent_for_produc','cancel','complete'])]}">
+						<tree string="Allocation Details" editable="bottom" delete="false" create="false">
+						   <field name="order_ref_no" invisible="1"/>
+						   <field name="pump_model_id" invisible="1"/>
+						   <field name="pattern_id" invisible="1"/>
+						   <field name="part_name_id" invisible="1"/>
+						   <field name="moc_id" invisible="1"/>
+						   <field name="planning_qty" invisible="1"/>
+						   <field name="stock_qty"/>
+						   <field name="stage_id"/>
+						   <field name="qty" on_change="onchange_allocation_qty(planning_qty, stock_qty, qty)" required="1"/>
+						   <field name="remarks"/>
+						   <field name="state" invisible="1"/>
+						</tree>
+					</field>
+				<group attrs="{'invisible': [('transac_state','not in',['re_allocate'])]}">
+					<button name="entry_reallocate" type="object" string="Re Allocate" class="oe_highlight" />
+				</group>
+				</group>
+				
+			</form>
+		</field>							
+					
+	</record>
+		
+	<!-- Child Class Form View End -->
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_daily_planning" model="ir.ui.view">
+			<field name="name">Daily Planning Entry Search</field>
+			<field name="model">kg.daily.planning</field>
+			<field name="arch" type="xml">
+				<search string="Daily Planning Entry Search">
+					<field name="name" string="Transaction"  filter_domain="[('name','ilike',self)]" />
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>
+					<filter icon="terp-check" name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>							
+					<separator/>
+					<group expand="0" string="Group By...">
+						<filter string="Division" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'division_id'}"/>
+						<filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+					</group>
+				</search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+		
+	<!-- Menu Action Start-->
+		
+		<record id="tma_daily_planning" model="ir.actions.act_window">
+			<field name="name">Planning</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.daily.planning</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_daily_planning"/>
+			<field name="search_view_id" ref="t_search_v_daily_planning"/>
+			<field name="context">{"search_default_draft":1}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Child Class Menu Action Start-->
+		
+		<record id="tma_daily_planning_details" model="ir.actions.act_window">
+			<field name="name">Planning Items</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">ch.daily.planning.details</field>
+			<field name="view_type">tree</field>
+			<field name="context">{}</field>
+			<field name="domain">[('transac_state','in',('in_plan','sent_for_qc','sent_for_produc','re_allocate')),('state','!=',('cancel'))]</field>
+			<field name="view_id" ref="t_tree_v_daily_planning_details_progress"/>
+		</record>
+		
+	<!-- Child Class Menu Action End-->
+	
+	
+		
+	</data>
+</openerp>

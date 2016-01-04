@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+
+	<!-- Form View Start -->
+
+		<record id="t_form_v_weekly_schedule" model="ir.ui.view">
+			<field name="name">Weekly Schedule Entry Form</field>
+			<field name="model">kg.weekly.schedule</field>
+			<field name="arch" type="xml">
+				<form string="Weekly Schedule" version="7.0">
+					<header>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible': [('flag_cancel','=',False)]}"
+							 class="oe_highlight" confirm="Are you sure to proceed ?"/>
+					</header>
+					<sheet>		
+						<group>
+							<group>
+								<field name="name"/>
+								<field name="from_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="division_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="note" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="flag_cancel" invisible="1"/>
+								
+							</group>											
+							<group>
+								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="to_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="location" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="state" style="width: 30%%" class="att_state_change"/>
+							</group>					
+						</group>
+						<group string="Remarks" attrs="{'invisible': [('flag_cancel','=',False)]}">
+							<group>
+								<field name="cancel_remark" attrs="{'invisible': [('flag_cancel','=',False)], 'readonly': [('state','in',['cancel'])]}"/>
+							</group>
+						</group>
+						<notebook>
+							<page string="Schedule Details" >
+								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['cancel'])]}"/>
+							</page>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+										<field name="cancel_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+										<field name="update_user_id"/>
+										
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+										<field name="cancel_date" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_weekly_schedule" model="ir.ui.view">
+			<field name="name">Weekly Schedule Entry Tree</field>
+			<field name="model">kg.weekly.schedule</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';black:state == 'confirmed';gray:state == 'cancel'" 
+								toolbar="True" string="Weekly Schedule Entry Tree">					
+					<field name="name"/>
+					<field name="entry_date"/>
+					<field name="division_id"/>
+					<field name="location" invisible="1"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	
+	<!-- Child Class Tree View Start -->
+		
+		<record id="t_tree_v_weekly_sch_details" model="ir.ui.view">
+			<field name="name">Weekly Schedule Details Entry Tree</field>
+			<field name="model">ch.weekly.schedule.details</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree string="Weekly Schedule Details Entry Tree" colors="gray:state == 'cancel'">					
+					<field name="order_ref_no" />
+					<field name="type"/>
+					<field name="pump_model_id"/>
+				    <field name="pattern_id"/>
+				    <field name="part_name_id"/>
+				    <field name="moc_id"/>
+				    <field name="qty"/>
+				    <field name="planning_qty"/>
+				    <field name="production_qty"/>
+				    <field name="transac_state" invisible="1"/>
+				    <field name="cancel_remark" invisible="1"/>
+				    <field name="state" invisible="1"/>
+				    
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Child Class Tree View End -->
+	
+	<!-- Child Class Tree View Start (Progress View)-->
+		
+		<record id="t_tree_v_weekly_sch_details_progress" model="ir.ui.view">
+			<field name="name">Weekly Schedule Details Entry Tree</field>
+			<field name="model">ch.weekly.schedule.details</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree string="Weekly Schedule Details Entry Tree" colors="gray:state == 'cancel'">					
+					<field name="header_id" string="Schedule No"/>
+					<field name="schedule_date" string="Schedule Date"/>
+					<field name="delivery_date"/>
+					<field name="order_ref_no" />
+					<field name="type"/>
+					<field name="pump_model_id"/>
+				    <field name="pattern_id"/>
+				    <field name="part_name_id"/>
+				    <field name="moc_id"/>
+				    <field name="qty"/>
+				    <field name="planning_qty"/>
+				    <field name="production_qty"/>
+				    <field name="transac_state"/>
+				    <field name="cancel_remark" invisible="1"/>
+				    <field name="state" invisible="1"/>
+				    
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Child Class Tree View End (Progress View)-->
+	
+	
+	<!-- Child Class Form View Start -->
+		
+		<record id="t_form_v_weekly_sch_details" model="ir.ui.view">
+			<field name="name">Weekly Schedule Details Entry Form</field>
+			<field name="model">ch.weekly.schedule.details</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<form string="Weekly Schedule Details Entry Form">
+					<group>
+						<group>
+							<field name="order_ref_no" on_change="onchange_order_refno(order_ref_no)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="pattern_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="type" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="qty" on_change="onchange_quanties(qty)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="production_qty" readonly="1"/>
+							<field name="delivery_date" on_change="onchange_delivery_date(delivery_date)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="state" invisible="1"/>
+							<field name="transac_state" invisible="1"/>
+							<group attrs="{'invisible': [('transac_state','not in',['in_schedule','sent_for_plan','partial'])]}">
+								<button name="entry_cancel" type="object" string="Cancel"  class="oe_highlight"  states="confirmed"/>
+							</group>
+						</group>
+						<group>
+							<field name="pump_model_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="part_name_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="moc_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="planning_qty" readonly="1"/>
+							<field name="unit_price" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="note" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="cancel_remark" attrs="{'invisible': [('transac_state','not in',['in_schedule','sent_for_plan','partial'])], 'readonly': [('state','in',['cancel'])]}"/>
+						</group>
+					</group>
+					
+				</form>
+			</field>
+		</record>
+		
+	<!-- Child Class Form View End -->
+		
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_weekly_schedule" model="ir.ui.view">
+            <field name="name">Weekly Schedule Entry Search</field>
+            <field name="model">kg.weekly.schedule</field>
+            <field name="arch" type="xml">
+                <search string="Weekly Schedule Entry Search">
+					<field name="name" string="Transaction"  filter_domain="[('name','ilike',self)]" />
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>					
+					<filter icon="terp-check" name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>					
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="Division" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'division_id'}"/>
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->
+	
+	<!-- Menu Action Start-->
+		
+		<record id="tma_weekly_schedule" model="ir.actions.act_window">
+			<field name="name">Schedule</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.weekly.schedule</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_weekly_schedule"/>
+			<field name="search_view_id" ref="t_search_v_weekly_schedule"/>
+			<field name="context">{"search_default_draft":1}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	
+	<!--Child Class Menu Action Start-->
+		
+		<record id="tma_weekly_schedule_details" model="ir.actions.act_window">
+			<field name="name">Schedule Items</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">ch.weekly.schedule.details</field>
+			<field name="view_type">tree</field>
+			<field name="context">{}</field>
+			<field name="domain">[('transac_state','in',('in_schedule','sent_for_plan','partial','sent_for_qc','sent_for_produc')),('state','!=',('cancel'))]</field>
+			<field name="view_id" ref="t_tree_v_weekly_sch_details_progress"/>
+			
+		</record>
+		
+	<!-- Child Class Menu Action End-->
+	
+		
+	</data>
+</openerp>

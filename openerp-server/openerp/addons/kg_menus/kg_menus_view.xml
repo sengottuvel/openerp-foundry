@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+		
+		<!-- Parent Master Menu -->
+		<menuitem name="Masters" id="mpm_masters" sequence="91"/>
+            
+            <!-- Planning Masters Menu -->
+            <menuitem name="Planning Masters" id="mpm_planning_master" parent = "mpm_masters" sequence="0"/>
+				
+				<!-- PumpModel Master  -->
+				<menuitem action="kg_pumpmodel_master.mma_pumpmodel_master" name="Pump Model" id="mam_pumpmodel_master" parent="mpm_planning_master" sequence="0"/>
+				
+				<!-- Pattern Master  -->
+				<menuitem action="kg_pattern_master.mma_pattern_master" name="Pattern" id="mam_pattern_master" parent="mpm_planning_master" sequence="1"/>
+				
+				<!-- MOC Master  -->
+				<menuitem action="kg_moc_master.mma_moc_master" name="MOC" id="mam_moc_master" parent="mpm_planning_master" sequence="2"/>
+				
+				<!-- Part Name 
+				<menuitem action="product.product_normal_action" name="Part Name" id="mam_part_name" parent="mpm_planning_master" sequence="3"/>-->
+				
+				<!-- Division Master  -->
+				<menuitem action="kg_division_master.mma_division_master" name="Division" id="mam_division_master" parent="mpm_planning_master" sequence="4"/>
+				
+				<!-- Units of Measure Master  --> 
+				<menuitem action="product.product_uom_form_action" name="Units of Measure" id="mam_uom_master" parent="mpm_planning_master" sequence="5"/>    
+				
+				<!-- Stage Master  --> 
+				<menuitem action="kg_stage_master.mma_stage_master" name="Stage" id="mam_stage_master" parent="mpm_planning_master" sequence="6"/>    
+				
+				<!-- BOM Master  --> 
+				<menuitem action="kg_bom.mma_bom_master" name="BOM" id="mam_bom_master" parent="mpm_planning_master" sequence="7"/>    
+				
+		<!-- Parent Transaction Menu -->
+		<menuitem name="Transactions" id="tpm_transactions" sequence="92"/>  
+		
+			<!-- Planning Transaction Menu -->
+            <menuitem name="Planning Transactions" id="tpm_planning_transactions" parent = "tpm_transactions" sequence="0"/>
+            
+				<!-- Stock Inward -->
+				<menuitem action="kg_stock_inward.tma_stock_inward" id="tam_stock_inward" parent="tpm_planning_transactions" sequence="0"/>
+				
+				<!-- Weekly Schedule -->
+				<menuitem action="kg_weekly_schedule.tma_weekly_schedule" id="tam_weekly_schedule" parent="tpm_planning_transactions" sequence="1"/>
+				
+				<!-- Daily Planning -->
+				<menuitem action="kg_daily_planning.tma_daily_planning" id="tam_daily_planning" parent="tpm_planning_transactions" sequence="2"/>
+				
+				<!-- QC Verification -->
+				<menuitem action="kg_qc_verification.tma_qc_verification" id="tam_qc_verification" parent="tpm_planning_transactions" sequence="3"/>
+
+				<!-- Production -->
+				<menuitem action="kg_production.tma_production" id="tam_production" parent="tpm_planning_transactions" sequence="4"/>
+				
+			<!-- Progress Menu -->
+            <menuitem name="Progress View" id="tpm_progress" parent = "tpm_transactions" sequence="1"/>
+            
+				<!-- Schedule Items -->
+				<menuitem action="kg_weekly_schedule.tma_weekly_schedule_details" id="tam_week_sch_details" parent="tpm_progress" sequence="0"/>
+				
+				<!-- Plan Items -->
+				<menuitem action="kg_daily_planning.tma_daily_planning_details" id="tam_plan_details" parent="tpm_progress" sequence="1"/>
+
+		<!-- Parent Report Menu -->
+		<menuitem name="Reports" id="rpm_reports" sequence="94"/> 
+			
+			
+			
+			<!-- Planning Reports Menu -->
+            <menuitem name="Planning Reports" id="rpm_planning_reports" parent = "rpm_reports" sequence="0"/>
+            
+				<!-- Dashboard Menu -->
+				<menuitem name="Dashboard" parent="rpm_planning_reports" action="board.open_board_my_dash_action" id="kg_dash_board" sequence="0"/>
+				
+				<!-- Weekly Schedule -->
+				<menuitem action="kg_reports.rma_schedule_register" id="ram_schedule_register" parent="rpm_planning_reports" sequence="1"/>
+				
+				<!-- Planning Register -->
+				<menuitem action="kg_reports.rma_planning_register" id="ram_planning_register" parent="rpm_planning_reports" sequence="2"/>
+				
+				<!-- QC Register -->
+				<menuitem action="kg_reports.rma_qc_register" id="ram_qc_register" parent="rpm_planning_reports" sequence="3"/>
+				
+				<!-- Production Register -->
+				<menuitem action="kg_reports.rma_production_register" id="ram_production_register" parent="rpm_planning_reports" sequence="4"/>
+				
+				<!-- Allotted Components Statement -->
+				<menuitem action="kg_reports.rma_allotted_components" id="ram_allotted_components" parent="rpm_planning_reports" sequence="5"/>
+				
+				<!-- Stock Statement Report-->
+				<menuitem action="kg_reports.rma_stock_statement" id="ram_stock_statement" parent="rpm_planning_reports" sequence="6"/>
+				
+				<!-- Stock Inspection Report
+				<menuitem action="kg_reports.rma_stock_inspection" id="ram_stock_inspection" parent="rpm_planning_reports" sequence="7"/>-->
+		
+		<!-- Scheduler Menu -->
+		<menuitem id="spm_scheduler" name="Scheduler" sequence="0" />
+		
+			<!-- Scheduler sub Menu -->
+			<menuitem id="spm_mail_menu" name="Mail Settings" parent="spm_scheduler" sequence="1" />
+		 
+				<!-- Scheduler maill Menu -->
+				<menuitem id="spm_mail_sub_menu" name="Mail Configuration" parent="spm_mail_menu" sequence="2" action="kg_mail_settings.action_mail_settings" />
+				
+				<!-- Scheduler Forms maill Menu -->
+				<menuitem id="spm_mail_form_sub_menu" name="Forms Scheduler" parent="spm_mail_menu" sequence="2" action="kg_scheduler.export_sch_action_form" />
+
+    </data>
+</openerp>
