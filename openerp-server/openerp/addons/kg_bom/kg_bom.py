@@ -15,7 +15,7 @@ class kg_bom(osv.osv):
 	
 	
 	_columns = {
-		'name': fields.char('BOM No', size=128, required=True, select=True),
+		'name': fields.char('BOM Name', size=128, required=True, select=True),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled'),('expire','Expired')],'Status', readonly=True),	
 		'line_ids': fields.one2many('ch.bom.line', 'header_id', "BOM Line"),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
