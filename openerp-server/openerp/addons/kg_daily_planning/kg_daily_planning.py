@@ -113,7 +113,7 @@ class kg_daily_planning(osv.osv):
 			for sch_item in entry.schedule_line_ids:
 				
 				for bom_item in sch_item.line_ids:
-					if bom_item.flag_applicable == True:
+					if bom_item.flag_applicable == True and bom_item.planning_qty > 0.00:
 						planning_item_vals = {
 													
 							'header_id': entry.id,

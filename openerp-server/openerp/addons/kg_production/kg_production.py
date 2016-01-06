@@ -378,6 +378,57 @@ class ch_casting_details(osv.osv):
 	
 ch_casting_details()
 
+class kg_foundry_stock(osv.osv):
+
+	_name = "kg.foundry.stock"
+	_description = "Foundry Stock"
+	
+	_columns = {
+	
+		'company_id': fields.many2one('res.company', 'Company Name'),
+		'division_id': fields.many2one('kg.division.master','Division'),
+		'stock_inward_id': fields.many2one('ch.stock.inward.details','Stock Inward Line'),
+		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location'),
+		'stage_id': fields.many2one('kg.stage.master','Stage Master'),
+		'remarks': fields.text('Remarks'),
+		'bom_id': fields.many2one('kg.bom', 'BOM Id'),
+		'bom_line_id': fields.many2one('ch.bom.line','BOM Line Id'),
+		'sch_bomline_id': fields.many2one('ch.sch.bom.details','Schedule BOM Line Id'),
+		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model'),
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern No'),
+		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'trans_type': fields.selection([('production','Production'),('spare','Spare')],'Purpose'),
+		'qty': fields.float('Qty', size=100),
+		'alloc_qty': fields.float('Allocation Qty', size=100),
+		'type': fields.char('Type', size=5),
+		'schedule_id': fields.many2one('kg.weekly.schedule','Schedule Header'),
+		'schedule_line_id': fields.many2one('ch.weekly.schedule.details','Schedule Line'),
+		'planning_id': fields.many2one('kg.daily.planning','Planning'),
+		'planning_line_id': fields.many2one('ch.daily.planning.details','Planning Line Item'),
+		'allocation_id': fields.many2one('ch.stock.allocation.details','Allocation'),
+		'qc_id': fields.many2one('kg.qc.verification','QC'),
+		'production_id': fields.many2one('kg.production','Production'),
+		'creation_date': fields.date('Creation Date'),
+		'schedule_date': fields.date('Schedule Date'),
+		'planning_date': fields.date('Planning Date'),
+		'allocation_date': fields.date('Allocation Date'),
+		'qc_date': fields.date('Qc Date'),
+		'production_date': fields.date('Production Date'),
+		
+		
+	
+	}
+	
+	
+	_defaults = {
+		
+		'creation_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		
+	}
+	
+	
+kg_foundry_stock()
+
 
 
 

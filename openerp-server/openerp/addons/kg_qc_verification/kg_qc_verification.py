@@ -146,7 +146,7 @@ class kg_qc_verification(osv.osv):
 			
 
 			cr.execute(''' update kg_foundry_stock set 
-					qty = %s
+					qty = %s,qc_id = %s
 					where allocation_id = (
 					select allocation_id from kg_foundry_stock 
 					where 
@@ -159,7 +159,7 @@ class kg_qc_verification(osv.osv):
 					type = 'OUT' and
 					alloc_qty > 0.00)
 					''',
-					[stock_item['qty'], entry.schedule_id.id, entry.schedule_line_id.id, 
+					[stock_item['qty'],entry.id, entry.schedule_id.id, entry.schedule_line_id.id, 
 					entry.planning_id.id, entry.planning_line_id.id, stock_item['allocation_id'],entry.sch_bomline_id.id])
 		
 		
