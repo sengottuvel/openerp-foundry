@@ -22,6 +22,7 @@ class kg_stage_master(osv.osv):
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
+		'stage_seq_id': fields.integer('Stage Sequence' , size=128),
 		'cancel_remark': fields.text('Cancel'),
 		
 		### Entry Info ###
@@ -83,6 +84,8 @@ class kg_stage_master(osv.osv):
 			else:
 				res = True				
 		return res
+		
+	
 			
 	def _code_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -144,6 +147,7 @@ class kg_stage_master(osv.osv):
 		#(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
 		(_name_validate, 'Stage name must be unique !!', ['name']),		
 		(_code_validate, 'Stage code must be unique !!', ['code']),	
+		
 	]
 	
 kg_stage_master()

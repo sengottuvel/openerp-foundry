@@ -20,9 +20,9 @@ class kg_bom(osv.osv):
 		'line_ids': fields.one2many('ch.bom.line', 'header_id', "BOM Line"),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True,domain="[('state','=','approved'), ('active','=','t')]"),	
-		'uom_id': fields.many2one('product.uom', 'Unit of Measure', required=True, help="Default Unit of Measure used for all stock operation.", domain="[('state','=','approved'), ('active','=','t')]"),	
+		'uom': fields.char('Unit of Measure', readonly=True,required=True),	
 		'remarks':fields.text('Remarks'),
-		'qty': fields.float('Qty', size=128,required=True,),
+		'qty': fields.float('Qty', size=128,required=True,readonly=True),
 		'active':fields.boolean('Active'),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
@@ -39,7 +39,7 @@ class kg_bom(osv.osv):
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
-		'expire_date':fields.date('Expired Date'),
+		'expire_date':fields.datetime('Expired Date'),
 		'expire_user_id': fields.many2one('res.users', 'Expired By', readonly=True),		
 	
 		
@@ -53,6 +53,7 @@ class kg_bom(osv.osv):
 	  'qty': 1.00,
 	  'user_id': lambda obj, cr, uid, context: uid,
 	  'crt_date':fields.datetime.now,	
+	  'uom':'Nos',	
 	  
 	}
 
@@ -65,7 +66,11 @@ class kg_bom(osv.osv):
 				_('Enter the remarks in Cancel remarks field !!'))
 		return True
 
-	def entry_confirm(self,cr,uid,ids,context=None):
+	def entry_confirm(self,cr,uid,ids,context=None):		
+		rec = self.browse(cr,uid,ids[0])
+		old_ids = self.search(cr,uid,[('state','=','approved'),('pump_model_id','=',rec.pump_model_id.id)])		
+		if old_ids:			
+			self.write(cr, uid, old_ids[0], {'state': 'expire','expire_user_id': uid, 'expire_date': time.strftime('%Y-%m-%d %H:%M:%S')})		
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
@@ -92,9 +97,17 @@ class kg_bom(osv.osv):
 				unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
 		
+	def create(self, cr, uid, vals, context=None):
+		print "vals",vals
+		"""if vals.get('qty'):
+			qty = vals.get('qty')
+			vals.update({'qty': qty,'planning_qty':qty})	"""
+		return super(kg_bom, self).create(cr, uid, vals, context=context)
+		
 	def write(self, cr, uid, ids, vals, context=None):
+		print "vals",vals
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
-		return super(kg_pattern_master, self).write(cr, uid, ids, vals, context)
+		return super(kg_bom, self).write(cr, uid, ids, vals, context)
 	
 kg_bom()
 
@@ -107,9 +120,9 @@ class ch_bom_line(osv.osv):
 	
 	_columns = {
 		
-		'header_id':fields.many2one('kg.bom', 'BOM Entry', required=1, ondelete='cascade'),	
+		'header_id':fields.many2one('kg.bom', 'BOM Entry', required=True, ondelete='cascade'),	
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern No', required=True,domain="[('state','=','approved')]"),	
-		'pattern_name': fields.char('Pattern Name', required=True),	
+		'pattern_name': fields.char('Pattern Name', required=True,readonly=True),	
 		'remarks':fields.text('Remarks'),
 		'qty': fields.float('Qty', size=128,required=True,),
 		'state':fields.selection([('draft','Draft'),('approve','Approved')],'Status'),
@@ -121,8 +134,34 @@ class ch_bom_line(osv.osv):
 	_defaults = {
 	
 	'state':'draft',
+	'qty': 1.00,
 	  
 	}
+	
+	def _name_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.name:
+			division_name = rec.name
+			name=division_name.upper()			
+			cr.execute(""" select upper(name) from kg_stage_master where upper(name)  = '%s' """ %(name))
+			data = cr.dictfetchall()
+			print "ddddddddddddddddd",data
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res
+	
+	def _check_line_duplicates(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		cr.execute('''select id from ch_bom_line where pattern_id = %s and id != %s and header_id = %s ''',[entry.pattern_id.id,entry.id,entry.header_id.id])
+		duplicate_id = cr.fetchone()
+		if duplicate_id:
+			if duplicate_id[0] != None:
+				return False
+		return True	
+
 	
 	def onchange_pattern_name(self, cr, uid, ids, pattern_id, context=None):
 		
@@ -131,7 +170,31 @@ class ch_bom_line(osv.osv):
 			pro_rec = self.pool.get('kg.pattern.master').browse(cr, uid, pattern_id, context=context)
 			value = {'pattern_name': pro_rec.pattern_name}
 			
-		return {'value': value}	
+		return {'value': value}
+		
+		
+	def create(self, cr, uid, vals, context=None):
+		pattern_obj = self.pool.get('kg.pattern.master')
+		if vals.get('pattern_id'):
+			print "vals.get('pattern_id')",vals.get('pattern_id')
+			pattern_rec = pattern_obj.browse(cr, uid, vals.get('pattern_id') )
+			pattern_name = pattern_rec.pattern_name
+			vals.update({'pattern_name': pattern_name})
+		return super(ch_bom_line, self).create(cr, uid, vals, context=context)
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		pattern_obj = self.pool.get('kg.pattern.master')
+		if vals.get('pattern_id'):
+			pattern_rec = pattern_obj.browse(cr, uid, vals.get('pattern_id') )
+			pattern_name = pattern_rec.pattern_name
+			vals.update({'pattern_name': pattern_name})
+		return super(ch_bom_line, self).write(cr, uid, ids, vals, context)	
+		
+	_constraints = [
+		
+		(_check_line_duplicates, 'Pattern Name must be unique !!', ['Pattern Name']),		
+		
+	]
 
 	
 ch_bom_line()

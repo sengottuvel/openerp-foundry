@@ -33,12 +33,17 @@ class kg_qc_verification(osv.osv):
 		'schedule_id': fields.many2one('kg.weekly.schedule','Schedule Header'),
 		'schedule_line_id': fields.many2one('ch.weekly.schedule.details','Schedule Line'),
 		
+		
+		'bom_id': fields.related('planning_line_id','bom_id', type='many2one', relation='kg.bom', string='BOM Id', store=True, readonly=True),
+		'bom_line_id': fields.related('planning_line_id','bom_line_id', type='many2one', relation='ch.bom.line', string='BOM Line Id', store=True, readonly=True),
+		'sch_bomline_id': fields.related('planning_line_id','sch_bomline_id', type='many2one', relation='ch.sch.bom.details', string='Schedule BOM Line Id', store=True, readonly=True),
+		
 		'order_ref_no': fields.related('schedule_line_id','order_ref_no', type='char', string='Order Reference', store=True, readonly=True),
 		'pump_model_id': fields.related('schedule_line_id','pump_model_id', type='many2one', relation='kg.pumpmodel.master', string='Pump Model', store=True, readonly=True),
-		'pattern_id': fields.related('schedule_line_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern Number', store=True, readonly=True),
-		'part_name_id': fields.related('schedule_line_id','part_name_id', type='many2one', relation='product.product', string='Part Name', store=True, readonly=True),
+		'pattern_id': fields.related('sch_bomline_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern Number', store=True, readonly=True),
+		#'part_name_id': fields.related('schedule_line_id','part_name_id', type='many2one', relation='product.product', string='Part Name', store=True, readonly=True),
 		'type': fields.related('schedule_line_id','type', type='char', string='Purpose', store=True, readonly=True),
-		'moc_id': fields.related('schedule_line_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
+		'moc_id': fields.related('sch_bomline_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
 		
 		'stage_id': fields.many2one('kg.stage.master','Stage', readonly=True),
 		
@@ -77,7 +82,7 @@ class kg_qc_verification(osv.osv):
 	_defaults = {
 	
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_qc_verification', context=c),
-		'entry_date' : fields.date.context_today,
+		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':time.strftime('%Y-%m-%d %H:%M:%S'),
 		'state': 'draft',	
@@ -121,6 +126,7 @@ class kg_qc_verification(osv.osv):
 		production_obj = self.pool.get('kg.production')
 		schedule_line_obj = self.pool.get('ch.weekly.schedule.details')
 		planning_line_obj = self.pool.get('ch.daily.planning.details')
+		sch_bomline_obj = self.pool.get('ch.sch.bom.details')
 		entry = self.browse(cr,uid,ids[0])
 			
 		if entry.qty > entry.allocated_qty:
@@ -128,121 +134,49 @@ class kg_qc_verification(osv.osv):
 		if entry.qty < 0.00:
 			raise osv.except_osv(_('Warning !'), _('QC Qty should not be less than zero !!'))
 			
-		#### Production Entry Creation Block ####
-		
-		cr.execute(''' select sum(qty) from kg_qc_verification where id != %s and state = 'draft' and  planning_line_id = %s group by planning_line_id
-		''',[entry.id,entry.planning_line_id.id])
-		result_qc = cr.fetchone()
-		
-		
-		if result_qc == None:
-			
-			cr.execute(''' select sum(qty) from kg_qc_verification where planning_line_id = %s and state not in ('reject','cancel') group by planning_line_id
-			''',[entry.planning_line_id.id])
-			tot_qc_qty = cr.fetchone()
-			
-			production_qty = entry.planning_line_id.qty - tot_qc_qty[0]
-			
-			if production_qty > 0.00:
-					
-				production_vals = {
-										
-					'name': '',
-					'planning_id': entry.planning_id.id,
-					'planning_date': entry.planning_id.entry_date,
-					'division_id': entry.division_id.id,
-					'location' : entry.location,
-					'planning_line_id': entry.planning_line_id.id,
-					'schedule_id': entry.schedule_id.id,
-					'schedule_line_id': entry.schedule_line_id.id,			
-					'allocation_id': entry.allocation_id.id,			
-					'qc_id': entry.id,			
-					'production_qty' : production_qty,
-					'qty' : production_qty,
-					'excess_qty' : 0.00,
-					'state' : 'draft',
-					'stage_id':None				
-				}
-			
-				production_id = production_obj.create(cr, uid, production_vals)
+		self.write(cr, uid, ids, {'cancel_remark':False})
 				
+		#### Stock Table Updatation Block ####
+		
+		cr.execute(''' select qty,allocation_id from kg_qc_verification where planning_line_id = %s
+		''',[entry.planning_line_id.id])
+		stock_qc_qty = cr.dictfetchall()
+		
+		for stock_item in stock_qc_qty:
+			
+
+			cr.execute(''' update kg_foundry_stock set 
+					qty = %s
+					where allocation_id = (
+					select allocation_id from kg_foundry_stock 
+					where 
+					schedule_id = %s and 
+					schedule_line_id = %s and 
+					planning_id = %s and
+					planning_line_id = %s and
+					allocation_id = %s and
+					sch_bomline_id = %s and
+					type = 'OUT' and
+					alloc_qty > 0.00)
+					''',
+					[stock_item['qty'], entry.schedule_id.id, entry.schedule_line_id.id, 
+					entry.planning_id.id, entry.planning_line_id.id, stock_item['allocation_id'],entry.sch_bomline_id.id])
+		
+		
+		
+		if entry.sch_bomline_id.transac_state == 'sent_for_produc':
+			sch_bomline_obj.write(cr, uid, entry.sch_bomline_id.id, {'transac_state':'sent_for_produc'})
+			planning_line_obj.write(cr, uid, entry.planning_line_id.id, {'transac_state':'sent_for_produc'})
+		if entry.sch_bomline_id.transac_state == 'sent_for_qc':
+			planning_line_obj.write(cr, uid, entry.planning_line_id.id, {'transac_state':'complete'})
+			if entry.sch_bomline_id.planning_qty == entry.sch_bomline_id.qty:
+				sch_bomline_obj.write(cr, uid, entry.sch_bomline_id.id, {'transac_state':'complete'})
+			if entry.sch_bomline_id.planning_qty == 0.00:
+				sch_bomline_obj.write(cr, uid, entry.sch_bomline_id.id, {'transac_state':'complete'})
+			if entry.sch_bomline_id.qty > entry.sch_bomline_id.planning_qty :
+				sch_bomline_obj.write(cr, uid, entry.sch_bomline_id.id, {'transac_state':'partial'})
 				
 
-			sch_planning_qty = entry.schedule_line_id.planning_qty - entry.planning_line_id.qty
-			
-			
-			if production_qty > 0.00:
-				
-					schedule_line_obj.write(cr, uid, entry.schedule_line_id.id, 
-					
-						{
-						
-						'transac_state':'sent_for_produc',
-						'planning_qty': sch_planning_qty,
-						
-						
-						})
-			else:
-				
-				if entry.schedule_line_id.planning_qty == 0.00:
-			
-					schedule_line_obj.write(cr, uid, entry.schedule_line_id.id, 
-					
-						{
-						
-						'transac_state':'complete',
-						'planning_qty': sch_planning_qty,
-						
-						
-						})
-						
-				if entry.schedule_line_id.planning_qty > 0.00:
-		
-					schedule_line_obj.write(cr, uid, entry.schedule_line_id.id, 
-					
-						{
-						
-						'transac_state':'partial',
-						'planning_qty': sch_planning_qty,
-						
-						
-						})
-						
-			
-			if production_qty > 0.00:
-				planning_line_obj.write(cr, uid, entry.planning_line_id.id, {'transac_state':'sent_for_produc'})
-			else:
-				planning_line_obj.write(cr, uid, entry.planning_line_id.id, {'transac_state':'complete'})
-			
-			self.write(cr, uid, ids, {'transac_state': 'sent_for_produc','cancel_remark':False})
-					
-			#### Stock Table Updatation Block ####
-			
-			cr.execute(''' select qty,allocation_id from kg_qc_verification where planning_line_id = %s
-			''',[entry.planning_line_id.id])
-			stock_qc_qty = cr.dictfetchall()
-			
-			for stock_item in stock_qc_qty:
-				
-
-				cr.execute(''' update kg_foundry_stock set 
-						qty = %s
-						where allocation_id = (
-						select allocation_id from kg_foundry_stock 
-						where 
-						schedule_id = %s and 
-						schedule_line_id = %s and 
-						planning_id = %s and
-						planning_line_id = %s and
-						allocation_id = %s and
-						type = 'OUT' and
-						alloc_qty > 0.00)
-						''',
-						[stock_item['qty'], entry.schedule_id.id, entry.schedule_line_id.id, 
-						entry.planning_id.id, entry.planning_line_id.id, stock_item['allocation_id']])
-		
-				
-					
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),
 			'name' :self.pool.get('ir.sequence').get(cr, uid, 'kg.qc.verification') or '/'})
 		
@@ -255,20 +189,12 @@ class kg_qc_verification(osv.osv):
 		if entry.cancel_remark == False:
 			raise osv.except_osv(_('Warning!'),
 						_('Cancellation Remarks is must !!'))
-		### Updation in Planning Table
-		planning_line_obj.write(cr, uid, entry.planning_line_id.id, {'transac_state':'sent_for_qc'})
-		### Updation in Stock Table
 		cr.execute(''' update kg_foundry_stock set qty = 0.00 where planning_line_id = %s and allocation_id = %s ''',[entry.planning_line_id.id, entry.allocation_id.id])
-		### Updation in Schedule Table
-		planning_qty = entry.schedule_line_id.planning_qty + entry.planning_line_id.qty
-		cr.execute(''' update ch_weekly_schedule_details set planning_qty = %s, transac_state='sent_for_qc' where id = %s and header_id = %s ''',[planning_qty,entry.schedule_line_id.id, entry.schedule_id.id])
-		### Updation in Production
-		cr.execute(''' delete from kg_production where planning_line_id = %s and qc_id = %s and state = 'draft' ''',[entry.planning_line_id.id, entry.id])
 		self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S'),'transac_state':'cancel'})
 		return True
 		
 		
-	def entry_reject(self,cr,uid,ids,context=None):
+	"""def entry_reject(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.reject_remark == False:
 			raise osv.except_osv(_('Warning!'),
@@ -280,6 +206,7 @@ class kg_qc_verification(osv.osv):
 		cr.execute(''' update ch_daily_planning_details set transac_state = 're_allocate' where id = %s and header_id = %s ''',[entry.planning_line_id.id, entry.planning_id.id])
 		self.write(cr, uid, ids, {'state': 'reject','transac_state':'reject','reject_user_id': uid, 'reject_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
+	"""
 		
 		
 	def entry_draft(self,cr,uid,ids,context=None):

@@ -18,7 +18,6 @@
 						<group>
 							<group>
 								<field name="name"/>
-								<field name="from_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="division_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="note" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="flag_cancel" invisible="1"/>
@@ -26,7 +25,6 @@
 							</group>											
 							<group>
 								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
-								<field name="to_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="location" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="state" style="width: 30%%" class="att_state_change"/>
 							</group>					
@@ -104,16 +102,9 @@
 					<field name="order_ref_no" />
 					<field name="type"/>
 					<field name="pump_model_id"/>
-				    <field name="pattern_id"/>
-				    <field name="part_name_id"/>
-				    <field name="moc_id"/>
 				    <field name="qty"/>
-				    <field name="planning_qty"/>
-				    <field name="production_qty"/>
-				    <field name="transac_state" invisible="1"/>
 				    <field name="cancel_remark" invisible="1"/>
 				    <field name="state" invisible="1"/>
-				    
 				</tree>
 			</field>
 		</record>
@@ -122,26 +113,23 @@
 	
 	<!-- Child Class Tree View Start (Progress View)-->
 		
-		<record id="t_tree_v_weekly_sch_details_progress" model="ir.ui.view">
-			<field name="name">Weekly Schedule Details Entry Tree</field>
-			<field name="model">ch.weekly.schedule.details</field>
+		<record id="t_tree_v_sch_bom_details" model="ir.ui.view">
+			<field name="name">BOM Details Tree View</field>
+			<field name="model">ch.sch.bom.details</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<tree string="Weekly Schedule Details Entry Tree" colors="gray:state == 'cancel'">					
-					<field name="header_id" string="Schedule No"/>
+				<tree string="BOM Details" colors="gray:state == 'cancel'">					
+					<field name="schedule_id" string="Schedule No"/>
 					<field name="schedule_date" string="Schedule Date"/>
 					<field name="delivery_date"/>
 					<field name="order_ref_no" />
 					<field name="type"/>
 					<field name="pump_model_id"/>
-				    <field name="pattern_id"/>
-				    <field name="part_name_id"/>
-				    <field name="moc_id"/>
+				    <field name="schedule_qty"/>
 				    <field name="qty"/>
 				    <field name="planning_qty"/>
 				    <field name="production_qty"/>
 				    <field name="transac_state"/>
-				    <field name="cancel_remark" invisible="1"/>
 				    <field name="state" invisible="1"/>
 				    
 				</tree>
@@ -162,25 +150,38 @@
 					<group>
 						<group>
 							<field name="order_ref_no" on_change="onchange_order_refno(order_ref_no)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
-							<field name="pattern_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="type" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
-							<field name="qty" on_change="onchange_quanties(qty)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
-							<field name="production_qty" readonly="1"/>
 							<field name="delivery_date" on_change="onchange_delivery_date(delivery_date)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="state" invisible="1"/>
-							<field name="transac_state" invisible="1"/>
-							<group attrs="{'invisible': [('transac_state','not in',['in_schedule','sent_for_plan','partial'])]}">
+							<field name="flag_cancel" invisible="1"/>
+							<field name="cancel_remark" attrs="{'invisible': [('flag_cancel','=',False)], 'readonly': [('state','in',['cancel'])]}"/>
+							<group attrs="{'invisible': [('flag_cancel','=',False)]}">
 								<button name="entry_cancel" type="object" string="Cancel"  class="oe_highlight"  states="confirmed"/>
 							</group>
 						</group>
 						<group>
 							<field name="pump_model_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
-							<field name="part_name_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
-							<field name="moc_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
-							<field name="planning_qty" readonly="1"/>
-							<field name="unit_price" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="qty" on_change="onchange_schedule_qty(qty, line_ids)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="note" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
-							<field name="cancel_remark" attrs="{'invisible': [('transac_state','not in',['in_schedule','sent_for_plan','partial'])], 'readonly': [('state','in',['cancel'])]}"/>
+						</group>
+					</group>
+					<newline/>
+					<group string="BOM Details">
+						<group>
+							<button name="list_bom" type="object" string="List BOM"  class="oe_highlight" attrs="{'invisible': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
+								<tree string="BOM Details" editable="bottom" delete="false" create="false">
+								   <field name="pattern_id" readonly="1"/>
+								   <field name="pattern_name" readonly="1"/>
+								   <field name="qty" readonly="1"/>
+								   <field name="planning_qty" invisible="1"/>
+								   <field name="production_qty" invisible="1"/>
+								   <field name="flag_applicable"/>
+								   <field name="moc_id" attrs="{'required': [('flag_applicable','!=',False)]}"/>
+								   <field name="add_spec"/>
+								   <field name="transac_state" invisible="1"/>
+								</tree>
+							</field>
 						</group>
 					</group>
 					
@@ -231,14 +232,14 @@
 	
 	<!--Child Class Menu Action Start-->
 		
-		<record id="tma_weekly_schedule_details" model="ir.actions.act_window">
+		<record id="tma_sch_bom_details" model="ir.actions.act_window">
 			<field name="name">Schedule Items</field>
 			<field name="type">ir.actions.act_window</field>
-			<field name="res_model">ch.weekly.schedule.details</field>
+			<field name="res_model">ch.sch.bom.details</field>
 			<field name="view_type">tree</field>
 			<field name="context">{}</field>
 			<field name="domain">[('transac_state','in',('in_schedule','sent_for_plan','partial','sent_for_qc','sent_for_produc')),('state','!=',('cancel'))]</field>
-			<field name="view_id" ref="t_tree_v_weekly_sch_details_progress"/>
+			<field name="view_id" ref="t_tree_v_sch_bom_details"/>
 			
 		</record>
 		

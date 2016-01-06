@@ -236,6 +236,68 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
 		</record> -->
 		
+		<!-- BOM -->
+		
+		<record id="user_bom" model="ir.model.access">
+			<field name="model_id" ref="kg_bom.model_kg_bom"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">BOM</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- BOM Child Class --> 
+		
+		<record id="user_bom_details" model="ir.model.access">
+			<field name="model_id" ref="kg_bom.model_ch_bom_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">BOM Details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		
+		<!-- Schedule BOM Child Class --> 
+		
+		<record id="user_schbom_details" model="ir.model.access">
+			<field name="model_id" ref="kg_weekly_schedule.model_ch_sch_bom_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Schedule BOM Details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		
+		<!-- Boring --> 
+		
+		<record id="user_boring_details" model="ir.model.access">
+			<field name="model_id" ref="kg_production.model_ch_boring_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Boring Details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- Casting --> 
+		
+		<record id="user_casting_details" model="ir.model.access">
+			<field name="model_id" ref="kg_production.model_ch_casting_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Casting Details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
 		
 		
     </data>

@@ -30,7 +30,10 @@
 				<menuitem action="kg_stage_master.mma_stage_master" name="Stage" id="mam_stage_master" parent="mpm_planning_master" sequence="6"/>    
 				
 				<!-- BOM Master  --> 
-				<menuitem action="kg_bom.mma_bom_master" name="BOM" id="mam_bom_master" parent="mpm_planning_master" sequence="7"/>    
+				<menuitem action="kg_bom.mma_bom_master" name="BOM" id="mam_bom_master" parent="mpm_planning_master" sequence="7"/> 
+				
+				<!-- BOM Details  --> 
+				<menuitem action="kg_bom.mma_bom_details" name="BOM Details" id="mam_bom_details" parent="mpm_planning_master" sequence="8"/>    
 				
 		<!-- Parent Transaction Menu -->
 		<menuitem name="Transactions" id="tpm_transactions" sequence="92"/>  
@@ -57,7 +60,7 @@
             <menuitem name="Progress View" id="tpm_progress" parent = "tpm_transactions" sequence="1"/>
             
 				<!-- Schedule Items -->
-				<menuitem action="kg_weekly_schedule.tma_weekly_schedule_details" id="tam_week_sch_details" parent="tpm_progress" sequence="0"/>
+				<menuitem action="kg_weekly_schedule.tma_sch_bom_details" id="tam_sch_bomdetails" parent="tpm_progress" sequence="0"/>
 				
 				<!-- Plan Items -->
 				<menuitem action="kg_daily_planning.tma_daily_planning_details" id="tam_plan_details" parent="tpm_progress" sequence="1"/>

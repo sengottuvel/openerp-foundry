@@ -19,7 +19,7 @@ class kg_pattern_master(osv.osv):
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'pattern_name': fields.char('Part/Pattern Name', size=128,required=True),
 		'active': fields.boolean('Active'),
-		'pcs_weight': fields.float('Pecs Weights(KG)', size=128,required=True,),
+		'pcs_weight': fields.float('Weight(KG)', size=128,required=True,),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
@@ -85,19 +85,7 @@ class kg_pattern_master(osv.osv):
 				res = True				
 		return res
 			
-	def _code_validate(self, cr, uid,ids, context=None):
-		rec = self.browse(cr,uid,ids[0])
-		res = True
-		if rec.pattern_name:
-			division_code = rec.pattern_name
-			pattern_name=division_code.upper()			
-			cr.execute(""" select upper(pattern_name) from kg_pattern_master where upper(pattern_name)  = '%s' """ %(pattern_name))
-			data = cr.dictfetchall()			
-			if len(data) > 1:
-				res = False
-			else:
-				res = True				
-		return res	
+	
 		
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -106,9 +94,19 @@ class kg_pattern_master(osv.osv):
 		else:
 			raise osv.except_osv(_('Cancel remark is must !!'),
 				_('Enter the remarks in Cancel remarks field !!'))
+				
 		return True
 
 	def entry_confirm(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.pcs_weight == 0:
+			raise osv.except_osv(_('Weight is must !!'),
+				_('Enter the Weight field !!'))
+		if rec.pcs_weight < 0:
+			raise osv.except_osv(_('Invalid!!'),
+				_('Weight field is invalid!!'))
+		else:
+			pass
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
@@ -144,7 +142,7 @@ class kg_pattern_master(osv.osv):
 		#(_Validation, 'Special Character Not Allowed !!!', ['name']),
 		#(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
 		(_name_validate, 'Pattern No must be unique !!', ['no']),		
-		(_code_validate, 'Pattern Name must be unique !!', ['pattern_name']),	
+		
 	]
 	
 kg_pattern_master()

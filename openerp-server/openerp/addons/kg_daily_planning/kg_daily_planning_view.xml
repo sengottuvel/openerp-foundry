@@ -44,7 +44,7 @@
 											<field name="type" />
 											<field name="pump_model_id"/>
 											<field name="pattern_id"/>
-											<field name="part_name_id"/>
+											<!--<field name="part_name_id"/>-->
 											<field name="moc_id" />
 											<field name="schedule_qty" />
 											<field name="stock_qty" />
@@ -61,10 +61,10 @@
 										<field name="schedule_date" readonly="1"/>
 										<field name="order_ref_no" readonly="1"/>
 										<field name="pump_model_id" readonly="1"/>
-										<field name="pattern_id" readonly="1"/>
-										<field name="part_name_id" readonly="1"/>
+										<!--<field name="pattern_id" readonly="1"/>
+										<field name="part_name_id" readonly="1"/>-->
 										<field name="type" readonly="1"/>
-										<field name="moc_id" readonly="1"/>
+										<!--<field name="moc_id" readonly="1"/>-->
 										<field name="qty" readonly="1"/>
 									</tree>
 								</field>
@@ -134,7 +134,7 @@
 				<field name="type" />
 				<field name="pump_model_id"/>
 				<field name="pattern_id"/>
-				<field name="part_name_id"/>
+				<!--<field name="part_name_id"/>-->
 				<field name="moc_id" />
 				<field name="schedule_qty" />
 				<field name="stock_qty" />
@@ -161,7 +161,7 @@
 				<field name="type" />
 				<field name="pump_model_id"/>
 				<field name="pattern_id"/>
-				<field name="part_name_id"/>
+				<!--<field name="part_name_id"/>-->
 				<field name="moc_id" />
 				<field name="schedule_qty" />
 				<field name="stock_qty" invisible="1"/>
@@ -196,7 +196,7 @@
 					
 					<group>
 						<field name="pump_model_id"/>
-						<field name="part_name_id"/>
+						<!--<field name="part_name_id"/>-->
 						<field name="moc_id" />
 						<field name="stock_qty" />
 						<field name="note" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
@@ -215,19 +215,19 @@
 						   <field name="order_ref_no" invisible="1"/>
 						   <field name="pump_model_id" invisible="1"/>
 						   <field name="pattern_id" invisible="1"/>
-						   <field name="part_name_id" invisible="1"/>
+						  <!-- <field name="part_name_id" invisible="1"/>-->
 						   <field name="moc_id" invisible="1"/>
 						   <field name="planning_qty" invisible="1"/>
 						   <field name="stock_qty"/>
-						   <field name="stage_id"/>
+						   <field name="stage_id" invisible="1"/>
 						   <field name="qty" on_change="onchange_allocation_qty(planning_qty, stock_qty, qty)" required="1"/>
 						   <field name="remarks"/>
 						   <field name="state" invisible="1"/>
 						</tree>
 					</field>
-				<group attrs="{'invisible': [('transac_state','not in',['re_allocate'])]}">
+				<!--<group attrs="{'invisible': [('transac_state','not in',['re_allocate'])]}">
 					<button name="entry_reallocate" type="object" string="Re Allocate" class="oe_highlight" />
-				</group>
+				</group>-->
 				</group>
 				
 			</form>

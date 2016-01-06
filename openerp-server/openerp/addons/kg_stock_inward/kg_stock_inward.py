@@ -51,7 +51,7 @@ class kg_stock_inward(osv.osv):
 	_defaults = {
 	
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_stock_inward', context=c),			
-		'entry_date' : fields.date.context_today,
+		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':time.strftime('%Y-%m-%d %H:%M:%S'),
 		'state': 'draft',		
@@ -100,11 +100,11 @@ class kg_stock_inward(osv.osv):
 		for line_item in entry.line_ids:
 			#### Stock Updation Block Starts Here ###
 							
-			cr.execute(''' insert into kg_foundry_stock(company_id,division_id,location,pump_model_id,pattern_id,part_name_id,
+			cr.execute(''' insert into kg_foundry_stock(company_id,division_id,location,pump_model_id,pattern_id,
 			moc_id,stage_id,stock_inward_id,qty,alloc_qty,type,creation_date)
 			
-			values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,0.00,'IN',%s)
-			''',[entry.company_id.id,entry.division_id.id or None,entry.location,line_item.pump_model_id.id, line_item.pattern_id.id,line_item.part_name_id.id,
+			values(%s,%s,%s,%s,%s,%s,%s,%s,%s,0.00,'IN',%s)
+			''',[entry.company_id.id,entry.division_id.id or None,entry.location,line_item.pump_model_id.id, line_item.pattern_id.id,
 			line_item.moc_id.id,line_item.stage_id.id,line_item.id,line_item.qty,entry.entry_date])
 					
 			#### Stock Updation Block Ends Here ###
@@ -145,7 +145,7 @@ class ch_stock_inward_details(osv.osv):
 		'inward_date': fields.related('header_id','entry_date', type='date', string='Date', store=True, readonly=True),
 		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True,domain="[('state','=','approved'), ('active','=','t')]"),
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern Number', required=True,domain="[('state','=','approved'), ('active','=','t')]"),
-		'part_name_id': fields.many2one('product.product','Part Name', required=True,domain="[('state','=','approved'), ('active','=','t')]"),
+		#'part_name_id': fields.many2one('product.product','Part Name', required=True,domain="[('state','=','approved'), ('active','=','t')]"),
 		'moc_id': fields.many2one('kg.moc.master','MOC',required=True,domain="[('state','=','approved'), ('active','=','t')]"),
 		'stage_id': fields.many2one('kg.stage.master','Stage',required=True,domain="[('state','=','approved'), ('active','=','t')]"),
 		'qty': fields.float('Stock Qty', size=100, required=True),
@@ -174,8 +174,8 @@ class ch_stock_inward_details(osv.osv):
 		
 	def _check_line_duplicates(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		cr.execute(''' select id from ch_stock_inward_details where  pump_model_id = %s and pattern_id = %s and part_name_id = %s and
-			stage_id = %s and moc_id = %s and id != %s and header_id = %s ''',[entry.pump_model_id.id, entry.pattern_id.id, entry.part_name_id.id,
+		cr.execute(''' select id from ch_stock_inward_details where  pump_model_id = %s and pattern_id = %s  and
+			stage_id = %s and moc_id = %s and id != %s and header_id = %s ''',[entry.pump_model_id.id, entry.pattern_id.id,
 			entry.stage_id.id, entry.moc_id.id, entry.id, entry.header_id.id,])
 		duplicate_id = cr.fetchone()
 		if duplicate_id:

@@ -92,7 +92,7 @@
 				<tree string="Stock Inward Details Entry Tree" editable="bottom" >					
 					<field name="pump_model_id"/>
 				    <field name="pattern_id"/>
-				    <field name="part_name_id"/>
+				    <!--<field name="part_name_id"/>-->
 				    <field name="moc_id"/>
 				    <field name="stage_id"/>
 				    <field name="qty"/>

@@ -16,6 +16,7 @@
             ref('kg_menus.mam_stage_master'),
             ref('kg_menus.mam_moc_master'),
             ref('kg_menus.mam_division_master'),
+            ref('kg_menus.mam_bom_master'),
             
             ref('kg_menus.tpm_transactions'),
             ref('kg_menus.tpm_planning_transactions'),
@@ -25,7 +26,7 @@
             ref('kg_menus.tam_production'),
             
             ref('kg_menus.tam_stock_inward'),
-            ref('kg_menus.tam_week_sch_details'),
+            ref('kg_menus.tam_sch_bomdetails'),
             ref('kg_menus.tam_plan_details'),
             
             
