@@ -161,7 +161,7 @@
 						</group>
 						<group>
 							<field name="pump_model_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
-							<field name="qty" on_change="onchange_schedule_qty(qty, line_ids)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="qty" on_change="onchange_schedule_qty(pump_model_id, qty, type)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="note" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 						</group>
 					</group>

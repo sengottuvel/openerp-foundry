@@ -94,16 +94,16 @@ class kg_weekly_schedule(osv.osv):
 		return True
 			
 	
-	_constraints = [        
-              
-        
-        (_future_entry_date_check, 'System not allow to save with future date. !!',['']),
-        (_check_duplicates, 'System not allow to do duplicate entry !!',['']),
-        (_check_lineitems, 'System not allow to save with empty Schedule Details !!',['']),
-       
-        
-       ]
-       
+	_constraints = [		
+			  
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
+		(_check_duplicates, 'System not allow to do duplicate entry !!',['']),
+		(_check_lineitems, 'System not allow to save with empty Schedule Details !!',['']),
+	   
+		
+	   ]
+	   
 
 	def entry_confirm(self,cr,uid,ids,context=None):
 		today = date.today()
@@ -205,7 +205,7 @@ class ch_weekly_schedule_details(osv.osv):
 		'type': fields.selection([('production','Production'),('spare','Spare')],'Purpose', required=True),
 		'qty': fields.float('Schedule Qty', size=100, required=True),
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),
-	    'note': fields.text('Notes'),
+		'note': fields.text('Notes'),
 		'remarks': fields.text('Approve/Reject Remarks'),
 		'cancel_remark': fields.text('Cancel Remarks'),
 		'active': fields.boolean('Active'),
@@ -238,8 +238,29 @@ class ch_weekly_schedule_details(osv.osv):
 						_('Delivery Date should not be less than current date!!'))
 		return True
 		
-	def onchange_schedule_qty(self, cr, uid, ids, qty, line_ids):
-		return True
+	def onchange_schedule_qty(self, cr, uid, ids, pump_model_id, qty, type):
+		bom_vals=[]
+		sch_bom_obj = self.pool.get('ch.sch.bom.details')
+		cr.execute(''' select id,header_id,pattern_id,pattern_name,qty from ch_bom_line 
+		where header_id = (select id from kg_bom where pump_model_id = %s and state='approved' and active='t') ''',[pump_model_id])
+		bom_details = cr.dictfetchall()
+		for bom_details in bom_details:
+			if type == 'production':
+				applicable = True
+			if type == 'spare':
+				applicable = False
+			bom_vals.append({
+												
+				'bom_id': bom_details['header_id'],
+				'bom_line_id': bom_details['id'],
+				'pattern_id': bom_details['pattern_id'],
+				'pattern_name': bom_details['pattern_name'],							
+				'qty' : qty * bom_details['qty'],					
+				'planning_qty' : qty * bom_details['qty'],					
+				'production_qty' : 0.00,					
+				'flag_applicable' : applicable							
+				})
+		return {'value': {'line_ids': bom_vals}}
 		
 	def onchange_order_refno(self, cr, uid, ids, order_ref_no):
 		if order_ref_no:
@@ -366,15 +387,15 @@ class ch_weekly_schedule_details(osv.osv):
 		
 	
 	
-	_constraints = [        
-              
-        (_check_values, 'System not allow to save with zero and less than zero qty .!!',['Quantity']),
-        (_Validation, 'Special Character Not Allowed', ['Order Reference']),
-        (_check_line_duplicates, 'Schedule Details are duplicate. Kindly check !! ', ['']),
-        (_check_line_items, 'Schedule Detail cannot be created after confirmation !! ', ['']),
-       
-        
-       ]
+	_constraints = [		
+			  
+		(_check_values, 'System not allow to save with zero and less than zero qty .!!',['Quantity']),
+		(_Validation, 'Special Character Not Allowed', ['Order Reference']),
+		(_check_line_duplicates, 'Schedule Details are duplicate. Kindly check !! ', ['']),
+		(_check_line_items, 'Schedule Detail cannot be created after confirmation !! ', ['']),
+	   
+		
+	   ]
 	
 ch_weekly_schedule_details()
 
@@ -407,7 +428,7 @@ class ch_sch_bom_details(osv.osv):
 		'add_spec': fields.text('Others Specification'),
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),
 		'transac_state': fields.selection([('in_draft','In Draft'),('in_schedule','In Schedule'),('partial','Partial'),('sent_for_plan','In Planning'),('sent_for_qc','In QC'),
-		               ('sent_for_produc','In Production'),('complete','Completed')],'Transaction Status', readonly=True),
+					   ('sent_for_produc','In Production'),('complete','Completed')],'Transaction Status', readonly=True),
 	
 	}
 	
