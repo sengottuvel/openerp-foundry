@@ -18,7 +18,7 @@
 						<group>
 							<group>
 								<field name="name"/>
-								<field name="division_id"  attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="division_id"/>
 								<field name="note" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="flag_cancel" invisible="1"/>
 							</group>											
@@ -112,8 +112,8 @@
 								toolbar="True" string="Daily Planning Entry Tree">					
 					<field name="name"/>
 					<field name="entry_date"/>
-					<field name="division_id"/>
-					<field name="location" invisible="1"/>
+					<field name="division_id" invisible="1"/>
+					<field name="location" />
 					<field name="state"/>
 				</tree>
 			</field>
@@ -188,7 +188,7 @@
 						<field name="pattern_id"/>
 						<field name="type" />
 						<field name="schedule_qty" />
-						<field name="qty" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}" on_change="onchange_planning_qty(schedule_qty,qty)"/>
+						<field name="qty" readonly="1" on_change="onchange_planning_qty(schedule_qty,qty)"/>
 						<field name="cancel_remark" attrs="{'invisible': [('transac_state','in',['in_draft','complete'])], 'readonly': [('state','in',['cancel'])]}"/>
 						<field name="state" invisible="1"/>
 						<field name="transac_state" invisible="1"/>
@@ -220,7 +220,7 @@
 						   <field name="planning_qty" invisible="1"/>
 						   <field name="stock_qty"/>
 						   <field name="stage_id" invisible="1"/>
-						   <field name="qty" on_change="onchange_allocation_qty(planning_qty, stock_qty, qty)" required="1"/>
+						   <field name="qty" readonly="1" on_change="onchange_allocation_qty(planning_qty, stock_qty, qty)" required="1"/>
 						   <field name="remarks"/>
 						   <field name="state" invisible="1"/>
 						</tree>

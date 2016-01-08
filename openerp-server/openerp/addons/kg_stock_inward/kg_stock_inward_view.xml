@@ -11,13 +11,12 @@
 				<form string="Stock Inward" version="7.0">
 					<header>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						
 					</header>
 					<sheet>		
 						<group>
 							<group>
 								<field name="name"/>
-								<field name="division_id" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="division_id"/>
 								<field name="note" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
 								
 							</group>											
@@ -72,8 +71,8 @@
 								toolbar="True" string="Stock Inward Entry Tree">					
 					<field name="name"/>
 					<field name="entry_date"/>
-					<field name="division_id"/>
-					<field name="location" invisible="1"/>
+					<field name="division_id" invisible="1"/>
+					<field name="location" />
 					<field name="state"/>
 				</tree>
 			</field>
@@ -89,9 +88,10 @@
 			<field name="model">ch.stock.inward.details</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<tree string="Stock Inward Details Entry Tree" editable="bottom" >					
+				<tree string="Stock Inward Details Entry Tree" editable="top" >					
 					<field name="pump_model_id"/>
-				    <field name="pattern_id"/>
+				    <field name="pattern_id" on_change="onchange_pattern_name(pattern_id)"/>
+				    <field name="pattern_name"/>
 				    <!--<field name="part_name_id"/>-->
 				    <field name="moc_id"/>
 				    <field name="stage_id"/>

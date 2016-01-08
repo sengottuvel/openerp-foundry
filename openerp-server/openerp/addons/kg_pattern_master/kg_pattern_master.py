@@ -15,7 +15,7 @@ class kg_pattern_master(osv.osv):
 	
 	_columns = {
 			
-		'name': fields.char('Part/Pattern No', size=128, required=True, select=True),
+		'name': fields.char('Part/Pattern No', size=128, required=True),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'pattern_name': fields.char('Part/Pattern Name', size=128,required=True),
 		'active': fields.boolean('Active'),
@@ -49,11 +49,6 @@ class kg_pattern_master(osv.osv):
 		
 	}
 	
-	_sql_constraints = [
-	
-		('name', 'unique(name)', 'No must be unique per Company !!'),
-		('pattern_name', 'unique(pattern_name)', 'Pattern Name must be unique per Company !!'),
-	]
 	
 	"""def _Validation(self, cr, uid, ids, context=None):
 		flds = self.browse(cr , uid , ids[0])
@@ -141,7 +136,7 @@ class kg_pattern_master(osv.osv):
 	_constraints = [
 		#(_Validation, 'Special Character Not Allowed !!!', ['name']),
 		#(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
-		(_name_validate, 'Pattern No must be unique !!', ['no']),		
+		#(_name_validate, 'Pattern No must be unique !!', ['no']),		
 		
 	]
 	

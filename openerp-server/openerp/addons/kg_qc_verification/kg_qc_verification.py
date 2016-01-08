@@ -47,9 +47,11 @@ class kg_qc_verification(osv.osv):
 		
 		'stage_id': fields.many2one('kg.stage.master','Stage', readonly=True),
 		
-		'stock_qty': fields.related('allocation_id','stock_qty', type='float', size=100, string='Stock Qty', store=True, readonly=True),
-		'allocated_qty': fields.related('allocation_id','qty', type='float', size=100, string='Allocated Qty', store=True, readonly=True),
-		'qty': fields.float('QC Qty', size=100, required=True),
+		'stock_qty': fields.related('allocation_id','stock_qty', type='integer', size=100, string='Stock Qty', store=True, readonly=True),
+		'allocated_qty': fields.related('allocation_id','qty', type='integer', size=100, string='Allocated Qty', store=True, readonly=True),
+		'qty': fields.integer('Accepted Qty', size=100, required=True),
+		'rework_qty': fields.integer('Rework Qty', size=100),
+		'reject_qty': fields.integer('Rejection Qty', size=100),
 		'position_no': fields.char('Pos No.', size=128),
 		'diameter': fields.char('Diameter', size=128),
 		
@@ -92,6 +94,7 @@ class kg_qc_verification(osv.osv):
 		
 	}
 	
+	
 	def _future_entry_date_check(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		today = date.today()
@@ -107,7 +110,7 @@ class kg_qc_verification(osv.osv):
 		
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.qty < 0.00:
+		if entry.qty < 0:
 			return False
 		return True
 		
@@ -131,10 +134,16 @@ class kg_qc_verification(osv.osv):
 			
 		if entry.qty > entry.allocated_qty:
 			raise osv.except_osv(_('Warning !'), _('Accepted Qty should not be greater than Allocated Qty !!'))
-		if entry.qty < 0.00:
+		if entry.qty < 0:
 			raise osv.except_osv(_('Warning !'), _('QC Qty should not be less than zero !!'))
 			
-		self.write(cr, uid, ids, {'cancel_remark':False})
+		
+		
+		### Rejection Qty Updation
+		
+		reject_qty = entry.allocated_qty - (entry.qty + entry.rework_qty)
+		
+		self.write(cr, uid, ids, {'cancel_remark':False, 'reject_qty':reject_qty or 0})
 				
 		#### Stock Table Updatation Block ####
 		
@@ -157,24 +166,28 @@ class kg_qc_verification(osv.osv):
 					allocation_id = %s and
 					sch_bomline_id = %s and
 					type = 'OUT' and
-					alloc_qty > 0.00)
+					alloc_qty > 0)
 					''',
-					[stock_item['qty'],entry.id, entry.schedule_id.id, entry.schedule_line_id.id, 
+					[stock_item['qty'], entry.id, entry.schedule_id.id, entry.schedule_line_id.id, 
 					entry.planning_id.id, entry.planning_line_id.id, stock_item['allocation_id'],entry.sch_bomline_id.id])
 		
 		
 		
 		if entry.sch_bomline_id.transac_state == 'sent_for_produc':
 			sch_bomline_obj.write(cr, uid, entry.sch_bomline_id.id, {'transac_state':'sent_for_produc'})
+			schedule_line_obj.write(cr, uid, entry.schedule_line_id.id, {'transac_state':'sent_for_produc'})
 			planning_line_obj.write(cr, uid, entry.planning_line_id.id, {'transac_state':'sent_for_produc'})
 		if entry.sch_bomline_id.transac_state == 'sent_for_qc':
 			planning_line_obj.write(cr, uid, entry.planning_line_id.id, {'transac_state':'complete'})
 			if entry.sch_bomline_id.planning_qty == entry.sch_bomline_id.qty:
 				sch_bomline_obj.write(cr, uid, entry.sch_bomline_id.id, {'transac_state':'complete'})
-			if entry.sch_bomline_id.planning_qty == 0.00:
+				schedule_line_obj.write(cr, uid, entry.schedule_line_id.id, {'transac_state':'complete'})
+			if entry.sch_bomline_id.planning_qty == 0:
 				sch_bomline_obj.write(cr, uid, entry.sch_bomline_id.id, {'transac_state':'complete'})
+				schedule_line_obj.write(cr, uid, entry.schedule_line_id.id, {'transac_state':'complete'})
 			if entry.sch_bomline_id.qty > entry.sch_bomline_id.planning_qty :
 				sch_bomline_obj.write(cr, uid, entry.sch_bomline_id.id, {'transac_state':'partial'})
+				schedule_line_obj.write(cr, uid, entry.schedule_line_id.id, {'transac_state':'partial'})
 				
 
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),
@@ -189,7 +202,7 @@ class kg_qc_verification(osv.osv):
 		if entry.cancel_remark == False:
 			raise osv.except_osv(_('Warning!'),
 						_('Cancellation Remarks is must !!'))
-		cr.execute(''' update kg_foundry_stock set qty = 0.00 where planning_line_id = %s and allocation_id = %s ''',[entry.planning_line_id.id, entry.allocation_id.id])
+		cr.execute(''' update kg_foundry_stock set qty = 0 where planning_line_id = %s and allocation_id = %s ''',[entry.planning_line_id.id, entry.allocation_id.id])
 		self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S'),'transac_state':'cancel'})
 		return True
 		

@@ -15,13 +15,18 @@ class kg_weekly_schedule(osv.osv):
 	_description = "Weekly Schedule Entry"
 	_order = "entry_date desc"
 	
+	def _get_default_division(self, cr, uid, context=None):
+		res = self.pool.get('kg.division.master').search(cr, uid, [('code','=','SAM'),('state','=','approved'), ('active','=','t')], context=context)
+		return res and res[0] or False
+
+	
 	
 	_columns = {
 	
 		### Header Details ####
-		'name': fields.char('Schedule No', size=128,select=True,readonly=True),
+		'name': fields.char('Schedule No', size=128,select=True,required=True),
 		'entry_date': fields.date('Schedule Date',required=True),
-		'division_id': fields.many2one('kg.division.master','Division', required=True,domain="[('state','=','approved'), ('active','=','t')]"),
+		'division_id': fields.many2one('kg.division.master','Division',readonly=True,required=True,domain="[('state','=','approved'), ('active','=','t')]"),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location', required=True),
 		'note': fields.text('Notes'),
 		'remarks': fields.text('Remarks'),
@@ -58,6 +63,7 @@ class kg_weekly_schedule(osv.osv):
 		'crt_date':time.strftime('%Y-%m-%d %H:%M:%S'),
 		'state': 'draft',
 		'active': True,
+		'division_id':_get_default_division,
 		
 		
 		
@@ -94,16 +100,16 @@ class kg_weekly_schedule(osv.osv):
 		return True
 			
 	
-	_constraints = [        
-              
-        
-        (_future_entry_date_check, 'System not allow to save with future date. !!',['']),
-        (_check_duplicates, 'System not allow to do duplicate entry !!',['']),
-        (_check_lineitems, 'System not allow to save with empty Schedule Details !!',['']),
-       
-        
-       ]
-       
+	_constraints = [		
+			  
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
+		(_check_duplicates, 'System not allow to do duplicate entry !!',['']),
+		(_check_lineitems, 'System not allow to save with empty Schedule Details !!',['']),
+	   
+		
+	   ]
+	   
 
 	def entry_confirm(self,cr,uid,ids,context=None):
 		today = date.today()
@@ -130,14 +136,22 @@ class kg_weekly_schedule(osv.osv):
 					if sch_bom_id[0] != None:
 						raise osv.except_osv(_('Warning!'),
 							_('Specify MOC for Order %s!!')%(item.order_ref_no))
-					
-			
+							
+				### Planning Qty Updation
+				
+				cr.execute(''' select sum(qty) from ch_sch_bom_details where flag_applicable = 't' and header_id = %s group by header_id ''',[item.id])		
+				bom_qty = cr.fetchone()
+				
+				if bom_qty:
+					if bom_qty[0] != None:
+						cr.execute(''' update ch_weekly_schedule_details set temp_planning_qty = %s 
+						where id = %s and header_id = %s ''',[bom_qty[0],item.id,entry.id])
+
 			cr.execute(''' update ch_sch_bom_details set state = 'confirmed',transac_state = 'in_schedule' where header_id = %s and flag_applicable = 't' ''',[item.id])
 			
 			cr.execute(''' update ch_sch_bom_details set state = 'confirmed' where header_id = %s ''',[item.id])
-		self.write(cr, uid, ids, {'state': 'confirmed','flag_cancel':1,'confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-			'name' :self.pool.get('ir.sequence').get(cr, uid, 'kg.weekly.schedule') or '/'})
-		cr.execute(''' update ch_weekly_schedule_details set state = 'confirmed', flag_cancel='t' where header_id = %s ''',[ids[0]])
+		self.write(cr, uid, ids, {'state': 'confirmed','flag_cancel':1,'confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		cr.execute(''' update ch_weekly_schedule_details set state = 'confirmed',transac_state = 'in_schedule', flag_cancel='t' where header_id = %s ''',[ids[0]])
 		return True
 		
 	def entry_cancel(self,cr,uid,ids,context=None):
@@ -202,19 +216,21 @@ class ch_weekly_schedule_details(osv.osv):
 		'schedule_date': fields.related('header_id','entry_date', type='date', string='Date', store=True, readonly=True),
 		'order_ref_no': fields.char('Order Reference', size=128, required=True),
 		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True,domain="[('state','=','approved'), ('active','=','t')]"),
-		'type': fields.selection([('production','Production'),('spare','Spare')],'Purpose', required=True),
-		'qty': fields.float('Schedule Qty', size=100, required=True),
+		'type': fields.selection([('production','Pump'),('spare','Spare')],'Purpose', required=True),
+		'qty': fields.integer('Schedule Qty', size=100, required=True),
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),
-	    'note': fields.text('Notes'),
+		'note': fields.text('Notes'),
 		'remarks': fields.text('Approve/Reject Remarks'),
 		'cancel_remark': fields.text('Cancel Remarks'),
 		'active': fields.boolean('Active'),
 		'delivery_date': fields.date('Delivery Date',required=True),
 		'line_ids': fields.one2many('ch.sch.bom.details', 'header_id', "BOM Details"),
 		'flag_cancel': fields.boolean('Cancellation Flag'),
-		
-		
-	
+		### Used for Planning Purpose
+		'temp_planning_qty':fields.integer('Planning Qty', size=100, required=True),
+		'transac_state': fields.selection([('in_draft','In Draft'),('in_schedule','In Schedule'),('partial','Partial'),('sent_for_plan','In Planning'),('sent_for_qc','In QC'),
+					   ('sent_for_produc','In Production'),('complete','Completed')],'Transaction Status', readonly=True),
+
 	}
 	
 	
@@ -238,8 +254,29 @@ class ch_weekly_schedule_details(osv.osv):
 						_('Delivery Date should not be less than current date!!'))
 		return True
 		
-	def onchange_schedule_qty(self, cr, uid, ids, qty, line_ids):
-		return True
+	def onchange_schedule_qty(self, cr, uid, ids, pump_model_id, qty, type):
+		bom_vals=[]
+		sch_bom_obj = self.pool.get('ch.sch.bom.details')
+		cr.execute(''' select id,header_id,pattern_id,pattern_name,qty from ch_bom_line 
+		where header_id = (select id from kg_bom where pump_model_id = %s and state='approved' and active='t') ''',[pump_model_id])
+		bom_details = cr.dictfetchall()
+		for bom_details in bom_details:
+			if type == 'production':
+				applicable = True
+			if type == 'spare':
+				applicable = False
+			bom_vals.append({
+												
+				'bom_id': bom_details['header_id'],
+				'bom_line_id': bom_details['id'],
+				'pattern_id': bom_details['pattern_id'],
+				'pattern_name': bom_details['pattern_name'],							
+				'qty' : qty * bom_details['qty'],					
+				'planning_qty' : qty * bom_details['qty'],					
+				'production_qty' : 0,					
+				'flag_applicable' : applicable							
+				})
+		return {'value': {'line_ids': bom_vals}}
 		
 	def onchange_order_refno(self, cr, uid, ids, order_ref_no):
 		if order_ref_no:
@@ -276,7 +313,7 @@ class ch_weekly_schedule_details(osv.osv):
 						'pattern_name': bom_details['pattern_name'],							
 						'qty' : entry.qty * bom_details['qty'],					
 						'planning_qty' : entry.qty * bom_details['qty'],					
-						'production_qty' : 0.00,					
+						'production_qty' : 0,					
 						'flag_applicable' : applicable							
 						}
 					
@@ -325,7 +362,7 @@ class ch_weekly_schedule_details(osv.osv):
 		
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.qty == 0.00 or entry.qty < 0.00:
+		if entry.qty == 0 or entry.qty < 0:
 			return False
 		return True
 		
@@ -366,15 +403,15 @@ class ch_weekly_schedule_details(osv.osv):
 		
 	
 	
-	_constraints = [        
-              
-        (_check_values, 'System not allow to save with zero and less than zero qty .!!',['Quantity']),
-        (_Validation, 'Special Character Not Allowed', ['Order Reference']),
-        (_check_line_duplicates, 'Schedule Details are duplicate. Kindly check !! ', ['']),
-        (_check_line_items, 'Schedule Detail cannot be created after confirmation !! ', ['']),
-       
-        
-       ]
+	_constraints = [		
+			  
+		(_check_values, 'System not allow to save with zero and less than zero qty .!!',['Quantity']),
+		(_Validation, 'Special Character Not Allowed', ['Order Reference']),
+		(_check_line_duplicates, 'Schedule Details are duplicate. Kindly check !! ', ['']),
+		(_check_line_items, 'Schedule Detail cannot be created after confirmation !! ', ['']),
+	   
+		
+	   ]
 	
 ch_weekly_schedule_details()
 
@@ -393,21 +430,21 @@ class ch_sch_bom_details(osv.osv):
 		'order_ref_no': fields.related('header_id','order_ref_no', type='char', string='Order Reference', store=True, readonly=True),
 		'pump_model_id': fields.related('header_id','pump_model_id', type='many2one',relation='kg.pumpmodel.master', string='Pump Model', store=True, readonly=True),
 		'type': fields.related('header_id','type', type='char', string='Purpose', store=True, readonly=True),
-		'schedule_qty': fields.related('header_id','qty', type='float', string='Schedule Qty', store=True, readonly=True),
+		'schedule_qty': fields.related('header_id','qty', type='integer', string='Schedule Qty', store=True, readonly=True),
 		
 		'bom_id': fields.many2one('kg.bom','BOM'),
 		'bom_line_id': fields.many2one('ch.bom.line','BOM Line'),
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern No',domain="[('state','=','approved'), ('active','=','t')]"),
 		'pattern_name': fields.char('Pattern Name'),
 		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','=','approved'), ('active','=','t')]"),
-		'qty': fields.float('BOM Qty', size=100),
-		'planning_qty': fields.float('Planning Pending Qty', size=100),
-		'production_qty': fields.float('Produced Qty', size=100),
+		'qty': fields.integer('BOM Qty', size=100),
+		'planning_qty': fields.integer('Planning Pending Qty', size=100),
+		'production_qty': fields.integer('Produced Qty', size=100),
 		'flag_applicable': fields.boolean('Is Applicable'),
 		'add_spec': fields.text('Others Specification'),
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),
 		'transac_state': fields.selection([('in_draft','In Draft'),('in_schedule','In Schedule'),('partial','Partial'),('sent_for_plan','In Planning'),('sent_for_qc','In QC'),
-		               ('sent_for_produc','In Production'),('complete','Completed')],'Transaction Status', readonly=True),
+					   ('sent_for_produc','In Production'),('complete','Completed')],'Transaction Status', readonly=True),
 	
 	}
 	

@@ -15,14 +15,17 @@ class kg_stock_inward(osv.osv):
 	_description = "Stock Inward Entry"
 	_order = "entry_date desc"
 	
+	def _get_default_division(self, cr, uid, context=None):
+		res = self.pool.get('kg.division.master').search(cr, uid, [('code','=','SAM'),('state','=','approved'), ('active','=','t')], context=context)
+		return res and res[0] or False
+	
 	
 	_columns = {
 	
 		### Header Details ####
 		'name': fields.char('Inward No', size=128,select=True,readonly=True),
 		'entry_date': fields.date('Inward Date',required=True),
-		
-		'division_id': fields.many2one('kg.division.master','Division',domain="[('state','=','approved'), ('active','=','t')]",required=True),
+		'division_id': fields.many2one('kg.division.master','Division',readonly=True,required=True,domain="[('state','=','approved'), ('active','=','t')]"),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location', required=True),
 		'note': fields.text('Notes'),
 		'remarks': fields.text('Remarks'),
@@ -56,10 +59,13 @@ class kg_stock_inward(osv.osv):
 		'crt_date':time.strftime('%Y-%m-%d %H:%M:%S'),
 		'state': 'draft',		
 		'active': True,
+		'division_id':_get_default_division,
 		
 		
 		
 	}
+	
+	
 	
 
 	def _future_entry_date_check(self,cr,uid,ids,context=None):
@@ -103,7 +109,7 @@ class kg_stock_inward(osv.osv):
 			cr.execute(''' insert into kg_foundry_stock(company_id,division_id,location,pump_model_id,pattern_id,
 			moc_id,stage_id,stock_inward_id,qty,alloc_qty,type,creation_date)
 			
-			values(%s,%s,%s,%s,%s,%s,%s,%s,%s,0.00,'IN',%s)
+			values(%s,%s,%s,%s,%s,%s,%s,%s,%s,0,'IN',%s)
 			''',[entry.company_id.id,entry.division_id.id or None,entry.location,line_item.pump_model_id.id, line_item.pattern_id.id,
 			line_item.moc_id.id,line_item.stage_id.id,line_item.id,line_item.qty,entry.entry_date])
 					
@@ -145,10 +151,11 @@ class ch_stock_inward_details(osv.osv):
 		'inward_date': fields.related('header_id','entry_date', type='date', string='Date', store=True, readonly=True),
 		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True,domain="[('state','=','approved'), ('active','=','t')]"),
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern Number', required=True,domain="[('state','=','approved'), ('active','=','t')]"),
+		'pattern_name': fields.char('Pattern Name',readonly=True),
 		#'part_name_id': fields.many2one('product.product','Part Name', required=True,domain="[('state','=','approved'), ('active','=','t')]"),
 		'moc_id': fields.many2one('kg.moc.master','MOC',required=True,domain="[('state','=','approved'), ('active','=','t')]"),
 		'stage_id': fields.many2one('kg.stage.master','Stage',required=True,domain="[('state','=','approved'), ('active','=','t')]"),
-		'qty': fields.float('Stock Qty', size=100, required=True),
+		'qty': fields.integer('Stock Qty', size=100, required=True),
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),
 		'active': fields.boolean('Active'),
 		'cancel_remark': fields.text('Cancel Remarks'),
@@ -164,11 +171,18 @@ class ch_stock_inward_details(osv.osv):
 		'active': True,
 		
 	}
+	
+	def onchange_pattern_name(self, cr, uid, ids, pattern_id, context=None):
+		value = {'pattern_name': ''}
+		if pattern_id:
+			pro_rec = self.pool.get('kg.pattern.master').browse(cr, uid, pattern_id, context=context)
+			value = {'pattern_name': pro_rec.pattern_name}
+		return {'value': value}
 		
 	
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.qty == 0.00 or entry.qty < 0.00:
+		if entry.qty == 0 or entry.qty < 0:
 			return False
 		return True
 		
@@ -183,11 +197,21 @@ class ch_stock_inward_details(osv.osv):
 		return True
 		
 		
-	def create(self, cr, uid, vals, context=None):	
+	def create(self, cr, uid, vals, context=None):
+		pattern_obj = self.pool.get('kg.pattern.master')
+		if vals.get('pattern_id'):
+			pattern_rec = pattern_obj.browse(cr, uid, vals.get('pattern_id') )
+			pattern_name = pattern_rec.pattern_name
+			vals.update({'pattern_name': pattern_name})
 		return super(ch_stock_inward_details, self).create(cr, uid, vals, context=context)
 		
 		
 	def write(self, cr, uid, ids, vals, context=None):
+		pattern_obj = self.pool.get('kg.pattern.master')
+		if vals.get('pattern_id'):
+			pattern_rec = pattern_obj.browse(cr, uid, vals.get('pattern_id') )
+			pattern_name = pattern_rec.pattern_name
+			vals.update({'pattern_name': pattern_name})
 		return super(ch_stock_inward_details, self).write(cr, uid, ids, vals, context)
 		
 		

@@ -10,8 +10,7 @@
 			<field name="arch" type="xml">
 				<form string="Production" version="7.0" create="false">
 					<header>
-						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="entry_update" type="object" string="Update" states="confirmed,boring_inprogress,boring_complete,casting_inprogress" class="oe_highlight" />
+						<button name="entry_update" type="object" string="Update" states="draft,boring_inprogress,boring_complete,casting_inprogress" class="oe_highlight" />
 						<!--<button name="entry_cancel" type="object" string="Cancel" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
 					</header>
 					<sheet>		
@@ -48,9 +47,9 @@
 							</group>					
 						</group>
 						<newline/>
-						<group string="Bouring Updates">
+						<group string="Pouring Updates">
 							<group>
-								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['draft','boring_complete','casting_inprogress','casting_complete','cancel'])]}">
+								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['boring_complete','casting_inprogress','casting_complete','cancel'])]}">
 									<tree string="Boring Details" editable="top">					
 										<field name="entry_date" required="1"/>
 										<field name="qty" required="1"/>
@@ -62,7 +61,7 @@
 						</group>
 						<group string="Casting Updates" >
 							<group>
-								<field name="line_ids_a" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['draft','confirmed','casting_complete','cancel'])]}">
+								<field name="line_ids_a" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['casting_complete','cancel'])]}">
 									<tree string="Casting Details" editable="top">					
 										<field name="entry_date" required="1"/>
 										<field name="qty" required="1"/>
@@ -120,7 +119,8 @@
 								toolbar="True" string="Prodution Entry Tree" create="false">					
 					<field name="name"/>
 					<field name="entry_date"/>
-					<field name="division_id"/>
+					<field name="division_id"  invisible="1"/>
+					<field name="location"/>
 					<field name="planning_id" invisible="1"/>
 					<field name="planning_date" invisible="1"/>
 					<field name="order_ref_no"/>
@@ -130,7 +130,7 @@
 					<field name="production_qty" sum="Total Qty"/>
 					<field name="qty" sum="Total Qty"/>
 					<field name="excess_qty" sum="Total Qty"/>
-					<field name="location" invisible="1"/>
+					
 					<field name="state"/>
 				</tree>
 			</field>

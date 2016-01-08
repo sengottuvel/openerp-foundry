@@ -43,10 +43,12 @@
 							<group>
 								<field name="stock_qty" readonly="1"/>
 								<field name="qty" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+								<field name="reject_qty" readonly="1"/>
 								<field name="diameter" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 							</group>											
 							<group>
 								<field name="allocated_qty" readonly="1"/>
+								<field name="rework_qty" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 								<field name="position_no" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 								<field name="remark" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 							</group>					
@@ -103,7 +105,8 @@
 								toolbar="True" string="QC Verification Entry Tree" create="false">					
 					<field name="name"/>
 					<field name="entry_date"/>
-					<field name="division_id"/>
+					<field name="division_id" invisible="1"/>
+					<field name="location" />
 					<field name="planning_id" invisible="1"/>
 					<field name="planning_date" invisible="1"/>
 					<field name="order_ref_no"/>
@@ -112,7 +115,6 @@
 					<field name="moc_id"/>
 					<field name="allocated_qty" sum="Total Qty"/>
 					<field name="qty" sum="Total Qty"/>
-					<field name="location" invisible="1"/>
 					<field name="state"/>
 				</tree>
 			</field>

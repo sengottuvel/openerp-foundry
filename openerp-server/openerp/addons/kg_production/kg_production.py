@@ -27,7 +27,7 @@ class kg_production(osv.osv):
 		'note': fields.text('Notes'),
 		'remarks': fields.text('Approve/Reject'),
 		'active': fields.boolean('Active'),
-		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('boring_inprogress','Boring In Progress'),('boring_complete','Boring Complete')
+		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('boring_inprogress','Pouring In Progress'),('boring_complete','Pouring Complete')
 				,('casting_inprogress','Casting In Progress'),('casting_complete','Casting Complete'),('cancel','Cancelled')],'Status', readonly=True),
 		
 		'planning_line_id': fields.many2one('ch.daily.planning.details','Planning Line Item'),
@@ -48,10 +48,10 @@ class kg_production(osv.osv):
 		'moc_id': fields.related('planning_line_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
 		
 		'stage_id': fields.many2one('kg.stage.master','Stage',domain="[('state','=','approved'), ('active','=','t')]"),
-		'planning_qty': fields.related('planning_line_id','qty', type='float', size=100, string='Planning Qty', store=True, readonly=True),
-		'production_qty': fields.float('Production Qty', size=100, required=True),
-		'qty': fields.float('Produced Qty', size=100, required=True),
-		'excess_qty': fields.float('Excess Qty', size=100, required=True),
+		'planning_qty': fields.related('planning_line_id','qty', type='integer', size=100, string='Planning Qty', store=True, readonly=True),
+		'production_qty': fields.integer('Production Qty', size=100, required=True),
+		'qty': fields.integer('Produced Qty', size=100, required=True),
+		'excess_qty': fields.integer('Excess Qty', size=100, required=True),
 		'cancel_remark': fields.text('Cancel Remarks'),
 		
 		'line_ids': fields.one2many('ch.boring.details', 'header_id', "Boring Details"),
@@ -109,13 +109,6 @@ class kg_production(osv.osv):
 		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
   
 	   ]
-	   
-	   
-	def entry_confirm(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-			'name' :self.pool.get('ir.sequence').get(cr, uid, 'kg.production') or '/'})
-		return True
-		
 
 	def entry_update(self,cr,uid,ids,context=None):
 		schedule_line_obj = self.pool.get('ch.weekly.schedule.details')
@@ -145,7 +138,7 @@ class kg_production(osv.osv):
 		
 		if casting_qty:
 			if casting_qty[0] != None:
-				if boring_qty[0] == None and casting_qty[0] > 0.00:
+				if boring_qty[0] == None and casting_qty[0] > 0:
 					raise osv.except_osv(_('Warning!'),
 						_('Casting cannot be done befor Bouring!!'))
 				if casting_qty[0] > boring_qty[0]:
@@ -155,7 +148,7 @@ class kg_production(osv.osv):
 					if casting_qty[0] > entry.qty:
 						excess_qty = casting_qty[0] - entry.qty
 					else:
-						excess_qty = 0.00
+						excess_qty = 0
 					self.write(cr, uid, ids, {'state': 'casting_complete','excess_qty':excess_qty,'qty':casting_qty[0]})
 					
 					### Production Qty Updation 
@@ -163,7 +156,7 @@ class kg_production(osv.osv):
 					
 					bom_produc_qty = entry.sch_bomline_id.production_qty + production_qty
 
-					if entry.sch_bomline_id.planning_qty == 0.00:
+					if entry.sch_bomline_id.planning_qty == 0:
 						sch_bomline_obj.write(cr, uid, entry.sch_bomline_id.id, 
 					
 						{
@@ -173,7 +166,9 @@ class kg_production(osv.osv):
 						
 						
 						})
-					if entry.sch_bomline_id.planning_qty > 0.00:
+						
+						schedule_line_obj.write(cr, uid, entry.schedule_line_id.id, {'transac_state':'complete'})
+					if entry.sch_bomline_id.planning_qty > 0:
 						sch_bomline_obj.write(cr, uid, entry.sch_bomline_id.id,  
 					
 						{
@@ -183,12 +178,11 @@ class kg_production(osv.osv):
 						
 						
 						})
-						
-						
+						schedule_line_obj.write(cr, uid, entry.schedule_line_id.id, {'transac_state':'partial'})
 						
 					planning_line_obj.write(cr, uid, entry.planning_line_id.id, {'transac_state':'complete'})
 				
-					if excess_qty > 0.00:
+					if excess_qty > 0:
 						
 						
 						#### Stock Updation Block Starts Here ###
@@ -199,7 +193,7 @@ class kg_production(osv.osv):
 								allocation_id,qc_id,production_id ,creation_date,schedule_date,
 								planning_date,qc_date,production_date,remarks,bom_id,bom_line_id,sch_bomline_id)
 							
-								values(%s,%s,%s,%s,%s,%s,%s,%s,0.00,'IN',%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+								values(%s,%s,%s,%s,%s,%s,%s,%s,0,'IN',%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
 								''',[entry.company_id.id,entry.division_id.id or None,entry.location,entry.pump_model_id.id, entry.pattern_id.id,
 								entry.moc_id.id,entry.type,excess_qty,entry.schedule_id.id,entry.schedule_line_id.id,
 								entry.planning_id.id,entry.planning_line_id.id,entry.allocation_id.id or None, entry.qc_id.id or None,
@@ -260,9 +254,9 @@ class ch_boring_details(osv.osv):
 	_columns = {
 	
 		'header_id':fields.many2one('kg.production', 'Production', required=1, ondelete='cascade'),
-		'production_qty': fields.related('header_id','qty', type='float', string='Production Qty', store=True, readonly=True),
+		'production_qty': fields.related('header_id','qty', type='integer', string='Production Qty', store=True, readonly=True),
 		'entry_date': fields.date('Date'),
-		'qty': fields.float('Qty', size=100),
+		'qty': fields.integer('Qty', size=100),
 		'heat_no': fields.char('Heat No'),
 		'remark': fields.text('Remarks'),
 	
@@ -276,7 +270,7 @@ class ch_boring_details(osv.osv):
 	
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.qty < 0.00:
+		if entry.qty < 0:
 			return False
 		return True
 		
@@ -329,9 +323,9 @@ class ch_casting_details(osv.osv):
 	_columns = {
 	
 		'header_id':fields.many2one('kg.production', 'Production', required=1, ondelete='cascade'),
-		'production_qty': fields.related('header_id','qty', type='float', string='Production Qty', store=True, readonly=True),
+		'production_qty': fields.related('header_id','qty', type='integer', string='Production Qty', store=True, readonly=True),
 		'entry_date': fields.date('Date'),
-		'qty': fields.float('Qty', size=100),
+		'qty': fields.integer('Qty', size=100),
 		'remark': fields.text('Remarks'),
 	
 	}
@@ -345,7 +339,7 @@ class ch_casting_details(osv.osv):
 	
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.qty < 0.00:
+		if entry.qty < 0:
 			return False
 		return True
 		
@@ -398,8 +392,8 @@ class kg_foundry_stock(osv.osv):
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern No'),
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
 		'trans_type': fields.selection([('production','Production'),('spare','Spare')],'Purpose'),
-		'qty': fields.float('Qty', size=100),
-		'alloc_qty': fields.float('Allocation Qty', size=100),
+		'qty': fields.integer('Qty', size=100),
+		'alloc_qty': fields.integer('Allocation Qty', size=100),
 		'type': fields.char('Type', size=5),
 		'schedule_id': fields.many2one('kg.weekly.schedule','Schedule Header'),
 		'schedule_line_id': fields.many2one('ch.weekly.schedule.details','Schedule Line'),

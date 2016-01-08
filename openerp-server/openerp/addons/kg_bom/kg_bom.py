@@ -22,7 +22,7 @@ class kg_bom(osv.osv):
 		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True,domain="[('state','=','approved'), ('active','=','t')]"),	
 		'uom': fields.char('Unit of Measure', readonly=True,required=True),	
 		'remarks':fields.text('Remarks'),
-		'qty': fields.float('Qty', size=128,required=True,readonly=True),
+		'qty': fields.integer('Qty', size=128,required=True,readonly=True),
 		'active':fields.boolean('Active'),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
@@ -50,7 +50,7 @@ class kg_bom(osv.osv):
 	  'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.bom', context=c),
 	  'active': True,
 	  'state': 'draft',
-	  'qty': 1.00,
+	  'qty': 1,
 	  'user_id': lambda obj, cr, uid, context: uid,
 	  'crt_date':fields.datetime.now,	
 	  'uom':'Nos',	
@@ -124,7 +124,7 @@ class ch_bom_line(osv.osv):
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern No', required=True,domain="[('state','=','approved')]"),	
 		'pattern_name': fields.char('Pattern Name', required=True,readonly=True),	
 		'remarks':fields.text('Remarks'),
-		'qty': fields.float('Qty', size=128,required=True,),
+		'qty': fields.integer('Qty', size=128,required=True,),
 		'state':fields.selection([('draft','Draft'),('approve','Approved')],'Status'),
 		
 		
@@ -134,7 +134,7 @@ class ch_bom_line(osv.osv):
 	_defaults = {
 	
 	'state':'draft',
-	'qty': 1.00,
+	'qty': 1,
 	  
 	}
 	

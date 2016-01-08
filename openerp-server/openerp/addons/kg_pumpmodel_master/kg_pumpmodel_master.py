@@ -17,7 +17,7 @@ class kg_pumpmodel_master(osv.osv):
 			
 		'name': fields.char('Name', size=128, required=True, select=True),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
-		'code': fields.char('Code', size=128),
+		'code': fields.char('Code', size=128, required=True),
 		'active': fields.boolean('Active'),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'notes': fields.text('Notes'),

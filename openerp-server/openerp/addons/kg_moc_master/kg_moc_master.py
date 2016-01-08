@@ -17,9 +17,9 @@ class kg_moc_master(osv.osv):
 			
 		'name': fields.char('Name', size=128, required=True, select=True),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
-		'code': fields.char('Code', size=128),
+		'code': fields.char('Code', size=128, required=True),
 		'active': fields.boolean('Active'),
-		'rate': fields.float('Rate', size=128,required=True,),
+		'rate': fields.float('Rate(Rs)', size=128,required=True,),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
