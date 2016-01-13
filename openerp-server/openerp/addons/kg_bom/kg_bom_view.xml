@@ -37,7 +37,7 @@
 											
 								<field name="pos_no"/>				   
 								<field name="pattern_id" on_change="onchange_pattern_name(pattern_id)"/>
-								<field name="pattern_name"/>				   
+								<field name="pattern_name" readonly="1"/>				   
 								<field name="qty"/>
 								<field name="remarks"/>
 								<field name="state" invisible="1"/>

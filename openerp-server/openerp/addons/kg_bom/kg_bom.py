@@ -123,7 +123,7 @@ class ch_bom_line(osv.osv):
 		
 		'header_id':fields.many2one('kg.bom', 'BOM Entry', required=True, ondelete='cascade'),			
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern No', required=True,domain="[('state','=','approved')]"),	
-		'pattern_name': fields.char('Pattern Name', required=True,readonly=True),	
+		'pattern_name': fields.char('Pattern Name', required=True),	
 		'remarks':fields.text('Remarks'),
 		'qty': fields.integer('Qty',required=True,),
 		'state':fields.selection([('draft','Draft'),('approve','Approved')],'Status'),
