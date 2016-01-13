@@ -32,8 +32,10 @@
 							</group>
 						</group>
 						<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">
-							<tree string="Stock Inward Details Entry Tree" editable="top" >					
-					
+							<tree string="BOM Details Entry Tree" editable="top" >	
+							
+											
+								<field name="pos_no"/>				   
 								<field name="pattern_id" on_change="onchange_pattern_name(pattern_id)"/>
 								<field name="pattern_name"/>				   
 								<field name="qty"/>
@@ -111,8 +113,9 @@
 			<field name="model">ch.bom.line</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<tree string="Stock Inward Details Entry Tree">					
-					
+				<tree string="BOM Details Entry Tree">	
+								
+					<field name="pos_no"/>			
 				    <field name="pattern_id" on_change="onchange_pattern_name(pattern_id)"/>
 				    <field name="pattern_name"/>				   
 				    <field name="qty"/>
@@ -132,8 +135,9 @@
 			<field name="model">ch.bom.line</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<form string="Stock Inward Details Entry Tree">					
-					
+				<form string="BOM Details Entry Tree">
+										
+					<field name="pos_no"/>			
 					<field name="header_id"/>
 				    <field name="pattern_id"/>
 				    <field name="pattern_name"/>				   

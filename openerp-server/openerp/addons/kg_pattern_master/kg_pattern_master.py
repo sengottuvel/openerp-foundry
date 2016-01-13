@@ -19,7 +19,8 @@ class kg_pattern_master(osv.osv):
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'pattern_name': fields.char('Part/Pattern Name', size=128,required=True),
 		'active': fields.boolean('Active'),
-		'pcs_weight': fields.float('Weight(KG)', size=128,required=True,),
+		'pcs_weight': fields.float('CI Weight(KG)',required=True,),
+		'ci_weight': fields.float('SS Weight(KG)',required=True,),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
@@ -93,15 +94,7 @@ class kg_pattern_master(osv.osv):
 		return True
 
 	def entry_confirm(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])
-		if rec.pcs_weight == 0:
-			raise osv.except_osv(_('Weight is must !!'),
-				_('Enter the Weight field !!'))
-		if rec.pcs_weight < 0:
-			raise osv.except_osv(_('Invalid!!'),
-				_('Weight field is invalid!!'))
-		else:
-			pass
+		rec = self.browse(cr,uid,ids[0])		
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 

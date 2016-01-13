@@ -24,6 +24,7 @@
 							</group>
 							<group>
 								<field name="pattern_name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="ci_weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="active"/>									
 								<field name="state" style="width: 30%%" class="att_state_change"/>							
 							</group>
