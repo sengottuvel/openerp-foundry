@@ -191,11 +191,11 @@ class ch_bom_line(osv.osv):
 			vals.update({'pattern_name': pattern_name})
 		return super(ch_bom_line, self).write(cr, uid, ids, vals, context)	
 		
-	_constraints = [
+	"""_constraints = [
 		
 		(_check_line_duplicates, 'Pattern Name must be unique !!', ['Pattern Name']),		
 		
-	]
+	]"""
 
 	
 ch_bom_line()
