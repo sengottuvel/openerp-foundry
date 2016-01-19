@@ -26,8 +26,8 @@
             ref('kg_menus.tam_production'),
             
             ref('kg_menus.tam_stock_inward'),
-            ref('kg_menus.tam_sch_bomdetails'),
-            ref('kg_menus.tam_plan_details'),
+            ref('kg_menus.tam_pouring'),
+            ref('kg_menus.tam_casting'),
             
             
             ref('kg_menus.rpm_reports'),

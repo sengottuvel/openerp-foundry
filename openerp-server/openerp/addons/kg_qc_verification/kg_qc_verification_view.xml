@@ -16,12 +16,12 @@
 						<button name="entry_draft" type="object" string="Set to Draft" states="cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
 					<sheet>		
-						<group string="Planning Details">
+						<group string="Schedule Details">
 							<group>
 								<field name="name"/>
 								<field name="planning_id" readonly="1"/>
 								<field name="division_id" readonly="1"/>
-								<field name="order_ref_no" readonly="1"/>
+								<field name="schedule_id" readonly="1"/>
 								<field name="pattern_id" readonly="1"/>
 								<field name="type" readonly="1"/>
 								<field name="stage_id" invisible="1"/>
@@ -33,7 +33,7 @@
 								<field name="planning_date" readonly="1"/>
 								<field name="location" readonly="1"/>
 								<field name="pump_model_id" readonly="1"/>
-								<!--<field name="part_name_id" invisible="1"/>-->
+								<field name="pattern_name" readonly="1"/>
 								<field name="moc_id" readonly="1"/>
 								<field name="active" invisible="1"/>
 								<field name="state" style="width: 30%%" class="att_state_change"/>	
@@ -109,9 +109,12 @@
 					<field name="location" />
 					<field name="planning_id" invisible="1"/>
 					<field name="planning_date" invisible="1"/>
-					<field name="order_ref_no"/>
+					<field name="order_ref_no" invisible="1"/>
+					<field name="schedule_id"/>
+					<field name="order_type"/>
 					<field name="pump_model_id"/>
-					<!--<field name="part_name_id"/>-->
+					<field name="pattern_id"/>
+					<field name="pattern_name"/>
 					<field name="moc_id"/>
 					<field name="allocated_qty" sum="Total Qty"/>
 					<field name="qty" sum="Total Qty"/>
@@ -129,17 +132,20 @@
             <field name="model">kg.qc.verification</field>
             <field name="arch" type="xml">
                 <search string="QC Verification Entry Search">
-					<field name="order_ref_no" string="Order Reference"  filter_domain="[('order_ref_no','ilike',self)]" />
+					<field name="order_ref_no" string="Work Order"  filter_domain="[('order_ref_no','ilike',self)]" />
 					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
 					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>						
 					<filter icon="terp-check" name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>						
 					<separator/>
                     <group expand="0" string="Group By...">
+						<filter string="Work Order" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_ref_no'}"/>
+						<filter string="Type" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_type'}"/>
 						<filter string="Planning No" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'planning_id'}"/>
 						<filter string="Planning Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'planning_date'}"/>
 						<filter string="Division" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'division_id'}"/>
 						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
-						<!--<filter string="Part Name" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'part_name_id'}"/>-->
+						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
+						<filter string="Pattern Name." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_name'}"/>
 						<filter string="MOC" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_id'}"/>
                         <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
 					</group>

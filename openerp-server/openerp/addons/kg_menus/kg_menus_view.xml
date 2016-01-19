@@ -44,27 +44,39 @@
 				<!-- Stock Inward -->
 				<menuitem action="kg_stock_inward.tma_stock_inward" id="tam_stock_inward" parent="tpm_planning_transactions" sequence="0"/>
 				
+				<!-- Stock Inward Details-->
+				<menuitem action="kg_stock_inward.tma_stock_inward_details" id="tam_stock_inward_details" parent="tpm_planning_transactions" sequence="1"/>
+				
 				<!-- Weekly Schedule -->
-				<menuitem action="kg_weekly_schedule.tma_weekly_schedule" id="tam_weekly_schedule" parent="tpm_planning_transactions" sequence="1"/>
+				<menuitem action="kg_weekly_schedule.tma_weekly_schedule" id="tam_weekly_schedule" parent="tpm_planning_transactions" sequence="2"/>
 				
 				<!-- Daily Planning -->
-				<menuitem action="kg_daily_planning.tma_daily_planning" id="tam_daily_planning" parent="tpm_planning_transactions" sequence="2"/>
+				<menuitem action="kg_daily_planning.tma_daily_planning" id="tam_daily_planning" parent="tpm_planning_transactions" sequence="3"/>
 				
 				<!-- QC Verification -->
-				<menuitem action="kg_qc_verification.tma_qc_verification" id="tam_qc_verification" parent="tpm_planning_transactions" sequence="3"/>
-
+				<menuitem action="kg_qc_verification.tma_qc_verification" id="tam_qc_verification" parent="tpm_planning_transactions" sequence="4"/>
+				
 				<!-- Production -->
-				<menuitem action="kg_production.tma_production" id="tam_production" parent="tpm_planning_transactions" sequence="4"/>
+				<menuitem action="kg_production.tma_production" id="tam_production" parent="tpm_planning_transactions" sequence="5"/>
 				
-			<!-- Progress Menu -->
-            <menuitem name="Progress View" id="tpm_progress" parent = "tpm_transactions" sequence="1"/>
+				<!-- Pouring Updates -->
+				<menuitem action="kg_production.tma_pouring" id="tam_pouring" parent="tpm_planning_transactions" sequence="6"/>
+				
+				<!-- Casting Updates -->
+				<menuitem action="kg_production.tma_casting" id="tam_casting" parent="tpm_planning_transactions" sequence="7"/>
+				
+				
+			
+			<!-- Progress Menu 
+            <menuitem name="Progress View" id="tpm_progress" parent = "tpm_transactions" sequence="1"/>-->
             
-				<!-- Schedule Items -->
+				<!-- Schedule Items 
 				<menuitem action="kg_weekly_schedule.tma_sch_bom_details" id="tam_sch_bomdetails" parent="tpm_progress" sequence="0"/>
-				
-				<!-- Plan Items -->
+				-->
+				<!-- Plan Items 
 				<menuitem action="kg_daily_planning.tma_daily_planning_details" id="tam_plan_details" parent="tpm_progress" sequence="1"/>
-
+				-->
+		
 		<!-- Parent Report Menu -->
 		<menuitem name="Reports" id="rpm_reports" sequence="94"/> 
 			

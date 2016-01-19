@@ -26,7 +26,7 @@ class kg_stock_inward(osv.osv):
 		'name': fields.char('Inward No', size=128,select=True,readonly=True),
 		'entry_date': fields.date('Inward Date',required=True),
 		'division_id': fields.many2one('kg.division.master','Division',readonly=True,required=True,domain="[('state','=','approved'), ('active','=','t')]"),
-		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location', required=True),
+		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location'),
 		'note': fields.text('Notes'),
 		'remarks': fields.text('Remarks'),
 		
@@ -106,12 +106,12 @@ class kg_stock_inward(osv.osv):
 		for line_item in entry.line_ids:
 			#### Stock Updation Block Starts Here ###
 							
-			cr.execute(''' insert into kg_foundry_stock(company_id,division_id,location,pump_model_id,pattern_id,
-			moc_id,stage_id,stock_inward_id,qty,alloc_qty,type,creation_date)
+			cr.execute(''' insert into kg_foundry_stock(company_id,division_id,location,pattern_id,
+			moc_id,stock_inward_id,qty,alloc_qty,type,creation_date)
 			
-			values(%s,%s,%s,%s,%s,%s,%s,%s,%s,0,'IN',%s)
-			''',[entry.company_id.id,entry.division_id.id or None,entry.location,line_item.pump_model_id.id, line_item.pattern_id.id,
-			line_item.moc_id.id,line_item.stage_id.id,line_item.id,line_item.qty,entry.entry_date])
+			values(%s,%s,%s,%s,%s,%s,%s,0,'IN',%s)
+			''',[entry.company_id.id,entry.division_id.id or None,entry.location, line_item.pattern_id.id,
+			line_item.moc_id.id,line_item.id,line_item.qty,entry.entry_date])
 					
 			#### Stock Updation Block Ends Here ###
 		
@@ -149,14 +149,15 @@ class ch_stock_inward_details(osv.osv):
 		### Inward Details ####
 		'header_id':fields.many2one('kg.stock.inward', 'Stock Inward', required=1, ondelete='cascade'),
 		'inward_date': fields.related('header_id','entry_date', type='date', string='Date', store=True, readonly=True),
-		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True,domain="[('state','=','approved'), ('active','=','t')]"),
+		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location', required=True),
+		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model',domain="[('state','=','approved'), ('active','=','t')]"),
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern Number', required=True,domain="[('state','=','approved'), ('active','=','t')]"),
-		'pattern_name': fields.char('Pattern Name',readonly=True),
+		'pattern_name': fields.char('Pattern Name'),
 		#'part_name_id': fields.many2one('product.product','Part Name', required=True,domain="[('state','=','approved'), ('active','=','t')]"),
 		'moc_id': fields.many2one('kg.moc.master','MOC',required=True,domain="[('state','=','approved'), ('active','=','t')]"),
-		'stage_id': fields.many2one('kg.stage.master','Stage',required=True,domain="[('state','=','approved'), ('active','=','t')]"),
-		'qty': fields.integer('Stock Qty', size=100, required=True),
-		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),
+		'stage_id': fields.many2one('kg.stage.master','Stage',domain="[('state','=','approved'), ('active','=','t')]"),
+		'qty': fields.integer('Stock Qty', required=True),
+		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status'),
 		'active': fields.boolean('Active'),
 		'cancel_remark': fields.text('Cancel Remarks'),
 		
@@ -188,9 +189,9 @@ class ch_stock_inward_details(osv.osv):
 		
 	def _check_line_duplicates(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		cr.execute(''' select id from ch_stock_inward_details where  pump_model_id = %s and pattern_id = %s  and
-			stage_id = %s and moc_id = %s and id != %s and header_id = %s ''',[entry.pump_model_id.id, entry.pattern_id.id,
-			entry.stage_id.id, entry.moc_id.id, entry.id, entry.header_id.id,])
+		cr.execute(''' select id from ch_stock_inward_details where pattern_id = %s  and
+			moc_id = %s and id != %s and header_id = %s ''',[entry.pattern_id.id,
+			entry.moc_id.id, entry.id, entry.header_id.id,])
 		duplicate_id = cr.fetchone()
 		if duplicate_id:
 			return False
@@ -230,7 +231,7 @@ class ch_stock_inward_details(osv.osv):
 	_constraints = [        
               
         (_check_values, 'System not allow to save with zero and less than zero qty .!!',['Quantity']),
-        (_check_line_duplicates, 'Inward Details are duplicate. Kindly check !! ', ['']),
+        #(_check_line_duplicates, 'Inward Details are duplicate. Kindly check !! ', ['']),
         
         
        ]

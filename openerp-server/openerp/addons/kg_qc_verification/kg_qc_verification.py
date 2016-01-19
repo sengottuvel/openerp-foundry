@@ -20,8 +20,8 @@ class kg_qc_verification(osv.osv):
 		### Header Details ####
 		'name': fields.char('QC No', size=128,select=True,readonly=True),
 		'entry_date': fields.date('QC Date',required=True),
-		'planning_id': fields.many2one('kg.daily.planning','Planning No.'),
-		'planning_date': fields.related('planning_id','entry_date', type='date', string='Planning Date', store=True, readonly=True),
+		'planning_id': fields.many2one('kg.daily.planning','Schedule No.'),
+		'planning_date': fields.related('planning_id','entry_date', type='date', string='Schedule Date', store=True, readonly=True),
 		'division_id': fields.many2one('kg.division.master','Division'),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location'),
 		'remark': fields.text('Remarks'),
@@ -30,7 +30,7 @@ class kg_qc_verification(osv.osv):
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled'),('reject','Rejected')],'Status', readonly=True),
 		'planning_line_id': fields.many2one('ch.daily.planning.details','Planning Line Item'),
 		'allocation_id': fields.many2one('ch.stock.allocation.details','Allocation'),
-		'schedule_id': fields.many2one('kg.weekly.schedule','Schedule Header'),
+		'schedule_id': fields.many2one('kg.weekly.schedule','Work Order No.'),
 		'schedule_line_id': fields.many2one('ch.weekly.schedule.details','Schedule Line'),
 		
 		
@@ -38,9 +38,12 @@ class kg_qc_verification(osv.osv):
 		'bom_line_id': fields.related('planning_line_id','bom_line_id', type='many2one', relation='ch.bom.line', string='BOM Line Id', store=True, readonly=True),
 		'sch_bomline_id': fields.related('planning_line_id','sch_bomline_id', type='many2one', relation='ch.sch.bom.details', string='Schedule BOM Line Id', store=True, readonly=True),
 		
-		'order_ref_no': fields.related('schedule_line_id','order_ref_no', type='char', string='Order Reference', store=True, readonly=True),
+		'order_ref_no': fields.related('schedule_id','name', type='char', string='Order Reference', store=True, readonly=True),
+		'order_type': fields.selection([('work_order','Normal'),('emergency','Emergency')],'Type'),
+		
 		'pump_model_id': fields.related('schedule_line_id','pump_model_id', type='many2one', relation='kg.pumpmodel.master', string='Pump Model', store=True, readonly=True),
-		'pattern_id': fields.related('sch_bomline_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern Number', store=True, readonly=True),
+		'pattern_id': fields.related('planning_line_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern No.', store=True, readonly=True),
+		'pattern_name': fields.related('pattern_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
 		#'part_name_id': fields.related('schedule_line_id','part_name_id', type='many2one', relation='product.product', string='Part Name', store=True, readonly=True),
 		'type': fields.related('schedule_line_id','type', type='char', string='Purpose', store=True, readonly=True),
 		'moc_id': fields.related('sch_bomline_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
@@ -49,11 +52,11 @@ class kg_qc_verification(osv.osv):
 		
 		'stock_qty': fields.related('allocation_id','stock_qty', type='integer', size=100, string='Stock Qty', store=True, readonly=True),
 		'allocated_qty': fields.related('allocation_id','qty', type='integer', size=100, string='Allocated Qty', store=True, readonly=True),
-		'qty': fields.integer('Accepted Qty', size=100, required=True),
-		'rework_qty': fields.integer('Rework Qty', size=100),
-		'reject_qty': fields.integer('Rejection Qty', size=100),
-		'position_no': fields.char('Pos No.', size=128),
-		'diameter': fields.char('Diameter', size=128),
+		'qty': fields.integer('Qty', required=True),
+		'rework_qty': fields.integer('Rework Qty'),
+		'reject_qty': fields.integer('Rejection Qty'),
+		'position_no': fields.char('Pos No.'),
+		'diameter': fields.char('Diameter'),
 		
 		'transac_state': fields.selection([('in_qc','In QC'),('sent_for_produc','Sent for Production'),
 			('complete','Completed'),('cancel','Cancelled'),('reject','Rejected')],'Transaction Status', readonly=True),
@@ -130,6 +133,8 @@ class kg_qc_verification(osv.osv):
 		schedule_line_obj = self.pool.get('ch.weekly.schedule.details')
 		planning_line_obj = self.pool.get('ch.daily.planning.details')
 		sch_bomline_obj = self.pool.get('ch.sch.bom.details')
+		pouring_obj = self.pool.get('ch.boring.details')
+		casting_obj = self.pool.get('ch.casting.details')
 		entry = self.browse(cr,uid,ids[0])
 			
 		if entry.qty > entry.allocated_qty:
@@ -144,7 +149,40 @@ class kg_qc_verification(osv.osv):
 		reject_qty = entry.allocated_qty - (entry.qty + entry.rework_qty)
 		
 		self.write(cr, uid, ids, {'cancel_remark':False, 'reject_qty':reject_qty or 0})
+		
+		### Creating Prroduction When Rejection
+		
+		if reject_qty > 0:
+		
+			production_vals = {
+												
+				'name': self.pool.get('ir.sequence').get(cr, uid, 'kg.production') or '/',
+				'planning_id': entry.planning_id.id,
+				'planning_date': entry.planning_id.entry_date,
+				'division_id': entry.division_id.id,
+				'location' : entry.location,
+				'planning_line_id': entry.planning_line_id.id,
+				'schedule_id': entry.schedule_id.id,
+				'schedule_line_id': entry.schedule_line_id.id,
+				'qc_id': entry.id,
+				'production_qty': reject_qty,
+				'bal_produc_qty': reject_qty,
+				'qty' : 0,	
+				'excess_qty' : 0,
+				'production_type':'nc',
+				'state' : 'draft',
+				'order_type':entry.order_type,
+								
+			}
+		
+			production_id = production_obj.create(cr, uid, production_vals)
 				
+			sch_bomline_obj.write(cr, uid, entry.sch_bomline_id.id, {'transac_state':'sent_for_produc'})
+			
+			schedule_line_obj.write(cr, uid, entry.schedule_line_id.id, {'transac_state':'sent_for_produc'})
+			
+			planning_line_obj.write(cr, uid, entry.planning_line_id.id, {'transac_state':'sent_for_produc'})
+		
 		#### Stock Table Updatation Block ####
 		
 		cr.execute(''' select qty,allocation_id from kg_qc_verification where planning_line_id = %s
