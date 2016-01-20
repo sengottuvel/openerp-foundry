@@ -511,7 +511,7 @@ class kg_foundry_stock(osv.osv):
 		'allocation_date': fields.date('Allocation Date'),
 		'qc_date': fields.date('Qc Date'),
 		'production_date': fields.date('Production Date'),
-		
+		'unit_price': fields.float('Unit Price'),
 		
 		
 	

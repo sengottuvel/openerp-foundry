@@ -107,11 +107,11 @@ class kg_stock_inward(osv.osv):
 			#### Stock Updation Block Starts Here ###
 							
 			cr.execute(''' insert into kg_foundry_stock(company_id,division_id,location,pattern_id,
-			moc_id,stock_inward_id,qty,alloc_qty,type,creation_date)
+			moc_id,stock_inward_id,qty,alloc_qty,type,creation_date,unit_price)
 			
-			values(%s,%s,%s,%s,%s,%s,%s,0,'IN',%s)
+			values(%s,%s,%s,%s,%s,%s,%s,0,'IN',%s,%s)
 			''',[entry.company_id.id,entry.division_id.id or None,entry.location, line_item.pattern_id.id,
-			line_item.moc_id.id,line_item.id,line_item.qty,entry.entry_date])
+			line_item.moc_id.id,line_item.id,line_item.qty,entry.entry_date,line_item.unit_price or 0.00])
 					
 			#### Stock Updation Block Ends Here ###
 		
@@ -157,6 +157,7 @@ class ch_stock_inward_details(osv.osv):
 		'moc_id': fields.many2one('kg.moc.master','MOC',required=True,domain="[('state','=','approved'), ('active','=','t')]"),
 		'stage_id': fields.many2one('kg.stage.master','Stage',domain="[('state','=','approved'), ('active','=','t')]"),
 		'qty': fields.integer('Stock Qty', required=True),
+		'unit_price': fields.float('Unit Price', required=True),
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status'),
 		'active': fields.boolean('Active'),
 		'cancel_remark': fields.text('Cancel Remarks'),
