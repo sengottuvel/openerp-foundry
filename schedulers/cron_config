@@ -1,0 +1,14 @@
+###############################################
+##                SAM TURBO START          ##
+###############################################
+
+
+
+53 12 * * * /usr/bin/python /OPENERP/Sam_Turbo/sam_turbo_dev/sch_script/scheduler_mails.py > /OPENERP/Sam_Turbo/sam_turbo_dev/sch_script/scheduler_mails.log 2>&1
+
+
+
+
+###############################################
+##                SAM TURBO END          ##
+###############################################

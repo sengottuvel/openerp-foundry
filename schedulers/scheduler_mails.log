@@ -1,0 +1,20 @@
+Traceback (most recent call last):
+  File "/home/administrator/sam_dev_project/sch_script/scheduler_mails.py", line 18, in <module>
+    sock.execute(dbname, uid, pwd, 'kg.scheduler', 'transaction_summary_list_scheduler_mail')
+  File "/usr/lib/python2.7/xmlrpclib.py", line 1233, in __call__
+    return self.__send(self.__name, args)
+  File "/usr/lib/python2.7/xmlrpclib.py", line 1587, in __request
+    verbose=self.__verbose
+  File "/usr/lib/python2.7/xmlrpclib.py", line 1273, in request
+    return self.single_request(host, handler, request_body, verbose)
+  File "/usr/lib/python2.7/xmlrpclib.py", line 1306, in single_request
+    return self.parse_response(response)
+  File "/usr/lib/python2.7/xmlrpclib.py", line 1482, in parse_response
+    return u.close()
+  File "/usr/lib/python2.7/xmlrpclib.py", line 794, in close
+    raise Fault(**self._stack[0])
+xmlrpclib.Fault: <Fault warning -- Mail delivery failed
+
+Mail delivery failed via SMTP server 'gmail.com'.
+gaierror: -2
+Name or service not known: ''>

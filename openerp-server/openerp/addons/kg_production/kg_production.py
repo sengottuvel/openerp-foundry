@@ -207,9 +207,9 @@ class kg_production(osv.osv):
 		if pouring_qty > 0:
 			
 			### Pouring Line Entry Creation in Production
-			cr.execute(''' insert into ch_boring_details(header_id,entry_date,qty,remark)
-				values(%s,%s,%s,%s)
-				''',[entry.id,pouring_date,pouring_qty,pouring_remark])
+			cr.execute(''' insert into ch_boring_details(create_uid,create_date,header_id,entry_date,qty,remark)
+				values(%s,%s,%s,%s,%s,%s)
+				''',[uid,dt_time,entry.id,pouring_date,pouring_qty,pouring_remark])
 			
 			### Production Creation When Rejection
 			
@@ -292,7 +292,7 @@ class kg_production(osv.osv):
 			if produced_qty < entry.production_qty :
 				
 				cr.execute(''' update kg_production set state = 'pouring_inprogress', qty=%s,
-				    bal_produc_qty = %s where id = %s
+					bal_produc_qty = %s where id = %s
 				''',[produced_qty,bal_produc_qty,entry.id])
 				### Production Qty Updation
 				sch_bomline_obj.write(cr, uid, entry.sch_bomline_id.id, {'production_qty': pouring_qty})
@@ -303,9 +303,9 @@ class kg_production(osv.osv):
 			
 			### Casting Line Entry Creation in Production
 			
-			cr.execute(''' insert into ch_casting_details(header_id,entry_date,qty,remark)
-				values(%s,%s,%s,%s)
-				''',[entry.id,casting_date,casting_qty,casting_remark])
+			cr.execute(''' insert into ch_casting_details(uid,create_date,header_id,entry_date,qty,remark)
+				values(%s,%s,%s,%s,%s,%s)
+				''',[uid,dt_time,entry.id,casting_date,casting_qty,casting_remark])
 			
 			### Production Creation When Rejection
 			if pre_casting_qty > entry.qty:
