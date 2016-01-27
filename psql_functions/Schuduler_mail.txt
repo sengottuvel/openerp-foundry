@@ -1,0 +1,1084 @@
+-- Function: all_daily_scheduler_mails(character)
+
+-- DROP FUNCTION all_daily_scheduler_mails(character);
+
+CREATE OR REPLACE FUNCTION all_daily_scheduler_mails(v_exam_name character)
+  RETURNS text AS
+$BODY$
+DECLARE
+cursor_temp refcursor;  
+cursor_temp123 refcursor; 
+v_previous_month_date char varying(1000);
+v_previous_month_date_fmt char varying(1000);
+v_table_heading text;
+v_date_order char varying(1000);
+v_data text;
+v_last_month char varying(1000);
+v_current_year int;
+v_mail_heading text;
+v_gr_total float;
+v_gr_pen_total float;
+sl_no int;
+v_today char varying(1000);
+v_from_mail_id text ;
+v_to_mail_id text ;
+v_cc_mail_id text ;
+v_subject text ;
+v_subject_new text ;
+ce_disp_current_date char varying(1000);		
+v_profit_loss_sub  char varying(1000);
+
+---------- Added by Karthikeyan Planning Vs Production Summary -----
+v_profit_loss char varying(50);
+v_company_name char varying(1000);
+v_order_no char varying(1000);
+v_pump_model_name char varying(1000);
+v_pattern_name char varying(1000);
+v_part_name char varying(1000);
+v_moc char varying(1000);
+v_production_qty float;
+v_requirement_qty float;
+v_tot_production float;
+v_tot_produced float;
+---------- Added by Karthikeyan Planning Vs Production Summary-----
+---------- Added by Karthikeyan Daily Stock Statement -----
+
+v_opening_stock float;
+v_in_qty float;
+v_out_qty float;
+v_closing_stock float;
+checkcnt numeric;
+
+---------- Added by  End Karthikeyan Daily Stock Statement -----
+
+
+---------- Added by Karthikeyan Transaction Summary -----
+v_old_sch_cnt numeric;
+v_old_plan_cnt numeric;
+v_old_qc_cnt numeric;
+v_old_stock_cnt numeric;
+v_old_pouring_cnt numeric;
+v_old_casting_cnt numeric;
+v_new_sch_cnt numeric;
+v_new_plan_cnt numeric;
+v_new_qc_cnt numeric;
+v_new_stock_cnt numeric;
+v_new_pouring_cnt numeric;
+v_new_casting_cnt numeric;
+v_old_total numeric;
+v_new_total numeric;
+v_sub_state text;
+
+
+
+---------- Added by  End Karthikeyan Transaction Summary-----
+
+
+
+BEGIN 
+
+v_table_heading='';
+v_date_order='';
+v_data='';     
+    
+	
+		v_table_heading='<html><head>
+                <style type="text/css">
+                #gradient-style{font-family:"arial",Sans-Serif;font-size:12px;width:750px;text-align:left;border-collapse:collapse;margin:20px;}
+                #gradient-style th{font-size:13px;font-weight:normal;background:#FFB895  repeat-x;border:2px solid #fff;color:#039;padding:8px;}
+                #gradient-style th .ttr { width:200px; }                
+                #gradient-style td{border:1px solid #fff;color:#Black;background:#FFE8DD repeat-x;padding:2px 8px; margin:0; table-layout:fixed; vertical-align:top}
+                #gradient-style tfoot tr td{background:#e8edff;font-size:12px;color:#99c;}
+                #gradient-style tbody tr:hover td{background:#FFFFCC  repeat-x;color:#000;}
+
+                #company-details { margin:0px 20px 0px 0px; clear:both; line-height:20px; }
+                #company-details  {display:block; font-family:tahoma; font-weight:bold; font-size:12px; color:#214570; }
+                #company-details span { clear:both; float:left; font-family:arial; font-weight:normal; font-size:12px; color:#cc0000; }
+
+                #gradient-style1{font-family:"arial",Sans-Serif;font-size:12px;width:750px;text-align:left;border-collapse:collapse;margin:-6px;}
+                #gradient-style1 th{font-size:13px;font-weight:normal;background:#FFB895  repeat-x;border:2px solid #fff;color:#039;padding:8px;}
+                #gradient-style1 td{border:1px solid #fff;color:#Black;background:#fff repeat-x;padding:2px 8px; margin:0; }
+
+                #mystyle {font-family:"arial",Sans-Serif;font-size:12px;text-align:left;border-collapse:collapse; margin:0px 20px 20px 20px;}
+                #mystyle th    {font-size:13px;font-weight:normal;background:#FFB895  repeat-x;border:2px solid #fff;color:#039;padding:8px;}
+                #mystyle th .ttr { width:200px; }
+                #mystyle td    {border:1px solid #fff;color:#Black;background:#FFE8DD repeat-x;padding:2px 8px; margin:0; table-layout:fixed; vertical-align:top}
+                #mystyle tfoot tr td{background:#e8edff;font-size:12px;color:#99c;}
+                #mystyle tbody tr:hover td{background:#FFFFCC  repeat-x;color:#000;}
+
+                
+                table { font-family:Arial, Helvetica, sans-serif; font-size:12px; text-align: left;border-collapse: collapse; margin:0px 20px 20px 20px; -webkit-font-smoothing: antialiased;}
+                table th {font-size:10pt; font-family:Arial, Helvetica, sans-serif; background:#FFB895  repeat-x; border:2px solid #fff; color:#039; margin:0px 0px 0px 0px; padding:8px; -webkit-font-smoothing: antialiased;}
+                table th .ttr { width:200px; }
+                table td {border:1px solid #fff;color:#Black;background:#FFE8DD repeat-x;padding:2px 8px; margin:0; table-layout:fixed; vertical-align:top}
+                table tfoot tr td{background:#e8edff;font-size:12px;color:#99c;}
+                table tbody tr:hover td{background:#FFFFCC  repeat-x;color:#000;}
+                </style></head>';
+
+	-- Planning Vs Production Summary Process Start 
+	
+if(v_exam_name='Planning Vs Production') then 
+		
+		               
+		
+		select 
+			res_company.name,to_char((date_trunc('month', now())::date),'Month'),extract(year from current_date),to_char(NOW() - '1 month'::interval,'yyyy-mm-dd'),
+			to_char(NOW() - '1 month'::interval,'dd/mm/yyyy'),to_char(current_date,'dd-mm-yyyy')
+		into 
+			v_company_name,v_last_month,v_current_year,v_previous_month_date,v_previous_month_date_fmt,v_today
+		from 
+			res_company;
+
+
+	select 
+		case when (sum(kg_production.qty) OVER () >= sum(kg_production.production_qty) OVER ())
+		then 'Profit' else 'Loss' end as profit_loss INTO v_profit_loss 
+			from
+
+			kg_production
+			left join kg_pumpmodel_master on kg_pumpmodel_master.id=			
+			kg_production.pump_model_id
+			left join kg_pattern_master on kg_pattern_master.id=kg_production.pattern_id
+			left join product_product on product_product.id=kg_production.part_name_id
+			left join product_template on product_template.id=product_product.product_tmpl_id
+			left join kg_moc_master on kg_moc_master.id=kg_production.moc_id
+			left join res_company on res_company.id=kg_production.company_id
+
+			where kg_production.state in ('confirmed','draft','casting_inprogress','casting_complete','boring_complete','boring_inprogress') and kg_production.entry_date=TO_DATE(v_today, 'dd/mm/yyyy') and kg_production.active=True;
+
+
+select count(*) into checkcnt from 
+(
+
+select res_company.name as company_name,
+			kg_production.order_ref_no as order_no,
+			kg_pumpmodel_master.name as pump_model_name,
+			kg_pattern_master.name as pattern_name,
+			product_template.name as part_name,
+			kg_moc_master.name as moc,
+			ltrim(to_char((COALESCE(kg_production.production_qty::numeric, 0.00)),'999G999G99G999G99G99G990D99'))::numeric as production_qty,
+			ltrim(to_char((COALESCE(kg_production.qty::numeric, 0.00)),'999G999G99G999G99G99G990D99'))::numeric as requirement_qty
+			from
+
+			kg_production
+			left join kg_pumpmodel_master on kg_pumpmodel_master.id=			
+			kg_production.pump_model_id
+			left join kg_pattern_master on kg_pattern_master.id=kg_production.pattern_id
+			left join product_product on product_product.id=kg_production.part_name_id
+			left join product_template on product_template.id=product_product.product_tmpl_id
+			left join kg_moc_master on kg_moc_master.id=kg_production.moc_id
+			left join res_company on res_company.id=kg_production.company_id
+
+			where kg_production.state in ('confirmed','draft','casting_inprogress','casting_complete','boring_complete','boring_inprogress') and kg_production.entry_date=TO_DATE(v_today, 'dd/mm/yyyy') and kg_production.active=True ) as a;
+
+		if(checkcnt=0) then
+			v_data=' No Data Found ';
+			v_to_mail_id= Null ;
+			v_from_mail_id= Null;
+			v_subject_new = Null;
+			v_cc_mail_id = Null; 
+			v_data=v_data || '~' || v_from_mail_id || '~' || v_to_mail_id || '~' || v_cc_mail_id || '~' || v_subject_new;
+		end if;
+		if(checkcnt>0) then
+
+
+		v_mail_heading = ' Planning Vs Production Summary';
+		v_table_heading=v_table_heading || '<BODY> <font size="15pt" face="Arial" Color="blue">
+					<b><h2 style="font-size: 10pt;color: #C90002;">' || '
+					 <span style="font-size: 10pt;color: #1F446E;">'||v_mail_heading ||'</span>
+					 </h2></b></Font><br>';
+		v_gr_total = 0.0;
+		v_gr_pen_total = 0.0;
+		v_data= v_table_heading || ' <TABLE>
+                <TR>
+                <TH>Sl No</TH>
+                
+                <TH><center>Order Ref.</center></TH>
+                <TH><center> Pump Model</center></TH>
+                <TH>Pattern No</TH>
+                <TH>Pattern Name</TH>
+                <TH>MOC</TH>
+                <TH>Production Qty</TH>
+                <TH>Produced Qty</TH>                                
+                </TR>';
+
+				
+		sl_no = 0;
+		Open cursor_temp FOR
+
+		select res_company.name as company_name,
+			kg_production.order_ref_no as order_no,
+			kg_pumpmodel_master.name as pump_model_name,
+			kg_pattern_master.name as pattern_no,
+			kg_pattern_master.pattern_name as pattern_name,
+			kg_moc_master.name as moc,
+			ltrim(to_char((COALESCE(kg_production.production_qty::numeric, 0.00)),'999G999G99G999G99G99G990D99'))::numeric as production_qty,
+			ltrim(to_char((COALESCE(kg_production.qty::numeric, 0.00)),'999G999G99G999G99G99G990D99'))::numeric as requirement_qty
+			from
+
+			kg_production
+			left join kg_pumpmodel_master on kg_pumpmodel_master.id=			
+			kg_production.pump_model_id
+			left join kg_pattern_master on kg_pattern_master.id=kg_production.pattern_id
+			left join product_product on product_product.id=kg_production.part_name_id
+			left join product_template on product_template.id=product_product.product_tmpl_id
+			left join kg_moc_master on kg_moc_master.id=kg_production.moc_id
+			left join res_company on res_company.id=kg_production.company_id
+
+			where kg_production.state in ('confirmed','draft','casting_inprogress','casting_complete','boring_complete','boring_inprogress') and kg_production.entry_date=TO_DATE(v_today, 'dd/mm/yyyy') and kg_production.active=True;
+	
+		LOOP                 
+		FETCH cursor_temp INTO v_company_name,v_order_no,v_pump_model_name,v_pattern_name,v_part_name,v_moc,			v_production_qty,v_requirement_qty;
+		  
+		   IF NOT FOUND then 
+		    Exit;
+		   end if; 
+		sl_no =sl_no +1;
+
+		if(v_company_name is null) then
+		  v_company_name='';
+		 end if;
+		if(v_order_no is null) then
+		  v_order_no='';
+		 end if;
+		if(v_pump_model_name is null) then
+		  v_pump_model_name=0;
+		 end if;
+		if(v_pattern_name is null) then   
+		  v_pattern_name='';
+		 end if;		
+		if(v_part_name is null) then   
+		  v_part_name='';
+		 end if;		 
+		if(v_moc is null) then   
+		  v_moc='';
+		 end if;		 
+		if(v_production_qty is null) then   
+		  v_production_qty=0.00;
+		 end if;
+		if(v_requirement_qty is null) then
+		  v_requirement_qty=0.00;
+		 end if;		
+		
+      
+			v_data=v_data || '<tr><td>'||sl_no|| '</td>
+			<td>'||v_order_no|| '</td>
+			<td>'||v_pump_model_name|| '</td>
+			<td align="left">'||v_pattern_name|| '</td>
+			<td align="left">'||v_part_name|| '</td>
+			<td align="left">'||v_moc|| '</td>
+			<td align="right">'|| round(v_production_qty::numeric,2) || '</td>
+			<td align="right">'|| round(v_requirement_qty::numeric,2) || '</td>
+			</tr>';
+
+
+		END LOOP;
+	 
+	  Close cursor_temp;
+
+	  
+		
+	v_data=v_data || '</Table><br><br><font face="Arial" Color="blue" size="2" >** This Mail is auto generated by ERP DATABASE.UNWANTED.</Font> </BODY></html>';
+	
+	
+	if(v_data is null) then
+		v_data=' No Data Found ';
+	end if;
+
+						
+	SELECT 	name,subject
+	INTO	v_from_mail_id,v_subject_new
+	FROM  kg_mail_settings WHERE 
+		kg_mail_settings.active = 't' and
+		kg_mail_settings.sch_name=v_exam_name;		
+			
+
+	ce_disp_current_date = v_today;			
+	v_profit_loss_sub = v_profit_loss;			
+			
+	v_subject_new=replace(v_subject_new,'#ce_disp_current_date',ce_disp_current_date);
+	v_subject_new=replace(v_subject_new,'#v_profit_loss_sub',v_profit_loss_sub);
+
+	SELECT 	array_to_string(array_agg(ltrim(ch_mail_settings_line.mail_id)),',') 
+	INTO	v_cc_mail_id
+	FROM 	ch_mail_settings_line,kg_mail_settings
+	WHERE 	ch_mail_settings_line.cc_address='t'
+		and ch_mail_settings_line.header_id=kg_mail_settings.id and
+		kg_mail_settings.active = 't' and
+		kg_mail_settings.sch_name=v_exam_name;
+
+	SELECT 	array_to_string(array_agg(ltrim(ch_mail_settings_line.mail_id)),',') 
+	INTO	v_to_mail_id
+	FROM 	ch_mail_settings_line,kg_mail_settings
+	WHERE 	ch_mail_settings_line.to_address='t'
+		and ch_mail_settings_line.header_id=kg_mail_settings.id
+		and kg_mail_settings.active = 't' and
+		kg_mail_settings.sch_name=v_exam_name;
+
+			if(v_from_mail_id is null) then 
+			  v_from_mail_id='';
+			end if; 
+			if(v_to_mail_id is null) then 
+			  v_to_mail_id='';
+			end if; 
+			if(v_cc_mail_id is null) then 
+			  v_cc_mail_id='';
+			end if; 
+			if(v_subject_new is null) then 
+			  v_subject_new='';
+			end if; 
+				
+			RAISE Info  '$$ % $$',v_data;
+
+			v_data=v_data || '~' || v_from_mail_id || '~' || v_to_mail_id || '~' || v_cc_mail_id || '~' || v_subject_new || '~' ;
+
+	end if;
+	
+			-- Planning Vs Production Summary End --
+
+
+-- Daily Stock Statement Start ------------
+	
+elsif(v_exam_name='Daily Stock Statement') then 
+		              
+		
+		select 
+			res_company.name,to_char((date_trunc('month', now())::date),'Month'),extract(year from current_date),to_char(NOW() - '1 month'::interval,'yyyy-mm-dd'),
+			to_char(NOW() - '1 month'::interval,'dd/mm/yyyy'),to_char(current_date,'dd-mm-yyyy')
+		into 
+			v_company_name,v_last_month,v_current_year,v_previous_month_date,v_previous_month_date_fmt,v_today
+		from 
+			res_company;
+
+		select count(*) into checkcnt from 
+(
+
+select
+
+			(case when open_in_qty > 0
+			then open_in_qty
+			else 0.00 end) -
+
+			(case when open_out_qty >0
+			then open_out_qty
+			else 0.00 end)
+
+			 as
+			opening_stock,
+			in_qty,
+			out_qty,
+			closing_stock,
+			model_name,
+			pattern_no,
+			pattern_name,
+			moc_name,
+			company_name
+
+
+
+			 from
+
+			(
+
+			select
+
+
+
+			--Opening Stock
+
+
+			(
+
+			select open_in_qty from
+
+			(
+
+			select
+
+			sum(kg_foundry_stock.qty) as open_in_qty from kg_foundry_stock
+
+
+			left join kg_pumpmodel_master on kg_pumpmodel_master.id=kg_foundry_stock.pump_model_id
+			left join kg_pattern_master on kg_pattern_master.id=kg_foundry_stock.pattern_id			
+			left join kg_moc_master on kg_moc_master.id=kg_foundry_stock.moc_id
+			left join res_company on res_company.id=kg_foundry_stock.company_id
+
+			where
+
+			kg_foundry_stock.creation_date < TO_DATE(v_today, 'dd/mm/yyyy') and
+			kg_pumpmodel_master.name = bb.model_name and			
+			kg_moc_master.name = bb.moc_name and
+			res_company.name = bb.company_name and
+			kg_foundry_stock.type = 'IN'
+
+
+			group by kg_foundry_stock.pump_model_id,
+			kg_foundry_stock.pattern_id,			
+			kg_foundry_stock.moc_id,
+			kg_foundry_stock.company_id
+
+
+			) open_in
+
+			) as open_in_qty,
+
+
+			(
+
+			select
+
+			open_out_qty from
+
+			(
+
+			select
+
+			sum(kg_foundry_stock.qty) as open_out_qty from kg_foundry_stock
+
+
+			left join kg_pumpmodel_master on kg_pumpmodel_master.id=kg_foundry_stock.pump_model_id
+			left join kg_pattern_master on kg_pattern_master.id=kg_foundry_stock.pattern_id			
+			left join kg_moc_master on kg_moc_master.id=kg_foundry_stock.moc_id
+			left join res_company on res_company.id=kg_foundry_stock.company_id
+
+			where
+
+			kg_foundry_stock.creation_date < TO_DATE(v_today, 'dd/mm/yyyy') and
+			kg_pumpmodel_master.name = bb.model_name and
+			kg_pattern_master.name = bb.pattern_name and			
+			kg_moc_master.name = bb.moc_name and
+			res_company.name = bb.company_name and
+			kg_foundry_stock.type = 'OUT'
+
+
+			group by kg_foundry_stock.pump_model_id,
+			kg_foundry_stock.pattern_id,			
+			kg_foundry_stock.moc_id,
+			kg_foundry_stock.company_id
+
+
+			) open_out
+
+			) as open_out_qty,
+
+
+			sum(bb.in_ty) as in_qty,sum(bb.out_ty) as out_qty,
+
+			(sum(bb.in_ty)-sum(bb.out_ty)) as closing_stock,bb.model_name,bb.pattern_no,
+			bb.pattern_name,bb.moc_name,bb.company_name
+
+			from
+
+			(
+
+			select distinct in_ty,out_ty,
+			model_name,pattern_no,pattern_name,moc_name,company_name
+
+
+			from
+
+
+			(
+			select qty,
+
+			case when kg_foundry_stock.type = 'IN'
+			then
+			sum(kg_foundry_stock.qty) OVER (PARTITION By kg_foundry_stock.type='IN',kg_foundry_stock.pump_model_id,kg_foundry_stock.pattern_id,
+			kg_foundry_stock.moc_id )
+			else 0.00 end as in_ty,
+
+			case when kg_foundry_stock.type = 'OUT' then
+			sum(kg_foundry_stock.qty) OVER (PARTITION By kg_foundry_stock.type='OUT',kg_foundry_stock.pump_model_id,kg_foundry_stock.pattern_id,
+			kg_foundry_stock.moc_id ) else 0.00 end as out_ty,
+
+
+			kg_pumpmodel_master.name as model_name,
+			kg_pattern_master.name as pattern_no,	
+			kg_pattern_master.name as pattern_name,					
+			kg_moc_master.name as moc_name,
+			res_company.name as company_name
+
+
+			from kg_foundry_stock
+
+			left join kg_pumpmodel_master on kg_pumpmodel_master.id=kg_foundry_stock.pump_model_id
+			left join kg_pattern_master on kg_pattern_master.id=kg_foundry_stock.pattern_id			
+			left join kg_moc_master on kg_moc_master.id=kg_foundry_stock.moc_id
+			left join res_company on res_company.id=kg_foundry_stock.company_id
+
+			where kg_foundry_stock.creation_date = TO_DATE(v_today, 'dd/mm/yyyy')
+
+			) as aa
+
+
+			) as bb
+
+			group by bb.model_name,bb.pattern_no,bb.pattern_name,bb.moc_name,bb.company_name
+
+			) as final
+
+			where closing_stock > 0 ) as a; 
+			
+		if(checkcnt=0) then
+			v_data=' No Data Found ';
+			v_to_mail_id= Null ;
+			v_from_mail_id= Null;
+			v_subject_new = Null;
+			v_cc_mail_id = Null; 
+			v_data=v_data || '~' || v_from_mail_id || '~' || v_to_mail_id || '~' || v_cc_mail_id || '~' || v_subject_new;
+		end if;
+	if(checkcnt>0) then
+	
+		v_mail_heading = ' Daily Stock Statement';
+		v_table_heading=v_table_heading || '<BODY> <font size="15pt" face="Arial" Color="blue">
+					<b><h2 style="font-size: 10pt;color: #C90002;">' || '
+					 <span style="font-size: 10pt;color: #1F446E;">'||v_mail_heading ||'</span>
+					 </h2></b></Font><br>';
+		
+		v_data= v_table_heading || ' <TABLE>
+                <TR>
+                <TH>Sl No</TH>               
+                <TH><center> Pump Model</center></TH>
+                <TH>Pattern No</TH>
+                <TH>Pattern Name</TH>
+                <TH>MOC</TH>
+                <TH>Opening Stock</TH>  
+                <TH>In Qty</TH> 
+                <TH>Out Qty</TH> 
+                <TH>Closing Stock</TH>           
+                                
+                </TR>';
+
+				
+		sl_no = 0;
+		Open cursor_temp FOR
+
+		select
+
+			(case when open_in_qty > 0
+			then open_in_qty
+			else 0.00 end) -
+
+			(case when open_out_qty >0
+			then open_out_qty
+			else 0.00 end)
+
+			 as
+			opening_stock,
+			in_qty,
+			out_qty,
+			closing_stock,
+			model_name,
+			pattern_no,
+			pattern_name,
+			moc_name,
+			company_name
+
+
+
+			 from
+
+			(
+
+			select
+
+
+
+			--Opening Stock
+
+
+			(
+
+			select open_in_qty from
+
+			(
+
+			select
+
+			sum(kg_foundry_stock.qty) as open_in_qty from kg_foundry_stock
+
+
+			left join kg_pumpmodel_master on kg_pumpmodel_master.id=kg_foundry_stock.pump_model_id
+			left join kg_pattern_master on kg_pattern_master.id=kg_foundry_stock.pattern_id			
+			left join kg_moc_master on kg_moc_master.id=kg_foundry_stock.moc_id
+			left join res_company on res_company.id=kg_foundry_stock.company_id
+
+			where
+
+			kg_foundry_stock.creation_date < TO_DATE(v_today, 'dd/mm/yyyy') and
+			kg_pumpmodel_master.name = bb.model_name and			
+			kg_moc_master.name = bb.moc_name and
+			res_company.name = bb.company_name and
+			kg_foundry_stock.type = 'IN'
+
+
+			group by kg_foundry_stock.pump_model_id,
+			kg_foundry_stock.pattern_id,			
+			kg_foundry_stock.moc_id,
+			kg_foundry_stock.company_id
+
+
+			) open_in
+
+			) as open_in_qty,
+
+
+			(
+
+			select
+
+			open_out_qty from
+
+			(
+
+			select
+
+			sum(kg_foundry_stock.qty) as open_out_qty from kg_foundry_stock
+
+
+			left join kg_pumpmodel_master on kg_pumpmodel_master.id=kg_foundry_stock.pump_model_id
+			left join kg_pattern_master on kg_pattern_master.id=kg_foundry_stock.pattern_id			
+			left join kg_moc_master on kg_moc_master.id=kg_foundry_stock.moc_id
+			left join res_company on res_company.id=kg_foundry_stock.company_id
+
+			where
+
+			kg_foundry_stock.creation_date < TO_DATE(v_today, 'dd/mm/yyyy') and
+			kg_pumpmodel_master.name = bb.model_name and
+			kg_pattern_master.name = bb.pattern_name and			
+			kg_moc_master.name = bb.moc_name and
+			res_company.name = bb.company_name and
+			kg_foundry_stock.type = 'OUT'
+
+
+			group by kg_foundry_stock.pump_model_id,
+			kg_foundry_stock.pattern_id,			
+			kg_foundry_stock.moc_id,
+			kg_foundry_stock.company_id
+
+
+			) open_out
+
+			) as open_out_qty,
+
+
+			sum(bb.in_ty) as in_qty,sum(bb.out_ty) as out_qty,
+
+			(sum(bb.in_ty)-sum(bb.out_ty)) as closing_stock,bb.model_name,bb.pattern_no,
+			bb.pattern_name,bb.moc_name,bb.company_name
+
+			from
+
+			(
+
+			select distinct in_ty,out_ty,
+			model_name,pattern_no,pattern_name,moc_name,company_name
+
+
+			from
+
+
+			(
+			select qty,
+
+			case when kg_foundry_stock.type = 'IN'
+			then
+			sum(kg_foundry_stock.qty) OVER (PARTITION By kg_foundry_stock.type='IN',kg_foundry_stock.pump_model_id,kg_foundry_stock.pattern_id,
+			kg_foundry_stock.moc_id )
+			else 0.00 end as in_ty,
+
+			case when kg_foundry_stock.type = 'OUT' then
+			sum(kg_foundry_stock.qty) OVER (PARTITION By kg_foundry_stock.type='OUT',kg_foundry_stock.pump_model_id,kg_foundry_stock.pattern_id,
+			kg_foundry_stock.moc_id ) else 0.00 end as out_ty,
+
+
+			kg_pumpmodel_master.name as model_name,
+			kg_pattern_master.name as pattern_no,	
+			kg_pattern_master.pattern_name as pattern_name,					
+			kg_moc_master.name as moc_name,
+			res_company.name as company_name
+
+
+			from kg_foundry_stock
+
+			left join kg_pumpmodel_master on kg_pumpmodel_master.id=kg_foundry_stock.pump_model_id
+			left join kg_pattern_master on kg_pattern_master.id=kg_foundry_stock.pattern_id			
+			left join kg_moc_master on kg_moc_master.id=kg_foundry_stock.moc_id
+			left join res_company on res_company.id=kg_foundry_stock.company_id
+
+			where kg_foundry_stock.creation_date = TO_DATE(v_today, 'dd/mm/yyyy')
+
+			) as aa
+
+
+			) as bb
+
+			group by bb.model_name,bb.pattern_no,bb.pattern_name,bb.moc_name,bb.company_name
+
+			) as final
+
+			where closing_stock > 0;
+		LOOP                 
+		FETCH cursor_temp INTO v_opening_stock,v_in_qty,v_out_qty,v_closing_stock,v_pump_model_name,v_pattern_name,v_part_name,v_moc,v_company_name;
+		  
+		   IF NOT FOUND then 
+		    Exit;
+		   end if; 
+		sl_no =sl_no +1;
+
+		if(v_company_name is null) then
+		  v_company_name='';
+		 end if;
+		if(v_opening_stock is null) then
+		  v_opening_stock=0.00;
+		 end if;
+		if(v_closing_stock is null) then
+		  v_closing_stock=0.00;
+		 end if;
+		if(v_pump_model_name is null) then
+		  v_pump_model_name=0;
+		 end if;
+		if(v_pattern_name is null) then   
+		  v_pattern_name='';
+		 end if;		
+		if(v_part_name is null) then   
+		  v_part_name='';
+		 end if;		 
+		if(v_moc is null) then   
+		  v_moc='';
+		 end if;		 
+		if(v_out_qty is null) then   
+		  v_out_qty=0.00;
+		 end if;
+		if(v_in_qty is null) then
+		  v_in_qty=0.00;
+		 end if;		
+		
+      
+			v_data=v_data || '<tr><td>'||sl_no|| '</td>			
+			<td>'||v_pump_model_name|| '</td>
+			<td align="left">'||v_pattern_name|| '</td>
+			<td align="left">'||v_part_name|| '</td>
+			<td align="left">'||v_moc|| '</td>
+			<td align="right">'|| round(v_opening_stock::numeric,2) || '</td>
+			<td align="right">'|| round(v_in_qty::numeric,2) || '</td>
+			<td align="right">'|| round(v_out_qty::numeric,2) || '</td>
+			<td align="right">'|| round(v_closing_stock::numeric,2) || '</td>
+			</tr>';
+
+
+		END LOOP;
+	 
+	  Close cursor_temp;
+
+	  
+		
+	v_data=v_data || '</Table><br><br><font face="Arial" Color="blue" size="2" >** This Mail is auto generated by ERP DATABASE.UNWANTED.</Font> </BODY></html>';
+
+
+	if(v_data is null) then
+		v_data=' No Data Found ';
+	end if;
+
+						
+	SELECT 	name,subject
+	INTO	v_from_mail_id,v_subject_new
+	FROM  kg_mail_settings WHERE 
+		kg_mail_settings.active = 't' and
+		kg_mail_settings.sch_name=v_exam_name;		
+			
+
+	ce_disp_current_date = v_today;		
+				
+			
+	v_subject_new=replace(v_subject_new,'#ce_disp_current_date',ce_disp_current_date);
+	
+
+	SELECT 	array_to_string(array_agg(ltrim(ch_mail_settings_line.mail_id)),',') 
+	INTO	v_cc_mail_id
+	FROM 	ch_mail_settings_line,kg_mail_settings
+	WHERE 	ch_mail_settings_line.cc_address='t'
+		and ch_mail_settings_line.header_id=kg_mail_settings.id and
+		kg_mail_settings.active = 't' and
+		kg_mail_settings.sch_name=v_exam_name;
+
+	SELECT 	array_to_string(array_agg(ltrim(ch_mail_settings_line.mail_id)),',') 
+	INTO	v_to_mail_id
+	FROM 	ch_mail_settings_line,kg_mail_settings
+	WHERE 	ch_mail_settings_line.to_address='t'
+		and ch_mail_settings_line.header_id=kg_mail_settings.id
+		and kg_mail_settings.active = 't' and
+		kg_mail_settings.sch_name=v_exam_name;
+
+			if(v_from_mail_id is null) then 
+			  v_from_mail_id='';
+			end if; 
+			if(v_to_mail_id is null) then 
+			  v_to_mail_id='';
+			end if; 
+			if(v_cc_mail_id is null) then 
+			  v_cc_mail_id='';
+			end if; 
+			if(v_subject_new is null) then 
+			  v_subject_new='';
+			end if; 
+				
+			RAISE Info  '$$ % $$',v_data;
+
+			v_data=v_data || '~' || v_from_mail_id || '~' || v_to_mail_id || '~' || v_cc_mail_id || '~' || v_subject_new || '~' ;
+	end if;
+			-- Daily Stock Statement End --
+
+
+---- ***************** --------------
+
+
+-- Transaction Summary List Start 
+	
+elsif(v_exam_name='Transaction Summary List') then 
+		
+		               
+		
+		select 
+			res_company.name,to_char((date_trunc('month', now())::date),'Month'),extract(year from current_date),to_char(NOW() - '1 month'::interval,'yyyy-mm-dd'),
+			to_char(NOW() - '1 month'::interval,'dd/mm/yyyy'),to_char(current_date,'dd-mm-yyyy')
+		into 
+			v_company_name,v_last_month,v_current_year,v_previous_month_date,v_previous_month_date_fmt,v_today
+		from 
+			res_company;
+
+
+	
+
+
+		v_mail_heading = 'Transaction Summary List';
+		v_table_heading=v_table_heading || '<BODY> <font size="15pt" face="Arial" Color="blue">
+					<b>' || '
+					 </b></Font><br>';
+		v_old_total = 0;
+		v_new_total = 0;
+		v_data= v_table_heading || ' <TABLE>
+                <TR>
+                <TH>Sl No</TH>                
+                <TH><center>Transaction Name</center></TH>
+                <TH><center>Old Count</center></TH>
+                <TH>Today&#39;s Count</TH>
+                </TR>';
+               	   
+		   			  
+		
+				
+		sl_no = 0;
+		Open cursor_temp FOR
+
+		select 
+
+			(select count(*) from kg_weekly_schedule where create_date < TO_DATE(v_today, 'dd/mm/yyyy') ) as old_sch_cnt,
+			(select count(*) from kg_daily_planning  where create_date < TO_DATE(v_today, 'dd/mm/yyyy')) as old_plan_cnt,
+			(select count(*) from kg_qc_verification where create_date < TO_DATE(v_today, 'dd/mm/yyyy')) as old_qc_cnt,
+			(select count(*) from kg_stock_inward where create_date < TO_DATE(v_today, 'dd/mm/yyyy')) as old_stock_cnt,
+			(select count(*) from ch_boring_details where create_date < TO_DATE(v_today, 'dd/mm/yyyy')) as old_pouring_cnt,
+			(select count(*) from ch_casting_details where create_date < TO_DATE(v_today, 'dd/mm/yyyy')) as old_casting_cnt,
+			(select count(*) from kg_weekly_schedule ) as new_sch_cnt,
+			(select count(*) from kg_daily_planning ) as new_plan_cnt,
+			(select count(*) from kg_qc_verification ) as new_qc_cnt,
+			(select count(*) from kg_stock_inward) as new_inw_cnt,
+			(select count(*) from ch_boring_details ) as new_pouring_cnt,
+			(select count(*) from ch_casting_details) as new_casting_cnt
+
+			from kg_weekly_schedule limit 1;
+		LOOP                 
+		FETCH cursor_temp INTO v_old_sch_cnt,v_old_plan_cnt,v_old_qc_cnt,v_old_stock_cnt,v_old_pouring_cnt,v_old_casting_cnt,			v_new_sch_cnt,v_new_plan_cnt,v_new_qc_cnt,v_new_stock_cnt,v_new_pouring_cnt,v_new_casting_cnt;
+		  
+		   IF NOT FOUND then 
+		    Exit;
+		   end if; 
+		sl_no =sl_no +1;
+
+		if(v_old_sch_cnt is null) then
+		  v_old_sch_cnt='0';
+		 end if;
+		if(v_old_plan_cnt is null) then
+		  v_old_plan_cnt='0';
+		 end if;
+		if(v_old_qc_cnt is null) then
+		  v_old_qc_cnt=0;
+		 end if;
+		if(v_old_stock_cnt is null) then   
+		  v_old_stock_cnt='0';
+		 end if;		
+		if(v_old_pouring_cnt is null) then   
+		  v_old_pouring_cnt='';
+		 end if;		 
+		if(v_old_casting_cnt is null) then   
+		  v_old_casting_cnt='0';
+		 end if;
+
+		if(v_new_sch_cnt is null) then
+		  v_new_sch_cnt='0';
+		 end if;
+		if(v_new_plan_cnt is null) then
+		  v_new_plan_cnt='0';
+		 end if;
+		if(v_new_qc_cnt is null) then
+		  v_new_qc_cnt=0;
+		 end if;
+		if(v_new_stock_cnt is null) then   
+		  v_new_stock_cnt='0';
+		 end if;		
+		if(v_new_pouring_cnt is null) then   
+		  v_new_pouring_cnt='';
+		 end if;		 
+		if(v_new_casting_cnt is null) then   
+		  v_new_casting_cnt='0';
+		 end if;
+
+			
+		
+		v_old_total = v_old_stock_cnt + v_old_sch_cnt +v_old_plan_cnt+ v_old_qc_cnt + v_old_pouring_cnt + v_old_casting_cnt;
+		v_new_total = v_new_stock_cnt + v_new_sch_cnt +v_new_plan_cnt+ v_new_qc_cnt + v_new_pouring_cnt + v_new_casting_cnt;
+
+			
+			v_data=v_data || '<tr><td align="center">'||'1'|| '</td>
+			<td align="left">'||'Stock Inward'|| '</td>
+			<td align="left">'||v_old_stock_cnt|| '</td>
+			<td align="left">'||v_new_stock_cnt|| '</td>			
+			</tr>';
+
+			v_data=v_data || '<tr><td align="center">'||'2'|| '</td>
+			<td align="left">'||'Work Order'|| '</td>
+			<td align="left">'||v_old_sch_cnt|| '</td>
+			<td align="left">'||v_new_sch_cnt|| '</td>			
+			</tr>';
+
+			v_data=v_data || '<tr><td align="center">'||'3'|| '</td>
+			<td align="left">'||'Schedule'|| '</td>
+			<td align="left">'||v_old_plan_cnt|| '</td>
+			<td align="left">'||v_new_plan_cnt|| '</td>			
+			</tr>';
+
+			v_data=v_data || '<tr><td align="center">'||'4'|| '</td>
+			<td align="left">'||'QC Verification'|| '</td>
+			<td align="left">'||v_old_qc_cnt|| '</td>
+			<td align="left">'||v_new_qc_cnt|| '</td>			
+			</tr>';
+
+			v_data=v_data || '<tr><td align="center">'||'5'|| '</td>
+			<td align="left">'||'Pouring Updates'|| '</td>
+			<td align="left">'||v_old_pouring_cnt|| '</td>
+			<td align="left">'||v_new_pouring_cnt|| '</td>			
+			</tr>';
+
+			v_data=v_data || '<tr><td align="center">'||'6'|| '</td>
+			<td align="left">'||'Casting Updates'|| '</td>
+			<td align="left">'||v_old_casting_cnt|| '</td>
+			<td align="left">'||v_new_casting_cnt|| '</td>			
+			</tr>';
+
+			v_data=v_data || '<tr><td>'||''|| '</td>
+			<td align="center"><b>'||'Total'|| '</b></td>
+			<td align="left"><b>'||v_old_total|| '</b></td>
+			<td align="left"><b>'||v_new_total|| '</b></td>			
+			</tr>';
+
+
+		END LOOP;
+	 
+	  Close cursor_temp;
+
+	  
+		
+	v_data=v_data || '</Table><br><br><font face="Arial" Color="blue" size="2" >** This Mail is auto generated by ERP DATABASE.UNWANTED.</Font> </BODY></html>';
+	
+	
+	if(v_data is null) then
+		v_data=' No Data Found ';
+	end if;
+
+
+	select
+
+	case when 
+
+	((new_sch_cnt+new_plan_cnt+new_qc_cnt+new_stock_cnt+new_pouring_cnt+new_casting_cnt)
+	-
+	(old_sch_cnt+old_plan_cnt+old_qc_cnt+old_stock_cnt+old_pouring_cnt+old_casting_cnt))
+
+	>= 10 then '' else ' - No Progress' end as state
+	INTO	v_sub_state
+	from 
+	(
+	select 
+	(select count(*) from kg_weekly_schedule where create_date < TO_DATE(v_today, 'dd/mm/yyyy') ) as old_sch_cnt,
+	(select count(*) from kg_daily_planning  where create_date < TO_DATE(v_today, 'dd/mm/yyyy')) as old_plan_cnt,
+	(select count(*) from kg_qc_verification where create_date < TO_DATE(v_today, 'dd/mm/yyyy')) as old_qc_cnt,
+	(select count(*) from kg_stock_inward where create_date < TO_DATE(v_today, 'dd/mm/yyyy')) as old_stock_cnt,
+	(select count(*) from ch_boring_details where create_date < TO_DATE(v_today, 'dd/mm/yyyy')) as old_pouring_cnt,
+	(select count(*) from ch_casting_details where create_date < TO_DATE(v_today, 'dd/mm/yyyy')) as old_casting_cnt,
+	(select count(*) from kg_weekly_schedule ) as new_sch_cnt,
+	(select count(*) from kg_daily_planning ) as new_plan_cnt,
+	(select count(*) from kg_qc_verification ) as new_qc_cnt,
+	(select count(*) from kg_stock_inward) as new_stock_cnt,
+	(select count(*) from ch_boring_details ) as new_pouring_cnt,
+	(select count(*) from ch_casting_details) as new_casting_cnt
+
+	from kg_weekly_schedule limit 1) as sub_query;		
+				
+	SELECT 	name,subject
+	INTO	v_from_mail_id,v_subject_new
+	FROM  kg_mail_settings WHERE 
+		kg_mail_settings.active = 't' and
+		kg_mail_settings.sch_name=v_exam_name;		
+	
+	ce_disp_current_date = v_today;			
+			
+		
+	v_subject_new=replace(v_subject_new,'#ce_disp_current_date',ce_disp_current_date);
+	v_subject_new=replace(v_subject_new,'#v_sub_state',v_sub_state);
+	
+	
+	
+	SELECT 	array_to_string(array_agg(ltrim(ch_mail_settings_line.mail_id)),',') 
+	INTO	v_cc_mail_id
+	FROM 	ch_mail_settings_line,kg_mail_settings
+	WHERE 	ch_mail_settings_line.cc_address='t'
+		and ch_mail_settings_line.header_id=kg_mail_settings.id and
+		kg_mail_settings.active = 't' and
+		kg_mail_settings.sch_name=v_exam_name;
+
+	SELECT 	array_to_string(array_agg(ltrim(ch_mail_settings_line.mail_id)),',') 
+	INTO	v_to_mail_id
+	FROM 	ch_mail_settings_line,kg_mail_settings
+	WHERE 	ch_mail_settings_line.to_address='t'
+		and ch_mail_settings_line.header_id=kg_mail_settings.id
+		and kg_mail_settings.active = 't' and
+		kg_mail_settings.sch_name=v_exam_name;
+
+			if(v_from_mail_id is null) then 
+			  v_from_mail_id='';
+			end if; 
+			if(v_to_mail_id is null) then 
+			  v_to_mail_id='';
+			end if; 
+			if(v_cc_mail_id is null) then 
+			  v_cc_mail_id='';
+			end if; 
+			if(v_subject_new is null) then 
+			  v_subject_new='';
+			end if; 
+				
+			
+
+			v_data=v_data || '~' || v_from_mail_id || '~' || v_to_mail_id || '~' || v_cc_mail_id || '~' || v_subject_new || '~' ;
+
+
+end if;
+
+  RETURN v_data;
+END;
+
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION all_daily_scheduler_mails(character)
+  OWNER TO postgres;

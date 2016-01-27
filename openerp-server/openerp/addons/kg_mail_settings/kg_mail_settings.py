@@ -20,7 +20,7 @@ class kg_mail_settings(osv.osv):
 	_columns = {
 		'creation_time':fields.date('Creation Date',readonly=True),
 		'created_by':fields.many2one('res.users', 'Created By',readonly=True),
-		'active':fields.boolean('Active',readonly=True),
+		'active':fields.boolean('Active'),
 		'doc_name': fields.many2one('ir.model','Document Name',readonly=True, states={'draft':[('readonly',False)]}),
 		'name':fields.char('From Email-ID',required = True,readonly=True, states={'draft':[('readonly',False)]}),
 		'line_ids':fields.one2many('ch.mail.settings.line','header_id',readonly=False),
