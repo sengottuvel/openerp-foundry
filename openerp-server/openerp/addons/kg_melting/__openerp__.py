@@ -13,5 +13,6 @@
     'css': ['static/src/css/state.css'], 
     'auto_install': False,
     'installable': True,
+    
 }
 
