@@ -39,7 +39,7 @@ class kg_qc_verification(osv.osv):
 		'sch_bomline_id': fields.related('planning_line_id','sch_bomline_id', type='many2one', relation='ch.sch.bom.details', string='Schedule BOM Line Id', store=True, readonly=True),
 		
 		'order_ref_no': fields.related('schedule_id','name', type='char', string='Order Reference', store=True, readonly=True),
-		'order_type': fields.selection([('work_order','Normal'),('emergency','Emergency')],'Type'),
+		'order_type': fields.selection([('work_order','Normal'),('emergency','Emergency'),('project','Project')],'Order Type'),
 		
 		'pump_model_id': fields.related('schedule_line_id','pump_model_id', type='many2one', relation='kg.pumpmodel.master', string='Pump Model', store=True, readonly=True),
 		'pattern_id': fields.related('planning_line_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern No.', store=True, readonly=True),

@@ -34,9 +34,9 @@ class kg_weekly_schedule(osv.osv):
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),
 		'line_ids': fields.one2many('ch.weekly.schedule.details', 'header_id', "Schedule Details"),
 		'flag_cancel': fields.boolean('Cancellation Flag'),
-		'order_type': fields.selection([('work_order','Normal'),('emergency','Emergency')],'Type', required=True),
+		'order_type': fields.selection([('work_order','Normal'),('emergency','Emergency'),('project','Project')],'Type', required=True),
 		'delivery_date': fields.date('Delivery Date',required=True),
-		'order_value': fields.float('Work Order Value',required=True),
+		'order_value': fields.float('Work Order Value(lakh)',required=True),
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		
@@ -50,7 +50,7 @@ class kg_weekly_schedule(osv.osv):
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
-		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),		
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),	   
 		
 		
 	}
@@ -72,6 +72,8 @@ class kg_weekly_schedule(osv.osv):
 		
 		
 	}
+	
+	
 	
 
 	def _future_entry_date_check(self,cr,uid,ids,context=None):
@@ -95,7 +97,7 @@ class kg_weekly_schedule(osv.osv):
 		duplicate_id = cr.fetchone()
 		if duplicate_id:
 			return False
-		return True	
+		return True 
 		
 	def _check_lineitems(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
@@ -109,15 +111,26 @@ class kg_weekly_schedule(osv.osv):
 		if special_char:
 			return False
 		return True
+		
+	def _check_name(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		cr.execute(""" select name from kg_weekly_schedule where name  = '%s' """ %(entry.name))
+		data = cr.dictfetchall()
+			
+		if len(data) > 1:
+			res = False
+		else:
+			res = True	
+		return res 
 			
 	
 	_constraints = [		
-			  
 		
 		#(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
 		#(_check_duplicates, 'System not allow to do duplicate entry !!',['']),
 		(_check_lineitems, 'System not allow to save with empty Schedule Details !!',['']),
 		(_Validation, 'Special Character Not Allowed in Work Order No.', ['']),
+		(_check_name, 'Work Order No. must be Unique', ['']),
 	   
 		
 	   ]
@@ -144,7 +157,6 @@ class kg_weekly_schedule(osv.osv):
 		entry = self.browse(cr,uid,ids[0])
 		schedule_line_ids = []
 		
-		
 		delivery_date = str(entry.delivery_date)
 		delivery_date = datetime.strptime(delivery_date, '%Y-%m-%d')
 		if delivery_date < today:
@@ -165,7 +177,7 @@ class kg_weekly_schedule(osv.osv):
 							_('Specify BOM Details for Pump Model %s !!')%(item.pump_model_id.name))
 				
 			else:
-				cr.execute(''' select id from ch_sch_bom_details where flag_applicable = 't' and header_id = %s ''',[item.id])		
+				cr.execute(''' select id from ch_sch_bom_details where flag_applicable = 't' and header_id = %s ''',[item.id])	  
 				bom_check_id = cr.fetchone()
 				
 				if bom_check_id == None:
@@ -173,7 +185,7 @@ class kg_weekly_schedule(osv.osv):
 							_('Kindly enable BOM Details for Pump Model %s!!')%(item.pump_model_id.name))
 					
 				
-				cr.execute(''' select id from ch_sch_bom_details where flag_applicable = 't' and moc_id is null and header_id = %s ''',[item.id])		
+				cr.execute(''' select id from ch_sch_bom_details where flag_applicable = 't' and moc_id is null and header_id = %s ''',[item.id])	   
 				sch_bom_id = cr.fetchone()
 				if sch_bom_id:
 					if sch_bom_id[0] != None:
@@ -182,7 +194,7 @@ class kg_weekly_schedule(osv.osv):
 							
 				### Planning Qty Updation
 				
-				cr.execute(''' select sum(qty) from ch_sch_bom_details where flag_applicable = 't' and header_id = %s group by header_id ''',[item.id])		
+				cr.execute(''' select sum(qty) from ch_sch_bom_details where flag_applicable = 't' and header_id = %s group by header_id ''',[item.id])	 
 				bom_qty = cr.fetchone()
 				
 				if bom_qty:
@@ -204,7 +216,7 @@ class kg_weekly_schedule(osv.osv):
 				'order_type': 'emergency',
 				'delivery_date': entry.delivery_date,
 				'schedule_line_ids': [(6, 0, schedule_line_ids)],
-				'state' : 'draft'						
+				'state' : 'draft'					   
 			}
 			
 			planning_id = planning_obj.create(cr, uid, planning_item_vals)
@@ -254,8 +266,8 @@ class kg_weekly_schedule(osv.osv):
 		
 		
 	def unlink(self,cr,uid,ids,context=None):
-		unlink_ids = []		
-		for rec in self.browse(cr,uid,ids):	
+		unlink_ids = []	 
+		for rec in self.browse(cr,uid,ids): 
 			if rec.state != 'draft':			
 				raise osv.except_osv(_('Warning!'),
 						_('You can not delete this entry !!'))
@@ -266,6 +278,8 @@ class kg_weekly_schedule(osv.osv):
 	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_weekly_schedule, self).write(cr, uid, ids, vals, context)
+		
+	
 	
 	
 kg_weekly_schedule()
@@ -284,7 +298,8 @@ class ch_weekly_schedule_details(osv.osv):
 		'order_type': fields.related('header_id','order_type', type='char', string='Order Type', store=True, readonly=True),
 		'order_ref_no': fields.related('header_id','name', type='char', string='Work Order No.', store=True, readonly=True),
 		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True,domain="[('state','=','approved'), ('active','=','t')]"),
-		'type': fields.selection([('production','Pump'),('spare','Spare')],'Purpose', required=True),
+		'order_no': fields.char('Order No.', size=128,select=True),
+		'type': fields.selection([('production','Pump'),('spare','Spare'),('pump_spare','Pump and Spare')],'Purpose', required=True),
 		'qty': fields.integer('Qty', required=True),
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),
 		'note': fields.text('Notes'),
@@ -335,15 +350,15 @@ class ch_weekly_schedule_details(osv.osv):
 						_('Kindly select Purpose and then enter Qty !!'))
 			
 		sch_bom_obj = self.pool.get('ch.sch.bom.details')
-		cr.execute(''' select bom.id,bom.header_id,bom.pattern_id,bom.pattern_name,bom.qty, pattern.pcs_weight, pattern.ci_weight
+		cr.execute(''' select bom.id,bom.header_id,bom.pattern_id,bom.pattern_name,bom.qty, bom.pos_no,pattern.pcs_weight, pattern.ci_weight
 				from ch_bom_line as bom
 				LEFT JOIN kg_pattern_master pattern on pattern.id = bom.pattern_id
 				where bom.header_id = (select id from kg_bom where pump_model_id = %s and state='approved' and active='t') ''',[pump_model_id])
 		bom_details = cr.dictfetchall()
 		for bom_details in bom_details:
-			if type == 'production':
+			if type == 'production' :
 				applicable = True
-			if type == 'spare':
+			if type in ('spare','pump_spare'):
 				applicable = False
 			bom_vals.append({
 												
@@ -352,11 +367,13 @@ class ch_weekly_schedule_details(osv.osv):
 				'pattern_id': bom_details['pattern_id'],
 				'pattern_name': bom_details['pattern_name'],						
 				'pcs_weight': bom_details['pcs_weight'] or 0.00,						
-				'ci_weight': bom_details['ci_weight'] or 0.00,						
-				'qty' : qty * bom_details['qty'],					
-				'planning_qty' : qty * bom_details['qty'],					
-				'production_qty' : 0,					
-				'flag_applicable' : applicable							
+				'ci_weight': bom_details['ci_weight'] or 0.00,				  
+				'pos_no': bom_details['pos_no'],				  
+				'qty' : qty * bom_details['qty'],				   
+				'planning_qty' : qty * bom_details['qty'],				  
+				'production_qty' : 0,				   
+				'flag_applicable' : applicable,
+				'type':	type		  
 				})
 		return {'value': {'line_ids': bom_vals}}
 		
@@ -393,10 +410,10 @@ class ch_weekly_schedule_details(osv.osv):
 						'bom_line_id': bom_details['id'],
 						'pattern_id': bom_details['pattern_id'],
 						'pattern_name': bom_details['pattern_name'],							
-						'qty' : entry.qty * bom_details['qty'],					
+						'qty' : entry.qty * bom_details['qty'],				 
 						'planning_qty' : entry.qty * bom_details['qty'],					
-						'production_qty' : 0,					
-						'flag_applicable' : applicable							
+						'production_qty' : 0,				   
+						'flag_applicable' : applicable						  
 						}
 					
 				sch_bom_id = sch_bom_obj.create(cr, uid, bom_vals)
@@ -467,7 +484,7 @@ class ch_weekly_schedule_details(osv.osv):
 		
 	def unlink(self,cr,uid,ids,context=None):
 		unlink_ids = []
-		for rec in self.browse(cr,uid,ids):	
+		for rec in self.browse(cr,uid,ids): 
 			if rec.state != 'draft':
 				raise osv.except_osv(_('Warning!'),
 						_('You can not delete Work Order Details after confirmation !!'))
@@ -509,8 +526,9 @@ class ch_sch_bom_details(osv.osv):
 		'bom_line_id': fields.many2one('ch.bom.line','BOM Line'),
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern No',domain="[('state','=','approved'), ('active','=','t')]"),
 		'pattern_name': fields.char('Pattern Name'),
-		'pcs_weight': fields.related('pattern_id','pcs_weight', type='float', string='SS Weight(kgs)', store=True, readonly=True),
-		'ci_weight': fields.related('pattern_id','ci_weight', type='float', string='CI Weight(kgs)', store=True, readonly=True),
+		'pcs_weight': fields.related('pattern_id','pcs_weight', type='float', string='SS Weight(kgs)', store=True),
+		'ci_weight': fields.related('pattern_id','ci_weight', type='float', string='CI Weight(kgs)', store=True),
+		'pos_no': fields.related('bom_line_id','pos_no', type='integer', string='Position No', store=True),
 		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','=','approved'), ('active','=','t')]"),
 		'qty': fields.integer('Qty'),
 		'planning_qty': fields.integer('Planning Pending Qty'),

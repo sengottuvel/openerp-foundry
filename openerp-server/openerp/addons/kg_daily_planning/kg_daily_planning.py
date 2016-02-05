@@ -32,12 +32,12 @@ class kg_daily_planning(osv.osv):
 		'line_ids': fields.one2many('ch.daily.planning.details', 'header_id', "Planning Details"),
 		
 		'schedule_line_ids':fields.many2many('ch.weekly.schedule.details','m2m_weekly_schedule_details' , 'planning_id', 'schedule_id', 'Weekly Schedule Lines',
-			domain="[('header_id.order_type','=','work_order'),'&',('header_id.state','=','confirmed'),'&',('state','=','confirmed'),'&', ('temp_planning_qty','>','0'),'&', ('transac_state','in',('in_schedule','partial','sent_for_produc')),'&', ('line_ids.flag_applicable','=',('True')),'&',('header_id.division_id','=',division_id),('header_id.location','=',location)]"),
+			domain="[('header_id.order_type','=',order_type),'&',('header_id.state','=','confirmed'),'&',('state','=','confirmed'),'&', ('temp_planning_qty','>','0'),'&', ('transac_state','in',('in_schedule','partial','sent_for_produc')),'&', ('line_ids.flag_applicable','=',('True')),'&',('header_id.division_id','=',division_id),('header_id.location','=',location)]"),
 		'flag_planning': fields.boolean('Planning'),
 		'flag_cancel': fields.boolean('Cancellation Flag'),
 		'cancel_remark': fields.text('Cancel Remarks'),
 		'delivery_date': fields.date('Delivery Date',required=True),
-		'order_type': fields.selection([('work_order','Normal'),('emergency','Emergency')],'Type'),
+		'order_type': fields.selection([('work_order','Normal'),('emergency','Emergency'),('project','Project')],'Order Type'),
 		
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
@@ -132,7 +132,8 @@ class kg_daily_planning(osv.osv):
 							'sch_bomline_id': bom_item.id,									
 							'qty' : bom_item.planning_qty,
 							'stock_qty' : 0,
-							'line_status': 'planning'									
+							'line_status': 'planning',
+							'type':	sch_item.type							
 							}
 						
 						planning_line_id = planning_line_obj.create(cr, uid, planning_item_vals)
@@ -214,6 +215,14 @@ class kg_daily_planning(osv.osv):
 								alloc_qty = stock_qty
 							if plan_rec.qty < stock_qty:
 								alloc_qty = plan_rec.qty
+								
+							
+							if plan_rec.order_type == 'project':
+								flag_allocate = False
+								allocation_qty = 0
+							else:
+								flag_allocate = True
+								allocation_qty = alloc_qty
 							
 							allocation_item_vals = {
 													
@@ -221,8 +230,9 @@ class kg_daily_planning(osv.osv):
 								'schedule_id': sch_item.header_id.id,
 								'schedule_line_id': sch_item.id,
 								'planning_qty' : bom_item.planning_qty,										
-								'qty' : alloc_qty,											
+								'qty' : allocation_qty,											
 								'stock_qty' : stock_qty,
+								'flag_allocate' : flag_allocate,
 								#'stage_id':stage_id			
 							}
 							
@@ -253,6 +263,10 @@ class kg_daily_planning(osv.osv):
 				### Allocation Details Validation ###
 				if plan_item.line_ids:
 					for alloc_item in plan_item.line_ids:
+						if alloc_item.flag_allocate == True and alloc_item.qty == 0:
+							raise osv.except_osv(_('Warning !'), _('Allocation Qty is must for Order %s !!')%(plan_item.order_ref_no))
+						if alloc_item.flag_allocate == False and alloc_item.qty > 0:
+							raise osv.except_osv(_('Warning !'), _('Kindly check allocation process for Order %s !!')%(plan_item.order_ref_no))
 						if alloc_item.qty > 0:
 							if alloc_item.qty > alloc_item.stock_qty:
 								raise osv.except_osv(_('Warning !'), _('Allocation Qty should not be greater than Stock Qty for Order %s !!')%(plan_item.order_ref_no))
@@ -266,7 +280,7 @@ class kg_daily_planning(osv.osv):
 						
 						#### QC Creation When Allocation ###
 						
-						if alloc_item.qty > 0: 
+						if alloc_item.flag_allocate == True and alloc_item.qty > 0: 
 				
 							qc_item_vals = {
 													
@@ -279,7 +293,7 @@ class kg_daily_planning(osv.osv):
 								'allocation_id': alloc_item.id,
 								'schedule_id': plan_item.schedule_id.id,
 								'schedule_line_id': plan_item.schedule_line_id.id,		
-								#'stage_id' : alloc_item.stage_id.id,		
+								'pattern_name' : plan_item.pattern_id.pattern_name,		
 								'qty' : alloc_item.qty,
 								'state' : 'draft',
 								'order_type':entry.order_type,
@@ -345,6 +359,7 @@ class kg_daily_planning(osv.osv):
 									'state' : 'draft',
 									'production_type':'schedule',
 									'order_type':entry.order_type,
+									'pattern_name' : plan_item.pattern_id.pattern_name,	
 									
 									
 													
@@ -417,6 +432,7 @@ class kg_daily_planning(osv.osv):
 						'state' : 'draft',
 						'production_type':'schedule',
 						'order_type':entry.order_type,
+						'pattern_name' : plan_item.pattern_id.pattern_name,	
 										
 					}
 				
@@ -489,18 +505,18 @@ class kg_daily_planning(osv.osv):
 			cr.execute(''' delete from kg_production where planning_line_id = %s and state = 'draft' ''',[plan_item.id])
 			cr.execute(''' select sum(qty) from ch_stock_allocation_details where header_id = %s  and qty > 0  ''',[plan_item.id])
 			alloc_qty = cr.fetchone()
-			if alloc_qty[0] == None:
-				if plan_item.sch_bomline_id.qty == planning_qty:
-					sch_bomline_obj.write(cr, uid, plan_item.sch_bomline_id.id, {'transac_state':'in_schedule','planning_qty':planning_qty})
-					schedule_line_obj.write(cr, uid, plan_item.schedule_line_id.id, {'transac_state':'in_schedule'})
-				
-				if planning_qty < plan_item.sch_bomline_id.qty:
-					sch_bomline_obj.write(cr, uid, plan_item.sch_bomline_id.id, {'transac_state':'partial','planning_qty':planning_qty})
-					schedule_line_obj.write(cr, uid, plan_item.schedule_line_id.id, {'transac_state':'partial'})
-				
-				if plan_item.sch_bomline_id.planning_qty == 0:
-					sch_bomline_obj.write(cr, uid, plan_item.sch_bomline_id.id, {'transac_state':'in_schedule','planning_qty':planning_qty})
-					schedule_line_obj.write(cr, uid, plan_item.schedule_line_id.id, {'transac_state':'in_schedule'})
+
+			if plan_item.sch_bomline_id.qty == planning_qty:
+				sch_bomline_obj.write(cr, uid, plan_item.sch_bomline_id.id, {'transac_state':'in_schedule','planning_qty':planning_qty})
+				schedule_line_obj.write(cr, uid, plan_item.schedule_line_id.id, {'transac_state':'in_schedule'})
+			
+			if planning_qty < plan_item.sch_bomline_id.qty:
+				sch_bomline_obj.write(cr, uid, plan_item.sch_bomline_id.id, {'transac_state':'partial','planning_qty':planning_qty})
+				schedule_line_obj.write(cr, uid, plan_item.schedule_line_id.id, {'transac_state':'partial'})
+			
+			if plan_item.sch_bomline_id.planning_qty == 0:
+				sch_bomline_obj.write(cr, uid, plan_item.sch_bomline_id.id, {'transac_state':'in_schedule','planning_qty':planning_qty})
+				schedule_line_obj.write(cr, uid, plan_item.schedule_line_id.id, {'transac_state':'in_schedule'})
 		
 		
 		#### Planning Qty Updation in Weekly Schedule Line Items
@@ -562,6 +578,7 @@ class ch_daily_planning_details(osv.osv):
 		'header_id':fields.many2one('kg.daily.planning', 'Daily Planning', ondelete='cascade',required=True),
 		'line_ids': fields.one2many('ch.stock.allocation.details', 'header_id', "Allocation Details"),
 		'planning_date': fields.related('header_id','entry_date', type='date', string='Date', store=True, readonly=True),
+		'order_type': fields.related('header_id','order_type', type='char', string='Order Type', store=True, readonly=True),
 		'schedule_id': fields.many2one('kg.weekly.schedule','Work Order No.'),
 		'schedule_line_id': fields.many2one('ch.weekly.schedule.details','Schedule Line Id'),
 		'bom_id': fields.many2one('kg.bom','BOM Id'),
@@ -571,7 +588,7 @@ class ch_daily_planning_details(osv.osv):
 		'pump_model_id': fields.related('schedule_line_id','pump_model_id', type='many2one', relation='kg.pumpmodel.master', string='Pump Model', store=True, readonly=True),
 		'pattern_id': fields.related('sch_bomline_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern Number', store=True, readonly=True),
 		#'part_name_id': fields.related('schedule_line_id','part_name_id', type='many2one', relation='product.product', string='Part Name', store=True, readonly=True),
-		'type': fields.related('schedule_line_id','type', type='char', string='Purpose', store=True, readonly=True),
+		'type': fields.selection([('production','Pump'),('spare','Spare'),('pump_spare','Pump and Spare')],'Purpose'),
 		'moc_id': fields.related('sch_bomline_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
 		'schedule_qty': fields.related('sch_bomline_id','qty', type='integer', size=100, string='Schedule Qty', store=True, readonly=True),
 		
@@ -663,182 +680,23 @@ class ch_daily_planning_details(osv.osv):
 		cr.execute(''' delete from kg_production where planning_line_id = %s and state = 'draft' ''',[entry.id])
 		cr.execute(''' select sum(qty) from ch_stock_allocation_details where header_id = %s and qty > 0  ''',[entry.id])
 		alloc_qty = cr.fetchone()
-		if alloc_qty[0] == None:
-			if entry.sch_bomline_id.qty == planning_qty:
-				sch_bomline_obj.write(cr, uid, entry.sch_bomline_id.id, {'transac_state':'in_schedule','planning_qty':planning_qty})
-				schedule_line_obj.write(cr, uid, entry.schedule_line_id.id, {'transac_state':'in_schedule'})
-				
-			if planning_qty < entry.sch_bomline_id.qty:
-				sch_bomline_obj.write(cr, uid, entry.sch_bomline_id.id, {'transac_state':'partial','planning_qty':planning_qty})
-				schedule_line_obj.write(cr, uid, entry.schedule_line_id.id, {'transac_state':'partial'})
-				
-			if planning_qty == 0:
-				sch_bomline_obj.write(cr, uid, entry.sch_bomline_id.id, {'transac_state':'in_schedule','planning_qty':planning_qty})
-				schedule_line_obj.write(cr, uid, entry.schedule_line_id.id, {'transac_state':'in_schedule'})
+	
+		if entry.sch_bomline_id.qty == planning_qty:
+			sch_bomline_obj.write(cr, uid, entry.sch_bomline_id.id, {'transac_state':'in_schedule','planning_qty':planning_qty})
+			schedule_line_obj.write(cr, uid, entry.schedule_line_id.id, {'transac_state':'in_schedule'})
+			
+		if planning_qty < entry.sch_bomline_id.qty:
+			sch_bomline_obj.write(cr, uid, entry.sch_bomline_id.id, {'transac_state':'partial','planning_qty':planning_qty})
+			schedule_line_obj.write(cr, uid, entry.schedule_line_id.id, {'transac_state':'partial'})
+			
+		if planning_qty == 0:
+			sch_bomline_obj.write(cr, uid, entry.sch_bomline_id.id, {'transac_state':'in_schedule','planning_qty':planning_qty})
+			schedule_line_obj.write(cr, uid, entry.schedule_line_id.id, {'transac_state':'in_schedule'})
 		
 		self.write(cr, uid, ids, {'state': 'cancel','transac_state':'cancel'})
 		
 		
 		return True
-		
-	"""def entry_reallocate(self,cr,uid,ids,context=None):
-		entry = self.browse(cr,uid,ids[0])
-		qc_verf_obj = self.pool.get('kg.qc.verification')
-		production_obj = self.pool.get('kg.production')
-		planning_line_obj = self.pool.get('ch.daily.planning.details')
-		allocation_line_obj = self.pool.get('ch.stock.allocation.details')
-		schedule_line_obj = self.pool.get('ch.weekly.schedule.details')
-		sch_bomline_obj = self.pool.get('ch.sch.bom.details')
-		today = date.today()
-		today = str(today)
-		### Allocation Details Validation ###
-		if entry.line_ids:
-			for alloc_item in entry.line_ids:
-				if alloc_item.qty > 0.00:
-					if alloc_item.qty > alloc_item.stock_qty:
-						raise osv.except_osv(_('Warning !'), _('Allocation Qty should not be greater than Stock Qty !!'))
-					
-				cr.execute(''' select sum(qty) from ch_stock_allocation_details where header_id = %s ''',[entry.id])
-				alloc_qty = cr.fetchone()
-				if alloc_qty[0] != None:
-					if entry.qty < alloc_qty[0]:
-						raise osv.except_osv(_('Warning !'), _('Allocation Qty should not be greater than Planning Qty for Order %s !!')%(entry.order_ref_no))
-							
-				#### QC Creation When Allocation ###
-				
-				if alloc_item.qty > 0.00: 
-		
-					qc_item_vals = {
-											
-						'name': '',
-						'planning_id': entry.header_id.id,
-						'planning_date': entry.header_id.entry_date,
-						'division_id': entry.header_id.division_id.id,
-						'location' : entry.header_id.location,
-						'planning_line_id': entry.id,
-						'allocation_id': alloc_item.id,
-						'schedule_id': entry.schedule_id.id,
-						'schedule_line_id': entry.schedule_line_id.id,		
-						'stage_id' : alloc_item.stage_id.id,		
-						'qty' : alloc_item.qty,
-						'state' : 'draft'						
-					}
-				
-					qc_id = qc_verf_obj.create(cr, uid, qc_item_vals)
-					
-					sch_bomline_obj.write(cr, uid, plan_item.sch_bomline_id.id, {'transac_state':'sent_for_qc'})
-					
-					planning_line_obj.write(cr, uid, entry.id, {'transac_state':'sent_for_qc'})
-					
-					
-					cr.execute(''' update ch_stock_allocation_details set state = 'confirmed' where header_id = %s ''',[alloc_item.header_id.id])
-				
-					#### Stock Updation Block Starts Here ###
-						
-					cr.execute(''' insert into kg_foundry_stock(company_id,division_id,location,pump_model_id,pattern_id,part_name_id,
-					moc_id,trans_type,qty,alloc_qty,type,schedule_id,schedule_line_id,planning_id,planning_line_id,
-					allocation_id,creation_date,schedule_date,planning_date,stage_id)
-					
-					values(%s,%s,%s,%s,%s,%s,%s,%s,0.00,%s,'OUT',%s,%s,%s,%s,%s,%s,%s,%s,%s)
-					''',[entry.header_id.company_id.id,entry.header_id.division_id.id or None,entry.header_id.location,entry.pump_model_id.id, entry.pattern_id.id,entry.part_name_id.id,
-					entry.moc_id.id,entry.type,alloc_item.qty,entry.schedule_id.id,entry.schedule_line_id.id,
-					entry.header_id.id,entry.id,alloc_item.id,today,entry.schedule_id.entry_date,entry.header_id.entry_date,alloc_item.stage_id.id ])
-							
-					#### Stock Updation Block Ends Here ###
-					
-					### Production Creation ###
-					
-					production_qty = entry.qty - alloc_qty
-					
-					if production_qty > 0:
-					
-						### Planning Qty Updation in Weekly Schedule ###
-						sch_bomline_rec = sch_bomline_obj.browse(cr, uid, entry.sch_bomline_id.id)
-						
-						planned_qty = sch_bomline_rec.planning_qty - entry.qty
-						
-						sch_bomline_rec.write({
-						
-							'planning_qty': planned_qty,
-							'transac_state':'sent_for_produc'
-							
-							})
-						
-						#### Production Creation When No Allocation ####
-
-						production_vals = {
-												
-							'name': '',
-							'planning_id': entry.header_id.id,
-							'planning_date': entry.header_id.entry_date,
-							'division_id': entry.header_id.division_id.id,
-							'location' : entry.header_id.location,
-							'planning_line_id': entry.id,
-							'schedule_id': entry.schedule_id.id,
-							'schedule_line_id': entry.schedule_line_id.id,
-							'production_qty': production_qty,	
-							'qty' : production_qty,	
-							'excess_qty' : 0.00,	
-							'state' : 'draft',
-											
-						}
-					
-						production_id = production_obj.create(cr, uid, production_vals)
-							
-						planning_line_obj.write(cr, uid, entry.id, {'transac_state':'sent_for_produc'})
-							
-		
-		### Production Creation When No Allocation ####
-					
-		cr.execute(''' select id from ch_stock_allocation_details
-		
-		where
-		header_id = %s and
-		qty > 0.00
-		
-		''',[entry.id])
-		allocation_id = cr.fetchone()
-		
-		if not allocation_id or allocation_id == None:
-			
-			### Planning Qty Updation in Weekly Schedule ###
-			sch_bomline_rec = sch_bomline_obj.browse(cr, uid, entry.sch_bomline_id.id)
-			
-			planned_qty = sch_bomline_rec.planning_qty - entry.qty
-			
-			sch_bomline_rec.write({
-			
-				'planning_qty': planned_qty,
-				'transac_state':'sent_for_produc'
-				
-				})
-			
-			#### Production Creation When No Allocation ####
-
-			production_vals = {
-									
-				'name': '',
-				'planning_id': entry.header_id.id,
-				'planning_date': entry.header_id.entry_date,
-				'division_id': entry.header_id.division_id.id,
-				'location' : entry.header_id.location,
-				'planning_line_id': entry.id,
-				'schedule_id': entry.schedule_id.id,
-				'schedule_line_id': entry.schedule_line_id.id,
-				'production_qty': entry.qty,	
-				'qty' : entry.qty,	
-				'excess_qty' : 0.00,	
-				'state' : 'draft',
-								
-			}
-		
-			production_id = production_obj.create(cr, uid, production_vals)
-			
-			planning_line_obj.write(cr, uid, entry.id, {'transac_state':'sent_for_produc'})
-				
-		return True
-		
-	"""
 		
 	
 	def create(self, cr, uid, vals, context=None):
@@ -907,6 +765,7 @@ class ch_stock_allocation_details(osv.osv):
 		'schedule_id': fields.many2one('kg.weekly.schedule','Schedule Id'),
 		'schedule_line_id': fields.many2one('ch.weekly.schedule.details','Schedule Line Id'),
 		'order_ref_no': fields.related('schedule_id','name', type='char', string='Order Reference', store=True, readonly=True),
+		'order_type': fields.related('header_id','order_type', type='char', string='Order Type', store=True, readonly=True),
 		'pump_model_id': fields.related('schedule_line_id','pump_model_id', type='many2one', relation='kg.pumpmodel.master', string='Pump Model', store=True, readonly=True),
 		'pattern_id': fields.related('header_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern Number', store=True, readonly=True),
 		#'part_name_id': fields.related('schedule_line_id','part_name_id', type='many2one', relation='product.product', string='Part Name', store=True, readonly=True),
@@ -914,12 +773,13 @@ class ch_stock_allocation_details(osv.osv):
 		
 		'planning_qty': fields.integer('Planning Qty', readonly=True),
 		'stock_qty': fields.integer('Stock Qty', readonly=True),
-		'qty': fields.integer('Qty',required=False),
+		'qty': fields.integer('Qty'),
 		'stage_id': fields.many2one('kg.stage.master','Stage', readonly=True),
 		'stage_sequence': fields.related('stage_id','stage_seq_id', type='integer', string='Stage Sequence', store=True, readonly=True),
-		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed')],'Status', readonly=True),
+		'state': fields.related('header_id','state', type='char', string='Status', store=True, readonly=True),
 		'remarks': fields.text('Remarks'),
 		'active': fields.boolean('Active'),
+		'flag_allocate': fields.boolean('Allocate'),
 		
 	
 	}
@@ -929,6 +789,7 @@ class ch_stock_allocation_details(osv.osv):
 	
 		'state': 'draft',
 		'active': True,
+		'flag_allocate': False,
 		
 	}
 		
@@ -938,7 +799,12 @@ class ch_stock_allocation_details(osv.osv):
 			return False
 		return True
 		
-	def onchange_allocation_qty(self, cr, uid, ids, planning_qty, stock_qty, qty, context=None):
+	def onchange_allocation_qty(self, cr, uid, ids, planning_qty, stock_qty, qty, flag_allocate, context=None):
+		
+		if flag_allocate == True and qty == 0:
+			raise osv.except_osv(_('Warning !'), _('Allocation Qty is must !!'))
+		if flag_allocate == False and qty > 0:
+			raise osv.except_osv(_('Warning !'), _('Kindly check allocation process !!'))
 		if stock_qty == 0:
 			raise osv.except_osv(_('Warning !'), _('Allocation Qty cannot be done without Stock Qty !!'))
 		entry = self.browse(cr,uid,ids[0])

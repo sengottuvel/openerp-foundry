@@ -13,7 +13,7 @@ class kg_production(osv.osv):
 
 	_name = "kg.production"
 	_description = "Production Updation"
-	_order = "entry_date desc"
+	_order = "pump_model_id"
 	
 	_columns = {
 	
@@ -41,7 +41,7 @@ class kg_production(osv.osv):
 		'allocation_id': fields.many2one('ch.stock.allocation.details','Allocation'),
 		'qc_id': fields.many2one('kg.qc.verification','QC'),
 		'order_ref_no': fields.related('schedule_line_id','order_ref_no', type='char', string='Order Reference', store=True, readonly=True),
-		'order_type': fields.selection([('work_order','Normal'),('emergency','Emergency')],'Type'),
+		'order_type': fields.selection([('work_order','Normal'),('emergency','Emergency'),('project','Project')],'Type'),
 		'pump_model_id': fields.related('schedule_line_id','pump_model_id', type='many2one', relation='kg.pumpmodel.master', string='Pump Model', store=True, readonly=True),
 		'pattern_id': fields.related('planning_line_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern Number', store=True, readonly=True),
 		'pattern_name': fields.related('pattern_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
@@ -74,6 +74,16 @@ class kg_production(osv.osv):
 		
 		'flag_save':fields.boolean('Save'),
 		
+		'pouring_heat_id': fields.many2one('kg.melting','Heat No.',domain="[('state','=','confirmed'), ('active','=','t')]"),
+		'pouring_weight': fields.float('Weight(kgs)'),
+		'pouring_shift': fields.char('Shift', size=128),
+		'pouring_time': fields.float('Pouring Time'),
+		
+		'casting_heat_id': fields.many2one('kg.melting','Heat No.',domain="[('state','=','confirmed'), ('active','=','t')]"),
+		'casting_weight': fields.float('Weight(kgs)'),
+		'casting_shift': fields.char('Shift', size=128),
+		'casting_time': fields.float('Casting Time'),
+		
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		
@@ -98,6 +108,8 @@ class kg_production(osv.osv):
 		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+		'pouring_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+		'casting_date':time.strftime('%Y-%m-%d %H:%M:%S'),
 		'state': 'draft',		
 		'active': True,
 		
@@ -176,11 +188,29 @@ class kg_production(osv.osv):
 		reject_qty = vals.get('reject_qty')
 		pouring_date = vals.get('pouring_date')
 		pouring_remark = vals.get('pouring_remark')
+		pouring_heat_id = vals.get('pouring_heat_id')
+		pouring_weight = vals.get('pouring_weight')
+		pouring_shift = vals.get('pouring_shift')
+		pouring_time = vals.get('pouring_time')
 		
 		### Casting Details
 		casting_qty = vals.get('casting_qty')
 		casting_date = vals.get('casting_date')
 		casting_remark = vals.get('casting_remark')
+		casting_heat_id = vals.get('casting_heat_id')
+		casting_weight = vals.get('casting_weight')
+		casting_shift = vals.get('casting_shift')
+		casting_time = vals.get('casting_time')
+		
+		if pouring_date == None:
+			pouring_date = today
+		else:
+			pouring_date = pouring_date
+		
+		if casting_date == None:
+			casting_date = today
+		else:
+			casting_date = casting_date
 		
 		
 		### Pouring Vs Production
@@ -207,9 +237,9 @@ class kg_production(osv.osv):
 		if pouring_qty > 0:
 			
 			### Pouring Line Entry Creation in Production
-			cr.execute(''' insert into ch_boring_details(create_uid,create_date,header_id,entry_date,qty,remark)
-				values(%s,%s,%s,%s,%s,%s)
-				''',[uid,dt_time,entry.id,pouring_date,pouring_qty,pouring_remark])
+			cr.execute(''' insert into ch_boring_details(create_uid,create_date,header_id,entry_date,qty,remark,heat_id,weight,shift,time)
+				values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+				''',[uid,dt_time,entry.id,pouring_date,pouring_qty,pouring_remark,pouring_heat_id,pouring_weight,pouring_shift,pouring_time])
 			
 			### Production Creation When Rejection
 			
@@ -271,11 +301,7 @@ class kg_production(osv.osv):
 				planning_line_obj.write(cr, uid, entry.planning_line_id.id, {'transac_state':'complete'})
 				
 				if excess_qty > 0:
-						
-						
 					#### Stock Updation Block Starts Here ###
-					
-							
 					cr.execute(''' insert into kg_foundry_stock(company_id,division_id,location,pump_model_id,pattern_id,
 						moc_id,trans_type,qty,alloc_qty,type,schedule_id,schedule_line_id,planning_id,planning_line_id,
 						allocation_id,qc_id,production_id ,creation_date,schedule_date,
@@ -292,7 +318,7 @@ class kg_production(osv.osv):
 			if produced_qty < entry.production_qty :
 				
 				cr.execute(''' update kg_production set state = 'pouring_inprogress', qty=%s,
-					bal_produc_qty = %s where id = %s
+				    bal_produc_qty = %s where id = %s
 				''',[produced_qty,bal_produc_qty,entry.id])
 				### Production Qty Updation
 				sch_bomline_obj.write(cr, uid, entry.sch_bomline_id.id, {'production_qty': pouring_qty})
@@ -303,9 +329,9 @@ class kg_production(osv.osv):
 			
 			### Casting Line Entry Creation in Production
 			
-			cr.execute(''' insert into ch_casting_details(uid,create_date,header_id,entry_date,qty,remark)
-				values(%s,%s,%s,%s,%s,%s)
-				''',[uid,dt_time,entry.id,casting_date,casting_qty,casting_remark])
+			cr.execute(''' insert into ch_casting_details(create_uid,create_date,header_id,entry_date,qty,remark,heat_id,weight,shift,time)
+				values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+				''',[uid,dt_time,entry.id,casting_date,casting_qty,casting_remark,casting_heat_id,casting_weight,casting_shift,casting_time])
 			
 			### Production Creation When Rejection
 			if pre_casting_qty > entry.qty:
@@ -320,8 +346,26 @@ class kg_production(osv.osv):
 				if entry.qty >= entry.production_qty:
 					cr.execute(''' update kg_production set state = 'casting_inprogress' where id = %s''',[entry.id])
 
-		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid,
-			'pouring_qty':0,'pouring_date':False,'reject_qty':0,'pouring_remark':'','casting_qty':0,'casting_date':False,'casting_remark':''})
+		vals.update({
+		'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+		'update_user_id':uid,
+		'pouring_qty':0,
+		'pouring_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+		'reject_qty':0,
+		'pouring_remark':'',
+		'casting_qty':0,
+		'casting_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+		'casting_remark':'',
+		'pouring_heat_id':False,
+		'casting_heat_id':False,
+		'pouring_shift':'',
+		'casting_shift':'',
+		'pouring_weight':0.00,
+		'casting_weight':0.00,
+		'pouring_time':0.00,
+		'casting_time':0.00
+		
+			})
 		return super(kg_production, self).write(cr, uid, ids, vals, context)
 	
 	
@@ -347,8 +391,12 @@ class ch_boring_details(osv.osv):
 				,('casting_inprogress','Casting In Progress'),('casting_complete','Casting Complete'),('cancel','Cancelled')],'Status', readonly=True),
 		'entry_date': fields.date('Date'),
 		'qty': fields.integer('Qty'),
-		'heat_no': fields.char('Heat No'),
 		'remark': fields.text('Remarks'),
+		
+		'heat_id': fields.many2one('kg.melting','Heat No.',domain="[('state','=','confirmed'), ('active','=','t')]"),
+		'weight': fields.float('Weight(kgs)'),
+		'shift': fields.char('Shift', size=128),
+		'time': fields.float('Pouring Time'),
 	
 	}
 	
@@ -427,6 +475,11 @@ class ch_casting_details(osv.osv):
 		'qty': fields.integer('Qty'),
 		'remark': fields.text('Remarks'),
 		'visible_state': fields.selection([('visible','Visible'),('in_visible','Invisble')],'Visible Status'),
+		
+		'heat_id': fields.many2one('kg.melting','Heat No.',domain="[('state','=','confirmed'), ('active','=','t')]"),
+		'weight': fields.float('Weight(kgs)'),
+		'shift': fields.char('Shift', size=128),
+		'time': fields.float('Casting Time'),
 	
 	}
 	
@@ -493,7 +546,7 @@ class kg_foundry_stock(osv.osv):
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern No'),
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
 		'trans_type': fields.selection([('production','Production'),('spare','Spare')],'Purpose'),
-		'order_type': fields.selection([('work_order','Normal'),('emergency','Emergency')],'Order Type'),
+		'order_type': fields.selection([('work_order','Normal'),('emergency','Emergency'),('project','Project')],'Order Type'),
 		'production_type': fields.selection([('schedule','Schedule'),('nc','NC'),('floor_nc','Floor NC')],'Production Type'),
 		'qty': fields.integer('Qty'),
 		'alloc_qty': fields.integer('Allocation Qty'),

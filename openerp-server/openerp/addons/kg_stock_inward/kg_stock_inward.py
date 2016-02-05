@@ -107,11 +107,11 @@ class kg_stock_inward(osv.osv):
 			#### Stock Updation Block Starts Here ###
 							
 			cr.execute(''' insert into kg_foundry_stock(company_id,division_id,location,pattern_id,
-			moc_id,stock_inward_id,qty,alloc_qty,type,creation_date,unit_price)
+			moc_id,stock_inward_id,qty,alloc_qty,type,creation_date,unit_price,pump_model_id)
 			
-			values(%s,%s,%s,%s,%s,%s,%s,0,'IN',%s,%s)
+			values(%s,%s,%s,%s,%s,%s,%s,0,'IN',%s,%s,%s)
 			''',[entry.company_id.id,entry.division_id.id or None,entry.location, line_item.pattern_id.id,
-			line_item.moc_id.id,line_item.id,line_item.qty,entry.entry_date,line_item.unit_price or 0.00])
+			line_item.moc_id.id,line_item.id,line_item.qty,entry.entry_date,line_item.unit_price or 0.00,line_item.pump_model_id.id or None ])
 					
 			#### Stock Updation Block Ends Here ###
 		
@@ -150,8 +150,9 @@ class ch_stock_inward_details(osv.osv):
 		'header_id':fields.many2one('kg.stock.inward', 'Stock Inward', required=1, ondelete='cascade'),
 		'inward_date': fields.related('header_id','entry_date', type='date', string='Date', store=True, readonly=True),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location', required=True),
+		'stock_type':fields.selection([('pump','Pump'),('pattern','Pattern')],'Type', required=True),
 		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model',domain="[('state','=','approved'), ('active','=','t')]"),
-		'pattern_id': fields.many2one('kg.pattern.master','Pattern Number', required=True,domain="[('state','=','approved'), ('active','=','t')]"),
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern Number',domain="[('state','=','approved'), ('active','=','t')]"),
 		'pattern_name': fields.char('Pattern Name'),
 		#'part_name_id': fields.many2one('product.product','Part Name', required=True,domain="[('state','=','approved'), ('active','=','t')]"),
 		'moc_id': fields.many2one('kg.moc.master','MOC',required=True,domain="[('state','=','approved'), ('active','=','t')]"),
@@ -238,6 +239,7 @@ class ch_stock_inward_details(osv.osv):
        ]
 	
 ch_stock_inward_details()
+
 
 
 

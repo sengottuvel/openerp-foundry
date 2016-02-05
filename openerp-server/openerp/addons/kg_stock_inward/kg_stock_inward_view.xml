@@ -28,7 +28,18 @@
 						</group>
 						<notebook>
 							<page string="Inward Details" >
-								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
+									<tree string="Stock Inward Details Entry Tree" editable="top" >					
+										<field name="location"/>
+										<field name="stock_type"/>
+										<field name="pump_model_id" attrs="{'required': [('stock_type','=','pump')]}"/>
+										<field name="pattern_id" attrs="{'required': [('stock_type','=','pattern')]}" on_change="onchange_pattern_name(pattern_id)"/>
+										<field name="pattern_name" readonly="1"/>
+										<field name="moc_id"/>
+										<field name="qty"/>
+										<field name="unit_price"/>
+									</tree>
+								</field>
 							</page>
 							<page string="Entry Info">
 								<group>
@@ -90,8 +101,9 @@
 			<field name="arch" type="xml">
 				<tree string="Stock Inward Details Entry Tree" editable="top" >					
 					<field name="location"/>
-					<field name="pump_model_id"/>
-				    <field name="pattern_id" on_change="onchange_pattern_name(pattern_id)"/>
+					<field name="stock_type"/>
+					<field name="pump_model_id" attrs="{'required': [('stock_type','=',['pump'])]}"/>
+				    <field name="pattern_id" attrs="{'required': [('stock_type','=',['pattern'])]}" on_change="onchange_pattern_name(pattern_id)"/>
 				    <field name="pattern_name" readonly="1"/>
 				    <!--<field name="part_name_id"/>-->
 				    <field name="moc_id"/>

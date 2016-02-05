@@ -28,6 +28,7 @@
             ref('kg_menus.tam_stock_inward'),
             ref('kg_menus.tam_pouring'),
             ref('kg_menus.tam_casting'),
+            ref('kg_menus.tam_melting'),
             
             
             ref('kg_menus.rpm_reports'),

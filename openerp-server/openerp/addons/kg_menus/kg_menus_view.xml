@@ -56,14 +56,18 @@
 				<!-- QC Verification -->
 				<menuitem action="kg_qc_verification.tma_qc_verification" id="tam_qc_verification" parent="tpm_planning_transactions" sequence="4"/>
 				
+				<!-- Melting Log -->
+				<menuitem action="kg_melting.tma_melting" id="tam_melting" parent="tpm_planning_transactions" sequence="5"/>
+				
 				<!-- Production -->
-				<menuitem action="kg_production.tma_production" id="tam_production" parent="tpm_planning_transactions" sequence="5"/>
+				<menuitem action="kg_production.tma_production" id="tam_production" parent="tpm_planning_transactions" sequence="6"/>
 				
 				<!-- Pouring Updates -->
-				<menuitem action="kg_production.tma_pouring" id="tam_pouring" parent="tpm_planning_transactions" sequence="6"/>
+				<menuitem action="kg_production.tma_pouring" id="tam_pouring" parent="tpm_planning_transactions" sequence="7"/>
 				
 				<!-- Casting Updates -->
-				<menuitem action="kg_production.tma_casting" id="tam_casting" parent="tpm_planning_transactions" sequence="7"/>
+				<menuitem action="kg_production.tma_casting" id="tam_casting" parent="tpm_planning_transactions" sequence="8"/>
+				
 				
 				
 			

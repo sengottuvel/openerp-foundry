@@ -50,8 +50,11 @@
 								<field name="line_ids" colspan="4" nolabel="1" context="{'visible_state' : 'visible'}" attrs="{'readonly': [('state','in',['pouring_complete','casting_inprogress','casting_complete','cancel'])]}">
 									<tree string="Pouring Details" editable="top">					
 										<field name="entry_date" required="1"/>
+										<field name="heat_id" readonly="1"/>
+										<field name="weight" readonly="1"/>
+										<field name="shift" readonly="1"/>
+										<field name="time" readonly="1" widget="float_time"/>
 										<field name="qty" required="1"/>
-										<field name="heat_no" invisible="1"/>
 										<field name="remark"/>
 									</tree>
 								</field>
@@ -62,6 +65,10 @@
 								<field name="line_ids_a" colspan="4" nolabel="1" context="{'visible_state' : 'visible'}" attrs="{'readonly': [('state','in',['casting_complete','cancel'])]}">
 									<tree string="Casting Details" editable="top">					
 										<field name="entry_date" required="1"/>
+										<field name="heat_id" readonly="1"/>
+										<field name="weight" readonly="1"/>
+										<field name="shift" readonly="1"/>
+										<field name="time" readonly="1" widget="float_time"/>
 										<field name="qty" required="1"/>
 										<field name="remark"/>
 									</tree>
@@ -156,6 +163,10 @@
 					<field name="pump_model_id"/>
 					<field name="moc_id"/>
 					<field name="bal_produc_qty" readonly="1"/>
+					<field name="pouring_heat_id" required="1"/>
+					<field name="pouring_weight" required="1"/>
+					<field name="pouring_shift"/>
+					<field name="pouring_time" widget="float_time"/>
 					<field name="pouring_date" required="1"/>
 					<field name="pouring_qty" required="1"/>
 					<field name="reject_qty"/>
@@ -184,6 +195,10 @@
 					<field name="pump_model_id"/>
 					<field name="moc_id"/>
 					<field name="qty" string="Poured Qty" readonly="1"/>
+					<field name="casting_heat_id" required="1"/>
+					<field name="casting_weight" required="1"/>
+					<field name="casting_shift"/>
+					<field name="casting_time" widget="float_time"/>
 					<field name="casting_date" required="1"/>
 					<field name="casting_qty" required="1"/>
 					<field name="casting_remark"/>
@@ -203,8 +218,12 @@
             <field name="model">kg.production</field>
             <field name="arch" type="xml">
                 <search string="Production Entry Search">
-					<field name="order_ref_no" string="Work Order No."  filter_domain="[('order_ref_no','ilike',self)]" />
+					
 					<field name="pattern_id" string="Pattern Number"  filter_domain="[('pattern_id','ilike',self)]" />
+					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
+					<field name="order_ref_no" string="Work Order No."  filter_domain="[('order_ref_no','ilike',self)]" />
+					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />
+					
 					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
 					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>
 					<filter icon="terp-check" name="pouring_inprogress" string="Pouring In Progress" domain="[('state','=','pouring_inprogress')]"/>
@@ -244,6 +263,7 @@
 			<field name="view_id" ref="t_tree_v_production"/>
 			<field name="search_view_id" ref="t_search_v_production"/>
 			<field name="context">{"search_default_draft":1,"search_default_pouring_inprogress":1,"search_default_casting_inprogress":1}</field>
+			
 		</record>
 		
 	<!-- Menu Action End-->
@@ -261,6 +281,8 @@
 			<field name="view_id" ref="t_tree_v_pouring"/>
 			<field name="search_view_id" ref="t_search_v_production"/>
 			<field name="domain">[('state','in',('draft','pouring_inprogress'))]</field>
+			
+
 		</record>
 		
 	<!-- Menu Action End-->

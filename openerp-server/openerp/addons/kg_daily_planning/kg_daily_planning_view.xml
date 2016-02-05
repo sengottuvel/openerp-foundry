@@ -28,6 +28,7 @@
 								<field name="location" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="active" invisible="1"/>
 								<field name="flag_planning" invisible="1"/>
+								<field name="order_type" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="state" style="width: 30%%" class="att_state_change"/>
 							</group>					
 						</group>
@@ -200,6 +201,7 @@
 						<field name="note" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 						<field name="cancel_remark" attrs="{'invisible': [('transac_state','in',['in_draft','complete'])], 'readonly': [('state','in',['cancel'])]}"/>
 						<field name="line_status" invisible="1"/>
+						<field name="order_type" invisible="1"/>
 					</group>
 					<group attrs="{'invisible': [('transac_state','in',['in_draft','cancel','complete'])]}">
 						<button name="entry_cancel" type="object" string="Cancel" states="confirmed" class="oe_highlight" />
@@ -209,18 +211,19 @@
 				<newline/>
 				
 				<group string="Allocation Details" attrs="{'invisible': [('line_status','in',['planning'])]}">
-					<field name="line_ids" colspan="4" nolabel="1"  attrs="{'readonly': [('transac_state','in',['in_plan','sent_for_qc','sent_for_produc','cancel','complete'])]}">
+					<field name="line_ids" colspan="4" nolabel="1"  attrs="{'readonly': [('state','!=','draft')]}">
 						<tree string="Allocation Details" editable="bottom" delete="false" create="false">
 						   <field name="schedule_id" invisible="1"/>
 						   <field name="pump_model_id" invisible="1"/>
 						   <field name="pattern_id" invisible="1"/>
-						  <!-- <field name="part_name_id" invisible="1"/>-->
 						   <field name="moc_id" invisible="1"/>
 						   <field name="planning_qty" invisible="1"/>
 						   <field name="stock_qty"/>
 						   <field name="stage_id" invisible="1"/>
-						   <field name="qty" readonly="1" on_change="onchange_allocation_qty(planning_qty, stock_qty, qty)" required="1"/>
-						   <field name="remarks"/>
+						   <field name="order_type" invisible="1"/>
+						   <field name="flag_allocate" attrs="{'readonly': [('order_type','!=','project')]}"/>
+						   <field name="qty" required="1" attrs="{'readonly': [('order_type','!=','project')]}" on_change="onchange_allocation_qty(planning_qty, stock_qty, qty,flag_allocate)"/>
+						   <field name="remarks" attrs="{'readonly': [('order_type','!=','project')]}"/>
 						   <field name="state" invisible="1"/>
 						</tree>
 					</field>
