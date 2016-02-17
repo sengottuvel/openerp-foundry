@@ -18,7 +18,7 @@
             <field name="inherit_id" ref="stock.view_picking_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='date']" position="before">
-                    <field name="purchase_id" domain="[('invoice_method','=','picking')]"  context="{'search_default_partner_id':partner_id,'default_partner_id':partner_id, 'default_invoice_method':'picking'}"/>
+                    <field name="purchase_id" domain="[('invoice_method','=','picking')]"  context="{'search_default_partner_id':partner_id,'default_partner_id':partner_id, 'default_invoice_method':'picking'}" invisible="1"/>
                 </xpath>
                 <xpath expr="//field[@name='company_id']" position="after">
                     <field name="warehouse_id" groups="stock.group_locations"/>
@@ -45,11 +45,11 @@
             <field name="arch" type="xml">
                  <xpath expr="//div[contains(@class, 'oe_title')]" position="before">
                     <div class="oe_right oe_button_box" name="buttons">
-                        <button type="object"
+                        <!--<button type="object"
                             name="view_picking"
                             string="Incoming Shipments" states="approved"/>
                         <button type="object"  name="invoice_open"
-                            string="Invoices" attrs="{'invisible': [('state', '=', 'draft')]}"/> 
+                            string="Invoices" attrs="{'invisible': [('state', '=', 'draft')]}" invisible="1"/> -->
                     </div>
                 </xpath>
             </field>
@@ -76,8 +76,8 @@
             </field>
        </record>
 
-        <menuitem action="action_picking_tree4_picking_to_invoice"
+        <!--<menuitem action="action_picking_tree4_picking_to_invoice"
             id="menu_action_picking_tree4_picking_to_invoice"
-            parent="purchase.menu_procurement_management_invoice" sequence="90"/>
+            parent="purchase.menu_procurement_management_invoice" sequence="90"/>-->
     </data>
 </openerp>

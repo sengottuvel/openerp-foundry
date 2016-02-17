@@ -20,7 +20,7 @@
 								<field name="name" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="division_id"/>
 								<field name="order_type" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
-								<field name="order_value" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="order_value"  attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="note" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="flag_cancel" invisible="1"/>
 								
@@ -29,6 +29,7 @@
 								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="location" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="delivery_date" on_change="onchange_delivery_date(delivery_date)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="type"/>
 								<field name="state" style="width: 30%%" class="att_state_change"/>
 							</group>					
 						</group>
@@ -39,7 +40,7 @@
 						</group>
 						<notebook>
 							<page string="Work Order Details" >
-								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['cancel'])]}">
+								<field name="line_ids" context="{'type': type}" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['cancel'])]}">
 									<tree string = "Work Order Items">
 										<field name="type" readonly="1"/>
 										<field name="pump_model_id" readonly="1"/>
@@ -164,7 +165,7 @@
 					<group>
 						<group>
 							<field name="order_no" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
-							<field name="pump_model_id" on_change="onchange_pump_model(pump_model_id)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="pump_model_id" on_change="onchange_pump_model(pump_model_id, qty, type)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="order_ref_no" invisible="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="delivery_date" on_change="onchange_delivery_date(delivery_date)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="state" invisible="1"/>
@@ -176,7 +177,7 @@
 						</group>
 						<group>
 							<field name="type" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
-							<field name="qty" on_change="onchange_schedule_qty(pump_model_id, qty, type)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="qty"  on_change="onchange_schedule_qty(pump_model_id, qty, type)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="note" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 						</group>
 					</group>

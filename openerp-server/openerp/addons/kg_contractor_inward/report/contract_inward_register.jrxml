@@ -1,0 +1,455 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="582" pageHeight="802" whenNoDataType="NoDataSection" columnWidth="542" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="192"/>
+	<subDataset name="dataset1">
+		<parameter name="cr_id" class="java.lang.Integer"/>
+		<queryString>
+			<![CDATA[select
+
+ci_line.id as ci_line_id,
+ci_line.product_id as product_id,
+product.name_template ||
+		(CASE 	WHEN brand.name!=''
+			THEN  ' | ' || brand.name
+			ELSE ''
+		END ) as product_name,
+
+
+uom.name as uom,
+inward.name as inward_type,
+
+ci_line.quantity as requested,
+
+(ci_line.quantity - ci_line.pending_qty) as already_received,
+
+ci_line.pending_qty as current_received,
+
+ci_line.pending_qty as pending
+
+from kg_contractor_inward_line ci_line
+
+left join product_product product on (ci_line.product_id=product.id)
+
+left join product_uom uom on (ci_line.uom_id=uom.id)
+
+left join kg_inwardmaster inward on (ci_line.inward_type=inward.id)
+
+left join kg_brand_master brand on (ci_line.brand_id=brand.id)
+
+
+where ci_line.header_id = $P{cr_id}]]>
+		</queryString>
+		<field name="ci_line_id" class="java.lang.Integer"/>
+		<field name="product_id" class="java.lang.Integer"/>
+		<field name="product_name" class="java.lang.String"/>
+		<field name="uom" class="java.lang.String"/>
+		<field name="inward_type" class="java.lang.String"/>
+		<field name="requested" class="java.lang.Double"/>
+		<field name="already_received" class="java.lang.Double"/>
+		<field name="current_received" class="java.lang.Double"/>
+		<field name="pending" class="java.lang.Double"/>
+	</subDataset>
+	<parameter name="cr_id" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[select
+
+ci.id as ci_id,
+comp.name as company_name,
+part.street as street1,
+part.street2 as street2,
+comp_city.name as city,
+part.zip as zip,
+part.phone as phone,
+part.fax as fax,
+part.email as email,
+
+ci.name as inward_no,
+ci.dc_no as dc_no,
+
+ci.remark as remark,
+to_char(ci.inward_date::date,'dd-mm-YYYY') as inward_date,
+to_char(ci.dc_date::date,'dd-mm-YYYY') as dc_date,
+
+partner.name as supplier_name,
+partner.street as sup_street1,
+partner.street2 as sup_street2,
+partner.phone as sup_phone,
+partner.fax as sup_fax,
+partner.email as sup_email,
+partner.zip as sup_zip,
+CASE WHEN partner_city.name = null THEN ''
+ELSE partner_city.name
+END as sup_city,
+
+to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS New_Date,
+user_part.name as user_name
+
+from kg_contractor_inward ci
+
+left join res_users users on (users.id = ci.user_id)
+
+left join res_partner user_part on (user_part.id = users.partner_id)
+
+
+left join res_company comp on (comp.id = ci.company_id)
+
+left join res_partner part on (part.id = comp.partner_id)
+
+left join res_partner partner on (partner.id = ci.supplier_id)
+
+left join res_city comp_city on (comp_city.id = comp.city)
+
+left join res_city partner_city on (partner_city.id = partner.city)
+
+where ci.id = $P{cr_id}]]>
+	</queryString>
+	<field name="ci_id" class="java.lang.Integer"/>
+	<field name="company_name" class="java.lang.String"/>
+	<field name="street1" class="java.lang.String"/>
+	<field name="street2" class="java.lang.String"/>
+	<field name="city" class="java.lang.String"/>
+	<field name="zip" class="java.lang.String"/>
+	<field name="phone" class="java.lang.String"/>
+	<field name="fax" class="java.lang.String"/>
+	<field name="email" class="java.lang.String"/>
+	<field name="inward_no" class="java.lang.String"/>
+	<field name="dc_no" class="java.lang.String"/>
+	<field name="remark" class="java.lang.String"/>
+	<field name="inward_date" class="java.lang.String"/>
+	<field name="dc_date" class="java.lang.String"/>
+	<field name="supplier_name" class="java.lang.String"/>
+	<field name="sup_street1" class="java.lang.String"/>
+	<field name="sup_street2" class="java.lang.String"/>
+	<field name="sup_phone" class="java.lang.String"/>
+	<field name="sup_fax" class="java.lang.String"/>
+	<field name="sup_email" class="java.lang.String"/>
+	<field name="sup_zip" class="java.lang.String"/>
+	<field name="sup_city" class="java.lang.String"/>
+	<field name="new_date" class="java.lang.String"/>
+	<field name="user_name" class="java.lang.String"/>
+	<group name="contractor_inward">
+		<groupExpression><![CDATA[$F{ci_id}]]></groupExpression>
+		<groupHeader>
+			<band height="70">
+				<componentElement>
+					<reportElement x="1" y="29" width="543" height="41"/>
+					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+						<datasetRun subDataset="dataset1">
+							<datasetParameter name="cr_id">
+								<datasetParameterExpression><![CDATA[$F{ci_id}]]></datasetParameterExpression>
+							</datasetParameter>
+							<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+						<jr:listContents height="41" width="543">
+							<textField>
+								<reportElement x="0" y="0" width="40" height="41"/>
+								<box topPadding="5" leftPadding="5">
+									<topPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+								</box>
+								<textElement>
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+							</textField>
+							<textField>
+								<reportElement x="40" y="0" width="205" height="41"/>
+								<box topPadding="5" leftPadding="40">
+									<pen lineWidth="0.0"/>
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.0"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.0"/>
+								</box>
+								<textElement>
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{product_name}]]></textFieldExpression>
+							</textField>
+							<textField>
+								<reportElement x="245" y="0" width="86" height="41"/>
+								<box topPadding="5" leftPadding="30">
+									<topPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+								</box>
+								<textElement>
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{uom}]]></textFieldExpression>
+							</textField>
+							<textField>
+								<reportElement x="331" y="0" width="112" height="41"/>
+								<box topPadding="5" leftPadding="34">
+									<topPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Left">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{requested}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="443" y="0" width="100" height="41"/>
+								<box topPadding="5" leftPadding="5">
+									<topPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+								</box>
+								<textElement>
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{inward_type}]]></textFieldExpression>
+							</textField>
+						</jr:listContents>
+					</jr:list>
+				</componentElement>
+				<textField>
+					<reportElement x="444" y="0" width="99" height="30"/>
+					<box topPadding="5" leftPadding="5">
+						<topPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Inward Type"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="246" y="0" width="86" height="30"/>
+					<box topPadding="5" leftPadding="30">
+						<topPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["UOM"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="41" y="0" width="205" height="30"/>
+					<box topPadding="5" leftPadding="56">
+						<topPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Product"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="332" y="0" width="112" height="30"/>
+					<box topPadding="5" leftPadding="12">
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Top">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Received Quantity"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="1" y="1" width="40" height="29"/>
+					<box topPadding="5" leftPadding="10">
+						<topPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["S.No"]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="33">
+			<textField>
+				<reportElement x="0" y="0" width="543" height="16"/>
+				<textElement>
+					<font size="12" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{company_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="16" width="543" height="15"/>
+				<box topPadding="5" leftPadding="5">
+					<pen lineWidth="0.0"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{street1}+$F{street2}+$F{city}+"-"+$F{zip}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="68" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="32" width="217" height="16"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Inward No"+" "+":"+" "+$F{inward_no}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="207" y="0" width="195" height="20"/>
+				<box topPadding="5" leftPadding="10" rightPadding="3"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Contractor Inward Register"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1" y="48" width="181" height="15"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["DC No"+" "+":"+" "+$F{dc_no}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="302" y="32" width="239" height="16"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Inward Date"+" "+":"+" "+$F{inward_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="353" y="48" width="188" height="15"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["DC Date"+" "+":"+" "+$F{dc_date}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="104" splitType="Stretch">
+			<textField>
+				<reportElement x="1" y="15" width="100" height="20"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Received From"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="70" y="35" width="359" height="16"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{supplier_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="70" y="51" width="359" height="15"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{sup_street1}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="70" y="81" width="359" height="16"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{sup_city}+"-"+$F{sup_zip}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="70" y="66" width="359" height="15"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{sup_street2}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<summary>
+		<band height="131" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="30" width="208" height="20"/>
+				<box topPadding="5" leftPadding="36"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Received By"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="207" y="30" width="194" height="20"/>
+				<box topPadding="5" leftPadding="5"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Purchase Manager"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="401" y="30" width="141" height="20"/>
+				<box topPadding="5" leftPadding="5"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Inspected By"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="208" y="72" width="66" height="20"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["REMARKS :"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="99" width="246" height="20"/>
+				<box topPadding="5" leftPadding="5">
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{user_name}+" "+"/"+" "+$F{new_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="246" y="99" width="85" height="20"/>
+				<box topPadding="5" leftPadding="5">
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="290" y="99" width="252" height="20"/>
+				<box topPadding="5" leftPadding="5">
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[+$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="273" y="72" width="260" height="20"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{remark}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+	<noData>
+		<band height="50">
+			<textField>
+				<reportElement x="135" y="30" width="267" height="20"/>
+				<box topPadding="5" leftPadding="10"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["No Data. Only Apporved GRN can be printed"]]></textFieldExpression>
+			</textField>
+		</band>
+	</noData>
+</jasperReport>

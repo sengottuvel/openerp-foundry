@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+	
+	
+	<!-- Payment Masters -->
+	
+	
+	<record id="kg_payment_master_form_view" model="ir.ui.view">
+			<field name="name">kg.payment.master.form</field>
+			<field name="model">kg.payment.master</field>
+			<field name="arch" type="xml">
+				<form string="Payment Master" version="7.0">
+			
+				<header>
+						<button name="entry_reject" type="object" string="Reject" states="confirm" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_approve" type="object" string="Approve" states="confirm" class="oe_highlight" confirm="Are you sure to proceed ?" />
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
+
+				 </header>				
+					<group>
+						<group>
+							<field name="name"/>
+							<field name="term_category"/>
+							
+							<field name="conf_user_id"/>
+							<field name="app_user_id"/>
+							<field name="rej_user_id"/>
+							<field name="remark"/>	
+						</group>
+						<group>
+							<field name="creation_date" readonly="1"/>
+							<field name="state"/>
+							<field name="confirm_date"/>
+							<field name="approve_date"/>
+							<field name="reject_date"/>
+							<field name="active"/>
+						</group>						
+						
+											
+										
+					</group>				   
+				</form>
+			</field> 
+		</record>
+		
+		<record id="kg_payment_master_tree_view" model="ir.ui.view">
+			<field name="name">kg.payment.master.tree</field>
+			<field name="model">kg.payment.master</field>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Payment Master">
+					<field name="name"/>
+					<field name="creation_date"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+		 <record id="payment_master_action_form" model="ir.actions.act_window">
+			<field name="name">Payment Master</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.payment.master</field>
+			<field name="view_type">form</field>
+			<field name="view_id" ref="kg_payment_master_tree_view"/>
+		</record>
+		
+		
+		
+		<!-- Delivery Masters -->
+	
+	
+		<record id="kg_delivery_master_form_view" model="ir.ui.view">
+			<field name="name">kg.delivery.master.form</field>
+			<field name="model">kg.delivery.master</field>
+			<field name="arch" type="xml">
+				<form string="Delivery Master" version="7.0">
+					<header> 
+						<button name="entry_reject" type="object" string="Reject" states="confirm" class="oe_highlight" confirm="Are you sure to proceed ?" />
+						<button name="entry_approve" type="object" string="Approve" states="confirm" class="oe_highlight" confirm="Are you sure to proceed ?" />
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
+
+					 </header>				
+					<group>
+						<group>
+							<field name="name"/>
+							<field name="active"/>
+							<field name="conf_user_id"/>
+							<field name="app_user_id"/>
+							<field name="rej_user_id"/>
+							<field name="remark"/>	
+						</group>
+						<group>
+							<field name="creation_date" readonly="1"/>
+							<field name="state"/>
+							<field name="confirm_date"/>
+							<field name="approve_date"/>
+							<field name="reject_date"/>
+						</group>						
+		
+					</group>					   
+				</form>
+			</field> 
+		</record>
+
+		<record id="kg_delivery_master_tree_view" model="ir.ui.view">
+			<field name="name">kg.delivery.master.tree</field>
+			<field name="model">kg.delivery.master</field>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Delivery Master">
+					<field name="name"/>
+					<field name="creation_date"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+
+		 <record id="delivery_master_action_form" model="ir.actions.act_window">
+			<field name="name">Delivery Master</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.delivery.master</field>
+			<field name="view_type">form</field>
+			<field name="view_id" ref="kg_delivery_master_tree_view"/>
+		</record>
+		
+		
+		
+		<!-- Brand Master -->
+		
+		
+		<record id="kg_brand_master_form_view" model="ir.ui.view">
+			<field name="name">kg.brand.master.form</field>
+			<field name="model">kg.brand.master</field>
+			<field name="arch" type="xml">
+				<form string="Brand Master" version="7.0">
+					<header> 
+						<button name="entry_reject" type="object" string="Reject" states="confirm" class="oe_highlight" confirm="Are you sure to proceed ?" />
+						<button name="entry_approve" type="object" string="Approve" states="confirm" class="oe_highlight" confirm="Are you sure to proceed ?" />
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
+
+					 </header>				
+					<group>
+						<group>
+							<field name="name"/>
+							<field name="active"/>
+							<field name="conf_user_id"/>
+							<field name="app_user_id"/>
+							<field name="rej_user_id"/>
+							<field name="remark"/>	
+						</group>
+						<group>
+							<field name="creation_date" readonly="1"/>
+							<field name="state"/>
+							<field name="confirm_date"/>
+							<field name="approve_date"/>
+							<field name="reject_date"/>
+						</group>						
+		
+					</group>					   
+				</form>
+			</field> 
+		</record>
+
+		<record id="kg_brand_master_tree_view" model="ir.ui.view">
+			<field name="name">kg.brand.master.tree</field>
+			<field name="model">kg.brand.master</field>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Brand Master">
+					<field name="name"/>
+					<field name="creation_date"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+
+		 <record id="brand_master_action_form" model="ir.actions.act_window">
+			<field name="name">Brand Master</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.brand.master</field>
+			<field name="view_type">form</field>
+			<field name="view_id" ref="kg_brand_master_tree_view"/>
+		</record>
+		
+
+	
+
+</data>
+	</openerp>

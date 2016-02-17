@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <!--
+          =====================
+          master Form view
+          =====================
+        -->
+
+        <record id="view_kg_issuereturn_form" model="ir.ui.view">
+            <field name="name">view.kg.issuereturn.form</field>
+            <field name="model">kg.issue.return</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Issue Return" version="7.0">
+		<header>
+                <button name="confirm_issue_return" states="draft" string="Confirm" type="object" />
+                <button name="approve_indent" states="confirm" string="Approve" type="object" />
+                <button name="cancel_indent" states="done" string="Cancel" type="object" class="oe_highlight"/>
+                <field name="state" widget="statusbar" statusbar_visible="draft,confirm,done,cancel" statusbar_colors='{"draft":"blue"}'/>
+
+		</header>
+				<group>
+					<group>
+						<field name="name" string="Return No"/>
+						<field name="dep_name" attrs="{'readonly': [('list_flag','=',True)]}"/>
+						<field name="origin" invisible="1"/>
+						<field name="dep_issue_no" string="Issue No" required="1" on_change = "onchange_didate(dep_issue_no)" attrs="{'readonly': [('list_flag','=',True)]}" />
+						<field name = "return_type" required="1"  on_change="onchange_qty(return_type)"/>
+						<field name="confirmed_by" readonly="1"/>
+						<field name="active"/>
+						<field name = "list_flag" invisible="1"/>
+						<field name = "rj_flag" invisible="1"/>
+						<field name = "excess_flag" invisible="1"/>
+
+						<button name="list_issue" string="List Details" type="object" class="oe_highlight" attrs="{'invisible': [('list_flag','=',True)]}"/>
+
+                    </group>
+                    <group>
+						<field name="date" string="Return Date"/>
+						<field name="creation_date"/>
+						<field name="depissue_date" string="Issue Date" attrs="{'readonly': [('list_flag','=',True)]}" />
+						<field name = "reject_location" attrs="{'required': [('rj_flag','=',True)],'invisible':[('excess_flag','=',True),'|',('rj_flag','=',False)]}" />
+						<field name="gate_pass" invisible="1"/>
+						<field name="user_id" invisible="1"/>
+
+						<field name="approved_by" readonly="1"/> 
+
+                    </group>
+				</group>
+				<notebook>
+					<page string = "Item Details">
+					<field colspan="4" mode="tree" name="issue_return_line" nolabel="1" widget="one2many_list">
+						<tree string="Issue Return Line" editable="bottom" delete="false"> 
+							<field name="product_id" readonly="1"/>
+							<field name="uom" readonly="1"/>
+							<field name="qty" readonly="1"/>
+							<field name="requested_by" readonly="1" />
+							<field name="pending_qty" invisible="1"/>
+							<field name="issue_pending_qty" required="1"/>
+							<field name="gate_pending_qty" invisible="1"/>
+							<field name = "return_type" on_change="onchange_qty(return_type)" invisible="1"/>
+							<field name = "rj_flag" invisible="1" />
+							<field name = "excess_flag" invisible="1"/>
+
+							<field name = "reject_location" attrs="{'required': [('rj_flag','=',True)],'readonly':[('excess_flag','=',True),'|',('rj_flag','=',False)]}" invisible="1"/>
+							<field name = "price_unit" invisible="1"/>
+							<field name = "returned_qty" invisible="1"/>
+							<field name="note"/>
+							<field name = "dep_issue_no_line" invisible="1"/>
+						</tree>
+						<form string="Issue Return Line">
+							<group>
+								<field name="product_id" on_change="onchange_product_id(product_id,uom)"/>
+								<field name="uom"/>
+								<field name="qty" on_change="onchange_qty(qty,pending_qty,issue_pending_qty)"/>
+												
+							</group>
+							<group>
+								<field name="pending_qty" invisible="1"/>
+								<field name="issue_pending_qty" invisible="1"/>
+								<field name="note"/>
+							</group>
+						</form>
+                    </field>
+                    </page>
+				</notebook>
+				<field name="remark" placeholder="Remarks"/>
+               </form>
+           </field>
+        </record>
+
+        <!--
+        =====================
+        master Tree view
+        =====================
+        -->
+        <record id="view_kg_issuereturn_tree" model="ir.ui.view">
+            <field name="name">kg.issuereturn.tree.view</field>
+            <field name="model">kg.issue.return</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+				<tree colors="red:state == 'confirm';blue:state == 'draft';black:state == 'approved'" 
+							string="Issue Return" toolbar="1" >
+                    <field name="name" string="Return No"/>
+		    <field name="date" string="Return Date"/>
+                    <field name="dep_name"/>
+                    <field name="dep_issue_no" string="Issue No"/>
+                    <field name="depissue_date" string="Issue Date"/>
+                    <field name="return_type"/>
+                    <field name="user_id"/>
+		    <field name="state"/>
+
+                </tree> 
+            </field>
+        </record>
+
+        <record id="issuereturn_search_view" model="ir.ui.view">
+            <field name="name">Issue Return</field>
+            <field name="model">kg.issue.return</field>
+            <field name="arch" type="xml">
+                <search string="Issue Return">
+					<field name="name" string="Issue Return" filter_domain="[('name','ilike',self)]"/> 
+					<field name="dep_issue_no" string="Department Issue" filter_domain="[('dep_issue_no','ilike',self)]"/> 
+					<field name="dep_name" string="Department Name" filter_domain="[('dep_name','ilike',self)]"/> 
+					<separator/>
+
+					<filter icon="terp-check" name="call" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirm" string="Confirmed" domain="[('state','=','confirm')]"/>
+					<filter icon="terp-check" name="approved" string="Approved" domain="[('state','=','approved')]"/>					
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Department" icon="terp-personal" domain="[]" context="{'group_by':'dep_name'}"/>
+
+                        <filter string="Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'date'}"/>
+                        <filter string="Department Issue Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'depissue_date'}"/>
+
+                        <filter string="Created By" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'user_id'}"/>
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+
+			
+					</group>
+                </search>
+			</field>
+		</record>	
+       
+       <!--
+        =====================
+        master Form Action
+        ===================== -->
+	
+
+	<record id="action_kg_issuereturn_form" model="ir.actions.act_window">
+			<field name="name">Issue Return</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.issue.return</field>
+			<field name="view_type">form</field>
+			<field name="view_id" ref="view_kg_issuereturn_tree"/>
+			<field name="context">{}</field>
+			<field name="search_view_id" ref="issuereturn_search_view"/>
+	</record>
+	
+	
+	
+	<!-- Issue Return line tree view -->
+	
+	<record id="view_kg_issuereturn_line_tree" model="ir.ui.view">
+            <field name="name">kg.issuereturn.line.tree</field>
+            <field name="model">kg.issue.return.line</field>
+            <field name="type">tree</field>
+            <field name="priority">2</field>
+            <field name="arch" type="xml">
+                <tree string="Issue Return Line">
+                    <field name="issue_return_id"/>
+                    <field name="line_date"/>
+                    <field name="product_id"/>
+                    <field name="uom"/>
+                    <field name="qty"/>
+                    <field name="pending_qty"/>      
+		    <field name = "price_unit" invisible="1"/>
+            
+                    
+                </tree>
+            </field>
+        </record>
+
+        <record id="issuereturn_line_search_view" model="ir.ui.view">
+            <field name="name">Issue Return</field>
+            <field name="model">kg.issue.return.line</field>
+            <field name="arch" type="xml">
+                <search string="Issue Return">
+					<field name="product_id" string="Product" filter_domain="[('product_id','ilike',self)]"/>
+					<separator/>                    
+                </search>
+			</field>
+		</record>
+	
+        <!--
+        =====================
+        master Menu Item
+        =====================
+        -->
+        
+        	<menuitem
+            name="Issue Return"
+            id="menu_mrp_bom_form_action1"
+            parent="base.menu_mrp_root"
+            sequence="1"/>
+            
+            <!--<menuitem
+            action="action_kg_issuereturn_form"
+            id="menu_mrp_issuereturn_menu"
+            parent="menu_mrp_bom_form_action1"
+            sequence="1"/>-->
+
+<!--	<menuitem id="menu_mrp_issuereturn_menu_id" name="Issue Return" parent="stock.menu_stock_warehouse_mgmt" sequence="2" action="action_kg_issuereturn_form" />-->
+
+        
+	
+    </data>
+</openerp>

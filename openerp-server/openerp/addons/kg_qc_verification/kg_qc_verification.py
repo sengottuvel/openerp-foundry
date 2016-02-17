@@ -172,8 +172,11 @@ class kg_qc_verification(osv.osv):
 				'production_type':'nc',
 				'state' : 'draft',
 				'order_type':entry.order_type,
+				'pattern_id' : entry.planning_line_id.pattern_id.id,
+				'pattern_name' : entry.planning_line_id.pattern_id.pattern_name,
 								
 			}
+			
 		
 			production_id = production_obj.create(cr, uid, production_vals)
 				

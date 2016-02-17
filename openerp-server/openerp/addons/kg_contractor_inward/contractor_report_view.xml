@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+    
+
+	<report string="Contract Inward Slip"
+        model="kg.contractor.inward"
+        auto="True"
+        name="onscreen_contractor_inward_report"
+        rml="kg_contractor_inward/report/contract_inward_register.jrxml"
+        id="contractor_inward_jasper_report1" 
+        menu="True"
+        header="False"
+        />
+
+
+    </data>
+</openerp>

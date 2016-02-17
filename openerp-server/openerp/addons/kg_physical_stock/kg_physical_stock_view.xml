@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <!--
+          =====================
+          master Form view
+          =====================
+        -->
+
+        <record id="kg_view_physical_stock_form" model="ir.ui.view">
+            <field name="name">kg.physical.stock</field>
+            <field name="model">kg.physical.stock</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Physical Stock Entry" version="7.0">
+		<header>
+                <button name="load_stock" string="Load Stock" type="object" attrs="{'invisible': ['|',('stock_type', '!=', 'main'),('state', 'not in', ('load'))]}"/>
+                 <button name="load_sale_stock" string="Load Sale Stock" type="object" attrs="{'invisible': ['|',('stock_type', '!=', 'sale'), ('state', 'not in', ('load'))]}"/>
+                <button name="confirm_stock" states="draft" string="Confirm" type="object" />
+                <button name="approve_stock" states="confirm" string="Approve" type="object" />
+                <button name="cancel_stock" states="approved" string="Cancel" type="object" class="oe_highlight"/>
+                <field name="state" widget="statusbar" statusbar_visible="draft,confirm,cancel" statusbar_colors='{"draft":"blue"}'/>
+
+		</header>
+				<group>
+					<group>
+									<field name="date" string="Stock Entry Date"  readonly="1"/>
+						<field name="name" string="Reference No" invisible="1"/>
+						<field name="confirmed_by" readonly="1"/>
+						
+						<!--<button name="list_issue" string="List Details" type="object" class="oe_highlight" />-->
+
+						<field name="load" invisible="1"/>
+							<field name="state" readonly="1"/>
+                    </group>
+                    <group>
+						
+							<field name="stock_type" required="1"/>
+						<field name="creation_date" invisible="1" />	
+						<field name="user_id" invisible="1"/>
+						<field name="approved_by" readonly="1"/> 
+					<field name="active"/>
+
+
+                    </group>
+				</group>
+				<notebook>
+					<page string = "Physical Stock Details">
+					<field colspan="4" mode="tree" name="stock_line" nolabel="1" widget="one2many_list">
+						<tree string="Physical Stock Entry Line" editable="bottom" delete="false"> 
+							<field name="product_id" readonly="1"/>
+							<field name="brand" readonly="1"/>
+							<field name="uom" readonly="1"/>
+							<field name="qty" readonly="1"/>
+							<field name="physical_stock" required="1"/>
+							<field name="diff_qty" invisible="1"/>
+							<field name = "stock_pid" invisible="1"/>
+							<field name = "price_unit" invisible="1"/>
+							<field name="note"/>
+						</tree>
+						<form string="Physical Stock Details">
+							<group>
+								<field name="product_id" on_change="onchange_product_id(product_id,uom)"/>
+								<field name="uom"/>
+								<field name="qty" />
+								<field name = "stock_pid" invisible="1"/>
+
+												
+							</group>
+							<group>
+								<field name="physical_stock" readonly="1" />
+								<field name="diff_qty" invisible="1"/>
+								<field name="note"/>
+
+							</group>
+						</form>
+                    </field>
+                    </page>
+				</notebook>
+				<field name="remark" placeholder="Remarks"/>
+               </form>
+           </field>
+        </record>
+
+        <!--
+        =====================
+        master Tree view
+        =====================
+        -->
+        <record id="view_kg_physicalstock_tree" model="ir.ui.view">
+            <field name="name">kg.physicalstock.tree.view</field>
+            <field name="model">kg.physical.stock</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+				<tree colors="red:state == 'confirm';blue:state == 'draft';black:state == 'approved'" 
+					string="Issue Return" toolbar="1" >
+					<field name="name" string="Reference No" invisible="1"/>
+					<field name="date" string="Stock Entry Date"/>
+					<field name="stock_type"/>
+                    <field name="user_id"/>
+					<field name="state"/>
+					<field name="load" invisible="1"/>
+                </tree> 
+            </field>
+        </record>
+		<!--
+        <record id="phy_search_view" model="ir.ui.view">
+            <field name="name">Issue Return</field>
+            <field name="model">kg.issue.return</field>
+            <field name="arch" type="xml">
+                <search string="Issue Return">
+					<field name="name" string="Issue Return" filter_domain="[('name','ilike',self)]"/> 
+					<field name="dep_issue_no" string="Department Issue" filter_domain="[('dep_issue_no','ilike',self)]"/> 
+					<field name="dep_name" string="Department Name" filter_domain="[('dep_name','ilike',self)]"/> 
+					<separator/>
+
+					<filter icon="terp-check" name="call" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirm" string="Confirmed" domain="[('state','=','confirm')]"/>
+					<filter icon="terp-check" name="approved" string="Approved" domain="[('state','=','approved')]"/>					
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Department" icon="terp-personal" domain="[]" context="{'group_by':'dep_name'}"/>
+
+                        <filter string="Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'date'}"/>
+                        <filter string="Department Issue Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'depissue_date'}"/>
+
+                        <filter string="Created By" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'user_id'}"/>
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+
+			
+					</group>
+                </search>
+			</field>
+		</record>	
+       -->
+       <!--
+        =====================
+        master Form Action
+        ===================== -->
+	
+
+	<record id="action_kg_physicalstock_form" model="ir.actions.act_window">
+			<field name="name">Physical Stock Entry</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.physical.stock</field>
+			<field name="view_type">form</field>
+			<field name="view_id" ref="view_kg_physicalstock_tree"/>
+			<field name="context">{}</field>
+			<!--<field name="search_view_id" ref="issuereturn_search_view"/>-->
+	</record>
+	
+	
+	
+	<!-- Physical Stock line tree view -->
+	
+	<record id="view_kg_physicalstock_line_tree" model="ir.ui.view">
+            <field name="name">kg.physicalstock.line.tree</field>
+            <field name="model">kg.physical.stock.line</field>
+            <field name="type">tree</field>
+            <field name="priority">2</field>
+            <field name="arch" type="xml">
+                <tree string="Physical Stock Line">
+                    <field name="line_date"/>
+                    <field name="product_id"/>
+                    <field name="uom"/>
+                    <field name="qty"/>
+                    <field name="physical_stock"/>      
+					<field name = "price_unit" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="pstock_line_search_view" model="ir.ui.view">
+            <field name="name">Issue Return</field>
+            <field name="model">kg.physical.stock.line</field>
+            <field name="arch" type="xml">
+                <search string="Stock Entry">
+					<field name="product_id" string="Product" filter_domain="[('product_id','ilike',self)]"/>
+					<separator/>                    
+                </search>
+			</field>
+		</record>
+	
+        <!--
+        =====================
+        master Menu Item
+        =====================
+        -->
+        
+        
+            
+            <!--<menuitem
+            action="action_kg_issuereturn_form"
+            id="menu_mrp_issuereturn_menu"
+            parent="menu_mrp_bom_form_action1"
+            sequence="1"/>-->
+
+	<!--<menuitem id="menu_physicalstock_menu_id" name="Physical Stock Entry" parent="stock.menu_stock_warehouse_mgmt" sequence="2" action="action_kg_physicalstock_form" />-->
+
+        
+	
+    </data>
+</openerp>

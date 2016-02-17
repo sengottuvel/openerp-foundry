@@ -879,12 +879,12 @@ elsif(v_exam_name='Transaction Summary List') then
 			(select count(*) from kg_stock_inward where create_date < TO_DATE(v_today, 'dd/mm/yyyy')) as old_stock_cnt,
 			(select count(*) from ch_boring_details where create_date < TO_DATE(v_today, 'dd/mm/yyyy')) as old_pouring_cnt,
 			(select count(*) from ch_casting_details where create_date < TO_DATE(v_today, 'dd/mm/yyyy')) as old_casting_cnt,
-			(select count(*) from kg_weekly_schedule ) as new_sch_cnt,
-			(select count(*) from kg_daily_planning ) as new_plan_cnt,
-			(select count(*) from kg_qc_verification ) as new_qc_cnt,
-			(select count(*) from kg_stock_inward) as new_inw_cnt,
-			(select count(*) from ch_boring_details ) as new_pouring_cnt,
-			(select count(*) from ch_casting_details) as new_casting_cnt
+			(select count(*) from kg_weekly_schedule where create_date::timestamp::date = CURRENT_DATE ) as new_sch_cnt,
+			(select count(*) from kg_daily_planning where create_date::timestamp::date = CURRENT_DATE ) as new_plan_cnt,
+			(select count(*) from kg_qc_verification where create_date::timestamp::date = CURRENT_DATE ) as new_qc_cnt,
+			(select count(*) from kg_stock_inward where create_date::timestamp::date = CURRENT_DATE ) as new_inw_cnt,
+			(select count(*) from ch_boring_details where create_date::timestamp::date = CURRENT_DATE ) as new_pouring_cnt,
+			(select count(*) from ch_casting_details where create_date::timestamp::date = CURRENT_DATE ) as new_casting_cnt
 
 			from kg_weekly_schedule limit 1;
 		LOOP                 
@@ -994,33 +994,25 @@ elsif(v_exam_name='Transaction Summary List') then
 	if(v_data is null) then
 		v_data=' No Data Found ';
 	end if;
-
+						
 
 	select
 
 	case when 
 
-	((new_sch_cnt+new_plan_cnt+new_qc_cnt+new_stock_cnt+new_pouring_cnt+new_casting_cnt)
-	-
-	(old_sch_cnt+old_plan_cnt+old_qc_cnt+old_stock_cnt+old_pouring_cnt+old_casting_cnt))
+	((new_sch_cnt+new_plan_cnt+new_qc_cnt+new_stock_cnt+new_pouring_cnt+new_casting_cnt))
 
 	>= 10 then '' else ' - No Progress' end as state
 	INTO	v_sub_state
 	from 
 	(
 	select 
-	(select count(*) from kg_weekly_schedule where create_date < TO_DATE(v_today, 'dd/mm/yyyy') ) as old_sch_cnt,
-	(select count(*) from kg_daily_planning  where create_date < TO_DATE(v_today, 'dd/mm/yyyy')) as old_plan_cnt,
-	(select count(*) from kg_qc_verification where create_date < TO_DATE(v_today, 'dd/mm/yyyy')) as old_qc_cnt,
-	(select count(*) from kg_stock_inward where create_date < TO_DATE(v_today, 'dd/mm/yyyy')) as old_stock_cnt,
-	(select count(*) from ch_boring_details where create_date < TO_DATE(v_today, 'dd/mm/yyyy')) as old_pouring_cnt,
-	(select count(*) from ch_casting_details where create_date < TO_DATE(v_today, 'dd/mm/yyyy')) as old_casting_cnt,
-	(select count(*) from kg_weekly_schedule ) as new_sch_cnt,
-	(select count(*) from kg_daily_planning ) as new_plan_cnt,
-	(select count(*) from kg_qc_verification ) as new_qc_cnt,
-	(select count(*) from kg_stock_inward) as new_stock_cnt,
-	(select count(*) from ch_boring_details ) as new_pouring_cnt,
-	(select count(*) from ch_casting_details) as new_casting_cnt
+	(select count(*) from kg_weekly_schedule where create_date::timestamp::date = CURRENT_DATE ) as new_sch_cnt,
+	(select count(*) from kg_daily_planning where create_date::timestamp::date = CURRENT_DATE ) as new_plan_cnt,
+	(select count(*) from kg_qc_verification where create_date::timestamp::date = CURRENT_DATE ) as new_qc_cnt,
+	(select count(*) from kg_stock_inward where create_date::timestamp::date = CURRENT_DATE ) as new_stock_cnt,
+	(select count(*) from ch_boring_details where create_date::timestamp::date = CURRENT_DATE ) as new_pouring_cnt,
+	(select count(*) from ch_casting_details where create_date::timestamp::date = CURRENT_DATE ) as new_casting_cnt
 
 	from kg_weekly_schedule limit 1) as sub_query;		
 				
@@ -1082,3 +1074,4 @@ $BODY$
   COST 100;
 ALTER FUNCTION all_daily_scheduler_mails(character)
   OWNER TO postgres;
+

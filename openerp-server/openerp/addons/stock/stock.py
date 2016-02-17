@@ -214,6 +214,19 @@ class stock_location(osv.osv):
                                                         "this account will be used to hold the value of products being moved out of this location "
                                                         "and into an internal location, instead of the generic Stock Output Account set on the product. "
                                                         "This has no effect for internal locations."),
+        'location_type':fields.selection([('main','Main Store'),('sub','Sub Store'),('view','View')],'Location Type',required=True),
+		'creation_date':fields.datetime('Creation Date',readonly=True),
+		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
+		'approve_date': fields.datetime('Approved Date', readonly=True),
+		'app_user_id': fields.many2one('res.users', 'Apprved By', readonly=True),
+		'confirm_date': fields.datetime('Confirm Date', readonly=True),
+		'conf_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
+		'reject_date': fields.datetime('Reject Date', readonly=True),
+		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
+		'dummy_state': fields.selection([('draft','Draft'),('confirm','Waiting for approval'),('approved','Approved'),
+				('reject','Rejected')],'Status', readonly=True),
+		'remark': fields.text('Remarks',readonly=False),
+		
     }
     _defaults = {
         'active': True,
@@ -1468,6 +1481,8 @@ class stock_production_lot(osv.osv):
         'revisions': fields.one2many('stock.production.lot.revision', 'lot_id', 'Revisions'),
         'company_id': fields.many2one('res.company', 'Company', select=True),
         'move_ids': fields.one2many('stock.move', 'prodlot_id', 'Moves for this serial number', readonly=True),
+        'lot_type':fields.selection([('in','in'),('out','out')],'Lot Type'),
+        
     }
     _defaults = {
         'date': lambda *a: time.strftime('%Y-%m-%d %H:%M:%S'),

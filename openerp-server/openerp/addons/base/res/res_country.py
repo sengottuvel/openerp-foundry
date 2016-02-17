@@ -97,6 +97,43 @@ class CountryState(osv.osv):
     _order = 'code'
 
     name_search = location_name_search
+	
+class res_city(osv.osv):
+	_name = 'res.city'
+	_description = 'city'
+	_columns = {
+		'country_id': fields.many2one('res.country','Country',required=True),
+		'state_id': fields.many2one('res.country.state','State',required=True),
+		'name':fields.char('City',size=125, required=True),
+		'creation_date':fields.datetime('Creation Date',readonly=True),
+		'active': fields.boolean('Active'),
+	}
+	_sql_constraints = [
+		('name_uniq', 'unique (name)',
+			'The name of the city must be unique !'),
+		
+	]
+	_defaults = {
+	   
+		#'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
+		'active':True,
+	}
+	
+	def create(self, cursor, user, vals, context=None):
+		if vals.get('name'):
+			vals['name'] = vals['name'].capitalize()
+	   
+		return super(res_city, self).create(cursor, user, vals,
+				context=context)
+
+	def write(self, cursor, user, ids, vals, context=None):
+		if vals.get('name'):
+			vals['name'] = vals['name'].capitalize()
+
+		return super(res_city, self).write(cursor, user, ids, vals,
+				context=context)
+	
+res_city()
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
 

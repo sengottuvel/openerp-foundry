@@ -37,6 +37,7 @@ class kg_weekly_schedule(osv.osv):
 		'order_type': fields.selection([('work_order','Normal'),('emergency','Emergency'),('project','Project')],'Type', required=True),
 		'delivery_date': fields.date('Delivery Date',required=True),
 		'order_value': fields.float('Work Order Value(lakh)',required=True),
+		'type': fields.selection([('production','Pump'),('spare','Spare'),('pump_spare','Pump and Spare')],'Purpose', required=True),
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		
@@ -325,6 +326,10 @@ class ch_weekly_schedule_details(osv.osv):
 		
 	}
 	
+	
+	def default_get(self, cr, uid, fields, context=None):
+		return context
+	
 	def onchange_delivery_date(self, cr, uid, ids, delivery_date):
 		today = date.today()
 		today = str(today)
@@ -337,10 +342,51 @@ class ch_weekly_schedule_details(osv.osv):
 						_('Delivery Date should not be less than current date!!'))
 		return True
 		
-	def onchange_pump_model(self, cr, uid, ids, pump_model_id):
-		if pump_model_id:
-			qty = 0
-		return {'value': {'qty': qty}}
+
+	def onchange_pump_model(self, cr, uid, ids, pump_model_id, qty, type):
+		bom_vals=[]
+		
+		if type == False:
+			raise osv.except_osv(_('Warning!'),
+						_('Kindly select Purpose and then enter Qty !!'))
+						
+		if pump_model_id != False:
+			
+			sch_bom_obj = self.pool.get('ch.sch.bom.details')
+			cr.execute(''' select bom.id,bom.header_id,bom.pattern_id,bom.pattern_name,bom.qty, bom.pos_no,pattern.pcs_weight, pattern.ci_weight
+					from ch_bom_line as bom
+					LEFT JOIN kg_pattern_master pattern on pattern.id = bom.pattern_id
+					where bom.header_id = (select id from kg_bom where pump_model_id = %s and state='approved' and active='t') ''',[pump_model_id])
+			bom_details = cr.dictfetchall()
+			for bom_details in bom_details:
+				if type == 'production' :
+					applicable = True
+				if type in ('spare','pump_spare'):
+					applicable = False
+					
+				if qty == 0:
+					bom_qty = bom_details['qty']
+				if qty > 0:
+					bom_qty = qty * bom_details['qty']
+					
+					
+				bom_vals.append({
+													
+					'bom_id': bom_details['header_id'],
+					'bom_line_id': bom_details['id'],
+					'pattern_id': bom_details['pattern_id'],
+					'pattern_name': bom_details['pattern_name'],						
+					'pcs_weight': bom_details['pcs_weight'] or 0.00,						
+					'ci_weight': bom_details['ci_weight'] or 0.00,				  
+					'pos_no': bom_details['pos_no'],				  
+					'qty' : bom_qty,				   
+					'planning_qty' : bom_qty,				  
+					'production_qty' : 0,				   
+					'flag_applicable' : applicable,
+					'type':	type		  
+					})
+		return {'value': {'line_ids': bom_vals}}
+		
 		
 	def onchange_schedule_qty(self, cr, uid, ids, pump_model_id, qty, type):
 		bom_vals=[]
@@ -348,6 +394,11 @@ class ch_weekly_schedule_details(osv.osv):
 		if type == False:
 			raise osv.except_osv(_('Warning!'),
 						_('Kindly select Purpose and then enter Qty !!'))
+		
+		if pump_model_id == False:
+			raise osv.except_osv(_('Warning!'),
+						_('Kindly select Pump Model !!'))
+			
 			
 		sch_bom_obj = self.pool.get('ch.sch.bom.details')
 		cr.execute(''' select bom.id,bom.header_id,bom.pattern_id,bom.pattern_name,bom.qty, bom.pos_no,pattern.pcs_weight, pattern.ci_weight
@@ -360,6 +411,11 @@ class ch_weekly_schedule_details(osv.osv):
 				applicable = True
 			if type in ('spare','pump_spare'):
 				applicable = False
+				
+			if qty == 0:
+				bom_qty = bom_details['qty']
+			if qty > 0:
+				bom_qty = qty * bom_details['qty']
 			bom_vals.append({
 												
 				'bom_id': bom_details['header_id'],
@@ -369,60 +425,13 @@ class ch_weekly_schedule_details(osv.osv):
 				'pcs_weight': bom_details['pcs_weight'] or 0.00,						
 				'ci_weight': bom_details['ci_weight'] or 0.00,				  
 				'pos_no': bom_details['pos_no'],				  
-				'qty' : qty * bom_details['qty'],				   
-				'planning_qty' : qty * bom_details['qty'],				  
+				'qty' : bom_qty,				   
+				'planning_qty' : bom_qty,				  
 				'production_qty' : 0,				   
 				'flag_applicable' : applicable,
 				'type':	type		  
 				})
 		return {'value': {'line_ids': bom_vals}}
-		
-	"""def onchange_order_refno(self, cr, uid, ids, order_ref_no):
-		if order_ref_no:
-			special_char = ''.join( c for c in order_ref_no if  c in '!@#$%^~*{}?+/=' )
-			if special_char:
-				raise osv.except_osv(_('Warning!'),
-						_('Special Character not allowed in Order reference No !!'))
-		return True
-	
-	def list_bom(self,cr,uid,ids,context=None):
-		bom_obj = self.pool.get('kg.bom')
-		bom_line_obj = self.pool.get('ch.bom.line')
-		sch_bom_obj = self.pool.get('ch.sch.bom.details')
-		entry = self.browse(cr,uid,ids[0])
-		
-		cr.execute(''' select id,header_id,pattern_id,pattern_name,qty from ch_bom_line 
-		where header_id = (select id from kg_bom where pump_model_id = %s and state='approved' and active='t') ''',[entry.pump_model_id.id])
-		bom_details = cr.dictfetchall()
-		line_ids = map(lambda x:x.id,entry.line_ids)
-		sch_bom_obj.unlink(cr,uid,line_ids)
-		
-		if bom_details:
-			for bom_details in bom_details:
-				if entry.type == 'production':
-					applicable = True
-				if entry.type == 'spare':
-					applicable = False
-				bom_vals = {
-												
-						'header_id': entry.id,
-						'bom_id': bom_details['header_id'],
-						'bom_line_id': bom_details['id'],
-						'pattern_id': bom_details['pattern_id'],
-						'pattern_name': bom_details['pattern_name'],							
-						'qty' : entry.qty * bom_details['qty'],				 
-						'planning_qty' : entry.qty * bom_details['qty'],					
-						'production_qty' : 0,				   
-						'flag_applicable' : applicable						  
-						}
-					
-				sch_bom_id = sch_bom_obj.create(cr, uid, bom_vals)
-		else:
-			raise osv.except_osv(_('Warning!'),
-						_('BOM Details not refered for this Pump Model !!'))
-			
-
-		return True"""
 	
 	def entry_cancel(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<openerp>
+    <data>
+        
+        <record id="sales_register_wiz_form" model="ir.ui.view">
+            <field name="name">Sales Register</field>
+            <field name="model">sales.register.wiz</field>
+            <field name="type">form</field>            
+            <field name="arch" type="xml">
+				<form string="Sales Register">
+					<group>
+						<group>
+						<field name="fis_year"/>
+						</group>
+						<group>
+						<field name="from_date" required="1"/>	
+						<field name="to_date" required="1"/>
+						
+
+						</group>
+					</group>				
+					<newline></newline>
+					<group>                         
+						<button type="object" name="create_report" icon="gtk-go-forward" string="Generate"/>
+					</group>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_sales_register_wiz" model="ir.actions.act_window">
+            <field name="name">Sales Register</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">sales.register.wiz</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>        
+
+        <report string="Sales Register"
+		model="sales.register.wiz"
+		auto="True"
+		name="jasper_sales_register_report"
+		rml="kg_store_reports/report/sales_register.jrxml"
+		id="sales_register_id"
+		menu="False"
+		/>               
+        
+         <report string="Sales Cash"
+		model="sales.register.wiz"
+		auto="True"
+		name="jasper_sale_cash"
+		rml="kg_store_reports/report/sale_cash.jrxml"
+		id="sales_cash_id"
+		menu="False"
+		/>   
+        
+     <!-- <menuitem
+				 name="Sales Register" 
+				 action="action_sales_register_wiz"
+				 id="menu_action_sales_registe_wizd"
+				 parent="kg_menus.main_sale_report_menus" sequence="2"/>-->
+
+    </data>
+</openerp>

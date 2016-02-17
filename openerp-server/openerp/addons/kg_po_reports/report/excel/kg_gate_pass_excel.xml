@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+          <record id="excel_gate_pass_reg_form" model="ir.ui.view">
+            <field name="name">Gate Pass Register</field>
+            <field name="model">kg.gate.pass.excel</field>
+            <field name="arch" type="xml">
+			<form string="Gate Pass Register" version="7.0">             			 
+				<header>
+				<button name="gate_pass_xls" states="draft" string="Download Report" type="object" class="oe_highlight"/>
+				</header>
+				<group>
+					<group>
+					 <field name="date_from" required="1"/>
+					 <field name="dep_id" widget="many2many_tags"/>
+					 <field name="product_type"/>
+					 <field name="status" invisible="1"/>
+					 <field name="rep_data" readonly="1" width="100" filename="name"/>
+
+					 </group>
+					 <group>
+					 <field name="date_to" required="1"/>
+					 
+					 <field name="name" invisible="1"/> 
+					 <field name="product" widget="many2many_tags"/>
+					 <field name="state"/>
+					 
+					 
+					 </group>
+				</group>
+			</form>
+            </field>
+        </record>
+        
+         <record id="excel_gate_pass_reg_tree" model="ir.ui.view">
+            <field name="name">Gate Pass Register</field>
+            <field name="model">kg.gate.pass.excel</field>
+            <field name="arch" type="xml">
+             <tree string="Gate Pass Register">
+				 
+				 <field name="date_from"/>
+				 <field name="date_to"/>
+				 <field name="status" />
+						
+				 <field name="rep_data"/>
+				 <field name="state"/>				 
+				 			 
+                
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_gate_pass_excel_report" model="ir.actions.act_window">  
+            <field name="name">Gate Pass Register</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">kg.gate.pass.excel</field>
+            <field name="view_type">form</field>
+			<field name="view_id" ref="excel_gate_pass_reg_tree"></field>
+        </record>
+            
+       
+	<!-- <menuitem name="Excel Reports" parent="kg_menus.main_report_menu" id="kg_gate_pass_excel_report" sequence = "4"/>   
+		<menuitem
+            icon="STOCK_PRINT"
+            parent="kg_gate_pass_excel_report" 
+            action="action_gate_pass_excel_report"
+            id="kg_gate_pass_excel_action_menu"
+            sequence="1"
+            />-->
+
+    </data>
+</openerp>

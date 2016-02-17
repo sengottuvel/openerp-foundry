@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <!--
+          =====================
+          master Form view
+          =====================
+        -->
+
+        <record id="view_gate_pass_form" model="ir.ui.view">
+            <field name="name">view.gate.pass.form</field>
+            <field name="model">kg.gate.pass</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Gate Pass" version="7.0">
+					<header>
+						
+						
+					<button name="confirm_entry" string="Confirm" type="object" states="draft" 
+						class="oe_highlight"/>
+						
+					<button name="approve_entry" string="Approve" type="object" states="confirmed" 
+						class="oe_highlight" />
+						
+					<button name="gate_pass_register_scheduler" string="Gate Pass Register" type="object" states="done" 
+						class="oe_highlight"  invisible="0"/>
+						
+					<button name="open_gate_pass_register_scheduler" string="Open Gate Pass Register" type="object" states="done" 
+						class="oe_highlight"  invisible="0"/>
+						
+					
+					<!--<button name="gate_pass_print" string="Print Gate Pass" states="done" type="object" class="oe_highlight"/>-->
+					<button name="inward_update" string="Received" states="done" type="object" class="oe_highlight" invisible="1"/>
+					</header>
+										
+					
+					<group>
+						<group>
+							<field name="creation_date"/>
+							<field name="name" required="0"/>
+							<field name="partner_id" required="1"/>
+							<field name="out_type" required="1"/>
+							<field name="division"/>
+							<field name="transport"/>
+							<field name="received_by"/>
+							<field name="gp_type" invisible="1"/>
+							<field name="confirm_flag"  invisible="1"/>
+							<field name="confirmed_by" readonly="1" attrs="{'invisible': [('confirm_flag','=',False)]}"/>
+							<field name="confirmed_date" readonly="1" attrs="{'invisible': [('confirm_flag','=',False)]}"/>
+						</group>						
+						<group>
+							<field name="user_id"/>
+							<field name="date"/>
+							<field name="dep_id" required="1"/>
+							<field name="return_date"/>
+							<field name="dep_project"/>
+							<field name="taken_by"/>
+							<field name="state"/>	
+							<field name="in_state"/>						
+							<field name="indent_flag" invisible="0"/>
+							<field name="approve_flag"  invisible="1"/>						
+							<field name="approved_by" readonly="1" attrs="{'invisible': [('approve_flag','=',False)]}"/>						
+							<field name="approved_date" readonly="1" attrs="{'invisible': [('approve_flag','=',False)]}"/>			
+						</group>
+					</group>
+					<notebook>
+						<page string="Outward Details" attrs="{'invisible': [('indent_flag','=',False)]}" >
+						<field colspan="4" string="Gate Pass Line" mode="tree" name="gate_line" nolabel="1" widget="one2many_list">									 
+							<tree string="Gate Pass Line"> 
+								<field name="product_id"/>
+								<field name="brand_id"/>
+								<field name="ser_no"/>
+								<field name="uom"/>
+								<field name="qty"/>
+								<field name="note"/>
+							</tree>
+							<form string="Gate Pass Line " >
+								<field name="product_id" on_change="onchange_uom(product_id)" required="1"/>
+								<field name="brand_id"/>
+								<field name="ser_no"/>
+								<field name="serial_no"/>
+								<field name="so_flag" invisible="1"/>
+									
+								<field name="uom" required="1"/>
+								<field name="qty" required="1"/>
+								<field name="note"/>
+							</form>
+						</field>
+						</page>
+
+						<page string="Select Service Indent">
+							<field name="si_indent_ids" colspan="4" nolabel="1"  >
+								<tree string = "Service Indent" editable="bottom">
+									<field name="service_id" readonly="1"/>
+									<field name="line_date" readonly="1"/>
+									<field name="product_id" readonly="1"/>
+									<field name="uom" readonly="1"/>
+									<field name="qty" readonly="1"/>
+								</tree>
+								
+						</field>							
+						<button name="create_gp_line" type='object' string="Save Record"/>
+
+						</page>
+
+					</notebook>                     
+                    <field name="note"/>
+               </form>
+           </field>
+        </record>
+
+        <!--
+        =====================
+        master Tree view
+        =====================
+        -->
+        <record id="gate_pass_tree_view" model="ir.ui.view">
+            <field name="name">gate.pass.tree.view</field>
+            <field name="model">kg.gate.pass</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree colors="red:state == 'confirm';blue:state == 'draft';black:state == 'done'" 
+							string="Gate Pass" toolbar="1" >
+                    <field name="name"/>
+                    <field name="date"/>
+                    <field name="partner_id"/>
+                    <field name="dep_id"/>
+                    <field name="out_type"/>
+                   
+                    <field name="state"/>
+                    <field name="in_state"/>
+                   
+                </tree> 
+            </field>
+        </record>
+       
+       <record id="gate_pass_line_tree_view" model="ir.ui.view">
+            <field name="name">gate.pass.line.tree.view</field>
+            <field name="model">kg.gate.pass.line</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Gate Pass Line" toolbar="1" >
+                    <field name="gate_id"/>
+                    <field name="product_id"/>
+                    <field name="brand_id"/>
+                    <field name="uom"/>
+                    <field name="qty"/>
+                    
+                   
+                </tree> 
+            </field>
+        </record>
+       
+       <!--
+        =====================
+        master Form Action
+        ===================== -->
+
+
+	<record id="action_gate_pass" model="ir.actions.act_window">
+			<field name="name">Gate Pass</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.gate.pass</field>
+			<field name="view_type">form</field>
+			<field name="view_id" ref="gate_pass_tree_view"/>
+	</record>
+	
+        <!--
+        =====================
+        master Menu Item
+        =====================
+        -->
+        
+	
+            
+    </data>
+</openerp>

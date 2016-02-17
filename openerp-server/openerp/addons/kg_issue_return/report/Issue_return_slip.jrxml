@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Issue_return_slip" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="144"/>
+	<subDataset name="dataset1">
+		<parameter name="issue_id" class="java.lang.Integer"/>
+		<queryString>
+			<![CDATA[select
+
+issre_line.id as issre_line_id,
+product.name_template as product_name,
+uom.name as uom,
+round((issre_line.qty)::numeric,2) as issued_qty,
+round((issre_line.issue_pending_qty)::numeric,2) as issue_returned_qty
+
+
+
+from kg_issue_return_line issre_line
+
+left join kg_issue_return issre on (issre.id=issre_line.issue_return_id)
+
+left join product_product product on (issre_line.product_id=product.id)
+
+left join product_uom uom on (issre_line.uom=uom.id)
+
+where issre_line.issue_return_id = $P{issue_id} order by issre_line.id]]>
+		</queryString>
+		<field name="issre_line_id" class="java.lang.Integer"/>
+		<field name="product_name" class="java.lang.String"/>
+		<field name="uom" class="java.lang.String"/>
+		<field name="issued_qty" class="java.math.BigDecimal"/>
+		<field name="issue_returned_qty" class="java.math.BigDecimal"/>
+	</subDataset>
+	<parameter name="issue_id" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[select
+
+issre.id as issue_id,
+issre.name as issre_no,
+comp.name as company_name,
+part.street as street1,
+part.street2 as street2,
+comp_city.name as city,
+part.zip as zip,
+part.phone as phone,
+part.fax as fax,
+part.email as email,
+issre.name as grn_no,
+dep.dep_name as dep_name,
+CASE WHEN issre.return_type = 'noreturn' THEN 'Damage/Replacement Return'
+ELSE 'Excess Return'
+END as return_type,
+
+issue.name as iss_no,
+to_char(issre.date::date,'dd-mm-YYYY') as issre_date,
+to_char(issue.issue_date::date,'dd-mm-YYYY') as iss_date,
+
+
+to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS New_Date,
+user_part.name as user_name
+from kg_issue_return issre
+
+left join res_users users on (users.id = issre.user_id)
+left join res_partner user_part on (user_part.id = users.partner_id)
+left join res_company comp on (comp.id = issre.company_id)
+left join res_partner part on (part.id = comp.partner_id)
+
+left join res_city comp_city on (comp_city.id = comp.city)
+left join kg_depmaster dep on (dep.id = issre.dep_name)
+left join kg_department_issue issue on (issue.id = issre.dep_issue_no)
+
+
+where issre.id = $P{issue_id} and issre.state not in ('cancel','draft')]]>
+	</queryString>
+	<field name="issue_id" class="java.lang.Integer"/>
+	<field name="issre_no" class="java.lang.String"/>
+	<field name="company_name" class="java.lang.String"/>
+	<field name="street1" class="java.lang.String"/>
+	<field name="street2" class="java.lang.String"/>
+	<field name="city" class="java.lang.String"/>
+	<field name="zip" class="java.lang.String"/>
+	<field name="phone" class="java.lang.String"/>
+	<field name="fax" class="java.lang.String"/>
+	<field name="email" class="java.lang.String"/>
+	<field name="grn_no" class="java.lang.String"/>
+	<field name="dep_name" class="java.lang.String"/>
+	<field name="return_type" class="java.lang.String"/>
+	<field name="iss_no" class="java.lang.String"/>
+	<field name="issre_date" class="java.lang.String"/>
+	<field name="iss_date" class="java.lang.String"/>
+	<field name="new_date" class="java.lang.String"/>
+	<field name="user_name" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="40" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="555" height="20"/>
+				<textElement>
+					<font size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{company_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="20" width="555" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{street1}+$F{street2}+$F{city}+"-"+$F{zip}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="119" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="555" height="20"/>
+				<box topPadding="4" leftPadding="221"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Stores Issue - Return"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="34" width="196" height="20"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Department:"+" "+$F{dep_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="395" y="34" width="160" height="20"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Return Type:"+" "+$F{return_type}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="68" width="196" height="20"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Issue No :"+" "+$F{iss_no}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="430" y="68" width="125" height="20"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Issue Date :"+" "+$F{iss_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="88" width="196" height="20"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Issue Return No :"+" "+$F{issre_no}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="430" y="88" width="125" height="20"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Issue Return Date :"+" "+$F{issre_date}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="163" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="100" height="20"/>
+				<box>
+					<bottomPen lineWidth="0.75"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA["Si.No"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="100" y="0" width="155" height="20"/>
+				<box>
+					<bottomPen lineWidth="0.75"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA["Product"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="255" y="0" width="100" height="20"/>
+				<box>
+					<bottomPen lineWidth="0.75"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA["UOM"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="355" y="0" width="100" height="20"/>
+				<box>
+					<bottomPen lineWidth="0.75"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA["Issued Qty"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="455" y="0" width="100" height="20"/>
+				<box>
+					<bottomPen lineWidth="0.75"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA["Returned Qty"]]></textFieldExpression>
+			</textField>
+			<componentElement>
+				<reportElement x="0" y="20" width="555" height="22"/>
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+					<datasetRun subDataset="dataset1">
+						<datasetParameter name="issue_id">
+							<datasetParameterExpression><![CDATA[$F{issue_id}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:listContents height="22" width="555">
+						<textField>
+							<reportElement x="0" y="0" width="100" height="20"/>
+							<textElement/>
+							<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+						</textField>
+						<textField>
+							<reportElement x="100" y="0" width="155" height="20"/>
+							<textElement/>
+							<textFieldExpression><![CDATA[$F{product_name}]]></textFieldExpression>
+						</textField>
+						<textField>
+							<reportElement x="255" y="0" width="100" height="20"/>
+							<textElement/>
+							<textFieldExpression><![CDATA[$F{uom}]]></textFieldExpression>
+						</textField>
+						<textField>
+							<reportElement x="355" y="0" width="100" height="20"/>
+							<textElement/>
+							<textFieldExpression><![CDATA[$F{issued_qty}]]></textFieldExpression>
+						</textField>
+						<textField>
+							<reportElement x="455" y="0" width="100" height="20"/>
+							<textElement/>
+							<textFieldExpression><![CDATA[$F{issue_returned_qty}]]></textFieldExpression>
+						</textField>
+					</jr:listContents>
+				</jr:list>
+			</componentElement>
+			<textField>
+				<reportElement x="0" y="143" width="100" height="20"/>
+				<box leftPadding="25">
+					<topPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Returned by"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="241" y="143" width="114" height="20"/>
+				<box leftPadding="25">
+					<topPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Stores-in-charge"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="455" y="143" width="100" height="20"/>
+				<box leftPadding="37">
+					<topPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Stores Manager"]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="65" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="34" width="241" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{user_name}+" "+"/"+" "+$F{new_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="241" y="34" width="314" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" "+"of"+" "+$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<noData>
+		<band height="50">
+			<textField>
+				<reportElement x="175" y="0" width="238" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA["No Data. Only Apporved GRN can be printed"]]></textFieldExpression>
+			</textField>
+		</band>
+	</noData>
+</jasperReport>

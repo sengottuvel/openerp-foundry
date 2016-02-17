@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>	
+
+	<!-- Form View -->
+	
+		<record id="kg_project_master_form_view" model="ir.ui.view">
+			<field name="name">Project Master Form</field>
+			<field name="model">kg.project.master</field>
+			<field name="arch" type="xml">
+				<form string="Project Master" version="7.0">
+					<header>
+						<button name="entry_reject" type="object" string="Reject" states="confirm" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_approve" type="object" string="Approve" states="confirm" class="oe_highlight" confirm="Are you sure to proceed ?" />
+				
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
+					</header>
+					<group>
+						<group>						
+							<field name="user_id"/>
+							<field name="name"/>
+							<field name="active"/>
+							<field name="conf_user_id"/>
+							<field name="app_user_id"/>
+							<field name="rej_user_id"/>
+							<field name="state"/>
+													
+						</group>
+						<group>
+							<field name="date"/>
+							<field name="code"/>
+							<field name="company_id"/>	
+							<field name="confirm_date"/>
+							<field name="approve_date"/>
+							<field name="reject_date"/>
+						</group>
+					</group>
+					<field name="remark" placeholder="Remarks"/>
+				</form>
+			</field> 
+		</record>
+
+		<!-- Tree View -->
+		
+		<record id="kg_project_master_tree_view" model="ir.ui.view">
+			<field name="name">Project Master Tree</field>
+			<field name="model">kg.project.master</field>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';red:state == 'confirm'
+						;black:state == 'approved';gray:state == 'reject'" 
+								toolbar="True" string="Project Master Tree">					
+					<field name="name"/>
+					<field name="code"/>
+					<field name="date"/>
+					<field name="user_id"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+
+		<!-- Search View -->
+
+		<record id="kg_project_master_search_view" model="ir.ui.view">
+            <field name="name">Project Master</field>
+            <field name="model">kg.project.master</field>
+            <field name="arch" type="xml">
+                <search string="Project Master Template">
+					<field name="name" string="Master" filter_domain="[('name','ilike',self)]"/> 
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="approve" string="Approved" domain="[('state','=','approved')]"/>					
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Name" icon="terp-personal" domain="[]" context="{'group_by':'name'}"/>
+                        <filter string="Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'date'}"/>
+                        <filter string="Created By" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'user_id'}"/>
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+
+		<!-- Menu Action -->
+		
+		 <record id="kg_project_master_menu_action" model="ir.actions.act_window">
+			<field name="name">Project Master Template</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.project.master</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="kg_project_master_tree_view"/>
+			<field name="search_view_id" ref="kg_project_master_search_view"/>
+		</record>
+
+		
+
+	</data>
+</openerp>

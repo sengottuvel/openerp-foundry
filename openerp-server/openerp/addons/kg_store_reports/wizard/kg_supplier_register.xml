@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="kg_supplier_reg_wizard_view" model="ir.ui.view">
+            <field name="name">Supplier Register</field>
+            <field name="model">kg.supplier.reg.wizard</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+				<form string="Supplier Register">
+					<separator string="Supplier Register" colspan="4"/>
+					   
+						<notebook tabpos="up" colspan="4">
+							
+							<page string="Supplier" name="product">
+									<group colspan="2" col="2">
+										<separator string="Suppliers" colspan="2" col="2" />
+										<field name = "suppliers"/>
+									</group>
+							</page>
+							
+						</notebook>                
+					<separator colspan="4"/>
+					<group col="4" colspan="4">
+						<button icon="gtk-print" name="check_report" string="Generate" type="object" colspan="2" default_focus="1" />
+						<button icon="gtk-cancel" special="cancel" string="Cancel" colspan="2"/>
+					</group>
+				</form>
+            </field>
+        </record>
+
+        <record id="action_kg_supplier_reg_wizard" model="ir.actions.act_window">  
+            <field name="name">Supplier Register</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">kg.supplier.reg.wizard</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+        
+        
+
+    </data>
+</openerp>

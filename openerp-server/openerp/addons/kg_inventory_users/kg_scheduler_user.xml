@@ -1,0 +1,30 @@
+<?xml version="1.0" ?>
+<openerp>
+<data noupdate="0">       		
+		
+		<!--Schedueler Mail admin-->
+		
+	    <record id="scheduler_mail_settings_user_kg_mail" model="ir.model.access">
+			<field name="model_id" ref="kg_mail_settings.model_kg_mail_settings"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Mail Settings </field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_scheduler_user')]"/>
+		</record>
+		
+		
+		<record id="scheduler_mail_settings_line_user_kg_mail" model="ir.model.access">
+			<field name="model_id" ref="kg_mail_settings.model_kg_mail_settings_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Mail Settings Line</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_scheduler_user')]"/>
+		</record>
+				
+    </data>
+</openerp>
+	

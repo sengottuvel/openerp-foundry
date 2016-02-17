@@ -199,7 +199,7 @@ class res_partner(osv.osv):
             view_load=True,
             domain="[('type', '=', 'payable')]",
             help="This account will be used instead of the default one as the payable account for the current partner",
-            required=True),
+            required=False),
         'property_account_receivable': fields.property(
             'account.account',
             type='many2one',
@@ -208,7 +208,7 @@ class res_partner(osv.osv):
             view_load=True,
             domain="[('type', '=', 'receivable')]",
             help="This account will be used instead of the default one as the receivable account for the current partner",
-            required=True),
+            required=False),
         'property_account_position': fields.property(
             'account.fiscal.position',
             type='many2one',

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+	
+	<!-- Form View -->
+	
+		<record id="kg_contractor_inward_form_view" model="ir.ui.view">
+				<field name="name">Contractor Iinward</field>
+				<field name="model">kg.contractor.inward</field>
+				<field name="arch" type="xml">
+				<form string="Kg Contractor Inward" version="7.0">
+				<header>
+					<button name="entry_reject" type="object" string="Reject" states="confirm" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+					<button name="entry_approve" type="object" string="Approve" states="confirm" class="oe_highlight" confirm="Are you sure to proceed ?" groups="kg_inventory_users.group_kg_main_user"/>
+					<button name="entry_draft" type="object" string="Set Draft" states="cancel" class="oe_highlight"/>
+					<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
+					<button name="entry_cancel" type="object" string="Cancel" states="approved" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+					
+				</header>			
+					<group>
+						<group>
+							<field name="user_id"/>
+							<field name="name"/>
+							<field name="dc_no"/>
+							<field name="supplier_id"/>
+							<field name="state"/>		
+						</group>											
+						<group>
+							<field name="date"/>							
+							<field name="inward_date"/>							
+							<field name="dc_date"/>							
+							<field name="active"/>							
+												
+						</group>					
+					</group>				   
+					<notebook>
+						<page string="Line Details">
+						<field colspan="4" mode="tree" name="line_ids" nolabel="1" widget="one2many_list" >
+							<tree string="Kg Contractor Iinward"> 
+							
+								<field name="product_id" />		
+								<field name="brand_id"/>									
+								<field name="uom_id"/>								
+								<field name="quantity"/>								
+								<field name="pending_qty" invisible="1"/>								
+								<field name="inward_type"/>	
+														
+													
+														
+							</tree>					
+							<form string="Kg Contractor Iinward Line" >
+								<group>
+									<group>
+										<field name="product_id" on_change="onchange_uom_id(product_id)"/>										
+										<field name="uom_id"/>										<field name="pending_qty" invisible="1"/>											
+																
+									</group>
+									<group>
+										<field name="brand_id"/>										
+										<field name="quantity"/>	
+										<field name="inward_type"/>		
+									</group>
+								</group>
+							</form>
+						</field>
+					</page>					
+					</notebook>					
+					<field name="remark" placeholder="Remarks"/>
+				</form>
+			</field>
+		</record>
+
+	<!-- Tree View -->
+		
+		<record id="kg_contractor_inward_tree_view" model="ir.ui.view">
+			<field name="name">Contractor Inward</field>
+			<field name="model">kg.contractor.inward</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';red:state == 'confirm'
+						;black:state == 'approved';gray:state == 'reject'" 
+								toolbar="True" string="Contractor Inward">				
+					
+					<field name="name"/>
+					<field name="inward_date"/>
+					<field name="supplier_id"/>
+					<field name="total" sum="Total" invisible="1"/>
+					<field name="state"/>					
+					<field name="user_id"/>					
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Search View -->
+		
+		<record id="kg_contractor_inward_search_view" model="ir.ui.view">
+            <field name="name">Contractor Inward</field>
+            <field name="model">kg.contractor.inward</field>
+            <field name="arch" type="xml">
+                <search string="Transaction">
+					<field name="name" string="Contractor Inward" filter_domain="['|',('name','ilike',self),('supplier_id','ilike',self)]"/>
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirm" string="Confirmed" domain="[('state','=','confirm')]"/>
+					<filter icon="terp-check" name="approved" string="Approved" domain="[('state','=','approved')]"/>
+					<filter icon="terp-check" name="rejected" string="Rejected" domain="[('state','=','reject')]"/>
+					<filter icon="terp-check" name="cancel" string="Cancel" domain="[('state','=','cancel')]"/>
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Seller" icon="terp-personal" domain="[]" context="{'group_by':'supplier_id'}"/>
+                        <filter string="Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'inward_date'}"/>
+                        <filter string="Created By" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'user_id'}"/>
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+					</group>
+                </search>
+			</field>
+		</record>		
+			
+        
+	<!-- Menu Action -->			
+		
+		 <record id="kg_contractor_inward_action" model="ir.actions.act_window">
+			<field name="name">Contractor Inward</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.contractor.inward</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="kg_contractor_inward_tree_view"/>
+			<field name="search_view_id" ref="kg_contractor_inward_search_view"/>
+		</record>	
+		
+	
+	</data>
+</openerp>

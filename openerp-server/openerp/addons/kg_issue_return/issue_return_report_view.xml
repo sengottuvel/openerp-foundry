@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+    
+
+	<report string="Issue Return Slip"
+        model="kg.issue.return"
+        auto="True"
+        name="onscreen_issue_return_report"
+        rml="kg_issue_return/report/Issue_return_slip.jrxml"
+        id="issue_return_jasper_report1" 
+        menu="True"
+        header="False"
+        />
+
+
+    </data>
+</openerp>

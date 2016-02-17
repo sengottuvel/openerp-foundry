@@ -186,7 +186,7 @@
 					<group>
 						<field name="schedule_id" readonly="1"/>
 						<field name="pattern_id"/>
-						<field name="type" />
+						<field name="type" readonly="1"/>
 						<field name="schedule_qty" />
 						<field name="qty" readonly="1" on_change="onchange_planning_qty(schedule_qty,qty)"/>
 						<field name="state" invisible="1"/>
@@ -195,7 +195,6 @@
 					
 					<group>
 						<field name="pump_model_id"/>
-						<!--<field name="part_name_id"/>-->
 						<field name="moc_id" />
 						<field name="stock_qty" />
 						<field name="note" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>

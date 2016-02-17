@@ -359,6 +359,7 @@ class kg_daily_planning(osv.osv):
 									'state' : 'draft',
 									'production_type':'schedule',
 									'order_type':entry.order_type,
+									'pattern_id' : plan_item.pattern_id.id,
 									'pattern_name' : plan_item.pattern_id.pattern_name,	
 									
 									
@@ -432,6 +433,7 @@ class kg_daily_planning(osv.osv):
 						'state' : 'draft',
 						'production_type':'schedule',
 						'order_type':entry.order_type,
+						'pattern_id' : plan_item.pattern_id.id,
 						'pattern_name' : plan_item.pattern_id.pattern_name,	
 										
 					}

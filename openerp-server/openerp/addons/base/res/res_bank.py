@@ -122,7 +122,7 @@ class res_partner_bank(osv.osv):
         'name': fields.char('Bank Account', size=64), # to be removed in v6.2 ?
         'acc_number': fields.char('Account Number', size=64, required=True),
         'bank': fields.many2one('res.bank', 'Bank'),
-        'bank_bic': fields.char('Bank Identifier Code', size=16),
+        'bank_bic': fields.char('IFSC Code', size=16),
         'bank_name': fields.char('Bank Name', size=32),
         'owner_name': fields.char('Account Owner Name', size=128),
         'street': fields.char('Street', size=128),
@@ -134,9 +134,9 @@ class res_partner_bank(osv.osv):
             change_default=True, domain="[('country_id','=',country_id)]"),
         'company_id': fields.many2one('res.company', 'Company',
             ondelete='cascade', help="Only if this bank account belong to your company"),
-        'partner_id': fields.many2one('res.partner', 'Account Owner', required=True,
+        'partner_id': fields.many2one('res.partner', 'Account Owner', required=False,
             ondelete='cascade', select=True),
-        'state': fields.selection(_bank_type_get, 'Bank Account Type', required=True,
+        'state': fields.selection(_bank_type_get, 'Bank Account Type', required=False,
             change_default=True),
         'sequence': fields.integer('Sequence'),
         'footer': fields.boolean("Display on Reports", help="Display this bank account on the footer of printed documents like invoices and sales orders.")

@@ -26,9 +26,9 @@
     'description': """
 This module allows you to manage your Project Menus
 """,
-    'depends' : ['base', 'mrp', 'stock','kg_pumpmodel_master'],
+    'depends' : ['base', 'mrp', 'stock','kg_pumpmodel_master','kg_reports'],
     'data': [
-				#'kg_groups.xml',
+				'kg_groups.xml',
 				'kg_menus_view.xml',
 			],
     'auto_install': False,

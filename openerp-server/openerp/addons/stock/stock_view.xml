@@ -8,15 +8,15 @@
             groups="group_stock_manager,group_stock_user"
             sequence="70"/>
 
-        <menuitem id="menu_stock_warehouse_mgmt" name="Receive/Deliver By Orders" parent="menu_stock_root" sequence="1"/>
-        <menuitem id="menu_stock_products_moves" name="Receive/Deliver Products" parent="menu_stock_root" sequence="2"/>
+     <!--   <menuitem id="menu_stock_warehouse_mgmt" name="Receive/Deliver By Orders" parent="menu_stock_root" sequence="1"/>
+       <menuitem id="menu_stock_products_moves" name="Receive/Deliver Products" parent="menu_stock_root" sequence="2"/>-->
         <menuitem id="menu_stock_product" name="Products" parent="menu_stock_root" sequence="6"/>
         <menuitem name="Products by Category" id="menu_product_by_category_stock_form" action="product.product_category_action"
             parent="stock.menu_stock_product" sequence="0"/>
         <menuitem action="product.product_normal_action" id="menu_stock_products_menu" parent="menu_stock_product" sequence="1"/>
         <menuitem id="menu_stock_configuration" name="Configuration" parent="menu_stock_root" sequence="15" groups="group_stock_manager"/>
         <menuitem id="menu_warehouse_config" name="Warehouse Management" parent="menu_stock_configuration" sequence="40" groups="base.group_no_one"/>
-        <menuitem id="menu_stock_inventory_control" name="Inventory Control" parent="menu_stock_root" sequence="4"/>
+        <!--<menuitem id="menu_stock_inventory_control" name="Inventory Control" parent="menu_stock_root" sequence="4"/>-->
         <menuitem
             id="menu_product_in_config_stock" name="Products"
             parent="stock.menu_stock_configuration" sequence="45" groups="base.group_no_one"/>
@@ -210,7 +210,7 @@
               </p>
             </field>
         </record>
-        <menuitem action="action_inventory_form" id="menu_action_inventory_form" parent="menu_stock_inventory_control" sequence="30"/>
+        <!--<menuitem action="action_inventory_form" id="menu_action_inventory_form" parent="menu_stock_inventory_control" sequence="30"/>-->
 
         <record id="action_inventory_form_draft" model="ir.actions.act_window">
             <field name="name">Draft Physical Inventories</field>
@@ -526,39 +526,66 @@
             <field name="model">stock.location</field>
             <field name="arch" type="xml">
                 <form string="Stock Location" version="7.0">
-                    <label for="name" class="oe_edit_only"/>
-                    <h1><field name="name"/></h1>
-                    <label for="location_id" class="oe_edit_only"/>
-                    <h2><field name="location_id"/></h2>
+				  <header> 
+					<button name="entry_reject" type="object" string="Reject" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible': [('dummy_state','!=', 'confirm')]}" />
+					<button name="entry_approve" type="object" string="Approve" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible': [('dummy_state','!=', 'confirm')]}" />
+					<button name="entry_confirm" type="object" string="Confirm" class="oe_highlight" attrs="{'invisible': [('dummy_state','!=', 'draft')]}"/>
+				  </header>	
+				  <group>
                     <group>
-                        <group string="Additional Information">
-                            <field name="usage"/>
-                            <field name="partner_id"/>
-                            <field name="company_id" groups="base.group_multi_company" widget="selection"/>
-                            <field name="icon"/>
-                            <field name="scrap_location"/>
-                            <field name="active"/>
+						<field name="user_id"/>
+						<field name="name" attrs="{'readonly': [('dummy_state','=', 'approved')]}"/>
+						<field name="usage" string="Usage Location" attrs="{'readonly': [('dummy_state','=', 'approved')]}"/>
+						<field name="scrap_location" attrs="{'readonly': [('dummy_state','=', 'approved')]}"/>
+						<field name="conf_user_id"/>
+						<field name="app_user_id"/>
+						<field name="rej_user_id"/>
+						<field name="dummy_state"/>
+						
+                    </group>
+                    <group>
+						<field name="creation_date"/>
+						<field name="location_id" attrs="{'readonly': [('dummy_state','=', 'approved')]}"/>
+						<field name="location_type" attrs="{'readonly': [('dummy_state','=', 'approved')]}"/>
+						<field name="active"/>
+						<field name="confirm_date"/>
+						<field name="approve_date"/>
+						<field name="reject_date"/>
+						<field name="remark" attrs="{'readonly': [('dummy_state','=', 'approved')]}"/>
+                    </group>
+                    
+                  </group>
+                    <group>
+                        <group>
+                           
+                            <field name="partner_id" invisible="1"/>
+                            <field name="company_id" groups="base.group_multi_company" widget="selection" invisible="1"/>
+                            <field name="icon" invisible="1"/>
+                            
+                            
+                            
                         </group>
-                        <group string="Chained Locations">
-                            <field name="chained_location_type"/>
-                            <field name="chained_location_id"  attrs="{'required':[('chained_location_type','=','fixed')],'invisible':[('chained_location_type','in',['none','customer'])]}"/>
-                            <field name="chained_auto_packing"/>
-                            <field name="chained_delay"/>
-                            <field name="chained_journal_id"/>
-                            <field name="chained_picking_type"/>
-                            <field name="chained_company_id" widget="selection"/>
+                        <group string="Chained Locations" invisible="1">
+                            <field name="chained_location_type" invisible="1"/>
+                            <field name="chained_location_id"  invisible="1" attrs="{'required':[('chained_location_type','=','fixed')],'invisible':[('chained_location_type','in',['none','customer'])]}"/>
+                            <field name="chained_auto_packing" invisible="1"/>
+                            <field name="chained_delay" invisible="1"/>
+                            <field name="chained_journal_id" invisible="1"/>
+                            <field name="chained_picking_type" invisible="1"/>
+                            <field name="chained_company_id" widget="selection" invisible="1"/>
                         </group>
-                        <group string="Localization">
-                            <field name="posx"/>
-                            <field name="posy"/>
-                            <field name="posz"/>
-                        </group><group string="Accounting Information" attrs="{'invisible':[('usage','not in',('inventory','production'))]}">
-                            <field name="valuation_in_account_id"/>
-                            <field name="valuation_out_account_id"/>
+                        <group string="Localization" invisible="1">
+                            <field name="posx" invisible="1"/>
+                            <field name="posy" invisible="1"/>
+                            <field name="posz" invisible="1"/>
+                        </group>
+                        <group string="Accounting Information" invisible="1" attrs="{'invisible':[('usage','not in',('inventory','production'))]}">
+                            <field name="valuation_in_account_id" invisible="1"/>
+                            <field name="valuation_out_account_id" invisible="1"/>
                         </group>
                     </group>
-                    <separator string="Additional Information"/>
-                    <field name="comment"/>
+                    <separator string="Additional Information" invisible="1"/>
+                    <field name="comment" invisible="1"/>
                 </form>
             </field>
         </record>
@@ -586,6 +613,7 @@
                 <tree string="Stock Location" colors="blue:usage=='view';darkred:usage=='internal'">
                     <field name="complete_name"/>
                     <field name="usage"/>
+                    <field name="location_type"/>
                     <field name="stock_real" invisible="'product_id' not in context"/>
                     <field name="stock_virtual" invisible="'product_id' not in context"/>
                 </tree>
@@ -650,11 +678,11 @@
               </p>
             </field>
         </record>
-        <menuitem action="action_location_tree"
+      <!--  <menuitem action="action_location_tree"
             id="menu_action_location_tree"
             parent="menu_stock_inventory_control"
             groups="stock.group_locations"
-            sequence="20"/>
+            sequence="20"/>-->
 
         <record id="view_warehouse" model="ir.ui.view">
             <field name="name">stock.warehouse</field>
@@ -984,7 +1012,7 @@
             <field name="view_id" ref="stock_picking_out_calendar"/>
             <field name="act_window_id" ref="action_picking_tree"/>
         </record>
-        <menuitem action="action_picking_tree" id="menu_action_picking_tree" parent="menu_stock_warehouse_mgmt" sequence="3"/>
+       <!-- <menuitem action="action_picking_tree" id="menu_action_picking_tree" parent="menu_stock_warehouse_mgmt" sequence="3"/>-->
 
         <!-- Incomming Shipments -->
         <record model="ir.ui.view" id="stock_picking_in_calendar">
@@ -1112,9 +1140,9 @@
             <field name="view_id" ref="stock_picking_in_calendar"/>
             <field name="act_window_id" ref="action_picking_tree4"/>
         </record>
-        <menuitem action="action_picking_tree4" id="menu_action_picking_tree4" parent="menu_stock_warehouse_mgmt" sequence="1"/>
+      <!--  <menuitem action="action_picking_tree4" id="menu_action_picking_tree4" parent="menu_stock_warehouse_mgmt" sequence="1"/>
 
-        <menuitem action="action_picking_tree6" id="menu_action_picking_tree6" parent="menu_stock_warehouse_mgmt" sequence="2" groups="stock.group_locations"/>
+        <menuitem action="action_picking_tree6" id="menu_action_picking_tree6" parent="menu_stock_warehouse_mgmt" sequence="2" groups="stock.group_locations"/>-->
 
         <record id="view_move_tree" model="ir.ui.view">
             <field name="name">stock.move.tree</field>
@@ -1662,8 +1690,8 @@
             <field name="act_window_id" ref="action_out_picking_move"/>
         </record>
 
-      <menuitem action="action_reception_picking_move" id="menu_action_pdct_in" parent="menu_stock_products_moves" sequence="1"/>
-      <menuitem action="action_out_picking_move" id="menu_action_pdct_out" parent="menu_stock_products_moves" sequence="2"/>
+      <!--<menuitem action="action_reception_picking_move" id="menu_action_pdct_in" parent="menu_stock_products_moves" sequence="1"/>
+      <menuitem action="action_out_picking_move" id="menu_action_pdct_out" parent="menu_stock_products_moves" sequence="2"/>-->
 
 
          <record id="view_stock_journal_filter" model="ir.ui.view">

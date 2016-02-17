@@ -9,7 +9,7 @@
             sequence="60"/>
 
         <menuitem id="menu_procurement_management" name="Purchase"
-            parent="base.menu_purchase_root" sequence="1" />
+            parent="base.menu_purchase_root" sequence="2" />
 
         <menuitem id="menu_purchase_config_purchase" name="Configuration"
             groups="group_purchase_manager"
@@ -82,16 +82,16 @@
         action="base.action_partner_supplier_form" sequence="15"/>
 
       <!--Inventory control-->
-      <menuitem id="menu_procurement_management_inventory" name="Incoming Products"
+      <!--<menuitem id="menu_procurement_management_inventory" name="Incoming Products"
             parent="base.menu_purchase_root" sequence="4"/>
       <menuitem action="stock.action_picking_tree4" id="menu_action_picking_tree4" parent="menu_procurement_management_inventory"
             name="Incoming Shipments" sequence="9"/>
       <menuitem action="stock.action_reception_picking_move" id="menu_action_picking_tree_in_move"
-            parent="menu_procurement_management_inventory" sequence="11"/>
+            parent="menu_procurement_management_inventory" sequence="11"/>-->
 
     <!--Invoice control-->
-    <menuitem id="menu_procurement_management_invoice" name="Invoice Control"
-        parent="base.menu_purchase_root" sequence="6"/>
+   <!-- <menuitem id="menu_procurement_management_invoice" name="Invoice Control"
+        parent="base.menu_purchase_root" sequence="6"/>-->
 
     <record id="action_invoice_pending" model="ir.actions.act_window">
         <field name="name">On Draft Invoices</field>
@@ -116,11 +116,11 @@
         </field>
     </record>
 
-     <menuitem
+     <!--<menuitem
           id="menu_procurement_management_pending_invoice"
           action="action_invoice_pending"
           parent="menu_procurement_management_invoice"
-          sequence="13"/>
+          sequence="13"/>-->
 
       <!-- Product menu-->
       <menuitem id="menu_procurement_management_product" name="Products"
@@ -167,15 +167,16 @@
                     <button name="print_quotation" string="Print" type="object" states="sent" groups="base.group_user"/>
                     <button name="purchase_confirm" states="draft" string="Confirm Order"/>
                     <button name="purchase_confirm" states="sent" string="Confirm Order" class="oe_highlight"/>
-                    <button name="wkf_send_rfq" states="confirmed" string="Resend Purchase Order" type="object" class="oe_highlight"/>
-                    <button name="action_cancel" states="approved,except_picking,except_invoice" string="Cancel Order" type="object" />
+                    <!--<button name="wkf_send_rfq" states="confirmed" string="Resend Purchase Order" type="object" class="oe_highlight"/>-->
+                    <!--<button name="action_cancel" states="approved,except_picking,except_invoice" string="Cancel PO" type="object" />-->
                     <button name="picking_ok" states="except_picking" string="Manually Corrected"/>
                     <button name="invoice_ok" states="except_invoice" string="Manually Corrected"/>
-                    <button name="purchase_approve" states="confirmed" string="Approve Order" class="oe_highlight" groups="purchase.group_purchase_manager"/>
+                    <!--<button name="purchase_approve" states="confirmed" string="Approve Order" class="oe_highlight" groups="purchase.group_purchase_manager"/>
+                    -->
                     <button name="view_picking" string="Receive Products" type="object" attrs="{'invisible': ['|', ('shipped','=',True), ('state','!=', 'approved')]}" class="oe_highlight"/>
                     <button name="view_invoice" string="Receive Invoice" type="object" attrs="{'invisible': ['|', ('invoice_method','=','picking'), '|', ('state','!=', 'approved'), ('invoiced','=',True) ]}" class="oe_highlight"/>
-                    <button name="action_cancel_draft" states="cancel,sent,confirmed" string="Set to Draft" type="object" />
-                    <button name="purchase_cancel" states="draft,confirmed,sent" string="Cancel Order"/>
+                   <!-- <button name="action_cancel_draft" states="cancel,sent,confirmed" string="Set to Draft" type="object"/> -->
+                    <button name="purchase_cancel" states="draft,confirmed,sent" string="Cancel Order" invisible="1"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,sent,approved,done" statusbar_colors='{"except_picking":"red","except_invoice":"red","confirmed":"blue"}' readonly="1"/>
                 </header>
                 <sheet>
@@ -195,25 +196,25 @@
                             <field name="journal_id" invisible='1'/>
                         </group>
                         <group>
-                            <field name="date_order"/>
+                            
                             <field name="origin" attr="{'invisible': [('origin','=',False)]}"/>
                             <field name="warehouse_id" on_change="onchange_warehouse_id(warehouse_id)" widget="selection" groups="stock.group_locations"/>
                             <field name="company_id" groups="base.group_multi_company" widget="selection"/>
                         </group>
                     </group>
                     <notebook>
-                        <page string="Purchase Order">
+                        <page string="Purchase Order" attrs="{'invisible': [('po_flag', '=', False),'|',('type_flag', '=', False)]}">
                             <field name="order_line">
-                                <tree string="Purchase Order Lines" editable="bottom">
+                                <tree string="Purchase Order Lines" create="false" delete="false">
                                     <field name="product_id" on_change="onchange_product_id(parent.pricelist_id,product_id,0,product_uom,parent.partner_id, parent.date_order,parent.fiscal_position,date_planned,name,price_unit,context)"/>
-                                    <field name="name"/>
+                                    <field name="name" invisible="1"/>
                                     <field name="date_planned"/>
                                     <field name="company_id" groups="base.group_multi_company" widget="selection"/>
                                     <field name="account_analytic_id" groups="purchase.group_analytic_accounting" domain="[('type','not in',('view','template'))]"/>
                                     <field name="product_qty" on_change="onchange_product_id(parent.pricelist_id,product_id,product_qty,product_uom,parent.partner_id,parent.date_order,parent.fiscal_position,date_planned,name,price_unit,context)"/>
                                     <field name="product_uom" groups="product.group_uom" on_change="onchange_product_uom(parent.pricelist_id,product_id,product_qty,product_uom,parent.partner_id, parent.date_order,parent.fiscal_position,date_planned,name,price_unit,context)"/>
                                     <field name="price_unit"/>
-                                    <field name="taxes_id" widget="many2many_tags" domain="[('parent_id','=',False),('type_tax_use','!=','sale')]"/>
+                                    <field name="taxes_id" widget="many2many_tags" domain="[('parent_id','=',False),('type_tax_use','!=','sale')]" invisible="0"/>
                                     <field name="price_subtotal"/>
                                 </tree>
                             </field>
@@ -230,7 +231,7 @@
                             <div class="oe_clear"/>
                             <field name="notes" class="oe_inline" placeholder="Terms and conditions..."/>
                         </page>
-                        <page string="Incoming Shipments &amp; Invoices">
+                        <page string="Incoming Shipments &amp; Invoices" invisible="1">
                             <group>
                                 <group>
                                     <field name="dest_address_id" string="Customer Address" on_change="onchange_dest_address_id(dest_address_id)" groups="stock.group_locations"/>
@@ -335,7 +336,7 @@
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">purchase.order</field>
             <field name="context">{}</field>
-            <field name="domain">[('state','in',('draft','sent','confirmed'))]</field>
+            <field name="domain">[('state','=','draft')]</field>
             <field name="view_mode">tree,form,graph,calendar</field>
             <field name="search_view_id" ref="view_purchase_order_filter"/>
             <field name="help" type="html">
@@ -351,17 +352,17 @@
               </p>
             </field>
         </record>
-        <menuitem action="purchase_rfq" id="menu_purchase_rfq"
+        <!--<menuitem action="purchase_rfq" id="menu_purchase_rfq"
             parent="menu_procurement_management"
-            sequence="0"/>
-
+				sequence="0"/>-->
+`
         <record id="purchase_form_action" model="ir.actions.act_window">
             <field name="name">Purchase Orders</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">purchase.order</field>
             <field name="view_mode">tree,form,graph,calendar</field>
             <field name="context">{}</field>
-            <field name="domain">[('state','not in',('draft','sent','confirmed'))]</field>
+            <field name="domain">[('state','!=','draft')]</field>
             <field name="search_view_id" ref="view_purchase_order_filter"/>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
@@ -393,19 +394,20 @@
                                 <field name="price_unit"/>
                             </group>
                             <group>
-                                <field name="taxes_id" widget="many2many_tags" domain="[('parent_id','=',False),('type_tax_use','!=','sale')]"/>
+                                <field name="taxes_id" widget="many2many_tags" domain="[('parent_id','=',False),('type_tax_use','!=','sale')]" invisible="0"/>
                                 <field name="date_planned" widget="date"/>
-                                <field name="account_analytic_id" colspan="2" groups="purchase.group_analytic_accounting"/>
-                                <field name="company_id" groups="base.group_multi_company" widget="selection"/>
+                                <field name="account_analytic_id" colspan="2" groups="purchase.group_analytic_accounting" invisible="1"/>
+                                <field name="company_id" groups="base.group_multi_company" widget="selection" invisible="1"/>
                             </group>
                         </group>
                         <notebook>
                         <page string="Notes">
                             <field name="name"/>
-                        </page><page string="Invoices and Receptions">
+                        </page>
+                       <!-- <page string="Invoices and Receptions">
                             <field name="invoice_lines"/>
                             <field name="move_ids"/>
-                        </page>
+                        </page>-->
                         </notebook>
                     </sheet>
                 </form>
@@ -423,6 +425,7 @@
                     <field name="product_id"/>
                     <field name="price_unit"/>
                     <field name="product_qty"/>
+
                     <field name="product_uom" groups="product.group_uom"/>
                     <field name="price_subtotal"/>
                     <field name="date_planned"  widget="date" width="135"/>
@@ -458,7 +461,7 @@
                             </group>
                             <group>
                                 <field name="taxes_id" widget="many2many_tags"
-                                    domain="[('parent_id','=',False),('type_tax_use','!=','sale')]"/>
+                                    domain="[('parent_id','=',False),('type_tax_use','!=','sale')]" invisible="1"/>
                                 <field name="date_planned" widget="date" readonly="1"/>
                                 <field name="company_id" groups="base.group_multi_company" widget="selection"/>
                                 <field name="account_analytic_id" colspan="4" groups="purchase.group_analytic_accounting"/>
@@ -530,11 +533,11 @@
             <field name="view_id" ref="purchase_order_line_form2"/>
             <field name="act_window_id" ref="purchase_line_form_action2"/>
         </record>
-        <menuitem
+        <!--<menuitem
             action="purchase_line_form_action2"
             id="menu_purchase_line_order_draft"
             parent="menu_procurement_management_invoice"
-            sequence="72"/>
+            sequence="72"/>-->
 
         <!-- Procurements -->
 
@@ -557,8 +560,8 @@
             <field name="inherit_id" ref="product.product_normal_form_view"/>
             <field name="arch" type="xml">
                 <div name="options" position="inside">
-                    <field name="purchase_ok" invisible="1"/>
-                    <label for="purchase_ok" invisible="1"/>
+                    <field name="purchase_ok" invisible ="1"/>
+                    <label for="purchase_ok"/>
                 </div>
                 <group name="procurement" position="after">
                      <separator string="Suppliers"/>

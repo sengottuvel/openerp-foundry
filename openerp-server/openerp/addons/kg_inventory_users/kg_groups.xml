@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data noupdate="0">
+	
+
+    <record id="group_kg_po_admin" model="res.groups">
+        <field name="name">kg_purchase_admin</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="category_id" ref="base.module_category_purchase_management"/>
+        <field eval="[(6,0,[
+       
+			ref('base.menu_purchase_root'),
+			ref('account.menu_action_invoice_tree2'),
+			ref('kg_menus.aam_service_invoice'),
+			ref('purchase.menu_procurement_management'),
+			ref('kg_menus.pam_po_amendment'),
+			ref('kg_menus.spm_service_order_menu'),
+			ref('kg_menus.sam_so_amendment'),
+			ref('kg_menus.mam_so_manual_closing'),
+			
+            ])]" name="menu_access"/>
+    </record>
+    
+    <!-- Warehouse Groups -->
+
+    <record id="group_kg_sub_store_user" model="res.groups">
+        <field name="name">kg_sub_store_user</field>
+        <field name="category_id" ref="base.module_category_warehouse_management"/>
+       <!-- <field name="implied_ids" eval="[(4, ref('stock.group_stock_user'))]"/> -->
+        <field eval="[(6,0,[
+       			
+			ref('kg_menus.ipm_indent'),
+			ref('kg_menus.ipm_dep_indent_menu'),
+			ref('kg_menus.iam_depindent'),
+			ref('kg_menus.ipm_service_indent_menu'),
+			ref('kg_menus.iam_service_indent'),
+			ref('stock.menu_stock_root'),
+			
+            ])]" name="menu_access"/>
+    </record>
+
+    <record id="group_kg_main_store_user" model="res.groups">
+        <field name="name">kg_main_store_user</field>
+        <field name="category_id" ref="base.module_category_warehouse_management"/>
+        <field name="implied_ids" eval="[(4, ref('stock.group_stock_user'))]"/>
+        
+        <field eval="[(6,0,[
+       
+			ref('base.menu_purchase_root'),
+			ref('account.menu_action_invoice_tree2'),
+			ref('kg_menus.aam_service_invoice'),	
+			ref('stock.menu_stock_root'),
+			ref('kg_menus.ipm_indent'),
+			ref('kg_menus.ipm_dep_indent_menu'),
+			ref('kg_menus.iam_depindent'),
+			ref('kg_menus.ram_product_reg'),
+			ref('kg_menus.rpm_po_register_reports'),	
+			ref('kg_menus.gam_po_grn'),
+			ref('kg_menus.gam_general_grn'),
+			
+            ])]" name="menu_access"/>
+    </record>
+    
+
+  
+</data>
+</openerp>
