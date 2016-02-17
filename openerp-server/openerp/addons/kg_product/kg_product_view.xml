@@ -51,14 +51,14 @@
 		</field>
 		
 		<field name="sale_ok" position="replace">
-        <field name="sale_ok"/>
+        <field name="sale_ok" invisible="1"/>
         </field>
         
         
 		
-		 <xpath expr = "//page[@string='Information']" position="after">
+		 <xpath expr = "//page[@string='Validations']" position="after">
 
-				<page string="User Information">
+				<page string="Entry Info">
 					
 					<group>
 						<group>

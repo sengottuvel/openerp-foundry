@@ -37,8 +37,8 @@ class kg_product(osv.osv):
         'abc': fields.boolean('ABC Analysis'),
         'po_uom_coeff': fields.float('PO Coeff', required=True, help="One Purchase Unit of Measure = Value of(PO Coeff)UOM"),
         
-        'type': fields.selection([('consu', 'Consumable Items'),('service','Service Items'),('cap','Capital Goods'),('assets','Assets')], 'Product Type', 
-                required=True, help="Consumable are product where you don't manage stock, a service is a non-material product provided by a company or an individual."),
+        'type': fields.selection([('consu', 'Consumable Items'),('bot','BOT'),('raw','Raw Materials'),('service','Service Items'),('finish','Finished Items')], 'Product Type', 
+                required=True),
         'user_id': fields.many2one('res.users', 'Created By', readonly=True),
         'approve_date': fields.datetime('Approved Date', readonly=True),
         'app_user_id': fields.many2one('res.users', 'Apprved By', readonly=True),
@@ -53,7 +53,7 @@ class kg_product(osv.osv):
     
     _defaults = {
     
-        'po_uom_coeff' : '1.0',
+        'po_uom_coeff' : 1.00,
         
         'user_id': lambda obj, cr, uid, context: uid,
         

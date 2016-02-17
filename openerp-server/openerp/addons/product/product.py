@@ -24,16 +24,21 @@ import re
 
 from _common import rounding
 
-from openerp import tools
-from openerp.osv import osv, fields
-from openerp.tools.translate import _
-
-import openerp.addons.decimal_precision as dp
-
-
-import time
 from datetime import datetime
-dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
+from dateutil.relativedelta import relativedelta
+import time
+from operator import itemgetter
+from itertools import groupby
+a = datetime.now()
+dt_time = a.strftime('%m/%d/%Y %H:%M:%S')
+from openerp.osv import fields, osv
+from openerp.tools.translate import _
+from openerp import netsvc
+from openerp import tools
+from openerp.tools import float_compare, DEFAULT_SERVER_DATETIME_FORMAT
+import openerp.addons.decimal_precision as dp
+import logging
+_logger = logging.getLogger(__name__)
 
 def ean_checksum(eancode):
 	"""returns the checksum of an ean string of length 13, returns -1 if the string has the wrong length"""
@@ -125,86 +130,92 @@ class product_uom(osv.osv):
 		return self.name_get(cr, uid, [uom_id], context=context)[0]
 
 	def create(self, cr, uid, data, context=None):
+		v_name = None 
+		v_code = None
+		
 		if 'factor_inv' in data:
 			if data['factor_inv'] <> 1:
 				data['factor'] = self._compute_factor_inv(data['factor_inv'])
 			del(data['factor_inv'])
+		if data.get('name'): 
+			v_name = data['name'].strip() 
+			data['name'] = v_name.capitalize()
 		return super(product_uom, self).create(cr, uid, data, context)
 
 	_order = "name"
 	_columns = {
-		'name': fields.char('Unit of Measure', size=64, required=True, translate=False),
-		'category_id': fields.many2one('product.uom.categ', 'Category', required=True, ondelete='cascade',
+		'name': fields.char('Unit of Measure', size=64, required=True, translate=True),
+		'category_id': fields.many2one('product.uom.categ', 'Category', ondelete='cascade',
 			help="Conversion between Units of Measure can only occur if they belong to the same category. The conversion will be made based on the ratios."),
-		'factor': fields.float('Ratio', required=True,digits=(12, 12),
+		'factor': fields.float('Ratio',digits=(12, 12),
 			help='How much bigger or smaller this unit is compared to the reference Unit of Measure for this category:\n'\
 					'1 * (reference unit) = ratio * (this unit)'),
 		'factor_inv': fields.function(_factor_inv, digits=(12,12),
 			fnct_inv=_factor_inv_write,
 			string='Ratio',
 			help='How many times this Unit of Measure is bigger than the reference Unit of Measure in this category:\n'\
-					'1 * (this unit) = ratio * (reference unit)', required=True),
-		'rounding': fields.float('Rounding Precision', digits_compute=dp.get_precision('Product Unit of Measure'), required=True,
+					'1 * (this unit) = ratio * (reference unit)'),
+		'rounding': fields.float('Rounding Precision', digits_compute=dp.get_precision('Product Unit of Measure'),
 			help="The computed quantity will be a multiple of this value. "\
 				 "Use 1.0 for a Unit of Measure that cannot be further split, such as a piece."),
 		'active': fields.boolean('Active', help="By unchecking the active field you can disable a unit of measure without deleting it."),
 		'uom_type': fields.selection([('bigger','Bigger than the reference Unit of Measure'),
 									  ('reference','Reference Unit of Measure for this category'),
-									  ('smaller','Smaller than the reference Unit of Measure')],'Type', required=1),
-									  
-		### Add By Karthikeyan
-		'companys_id': fields.many2one('res.company', 'Company Name',readonly=True),
-		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
-		'crt_date': fields.datetime('Creation Date',readonly=True),
+									  ('smaller','Smaller than the reference Unit of Measure')],'Type'),
+		'creation_date':fields.datetime('Creation Date',readonly=True),
 		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
-		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
-		'confirm_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
-		'ap_rej_date': fields.datetime('Approved/Reject Date', readonly=True),
-		'ap_rej_user_id': fields.many2one('res.users', 'Approved/Reject By', readonly=True),	
-		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
-		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
-		'update_date': fields.datetime('Last Updated Date', readonly=True),
-		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
-		'remark': fields.text('Approve/Reject'),
-		'cancel_remark': fields.text('Cancel'),	
+		'approve_date': fields.datetime('Approved Date', readonly=True),
+		'app_user_id': fields.many2one('res.users', 'Apprved By', readonly=True),
+		'confirm_date': fields.datetime('Confirm Date', readonly=True),
+		'conf_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
+		'reject_date': fields.datetime('Reject Date', readonly=True),
+		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
+		'dummy_state': fields.selection([('draft','Draft'),('confirm','Waiting for approval'),('approved','Approved'),
+				('reject','Rejected')],'Status', readonly=True),
+		'remark': fields.text('Remarks',readonly=False),
 	}
 
 	_defaults = {
 		'active': 1,
 		'rounding': 0.01,
 		'uom_type': 'reference',
-		
-		'companys_id': lambda s,cr,uid,c: s.pool.get('res.company')._company_default_get(cr, uid, 'product.uom', context=c),
-		'state': 'draft',
+		'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
+		'dummy_state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
-		'crt_date':fields.datetime.now,	
 	}
 
 	_sql_constraints = [
-		('factor_gt_zero', 'CHECK (factor!=0)', 'The conversion ratio for a unit of measure cannot be 0!')
+		('factor_gt_zero', 'CHECK (factor!=0)', 'The conversion ratio for a unit of measure cannot be 0!'),
+		('name', 'unique(name)', 'UOM name must be unique!'),
 	]
-	
-	def _Validation(self, cr, uid, ids, context=None):
-		flds = self.browse(cr , uid , ids[0])
-		name_special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )		
-		if name_special_char:
-			return False		
+
+	def entry_confirm(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'dummy_state': 'confirm','conf_user_id': uid, 'confirm_date': dt_time})
+		return True
+
+	def entry_approve(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'dummy_state': 'approved','app_user_id': uid, 'approve_date': dt_time})
+		return True
+
+	def entry_reject(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.remark:
+			self.write(cr, uid, ids, {'dummy_state': 'reject','rej_user_id': uid, 'reject_date': dt_time})
+		else:
+			raise osv.except_osv(_('Rejection remark is must !!'),
+				_('Enter rejection remark in remark field !!'))
 		return True
 		
-	def _name_validate(self, cr, uid,ids, context=None):
-		rec = self.browse(cr,uid,ids[0])
-		res = True
-		if rec.name:
-			division_name = rec.name
-			name=division_name.upper()			
-			cr.execute(""" select upper(name) from product_uom where upper(name)  = '%s' """ %(name))
-			data = cr.dictfetchall()			
-			if len(data) > 1:
-				res = False
+	def unlink(self,cr,uid,ids,context=None):
+		unlink_ids = []		
+		for rec in self.browse(cr,uid,ids):	
+			if rec.dummy_state != 'draft' and rec.dummy_state != 'reject':			
+				raise osv.except_osv(_('Warning!'),
+						_('You can not delete this entry !!'))
 			else:
-				res = True				
-		return res
-	
+				unlink_ids.append(rec.id)
+		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
+
 	def _compute_qty(self, cr, uid, from_uom_id, qty, to_uom_id=False):
 		if not from_uom_id or not qty or not to_uom_id:
 			return qty
@@ -223,9 +234,7 @@ class product_uom(osv.osv):
 				raise osv.except_osv(_('Error!'), _('Conversion from Product UoM %s to Default UoM %s is not possible as they both belong to different Category!.') % (from_unit.name,to_unit.name,))
 			else:
 				return qty
-		amount = qty / from_unit.factor
-		if to_unit:
-			amount = rounding(amount * to_unit.factor, to_unit.rounding)
+		amount = qty
 		return amount
 
 	def _compute_price(self, cr, uid, from_uom_id, price, to_uom_id=False):
@@ -240,53 +249,29 @@ class product_uom(osv.osv):
 			return price
 		amount = price * from_unit.factor
 		if to_uom_id:
-			amount = amount / to_unit.factor
+			amount = amount / to_unit.factor 
 		return amount
 
 	def onchange_type(self, cursor, user, ids, value):
 		if value == 'reference':
 			return {'value': {'factor': 1, 'factor_inv': 1}}
 		return {}
-	
-	def entry_cancel(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])
-		if rec.cancel_remark:
-			self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		else:
-			raise osv.except_osv(_('Cancel remark is must !!'),
-				_('Enter the remarks in Cancel remarks field !!'))
-		return True
 
-	def entry_confirm(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		return True
-
-	def entry_approve(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		return True
-
-	def entry_reject(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])
-		if rec.remark:
-			self.write(cr, uid, ids, {'state': 'reject','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		else:
-			raise osv.except_osv(_('Rejection remark is must !!'),
-				_('Enter the remarks in rejection remark field !!'))
-		return True
-	
 	def write(self, cr, uid, ids, vals, context=None):
-		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		v_name = None 
+		v_code = None
 		if 'category_id' in vals:
 			for uom in self.browse(cr, uid, ids, context=context):
 				if uom.category_id.id != vals['category_id']:
 					raise osv.except_osv(_('Warning!'),_("Cannot change the category of existing Unit of Measure '%s'.") % (uom.name,))
+					
+		if vals.get('name'): 
+			v_name = vals['name'].strip() 
+			vals['name'] = v_name.capitalize() 
 		return super(product_uom, self).write(cr, uid, ids, vals, context=context)
 		
-	_constraints = [
-		(_Validation, 'Special Character Not Allowed !!!', ['Check Name']),		
-		(_name_validate, 'UOM name must be unique !!', ['name']),	
 		
-	]
+	
 
 product_uom()
 
@@ -327,26 +312,102 @@ class product_category(osv.osv):
 	_name = "product.category"
 	_description = "Product Category"
 	_columns = {
-		'name': fields.char('Name', size=64, required=True, translate=False, select=True),
+		'name': fields.char('Name', size=64, required=True, translate=True, select=True),
 		'complete_name': fields.function(_name_get_fnc, type="char", string='Name'),
-		'parent_id': fields.many2one('product.category','Parent Category', select=True, ondelete='cascade'),
+		'parent_id': fields.many2one('product.category','Parent Category', select=True, ondelete='cascade', domain="[('flag_isparent','=',True)]"),
 		'child_id': fields.one2many('product.category', 'parent_id', string='Child Categories'),
 		'sequence': fields.integer('Sequence', select=True, help="Gives the sequence order when displaying a list of product categories."),
 		'type': fields.selection([('view','View'), ('normal','Normal')], 'Category Type', help="A category of the view type is a virtual category that can be used as the parent of another category to create a hierarchical structure."),
 		'parent_left': fields.integer('Left Parent', select=1),
 		'parent_right': fields.integer('Right Parent', select=1),
+		'category_code':fields.char('Code',size=20),
+		'active':fields.boolean('Active'),
+		'creation_date':fields.datetime('Creation Date',readonly=True),
+		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
+		'approve_date': fields.datetime('Approved Date', readonly=True),
+		'app_user_id': fields.many2one('res.users', 'Apprved By', readonly=True),
+		'confirm_date': fields.datetime('Confirm Date', readonly=True),
+		'conf_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
+		'reject_date': fields.datetime('Reject Date', readonly=True),
+		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
+		'state': fields.selection([('draft','Draft'),('confirm','Waiting for approval'),('approved','Approved'),
+				('reject','Rejected')],'Status', readonly=True),
+		'remark': fields.text('Remarks',readonly=False,states={'approved':[('readonly',True)]}),
+		
+		'flag_isparent': fields.boolean('Is Parent'),
 	}
+	
+	_sql_constraints = [
+		#('name', 'unique(name)', 'Category name must be unique!'),
+		
+	]
 
 
 	_defaults = {
 		'type' : lambda *a : 'normal',
+		'active':True,
+		'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
+		'state': 'draft',
+		'user_id': lambda obj, cr, uid, context: uid,
 	}
 
 	_parent_name = "parent_id"
 	_parent_store = True
 	_parent_order = 'sequence, name'
 	_order = 'parent_left'
+	
+	"""
+	def write(self, cr, uid, ids, vals, context=None):
+		v_name = None 
+		v_code = None
+		if vals.get('name'): 
+			v_name = vals['name'].strip() 
+			vals['name'] = v_name.capitalize() 
+		if vals.get('category_code'):
+			v_code = vals['category_code'].strip()
+			vals['category_code'] = v_code.capitalize()
+		result = super(product_category,self).write(cr, uid, ids, vals, context=context)	
+		return result
 
+	def create(self, cr, uid, vals, context=None):
+		v_name = None 
+		v_code = None
+		if vals.get('name'): 
+			v_name = vals['name'].strip() 
+			vals['name'] = v_name.capitalize() 
+		if vals.get('category_code'):
+			v_code = vals['category_code'].strip()
+			vals['category_code'] = v_code.capitalize()
+		result = super(product_category,self).create(cr, uid, vals,context=context)	
+		return result
+	"""
+	def entry_confirm(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'confirm','conf_user_id': uid, 'confirm_date': dt_time})
+		return True
+
+	def entry_approve(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': dt_time})
+		return True
+
+	def entry_reject(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.remark:
+			self.write(cr, uid, ids, {'state': 'reject','rej_user_id': uid, 'reject_date': dt_time})
+		else:
+			raise osv.except_osv(_('Rejection remark is must !!'),
+				_('Enter rejection remark in remark field !!'))
+		return True
+		
+	def unlink(self,cr,uid,ids,context=None):
+		unlink_ids = []		
+		for rec in self.browse(cr,uid,ids):	
+			if rec.state != 'draft':			
+				raise osv.except_osv(_('Warning!'),
+						_('You can not delete this entry !!'))
+			else:
+				unlink_ids.append(rec.id)
+		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
+	
 	def _check_recursion(self, cr, uid, ids, context=None):
 		level = 100
 		while len(ids):
@@ -374,12 +435,12 @@ class product_template(osv.osv):
 	_description = "Product Template"
 
 	_columns = {
-		'name': fields.char('Name', size=128, required=True, translate=True, select=True),
+		'name': fields.char('Name', required=True, translate=True, select=True),
 		'product_manager': fields.many2one('res.users','Product Manager'),
 		'description': fields.text('Description',translate=True),
 		'description_purchase': fields.text('Purchase Description',translate=True),
 		'description_sale': fields.text('Sale Description',translate=True),
-		'type': fields.selection([('consu', 'Consumable'),('service','Service')], 'Product Type', help="Consumable are product where you don't manage stock, a service is a non-material product provided by a company or an individual."),
+		'type': fields.selection([('consu', 'Consumable'),('service','Service')], 'Product Type', required=True, help="Consumable are product where you don't manage stock, a service is a non-material product provided by a company or an individual."),
 		'produce_delay': fields.float('Manufacturing Lead Time', help="Average delay in days to produce this product. In the case of multi-level BOM, the manufacturing lead times of the components will be added."),
 		'rental': fields.boolean('Can be Rent'),
 		'categ_id': fields.many2one('product.category','Category', required=True, change_default=True, domain="[('type','=','normal')]" ,help="Select category for the current product"),
@@ -397,8 +458,8 @@ class product_template(osv.osv):
 			('sellable','Normal'),
 			('end','End of Lifecycle'),
 			('obsolete','Obsolete')], 'Status'),
-		'uom_id': fields.many2one('product.uom', 'Unit of Measure', required=True, help="Default Unit of Measure used for all stock operation.", domain="[('state','=','approved'), ('active','=','t')]"),
-		'uom_po_id': fields.many2one('product.uom', 'Purchase Unit of Measure', required=True, help="Default Unit of Measure used for purchase orders. It must be in the same category than the default unit of measure."),
+		'uom_id': fields.many2one('product.uom', 'Store UOM', required=True, help="Default Unit of Measure used for all stock operation."),
+		'uom_po_id': fields.many2one('product.uom', 'PO UOM', required=True, help="Default Unit of Measure used for purchase orders. It must be in the same category than the default unit of measure."),
 		'uos_id' : fields.many2one('product.uom', 'Unit of Sale',
 			help='Sepcify a unit of measure here if invoicing is made in another unit of measure than inventory. Keep empty to use the default unit of measure.'),
 		'uos_coeff': fields.float('Unit of Measure -> UOS Coeff', digits_compute= dp.get_precision('Product UoS'),
@@ -438,7 +499,8 @@ class product_template(osv.osv):
 			for product in self.browse(cr, uid, ids, context=context):
 				old_uom = product.uom_po_id
 				if old_uom.category_id.id != new_uom.category_id.id:
-					raise osv.except_osv(_('Unit of Measure categories Mismatch!'), _("New Unit of Measure '%s' must belong to same Unit of Measure category '%s' as of old Unit of Measure '%s'. If you need to change the unit of measure, you may deactivate this product from the 'Procurements' tab and create a new one.") % (new_uom.name, old_uom.category_id.name, old_uom.name,))
+					pass
+					#raise osv.except_osv(_('Unit of Measure categories Mismatch!'), _("New Unit of Measure '%s' must belong to same Unit of Measure category '%s' as of old Unit of Measure '%s'. If you need to change the unit of measure, you may deactivate this product from the 'Procurements' tab and create a new one.") % (new_uom.name, old_uom.category_id.name, old_uom.name,))
 		return super(product_template, self).write(cr, uid, ids, vals, context=context)
 
 	_defaults = {
@@ -446,37 +508,16 @@ class product_template(osv.osv):
 		'list_price': 1,
 		'cost_method': 'standard',
 		'standard_price': 0.0,
-		'sale_ok': 1,
+		'sale_ok': 0,
 		'produce_delay': 1,
 		'uom_id': _get_uom_id,
 		'uom_po_id': _get_uom_id,
 		'uos_coeff' : 1.0,
 		'mes_type' : 'fixed',
 		'categ_id' : _default_category,
-		
+		'type' : 'consu',
 	}
-	
-	"""def _Validation(self, cr, uid, ids, context=None):
-		flds = self.browse(cr , uid , ids[0])
-		name_special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )		
-		if name_special_char:
-			return False		
-		return True"""
-		
-	def _name_validate(self, cr, uid,ids, context=None):
-		rec = self.browse(cr,uid,ids[0])
-		res = True
-		if rec.name:
-			division_name = rec.name
-			name=division_name.upper()			
-			cr.execute(""" select upper(name) from product_template where upper(name)  = '%s' """ %(name))
-			data = cr.dictfetchall()			
-			if len(data) > 1:
-				res = False
-			else:
-				res = True				
-		return res
-	
+
 	def _check_uom(self, cursor, user, ids, context=None):
 		for product in self.browse(cursor, user, ids, context=context):
 			if product.uom_id.category_id.id <> product.uom_po_id.category_id.id:
@@ -493,9 +534,6 @@ class product_template(osv.osv):
 
 	_constraints = [
 		(_check_uom, 'Error: The default Unit of Measure and the purchase Unit of Measure must be in the same category.', ['uom_id']),
-		#(_Validation, 'Special Character Not Allowed !!!', ['Check Name']),
-		(_name_validate, 'Part name must be unique !!', ['name']),		
-		
 	]
 
 	def name_get(self, cr, user, ids, context=None):
@@ -631,11 +669,7 @@ class product_product(osv.osv):
 		'active': lambda *a: 1,
 		'price_extra': lambda *a: 0.0,
 		'price_margin': lambda *a: 1.0,
-		'color': 0,		
-		'companys_id': lambda s,cr,uid,c: s.pool.get('res.company')._company_default_get(cr, uid, 'product.product', context=c),
-		'state': 'draft',
-		'user_id': lambda obj, cr, uid, context: uid,
-		'crt_date':fields.datetime.now,	
+		'color': 0,
 	}
 
 	_name = "product.product"
@@ -645,7 +679,6 @@ class product_product(osv.osv):
 	_inherit = ['mail.thread']
 	_order = 'default_code,name_template'
 	_columns = {
-		'product_code':fields.char('Code',required=True),
 		'qty_available': fields.function(_product_qty_available, type='float', string='Quantity On Hand'),
 		'virtual_available': fields.function(_product_virtual_available, type='float', string='Quantity Available'),
 		'incoming_qty': fields.function(_product_incoming_qty, type='float', string='Incoming'),
@@ -663,8 +696,22 @@ class product_product(osv.osv):
 		'price_extra': fields.float('Variant Price Extra', digits_compute=dp.get_precision('Product Price')),
 		'price_margin': fields.float('Variant Price Margin', digits_compute=dp.get_precision('Product Price')),
 		'pricelist_id': fields.dummy(string='Pricelist', relation='product.pricelist', type='many2one'),
-		'name_template': fields.related('product_tmpl_id', 'name', string="Template Name", type='char', size=128, store=True, select=True, ),
+		'name_template': fields.related('product_tmpl_id', 'name', string="Template Name", type='char', store=True, select=True),
 		'color': fields.integer('Color Index'),
+		
+		'product_code':fields.char('Product Code', size=20),
+		'qa_status':fields.boolean('QA Status'),
+		'reorder_status':fields.boolean('Re-Order Status'),
+		'expiry': fields.boolean('Expiry Status'),
+		'sales_price':fields.float('Sales Price'),
+		'po_price':fields.float('PO Price'),
+		'latest_price':fields.float('Latest Price'),
+		'discount':fields.integer('Discount(%)'),
+		'pro_seller_ids': fields.one2many('product.supplierinfo', 'product_id', 'Supplier'),
+		'minimum_qty':fields.integer('Minimum Stock Qty'),
+		'reorder_qty':fields.integer('Re-Order Qty'),
+		'stock_in_hand':fields.integer('Stock In Hand'),
+		'creation_date':fields.datetime('Creation Date',readonly=True),
 		# image: all image fields are base64 encoded and PIL-supported
 		'image': fields.binary("Image",
 			help="This field holds the image used as image for the product, limited to 1024x1024px."),
@@ -688,22 +735,62 @@ class product_product(osv.osv):
 		'seller_delay': fields.function(_calc_seller, type='integer', string='Supplier Lead Time', multi="seller_info", help="This is the average delay in days between the purchase order confirmation and the reception of goods for this product and for the default supplier. It is used by the scheduler to order requests based on reordering delays."),
 		'seller_qty': fields.function(_calc_seller, type='float', string='Supplier Quantity', multi="seller_info", help="This is minimum quantity to purchase from Main Supplier."),
 		'seller_id': fields.function(_calc_seller, type='many2one', relation="res.partner", string='Main Supplier', help="Main Supplier who has highest priority in Supplier List.", multi="seller_info"),
-		### Add By Karthikeyan
-		'companys_id': fields.many2one('res.company', 'Company Name',readonly=True),
-		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status'),
-		'crt_date': fields.datetime('Creation Date',readonly=True),
-		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
-		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
-		'confirm_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
-		'ap_rej_date': fields.datetime('Approved/Reject Date', readonly=True),
-		'ap_rej_user_id': fields.many2one('res.users', 'Approved/Reject By', readonly=True),	
-		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
-		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
-		'update_date': fields.datetime('Last Updated Date', readonly=True),
-		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
-		'remark': fields.text('Approve/Reject'),
-		'cancel_remark': fields.text('Cancel'),	
+	    'product_status':fields.selection([('approve', 'Approved'), ('not_approve', 'Waiting For Approval')], 'Product Status', readonly=True),
+		'state': fields.selection([('draft','Draft'),('confirm','Waiting for approval'),('approved','Approved'),
+				('reject','Rejected')],'Status', readonly=True),
+				
+		'flag_qc_notreq': fields.boolean('QC Not Required'),
+		'flag_minqty_rule': fields.boolean('Minimum Qty Rule Applicable'),
+		'flag_expiry_alert': fields.boolean('Expiry Alert'),
 	}
+	
+	
+	_sql_constraints = [
+		('name_template', 'unique(name_template)', 'Product Name must be unique!'),
+	]
+	
+	_defaults = {
+		'active':True,
+		'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
+		'product_status':'not_approve',
+		'state': 'draft',
+	   }
+	
+	
+	   
+	   
+	def approve_product(self, cr, uid, ids, context=None):
+		return self.write(cr, uid, ids, {'product_status':'approve'})
+	"""
+	def write(self, cr, uid, ids, vals, context=None): 
+		v_name = None 
+		v_code = None
+		if vals.get('name'): 
+			v_name = vals['name'].strip() 
+			vals['name'] = v_name.capitalize() 
+		if vals.get('product_code'):
+			v_code = vals['product_code'].strip()
+			vals['product_code'] = v_code.capitalize()
+				
+		result = super(product_product,self).write(cr, uid, ids, vals, context=context) 
+		return result
+	"""
+	"""	
+	def create(self, cr, uid, vals, context=None): 
+		v_name = None 
+		v_code = None
+		if vals.get('name'): 
+			v_name = vals['name'].strip() 
+			vals['name'] = v_name.capitalize() 
+		if vals.get('product_code'):
+			v_code = vals['product_code'].strip()
+			vals['product_code'] = v_code.capitalize()
+			
+		result = super(product_product,self).create(cr, uid, vals, context=context) 
+		return result
+
+	"""
+	
 	def unlink(self, cr, uid, ids, context=None):
 		unlink_ids = []
 		unlink_product_tmpl_ids = []
@@ -728,69 +815,14 @@ class product_product(osv.osv):
 			if uom.category_id.id != uom_po.category_id.id:
 				return {'value': {'uom_po_id': uom_id}}
 		return False
-	
-	"""def _CodeValidation(self, cr, uid, ids, context=None):
-		flds = self.browse(cr , uid , ids[0])	
-		if flds.product_code:		
-			code_special_char = ''.join( c for c in flds.product_code if  c in '!@#$%^~*{}?+/=' )		
-			if code_special_char:
-				return False
-		return True	"""
-	def _code_validate(self, cr, uid,ids, context=None):
-		rec = self.browse(cr,uid,ids[0])
-		res = True
-		if rec.product_code:
-			product_code = rec.product_code
-			code=product_code.upper()			
-			cr.execute(""" select upper(product_code) from product_product where upper(product_code)  = '%s' """ %(code))
-			data = cr.dictfetchall()			
-			if len(data) > 1:
-				res = False
-			else:
-				res = True				
-		return res	
-		
-		
-	def entry_cancel(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])
-		if rec.cancel_remark:
-			self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		else:
-			raise osv.except_osv(_('Cancel remark is must !!'),
-				_('Enter the remarks in Cancel remarks field !!'))
-		return True
-
-	def entry_confirm(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		return True
-
-	def entry_approve(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		return True
-
-	def entry_reject(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])
-		if rec.remark:
-			self.write(cr, uid, ids, {'state': 'reject','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		else:
-			raise osv.except_osv(_('Rejection remark is must !!'),
-				_('Enter the remarks in rejection remark field !!'))
-		return True
-		
-	def write(self, cr, uid, ids, vals, context=None):
-		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
-		return super(product_product, self).write(cr, uid, ids, vals, context)
 
 	def _check_ean_key(self, cr, uid, ids, context=None):
 		for product in self.read(cr, uid, ids, ['ean13'], context=context):
 			res = check_ean(product['ean13'])
 		return res
 
-	
-	_constraints = [(_check_ean_key, 'You provided an invalid "EAN13 Barcode" reference. You may use the "Internal Reference" field instead.', ['ean13']),
-					#(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
-					(_code_validate, 'Part code must be unique !!', ['code']),		
-	]
+
+	_constraints = [(_check_ean_key, 'You provided an invalid "EAN13 Barcode" reference. You may use the "Internal Reference" field instead.', ['ean13'])]
 
 	def on_order(self, cr, uid, ids, orderline, quantity):
 		pass

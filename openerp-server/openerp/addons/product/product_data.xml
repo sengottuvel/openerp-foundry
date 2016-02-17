@@ -4,14 +4,13 @@
         <!--
     Resource: product.uom.categ
     -->
-        <record id="product_category_all" model="product.category">
+       <record id="product_category_all" model="product.category">
             <field name="name">All products</field>
         </record>
         <record id="product_category_1" model="product.category">
             <field name="parent_id" ref="product_category_all"/>
             <field name="name">Saleable</field>
-        </record>
-        
+        </record> 
         <!--
         <record id="product_uom_categ_unit" model="product.uom.categ">
             <field name="name">Unit</field>
@@ -27,14 +26,12 @@
         </record>
         <record id="product_uom_categ_vol" model="product.uom.categ">
             <field name="name">Volume</field>
-        </record>-->
+        </record> -->
 
         <!--
             Resource: product.uom
         -->
-        
-        <!--
-        <record id="product_uom_unit" model="product.uom">
+       <!-- <record id="product_uom_unit" model="product.uom">
             <field name="category_id" ref="product_uom_categ_unit"/>
             <field name="name">Unit(s)</field>
             <field name="factor" eval="1.0"/>
@@ -67,15 +64,12 @@
             <field name="name">Day(s)</field>
             <field eval="uom_categ_wtime" name="category_id"/>
             <field name="factor" eval="1.0"/>
-        </record> -->
-        
-        <!--
+        </record>
         <record id="product_uom_ton" model="product.uom">
-            <field name="category_id" ref="product_uom_categ_kgm"/>-->
+            <field name="category_id" ref="product_uom_categ_kgm"/> -->
             <!-- 'tonne' is the most common spelling in english-speaking countries,
                  the alternative is 'metric ton' in the US, abbreviated as 'mt' -->
-        <!--
-            <field name="name">t</field>
+         <!--   <field name="name">t</field>
             <field name="factor_inv" eval="1000"/>
             <field name="uom_type">bigger</field>
         </record>
@@ -100,9 +94,7 @@
             <field name="name">Liter(s)</field>
             <field name="category_id" ref="product_uom_categ_vol"/>
             <field name="factor">1.0</field>
-        </record>
-        
-        -->
+        </record> -->
 
 
         <!--
