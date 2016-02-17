@@ -41,14 +41,7 @@
 				<!-- BOM Details  --> 
 				<menuitem action="kg_bom.mma_bom_details" name="BOM Details" id="mam_bom_details" parent="mpm_planning_master" sequence="9"/>   
 				
-				<!-- Machine Shop Master  --> 
-				<menuitem action="kg_machine_shop.mma_machineshop_master" name="MS Items" id="mam_machineshop_master" parent="mpm_planning_master" sequence="10"/> 
 				
-				<!-- BOM Amendment  --> 
-				<menuitem action="kg_bom_amendment.mma_bom_amendment" name="BOM Amendment" id="mam_bom_amendment" parent="mpm_planning_master" sequence="11"/> 
-				  
-				<!-- BOX Master   --> 
-				<menuitem action="kg_box_master.mma_box_master" name="BOX" id="mam_box_master" parent="mpm_planning_master" sequence="12"/> 
 			
 		   <!-- Store Masters Menu -->
            <menuitem name="Store Masters" id="mpm_store_master" parent = "mpm_masters" sequence="1"/>
@@ -240,9 +233,9 @@
 				<!-- Manual Closing -->
 				<menuitem id="mpm_manual_closing_menu" name="Manual Closing" parent="stock.menu_stock_root" sequence="5"/>
                 
-                <!--PO Manual Closing Transaction Menu -->
+                <!--PO Manual Closing Transaction Menu 
 				<menuitem action="kg_po_manual_closing.po_close_form_action" id="mam_po_manual_closing" name="Purchase Order" parent="mpm_manual_closing_menu" sequence="1"/>
-				
+				-->
                 <!--SO Manual Closing Transaction Menu -->
 				<menuitem action="kg_so_manual_closing.so_close_form_action" id="mam_so_manual_closing" name="Service Order" parent="mpm_manual_closing_menu" sequence="2"/>
 				
