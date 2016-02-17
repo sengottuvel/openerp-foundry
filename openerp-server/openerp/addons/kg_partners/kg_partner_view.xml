@@ -7,14 +7,221 @@
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">	
-        	
+        
+        <xpath expr="//sheet" position="before">
+		<header>
+			<!--<button name="entry_confirm" class="oe_highlight" type="object" string="Confirm" attrs = "{'invisible':['|',('state_stage','=','approve'),('state_stage','=','confirm')]}"/>-->
+			<button name="approve_partner" class="oe_highlight" type="object" string="Approve" attrs = "{'invisible':[('partner_state','=','approve')]}"/>
+		</header>
+		</xpath>
+        
 		<field name="city" position="after">
-
 		<field name="city_id" style="width: 40%%" placeholder="City"/>
 		</field>
+		
+		<field name="name" position="after">
+		<field name="tin_no" required="1" placeholder="TIN Number"/>
+		</field>
+		
+		<field name="email" position="after">
+		<field name="tin_no"/>
+		</field>
+		<field name="zip" position="after">
+		<field name="language"/>
+		</field>
+		
+		<field name="birthdate" position="replace">
+		<field name="supply_type"/>
+		<field name="tds" attrs = "{'required':[('type','=','individual')]}"/>
+		<field name="tan_no"/>
+		<field name="cst_no"/>
+		<field name="cheque_in_favour"/>
+		</field>
+		<field name="ean13" position="replace">
+		<field name="company_type"/>
+		<field name="grade"/>
+		<field name="pan_no"/>
+		<field name="gst_no"/>
+		<field name="transport"/>
+		</field>
+		
+		<field name="ref" position="replace">
+		<field name="payment_id"/>
+		<field name="advance_limit"/>
+		</field>
+		<field name="color" position="replace">
+		<field name="delivery_id"/>
+		</field>
+		
+		
+		<field name="function" position="replace">
+		<field name="contact_person"/>
+		</field>
+		<field name="title" position="replace">
+		<field name="group_flag"/>
+		</field>
+		<field name="city" position="replace">
+		<field name="city" invisible="1"/>
+		<field name="landmark" placeholder="Landmark"/>
+		</field>
+		<field name="category_id" position="replace">
+		<field name="category_id" invisible="1"/>
+		<field name="con_designation" invisible="1"/>
+		<field name="con_whatsapp" invisible="1"/>
+		<field name="acc_number" invisible="1"/>
+		<field name="bank_name" invisible="1"/>
+		<field name="bank_bic" invisible="1"/>
+		<field name="partner_state" invisible="1"/>
+		</field>
+		
 	
+		
+		<xpath expr = "//page[@string='Additional Contacts']" position="after">
+					<page string="Delivery Address">
+				
+				<field colspan="4" mode="tree" name="delivery_ids" nolabel="1" widget="one2many_list" >
+					<tree string="Delivery Address"> 
+						<field name="landmark"/>
+						<field name="street"/>
+						<field name="street1"/>
+						<field name="city_id"/>
+						<field name="contact_no"/>
+						<field name="default"/>
+					</tree>
+					<form string="Delivery Address"	>
+						<group>
+							<group>
+								<field name="landmark" placeholder="Landmark"/>
+								<field name="street"/>
+								<field name="street1"/>
+								<field name="city_id"/>
+								<field name="state_id"/>
+								<field name="country_id"/>
+							</group>
+							<group>
+								<field name="contact_no"/>
+								<field name="zip"/>
+								<field name="default"/>
+							</group>
+						</group>
+					</form>
+				</field>
+				</page>
+				</xpath>
+				
+		<xpath expr = "//page[@string='Delivery Address']" position="after">
+					<page string="Billing Address">
+				
+				<field colspan="4" mode="tree" name="billing_ids" nolabel="1" widget="one2many_list" >
+					<tree string="Billing Address"> 
+						<field name="landmark"/>
+						<field name="street"/>
+						<field name="street1"/>
+						<field name="city_id"/>
+						<field name="contact_no"/>
+						<field name="default"/>
+					</tree>
+					<form string="Billing Address"	>
+						<group>
+							<group>
+								<field name="landmark" placeholder="Landmark"/>
+								<field name="street"/>
+								<field name="street1"/>
+								<field name="city_id"/>
+								<field name="state_id"/>
+								<field name="country_id"/>
+							</group>
+							<group>
+								<field name="contact_no"/>
+								<field name="zip"/>
+								<field name="default"/>
+							</group>
+						</group>
+					</form>
+				</field>
+				</page>
+				</xpath>
+		
+		<!-- Bank Tab Menu -->
+		
+		<xpath expr = "//page[@string='Billing Address']" position="after">
+				<page string="Bank Details">
+					<group>
+				<field name="bank_ids" nolabel="1" context="{'default_acc_number': acc_number, 'default_bank_name': bank_name, 'default_bank_bic': bank_bic}">
+				<form string="Bank" version="7.0">
+				<sheet>
+				<group>
+					<group>
+						<field name="acc_number"/>
+						<field name="bank_name"/>
+					</group>
+					<group>
+						<field name="bank_bic"/>
+					</group>
+				</group>	
+				</sheet>
+			</form>
+			</field>
+			</group>
+			</page>	
+		</xpath>
+		<xpath expr = "//page[@string='Bank Details']" position="after">
+				<page string="Entry Info">
+				<group>
+					<field name="company_id"/>
+				</group>
+				<group>
+				<form string="Bank" version="7.0">
+				<sheet>
+				<group>
+					<group>
+						<field name="created_by"/>
+						<field name="approved_by"/>
+						<field name="updated_by"/>
+					</group>
+					<group>
+						<field name="creation_date"/>
+						<field name="approved_date"/>
+						<field name="updated_date"/>
+					</group>
+				</group>	
+				</sheet>
+			</form>
+			</group>
+			</page>	
+		</xpath>
 		</field>
 	</record>
 	
+	
+	<record model="ir.ui.view" id="kg_partner_tree">
+		<field name="name">res.partner.form</field>
+		<field name="model">res.partner</field>
+		<field name="inherit_id" ref="base.view_partner_tree"/>
+		<field name="arch" type="xml">
+			<field name="name" position="after"> 
+			<field name="contact_person"/> 
+			<field name="mobile"/> 
+			</field>					
+			<field name="email" position="after"> 
+			<field name="supply_type"/> 
+			<field name="partner_state"/> 
+			</field>					
+		</field>
+	</record>
+	
+	
+	<record id="kg_action_supplier_form" model="ir.actions.act_window">
+		<field name="name">Suppliers</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="res_model">res.partner</field>
+		<field name="view_type">form</field>
+		<field name="view_mode">tree,form,kanban</field>
+		<field name="domain">[('supplier','=',True)]</field>
+		<field name="context">{'default_customer': 1,'default_supplier': 0}</field>
+		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
+		<field name="search_view_id" ref="partner_group_view"/>-->
+	</record>
+        
     </data>
 </openerp>
