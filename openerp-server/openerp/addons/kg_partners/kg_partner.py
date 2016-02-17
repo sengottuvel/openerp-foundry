@@ -70,13 +70,14 @@ class kg_partner(osv.osv):
 	  'created_by': lambda obj, cr, uid, context: uid,
 	 
 	}
-	
+	"""
 	
 	def approve_partner(self, cr, uid, ids, context=None): 
 		rec = self.browse(cr, uid, ids[0])
 		self.write(cr, uid, ids, {'partner_state': 'approve','approved_by':uid,'approved_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		
 		return True
+		"""
 	
 	def write(self, cr, uid, ids, vals, context=None):		
 		vals.update({'updated_date': time.strftime('%Y-%m-%d %H:%M:%S'),'updated_by':uid})
