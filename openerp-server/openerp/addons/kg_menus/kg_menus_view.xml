@@ -153,7 +153,7 @@
 				<menuitem action="product.product_normal_action" name="Product Master" id="mam_product_master" parent="ppm_master_menu" sequence="2"/>
 				
 				<!-- Product Category Master  -->
-				<menuitem id="kg_product_catg_master" parent="mpm_planning_master"
+				<menuitem id="kg_product_catg_master" parent="ppm_master_menu"
 						 action="product.product_category_action_form" name="Product Category" sequence="3"/>
 				
 				<!-- Payment Master  --> 
