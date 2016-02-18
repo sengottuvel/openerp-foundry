@@ -90,7 +90,8 @@ class kg_product(osv.osv):
         return True
 
     def entry_approve(self,cr,uid,ids,context=None):
-        obj = self.browse(cr, uid, ids[0])       
+        obj = self.browse(cr, uid, ids[0]) 
+        self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': dt_time})      
         return True
 
     def entry_reject(self,cr,uid,ids,context=None):
