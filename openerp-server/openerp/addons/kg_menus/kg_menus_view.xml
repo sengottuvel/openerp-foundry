@@ -11,8 +11,8 @@
 				<!-- PumpModel Master  -->
 				<menuitem action="kg_pumpmodel_master.mma_pumpmodel_master" name="Pump Model" id="mam_pumpmodel_master" parent="mpm_planning_master" sequence="0"/>
 				
-				<!-- Pattern Master  -->
-				<menuitem action="kg_pattern_master.mma_pattern_master" name="Pattern" id="mam_pattern_master" parent="mpm_planning_master" sequence="1"/>
+				<!-- Pattern Master  
+				<menuitem action="kg_pattern_master.mma_pattern_master" name="Pattern" id="mam_pattern_master" parent="mpm_planning_master" sequence="1"/>-->
 				
 				<!-- MOC Master  -->
 				<menuitem action="kg_moc_master.mma_moc_master" name="MOC" id="mam_moc_master" parent="mpm_planning_master" sequence="2"/>
@@ -41,54 +41,29 @@
 				<!-- BOM Details  --> 
 				<menuitem action="kg_bom.mma_bom_details" name="BOM Details" id="mam_bom_details" parent="mpm_planning_master" sequence="9"/>   
 				
+				<!-- Machine Shop Master  
+				<menuitem action="kg_machine_shop.mma_machineshop_master" name="MS Items" id="mam_machineshop_master" parent="mpm_planning_master" sequence="10"/> --> 
 				
-			
-		   <!-- Store Masters Menu -->
-           <menuitem name="Store Masters" id="mpm_store_master" parent = "mpm_masters" sequence="1"/>
-					 
-				<!-- Dep Master  --> 
-				<menuitem action="kg_depmaster.kg_depmaster_action_form" name="Department Master" id="menu_depmaster_action_form" parent="mpm_store_master" sequence="1"/>
+				<!-- BOM Copy 
+				<menuitem action="kg_bom.mma_bom_copy" name="BOM Copy" id="mam_bom_copy" parent="mpm_planning_master" sequence="10"/> --> 
 				 
-				<!-- PO Master  --> 
-				<menuitem action="kg_po_masters.brand_master_action_form" name="Brand Master" id="mam_po_master" parent="mpm_store_master" sequence="2"/>
-				 
-				<!-- Inward Master  --> 
-				<menuitem action="kg_inwardmaster.inwardmaster_action_form" name="Inward Master" id="mam_inward_master" parent="mpm_store_master" sequence="3"/>
-				 
-				<!-- Outward Master  --> 
-				<menuitem action="kg_outwardmaster.outwardmaster_action_form" name="Outward Master" id="mam_outward_master" parent="mpm_store_master" sequence="4"/>
-				 
-				<!-- Holiday Master  --> 
-				<menuitem action="kg_holiday_master.action_holiday_master" name="Holiday Master" id="mam_holiday_master" parent="mpm_store_master" sequence="5"/>
-				 
-				<!-- Project Master  --> 
-				<menuitem action="kg_project_master.kg_project_master_menu_action" name="Project Master" id="mam_project_master" parent="mpm_store_master" sequence="6"/>
-				 
-				<!-- Payment Master  --> 
-				<menuitem action="kg_po_masters.payment_master_action_form" name="Payment Master" id="mam_payment_master" parent="mpm_store_master" sequence="7"/>
-				 
-				<!-- Delivery Master  --> 
-				<menuitem action="kg_po_masters.delivery_master_action_form" name="Delivery Master" id="mam_delivery_master" parent="mpm_store_master" sequence="8"/>
-			
-				<!-- Product Master  --> 
-				<menuitem action="product.product_normal_action" name="Product Master" id="mam_product_master" parent="mpm_store_master" sequence="9"/>
-			
-				<!-- Inventory Master  --> 
-				<menuitem action="stock.action_location_form" name="Inventory Master" id="mam_inventory_master" parent="mpm_store_master" sequence="10"/>
+				<!-- BOX Master   
+				<menuitem action="kg_box_master.mma_box_master" name="BOX" id="mam_box_master" parent="mpm_planning_master" sequence="11"/>  --> 
 			
 		  <!-- Partner Masters Menu -->
           <menuitem name="Partner Masters" id="mpm_customer_master" parent = "mpm_masters" sequence="2"/>
 				 
+				<!-- BOM Amendment  
+				<menuitem action="kg_bom_amendment.mma_bom_amendment" name="BOM Amendment" id="mam_bom_amendment" parent="mpm_planning_master" sequence="11"/>  -->
+				  
+				<!-- BOX Master    
+				<menuitem action="kg_box_master.mma_box_master" name="BOX" id="mam_box_master" parent="mpm_planning_master" sequence="12"/> -->
 				<!-- Customer Master  --> 
-				<menuitem action="base.action_partner_supplier_form" name="Supplier" id="mam_supplier_master" parent="mpm_customer_master" sequence="1"/>
-			
-				<!-- Supplier Master  --> 
-				<menuitem action="kg_partners.kg_action_supplier_form" name="Customer" id="mam_customer_master" parent="mpm_customer_master" sequence="2"/>
-			
+				<menuitem action="kg_partners.kg_action_supplier_form" name="Customer" id="mam_customer_master" parent="mpm_customer_master" sequence="1"/>
+				
 				<!-- City Master  --> 
 				<menuitem action="base.action_city" name="City" id="mam_city_master" parent="mpm_customer_master" sequence="3"/>
 			
-				
 		<!-- Parent Transaction Menu -->
 		<menuitem name="Transactions" id="tpm_transactions" sequence="92"/>  
 		
@@ -110,27 +85,40 @@
 				<!-- QC Verification -->
 				<menuitem action="kg_qc_verification.tma_qc_verification" id="tam_qc_verification" parent="tpm_planning_transactions" sequence="4"/>
 				
+				<!-- Pattern Request 
+				<menuitem action="kg_pattern_request.tma_pattern_request" id="tam_pattern_request" parent="tpm_planning_transactions" sequence="5"/>
+				-->
+				<!-- Pattern Issue 
+				<menuitem action="kg_pattern_issue.tma_pattern_issue" id="tam_pattern_issue" parent="tpm_planning_transactions" sequence="6"/>-->
+				
+				<!-- Pattern Batch Issue 
+				<menuitem action="kg_pattern_issue.tma_pattern_batch_issue" id="tam_pattern_batch_issue" parent="tpm_planning_transactions" sequence="7"/>-->
+				
 				<!-- Melting Log -->
-				<menuitem action="kg_melting.tma_melting" id="tam_melting" parent="tpm_planning_transactions" sequence="5"/>
+				<menuitem action="kg_melting.tma_melting" id="tam_melting" parent="tpm_planning_transactions" sequence="8"/>
 				
 				<!-- Production -->
-				<menuitem action="kg_production.tma_production" id="tam_production" parent="tpm_planning_transactions" sequence="6"/>
+				<menuitem action="kg_production.tma_production" id="tam_production" parent="tpm_planning_transactions" sequence="9"/>
 				
 				<!-- Pouring Updates -->
-				<menuitem action="kg_production.tma_pouring" id="tam_pouring" parent="tpm_planning_transactions" sequence="7"/>
+				<menuitem action="kg_production.tma_pouring" id="tam_pouring" parent="tpm_planning_transactions" sequence="10"/>
 				
 				<!-- Casting Updates -->
-				<menuitem action="kg_production.tma_casting" id="tam_casting" parent="tpm_planning_transactions" sequence="8"/>
+				<menuitem action="kg_production.tma_casting" id="tam_casting" parent="tpm_planning_transactions" sequence="11"/>
 				
 		<!-- Indent Menu -->
 		
-		<menuitem name="Indents" id="ipm_indent" sequence="95"/>
+		<menuitem name="Indents" id="ipm_indent" sequence="20"/>
 		
 				<!-- Indent Transaction Menu -->
 				<menuitem id="ipm_dep_indent_menu" name="Department Indent" parent="ipm_indent" sequence="1"/>
 				
 				<!-- Department Indent -->
 				<menuitem action="kg_depindent.action_kg_depindent_form" id="iam_depindent" name="Department Indent" parent="ipm_dep_indent_menu" sequence="1"/>
+
+				
+				
+
 			
 				<!-- Purchase Transaction Menu -->
 				<menuitem id="ipm_purchase_indent_menu" name="Purchase Indent" parent="ipm_indent" sequence="2"/>
@@ -155,7 +143,24 @@
 				-->
 		
 		<!-- Purchase Menu -->
-		
+			<!-- Purchase Master Menu -->
+				<menuitem id="ppm_master_menu" name="Masters" parent="base.menu_purchase_root" sequence="0"/>
+				
+				<!--  Supplier Master  --> 
+				<menuitem action="base.action_partner_supplier_form" name="Supplier" id="mam_supplier_master" parent="ppm_master_menu" sequence="1"/>
+				
+				<!-- Product Master  --> 
+				<menuitem action="product.product_normal_action" name="Product Master" id="mam_product_master" parent="ppm_master_menu" sequence="2"/>
+				
+				<!-- Payment Master  --> 
+				<menuitem action="kg_po_masters.payment_master_action_form" name="Payment Master" id="mam_payment_master" parent="ppm_master_menu" sequence="3"/>
+				
+				<!-- Delivery Master  --> 
+				<menuitem action="kg_po_masters.delivery_master_action_form" name="Delivery Master" id="mam_delivery_master" parent="ppm_master_menu" sequence="4"/>
+			
+				<!-- Brand Master  --> 
+				<menuitem action="kg_po_masters.brand_master_action_form" name="Brand Master" id="mam_po_master" parent="ppm_master_menu" sequence="6"/>
+				 
 				<menuitem action="purchase.purchase_rfq" id="pam_purchase_order" name="Generate PO" parent="purchase.menu_procurement_management" sequence="1"/>
                 
                 <!-- Service Order Menu -->
@@ -180,14 +185,43 @@
 				<menuitem action="kg_so_advance.kg_so_advance_action_form" id="aam_so_advance" name="SO Advance" parent="apm_advance_menu" sequence="2"/>
 			    
 			    <!-- Service Invoice Menu -->
-				<menuitem id="spm_service_invoice_menu" name="Bills" parent="base.menu_purchase_root" sequence="4"/>
+				<menuitem id="spm_service_invoice_menu" name="Bills" parent="base.menu_purchase_root" sequence="4" groups="base.group_no_one"/>
 				   
 				<!-- Service Invoice Transaction -->
 				<menuitem action="kg_service_invoice.action_kg_serviceinv_form" id="aam_service_invoice" name="Service Bill" parent="spm_service_invoice_menu" sequence="2"/>
-			    
-			        
+		 
+		  <!-- Purchase Report Menu -->
+			<menuitem id="rpm_report_menu" name="Reports" parent="base.menu_purchase_root" sequence="6"/>
+				 
+				 <!-- PO Menu -->
+				<menuitem name="PO Register" parent="rpm_report_menu" action="kg_po_reports.action_po_stm_report" id="ram_po_register_reports" sequence="1"/>
+				
+				<!-- SO Menu -->
+				<menuitem name="SO Register" parent="rpm_report_menu" action="kg_po_reports.action_so_stm_report" id="ram_po_register_report" sequence="2"/>
+				 
 		<!-- Warehouse Menu -->
 		        
+			<!-- Store Masters Menu -->
+			<menuitem name="Store Masters" id="mpm_store_master" parent = "stock.menu_stock_root" sequence="0"/>
+				
+				<!-- Dep Master  --> 
+				<menuitem action="kg_depmaster.kg_depmaster_action_form" name="Department Master" id="menu_depmaster_action_form" parent="mpm_store_master" sequence="1"/>
+				  
+				<!-- Inward Master  --> 
+				<menuitem action="kg_inwardmaster.inwardmaster_action_form" name="Inward Master" id="mam_inward_master" parent="mpm_store_master" sequence="3"/>
+				 
+				<!-- Outward Master  --> 
+				<menuitem action="kg_outwardmaster.outwardmaster_action_form" name="Outward Master" id="mam_outward_master" parent="mpm_store_master" sequence="4"/>
+				 
+				<!-- Holiday Master  --> 
+				<menuitem action="kg_holiday_master.action_holiday_master" name="Holiday Master" id="mam_holiday_master" parent="mpm_store_master" sequence="5"/>
+				 
+				<!-- Project Master  --> 
+				<menuitem action="kg_project_master.kg_project_master_menu_action" name="Project Master" id="mam_project_master" parent="mpm_store_master" sequence="6"/>
+				 
+				<!-- Inventory Master  --> 
+				<menuitem action="stock.action_location_form" name="Inventory Master" id="mam_inventory_master" parent="mpm_store_master" sequence="10"/>
+			
 		        <!-- GRN AND ISSUE -->
 				<menuitem id="gpm_grn_issue_menu" name="GRN AND ISSUE" parent="stock.menu_stock_root" sequence="1"/>
 				
@@ -235,7 +269,7 @@
                 
                 <!--PO Manual Closing Transaction Menu -->
 				<menuitem action="kg_po_manual_closing.po_close_form_action" id="mam_po_manual_closing" name="Purchase Order" parent="mpm_manual_closing_menu" sequence="1"/>
-
+				
                 <!--SO Manual Closing Transaction Menu -->
 				<menuitem action="kg_so_manual_closing.so_close_form_action" id="mam_so_manual_closing" name="Service Order" parent="mpm_manual_closing_menu" sequence="2"/>
 				
@@ -244,54 +278,10 @@
                 
                 <!--PO Manual Closing Transaction Menu -->
 				<menuitem action="kg_item_ledger.action_kg_item_ledger" id="iam_item_ledger" name="Item Ledger View" parent="ipm_item_ledger_menu" sequence="1"/>
-				
-		<!-- Parent Report Menu -->
-		<menuitem name="Reports" id="rpm_reports" sequence="94"/> 
 			
-			<!-- Planning Reports Menu -->
-            <menuitem name="Planning Reports" id="rpm_planning_reports" parent = "rpm_reports" sequence="0"/>
-            
-				<!-- Dashboard Menu -->
-				<menuitem name="Dashboard" parent="rpm_planning_reports" action="board.open_board_my_dash_action" id="kg_dash_board" sequence="0"/>
-				
-				<!-- Weekly Schedule -->
-				<menuitem action="kg_reports.rma_schedule_register" id="ram_schedule_register" parent="rpm_planning_reports" sequence="1"/>
-				
-				<!-- Planning Register -->
-				<menuitem action="kg_reports.rma_planning_register" id="ram_planning_register" parent="rpm_planning_reports" sequence="2"/>
-				
-				<!-- QC Register -->
-				<menuitem action="kg_reports.rma_qc_register" id="ram_qc_register" parent="rpm_planning_reports" sequence="3"/>
-				
-				<!-- Production Register -->
-				<menuitem action="kg_reports.rma_production_register" id="ram_production_register" parent="rpm_planning_reports" sequence="4"/>
-				
-				<!-- Allotted Components Statement -->
-				<menuitem action="kg_reports.rma_allotted_components" id="ram_allotted_components" parent="rpm_planning_reports" sequence="5"/>
-				
-				<!-- Stock Statement Report-->
-				<menuitem action="kg_reports.rma_stock_statement" id="ram_stock_statement" parent="rpm_planning_reports" sequence="6"/>
-				
-				<!-- Stock Inspection Report
-				<menuitem action="kg_reports.rma_stock_inspection" id="ram_stock_inspection" parent="rpm_planning_reports" sequence="7"/>-->
-		
-		<!-- Parent Report Menu -->
-		<menuitem name="P_Reports" id="rpm_p_reports" sequence="95"/> 
-			
-			<!-- PO Reports Menu -->
-            <menuitem name="PO Reports" id="rpm_po_register_reports" parent = "rpm_p_reports" sequence="0"/>
-            
-				<!-- Dashboard Menu -->
-				<menuitem name="Dashboard" parent="rpm_po_register_reports" action="board.open_board_my_dash_action" id="ram_po_dash_board" sequence="0"/>
-				
-				<!-- PO Menu -->
-				<menuitem name="PO Register" parent="rpm_po_register_reports" action="kg_po_reports.action_po_stm_report" id="ram_po_register_reports" sequence="1"/>
-				
-				<!-- SO Menu -->
-				<menuitem name="SO Register" parent="rpm_po_register_reports" action="kg_po_reports.action_so_stm_report" id="ram_po_register_report" sequence="2"/>
-				
+					
 			<!-- Store Reports Menu -->
-            <menuitem name="Store Reports" id="rpm_str_reports" parent = "rpm_p_reports" sequence="1"/>
+            <menuitem name="Reports" id="rpm_str_reports" parent = "stock.menu_stock_root" sequence="7"/>
             
 				<!-- Product Register Menu -->
 				<menuitem name="Product Register" parent="rpm_str_reports" action="kg_store_reports.action_kg_product_reg_wizard" id="ram_product_reg" sequence="1"/>
@@ -326,6 +316,38 @@
 				<!-- Closing Stock Menu -->
 				<menuitem name="Closing Stock" parent="rpm_str_reports" action="kg_store_reports.action_main_close_stock" id="ram_closing_stock" sequence="11"/>
 				
+				
+		<!-- Parent Report Menu -->
+		<menuitem name="Reports" id="rpm_reports" sequence="94"/> 
+			
+			<!-- Planning Reports Menu -->
+            <menuitem name="Planning Reports" id="rpm_planning_reports" parent = "rpm_reports" sequence="0"/>
+            
+				<!-- Dashboard Menu -->
+				<menuitem name="Dashboard" parent="rpm_planning_reports" action="board.open_board_my_dash_action" id="kg_dash_board" sequence="0"/>
+				
+				<!-- Weekly Schedule -->
+				<menuitem action="kg_reports.rma_schedule_register" id="ram_schedule_register" parent="rpm_planning_reports" sequence="1"/>
+				
+				<!-- Planning Register -->
+				<menuitem action="kg_reports.rma_planning_register" id="ram_planning_register" parent="rpm_planning_reports" sequence="2"/>
+				
+				<!-- QC Register -->
+				<menuitem action="kg_reports.rma_qc_register" id="ram_qc_register" parent="rpm_planning_reports" sequence="3"/>
+				
+				<!-- Production Register -->
+				<menuitem action="kg_reports.rma_production_register" id="ram_production_register" parent="rpm_planning_reports" sequence="4"/>
+				
+				<!-- Allotted Components Statement -->
+				<menuitem action="kg_reports.rma_allotted_components" id="ram_allotted_components" parent="rpm_planning_reports" sequence="5"/>
+				
+				<!-- Stock Statement Report-->
+				<menuitem action="kg_reports.rma_stock_statement" id="ram_stock_statement" parent="rpm_planning_reports" sequence="6"/>
+				
+				<!-- Stock Inspection Report
+				<menuitem action="kg_reports.rma_stock_inspection" id="ram_stock_inspection" parent="rpm_planning_reports" sequence="7"/>-->
+		
+		
 		<!-- Scheduler Menu -->
 		<menuitem id="spm_scheduler" name="Scheduler" sequence="0" />
 		

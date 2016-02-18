@@ -18,14 +18,15 @@
 		<field name="city" position="after">
 		<field name="city_id" style="width: 40%%" placeholder="City"/>
 		</field>
+		<field name="is_company" position="replace">
+		<field name="is_company" invisible="1"/>
+		</field>
 		
 		<field name="name" position="after">
 		<field name="tin_no" required="1" placeholder="TIN Number"/>
 		</field>
 		
-		<field name="email" position="after">
-		<field name="tin_no"/>
-		</field>
+		
 		<field name="zip" position="after">
 		<field name="language"/>
 		</field>

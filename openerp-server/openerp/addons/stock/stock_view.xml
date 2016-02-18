@@ -10,10 +10,11 @@
 
      <!--   <menuitem id="menu_stock_warehouse_mgmt" name="Receive/Deliver By Orders" parent="menu_stock_root" sequence="1"/>
        <menuitem id="menu_stock_products_moves" name="Receive/Deliver Products" parent="menu_stock_root" sequence="2"/>-->
-        <menuitem id="menu_stock_product" name="Products" parent="menu_stock_root" sequence="6"/>
+       <!--<menuitem id="menu_stock_product" name="Products" parent="menu_stock_root" sequence="6"/>
         <menuitem name="Products by Category" id="menu_product_by_category_stock_form" action="product.product_category_action"
             parent="stock.menu_stock_product" sequence="0"/>
         <menuitem action="product.product_normal_action" id="menu_stock_products_menu" parent="menu_stock_product" sequence="1"/>
+        -->
         <menuitem id="menu_stock_configuration" name="Configuration" parent="menu_stock_root" sequence="15" groups="group_stock_manager"/>
         <menuitem id="menu_warehouse_config" name="Warehouse Management" parent="menu_stock_configuration" sequence="40" groups="base.group_no_one"/>
         <!--<menuitem id="menu_stock_inventory_control" name="Inventory Control" parent="menu_stock_root" sequence="4"/>-->
@@ -271,12 +272,13 @@
               </p>
             </field>
         </record>
+        <!--
         <menuitem id="menu_traceability" name="Traceability" parent="menu_stock_root" 
             sequence="3"/>
         <menuitem action="action_tracking_form" id="menu_action_tracking_form"
             groups="product.group_stock_packaging"
             sequence="6"
-            parent="menu_traceability"/>
+            parent="menu_traceability"/>-->
 
         <record id="lot_line_tree" model="ir.ui.view">
             <field name="name">stock.tracking.tree</field>
@@ -436,9 +438,10 @@
               </p>
             </field>
         </record>
+        <!--
         <menuitem action="action_production_lot_form" id="menu_action_production_lot_form"
             parent="menu_traceability" groups="stock.group_production_lot"
-            sequence="1"/>
+            sequence="1"/> -->
 
         #
         # Lot composition (history)
@@ -1450,7 +1453,7 @@
         <field name="act_window_id" ref="action_move_form2"/>
         </record>
 
-        <menuitem action="action_move_form2" id="menu_action_move_form2" parent="menu_traceability" sequence="3" groups="stock.group_locations"/>
+        <!--<menuitem action="action_move_form2" id="menu_action_move_form2" parent="menu_traceability" sequence="3" groups="stock.group_locations"/>-->
 
         <!--
             Reception Picking (By Stock Move)
