@@ -17,6 +17,7 @@
             ref('kg_menus.mam_moc_master'),
             ref('kg_menus.mam_division_master'),
             ref('kg_menus.mam_bom_master'),
+            ref('kg_menus.mam_box_master'),
             
             ref('kg_menus.tpm_transactions'),
             ref('kg_menus.tpm_planning_transactions'),

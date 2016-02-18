@@ -34,7 +34,7 @@ class kg_partner(osv.osv):
 	'language': fields.selection([('tamil', 'Tamil'),('english', 'English'),('hindi', 'Hindi'),('malayalam', 'Malayalam'),('others','Others')],'Preferred Language'),
 	'cheque_in_favour': fields.char('Cheque in Favor Of'),
 	'advance_limit': fields.float('Advance Limit'),
-	'transport': fields.char('Transport'),
+	'transport_id': fields.many2one('kg.transport','Transport'),
 	'contact_person': fields.char('Contact Person', size=128),
 	'landmark': fields.char('Landmark', size=128),
 	'partner_state': fields.selection([('draft','Draft'),('approve','Approved')],'Status'),

@@ -6,6 +6,8 @@ import openerp.addons.decimal_precision as dp
 from datetime import datetime
 import re
 import math
+import time
+from datetime import date
 dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
 class kg_pattern_master(osv.osv):
@@ -17,14 +19,22 @@ class kg_pattern_master(osv.osv):
 			
 		'name': fields.char('Part/Pattern No', size=128, required=True),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
+		'box_id': fields.many2one('kg.box.master','Box',readonly=True,required=True,domain="[('state','=','approved'), ('active','=','t')]"),		
 		'pattern_name': fields.char('Part/Pattern Name', size=128,required=True),
+		'code': fields.char('Pattern Code', size=128,required=True),
 		'active': fields.boolean('Active'),
-		'pcs_weight': fields.float('SS Weight(KG)'),
-		'ci_weight': fields.float('CI Weight(KG)'),
+		'pcs_weight': fields.float('SS Weight(kgs)'),
+		'ci_weight': fields.float('CI Weight(kgs)'),
+		'mould_rate': fields.float('Mould Rate(Rs)'),
+		'location': fields.char('Location', required=True),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
+		'pattern_state': fields.selection([('active','Active'),('hold','Hold'),('rework','Rework'),('reject','Rejected')],'Pattern Status',required=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
+		'line_ids':fields.one2many('ch.mocwise.rate', 'header_id', "MOC Wise Rate"),
+		'line_ids_a':fields.one2many('ch.pattern.attachment', 'header_id', "Attachments"),
+		'line_ids_b':fields.one2many('ch.pattern.history', 'header_id', "Pattern History"),
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -134,3 +144,126 @@ class kg_pattern_master(osv.osv):
 	]
 	
 kg_pattern_master()
+
+
+class ch_mocwise_rate(osv.osv):
+	
+	_name = "ch.mocwise.rate"
+	_description = "MOC Wise Rate"
+	
+	_columns = {
+			
+		'header_id':fields.many2one('kg.pattern.master', 'Pattern Entry', required=True, ondelete='cascade'),	
+		'moc_id': fields.many2one('kg.moc.master','MOC', required=True,domain="[('state','=','approved'), ('active','=','t')]"),			
+		'date':fields.date('Effective Date',required=True),
+		'rate':fields.float('Rate(Rs)',required=True),
+		'remarks':fields.text('Remarks'),
+		
+	}
+	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		today = datetime.strptime(today, '%Y-%m-%d')
+		entry_date = rec.date
+		entry_date = str(entry_date)
+		entry_date = datetime.strptime(entry_date, '%Y-%m-%d')
+		if entry_date > today:
+			return False
+		return True
+		
+	_constraints = [		
+			  
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),   
+		
+		
+	   ]
+	   
+	def onchange_rate(self, cr, uid, ids, moc_id, context=None):
+		
+		value = {'rate': ''}
+		if moc_id:
+			moc_rec = self.pool.get('kg.moc.master').browse(cr, uid, moc_id, context=context)
+			value = {'rate': moc_rec.rate}
+			
+		return {'value': value}
+		
+ch_mocwise_rate()
+
+
+
+class ch_pattern_history(osv.osv):
+	
+	_name = "ch.pattern.history"
+	_description = "Pattern History"
+	
+	_columns = {
+			
+		'header_id':fields.many2one('kg.pattern.master', 'Pattern Entry', required=True, ondelete='cascade'),	
+		's_no': fields.integer('S.No.', required=True),			
+		'date':fields.date('Date',required=True),
+		'reason':fields.text('Reason for Rework',required=True),
+		'remarks':fields.text('Remarks'),
+		
+	}
+	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		today = datetime.strptime(today, '%Y-%m-%d')
+		entry_date = rec.date
+		entry_date = str(entry_date)
+		entry_date = datetime.strptime(entry_date, '%Y-%m-%d')
+		if entry_date > today:
+			return False
+		return True
+		
+	_constraints = [		
+			  
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),   
+		
+		
+	   ]
+ch_pattern_history()
+
+
+
+class ch_pattern_attachment(osv.osv):
+	
+	_name = "ch.pattern.attachment"
+	_description = "Pattern Attachments"
+	
+	_columns = {
+			
+		'header_id':fields.many2one('kg.pattern.master', 'Pattern Entry', required=True, ondelete='cascade'),			
+		'date':fields.date('Date',required=True),
+		'attach_file': fields.binary('Attachment'),
+		
+	}
+	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		today = datetime.strptime(today, '%Y-%m-%d')
+		entry_date = rec.date
+		entry_date = str(entry_date)
+		entry_date = datetime.strptime(entry_date, '%Y-%m-%d')
+		if entry_date > today:
+			return False
+		return True
+		
+	_constraints = [		
+			  
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),   
+		
+		
+	   ]
+ch_pattern_attachment()
+
+

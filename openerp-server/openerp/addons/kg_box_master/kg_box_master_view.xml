@@ -4,11 +4,11 @@
 
 	<!-- Form View Start -->
 	
-		<record id="m_form_v_pattern" model="ir.ui.view">
-			<field name="name">Pattern Master Form</field>
-			<field name="model">kg.pattern.master</field>
+		<record id="m_form_v_box" model="ir.ui.view">
+			<field name="name">Box Master Form</field>
+			<field name="model">kg.box.master</field>
 			<field name="arch" type="xml">
-				<form string="Pattern Master" version="7.0">					
+				<form string="Box Master" version="7.0">					
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
@@ -19,21 +19,14 @@
 						<group>
 							<group>						
 								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
-								<field name="box_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
-								<field name="pcs_weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
-								<field name="mould_rate" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" invisible="1"/>
-								<field name="location" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>									
-								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>					
+								<field name="active"/>
+								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 							</group>
 							<group>
-								<field name="pattern_name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="ci_weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>													
-								<field name="active"/>									
-								<field name="pattern_state" style="width: 50%%" class="att_state_change"/>							
-								<field name="state" style="width: 30%%" class="att_state_change"/>							
+								<field name="cost" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="state"/>								
 							</group>
-						</group>
+						</group>						
 						<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
 							<group>	
 								<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject','cancel'])]}"/>
@@ -43,34 +36,6 @@
 							</group>
 						</group>
 						<notebook>
-							<page string="MOC Rate Details">	
-								<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">
-									<tree string="MOC Rate Details Entry Tree" editable="top" >									
-										<field name="moc_id" on_change="onchange_rate(moc_id)"/>											
-										<field name="date"/>				   
-										<field name="rate"/>
-										<field name="remarks" widget="char"/>														
-									</tree>
-								</field>																								
-							</page>
-							<page string="Attachments">	
-								<field name="line_ids_a" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">
-									<tree string="Attachments Entry Tree" editable="top" >									
-										<field name="date" />											
-										<field name="attach_file"/>																						
-									</tree>
-								</field>																								
-							</page>
-							<page string="Pattern History">	
-								<field name="line_ids_b" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">
-									<tree string="Pattern History Entry Tree" editable="top" >									
-										<field name="s_no" />											
-										<field name="date"/>				   
-										<field name="reason" widget="char"/>
-																							
-									</tree>
-								</field>																								
-							</page>
 							<page string="Entry Info">
 									<group>
 										<field name="company_id"/>
@@ -102,17 +67,15 @@
 
 		<!-- Tree View Start -->
 		
-		<record id="m_tree_v_pattern" model="ir.ui.view">
-			<field name="name">Pattern Master Tree</field>
-			<field name="model">kg.pattern.master</field>
+		<record id="m_tree_v_box" model="ir.ui.view">
+			<field name="name">Box Master Tree</field>
+			<field name="model">kg.box.master</field>
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'draft';red:state == 'confirmed'
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" 
-								toolbar="True" string="Pattern Master Tree">		
-					<field name="name"/>						
-					<field name="pattern_name"/>					
-					<field name="pcs_weight"/>					
-					<field name="ci_weight"/>					
+								toolbar="True" string="Box Master Tree">				
+					<field name="name"/>
+					<field name="cost"/>
 					<field name="state"/>
 				</tree>
 			</field>
@@ -122,12 +85,12 @@
 
 		<!-- Search View Start -->
 
-		<record id="m_search_v_pattern" model="ir.ui.view">
-            <field name="name">Pattern Master Search</field>
-            <field name="model">kg.pattern.master</field>
+		<record id="m_search_v_box" model="ir.ui.view">
+            <field name="name">box Master Search</field>
+            <field name="model">kg.box.master</field>
             <field name="arch" type="xml">
-                <search string="Pattern Master Template">
-					<field name="name" string="Master"  filter_domain="['|', ('name','ilike',self), ('pattern_name','ilike',self)]" />
+                <search string="Box Master Template">
+					<field name="name" string="Master"  filter_domain="['|', ('name','ilike',self)]" />
 					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
 					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>				
 					<filter icon="terp-check" name="approve" string="Approved" domain="[('state','=','approved')]"/>				
@@ -145,14 +108,14 @@
 
 		<!-- Menu Action Start-->
 		
-		 <record id="mma_pattern_master" model="ir.actions.act_window">
-			<field name="name">Pattern</field>
+		 <record id="mma_box_master" model="ir.actions.act_window">
+			<field name="name">Box</field>
 			<field name="type">ir.actions.act_window</field>
-			<field name="res_model">kg.pattern.master</field>
+			<field name="res_model">kg.box.master</field>
 			<field name="view_type">form</field>
 			<field name="context">{}</field>
-			<field name="view_id" ref="m_tree_v_pattern"/>
-			<field name="search_view_id" ref="m_search_v_pattern"/>
+			<field name="view_id" ref="m_tree_v_box"/>
+			<field name="search_view_id" ref="m_search_v_box"/>
 		</record>
 		
 		<!-- Menu Action End-->

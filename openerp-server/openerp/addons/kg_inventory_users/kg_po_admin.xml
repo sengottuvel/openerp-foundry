@@ -281,16 +281,6 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
 		</record>
 		
-		<record id="po_kg_product_category" model="ir.model.access">
-			<field name="model_id" ref="product.model_product_category"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">Product Category</field>
-			<field eval="1" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
-		</record>
-		
 		<record id="po_kg_product_template" model="ir.model.access">
 			<field name="model_id" ref="product.model_product_template"/>
 			<field eval="1" name="perm_read"/>
@@ -503,15 +493,45 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
 		</record>
 		
+		<record id="po_kg_delivery_address" model="ir.model.access">
+			<field name="model_id" ref="kg_partners.model_kg_delivery_address"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Delivery Adress</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
+		</record>
 		
+		<record id="po_kg_billing_address" model="ir.model.access">
+			<field name="model_id" ref="kg_partners.model_kg_billing_address"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Billing Adress</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
+		</record>
 		
+		<record id="po_kg_project_master_user" model="ir.model.access">
+			<field name="model_id" ref="kg_project_master.model_kg_project_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Project</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
+		</record>		
 		
-		
-		
-		
-		
-		
-		
+		<record id="po_kg_transport_master" model="ir.model.access">
+			<field name="model_id" ref="kg_transport.model_kg_transport"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Transport</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
+		</record>	
 		
 		
 		

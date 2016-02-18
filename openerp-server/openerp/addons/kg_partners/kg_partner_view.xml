@@ -33,7 +33,7 @@
 		
 		<field name="birthdate" position="replace">
 		<field name="supply_type"/>
-		<field name="tds" attrs = "{'required':[('type','=','individual')]}"/>
+		<field name="tds" attrs = "{'required':[('company_type','=','individual')]}"/>
 		<field name="tan_no"/>
 		<field name="cst_no"/>
 		<field name="cheque_in_favour"/>
@@ -43,7 +43,7 @@
 		<field name="grade"/>
 		<field name="pan_no"/>
 		<field name="gst_no"/>
-		<field name="transport"/>
+		<field name="transport_id"/>
 		</field>
 		
 		<field name="ref" position="replace">

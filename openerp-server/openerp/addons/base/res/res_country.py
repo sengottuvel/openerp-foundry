@@ -20,6 +20,8 @@
 ##############################################################################
 
 from openerp.osv import fields, osv
+import time
+from datetime import date
 
 def location_name_search(self, cr, user, name='', args=None, operator='ilike',
                          context=None, limit=100):
@@ -115,7 +117,7 @@ class res_city(osv.osv):
 	]
 	_defaults = {
 	   
-		#'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
+		'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'active':True,
 	}
 	

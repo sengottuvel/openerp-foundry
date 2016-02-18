@@ -8,24 +8,21 @@ import re
 import math
 dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
-class kg_moc_master(osv.osv):
+class kg_box_master(osv.osv):
 
-	_name = "kg.moc.master"
-	_description = "SAM MOC Master"
+	_name = "kg.box.master"
+	_description = "SAM box Master"
 	
 	_columns = {
 			
 		'name': fields.char('Name', size=128, required=True, select=True),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
-		'code': fields.char('Code', size=128, required=True),
+		'cost': fields.float('Moulding Cost', size=128, required=True),
 		'active': fields.boolean('Active'),
-		'rate': fields.float('Rate(Rs)', required=True,),
-		'pro_cost': fields.float('Production Cost(Rs)', required=True,),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
-		'line_ids':fields.one2many('ch.moc.raw.material', 'header_id', "Raw Materials"),
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -43,7 +40,7 @@ class kg_moc_master(osv.osv):
 	
 	_defaults = {
 	
-		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.moc.master', context=c),
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.box.master', context=c),
 		'active': True,
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
@@ -57,50 +54,8 @@ class kg_moc_master(osv.osv):
 		('code', 'unique(code)', 'Code must be unique per Company !!'),
 	]
 	
-	"""def _Validation(self, cr, uid, ids, context=None):
-		flds = self.browse(cr , uid , ids[0])
-		special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )
-		if special_char:
-			return False
-		return True
 	
-	def _CodeValidation(self, cr, uid, ids, context=None):
-		flds = self.browse(cr , uid , ids[0])
-		if flds.code:			
-			code_special_char = ''.join( c for c in flds.code if  c in '!@#$%^~*{}?+/=' )		
-			if code_special_char:
-				return False
-		return True		"""
-		
-	def _name_validate(self, cr, uid,ids, context=None):
-		rec = self.browse(cr,uid,ids[0])
-		res = True
-		if rec.name:
-			division_name = rec.name
-			name=division_name.upper()			
-			cr.execute(""" select upper(name) from kg_moc_master where upper(name)  = '%s' """ %(name))
-			data = cr.dictfetchall()
-			
-			if len(data) > 1:
-				res = False
-			else:
-				res = True				
-		return res
-			
-	def _code_validate(self, cr, uid,ids, context=None):
-		rec = self.browse(cr,uid,ids[0])
-		res = True
-		if rec.code:
-			division_code = rec.code
-			code=division_code.upper()			
-			cr.execute(""" select upper(code) from kg_moc_master where upper(code)  = '%s' """ %(code))
-			data = cr.dictfetchall()			
-			if len(data) > 1:
-				res = False
-			else:
-				res = True				
-		return res	
-		
+	
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.cancel_remark:
@@ -139,31 +94,9 @@ class kg_moc_master(osv.osv):
 		
 	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
-		return super(kg_moc_master, self).write(cr, uid, ids, vals, context)
+		return super(kg_box_master, self).write(cr, uid, ids, vals, context)
 		
 	
-	_constraints = [
-		#(_Validation, 'Special Character Not Allowed !!!', ['name']),
-		#(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
-		(_name_validate, 'MOC name must be unique !!', ['name']),		
-		(_code_validate, 'MOC code must be unique !!', ['code']),	
-	]
 	
-kg_moc_master()
-
-
-class ch_moc_raw_material(osv.osv):
 	
-	_name = "ch.moc.raw.material"
-	_description = "SAM MOC Raw Materials Master"
-	
-	_columns = {
-			
-		'header_id':fields.many2one('kg.moc.master', 'MOC Entry', required=True, ondelete='cascade'),	
-		'product_id': fields.many2one('product.product','Raw Material', required=True,domain="[('state','=','approved')]"),			
-		'uom':fields.many2one('product.uom', 'UOM',required=True),
-		'qty':fields.float('Qty',required=True),
-		'remarks':fields.text('Remarks'),
-		
-	}
-ch_moc_raw_material()
+kg_box_master()

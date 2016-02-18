@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+	
+	
+	<record id="kg_transport_form_view" model="ir.ui.view">
+			<field name="name">kg.transport</field>
+			<field name="model">kg.transport</field>
+			<field name="arch" type="xml">
+				<form string="Transport Master" version="7.0">	
+				<header>			
+				<button name="confirm_transport" states="draft" string="Confirm" type="object" class="oe_highlight"/>	
+				<button name="approve_transport" states="confirm" string="Approve" type="object" class="oe_highlight"/>
+				<!--<button name="delete_transport" type="object" string="Delete Transport" />	-->
+				</header>
+					<group>
+						<group>						
+							<field name="code"/>
+							<field name="name"/>
+							<field name="contact_person"/>						
+							<field name="mobile"/>						
+							<field name="phone"/>						
+							<field name="email"/>	
+							<field name="transport_user_id"/>	
+							<field name="rules"/>					
+						</group>
+						<group>
+							<field name="creation_date"/>
+							<field name="created_by"/>
+							<field name="address"/>
+							<field name="address1"/>
+							<field name="city"/>
+							<field name="zip"/>
+							<field name="state_id"/>
+							<field name="country_id"/>
+							<field name="state"/>
+						</group>
+					</group>
+					<notebook>
+					<page string="Additional Contacts">
+					<field colspan="4" mode="tree" name="line_id" nolabel="1" widget="one2many_list" >
+						<tree string="Enquiry Line" editable="bottom"> 
+							<field name="name" />
+							<field name="position" />
+							<field name="branch"/>
+							<field name="phone"/>
+							<field name="mobile"/>	
+							<button name="call_from_device" type="object" string="Call" icon="click_call"/>
+							<button name="call_from_device_hardphone" type="object" string="Call" icon="click_call_hardphone"/>					
+						</tree>		
+					</field>
+					</page>
+					</notebook>
+					<field name="int_notes" placeholder="Internal Notes..."/>
+				</form>
+			</field> 
+		</record>
+		
+		<record id="kg_transport_tree_view" model="ir.ui.view">
+			<field name="name">kg.transport</field>
+			<field name="model">kg.transport</field>
+			<field name="arch" type="xml">
+			<!--	<tree toolbar="True" string="Transport Master">-->
+				<tree colors="red:state == 'draft';blue:state == 'approve'" 
+								string="Transport Type" toolbar="1" >
+					<field name="code"/>
+					<field name="name"/>
+					<field name="contact_person"/>
+					<field name="transport_user_id"/>
+					<field name="mobile"/>
+					<field name="city"/>
+					<field name="state_id"/>
+					<field name="state"/>
+					<field name="created_by" invisible="1"/>
+				</tree>
+			</field>
+		</record>
+		
+		<record id="transport_group_view" model="ir.ui.view">
+            <field name="name">Kg Transport</field>
+            <field name="model">kg.transport</field>
+            <field name="arch" type="xml">
+                <search string="Transport Filter">
+					<field name="name" string="Transport Name" filter_domain="[('name','ilike',self)]" />
+					<field name="code" string="Code" filter_domain="[('code','ilike',self)]" />
+					<filter icon="terp-check" name="state" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="state" string="Confirmed" domain="[('state','=','confirm')]"/>
+					<filter icon="terp-check" name="state" string="Approved" domain="[('state','=','approve')]"/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Created By" icon="terp-personal" domain="[]" context="{'group_by':'created_by'}"/>
+                        <filter string="City" icon="terp-personal" domain="[]" context="{'group_by':'city'}"/>
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+		<record id="transport_action_form" model="ir.actions.act_window">
+			<field name="name">Transport Master</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.transport</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="search_view_id" ref="transport_group_view"/>
+			<field name="view_id" ref="kg_transport_tree_view"/>
+		</record>
+
+</data>
+	</openerp>

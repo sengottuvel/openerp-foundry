@@ -20,6 +20,7 @@
 							<group>						
 								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 								<field name="rate" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="pro_cost" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 							</group>
 							<group>
@@ -37,6 +38,16 @@
 							</group>
 						</group>
 						<notebook>
+							<page string="Raw Materials">	
+								<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">
+									<tree string="Raw Materials Entry Tree" editable="top" >									
+										<field name="product_id" />											
+										<field name="uom"/>				   
+										<field name="qty" />
+										<field name="remarks" widget="char"/>														
+									</tree>
+								</field>																								
+							</page>
 							<page string="Entry Info">
 									<group>
 										<field name="company_id"/>

@@ -42,27 +42,22 @@
 				<menuitem action="kg_bom.mma_bom_details" name="BOM Details" id="mam_bom_details" parent="mpm_planning_master" sequence="9"/>   
 				
 				<!-- Machine Shop Master  
-				<menuitem action="kg_machine_shop.mma_machineshop_master" name="MS Items" id="mam_machineshop_master" parent="mpm_planning_master" sequence="10"/> --> 
+				<menuitem action="kg_machine_shop.mma_machineshop_master" name="MS Items" id="mam_machineshop_master" parent="mpm_planning_master" sequence="10"/> --> 				
 				
-				<!-- BOM Copy 
-				<menuitem action="kg_bom.mma_bom_copy" name="BOM Copy" id="mam_bom_copy" parent="mpm_planning_master" sequence="10"/> --> 
+				<!-- BOM Amendment  
+				<menuitem action="kg_bom_amendment.mma_bom_amendment" name="BOM Amendment" id="mam_bom_amendment" parent="mpm_planning_master" sequence="11"/>  -->
 				 
-				<!-- BOX Master   
-				<menuitem action="kg_box_master.mma_box_master" name="BOX" id="mam_box_master" parent="mpm_planning_master" sequence="11"/>  --> 
+				<!-- BOX Master   --> 
+				<menuitem action="kg_box_master.mma_box_master" name="BOX" id="mam_box_master" parent="mpm_planning_master" sequence="12"/> 
 			
 		  <!-- Partner Masters Menu -->
           <menuitem name="Partner Masters" id="mpm_customer_master" parent = "mpm_masters" sequence="2"/>
 				 
-				<!-- BOM Amendment  
-				<menuitem action="kg_bom_amendment.mma_bom_amendment" name="BOM Amendment" id="mam_bom_amendment" parent="mpm_planning_master" sequence="11"/>  -->
-				  
-				<!-- BOX Master    
-				<menuitem action="kg_box_master.mma_box_master" name="BOX" id="mam_box_master" parent="mpm_planning_master" sequence="12"/> -->
+						
 				<!-- Customer Master  --> 
 				<menuitem action="kg_partners.kg_action_supplier_form" name="Customer" id="mam_customer_master" parent="mpm_customer_master" sequence="1"/>
 				
-				<!-- City Master  --> 
-				<menuitem action="base.action_city" name="City" id="mam_city_master" parent="mpm_customer_master" sequence="3"/>
+				
 			
 		<!-- Parent Transaction Menu -->
 		<menuitem name="Transactions" id="tpm_transactions" sequence="92"/>  
@@ -164,6 +159,16 @@
 			
 				<!-- Brand Master  --> 
 				<menuitem action="kg_po_masters.brand_master_action_form" name="Brand Master" id="mam_po_master" parent="ppm_master_menu" sequence="6"/>
+				
+				<!-- Country -->
+				<menuitem id="kg_country_master" parent="ppm_master_menu" name="Country" action="base.action_country" sequence="7"/>
+				<!-- State -->
+				<menuitem id="kg_state_master" parent="ppm_master_menu" name="State" action="base.action_country_state" sequence="8"/>
+				<!-- City Master  --> 
+				<menuitem action="base.action_city" name="City" id="mam_city_master" parent="ppm_master_menu" sequence="9"/>
+				
+				<!-- Transport Master  --> 
+				<menuitem action="kg_transport.transport_action_form" name="Transport" id="mam_transport_master" parent="ppm_master_menu" sequence="10"/>
 				 
 				<menuitem action="purchase.purchase_rfq" id="pam_purchase_order" name="Generate PO" parent="purchase.menu_procurement_management" sequence="1"/>
                 
