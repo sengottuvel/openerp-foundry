@@ -152,11 +152,15 @@
 				<!-- Product Master  --> 
 				<menuitem action="product.product_normal_action" name="Product Master" id="mam_product_master" parent="ppm_master_menu" sequence="2"/>
 				
+				<!-- Product Category Master  -->
+				<menuitem id="kg_product_catg_master" parent="mpm_planning_master"
+						 action="product.product_category_action_form" name="Product Category" sequence="3"/>
+				
 				<!-- Payment Master  --> 
-				<menuitem action="kg_po_masters.payment_master_action_form" name="Payment Master" id="mam_payment_master" parent="ppm_master_menu" sequence="3"/>
+				<menuitem action="kg_po_masters.payment_master_action_form" name="Payment Master" id="mam_payment_master" parent="ppm_master_menu" sequence="4"/>
 				
 				<!-- Delivery Master  --> 
-				<menuitem action="kg_po_masters.delivery_master_action_form" name="Delivery Master" id="mam_delivery_master" parent="ppm_master_menu" sequence="4"/>
+				<menuitem action="kg_po_masters.delivery_master_action_form" name="Delivery Master" id="mam_delivery_master" parent="ppm_master_menu" sequence="5"/>
 			
 				<!-- Brand Master  --> 
 				<menuitem action="kg_po_masters.brand_master_action_form" name="Brand Master" id="mam_po_master" parent="ppm_master_menu" sequence="6"/>

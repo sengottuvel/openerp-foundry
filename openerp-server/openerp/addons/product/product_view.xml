@@ -395,7 +395,7 @@
                         <group>
 							<group>
 								<field name="name" placeholder="Name" attrs="{'readonly': [('state','=','approved')]}" />
-								<field name="parent_id" attrs="{'readonly': [('state','=','approved')],'invisible': [('flag_isparent','=',True)]}"/>
+								<field name="parent_id" attrs="{'readonly': [('state','=','approved')]"/>
 							
 							</group>
 							<group>

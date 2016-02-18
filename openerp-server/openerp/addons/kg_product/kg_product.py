@@ -86,50 +86,11 @@ class kg_product(osv.osv):
         return val
     
     def entry_confirm(self,cr,uid,ids,context=None):
-        self.write(cr, uid, ids, {'state': 'confirm','conf_user_id': uid, 'confirm_date': dt_time})
-        cr.execute("""select all_transaction_mails('Product Master Approval',%s)"""%(ids[0]))
-        data = cr.fetchall();
-        vals = self.email_ids(cr,uid,ids,context = context)
-        if (not vals['email_to']) or (not vals['email_cc']):
-            pass
-        else:
-            ir_mail_server = self.pool.get('ir.mail_server')
-            msg = ir_mail_server.build_email(
-                    email_from = vals['email_from'][0],
-                    email_to = vals['email_to'],
-                    subject = " New Product - Waiting For Approval",
-                    body = data[0][0],
-                    email_cc = vals['email_cc'],
-                    object_id = ids[0] and ('%s-%s' % (ids[0], 'product.product')),
-                    subtype = 'html',
-                    subtype_alternative = 'plain')
-            res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
+        self.write(cr, uid, ids, {'state': 'confirm','conf_user_id': uid, 'confirm_date': dt_time})       
         return True
 
     def entry_approve(self,cr,uid,ids,context=None):
-        obj = self.browse(cr, uid, ids[0])
-        if obj.conf_user_id.id == uid:
-            raise osv.except_osv(
-                    _('Warning'),
-                    _('Approve cannot be done by Confirmed user'))
-        self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': dt_time})
-        cr.execute("""select all_transaction_mails('Product Master Approval',%s)"""%(ids[0]))
-        data = cr.fetchall();
-        vals = self.email_ids(cr,uid,ids,context = context)
-        if (not vals['email_to']) or (not vals['email_cc']):
-            pass
-        else:
-            ir_mail_server = self.pool.get('ir.mail_server')
-            msg = ir_mail_server.build_email(
-                    email_from = vals['email_from'][0],
-                    email_to = vals['email_to'],
-                    subject = " New Product - Approved",
-                    body = data[0][0],
-                    email_cc = vals['email_cc'],
-                    object_id = ids[0] and ('%s-%s' % (ids[0], 'product.product')),
-                    subtype = 'html',
-                    subtype_alternative = 'plain')
-            res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
+        obj = self.browse(cr, uid, ids[0])       
         return True
 
     def entry_reject(self,cr,uid,ids,context=None):
