@@ -63,10 +63,10 @@
             <field name="arch" type="xml">
                 <form string="Product" version="7.0">
 				 <header> 
-					<button name="entry_reject" type="object" string="Reject" states="confirm" class="oe_highlight" confirm="Are you sure to proceed ?" groups="kg_inventory_users.group_kg_main_user"/>
+					<button name="entry_reject" type="object" string="Reject" states="confirm" class="oe_highlight" confirm="Are you sure to proceed ?" />
 							
 						<button name="entry_confirm" states="draft" string="Confirm" type="object" class="oe_highlight"/>
-						<button name="entry_approve" states="confirm" string="Approve" type="object" class="oe_highlight" confirm="Are you sure to proceed ?" groups="kg_inventory_users.group_kg_main_user"/>
+						<button name="entry_approve" states="confirm" string="Approve" type="object" class="oe_highlight" confirm="Are you sure to proceed ?" />
 						
 				</header>
                     <sheet>
@@ -518,10 +518,10 @@
             <field name="arch" type="xml">
                 <form string="Units of Measure" version="7.0">
 					<header>
-						<button name="entry_reject" type="object" string="Reject" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('dummy_state','!=','confirm')]}" groups="kg_inventory_users.group_kg_main_user"/>
+						<button name="entry_reject" type="object" string="Reject" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('dummy_state','!=','confirm')]}" />
 							
 						<button name="entry_confirm" string="Confirm" type="object" class="oe_highlight" attrs="{'invisible':[('dummy_state','!=','draft')]}"/>
-						<button name="entry_approve" string="Approve" type="object" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('dummy_state','!=','confirm')]}" groups="kg_inventory_users.group_kg_main_user"/>
+						<button name="entry_approve" string="Approve" type="object" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('dummy_state','!=','confirm')]}" />
 						
 					</header>
                     <group>
