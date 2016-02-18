@@ -11,8 +11,8 @@
 				<!-- PumpModel Master  -->
 				<menuitem action="kg_pumpmodel_master.mma_pumpmodel_master" name="Pump Model" id="mam_pumpmodel_master" parent="mpm_planning_master" sequence="0"/>
 				
-				<!-- Pattern Master  
-				<menuitem action="kg_pattern_master.mma_pattern_master" name="Pattern" id="mam_pattern_master" parent="mpm_planning_master" sequence="1"/>-->
+				<!-- Pattern Master  -->
+				<menuitem action="kg_pattern_master.mma_pattern_master" name="Pattern" id="mam_pattern_master" parent="mpm_planning_master" sequence="1"/>
 				
 				<!-- MOC Master  -->
 				<menuitem action="kg_moc_master.mma_moc_master" name="MOC" id="mam_moc_master" parent="mpm_planning_master" sequence="2"/>
