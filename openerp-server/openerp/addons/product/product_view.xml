@@ -123,7 +123,7 @@
                             <page string="Pricing">
                                 <group>
                                     <group>
-                                        <field name="latest_price"/>
+                                        <field name="latest_price" attrs="{'readonly':[('state','=','approved')]}"/>
                                         <field name="sales_price" invisible ="1"/>
                                         <field name="po_price" invisible ="1"/>
                                         <field name="discount" invisible ="1"/>
@@ -135,13 +135,13 @@
                             <page string="Inventory">
                                 <group>
                                     <group>
-                                        <field name="qty_available" invisible ="1"/>
-                                        <field name="stock_in_hand"/>
+                                        <field name="qty_available" attrs="{'readonly':[('state','=','approved')]}"/>
+                                        <field name="stock_in_hand" attrs="{'readonly':[('state','=','approved')]}"/>
                                     
                                     </group>
                                     <group>
-                                        <field name="minimum_qty"/>
-                                        <field name="reorder_qty"/>
+                                        <field name="minimum_qty" attrs="{'readonly':[('state','=','approved')]}"/>
+                                        <field name="reorder_qty" attrs="{'readonly':[('state','=','approved')]}"/>
                                     
                                     </group>
          
@@ -163,9 +163,9 @@
                             <page string="Validations">
                                 <group>
                                     <group>
-                                        <field name="flag_qc_notreq"/>
-										<field name="flag_minqty_rule"/>
-										<field name="flag_expiry_alert"/>
+                                        <field name="flag_qc_notreq" attrs="{'readonly':[('state','=','approved')]}"/>
+										<field name="flag_minqty_rule" attrs="{'readonly':[('state','=','approved')]}"/>
+										<field name="flag_expiry_alert" attrs="{'readonly':[('state','=','approved')]}"/>
                                     </group>
                                 </group>
                                
@@ -183,7 +183,7 @@
                                 <separator string="Description for Suppliers"/>
                                 <field name="description_purchase" placeholder="This note will be displayed on requests for quotation..."/>
                             </page>
-                            <page string="Inventory" groups="base.group_user" invisible="1">
+                            <page string="Inventory" groups="base.group_user" invisible="1" >
                                 <group name="inventory">
                                     <group name="status" string="Status">
                                         <field name="state"/>
@@ -531,7 +531,7 @@
 							<field name="conf_user_id"/>
 							<field name="app_user_id"/>
 							<field name="rej_user_id"/>
-							<field name="dummy_state"/>
+							<field name="dummy_state" />
                            <field name="category_id" invisible="1"/>
                             <field name="uom_type" on_change="onchange_type(uom_type)" />
                             <label for="factor"/>
