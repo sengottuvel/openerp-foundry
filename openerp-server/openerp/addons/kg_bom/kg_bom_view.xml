@@ -52,7 +52,7 @@
 								<field name="line_ids_a" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
 									<tree string="Machine Shop Details Entry Tree" editable="top" >			
 										
-										
+										<field name="ms_id" on_change="onchange_machineshop_name(ms_id)"/>	
 										<field name="name" readonly="1"/>
 										<field name="qty"/>
 										<field name="remarks" widget="char"/>
