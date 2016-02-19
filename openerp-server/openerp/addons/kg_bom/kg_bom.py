@@ -222,7 +222,7 @@ class ch_machineshop_details(osv.osv):
 	_columns = {
 	
 		'header_id':fields.many2one('kg.bom', 'BOM', ondelete='cascade',required=True),
-		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', ondelete='cascade',required=True),
+		#'ms_id':fields.many2one('kg.machine.shop', 'Item Code', ondelete='cascade',required=True),
 		'name':fields.char('Item Name', size=128),	  
 		'qty': fields.integer('Qty', required=True),
 		'remarks':fields.text('Remarks'),   
