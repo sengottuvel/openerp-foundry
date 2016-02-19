@@ -20,39 +20,70 @@
 					<sheet>
 						<group>
 							<group>						
-								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+								<field name="name" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}"/>								
 								<field name="uom" readonly="1"/>
-								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+								<field name="revision" readonly="1"/>
+								<field name="notes" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}"/>								
 							</group>
 							<group>
-								<field name="pump_model_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="pump_model_id" required="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}"/>
 								<field name="qty" readonly="1"/>
 								<field name="active"/>									
+								<field name="type" invisible="1"/>									
 								<field name="state" style="width: 30%%" class="att_state_change"/>								
 							</group>
 						</group>
-						<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">
-							<tree string="BOM Details Entry Tree" editable="top" >	
-							
-											
-								<field name="pos_no"/>				   
+						<notebook>
+						<page string="Foundry Items">
+						<field name="line_ids" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
+							<tree string="BOM Details Entry Tree" editable="top" >					
+								
+								<field name="pos_no" />	
 								<field name="pattern_id" on_change="onchange_pattern_name(pattern_id)"/>
 								<field name="pattern_name" readonly="1"/>				   
 								<field name="qty"/>
-								<field name="remarks"/>
+								<field name="remarks" widget="char"/>
 								<field name="state" invisible="1"/>
 				    
 							</tree>
 						</field>
-						<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
-							<group>	
-								<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							</group>
-							<group>												
-								<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])], 'readonly': [('state','in',['cancel'])]}"/>												
-							</group>
-						</group>
-						<notebook>
+						</page>
+						<page string="Machine Shop">
+								<field name="line_ids_a" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
+									<tree string="Machine Shop Details Entry Tree" editable="top" >			
+										
+										<field name="ms_id" on_change="onchange_machineshop_name(ms_id)"/>	
+										<field name="name" readonly="1"/>
+										<field name="qty"/>
+										<field name="remarks" widget="char"/>
+									</tree>
+								</field>
+							</page>
+							<page string="BOT">
+								<field name="line_ids_b" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
+									<tree string="BOT Details Entry Tree" editable="top" >	
+											
+										<field name="product_temp_id" on_change="onchange_bot_code(product_temp_id)"/>
+										<field name="code" readonly="1" />											
+										<field name="qty"/>
+										<field name="remarks" widget="char"/>
+									</tree>
+								</field>
+							</page>
+							<page string="Consumable">
+								<field name="line_ids_c" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
+									<tree string="Consumable Details Entry Tree" editable="top" >					
+										
+										<field name="product_temp_id" on_change="onchange_consu_code(product_temp_id)"/>
+										<field name="code" readonly="1"/>											
+										<field name="qty"/>
+										<field name="remarks"  widget="char"/>
+									</tree>
+								</field>
+							</page>
+							<page string="Core" invisible="1">					
+								
+							</page>
 							<page string="Entry Info">
 									<group>
 										<field name="company_id"/>
@@ -76,7 +107,15 @@
 									</group>
 								</group>
 							</page>
-						</notebook>															
+						</notebook>				
+						<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
+							<group>	
+								<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject','cancel','expire'])]}"/>
+							</group>
+							<group>												
+								<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','reject','confirmed','expire'])], 'readonly': [('state','in',['cancel','expire'])]}"/>												
+							</group>
+						</group>																		
 					</sheet>
 				</form>
 			</field> 
@@ -96,6 +135,7 @@
 								toolbar="True" string="BOM Entry Tree">					
 					<field name="name"/>
 					<field name="pump_model_id"/>
+					<field name="revision"/>
 					<field name="uom"/>					
 					<field name="state"/>
 				</tree>
@@ -113,13 +153,13 @@
 			<field name="model">ch.bom.line</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<tree string="BOM Details Entry Tree">	
-								
-					<field name="pos_no"/>			
+				<tree string="Stock Inward Details Entry Tree">					
+					
+					<field name="pos_no"/>	
 				    <field name="pattern_id" on_change="onchange_pattern_name(pattern_id)"/>
 				    <field name="pattern_name"/>				   
 				    <field name="qty"/>
-				    <field name="remarks"/>
+				    <field name="remarks" widget="char"/>
 				    <field name="state" invisible="1"/>
 				    
 				</tree>
@@ -135,14 +175,14 @@
 			<field name="model">ch.bom.line</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<form string="BOM Details Entry Tree">
-										
-					<field name="pos_no"/>			
+				<form string="Stock Inward Details Entry Tree">					
+					
+					<field name="pos_no"/>	
 					<field name="header_id"/>
 				    <field name="pattern_id"/>
 				    <field name="pattern_name"/>				   
 				    <field name="qty"/>
-				    <field name="remarks"/>
+				    <field name="remarks" widget="char"/>
 				    <field name="state" invisible="1"/>
 				    
 				</form>
@@ -159,11 +199,12 @@
             <field name="model">kg.bom</field>
             <field name="arch" type="xml">
                 <search string="BOM Master Template">
-					<field name="name" string="Master"  filter_domain="['|', ('name','ilike',self)]" />
+					<field name="name" string="Master"  filter_domain="[('name','ilike',self)]" />
 					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
 					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>				
 					<filter icon="terp-check" name="approve" string="Approved" domain="[('state','=','approved')]"/>				
 					<filter icon="terp-check" name="reject" string="Rejected" domain="[('state','=','reject')]"/>				
+					<filter icon="terp-check" name="expire" string="Expired" domain="[('state','=','expire')]"/>				
 					<separator/>
                     <group expand="0" string="Group By...">
                         <filter string="Name" icon="terp-personal" domain="[]" context="{'group_by':'name'}"/> 
@@ -185,6 +226,7 @@
 			<field name="context">{}</field>
 			<field name="view_id" ref="m_tree_v_bom"/>
 			<field name="search_view_id" ref="m_search_v_bom"/>
+			<field name="context">{"search_default_draft":1}</field>
 			
 		</record>
 		
@@ -202,7 +244,11 @@
 		</record>
 		
 	<!-- Child Class  Menu Action End-->
-			
+	
+	
+	
+	
+	
 	
 	
     </data>

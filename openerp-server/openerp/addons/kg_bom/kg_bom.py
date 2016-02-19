@@ -16,17 +16,23 @@ class kg_bom(osv.osv):
 	
 	_columns = {
 		'name': fields.char('BOM Name', size=128, required=True, select=True),
-		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled'),('expire','Expired')],'Status', readonly=True),	
-		'line_ids': fields.one2many('ch.bom.line', 'header_id', "BOM Line"),
+		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled'),('expire','Expired')],'Status', readonly=True),   
+		'line_ids': fields.one2many('ch.bom.line', 'header_id', "BOM Line"),		
+		'line_ids_a':fields.one2many('ch.machineshop.details', 'header_id', "Machine Shop Line"),
+		'line_ids_b':fields.one2many('ch.bot.details', 'header_id', "BOT Line"),
+		'line_ids_c':fields.one2many('ch.consu.details', 'header_id', "Consumable Line"),
+		'type': fields.selection([('new','New'),('copy','Copy'),('amendment','Amendment')],'Type', required=True),
+		
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
-		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True,domain="[('state','=','approved'), ('active','=','t')]"),	
-		'uom': fields.char('Unit of Measure', readonly=True,required=True),	
+		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model',domain="[('state','=','approved'), ('active','=','t')]"),   
+		'uom': fields.char('Unit of Measure', readonly=True,required=True), 
 		'remarks':fields.text('Remarks'),
 		'qty': fields.integer('Qty', size=128,required=True,readonly=True),
 		'active':fields.boolean('Active'),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
+		'revision': fields.integer('Revision'),
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -39,7 +45,7 @@ class kg_bom(osv.osv):
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
-		'expire_date':fields.datetime('Expired Date'),
+		'expire_date':fields.datetime('Expired Date', readonly=True),
 		'expire_user_id': fields.many2one('res.users', 'Expired By', readonly=True),		
 	
 		
@@ -52,11 +58,14 @@ class kg_bom(osv.osv):
 	  'state': 'draft',
 	  'qty': 1,
 	  'user_id': lambda obj, cr, uid, context: uid,
-	  'crt_date':fields.datetime.now,	
-	  'uom':'Nos',	
+	  'crt_date':fields.datetime.now,   
+	  'type':'new', 
+	  'uom':'Nos', 
+	  'revision' : 0, 
 	  
 	}
-
+	
+	
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.cancel_remark:
@@ -68,13 +77,20 @@ class kg_bom(osv.osv):
 
 	def entry_confirm(self,cr,uid,ids,context=None):		
 		rec = self.browse(cr,uid,ids[0])
-		old_ids = self.search(cr,uid,[('state','=','approved'),('pump_model_id','=',rec.pump_model_id.id)])		
-		if old_ids:			
-			self.write(cr, uid, old_ids[0], {'state': 'expire','expire_user_id': uid, 'expire_date': time.strftime('%Y-%m-%d %H:%M:%S')})		
+		bom_obj = self.pool.get('kg.bom')
+		old_ids = self.search(cr,uid,[('state','=','approved'),('name','=',rec.name)])
+		if old_ids:
+			bom_rec = bom_obj.browse(cr, uid, old_ids[0])			  
+			if rec.name == bom_rec.name and rec.type != 'amendment':
+				raise osv.except_osv(_('Warning !'), _('BOM Name must be uniqe!!'))	 
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])		
+		old_ids = self.search(cr,uid,[('state','=','approved'),('name','=',rec.name)])	  
+		if old_ids:		 
+			self.write(cr, uid, old_ids[0], {'state': 'expire','expire_user_id': uid, 'expire_date': time.strftime('%Y-%m-%d %H:%M:%S')})		   
 		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
@@ -88,9 +104,9 @@ class kg_bom(osv.osv):
 		return True
 		
 	def unlink(self,cr,uid,ids,context=None):
-		unlink_ids = []		
-		for rec in self.browse(cr,uid,ids):	
-			if rec.state not in ('draft','cancel'):				
+		unlink_ids = []	 
+		for rec in self.browse(cr,uid,ids): 
+			if rec.state not in ('draft','cancel'):			 
 				raise osv.except_osv(_('Warning!'),
 						_('You can not delete this entry !!'))
 			else:
@@ -98,14 +114,12 @@ class kg_bom(osv.osv):
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
 		
 	def create(self, cr, uid, vals, context=None):
-		print "vals",vals
 		"""if vals.get('qty'):
 			qty = vals.get('qty')
 			vals.update({'qty': qty,'planning_qty':qty})	"""
 		return super(kg_bom, self).create(cr, uid, vals, context=context)
 		
-	def write(self, cr, uid, ids, vals, context=None):
-		print "vals",vals
+	def write(self, cr, uid, ids, vals, context=None):	  
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_bom, self).write(cr, uid, ids, vals, context)
 	
@@ -120,14 +134,14 @@ class ch_bom_line(osv.osv):
 	
 	_columns = {
 		
-		
-		'header_id':fields.many2one('kg.bom', 'BOM Entry', required=True, ondelete='cascade'),			
-		'pattern_id': fields.many2one('kg.pattern.master','Pattern No', required=True,domain="[('state','=','approved')]"),	
-		'pattern_name': fields.char('Pattern Name', required=True),	
+		'header_id':fields.many2one('kg.bom', 'BOM Entry', required=True, ondelete='cascade'),  
+		'pos_no': fields.integer('Position No'),
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern No', required=True,domain="[('state','=','approved')]"), 
+		'pattern_name': fields.char('Pattern Name', required=True), 
 		'remarks':fields.text('Remarks'),
 		'qty': fields.integer('Qty',required=True,),
 		'state':fields.selection([('draft','Draft'),('approve','Approved')],'Status'),
-		'pos_no': fields.integer('Position No'),
+		
 		
 	}
 	
@@ -144,14 +158,13 @@ class ch_bom_line(osv.osv):
 		res = True
 		if rec.name:
 			division_name = rec.name
-			name=division_name.upper()			
+			name=division_name.upper()		  
 			cr.execute(""" select upper(name) from kg_stage_master where upper(name)  = '%s' """ %(name))
-			data = cr.dictfetchall()
-			print "ddddddddddddddddd",data
+			data = cr.dictfetchall()			
 			if len(data) > 1:
 				res = False
 			else:
-				res = True				
+				res = True			  
 		return res
 	
 	def _check_line_duplicates(self, cr, uid, ids, context=None):
@@ -161,7 +174,7 @@ class ch_bom_line(osv.osv):
 		if duplicate_id:
 			if duplicate_id[0] != None:
 				return False
-		return True	
+		return True 
 
 	
 	def onchange_pattern_name(self, cr, uid, ids, pattern_id, context=None):
@@ -176,8 +189,7 @@ class ch_bom_line(osv.osv):
 		
 	def create(self, cr, uid, vals, context=None):
 		pattern_obj = self.pool.get('kg.pattern.master')
-		if vals.get('pattern_id'):
-			print "vals.get('pattern_id')",vals.get('pattern_id')
+		if vals.get('pattern_id'):		  
 			pattern_rec = pattern_obj.browse(cr, uid, vals.get('pattern_id') )
 			pattern_name = pattern_rec.pattern_name
 			vals.update({'pattern_name': pattern_name})
@@ -189,11 +201,11 @@ class ch_bom_line(osv.osv):
 			pattern_rec = pattern_obj.browse(cr, uid, vals.get('pattern_id') )
 			pattern_name = pattern_rec.pattern_name
 			vals.update({'pattern_name': pattern_name})
-		return super(ch_bom_line, self).write(cr, uid, ids, vals, context)	
+		return super(ch_bom_line, self).write(cr, uid, ids, vals, context)  
 		
 	"""_constraints = [
 		
-		(_check_line_duplicates, 'Pattern Name must be unique !!', ['Pattern Name']),		
+		(_check_line_duplicates, 'Pattern Name must be unique !!', ['Pattern Name']),	   
 		
 	]"""
 
@@ -201,10 +213,129 @@ class ch_bom_line(osv.osv):
 ch_bom_line()
 
 
+class ch_machineshop_details(osv.osv):
 
+	_name = "ch.machineshop.details"
+	_description = "BOM machineshop Details"
+	
+	
+	_columns = {
+	
+		'header_id':fields.many2one('kg.bom', 'BOM', ondelete='cascade',required=True),
+		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', ondelete='cascade',required=True),
+		'name':fields.char('Item Name', size=128),	  
+		'qty': fields.integer('Qty', required=True),
+		'remarks':fields.text('Remarks'),   
+	
+	}   
+	
+	def onchange_machineshop_name(self, cr, uid, ids, ms_id, context=None):
+		
+		value = {'name': ''}
+		if ms_id:
+			pro_rec = self.pool.get('kg.machine.shop').browse(cr, uid, ms_id, context=context)
+			value = {'name': pro_rec.name}
+			
+		return {'value': value}
+		
+	def create(self, cr, uid, vals, context=None):	  
+		ms_obj = self.pool.get('kg.machine.shop')
+		if vals.get('ms_id'):		   
+			ms_rec = ms_obj.browse(cr, uid, vals.get('ms_id') )
+			ms_name = ms_rec.name		   
+			vals.update({'name':ms_name })
+		return super(ch_machineshop_details, self).create(cr, uid, vals, context=context)
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		ms_obj = self.pool.get('kg.machine.shop')
+		if vals.get('ms_id'):		   
+			ms_rec = ms_obj.browse(cr, uid, vals.get('ms_id') )
+			ms_name = ms_rec.name		   
+			vals.update({'name':ms_name })
+		return super(ch_machineshop_details, self).write(cr, uid, ids, vals, context)   
 
+ch_machineshop_details()
 
+class ch_bot_details(osv.osv):
+	
+	_name = "ch.bot.details"
+	_description = "BOM BOT Details"	
+	
+	_columns = {
+	
+		'header_id':fields.many2one('kg.bom', 'BOM', ondelete='cascade',required=True),
+		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('type','=','bot')], ondelete='cascade',required=True),
+		'code':fields.char('Item Code', size=128),	  
+		'qty': fields.integer('Qty', required=True),
+		'remarks':fields.text('Remarks'),   
+	
+	}
+	
+	def onchange_bot_code(self, cr, uid, ids, product_temp_id, context=None):	   
+		value = {'code': ''}
+		if product_temp_id:
+			pro_rec = self.pool.get('product.product').browse(cr, uid, product_temp_id, context=context)
+			value = {'code': pro_rec.product_code}		  
+		return {'value': value}
+		
+	def create(self, cr, uid, vals, context=None):	  
+		product_obj = self.pool.get('product.product')
+		if vals.get('product_temp_id'):		 
+			product_rec = product_obj.browse(cr, uid, vals.get('product_temp_id') )
+			product_code = product_rec.product_code		 
+			vals.update({'code':product_code })
+		return super(ch_bot_details, self).create(cr, uid, vals, context=context)
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		product_obj = self.pool.get('product.product')
+		if vals.get('product_temp_id'):		 
+			product_rec = product_obj.browse(cr, uid, vals.get('product_temp_id') )
+			product_code = product_rec.product_code
+			vals.update({'code':product_code })
+		return super(ch_bot_details, self).write(cr, uid, ids, vals, context)   
 
+ch_bot_details()
 
+class ch_consu_details(osv.osv):
+	
+	_name = "ch.consu.details"
+	_description = "BOM Consumable Details" 
+	
+	_columns = {
+	
+		'header_id':fields.many2one('kg.bom', 'BOM', ondelete='cascade',required=True),
+		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('type','=','consu')], ondelete='cascade',required=True),
+		'code':fields.char('Item Code', size=128),  
+		'qty': fields.integer('Qty',required=True), 
+		'remarks':fields.text('Remarks'),
+	
+	}
+	
+	def onchange_consu_code(self, cr, uid, ids, product_temp_id, context=None):
+		
+		value = {'code': ''}
+		if product_temp_id:
+			pro_rec = self.pool.get('product.product').browse(cr, uid, product_temp_id, context=context)
+			value = {'code': pro_rec.product_code}
+			
+		return {'value': value}
+		
+	def create(self, cr, uid, vals, context=None):	  
+		product_obj = self.pool.get('product.product')
+		if vals.get('product_temp_id'):		 
+			product_rec = product_obj.browse(cr, uid, vals.get('product_temp_id') )
+			product_code = product_rec.product_code		 
+			vals.update({'code':product_code })
+		return super(ch_consu_details, self).create(cr, uid, vals, context=context)
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		product_obj = self.pool.get('product.product')
+		if vals.get('product_temp_id'):		 
+			product_rec = product_obj.browse(cr, uid, vals.get('product_temp_id') )
+			product_code = product_rec.product_code
+			vals.update({'code':product_code })
+		return super(ch_consu_details, self).write(cr, uid, ids, vals, context) 
+
+ch_consu_details()
 
 

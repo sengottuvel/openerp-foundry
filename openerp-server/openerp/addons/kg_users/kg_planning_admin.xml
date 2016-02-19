@@ -324,6 +324,103 @@
 		
 		
 		<!-- BOX Master end -->
+		<!-- Pattern History -->
+		
+		<record id="user_pattern_history" model="ir.model.access">
+			<field name="model_id" ref="kg_pattern_master.model_ch_pattern_history"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Pattern History</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- MOC Wise Rate  -->
+		
+		<record id="user_mocwise_rate" model="ir.model.access">
+			<field name="model_id" ref="kg_pattern_master.model_ch_mocwise_rate"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">MOC Wise Rate</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- MOC Wise Rate end -->
+		
+		<!-- Pattern Attachments -->
+		
+		<record id="user_pattern_attachment" model="ir.model.access">
+			<field name="model_id" ref="kg_pattern_master.model_ch_pattern_attachment"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Pattern Attachments</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!--Pattern Attachments end -->
+		
+		<!-- Raw Material--> 
+		
+		<record id="ch_moc_raw_material" model="ir.model.access">
+			<field name="model_id" ref="kg_moc_master.model_ch_moc_raw_material"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Raw Material</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		
+		<!-- Raw Material -->
+		
+		<!-- Consumable -->
+		
+		<record id="user_consu_master" model="ir.model.access">
+			<field name="model_id" ref="kg_bom.model_ch_consu_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Consumable Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- Consumable end -->
+		
+		<!-- Consumable -->
+		
+		<record id="user_bot_master" model="ir.model.access">
+			<field name="model_id" ref="kg_bom.model_ch_bot_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">BOT Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- Consumable end -->
+		
+		<!-- Machine Shop -->
+		
+		<record id="user_machineshop_item" model="ir.model.access">
+			<field name="model_id" ref="kg_bom.model_ch_machineshop_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">BOT Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		
+		<!-- Machineshop end -->
 		
 		
     </data>
