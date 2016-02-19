@@ -29,9 +29,6 @@
 				<!-- Division Master  -->
 				<menuitem action="kg_division_master.mma_division_master" name="Division" id="mam_division_master" parent="mpm_planning_master" sequence="5"/>
 				
-				<!-- Units of Measure Master  --> 
-				<menuitem action="product.product_uom_form_action" name="Units of Measure" id="mam_uom_master" parent="mpm_planning_master" sequence="6"/>    
-				
 				<!-- Stage Master  --> 
 				<menuitem action="kg_stage_master.mma_stage_master" name="Stage" id="mam_stage_master" parent="mpm_planning_master" sequence="7"/>    
 				
@@ -52,12 +49,9 @@
 			
 		  <!-- Partner Masters Menu -->
           <menuitem name="Partner Masters" id="mpm_customer_master" parent = "mpm_masters" sequence="2"/>
-				 
 						
 				<!-- Customer Master  --> 
 				<menuitem action="kg_partners.kg_action_supplier_form" name="Customer" id="mam_customer_master" parent="mpm_customer_master" sequence="1"/>
-				
-				
 			
 		<!-- Parent Transaction Menu -->
 		<menuitem name="Transactions" id="tpm_transactions" sequence="92"/>  
@@ -111,10 +105,6 @@
 				<!-- Department Indent -->
 				<menuitem action="kg_depindent.action_kg_depindent_form" id="iam_depindent" name="Department Indent" parent="ipm_dep_indent_menu" sequence="1"/>
 
-				
-				
-
-			
 				<!-- Purchase Transaction Menu -->
 				<menuitem id="ipm_purchase_indent_menu" name="Purchase Indent" parent="ipm_indent" sequence="2"/>
 				
@@ -151,24 +141,29 @@
 				<menuitem id="kg_product_catg_master" parent="ppm_master_menu"
 						 action="product.product_category_action_form" name="Product Category" sequence="3"/>
 				
+				<!-- Units of Measure Master  --> 
+				<menuitem action="product.product_uom_form_action" name="Units of Measure" id="mam_uom_master" parent="ppm_master_menu" sequence="4"/>    
+				
 				<!-- Payment Master  --> 
-				<menuitem action="kg_po_masters.payment_master_action_form" name="Payment Master" id="mam_payment_master" parent="ppm_master_menu" sequence="4"/>
+				<menuitem action="kg_po_masters.payment_master_action_form" name="Payment Master" id="mam_payment_master" parent="ppm_master_menu" sequence="5"/>
 				
 				<!-- Delivery Master  --> 
-				<menuitem action="kg_po_masters.delivery_master_action_form" name="Delivery Master" id="mam_delivery_master" parent="ppm_master_menu" sequence="5"/>
+				<menuitem action="kg_po_masters.delivery_master_action_form" name="Delivery Master" id="mam_delivery_master" parent="ppm_master_menu" sequence="6"/>
 			
 				<!-- Brand Master  --> 
-				<menuitem action="kg_po_masters.brand_master_action_form" name="Brand Master" id="mam_po_master" parent="ppm_master_menu" sequence="6"/>
+				<menuitem action="kg_po_masters.brand_master_action_form" name="Brand Master" id="mam_po_master" parent="ppm_master_menu" sequence="7"/>
 				
 				<!-- Country -->
-				<menuitem id="kg_country_master" parent="ppm_master_menu" name="Country" action="base.action_country" sequence="7"/>
+				<menuitem id="kg_country_master" parent="ppm_master_menu" name="Country" action="base.action_country" sequence="8"/>
+				
 				<!-- State -->
-				<menuitem id="kg_state_master" parent="ppm_master_menu" name="State" action="base.action_country_state" sequence="8"/>
+				<menuitem id="kg_state_master" parent="ppm_master_menu" name="State" action="base.action_country_state" sequence="9"/>
+				
 				<!-- City Master  --> 
-				<menuitem action="base.action_city" name="City" id="mam_city_master" parent="ppm_master_menu" sequence="9"/>
+				<menuitem action="base.action_city" name="City" id="mam_city_master" parent="ppm_master_menu" sequence="10"/>
 				
 				<!-- Transport Master  --> 
-				<menuitem action="kg_transport.transport_action_form" name="Transport" id="mam_transport_master" parent="ppm_master_menu" sequence="10"/>
+				<menuitem action="kg_transport.transport_action_form" name="Transport" id="mam_transport_master" parent="ppm_master_menu" sequence="11"/>
 				 
 				<menuitem action="purchase.purchase_rfq" id="pam_purchase_order" name="Generate PO" parent="purchase.menu_procurement_management" sequence="1"/>
                 
