@@ -176,7 +176,7 @@ class product_uom(osv.osv):
 		'ap_rej_user_id': fields.many2one('res.users', 'Approved/Reject By', readonly=True),			
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
-		
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 	}
 
 	_defaults = {
@@ -186,6 +186,7 @@ class product_uom(osv.osv):
 		'crt_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'dummy_state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'product.uom', context=c),
 	}
 
 	_sql_constraints = [
