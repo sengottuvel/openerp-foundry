@@ -245,7 +245,15 @@
 		
 	<!-- Child Class  Menu Action End-->
 	
+	<!-- Menu Name Start here --> 
 	
+		<!-- BOM Master  --> 
+				<menuitem action="mma_bom_master" name="BOM" id="mam_bom_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="8"/> 
+	
+		<!-- BOM Details  --> 
+				<menuitem action="mma_bom_details" name="BOM Details" id="mam_bom_details" parent="kg_pumpmodel_master.mpm_planning_master" sequence="9"/>   
+	
+	<!-- Menu Name End here --> 
 	
 	
 	

@@ -172,6 +172,16 @@
 		
 	<!-- Menu Action End-->
 	
+	
+	<!-- Menu Item Start -->
+	
+		<!-- QC Verification -->
+		<menuitem action="tma_qc_verification" id="tam_qc_verification" parent="kg_stock_inward.tpm_planning_transactions" sequence="4"/>
+		
+		
+	
+	<!-- Menu Item End -->
+	
 		
 	</data>
 </openerp>

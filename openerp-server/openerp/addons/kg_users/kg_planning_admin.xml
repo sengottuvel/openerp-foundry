@@ -438,6 +438,58 @@
 		<!-- Machineshop end -->
 		
 		
+		<!-- Pattern Request --> 
+		
+		<record id="user_pattern_request" model="ir.model.access">
+			<field name="model_id" ref="kg_pattern_request.model_kg_pattern_request"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Pattern Request</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		
+		<!-- Pattern Request Line--> 
+		
+		<record id="user_pattern_request_line" model="ir.model.access">
+			<field name="model_id" ref="kg_pattern_request.model_ch_pattern_request_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Pattern Request Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- Pattern Issue --> 
+		
+		<record id="user_pattern_issue" model="ir.model.access">
+			<field name="model_id" ref="kg_pattern_issue.model_kg_pattern_issue"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Pattern Issue</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- Pattern Batch Issue Line--> 
+		
+		<record id="user_pattern_batch_issue_line" model="ir.model.access">
+			<field name="model_id" ref="kg_pattern_issue.model_ch_pattern_batch_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Pattern Batch Issue Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- Pattern Batch Issue -->
+		
+		
     </data>
 </openerp>
 	

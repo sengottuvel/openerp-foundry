@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_pattern_issue" model="ir.ui.view">
+			<field name="name">Pattern Issue Form</field>
+			<field name="model">kg.pattern.issue</field>
+			<field name="arch" type="xml">
+				<form string="Pattern Issue" version="7.0" create="false" delete="false">
+					<header>
+						<button name="pattern_issue" type="object" string="Issue" states="open" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="pattern_receive" type="object" string="Receive" class="oe_highlight" confirm="Are you sure to proceed ?" states="issue"/>
+					</header>
+					<sheet>		
+						<group>
+							<group>
+								<field name="name" readonly="1"/>
+							</group>											
+							<group>
+								<field name="entry_date" attrs="{'readonly': [('state','not in',['open'])]}"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+							</group>					
+						</group>
+						<group string="Request Details">
+							<group>
+								<field name="request_id" readonly="1"/>
+								<field name="pattern_id" readonly="1"/>
+								<field name="requested_qty" readonly="1"/>
+							</group>
+							<group>
+								<field name="request_date" readonly="1"/>
+								<field name="pattern_name" readonly="1"/>
+								<field name="remark" attrs="{'readonly': [('state','not in',['open'])]}"/>
+							</group>
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_pattern_issue" model="ir.ui.view">
+			<field name="name">Pattern Issue Tree</field>
+			<field name="model">kg.pattern.issue</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'open';black:state == 'issue';green:state == 'receive'"
+				toolbar="True" string="Pattern Request" create="false" delete="false">					
+					<field name="name"/>
+					<field name="entry_date"/>
+					<field name="pattern_id"/>
+					<field name="pattern_name"/>
+					<field name="requested_qty"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_pattern_issue" model="ir.ui.view">
+            <field name="name">Pattern Issue Search</field>
+            <field name="model">kg.pattern.issue</field>
+            <field name="arch" type="xml">
+                <search string="Pattern Issue">
+					<field name="name" string="Issue No.."  filter_domain="[('name','ilike',self)]" />
+					<field name="pattern_id" string="Pattern Number"  filter_domain="[('pattern_id','ilike',self)]" />
+					<filter icon="terp-check" name="open" string="Open" domain="[('state','=','open')]"/>
+					<filter icon="terp-check" name="issue" string="Issued" domain="[('state','=','issue')]"/>						
+					<filter icon="terp-check" name="receive" string="Received" domain="[('state','=','receive')]"/>						
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+                        <filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
+						<filter string="Pattern Name." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_name'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->
+		
+	<!-- Batch Issue Start Here -->
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_pattern_batch_issue" model="ir.ui.view">
+			<field name="name">Pattern Batch Issue Form</field>
+			<field name="model">ch.pattern.batch.issue</field>
+			<field name="arch" type="xml">
+				<form string="Pattern Batch Issue" version="7.0" create="false" delete="false">
+					<header>
+						<button name="entry_issue" type="object" string="Issue" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+					</header>
+					<sheet>		
+						<group>
+							<group>
+								<field name="name" readonly="1"/>
+								<field name="note" attrs="{'readonly': [('state','in',['issue'])]}" invisible="1"/>
+								<field name="flag_issueline" invisible="1"/>
+							</group>											
+							<group>
+								<field name="entry_date" attrs="{'readonly': [('state','not in',['open'])]}"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+							</group>					
+						</group>
+						<notebook>
+							<page string="Issue Items" attrs="{'invisible':[('flag_issueline','=',False)]}">
+								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['issue'])]}">
+									<tree string="Issue Line Entry" editable="top" create="false">	
+										<field name="issue_id" readonly="1"/>
+										<field name="issue_date" readonly="1"/>
+										<field name="request_id" readonly="1"/>
+										<field name="request_date" readonly="1"/>
+										<field name="pattern_id" readonly="1"/>
+										<field name="pattern_name" readonly="1"/>
+										<field name="requested_qty" readonly="1"/>
+										<field name="remark" widget="char"/>
+									</tree>
+								</field>
+							</page>
+							<page string="Select Issue Items">
+								<field name="issue_line_ids" attrs="{'readonly': [('state','in',['issue'])]}">
+									<tree string = "Issue Entry Tree" create="false" edit="false">
+										<field name="name" string="Issue No."/>
+										<field name="entry_date"/>
+										<field name="request_id"/>
+										<field name="request_date"/>
+										<field name="pattern_id"/>
+										<field name="pattern_name"/>
+										<field name="requested_qty"/>
+										<field name="remark"/>										
+										
+									</tree>
+								</field>
+								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['issue'])]}"/>
+							</page>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['issue'])]}"/>										
+										<field name="update_user_id"/>
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="confirm_date" attrs="{'invisible':[('state','not in',['issue'])]}"/>									
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_pattern_batch_issue" model="ir.ui.view">
+			<field name="name">Pattern Batch Issue Tree</field>
+			<field name="model">ch.pattern.batch.issue</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">	
+			<tree toolbar="True" string="Pattern Request">									
+					<field name="name"/>
+					<field name="entry_date"/>					
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_pattern_batch_issue" model="ir.ui.view">
+            <field name="name">Pattern Batch Issue Search</field>
+            <field name="model">ch.pattern.batch.issue</field>
+            <field name="arch" type="xml">
+                <search string="Pattern Batch Issue">
+					<field name="name" string="Batch No."  filter_domain="[('name','ilike',self)]" />
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+                       
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+	
+	<!-- Batch Issue End Here -->			
+			
+        
+	<!-- Menu Action Start-->
+		
+		
+		<record id="tma_pattern_issue" model="ir.actions.act_window">
+			<field name="name">Pattern Issue</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.pattern.issue</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_pattern_issue"/>
+			<field name="search_view_id" ref="t_search_v_pattern_issue"/>
+			<field name="context">{"search_default_open":1}</field>
+		</record>
+		
+	<!-- Menu Action End-->	
+	
+	<!-- Menu Action Start-->	
+		
+		<record id="tma_pattern_batch_issue" model="ir.actions.act_window">
+			<field name="name">Pattern Batch Issue</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">ch.pattern.batch.issue</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_pattern_batch_issue"/>
+			<field name="search_view_id" ref="t_search_v_pattern_batch_issue"/>
+			<field name="context">{"search_default_open":1}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Menu Item Start -->
+	
+		<!-- Pattern Issue  -->
+		<menuitem action="tma_pattern_issue" id="tam_pattern_issue" parent="kg_stock_inward.tpm_planning_transactions" sequence="6"/>
+		
+		<!-- Pattern Batch Issue -->
+		<menuitem action="tma_pattern_batch_issue" id="tam_pattern_batch_issue" parent="kg_stock_inward.tpm_planning_transactions" sequence="7"/>
+	
+	<!-- Menu Item End -->
+		
+	</data>
+</openerp>

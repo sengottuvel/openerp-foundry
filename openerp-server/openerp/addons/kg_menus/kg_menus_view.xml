@@ -2,98 +2,23 @@
 <openerp>
     <data>
 		
-		<!-- Parent Master Menu -->
-		<menuitem name="Masters" id="mpm_masters" sequence="91"/>
-            
-            <!-- Planning Masters Menu -->
-            <menuitem name="Planning Masters" id="mpm_planning_master" parent = "mpm_masters" sequence="0"/>
-				
-				<!-- PumpModel Master  -->
-				<menuitem action="kg_pumpmodel_master.mma_pumpmodel_master" name="Pump Model" id="mam_pumpmodel_master" parent="mpm_planning_master" sequence="0"/>
-				
-				<!-- Pattern Master  -->
-				<menuitem action="kg_pattern_master.mma_pattern_master" name="Pattern" id="mam_pattern_master" parent="mpm_planning_master" sequence="1"/>
-				
-				<!-- MOC Master  -->
-				<menuitem action="kg_moc_master.mma_moc_master" name="MOC" id="mam_moc_master" parent="mpm_planning_master" sequence="2"/>
-				
 				<!-- Products Master  -->
-				<menuitem id="kg_product_master" parent="mpm_planning_master"
+				<menuitem id="kg_product_master" parent="kg_pumpmodel_master.mpm_planning_master"
 						 action="product.product_normal_action" name="Item Master" sequence="3"/>
 				
 				<!-- Product Category Master  -->
-				<menuitem id="kg_product_catg_master" parent="mpm_planning_master"
+				<menuitem id="kg_product_catg_master" parent="kg_pumpmodel_master.mpm_planning_master"
 						 action="product.product_category_action_form" name="Product Category" sequence="4"/>
 				
-								
-				<!-- Division Master  -->
-				<menuitem action="kg_division_master.mma_division_master" name="Division" id="mam_division_master" parent="mpm_planning_master" sequence="5"/>
-				
-				<!-- Stage Master  --> 
-				<menuitem action="kg_stage_master.mma_stage_master" name="Stage" id="mam_stage_master" parent="mpm_planning_master" sequence="7"/>    
-				
-				<!-- BOM Master  --> 
-				<menuitem action="kg_bom.mma_bom_master" name="BOM" id="mam_bom_master" parent="mpm_planning_master" sequence="8"/> 
-				
-				<!-- BOM Details  --> 
-				<menuitem action="kg_bom.mma_bom_details" name="BOM Details" id="mam_bom_details" parent="mpm_planning_master" sequence="9"/>   
-				
-				<!-- Machine Shop Master  --> 
-				<menuitem action="kg_machine_shop.mma_machineshop_master" name="MS Items" id="mam_machineshop_master" parent="mpm_planning_master" sequence="10"/> 
-				
-				<!-- BOM Amendment  
-				<menuitem action="kg_bom_amendment.mma_bom_amendment" name="BOM Amendment" id="mam_bom_amendment" parent="mpm_planning_master" sequence="11"/>  -->
-				 
-				<!-- BOX Master   --> 
-				<menuitem action="kg_box_master.mma_box_master" name="BOX" id="mam_box_master" parent="mpm_planning_master" sequence="12"/> 
+				<!-- Units of Measure Master  --> 
+				<menuitem action="product.product_uom_form_action" name="Units of Measure" id="mam_uom_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="6"/>    
 			
 		  <!-- Partner Masters Menu -->
           <menuitem name="Partner Masters" id="mpm_customer_master" parent = "mpm_masters" sequence="2"/>
 						
 				<!-- Customer Master  --> 
-				<menuitem action="kg_partners.kg_action_supplier_form" name="Customer" id="mam_customer_master" parent="mpm_customer_master" sequence="1"/>
-			
-		<!-- Parent Transaction Menu -->
-		<menuitem name="Transactions" id="tpm_transactions" sequence="92"/>  
-		
-			<!-- Planning Transaction Menu -->
-            <menuitem name="Planning Transactions" id="tpm_planning_transactions" parent = "tpm_transactions" sequence="0"/>
-            
-				<!-- Stock Inward -->
-				<menuitem action="kg_stock_inward.tma_stock_inward" id="tam_stock_inward" parent="tpm_planning_transactions" sequence="0"/>
+				<menuitem action="kg_partners.kg_action_supplier_form" name="Customer" id="mam_customer_master" parent="mpm_customer_master" sequence="1"/>	
 				
-				<!-- Stock Inward Details-->
-				<menuitem action="kg_stock_inward.tma_stock_inward_details" id="tam_stock_inward_details" parent="tpm_planning_transactions" sequence="1"/>
-				
-				<!-- Weekly Schedule -->
-				<menuitem action="kg_weekly_schedule.tma_weekly_schedule" id="tam_weekly_schedule" parent="tpm_planning_transactions" sequence="2"/>
-				
-				<!-- Daily Planning -->
-				<menuitem action="kg_daily_planning.tma_daily_planning" id="tam_daily_planning" parent="tpm_planning_transactions" sequence="3"/>
-				
-				<!-- QC Verification -->
-				<menuitem action="kg_qc_verification.tma_qc_verification" id="tam_qc_verification" parent="tpm_planning_transactions" sequence="4"/>
-				
-				<!-- Pattern Request 
-				<menuitem action="kg_pattern_request.tma_pattern_request" id="tam_pattern_request" parent="tpm_planning_transactions" sequence="5"/>
-				-->
-				<!-- Pattern Issue 
-				<menuitem action="kg_pattern_issue.tma_pattern_issue" id="tam_pattern_issue" parent="tpm_planning_transactions" sequence="6"/>-->
-				
-				<!-- Pattern Batch Issue 
-				<menuitem action="kg_pattern_issue.tma_pattern_batch_issue" id="tam_pattern_batch_issue" parent="tpm_planning_transactions" sequence="7"/>-->
-				
-				<!-- Melting Log -->
-				<menuitem action="kg_melting.tma_melting" id="tam_melting" parent="tpm_planning_transactions" sequence="8"/>
-				
-				<!-- Production -->
-				<menuitem action="kg_production.tma_production" id="tam_production" parent="tpm_planning_transactions" sequence="9"/>
-				
-				<!-- Pouring Updates -->
-				<menuitem action="kg_production.tma_pouring" id="tam_pouring" parent="tpm_planning_transactions" sequence="10"/>
-				
-				<!-- Casting Updates -->
-				<menuitem action="kg_production.tma_casting" id="tam_casting" parent="tpm_planning_transactions" sequence="11"/>
 				
 		<!-- Indent Menu -->
 		

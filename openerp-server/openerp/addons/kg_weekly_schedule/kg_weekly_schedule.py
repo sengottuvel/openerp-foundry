@@ -37,7 +37,7 @@ class kg_weekly_schedule(osv.osv):
 		'order_type': fields.selection([('work_order','Normal'),('emergency','Emergency'),('project','Project')],'Type', required=True),
 		'delivery_date': fields.date('Delivery Date',required=True),
 		'order_value': fields.float('Work Order Value(lakh)',required=True),
-		'type': fields.selection([('production','Pump'),('spare','Spare'),('pump_spare','Pump and Spare')],'Purpose', required=True),
+		'type': fields.selection([('production','Pump'),('spare','Spare'),('pump_spare','Pump and Spare')],'Purpose'),
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		
@@ -327,8 +327,8 @@ class ch_weekly_schedule_details(osv.osv):
 	}
 	
 	
-	def default_get(self, cr, uid, fields, context=None):
-		return context
+	"""def default_get(self, cr, uid, fields, context=None):
+		return context"""
 	
 	def onchange_delivery_date(self, cr, uid, ids, delivery_date):
 		today = date.today()

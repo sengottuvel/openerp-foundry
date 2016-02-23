@@ -152,7 +152,7 @@
 		<record id="t_tree_v_pouring" model="ir.ui.view">
 			<field name="name">Pouring Entry Tree</field>
 			<field name="model">kg.production</field>
-			<field eval="8" name="priority"/>
+			<field eval="9" name="priority"/>
 			<field name="arch" type="xml">
 				
 				<tree string="Pouring Entry Tree" editable="top" create="false" version="7.0">
@@ -184,7 +184,7 @@
 		<record id="t_tree_v_casting" model="ir.ui.view">
 			<field name="name">Casting Entry Tree</field>
 			<field name="model">kg.production</field>
-			<field eval="8" name="priority"/>
+			<field eval="10" name="priority"/>
 			<field name="arch" type="xml">
 				
 				<tree string="Casting Entry Tree" editable="top" create="false">
@@ -302,6 +302,19 @@
 		</record>
 		
 	<!-- Menu Action End-->
+	
+	<!-- Menu Item Start -->
+	
+		<!-- Production -->
+		<menuitem action="tma_production" id="tam_production" parent="kg_stock_inward.tpm_planning_transactions" sequence="9"/>
+		
+		<!-- Pouring Updates -->
+		<menuitem action="tma_pouring" id="tam_pouring" parent="kg_stock_inward.tpm_planning_transactions" sequence="10"/>
+		
+		<!-- Casting Updates -->
+		<menuitem action="tma_casting" id="tam_casting" parent="kg_stock_inward.tpm_planning_transactions" sequence="11"/>
+	
+	<!-- Menu Item End -->
 		
 	</data>
 </openerp>

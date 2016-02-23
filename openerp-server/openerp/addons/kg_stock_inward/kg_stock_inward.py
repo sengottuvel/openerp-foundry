@@ -110,7 +110,7 @@ class kg_stock_inward(osv.osv):
 			moc_id,stock_inward_id,qty,alloc_qty,type,creation_date,unit_price,pump_model_id)
 			
 			values(%s,%s,%s,%s,%s,%s,%s,0,'IN',%s,%s,%s)
-			''',[entry.company_id.id,entry.division_id.id or None,entry.location, line_item.pattern_id.id,
+			''',[entry.company_id.id,entry.division_id.id or None,entry.location, line_item.pattern_id.id or None,
 			line_item.moc_id.id,line_item.id,line_item.qty,entry.entry_date,line_item.unit_price or 0.00,line_item.pump_model_id.id or None ])
 					
 			#### Stock Updation Block Ends Here ###
@@ -158,7 +158,10 @@ class ch_stock_inward_details(osv.osv):
 		'moc_id': fields.many2one('kg.moc.master','MOC',required=True,domain="[('state','=','approved'), ('active','=','t')]"),
 		'stage_id': fields.many2one('kg.stage.master','Stage',domain="[('state','=','approved'), ('active','=','t')]"),
 		'qty': fields.integer('Stock Qty', required=True),
-		'unit_price': fields.float('Unit Price', required=True),
+		'unit_price': fields.float('Material Amount', required=True),
+		'each_wgt': fields.float('Each Weight', required=True),
+		'total_wgt': fields.float('Total Weight', required=True),
+		'total_value': fields.float('Total Value', required=True),
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status'),
 		'active': fields.boolean('Active'),
 		'cancel_remark': fields.text('Cancel Remarks'),
@@ -174,12 +177,26 @@ class ch_stock_inward_details(osv.osv):
 		'active': True,
 		
 	}
-	
-	def onchange_pattern_name(self, cr, uid, ids, pattern_id, context=None):
-		value = {'pattern_name': ''}
-		if pattern_id:
-			pro_rec = self.pool.get('kg.pattern.master').browse(cr, uid, pattern_id, context=context)
-			value = {'pattern_name': pro_rec.pattern_name}
+		
+	def onchange_stock_qty(self, cr, uid, ids, pattern_id,moc_id,qty,each_wgt, context=None):
+		mat_amt = 0.00
+		pattern_name = False
+		
+		if pattern_id != False:
+			pattern_rec = self.pool.get('kg.pattern.master').browse(cr, uid, pattern_id, context=context)
+			pattern_name = pattern_rec.pattern_name
+		if moc_id != False:
+			moc_rec = self.pool.get('kg.moc.master').browse(cr, uid, moc_id, context=context)
+			mat_amt = moc_rec.rate or 0.00
+		total_weight = qty * each_wgt or 0.00
+		total_value = total_weight * mat_amt
+		value = {
+		'pattern_name': pattern_name,
+		'unit_price': mat_amt,
+		'total_wgt': total_weight,
+		'total_value': total_value
+		
+		}
 		return {'value': value}
 		
 	
@@ -201,20 +218,73 @@ class ch_stock_inward_details(osv.osv):
 		
 		
 	def create(self, cr, uid, vals, context=None):
+		pattern_name = False
+		
 		pattern_obj = self.pool.get('kg.pattern.master')
-		if vals.get('pattern_id'):
-			pattern_rec = pattern_obj.browse(cr, uid, vals.get('pattern_id') )
+		moc_obj = self.pool.get('kg.moc.master')
+		if vals.get('pattern_id') != False:
+			pattern_rec = pattern_obj.browse(cr, uid, vals.get('pattern_id'))
 			pattern_name = pattern_rec.pattern_name
-			vals.update({'pattern_name': pattern_name})
+		each_weight = vals.get('each_wgt')
+		moc_rec = moc_obj.browse(cr, uid, vals.get('moc_id') )
+		mat_amt = moc_rec.rate
+		qty = vals.get('qty')
+		total_weight = qty * each_weight
+		total_value = total_weight * mat_amt
+		
+		
+		vals.update({
+		'pattern_name': pattern_name,
+		'each_wgt': each_weight,
+		'unit_price': mat_amt,
+		'total_wgt': total_weight,
+		'total_value': total_value
+		
+		})
 		return super(ch_stock_inward_details, self).create(cr, uid, vals, context=context)
 		
 		
 	def write(self, cr, uid, ids, vals, context=None):
+		pattern_name = False
+		
 		pattern_obj = self.pool.get('kg.pattern.master')
-		if vals.get('pattern_id'):
-			pattern_rec = pattern_obj.browse(cr, uid, vals.get('pattern_id') )
-			pattern_name = pattern_rec.pattern_name
-			vals.update({'pattern_name': pattern_name})
+		moc_obj = self.pool.get('kg.moc.master')
+		entry_rec = self.browse(cr, uid, ids[0] )
+		
+		if vals.get('pattern_id') != None:
+			if vals.get('pattern_id') != False: 
+				pattern_rec = pattern_obj.browse(cr, uid, vals.get('pattern_id'))
+				pattern_name = pattern_rec.pattern_name
+		
+		if vals.get('moc_id') == None: 
+			moc_rec = moc_obj.browse(cr, uid, entry_rec.moc_id.id )
+			mat_amt = moc_rec.rate
+		else:
+			moc_rec = moc_obj.browse(cr, uid, vals.get('moc_id') )
+			mat_amt = moc_rec.rate
+		if vals.get('qty') == None: 
+			qty = entry_rec.qty
+		else:
+			qty = vals.get('qty')
+			
+		if vals.get('each_wgt') == None: 
+			each_weight = entry_rec.each_wgt
+		else:
+			each_weight = vals.get('each_wgt')
+			
+			
+		total_weight = qty * each_weight
+		total_value = total_weight * mat_amt
+		
+		
+		vals.update({
+		'pattern_name': pattern_name,
+		'each_wgt': each_weight,
+		'unit_price': mat_amt,
+		'total_wgt': total_weight,
+		'total_value': total_value
+		
+		})
 		return super(ch_stock_inward_details, self).write(cr, uid, ids, vals, context)
 		
 		

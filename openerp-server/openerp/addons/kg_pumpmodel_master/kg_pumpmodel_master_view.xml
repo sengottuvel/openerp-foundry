@@ -119,7 +119,19 @@
 		</record>
 		
 		<!-- Menu Action End-->
-
+		
+		<!-- Menu Name Start here --> 
+		
+		<!-- Parent Master Menu -->
+		<menuitem name="Masters" id="mpm_masters" sequence="91"/>
+            
+            <!-- Planning Masters Menu -->
+            <menuitem name="Planning Masters" id="mpm_planning_master" parent = "mpm_masters" sequence="0"/>
+            
+            <!-- PumpModel Master  -->
+				<menuitem action="mma_pumpmodel_master" name="Pump Model" id="mam_pumpmodel_master" parent="mpm_planning_master" sequence="0"/>
+				
+		<!-- Menu Name End here --> 
 	
 
 	</data>

@@ -33,11 +33,15 @@
 										<field name="location"/>
 										<field name="stock_type"/>
 										<field name="pump_model_id" attrs="{'required': [('stock_type','=','pump')]}"/>
-										<field name="pattern_id" attrs="{'required': [('stock_type','=','pattern')]}" on_change="onchange_pattern_name(pattern_id)"/>
+										<field name="pattern_id" attrs="{'required': [('stock_type','=','pattern')]}" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt)"/>
 										<field name="pattern_name" readonly="1"/>
-										<field name="moc_id"/>
-										<field name="qty"/>
-										<field name="unit_price"/>
+										<field name="moc_id" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt)"/>
+										<field name="qty" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt)"/>
+										<field name="each_wgt" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt)"/>
+										<field name="total_wgt" readonly="1"/>
+										<field name="unit_price" readonly="1"/>
+										<field name="total_value" readonly="1"/>
+										
 									</tree>
 								</field>
 							</page>
@@ -168,6 +172,24 @@
 		</record>
 		
 	<!-- Child Menu Action End-->
+	
+	
+	<!-- Menu Item Start -->
+	
+		<!-- Parent Transaction Menu -->
+		<menuitem name="Transactions" id="tpm_transactions" sequence="92"/>  
+		
+			<!-- Planning Transaction Menu -->
+            <menuitem name="Planning Transactions" id="tpm_planning_transactions" parent = "tpm_transactions" sequence="0"/>
+            
+				<!-- Stock Inward -->
+				<menuitem action="kg_stock_inward.tma_stock_inward" id="tam_stock_inward" parent="tpm_planning_transactions" sequence="0"/>
+				
+				<!-- Stock Inward Details-->
+				<menuitem action="kg_stock_inward.tma_stock_inward_details" id="tam_stock_inward_details" parent="tpm_planning_transactions" sequence="1"/>
+	
+	<!-- Menu Item End -->
+	
 	
 		
 	</data>

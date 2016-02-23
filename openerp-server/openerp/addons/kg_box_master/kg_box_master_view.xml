@@ -119,6 +119,13 @@
 		</record>
 		
 		<!-- Menu Action End-->
+		
+		
+		<!-- Menu Name Start here -->
+		 
+			<menuitem action="mma_box_master" name="BOX" id="mam_box_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="12"/> 
+
+		<!-- Menu Name End here --> 
 
 	
 

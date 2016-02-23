@@ -291,6 +291,14 @@
 		
 	<!-- Child Class Menu Action End-->
 	
+	<!-- Menu Item Start -->
+	
+		<!-- Daily Planning -->
+		<menuitem action="tma_daily_planning" id="tam_daily_planning" parent="kg_stock_inward.tpm_planning_transactions" sequence="3"/>
+	
+	<!-- Menu Item End -->
+	
+	
 	
 		
 	</data>
