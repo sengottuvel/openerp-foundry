@@ -162,24 +162,28 @@ class product_uom(osv.osv):
 		'uom_type': fields.selection([('bigger','Bigger than the reference Unit of Measure'),
 									  ('reference','Reference Unit of Measure for this category'),
 									  ('smaller','Smaller than the reference Unit of Measure')],'Type'),
-		'creation_date':fields.datetime('Creation Date',readonly=True),
-		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
-		'approve_date': fields.datetime('Approved Date', readonly=True),
-		'app_user_id': fields.many2one('res.users', 'Apprved By', readonly=True),
-		'confirm_date': fields.datetime('Confirm Date', readonly=True),
-		'conf_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
-		'reject_date': fields.datetime('Reject Date', readonly=True),
-		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
+		
 		'dummy_state': fields.selection([('draft','Draft'),('confirm','Waiting for approval'),('approved','Approved'),
 				('reject','Rejected')],'Status', readonly=True),
 		'remark': fields.text('Remarks',readonly=False),
+		
+		### Entry Info ###
+		'crt_date': fields.datetime('Creation Date',readonly=True),
+		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
+		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
+		'confirm_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
+		'ap_rej_date': fields.datetime('Approved/Reject Date', readonly=True),
+		'ap_rej_user_id': fields.many2one('res.users', 'Approved/Reject By', readonly=True),			
+		'update_date': fields.datetime('Last Updated Date', readonly=True),
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
+		
 	}
 
 	_defaults = {
 		'active': 1,
 		'rounding': 0.01,
 		'uom_type': 'reference',
-		'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
+		'crt_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'dummy_state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
 	}
@@ -190,21 +194,22 @@ class product_uom(osv.osv):
 	]
 
 	def entry_confirm(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'dummy_state': 'confirm','conf_user_id': uid, 'confirm_date': dt_time})
+		self.write(cr, uid, ids, {'dummy_state': 'confirm','confirm_user_id': uid, 'confirm_date': dt_time})
 		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'dummy_state': 'approved','app_user_id': uid, 'approve_date': dt_time})
+		self.write(cr, uid, ids, {'dummy_state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': dt_time})
 		return True
 
 	def entry_reject(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.remark:
-			self.write(cr, uid, ids, {'dummy_state': 'reject','rej_user_id': uid, 'reject_date': dt_time})
+			self.write(cr, uid, ids, {'dummy_state': 'reject','ap_rej_user_id': uid, 'ap_rej_date': dt_time})
 		else:
 			raise osv.except_osv(_('Rejection remark is must !!'),
 				_('Enter rejection remark in remark field !!'))
 		return True
+		
 		
 	def unlink(self,cr,uid,ids,context=None):
 		unlink_ids = []		
@@ -268,8 +273,8 @@ class product_uom(osv.osv):
 		if vals.get('name'): 
 			v_name = vals['name'].strip() 
 			vals['name'] = v_name.capitalize() 
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(product_uom, self).write(cr, uid, ids, vals, context=context)
-		
 		
 	
 
