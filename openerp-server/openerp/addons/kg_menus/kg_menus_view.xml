@@ -14,7 +14,7 @@
 				<menuitem action="product.product_uom_form_action" name="Units of Measure" id="mam_uom_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="6"/>    
 			
 		  <!-- Partner Masters Menu -->
-          <menuitem name="Partner Masters" id="mpm_customer_master" parent = "mpm_masters" sequence="2"/>
+          <menuitem name="Partner Masters" id="mpm_customer_master" parent = "kg_pumpmodel_master.mpm_masters" sequence="2"/>
 						
 				<!-- Customer Master  --> 
 				<menuitem action="kg_partners.kg_action_supplier_form" name="Customer" id="mam_customer_master" parent="mpm_customer_master" sequence="1"/>	
