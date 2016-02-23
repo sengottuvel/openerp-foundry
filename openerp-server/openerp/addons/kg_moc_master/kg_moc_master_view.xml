@@ -88,6 +88,8 @@
 								toolbar="True" string="MOC Master Tree">				
 					<field name="code"/>
 					<field name="name"/>
+					<field name="rate"/>
+					<field name="pro_cost"/>
 					<field name="state"/>
 				</tree>
 			</field>
@@ -121,7 +123,7 @@
 		<!-- Menu Action Start-->
 		
 		 <record id="mma_moc_master" model="ir.actions.act_window">
-			<field name="name">Material Of Consume</field>
+			<field name="name">Material Of Construction</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.moc.master</field>
 			<field name="view_type">form</field>
