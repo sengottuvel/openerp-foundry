@@ -7,7 +7,7 @@
     'author': 'Karthikeyan',
     'maintainer': 'Karthikeyan',
     'website': 'http://www.openerp.com',
-    'depends': ['base'],
+    'depends': ['base','kg_division_master'],
     'data': [		
 		'planning/wizard/kg_schedule_register_view.xml',
 		'planning/wizard/kg_planning_register_view.xml',
