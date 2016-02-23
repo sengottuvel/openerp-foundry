@@ -10,7 +10,7 @@
     'author': 'Karthikeyan',
     'category': 'MRP',
     'website': 'http://www.openerp.com',
-    'depends' : ['base','product','sale','mrp'],
+    'depends' : ['base','product','sale','mrp','kg_pumpmodel_master'],
     'data': ['kg_bom_view.xml'],
     'auto_install': False,
     'installable': True,
