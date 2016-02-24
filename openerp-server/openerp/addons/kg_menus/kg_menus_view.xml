@@ -2,27 +2,36 @@
 <openerp>
     <data>
 		
+		
+		<!-- Planning Master Base menu start here-->
+				
+				
 				<!-- Products Master  -->
 				<menuitem id="kg_product_master" parent="kg_pumpmodel_master.mpm_planning_master"
 						 action="product.product_normal_action" name="Item Master" sequence="3"/>
 				
-				<!-- Product Category Master  -->
+				<!-- Product Category Master 
 				<menuitem id="kg_product_catg_master" parent="kg_pumpmodel_master.mpm_planning_master"
-						 action="product.product_category_action_form" name="Product Category" sequence="4"/>
+						 action="product.product_category_action_form" name="Product Category" sequence="4"/>	 -->						
 				
-				<!-- Units of Measure Master  --> 
-				<menuitem action="product.product_uom_form_action" name="Units of Measure" id="mam_uom_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="6"/>    
+				
+				<!-- Units of Measure Master  
+				<menuitem action="product.product_uom_form_action" name="Units of Measure" id="mam_uom_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="6"/>   -->  
+				
+		<!-- Planning Master Base menu End here-->
+				
 			
 		  <!-- Partner Masters Menu -->
           <menuitem name="Partner Masters" id="mpm_customer_master" parent = "kg_pumpmodel_master.mpm_masters" sequence="2"/>
-						
+				 
+				
 				<!-- Customer Master  --> 
-				<menuitem action="kg_partners.kg_action_supplier_form" name="Customer" id="mam_customer_master" parent="mpm_customer_master" sequence="1"/>	
+				<menuitem action="kg_partners.kg_action_supplier_form" name="Customer" id="mam_customer_master" parent="mpm_customer_master" sequence="1"/>				
 				
 				
 		<!-- Indent Menu -->
 		
-		<menuitem name="Indents" id="ipm_indent" sequence="20"/>
+		<menuitem name="Indents" id="ipm_indent" sequence="95"/>
 		
 				<!-- Indent Transaction Menu -->
 				<menuitem id="ipm_dep_indent_menu" name="Department Indent" parent="ipm_indent" sequence="1"/>
@@ -30,6 +39,10 @@
 				<!-- Department Indent -->
 				<menuitem action="kg_depindent.action_kg_depindent_form" id="iam_depindent" name="Department Indent" parent="ipm_dep_indent_menu" sequence="1"/>
 
+				
+				
+
+			
 				<!-- Purchase Transaction Menu -->
 				<menuitem id="ipm_purchase_indent_menu" name="Purchase Indent" parent="ipm_indent" sequence="2"/>
 				
@@ -62,12 +75,13 @@
 				<!-- Product Master  --> 
 				<menuitem action="product.product_normal_action" name="Product Master" id="mam_product_master" parent="ppm_master_menu" sequence="2"/>
 				
-				<!-- Product Category Master  -->
+				<!-- Product Category Master -->
 				<menuitem id="kg_product_catg_master" parent="ppm_master_menu"
-						 action="product.product_category_action_form" name="Product Category" sequence="3"/>
+						 action="product.product_category_action_form" name="Product Category" sequence="3"/>					
 				
-				<!-- Units of Measure Master  --> 
-				<menuitem action="product.product_uom_form_action" name="Units of Measure" id="mam_uom_master" parent="ppm_master_menu" sequence="4"/>    
+				
+				<!-- Units of Measure Master  -->
+				<menuitem action="product.product_uom_form_action" name="Units of Measure" id="mam_uom_master" parent="ppm_master_menu" sequence="4"/>
 				
 				<!-- Payment Master  --> 
 				<menuitem action="kg_po_masters.payment_master_action_form" name="Payment Master" id="mam_payment_master" parent="ppm_master_menu" sequence="5"/>
@@ -80,13 +94,11 @@
 				
 				<!-- Country -->
 				<menuitem id="kg_country_master" parent="ppm_master_menu" name="Country" action="base.action_country" sequence="8"/>
-				
 				<!-- State -->
 				<menuitem id="kg_state_master" parent="ppm_master_menu" name="State" action="base.action_country_state" sequence="9"/>
-				
 				<!-- City Master  --> 
 				<menuitem action="base.action_city" name="City" id="mam_city_master" parent="ppm_master_menu" sequence="10"/>
-				
+				 
 				<!-- Transport Master  --> 
 				<menuitem action="kg_transport.transport_action_form" name="Transport" id="mam_transport_master" parent="ppm_master_menu" sequence="11"/>
 				 

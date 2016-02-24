@@ -35,7 +35,7 @@
 										<field name="pump_model_id" attrs="{'required': [('stock_type','=','pump')]}"/>
 										<field name="pattern_id" attrs="{'required': [('stock_type','=','pattern')]}" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt)"/>
 										<field name="pattern_name" readonly="1"/>
-										<field name="moc_id" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt)"/>
+										<field name="moc_id" required="1" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt)"/>
 										<field name="qty" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt)"/>
 										<field name="serial_no"/>
 										<field name="heat_no"/>

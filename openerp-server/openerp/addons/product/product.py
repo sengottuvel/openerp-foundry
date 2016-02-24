@@ -144,6 +144,7 @@ class product_uom(osv.osv):
 
 	_order = "name"
 	_columns = {
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'name': fields.char('Unit of Measure', size=64, required=True, translate=True),
 		'category_id': fields.many2one('product.uom.categ', 'Category', ondelete='cascade',
 			help="Conversion between Units of Measure can only occur if they belong to the same category. The conversion will be made based on the ratios."),
@@ -163,11 +164,12 @@ class product_uom(osv.osv):
 									  ('reference','Reference Unit of Measure for this category'),
 									  ('smaller','Smaller than the reference Unit of Measure')],'Type'),
 		
+		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
 		'dummy_state': fields.selection([('draft','Draft'),('confirm','Waiting for approval'),('approved','Approved'),
 				('reject','Rejected')],'Status', readonly=True),
 		'remark': fields.text('Remarks',readonly=False),
 		
-		### Entry Info ###
+			### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
 		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
 		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
@@ -176,7 +178,7 @@ class product_uom(osv.osv):
 		'ap_rej_user_id': fields.many2one('res.users', 'Approved/Reject By', readonly=True),			
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
-		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
+		
 	}
 
 	_defaults = {
@@ -186,7 +188,7 @@ class product_uom(osv.osv):
 		'crt_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'dummy_state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
-		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'product.uom', context=c),
+		 'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'product.uom', context=c),
 	}
 
 	_sql_constraints = [
@@ -210,7 +212,6 @@ class product_uom(osv.osv):
 			raise osv.except_osv(_('Rejection remark is must !!'),
 				_('Enter rejection remark in remark field !!'))
 		return True
-		
 		
 	def unlink(self,cr,uid,ids,context=None):
 		unlink_ids = []		
@@ -276,6 +277,7 @@ class product_uom(osv.osv):
 			vals['name'] = v_name.capitalize() 
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(product_uom, self).write(cr, uid, ids, vals, context=context)
+		
 		
 	
 
@@ -705,7 +707,7 @@ class product_product(osv.osv):
 		'name_template': fields.related('product_tmpl_id', 'name', string="Template Name", type='char', store=True, select=True),
 		'color': fields.integer('Color Index'),
 		
-		'product_code':fields.char('Product Code', size=20),
+		'product_code':fields.char('Code', size=20),
 		'qa_status':fields.boolean('QA Status'),
 		'reorder_status':fields.boolean('Re-Order Status'),
 		'expiry': fields.boolean('Expiry Status'),

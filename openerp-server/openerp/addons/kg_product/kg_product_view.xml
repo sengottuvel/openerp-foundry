@@ -54,24 +54,34 @@
         <field name="sale_ok" invisible="1"/>
         </field>
         
+        <field name="sale_ok" invisible="1" position="after">
+			<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
+				<group>	
+					<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject'])]}"/>
+				</group>
+				
+			</group>
+		</field>
         
 		
-		 <xpath expr = "//page[@string='Validations']" position="after">
+		 <xpath expr = "//page[@string='Suppliers']" position="after">
 
 				<page string="Entry Info">
 					
 					<group>
 						<group>
-							<field name="conf_user_id"/>
-							<field name="app_user_id"/>
-							<field name="rej_user_id"/>
 							<field name="user_id"/>
+							<field name="conf_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+							<field name="app_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject'])]}"/>
+							<field name="rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','approved'])]}"/>		
+							<field name="update_user_id"/>					
 						</group>
 						<group>
-							<field name="confirm_date"/>
-							<field name="approve_date"/>
-							<field name="reject_date"/>
-							<field name="remark"/>
+							<field name="crt_date"/>
+							<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+							<field name="approve_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject'])]}"/>
+							<field name="reject_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','approved'])]}"/>	
+							<field name="update_date"/>						
 						</group>
 					</group>
 							

@@ -164,7 +164,7 @@ class ch_stock_inward_details(osv.osv):
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern Number',domain="[('state','=','approved'), ('active','=','t')]"),
 		'pattern_name': fields.char('Pattern Name'),
 		#'part_name_id': fields.many2one('product.product','Part Name', required=True,domain="[('state','=','approved'), ('active','=','t')]"),
-		'moc_id': fields.many2one('kg.moc.master','MOC',required=True,domain="[('state','=','approved'), ('active','=','t')]"),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','=','approved'), ('active','=','t')]"),
 		'stage_id': fields.many2one('kg.stage.master','Stage',domain="[('state','=','approved'), ('active','=','t')]"),
 		'qty': fields.integer('Stock Qty', required=True),
 		'unit_price': fields.float('Material Amount'),

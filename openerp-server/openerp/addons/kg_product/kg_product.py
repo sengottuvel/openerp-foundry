@@ -39,6 +39,7 @@ class kg_product(osv.osv):
         
         'type': fields.selection([('consu', 'Consumable Items'),('bot','BOT'),('raw','Raw Materials'),('service','Service Items'),('finish','Finished Items')], 'Product Type', 
                 required=True),
+	    'crt_date': fields.datetime('Creation Date',readonly=True),
         'user_id': fields.many2one('res.users', 'Created By', readonly=True),
         'approve_date': fields.datetime('Approved Date', readonly=True),
         'app_user_id': fields.many2one('res.users', 'Apprved By', readonly=True),
@@ -46,6 +47,8 @@ class kg_product(osv.osv):
         'conf_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
         'reject_date': fields.datetime('Reject Date', readonly=True),
         'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
+        'update_date': fields.datetime('Last Updated Date', readonly=True),
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
         
         'remark': fields.text('Remarks',readonly=False,states={'approved':[('readonly',True)]}),
         
@@ -54,7 +57,7 @@ class kg_product(osv.osv):
     _defaults = {
     
         'po_uom_coeff' : 1.00,
-        
+        'crt_date':fields.datetime.now,	
         'user_id': lambda obj, cr, uid, context: uid,
         
     }
@@ -86,12 +89,14 @@ class kg_product(osv.osv):
         return val
     
     def entry_confirm(self,cr,uid,ids,context=None):
-        self.write(cr, uid, ids, {'state': 'confirm','conf_user_id': uid, 'confirm_date': dt_time})       
+        self.write(cr, uid, ids, {'state': 'confirm','conf_user_id': uid, 'confirm_date': dt_time})
+       
         return True
 
     def entry_approve(self,cr,uid,ids,context=None):
-        obj = self.browse(cr, uid, ids[0]) 
-        self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': dt_time})      
+        obj = self.browse(cr, uid, ids[0])        
+        self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': dt_time})
+       
         return True
 
     def entry_reject(self,cr,uid,ids,context=None):
@@ -106,10 +111,11 @@ class kg_product(osv.osv):
     def _name_validate(self, cr, uid,ids, context=None):
         rec = self.browse(cr,uid,ids[0])
         res = True
-        
-        
-                
-        return res  
+                       
+        return res 
+    def write(self, cr, uid, ids, vals, context=None):
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(kg_product, self).write(cr, uid, ids, vals, context)     
     
     _constraints = [
         

@@ -561,7 +561,7 @@
             <field name="arch" type="xml">
                 <div name="options" position="inside">
                     <field name="purchase_ok" invisible ="1"/>
-                    <label for="purchase_ok"/>
+                    <label for="purchase_ok" invisible ="1"/>
                 </div>
                 <group name="procurement" position="after">
                      <separator string="Suppliers"/>
@@ -601,7 +601,7 @@
                     <filter name="filter_to_purchase" string="To Purchase" icon="terp-accessories-archiver+" domain="[('purchase_ok', '=', 1)]"/>
                 </filter>
                 <filter name="filter_to_sell" position="after">
-                   <filter name="filter_to_purchase" string="Can be Purchased" icon="terp-accessories-archiver+" domain="[('purchase_ok', '=', 1)]"/>
+                   <filter name="filter_to_purchase" string="Can be Purchased" icon="terp-accessories-archiver+" domain="[('purchase_ok', '=', 1)]" invisible="1"/>
                 </filter>
             </field>
         </record>
