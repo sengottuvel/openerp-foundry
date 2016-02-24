@@ -108,15 +108,17 @@
 				<tree string="Stock Inward Details Entry Tree" editable="top" >					
 					<field name="location"/>
 					<field name="stock_type"/>
-					<field name="pump_model_id" attrs="{'required': [('stock_type','=',['pump'])]}"/>
-				    <field name="pattern_id" attrs="{'required': [('stock_type','=',['pattern'])]}" on_change="onchange_pattern_name(pattern_id)"/>
-				    <field name="pattern_name" readonly="1"/>
-				    <!--<field name="part_name_id"/>-->
-				    <field name="moc_id"/>
-				    <field name="stage_id" invisible="1"/>
-				    <field name="qty"/>
-				    <field name="unit_price"/>
-				    <field name="state" invisible="1"/>
+					<field name="pump_model_id" attrs="{'required': [('stock_type','=','pump')]}"/>
+					<field name="pattern_id" attrs="{'required': [('stock_type','=','pattern')]}"/>
+					<field name="pattern_name" readonly="1"/>
+					<field name="moc_id"/>
+					<field name="qty"/>
+					<field name="serial_no"/>
+					<field name="heat_no"/>
+					<field name="each_wgt"/>
+					<field name="total_wgt" readonly="1"/>
+					<field name="unit_price" readonly="1"/>
+					<field name="total_value" readonly="1"/>
 				    
 				</tree>
 			</field>
