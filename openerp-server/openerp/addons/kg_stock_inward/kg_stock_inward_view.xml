@@ -39,10 +39,10 @@
 										<field name="qty" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt)"/>
 										<field name="serial_no"/>
 										<field name="heat_no"/>
-										<field name="each_wgt" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt)"/>
-										<field name="total_wgt" readonly="1"/>
-										<field name="unit_price" readonly="1"/>
-										<field name="total_value" readonly="1"/>
+										<field name="each_wgt" required="1" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt)"/>
+										<field name="total_wgt" readonly="1" required="1"/>
+										<field name="unit_price" readonly="1" required="1"/>
+										<field name="total_value" readonly="1" required="1"/>
 										
 									</tree>
 								</field>

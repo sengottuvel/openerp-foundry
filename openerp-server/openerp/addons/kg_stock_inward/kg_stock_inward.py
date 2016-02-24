@@ -92,7 +92,7 @@ class kg_stock_inward(osv.osv):
               
         
         (_future_entry_date_check, 'System not allow to save with future date. !!',['']),
-        (_check_lineitems, 'System not allow to save with empty Inward Details !!',['']),
+        #(_check_lineitems, 'System not allow to save with empty Inward Details !!',['']),
        
         
        ]
@@ -115,8 +115,7 @@ class kg_stock_inward(osv.osv):
 					
 			#### Stock Updation Block Ends Here ###
 		
-		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-			'name' :self.pool.get('ir.sequence').get(cr, uid, 'kg.stock.inward') or '/'})
+		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		cr.execute(''' update ch_stock_inward_details set state = 'confirmed' where header_id = %s ''',[ids[0]])
 		return True
 		
@@ -131,9 +130,19 @@ class kg_stock_inward(osv.osv):
 				unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
 		
+	def create(self, cr, uid, vals, context=None):
+		if vals.get('name') == None:
+			vals.update({'name' :self.pool.get('ir.sequence').get(cr, uid, 'kg.stock.inward') or '/'})
+		return super(kg_stock_inward, self).create(cr, uid, vals, context=context)
+		
 	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_stock_inward, self).write(cr, uid, ids, vals, context)
+		
+	_sql_constraints = [
+	
+		('name', 'unique(name)', 'Stock Inward No. must be Unique !!'),
+	]
 	
 	
 kg_stock_inward()
@@ -158,10 +167,10 @@ class ch_stock_inward_details(osv.osv):
 		'moc_id': fields.many2one('kg.moc.master','MOC',required=True,domain="[('state','=','approved'), ('active','=','t')]"),
 		'stage_id': fields.many2one('kg.stage.master','Stage',domain="[('state','=','approved'), ('active','=','t')]"),
 		'qty': fields.integer('Stock Qty', required=True),
-		'unit_price': fields.float('Material Amount', required=True),
-		'each_wgt': fields.float('Each Weight', required=True),
-		'total_wgt': fields.float('Total Weight', required=True),
-		'total_value': fields.float('Total Value', required=True),
+		'unit_price': fields.float('Material Amount'),
+		'each_wgt': fields.float('Each Weight'),
+		'total_wgt': fields.float('Total Weight'),
+		'total_value': fields.float('Total Value'),
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status'),
 		'active': fields.boolean('Active'),
 		'cancel_remark': fields.text('Cancel Remarks'),
@@ -233,8 +242,6 @@ class ch_stock_inward_details(osv.osv):
 		qty = vals.get('qty')
 		total_weight = qty * each_weight
 		total_value = total_weight * mat_amt
-		
-		
 		vals.update({
 		'pattern_name': pattern_name,
 		'each_wgt': each_weight,
