@@ -165,8 +165,7 @@ class ch_stock_inward_details(osv.osv):
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status'),
 		'active': fields.boolean('Active'),
 		'cancel_remark': fields.text('Cancel Remarks'),
-		'serial_no': fields.char('Serial No', size=128),
-		#'heat_nos': fields.char('Heat No', size=128),
+		
 		
 		
 	
