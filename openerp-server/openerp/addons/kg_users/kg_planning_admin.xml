@@ -503,6 +503,76 @@
 		
 		<!-- Pattern Batch Issue -->
 		
+		<!-- BOM Amendment-->
+		
+		<record id="user_bom_amendment" model="ir.model.access">
+			<field name="model_id" ref="kg_bom_amendment.model_kg_bom_amendment"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">BOM Amendment</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- BOM Child Class --> 
+		
+		<record id="user_bom_details_amendment" model="ir.model.access">
+			<field name="model_id" ref="kg_bom_amendment.model_ch_bom_line_amendment"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">BOM Details Amendment</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- BOM Child Class --> 
+		
+		<!-- BOM Amendment Consumable -->
+		
+		<record id="user_consu_master_amendment" model="ir.model.access">
+			<field name="model_id" ref="kg_bom_amendment.model_ch_consu_details_amendment"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Consumable Master Amendment</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- BOM Amendment Consumable end -->
+		
+		<!-- BOM Amendment bot -->
+		
+		<record id="user_bot_master_amendment" model="ir.model.access">
+			<field name="model_id" ref="kg_bom_amendment.model_ch_bot_details_amendment"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">BOT Master Amendment</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- BOM Amendment BOT end -->
+		
+		<!-- BOM Amendment Machine Shop -->
+		
+		<record id="user_machineshop_item_amendment" model="ir.model.access">
+			<field name="model_id" ref="kg_bom_amendment.model_ch_machineshop_details_amendment"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">BOT Master_amendment</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		
+		<!-- BOM Amendment Machineshop end -->
+
+		
 		
     </data>
 </openerp>

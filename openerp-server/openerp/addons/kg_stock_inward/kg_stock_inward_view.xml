@@ -37,6 +37,8 @@
 										<field name="pattern_name" readonly="1"/>
 										<field name="moc_id" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt)"/>
 										<field name="qty" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt)"/>
+										<field name="serial_no"/>
+										<field name="heat_no"/>
 										<field name="each_wgt" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt)"/>
 										<field name="total_wgt" readonly="1"/>
 										<field name="unit_price" readonly="1"/>

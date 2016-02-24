@@ -18,7 +18,8 @@
             ref('kg_division_master.mam_division_master'),
             ref('kg_bom.mam_bom_master'),
             ref('kg_machine_shop.mam_machineshop_master'),            
-            ref('kg_box_master.mam_box_master'),            
+            ref('kg_box_master.mam_box_master'),
+            ref('kg_bom_amendment.mam_bom_amendment'),            
             
             
             ref('kg_stock_inward.tpm_transactions'),

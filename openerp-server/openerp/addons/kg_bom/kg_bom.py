@@ -78,6 +78,31 @@ class kg_bom(osv.osv):
 	def entry_confirm(self,cr,uid,ids,context=None):		
 		rec = self.browse(cr,uid,ids[0])
 		bom_obj = self.pool.get('kg.bom')
+		bom_foundry_lines=rec.line_ids			 
+		machine_shop_lines=rec.line_ids_a			 
+		bot_lines=rec.line_ids_b			 
+		consu_lines=rec.line_ids_c	
+		
+		for bom_foundry_item in bom_foundry_lines:			
+			if bom_foundry_item.qty == 0:
+				raise osv.except_osv(
+					_('Warning !'),
+					_('Please foundry items zero qty not accepted!!')) 					
+		for machine_shop_item in machine_shop_lines:			
+			if machine_shop_item.qty == 0:
+				raise osv.except_osv(
+					_('Warning !'),
+					_('Please machine shop items zero qty not accepted!!'))
+		for bot_item in bot_lines:			
+			if bot_item.qty == 0:
+				raise osv.except_osv(
+					_('Warning !'),
+					_('Please BOT zero qty not accepted!!')) 	
+		for consu_item in consu_lines:			
+			if consu_item.qty == 0:
+				raise osv.except_osv(
+					_('Warning !'),
+					_('Please Consumable items zero qty not accepted!!'))		 
 		old_ids = self.search(cr,uid,[('state','=','approved'),('name','=',rec.name)])
 		if old_ids:
 			bom_rec = bom_obj.browse(cr, uid, old_ids[0])			  

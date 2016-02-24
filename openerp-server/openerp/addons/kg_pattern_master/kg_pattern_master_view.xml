@@ -20,7 +20,8 @@
 							<group>						
 								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 								<field name="box_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
-								<field name="pcs_weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+								<field name="pcs_weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="tolerance" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>									
 								<field name="mould_rate" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" invisible="1"/>
 								<field name="location" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>									
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>					
@@ -28,7 +29,8 @@
 							<group>
 								<field name="pattern_name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="ci_weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>													
+								<field name="ci_weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
+								<field name="nonferous_weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>												
 								<field name="active"/>									
 								<field name="pattern_state" style="width: 50%%" class="att_state_change"/>							
 								<field name="state" style="width: 30%%" class="att_state_change"/>							
@@ -112,7 +114,8 @@
 					<field name="name"/>						
 					<field name="pattern_name"/>					
 					<field name="pcs_weight"/>					
-					<field name="ci_weight"/>					
+					<field name="ci_weight"/>
+					<field name="nonferous_weight"/>						
 					<field name="state"/>
 				</tree>
 			</field>
