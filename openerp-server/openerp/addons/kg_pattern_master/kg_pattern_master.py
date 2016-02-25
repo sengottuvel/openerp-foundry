@@ -37,7 +37,7 @@ class kg_pattern_master(osv.osv):
 		'line_ids_b':fields.one2many('ch.pattern.history', 'header_id', "Pattern History"),
 		
 		'tolerance': fields.float('Tolerance(%)'),
-		'nonferous_weight': fields.float('Non Ferous Weight(kgs)'),
+		'nonferous_weight': fields.float('Non-Ferrous Weight(kgs)'),
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),

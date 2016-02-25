@@ -112,9 +112,9 @@
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" 
 								toolbar="True" string="Pattern Master Tree">		
 					<field name="name"/>						
-					<field name="pattern_name"/>					
+					<field name="pattern_name"/>	
+					<field name="ci_weight"/>				
 					<field name="pcs_weight"/>					
-					<field name="ci_weight"/>
 					<field name="nonferous_weight"/>						
 					<field name="state"/>
 				</tree>
