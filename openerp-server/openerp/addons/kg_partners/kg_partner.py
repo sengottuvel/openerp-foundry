@@ -68,18 +68,38 @@ class kg_partner(osv.osv):
 	  'is_company': True,
 	  'creation_date': fields.datetime.now,
 	  'created_by': lambda obj, cr, uid, context: uid,
-	 
+	  'partner_state': 'draft',
+		  
 	}
-	"""
+
+	def onchange_city(self, cr, uid, ids, city_id, context=None):
+		if city_id:
+			state_id = self.pool.get('res.city').browse(cr, uid, city_id, context).state_id.id
+			return {'value':{'state_id':state_id}}
+		return {}
 	
+	def onchange_zip(self,cr,uid,ids,zip,context=None):
+		if len(str(zip)) == 6:
+			value = {'zip':zip}
+		else:
+			raise osv.except_osv(_('Check zip number !!'),
+				_('Please enter six digit number !!'))
+		
+		return {'value': value}
+			
 	def approve_partner(self, cr, uid, ids, context=None): 
 		rec = self.browse(cr, uid, ids[0])
 		self.write(cr, uid, ids, {'partner_state': 'approve','approved_by':uid,'approved_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		
 		return True
-		"""
+
 	
-	def write(self, cr, uid, ids, vals, context=None):		
+	def write(self, cr, uid, ids, vals, context=None):
+		if len(str(vals['zip'])) == 6:
+			pass
+		else:
+			raise osv.except_osv(_('Check zip number !!'),
+				_('Please enter six digit number !!'))
 		vals.update({'updated_date': time.strftime('%Y-%m-%d %H:%M:%S'),'updated_by':uid})
 		return super(kg_partner, self).write(cr, uid, ids, vals, context)
 			
@@ -113,7 +133,7 @@ class kg_delivery_address(osv.osv):
 	'date' : fields.date.context_today,
 
 	} 
-
+	
 kg_delivery_address()
 
 class kg_billing_address(osv.osv):
