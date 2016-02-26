@@ -571,6 +571,55 @@
 		
 		
 		<!-- BOM Amendment Machineshop end -->
+		
+		<!-- Chemical Master -->
+		
+		<record id="user_chemical_master" model="ir.model.access">
+			<field name="model_id" ref="kg_chemical_master.model_kg_chemical_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Chemical Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- Mechanical Master -->
+		
+		<record id="user_mechanical_master" model="ir.model.access">
+			<field name="model_id" ref="kg_mechanical_master.model_kg_mechanical_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Mechanical Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- Chemical Composition Tap -->
+		
+		<record id="user_chemical_composition_master" model="ir.model.access">
+			<field name="model_id" ref="kg_moc_master.model_ch_chemical_chart"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Chemical Composition</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- Mechanical Properties Tap -->
+		
+		<record id="user_mechanical_properties_master" model="ir.model.access">
+			<field name="model_id" ref="kg_moc_master.model_ch_mechanical_chart"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Mechanical Properties</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>	
+		
 
 		
 		

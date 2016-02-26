@@ -8,29 +8,22 @@ import re
 import math
 dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
-class kg_moc_master(osv.osv):
-	
-	_name = "kg.moc.master"
-	_description = "SAM MOC Master"
+class kg_mechanical_master(osv.osv):
+
+	_name = "kg.mechanical.master"
+	_description = "Mechanical Properties Master"
 	
 	_columns = {
 			
 		'name': fields.char('Name', size=128, required=True, select=True),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'code': fields.char('Code', size=128, required=True),
+		'uom':fields.many2one('product.uom', 'UOM',required=True,domain="[('dummy_state','=','approved')]"),
 		'active': fields.boolean('Active'),
-		'rate': fields.float('Design Rate(Rs)', required=True,),
-		'pro_cost': fields.float('Production Cost(Rs)', required=True,),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
-		'line_ids':fields.one2many('ch.moc.raw.material', 'header_id', "Raw Materials"),
-		'line_ids_a':fields.one2many('ch.chemical.chart', 'header_id', "Chemical Chart"),
-		'line_ids_b':fields.one2many('ch.mechanical.chart', 'header_id', "Mechanical Chart"),
-		
-		'weight_type': fields.selection([('ci','CI'),('ss','SS'),('non_ferrous','Non-Ferrous')],'Weight Type'),
-		
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -48,7 +41,7 @@ class kg_moc_master(osv.osv):
 	
 	_defaults = {
 	
-		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.moc.master', context=c),
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.mechanical.master', context=c),
 		'active': True,
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
@@ -58,20 +51,20 @@ class kg_moc_master(osv.osv):
 	
 	_sql_constraints = [
 	
-		('name', 'unique(name)', 'Name must be unique per Company !!'),
-		('code', 'unique(code)', 'Code must be unique per Company !!'),
+		('name', 'unique(name)', 'Name must be unique!!'),
+		('code', 'unique(code)', 'Code must be unique!!'),
 	]
 	
 	"""def _Validation(self, cr, uid, ids, context=None):
 		flds = self.browse(cr , uid , ids[0])
-		special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )
-		if special_char:
-			return False
-		return True
-	
+		name_special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )		
+		if name_special_char:
+			return False		
+		return True	
+		
 	def _CodeValidation(self, cr, uid, ids, context=None):
-		flds = self.browse(cr , uid , ids[0])
-		if flds.code:			
+		flds = self.browse(cr , uid , ids[0])	
+		if flds.code:		
 			code_special_char = ''.join( c for c in flds.code if  c in '!@#$%^~*{}?+/=' )		
 			if code_special_char:
 				return False
@@ -81,11 +74,10 @@ class kg_moc_master(osv.osv):
 		rec = self.browse(cr,uid,ids[0])
 		res = True
 		if rec.name:
-			division_name = rec.name
-			name=division_name.upper()			
-			cr.execute(""" select upper(name) from kg_moc_master where upper(name)  = '%s' """ %(name))
-			data = cr.dictfetchall()
-			
+			mech_name = rec.name
+			name=mech_name.upper()			
+			cr.execute(""" select upper(name) from kg_mechanical_master where upper(name)  = '%s' """ %(name))
+			data = cr.dictfetchall()			
 			if len(data) > 1:
 				res = False
 			else:
@@ -96,16 +88,16 @@ class kg_moc_master(osv.osv):
 		rec = self.browse(cr,uid,ids[0])
 		res = True
 		if rec.code:
-			division_code = rec.code
-			code=division_code.upper()			
-			cr.execute(""" select upper(code) from kg_moc_master where upper(code)  = '%s' """ %(code))
+			mech_code = rec.code
+			code=mech_code.upper()			
+			cr.execute(""" select upper(code) from kg_mechanical_master where upper(code)  = '%s' """ %(code))
 			data = cr.dictfetchall()			
 			if len(data) > 1:
 				res = False
 			else:
 				res = True				
 		return res	
-		
+	
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.cancel_remark:
@@ -144,94 +136,15 @@ class kg_moc_master(osv.osv):
 		
 	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
-		return super(kg_moc_master, self).write(cr, uid, ids, vals, context)
+		return super(kg_mechanical_master, self).write(cr, uid, ids, vals, context)
 		
 	
 	_constraints = [
-		#(_Validation, 'Special Character Not Allowed !!!', ['name']),
+		#(_Validation, 'Special Character Not Allowed !!!', ['Check Name']),
 		#(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
-		(_name_validate, 'MOC name must be unique !!', ['name']),		
-		(_code_validate, 'MOC code must be unique !!', ['code']),	
+		(_name_validate, 'Mechanical name must be unique !!', ['name']),		
+		(_code_validate, 'Mechanical code must be unique !!', ['code']),		
+		
 	]
 	
-kg_moc_master()
-
-
-class ch_moc_raw_material(osv.osv):
-	
-	_name = "ch.moc.raw.material"
-	_description = "SAM MOC Raw Materials Master"
-	
-	_columns = {
-			
-		'header_id':fields.many2one('kg.moc.master', 'MOC Entry', required=True, ondelete='cascade'),	
-		'product_id': fields.many2one('product.product','Raw Material', required=True,domain="[('state','=','approved')]"),			
-		'uom':fields.many2one('product.uom', 'UOM',required=True,domain="[('dummy_state','=','approved')]"),
-		'qty':fields.float('Qty',required=True),
-		'remarks':fields.text('Remarks'),		
-	}
-ch_moc_raw_material()
-
-
-
-class ch_chemical_chart(osv.osv):
-	
-	_name = "ch.chemical.chart"
-	_description = "Chemical Chart"
-	
-	_columns = {
-			
-		'header_id':fields.many2one('kg.moc.master', 'MOC Entry', required=True, ondelete='cascade'),				
-		'chemical_id': fields.many2one('kg.chemical.master','Name', required=True,domain="[('state','=','approved')]"),		
-		'min':fields.float('Min',required=True),
-		'max':fields.float('Max',required=True),		
-	}
-	def _check_values(self, cr, uid, ids, context=None):
-		entry = self.browse(cr,uid,ids[0])
-		if entry.min > entry.max:
-			return False
-		return True
-		
-	_constraints = [		
-			  
-		(_check_values, 'Please Check the Min & Max values ,Min value should be less than Max value.!!',['Chemical Chart']),	
-		
-	   ]
-	
-ch_chemical_chart()
-
-class ch_mechanical_chart(osv.osv):
-	
-	_name = "ch.mechanical.chart"
-	_description = "Mechanical Chart"
-	
-	_columns = {
-			
-		'header_id':fields.many2one('kg.moc.master', 'MOC Entry', required=True, ondelete='cascade'),
-		'uom': fields.char('UOM',size=128),						
-		'mechanical_id': fields.many2one('kg.mechanical.master','Name', required=True,domain="[('state','=','approved')]"),	
-		'min':fields.float('Min',required=True),
-		'max':fields.float('Max',required=True),		
-	}
-	
-	def _check_values(self, cr, uid, ids, context=None):
-		entry = self.browse(cr,uid,ids[0])
-		if entry.min > entry.max:
-			return False
-		return True
-		
-	def onchange_uom_name(self, cr, uid, ids, mechanical_id, context=None):
-		
-		value = {'uom': ''}
-		if mechanical_id:
-			uom_rec = self.pool.get('kg.mechanical.master').browse(cr, uid, mechanical_id, context=context)
-			value = {'uom': uom_rec.uom.name}
-			
-		return {'value': value}
-		
-	_constraints = [		
-			  
-		(_check_values, 'Please Check the Min & Max values ,Min value should be less than Max value.!!',['Mechanical Chart']),		
-	   ]
-	
-ch_mechanical_chart()
+kg_mechanical_master()
