@@ -41,7 +41,7 @@
 								<field name="type" readonly="1"/>
 								<field name="active" invisible="1"/>
 								<field name="qty" readonly="1"/>
-								<field name="note" attrs="{'readonly': [('state','not in',['draft','confirmed'])]}"/>
+								<field name="note" string="Remarks" attrs="{'readonly': [('state','not in',['draft','confirmed'])]}"/>
 							</group>					
 						</group>
 						<newline/>

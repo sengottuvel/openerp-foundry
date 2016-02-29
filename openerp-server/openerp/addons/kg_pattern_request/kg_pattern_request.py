@@ -23,6 +23,7 @@ class kg_pattern_request(osv.osv):
 		'name': fields.char('Request No.', size=128,select=True),
 		'entry_date': fields.date('Request Date',required=True),
 		'note': fields.text('Notes'),
+		'remarks': fields.text('Remarks'),
 		'cancel_remark': fields.text('Cancel Remarks'),
 		'active': fields.boolean('Active'),
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),

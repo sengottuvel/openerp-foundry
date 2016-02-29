@@ -27,6 +27,7 @@ class kg_daily_planning(osv.osv):
 		'division_id': fields.many2one('kg.division.master','Division',readonly=True,required=True,domain="[('state','=','approved'), ('active','=','t')]"),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location',required=True),
 		'note': fields.text('Notes'),
+		'remarks': fields.text('Remarks'),
 		'active': fields.boolean('Active'),
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),
 		'line_ids': fields.one2many('ch.daily.planning.details', 'header_id', "Planning Details"),

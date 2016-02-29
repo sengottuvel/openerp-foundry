@@ -20,7 +20,7 @@
 								<field name="name"/>
 								<field name="division_id"/>
 								<field name="delivery_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
-								<field name="note" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="note" string="Remarks" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="flag_cancel" invisible="1"/>
 							</group>											
 							<group>

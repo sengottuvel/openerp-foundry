@@ -17,7 +17,7 @@
 							<group>
 								<field name="name"/>
 								<field name="division_id"/>
-								<field name="note" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="note" string="Remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
 								
 							</group>											
 							<group>
@@ -29,20 +29,21 @@
 						<notebook>
 							<page string="Inward Details" >
 								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
-									<tree string="Stock Inward Details Entry Tree" editable="top" >					
-										<field name="location"/>
+									<tree string="Stock Inward Details Entry Tree" editable="top">					
+										<field name="location" required="1"/>
 										<field name="stock_type"/>
 										<field name="pump_model_id" attrs="{'required': [('stock_type','=','pump')]}"/>
-										<field name="pattern_id" attrs="{'required': [('stock_type','=','pattern')]}" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt)"/>
+										<field name="pattern_id" attrs="{'required': [('stock_type','=','pattern')]}" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt,unit_price)"/>
 										<field name="pattern_name" readonly="1"/>
-										<field name="moc_id" required="1" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt)"/>
-										<field name="qty" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt)"/>
-										<field name="serial_no"/>
-										<field name="heat_no"/>
-										<field name="each_wgt" required="1" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt)"/>
+										<field name="moc_id" attrs="{'required': [('stock_type','=','pattern')],'readonly': [('stock_type','=','pump')]}" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt,unit_price)"/>
+										<field name="moc_construction_id" attrs="{'required': [('stock_type','=','pump')],'readonly': [('stock_type','=','pattern')]}"/>
+										<field name="qty" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt,unit_price)"/>
+										<field name="serial_no"  attrs="{'readonly': [('stock_type','=','pattern')]}"/>
+										<field name="heat_no"  attrs="{'readonly': [('stock_type','=','pump')]}"/>
+										<field name="each_wgt" required="1" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt,unit_price)"/>
 										<field name="total_wgt" readonly="1" required="1"/>
-										<field name="unit_price" readonly="1" required="1"/>
-										<field name="total_value" readonly="1" required="1"/>
+										<field name="unit_price" required="1" attrs="{'readonly': [('stock_type','=','pattern')]}" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt,unit_price)"/>
+										<field name="total_value" sum="Grand Total" readonly="1" required="1"/>
 										
 									</tree>
 								</field>
@@ -89,7 +90,8 @@
 					<field name="name"/>
 					<field name="entry_date"/>
 					<field name="division_id" invisible="1"/>
-					<field name="location" />
+					<field name="location" invisible="1"/>
+					<field name="total_value" sum="Grand Total"/>
 					<field name="state"/>
 				</tree>
 			</field>

@@ -6,7 +6,7 @@ from datetime import date
 import openerp.addons.decimal_precision as dp
 from datetime import datetime
 
-dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
+dt_time = lambda * a: time.strftime('%m/%d/%Y %H:%M:%S')
 
 
 class kg_production(osv.osv):
@@ -25,7 +25,7 @@ class kg_production(osv.osv):
 		'division_id': fields.many2one('kg.division.master','Division'),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location'),
 		'note': fields.text('Notes'),
-		'remarks': fields.text('Approve/Reject'),
+		'remarks': fields.text('Remarks'),
 		'active': fields.boolean('Active'),
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('pouring_inprogress','Pouring In Progress'),('pouring_complete','Pouring Complete')
 				,('casting_inprogress','Casting In Progress'),('casting_complete','Casting Complete'),('cancel','Cancelled')],'Status', readonly=True),
@@ -236,10 +236,11 @@ class kg_production(osv.osv):
 		
 		if pouring_qty > 0:
 			
+			
 			### Pouring Line Entry Creation in Production
 			cr.execute(''' insert into ch_boring_details(create_uid,create_date,header_id,entry_date,qty,remark,heat_id,weight,shift,time)
-				values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-				''',[uid,dt_time,entry.id,pouring_date,pouring_qty,pouring_remark,pouring_heat_id,pouring_weight,pouring_shift,pouring_time])
+				values(%s,now(),%s,%s,%s,%s,%s,%s,%s,%s)
+				''',[uid,entry.id,pouring_date,pouring_qty,pouring_remark,pouring_heat_id,pouring_weight,pouring_shift,pouring_time])
 			
 			### Production Creation When Rejection
 			
@@ -330,8 +331,8 @@ class kg_production(osv.osv):
 			### Casting Line Entry Creation in Production
 			
 			cr.execute(''' insert into ch_casting_details(create_uid,create_date,header_id,entry_date,qty,remark,heat_id,weight,shift,time)
-				values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-				''',[uid,dt_time,entry.id,casting_date,casting_qty,casting_remark,casting_heat_id,casting_weight,casting_shift,casting_time])
+				values(%s,now(),%s,%s,%s,%s,%s,%s,%s,%s)
+				''',[uid,entry.id,casting_date,casting_qty,casting_remark,casting_heat_id,casting_weight,casting_shift,casting_time])
 			
 			### Production Creation When Rejection
 			if pre_casting_qty > entry.qty:

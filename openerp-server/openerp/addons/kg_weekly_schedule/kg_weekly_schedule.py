@@ -32,7 +32,7 @@ class kg_weekly_schedule(osv.osv):
 		'cancel_remark': fields.text('Cancel Remarks'),
 		'active': fields.boolean('Active'),
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),
-		'line_ids': fields.one2many('ch.weekly.schedule.details', 'header_id', "Schedule Details"),
+		'line_ids': fields.one2many('ch.weekly.schedule.details', 'header_id', "Work Order Details"),
 		'flag_cancel': fields.boolean('Cancellation Flag'),
 		'order_type': fields.selection([('work_order','Normal'),('emergency','Emergency'),('project','Project')],'Type', required=True),
 		'delivery_date': fields.date('Delivery Date',required=True),
@@ -314,6 +314,7 @@ class ch_weekly_schedule_details(osv.osv):
 		'temp_planning_qty':fields.integer('Planning Qty'),
 		'transac_state': fields.selection([('in_draft','In Draft'),('in_schedule','In Schedule'),('partial','Partial'),('sent_for_plan','In Planning'),('sent_for_qc','In QC'),
 					   ('sent_for_produc','In Production'),('complete','Completed')],'Transaction Status', readonly=True),
+		'moc_construction_id':fields.many2one('kg.moc.construction','MOC Construction',domain="[('state','=','approved'), ('active','=','t')]"),
 
 	}
 	
@@ -353,7 +354,7 @@ class ch_weekly_schedule_details(osv.osv):
 		if pump_model_id != False:
 			
 			sch_bom_obj = self.pool.get('ch.sch.bom.details')
-			cr.execute(''' select bom.id,bom.header_id,bom.pattern_id,bom.pattern_name,bom.qty, bom.pos_no,pattern.pcs_weight, pattern.ci_weight
+			cr.execute(''' select bom.id,bom.header_id,bom.pattern_id,bom.pattern_name,bom.qty, bom.pos_no,pattern.pcs_weight, pattern.ci_weight,pattern.nonferous_weight
 					from ch_bom_line as bom
 					LEFT JOIN kg_pattern_master pattern on pattern.id = bom.pattern_id
 					where bom.header_id = (select id from kg_bom where pump_model_id = %s and state='approved' and active='t') ''',[pump_model_id])
@@ -378,6 +379,7 @@ class ch_weekly_schedule_details(osv.osv):
 					'pattern_name': bom_details['pattern_name'],						
 					'pcs_weight': bom_details['pcs_weight'] or 0.00,						
 					'ci_weight': bom_details['ci_weight'] or 0.00,				  
+					'nonferous_weight': bom_details['nonferous_weight'] or 0.00,				  
 					'pos_no': bom_details['pos_no'],				  
 					'qty' : bom_qty,				   
 					'planning_qty' : bom_qty,				  
@@ -401,7 +403,7 @@ class ch_weekly_schedule_details(osv.osv):
 			
 			
 		sch_bom_obj = self.pool.get('ch.sch.bom.details')
-		cr.execute(''' select bom.id,bom.header_id,bom.pattern_id,bom.pattern_name,bom.qty, bom.pos_no,pattern.pcs_weight, pattern.ci_weight
+		cr.execute(''' select bom.id,bom.header_id,bom.pattern_id,bom.pattern_name,bom.qty, bom.pos_no,pattern.pcs_weight, pattern.ci_weight,pattern.nonferous_weight
 				from ch_bom_line as bom
 				LEFT JOIN kg_pattern_master pattern on pattern.id = bom.pattern_id
 				where bom.header_id = (select id from kg_bom where pump_model_id = %s and state='approved' and active='t') ''',[pump_model_id])
@@ -423,7 +425,8 @@ class ch_weekly_schedule_details(osv.osv):
 				'pattern_id': bom_details['pattern_id'],
 				'pattern_name': bom_details['pattern_name'],						
 				'pcs_weight': bom_details['pcs_weight'] or 0.00,						
-				'ci_weight': bom_details['ci_weight'] or 0.00,				  
+				'ci_weight': bom_details['ci_weight'] or 0.00,
+				'nonferous_weight': bom_details['nonferous_weight'] or 0.00,				  
 				'pos_no': bom_details['pos_no'],				  
 				'qty' : bom_qty,				   
 				'planning_qty' : bom_qty,				  
@@ -537,6 +540,7 @@ class ch_sch_bom_details(osv.osv):
 		'pattern_name': fields.char('Pattern Name'),
 		'pcs_weight': fields.related('pattern_id','pcs_weight', type='float', string='SS Weight(kgs)', store=True),
 		'ci_weight': fields.related('pattern_id','ci_weight', type='float', string='CI Weight(kgs)', store=True),
+		'nonferous_weight': fields.related('pattern_id','nonferous_weight', type='float', string='Non-Ferrous Weight(kgs)', store=True),
 		'pos_no': fields.related('bom_line_id','pos_no', type='integer', string='Position No', store=True),
 		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','=','approved'), ('active','=','t')]"),
 		'qty': fields.integer('Qty'),

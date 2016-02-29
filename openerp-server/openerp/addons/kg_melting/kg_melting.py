@@ -6,7 +6,6 @@ from datetime import date
 import openerp.addons.decimal_precision as dp
 from datetime import datetime
 
-
 dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
 

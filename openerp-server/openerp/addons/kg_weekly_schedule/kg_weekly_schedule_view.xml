@@ -21,7 +21,7 @@
 								<field name="division_id"/>
 								<field name="order_type" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="order_value"  attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
-								<field name="note" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="note" string="Remarks" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="flag_cancel" invisible="1"/>
 								
 							</group>											
@@ -167,7 +167,7 @@
 							<field name="order_no" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="pump_model_id" on_change="onchange_pump_model(pump_model_id, qty, type)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="order_ref_no" invisible="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
-							<field name="delivery_date" on_change="onchange_delivery_date(delivery_date)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="moc_construction_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="state" invisible="1"/>
 							<field name="flag_cancel" invisible="1"/>
 							<field name="cancel_remark" attrs="{'invisible': [('flag_cancel','=',False)], 'readonly': [('state','in',['cancel'])]}"/>
@@ -178,6 +178,7 @@
 						<group>
 							<field name="type" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="qty"  on_change="onchange_schedule_qty(pump_model_id, qty, type)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="delivery_date" on_change="onchange_delivery_date(delivery_date)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="note" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 						</group>
 					</group>
@@ -192,6 +193,7 @@
 								   <field name="pos_no" readonly="1"/>
 								   <field name="pcs_weight" readonly="1"/>
 								   <field name="ci_weight" readonly="1"/>
+								   <field name="nonferous_weight" readonly="1"/>
 								   <field name="type" invisible="1"/>
 								   <field name="qty" attrs="{'readonly': [('type','=','production')]}"/>
 								   <field name="planning_qty" invisible="1"/>

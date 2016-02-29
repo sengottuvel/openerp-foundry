@@ -34,6 +34,8 @@ class kg_stock_inward(osv.osv):
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),
 		'line_ids': fields.one2many('ch.stock.inward.details', 'header_id', "Inward Details"),
 		
+		'total_value': fields.float('Total Value'),
+		
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		
@@ -65,9 +67,6 @@ class kg_stock_inward(osv.osv):
 		
 	}
 	
-	
-	
-
 	def _future_entry_date_check(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		today = date.today()
@@ -111,11 +110,20 @@ class kg_stock_inward(osv.osv):
 			
 			values(%s,%s,%s,%s,%s,%s,%s,0,'IN',%s,%s,%s)
 			''',[entry.company_id.id,entry.division_id.id or None,entry.location, line_item.pattern_id.id or None,
-			line_item.moc_id.id,line_item.id,line_item.qty,entry.entry_date,line_item.unit_price or 0.00,line_item.pump_model_id.id or None ])
+			line_item.moc_id.id or None,line_item.id,line_item.qty,entry.entry_date,line_item.unit_price or 0.00,line_item.pump_model_id.id or None ])
 					
 			#### Stock Updation Block Ends Here ###
+			
+			
+		### Total Value ###
+		cr.execute(''' select sum(total_value) from ch_stock_inward_details where header_id = %s ''',[ids[0]])
+		inward_total = cr.fetchone()
+		if inward_total[0] != None:
+			total = inward_total[0]
+		else:
+			total = 0.00
 		
-		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		self.write(cr, uid, ids, {'total_value':total,'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		cr.execute(''' update ch_stock_inward_details set state = 'confirmed' where header_id = %s ''',[ids[0]])
 		return True
 		
@@ -158,8 +166,8 @@ class ch_stock_inward_details(osv.osv):
 		### Inward Details ####
 		'header_id':fields.many2one('kg.stock.inward', 'Stock Inward', required=1, ondelete='cascade'),
 		'inward_date': fields.related('header_id','entry_date', type='date', string='Date', store=True, readonly=True),
-		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location', required=True),
-		'stock_type':fields.selection([('pump','Pump'),('pattern','Pattern')],'Type', required=True),
+		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location'),
+		'stock_type':fields.selection([('pump','Pump'),('pattern','Part')],'Type', required=True),
 		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model',domain="[('state','=','approved'), ('active','=','t')]"),
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern Number',domain="[('state','=','approved'), ('active','=','t')]"),
 		'pattern_name': fields.char('Pattern Name'),
@@ -176,6 +184,7 @@ class ch_stock_inward_details(osv.osv):
 		'cancel_remark': fields.text('Cancel Remarks'),
 		'serial_no': fields.char('Serial No', size=128),
 		'heat_no': fields.char('Heat No', size=128),
+		'moc_construction_id':fields.many2one('kg.moc.construction','MOC Construction',domain="[('state','=','approved'), ('active','=','t')]"),
 		
 		
 	
@@ -189,7 +198,7 @@ class ch_stock_inward_details(osv.osv):
 		
 	}
 		
-	def onchange_stock_qty(self, cr, uid, ids, pattern_id,moc_id,qty,each_wgt, context=None):
+	def onchange_stock_qty(self, cr, uid, ids, pattern_id,moc_id,qty,each_wgt,unit_price, context=None):
 		mat_amt = 0.00
 		pattern_name = False
 		
@@ -199,6 +208,9 @@ class ch_stock_inward_details(osv.osv):
 		if moc_id != False:
 			moc_rec = self.pool.get('kg.moc.master').browse(cr, uid, moc_id, context=context)
 			mat_amt = moc_rec.rate or 0.00
+		else:
+			mat_amt = unit_price
+			
 		total_weight = qty * each_wgt or 0.00
 		total_value = total_weight * mat_amt
 		value = {
@@ -229,17 +241,21 @@ class ch_stock_inward_details(osv.osv):
 		
 		
 	def create(self, cr, uid, vals, context=None):
+		inward_obj = self.pool.get('kg.stock.inward')
 		pattern_name = False
-		
 		pattern_obj = self.pool.get('kg.pattern.master')
 		moc_obj = self.pool.get('kg.moc.master')
 		if vals.get('pattern_id') != False:
 			pattern_rec = pattern_obj.browse(cr, uid, vals.get('pattern_id'))
 			pattern_name = pattern_rec.pattern_name
-		each_weight = vals.get('each_wgt')
-		moc_rec = moc_obj.browse(cr, uid, vals.get('moc_id') )
-		mat_amt = moc_rec.rate
+		
+		if vals.get('moc_id') != None:
+			moc_rec = moc_obj.browse(cr, uid, vals.get('moc_id') )
+			mat_amt = moc_rec.rate
+		else:
+			mat_amt = vals.get('unit_price')
 		qty = vals.get('qty')
+		each_weight = vals.get('each_wgt')
 		total_weight = qty * each_weight
 		total_value = total_weight * mat_amt
 		vals.update({
@@ -250,14 +266,16 @@ class ch_stock_inward_details(osv.osv):
 		'total_value': total_value
 		
 		})
+		inward_rec = inward_obj.browse(cr, uid, vals.get('header_id'))
+		inward_obj.write(cr, uid, vals.get('header_id'),{'total_value':inward_rec.total_value + total_value})
 		return super(ch_stock_inward_details, self).create(cr, uid, vals, context=context)
 		
 		
 	def write(self, cr, uid, ids, vals, context=None):
 		pattern_name = False
-		
 		pattern_obj = self.pool.get('kg.pattern.master')
 		moc_obj = self.pool.get('kg.moc.master')
+		inward_obj = self.pool.get('kg.stock.inward')
 		entry_rec = self.browse(cr, uid, ids[0] )
 		
 		if vals.get('pattern_id') != None:
@@ -265,12 +283,20 @@ class ch_stock_inward_details(osv.osv):
 				pattern_rec = pattern_obj.browse(cr, uid, vals.get('pattern_id'))
 				pattern_name = pattern_rec.pattern_name
 		
-		if vals.get('moc_id') == None: 
-			moc_rec = moc_obj.browse(cr, uid, entry_rec.moc_id.id )
-			mat_amt = moc_rec.rate
-		else:
-			moc_rec = moc_obj.browse(cr, uid, vals.get('moc_id') )
-			mat_amt = moc_rec.rate
+		if entry_rec.stock_type == 'pattern':
+			if vals.get('moc_id') == None: 
+				moc_rec = moc_obj.browse(cr, uid, entry_rec.moc_id.id )
+				mat_amt = moc_rec.rate
+			else:
+				moc_rec = moc_obj.browse(cr, uid, vals.get('moc_id') )
+				mat_amt = moc_rec.rate
+		
+		if entry_rec.stock_type == 'pump':
+			if vals.get('unit_price'):
+				mat_amt = vals.get('unit_price')
+			else:
+				mat_amt = entry_rec.unit_price
+
 		if vals.get('qty') == None: 
 			qty = entry_rec.qty
 		else:
@@ -294,6 +320,14 @@ class ch_stock_inward_details(osv.osv):
 		'total_value': total_value
 		
 		})
+		
+		cr.execute(''' select sum(total_value) from ch_stock_inward_details where header_id = %s and id != %s ''',[entry_rec.header_id.id, ids[0]])
+		inward_total = cr.fetchone()
+		if inward_total[0] != None:
+			total = inward_total[0]
+		else:
+			total = 0.00
+		inward_obj.write(cr, uid, entry_rec.header_id.id,{'total_value':total + total_value})
 		return super(ch_stock_inward_details, self).write(cr, uid, ids, vals, context)
 		
 		
