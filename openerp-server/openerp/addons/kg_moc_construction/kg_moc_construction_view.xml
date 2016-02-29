@@ -37,7 +37,7 @@
 						</group>
 						<notebook>
 							<page string="Construction Details">	
-								<field name="line_ids" nolabel="1" >
+								<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" >
 									<tree string="Construction Details Entry Tree" editable="top" >									
 										<field name="pattern_id" on_change="onchange_pattern_name(pattern_id)"/>											
 										<field name="pattern_name" readonly="1"/>				   
