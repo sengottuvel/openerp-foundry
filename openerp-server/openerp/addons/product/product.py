@@ -751,6 +751,7 @@ class product_product(osv.osv):
 		'flag_minqty_rule': fields.boolean('Minimum Qty Rule Applicable'),
 		'flag_expiry_alert': fields.boolean('Expiry Alert'),
 		
+		'design_rate': fields.float('Design Rate'),
 		'equivalent_stand': fields.char('Equivalent standard'),
 	}
 	
