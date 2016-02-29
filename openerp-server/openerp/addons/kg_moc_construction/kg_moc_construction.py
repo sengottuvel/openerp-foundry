@@ -8,24 +8,22 @@ import re
 import math
 dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
-class kg_pumpmodel_master(osv.osv):
+class kg_moc_construction(osv.osv):
 
-	_name = "kg.pumpmodel.master"
-	_description = "SAM PumpModel Master"
+	_name = "kg.moc.construction"
+	_description = "MOC Construction Master"
 	
 	_columns = {
 			
 		'name': fields.char('Name', size=128, required=True, select=True),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
-		'code': fields.char('Code', size=128, required=True),
+		'code': fields.char('Code', size=128, required=True),		
 		'active': fields.boolean('Active'),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
-		
-		'alias_name': fields.char('Alias Name', size=128),
-		'make_by': fields.char('Make By', size=128),
+		'line_ids':fields.one2many('ch.const.details', 'header_id', "Construction Details"),
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -43,7 +41,7 @@ class kg_pumpmodel_master(osv.osv):
 	
 	_defaults = {
 	
-		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.pumpmodel.master', context=c),
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.moc.construction', context=c),
 		'active': True,
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
@@ -53,17 +51,17 @@ class kg_pumpmodel_master(osv.osv):
 	
 	_sql_constraints = [
 	
-		('name', 'unique(name)', 'Name must be unique per Company !!'),
-		('code', 'unique(code)', 'Code must be unique per Company !!'),
+		('name', 'unique(name)', 'Name must be unique!!'),
+		('code', 'unique(code)', 'Code must be unique!!'),
 	]
 	
 	"""def _Validation(self, cr, uid, ids, context=None):
 		flds = self.browse(cr , uid , ids[0])
-		special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )
-		if special_char:
-			return False
-		return True
-	
+		name_special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )		
+		if name_special_char:
+			return False		
+		return True	
+		
 	def _CodeValidation(self, cr, uid, ids, context=None):
 		flds = self.browse(cr , uid , ids[0])	
 		if flds.code:		
@@ -76,11 +74,10 @@ class kg_pumpmodel_master(osv.osv):
 		rec = self.browse(cr,uid,ids[0])
 		res = True
 		if rec.name:
-			division_name = rec.name
-			name=division_name.upper()			
-			cr.execute(""" select upper(name) from kg_pumpmodel_master where upper(name)  = '%s' """ %(name))
-			data = cr.dictfetchall()
-			
+			moc_name = rec.name
+			name=moc_name.upper()			
+			cr.execute(""" select upper(name) from kg_moc_construction where upper(name)  = '%s' """ %(name))
+			data = cr.dictfetchall()			
 			if len(data) > 1:
 				res = False
 			else:
@@ -91,16 +88,16 @@ class kg_pumpmodel_master(osv.osv):
 		rec = self.browse(cr,uid,ids[0])
 		res = True
 		if rec.code:
-			division_code = rec.code
-			code=division_code.upper()			
-			cr.execute(""" select upper(code) from kg_pumpmodel_master where upper(code)  = '%s' """ %(code))
+			moc_code = rec.code
+			code=moc_code.upper()			
+			cr.execute(""" select upper(code) from kg_moc_construction where upper(code)  = '%s' """ %(code))
 			data = cr.dictfetchall()			
 			if len(data) > 1:
 				res = False
 			else:
 				res = True				
 		return res	
-		
+	
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.cancel_remark:
@@ -111,6 +108,11 @@ class kg_pumpmodel_master(osv.osv):
 		return True
 
 	def entry_confirm(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		item_lines = rec.line_ids
+		if not item_lines:
+			raise osv.except_osv(_('Construction Details is must !!'),
+				_('Enter the Construction Details Lines field !!'))
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
@@ -130,7 +132,7 @@ class kg_pumpmodel_master(osv.osv):
 	def unlink(self,cr,uid,ids,context=None):
 		unlink_ids = []		
 		for rec in self.browse(cr,uid,ids):	
-			if rec.state not in ('draft','cancel'):			
+			if rec.state not in ('draft','cancel'):				
 				raise osv.except_osv(_('Warning!'),
 						_('You can not delete this entry !!'))
 			else:
@@ -139,14 +141,57 @@ class kg_pumpmodel_master(osv.osv):
 		
 	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
-		return super(kg_pumpmodel_master, self).write(cr, uid, ids, vals, context)
+		return super(kg_moc_construction, self).write(cr, uid, ids, vals, context)
 		
 	
 	_constraints = [
-		#(_Validation, 'Special Character Not Allowed !!!', ['name']),
+		#(_Validation, 'Special Character Not Allowed !!!', ['Check Name']),
 		#(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
-		(_name_validate, 'PumpModel name must be unique !!', ['name']),		
-		(_code_validate, 'PumpModel code must be unique !!', ['code']),	
+		(_name_validate, 'MOC Construction name must be unique !!', ['name']),		
+		(_code_validate, 'MOC Construction code must be unique !!', ['code']),		
+		
 	]
 	
-kg_pumpmodel_master()
+kg_moc_construction()
+
+
+
+class ch_const_details(osv.osv):
+	
+	_name = "ch.const.details"
+	_description = "MOC Construction Details"
+	
+	_columns = {
+			
+		'header_id':fields.many2one('kg.moc.construction', 'MOC Construction Entry', required=True, ondelete='cascade'),	
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern No', required=True,domain="[('state','=','approved')]"),			
+		'pattern_name':fields.char('Pattern Name'),
+		'moc_id':fields.many2one('kg.moc.master','MOC',required=True,domain="[('state','=','approved')]"),
+		'remarks':fields.text('Remarks'),		
+	}
+	
+	def onchange_pattern_name(self, cr, uid, ids, pattern_id, context=None):
+		
+		value = {'pattern_name': ''}
+		if pattern_id:
+			pattern_rec = self.pool.get('kg.pattern.master').browse(cr, uid, pattern_id, context=context)
+			value = {'pattern_name': pattern_rec.pattern_name}
+			
+		return {'value': value}
+		
+	def create(self, cr, uid, vals, context=None):
+		pattern_obj = self.pool.get('kg.pattern.master')
+		if vals.get('pattern_id'):		  
+			pattern_rec = pattern_obj.browse(cr, uid, vals.get('pattern_id') )
+			pattern_name = pattern_rec.pattern_name
+			vals.update({'pattern_name': pattern_name})
+		return super(ch_const_details, self).create(cr, uid, vals, context=context)
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		pattern_obj = self.pool.get('kg.pattern.master')
+		if vals.get('pattern_id'):
+			pattern_rec = pattern_obj.browse(cr, uid, vals.get('pattern_id') )
+			pattern_name = pattern_rec.pattern_name
+			vals.update({'pattern_name': pattern_name})
+		return super(ch_const_details, self).write(cr, uid, ids, vals, context)  
+ch_const_details()

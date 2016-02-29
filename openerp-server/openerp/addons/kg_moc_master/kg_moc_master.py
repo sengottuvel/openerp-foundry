@@ -183,8 +183,8 @@ class ch_chemical_chart(osv.osv):
 			
 		'header_id':fields.many2one('kg.moc.master', 'MOC Entry', required=True, ondelete='cascade'),				
 		'chemical_id': fields.many2one('kg.chemical.master','Name', required=True,domain="[('state','=','approved')]"),		
-		'min':fields.float('Min',required=True),
-		'max':fields.float('Max',required=True),		
+		'min':fields.float('Min',required=True,digits_compute=dp.get_precision('Min Value')),		
+		'max':fields.float('Max',required=True,digits_compute=dp.get_precision('Max Value')),		
 	}
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
@@ -210,8 +210,8 @@ class ch_mechanical_chart(osv.osv):
 		'header_id':fields.many2one('kg.moc.master', 'MOC Entry', required=True, ondelete='cascade'),
 		'uom': fields.char('UOM',size=128),						
 		'mechanical_id': fields.many2one('kg.mechanical.master','Name', required=True,domain="[('state','=','approved')]"),	
-		'min':fields.float('Min',required=True),
-		'max':fields.float('Max',required=True),		
+		'min':fields.float('Min',required=True,digits_compute=dp.get_precision('Min Value')),
+		'max':fields.float('Max',required=True,digits_compute=dp.get_precision('Max Value')),		
 	}
 	
 	def _check_values(self, cr, uid, ids, context=None):
@@ -228,6 +228,22 @@ class ch_mechanical_chart(osv.osv):
 			value = {'uom': uom_rec.uom.name}
 			
 		return {'value': value}
+		
+	def create(self, cr, uid, vals, context=None):
+		mech_obj = self.pool.get('kg.mechanical.master')
+		if vals.get('mechanical_id'):		  
+			uom_rec = mech_obj.browse(cr, uid, vals.get('mechanical_id') )
+			uom_name = uom_rec.uom.name
+			vals.update({'uom': uom_name})
+		return super(ch_mechanical_chart, self).create(cr, uid, vals, context=context)
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		mech_obj = self.pool.get('kg.mechanical.master')
+		if vals.get('mechanical_id'):
+			uom_rec = mech_obj.browse(cr, uid, vals.get('mechanical_id') )
+			uom_name = uom_rec.uom.name
+			vals.update({'uom': uom_name})
+		return super(ch_mechanical_chart, self).write(cr, uid, ids, vals, context)  
 		
 	_constraints = [		
 			  

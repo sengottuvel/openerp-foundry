@@ -21,7 +21,8 @@
             ref('kg_box_master.mam_box_master'),
             ref('kg_bom_amendment.mam_bom_amendment'),    
             ref('kg_chemical_master.mam_chemical_master'),
-            ref('kg_mechanical_master.mam_mechanical_master'),        
+            ref('kg_mechanical_master.mam_mechanical_master'),  
+            ref('kg_moc_construction.mam_mocconstruction_master'),      
             
             
             ref('kg_stock_inward.tpm_transactions'),

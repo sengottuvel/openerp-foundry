@@ -19,14 +19,14 @@ class kg_pattern_master(osv.osv):
 			
 		'name': fields.char('Part/Pattern No', size=128, required=True),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
-		'box_id': fields.many2one('kg.box.master','Box',readonly=True,required=True,domain="[('state','=','approved'), ('active','=','t')]"),		
+		'box_id': fields.many2one('kg.box.master','Box',readonly=True,domain="[('state','=','approved'), ('active','=','t')]"),		
 		'pattern_name': fields.char('Part/Pattern Name', size=128,required=True),
-		'code': fields.char('Pattern Code', size=128,required=True),
+		'code': fields.char('Pattern Code', size=128),
 		'active': fields.boolean('Active'),
 		'pcs_weight': fields.float('SS Weight(kgs)'),
 		'ci_weight': fields.float('CI Weight(kgs)'),
 		'mould_rate': fields.float('Mould Rate(Rs)'),
-		'location': fields.char('Location', required=True),
+		'location': fields.char('Physical Location', required=True),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'pattern_state': fields.selection([('active','Active'),('hold','Hold'),('rework','Rework'),('reject','Rejected')],'Pattern Status',required=True),
 		'notes': fields.text('Notes'),
@@ -38,6 +38,9 @@ class kg_pattern_master(osv.osv):
 		
 		'tolerance': fields.float('Tolerance(%)'),
 		'nonferous_weight': fields.float('Non-Ferrous Weight(kgs)'),
+		
+		'alias_name': fields.char('Alias Name', size=128),
+		'make_by': fields.char('Make By', size=128),
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -107,7 +110,32 @@ class kg_pattern_master(osv.osv):
 		return True
 
 	def entry_confirm(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])		
+		rec = self.browse(cr,uid,ids[0])
+		moc_rate_lines=rec.line_ids	
+		moc_obj=self.pool.get('kg.moc.master')	
+		for moc_rate_item in moc_rate_lines:			
+			moc_rate_ids=moc_obj.search(cr,uid,[('name','=',moc_rate_item.moc_id.name),('state','=','approved')])			
+			moc_rec = moc_obj.browse(cr,uid,moc_rate_ids[0])						
+			if moc_rec.weight_type == 'ci':			
+				amount=rec.ci_weight * moc_rate_item.rate
+				vals = {
+				'amount': amount,				
+					}
+				self.pool.get('ch.mocwise.rate').write(cr,uid,moc_rate_item.id,vals)	
+			elif moc_rec.weight_type == 'ss':				
+				amount=rec.pcs_weight * moc_rate_item.rate
+				vals = {
+				'amount': amount,				
+					}
+				self.pool.get('ch.mocwise.rate').write(cr,uid,moc_rate_item.id,vals)	
+			elif moc_rec.weight_type == 'non_ferrous':				
+				amount=rec.nonferous_weight * moc_rate_item.rate
+				vals = {
+				'amount': amount,				
+					}
+				self.pool.get('ch.mocwise.rate').write(cr,uid,moc_rate_item.id,vals)	
+			else:
+				pass			
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
@@ -157,9 +185,10 @@ class ch_mocwise_rate(osv.osv):
 	_columns = {
 			
 		'header_id':fields.many2one('kg.pattern.master', 'Pattern Entry', required=True, ondelete='cascade'),	
-		'moc_id': fields.many2one('kg.moc.master','MOC', required=True,domain="[('state','=','approved'), ('active','=','t')]"),			
+		'moc_id': fields.many2one('kg.moc.master','MOC', required=True,domain="[('state','=','approved'), ('active','=','t')]" ),			
 		'date':fields.date('Effective Date',required=True),
 		'rate':fields.float('Rate(Rs)',required=True),
+		'amount':fields.float('Amount(Rs)'),
 		'remarks':fields.text('Remarks'),
 		
 	}
@@ -189,9 +218,24 @@ class ch_mocwise_rate(osv.osv):
 		value = {'rate': ''}
 		if moc_id:
 			moc_rec = self.pool.get('kg.moc.master').browse(cr, uid, moc_id, context=context)
-			value = {'rate': moc_rec.rate}
-			
+			value = {'rate': moc_rec.rate}			
 		return {'value': value}
+		
+	def create(self, cr, uid, vals, context=None):
+		moc_obj = self.pool.get('kg.moc.master')
+		if vals.get('moc_id'):		  
+			moc_rec = moc_obj.browse(cr, uid, vals.get('moc_id') )
+			moc_name = moc_rec.rate
+			vals.update({'rate': moc_name})
+		return super(ch_mocwise_rate, self).create(cr, uid, vals, context=context)
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		mech_obj = self.pool.get('kg.moc.master')
+		if vals.get('moc_id'):
+			moc_rec = moc_obj.browse(cr, uid, vals.get('moc_id') )
+			moc_name = moc_rec.rate
+			vals.update({'rate': moc_name})
+		return super(ch_mocwise_rate, self).write(cr, uid, ids, vals, context)  
 		
 ch_mocwise_rate()
 

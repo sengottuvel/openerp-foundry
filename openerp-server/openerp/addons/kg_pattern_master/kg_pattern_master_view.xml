@@ -18,19 +18,21 @@
 					<sheet>
 						<group>
 							<group>						
-								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
-								<field name="box_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
-								<field name="pcs_weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="tolerance" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>									
+								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>		
+								<field name="alias_name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>																
+								<field name="box_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>															
+								<field name="pcs_weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+								<field name="tolerance" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 								<field name="mould_rate" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" invisible="1"/>
 								<field name="location" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>									
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>					
 							</group>
 							<group>
 								<field name="pattern_name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="ci_weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
-								<field name="nonferous_weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>												
+								<field name="make_by" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+								<field name="ci_weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>													
+								<field name="nonferous_weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>													
 								<field name="active"/>									
 								<field name="pattern_state" style="width: 50%%" class="att_state_change"/>							
 								<field name="state" style="width: 30%%" class="att_state_change"/>							
@@ -50,7 +52,8 @@
 									<tree string="MOC Rate Details Entry Tree" editable="top" >									
 										<field name="moc_id" on_change="onchange_rate(moc_id)"/>											
 										<field name="date"/>				   
-										<field name="rate"/>
+										<field name="rate" readonly="1"/>
+										<field name="amount" readonly="1"/>
 										<field name="remarks" widget="char"/>														
 									</tree>
 								</field>																								
@@ -112,10 +115,10 @@
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" 
 								toolbar="True" string="Pattern Master Tree">		
 					<field name="name"/>						
-					<field name="pattern_name"/>	
-					<field name="ci_weight"/>				
-					<field name="pcs_weight"/>					
-					<field name="nonferous_weight"/>						
+					<field name="pattern_name"/>
+					<field name="ci_weight"/>					
+					<field name="pcs_weight"/>										
+					<field name="nonferous_weight"/>					
 					<field name="state"/>
 				</tree>
 			</field>
@@ -160,7 +163,7 @@
 		
 		<!-- Menu Action End-->
 		
-			<!-- Menu Name Start here --> 
+		<!-- Menu Name Start here --> 
 		
 			<menuitem action="mma_pattern_master" name="Pattern" id="mam_pattern_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="1"/>
 
