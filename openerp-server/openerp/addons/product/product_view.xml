@@ -109,6 +109,7 @@
                                     </group>
                                     <group>
 										<field name="latest_price" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
+										<field name="equivalent_stand" attrs="{'readonly':[('state','in',('approved','reject'))]}" groups="kg_users.group_planning_admin"/>
 										<field name="minimum_qty" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
                                         <field name="reorder_qty" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
                                         <field name="stock_in_hand" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>

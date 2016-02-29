@@ -750,6 +750,8 @@ class product_product(osv.osv):
 		'flag_qc_notreq': fields.boolean('QC Not Required'),
 		'flag_minqty_rule': fields.boolean('Minimum Qty Rule Applicable'),
 		'flag_expiry_alert': fields.boolean('Expiry Alert'),
+		
+		'equivalent_stand': fields.char('Equivalent standard'),
 	}
 	
 	
