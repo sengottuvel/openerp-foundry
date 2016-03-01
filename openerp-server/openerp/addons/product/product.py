@@ -792,14 +792,14 @@ class product_product(osv.osv):
 
 	def create(self, cr, uid, vals, context=None): 
 		print"createvalsvals",vals
-		v_name = None 
-		v_code = None
-		if vals.get('name'): 
-			v_name = vals['name'].strip() 
-			vals['name'] = v_name.capitalize() 
-		if vals.get('product_code'):
-			v_code = vals['product_code'].strip()
-			vals['product_code'] = v_code.capitalize()
+		#v_name = None 
+		#v_code = None
+		#if vals.get('name'): 
+		#	v_name = vals['name'].strip() 
+		#	vals['name'] = v_name.capitalize() 
+		#if vals.get('product_code'):
+		#	v_code = vals['product_code'].strip()
+		#	vals['product_code'] = v_code.capitalize()
 		if vals['tolerance_applicable'] == True:
 			if vals['tolerance_plus'] <= 0.00:
 				raise osv.except_osv(_('Check Tolerance(+) Value !!'),
