@@ -750,9 +750,12 @@ class product_product(osv.osv):
 		'flag_qc_notreq': fields.boolean('QC Not Required'),
 		'flag_minqty_rule': fields.boolean('Minimum Qty Rule Applicable'),
 		'flag_expiry_alert': fields.boolean('Expiry Alert'),
-		
 		'design_rate': fields.float('Design Rate'),
 		'equivalent_stand': fields.char('Equivalent standard'),
+		'tolerance_plus': fields.float('Tolerance(+ %)'),
+		'tolerance_minus': fields.float('Tolerance(- %)'),
+		'tolerance_applicable': fields.boolean('Tolerance Applicable?'),
+		
 	}
 	
 	
@@ -786,8 +789,9 @@ class product_product(osv.osv):
 		result = super(product_product,self).write(cr, uid, ids, vals, context=context) 
 		return result
 	"""
-	"""	
+
 	def create(self, cr, uid, vals, context=None): 
+		print"createvalsvals",vals
 		v_name = None 
 		v_code = None
 		if vals.get('name'): 
@@ -796,12 +800,45 @@ class product_product(osv.osv):
 		if vals.get('product_code'):
 			v_code = vals['product_code'].strip()
 			vals['product_code'] = v_code.capitalize()
-			
+		if vals['tolerance_applicable'] == True:
+			if vals['tolerance_plus'] <= 0.00:
+				raise osv.except_osv(_('Check Tolerance(+) Value !!'),
+					_('Please enter greater than zero !!'))
+			else:
+				pass
+			#if vals['tolerance_minus'] <= 0.00:
+			#	raise osv.except_osv(_('Check Tolerance(-) Value !!'),
+			#		_('Please enter greater than zero !!'))
+			#else:
+			#	pass
+		else:
+			pass	
 		result = super(product_product,self).create(cr, uid, vals, context=context) 
 		return result
 
+
 	"""
-	
+	def write(self, cr, uid, ids, vals, context=None):	
+		print"valsvalsvals",vals
+		tolerance_applicable
+		if vals['tolerance_applicable'] == True:
+			print"aaaaAAA"
+			if vals['tolerance_plus'] == 0.00:
+				raise osv.except_osv(_('Check Tolerance Vslue !!'),
+					_('Please enter greater than zero !!'))
+			else:
+				print"bbbbbbbbb"
+				pass
+			if vals['tolerance_minus'] == 0.00:
+				raise osv.except_osv(_('Check Tolerance Vslue !!'),
+					_('Please enter greater than zero !!'))
+			else:
+				print"cccccc"
+				pass
+		else:
+			pass		
+		return super(product_product, self).write(cr, uid, ids, vals, context)
+		"""
 	def unlink(self, cr, uid, ids, context=None):
 		unlink_ids = []
 		unlink_product_tmpl_ids = []
