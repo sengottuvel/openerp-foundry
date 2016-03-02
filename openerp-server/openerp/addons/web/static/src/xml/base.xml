@@ -757,6 +757,19 @@
         </button>
     </t>
     </div>
+    <t t-if="widget.view_id == 1125">
+		<div>
+			<button type="button" class="oe_list_issue">
+				Issue
+			</button>
+		</div>
+		<div>
+			<label class="oe_label oe_align_right">
+			 Remarks : 
+			</label>
+			<input type="text" name="text" id="remark"/>
+		</div>
+    </t>
 </t>
 <t t-name="ListView.pager">
     <div class="oe_list_pager" t-att-colspan="widget.columns_count">

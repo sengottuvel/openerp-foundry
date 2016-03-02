@@ -116,6 +116,8 @@ class kg_pattern_request(osv.osv):
 		cr.execute(del_sql)
 		
 		if entry.production_line_ids:
+			
+			"""
 		
 			produc_line_ids = map(lambda x:x.id,entry.production_line_ids)
 			produc_line_browse = production_obj.browse(cr,uid,produc_line_ids)
@@ -125,22 +127,30 @@ class kg_pattern_request(osv.osv):
 			for key, group in groupby(produc_line_browse, lambda x: x.pattern_id.id):
 				groups.append(map(lambda r:r,group))
 			for key,group in enumerate(groups):
+			
+			"""
+			
+			for line_item in entry.production_line_ids:
+				
 				
 				vals = {
 				
 					'header_id': entry.id,
-					'pattern_id':group[0].pattern_id.id,
-					'pattern_name':group[0].pattern_id.pattern_name,
+					'pattern_id':line_item.pattern_id.id,
+					'pattern_name':line_item.pattern_id.pattern_name,
+					'production_id':line_item.id,
+					'order_ref_no':line_item.order_ref_no,
+					'pump_model_id':line_item.pump_model_id.id,
+					'moc_id':line_item.moc_id.id,
 					
 				}
 				
 				request_line_id = request_line_obj.create(cr, uid,vals)
 				
-				for item in group:
+				cr.execute(''' insert into tmp_pattern_request_details(request_id,request_line_id,production_id,creation_date)
+					values(%s,%s,%s,now())
+					''',[entry.id,request_line_id,line_item.id])
 					
-					cr.execute(''' insert into tmp_pattern_request_details(request_id,request_line_id,production_id,creation_date)
-						values(%s,%s,%s,now())
-						''',[entry.id,request_line_id,item.id])	  
 			self.write(cr, uid, ids, {'flag_reqline': True})
 
 		return True
@@ -165,6 +175,9 @@ class kg_pattern_request(osv.osv):
 					'request_line_id': req_item.id,
 					'pattern_id':req_item.pattern_id.id,
 					'pattern_name':req_item.pattern_id.pattern_name,
+					'order_ref_no':req_item.order_ref_no,
+					'pump_model_id':req_item.pump_model_id.id,
+					'moc_id':req_item.moc_id.id,
 					'requested_qty':req_item.qty,
 					'state': 'open',
 				}
@@ -228,6 +241,11 @@ class ch_pattern_request_line(osv.osv):
 		'header_id':fields.many2one('kg.pattern.request', 'Pattern Request', required=1, ondelete='cascade'),
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern No',domain="[('state','=','approved'), ('active','=','t')]"),
 		'pattern_name': fields.char('Pattern Name'),
+		'production_id':fields.many2one('kg.production', 'Production Id'),
+		'order_ref_no': fields.related('production_id','order_ref_no', type='char', string='Work Order No.', store=True),
+		'order_type': fields.related('production_id','order_type', type='char', string='Order Type', store=True),
+		'pump_model_id': fields.related('production_id','pump_model_id', type='many2one', relation='kg.pumpmodel.master', string='Pump Model', store=True),
+		'moc_id': fields.related('production_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True),
 		'qty': fields.integer('Requested Qty'),
 		'remark': fields.text('Remarks'),
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),

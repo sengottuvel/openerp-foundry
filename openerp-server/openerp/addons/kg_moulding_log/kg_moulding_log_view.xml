@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_moulding_log" model="ir.ui.view">
+			<field name="name">Moulding Log Form</field>
+			<field name="model">kg.moulding.log</field>
+			<field name="arch" type="xml">
+				<form string="Moulding Log" version="7.0" create="false" delete="false">
+					<header>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+					</header>
+					<sheet>		
+						<group>
+							<group>
+								<field name="name" readonly="1"/>
+								<field name="remark" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							</group>											
+							<group>
+								<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+							</group>					
+						</group>
+						<group string="Mould Details">
+							<group>
+								<field name="issue_id" readonly="1"/>
+								<field name="order_ref_no" readonly="1"/>
+								<field name="moc_id" readonly="1"/>
+								<field name="pattern_name" readonly="1"/>
+								
+							</group>
+							<group>
+								<field name="issue_date" readonly="1"/>
+								<field name="pump_model_id" readonly="1"/>
+								<field name="pattern_id" readonly="1"/>
+								<field name="qty" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+								
+							</group>
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_moulding_log" model="ir.ui.view">
+			<field name="name">Moulding Log Tree</field>
+			<field name="model">kg.moulding.log</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';black:state == 'confirmed'"
+				toolbar="True" string="Moulding Log" create="false" delete="false">					
+					<field name="name"/>
+					<field name="entry_date"/>
+					<field name="order_ref_no"/>
+					<field name="pump_model_id"/>
+					<field name="moc_id"/>
+					<field name="pattern_id"/>
+					<field name="pattern_name"/>
+					<field name="qty"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_moulding_log" model="ir.ui.view">
+            <field name="name">Moulding Log</field>
+            <field name="model">kg.moulding.log</field>
+            <field name="arch" type="xml">
+                <search string="Moulding Log">
+					<field name="pattern_id" string="Pattern Number"  filter_domain="[('pattern_id','ilike',self)]" />
+					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
+					<field name="order_ref_no" string="Work Order No."  filter_domain="[('order_ref_no','ilike',self)]" />
+					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />
+					
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>						
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+                        <filter string="Work Order No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_ref_no'}"/>
+                        <filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
+                        <filter string="MOC" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_id'}"/>
+                        <filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
+						<filter string="Pattern Name." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_name'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->
+			
+	
+	<!-- Menu Action Start-->	
+		
+		<record id="tma_moulding_log" model="ir.actions.act_window">
+			<field name="name">Moulding Log</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.moulding.log</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_moulding_log"/>
+			<field name="search_view_id" ref="t_search_v_moulding_log"/>
+			<field name="context">{"search_default_draft":1}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start-->
+		
+        <record id="audit_moulding_log" model="audittrail.rule">
+            <field name="name">Audit Log Moulding</field>
+            <field name="object_id" eval="ref('kg_moulding_log.model_kg_moulding_log')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->
+	
+	<!-- Menu Item Start -->
+	
+		<!-- Moulding Log  -->
+		<menuitem action="tma_moulding_log" id="tam_moulding_log" parent="kg_stock_inward.tpm_planning_transactions" sequence="8"/>
+	
+	<!-- Menu Item End -->
+		
+	</data>
+</openerp>

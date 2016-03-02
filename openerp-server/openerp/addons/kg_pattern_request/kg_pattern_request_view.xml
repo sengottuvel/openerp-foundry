@@ -10,7 +10,7 @@
 			<field name="arch" type="xml">
 				<form string="Pattern Request" version="7.0">
 					<header>
-						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 						<button name="entry_cancel" type="object" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?" states="confirmed"/>
 					</header>
 					<sheet>		
@@ -35,6 +35,9 @@
 							<page string="Pattern Items" attrs="{'invisible':[('flag_reqline','=',False)]}">
 								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
 									<tree string="Request Line Entry" editable="top" create="false">					
+										<field name="order_ref_no" readonly="1"/>
+										<field name="pump_model_id" readonly="1"/>
+										<field name="moc_id" readonly="1"/>
 										<field name="pattern_id" readonly="1"/>
 										<field name="pattern_name" readonly="1"/>
 										<field name="qty" required="1"/>
@@ -143,6 +146,22 @@
 		</record>
 		
 	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start-->
+		
+        <record id="audit_pattern_request" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Request</field>
+            <field name="object_id" eval="ref('kg_pattern_request.model_kg_pattern_request')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+		
+        <record id="audit_pattern_request_line" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Request Line</field>
+            <field name="object_id" eval="ref('kg_pattern_request.model_ch_pattern_request_line')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->
 	
 	<!-- Menu Item Start -->
 	

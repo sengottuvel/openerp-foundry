@@ -17,6 +17,7 @@
 						<group>
 							<group>
 								<field name="name" readonly="1"/>
+								<field name="remark" attrs="{'readonly': [('state','not in',['open'])]}"/>
 							</group>											
 							<group>
 								<field name="entry_date" attrs="{'readonly': [('state','not in',['open'])]}"/>
@@ -26,13 +27,17 @@
 						<group string="Request Details">
 							<group>
 								<field name="request_id" readonly="1"/>
-								<field name="pattern_id" readonly="1"/>
-								<field name="requested_qty" readonly="1"/>
+								<field name="order_ref_no" readonly="1"/>
+								<field name="moc_id" readonly="1"/>
+								<field name="pattern_name" readonly="1"/>
+								
 							</group>
 							<group>
 								<field name="request_date" readonly="1"/>
-								<field name="pattern_name" readonly="1"/>
-								<field name="remark" attrs="{'readonly': [('state','not in',['open'])]}"/>
+								<field name="pump_model_id" readonly="1"/>
+								<field name="pattern_id" readonly="1"/>
+								<field name="requested_qty" readonly="1"/>
+								
 							</group>
 						</group>
 					</sheet>
@@ -54,6 +59,9 @@
 				toolbar="True" string="Pattern Request" create="false" delete="false">					
 					<field name="name"/>
 					<field name="entry_date"/>
+					<field name="order_ref_no"/>
+					<field name="pump_model_id"/>
+					<field name="moc_id"/>
 					<field name="pattern_id"/>
 					<field name="pattern_name"/>
 					<field name="requested_qty"/>
@@ -71,14 +79,20 @@
             <field name="model">kg.pattern.issue</field>
             <field name="arch" type="xml">
                 <search string="Pattern Issue">
-					<field name="name" string="Issue No.."  filter_domain="[('name','ilike',self)]" />
 					<field name="pattern_id" string="Pattern Number"  filter_domain="[('pattern_id','ilike',self)]" />
+					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
+					<field name="order_ref_no" string="Work Order No."  filter_domain="[('order_ref_no','ilike',self)]" />
+					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />
+					
 					<filter icon="terp-check" name="open" string="Open" domain="[('state','=','open')]"/>
 					<filter icon="terp-check" name="issue" string="Issued" domain="[('state','=','issue')]"/>						
 					<filter icon="terp-check" name="receive" string="Received" domain="[('state','=','receive')]"/>						
 					<separator/>
                     <group expand="0" string="Group By...">
                         <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+                        <filter string="Work Order No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_ref_no'}"/>
+                        <filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
+                        <filter string="MOC" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_id'}"/>
                         <filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
 						<filter string="Pattern Name." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_name'}"/>
 					</group>
@@ -241,6 +255,28 @@
 		</record>
 		
 	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start-->
+		
+        <record id="audit_pattern_issue" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Issue</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_kg_pattern_issue')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+		
+        <record id="audit_pattern_batchissue" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Batch Issue</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_issue')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <record id="audit_pattern_batchissue_line" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Batch Issue Line</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_line')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->
 	
 	<!-- Menu Item Start -->
 	

@@ -34,6 +34,11 @@ class kg_pattern_issue(osv.osv):
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern No.',domain="[('state','=','approved'), ('active','=','t')]"),
 		'pattern_name': fields.char('Pattern Name'),
 		
+		'order_ref_no': fields.related('request_line_id','order_ref_no', type='char', string='Work Order No.', store=True),
+		'order_type': fields.related('request_line_id','order_type', type='char', string='Order Type', store=True),
+		'pump_model_id': fields.related('request_line_id','pump_model_id', type='many2one', relation='kg.pumpmodel.master', string='Pump Model', store=True),
+		'moc_id': fields.related('request_line_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True),
+		
 		'requested_qty': fields.integer('Requested Qty'),
 		'remark': fields.text('Remarks'),
 		
@@ -69,9 +74,51 @@ class kg_pattern_issue(osv.osv):
 	}
 	
 
-	def pattern_issue(self,cr,uid,ids,context=None):
+	def pattern_issue(self,cr,uid,ids,remark,context=None):
+		if not ids:
+			raise osv.except_osv(_('Warning!'),
+						_('Kindly select Entries to proceed Further !!'))
 		entry = self.browse(cr,uid,ids[0])
-		self.write(cr, uid, ids, {'state': 'issue','issue_user_id': uid, 'issue_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		if not remark and entry.remark == False:
+			remarks = False
+		if entry.remark != False:
+			remarks = entry.remark
+		if remark and entry.remark == False:
+			remarks = remark
+		if entry.state == 'open':
+			core_obj = self.pool.get('kg.core.log')
+			core_vals = {
+						
+				'name': self.pool.get('ir.sequence').get(cr, uid, 'kg.core.log'),
+				'issue_id': entry.id,
+				'issue_date': entry.entry_date,
+				'pattern_id':entry.pattern_id.id,
+				'pattern_name':entry.pattern_id.pattern_name,
+				'order_ref_no':entry.order_ref_no,
+				'pump_model_id':entry.pump_model_id.id,
+				'moc_id':entry.moc_id.id,
+				'state': 'draft',
+			}
+						
+			core_id = core_obj.create(cr, uid,core_vals)
+			
+			moulding_obj = self.pool.get('kg.moulding.log')
+			
+			mould_vals = {
+					
+				'name': self.pool.get('ir.sequence').get(cr, uid, 'kg.moulding.log'),
+				'issue_id': entry.id,
+				'issue_date': entry.entry_date,
+				'pattern_id':entry.pattern_id.id,
+				'pattern_name':entry.pattern_id.pattern_name,
+				'order_ref_no':entry.order_ref_no,
+				'pump_model_id':entry.pump_model_id.id,
+				'moc_id':entry.moc_id.id,
+				'state': 'draft',
+			}
+					
+			mould_id = moulding_obj.create(cr, uid,mould_vals)
+			self.write(cr, uid, ids, {'remark':remarks,'state': 'issue','issue_user_id': uid, 'issue_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 		
 	def pattern_receive(self,cr,uid,ids,context=None):
@@ -210,12 +257,13 @@ class ch_pattern_batch_issue(osv.osv):
 		
 		for req_item in entry.line_ids:			
 			issue_ids=issue_obj.search(cr,uid,[('name','=',req_item.issue_id.name)])		
-			vals = {			
-					
-					'state': 'issue',				
+			vals = {				
 					'remark': req_item.remark,				
 				}
-					
+				
+			remark = req_item.remark
+			issue_obj.pattern_issue(cr, uid, issue_ids, remark)
+		
 			self.pool.get('kg.pattern.issue').write(cr,uid,issue_ids,vals)
 			
 		self.write(cr, uid, ids, {'name':self.pool.get('ir.sequence').get(cr, uid, 'ch.pattern.batch.issue'),'state': 'issue','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})

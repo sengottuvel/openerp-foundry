@@ -280,6 +280,9 @@ instance.web.ListView = instance.web.View.extend( /** @lends instance.web.ListVi
             this.$buttons.find('.oe_list_add')
                     .click(this.proxy('do_add_record'))
                     .prop('disabled', this.grouped);
+                    
+            this.$buttons.find('.oe_list_issue')
+                    .click(this.proxy('pattern_issue'))  
         }
 
         // Pager
@@ -688,6 +691,20 @@ instance.web.ListView = instance.web.View.extend( /** @lends instance.web.ListVi
      */
     do_add_record: function () {
         this.select_record(null);
+    },
+    
+    pattern_issue: function () {
+		//ids = get the id of the current record
+		// context : get the context 
+		var ids = this.groups.get_selection().ids;
+		var ds = new instance.web.DataSet(this, 'kg.pattern.issue');
+		var remark = document.getElementsByName('text')[0].value
+		ds.call('pattern_issue', [ids,remark]).done(function(r) {
+			//process the value returned from 'button_function' as per your requirement.
+			
+		})
+		this.reload_content();
+		
     },
     /**
      * Handles deletion of all selected lines
