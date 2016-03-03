@@ -137,11 +137,12 @@ class kg_product(osv.osv):
 	""" 
 
 	def write(self,cr,uid,ids,vals,context={}):
-		if 'default_code' in vals:
+		"""if 'default_code' in vals:
 			 raise osv.except_osv(_('Warning !'),_('You can not modify Product code'))
 			 
 		if 'name' in vals:
-			 raise osv.except_osv(_('Warning !'),_('You can not modify Product Name'))	
+			 raise osv.except_osv(_('Warning !'),_('You can not modify Product Name'))
+		"""
 		
 		if 'tolerance_applicable' in vals:
 			if vals['tolerance_applicable'] == True:
