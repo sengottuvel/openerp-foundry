@@ -148,6 +148,8 @@
 	<!-- Menu Action End-->
 	
 	<!-- Audit Log Xml Data Start-->
+	
+	<!--
 		
         <record id="audit_pattern_request" model="audittrail.rule">
             <field name="name">Audit Log Pattern Request</field>
@@ -160,6 +162,8 @@
             <field name="object_id" eval="ref('kg_pattern_request.model_ch_pattern_request_line')"/>       
             <field name="state">subscribed</field>              
         </record>
+    
+    -->
         
     <!-- Audit Log Xml Data End-->
 	

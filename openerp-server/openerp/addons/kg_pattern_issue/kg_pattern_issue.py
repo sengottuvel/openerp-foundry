@@ -74,7 +74,8 @@ class kg_pattern_issue(osv.osv):
 	}
 	
 
-	def pattern_issue(self,cr,uid,ids,remark,context=None):
+	def pattern_issue(self,cr,uid,ids,context=None):
+		"""
 		if not ids:
 			raise osv.except_osv(_('Warning!'),
 						_('Kindly select Entries to proceed Further !!'))
@@ -118,7 +119,9 @@ class kg_pattern_issue(osv.osv):
 			}
 					
 			mould_id = moulding_obj.create(cr, uid,mould_vals)
-			self.write(cr, uid, ids, {'remark':remarks,'state': 'issue','issue_user_id': uid, 'issue_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			"""
+			entry = self.browse(cr,uid,ids[0])
+			self.write(cr, uid, ids, {'remark':entry.remark,'state': 'issue','issue_user_id': uid, 'issue_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 		
 	def pattern_receive(self,cr,uid,ids,context=None):

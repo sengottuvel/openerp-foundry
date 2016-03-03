@@ -256,7 +256,9 @@
 		
 	<!-- Menu Action End-->
 	
-	<!-- Audit Log Xml Data Start-->
+	<!-- Audit Log Xml Data Start -->
+	
+	<!--
 		
         <record id="audit_pattern_issue" model="audittrail.rule">
             <field name="name">Audit Log Pattern Issue</field>
@@ -275,6 +277,8 @@
             <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_line')"/>       
             <field name="state">subscribed</field>              
         </record>
+        
+     -->
         
     <!-- Audit Log Xml Data End-->
 	

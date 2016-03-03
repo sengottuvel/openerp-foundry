@@ -117,12 +117,16 @@
 	<!-- Menu Action End-->
 	
 	<!-- Audit Log Xml Data Start-->
+	
+	<!--
 		
         <record id="audit_moulding_log" model="audittrail.rule">
             <field name="name">Audit Log Moulding</field>
             <field name="object_id" eval="ref('kg_moulding_log.model_kg_moulding_log')"/>       
             <field name="state">subscribed</field>              
         </record>
+        
+    -->
         
     <!-- Audit Log Xml Data End-->
 	
