@@ -186,7 +186,8 @@ class ch_chemical_chart(osv.osv):
 		'header_id':fields.many2one('kg.moc.master', 'MOC Entry', required=True, ondelete='cascade'),				
 		'chemical_id': fields.many2one('kg.chemical.master','Name', required=True,domain="[('state','=','approved')]"),		
 		'min':fields.float('Min',required=True,digits_compute=dp.get_precision('Min Value')),		
-		'max':fields.float('Max',required=True,digits_compute=dp.get_precision('Max Value')),		
+		'max':fields.float('Max',required=True,digits_compute=dp.get_precision('Max Value')),
+		'range_flag': fields.boolean('Max Range'),	
 	}
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
