@@ -20,8 +20,7 @@ class kg_bom(osv.osv):
 		'line_ids': fields.one2many('ch.bom.line', 'header_id', "BOM Line"),		
 		'line_ids_a':fields.one2many('ch.machineshop.details', 'header_id', "Machine Shop Line"),
 		'line_ids_b':fields.one2many('ch.bot.details', 'header_id', "BOT Line"),
-		'line_ids_c':fields.one2many('ch.consu.details', 'header_id', "Consumable Line"),
-		'line_ids_d':fields.one2many('ch.bearing.details', 'header_id', "Bearing Line"),
+		'line_ids_c':fields.one2many('ch.consu.details', 'header_id', "Consumable Line"),		
 		'type': fields.selection([('new','New'),('copy','Copy'),('amendment','Amendment')],'Type', required=True),
 		'bom_type': fields.selection([('new_bom','New BOM'),('copy_bom','Copy BOM')],'Type', required=True),
 		'source_bom': fields.many2one('kg.bom', 'Source BOM',domain="[('state','=','approved'), ('active','=','t')]"),
@@ -84,14 +83,12 @@ class kg_bom(osv.osv):
 		rec = self.browse(cr,uid,ids[0])		
 		foundry_line_obj = self.pool.get('ch.bom.line')
 		machine_line_obj = self.pool.get('ch.machineshop.details')
-		bot_line_obj = self.pool.get('ch.bot.details')
-		bearing_line_obj = self.pool.get('ch.bearing.details')
+		bot_line_obj = self.pool.get('ch.bot.details')		
 		consu_line_obj = self.pool.get('ch.consu.details')
 		cr.execute(""" delete from ch_bom_line where header_id  = %s """ %(ids[0]))
 		cr.execute(""" delete from ch_machineshop_details where header_id  = %s """ %(ids[0]))
 		cr.execute(""" delete from ch_bot_details where header_id  = %s """ %(ids[0]))
-		cr.execute(""" delete from ch_consu_details where header_id  = %s """ %(ids[0]))
-		cr.execute(""" delete from ch_bearing_details where header_id  = %s """ %(ids[0]))
+		cr.execute(""" delete from ch_consu_details where header_id  = %s """ %(ids[0]))	
 		for foundry_line_item in rec.source_bom.line_ids:			
 			vals = {
 				'header_id' : ids[0]
@@ -108,14 +105,8 @@ class kg_bom(osv.osv):
 			vals = {
 				'header_id' : ids[0]
 				}			
-			copy_rec = bot_line_obj.copy(cr, uid, bot_line_item.id,vals, context) 
-			
-			
-		for bearing_line_item in rec.source_bom.line_ids_d:			
-			vals = {
-				'header_id' : ids[0]
-				}			
-			copy_rec = bearing_line_obj.copy(cr, uid, bearing_line_item.id,vals, context) 
+			copy_rec = bot_line_obj.copy(cr, uid, bot_line_item.id,vals, context) 			
+	
 			
 		for consu_line_item in rec.source_bom.line_ids_c:			
 			vals = {
@@ -132,8 +123,7 @@ class kg_bom(osv.osv):
 		bom_foundry_lines=rec.line_ids			 
 		machine_shop_lines=rec.line_ids_a			 
 		bot_lines=rec.line_ids_b			 
-		consu_lines=rec.line_ids_c	
-		bearing_lines=rec.line_ids_d	
+		consu_lines=rec.line_ids_c		
 		
 		for bom_foundry_item in bom_foundry_lines:			
 			if bom_foundry_item.qty == 0:
@@ -149,12 +139,7 @@ class kg_bom(osv.osv):
 			if bot_item.qty == 0:
 				raise osv.except_osv(
 					_('Warning !'),
-					_('Please BOT zero qty not accepted!!')) 	
-		for bearing_item in bearing_lines:			
-			if bearing_item.qty == 0:
-				raise osv.except_osv(
-					_('Warning !'),
-					_('Please BOT zero qty not accepted!!')) 
+					_('Please BOT zero qty not accepted!!')) 			
 		for consu_item in consu_lines:			
 			if consu_item.qty == 0:
 				raise osv.except_osv(
@@ -420,42 +405,4 @@ class ch_consu_details(osv.osv):
 
 ch_consu_details()
 
-class ch_bearing_details(osv.osv):
-	
-	_name = "ch.bearing.details"
-	_description = "BOM Bearing Details"	
-	
-	_columns = {
-	
-		'header_id':fields.many2one('kg.bom', 'BOM', ondelete='cascade',required=True),
-		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('type','=','bearing')], ondelete='cascade',required=True),
-		'code':fields.char('Item Code', size=128),	  
-		'qty': fields.integer('Qty', required=True),
-		'remarks':fields.text('Remarks'),   
-	
-	}
-	
-	def onchange_bot_code(self, cr, uid, ids, product_temp_id, context=None):	   
-		value = {'code': ''}
-		if product_temp_id:
-			pro_rec = self.pool.get('product.product').browse(cr, uid, product_temp_id, context=context)
-			value = {'code': pro_rec.product_code}		  
-		return {'value': value}
-		
-	def create(self, cr, uid, vals, context=None):	  
-		product_obj = self.pool.get('product.product')
-		if vals.get('product_temp_id'):		 
-			product_rec = product_obj.browse(cr, uid, vals.get('product_temp_id') )
-			product_code = product_rec.product_code		 
-			vals.update({'code':product_code })
-		return super(ch_bearing_details, self).create(cr, uid, vals, context=context)
-		
-	def write(self, cr, uid, ids, vals, context=None):
-		product_obj = self.pool.get('product.product')
-		if vals.get('product_temp_id'):		 
-			product_rec = product_obj.browse(cr, uid, vals.get('product_temp_id') )
-			product_code = product_rec.product_code
-			vals.update({'code':product_code })
-		return super(ch_bearing_details, self).write(cr, uid, ids, vals, context)   
 
-ch_bearing_details()

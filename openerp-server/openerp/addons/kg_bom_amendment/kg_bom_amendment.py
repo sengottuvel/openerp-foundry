@@ -21,8 +21,7 @@ class kg_bom_amendment(osv.osv):
 		'line_ids': fields.one2many('ch.bom.line.amendment', 'header_id', "BOM Line"),	  
 		'line_ids_a':fields.one2many('ch.machineshop.details.amendment', 'header_id', "Machine Shop Line"),
 		'line_ids_b':fields.one2many('ch.bot.details.amendment', 'header_id', "BOT Line"),
-		'line_ids_c':fields.one2many('ch.consu.details.amendment', 'header_id', "Consumable Line"),
-		'line_ids_d':fields.one2many('ch.bearing.details', 'header_id', "Bearing Line"),
+		'line_ids_c':fields.one2many('ch.consu.details.amendment', 'header_id', "Consumable Line"),		
 		'bom_id': fields.many2one('kg.bom', 'BOM Name',domain="[('state','=','approved'), ('active','=','t')]",required=True),
 		'entry_date':fields.date('Amendment Date',required=True),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved')],'Status', readonly=True),   
@@ -183,7 +182,7 @@ class kg_bom_amendment(osv.osv):
 		machine_shop_lines=rec.line_ids_a			 
 		bot_lines=rec.line_ids_b			 
 		consu_lines=rec.line_ids_c	
-		bearing_lines=rec.line_ids_d	
+
 		
 		for bom_foundry_item in bom_foundry_lines:			
 			if bom_foundry_item.qty == 0:
@@ -200,11 +199,7 @@ class kg_bom_amendment(osv.osv):
 				raise osv.except_osv(
 					_('Warning !'),
 					_('Please BOT zero qty not accepted!!')) 
-		for bearing_item in bearing_lines:			
-			if bearing_item.qty == 0:
-				raise osv.except_osv(
-					_('Warning !'),
-					_('Please BOT zero qty not accepted!!')) 	
+		
 		for consu_item in consu_lines:			
 			if consu_item.qty == 0:
 				raise osv.except_osv(
@@ -264,8 +259,7 @@ class kg_bom_amendment(osv.osv):
 			amend_bot_line_obj = self.pool.get('ch.bot.details')
 			bom_bot_lines=obj.line_ids_b
 			
-			amend_bearing_line_obj = self.pool.get('ch.bearing.details')
-			bom_bearing_lines=obj.line_ids_d
+		
 			
 			amend_consu_line_obj = self.pool.get('ch.consu.details')
 			bom_consu_lines=obj.line_ids_c		
@@ -304,17 +298,7 @@ class kg_bom_amendment(osv.osv):
 						
 					})	
 					
-			for bom_bearing_line in bom_bearing_lines:			
-				
-				amend_bearing_line_id = amend_bearing_line_obj.create(cr,uid,
-					{
-						'header_id':new_bom,
-						'product_temp_id': bom_bot_line.product_temp_id.id,
-						'code': bom_bot_line.code,
-						'qty':bom_bot_line.qty,
-						'remarks':bom_bot_line.remarks,
-						
-					})	
+		
 					
 			for bom_consu_line in bom_consu_lines:	
 				
@@ -531,47 +515,4 @@ class ch_consu_details_amendment(osv.osv):
 		return super(ch_consu_details_amendment, self).write(cr, uid, ids, vals, context) 
 
 ch_consu_details_amendment()
-
-
-class ch_bearing_details_amendment(osv.osv):
-	
-	_name = "ch.bearing.details.amendment"
-	_description = "BOM Bearing Details Amendment"	
-	
-	_columns = {
-	
-		'header_id':fields.many2one('kg.bom', 'BOM', ondelete='cascade',required=True),
-		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('type','=','bearing')], ondelete='cascade',required=True),
-		'code':fields.char('Item Code', size=128),	  
-		'qty': fields.integer('Qty', required=True),
-		'remarks':fields.text('Remarks'),   
-	
-	}
-	
-	def onchange_bot_code(self, cr, uid, ids, product_temp_id, context=None):	   
-		value = {'code': ''}
-		if product_temp_id:
-			pro_rec = self.pool.get('product.product').browse(cr, uid, product_temp_id, context=context)
-			value = {'code': pro_rec.product_code}		  
-		return {'value': value}
-		
-	def create(self, cr, uid, vals, context=None):	  
-		product_obj = self.pool.get('product.product')
-		if vals.get('product_temp_id'):		 
-			product_rec = product_obj.browse(cr, uid, vals.get('product_temp_id') )
-			product_code = product_rec.product_code		 
-			vals.update({'code':product_code })
-		return super(ch_bearing_details_amendment, self).create(cr, uid, vals, context=context)
-		
-	def write(self, cr, uid, ids, vals, context=None):
-		product_obj = self.pool.get('product.product')
-		if vals.get('product_temp_id'):		 
-			product_rec = product_obj.browse(cr, uid, vals.get('product_temp_id') )
-			product_code = product_rec.product_code
-			vals.update({'code':product_code })
-		return super(ch_bearing_details_amendment, self).write(cr, uid, ids, vals, context)   
-
-ch_bearing_details_amendment()
-
-
 

@@ -75,19 +75,7 @@
 										<field name="remarks" widget="char"/>
 									</tree>
 								</field>
-							</page>
-							<page string="Bearing">
-								<field name="line_ids_d" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
-									<tree string="Bearing Details Entry Tree" editable="top" >	
-											
-										<field name="product_temp_id" on_change="onchange_bot_code(product_temp_id)"/>
-										<field name="code" readonly="1" />											
-										<field name="qty"/>
-										<field name="remarks" widget="char"/>
-									</tree>
-								</field>
-							</page>
-							
+							</page>						
 							<page string="Consumable">
 								<field name="line_ids_c" nolabel="1" attrs="{'readonly': [('state','in',['approved'])]}" >
 									<tree string="Consumable Details Entry Tree" editable="top" >					
@@ -214,7 +202,7 @@
 		
 		<!-- Menu Name Start here --> 
 		
-				<menuitem action="mma_bom_amendment" name="BOM Amendment" id="mam_bom_amendment" parent="kg_pumpmodel_master.mpm_planning_master" sequence="5"/> 
+			<menuitem action="mma_bom_amendment" name="BOM Amendment" id="mam_bom_amendment" parent="kg_pumpmodel_master.mpm_planning_master" sequence="5"/> 
 		
 		<!-- Menu Name End here --> 	
 	
