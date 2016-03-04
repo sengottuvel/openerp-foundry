@@ -173,14 +173,11 @@
 			<field name="model">ch.bom.line</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<tree string="Stock Inward Details Entry Tree">					
-					
-					<field name="pos_no"/>	
+				<tree string="BOM Details Entry Tree">					
+					<field name="header_id"/>						
 				    <field name="pattern_id" on_change="onchange_pattern_name(pattern_id)"/>
 				    <field name="pattern_name"/>				   
-				    <field name="qty"/>
-				    <field name="remarks" widget="char"/>
-				    <field name="state" invisible="1"/>
+				    <field name="qty"/> 
 				    
 				</tree>
 			</field>
@@ -195,14 +192,13 @@
 			<field name="model">ch.bom.line</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<form string="Stock Inward Details Entry Tree">					
-					
-					<field name="pos_no"/>	
-					<field name="header_id"/>
-				    <field name="pattern_id"/>
-				    <field name="pattern_name"/>				   
-				    <field name="qty"/>
-				    <field name="remarks" widget="char"/>
+				<form string="BOM Details Entry Tree">					
+					<field name="header_id" readonly="1"/>
+					<field name="pos_no" readonly="1"/>						
+				    <field name="pattern_id" readonly="1"/>
+				    <field name="pattern_name" readonly="1"/>				   
+				    <field name="qty" readonly="1"/>
+				    <field name="remarks" widget="char" readonly="1"/>
 				    <field name="state" invisible="1"/>
 				    
 				</form>
@@ -244,7 +240,7 @@
             <field name="model">ch.bom.line</field>
             <field name="arch" type="xml">
                 <search string="BOM Details">
-					<field name="pattern_name" string="Pattern Name"  filter_domain="[('pattern_name','ilike',self)]" />						
+					<field name="header_id" string="BOM Name"  filter_domain="[('header_id','ilike',self)]" />					
 					<separator/>
                     <group expand="0" string="Group By...">
                         <filter string="Pattern Name" icon="terp-personal" domain="[]" context="{'group_by':'pattern_name'}"/> 

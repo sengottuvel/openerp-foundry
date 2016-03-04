@@ -201,7 +201,7 @@ class ch_bom_line(osv.osv):
 	
 	_columns = {
 		
-		'header_id':fields.many2one('kg.bom', 'BOM Entry', required=True, ondelete='cascade'),  
+		'header_id':fields.many2one('kg.bom', 'BOM Name', required=True, ondelete='cascade'),  
 		'pos_no': fields.integer('Position No'),
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern No', required=True,domain="[('state','=','approved')]"), 
 		'pattern_name': fields.char('Pattern Name', required=True), 
