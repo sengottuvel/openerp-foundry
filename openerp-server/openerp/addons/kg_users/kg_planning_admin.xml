@@ -643,6 +643,48 @@
 			<field eval="1" name="perm_create"/>
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
 		</record>
+		
+		<!-- Schedule Machine Shop Items --> 
+		
+		<record id="user_sch_machineshop_item" model="ir.model.access">
+			<field name="model_id" ref="kg_weekly_schedule.model_ch_sch_machineshop_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Schedule Machine Shop Items</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- Schedule Machine Shop Items End-->
+		
+		<!-- Schedule BOT --> 
+		
+		<record id="user_sch_bot" model="ir.model.access">
+			<field name="model_id" ref="kg_weekly_schedule.model_ch_sch_bot_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Schedule BOT Items</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- Schedule BOT-->
+		
+		<!-- Schedule  Consumables --> 
+		
+		<record id="user_sch_consu" model="ir.model.access">
+			<field name="model_id" ref="kg_weekly_schedule.model_ch_sch_consu_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Schedule Consumable Items</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- Schedule Consumables End-->
 
 		
 		

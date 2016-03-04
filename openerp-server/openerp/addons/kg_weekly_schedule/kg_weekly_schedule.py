@@ -129,7 +129,7 @@ class kg_weekly_schedule(osv.osv):
 		
 		#(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
 		#(_check_duplicates, 'System not allow to do duplicate entry !!',['']),
-		(_check_lineitems, 'System not allow to save with empty Schedule Details !!',['']),
+		(_check_lineitems, 'System not allow to save with empty Work Order Details !!',['']),
 		(_Validation, 'Special Character Not Allowed in Work Order No.', ['']),
 		(_check_name, 'Work Order No. must be Unique', ['']),
 	   
@@ -152,6 +152,7 @@ class kg_weekly_schedule(osv.osv):
 
 	def entry_confirm(self,cr,uid,ids,context=None):
 		planning_obj = self.pool.get('kg.daily.planning')
+		line_obj = self.pool.get('ch.weekly.schedule.details')
 		today = date.today()
 		today = str(today)
 		today = datetime.strptime(today, '%Y-%m-%d')
@@ -163,7 +164,14 @@ class kg_weekly_schedule(osv.osv):
 		if delivery_date < today:
 			raise osv.except_osv(_('Warning!'),
 						_('Delivery Date should not be less than current date for Order !!'))
+						
+		number = 1
 		for item in entry.line_ids:
+			
+			### Work Order Number Generation in Line Details
+			order_name = entry.name + '-' + str(number)
+			line_obj.write(cr, uid, item.id, {'order_no': order_name})
+			number = number + 1
 			
 			schedule_line_ids.append(item.id)
 			line_delivery_date = str(item.delivery_date)
@@ -280,9 +288,6 @@ class kg_weekly_schedule(osv.osv):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_weekly_schedule, self).write(cr, uid, ids, vals, context)
 		
-	
-	
-	
 kg_weekly_schedule()
 
 
@@ -306,10 +311,14 @@ class ch_weekly_schedule_details(osv.osv):
 		'note': fields.text('Notes'),
 		'remarks': fields.text('Approve/Reject Remarks'),
 		'cancel_remark': fields.text('Cancel Remarks'),
-		'active': fields.boolean('Active'),
 		'delivery_date': fields.date('Delivery Date',required=True),
 		'line_ids': fields.one2many('ch.sch.bom.details', 'header_id', "BOM Details"),
+		'line_ids_a': fields.one2many('ch.sch.machineshop.details', 'header_id', "Machine Shop Details"),
+		'line_ids_b': fields.one2many('ch.sch.bot.details', 'header_id', "BOT Details"),
+		'line_ids_c': fields.one2many('ch.sch.consu.details', 'header_id', "Consumale Details"),
 		'flag_cancel': fields.boolean('Cancellation Flag'),
+		'flag_standard': fields.boolean('Non Standard'),
+		'unit_price': fields.float('Unit Price',required=True),
 		### Used for Planning Purpose
 		'temp_planning_qty':fields.integer('Planning Qty'),
 		'transac_state': fields.selection([('in_draft','In Draft'),('in_schedule','In Schedule'),('partial','Partial'),('sent_for_plan','In Planning'),('sent_for_qc','In QC'),
@@ -322,14 +331,15 @@ class ch_weekly_schedule_details(osv.osv):
 	_defaults = {
 	
 		'state': 'draft',
-		'active': True,
 		'delivery_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		
 	}
 	
 	
-	"""def default_get(self, cr, uid, fields, context=None):
-		return context"""
+	def default_get(self, cr, uid, fields, context=None):
+		return context
+	
+	
 	
 	def onchange_delivery_date(self, cr, uid, ids, delivery_date):
 		today = date.today()
@@ -344,14 +354,19 @@ class ch_weekly_schedule_details(osv.osv):
 		return True
 		
 
-	def onchange_pump_model(self, cr, uid, ids, pump_model_id, qty, type):
+	def onchange_bom_details(self, cr, uid, ids, pump_model_id, qty,moc_construction_id, type,flag_standard):
 		bom_vals=[]
+		machine_shop_vals=[]
+		bot_vals=[]
+		consu_vals=[]
 		
 		if type == False:
 			raise osv.except_osv(_('Warning!'),
 						_('Kindly select Purpose and then enter Qty !!'))
 						
 		if pump_model_id != False:
+			
+			#### Loading Foundry Items
 			
 			sch_bom_obj = self.pool.get('ch.sch.bom.details')
 			cr.execute(''' select bom.id,bom.header_id,bom.pattern_id,bom.pattern_name,bom.qty, bom.pos_no,pattern.pcs_weight, pattern.ci_weight,pattern.nonferous_weight
@@ -370,6 +385,20 @@ class ch_weekly_schedule_details(osv.osv):
 				if qty > 0:
 					bom_qty = qty * bom_details['qty']
 					
+				### Loading MOC from MOC Construction
+				
+				if moc_construction_id != False:
+					
+					cr.execute(''' select moc_id
+					from ch_const_details
+					where header_id = %s and pattern_id = %s  ''',[moc_construction_id,bom_details['pattern_id']])
+					const_moc_id = cr.fetchone()
+					if const_moc_id != None:
+						moc_id = const_moc_id[0]
+					else:
+						moc_id = False
+				else:
+					moc_id = False
 					
 				bom_vals.append({
 													
@@ -385,56 +414,78 @@ class ch_weekly_schedule_details(osv.osv):
 					'planning_qty' : bom_qty,				  
 					'production_qty' : 0,				   
 					'flag_applicable' : applicable,
-					'type':	type		  
+					'type':	type,
+					'moc_id': moc_id,
+					'flag_standard':flag_standard	  
 					})
-		return {'value': {'line_ids': bom_vals}}
-		
-		
-	def onchange_schedule_qty(self, cr, uid, ids, pump_model_id, qty, type):
-		bom_vals=[]
-		
-		if type == False:
-			raise osv.except_osv(_('Warning!'),
-						_('Kindly select Purpose and then enter Qty !!'))
-		
-		if pump_model_id == False:
-			raise osv.except_osv(_('Warning!'),
-						_('Kindly select Pump Model !!'))
+					
+			#### Loading Machine Shop details
 			
+			bom_ms_obj = self.pool.get('ch.machineshop.details')
+			cr.execute(''' select id,ms_id,name,qty
+					from ch_machineshop_details
+					where header_id = (select id from kg_bom where pump_model_id = %s and state='approved' and active='t') ''',[pump_model_id])
+			bom_ms_details = cr.dictfetchall()
+			for bom_ms_details in bom_ms_details:
+				if qty == 0:
+					bom_ms_qty = bom_ms_details['qty']
+				if qty > 0:
+					bom_ms_qty = qty * bom_ms_details['qty']
+					
+					
+				machine_shop_vals.append({
+													
+					'ms_id': bom_ms_details['ms_id'],
+					'name': bom_ms_details['name'],
+					'qty': bom_ms_qty,
+							  
+					})
+					
+			#### Loading BOT Details
 			
-		sch_bom_obj = self.pool.get('ch.sch.bom.details')
-		cr.execute(''' select bom.id,bom.header_id,bom.pattern_id,bom.pattern_name,bom.qty, bom.pos_no,pattern.pcs_weight, pattern.ci_weight,pattern.nonferous_weight
-				from ch_bom_line as bom
-				LEFT JOIN kg_pattern_master pattern on pattern.id = bom.pattern_id
-				where bom.header_id = (select id from kg_bom where pump_model_id = %s and state='approved' and active='t') ''',[pump_model_id])
-		bom_details = cr.dictfetchall()
-		for bom_details in bom_details:
-			if type == 'production' :
-				applicable = True
-			if type in ('spare','pump_spare'):
-				applicable = False
-				
-			if qty == 0:
-				bom_qty = bom_details['qty']
-			if qty > 0:
-				bom_qty = qty * bom_details['qty']
-			bom_vals.append({
-												
-				'bom_id': bom_details['header_id'],
-				'bom_line_id': bom_details['id'],
-				'pattern_id': bom_details['pattern_id'],
-				'pattern_name': bom_details['pattern_name'],						
-				'pcs_weight': bom_details['pcs_weight'] or 0.00,						
-				'ci_weight': bom_details['ci_weight'] or 0.00,
-				'nonferous_weight': bom_details['nonferous_weight'] or 0.00,				  
-				'pos_no': bom_details['pos_no'],				  
-				'qty' : bom_qty,				   
-				'planning_qty' : bom_qty,				  
-				'production_qty' : 0,				   
-				'flag_applicable' : applicable,
-				'type':	type		  
-				})
-		return {'value': {'line_ids': bom_vals}}
+			bom_bot_obj = self.pool.get('ch.bot.details')
+			cr.execute(''' select id,product_temp_id,code,qty
+					from ch_bot_details
+					where header_id = (select id from kg_bom where pump_model_id = %s and state='approved' and active='t') ''',[pump_model_id])
+			bom_bot_details = cr.dictfetchall()
+			for bom_bot_details in bom_bot_details:
+				if qty == 0:
+					bom_bot_qty = bom_bot_details['qty']
+				if qty > 0:
+					bom_bot_qty = qty * bom_bot_details['qty']
+					
+					
+				bot_vals.append({
+													
+					'product_temp_id': bom_bot_details['product_temp_id'],
+					'code': bom_bot_details['code'],
+					'qty': bom_bot_qty,
+							  
+					})
+					
+			### Loading Consu Details
+			
+			bom_consu_obj = self.pool.get('ch.consu.details')
+			cr.execute(''' select id,product_temp_id,code,qty
+					from ch_consu_details
+					where header_id = (select id from kg_bom where pump_model_id = %s and state='approved' and active='t') ''',[pump_model_id])
+			bom_consu_details = cr.dictfetchall()
+			for bom_consu_details in bom_consu_details:
+				if qty == 0:
+					bom_consu_qty = bom_consu_details['qty']
+				if qty > 0:
+					bom_consu_qty = qty * bom_consu_details['qty']
+					
+					
+				consu_vals.append({
+													
+					'product_temp_id': bom_consu_details['product_temp_id'],
+					'code': bom_consu_details['code'],
+					'qty': bom_consu_qty,
+							  
+					})
+
+		return {'value': {'line_ids': bom_vals,'line_ids_a':machine_shop_vals,'line_ids_b':bot_vals,'line_ids_c':consu_vals}}
 	
 	def entry_cancel(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
@@ -487,7 +538,12 @@ class ch_weekly_schedule_details(osv.osv):
 		
 		
 	def create(self, cr, uid, vals, context=None):
-		return super(ch_weekly_schedule_details, self).create(cr, uid, vals, context=context)
+		header_rec = self.pool.get('kg.weekly.schedule').browse(cr, uid,vals['header_id'])
+		if header_rec.state == 'draft':
+			res = super(ch_weekly_schedule_details, self).create(cr, uid, vals, context=context)
+		else:
+			res = False
+		return res
 		
 		
 	def write(self, cr, uid, ids, vals, context=None):
@@ -550,7 +606,8 @@ class ch_sch_bom_details(osv.osv):
 		'add_spec': fields.text('Others Specification'),
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),
 		'transac_state': fields.selection([('in_draft','In Draft'),('in_schedule','In Schedule'),('partial','Partial'),('sent_for_plan','In Planning'),('sent_for_qc','In QC'),
-					   ('sent_for_produc','In Production'),('complete','Completed')],'Transaction Status', readonly=True),
+					   ('sent_for_produc','In Production'),('complete','Completed')],'Transaction Status', readonly=True),			   
+		'flag_standard': fields.boolean('Non Standard'),
 	
 	}
 	
@@ -591,6 +648,79 @@ class ch_sch_bom_details(osv.osv):
 		return super(ch_sch_bom_details, self).write(cr, uid, ids, vals, context)
 	
 ch_sch_bom_details()
+
+class ch_sch_machineshop_details(osv.osv):
+
+	_name = "ch.sch.machineshop.details"
+	_description = "Schedule machineshop Details"
+	
+	
+	_columns = {
+	
+		'header_id':fields.many2one('ch.weekly.schedule.details', 'Schedule Detail', required=1, ondelete='cascade'),
+		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', ondelete='cascade',required=True),
+		'name':fields.char('Item Name', size=128),	  
+		'qty': fields.integer('Qty', required=True),
+		'remarks':fields.text('Remarks'),   
+	
+	}   
+	
+		
+	def create(self, cr, uid, vals, context=None):
+		return super(ch_sch_machineshop_details, self).create(cr, uid, vals, context=context)
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		return super(ch_sch_machineshop_details, self).write(cr, uid, ids, vals, context)   
+
+ch_sch_machineshop_details()
+
+class ch_sch_bot_details(osv.osv):
+	
+	_name = "ch.sch.bot.details"
+	_description = "Schedule BOT Details"	
+	
+	_columns = {
+	
+		'header_id':fields.many2one('ch.weekly.schedule.details', 'Schedule Detail', required=1, ondelete='cascade'),
+		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('type','=','bot')], ondelete='cascade',required=True),
+		'code':fields.char('Item Code', size=128),	  
+		'qty': fields.integer('Qty', required=True),
+		'remarks':fields.text('Remarks'),   
+	
+	}
+	
+		
+	def create(self, cr, uid, vals, context=None):
+		return super(ch_sch_bot_details, self).create(cr, uid, vals, context=context)
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		return super(ch_sch_bot_details, self).write(cr, uid, ids, vals, context)   
+
+ch_sch_bot_details()
+
+class ch_sch_consu_details(osv.osv):
+	
+	_name = "ch.sch.consu.details"
+	_description = "Schedule Consumable Details" 
+	
+	_columns = {
+	
+		'header_id':fields.many2one('ch.weekly.schedule.details', 'Schedule Detail', required=1, ondelete='cascade'),
+		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('type','=','consu')], ondelete='cascade',required=True),
+		'code':fields.char('Item Code', size=128),  
+		'qty': fields.integer('Qty',required=True), 
+		'remarks':fields.text('Remarks'),
+	
+	}
+	
+		
+	def create(self, cr, uid, vals, context=None):	  
+		return super(ch_sch_consu_details, self).create(cr, uid, vals, context=context)
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		return super(ch_sch_consu_details, self).write(cr, uid, ids, vals, context) 
+
+ch_sch_consu_details()
 
 
 
