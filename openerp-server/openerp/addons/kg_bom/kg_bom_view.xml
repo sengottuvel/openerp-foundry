@@ -244,7 +244,7 @@
             <field name="model">ch.bom.line</field>
             <field name="arch" type="xml">
                 <search string="BOM Details">
-					<field name="name" string="Pattern Name"  filter_domain="[('pattern_name','ilike',self)]" />				
+					<field name="pattern_name" string="Pattern Name"  filter_domain="[('pattern_name','ilike',self)]" />				
 					<field name="pos_no" string="Position No."  filter_domain="[('pos_no','ilike',self)]" />				
 					<separator/>
                     <group expand="0" string="Group By...">
