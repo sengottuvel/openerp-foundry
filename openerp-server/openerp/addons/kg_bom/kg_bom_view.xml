@@ -234,7 +234,28 @@
 			</field>
 		</record>
 		
-		<!-- Search View End -->	
+		<!-- Search View End -->
+		
+		
+		<!-- Child Class Search View Start -->
+
+		<record id="m_search_v_bom_details" model="ir.ui.view">
+            <field name="name">BOM Details Search</field>
+            <field name="model">ch.bom.line</field>
+            <field name="arch" type="xml">
+                <search string="BOM Details">
+					<field name="name" string="Pattern Name"  filter_domain="[('pattern_name','ilike',self)]" />				
+					<field name="pos_no" string="Position No."  filter_domain="[('pos_no','ilike',self)]" />				
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Pattern Name" icon="terp-personal" domain="[]" context="{'group_by':'pattern_name'}"/> 
+                        <filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+		<!--Child Class Search View End -->
 			
 		<!-- Menu Action Start-->
 		
@@ -270,55 +291,6 @@
 		
 	<!-- Child Class  Menu Action End-->
 	
-	 <!-- Audit Log Xml Data Start-->
-		
-        <record id="bom_model" model="audittrail.rule">
-            <field name="name">Audit Log BOM</field>
-            <field name="object_id" eval="ref('kg_bom.model_kg_bom')"/>       
-            <field name="state">subscribed</field>              
-        </record>
-        
-    <!-- Audit Log Xml Data End-->
-    
-	 <!-- Audit Log Xml Data Start-->
-		
-        <record id="bom_line_model" model="audittrail.rule">
-            <field name="name">Audit Log BOM Line</field>
-            <field name="object_id" eval="ref('kg_bom.model_ch_bom_line')"/>       
-            <field name="state">subscribed</field>              
-        </record>
-        
-    <!-- Audit Log Xml Data End-->
-    
-     <!-- Audit Log Xml Data Start-->
-		
-        <record id="bom_machine_model" model="audittrail.rule">
-            <field name="name">Audit Log BOM Machine Shop</field>
-            <field name="object_id" eval="ref('kg_bom.model_ch_machineshop_details')"/>       
-            <field name="state">subscribed</field>              
-        </record>
-        
-    <!-- Audit Log Xml Data End-->
-    
-     <!-- Audit Log Xml Data Start-->
-		
-        <record id="bom_bot_model" model="audittrail.rule">
-            <field name="name">Audit Log BOM BOT</field>
-            <field name="object_id" eval="ref('kg_bom.model_ch_bot_details')"/>       
-            <field name="state">subscribed</field>              
-        </record>
-        
-    <!-- Audit Log Xml Data End-->
-    
-     <!-- Audit Log Xml Data Start-->
-		
-        <record id="bom_consu_model" model="audittrail.rule">
-            <field name="name">Audit Log BOM Consumable</field>
-            <field name="object_id" eval="ref('kg_bom.model_ch_consu_details')"/>       
-            <field name="state">subscribed</field>              
-        </record>
-        
-    <!-- Audit Log Xml Data End-->
         
 	
 	<!-- Menu Name Start here --> 
