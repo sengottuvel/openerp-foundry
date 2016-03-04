@@ -123,7 +123,7 @@
 		
 		<!-- Menu Name Start here --> 
 		
-			<menuitem action="mma_stage_master" name="Stage" id="mam_stage_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="7"/>  
+			<menuitem action="mma_stage_master" name="Stage" id="mam_stage_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="8"/>  
 		
 		<!-- Menu Name End here --> 
 

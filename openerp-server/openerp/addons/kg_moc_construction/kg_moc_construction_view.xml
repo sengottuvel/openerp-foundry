@@ -134,7 +134,7 @@
 		
 		<!-- Menu Name Start here --> 
 		
-			<menuitem action="mma_mocconstruction_master" name="MOC Construction" id="mam_mocconstruction_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="15"/>
+			<menuitem action="mma_mocconstruction_master" name="MOC Construction" id="mam_mocconstruction_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="12"/>
 
 		<!-- Menu Name End here --> 
 

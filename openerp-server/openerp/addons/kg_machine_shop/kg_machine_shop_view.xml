@@ -123,7 +123,7 @@
 		
 		<!-- Menu Name Start here --> 
 		
-			<menuitem action="mma_machineshop_master" name="MS Items" id="mam_machineshop_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="10"/> 
+			<menuitem action="mma_machineshop_master" name="MS Items" id="mam_machineshop_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="1"/> 
 			
 		<!-- Menu Name End here --> 
 	

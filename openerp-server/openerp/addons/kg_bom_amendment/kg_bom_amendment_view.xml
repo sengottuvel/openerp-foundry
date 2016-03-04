@@ -4,7 +4,6 @@
     
     
     <!-- Form View Start -->
-    
 	
 	
 	<!-- BOM Amendment -->
@@ -77,6 +76,18 @@
 									</tree>
 								</field>
 							</page>
+							<page string="Bearing">
+								<field name="line_ids_d" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
+									<tree string="Bearing Details Entry Tree" editable="top" >	
+											
+										<field name="product_temp_id" on_change="onchange_bot_code(product_temp_id)"/>
+										<field name="code" readonly="1" />											
+										<field name="qty"/>
+										<field name="remarks" widget="char"/>
+									</tree>
+								</field>
+							</page>
+							
 							<page string="Consumable">
 								<field name="line_ids_c" nolabel="1" attrs="{'readonly': [('state','in',['approved'])]}" >
 									<tree string="Consumable Details Entry Tree" editable="top" >					
@@ -149,11 +160,61 @@
 		</record>
 		
 		
+		 <!-- Audit Log Xml Data Start-->
+		
+        <record id="bom_amend_model" model="audittrail.rule">
+            <field name="name">Audit Log BOM Amendment</field>
+            <field name="object_id" eval="ref('kg_bom_amendment.model_kg_bom_amendment')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->
+    
+     <!-- Audit Log Xml Data Start-->
+		
+        <record id="bom_amend_foundry_model" model="audittrail.rule">
+            <field name="name">Audit Log Amend Foundry Items</field>
+            <field name="object_id" eval="ref('kg_bom_amendment.model_ch_bom_line_amendment')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->
+    
+     <!-- Audit Log Xml Data Start-->
+		
+        <record id="bom_amend_machine_model" model="audittrail.rule">
+            <field name="name">Audit Log BOM Amend Machine Shop</field>
+            <field name="object_id" eval="ref('kg_bom_amendment.model_ch_machineshop_details_amendment')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->
+    
+     <!-- Audit Log Xml Data Start-->
+		
+        <record id="bom_amend_bot_model" model="audittrail.rule">
+            <field name="name">Audit Log Amend BOM BOT</field>
+            <field name="object_id" eval="ref('kg_bom_amendment.model_ch_bot_details_amendment')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->
+    
+     <!-- Audit Log Xml Data Start-->
+		
+        <record id="bom_amend_consu_model" model="audittrail.rule">
+            <field name="name">Audit Log BOM Amend Consumable</field>
+            <field name="object_id" eval="ref('kg_bom_amendment.model_ch_consu_details_amendment')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->
+		
 		<!-- Menu Action End-->
 		
 		<!-- Menu Name Start here --> 
 		
-				<menuitem action="mma_bom_amendment" name="BOM Amendment" id="mam_bom_amendment" parent="kg_pumpmodel_master.mpm_planning_master" sequence="11"/> 
+				<menuitem action="mma_bom_amendment" name="BOM Amendment" id="mam_bom_amendment" parent="kg_pumpmodel_master.mpm_planning_master" sequence="5"/> 
 		
 		<!-- Menu Name End here --> 	
 	

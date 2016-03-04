@@ -19,15 +19,35 @@
 					</header>
 					<sheet>
 						<group>
-							<group>						
-								<field name="name" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}"/>								
-								<field name="uom" readonly="1"/>
-								<field name="revision" readonly="1"/>
-								<field name="notes" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}"/>								
+							<group>
+								<field name="bom_type" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire'])]}"/>
 							</group>
 							<group>
+							</group>
+						</group>
+						<group>
+							<group>
+								<field name="source_bom" attrs="{'invisible':[('bom_type','=','new_bom')],'readonly': [('copy_flag','=',True)]}"/>
+							</group>
+							<group>
+								<button name="copy_bom" type="object" string="Copy" class="oe_highlight" attrs="{'invisible':['|',('bom_type','=','new_bom'),('copy_flag','=',True)]}"/>
+							</group>
+						</group>
+						<group>
+							<group>	
+									
+								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire'])]}"/>								
+								<field name="uom" readonly="1"/>
+								<field name="revision" readonly="1"/>
+								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire'])]}"/>								
+							</group>
+							<group>
+								
+								
+							
 								<field name="pump_model_id" required="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}"/>
 								<field name="qty" readonly="1"/>
+								<field name="copy_flag" invisible="1"/>									
 								<field name="active"/>									
 								<field name="type" invisible="1"/>									
 								<field name="state" style="width: 30%%" class="att_state_change"/>								
@@ -70,6 +90,17 @@
 							<page string="BOT">
 								<field name="line_ids_b" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
 									<tree string="BOT Details Entry Tree" editable="top" >	
+											
+										<field name="product_temp_id" on_change="onchange_bot_code(product_temp_id)"/>
+										<field name="code" readonly="1" />											
+										<field name="qty"/>
+										<field name="remarks" widget="char"/>
+									</tree>
+								</field>
+							</page>
+							<page string="Bearing">
+								<field name="line_ids_d" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
+									<tree string="Bearing Details Entry Tree" editable="top" >	
 											
 										<field name="product_temp_id" on_change="onchange_bot_code(product_temp_id)"/>
 										<field name="code" readonly="1" />											
@@ -245,19 +276,19 @@
 			<field name="view_type">form</field>
 			<field name="context">{}</field>
 			<field name="view_id" ref="m_tree_v_bom_details"/>
-		</record>
+		</record>	
 		
 		
-		
-	<!-- Child Class  Menu Action End-->
+	<!-- Child Class  Menu Action End-->	
+	 
 	
 	<!-- Menu Name Start here --> 
 	
 		<!-- BOM Master  --> 
-				<menuitem action="mma_bom_master" name="BOM" id="mam_bom_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="8"/> 
+				<menuitem action="mma_bom_master" name="BOM" id="mam_bom_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="3"/> 
 	
 		<!-- BOM Details  --> 
-				<menuitem action="mma_bom_details" name="BOM Details" id="mam_bom_details" parent="kg_pumpmodel_master.mpm_planning_master" sequence="9"/>   
+				<menuitem action="mma_bom_details" name="BOM Details" id="mam_bom_details" parent="kg_pumpmodel_master.mpm_planning_master" sequence="4"/>   
 	
 	<!-- Menu Name End here --> 
 	

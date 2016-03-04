@@ -165,7 +165,7 @@
 		
 		<!-- Menu Name Start here --> 
 		
-			<menuitem action="mma_pattern_master" name="Pattern" id="mam_pattern_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="1"/>
+			<menuitem action="mma_pattern_master" name="Pattern" id="mam_pattern_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="0"/>
 
 		<!-- Menu Name End here --> 
 

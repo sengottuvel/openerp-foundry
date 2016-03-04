@@ -21,7 +21,7 @@ class kg_pattern_master(osv.osv):
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'box_id': fields.many2one('kg.box.master','Box',readonly=True,domain="[('state','=','approved'), ('active','=','t')]"),		
 		'pattern_name': fields.char('Part/Pattern Name', size=128,required=True),
-		'code': fields.char('Pattern Code', size=128),
+		'code': fields.char('Code No', size=128),
 		'active': fields.boolean('Active'),
 		'pcs_weight': fields.float('SS Weight(kgs)'),
 		'ci_weight': fields.float('CI Weight(kgs)'),

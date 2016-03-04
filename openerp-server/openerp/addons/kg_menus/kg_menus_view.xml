@@ -6,18 +6,18 @@
 		<!-- Planning Master Base menu start here-->
 				
 				
-				<!-- Products Master  -->
+				<!-- Products Master  
 				<menuitem id="kg_product_master" parent="kg_pumpmodel_master.mpm_planning_master"
-						 action="product.product_normal_action" name="Item Master" sequence="3"/>
+						 action="product.product_normal_action" name="Item Master" sequence="3"/>-->
 				
-				<!-- Product Category Master  -->		
+				<!-- Product Category Master  
 				<menuitem id="kg_product_catg_master_plan" parent="kg_pumpmodel_master.mpm_planning_master"
-						 action="product.product_category_action_form" name="Product Category" sequence="4"/>					
+						 action="product.product_category_action_form" name="Product Category" sequence="4"/>	-->				
 				
 				
-				<!-- Units of Measure Master  -->  
+				<!-- Units of Measure Master  
 				<menuitem action="product.product_uom_form_action" name="Units of Measure" id="mam_uom_master_plan" parent="kg_pumpmodel_master.mpm_planning_master" sequence="6"/>   
-				
+				-->
 		<!-- Planning Master Base menu End here-->
 				
 			

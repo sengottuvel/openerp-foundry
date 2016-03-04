@@ -18,6 +18,8 @@ class kg_box_master(osv.osv):
 		'name': fields.char('Name', size=128, required=True, select=True),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'cost': fields.float('Moulding Cost', size=128, required=True),
+		'qty': fields.float('BOX Set Qty', size=128),
+		'purpose': fields.selection([('moulding','Moulding'),('packing','Packing')],'Purpose',readonly=True),
 		'active': fields.boolean('Active'),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'notes': fields.text('Notes'),
@@ -45,6 +47,7 @@ class kg_box_master(osv.osv):
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':fields.datetime.now,	
+		'purpose':'moulding',	
 		
 	}
 	
@@ -55,6 +58,12 @@ class kg_box_master(osv.osv):
 	]
 	
 	
+	
+	def _cost_validation(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.cost == 0.00:		
+			return False
+		return True
 	
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -96,7 +105,11 @@ class kg_box_master(osv.osv):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_box_master, self).write(cr, uid, ids, vals, context)
 		
-	
+	_constraints = [
+		
+		(_cost_validation, 'Cost Value should be greater than 0.00!!', ['Cost Value']),		
+		
+	]		
 	
 	
 kg_box_master()

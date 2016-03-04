@@ -19,6 +19,7 @@
 						<group>
 							<group>						
 								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+								<field name="alias_name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 								<field name="rate" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="pro_cost" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
@@ -26,8 +27,7 @@
 							<group>
 								<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="weight_type"/>									
-								<field name="active"/>
-								<field name="moc_type"/>									
+								<field name="active"/>									
 								<field name="state" style="width: 30%%" class="att_state_change"/>								
 							</group>
 						</group>
@@ -53,9 +53,10 @@
 							<page string="Chemical Composition">	
 								<field name="line_ids_a" nolabel="1" >
 									<tree string="Chemical Composition Chart Tree" editable="top" >									
-										<field name="chemical_id" />											
-										<field name="min"/>										
-										<field name="max" />																					
+										<field name="chemical_id" />
+										<field name="range_flag" />														
+										<field name="min" attrs="{'required': [('range_flag','=',False)]}"/>										
+										<field name="max" attrs="{'required': [('range_flag','=',False)]}"/>																												
 									</tree>
 								</field>																								
 							</page>
@@ -64,8 +65,9 @@
 									<tree string="Mechanical Properties chart Tree" editable="top" >									
 										<field name="mechanical_id" on_change="onchange_uom_name(mechanical_id)"/>											
 										<field name="uom" readonly="1" />											
-										<field name="min"/>				   
-										<field name="max" />																					
+										<field name="min"/>	
+										<field name="range_flag" />				   
+										<field name="max" attrs="{'required': [('range_flag','=',False)]}"/>																													
 									</tree>
 								</field>																								
 							</page>							
@@ -153,7 +155,8 @@
 			<field name="search_view_id" ref="m_search_v_moc"/>
 		</record>
 		
-		<!-- Menu Action End-->
+		<!-- Menu Action End-->	
+	
 		
 		<!-- Menu Name Start here --> 
 		
