@@ -31,6 +31,7 @@ class kg_moc_master(osv.osv):
 		
 		'weight_type': fields.selection([('ci','CI'),('ss','SS'),('non_ferrous','Non-Ferrous')],'Weight Type'),
 		'alias_name': fields.char('Alias Name', size=128),
+		'moc_type': fields.selection([('foundry','Foundry'),('machine_shop','Machine Shop'),('bot','BOT')],'Type'),
 		
 		
 		### Entry Info ###

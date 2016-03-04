@@ -27,7 +27,8 @@
 							<group>
 								<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="weight_type"/>									
-								<field name="active"/>									
+								<field name="active"/>		
+								<field name="moc_type"/>									
 								<field name="state" style="width: 30%%" class="att_state_change"/>								
 							</group>
 						</group>
