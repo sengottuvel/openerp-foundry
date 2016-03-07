@@ -14,6 +14,21 @@ class kg_machine_shop(osv.osv):
 	_description = "SAM MOC Master"
 	_rec_name = 'code'
 	
+	
+	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
+		res={}
+		ms_line_obj = self.pool.get('ch.machineshop.details')
+		ms_line_amend_obj = self.pool.get('ch.machineshop.details.amendment')
+		moc_const_ms_obj = self.pool.get('ch.moc.machineshop.details')		
+		for item in self.browse(cr, uid, ids, context=None):
+			res[item.id] = 'no'
+			ms_line_ids = ms_line_obj.search(cr,uid,[('ms_id','=',item.id)])
+			ms_line_amend_ids = ms_line_amend_obj.search(cr,uid,[('ms_id','=',item.id)])
+			moc_const_ms_ids = moc_const_ms_obj.search(cr,uid,[('ms_id','=',item.id)])					
+			if ms_line_ids or ms_line_amend_ids or moc_const_ms_ids:
+				res[item.id] = 'yes'		
+		return res
+	
 	_columns = {
 			
 		'name': fields.char('Name', size=128, required=True, select=True),
@@ -25,6 +40,9 @@ class kg_machine_shop(osv.osv):
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
+		
+		'csd_code': fields.char('CSD Code No.', size=128),
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -47,6 +65,7 @@ class kg_machine_shop(osv.osv):
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':fields.datetime.now,	
+		'modify': 'no',
 		
 	}
 	
@@ -107,6 +126,10 @@ class kg_machine_shop(osv.osv):
 		else:
 			raise osv.except_osv(_('Cancel remark is must !!'),
 				_('Enter the remarks in Cancel remarks field !!'))
+		return True
+		
+	def entry_draft(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'draft'})
 		return True
 
 	def entry_confirm(self,cr,uid,ids,context=None):

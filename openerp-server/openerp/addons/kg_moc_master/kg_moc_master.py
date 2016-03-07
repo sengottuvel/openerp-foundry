@@ -13,6 +13,24 @@ class kg_moc_master(osv.osv):
 	_name = "kg.moc.master"
 	_description = "SAM MOC Master"
 	
+	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
+		res={}
+		moc_const_foundry_obj = self.pool.get('ch.moc.foundry.details')
+		moc_const_ms_obj = self.pool.get('ch.moc.machineshop.details')
+		moc_const_bot_obj = self.pool.get('ch.moc.bot.details')			
+		moc_const_consu_obj = self.pool.get('ch.moc.consu.details')	
+		stock_line_obj = self.pool.get('ch.stock.inward.details')		
+		for item in self.browse(cr, uid, ids, context=None):
+			res[item.id] = 'no'
+			moc_const_foundry_ids = moc_const_foundry_obj.search(cr,uid,[('moc_id','=',item.id)])
+			moc_const_ms_ids = moc_const_ms_obj.search(cr,uid,[('moc_id','=',item.id)])
+			moc_const_bot_ids = moc_const_bot_obj.search(cr,uid,[('moc_id','=',item.id)])					
+			moc_const_consu_ids = moc_const_consu_obj.search(cr,uid,[('moc_id','=',item.id)])
+			stock_line_ids = stock_line_obj.search(cr,uid,[('moc_id','=',item.id)])					
+			if moc_const_foundry_ids or moc_const_ms_ids or moc_const_bot_ids or moc_const_consu_ids or stock_line_ids:
+				res[item.id] = 'yes'		
+		return res
+	
 	_columns = {
 			
 		'name': fields.char('Name', size=128, required=True, select=True),
@@ -29,9 +47,10 @@ class kg_moc_master(osv.osv):
 		'line_ids_a':fields.one2many('ch.chemical.chart', 'header_id', "Chemical Chart"),
 		'line_ids_b':fields.one2many('ch.mechanical.chart', 'header_id', "Mechanical Chart"),
 		
-		'weight_type': fields.selection([('ci','CI'),('ss','SS'),('non_ferrous','Non-Ferrous')],'Weight Type'),
+		'weight_type': fields.selection([('ci','CI'),('ss','SS'),('non_ferrous','Non-Ferrous')],'Family Type'),
 		'alias_name': fields.char('Alias Name', size=128),
 		'moc_type': fields.selection([('foundry','Foundry'),('machine_shop','Machine Shop'),('bot','BOT')],'Type'),
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),	
 		
 		
 		### Entry Info ###
@@ -55,6 +74,7 @@ class kg_moc_master(osv.osv):
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':fields.datetime.now,	
+		'modify': 'no',
 		
 	}
 	
@@ -120,6 +140,10 @@ class kg_moc_master(osv.osv):
 	def entry_confirm(self,cr,uid,ids,context=None):
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
+		
+	def entry_draft(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'draft'})
+		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -171,12 +195,37 @@ class ch_moc_raw_material(osv.osv):
 	_columns = {
 			
 		'header_id':fields.many2one('kg.moc.master', 'MOC Entry', required=True, ondelete='cascade'),	
-		#'name':fields.char('Name'),
-		'product_id': fields.many2one('product.product','Raw Material', required=True,domain="[('state','=','approved')]"),			
-		'uom':fields.many2one('product.uom', 'UOM',required=True,domain="[('dummy_state','=','approved')]"),
+		'product_id': fields.many2one('product.product','Raw Material', required=True,domain="[('state','=','approved')]"),	
+		'rate': fields.related('product_id','latest_price', type='float', string='Rate(Rs)', store=True),		
+		'uom':fields.char('UOM',size=128),
 		'qty':fields.float('Qty',required=True),
 		'remarks':fields.text('Remarks'),		
 	}
+	
+	def onchange_uom(self, cr, uid, ids, product_id, context=None):
+		
+		value = {'uom': ''}
+		if product_id:
+			uom_rec = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
+			value = {'uom': uom_rec.uom_id.name}
+			
+		return {'value': value}
+		
+	def create(self, cr, uid, vals, context=None):
+		pro_obj = self.pool.get('product.product')
+		if vals.get('product_id'):		  
+			uom_rec = pro_obj.browse(cr, uid, vals.get('product_id') )
+			uom_name = uom_rec.uom_id.name
+			vals.update({'uom': uom_name})
+		return super(ch_moc_raw_material, self).create(cr, uid, vals, context=context)
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		pro_obj = self.pool.get('product.product')
+		if vals.get('product_id'):
+			uom_rec = pro_obj.browse(cr, uid, vals.get('product_id') )
+			uom_name = uom_rec.uom_id.name
+			vals.update({'uom': uom_name})
+		return super(ch_moc_raw_material, self).write(cr, uid, ids, vals, context)  
 	
 ch_moc_raw_material()
 

@@ -17,8 +17,10 @@
 			ref('kg_menus.spm_service_order_menu'),
 			ref('kg_menus.sam_so_amendment'),
 			ref('kg_menus.mam_so_manual_closing'),
+			ref('kg_menus.mam_uom_master'),
 			
             ])]" name="menu_access"/>
+            <field name="users" eval="[(4, ref('base.user_root'))]"/>
     </record>
     
     <!-- Warehouse Groups -->
@@ -37,6 +39,7 @@
 			ref('stock.menu_stock_root'),
 			
             ])]" name="menu_access"/>
+            <field name="users" eval="[(4, ref('base.user_root'))]"/>
     </record>
 
     <record id="group_kg_main_store_user" model="res.groups">
@@ -59,9 +62,26 @@
 			ref('kg_menus.gam_general_grn'),
 			
             ])]" name="menu_access"/>
+            <field name="users" eval="[(4, ref('base.user_root'))]"/>
     </record>
     
-
+    <!-- CRM Admin Group-->
+    
+	 <record id="group_kg_crm_admin" model="res.groups">
+        <field name="name">kg_crm_admin</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="category_id" ref="base.module_category_purchase_management"/>
+        <field eval="[(6,0,[
+       
+			ref('kg_menus.cpm_crm'),
+			ref('kg_menus.cpm_crm_master_menu'),
+			ref('kg_menus.cam_crm_customer_master'),
+			ref('kg_menus.cam_crm_dealer_master'),
+			
+            ])]" name="menu_access"/>
+            <field name="users" eval="[(4, ref('base.user_root'))]"/>
+    </record>
+    
   
 </data>
 </openerp>

@@ -12,8 +12,9 @@
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="entry_cancel" type="object" string="Cancel" states="approved" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_cancel" type="object" states="reject,approved" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
+						<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
 					<sheet>
 						<group>
@@ -32,21 +33,54 @@
 								<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							</group>
 							<group>												
-								<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])], 'readonly': [('state','in',['cancel'])]}"/>												
+								<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','confirmed'])], 'readonly': [('state','in',['cancel'])]}"/>	
 							</group>
 						</group>
-						<notebook>
-							<page string="Construction Details">	
-								<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" >
-									<tree string="Construction Details Entry Tree" editable="top" >									
-										<field name="pattern_id" on_change="onchange_pattern_name(pattern_id)"/>											
-										<field name="pattern_name" readonly="1"/>				   
+						<notebook>						
+						<page string="Foundry Items">
+						<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">
+							<tree string="MOC Details Entry Tree" editable="top" >			
+								<field name="pattern_id" on_change="onchange_pattern_name(pattern_id)"/>
+								<field name="pattern_name" readonly="1"/>
+								<field name="moc_id" />	
+								<field name="remarks" widget="char"/>
+								<field name="state" invisible="1"/>				    
+							</tree>
+						</field>
+						</page>
+						<page string="Machine Shop">
+								<field name="line_ids_a" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">
+									<tree string="Machine Shop Details Entry Tree" editable="top" >			
+										
+										<field name="ms_id" on_change="onchange_machineshop_name(ms_id)"/>	
+										<field name="name" readonly="1"/>
 										<field name="moc_id" />
-										<field name="remarks" widget="char"/>														
+										<field name="remarks" widget="char"/>
 									</tree>
-								</field>																								
+								</field>
 							</page>
-							
+							<page string="BOT">
+								<field name="line_ids_b" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">
+									<tree string="BOT Details Entry Tree" editable="top" >	
+											
+										<field name="product_temp_id" on_change="onchange_bot_code(product_temp_id)"/>
+										<field name="code" readonly="1" />	
+										<field name="moc_id" />	
+										<field name="remarks" widget="char"/>
+									</tree>
+								</field>
+							</page>							
+							<page string="Consumable">
+								<field name="line_ids_c" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">
+									<tree string="Consumable Details Entry Tree" editable="top" >					
+										
+										<field name="product_temp_id" on_change="onchange_consu_code(product_temp_id)"/>
+										<field name="code" readonly="1"/>	
+										<field name="moc_id" />	
+										<field name="remarks"  widget="char"/>
+									</tree>
+								</field>
+							</page>
 							<page string="Entry Info">
 									<group>
 										<field name="company_id"/>
@@ -130,11 +164,12 @@
 		</record>	
 		
 		
-		<!-- Menu Action End-->
+		<!-- Menu Action End-->      
+    
 		
 		<!-- Menu Name Start here --> 
 		
-			<menuitem action="mma_mocconstruction_master" name="MOC Construction" id="mam_mocconstruction_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="12"/>
+			<menuitem action="mma_mocconstruction_master" name="MOC Construction" id="mam_mocconstruction_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="13"/>
 
 		<!-- Menu Name End here --> 
 

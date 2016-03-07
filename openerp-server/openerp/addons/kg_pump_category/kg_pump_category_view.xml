@@ -4,11 +4,11 @@
 
 	<!-- Form View Start -->
 	
-		<record id="m_form_v_division" model="ir.ui.view">
-			<field name="name">Division Master Form</field>
-			<field name="model">kg.division.master</field>
+		<record id="m_form_v_pumpcate" model="ir.ui.view">
+			<field name="name">Pump Category Master Form</field>
+			<field name="model">kg.pump.category</field>
 			<field name="arch" type="xml">
-				<form string="Division Master" version="7.0">					
+				<form string="Pump Category Master" version="7.0">					
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
@@ -19,21 +19,21 @@
 					<sheet>
 						<group>
 							<group>						
-								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
-								<field name="active"/>
+								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>												
+								<field name="active"/>		
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 							</group>
 							<group>
-								<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="state" style="width: 30%%" class="att_state_change"/>								
+								<field name="type" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+								<field name="state" style="width: 30%%" class="att_state_change"/>									
 							</group>
-						</group>						
+						</group>
 						<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
 							<group>	
 								<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							</group>
 							<group>												
-								<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','confirmed'])], 'readonly': [('state','in',['cancel'])]}"/>		
+								<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','confirmed'])], 'readonly': [('state','in',['cancel'])]}"/>	
 							</group>
 						</group>
 						<notebook>
@@ -68,15 +68,16 @@
 
 		<!-- Tree View Start -->
 		
-		<record id="m_tree_v_division" model="ir.ui.view">
-			<field name="name">Division Master Tree</field>
-			<field name="model">kg.division.master</field>
+		<record id="m_tree_v_pumpcate" model="ir.ui.view">
+			<field name="name">Pump Category Master Tree</field>
+			<field name="model">kg.pump.category</field>
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'draft';red:state == 'confirmed'
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" 
-								toolbar="True" string="Division Master Tree">				
-					<field name="code"/>
-					<field name="name"/>
+								toolbar="True" string="Pump Category Master Tree">		
+					
+					<field name="name"/>					
+					<field name="type"/>					
 					<field name="state"/>
 				</tree>
 			</field>
@@ -86,11 +87,11 @@
 
 		<!-- Search View Start -->
 
-		<record id="m_search_v_division" model="ir.ui.view">
-            <field name="name">Division Master Search</field>
-            <field name="model">kg.division.master</field>
+		<record id="m_search_v_pumpcate" model="ir.ui.view">
+            <field name="name">Pump Category Master Search</field>
+            <field name="model">kg.pump.category</field>
             <field name="arch" type="xml">
-                <search string="Division Master Template">
+                <search string="Pump Category Master Template">
 					<field name="name" string="Master"  filter_domain="['|', ('name','ilike',self), ('code','ilike',self)]" />
 					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
 					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>				
@@ -109,25 +110,37 @@
 
 		<!-- Menu Action Start-->
 		
-		 <record id="mma_division_master" model="ir.actions.act_window">
-			<field name="name">Division</field>
+		 <record id="mma_pumpcate_master" model="ir.actions.act_window">
+			<field name="name">Pump Category</field>
 			<field name="type">ir.actions.act_window</field>
-			<field name="res_model">kg.division.master</field>
+			<field name="res_model">kg.pump.category</field>
 			<field name="view_type">form</field>
 			<field name="context">{}</field>
-			<field name="view_id" ref="m_tree_v_division"/>
-			<field name="search_view_id" ref="m_search_v_division"/>
-		</record>	
+			<field name="view_id" ref="m_tree_v_pumpcate"/>
+			<field name="search_view_id" ref="m_search_v_pumpcate"/>
+		</record>			
 		
+		<!-- Menu Action End-->
 		
-		<!-- Menu Action End-->		
+		<!-- Audit Log Xml Data Start-->
 		
+        <record id="pump_cate" model="audittrail.rule">
+            <field name="name">Audit Log PumpCategory Master</field>
+            <field name="object_id" eval="ref('kg_pump_category.model_kg_pump_category')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <!-- Audit Log Xml Data End-->
 		
-		<!-- Menu Name Start here --> 
-		
-			<menuitem action="mma_division_master" name="Division" id="mam_division_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="8"/>
-
+		<!-- Menu Name Start here -->           
+          
+            
+            <!-- PumpCategory Master  -->
+            
+				<menuitem action="mma_pumpcate_master" name="Pump Category" id="mam_pumpcate_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="7"/>
+				
 		<!-- Menu Name End here --> 
+	
 
 	</data>
 </openerp>

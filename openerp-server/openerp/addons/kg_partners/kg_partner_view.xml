@@ -12,6 +12,9 @@
 		<header>
 			<!--<button name="entry_confirm" class="oe_highlight" type="object" string="Confirm" attrs = "{'invisible':['|',('partner_state','=','approve'),('partner_state','=','confirm')]}"/>-->
 			<button name="approve_partner" class="oe_highlight" type="object" string="Approve" attrs = "{'invisible':[('partner_state','=','approve')]}"/> 
+			<!--	<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes'),('partner_state','in',('approve','cancel'))]}" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
+			<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('partner_state','=','draft')]}" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+			<button name="entry_draft" class="oe_highlight" type="object" string="Set To Draft" attrs = "{'invisible':[('partner_state','=','draft')]}"/> 
 		</header>
 		</xpath>
         
@@ -34,6 +37,8 @@
 		<field name="tan_no"/>
 		<field name="cst_no"/>
 		<field name="cheque_in_favour"/>
+		<field name="economic_category"/>
+		<field name="dealer_id"  attrs="{'invisible':['|',('supplier','=',True),('dealer','=',True)]}"/>
 		</field>
 		<field name="ean13" position="replace">
 		<field name="company_type"/>
@@ -41,6 +46,7 @@
 		<field name="pan_no"/>
 		<field name="gst_no"/>
 		<field name="transport_id"/>
+		<field name="sector"/>
 		</field>
 		
 		<field name="ref" position="replace">
@@ -70,12 +76,14 @@
 		<field name="bank_name" invisible="1"/>
 		<field name="bank_bic" invisible="1"/>
 		<field name="partner_state" invisible="1"/> 
+		<field name="dealer" invisible="1"/> 
+		<field name="modify" invisible="1"/> 
 		</field>
 		
 	
 		
 		<xpath expr = "//page[@string='Additional Contacts']" position="after">
-					<page string="Delivery Address">
+					<page string="Delivery Address" attrs="{'invisible':[('supplier','=',True)]}">
 				
 				<field colspan="4" mode="tree" name="delivery_ids" nolabel="1" widget="one2many_list" >
 					<tree string="Delivery Address"> 
@@ -207,19 +215,42 @@
 			<field name="email" position="after"> 
 			<field name="supply_type"/> 
 			<field name="partner_state"/>
+			<field name="dealer" invisible="1"/>
+			<field name="modify" invisible="1"/>
 			</field>					
 		</field>
 	</record>
 	
+	<!-- Audit Log Xml Data Start-->
+		
+      <!--  <record id="partnermaster_model" model="audittrail.rule">
+            <field name="name">Audit Log Partner Master</field>
+            <field name="object_id" eval="ref('base.model_res_partner')"/>       
+            <field name="state">subscribed</field>              
+        </record>-->
+        
+	<!-- Audit Log Xml Data End-->
 	
-	<record id="kg_action_supplier_form" model="ir.actions.act_window">
-		<field name="name">Suppliers</field>
+	<record id="kg_action_customer_form" model="ir.actions.act_window">
+		<field name="name">Customer</field>
 		<field name="type">ir.actions.act_window</field>
 		<field name="res_model">res.partner</field>
 		<field name="view_type">form</field>
 		<field name="view_mode">tree,form,kanban</field>
-		<field name="domain">[('supplier','=',True)]</field>
+		<field name="domain">[('customer','=',True)]</field>
 		<field name="context">{'default_customer': 1,'default_supplier': 0}</field>
+		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
+		<field name="search_view_id" ref="partner_group_view"/>-->
+	</record>
+	
+	<record id="kg_action_dealer_form" model="ir.actions.act_window">
+		<field name="name">Dealer</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="res_model">res.partner</field>
+		<field name="view_type">form</field>
+		<field name="view_mode">tree,form,kanban</field>
+		<field name="domain">[('dealer','=',True)]</field>
+		<field name="context">{'default_dealer': 1,'default_customer': 0,'default_supplier': 0}</field>
 		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
 		<field name="search_view_id" ref="partner_group_view"/>-->
 	</record>

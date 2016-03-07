@@ -14,6 +14,16 @@ class kg_bom(osv.osv):
 	_name = 'kg.bom'	
 	
 	
+	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
+		res={}
+		bom_amend_obj = self.pool.get('kg.bom.amendment')				
+		for item in self.browse(cr, uid, ids, context=None):
+			res[item.id] = 'no'
+			bom_amend_ids = bom_amend_obj.search(cr,uid,[('bom_id','=',item.id)])			
+			if bom_amend_ids:
+				res[item.id] = 'yes'		
+		return res
+	
 	_columns = {
 		'name': fields.char('BOM Name', size=128, required=True, select=True),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled'),('expire','Expired')],'Status', readonly=True),   
@@ -27,7 +37,7 @@ class kg_bom(osv.osv):
 		'copy_flag':fields.boolean('Copy Flag'),
 		
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
-		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model',domain="[('state','=','approved'), ('active','=','t')]"),   
+		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model',domain="[('active','=','t')]"),   
 		'uom': fields.char('Unit of Measure', readonly=True,required=True), 
 		'remarks':fields.text('Remarks'),
 		'qty': fields.integer('Qty', size=128,required=True,readonly=True),
@@ -36,6 +46,7 @@ class kg_bom(osv.osv):
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
 		'revision': fields.integer('Revision'),
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -67,6 +78,7 @@ class kg_bom(osv.osv):
 	  'uom':'Nos', 
 	  'revision' : 0, 
 	  'copy_flag' : False, 
+	  'modify': 'no',
 	  
 	}
 	
@@ -170,6 +182,10 @@ class kg_bom(osv.osv):
 				_('Enter the remarks in rejection remark field !!'))
 		return True
 		
+	def entry_draft(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'draft'})
+		return True
+		
 	def unlink(self,cr,uid,ids,context=None):
 		unlink_ids = []	 
 		for rec in self.browse(cr,uid,ids): 
@@ -203,7 +219,7 @@ class ch_bom_line(osv.osv):
 		
 		'header_id':fields.many2one('kg.bom', 'BOM Name', required=True, ondelete='cascade'),  
 		'pos_no': fields.integer('Position No'),
-		'pattern_id': fields.many2one('kg.pattern.master','Pattern No', required=True,domain="[('state','=','approved')]"), 
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern No', required=True,domain="[('active','=','t')]"), 
 		'pattern_name': fields.char('Pattern Name', required=True), 
 		'remarks':fields.text('Remarks'),
 		'qty': fields.integer('Qty',required=True,),

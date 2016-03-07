@@ -15,20 +15,39 @@ class kg_pattern_master(osv.osv):
 	_name = "kg.pattern.master"
 	_description = "SAM Pattern Master"
 	
+	
+	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
+		res={}
+		bom_line_obj = self.pool.get('ch.bom.line')
+		bom_line_amend_obj = self.pool.get('ch.bom.line.amendment')
+		moc_const_foundry_obj = self.pool.get('ch.moc.foundry.details')
+		stock_line_obj = self.pool.get('ch.stock.inward.details')
+		weekly_bom_obj = self.pool.get('ch.sch.bom.details')		
+		for item in self.browse(cr, uid, ids, context=None):
+			res[item.id] = 'no'
+			bom_line_ids = bom_line_obj.search(cr,uid,[('pattern_id','=',item.id)])
+			bom_line_amend_ids = bom_line_amend_obj.search(cr,uid,[('pattern_id','=',item.id)])
+			moc_const_foundry_ids = moc_const_foundry_obj.search(cr,uid,[('pattern_id','=',item.id)])
+			stock_line_ids = stock_line_obj.search(cr,uid,[('pattern_id','=',item.id)])
+			weekly_bom_ids = weekly_bom_obj.search(cr,uid,[('pattern_id','=',item.id)])			
+			if bom_line_ids or bom_line_amend_ids or moc_const_foundry_ids or stock_line_ids or weekly_bom_ids:
+				res[item.id] = 'yes'		
+		return res
+	
 	_columns = {
 			
 		'name': fields.char('Part/Pattern No', size=128, required=True),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'box_id': fields.many2one('kg.box.master','Box',readonly=True,domain="[('state','=','approved'), ('active','=','t')]"),		
 		'pattern_name': fields.char('Part/Pattern Name', size=128,required=True),
-		'code': fields.char('Code No', size=128),
+		'code': fields.char('Customer Code No.', size=128),
 		'active': fields.boolean('Active'),
 		'pcs_weight': fields.float('SS Weight(kgs)'),
 		'ci_weight': fields.float('CI Weight(kgs)'),
 		'mould_rate': fields.float('Mould Rate(Rs)'),
 		'location': fields.char('Physical Location', required=True),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
-		'pattern_state': fields.selection([('active','Active'),('hold','Hold'),('rework','Rework'),('reject','Rejected')],'Pattern Status',required=True),
+		'pattern_state': fields.selection([('active','Active'),('hold','Hold'),('rework','Rework'),('reject','Rejected'),('not_available','Not available')],'Pattern Status',required=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
@@ -37,10 +56,12 @@ class kg_pattern_master(osv.osv):
 		'line_ids_b':fields.one2many('ch.pattern.history', 'header_id', "Pattern History"),
 		
 		'tolerance': fields.float('Tolerance(%)'),
-		'nonferous_weight': fields.float('Non-Ferrous Weight(kgs)'),
-		
+		'nonferous_weight': fields.float('Non-Ferrous Weight(kgs)'),		
 		'alias_name': fields.char('Alias Name', size=128),
 		'make_by': fields.char('Make By', size=128),
+		'delivery_lead': fields.integer('Delivery Lead Time(Weeks)', size=128),
+		'csd_code': fields.char('CSD Code No.', size=128),
+		'making_cost': fields.float('Pattern Making Cost'),
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -52,7 +73,8 @@ class kg_pattern_master(osv.osv):
 		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
-		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),		
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
 				
 	}
 	
@@ -63,11 +85,14 @@ class kg_pattern_master(osv.osv):
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':fields.datetime.now,	
+		'delivery_lead':8,	
+		'modify': 'no',
+		'pattern_state': 'active',
 		
 	}
 	
 	
-	"""def _Validation(self, cr, uid, ids, context=None):
+	def _Validation(self, cr, uid, ids, context=None):
 		flds = self.browse(cr , uid , ids[0])
 		special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )
 		if special_char:
@@ -80,7 +105,7 @@ class kg_pattern_master(osv.osv):
 			code_special_char = ''.join( c for c in flds.code if  c in '!@#$%^~*{}?+/=' )		
 			if code_special_char:
 				return False
-		return True		"""
+		return True		
 		
 	def _name_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -142,6 +167,10 @@ class kg_pattern_master(osv.osv):
 	def entry_approve(self,cr,uid,ids,context=None):
 		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
+	
+	def entry_draft(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'draft'})
+		return True
 
 	def entry_reject(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -160,7 +189,8 @@ class kg_pattern_master(osv.osv):
 						_('You can not delete this entry !!'))
 			else:
 				unlink_ids.append(rec.id)
-		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
+		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)	
+	
 		
 	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
@@ -168,9 +198,9 @@ class kg_pattern_master(osv.osv):
 		
 	
 	_constraints = [
-		#(_Validation, 'Special Character Not Allowed !!!', ['name']),
-		#(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
-		#(_name_validate, 'Pattern No must be unique !!', ['no']),		
+		(_Validation, 'Special Character Not Allowed !!!', ['name']),
+		(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
+		(_name_validate, 'Pattern No must be unique !!', ['no']),		
 		
 	]
 	

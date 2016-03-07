@@ -13,6 +13,18 @@ class kg_division_master(osv.osv):
 	_name = "kg.division.master"
 	_description = "SAM Division Master"
 	
+	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
+		res={}
+		stock_obj = self.pool.get('kg.stock.inward')
+		weekly_sch_obj = self.pool.get('kg.weekly.schedule')				
+		for item in self.browse(cr, uid, ids, context=None):
+			res[item.id] = 'no'
+			stock_ids = stock_obj.search(cr,uid,[('division_id','=',item.id)])
+			weekly_sch_ids = weekly_sch_obj.search(cr,uid,[('division_id','=',item.id)])			
+			if stock_ids or weekly_sch_ids:
+				res[item.id] = 'yes'		
+		return res
+	
 	_columns = {
 			
 		'name': fields.char('Name', size=128, required=True, select=True),
@@ -23,6 +35,7 @@ class kg_division_master(osv.osv):
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -45,6 +58,7 @@ class kg_division_master(osv.osv):
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':fields.datetime.now,	
+		'modify': 'no',
 		
 	}
 	
@@ -108,6 +122,9 @@ class kg_division_master(osv.osv):
 
 	def entry_confirm(self,cr,uid,ids,context=None):
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		return True
+	def entry_draft(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'draft'})
 		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):

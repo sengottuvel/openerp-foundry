@@ -13,6 +13,8 @@ class kg_stage_master(osv.osv):
 	_name = "kg.stage.master"
 	_description = "SAM Stage Master"
 	
+	
+	
 	_columns = {
 			
 		'name': fields.char('Name', size=128, required=True, select=True),
@@ -24,6 +26,7 @@ class kg_stage_master(osv.osv):
 		'remark': fields.text('Approve/Reject'),
 		'stage_seq_id': fields.integer('Stage Sequence' , size=128),
 		'cancel_remark': fields.text('Cancel'),
+		
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -46,6 +49,7 @@ class kg_stage_master(osv.osv):
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':fields.datetime.now,	
+		
 		
 	}
 	
@@ -112,6 +116,10 @@ class kg_stage_master(osv.osv):
 
 	def entry_confirm(self,cr,uid,ids,context=None):
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		return True
+		
+	def entry_draft(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'draft'})
 		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):

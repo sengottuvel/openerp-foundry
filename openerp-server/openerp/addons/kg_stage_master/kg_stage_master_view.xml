@@ -12,8 +12,9 @@
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="entry_cancel" type="object" string="Cancel" states="approved" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_cancel" type="object" string="Cancel" states="reject,approved" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
+						<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
 					<sheet>
 						<group>
@@ -33,7 +34,7 @@
 								<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							</group>
 							<group>												
-								<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])], 'readonly': [('state','in',['cancel'])]}"/>												
+								<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','confirmed'])], 'readonly': [('state','in',['cancel'])]}"/>													
 							</group>
 						</group>
 						<notebook>
@@ -117,16 +118,17 @@
 			<field name="context">{}</field>
 			<field name="view_id" ref="m_tree_v_stage"/>
 			<field name="search_view_id" ref="m_search_v_stage"/>
-		</record>
+		</record>		
 		
-		<!-- Menu Action End-->
+		
+		<!-- Menu Action End-->	
+		
 		
 		<!-- Menu Name Start here --> 
 		
-			<menuitem action="mma_stage_master" name="Stage" id="mam_stage_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="8"/>  
+			<menuitem action="mma_stage_master" name="Stage" id="mam_stage_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="9"/>  
 		
 		<!-- Menu Name End here --> 
-
 	
 
 	</data>

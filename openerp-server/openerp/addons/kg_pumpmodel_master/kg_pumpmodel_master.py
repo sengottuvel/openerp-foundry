@@ -13,6 +13,19 @@ class kg_pumpmodel_master(osv.osv):
 	_name = "kg.pumpmodel.master"
 	_description = "SAM PumpModel Master"
 	
+	
+	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
+		res={}		
+		stock_line_obj = self.pool.get('ch.stock.inward.details')
+		weekly_sch_obj = self.pool.get('ch.weekly.schedule.details')		
+		for item in self.browse(cr, uid, ids, context=None):
+			res[item.id] = 'no'			
+			stock_line_ids = stock_line_obj.search(cr,uid,[('pump_model_id','=',item.id)])
+			weekly_sch_ids = weekly_sch_obj.search(cr,uid,[('pump_model_id','=',item.id)])			
+			if stock_line_ids or weekly_sch_ids:
+				res[item.id] = 'yes'		
+		return res
+	
 	_columns = {
 			
 		'name': fields.char('Name', size=128, required=True, select=True),
@@ -26,6 +39,10 @@ class kg_pumpmodel_master(osv.osv):
 		
 		'alias_name': fields.char('Alias Name', size=128),
 		'make_by': fields.char('Make By', size=128),
+		'delivery_lead': fields.integer('Delivery Lead Time(Weeks)', size=128),
+		'type': fields.selection([('vertical','Vertical'),('horizontal','Horizontal')],'Type' ,required=True),
+		'category_id': fields.many2one('kg.pump.category', 'Pump Category',required=True,domain="[('type','=',type)]"),
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -48,6 +65,8 @@ class kg_pumpmodel_master(osv.osv):
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':fields.datetime.now,	
+		'delivery_lead':10,	
+		'modify': 'no',
 		
 	}
 	
@@ -112,6 +131,10 @@ class kg_pumpmodel_master(osv.osv):
 
 	def entry_confirm(self,cr,uid,ids,context=None):
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		return True
+		
+	def entry_draft(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'draft'})
 		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):

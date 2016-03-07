@@ -18,6 +18,43 @@ class kg_partner(osv.osv):
 	_inherit = "res.partner"
 	_description = "Partner Managment"
 	
+	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
+		res={}
+		po_obj = self.pool.get('purchase.order')
+		po_amd_obj = self.pool.get('kg.purchase.amendment')
+		so_obj = self.pool.get('kg.service.order')
+		po_adv_obj = self.pool.get('kg.po.advance')
+		so_adv_obj = self.pool.get('kg.so.advance')
+		ser_inv_obj = self.pool.get('kg.service.invoice')
+		gen_grn_obj = self.pool.get('kg.general.grn')
+		po_grn_obj = self.pool.get('kg.po.grn')
+		com_grn_obj = self.pool.get('kg.common.grn')
+		gate_pass_obj = self.pool.get('kg.gate.pass')
+		pur_inv_obj = self.pool.get('kg.purchase.invoice')
+		con_inw_obj = self.pool.get('kg.contractor.inward')
+		po_man_obj = self.pool.get('kg.po.manual.closing')
+		so_man_obj = self.pool.get('kg.so.manual.closing')
+		for h in self.browse(cr, uid, ids, context=None):
+			res[h.id] = 'no'
+			po_ids = po_obj.search(cr,uid,[('partner_id','=',h.id)])
+			po_amd_ids = po_amd_obj.search(cr,uid,[('partner_id_amend','=',h.id)])
+			so_ids = so_obj.search(cr,uid,[('partner_id','=',h.id)])
+			po_adv_ids = po_adv_obj.search(cr,uid,[('supplier_id','=',h.id)])
+			so_adv_ids = so_adv_obj.search(cr,uid,[('supplier_id','=',h.id)])
+			ser_inv_ids = ser_inv_obj.search(cr,uid,[('partner_id','=',h.id)])
+			gen_grn_ids = gen_grn_obj.search(cr,uid,[('supplier_id','=',h.id)])
+			po_grn_ids = po_grn_obj.search(cr,uid,[('supplier_id','=',h.id)])
+			com_grn_ids = com_grn_obj.search(cr,uid,[('supplier_id','=',h.id)])
+			gate_pass_ids = gate_pass_obj.search(cr,uid,[('partner_id','=',h.id)])
+			pur_inv_ids = pur_inv_obj.search(cr,uid,[('supplier_id','=',h.id)])
+			con_inw_ids = con_inw_obj.search(cr,uid,[('supplier_id','=',h.id)])
+			po_man_ids = po_man_obj.search(cr,uid,[('partner_id','=',h.id)])
+			so_man_ids = so_man_obj.search(cr,uid,[('partner_id','=',h.id)])
+			if po_ids or po_amd_ids or so_ids or po_adv_ids or so_adv_ids or ser_inv_ids or gen_grn_ids or po_grn_ids or com_grn_ids or gate_pass_ids or pur_inv_ids or con_inw_ids or so_man_ids:
+				res[h.id] = 'yes'
+		print "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",res
+		return res
+		
 	_columns = {
 	
 	'city_id' : fields.many2one('res.city', 'City'),
@@ -37,7 +74,7 @@ class kg_partner(osv.osv):
 	'transport_id': fields.many2one('kg.transport','Transport'),
 	'contact_person': fields.char('Contact Person', size=128),
 	'landmark': fields.char('Landmark', size=128),
-	'partner_state': fields.selection([('draft','Draft'),('approve','Approved')],'Status'),
+	'partner_state': fields.selection([('draft','Draft'),('approve','Approved'),('cancel','Cancelled')],'Status'),
 	'group_flag': fields.boolean('Is Group Company'),
 	'delivery_id': fields.many2one('kg.delivery.master','Delivery Type'),
 	#'child_ids': fields.one2many('res.partner', 'parent_id', 'Contacts', domain=[('active','=',True)]),
@@ -49,16 +86,18 @@ class kg_partner(osv.osv):
 	'approved_by': fields.many2one('res.users','Approved By',readonly=True),
 	'updated_date': fields.datetime('Last Update Date',readonly=True),
 	'updated_by': fields.many2one('res.users','Last Updated By',readonly=True),
-	
 	'con_designation': fields.char('Designation'),
 	'con_whatsapp': fields.char('Whatsapp No'),
 	'acc_number': fields.char('Whatsapp No'),
 	'bank_name': fields.char('Whatsapp No'),
 	'bank_bic': fields.char('Whatsapp No'),
-	
 	'delivery_ids':fields.one2many('kg.delivery.address', 'src_id', 'Delivery Address'),
-	
 	'billing_ids':fields.one2many('kg.billing.address', 'bill_id', 'Billing Address'),
+	'dealer': fields.boolean('Dealer'),
+	'economic_category': fields.selection([('budget','Budget'),('loyalty','Loyalty')],'Economic Category'),
+	'sector': fields.selection([('cp','CP'),('ip','IP')],'Sector'),
+	'dealer_id': fields.many2one('res.partner','Dealer Name',domain=[('dealer','=',True)]),
+	'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
 	
 	
 	}
@@ -69,7 +108,8 @@ class kg_partner(osv.osv):
 	  'creation_date': fields.datetime.now,
 	  'created_by': lambda obj, cr, uid, context: uid,
 	  'partner_state': 'draft',
-		  
+	  'modify': 'no',
+		 
 	}
 
 	def onchange_city(self, cr, uid, ids, city_id, context=None):
@@ -93,13 +133,17 @@ class kg_partner(osv.osv):
 		
 		return True
 
-	
+	def entry_draft(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'partner_state': 'draft'})
+		return True
+		
 	def write(self, cr, uid, ids, vals, context=None):
-		if len(str(vals['zip'])) == 6:
-			pass
-		else:
-			raise osv.except_osv(_('Check zip number !!'),
-				_('Please enter six digit number !!'))
+		print"valsssssS",vals
+		#if len(str(vals['zip'])) == 6:
+		#	pass
+		#else:
+		#	raise osv.except_osv(_('Check zip number !!'),
+		#		_('Please enter six digit number !!'))
 		vals.update({'updated_date': time.strftime('%Y-%m-%d %H:%M:%S'),'updated_by':uid})
 		return super(kg_partner, self).write(cr, uid, ids, vals, context)
 			

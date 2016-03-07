@@ -12,8 +12,9 @@
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="entry_cancel" type="object" string="Cancel" states="approved" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_cancel" type="object" states="reject,approved" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
+						<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
 					<sheet>
 						<group>
@@ -24,6 +25,7 @@
 							</group>
 							<group>
 								<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+								<field name="csd_code"/>
 								<field name="active"/>									
 								<field name="state" style="width: 30%%" class="att_state_change"/>								
 							</group>
@@ -33,7 +35,7 @@
 								<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							</group>
 							<group>												
-								<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])], 'readonly': [('state','in',['cancel'])]}"/>												
+								<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','confirmed'])], 'readonly': [('state','in',['cancel'])]}"/>												
 							</group>
 						</group>
 						<notebook>
@@ -119,13 +121,17 @@
 			<field name="search_view_id" ref="m_search_v_machineshop"/>
 		</record>
 		
+				
 		<!-- Menu Action End-->
+		
+		
 		
 		<!-- Menu Name Start here --> 
 		
-			<menuitem action="mma_machineshop_master" name="MS Items" id="mam_machineshop_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="1"/> 
+			<menuitem action="mma_machineshop_master" name="MS Items" id="mam_machineshop_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="2"/> 
 			
 		<!-- Menu Name End here --> 
+
 	
 
 	</data>

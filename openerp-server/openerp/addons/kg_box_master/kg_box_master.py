@@ -13,6 +13,16 @@ class kg_box_master(osv.osv):
 	_name = "kg.box.master"
 	_description = "SAM box Master"
 	
+	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
+		res={}
+		pattern_obj = self.pool.get('kg.pattern.master')		
+		for item in self.browse(cr, uid, ids, context=None):
+			res[item.id] = 'no'
+			pattern_ids = pattern_obj.search(cr,uid,[('box_id','=',item.id)])			
+			if pattern_ids:
+				res[item.id] = 'yes'		
+		return res
+	
 	_columns = {
 			
 		'name': fields.char('Name', size=128, required=True, select=True),
@@ -25,6 +35,7 @@ class kg_box_master(osv.osv):
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -48,6 +59,7 @@ class kg_box_master(osv.osv):
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':fields.datetime.now,	
 		'purpose':'moulding',	
+		'modify': 'no',
 		
 	}
 	
@@ -77,7 +89,11 @@ class kg_box_master(osv.osv):
 	def entry_confirm(self,cr,uid,ids,context=None):
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
-
+		
+	def entry_draft(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'draft'})
+		return True
+		
 	def entry_approve(self,cr,uid,ids,context=None):
 		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True

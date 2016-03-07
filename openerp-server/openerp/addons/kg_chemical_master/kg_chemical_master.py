@@ -13,6 +13,17 @@ class kg_chemical_master(osv.osv):
 	_name = "kg.chemical.master"
 	_description = "Chemical Master"
 	
+	
+	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
+		res={}
+		moc_chemical_obj = self.pool.get('ch.chemical.chart')			
+		for item in self.browse(cr, uid, ids, context=None):
+			res[item.id] = 'no'
+			moc_chemical_ids = moc_chemical_obj.search(cr,uid,[('chemical_id','=',item.id)])			
+			if moc_chemical_ids:
+				res[item.id] = 'yes'		
+		return res
+	
 	_columns = {
 			
 		'name': fields.char('Name', size=128, required=True, select=True),
@@ -23,6 +34,8 @@ class kg_chemical_master(osv.osv):
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
+		
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -41,11 +54,11 @@ class kg_chemical_master(osv.osv):
 	_defaults = {
 	
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.chemical.master', context=c),
-		'active': True,
+		'active': True,		
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':fields.datetime.now,	
-		
+		'modify': 'no',
 	}
 	
 	_sql_constraints = [
@@ -108,6 +121,10 @@ class kg_chemical_master(osv.osv):
 
 	def entry_confirm(self,cr,uid,ids,context=None):
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		return True
+		
+	def entry_draft(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'draft'})
 		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):

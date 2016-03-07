@@ -26,6 +26,7 @@ keep track and order all your purchase orders.
 			'kg_po_admin.xml',
 			'kg_sub_store.xml',
 			'kg_main_store.xml',
+			'kg_crm_admin.xml',
 			#'kg_masters_read_admin.xml',
 			#'kg_main_store_noedit.xml',
 			#'kg_po_admin_noedit.xml',

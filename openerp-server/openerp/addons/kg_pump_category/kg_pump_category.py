@@ -8,34 +8,32 @@ import re
 import math
 dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
-class kg_mechanical_master(osv.osv):
+class kg_pump_category(osv.osv):
 
-	_name = "kg.mechanical.master"
-	_description = "Mechanical Properties Master"
+	_name = "kg.pump.category"
+	_description = "Pump Category Master"
 	
 	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
 		res={}
-		moc_mechanical_obj = self.pool.get('ch.mechanical.chart')			
+		pump_cate_obj = self.pool.get('kg.pumpmodel.master')				
 		for item in self.browse(cr, uid, ids, context=None):
 			res[item.id] = 'no'
-			moc_mechanical_ids = moc_mechanical_obj.search(cr,uid,[('mechanical_id','=',item.id)])			
-			if moc_mechanical_ids:
+			pump_cate_ids = pump_cate_obj.search(cr,uid,[('category_id','=',item.id)])			
+			if pump_cate_ids:
 				res[item.id] = 'yes'		
 		return res
 	
 	_columns = {
 			
 		'name': fields.char('Name', size=128, required=True, select=True),
-		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
-		'code': fields.char('Code', size=128, required=True),
-		'uom':fields.many2one('product.uom', 'UOM',required=True,domain="[('dummy_state','=','approved')]"),
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),		
 		'active': fields.boolean('Active'),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
+		'type': fields.selection([('vertical','Vertical'),('horizontal','Horizontal')],'Type' ,required=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
-		
-		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),	
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -53,64 +51,48 @@ class kg_mechanical_master(osv.osv):
 	
 	_defaults = {
 	
-		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.mechanical.master', context=c),
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.pump.category', context=c),
 		'active': True,
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':fields.datetime.now,	
-		'modify': 'no',
+		'modify': 'no',		
 		
 	}
 	
 	_sql_constraints = [
 	
-		('name', 'unique(name)', 'Name must be unique!!'),
-		('code', 'unique(code)', 'Code must be unique!!'),
+		('name', 'unique(name)', 'Name must be unique per Company !!'),		
 	]
 	
 	"""def _Validation(self, cr, uid, ids, context=None):
 		flds = self.browse(cr , uid , ids[0])
-		name_special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )		
-		if name_special_char:
-			return False		
-		return True	
-		
-	def _CodeValidation(self, cr, uid, ids, context=None):
-		flds = self.browse(cr , uid , ids[0])	
-		if flds.code:		
-			code_special_char = ''.join( c for c in flds.code if  c in '!@#$%^~*{}?+/=' )		
-			if code_special_char:
-				return False
-		return True		"""
+		special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )
+		if special_char:
+			return False
+		return True
+	
+	"""
 		
 	def _name_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
 		res = True
 		if rec.name:
-			mech_name = rec.name
-			name=mech_name.upper()			
-			cr.execute(""" select upper(name) from kg_mechanical_master where upper(name)  = '%s' """ %(name))
-			data = cr.dictfetchall()			
+			pumpcate_name = rec.name
+			name=pumpcate_name.upper()			
+			cr.execute(""" select upper(name) from kg_pump_category where upper(name)  = '%s' """ %(name))
+			data = cr.dictfetchall()
+			
 			if len(data) > 1:
 				res = False
 			else:
 				res = True				
 		return res
 			
-	def _code_validate(self, cr, uid,ids, context=None):
-		rec = self.browse(cr,uid,ids[0])
-		res = True
-		if rec.code:
-			mech_code = rec.code
-			code=mech_code.upper()			
-			cr.execute(""" select upper(code) from kg_mechanical_master where upper(code)  = '%s' """ %(code))
-			data = cr.dictfetchall()			
-			if len(data) > 1:
-				res = False
-			else:
-				res = True				
-		return res	
-	
+	def entry_draft(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'draft'})
+		return True
+		
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.cancel_remark:
@@ -122,10 +104,6 @@ class kg_mechanical_master(osv.osv):
 
 	def entry_confirm(self,cr,uid,ids,context=None):
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		return True
-		
-	def entry_draft(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'draft'})
 		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):
@@ -144,7 +122,7 @@ class kg_mechanical_master(osv.osv):
 	def unlink(self,cr,uid,ids,context=None):
 		unlink_ids = []		
 		for rec in self.browse(cr,uid,ids):	
-			if rec.state not in ('draft','cancel'):				
+			if rec.state not in ('draft','cancel'):			
 				raise osv.except_osv(_('Warning!'),
 						_('You can not delete this entry !!'))
 			else:
@@ -153,15 +131,13 @@ class kg_mechanical_master(osv.osv):
 		
 	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
-		return super(kg_mechanical_master, self).write(cr, uid, ids, vals, context)
+		return super(kg_pump_category, self).write(cr, uid, ids, vals, context)
 		
 	
 	_constraints = [
-		#(_Validation, 'Special Character Not Allowed !!!', ['Check Name']),
-		#(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
-		(_name_validate, 'Mechanical name must be unique !!', ['name']),		
-		(_code_validate, 'Mechanical code must be unique !!', ['code']),		
+		#(_Validation, 'Special Character Not Allowed !!!', ['name']),		
+		(_name_validate, 'Pump Category name must be unique !!', ['name']),		
 		
 	]
 	
-kg_mechanical_master()
+kg_pump_category()

@@ -11,27 +11,47 @@
 						 action="product.product_normal_action" name="Item Master" sequence="3"/>-->
 				
 				<!-- Product Category Master  
-				<menuitem id="kg_product_catg_master_plan" parent="kg_pumpmodel_master.mpm_planning_master"
-						 action="product.product_category_action_form" name="Product Category" sequence="4"/>	-->				
+				<menuitem id="kg_product_catg_master1" parent="kg_pumpmodel_master.mpm_planning_master"
+						 action="product.product_category_action_form" name="Item Category" sequence="4"/>	-->						
 				
 				
 				<!-- Units of Measure Master  
-				<menuitem action="product.product_uom_form_action" name="Units of Measure" id="mam_uom_master_plan" parent="kg_pumpmodel_master.mpm_planning_master" sequence="6"/>   
-				-->
+				<menuitem action="product.product_uom_form_action" name="Units of Measure" id="mam_uom_master1" parent="kg_pumpmodel_master.mpm_planning_master" sequence="4"/>   -->  
+				
 		<!-- Planning Master Base menu End here-->
 				
 			
-		  <!-- Partner Masters Menu -->
-          <menuitem name="Partner Masters" id="mpm_customer_master" parent = "kg_pumpmodel_master.mpm_masters" sequence="2"/>
+		  <!-- Partner Masters Menu 
+          <menuitem name="Partner Masters" id="mpm_customer_master" parent = "kg_pumpmodel_master.mpm_masters" sequence="2"/>-->
 				 
+				<!-- Customer Master  
+				<menuitem action="kg_partners.kg_action_customer_form" name="Customer" id="mam_customer_master" parent="mpm_customer_master" sequence="1"/>				--> 
 				
-				<!-- Customer Master  --> 
-				<menuitem action="kg_partners.kg_action_supplier_form" name="Customer" id="mam_customer_master" parent="mpm_customer_master" sequence="1"/>				
+		<!-- CRM Menu -->
+		
+		<menuitem name="CRM" id="cpm_crm" sequence="19"/>
+		
+				<!-- CRM Master Menu -->
+				<menuitem id="cpm_crm_master_menu" name="Masters" parent="cpm_crm" sequence="1"/>
 				
+				<!-- Customer Master -->
+				<menuitem action="kg_partners.kg_action_customer_form" id="cam_crm_customer_master" name="Customer" parent="cpm_crm_master_menu" sequence="1"/>
+
+				<!-- Dealer Master -->
+				<menuitem action="kg_partners.kg_action_dealer_form" id="cam_crm_dealer_master" name="Dealer" parent="cpm_crm_master_menu" sequence="2"/>
+				
+				<!-- Country -->
+				<menuitem id="cam_crm_country_master" parent="cpm_crm_master_menu" name="Country" action="base.action_country" sequence="3"/>
+				
+				<!-- State -->
+				<menuitem id="cam_crm_state_master" parent="cpm_crm_master_menu" name="State" action="base.action_country_state" sequence="4"/>
+				
+				<!-- City Master  --> 
+				<menuitem action="base.action_city" name="City" id="cam_crm_city_master" parent="cpm_crm_master_menu" sequence="5"/>
 				
 		<!-- Indent Menu -->
 		
-		<menuitem name="Indents" id="ipm_indent" sequence="95"/>
+		<menuitem name="Indents" id="ipm_indent" sequence="20"/>
 		
 				<!-- Indent Transaction Menu -->
 				<menuitem id="ipm_dep_indent_menu" name="Department Indent" parent="ipm_indent" sequence="1"/>
@@ -39,10 +59,6 @@
 				<!-- Department Indent -->
 				<menuitem action="kg_depindent.action_kg_depindent_form" id="iam_depindent" name="Department Indent" parent="ipm_dep_indent_menu" sequence="1"/>
 
-				
-				
-
-			
 				<!-- Purchase Transaction Menu -->
 				<menuitem id="ipm_purchase_indent_menu" name="Purchase Indent" parent="ipm_indent" sequence="2"/>
 				
@@ -73,11 +89,11 @@
 				<menuitem action="base.action_partner_supplier_form" name="Supplier" id="mam_supplier_master" parent="ppm_master_menu" sequence="1"/>
 				
 				<!-- Product Master  --> 
-				<menuitem action="product.product_normal_action" name="Product Master" id="mam_product_master" parent="ppm_master_menu" sequence="2"/>
+				<menuitem action="product.product_normal_action" name="Item Master" id="mam_product_master" parent="ppm_master_menu" sequence="2"/>
 				
 				<!-- Product Category Master -->
 				<menuitem id="kg_product_catg_master" parent="ppm_master_menu"
-						 action="product.product_category_action_form" name="Product Category" sequence="3"/>					
+						 action="product.product_category_action_form" name="Item Category" sequence="3"/>					
 				
 				
 				<!-- Units of Measure Master  -->
@@ -94,8 +110,10 @@
 				
 				<!-- Country -->
 				<menuitem id="kg_country_master" parent="ppm_master_menu" name="Country" action="base.action_country" sequence="8"/>
+				
 				<!-- State -->
 				<menuitem id="kg_state_master" parent="ppm_master_menu" name="State" action="base.action_country_state" sequence="9"/>
+				
 				<!-- City Master  --> 
 				<menuitem action="base.action_city" name="City" id="mam_city_master" parent="ppm_master_menu" sequence="10"/>
 				 
@@ -176,7 +194,7 @@
 				<menuitem action="kg_common_grn.kg_common_grn_action_form" id="gam_grn_register" name="GRN Register" parent="gpm_grn_issue_menu" sequence="3"/>
 				
 				<!-- Dept Issue Transaction Menu -->
-				<menuitem action="kg_department_issue.action_kg_department_issue" id="gam_dept_issue" name="Department Issue" parent="gpm_grn_issue_menu" sequence="4"/>
+				<menuitem action="kg_department_issue.action_kg_department_issue" id="gam_dept_issue" name="Store Issue" parent="gpm_grn_issue_menu" sequence="4"/>
 				
 				<!-- Issue Return Transaction Menu -->
 				<menuitem action="kg_issue_return.action_kg_issuereturn_form" id="iam_issue_return" name="Issue Return" parent="gpm_grn_issue_menu" sequence="5"/>
