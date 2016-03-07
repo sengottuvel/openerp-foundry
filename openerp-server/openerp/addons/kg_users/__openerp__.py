@@ -16,8 +16,8 @@
     'depends' : ['base','kg_menus'],
     'data': [
     
-			#'kg_groups.xml',
-			#'kg_planning_admin.xml',
+			'kg_groups.xml',
+			'kg_planning_admin.xml',
 			
 			],
     'auto_install': False,
