@@ -112,8 +112,8 @@ class kg_pattern_request(osv.osv):
 		del_sql = """ delete from ch_pattern_request_line where header_id=%s """ %(ids[0])
 		cr.execute(del_sql)
 		
-		del_sql = """ delete from tmp_pattern_request_details where request_id=%s """ %(ids[0])
-		cr.execute(del_sql)
+		#del_sql = """ delete from tmp_pattern_request_details where request_id=%s """ %(ids[0])
+		#cr.execute(del_sql)
 		
 		if entry.production_line_ids:
 			
@@ -147,9 +147,9 @@ class kg_pattern_request(osv.osv):
 				
 				request_line_id = request_line_obj.create(cr, uid,vals)
 				
-				cr.execute(''' insert into tmp_pattern_request_details(request_id,request_line_id,production_id,creation_date)
+			"""	cr.execute(''' insert into tmp_pattern_request_details(request_id,request_line_id,production_id,creation_date)
 					values(%s,%s,%s,now())
-					''',[entry.id,request_line_id,line_item.id])
+					''',[entry.id,request_line_id,line_item.id]) """
 					
 			self.write(cr, uid, ids, {'flag_reqline': True})
 

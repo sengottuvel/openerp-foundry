@@ -168,12 +168,12 @@ class ch_stock_inward_details(osv.osv):
 		'inward_date': fields.related('header_id','entry_date', type='date', string='Date', store=True, readonly=True),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location'),
 		'stock_type':fields.selection([('pump','Pump'),('pattern','Part')],'Type', required=True),
-		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model',domain="[('state','=','approved'), ('active','=','t')]"),
-		'pattern_id': fields.many2one('kg.pattern.master','Pattern Number',domain="[('state','=','approved'), ('active','=','t')]"),
+		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model',domain="[('active','=','t')]"),
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern Number',domain="[('active','=','t')]"),
 		'pattern_name': fields.char('Pattern Name'),
 		#'part_name_id': fields.many2one('product.product','Part Name', required=True,domain="[('state','=','approved'), ('active','=','t')]"),
-		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','=','approved'), ('active','=','t')]"),
-		'stage_id': fields.many2one('kg.stage.master','Stage',domain="[('state','=','approved'), ('active','=','t')]"),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),
+		'stage_id': fields.many2one('kg.stage.master','Stage',domain="[('active','=','t')]"),
 		'qty': fields.integer('Stock Qty', required=True),
 		'unit_price': fields.float('Material Amount'),
 		'each_wgt': fields.float('Each Weight'),
@@ -184,7 +184,7 @@ class ch_stock_inward_details(osv.osv):
 		'cancel_remark': fields.text('Cancel Remarks'),
 		'serial_no': fields.char('Serial No', size=128),
 		'heat_no': fields.char('Heat No', size=128),
-		'moc_construction_id':fields.many2one('kg.moc.construction','MOC Construction',domain="[('state','=','approved'), ('active','=','t')]"),
+		'moc_construction_id':fields.many2one('kg.moc.construction','MOC Construction',domain="[('active','=','t')]"),
 		
 		
 	

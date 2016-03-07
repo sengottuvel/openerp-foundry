@@ -169,7 +169,9 @@ class kg_weekly_schedule(osv.osv):
 		for item in entry.line_ids:
 			
 			### Work Order Number Generation in Line Details
-			order_name = entry.name + '-' + str(number)
+			cr.execute(''' select to_char(%s, 'FMRN') ''',[number])	  
+			roman = cr.fetchone()
+			order_name = entry.name + '-' + str(roman[0])
 			line_obj.write(cr, uid, item.id, {'order_no': order_name})
 			number = number + 1
 			
@@ -422,7 +424,7 @@ class ch_weekly_schedule_details(osv.osv):
 			#### Loading Machine Shop details
 			
 			bom_ms_obj = self.pool.get('ch.machineshop.details')
-			cr.execute(''' select id,ms_id,name,qty
+			cr.execute(''' select id,ms_id,name,qty,header_id as bom_id
 					from ch_machineshop_details
 					where header_id = (select id from kg_bom where pump_model_id = %s and state='approved' and active='t') ''',[pump_model_id])
 			bom_ms_details = cr.dictfetchall()
@@ -435,6 +437,8 @@ class ch_weekly_schedule_details(osv.osv):
 					
 				machine_shop_vals.append({
 													
+					'ms_line_id': bom_ms_details['id'],
+					'bom_id': bom_ms_details['bom_id'],
 					'ms_id': bom_ms_details['ms_id'],
 					'name': bom_ms_details['name'],
 					'qty': bom_ms_qty,
@@ -444,7 +448,7 @@ class ch_weekly_schedule_details(osv.osv):
 			#### Loading BOT Details
 			
 			bom_bot_obj = self.pool.get('ch.bot.details')
-			cr.execute(''' select id,product_temp_id,code,qty
+			cr.execute(''' select id,product_temp_id,code,qty,header_id as bom_id
 					from ch_bot_details
 					where header_id = (select id from kg_bom where pump_model_id = %s and state='approved' and active='t') ''',[pump_model_id])
 			bom_bot_details = cr.dictfetchall()
@@ -456,7 +460,9 @@ class ch_weekly_schedule_details(osv.osv):
 					
 					
 				bot_vals.append({
-													
+					
+					'bot_line_id': bom_ms_details['id'],
+					'bom_id': bom_ms_details['bom_id'],							
 					'product_temp_id': bom_bot_details['product_temp_id'],
 					'code': bom_bot_details['code'],
 					'qty': bom_bot_qty,
@@ -466,7 +472,7 @@ class ch_weekly_schedule_details(osv.osv):
 			### Loading Consu Details
 			
 			bom_consu_obj = self.pool.get('ch.consu.details')
-			cr.execute(''' select id,product_temp_id,code,qty
+			cr.execute(''' select id,product_temp_id,code,qty,header_id as bom_id
 					from ch_consu_details
 					where header_id = (select id from kg_bom where pump_model_id = %s and state='approved' and active='t') ''',[pump_model_id])
 			bom_consu_details = cr.dictfetchall()
@@ -478,7 +484,9 @@ class ch_weekly_schedule_details(osv.osv):
 					
 					
 				consu_vals.append({
-													
+					
+					'consu_line_id': bom_ms_details['id'],
+					'bom_id': bom_ms_details['bom_id'],					
 					'product_temp_id': bom_consu_details['product_temp_id'],
 					'code': bom_consu_details['code'],
 					'qty': bom_consu_qty,
@@ -658,6 +666,8 @@ class ch_sch_machineshop_details(osv.osv):
 	_columns = {
 	
 		'header_id':fields.many2one('ch.weekly.schedule.details', 'Schedule Detail', required=1, ondelete='cascade'),
+		'ms_line_id':fields.many2one('ch.machineshop.details', 'Machine Shop Id'),
+		'bom_id': fields.many2one('kg.bom','BOM'),
 		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', ondelete='cascade',required=True),
 		'name':fields.char('Item Name', size=128),	  
 		'qty': fields.integer('Qty', required=True),
@@ -683,6 +693,8 @@ class ch_sch_bot_details(osv.osv):
 	
 		'header_id':fields.many2one('ch.weekly.schedule.details', 'Schedule Detail', required=1, ondelete='cascade'),
 		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('type','=','bot')], ondelete='cascade',required=True),
+		'bot_line_id':fields.many2one('ch.bot.details', 'BOT Line Id'),
+		'bom_id': fields.many2one('kg.bom','BOM'),
 		'code':fields.char('Item Code', size=128),	  
 		'qty': fields.integer('Qty', required=True),
 		'remarks':fields.text('Remarks'),   
@@ -707,6 +719,8 @@ class ch_sch_consu_details(osv.osv):
 	
 		'header_id':fields.many2one('ch.weekly.schedule.details', 'Schedule Detail', required=1, ondelete='cascade'),
 		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('type','=','consu')], ondelete='cascade',required=True),
+		'consu_line_id':fields.many2one('ch.consu.details', 'Consumable Line Id'),
+		'bom_id': fields.many2one('kg.bom','BOM'),
 		'code':fields.char('Item Code', size=128),  
 		'qty': fields.integer('Qty',required=True), 
 		'remarks':fields.text('Remarks'),
