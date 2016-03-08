@@ -75,7 +75,8 @@
        
 			ref('kg_menus.cpm_crm'),
 			ref('kg_menus.cpm_crm_master_menu'),
-			
+			ref('kg_menus.cam_crm_customer_master'),
+			ref('kg_menus.cam_crm_dealer_master'),
 			
             ])]" name="menu_access"/>
             <field name="users" eval="[(4, ref('base.user_root'))]"/>
