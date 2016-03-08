@@ -251,7 +251,7 @@ s
 		<field name="view_type">form</field>
 		<field name="view_mode">tree,form,kanban</field>
 		<field name="context">{'default_customer': True,'default_supplier': False}</field>
-		<field name="domain">[('customer','=',True),('contact','=',False)]</field>
+		<field name="domain">[('customer','=',True)]</field>
 		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
 		<field name="search_view_id" ref="partner_group_view"/>-->
 	</record>
@@ -264,7 +264,7 @@ s
 		<field name="view_type">form</field>
 		<field name="view_mode">tree,form,kanban</field>
 		<field name="context">{'default_dealer': True,'default_customer': False,'default_supplier': False}</field>
-		<field name="domain">[('dealer','=',True),('contact','=',False)]</field>
+		<field name="domain">[('dealer','=',True)]</field>
 		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
 		<field name="search_view_id" ref="partner_group_view"/>-->
 	</record>

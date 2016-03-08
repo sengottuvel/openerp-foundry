@@ -195,7 +195,7 @@ class ch_moc_raw_material(osv.osv):
 	_columns = {
 			
 		'header_id':fields.many2one('kg.moc.master', 'MOC Entry', required=True, ondelete='cascade'),	
-		'product_id': fields.many2one('product.product','Raw Material', required=True,domain="[('state','=','approved')]"),	
+		'product_id': fields.many2one('product.product','Raw Material', required=True),	
 		'rate': fields.related('product_id','latest_price', type='float', string='Rate(Rs)', store=True),		
 		'uom':fields.char('UOM',size=128),
 		'qty':fields.float('Qty',required=True),
@@ -239,7 +239,7 @@ class ch_chemical_chart(osv.osv):
 	_columns = {
 			
 		'header_id':fields.many2one('kg.moc.master', 'MOC Entry', required=True, ondelete='cascade'),				
-		'chemical_id': fields.many2one('kg.chemical.master','Name', required=True,domain="[('state','=','approved')]"),		
+		'chemical_id': fields.many2one('kg.chemical.master','Name', required=True),		
 		'min':fields.float('Min',required=True,digits_compute=dp.get_precision('Min Value')),		
 		'max':fields.float('Max',required=True,digits_compute=dp.get_precision('Max Value')),	
 		'range_flag': fields.boolean('Range Limit'),	
@@ -267,7 +267,7 @@ class ch_mechanical_chart(osv.osv):
 			
 		'header_id':fields.many2one('kg.moc.master', 'MOC Entry', required=True, ondelete='cascade'),
 		'uom': fields.char('UOM',size=128),						
-		'mechanical_id': fields.many2one('kg.mechanical.master','Name', required=True,domain="[('state','=','approved')]"),	
+		'mechanical_id': fields.many2one('kg.mechanical.master','Name', required=True),	
 		'min':fields.float('Min',required=True,digits_compute=dp.get_precision('Min Value')),
 		'max':fields.float('Max',required=True,digits_compute=dp.get_precision('Max Value')),
 		'range_flag': fields.boolean('No Max Range'),			
