@@ -122,15 +122,6 @@
 		
 		<!-- Menu Action End-->
 		
-		<!-- Audit Log Xml Data Start-->
-		
-        <record id="pump_cate" model="audittrail.rule">
-            <field name="name">Audit Log PumpCategory Master</field>
-            <field name="object_id" eval="ref('kg_pump_category.model_kg_pump_category')"/>       
-            <field name="state">subscribed</field>              
-        </record>
-        
-        <!-- Audit Log Xml Data End-->
 		
 		<!-- Menu Name Start here -->           
           
