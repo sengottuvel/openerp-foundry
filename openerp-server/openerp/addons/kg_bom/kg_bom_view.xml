@@ -241,7 +241,7 @@
             <field name="model">ch.bom.line</field>
             <field name="arch" type="xml">
                 <search string="BOM Details">
-					<field name="header_id" string="BOM Name"  filter_domain="[('header_id','ilike',self)]" />						
+					<field name="pattern_id" string="Pattern No"  filter_domain="[('pattern_id','ilike',self)]" />				
 					<separator/>
                     <group expand="0" string="Group By...">
 						<filter string="BOM Name" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'header_id'}"/>
