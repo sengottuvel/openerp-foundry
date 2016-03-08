@@ -11,10 +11,10 @@
         <xpath expr="//sheet" position="before">
 		<header>
 			<!--<button name="entry_confirm" class="oe_highlight" type="object" string="Confirm" attrs = "{'invisible':['|',('partner_state','=','approve'),('partner_state','=','confirm')]}"/>-->
-			<button name="approve_partner" class="oe_highlight" type="object" string="Approve" attrs = "{'invisible':[('partner_state','=','approve')]}"/> 
+			<button name="approve_partner" class="oe_highlight" type="object" string="Approve" attrs = "{'invisible':[('partner_state','in',('cancel','approve'))]}"/> 
 			<!--	<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes'),('partner_state','in',('approve','cancel'))]}" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
-			<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('partner_state','=','draft')]}" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-			<button name="entry_draft" class="oe_highlight" type="object" string="Set To Draft" attrs = "{'invisible':[('partner_state','=','draft')]}"/> 
+			<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('partner_state','in',('draft','cancel'))]}" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+			<button name="entry_draft" class="oe_highlight" type="object" string="Set To Draft" attrs = "{'invisible':[('partner_state','in',('draft','approve'))]}"/> 
 		</header>
 		</xpath>
         

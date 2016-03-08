@@ -57,7 +57,7 @@
 								<field name="line_ids_a" nolabel="1" >
 									<tree string="Chemical Composition Chart Tree" editable="top" >									
 										<field name="chemical_id" />
-										<field name="range_flag" />														
+										<field name="range_flag" invisible="1" />														
 										<field name="min" attrs="{'required': [('range_flag','=',False)]}"/>										
 										<field name="max" attrs="{'required': [('range_flag','=',False)]}"/>																												
 									</tree>
@@ -164,7 +164,7 @@
 		
 		<!-- Menu Name Start here --> 
 		
-			<menuitem action="mma_moc_master" name="MOC" id="mam_moc_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="3"/>
+			<menuitem action="mma_moc_master" name="MOC" id="mam_moc_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="2"/>
 			
 		<!-- Menu Name End here --> 
 

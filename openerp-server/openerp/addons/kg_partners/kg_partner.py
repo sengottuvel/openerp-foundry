@@ -137,6 +137,12 @@ class kg_partner(osv.osv):
 		self.write(cr, uid, ids, {'partner_state': 'draft'})
 		return True
 		
+	def entry_cancel(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		self.write(cr, uid, ids, {'partner_state': 'cancel'})
+		
+		return True
+				
 	def write(self, cr, uid, ids, vals, context=None):
 		print"valsssssS",vals
 		#if len(str(vals['zip'])) == 6:
@@ -146,7 +152,7 @@ class kg_partner(osv.osv):
 		#		_('Please enter six digit number !!'))
 		vals.update({'updated_date': time.strftime('%Y-%m-%d %H:%M:%S'),'updated_by':uid})
 		return super(kg_partner, self).write(cr, uid, ids, vals, context)
-			
+		
 kg_partner()
 
 

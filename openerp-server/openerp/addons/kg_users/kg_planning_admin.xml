@@ -685,6 +685,21 @@
 		</record>
 		
 		<!-- Schedule Consumables End-->
+		
+		<!-- Pump Category Model Master-->
+		
+		<record id="user_pump_cate_model_master" model="ir.model.access">
+			<field name="model_id" ref="kg_pump_category.model_kg_pump_category"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Pump Category Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		
+		<!-- Pump Category Model Master end -->
 
 		
 		

@@ -152,7 +152,7 @@
 		
 		<!-- Menu Name Start here --> 
 		
-				<menuitem action="mma_bom_amendment" name="BOM Amendment" id="mam_bom_amendment" parent="kg_pumpmodel_master.mpm_planning_master" sequence="6"/> 
+				<menuitem action="mma_bom_amendment" name="BOM Amendment" id="mam_bom_amendment" parent="kg_pumpmodel_master.mpm_planning_master" sequence="5"/> 
 		
 		<!-- Menu Name End here --> 	
 	

@@ -36,8 +36,7 @@ class kg_product(osv.osv):
 		'capital': fields.boolean('Capital Goods'),
 		'abc': fields.boolean('ABC Analysis'),
 		'po_uom_coeff': fields.float('PO Coeff', required=True, help="One Purchase Unit of Measure = Value of(PO Coeff)UOM"),
-		
-		'type': fields.selection([('consu', 'Consumable Items'),('bot','BOT'),('raw','Raw Materials'),('service','Service Items'),('finish','Finished Items')], 'Product Type', 
+		'type': fields.selection([('consu', 'Consumable Items'),('bot','BOT'),('bearing','Bearing'),('raw','Raw Materials'),('service','Service Items'),('finish','Finished Items')], 'Product Type', 
 				required=True),
 		'crt_date': fields.datetime('Creation Date',readonly=True),
 		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
@@ -49,8 +48,8 @@ class kg_product(osv.osv):
 		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
-		
 		'remark': fields.text('Remarks',readonly=False,states={'approved':[('readonly',True)]}),
+		'moc_id': fields.many2one('kg.moc.master','MOC'),
 		
 	}
 	
@@ -98,7 +97,11 @@ class kg_product(osv.osv):
 		self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': dt_time})
 	   
 		return True
-
+	
+	def entry_draft(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'draft'})
+		return True
+		
 	def entry_reject(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.remark:
@@ -137,12 +140,11 @@ class kg_product(osv.osv):
 	""" 
 
 	def write(self,cr,uid,ids,vals,context={}):
-		"""if 'default_code' in vals:
-			 raise osv.except_osv(_('Warning !'),_('You can not modify Product code'))
+		#if 'default_code' in vals:
+		#	 raise osv.except_osv(_('Warning !'),_('You can not modify Product code'))
 			 
-		if 'name' in vals:
-			 raise osv.except_osv(_('Warning !'),_('You can not modify Product Name'))
-		"""
+		#if 'name' in vals:
+		#	 raise osv.except_osv(_('Warning !'),_('You can not modify Product Name'))	
 		
 		if 'tolerance_applicable' in vals:
 			if vals['tolerance_applicable'] == True:

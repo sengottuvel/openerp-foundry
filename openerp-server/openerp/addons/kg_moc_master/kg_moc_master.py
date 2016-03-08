@@ -270,14 +270,13 @@ class ch_mechanical_chart(osv.osv):
 		'mechanical_id': fields.many2one('kg.mechanical.master','Name', required=True,domain="[('state','=','approved')]"),	
 		'min':fields.float('Min',required=True,digits_compute=dp.get_precision('Min Value')),
 		'max':fields.float('Max',required=True,digits_compute=dp.get_precision('Max Value')),
-		'range_flag': fields.boolean('Max Range'),			
+		'range_flag': fields.boolean('No Max Range'),			
 		
 	}
 	
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.range_flag == False:
-			print"www"
+		if entry.range_flag == False:			
 			if entry.min > entry.max:
 				return False
 		return True
