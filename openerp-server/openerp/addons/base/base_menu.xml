@@ -5,7 +5,7 @@
         <!-- Top menu item -->
         <menuitem name="Reporting"
             id="menu_reporting"
-            groups="base.group_user"
+            groups="base.user_root"
             sequence="170"/>
             <menuitem id="menu_reporting_dashboard" name="Dashboards" parent="menu_reporting" sequence="0"/>
             <menuitem id="menu_reporting_config" name="Configuration" parent="menu_reporting" sequence="100" groups="base.group_system"/>
