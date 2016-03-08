@@ -53,11 +53,22 @@
 		<field name="payment_id"/>
 		<field name="advance_limit"/>
 		</field>
+		
+		<!--<xpath expr = "//group[@string='Terms and Conditions']" position="after">
+			<group string="Remarks">
+				<group>	
+					<field name="remark" attrs="{'readonly': [('partner_state','in',['approve','cancel'])]}"/>
+				</group>
+				<group>												
+					<field name="cancel_remark" attrs="{'invisible':[('partner_state','in',['draft'])], 'readonly': [('partner_state','in',['cancel'])]}"/>
+				</group>
+			</group>
+		</xpath>-->
+				
 		<field name="color" position="replace">
 		<field name="delivery_id"/>
 		</field>
-		
-		
+s		
 		<field name="function" position="replace">
 		<field name="contact_person"/>
 		</field>
@@ -174,7 +185,7 @@
 		<xpath expr = "//page[@string='Bank Details']" position="after">
 				<page string="Entry Info">
 				<group>
-					<field name="company_id"/>
+					<field name="company_id" readonly="1"/>
 				</group>
 				<group>
 				<form string="Bank" version="7.0">
@@ -183,11 +194,13 @@
 					<group>
 						<field name="created_by"/>
 						<field name="approved_by"/>
+						<field name="cancel_user_id" attrs="{'invisible':[('partner_state','in',['approve'])]}"/>
 						<field name="updated_by"/>
 					</group>
 					<group>
 						<field name="creation_date"/>
 						<field name="approved_date"/>
+						<field name="cancel_date" attrs="{'invisible':[('partner_state','in',['approve'])]}"/>
 						<field name="updated_date"/>
 					</group>
 				</group>	
@@ -237,20 +250,21 @@
 		<field name="res_model">res.partner</field>
 		<field name="view_type">form</field>
 		<field name="view_mode">tree,form,kanban</field>
-		<field name="domain">[('customer','=',True)]</field>
-		<field name="context">{'default_customer': 1,'default_supplier': 0}</field>
+		<field name="context">{'default_customer': True,'default_supplier': False}</field>
+		<field name="domain">[('customer','=',True),('contact','=',False)]</field>
 		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
 		<field name="search_view_id" ref="partner_group_view"/>-->
 	</record>
 	
+        
 	<record id="kg_action_dealer_form" model="ir.actions.act_window">
 		<field name="name">Dealer</field>
 		<field name="type">ir.actions.act_window</field>
 		<field name="res_model">res.partner</field>
 		<field name="view_type">form</field>
 		<field name="view_mode">tree,form,kanban</field>
-		<field name="domain">[('dealer','=',True)]</field>
-		<field name="context">{'default_dealer': 1,'default_customer': 0,'default_supplier': 0}</field>
+		<field name="context">{'default_dealer': True,'default_customer': False,'default_supplier': False}</field>
+		<field name="domain">[('dealer','=',True),('contact','=',False)]</field>
 		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
 		<field name="search_view_id" ref="partner_group_view"/>-->
 	</record>

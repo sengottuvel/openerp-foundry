@@ -211,7 +211,7 @@
 					<field name="comment" placeholder="Notes..."/>
                     <notebook colspan="4">
                         <page string="Additional Contacts" attrs="{'invisible': [('is_company','=',False), ('child_ids', '=', [])]}" autofocus="autofocus">
-                            <field name="child_ids" mode="kanban" context="{'default_parent_id': active_id, 'default_street': street, 'default_street2': street2, 'default_city': city, 'default_state_id': state_id, 'default_zip': zip, 'default_country_id': country_id, 'default_supplier': supplier}">
+                            <field name="child_ids" mode="kanban" context="{'default_parent_id': active_id, 'default_street': street, 'default_street2': street2, 'default_city': city, 'default_state_id': state_id, 'default_zip': zip, 'default_country_id': country_id, 'default_supplier': supplier, 'default_contact': active}">
                                 <kanban>
                                     <field name="color"/>
                                     <field name="name"/>
@@ -289,6 +289,7 @@
                                             <field name="email"/>
                                             <field name="phone"/>
                                             <field name="mobile"/>
+                                            <field name="contact" invisible="1"/>
                                         </group>
                                         <div>
                                             <field name="use_parent_address"/><label for="use_parent_address"/>
@@ -499,9 +500,9 @@
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">res.partner</field>
             <field name="view_type">form</field>
-            <field name="domain">[('supplier','=',True)]</field>
             <field name="view_mode">tree,form,kanban</field>
-            <field name="context">{'default_customer': 0,'default_supplier': 1}</field>
+            <field name="context">{'default_customer': False,'default_supplier': True}</field>
+            <field name="domain">[('supplier','=',True),('contact','=',False)]</field>
             <field name="filter" eval="True"/>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">

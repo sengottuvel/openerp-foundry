@@ -52,7 +52,6 @@ class kg_partner(osv.osv):
 			so_man_ids = so_man_obj.search(cr,uid,[('partner_id','=',h.id)])
 			if po_ids or po_amd_ids or so_ids or po_adv_ids or so_adv_ids or ser_inv_ids or gen_grn_ids or po_grn_ids or com_grn_ids or gate_pass_ids or pur_inv_ids or con_inw_ids or so_man_ids:
 				res[h.id] = 'yes'
-		print "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",res
 		return res
 		
 	_columns = {
@@ -84,6 +83,8 @@ class kg_partner(osv.osv):
 	'confirmed_by': fields.many2one('res.users','Confirmed By',readonly=True),
 	'approved_date': fields.datetime('Approved Date',readonly=True),
 	'approved_by': fields.many2one('res.users','Approved By',readonly=True),
+	'cancel_date': fields.datetime('Cancelled Date', readonly=True),
+	'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 	'updated_date': fields.datetime('Last Update Date',readonly=True),
 	'updated_by': fields.many2one('res.users','Last Updated By',readonly=True),
 	'con_designation': fields.char('Designation'),
@@ -97,6 +98,8 @@ class kg_partner(osv.osv):
 	'economic_category': fields.selection([('budget','Budget'),('loyalty','Loyalty')],'Economic Category'),
 	'sector': fields.selection([('cp','CP'),('ip','IP')],'Sector'),
 	'dealer_id': fields.many2one('res.partner','Dealer Name',domain=[('dealer','=',True)]),
+	'remark': fields.text('Approve'),
+	'cancel_remark': fields.text('Cancel Remarks'),
 	'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
 	
 	
@@ -139,7 +142,7 @@ class kg_partner(osv.osv):
 		
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		self.write(cr, uid, ids, {'partner_state': 'cancel'})
+		self.write(cr, uid, ids, {'partner_state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		
 		return True
 				

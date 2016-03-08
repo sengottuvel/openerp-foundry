@@ -89,11 +89,11 @@
 				<menuitem action="base.action_partner_supplier_form" name="Supplier" id="mam_supplier_master" parent="ppm_master_menu" sequence="1"/>
 				
 				<!-- Product Master  --> 
-				<menuitem action="product.product_normal_action" name="Item Master" id="mam_product_master" parent="ppm_master_menu" sequence="2"/>
+				<menuitem action="product.product_normal_action" name="Product Master" id="mam_product_master" parent="ppm_master_menu" sequence="2"/>
 				
 				<!-- Product Category Master -->
 				<menuitem id="kg_product_catg_master" parent="ppm_master_menu"
-						 action="product.product_category_action_form" name="Item Category" sequence="3"/>					
+						 action="product.product_category_action_form" name="Product Category" sequence="3"/>					
 				
 				
 				<!-- Units of Measure Master  -->
