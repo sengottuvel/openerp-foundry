@@ -99,7 +99,28 @@ product_uom_categ()
 class product_uom(osv.osv):
 	_name = 'product.uom'
 	_description = 'Product Unit of Measure'
-
+	
+	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
+		res={}
+		dep_ind_obj = self.pool.get('kg.depindent.line')
+		ser_ind_obj = self.pool.get('kg.service.indent.line')
+		so_obj = self.pool.get('kg.service.order.line')
+		ser_inv_line_obj = self.pool.get('kg.service.invoice.line')
+		po_grn_obj = self.pool.get('po.grn.line')
+		con_inw_line_obj = self.pool.get('kg.contractor.inward.line')
+		for h in self.browse(cr, uid, ids, context=None):
+			res[h.id] = 'no'
+			dep_ind_ids = dep_ind_obj.search(cr,uid,[('uom','=',h.id)])
+			ser_ind_ids = ser_ind_obj.search(cr,uid,[('uom','=',h.id)])
+			so_ids = so_obj.search(cr,uid,[('product_uom','=',h.id)])
+			ser_inv_line_ids = ser_inv_line_obj.search(cr,uid,[('product_uom','=',h.id)])
+			po_grn_ids = po_grn_obj.search(cr,uid,[('uom_id','=',h.id)])
+			con_inw_line_ids = con_inw_line_obj.search(cr,uid,[('uom_id','=',h.id)])
+			if dep_ind_ids or ser_ind_ids or so_ids or ser_inv_line_ids or po_grn_ids or con_inw_line_ids:
+				res[h.id] = 'yes'
+		print "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",res
+		return res
+	
 	def _compute_factor_inv(self, factor):
 		return factor and (1.0 / factor) or 0.0
 
@@ -166,8 +187,9 @@ class product_uom(osv.osv):
 		
 		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
 		'dummy_state': fields.selection([('draft','Draft'),('confirm','Waiting for approval'),('approved','Approved'),
-				('reject','Rejected')],'Status', readonly=True),
+				('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'remark': fields.text('Remarks',readonly=False),
+		'cancel_remark': fields.text('Cancel Remarks'),
 		
 			### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -178,17 +200,25 @@ class product_uom(osv.osv):
 		'ap_rej_user_id': fields.many2one('res.users', 'Approved/Reject By', readonly=True),			
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
+		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
+		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
+		'approve_date': fields.datetime('Approved Date', readonly=True),
+		'app_user_id': fields.many2one('res.users', 'Apprved By', readonly=True),
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
 		
 	}
 
 	_defaults = {
+	
 		'active': 1,
 		'rounding': 0.01,
 		'uom_type': 'reference',
 		'crt_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'dummy_state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
-		 'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'product.uom', context=c),
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'product.uom', context=c),
+		'modify': 'no',
+		
 	}
 
 	_sql_constraints = [
@@ -201,7 +231,7 @@ class product_uom(osv.osv):
 		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'dummy_state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': dt_time})
+		self.write(cr, uid, ids, {'dummy_state': 'approved','app_user_id': uid, 'approve_date': dt_time})
 		return True
 
 	def entry_reject(self,cr,uid,ids,context=None):
@@ -211,6 +241,16 @@ class product_uom(osv.osv):
 		else:
 			raise osv.except_osv(_('Rejection remark is must !!'),
 				_('Enter rejection remark in remark field !!'))
+		return True
+	
+	
+	def entry_cancel(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.cancel_remark:
+			self.write(cr, uid, ids, {'dummy_state': 'cancel','cancel_user_id': uid, 'cancel_date': dt_time})
+		else:
+			raise osv.except_osv(_('Cancel remark is must !!'),
+				_('Enter the remarks in Cancel remarks field !!'))
 		return True
 		
 	def unlink(self,cr,uid,ids,context=None):
@@ -744,7 +784,7 @@ class product_product(osv.osv):
 		'seller_qty': fields.function(_calc_seller, type='float', string='Supplier Quantity', multi="seller_info", help="This is minimum quantity to purchase from Main Supplier."),
 		'seller_id': fields.function(_calc_seller, type='many2one', relation="res.partner", string='Main Supplier', help="Main Supplier who has highest priority in Supplier List.", multi="seller_info"),
 	    'product_status':fields.selection([('approve', 'Approved'), ('not_approve', 'Waiting For Approval')], 'Product Status', readonly=True),
-		'state': fields.selection([('draft','Draft'),('confirm','Waiting for approval'),('approved','Approved'),
+		'state': fields.selection([('draft','Draft'),('confirm','Waiting for approval'),('approved','Approved'),('cancel','Cancelled'),
 				('reject','Rejected')],'Status', readonly=True),
 				
 		'flag_qc_notreq': fields.boolean('QC Not Required'),
@@ -755,6 +795,7 @@ class product_product(osv.osv):
 		'tolerance_plus': fields.float('Tolerance(+ %)'),
 		'tolerance_minus': fields.float('Tolerance(- %)'),
 		'tolerance_applicable': fields.boolean('Tolerance Applicable?'),
+	#	'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
 		
 	}
 	
@@ -764,10 +805,13 @@ class product_product(osv.osv):
 	]
 	
 	_defaults = {
+		
 		'active':True,
 		'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'product_status':'not_approve',
 		'state': 'draft',
+		#'modify': 'no',
+		
 	   }
 	
 	
