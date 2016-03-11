@@ -63,10 +63,10 @@
                 <form string="Product" version="7.0">
 				 <header> 
 					<button name="entry_reject" type="object" string="Reject" states="confirm" class="oe_highlight" confirm="Are you sure to proceed ?" />
-							
-						<button name="entry_confirm" states="draft" string="Confirm" type="object" class="oe_highlight"/>
-						<button name="entry_approve" states="confirm" string="Approve" type="object" class="oe_highlight" confirm="Are you sure to proceed ?" />
-						
+					<button name="entry_confirm" states="draft" string="Confirm" type="object" class="oe_highlight"/>
+					<button name="entry_approve" states="confirm" string="Approve" type="object" class="oe_highlight" confirm="Are you sure to proceed ?" />
+					<button name="entry_cancel" type="object" states="approved,reject" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+					<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 				</header>
                     <sheet>
                         <field name="image_medium" widget="image" class="oe_avatar oe_left"/>
@@ -76,7 +76,7 @@
 								<label for="name"/>
                                 <field name="name" placeholder="Name" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
                                 <label for="product_code"/>
-                                <field name="product_code" placeholder="Code" attrs="{'readonly':[('state','in',('approved','reject'))]}" required="1"/>
+                                <field name="product_code" placeholder="Code" attrs="{'readonly':[('state','in',('approved','reject'))]}" required="0"/>
                                 
                             </h3>
                             <label for="categ_id" class="oe_edit_only"/>
@@ -523,6 +523,8 @@
                 <tree string="Units of Measure">
                     <field name="name"/>
                     <field name="category_id"/>
+                    <field name="dummy_state"/>
+                    <field name="modify" invisible="1"/>
                 </tree>
             </field>
         </record>
@@ -534,17 +536,18 @@
                 <form string="Units of Measure" version="7.0">
 					<header>
 						<button name="entry_reject" type="object" string="Reject" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('dummy_state','!=','confirm')]}" />
-							
 						<button name="entry_confirm" string="Confirm" type="object" class="oe_highlight" attrs="{'invisible':[('dummy_state','!=','draft')]}"/>
 						<button name="entry_approve" string="Approve" type="object" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('dummy_state','!=','confirm')]}" />
-						
+						<!--<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes'),('state','in',('approved','cancel'))]}" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
+						<button name="entry_cancel" type="object" attrs="{'invisible':[('dummy_state','!=','cancel')]}" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_draft" type="object"  attrs="{'invisible':[('dummy_state','!=','cancel')]}" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
                     <group>
                         <group>
                             <field name="name" attrs="{'readonly':[('dummy_state','=','approved')]}"/>
-							<field name="active"/>							
-							<field name="dummy_state"/>
-                           <field name="category_id" invisible="1"/>
+                            <field name="category_id" invisible="1"/>
+                            <field name="modify" invisible="1"/>
+                            <field name="rounding" invisible="1"/>
                             <field name="uom_type" on_change="onchange_type(uom_type)" />
                             <label for="factor"/>
                             <div>
@@ -559,10 +562,19 @@
                             </div>
                         </group>
                         <group>
-							
-							<field name="remark" attrs="{'readonly':[('dummy_state','=','approved')]}"/>           
-                            <field name="rounding" invisible="1"/>
+							<field name="active"/>	
+							<field name="dummy_state" attrs="{'readonly':[('dummy_state','=','approved')]}"/>
                         </group>
+                   </group>                       
+                        <group string='Remarks' attrs="{'invisible':[('dummy_state','=','draft')]}">
+							<group>	
+								<field name="remark" attrs="{'invisible':[('dummy_state','=','draft')], 'readonly': [('dummy_state','in',['approved','reject','cancel'])]}"/>
+							</group>
+							<group>												
+								<field name="cancel_remark" attrs="{'invisible':[('dummy_state','in',['draft','reject','confirmed'])], 'readonly': [('dummy_state','in',['cancel'])]}"/>												
+							</group>
+						</group>
+				
                         <notebook>
 							<page string="Entry Info">
 									<group>
@@ -572,19 +584,23 @@
 									<group>
 										<field name="user_id"/>
 										<field name="confirm_user_id" attrs="{'invisible':[('dummy_state','in',['draft'])]}"/>
+										<field name="app_user_id" attrs="{'invisible':[('dummy_state','in',['draft', 'reject','confirmed'])]}"/>
+										<field name="cancel_user_id" attrs="{'invisible':[('dummy_state','in',['draft', 'confirmed','reject','approved'])]}"/>
 										<field name="ap_rej_user_id" attrs="{'invisible':[('dummy_state','in',['draft', 'confirmed'])]}"/>										
 										<field name="update_user_id"/>
 									</group>
 									<group>
 										<field name="crt_date"/>
 										<field name="confirm_date" attrs="{'invisible':[('dummy_state','in',['draft'])]}"/>
+										<field name="approve_date" attrs="{'invisible':[('dummy_state','in',['draft','reject', 'confirmed'])]}"/>
+										<field name="cancel_date" attrs="{'invisible':[('dummy_state','in',['draft', 'confirmed','reject','approved'])]}"/>
 										<field name="ap_rej_date" attrs="{'invisible':[('dummy_state','in',['draft', 'confirmed'])]}"/>										
 										<field name="update_date"/>
 									</group>
 								</group>
 							</page>
 						</notebook>		
-                    </group>
+                    
                 </form>
             </field>
         </record>

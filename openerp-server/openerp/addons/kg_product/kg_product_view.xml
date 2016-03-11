@@ -26,7 +26,7 @@
 	</field>
 	<field name="product_code" position="after">
 		<label for = "moc_id"></label>
-			<field name="moc_id" required="1"/>
+			<field name="moc_id" required="0"/>
 	</field>
 	
 
