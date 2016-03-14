@@ -542,7 +542,7 @@
 			<field eval="1" name="perm_create"/>
 			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
 		</record>		
-		
+		<!--
 		<record id="po_kg_gen_grn_expense_track" model="ir.model.access">
 			<field name="model_id" ref="kg_general_grn.model_kg_gen_grn_expense_track"/>
 			<field eval="1" name="perm_read"/>
@@ -601,7 +601,7 @@
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
 			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
-		</record>		
+		</record>	-->	
 		
 		<!-- Partner -->
 		
