@@ -750,7 +750,7 @@
 		
 		<!-- Machine Shop Raw Materials start -->
 		
-		<record id="user_machineshop_master" model="ir.model.access">
+		<record id="user_machineshop_raw_master" model="ir.model.access">
 			<field name="model_id" ref="kg_machine_shop.model_ch_ms_raw_material"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">Machine Shop Raw Materials</field>
