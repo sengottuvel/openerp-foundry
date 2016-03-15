@@ -28,7 +28,7 @@
 						</group>
 						<group>
 							<group>
-								<field name="source_bom" attrs="{'invisible':[('bom_type','=','new_bom')],'readonly': [('copy_flag','=',True)]}"/>
+							<field name="source_bom" attrs="{'invisible':[('bom_type','=','new_bom')],'readonly': [('copy_flag','=',True)], 'required': [('bom_type','=','copy_bom')]}"/>
 							</group>
 							<group>
 								<button name="copy_bom" type="object" string="Copy" class="oe_highlight" attrs="{'invisible':['|',('bom_type','=','new_bom'),('copy_flag','=',True)]}"/>
