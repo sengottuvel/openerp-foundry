@@ -57,7 +57,7 @@
 								<field name="line_ids_a" nolabel="1" >
 									<tree string="Chemical Composition Chart Tree" editable="top" >									
 										<field name="chemical_id" />
-										<field name="range_flag" invisible="1" />														
+										<field name="range_flag" invisible="1"/>														
 										<field name="min" attrs="{'required': [('range_flag','=',False)]}"/>										
 										<field name="max" attrs="{'required': [('range_flag','=',False)]}"/>																												
 									</tree>
@@ -158,9 +158,8 @@
 			<field name="search_view_id" ref="m_search_v_moc"/>
 		</record>
 		
-		<!-- Menu Action End-->
-		
-		
+		<!-- Menu Action End-->        
+        
 		
 		<!-- Menu Name Start here --> 
 		

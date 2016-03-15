@@ -42,7 +42,8 @@ class kg_pumpmodel_master(osv.osv):
 		'delivery_lead': fields.integer('Delivery Lead Time(Weeks)', size=128),
 		'type': fields.selection([('vertical','Vertical'),('horizontal','Horizontal')],'Type' ,required=True),
 		'category_id': fields.many2one('kg.pump.category', 'Pump Category',required=True,domain="[('type','=',type)]"),
-		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),	
+		'pump_mode': fields.selection([('only_spares','Only Spares'),('full_pump','Full Pump')],'Pump Mode'),	
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),

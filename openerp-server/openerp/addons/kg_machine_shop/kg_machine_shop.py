@@ -40,9 +40,16 @@ class kg_machine_shop(osv.osv):
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
+		'line_ids':fields.one2many('ch.ms.raw.material', 'header_id', "Raw Materials"),
 		
 		'csd_code': fields.char('CSD Code No.', size=128),
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
+		'type': fields.selection([('ms','MS Item'),('bot','BOT')],'Type'),
+		'od': fields.float('OD'),
+		'length': fields.float('Length'),
+		'breadth': fields.float('Breadth'),
+		'thickness': fields.float('Thickness'),
+		'weight': fields.float('Weight'),
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -172,3 +179,46 @@ class kg_machine_shop(osv.osv):
 	]
 	
 kg_machine_shop()
+
+
+
+class ch_ms_raw_material(osv.osv):
+	
+	_name = "ch.ms.raw.material"
+	_description = "MS Raw Materials Master"
+	
+	_columns = {
+			
+		'header_id':fields.many2one('kg.machine.shop', 'MS Entry', required=True, ondelete='cascade'),	
+		'product_id': fields.many2one('product.product','Raw Material', required=True,domain="[('state','=','approved')]"),			
+		'uom':fields.char('UOM',size=128),		
+		'qty':fields.float('Qty'),
+		'remarks':fields.text('Remarks'),		
+	}
+	
+	def onchange_uom(self, cr, uid, ids, product_id, context=None):
+		
+		value = {'uom': ''}
+		if product_id:
+			uom_rec = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
+			value = {'uom': uom_rec.uom_id.name}
+			
+		return {'value': value}
+		
+	def create(self, cr, uid, vals, context=None):
+		pro_obj = self.pool.get('product.product')
+		if vals.get('product_id'):		  
+			uom_rec = pro_obj.browse(cr, uid, vals.get('product_id') )
+			uom_name = uom_rec.uom_id.name
+			vals.update({'uom': uom_name})
+		return super(ch_ms_raw_material, self).create(cr, uid, vals, context=context)
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		pro_obj = self.pool.get('product.product')
+		if vals.get('product_id'):
+			uom_rec = pro_obj.browse(cr, uid, vals.get('product_id') )
+			uom_name = uom_rec.uom_id.name
+			vals.update({'uom': uom_name})
+		return super(ch_ms_raw_material, self).write(cr, uid, ids, vals, context)  
+	
+ch_ms_raw_material()

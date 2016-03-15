@@ -220,6 +220,7 @@ class ch_bom_line(osv.osv):
 		'header_id':fields.many2one('kg.bom', 'BOM Name', required=True, ondelete='cascade'),  
 		'pos_no': fields.integer('Position No'),
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern No', required=True,domain="[('active','=','t')]"), 
+		'moc_id':fields.many2one('kg.moc.master','MOC',required=True,domain="[('active','=','t')]"),
 		'pattern_name': fields.char('Pattern Name', required=True), 
 		'remarks':fields.text('Remarks'),
 		'qty': fields.integer('Qty',required=True,),
@@ -306,6 +307,9 @@ class ch_machineshop_details(osv.osv):
 	
 		'header_id':fields.many2one('kg.bom', 'BOM', ondelete='cascade',required=True),
 		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', ondelete='cascade',required=True),
+		'moc_id':fields.many2one('kg.moc.master','MOC',required=True,domain="[('active','=','t')]"),
+		'pos_no': fields.integer('Position No'),
+		'csd_no': fields.char('CSD No.'),
 		'name':fields.char('Item Name', size=128),	  
 		'qty': fields.integer('Qty', required=True),
 		'remarks':fields.text('Remarks'),   
@@ -314,10 +318,10 @@ class ch_machineshop_details(osv.osv):
 	
 	def onchange_machineshop_name(self, cr, uid, ids, ms_id, context=None):
 		
-		value = {'name': ''}
+		value = {'name': '','csd_no':''}
 		if ms_id:
 			pro_rec = self.pool.get('kg.machine.shop').browse(cr, uid, ms_id, context=context)
-			value = {'name': pro_rec.name}
+			value = {'name': pro_rec.name,'csd_no':pro_rec.csd_code}
 			
 		return {'value': value}
 		
@@ -326,15 +330,17 @@ class ch_machineshop_details(osv.osv):
 		if vals.get('ms_id'):		   
 			ms_rec = ms_obj.browse(cr, uid, vals.get('ms_id') )
 			ms_name = ms_rec.name		   
-			vals.update({'name':ms_name })
+			csd_no = ms_rec.csd_code		   
+			vals.update({'name':ms_name ,'csd_no':csd_no})
 		return super(ch_machineshop_details, self).create(cr, uid, vals, context=context)
 		
 	def write(self, cr, uid, ids, vals, context=None):
 		ms_obj = self.pool.get('kg.machine.shop')
 		if vals.get('ms_id'):		   
 			ms_rec = ms_obj.browse(cr, uid, vals.get('ms_id') )
-			ms_name = ms_rec.name		   
-			vals.update({'name':ms_name })
+			ms_name = ms_rec.name
+			csd_no = ms_rec.csd_code		   		   
+			vals.update({'name':ms_name,'csd_no':csd_no })
 		return super(ch_machineshop_details, self).write(cr, uid, ids, vals, context)   
 
 ch_machineshop_details()
@@ -348,6 +354,7 @@ class ch_bot_details(osv.osv):
 	
 		'header_id':fields.many2one('kg.bom', 'BOM', ondelete='cascade',required=True),
 		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('type','=','bot')], ondelete='cascade',required=True),
+		'moc_id':fields.many2one('kg.moc.master','MOC',required=True,domain="[('active','=','t')]"),
 		'code':fields.char('Item Code', size=128),	  
 		'qty': fields.integer('Qty', required=True),
 		'remarks':fields.text('Remarks'),   
@@ -388,6 +395,7 @@ class ch_consu_details(osv.osv):
 	
 		'header_id':fields.many2one('kg.bom', 'BOM', ondelete='cascade',required=True),
 		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('type','=','consu')], ondelete='cascade',required=True),
+		'moc_id':fields.many2one('kg.moc.master','MOC',required=True,domain="[('active','=','t')]"),
 		'code':fields.char('Item Code', size=128),  
 		'qty': fields.integer('Qty',required=True), 
 		'remarks':fields.text('Remarks'),

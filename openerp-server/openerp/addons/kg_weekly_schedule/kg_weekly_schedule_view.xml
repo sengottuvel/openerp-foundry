@@ -201,6 +201,7 @@
 								   <field name="planning_qty" invisible="1"/>
 								   <field name="production_qty" invisible="1"/>
 								   <field name="flag_applicable"/>
+								   <field name="flag_pattern_check"/>
 								   <field name="moc_id" attrs="{'required': [('flag_applicable','!=',False)],'readonly': [('flag_standard','=',False)]}"/>
 								   <field name="add_spec"/>
 								   <field name="transac_state" invisible="1"/>

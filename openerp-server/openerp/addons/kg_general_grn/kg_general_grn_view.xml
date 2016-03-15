@@ -75,12 +75,12 @@
 						
 						 <group>
 							<group>
-							<field name="po_expenses_type1"/>
-							<field name="value1"/>
+							<field name="po_expenses_type1" invisible="1"/>
+							<field name="value1" invisible="1"/>
 							</group>
 							<group>
-							<field name="po_expenses_type2"/>
-							<field name="value2"/>
+							<field name="po_expenses_type2" invisible="1"/>
+							<field name="value2" invisible="1"/>
 							</group>					
 						</group>
 
@@ -99,6 +99,14 @@
 						
 					</page>
 					
+					<page string="Additonal Charges">
+						<field colspan="4" mode="tree" name="expense_line_id" nolabel="1" widget="one2many_list" >
+							<tree string="Expense Lines" editable="bottom"> 
+							<field name="description" required="1"/>
+							<field name="expense_amt" required="1"/>
+							</tree>
+							</field>
+					</page>
 					<page string="Remarks">
 						<field name="remark"/>
 					</page>

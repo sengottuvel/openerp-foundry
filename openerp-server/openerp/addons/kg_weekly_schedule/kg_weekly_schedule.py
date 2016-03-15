@@ -616,6 +616,7 @@ class ch_sch_bom_details(osv.osv):
 		'transac_state': fields.selection([('in_draft','In Draft'),('in_schedule','In Schedule'),('partial','Partial'),('sent_for_plan','In Planning'),('sent_for_qc','In QC'),
 					   ('sent_for_produc','In Production'),('complete','Completed')],'Transaction Status', readonly=True),			   
 		'flag_standard': fields.boolean('Non Standard'),
+		'flag_pattern_check': fields.boolean('Is Pattern Check'),
 	
 	}
 	
@@ -625,8 +626,8 @@ class ch_sch_bom_details(osv.osv):
 		
 		'state': 'draft',
 		'transac_state': 'in_draft',
-		'flag_applicable': False
-	
+		'flag_applicable': False,
+		'flag_pattern_check': False,
 		
 	}
 	

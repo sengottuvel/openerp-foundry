@@ -49,7 +49,7 @@ class kg_moc_master(osv.osv):
 		
 		'weight_type': fields.selection([('ci','CI'),('ss','SS'),('non_ferrous','Non-Ferrous')],'Family Type'),
 		'alias_name': fields.char('Alias Name', size=128),
-		'moc_type': fields.selection([('foundry','Foundry'),('machine_shop','Machine Shop'),('bot','BOT')],'Type'),
+		'moc_type': fields.selection([('foundry_moc','Foundry MOC'),('purchase_moc','Purchase MOC'),('both','Both')],'Type'),
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),	
 		
 		
@@ -195,7 +195,7 @@ class ch_moc_raw_material(osv.osv):
 	_columns = {
 			
 		'header_id':fields.many2one('kg.moc.master', 'MOC Entry', required=True, ondelete='cascade'),	
-		'product_id': fields.many2one('product.product','Raw Material', required=True),	
+		'product_id': fields.many2one('product.product','Raw Material', required=True,domain="[('state','=','approved')]"),	
 		'rate': fields.related('product_id','latest_price', type='float', string='Rate(Rs)', store=True),		
 		'uom':fields.char('UOM',size=128),
 		'qty':fields.float('Qty',required=True),
@@ -239,7 +239,7 @@ class ch_chemical_chart(osv.osv):
 	_columns = {
 			
 		'header_id':fields.many2one('kg.moc.master', 'MOC Entry', required=True, ondelete='cascade'),				
-		'chemical_id': fields.many2one('kg.chemical.master','Name', required=True),		
+		'chemical_id': fields.many2one('kg.chemical.master','Name', required=True,domain="[('state','=','approved')]"),		
 		'min':fields.float('Min',required=True,digits_compute=dp.get_precision('Min Value')),		
 		'max':fields.float('Max',required=True,digits_compute=dp.get_precision('Max Value')),	
 		'range_flag': fields.boolean('Range Limit'),	
@@ -267,7 +267,7 @@ class ch_mechanical_chart(osv.osv):
 			
 		'header_id':fields.many2one('kg.moc.master', 'MOC Entry', required=True, ondelete='cascade'),
 		'uom': fields.char('UOM',size=128),						
-		'mechanical_id': fields.many2one('kg.mechanical.master','Name', required=True),	
+		'mechanical_id': fields.many2one('kg.mechanical.master','Name', required=True,domain="[('state','=','approved')]"),	
 		'min':fields.float('Min',required=True,digits_compute=dp.get_precision('Min Value')),
 		'max':fields.float('Max',required=True,digits_compute=dp.get_precision('Max Value')),
 		'range_flag': fields.boolean('No Max Range'),			
@@ -276,7 +276,8 @@ class ch_mechanical_chart(osv.osv):
 	
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.range_flag == False:			
+		if entry.range_flag == False:
+			print"www"
 			if entry.min > entry.max:
 				return False
 		return True

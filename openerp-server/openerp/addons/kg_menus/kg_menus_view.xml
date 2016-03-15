@@ -31,8 +31,8 @@
 		
 		<menuitem name="CRM" id="cpm_crm" sequence="19"/>
 		
-				<!-- CRM Master Menu -->
-				<menuitem id="cpm_crm_master_menu" name="Masters" parent="cpm_crm" sequence="1"/>
+			<!-- CRM Master Menu -->
+			<menuitem id="cpm_crm_master_menu" name="Masters" parent="cpm_crm" sequence="1"/>
 				
 				<!-- Customer Master -->
 				<menuitem action="kg_partners.kg_action_customer_form" id="cam_crm_customer_master" name="Customer" parent="cpm_crm_master_menu" sequence="1"/>
@@ -48,6 +48,19 @@
 				
 				<!-- City Master  --> 
 				<menuitem action="base.action_city" name="City" id="cam_crm_city_master" parent="cpm_crm_master_menu" sequence="5"/>
+				
+				<!-- Chemical Master  --> 
+				<menuitem action="kg_chemical_master.cma_chemical_master" name="Chemical Master" id="cam_crm_chemical_master" parent="cpm_crm_master_menu" sequence="6"/>
+				
+				<!-- Industry Master  --> 
+				<menuitem action="kg_industry_master.mma_industry_master" name="Industry Master" id="cam_crm_industry_master" parent="cpm_crm_master_menu" sequence="7"/>
+				
+			<!-- CRM Enquiry Menu -->
+			<menuitem id="cpm_crm_enquiry_menu" name="Enquiry" parent="cpm_crm" sequence="2"/>
+				
+				<!-- Enquiry --> 
+				<menuitem action="kg_crm_enquiry.tma_crm_enquiry" name="Enquiry" id="tma_crm_enquiry" parent="cpm_crm_enquiry_menu" sequence="1"/>
+				
 				
 		<!-- Indent Menu -->
 		
@@ -89,36 +102,39 @@
 				<menuitem action="base.action_partner_supplier_form" name="Supplier" id="mam_supplier_master" parent="ppm_master_menu" sequence="1"/>
 				
 				<!-- Product Master  --> 
-				<menuitem action="product.product_normal_action" name="Product Master" id="mam_product_master" parent="ppm_master_menu" sequence="2"/>
+				<menuitem action="product.product_normal_action" name="Product Master-Purchase" id="mam_product_master" parent="ppm_master_menu" sequence="2"/>
+				
+				<!-- Product Master  --> 
+				<menuitem action="product.product_normal_action" name="Product Master-Design" id="mam_product_master_design" parent="ppm_master_menu" sequence="3"/>
 				
 				<!-- Product Category Master -->
 				<menuitem id="kg_product_catg_master" parent="ppm_master_menu"
-						 action="product.product_category_action_form" name="Product Category" sequence="3"/>					
+						 action="product.product_category_action_form" name="Product Category" sequence="4"/>					
 				
 				
 				<!-- Units of Measure Master  -->
-				<menuitem action="product.product_uom_form_action" name="Units of Measure" id="mam_uom_master" parent="ppm_master_menu" sequence="4"/>
+				<menuitem action="product.product_uom_form_action" name="Units of Measure" id="mam_uom_master" parent="ppm_master_menu" sequence="5"/>
 				
 				<!-- Payment Master  --> 
 				<menuitem action="kg_po_masters.payment_master_action_form" name="Payment Master" id="mam_payment_master" parent="ppm_master_menu" sequence="5"/>
 				
 				<!-- Delivery Master  --> 
-				<menuitem action="kg_po_masters.delivery_master_action_form" name="Delivery Master" id="mam_delivery_master" parent="ppm_master_menu" sequence="6"/>
+				<menuitem action="kg_po_masters.delivery_master_action_form" name="Delivery Master" id="mam_delivery_master" parent="ppm_master_menu" sequence="7"/>
 			
 				<!-- Brand Master  --> 
-				<menuitem action="kg_po_masters.brand_master_action_form" name="Brand Master" id="mam_po_master" parent="ppm_master_menu" sequence="7"/>
+				<menuitem action="kg_po_masters.brand_master_action_form" name="Brand Master" id="mam_po_master" parent="ppm_master_menu" sequence="8"/>
 				
 				<!-- Country -->
-				<menuitem id="kg_country_master" parent="ppm_master_menu" name="Country" action="base.action_country" sequence="8"/>
+				<menuitem id="kg_country_master" parent="ppm_master_menu" name="Country" action="base.action_country" sequence="9"/>
 				
 				<!-- State -->
-				<menuitem id="kg_state_master" parent="ppm_master_menu" name="State" action="base.action_country_state" sequence="9"/>
+				<menuitem id="kg_state_master" parent="ppm_master_menu" name="State" action="base.action_country_state" sequence="10"/>
 				
 				<!-- City Master  --> 
-				<menuitem action="base.action_city" name="City" id="mam_city_master" parent="ppm_master_menu" sequence="10"/>
+				<menuitem action="base.action_city" name="City" id="mam_city_master" parent="ppm_master_menu" sequence="11"/>
 				 
 				<!-- Transport Master  --> 
-				<menuitem action="kg_transport.transport_action_form" name="Transport" id="mam_transport_master" parent="ppm_master_menu" sequence="11"/>
+				<menuitem action="kg_transport.transport_action_form" name="Transport" id="mam_transport_master" parent="ppm_master_menu" sequence="12"/>
 				 
 				<menuitem action="purchase.purchase_rfq" id="pam_purchase_order" name="Generate PO" parent="purchase.menu_procurement_management" sequence="1"/>
                 

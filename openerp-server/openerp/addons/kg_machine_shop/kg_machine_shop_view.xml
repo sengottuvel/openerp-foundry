@@ -21,11 +21,17 @@
 							<group>						
 								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
 								<field name="uom_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>											
+								<field name="type"/>											
+								<field name="od"/>											
+								<field name="length"/>											
+								<field name="weight"/>											
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 							</group>
 							<group>
 								<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 								<field name="csd_code"/>
+								<field name="breadth"/>
+								<field name="thickness"/>
 								<field name="active"/>									
 								<field name="state" style="width: 30%%" class="att_state_change"/>								
 							</group>
@@ -39,6 +45,16 @@
 							</group>
 						</group>
 						<notebook>
+							<page string="Raw Materials">	
+								<field name="line_ids" nolabel="1" >
+									<tree string="Raw Materials Entry Tree" editable="top" >									
+										<field name="product_id" on_change="onchange_uom(product_id)" />											
+										<field name="uom" readonly="1"/>	
+										<field name="qty" />
+										<field name="remarks" widget="char"/>														
+									</tree>
+								</field>																								
+							</page>
 							<page string="Entry Info">
 									<group>
 										<field name="company_id"/>
@@ -122,8 +138,7 @@
 		</record>
 		
 				
-		<!-- Menu Action End-->
-		
+		<!-- Menu Action End-->	
 		
 		
 		<!-- Menu Name Start here --> 

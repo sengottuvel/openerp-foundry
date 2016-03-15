@@ -36,7 +36,7 @@ class kg_product(osv.osv):
 		'capital': fields.boolean('Capital Goods'),
 		'abc': fields.boolean('ABC Analysis'),
 		'po_uom_coeff': fields.float('PO Coeff', required=True, help="One Purchase Unit of Measure = Value of(PO Coeff)UOM"),
-		'type': fields.selection([('consu', 'Consumable Items'),('bot','BOT'),('bearing','Bearing'),('raw','Raw Materials'),('service','Service Items'),('finish','Finished Items')], 'Product Type', 
+		'type': fields.selection([('raw','Foundry Ram Materials'),('ms','MS Item'),('bot','BOT'),('consu', 'Consumables'),('capital','Capitals and Asset'),('service','Service Items')], 'Product Type', 
 				required=True),
 		'crt_date': fields.datetime('Creation Date',readonly=True),
 		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
@@ -49,7 +49,7 @@ class kg_product(osv.osv):
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
 		'remark': fields.text('Remarks',readonly=False,states={'approved':[('readonly',True)]}),
-		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		#'moc_id': fields.many2one('kg.moc.master','MOC'),
 		
 	}
 	

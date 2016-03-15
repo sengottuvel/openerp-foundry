@@ -80,9 +80,10 @@
 						<page string="Machine Shop">
 								<field name="line_ids_a" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
 									<tree string="Machine Shop Details Entry Tree" editable="top" >			
-										
+										<field name="pos_no" />	
 										<field name="ms_id" on_change="onchange_machineshop_name(ms_id)"/>	
 										<field name="name" readonly="1"/>
+										<field name="csd_no" readonly="1"/>
 										<field name="qty"/>
 										<field name="remarks" widget="char"/>
 									</tree>
@@ -241,7 +242,7 @@
             <field name="model">ch.bom.line</field>
             <field name="arch" type="xml">
                 <search string="BOM Details">
-					<field name="pattern_id" string="Pattern No"  filter_domain="[('pattern_id','ilike',self)]" />				
+					<field name="pattern_id" string="Pattern No"  filter_domain="[('pattern_id','ilike',self)]" />						
 					<separator/>
                     <group expand="0" string="Group By...">
 						<filter string="BOM Name" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'header_id'}"/>
@@ -286,10 +287,8 @@
 		</record>	
 		
 		
-	<!-- Child Class  Menu Action End-->
+	<!-- Child Class  Menu Action End-->	
 	
-	
-        
 	
 	<!-- Menu Name Start here --> 
 	
