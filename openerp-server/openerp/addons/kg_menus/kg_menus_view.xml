@@ -52,8 +52,8 @@
 				<!-- Chemical Master  --> 
 				<menuitem action="kg_chemical_master.mma_chemical_master" name="Chemical Master" id="cam_crm_chemical_master" parent="cpm_crm_master_menu" sequence="6"/>
 				
-				<!-- Industry Master  --> 
-				<menuitem action="kg_industry_master.mma_industry_master" name="Industry Master" id="cam_crm_industry_master" parent="cpm_crm_master_menu" sequence="7"/>
+				<!-- Industry Master  
+				<menuitem action="kg_industry_master.mma_industry_master" name="Industry Master" id="cam_crm_industry_master" parent="cpm_crm_master_menu" sequence="7"/> --> 
 				
 			<!-- CRM Enquiry Menu -->
 			<menuitem id="cpm_crm_enquiry_menu" name="Enquiry" parent="cpm_crm" sequence="2"/>
