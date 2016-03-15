@@ -69,7 +69,8 @@
 								
 								<field name="pos_no" />	
 								<field name="pattern_id" on_change="onchange_pattern_name(pattern_id)"/>
-								<field name="pattern_name" readonly="1"/>				   
+								<field name="pattern_name" readonly="1"/>
+								<field name="moc_id"/>							   
 								<field name="qty"/>
 								<field name="remarks" widget="char"/>
 								<field name="state" invisible="1"/>
@@ -83,6 +84,7 @@
 										<field name="pos_no" />	
 										<field name="ms_id" on_change="onchange_machineshop_name(ms_id)"/>	
 										<field name="name" readonly="1"/>
+										<field name="moc_id"/>			
 										<field name="csd_no" readonly="1"/>
 										<field name="qty"/>
 										<field name="remarks" widget="char"/>
@@ -94,13 +96,14 @@
 									<tree string="BOT Details Entry Tree" editable="top" >	
 											
 										<field name="product_temp_id" on_change="onchange_bot_code(product_temp_id)"/>
-										<field name="code" readonly="1" />											
+										<field name="code" readonly="1" />
+										<field name="moc_id"/>														
 										<field name="qty"/>
 										<field name="remarks" widget="char"/>
 									</tree>
 								</field>
 							</page>							
-							<page string="Consumable">
+							<page string="Consumable" invisible="1">
 								<field name="line_ids_c" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
 									<tree string="Consumable Details Entry Tree" editable="top" >					
 										
