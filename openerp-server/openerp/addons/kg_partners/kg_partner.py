@@ -94,6 +94,7 @@ class kg_partner(osv.osv):
 	'bank_bic': fields.char('Whatsapp No'),
 	'delivery_ids':fields.one2many('kg.delivery.address', 'src_id', 'Delivery Address'),
 	'billing_ids':fields.one2many('kg.billing.address', 'bill_id', 'Billing Address'),
+	'consult_ids':fields.one2many('kg.consultant.fee', 'consult_id', 'Consultant Fees'),
 	'dealer': fields.boolean('Dealer'),
 	'economic_category': fields.selection([('budget','Budget'),('loyalty','Loyalty')],'Economic Category'),
 	'sector': fields.selection([('cp','CP'),('ip','IP'),('both','Both')],'Sector'),
@@ -213,6 +214,29 @@ class kg_billing_address(osv.osv):
 	_defaults = {
 
 	'date' : fields.date.context_today,
+
+	} 
+
+kg_billing_address()
+
+
+class kg_consultant_fee(osv.osv):
+
+	_name = "kg.consultant.fee"
+	_description = "Consultant Fees"
+	
+	_columns = {
+
+	'consult_id': fields.many2one('res.partner', 'Partner Master'),
+	'effective_date': fields.date('Effective Date'),
+	'value': fields.float('Value (%)'),
+	'state': fields.selection([('active','Active'),('expire','Expired')],'Status'),
+	
+	}
+
+	_defaults = {
+
+	'state' : 'active',
 
 	} 
 

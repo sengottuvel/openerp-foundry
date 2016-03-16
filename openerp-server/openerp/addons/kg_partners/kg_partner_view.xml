@@ -23,7 +23,7 @@
 		</field>
 		<field name="is_company" position="replace">
 		<field name="is_company" invisible="1"/>
-		<field name="tin_no" required="1" placeholder="TIN Number"/>
+		<field name="tin_no" attrs = "{'required':[('group_flag','!=',True)]}" placeholder="TIN Number"/>
 		</field>
 		
 		<field name="zip" position="replace">
@@ -32,12 +32,12 @@
 		</field>
 		
 		<field name="birthdate" position="replace">
-		<field name="supply_type"/>
-		<field name="tds" attrs = "{'required':[('company_type','=','individual')]}"/>
+		<field name="supply_type" attrs = "{'invisible':[('customer','=',True)]}"/>
+		<field name="tds" attrs = "{'required':[('company_type','=','individual')],'invisible':[('customer','=',True)]}"/>
 		<field name="tan_no"/>
 		<field name="cst_no"/>
 		<field name="cheque_in_favour"/>
-		<field name="economic_category"/>
+		<field name="economic_category" attrs="{'invisible':['|',('supplier','=',True),('dealer','=',True)]}"/>
 		<field name="dealer_id"  attrs="{'invisible':['|',('supplier','=',True),('dealer','=',True)]}"/>
 		</field>
 		<field name="ean13" position="replace">
@@ -51,7 +51,11 @@
 		
 		<field name="ref" position="replace">
 		<field name="payment_id"/>
-		<field name="advance_limit"/>
+		<div >
+			<label for="advance_limit"  string="Advance"  attrs="{'invisible': [('customer','=',True)]}"/>
+			<label for="advance_limit" string="Credit" attrs="{'invisible': [('supplier','=',True)]}"/>
+		</div>
+		<field name="advance_limit" nolabel="1"/>
 		</field>
 		
 		<!--<xpath expr = "//group[@string='Terms and Conditions']" position="after">
@@ -73,7 +77,7 @@ s
 		<field name="contact_person"/>
 		</field>
 		<field name="title" position="replace">
-		<field name="group_flag"/>
+		<field name="group_flag" invisible="1"/>
 		</field>
 		<field name="city" position="replace">
 		<field name="city" invisible="1"/>
@@ -183,12 +187,36 @@ s
 			</page>	
 		</xpath>
 		<xpath expr = "//page[@string='Bank Details']" position="after">
+				<page string="Consultant Fee" attrs="{'invisible':[('dealer','!=',True)]}">
+				
+				<field colspan="4" mode="tree" name="consult_ids" nolabel="1" widget="one2many_list" >
+					<tree string="Consult Fee" editable="bottom"> 
+						<field name="effective_date"/>
+						<field name="value"/>
+						<field name="state" readonly="1"/>
+						
+					</tree>
+					<form string="Billing Address" >
+						<group>
+							<group>
+								<field name="effective_date"/>
+								<field name="value"/>
+							</group>
+							<group>
+								<field name="state" readonly="1"/>
+							</group>
+						</group>
+					</form>
+				</field>
+			</page>	
+		</xpath>
+		<xpath expr = "//page[@string='Consultant Fee']" position="after">
 				<page string="Entry Info">
 				<group>
 					<field name="company_id" readonly="1"/>
 				</group>
 				<group>
-				<form string="Bank" version="7.0">
+				<form string="Entry" version="7.0">
 				<sheet>
 				<group>
 					<group>
@@ -264,6 +292,18 @@ s
 		<field name="view_type">form</field>
 		<field name="view_mode">tree,form,kanban</field>
 		<field name="context">{'default_dealer': True,'default_customer': False,'default_supplier': False}</field>
+		<field name="domain">[('dealer','=',True),('contact','=',False)]</field>
+		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
+		<field name="search_view_id" ref="partner_group_view"/>-->
+	</record>
+        
+	<record id="kg_action_group_form" model="ir.actions.act_window">
+		<field name="name">Groups</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="res_model">res.partner</field>
+		<field name="view_type">form</field>
+		<field name="view_mode">tree,form,kanban</field>
+		<field name="context">{'default_group_flag': True,'default_dealer': False,'default_customer': False,'default_supplier': False}</field>
 		<field name="domain">[('dealer','=',True),('contact','=',False)]</field>
 		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
 		<field name="search_view_id" ref="partner_group_view"/>-->

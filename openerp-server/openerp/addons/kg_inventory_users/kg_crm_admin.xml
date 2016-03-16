@@ -32,6 +32,16 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
 		</record>
 		
+		<record id="crm_admin_consultan_fee" model="ir.model.access">
+			<field name="model_id" ref="kg_partners.model_kg_consultant_fee"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Consultant Fee</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
 		<record id="crm_admin_res_city" model="ir.model.access">
 			<field name="model_id" ref="base.model_res_city"/>
 			<field eval="1" name="perm_read"/>
@@ -206,6 +216,56 @@
 			<field name="model_id" ref="kg_po_manual_closing.model_kg_po_manual_closing"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">PO Manual Closing</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_chemical_master" model="ir.model.access">
+			<field name="model_id" ref="kg_chemical_master.model_kg_chemical_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Chemical Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_industry_master" model="ir.model.access">
+			<field name="model_id" ref="kg_industry_master.model_kg_industry_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Industry Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_crm_enquiry" model="ir.model.access">
+			<field name="model_id" ref="kg_crm_enquiry.model_kg_crm_enquiry"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">CRM Enquiry</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_ch_kg_crm_enquiry" model="ir.model.access">
+			<field name="model_id" ref="kg_crm_enquiry.model_ch_kg_crm_enquiry"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">CH CRM Enquiry</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_ch_kg_crm_pumpmodel" model="ir.model.access">
+			<field name="model_id" ref="kg_crm_enquiry.model_ch_kg_crm_pumpmodel"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">CH CRM Enquiry Pump</field>
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>

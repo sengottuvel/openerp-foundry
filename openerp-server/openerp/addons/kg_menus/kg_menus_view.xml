@@ -40,26 +40,29 @@
 				<!-- Dealer Master -->
 				<menuitem action="kg_partners.kg_action_dealer_form" id="cam_crm_dealer_master" name="Dealer" parent="cpm_crm_master_menu" sequence="2"/>
 				
+				<!-- Group Master -->
+				<menuitem action="kg_partners.kg_action_group_form" id="cam_crm_group_master" name="Group" parent="cpm_crm_master_menu" sequence="3"/>
+				
 				<!-- Country -->
-				<menuitem id="cam_crm_country_master" parent="cpm_crm_master_menu" name="Country" action="base.action_country" sequence="3"/>
+				<menuitem id="cam_crm_country_master" parent="cpm_crm_master_menu" name="Country" action="base.action_country" sequence="4"/>
 				
 				<!-- State -->
-				<menuitem id="cam_crm_state_master" parent="cpm_crm_master_menu" name="State" action="base.action_country_state" sequence="4"/>
+				<menuitem id="cam_crm_state_master" parent="cpm_crm_master_menu" name="State" action="base.action_country_state" sequence="5"/>
 				
 				<!-- City Master  --> 
-				<menuitem action="base.action_city" name="City" id="cam_crm_city_master" parent="cpm_crm_master_menu" sequence="5"/>
+				<menuitem action="base.action_city" name="City" id="cam_crm_city_master" parent="cpm_crm_master_menu" sequence="6"/>
 				
 				<!-- Chemical Master  --> 
-				<menuitem action="kg_chemical_master.mma_chemical_master" name="Chemical Master" id="cam_crm_chemical_master" parent="cpm_crm_master_menu" sequence="6"/>
+				<menuitem action="kg_chemical_master.mma_chemical_master" name="Chemical Master" id="cam_crm_chemical_master" parent="cpm_crm_master_menu" sequence="7"/>
 				
-				<!-- Industry Master  
-				<menuitem action="kg_industry_master.mma_industry_master" name="Industry Master" id="cam_crm_industry_master" parent="cpm_crm_master_menu" sequence="7"/> --> 
+				<!-- Industry Master  --> 
+				<menuitem action="kg_industry_master.mma_industry_master" name="Industry Master" id="cam_crm_industry_master" parent="cpm_crm_master_menu" sequence="8"/>
 				
-			<!-- CRM Enquiry Menu 
-			<menuitem id="cpm_crm_enquiry_menu" name="Enquiry" parent="cpm_crm" sequence="2"/> -->
+			<!-- CRM Enquiry Menu -->
+			<menuitem id="cpm_crm_enquiry_menu" name="Enquiry" parent="cpm_crm" sequence="2"/>
 				
-				<!-- Enquiry 
-				<menuitem action="kg_crm_enquiry.tma_crm_enquiry" name="Enquiry" id="tma_crm_enquiry" parent="cpm_crm_enquiry_menu" sequence="1"/> --> 
+				<!-- Enquiry --> 
+				<menuitem action="kg_crm_enquiry.tma_crm_enquiry" name="Enquiry" id="tma_crm_enquiry" parent="cpm_crm_enquiry_menu" sequence="1"/>
 				
 				
 		<!-- Indent Menu -->
