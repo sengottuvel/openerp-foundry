@@ -191,9 +191,10 @@ s
 				
 				<field colspan="4" mode="tree" name="consult_ids" nolabel="1" widget="one2many_list" >
 					<tree string="Consult Fee" editable="bottom"> 
-						<field name="effective_date"/>
-						<field name="value"/>
+						<field name="effective_date" attrs="{'readonly':[('read_flag','=',True)]}"/>
+						<field name="value" attrs="{'readonly':[('read_flag','=',True)]}"/>
 						<field name="state" readonly="1"/>
+						<field name="read_flag" readonly="1" invisible="1"/>
 						
 					</tree>
 					<form string="Billing Address" >
@@ -204,6 +205,7 @@ s
 							</group>
 							<group>
 								<field name="state" readonly="1"/>
+								<field name="read_flag" invisible="1"/>
 							</group>
 						</group>
 					</form>

@@ -231,13 +231,27 @@ class kg_consultant_fee(osv.osv):
 	'effective_date': fields.date('Effective Date'),
 	'value': fields.float('Value (%)'),
 	'state': fields.selection([('active','Active'),('expire','Expired')],'Status'),
+	'read_flag': fields.boolean('Read Flag'),
 	
 	}
 
 	_defaults = {
 
 	'state' : 'active',
-
+	'read_flag': False,
+	
 	} 
-
+	
+	def create(self, cr, uid, vals, context=None):
+		new_id = super(kg_consultant_fee, self).create(cr, uid, vals, context=context)
+		partner = self.browse(cr, uid, new_id, context=context)
+		
+		obj = self.search(cr,uid,([('consult_id','=',vals['consult_id'])]))
+		if obj:
+			for item in obj:
+				self.write(cr,uid,item,{'state':'expire','read_flag':True})
+			self.write(cr,uid,obj[-1],{'state':'active','read_flag':False})
+		
+		return new_id
+		
 kg_billing_address()
