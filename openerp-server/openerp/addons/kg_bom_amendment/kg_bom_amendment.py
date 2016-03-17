@@ -143,6 +143,7 @@ class kg_bom_amendment(osv.osv):
 				amend_machineshop_line_id = amend_machineshop_line_obj.create(cr,uid,
 					{
 						'header_id':obj.id,
+						'pos_no': bom_machineshop_line.pos_no,
 						'ms_id': bom_machineshop_line.ms_id.id,
 						'name': bom_machineshop_line.name,
 						'qty':bom_machineshop_line.qty,
@@ -154,6 +155,7 @@ class kg_bom_amendment(osv.osv):
 				amend_bot_line_id = amend_bot_line_obj.create(cr,uid,
 					{
 						'header_id':obj.id,
+						'pos_no': bom_bot_line.pos_no,
 						'product_temp_id': bom_bot_line.product_temp_id.id,
 						'code': bom_bot_line.code,
 						'qty':bom_bot_line.qty,
@@ -280,6 +282,7 @@ class kg_bom_amendment(osv.osv):
 				amend_machineshop_line_id = amend_machineshop_line_obj.create(cr,uid,
 					{
 						'header_id':new_bom,
+						'pos_no': bom_machineshop_line.pos_no,
 						'ms_id': bom_machineshop_line.ms_id.id,
 						'name': bom_machineshop_line.name,
 						'qty':bom_machineshop_line.qty,
@@ -291,6 +294,7 @@ class kg_bom_amendment(osv.osv):
 				amend_bot_line_id = amend_bot_line_obj.create(cr,uid,
 					{
 						'header_id':new_bom,
+						'pos_no': bom_bot_line.pos_no,
 						'product_temp_id': bom_bot_line.product_temp_id.id,
 						'code': bom_bot_line.code,
 						'qty':bom_bot_line.qty,
@@ -400,6 +404,7 @@ class ch_machineshop_details_amendment(osv.osv):
 	_columns = {
 	
 		'header_id':fields.many2one('kg.bom.amendment', 'BOM', ondelete='cascade',required=True),
+		'pos_no': fields.integer('Position No'),
 		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', ondelete='cascade',required=True),
 		'name':fields.char('Item Name', size=128),	  
 		'qty': fields.integer('Qty', required=True),
@@ -442,7 +447,8 @@ class ch_bot_details_amendment(osv.osv):
 	_columns = {
 	
 		'header_id':fields.many2one('kg.bom.amendment', 'BOM', ondelete='cascade',required=True),
-		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('type','=','bot')], ondelete='cascade',required=True),
+		'pos_no': fields.integer('Position No'),
+		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('product_type','=','bot')], ondelete='cascade',required=True),
 		'code':fields.char('Item Code', size=128),	  
 		'qty': fields.integer('Qty', required=True),
 		'remarks':fields.text('Remarks'),   
@@ -482,7 +488,7 @@ class ch_consu_details_amendment(osv.osv):
 	_columns = {
 	
 		'header_id':fields.many2one('kg.bom.amendment', 'BOM', ondelete='cascade',required=True),
-		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('type','=','consu')], ondelete='cascade',required=True),
+		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('product_type','=','consu')], ondelete='cascade',required=True),
 		'code':fields.char('Item Code', size=128),  
 		'qty': fields.integer('Qty',required=True), 
 		'remarks':fields.text('Remarks'),

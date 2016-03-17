@@ -57,7 +57,7 @@
 						<page string="Machine Shop">
 								<field name="line_ids_a" nolabel="1" attrs="{'readonly': [('state','in',['approved'])]}" >
 									<tree string="Machine Shop Details Entry Tree" editable="top" >			
-										
+										<field name="pos_no" />	
 										<field name="ms_id" on_change="onchange_machineshop_name(ms_id)"/>	
 										<field name="name" readonly="1"/>
 										<field name="qty"/>
@@ -68,7 +68,7 @@
 							<page string="BOT">
 								<field name="line_ids_b" nolabel="1" attrs="{'readonly': [('state','in',['approved'])]}" >
 									<tree string="BOT Details Entry Tree" editable="top" >	
-											
+										<field name="pos_no" />		
 										<field name="product_temp_id" on_change="onchange_bot_code(product_temp_id)"/>
 										<field name="code" readonly="1" />											
 										<field name="qty"/>
@@ -76,7 +76,7 @@
 									</tree>
 								</field>
 							</page>						
-							<page string="Consumable">
+							<page string="Consumable" invisible="1">
 								<field name="line_ids_c" nolabel="1" attrs="{'readonly': [('state','in',['approved'])]}" >
 									<tree string="Consumable Details Entry Tree" editable="top" >					
 										
@@ -145,10 +145,10 @@
 			<field name="view_type">form</field>			
 			<field name="context">{}</field>
 			<field name="view_id" ref="m_tree_v_bom_amendment"/>
-		</record>
-			
-		<!-- Menu Action End-->
+		</record>		
 		
+		
+		<!-- Menu Action End-->
 		
 		<!-- Menu Name Start here --> 
 		

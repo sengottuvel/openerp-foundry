@@ -351,7 +351,7 @@ class ch_bot_details(osv.osv):
 	_columns = {
 	
 		'header_id':fields.many2one('kg.bom', 'BOM', ondelete='cascade',required=True),
-		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('type','=','bot')], ondelete='cascade',required=True),	
+		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('product_type','=','bot')], ondelete='cascade',required=True),	
 		'pos_no': fields.integer('Position No'),	
 		'code':fields.char('Item Code', size=128),	  
 		'qty': fields.integer('Qty', required=True),
@@ -392,7 +392,7 @@ class ch_consu_details(osv.osv):
 	_columns = {
 	
 		'header_id':fields.many2one('kg.bom', 'BOM', ondelete='cascade',required=True),
-		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('type','=','consu')], ondelete='cascade',required=True),		
+		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('product_type','=','consu')], ondelete='cascade',required=True),		
 		'code':fields.char('Item Code', size=128),  
 		'qty': fields.integer('Qty',required=True), 
 		'remarks':fields.text('Remarks'),
