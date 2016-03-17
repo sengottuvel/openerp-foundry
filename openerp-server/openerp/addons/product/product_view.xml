@@ -21,7 +21,7 @@
                    <group  expand='0' string='Group by...'>
                        <filter string='Category' icon="terp-stock_symbol-selection" domain="[]" context="{'group_by' : 'categ_id'}"/>
                        <filter string='Default Unit of Measure' icon="terp-mrp" domain="[]" context="{'group_by' : 'uom_id'}"/>
-                       <filter string='Type' icon="terp-stock_symbol-selection" domain="[]" context="{'group_by' : 'type'}"/>
+                       <filter string='Product Type' icon="terp-stock_symbol-selection" domain="[]" context="{'group_by' : 'product_type'}"/>
                        <filter string='Company' icon="terp-go-home" domain="[]" context="{'group_by' : 'company_id'}" groups="base.group_multi_company"/>
                    </group>
                 </search>
@@ -102,7 +102,7 @@
                             <page string="Information">
                                 <group>
                                     <group>
-                                        <field name="type" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
+                                        <field name="type" attrs="{'readonly':[('state','in',('approved','reject'))]}" invisible="1"/>
                                         <field name="uom_id" on_change="onchange_uom(uom_id,uom_po_id)" groups="product.group_uom" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
                                         <field name="list_price" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
                                         <field name="qty_available" attrs="{'readonly':[('state','in',('approved','reject'))]}" />                                        
@@ -299,6 +299,8 @@
             <field name="res_model">product.product</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form,kanban</field>
+            <field name="context">{'default_product_type': 'consu',}</field>
+			<field name="domain">[('product_type','in',('consu','capital','service')),]</field>
             <field name="view_id" ref="product_product_tree_view"/>
             <field name="search_view_id" ref="product_search_form_view"/>
             <field name="help" type="html">
@@ -819,7 +821,7 @@
                 <tree string="Product Template">
                     <field name="name"/>
                     <field name="categ_id"/>
-                    <field name="type"/>
+                    <field name="type" invisible="1"/>
                     <field name="state"/>
                 </tree>
             </field>

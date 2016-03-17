@@ -16,34 +16,29 @@
 		</field>
 		-->
 		
-	<field name="categ_id" position="after">
-		<group>
-			<field name="capital" invisible="1"/>
-			<field name="abc" invisible="1"/>
-
-			
-		</group>
-	</field>
-	<!--<field name="product_code" position="after">
-		<label for = "moc_id"></label>
-			<field name="moc_id" required="0"/>
-	</field>
-	-->
-
+		<field name="categ_id" position="after">
+			<group>
+				<field name="capital" invisible="1"/>
+				<field name="abc" invisible="1"/>
+			</group>
+		</field>
+		<!--<field name="product_code" position="after">
+			<label for = "moc_id"></label>
+				<field name="moc_id" required="0"/>
+		</field>
+		-->
 		<field name="variants" position="replace">
 		<field name="variants" invisible="1"/>
 		</field>
 		
-		
-			
 		<field name="price_extra" position="replace">
 		<field name="price_extra" invisible="1"/>
 		</field>
 		<field name="price_margin" position="replace">
 		<field name="price_margin" invisible="1"/>
 		</field>
-		
-		<field name="uom_po_id" position="replace">
+		<field name="uom_id" position="before">
+		<field name="product_type"/>
 		</field>
 		
 		<field name="uom_id" position="after">
@@ -63,15 +58,11 @@
 				<group>	
 					<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject'])]}"/>
 				</group>
-				
 			</group>
 		</field>
-        
 		
 		 <xpath expr = "//page[@string='Suppliers']" position="after">
-
 				<page string="Entry Info">
-					
 					<group>
 						<group>
 							<field name="user_id"/>
@@ -88,14 +79,8 @@
 							<field name="update_date"/>						
 						</group>
 					</group>
-							
-											   
-					
-				
-					 
 				</page>
 		</xpath>
-		
 		</field>
 	</record>
 	
@@ -119,6 +104,19 @@
 		</field>
 	</record>
 	
+	<record model="ir.ui.view" id="kg_product_tree">
+		<field name="name">product.product.tree</field>
+		<field name="model">product.product</field>
+		<field name="inherit_id" ref="product.product_product_tree_view"/>
+		<field name="arch" type="xml">
+			
+			<field name="latest_price" position="after"> 
+			<field name="product_type" invisible="1"/> 
+			</field>					
+			
+		</field>
+	</record>
+			
 	<!-- Product Master Template form view  
 	
 	<record model="ir.ui.view" id="kg_product_template_form_inherit">
@@ -127,14 +125,20 @@
         <field name="inherit_id" ref="product.product_template_form_view"/>
         <field name="arch" type="xml">
 			
-			
-            
 		</field>
 	</record>
 -->
-	
-	
-	
+	<record id="kg_action_product_form" model="ir.actions.act_window">
+		<field name="name">Product Master Design</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="res_model">product.product</field>
+		<field name="view_type">form</field>
+		<field name="view_mode">tree,form,kanban</field>
+		<field name="context">{'default_product_type': 'ms',}</field>
+		<field name="domain">[('product_type','in',('raw','ms','bot')),]</field>
+		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
+		-->
+	</record>
 	
 	
 	

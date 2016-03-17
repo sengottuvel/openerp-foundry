@@ -219,8 +219,7 @@ class ch_bom_line(osv.osv):
 		
 		'header_id':fields.many2one('kg.bom', 'BOM Name', required=True, ondelete='cascade'),  
 		'pos_no': fields.integer('Position No'),
-		'pattern_id': fields.many2one('kg.pattern.master','Pattern No', required=True,domain="[('active','=','t')]"), 
-		'moc_id':fields.many2one('kg.moc.master','MOC',required=True,domain="[('active','=','t')]"),
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern No', required=True,domain="[('active','=','t')]"),		
 		'pattern_name': fields.char('Pattern Name', required=True), 
 		'remarks':fields.text('Remarks'),
 		'qty': fields.integer('Qty',required=True,),
@@ -306,8 +305,7 @@ class ch_machineshop_details(osv.osv):
 	_columns = {
 	
 		'header_id':fields.many2one('kg.bom', 'BOM', ondelete='cascade',required=True),
-		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', ondelete='cascade',required=True),
-		'moc_id':fields.many2one('kg.moc.master','MOC',required=True,domain="[('active','=','t')]"),
+		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', ondelete='cascade',required=True),		
 		'pos_no': fields.integer('Position No'),
 		'csd_no': fields.char('CSD No.'),
 		'name':fields.char('Item Name', size=128),	  
@@ -353,8 +351,8 @@ class ch_bot_details(osv.osv):
 	_columns = {
 	
 		'header_id':fields.many2one('kg.bom', 'BOM', ondelete='cascade',required=True),
-		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('type','=','bot')], ondelete='cascade',required=True),
-		'moc_id':fields.many2one('kg.moc.master','MOC',required=True,domain="[('active','=','t')]"),
+		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('type','=','bot')], ondelete='cascade',required=True),	
+		'pos_no': fields.integer('Position No'),	
 		'code':fields.char('Item Code', size=128),	  
 		'qty': fields.integer('Qty', required=True),
 		'remarks':fields.text('Remarks'),   
@@ -394,8 +392,7 @@ class ch_consu_details(osv.osv):
 	_columns = {
 	
 		'header_id':fields.many2one('kg.bom', 'BOM', ondelete='cascade',required=True),
-		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('type','=','consu')], ondelete='cascade',required=True),
-		'moc_id':fields.many2one('kg.moc.master','MOC',required=True,domain="[('active','=','t')]"),
+		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('type','=','consu')], ondelete='cascade',required=True),		
 		'code':fields.char('Item Code', size=128),  
 		'qty': fields.integer('Qty',required=True), 
 		'remarks':fields.text('Remarks'),

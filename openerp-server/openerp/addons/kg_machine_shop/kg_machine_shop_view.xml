@@ -128,7 +128,7 @@
 		<!-- Menu Action Start-->
 		
 		 <record id="mma_machineshop_master" model="ir.actions.act_window">
-			<field name="name">Machine Shop Items</field>
+			<field name="name">MS/BOT Items</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.machine.shop</field>
 			<field name="view_type">form</field>
@@ -143,7 +143,7 @@
 		
 		<!-- Menu Name Start here --> 
 		
-			<menuitem action="mma_machineshop_master" name="MS Items" id="mam_machineshop_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="1"/> 
+			<menuitem action="mma_machineshop_master" name="MS/BOT Items" id="mam_machineshop_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="1"/> 
 			
 		<!-- Menu Name End here --> 
 
