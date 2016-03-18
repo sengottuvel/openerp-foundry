@@ -37,7 +37,7 @@ class kg_service_invoice(osv.osv):
 	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
 		res = {}
 		cur_obj=self.pool.get('res.currency')
-		
+		other_charges_amt = 0
 		for order in self.browse(cr, uid, ids, context=context):
 			res[order.id] = {
 				'amount_untaxed': 0.0,
@@ -49,6 +49,13 @@ class kg_service_invoice(osv.osv):
 			val = val1 = val3 = 0.0
 			cur = order.pricelist_id.currency_id
 			po_charges=order.value1 + order.value2
+			
+			if order.expense_line_id:
+				for item in order.expense_line_id:
+					other_charges_amt += item.expense_amt
+			else:
+				other_charges_amt = 0
+				
 			for line in order.service_invoice_line:
 				tot_discount = line.kg_discount + line.kg_discount_per_value
 				val1 += line.price_subtotal
@@ -56,7 +63,7 @@ class kg_service_invoice(osv.osv):
 				val3 += tot_discount
 			print "po_charges :::", po_charges , "val ::::", val, "val1::::", val1, "val3:::::", val3
 			print "cur_obj............",cur_obj,res[order.id]['other_charge']
-			res[order.id]['other_charge']=(round(po_charges,0))
+			res[order.id]['other_charge']=(round(other_charges_amt,0))
 			res[order.id]['amount_tax']=(round(val,0))
 			res[order.id]['amount_untaxed']=(round(val1,0))
 			res[order.id]['amount_total']=(round(val + val1 + res[order.id]['other_charge'],0))
@@ -121,7 +128,7 @@ class kg_service_invoice(osv.osv):
 		'supplier_invoice_date':fields.date('Supplier Invoice Date', readonly=True, states={'draft': [('readonly', False)]}),
 		'payment_type': fields.selection([('cash', 'Cash'), ('credit', 'Credit')], 'Payment Type',states={'draft':[('readonly',False)]}),
 		'dep_project':fields.many2one('kg.project.master','Dept/Project Name',readonly=True,states={'draft': [('readonly', False)]}),	
-
+		'expense_line_id': fields.one2many('kg.service.invoice.expense.track','expense_id','Expense Track'),
 	
 	}
 	_sql_constraints = [('code_uniq','unique(name)', 'Service Order number must be unique!')]
@@ -340,3 +347,29 @@ class kg_service_invoice_line(osv.osv):
 		
 	
 kg_service_invoice_line()	
+
+
+class kg_service_invoice_expense_track(osv.osv):
+
+	_name = "kg.service.invoice.expense.track"
+	_description = "kg expense track"
+	
+	
+	_columns = {
+		
+		'expense_id': fields.many2one('kg.service.invoice', 'Expense Track'),
+		'name': fields.char('Number', size=128, select=True,readonly=False),
+		'date': fields.date('Creation Date'),
+		'company_id': fields.many2one('res.company', 'Company Name'),
+		'description': fields.char('Description'),
+		'expense_amt': fields.float('Amount'),
+	}
+	
+	_defaults = {
+		
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.service.invoice.expense.entry', context=c),
+		'date' : fields.date.context_today,
+	
+		}
+	
+kg_service_invoice_expense_track()

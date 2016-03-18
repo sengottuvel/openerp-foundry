@@ -98,6 +98,7 @@ class kg_partner(osv.osv):
 	'dealer': fields.boolean('Dealer'),
 	'economic_category': fields.selection([('budget','Budget'),('loyalty','Loyalty')],'Economic Category'),
 	'sector': fields.selection([('cp','CP'),('ip','IP'),('both','Both')],'Sector'),
+	'industry_id': fields.many2one('kg.industry.master','Industry'),
 	'dealer_id': fields.many2one('res.partner','Dealer Name',domain=[('dealer','=',True)]),
 	'remark': fields.text('Approve'),
 	'cancel_remark': fields.text('Cancel Remarks'),

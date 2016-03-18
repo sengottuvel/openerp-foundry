@@ -36,6 +36,15 @@
 								<field name="state" style="width: 30%%" class="att_state_change"/>								
 							</group>
 						</group>
+						<group>
+							<group>	
+								<field name="moc_id"/>
+							</group>
+							<group>												
+								<field name="moc_type"/>												
+							</group>
+							<button name="list_moc" type="object" states="draft,confirmed" string="List MOC Construction" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						</group>
 						<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
 							<group>	
 								<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject','cancel'])]}"/>
@@ -45,6 +54,15 @@
 							</group>
 						</group>
 						<notebook>
+							<page string="MOC Construction &amp; Rate Details">	
+								<field name="line_ids_a" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">
+									<tree string="MOC Rate Details Entry Tree" editable="top" create="false" >	
+										<field name="code"/>								
+										<field name="moc_id"/>										
+										<field name="remarks" widget="char"/>														
+									</tree>
+								</field>																								
+							</page>
 							<page string="Raw Materials">	
 								<field name="line_ids" nolabel="1" >
 									<tree string="Raw Materials Entry Tree" editable="top" >									
@@ -138,7 +156,8 @@
 		</record>
 		
 				
-		<!-- Menu Action End-->	
+		<!-- Menu Action End-->
+		
 		
 		
 		<!-- Menu Name Start here --> 

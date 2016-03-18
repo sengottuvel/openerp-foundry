@@ -34,7 +34,7 @@ class kg_chemical_master(osv.osv):
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
-		
+		'purpose': fields.selection([('foundry','Foundry'),('general','General')],'Purpose'),
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
 		
 		### Entry Info ###

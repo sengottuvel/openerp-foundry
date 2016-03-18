@@ -102,9 +102,21 @@ class kg_contractor_inward(osv.osv):
        ]
 
 	def entry_confirm(self,cr,uid,ids,context=None):		
+		rec = self.browse(cr,uid,ids[0])
+		#inward_obj = self.pool.get('kg.inwardmaster')
+		#brand_obj = self.pool.get('kg.brand.master')
 		cr.execute(''' select count(*) from kg_contractor_inward where state !='draft' ''')
 		data = cr.fetchone()
 		order_by = data[0] + 1		
+		#for item in rec.line_ids:
+		#	print"item.inward_type",item.inward_type.name
+		#	print"item.inward_type.id",item.inward_type.id
+			
+		#	inward_obj.write(cr,uid,item.inward_type.id,{'modify': True})
+		#	brand_obj.write(cr,uid,item.brand_id.id,{'modify': True})
+			
+			
+			
 		self.write(cr, uid, ids, {
 					'state': 'confirm',
 					'conf_user_id': uid,
@@ -112,6 +124,7 @@ class kg_contractor_inward(osv.osv):
 					'name' : self.pool.get('ir.sequence').get(cr, uid, 'kg.contractor.inward'),
 					'orderby_no':order_by,
 					})
+		
 		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):

@@ -21,6 +21,8 @@
 
 
 import kg_inwardmaster
+import wizard
+import test
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
 

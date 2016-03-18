@@ -39,6 +39,7 @@ class kg_moc_construction(osv.osv):
 		'line_ids_c':fields.one2many('ch.moc.consu.details', 'header_id', "Consumable Line"),		
 		
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
+		'type': fields.selection([('slurry','Slurry'),('non_slurry','Non Slurry')],'Type', required=True),
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),

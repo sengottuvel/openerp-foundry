@@ -16,12 +16,12 @@ class kg_transport(osv.osv):
 		'creation_date': fields.datetime('Creation Date', readonly=True),
 		'code': fields.char('Code',required=True,readonly=False, states={'draft':[('readonly',False)]}),
 		'name': fields.char('Transport Name', size=128, required=True, select=True,readonly=True, states={'draft':[('readonly',False)]}),
-		'company_id': fields.many2one('res.company', 'Company Name'),
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'contact_person': fields.char('Contact Person', size=128, required=True, readonly=True, states={'draft':[('readonly',False)]}, select=True),
 		'address': fields.char('Address', size=128),
 		'address1': fields.char('Address1', size=128),
-		'city': fields.char('City', size=128),
-		'zip': fields.char('Zip', size=128),
+		'city_id': fields.many2one('res.city','City', size=128),
+		'zip': fields.integer('Zip', size=128),
 		'mobile': fields.char('Mobile', size=128),
 		'phone': fields.char('Phone', size=128),
 		'email': fields.char('Email', size=128),
@@ -29,14 +29,23 @@ class kg_transport(osv.osv):
 		'country_id': fields.many2one('res.country', 'Country'),
 		'active': fields.boolean('Active'),
 		'int_notes': fields.text('Internal Notes'),
-		'state': fields.selection([('draft','Draft'),('confirm','Confirmed'),('approve','Approved')],'Status',required=True,readonly=True),
-		'confirm_by': fields.many2one('res.users','Confirmed By'),
-		'confirm_date': fields.datetime('Confirmed Date'),
-		'approve_by': fields.many2one('res.users','Approved By'),
-		'approve_date': fields.datetime('Approve Date'),
+		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
+		'confirm_by': fields.many2one('res.users','Confirmed By', readonly=True),
+		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
+		'approve_by': fields.many2one('res.users','Approved By', readonly=True),
+		'approve_date': fields.datetime('Approve Date', readonly=True),
+		'update_date': fields.datetime('Last Updated Date', readonly=True),
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
+		'reject_date': fields.datetime('Reject Date', readonly=True),
+		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
 		'transport_user_id': fields.many2one('res.users','Transport User'),
 		'rules': fields.text('Rules'),
 		'line_id': fields.one2many('kg.transport.line','header_id', 'Transport Line'),
+		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
+		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
+		'notes': fields.text('Notes'),
+		'remark': fields.text('Approve/Reject'),
+		'cancel_remark': fields.text('Cancel Remarks'),
 		
 	}
 	
@@ -61,6 +70,27 @@ class kg_transport(osv.osv):
 	#	('code', 'unique(code)', 'Transport Code must be unique per Company !!'),
 	#]
 	
+	def onchange_zip(self,cr,uid,ids,zip,context=None):
+		if len(str(zip)) == 6:
+			value = {'zip':zip}
+		else:
+			raise osv.except_osv(_('Check zip number !!'),
+				_('Please enter six digit number !!'))
+		
+		return {'value': value}
+	
+	def onchange_city(self, cr, uid, ids, city_id, context=None):
+		if city_id:
+			state_id = self.pool.get('res.city').browse(cr, uid, city_id, context).state_id.id
+			return {'value':{'state_id':state_id}}
+		return {}
+	
+	def onchange_state(self, cr, uid, ids, state_id, context=None):
+		if state_id:
+			country_id = self.pool.get('res.country.state').browse(cr, uid, state_id, context).country_id.id
+			return {'value':{'country_id':country_id}}
+		return {}
+				
 	def create(self, cr, uid, vals,context=None):		
 		if vals.get('code','/')=='/':
 			vals['code'] = self.pool.get('ir.sequence').get(cr, uid, 'kg.transport') or '/'
@@ -70,25 +100,47 @@ class kg_transport(osv.osv):
 	def confirm_transport(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		cur_date = datetime.datetime.now()
-		self.write(cr,uid,ids,{'state': 'confirm','confirm_by': uid, 'confirm_date': cur_date})
+		self.write(cr,uid,ids,{'state': 'confirmed','confirm_by': uid, 'confirm_date': cur_date})
 		return True
 		
 	def approve_transport(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		cur_date = datetime.datetime.now()
-		self.write(cr,uid,ids,{'state': 'approve','approve_by': uid, 'approve_date': cur_date})
+		self.write(cr,uid,ids,{'state': 'approved','approve_by': uid, 'approve_date': cur_date})
+		return True
+		
+	def entry_reject(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.remark:
+			self.write(cr, uid, ids, {'state': 'reject','rej_user_id': uid, 'reject_date': dt_time})
+		else:
+			raise osv.except_osv(_('Rejection remark is must !!'),
+				_('Enter rejection remark in remark field !!'))
 		return True
 	
-	def unlink(self,cr,uid,ids,context = None):
-		unlink_ids = []		
-		for rec in self.browse(cr,uid,ids):	
-			if rec.state != 'draft':			
-				raise osv.except_osv(_('Warning!'),
-						_('You can not delete this entry !!'))
-			else:
-				unlink_ids.append(rec.id)
-		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
-		
+	def entry_cancel(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.cancel_remark:
+			self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': dt_time})
+		else:
+			raise osv.except_osv(_('Cancel remark is must !!'),
+				_('Enter the remarks in Cancel remarks field !!'))
+		return True
+			
+	def unlink(self,cr,uid,ids,context=None):
+		raise osv.except_osv(_('Warning!'),
+				_('You can not delete Entry !!'))		
+	
+	def write(self, cr, uid, ids, vals, context=None):	
+		if len(str(vals['zip'])) == 6:
+			pass
+		else:
+			raise osv.except_osv(_('Check zip number !!'),
+				_('Please enter six digit number !!'))
+				
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(kg_transport, self).write(cr, uid, ids, vals, context)
+			
 	"""			   
 	def delete_transport(self,cr,uid,ids,context = None):
 		unlink_ids = []		
@@ -107,6 +159,7 @@ class kg_transport(osv.osv):
 		raise osv.except_osv(_('Warning!'),
 				_('You can not delete Entry !!'))	
 	"""	
+	
 kg_transport()
 
 
@@ -123,56 +176,7 @@ class kg_transport_line(osv.osv):
 		'branch': fields.char('Branch', size=128),
 		'phone': fields.char('Phone'),
 		'mobile': fields.char('Mobile'),
-	
 		
 	}
-	
-	def call_from_device(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])
-		if not rec.mobile:
-			raise osv.except_osv(_('Please Check Mobile Number !!!'),
-				_('Please Enter Mobile Number For The Transport !!'))
-		else:
-			mob_no = str(rec.mobile)
-			mob_no = mob_no.split('/', 1 )
-			mob_no = str(mob_no[0])
-			user_rec = self.pool.get('res.users').browse(cr,uid,uid)
-			exe_no = str(user_rec.ext_no)		
-			#url = 'http://192.168.1.150/pbxclick2call.php?exten='+exe_no+'&phone='+mob_no
-			url = 'http://192.168.1.150:81/pbxclick2call.php?exten='+exe_no+'&phone='+mob_no
-			#url = 'http://cloud.kgisl.com/gayathri_click_to_call.php?id=123&date=2014-12-29&time=21:30&ioflag=IN&macno=01'	
-			print "url..................................", url
-			
-			return {
-						  'name'     : 'Go to website',
-						  'res_model': 'ir.actions.act_url',
-						  'type'     : 'ir.actions.act_url',
-						  'target'   : 'current',
-						  'url'      : url
-				   }
-	
-	def call_from_device_hardphone(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])
-		if not rec.mobile:
-			raise osv.except_osv(_('Please Check Mobile Number !!!'),
-				_('Please Enter Mobile Number For The Transport !!'))
-		else:
-			mob_no = str(rec.mobile)
-			mob_no = mob_no.split('/', 1 )
-			mob_no = str(mob_no[0])
-			user_rec = self.pool.get('res.users').browse(cr,uid,uid)
-			exe_no = str(user_rec.ext_no2)		
-			#url = 'http://192.168.1.150/pbxclick2call.php?exten='+exe_no+'&phone='+mob_no
-			url = 'http://192.168.1.150:81/pbxclick2call.php?exten='+exe_no+'&phone='+mob_no
-			#url = 'http://cloud.kgisl.com/gayathri_click_to_call.php?id=123&date=2014-12-29&time=21:30&ioflag=IN&macno=01'	
-			print "url..................................", url
-			
-			return {
-						  'name'     : 'Go to website',
-						  'res_model': 'ir.actions.act_url',
-						  'type'     : 'ir.actions.act_url',
-						  'target'   : 'current',
-						  'url'      : url
-				   }
 
 kg_transport_line()

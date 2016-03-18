@@ -136,9 +136,9 @@ class ch_brandmoc_rate_details(osv.osv):
 	_columns = {
 			
 		'header_id':fields.many2one('kg.brandmoc.rate', 'Brand MOC Entry', required=True, ondelete='cascade'),	
-		'brand_id': fields.many2one('kg.brand.master','Brand', required=True),			
-		'moc_id':fields.many2one('kg.moc.master','MOC', required=True),	
-		'rate':fields.float('Rate',required=True),
+		'brand_id': fields.many2one('kg.brand.master','Brand'),			
+		'moc_id':fields.many2one('kg.moc.master','MOC'),	
+		'rate':fields.float('Design Rate(Rs)',required=True),
 		'remarks':fields.text('Remarks'),		
 	}
 	

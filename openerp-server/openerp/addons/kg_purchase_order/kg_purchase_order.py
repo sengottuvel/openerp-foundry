@@ -47,6 +47,7 @@ class kg_purchase_order(osv.osv):
 		logger.info('[KG OpenERP] Class: kg_purchase_order, Method: _amount_all called...')
 		res = {}
 		cur_obj=self.pool.get('res.currency')
+		other_charges_amt = 0
 		for order in self.browse(cr, uid, ids, context=context):
 			res[order.id] = {
 				'amount_untaxed': 0.0,
@@ -58,6 +59,13 @@ class kg_purchase_order(osv.osv):
 			val = val1 = val3 = 0.0
 			cur = order.pricelist_id.currency_id
 			po_charges=order.value1 + order.value2
+			
+			if order.expense_line_id:
+				for item in order.expense_line_id:
+					other_charges_amt += item.expense_amt
+			else:
+				other_charges_amt = 0
+				
 			pol = self.pool.get('purchase.order.line')
 			for line in order.order_line:
 				tot_discount = line.kg_discount + line.kg_discount_per_value
@@ -65,7 +73,7 @@ class kg_purchase_order(osv.osv):
 				#for c in self.pool.get('account.tax').compute_all(cr, uid, line.taxes_id, line.price_unit, line.product_qty, line.product_id, order.partner_id)['taxes']:
 				val += self._amount_line_tax(cr, uid, line, context=context)
 				val3 += tot_discount
-			res[order.id]['other_charge']= po_charges or 0
+			res[order.id]['other_charge']= other_charges_amt or 0
 			res[order.id]['amount_tax']=(round(val,0))
 			res[order.id]['amount_untaxed']=(round(val1,0)) - (round(val,0)) + (round(val3,0))
 			res[order.id]['discount']=(round(val3,0))
@@ -152,6 +160,7 @@ class kg_purchase_order(osv.osv):
 		'frieght_flag':fields.boolean('Expiry Flag'),
 		'version':fields.char('Version'),
 		'purpose':fields.selection([('for_sale','For Sale'),('own_use','Own use')], 'Purpose'), 
+		'expense_line_id': fields.one2many('kg.purchase.order.expense.track','expense_id','Expense Track',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		
 	}
 	
@@ -1043,12 +1052,7 @@ class kg_purchase_order_line(osv.osv):
 	
 		return data
 			
-			
-			
 		
-	
-		
-	
 kg_purchase_order_line()
 
 class kg_po_line(osv.osv):
@@ -1072,8 +1076,30 @@ class kg_po_line(osv.osv):
 	
 kg_po_line()
 
+
+class kg_purchase_order_expense_track(osv.osv):
+
+	_name = "kg.purchase.order.expense.track"
+	_description = "kg expense track"
 	
-
-
+	
+	_columns = {
+		
+		'expense_id': fields.many2one('purchase.order', 'Expense Track'),
+		'name': fields.char('Number', size=128, select=True,readonly=False),
+		'date': fields.date('Creation Date'),
+		'company_id': fields.many2one('res.company', 'Company Name'),
+		'description': fields.char('Description'),
+		'expense_amt': fields.float('Amount'),
+	}
+	
+	_defaults = {
+		
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.purchase.order.expense.track', context=c),
+		'date' : fields.date.context_today,
+	
+		}
+	
+kg_purchase_order_expense_track()
 
 

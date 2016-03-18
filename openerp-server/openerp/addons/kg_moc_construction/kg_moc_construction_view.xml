@@ -20,11 +20,12 @@
 						<group>
 							<group>						
 								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
-								<field name="active"/>
+								<field name="type"/>
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 							</group>
 							<group>
-								<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+								<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="active"/>								
 								<field name="state" style="width: 30%%" class="att_state_change"/>								
 							</group>
 						</group>						
@@ -164,8 +165,9 @@
 		</record>	
 		
 		
-		<!-- Menu Action End-->      
-    
+		<!-- Menu Action End-->
+		
+		
 		
 		<!-- Menu Name Start here --> 
 		

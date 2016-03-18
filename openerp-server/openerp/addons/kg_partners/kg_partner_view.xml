@@ -39,6 +39,7 @@
 		<field name="cheque_in_favour"/>
 		<field name="economic_category" attrs="{'invisible':['|',('supplier','=',True),('dealer','=',True)]}"/>
 		<field name="dealer_id"  attrs="{'invisible':['|',('supplier','=',True),('dealer','=',True)]}"/>
+		<field name="industry_id" />
 		</field>
 		<field name="ean13" position="replace">
 		<field name="company_type"/>

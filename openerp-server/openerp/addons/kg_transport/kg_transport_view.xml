@@ -10,45 +10,75 @@
 				<form string="Transport Master" version="7.0">	
 				<header>			
 				<button name="confirm_transport" states="draft" string="Confirm" type="object" class="oe_highlight"/>	
-				<button name="approve_transport" states="confirm" string="Approve" type="object" class="oe_highlight"/>
+				<button name="approve_transport" states="confirmed" string="Approve" type="object" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+				<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+				<button name="entry_cancel" type="object" string="Cancel" states="approved" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 				<!--<button name="delete_transport" type="object" string="Delete Transport" />	-->
 				</header>
 					<group>
 						<group>						
-							<field name="code"/>
-							<field name="name"/>
-							<field name="contact_person"/>						
-							<field name="mobile"/>						
-							<field name="phone"/>						
-							<field name="email"/>	
-							<field name="transport_user_id"/>	
-							<field name="rules"/>					
+							<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="contact_person" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="mobile" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="phone" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="email" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="transport_user_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="rules" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 						</group>
 						<group>
-							<field name="creation_date"/>
-							<field name="created_by"/>
-							<field name="address"/>
-							<field name="address1"/>
-							<field name="city"/>
-							<field name="zip"/>
-							<field name="state_id"/>
-							<field name="country_id"/>
-							<field name="state"/>
+							<field name="address" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="address1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="city_id" on_change="onchange_city(city_id)" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="state_id" on_change="onchange_state(state_id)" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="country_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="zip" on_change="onchange_zip(zip)" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="active"/>
+							<field name="state" style="width: 30%%" class="att_state_change"/>
+						</group>
+					</group>
+					<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
+						<group>	
+							<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+						</group>
+						<group>												
+							<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])], 'readonly': [('state','in',['cancel'])]}"/>												
 						</group>
 					</group>
 					<notebook>
 					<page string="Additional Contacts">
-					<field colspan="4" mode="tree" name="line_id" nolabel="1" widget="one2many_list" >
+					<field name="line_id" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">
 						<tree string="Enquiry Line" editable="bottom"> 
 							<field name="name" />
 							<field name="position" />
 							<field name="branch"/>
 							<field name="phone"/>
 							<field name="mobile"/>	
-							<button name="call_from_device" type="object" string="Call" icon="click_call"/>
-							<button name="call_from_device_hardphone" type="object" string="Call" icon="click_call_hardphone"/>					
 						</tree>		
 					</field>
+					</page>
+					<page string="Entry Info">
+						<group>
+							<field name="company_id"/>
+						</group>
+						<group>
+						<group>
+							<field name="created_by"/>
+							<field name="confirm_by" attrs="{'invisible':[('state','in',['draft'])]}"/>
+							<field name="approve_by" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])]}"/>
+							<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
+							<field name="rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','approved','cancel'])]}"/>
+							<field name="update_user_id"/>
+						</group>
+						<group>
+							<field name="creation_date"/>
+							<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+							<field name="approve_date" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])]}"/>
+							<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
+							<field name="reject_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','approved','cancel'])]}"/>
+							<field name="update_date"/>
+						</group>
+						</group>
 					</page>
 					</notebook>
 					<field name="int_notes" placeholder="Internal Notes..."/>
@@ -61,14 +91,15 @@
 			<field name="model">kg.transport</field>
 			<field name="arch" type="xml">
 			<!--	<tree toolbar="True" string="Transport Master">-->
-				<tree colors="red:state == 'draft';blue:state == 'approve'" 
+				<tree colors="blue:state == 'draft';red:state == 'confirmed'
+						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" 
 								string="Transport Type" toolbar="1" >
 					<field name="code"/>
 					<field name="name"/>
 					<field name="contact_person"/>
 					<field name="transport_user_id"/>
 					<field name="mobile"/>
-					<field name="city"/>
+					<field name="city_id"/>
 					<field name="state_id"/>
 					<field name="state"/>
 					<field name="created_by" invisible="1"/>
@@ -84,11 +115,12 @@
 					<field name="name" string="Transport Name" filter_domain="[('name','ilike',self)]" />
 					<field name="code" string="Code" filter_domain="[('code','ilike',self)]" />
 					<filter icon="terp-check" name="state" string="Draft" domain="[('state','=','draft')]"/>
-					<filter icon="terp-check" name="state" string="Confirmed" domain="[('state','=','confirm')]"/>
-					<filter icon="terp-check" name="state" string="Approved" domain="[('state','=','approve')]"/>
+					<filter icon="terp-check" name="state" string="Confirmed" domain="[('state','=','confirmed')]"/>
+					<filter icon="terp-check" name="state" string="Approved" domain="[('state','=','approved')]"/>
+					<filter icon="terp-check" name="state" string="Rejected" domain="[('state','=','reject')]"/>
                     <group expand="0" string="Group By...">
                         <filter string="Created By" icon="terp-personal" domain="[]" context="{'group_by':'created_by'}"/>
-                        <filter string="City" icon="terp-personal" domain="[]" context="{'group_by':'city'}"/>
+                        <filter string="City" icon="terp-personal" domain="[]" context="{'group_by':'city_id'}"/>
                         <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
 					</group>
                 </search>

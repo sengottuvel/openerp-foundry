@@ -22,6 +22,10 @@
 from openerp.osv import fields, osv
 import time
 from datetime import date
+from datetime import datetime
+
+a = datetime.now()
+dt_time = a.strftime('%m/%d/%Y %H:%M:%S')
 
 def location_name_search(self, cr, user, name='', args=None, operator='ilike',
 						 context=None, limit=100):
@@ -44,6 +48,20 @@ def location_name_search(self, cr, user, name='', args=None, operator='ilike',
 class Country(osv.osv):
 	_name = 'res.country'
 	_description = 'Country'
+	
+	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
+		res={}
+		trans_obj = self.pool.get('kg.transport')
+		partner_obj = self.pool.get('res.partner')
+		for h in self.browse(cr, uid, ids, context=None):
+			res[h.id] = 'no'
+			trans_ids = trans_obj.search(cr,uid,[('city_id','=',h.id)])
+			partner_ids = partner_obj.search(cr,uid,[('city_id','=',h.id)])
+			if trans_ids or partner_ids:
+				res[h.id] = 'yes'
+		print "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",res
+		return res
+		
 	_columns = {
 		'name': fields.char('Country Name', size=64,
 			help='The full name of the country.', required=True, translate=True),
@@ -58,7 +76,27 @@ addresses belonging to this country.\n\nYou can use the python-style string pate
 			\n%(country_name)s: the name of the country
 			\n%(country_code)s: the code of the country"""),
 		'currency_id': fields.many2one('res.currency', 'Currency'),
+		'active': fields.boolean('Active'),
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
+		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
+		'creation_date':fields.datetime('Creation Date',readonly=True),
+		'approve_date': fields.datetime('Approved Date', readonly=True),
+		'app_user_id': fields.many2one('res.users', 'Apprved By', readonly=True),
+		'confirm_date': fields.datetime('Confirm Date', readonly=True),
+		'conf_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
+		'reject_date': fields.datetime('Reject Date', readonly=True),
+		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
+		'update_date': fields.datetime('Last Updated Date', readonly=True),
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
+		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
+		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
+		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
+		'remark': fields.text('Approve/Reject'),
+		'cancel_remark': fields.text('Cancel Remarks'),
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
+		
 	}
+	
 	_sql_constraints = [
 		('name_uniq', 'unique (name)',
 			'The name of the country must be unique !'),
@@ -66,7 +104,15 @@ addresses belonging to this country.\n\nYou can use the python-style string pate
 			'The code of the country must be unique !')
 	]
 	_defaults = {
+	
 		'address_format': "%(street)s\n%(street2)s\n%(city)s %(state_code)s %(zip)s\n%(country_name)s",
+		'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'res.country', context=c),
+		'active': True,
+		'state': 'draft',
+		'user_id': lambda obj, cr, uid, context: uid,
+		'modify': 'no',
+		
 	}
 	_order='name'
 
@@ -88,6 +134,21 @@ addresses belonging to this country.\n\nYou can use the python-style string pate
 class CountryState(osv.osv):
 	_description="Country state"
 	_name = 'res.country.state'
+	
+	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
+		res={}
+		trans_obj = self.pool.get('kg.transport')
+		partner_obj = self.pool.get('res.partner')
+		for h in self.browse(cr, uid, ids, context=None):
+			res[h.id] = 'no'
+			trans_ids = trans_obj.search(cr,uid,[('city_id','=',h.id)])
+			partner_ids = partner_obj.search(cr,uid,[('city_id','=',h.id)])
+			if trans_ids or partner_ids:
+				res[h.id] = 'yes'
+		print "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",res
+		return res
+		
+		
 	_columns = {
 		
 		'country_id': fields.many2one('res.country', 'Country',
@@ -114,7 +175,8 @@ class CountryState(osv.osv):
 		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
-		   
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
+		
 	}
 	_order = 'code'
 	
@@ -125,6 +187,7 @@ class CountryState(osv.osv):
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'res.country.state', context=c),
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
+		'modify': 'no',
 		
 	}
 	
@@ -137,7 +200,11 @@ class CountryState(osv.osv):
 	def entry_approve(self,cr,uid,ids,context=None):
 		self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': dt_time})
 		return True
-
+	
+	def entry_draft(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'draft'})
+		return True
+		
 	def entry_reject(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.remark:
@@ -167,6 +234,20 @@ class CountryState(osv.osv):
 class res_city(osv.osv):
 	_name = 'res.city'
 	_description = 'city'
+	
+	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
+		res={}
+		trans_obj = self.pool.get('kg.transport')
+		partner_obj = self.pool.get('res.partner')
+		for h in self.browse(cr, uid, ids, context=None):
+			res[h.id] = 'no'
+			trans_ids = trans_obj.search(cr,uid,[('city_id','=',h.id)])
+			partner_ids = partner_obj.search(cr,uid,[('city_id','=',h.id)])
+			if trans_ids or partner_ids:
+				res[h.id] = 'yes'
+		print "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",res
+		return res
+		
 	_columns = {
 	
 		'country_id': fields.many2one('res.country','Country',required=True),
@@ -190,6 +271,7 @@ class res_city(osv.osv):
 		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
 		
 	}
 	
@@ -207,6 +289,7 @@ class res_city(osv.osv):
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'res.city', context=c),
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
+		'modify': 'no',
 		
 	}
 	
@@ -231,7 +314,11 @@ class res_city(osv.osv):
 	def entry_approve(self,cr,uid,ids,context=None):
 		self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': dt_time})
 		return True
-
+	
+	def entry_draft(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'draft'})
+		return True
+		
 	def entry_reject(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.remark:

@@ -62,6 +62,8 @@ class kg_pattern_master(osv.osv):
 		'delivery_lead': fields.integer('Delivery Lead Time(Weeks)', size=128),
 		'csd_code': fields.char('CSD Code No.', size=128),
 		'making_cost': fields.float('Pattern Making Cost'),
+		'moc_type': fields.selection([('slurry','Slurry'),('non_slurry','Non Slurry')],'Type', required=True),
+		'moc_id': fields.many2one('kg.moc.master','Default MOC', required=True,domain="[('state','=','approved'), ('active','=','t')]" ),			
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -122,7 +124,19 @@ class kg_pattern_master(osv.osv):
 				res = True				
 		return res
 			
-	
+	def list_moc(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])		
+		moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('type','=',rec.moc_type)]))		
+		cr.execute(""" delete from ch_mocwise_rate where header_id  = %s """ %(ids[0]))
+		for item in moc_const_obj:			
+			moc_const_rec = self.pool.get('kg.moc.construction').browse(cr,uid,item)				
+			line = self.pool.get('ch.mocwise.rate').create(cr,uid,{
+			       'header_id':rec.id,
+				   'moc_id':rec.moc_id.id,
+				   'code':moc_const_rec.code,
+				   'rate':rec.moc_id.rate,
+				   'pro_cost':rec.moc_id.pro_cost})				
+		return True
 		
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -135,7 +149,12 @@ class kg_pattern_master(osv.osv):
 		return True
 
 	def entry_confirm(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])
+		rec = self.browse(cr,uid,ids[0])				
+		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		return True
+
+	def entry_approve(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])				
 		moc_rate_lines=rec.line_ids	
 		moc_obj=self.pool.get('kg.moc.master')	
 		for moc_rate_item in moc_rate_lines:			
@@ -160,11 +179,7 @@ class kg_pattern_master(osv.osv):
 					}
 				self.pool.get('ch.mocwise.rate').write(cr,uid,moc_rate_item.id,vals)	
 			else:
-				pass			
-		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		return True
-
-	def entry_approve(self,cr,uid,ids,context=None):
+				pass	
 		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 	
@@ -215,40 +230,23 @@ class ch_mocwise_rate(osv.osv):
 	_columns = {
 			
 		'header_id':fields.many2one('kg.pattern.master', 'Pattern Entry', required=True, ondelete='cascade'),	
-		'moc_id': fields.many2one('kg.moc.master','MOC', required=True,domain="[('state','=','approved'), ('active','=','t')]" ),			
-		'date':fields.date('Effective Date',required=True),
-		'rate':fields.float('Rate(Rs)',required=True),
-		'amount':fields.float('Amount(Rs)'),
+		'moc_id': fields.many2one('kg.moc.master','MOC', required=True,domain="[('state','=','approved'), ('active','=','t')]" ),		
+		'code':fields.char('MOC Construction Code'),
+		'rate':fields.float('Design Rate(Rs)',required=True),
+		'amount':fields.float('Design Amount(Rs)'),
+		'pro_cost':fields.float('Production Cost(Rs)'),
 		'remarks':fields.text('Remarks'),
 		
 	}
 	
-	def _future_entry_date_check(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])
-		today = date.today()
-		today = str(today)
-		today = datetime.strptime(today, '%Y-%m-%d')
-		entry_date = rec.date
-		entry_date = str(entry_date)
-		entry_date = datetime.strptime(entry_date, '%Y-%m-%d')
-		if entry_date > today:
-			return False
-		return True
-		
-	_constraints = [		
-			  
-		
-		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),   
-		
-		
-	   ]
+	
 	   
 	def onchange_rate(self, cr, uid, ids, moc_id, context=None):
 		
-		value = {'rate': ''}
+		value = {'rate': '','pro_cost':''}
 		if moc_id:
 			moc_rec = self.pool.get('kg.moc.master').browse(cr, uid, moc_id, context=context)
-			value = {'rate': moc_rec.rate}			
+			value = {'rate': moc_rec.rate,'pro_cost':moc_rec.pro_cost}			
 		return {'value': value}
 		
 	def create(self, cr, uid, vals, context=None):
@@ -256,15 +254,17 @@ class ch_mocwise_rate(osv.osv):
 		if vals.get('moc_id'):		  
 			moc_rec = moc_obj.browse(cr, uid, vals.get('moc_id') )
 			moc_name = moc_rec.rate
-			vals.update({'rate': moc_name})
+			pro_cost = moc_rec.pro_cost
+			vals.update({'rate': moc_name,'pro_cost':pro_cost})
 		return super(ch_mocwise_rate, self).create(cr, uid, vals, context=context)
 		
 	def write(self, cr, uid, ids, vals, context=None):
-		mech_obj = self.pool.get('kg.moc.master')
+		moc_obj = self.pool.get('kg.moc.master')
 		if vals.get('moc_id'):
 			moc_rec = moc_obj.browse(cr, uid, vals.get('moc_id') )
 			moc_name = moc_rec.rate
-			vals.update({'rate': moc_name})
+			pro_cost = moc_rec.pro_cost
+			vals.update({'rate': moc_name,'pro_cost':pro_cost})
 		return super(ch_mocwise_rate, self).write(cr, uid, ids, vals, context)  
 		
 ch_mocwise_rate()

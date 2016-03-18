@@ -41,8 +41,8 @@
 							<page string="Brand MOC Rate Details">	
 								<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire'])]}">
 									<tree string="Brand Moc Rate Details Entry Tree" editable="top" >									
-										<field name="brand_id" />											
-										<field name="moc_id" />	
+										<field name="brand_id" attrs="{'required':[('moc_id','=',False)]}"/>											
+										<field name="moc_id" attrs="{'required':[('brand_id','=',False)]}"/>	
 										<field name="rate" />
 										<field name="remarks" widget="char"/>														
 									</tree>
@@ -131,7 +131,9 @@
 		</record>
 		
 				
-		<!-- Menu Action End-->		
+		<!-- Menu Action End-->
+		
+		
 		
 		<!-- Menu Name Start here --> 
 		

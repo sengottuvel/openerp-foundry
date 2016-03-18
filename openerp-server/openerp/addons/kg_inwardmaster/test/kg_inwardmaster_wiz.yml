@@ -1,0 +1,23 @@
+-
+  I check that Initially customer invoice state is "Draft"
+-
+  !assert {model: kg.inwardmaster, id: kg_inwardmaster_wiz}:
+    - state == 'draft'
+-
+  I called the "Confirm Draft Invoices" wizard
+-
+  !record {model: kg.inwardmaster.confirm, id: kg_inwardmaster_confirm_0}:
+    {}
+-
+  I clicked on Confirm Invoices Button
+-
+  !python {model: kg.inwardmaster.confirm}: |
+    self.inwardmaster_confirm(cr, uid, [ref("kg_inwardmaster_confirm_0")], {"lang": 'en_US',
+      "tz": False, "active_model": "kg.inwardmaster", "active_ids": [ref("kg_inwardmaster_wiz")],
+      "type": "out_invoice", "active_id": ref("kg_inwardmaster_wiz"), })
+-
+  I check that customer invoice state is "Open"
+-
+  !assert {model: kg.inwardmaster, id: kg_inwardmaster_wiz}:
+    - state == 'confirmed'
+

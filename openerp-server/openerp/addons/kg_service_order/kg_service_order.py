@@ -42,6 +42,7 @@ class kg_service_order(osv.osv):
 	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
 		res = {}
 		cur_obj=self.pool.get('res.currency')
+		other_charges_amt = 0
 		for order in self.browse(cr, uid, ids, context=context):
 			res[order.id] = {
 				'amount_untaxed': 0.0,
@@ -53,15 +54,22 @@ class kg_service_order(osv.osv):
 			val = val1 = val3 = 0.0
 			cur = order.pricelist_id.currency_id
 			po_charges=order.value1 + order.value2
+			
+			if order.expense_line_id:
+				for item in order.expense_line_id:
+					other_charges_amt += item.expense_amt
+			else:
+				other_charges_amt = 0
+				
 			for line in order.service_order_line:
 				tot_discount = line.kg_discount + line.kg_discount_per_value
 				val1 += line.price_subtotal
 				val += self._amount_line_tax(cr, uid, line, context=context)
 				val3 += tot_discount
-			res[order.id]['other_charge']=(round(po_charges,0))
+			res[order.id]['other_charge']=(round(other_charges_amt,0))
 			res[order.id]['amount_tax']=(round(val,0))
 			res[order.id]['amount_untaxed']=(round(val1,0))
-			res[order.id]['amount_total']=res[order.id]['amount_untaxed'] + res[order.id]['amount_tax'] 
+			res[order.id]['amount_total']=res[order.id]['amount_untaxed'] + res[order.id]['amount_tax'] + res[order.id]['other_charge']
 			res[order.id]['discount']=(round(val3,0))
 		return res
 		
@@ -168,6 +176,7 @@ class kg_service_order(osv.osv):
 		'confirmed_date': fields.date('Confirmed Date'),
 		'payment_type': fields.selection([('cash', 'Cash'), ('credit', 'Credit')], 'Payment Type',readonly=True,states={'draft':[('readonly',False)]}),
 		'version':fields.char('Version'),
+		'expense_line_id': fields.one2many('kg.service.order.expense.track','expense_id','Expense Track'),
 		
 	}
 	#_sql_constraints = [('code_uniq','unique(name)', 'Service Order number must be unique!')]
@@ -259,7 +268,7 @@ class kg_service_order(osv.osv):
 		supplier_address = partner.address_get(cr, uid, [partner_id], ['default'])
 		supplier = partner.browse(cr, uid, partner_id)
 		street = supplier.street or ''
-		city = supplier.city.name or ''
+		city = supplier.city_id.name or ''
 		address = street+ city or ''
 
 		return {'value': {
@@ -430,7 +439,7 @@ class kg_service_order(osv.osv):
 		self.pool.get('kg.service.order.line').unlink(cr, uid, indent_lines_to_del)
 		osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
 		return True
-
+	"""
 	def kg_email_attachment(self,cr,uid,ids,context=None):
 		ir_model_data = self.pool.get('ir.model.data')
 		email_tmp_obj = self.pool.get('email.template')
@@ -461,6 +470,7 @@ class kg_service_order(osv.osv):
                     }, context=context)
 			
 			self.send_mail(cr,uid,ids,attachment_id,template,context)
+	"""
 	
 	def send_mail(self, cr, uid, ids,attachment_id,template,context=None):
 		ir_attachment_obj = self.pool.get('ir.attachment')
@@ -629,12 +639,13 @@ class kg_service_order(osv.osv):
 		
 		if line_rec:
 			
-			cr.execute("""select all_daily_auto_scheduler_mails('SO Register')""")
-			data = cr.fetchall();
-			cr.execute("""select trim(TO_CHAR(round(sum(amount_total),2)::float, '999G999G99G999G99G99G990D99')) as sum
-							from kg_service_order where 	
-							to_char(kg_service_order.approved_date,'dd-mm-yyyy') = '%s' and
-							kg_service_order.state in ('approved')"""%(time.strftime('%d-%m-%Y')))
+			#cr.execute("""select all_daily_auto_scheduler_mails('SO Register')""")
+			#data = cr.fetchall();
+			#cr.execute("""select trim(TO_CHAR(round(sum(amount_total),2)::float, '999G999G99G999G99G99G990D99')) as sum
+			#				from kg_service_order where 	
+			#				to_char(kg_service_order.approved_date,'dd-mm-yyyy') = '%s' and
+			#				kg_service_order.state in ('approved')"""%(time.strftime('%d-%m-%Y')))
+			"""Raj
 			total_sum = cr.dictfetchall();
 			
 			db = db[0]['current_database'].encode('utf-8')
@@ -654,6 +665,7 @@ class kg_service_order(osv.osv):
 						subtype = 'html',
 						subtype_alternative = 'plain')
 				res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
+			"""
 		else:
 			pass		
 				
@@ -763,3 +775,30 @@ class kg_service_order_line(osv.osv):
 		
 	
 kg_service_order_line()	
+
+
+
+class kg_service_order_expense_track(osv.osv):
+
+	_name = "kg.service.order.expense.track"
+	_description = "kg expense track"
+	
+	
+	_columns = {
+		
+		'expense_id': fields.many2one('kg.service.order', 'Expense Track'),
+		'name': fields.char('Number', size=128, select=True,readonly=False),
+		'date': fields.date('Creation Date'),
+		'company_id': fields.many2one('res.company', 'Company Name'),
+		'description': fields.char('Description'),
+		'expense_amt': fields.float('Amount'),
+	}
+	
+	_defaults = {
+		
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.service.order.expense.entry', context=c),
+		'date' : fields.date.context_today,
+	
+		}
+	
+kg_service_order_expense_track()

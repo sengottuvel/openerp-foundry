@@ -33,7 +33,11 @@ related requisition. This new object will regroup and will allow you to easily
 keep track and order all your purchase orders.
 """,
     'depends' : ['base'],
-    'data': ['kg_inwardmaster_view.xml'],
+    'data': ['kg_inwardmaster_view.xml','wizard/kg_inwardmaster_wiz_view.xml'],
+     'test': [
+        'test/kg_inwardmaster_wiz.yml',
+        
+    ],
     'auto_install': False,
     'installable': True,
 }

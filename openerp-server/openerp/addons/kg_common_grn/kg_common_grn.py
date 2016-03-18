@@ -67,23 +67,19 @@ class kg_common_grn(osv.osv):
 		cr.execute(sql_delete)
 		
 		sql="""select gg.name as grn_no,gg.grn_date as grn_date,gg.order_no as order_no,gg.order_date as order_date,
-			ac.name as invoice_no,ac.date_invoice as invoice_date,
 			gg.dc_no as dc_no,gg.dc_date as dc_date,
 			gg.payment_type,
 			gg.supplier_id as supplier,gg.remark as remark,gg.state as state
 			from kg_general_grn gg 
-			left join account_invoice ac on (ac.grn_id=gg.id)
 			where gg.state != 'draft' """ + supplier + payment + """ 
 			
 			union
 			
 			select gg.name as grn_no,gg.grn_date as grn_date,gg.order_no as order_no,gg.order_date as order_date,
-			ac.name as invoice_no,ac.date_invoice as invoice_date,
 			gg.dc_no as dc_no,gg.dc_date as dc_date,
 			gg.payment_type,
 			gg.supplier_id as supplier,gg.po_so_remark as remark,gg.state as state
 			from kg_po_grn gg 
-			left join account_invoice ac on (ac.grn_id=gg.id)
 			where gg.state != 'draft' """+ supplier + payment + """ """
 		cr.execute(sql)
 		data = cr.dictfetchall()

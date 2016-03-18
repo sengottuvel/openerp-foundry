@@ -1,0 +1,31 @@
+<openerp>
+    <data>
+
+        <record id="kg_inwardmaster_confirm_view" model="ir.ui.view">
+            <field name="name">inwardmaster.confirm.form</field>
+            <field name="model">kg.inwardmaster.confirm</field>
+            <field name="arch" type="xml">
+                <form string="Inward Confirm" version="7.0">
+					<label for="remark"></label>
+					<field name="remark"/>
+                    <p class="oe_grey">
+                        Once draft entries are approved, you will not be able
+                        to modify them. 
+                    </p>
+                    <footer>
+                        <button string="Confirm" name="inwardmaster_confirm" type="object" default_focus="1" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <act_window id="action_kg_inwardmaster_confirm"
+            multi="True"
+            key2="client_action_multi" name="Confirm Draft Entries"
+            res_model="kg.inwardmaster.confirm" src_model="kg.inwardmaster"
+            view_mode="form" target="new" view_type="form" />
+
+    </data>
+</openerp>

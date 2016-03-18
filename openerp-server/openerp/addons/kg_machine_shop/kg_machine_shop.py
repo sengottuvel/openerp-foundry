@@ -41,6 +41,7 @@ class kg_machine_shop(osv.osv):
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
 		'line_ids':fields.one2many('ch.ms.raw.material', 'header_id', "Raw Materials"),
+		'line_ids_a':fields.one2many('ch.machine.mocwise', 'header_id', "Machine Shop MOC Wise"),
 		
 		'csd_code': fields.char('CSD Code No.', size=128),
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
@@ -50,6 +51,9 @@ class kg_machine_shop(osv.osv):
 		'breadth': fields.float('Breadth'),
 		'thickness': fields.float('Thickness'),
 		'weight': fields.float('Weight'),
+		
+		'moc_type': fields.selection([('slurry','Slurry'),('non_slurry','Non Slurry')],'Type', required=True),
+		'moc_id': fields.many2one('kg.moc.master','Default MOC', required=True,domain="[('state','=','approved'), ('active','=','t')]" ),		
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -78,39 +82,10 @@ class kg_machine_shop(osv.osv):
 	
 	_sql_constraints = [
 	
-		('name', 'unique(name)', 'Name must be unique per Company !!'),
-		('code', 'unique(code)', 'Code must be unique per Company !!'),
-	]
-	
-	"""def _Validation(self, cr, uid, ids, context=None):
-		flds = self.browse(cr , uid , ids[0])
-		special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )
-		if special_char:
-			return False
-		return True
-	
-	def _CodeValidation(self, cr, uid, ids, context=None):
-		flds = self.browse(cr , uid , ids[0])
-		if flds.code:			
-			code_special_char = ''.join( c for c in flds.code if  c in '!@#$%^~*{}?+/=' )		
-			if code_special_char:
-				return False
-		return True		"""
 		
-	def _name_validate(self, cr, uid,ids, context=None):
-		rec = self.browse(cr,uid,ids[0])
-		res = True
-		if rec.name:
-			division_name = rec.name
-			name=division_name.upper()			
-			cr.execute(""" select upper(name) from kg_machine_shop where upper(name)  = '%s' """ %(name))
-			data = cr.dictfetchall()
-			
-			if len(data) > 1:
-				res = False
-			else:
-				res = True				
-		return res
+		('code', 'unique(code)', 'Code must be unique per Company !!'),
+	]	
+	
 			
 	def _code_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -134,6 +109,19 @@ class kg_machine_shop(osv.osv):
 			raise osv.except_osv(_('Cancel remark is must !!'),
 				_('Enter the remarks in Cancel remarks field !!'))
 		return True
+		
+	def list_moc(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])		
+		moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('type','=',rec.moc_type)]))		
+		cr.execute(""" delete from ch_machine_mocwise where header_id  = %s """ %(ids[0]))
+		for item in moc_const_obj:			
+			moc_const_rec = self.pool.get('kg.moc.construction').browse(cr,uid,item)				
+			line = self.pool.get('ch.machine.mocwise').create(cr,uid,{
+			       'header_id':rec.id,
+				   'moc_id':rec.moc_id.id,
+				   'code':moc_const_rec.code,
+						})				
+		return True	
 		
 	def entry_draft(self,cr,uid,ids,context=None):
 		self.write(cr, uid, ids, {'state': 'draft'})
@@ -172,9 +160,7 @@ class kg_machine_shop(osv.osv):
 		
 	
 	_constraints = [
-		#(_Validation, 'Special Character Not Allowed !!!', ['name']),
-		#(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
-		(_name_validate, 'MOC name must be unique !!', ['name']),		
+		
 		(_code_validate, 'MOC code must be unique !!', ['code']),	
 	]
 	
@@ -222,3 +208,24 @@ class ch_ms_raw_material(osv.osv):
 		return super(ch_ms_raw_material, self).write(cr, uid, ids, vals, context)  
 	
 ch_ms_raw_material()
+
+
+class ch_machine_mocwise(osv.osv):
+	
+	_name = "ch.machine.mocwise"
+	_description = "Machine Shop MOC Wise"
+	
+	_columns = {
+			
+		'header_id':fields.many2one('kg.machine.shop', 'Pattern Entry', required=True, ondelete='cascade'),	
+		'moc_id': fields.many2one('kg.moc.master','MOC', required=True,domain="[('state','=','approved'), ('active','=','t')]" ),		
+		'code':fields.char('MOC Construction Code'),		
+		'remarks':fields.text('Remarks'),
+		
+	}
+	
+	
+	
+		
+ch_machine_mocwise()
+
