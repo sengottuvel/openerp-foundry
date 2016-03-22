@@ -553,65 +553,6 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
 		</record>		
 		
-		<record id="po_kg_gen_grn_expense_track" model="ir.model.access">
-			<field name="model_id" ref="kg_general_grn.model_kg_gen_grn_expense_track"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">General GRN Exp</field>
-			<field eval="1" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
-		</record>		
-		
-		<record id="po_kg_po_grn_expense_track" model="ir.model.access">
-			<field name="model_id" ref="kg_po_grn.model_kg_po_grn_expense_track"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">PO GRN Exp</field>
-			<field eval="1" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
-		</record>		
-		
-		<record id="po_kg_service_invoice_expense_track" model="ir.model.access">
-			<field name="model_id" ref="kg_service_invoice.model_kg_service_invoice_expense_track"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">Service Inv Exp</field>
-			<field eval="1" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
-		</record>		
-		
-		<record id="po_kg_purchase_order_expense_track" model="ir.model.access">
-			<field name="model_id" ref="kg_purchase_order.model_kg_purchase_order_expense_track"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">Purchase Order Exp</field>
-			<field eval="1" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
-		</record>		
-		
-		<record id="po_kg_service_order_expense_track" model="ir.model.access">
-			<field name="model_id" ref="kg_service_order.model_kg_service_order_expense_track"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">Service Order Exp</field>
-			<field eval="1" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
-		</record>		
-		
-		<record id="po_kg_moc_master" model="ir.model.access">
-			<field name="model_id" ref="kg_moc_master.model_kg_moc_master"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">MOC Master</field>
-			<field eval="1" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
-		</record>		
 		
 		<!-- Partner -->
 		
