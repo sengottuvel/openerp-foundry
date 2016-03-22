@@ -163,7 +163,7 @@
 		
 		<!-- Menu Name Start here --> 
 		
-			<menuitem action="mma_moc_master" name="MOC" id="mam_moc_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="2"/>
+			<menuitem action="mma_moc_master" name="MOC" id="mam_moc_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="3"/>
 			
 		<!-- Menu Name End here --> 
 

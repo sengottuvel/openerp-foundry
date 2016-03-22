@@ -4,11 +4,11 @@
 
 	<!-- Form View Start -->
 	
-		<record id="m_form_v_box" model="ir.ui.view">
-			<field name="name">Box Master Form</field>
-			<field name="model">kg.box.master</field>
+		<record id="m_form_v_contractor_category" model="ir.ui.view">
+			<field name="name">Contractor Category Master Form</field>
+			<field name="model">kg.contractor.category</field>
 			<field name="arch" type="xml">
-				<form string="Box Master" version="7.0">					
+				<form string="Contractor Category Master" version="7.0">					
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
@@ -19,16 +19,13 @@
 					<sheet>
 						<group>
 							<group>						
-								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
-								<field name="qty" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>							
-								<field name="purpose"/>								
+								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>													
+								<field name="active"/>			
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 							</group>
 							<group>
-								<field name="cost" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								
-								<field name="active"/>
-								<field name="state"/>								
+								<field name="shift_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>											
+								<field name="state" style="width: 30%%" class="att_state_change"/>								
 							</group>
 						</group>						
 						<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
@@ -36,7 +33,7 @@
 								<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							</group>
 							<group>												
-								<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','confirmed'])], 'readonly': [('state','in',['cancel'])]}"/>	
+								<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','confirmed'])], 'readonly': [('state','in',['cancel'])]}"/>		
 							</group>
 						</group>
 						<notebook>
@@ -71,17 +68,16 @@
 
 		<!-- Tree View Start -->
 		
-		<record id="m_tree_v_box" model="ir.ui.view">
-			<field name="name">Box Master Tree</field>
-			<field name="model">kg.box.master</field>
+		<record id="m_tree_v_contractor_category" model="ir.ui.view">
+			<field name="name">Contractor Category Master Tree</field>
+			<field name="model">kg.contractor.category</field>
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'draft';red:state == 'confirmed'
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" 
-								toolbar="True" string="Box Master Tree">				
+								toolbar="True" string="Contractor Category Master Tree">				
+					
 					<field name="name"/>
-					<field name="cost"/>
-					<field name="purpose"/>
-					<field name="qty"/>
+					<field name="shift_id"/>
 					<field name="state"/>
 				</tree>
 			</field>
@@ -91,12 +87,12 @@
 
 		<!-- Search View Start -->
 
-		<record id="m_search_v_box" model="ir.ui.view">
-            <field name="name">box Master Search</field>
-            <field name="model">kg.box.master</field>
+		<record id="m_search_v_contractor_category" model="ir.ui.view">
+            <field name="name">Contractor Category Master Search</field>
+            <field name="model">kg.contractor.category</field>
             <field name="arch" type="xml">
-                <search string="Box Master Template">
-					<field name="name" string="Master"  filter_domain="['|', ('name','ilike',self)]" />
+                <search string="Contractor Category Master Template">
+					<field name="name" string="Master"  filter_domain="[('name','ilike',self)]" />
 					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
 					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>				
 					<filter icon="terp-check" name="approve" string="Approved" domain="[('state','=','approved')]"/>				
@@ -114,25 +110,25 @@
 
 		<!-- Menu Action Start-->
 		
-		 <record id="mma_box_master" model="ir.actions.act_window">
-			<field name="name">Box Moulding</field>
+		 <record id="mma_contractor_category_master" model="ir.actions.act_window">
+			<field name="name">Contractor Category</field>
 			<field name="type">ir.actions.act_window</field>
-			<field name="res_model">kg.box.master</field>
+			<field name="res_model">kg.contractor.category</field>
 			<field name="view_type">form</field>
 			<field name="context">{}</field>
-			<field name="view_id" ref="m_tree_v_box"/>
-			<field name="search_view_id" ref="m_search_v_box"/>
+			<field name="view_id" ref="m_tree_v_contractor_category"/>
+			<field name="search_view_id" ref="m_search_v_contractor_category"/>
 		</record>	
 		
-		<!-- Menu Action End-->      
-       
+		
+		<!-- Menu Action End-->
 		
 		
-		<!-- Menu Name Start here -->
-		 
-			<menuitem action="mma_box_master" name="Box Moulding" id="mam_box_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="11"/> 
+		<!-- Menu Name Start here --> 
+		
+			<menuitem action="mma_contractor_category_master" name="Contractor Category" id="mam_contractor_category_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="18"/>
 
-		<!-- Menu Name End here --> 	
+		<!-- Menu Name End here --> 
 
 	</data>
 </openerp>

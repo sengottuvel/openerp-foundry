@@ -793,6 +793,78 @@
 		
 		
 		<!-- Brand Moc Rate Details end-->
+		
+		
+		<!-- Shift Master start -->
+		
+		<record id="user_shift_master" model="ir.model.access">
+			<field name="model_id" ref="kg_shift_master.model_kg_shift_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Shift Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>		
+		
+		<!-- Shift Master end-->
+		
+		<!-- Contractor Category start -->
+		
+		<record id="user_contractor_category" model="ir.model.access">
+			<field name="model_id" ref="kg_contractor_category.model_kg_contractor_category"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Contractor Category Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>		
+		
+		<!-- Contractor Category end-->
+		
+		<!-- Contractor Master start -->
+		
+		<record id="user_contractor_master" model="ir.model.access">
+			<field name="model_id" ref="kg_contractor_master.model_kg_contractor_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Contractor Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>		
+		
+		<!-- Contractor Master end-->
+		
+		<!-- Contractor Rate Details Master start -->
+		
+		<record id="user_contractor_rate_details" model="ir.model.access">
+			<field name="model_id" ref="kg_contractor_master.model_ch_contractor_rate_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Contractor Rate Details Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>		
+		
+		<!-- Contractor Rate Details Master end-->
+		
+		<!-- Machine Shop Rate Details-->
+		
+		<record id="user_machineshop_rate_master" model="ir.model.access">
+			<field name="model_id" ref="kg_machine_shop.model_ch_machine_mocwise"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Machine Shop Rate Details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		
+		<!-- Machineshop Rate Details end -->
 
 		
 		

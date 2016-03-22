@@ -108,7 +108,7 @@
 				<menuitem action="product.product_normal_action" name="Product Master-Purchase" id="mam_product_master" parent="ppm_master_menu" sequence="2"/>
 				
 				<!-- Product Master Design --> 
-				<menuitem action="kg_product.kg_action_product_form" name="Product Master-Design" id="mam_product_master_design" parent="kg_pumpmodel_master.mpm_planning_master" sequence="15"/>
+				<menuitem action="kg_product.kg_action_product_form" name="Product Master-Design" id="mam_product_master_design" parent="kg_pumpmodel_master.mpm_planning_master" sequence="16"/>
 				
 				<!-- Product Category Master -->
 				<menuitem id="kg_product_catg_master" parent="ppm_master_menu"

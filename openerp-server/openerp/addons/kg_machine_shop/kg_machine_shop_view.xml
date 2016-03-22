@@ -21,7 +21,7 @@
 							<group>						
 								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
 								<field name="uom_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>											
-								<field name="type"/>											
+								<field name="type" invisible="1"/>											
 								<field name="od"/>											
 								<field name="length"/>											
 								<field name="weight"/>											
@@ -113,6 +113,7 @@
 								toolbar="True" string="Machine Shop Tree">				
 					<field name="code"/>
 					<field name="name"/>
+					<field name="type"/>
 					<field name="state"/>
 				</tree>
 			</field>
@@ -145,16 +146,28 @@
 
 		<!-- Menu Action Start-->
 		
-		 <record id="mma_machineshop_master" model="ir.actions.act_window">
-			<field name="name">MS/BOT Items</field>
+		<record id="mma_machineshop_ms_master" model="ir.actions.act_window">
+			<field name="name">MS Items</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.machine.shop</field>
 			<field name="view_type">form</field>
-			<field name="context">{}</field>
+			 <field name="context">{'default_type': 'ms'}</field>
+			<field name="domain">[('type','=','ms')]</field>			
 			<field name="view_id" ref="m_tree_v_machineshop"/>
 			<field name="search_view_id" ref="m_search_v_machineshop"/>
 		</record>
 		
+		
+		<record id="mma_machineshop_bot_master" model="ir.actions.act_window">
+			<field name="name">BOT Items</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.machine.shop</field>
+			<field name="view_type">form</field>
+			<field name="context">{'default_type': 'bot'}</field>
+			<field name="domain">[('type','=','bot')]</field>
+			<field name="view_id" ref="m_tree_v_machineshop"/>
+			<field name="search_view_id" ref="m_search_v_machineshop"/>
+		</record>
 				
 		<!-- Menu Action End-->
 		
@@ -162,7 +175,8 @@
 		
 		<!-- Menu Name Start here --> 
 		
-			<menuitem action="mma_machineshop_master" name="MS/BOT Items" id="mam_machineshop_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="1"/> 
+			<menuitem action="mma_machineshop_ms_master" name="MS Items" id="mam_machineshop_ms_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="1"/> 
+			<menuitem action="mma_machineshop_bot_master" name="BOT Items" id="mam_machineshop_bot_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="2"/> 
 			
 		<!-- Menu Name End here --> 
 

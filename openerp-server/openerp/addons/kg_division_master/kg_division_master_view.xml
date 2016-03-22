@@ -125,7 +125,7 @@
 		
 		<!-- Menu Name Start here --> 
 		
-			<menuitem action="mma_division_master" name="Division" id="mam_division_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="8"/>
+			<menuitem action="mma_division_master" name="Division" id="mam_division_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="9"/>
 
 		<!-- Menu Name End here --> 
 
