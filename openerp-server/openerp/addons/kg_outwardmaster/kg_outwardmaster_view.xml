@@ -106,16 +106,7 @@
 			<field name="view_id" ref="kg_outwardmaster_tree_view"/>
 			<field name="search_view_id" ref="m_search_v_outward"/>
 		</record>
-		
-		<!-- Audit Log Xml Data Start-->
-		
-        <record id="outwardmaster_model" model="audittrail.rule">
-            <field name="name">Audit Log Outwardmaster</field>
-            <field name="object_id" eval="ref('kg_outwardmaster.model_kg_outwardmaster')"/>       
-            <field name="state">subscribed</field>              
-        </record>
-        
-		<!-- Audit Log Xml Data End-->
+	
 		
 	<!--<menuitem action="outwardmaster_action_form" id="menu_kg_brandmaster_action_form" parent="kg_depmaster.kg_depmaster_parent_menu" sequence="6"/>
      -->

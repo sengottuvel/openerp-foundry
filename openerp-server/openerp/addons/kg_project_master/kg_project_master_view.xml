@@ -119,15 +119,7 @@
 			<field name="search_view_id" ref="kg_project_master_search_view"/>
 		</record>
 		
-		<!-- Audit Log Xml Data Start-->
-		
-        <record id="project_master_model" model="audittrail.rule">
-            <field name="name">Audit Log Project Master</field>
-            <field name="object_id" eval="ref('kg_project_master.model_kg_project_master')"/>       
-            <field name="state">subscribed</field>              
-        </record>
-        
-		<!-- Audit Log Xml Data End-->
+	
 		
 
 	</data>
