@@ -43,7 +43,8 @@ class kg_brandmoc_rate(osv.osv):
 		
 		
 		#'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
-		
+		'latest_price':fields.float('Latest Price(Rs)',readonly=True),
+		'category_type': fields.selection([('purchase_item','Purchase Item'),('design_item','Design Item')],'Category'),
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -108,6 +109,13 @@ class kg_brandmoc_rate(osv.osv):
 				_('Enter the remarks in rejection remark field !!'))
 		return True
 		
+	def onchange_latest_price(self, cr, uid, ids, product_id, context=None):		
+		value = {'latest_price': ''}
+		if product_id:
+			pro_rec = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
+			value = {'latest_price': pro_rec.latest_price}			
+		return {'value': value}
+		
 	def unlink(self,cr,uid,ids,context=None):
 		unlink_ids = []		
 		for rec in self.browse(cr,uid,ids):	
@@ -117,8 +125,20 @@ class kg_brandmoc_rate(osv.osv):
 			else:
 				unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
+	def create(self, cr, uid, vals, context=None):
+		product_obj = self.pool.get('product.product')
+		if vals.get('product_id'):		  
+			product_rec = product_obj.browse(cr, uid, vals.get('product_id') )
+			latest_price = product_rec.latest_price
+			vals.update({'latest_price': latest_price})
+		return super(kg_brandmoc_rate, self).create(cr, uid, vals, context=context)
 		
 	def write(self, cr, uid, ids, vals, context=None):
+		product_obj = self.pool.get('product.product')
+		if vals.get('product_id'):		  
+			product_rec = product_obj.browse(cr, uid, vals.get('product_id') )
+			latest_price = product_rec.latest_price
+			vals.update({'latest_price': latest_price})
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_brandmoc_rate, self).write(cr, uid, ids, vals, context)
 		
