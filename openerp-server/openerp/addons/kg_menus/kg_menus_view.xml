@@ -138,6 +138,9 @@
 				 
 				<!-- Transport Master  --> 
 				<menuitem action="kg_transport.transport_action_form" name="Transport" id="mam_transport_master" parent="ppm_master_menu" sequence="12"/>
+				
+				<!-- Brand/Moc/Rate-Purchase Master  --> 
+				<menuitem action="kg_brandmoc_rate.mma_brandmocrate_purchase_master" name="Brand/Moc/Rate-Purchase" id="mam_brandmocrate_purchase_master" parent="ppm_master_menu" sequence="13"/>
 				 
 				<menuitem action="purchase.purchase_rfq" id="pam_purchase_order" name="Generate PO" parent="purchase.menu_procurement_management" sequence="1"/>
                 

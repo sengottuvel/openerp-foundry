@@ -83,6 +83,7 @@
 								toolbar="True" string="Pump Model Master Tree">		
 					<field name="code"/>			
 					<field name="name"/>					
+					<field name="pump_mode"/>					
 					<field name="state"/>
 				</tree>
 			</field>
@@ -102,6 +103,8 @@
 					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>				
 					<filter icon="terp-check" name="approve" string="Approved" domain="[('state','=','approved')]"/>				
 					<filter icon="terp-check" name="reject" string="Rejected" domain="[('state','=','reject')]"/>				
+					<filter icon="terp-check" name="only_spares" string="Only Spares" domain="[('pump_mode','=','only_spares')]"/>				
+					<filter icon="terp-check" name="reject" string="Full Pump" domain="[('pump_mode','=','full_pump')]"/>				
 					<separator/>
                     <group expand="0" string="Group By...">
                         <filter string="Name" icon="terp-personal" domain="[]" context="{'group_by':'name'}"/> 
@@ -125,7 +128,7 @@
 			<field name="search_view_id" ref="m_search_v_pumpmodel"/>
 		</record>			
 		
-		<!-- Menu Action End-->
+		<!-- Menu Action End-->	
 		
 		
 		<!-- Menu Name Start here --> 

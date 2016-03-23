@@ -52,7 +52,7 @@ class kg_machine_shop(osv.osv):
 		'thickness': fields.float('Thickness'),
 		'weight': fields.float('Weight'),
 		
-		'moc_type': fields.selection([('slurry','Slurry'),('non_slurry','Non Slurry')],'Type', required=True),
+		'moc_type': fields.selection([('slurry','Slurry'),('non_slurry','Non Slurry'),('both','Both')],'Type', required=True),
 		'moc_id': fields.many2one('kg.moc.master','Default MOC', required=True,domain="[('state','=','approved'), ('active','=','t')]" ),		
 		
 		### Entry Info ###
@@ -80,8 +80,7 @@ class kg_machine_shop(osv.osv):
 		
 	}
 	
-	_sql_constraints = [
-	
+	_sql_constraints = [	
 		
 		('code', 'unique(code)', 'Code must be unique per Company !!'),
 	]	
@@ -111,8 +110,11 @@ class kg_machine_shop(osv.osv):
 		return True
 		
 	def list_moc(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])		
-		moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('type','=',rec.moc_type)]))		
+		rec = self.browse(cr,uid,ids[0])
+		if rec.moc_type == 'both':
+			moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('active','=',True),('state','=','approved')]))				
+		else:	
+			moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('type','=',rec.moc_type),('state','=','approved')]))		
 		cr.execute(""" delete from ch_machine_mocwise where header_id  = %s """ %(ids[0]))
 		for item in moc_const_obj:			
 			moc_const_rec = self.pool.get('kg.moc.construction').browse(cr,uid,item)				

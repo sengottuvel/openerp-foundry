@@ -177,7 +177,8 @@
 			<field name="search_view_id" ref="m_search_v_pattern"/>
 		</record>
 		
-		<!-- Menu Action End-->		
+		<!-- Menu Action End-->
+		
 		
 		<!-- Menu Name Start here --> 
 		

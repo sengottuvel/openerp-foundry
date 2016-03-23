@@ -47,7 +47,7 @@ class kg_pattern_master(osv.osv):
 		'mould_rate': fields.float('Mould Rate(Rs)'),
 		'location': fields.char('Physical Location', required=True),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
-		'pattern_state': fields.selection([('active','Active'),('hold','Hold'),('rework','Rework'),('reject','Rejected'),('not_available','Not available')],'Pattern Status',required=True),
+		'pattern_state': fields.selection([('active','Active'),('hold','Hold'),('rework','Rework'),('reject','Rejected'),('new_develop','New Development')],'Pattern Status',required=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
@@ -55,14 +55,14 @@ class kg_pattern_master(osv.osv):
 		'line_ids_a':fields.one2many('ch.pattern.attachment', 'header_id', "Attachments"),
 		'line_ids_b':fields.one2many('ch.pattern.history', 'header_id', "Pattern History"),
 		
-		'tolerance': fields.float('Tolerance(%)'),
+		'tolerance': fields.float('Tolerance(-%)'),
 		'nonferous_weight': fields.float('Non-Ferrous Weight(kgs)'),		
 		'alias_name': fields.char('Alias Name', size=128),
 		'make_by': fields.char('Make By', size=128),
 		'delivery_lead': fields.integer('Delivery Lead Time(Weeks)', size=128),
 		'csd_code': fields.char('CSD Code No.', size=128),
 		'making_cost': fields.float('Pattern Making Cost'),
-		'moc_type': fields.selection([('slurry','Slurry'),('non_slurry','Non Slurry')],'Type', required=True),
+		'moc_type': fields.selection([('slurry','Slurry'),('non_slurry','Non Slurry'),('both','Both')],'Type', required=True),
 		'moc_id': fields.many2one('kg.moc.master','Default MOC', required=True,domain="[('state','=','approved'), ('active','=','t')]" ),			
 		
 		### Entry Info ###
@@ -126,7 +126,10 @@ class kg_pattern_master(osv.osv):
 			
 	def list_moc(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])		
-		moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('type','=',rec.moc_type)]))		
+		if rec.moc_type == 'both':
+			moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('active','=',True),('state','=','approved')]))				
+		else:	
+			moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('type','=',rec.moc_type),('state','=','approved')]))			
 		cr.execute(""" delete from ch_mocwise_rate where header_id  = %s """ %(ids[0]))
 		for item in moc_const_obj:			
 			moc_const_rec = self.pool.get('kg.moc.construction').browse(cr,uid,item)				

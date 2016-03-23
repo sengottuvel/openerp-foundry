@@ -32,11 +32,7 @@ class kg_moc_construction(osv.osv):
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
-		'cancel_remark': fields.text('Cancel'),		
-		'line_ids': fields.one2many('ch.moc.foundry.details', 'header_id', "Foundry Line"),		
-		'line_ids_a':fields.one2many('ch.moc.machineshop.details', 'header_id', "Machine Shop Line"),
-		'line_ids_b':fields.one2many('ch.moc.bot.details', 'header_id', "BOT Line"),
-		'line_ids_c':fields.one2many('ch.moc.consu.details', 'header_id', "Consumable Line"),		
+		'cancel_remark': fields.text('Cancel'),			
 		
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
 		'type': fields.selection([('slurry','Slurry'),('non_slurry','Non Slurry')],'Type', required=True),
@@ -125,11 +121,7 @@ class kg_moc_construction(osv.osv):
 		return True
 
 	def entry_confirm(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])
-		item_lines = rec.line_ids
-		if not item_lines:
-			raise osv.except_osv(_('Construction Details is must !!'),
-				_('Enter the Construction Details Lines field !!'))
+		rec = self.browse(cr,uid,ids[0])		
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 		
@@ -174,188 +166,5 @@ class kg_moc_construction(osv.osv):
 	]
 	
 kg_moc_construction()
-
-
-
-class ch_moc_foundry_details(osv.osv):
-	
-	_name = 'ch.moc.foundry.details'
-	
-	
-	_columns = {
-		
-		'header_id':fields.many2one('kg.moc.construction', 'MOC Construction Name', required=True, ondelete='cascade'),  		
-		'pattern_id': fields.many2one('kg.pattern.master','Pattern No', required=True,domain="[('active','=','t')]"), 
-		'pattern_name': fields.char('Pattern Name', required=True), 
-		'moc_id':fields.many2one('kg.moc.master','MOC',required=True,domain="[('active','=','t')]"),
-		'state':fields.selection([('draft','Draft'),('approve','Approved')],'Status'),
-		'remarks':fields.text('Remarks'),		
-		
-		
-	}
-	
-	
-	_defaults = {
-	
-	'state':'draft',
-	  
-	}
-	
-	
-	
-	def onchange_pattern_name(self, cr, uid, ids, pattern_id, context=None):
-		
-		value = {'pattern_name': ''}
-		if pattern_id:
-			pro_rec = self.pool.get('kg.pattern.master').browse(cr, uid, pattern_id, context=context)
-			value = {'pattern_name': pro_rec.pattern_name}
-			
-		return {'value': value}
-		
-		
-	def create(self, cr, uid, vals, context=None):
-		pattern_obj = self.pool.get('kg.pattern.master')
-		if vals.get('pattern_id'):		  
-			pattern_rec = pattern_obj.browse(cr, uid, vals.get('pattern_id') )
-			pattern_name = pattern_rec.pattern_name
-			vals.update({'pattern_name': pattern_name})
-		return super(ch_moc_foundry_details, self).create(cr, uid, vals, context=context)
-		
-	def write(self, cr, uid, ids, vals, context=None):
-		pattern_obj = self.pool.get('kg.pattern.master')
-		if vals.get('pattern_id'):
-			pattern_rec = pattern_obj.browse(cr, uid, vals.get('pattern_id') )
-			pattern_name = pattern_rec.pattern_name
-			vals.update({'pattern_name': pattern_name})
-		return super(ch_moc_foundry_details, self).write(cr, uid, ids, vals, context)  
-	
-	
-ch_moc_foundry_details()
-
-
-class ch_moc_machineshop_details(osv.osv):
-
-	_name = "ch.moc.machineshop.details"
-	_description = "MOC machineshop Details"
-	
-	
-	_columns = {
-	
-		'header_id':fields.many2one('kg.moc.construction', 'MOC', ondelete='cascade',required=True),
-		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', ondelete='cascade',required=True),
-		'name':fields.char('Item Name', size=128),	
-		'moc_id':fields.many2one('kg.moc.master','MOC',required=True,domain="[('active','=','t')]"),  		
-		'remarks':fields.text('Remarks'),   
-	
-	}   
-	
-	def onchange_machineshop_name(self, cr, uid, ids, ms_id, context=None):
-		
-		value = {'name': ''}
-		if ms_id:
-			pro_rec = self.pool.get('kg.machine.shop').browse(cr, uid, ms_id, context=context)
-			value = {'name': pro_rec.name}
-			
-		return {'value': value}
-		
-	def create(self, cr, uid, vals, context=None):	  
-		ms_obj = self.pool.get('kg.machine.shop')
-		if vals.get('ms_id'):		   
-			ms_rec = ms_obj.browse(cr, uid, vals.get('ms_id') )
-			ms_name = ms_rec.name		   
-			vals.update({'name':ms_name })
-		return super(ch_moc_machineshop_details, self).create(cr, uid, vals, context=context)
-		
-	def write(self, cr, uid, ids, vals, context=None):
-		ms_obj = self.pool.get('kg.machine.shop')
-		if vals.get('ms_id'):		   
-			ms_rec = ms_obj.browse(cr, uid, vals.get('ms_id') )
-			ms_name = ms_rec.name		   
-			vals.update({'name':ms_name })
-		return super(ch_moc_machineshop_details, self).write(cr, uid, ids, vals, context)   
-
-ch_moc_machineshop_details()
-
-class ch_moc_bot_details(osv.osv):
-	
-	_name = "ch.moc.bot.details"
-	_description = "MOC BOT Details"	
-	
-	_columns = {
-	
-		'header_id':fields.many2one('kg.moc.construction', 'MOC', ondelete='cascade',required=True),
-		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('type','=','bot')], ondelete='cascade',required=True),
-		'code':fields.char('Item Code', size=128),	
-		'moc_id':fields.many2one('kg.moc.master','MOC',required=True,domain="[('active','=','t')]"),  		
-		'remarks':fields.text('Remarks'),   
-	
-	}
-	
-	def onchange_bot_code(self, cr, uid, ids, product_temp_id, context=None):	   
-		value = {'code': ''}
-		if product_temp_id:
-			pro_rec = self.pool.get('product.product').browse(cr, uid, product_temp_id, context=context)
-			value = {'code': pro_rec.product_code}		  
-		return {'value': value}
-		
-	def create(self, cr, uid, vals, context=None):	  
-		product_obj = self.pool.get('product.product')
-		if vals.get('product_temp_id'):		 
-			product_rec = product_obj.browse(cr, uid, vals.get('product_temp_id') )
-			product_code = product_rec.product_code		 
-			vals.update({'code':product_code })
-		return super(ch_moc_bot_details, self).create(cr, uid, vals, context=context)
-		
-	def write(self, cr, uid, ids, vals, context=None):
-		product_obj = self.pool.get('product.product')
-		if vals.get('product_temp_id'):		 
-			product_rec = product_obj.browse(cr, uid, vals.get('product_temp_id') )
-			product_code = product_rec.product_code
-			vals.update({'code':product_code })
-		return super(ch_moc_bot_details, self).write(cr, uid, ids, vals, context)   
-
-ch_moc_bot_details()
-
-class ch_moc_consu_details(osv.osv):
-	
-	_name = "ch.moc.consu.details"
-	_description = "MOC Consumable Details" 
-	
-	_columns = {
-	
-		'header_id':fields.many2one('kg.moc.construction', 'MOC', ondelete='cascade',required=True),
-		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('type','=','consu')], ondelete='cascade',required=True),
-		'code':fields.char('Item Code', size=128), 
-		'moc_id':fields.many2one('kg.moc.master','MOC',required=True,domain="[('active','=','t')]"), 	
-		'remarks':fields.text('Remarks'),
-	
-	}
-	
-	def onchange_consu_code(self, cr, uid, ids, product_temp_id, context=None):
-		
-		value = {'code': ''}
-		if product_temp_id:
-			pro_rec = self.pool.get('product.product').browse(cr, uid, product_temp_id, context=context)
-			value = {'code': pro_rec.product_code}
-			
-		return {'value': value}
-		
-	def create(self, cr, uid, vals, context=None):	  
-		product_obj = self.pool.get('product.product')
-		if vals.get('product_temp_id'):		 
-			product_rec = product_obj.browse(cr, uid, vals.get('product_temp_id') )
-			product_code = product_rec.product_code		 
-			vals.update({'code':product_code })
-		return super(ch_moc_consu_details, self).create(cr, uid, vals, context=context)
-		
-	def write(self, cr, uid, ids, vals, context=None):
-		product_obj = self.pool.get('product.product')
-		if vals.get('product_temp_id'):		 
-			product_rec = product_obj.browse(cr, uid, vals.get('product_temp_id') )
-			product_code = product_rec.product_code
-			vals.update({'code':product_code })
-		return super(ch_moc_consu_details, self).write(cr, uid, ids, vals, context) 
-
-ch_moc_consu_details()
 
 

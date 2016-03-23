@@ -18,6 +18,7 @@
 			ref('kg_menus.sam_so_amendment'),
 			ref('kg_menus.mam_so_manual_closing'),
 			ref('kg_menus.mam_uom_master'),
+			ref('kg_menus.mam_brandmocrate_purchase_master'),
 			
             ])]" name="menu_access"/>
             <field name="users" eval="[(4, ref('base.user_root'))]"/>

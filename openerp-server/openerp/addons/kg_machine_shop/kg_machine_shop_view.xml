@@ -146,7 +146,7 @@
 
 		<!-- Menu Action Start-->
 		
-		<record id="mma_machineshop_ms_master" model="ir.actions.act_window">
+		 <record id="mma_machineshop_ms_master" model="ir.actions.act_window">
 			<field name="name">MS Items</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.machine.shop</field>
@@ -158,7 +158,7 @@
 		</record>
 		
 		
-		<record id="mma_machineshop_bot_master" model="ir.actions.act_window">
+		 <record id="mma_machineshop_bot_master" model="ir.actions.act_window">
 			<field name="name">BOT Items</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.machine.shop</field>
@@ -170,7 +170,6 @@
 		</record>
 				
 		<!-- Menu Action End-->
-		
 		
 		
 		<!-- Menu Name Start here --> 

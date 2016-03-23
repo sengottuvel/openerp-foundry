@@ -38,50 +38,6 @@
 							</group>
 						</group>
 						<notebook>						
-						<page string="Foundry Items">
-						<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">
-							<tree string="MOC Details Entry Tree" editable="top" >			
-								<field name="pattern_id" on_change="onchange_pattern_name(pattern_id)"/>
-								<field name="pattern_name" readonly="1"/>
-								<field name="moc_id" />	
-								<field name="remarks" widget="char"/>
-								<field name="state" invisible="1"/>				    
-							</tree>
-						</field>
-						</page>
-						<page string="Machine Shop">
-								<field name="line_ids_a" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">
-									<tree string="Machine Shop Details Entry Tree" editable="top" >			
-										
-										<field name="ms_id" on_change="onchange_machineshop_name(ms_id)"/>	
-										<field name="name" readonly="1"/>
-										<field name="moc_id" />
-										<field name="remarks" widget="char"/>
-									</tree>
-								</field>
-							</page>
-							<page string="BOT">
-								<field name="line_ids_b" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">
-									<tree string="BOT Details Entry Tree" editable="top" >	
-											
-										<field name="product_temp_id" on_change="onchange_bot_code(product_temp_id)"/>
-										<field name="code" readonly="1" />	
-										<field name="moc_id" />	
-										<field name="remarks" widget="char"/>
-									</tree>
-								</field>
-							</page>							
-							<page string="Consumable">
-								<field name="line_ids_c" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">
-									<tree string="Consumable Details Entry Tree" editable="top" >					
-										
-										<field name="product_temp_id" on_change="onchange_consu_code(product_temp_id)"/>
-										<field name="code" readonly="1"/>	
-										<field name="moc_id" />	
-										<field name="remarks"  widget="char"/>
-									</tree>
-								</field>
-							</page>
 							<page string="Entry Info">
 									<group>
 										<field name="company_id"/>
@@ -121,7 +77,8 @@
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" 
 								toolbar="True" string="mocconstruction Master Tree">				
 					<field name="code"/>
-					<field name="name"/>					
+					<field name="name"/>	
+					<field name="type"/>				
 					<field name="state"/>
 				</tree>
 			</field>
