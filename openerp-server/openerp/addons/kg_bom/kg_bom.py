@@ -343,6 +343,7 @@ class ch_machineshop_details(osv.osv):
 
 ch_machineshop_details()
 
+
 class ch_bot_details(osv.osv):
 	
 	_name = "ch.bot.details"
@@ -351,35 +352,35 @@ class ch_bot_details(osv.osv):
 	_columns = {
 	
 		'header_id':fields.many2one('kg.bom', 'BOM', ondelete='cascade',required=True),
-		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('product_type','=','bot')], ondelete='cascade',required=True),	
-		'pos_no': fields.integer('Position No'),	
-		'code':fields.char('Item Code', size=128),	  
+		'bot_id':fields.many2one('kg.machine.shop', 'Item Code',domain = [('type','=','bot')], ondelete='cascade',required=True),
+		'pos_no': fields.integer('Position No'),		
+		'name':fields.char('Item Name', size=128),	  
 		'qty': fields.integer('Qty', required=True),
 		'remarks':fields.text('Remarks'),   
 	
 	}
 	
-	def onchange_bot_code(self, cr, uid, ids, product_temp_id, context=None):	   
-		value = {'code': ''}
-		if product_temp_id:
-			pro_rec = self.pool.get('product.product').browse(cr, uid, product_temp_id, context=context)
-			value = {'code': pro_rec.product_code}		  
+	def onchange_bot_name(self, cr, uid, ids, bot_id, context=None):	   
+		value = {'name': ''}
+		if bot_id:
+			pro_rec = self.pool.get('kg.machine.shop').browse(cr, uid, bot_id, context=context)
+			value = {'name': pro_rec.name}		  
 		return {'value': value}
 		
 	def create(self, cr, uid, vals, context=None):	  
-		product_obj = self.pool.get('product.product')
-		if vals.get('product_temp_id'):		 
-			product_rec = product_obj.browse(cr, uid, vals.get('product_temp_id') )
-			product_code = product_rec.product_code		 
-			vals.update({'code':product_code })
+		product_obj = self.pool.get('kg.machine.shop')
+		if vals.get('bot_id'):		 
+			product_rec = product_obj.browse(cr, uid, vals.get('bot_id') )
+			product_code = product_rec.name		 
+			vals.update({'name':product_code })
 		return super(ch_bot_details, self).create(cr, uid, vals, context=context)
 		
 	def write(self, cr, uid, ids, vals, context=None):
-		product_obj = self.pool.get('product.product')
-		if vals.get('product_temp_id'):		 
-			product_rec = product_obj.browse(cr, uid, vals.get('product_temp_id') )
-			product_code = product_rec.product_code
-			vals.update({'code':product_code })
+		product_obj = self.pool.get('kg.machine.shop')
+		if vals.get('bot_id'):		 
+			product_rec = product_obj.browse(cr, uid, vals.get('bot_id') )
+			product_code = product_rec.name
+			vals.update({'name':product_code })
 		return super(ch_bot_details, self).write(cr, uid, ids, vals, context)   
 
 ch_bot_details()

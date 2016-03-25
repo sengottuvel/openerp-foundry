@@ -93,8 +93,8 @@
 								<field name="line_ids_b" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
 									<tree string="BOT Details Entry Tree" editable="top" >	
 										<field name="pos_no" />			
-										<field name="product_temp_id" on_change="onchange_bot_code(product_temp_id)"/>
-										<field name="code" readonly="1" />															
+										<field name="bot_id" on_change="onchange_bot_name(bot_id)"/>
+										<field name="name" readonly="1" />															
 										<field name="qty"/>
 										<field name="remarks" widget="char"/>
 									</tree>
@@ -239,8 +239,8 @@
 			<field name="arch" type="xml">
 				<tree string="BOT Details Entry Tree">
 					<field name="pos_no" />		
-					<field name="product_temp_id" on_change="onchange_bot_code(product_temp_id)"/>
-					<field name="code" readonly="1" />																			
+					<field name="bot_id" on_change="onchange_bot_name(bot_id)"/>
+					<field name="name" readonly="1" />																			
 					<field name="qty"/>
 					<field name="remarks" widget="char"/>			    
 				</tree>
