@@ -53,7 +53,7 @@ class kg_machine_shop(osv.osv):
 		'weight': fields.float('Weight'),
 		
 		'moc_type': fields.selection([('slurry','Slurry'),('non_slurry','Non Slurry'),('both','Both')],'Type', required=True),
-		'moc_id': fields.many2one('kg.moc.master','Default MOC', required=True,domain="[('state','=','approved'), ('active','=','t')]" ),		
+		'moc_id': fields.many2one('kg.moc.master','Default MOC', required=True,domain="[('active','=','t')]" ),		
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -178,7 +178,7 @@ class ch_ms_raw_material(osv.osv):
 	_columns = {
 			
 		'header_id':fields.many2one('kg.machine.shop', 'MS Entry', required=True, ondelete='cascade'),	
-		'product_id': fields.many2one('product.product','Raw Material', required=True,domain="[('state','=','approved')]"),			
+		'product_id': fields.many2one('product.product','Raw Material', required=True),			
 		'uom':fields.char('UOM',size=128),		
 		'qty':fields.float('Qty'),
 		'remarks':fields.text('Remarks'),		
@@ -220,7 +220,7 @@ class ch_machine_mocwise(osv.osv):
 	_columns = {
 			
 		'header_id':fields.many2one('kg.machine.shop', 'Pattern Entry', required=True, ondelete='cascade'),	
-		'moc_id': fields.many2one('kg.moc.master','MOC', required=True,domain="[('state','=','approved'), ('active','=','t')]" ),		
+		'moc_id': fields.many2one('kg.moc.master','MOC', required=True,domain="[('active','=','t')]" ),		
 		'code':fields.char('MOC Construction Code'),		
 		'remarks':fields.text('Remarks'),
 		

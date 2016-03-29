@@ -30,7 +30,7 @@ class kg_contractor_category(osv.osv):
 			
 		'name': fields.char('Name', size=128, required=True, select=True),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),	
-		'shift_id': fields.many2one('kg.shift.master', 'Shift' ,domain="[('state','=','approved'), ('active','=','t')]"),	
+		'shift_id': fields.many2one('kg.shift.master', 'Shift' ,domain="[('active','=','t')]"),	
 		'active': fields.boolean('Active'),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'notes': fields.text('Notes'),

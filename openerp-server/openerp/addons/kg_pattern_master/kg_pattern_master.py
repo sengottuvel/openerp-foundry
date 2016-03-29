@@ -19,18 +19,13 @@ class kg_pattern_master(osv.osv):
 	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
 		res={}
 		bom_line_obj = self.pool.get('ch.bom.line')
-		bom_line_amend_obj = self.pool.get('ch.bom.line.amendment')
-		moc_const_foundry_obj = self.pool.get('ch.moc.foundry.details')
-		stock_line_obj = self.pool.get('ch.stock.inward.details')
-		weekly_bom_obj = self.pool.get('ch.sch.bom.details')		
+		bom_line_amend_obj = self.pool.get('ch.bom.line.amendment')		
 		for item in self.browse(cr, uid, ids, context=None):
 			res[item.id] = 'no'
 			bom_line_ids = bom_line_obj.search(cr,uid,[('pattern_id','=',item.id)])
 			bom_line_amend_ids = bom_line_amend_obj.search(cr,uid,[('pattern_id','=',item.id)])
-			moc_const_foundry_ids = moc_const_foundry_obj.search(cr,uid,[('pattern_id','=',item.id)])
-			stock_line_ids = stock_line_obj.search(cr,uid,[('pattern_id','=',item.id)])
-			weekly_bom_ids = weekly_bom_obj.search(cr,uid,[('pattern_id','=',item.id)])			
-			if bom_line_ids or bom_line_amend_ids or moc_const_foundry_ids or stock_line_ids or weekly_bom_ids:
+					
+			if bom_line_ids or bom_line_amend_ids:
 				res[item.id] = 'yes'		
 		return res
 	
@@ -38,7 +33,7 @@ class kg_pattern_master(osv.osv):
 			
 		'name': fields.char('Part/Pattern No', size=128, required=True),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
-		'box_id': fields.many2one('kg.box.master','Box',readonly=True,domain="[('state','=','approved'), ('active','=','t')]"),		
+		'box_id': fields.many2one('kg.box.master','Box',readonly=True,domain="[('active','=','t')]"),		
 		'pattern_name': fields.char('Part/Pattern Name', size=128,required=True),
 		'code': fields.char('Customer Code No.', size=128),
 		'active': fields.boolean('Active'),
@@ -63,7 +58,7 @@ class kg_pattern_master(osv.osv):
 		'csd_code': fields.char('CSD Code No.', size=128),
 		'making_cost': fields.float('Pattern Making Cost'),
 		'moc_type': fields.selection([('slurry','Slurry'),('non_slurry','Non Slurry'),('both','Both')],'Type', required=True),
-		'moc_id': fields.many2one('kg.moc.master','Default MOC', required=True,domain="[('state','=','approved'), ('active','=','t')]" ),			
+		'moc_id': fields.many2one('kg.moc.master','Default MOC', required=True,domain="[('active','=','t')]" ),			
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -233,7 +228,7 @@ class ch_mocwise_rate(osv.osv):
 	_columns = {
 			
 		'header_id':fields.many2one('kg.pattern.master', 'Pattern Entry', required=True, ondelete='cascade'),	
-		'moc_id': fields.many2one('kg.moc.master','MOC', required=True,domain="[('state','=','approved'), ('active','=','t')]" ),		
+		'moc_id': fields.many2one('kg.moc.master','MOC', required=True,domain="[('active','=','t')]" ),		
 		'code':fields.char('MOC Construction Code'),
 		'rate':fields.float('Design Rate(Rs)',required=True),
 		'amount':fields.float('Design Amount(Rs)'),
