@@ -73,7 +73,7 @@ class kg_partner(osv.osv):
 	'transport_id': fields.many2one('kg.transport','Transport'),
 	'contact_person': fields.char('Contact Person', size=128),
 	'landmark': fields.char('Landmark', size=128),
-	'partner_state': fields.selection([('draft','Draft'),('approve','Approved'),('cancel','Cancelled')],'Status'),
+	'partner_state': fields.selection([('draft','Draft'),('confirm','WFA'),('approve','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status'),
 	'group_flag': fields.boolean('Is Group Company'),
 	'delivery_id': fields.many2one('kg.delivery.master','Delivery Type'),
 	#'child_ids': fields.one2many('res.partner', 'parent_id', 'Contacts', domain=[('active','=',True)]),
@@ -81,6 +81,8 @@ class kg_partner(osv.osv):
 	'created_by': fields.many2one('res.users', 'Created by',readonly=True),
 	'confirmed_date': fields.datetime('Confirmed Date',readonly=True),
 	'confirmed_by': fields.many2one('res.users','Confirmed By',readonly=True),
+	'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
+	'reject_date': fields.datetime('Reject Date', readonly=True),
 	'approved_date': fields.datetime('Approved Date',readonly=True),
 	'approved_by': fields.many2one('res.users','Approved By',readonly=True),
 	'cancel_date': fields.datetime('Cancelled Date', readonly=True),
@@ -97,10 +99,10 @@ class kg_partner(osv.osv):
 	'consult_ids':fields.one2many('kg.consultant.fee', 'consult_id', 'Consultant Fees'),
 	'dealer': fields.boolean('Dealer'),
 	'economic_category': fields.selection([('budget','Budget'),('loyalty','Loyalty')],'Economic Category'),
-	'sector': fields.selection([('cp','CP'),('ip','IP'),('both','Both')],'Division'),
+	'sector': fields.selection([('cp','CP'),('ip','IP'),('both','Both')],'Marketing Division'),
 	'industry_id': fields.many2one('kg.industry.master','Sector'),
 	'dealer_id': fields.many2one('res.partner','Dealer Name',domain=[('dealer','=',True)]),
-	'remark': fields.text('Approve'),
+	'remark': fields.text('Approve/Reject'),
 	'cancel_remark': fields.text('Cancel Remarks'),
 	'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
 	
@@ -132,6 +134,21 @@ class kg_partner(osv.osv):
 		
 		return {'value': value}
 			
+	def confirm_partner(self, cr, uid, ids, context=None): 
+		rec = self.browse(cr, uid, ids[0])
+		self.write(cr, uid, ids, {'partner_state': 'confirm','confirmed_by':uid,'confirmed_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		
+		return True
+		
+	def reject_partner(self, cr, uid, ids, context=None): 
+		rec = self.browse(cr, uid, ids[0])
+		if rec.remark:
+			self.write(cr, uid, ids, {'partner_state': 'reject','update_user_id':uid,'reject_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		else:
+			raise osv.except_osv(_('Rejection remark is must !!'),
+				_('Enter rejection remark in remark field !!'))
+		return True
+		
 	def approve_partner(self, cr, uid, ids, context=None): 
 		rec = self.browse(cr, uid, ids[0])
 		self.write(cr, uid, ids, {'partner_state': 'approve','approved_by':uid,'approved_date': time.strftime('%Y-%m-%d %H:%M:%S')})
@@ -144,10 +161,13 @@ class kg_partner(osv.osv):
 		
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		self.write(cr, uid, ids, {'partner_state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		
+		if rec.cancel_remark:
+			self.write(cr, uid, ids, {'partner_state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		else:
+			raise osv.except_osv(_('Cancel remark is must !!'),
+				_('Enter the remarks in Cancel remarks field !!'))
 		return True
-				
+		
 	def write(self, cr, uid, ids, vals, context=None):
 		print"valsssssS",vals
 		#if len(str(vals['zip'])) == 6:

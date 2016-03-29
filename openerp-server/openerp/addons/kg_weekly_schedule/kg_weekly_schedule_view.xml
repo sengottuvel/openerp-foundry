@@ -98,6 +98,7 @@
 					<field name="order_type"/>
 					<field name="delivery_date"/>
 					<field name="order_value"/>
+					<button name="send_to_dms" type="object" string="DMS"/>
 					<field name="state"/>
 				</tree>
 			</field>

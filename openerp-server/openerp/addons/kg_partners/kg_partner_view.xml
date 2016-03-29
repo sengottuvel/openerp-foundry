@@ -11,10 +11,12 @@
         <xpath expr="//sheet" position="before">
 		<header>
 			<!--<button name="entry_confirm" class="oe_highlight" type="object" string="Confirm" attrs = "{'invisible':['|',('partner_state','=','approve'),('partner_state','=','confirm')]}"/>-->
-			<button name="approve_partner" class="oe_highlight" type="object" string="Approve" attrs = "{'invisible':[('partner_state','in',('cancel','approve'))]}"/> 
+			<button name="confirm_partner" class="oe_highlight" type="object" string="Confirm" attrs = "{'invisible':[('partner_state','not in',('draft'))]}"/> 
+			<button name="reject_partner" class="oe_highlight" type="object" string="Reject" attrs = "{'invisible':[('partner_state','not in',('confirm'))]}"/> 
+			<button name="approve_partner" class="oe_highlight" type="object" string="Approve" attrs = "{'invisible':[('partner_state','not in',('confirm'))]}"/> 
 			<!--	<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes'),('partner_state','in',('approve','cancel'))]}" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
-			<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('partner_state','in',('draft','cancel'))]}" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-			<button name="entry_draft" class="oe_highlight" type="object" string="Set To Draft" attrs = "{'invisible':[('partner_state','in',('draft','approve'))]}"/> 
+			<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('partner_state','not in',('approve'))]}" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+			<button name="entry_draft" class="oe_highlight" type="object" string="Set To Draft" attrs = "{'invisible':[('partner_state','not in',('cancel'))]}"/> 
 		</header>
 		</xpath>
         
@@ -32,7 +34,7 @@
 		</field>
 		
 		<field name="birthdate" position="replace">
-		<field name="supply_type" attrs = "{'invisible':[('customer','=',True)]}"/>
+		<field name="supply_type" attrs = "{'invisible':['|',('customer','=',True),('dealer','=',True)]}"/>
 		<field name="tds" attrs = "{'required':[('company_type','=','individual')],'invisible':[('customer','=',True)]}"/>
 		<field name="tan_no"/>
 		<field name="cst_no"/>
@@ -59,21 +61,21 @@
 		<field name="advance_limit" nolabel="1"/>
 		</field>
 		
-		<!--<xpath expr = "//group[@string='Terms and Conditions']" position="after">
+		<xpath expr = "//group[@string='Terms and Conditions']" position="after">
 			<group string="Remarks">
 				<group>	
 					<field name="remark" attrs="{'readonly': [('partner_state','in',['approve','cancel'])]}"/>
 				</group>
 				<group>												
-					<field name="cancel_remark" attrs="{'invisible':[('partner_state','in',['draft'])], 'readonly': [('partner_state','in',['cancel'])]}"/>
+					<field name="cancel_remark" attrs="{'invisible':[('partner_state','not in',['approve'])], 'readonly': [('partner_state','in',['cancel'])]}"/>
 				</group>
 			</group>
-		</xpath>-->
+		</xpath>
 				
 		<field name="color" position="replace">
-		<field name="delivery_id"/>
+		<field name="delivery_id" attrs = "{'invisible':[('dealer','=',True)]}"/>
 		</field>
-s		
+
 		<field name="function" position="replace">
 		<field name="contact_person"/>
 		</field>
@@ -99,7 +101,7 @@ s
 	
 		
 		<xpath expr = "//page[@string='Additional Contacts']" position="after">
-					<page string="Delivery Address" attrs="{'invisible':[('supplier','=',True)]}">
+				<page string="Delivery Address" attrs="{'invisible':['|',('supplier','=',True),('dealer','=',True)]}">
 				
 				<field colspan="4" mode="tree" name="delivery_ids" nolabel="1" widget="one2many_list" >
 					<tree string="Delivery Address"> 
@@ -224,14 +226,18 @@ s
 				<group>
 					<group>
 						<field name="created_by"/>
-						<field name="approved_by"/>
-						<field name="cancel_user_id" attrs="{'invisible':[('partner_state','in',['approve'])]}"/>
+						<field name="confirmed_by" attrs="{'invisible':[('partner_state','in',['draft'])]}"/>
+						<field name="approved_by" attrs="{'invisible':[('partner_state','in',['draft','reject','confirm'])]}"/>
+						<field name="cancel_user_id" attrs="{'invisible':[('partner_state','in',['draft', 'confirm','reject','approve'])]}"/>
+						<field name="rej_user_id" attrs="{'invisible':[('partner_state','in',['draft', 'confirm','approve','cancel'])]}"/>
 						<field name="updated_by"/>
 					</group>
 					<group>
 						<field name="creation_date"/>
-						<field name="approved_date"/>
-						<field name="cancel_date" attrs="{'invisible':[('partner_state','in',['approve'])]}"/>
+						<field name="confirmed_date" attrs="{'invisible':[('partner_state','in',['draft'])]}"/>
+						<field name="approved_date" attrs="{'invisible':[('partner_state','in',['draft','reject','confirm'])]}"/>
+						<field name="cancel_date" attrs="{'invisible':[('partner_state','in',['draft', 'confirm','reject','approve'])]}"/>
+						<field name="reject_date" attrs="{'invisible':[('partner_state','in',['draft', 'confirm','approve','cancel'])]}"/>
 						<field name="updated_date"/>
 					</group>
 				</group>	

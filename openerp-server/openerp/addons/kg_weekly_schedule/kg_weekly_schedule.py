@@ -243,6 +243,24 @@ class kg_weekly_schedule(osv.osv):
 		self.write(cr, uid, ids, {'schedule_no':self.pool.get('ir.sequence').get(cr, uid, 'kg.weekly.schedule'),'state': 'confirmed','flag_cancel':1,'confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		cr.execute(''' update ch_weekly_schedule_details set state = 'confirmed',transac_state = 'in_schedule', flag_cancel='t' where header_id = %s ''',[ids[0]])
 		return True
+	
+	def send_to_dms(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res_rec=self.pool.get('res.users').browse(cr,uid,uid)		
+		rec_user = str(res_rec.login)
+		rec_work_order = str(rec.name)
+		url = 'http://iasqa1.kgisl.com/?uname='+rec_user+'&s='+rec_work_order
+		
+		#url = 'http://192.168.1.150:81/pbxclick2call.php?exten='+exe_no+'&phone='+str(m_no)
+		print "url..................................", url
+		return {
+					  'name'     : 'Go to website',
+					  'res_model': 'ir.actions.act_url',
+					  'type'     : 'ir.actions.act_url',
+					  'target'   : 'current',
+					  'url'      : url
+			   }
+		
 		
 	def entry_cancel(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])

@@ -582,7 +582,7 @@ class product_template(osv.osv):
 		return True
 
 	_constraints = [
-		(_check_uom, 'Error: The default Unit of Measure and the purchase Unit of Measure must be in the same category.', ['uom_id']),
+	#	(_check_uom, 'Error: The default Unit of Measure and the purchase Unit of Measure must be in the same category.', ['uom_id']),
 	]
 
 	def name_get(self, cr, user, ids, context=None):

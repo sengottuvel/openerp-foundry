@@ -44,7 +44,7 @@
                     <field name="uom_id" string="Store UOM" groups="product.group_uom"/>
                     <field name="qty_available"/>
                     <field name="sales_price" invisible="1"/>
-                    <field name="latest_price"/>                   
+                    <field name="latest_price" invisible="1"/>                   
                     <field name="virtual_available" invisible="1"/>
                     <field name="lst_price" invisible="1"/>
                     <field name="price" invisible="1"/>
@@ -104,13 +104,14 @@
                                     <group>
                                         <field name="type" attrs="{'readonly':[('state','in',('approved','reject'))]}" invisible="1"/>
                                         <field name="uom_id" on_change="onchange_uom(uom_id,uom_po_id)" groups="product.group_uom" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
+                                        <field name="uom_po_id" attrs="{'readonly':[('state','=','approved')]}"/>
                                         <field name="list_price" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
                                         <field name="qty_available" attrs="{'readonly':[('state','in',('approved','reject'))]}" />                                        
                                         <field name="tolerance_plus" attrs="{'readonly':[('state','in',('approved','reject'))],'required':[('tolerance_applicable','=',True)]}" />                                        
                                     </group>
                                     <group>
-										<field name="latest_price" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
-										<field name="design_rate" invisible="1" attrs="{'readonly':[('state','in',('approved','reject'))]}" groups="kg_users.group_planning_admin"/>
+										<field name="latest_price" invisible="1" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
+										<field name="design_rate" attrs="{'readonly':[('state','in',('approved','reject'))],'invisible':[('product_type','in',('consu','capital','service'))]}" groups="kg_users.group_planning_admin"/>
 										<field name="equivalent_stand" attrs="{'readonly':[('state','in',('approved','reject'))]}" groups="kg_users.group_planning_admin"/>
 										<field name="minimum_qty" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
                                         <field name="reorder_qty" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
@@ -190,7 +191,7 @@
                                         <field name="standard_price" attrs="{'readonly':[('cost_method','=','average')]}"/>
                                     </group>
                                     <group name="procurement_uom" groups="product.group_uom" string="Purchase">
-                                        <field name="uom_po_id"/>
+                                        <!--<field name="uom_po_id"/>-->
                                     </group>
                                 </group>
                                 <separator string="Description for Suppliers"/>

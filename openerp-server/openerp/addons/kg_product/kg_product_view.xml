@@ -41,8 +41,8 @@
 		<field name="product_type"/>
 		</field>
 		
-		<field name="uom_id" position="after">
-		<field name="uom_po_id" attrs="{'readonly':[('state','=','approved')]}"/>
+		<field name="uom_po_id" position="after">
+		
 		<field name="po_uom_coeff" placeholder="UOM * PO Coeff = 1 POM" attrs="{'readonly':[('state','=','approved')]}"/>
 		</field>
 			
@@ -58,6 +58,9 @@
 				<group>	
 					<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject'])]}"/>
 				</group>
+				<group>												
+					<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','reject','confirm'])], 'readonly': [('state','in',['cancel'])]}"/>												
+				</group>
 			</group>
 		</field>
 		
@@ -67,15 +70,17 @@
 						<group>
 							<field name="user_id"/>
 							<field name="conf_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
-							<field name="app_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject'])]}"/>
-							<field name="rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','approved'])]}"/>		
+							<field name="app_user_id" attrs="{'invisible':[('state','in',['draft', 'confirm','reject'])]}"/>
+							<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirm','reject','approved'])]}"/>
+							<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirm','reject','approved'])]}"/>
+							<field name="rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirm','approved'])]}"/>		
 							<field name="update_user_id"/>					
 						</group>
 						<group>
 							<field name="crt_date"/>
 							<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
-							<field name="approve_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject'])]}"/>
-							<field name="reject_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','approved'])]}"/>	
+							<field name="approve_date" attrs="{'invisible':[('state','in',['draft', 'confirm','reject'])]}"/>
+							<field name="reject_date" attrs="{'invisible':[('state','in',['draft', 'confirm','approved'])]}"/>	
 							<field name="update_date"/>						
 						</group>
 					</group>
@@ -110,7 +115,7 @@
 		<field name="inherit_id" ref="product.product_product_tree_view"/>
 		<field name="arch" type="xml">
 			
-			<field name="latest_price" position="after"> 
+			<field name="qty_available" position="after"> 
 			<field name="product_type" invisible="1"/> 
 			</field>					
 			

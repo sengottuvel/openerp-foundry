@@ -48,7 +48,10 @@ class kg_product(osv.osv):
 		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
+		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
+		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'remark': fields.text('Remarks',readonly=False,states={'approved':[('readonly',True)]}),
+		'cancel_remark': fields.text('Cancel Remarks'),
 		#'moc_id': fields.many2one('kg.moc.master','MOC'),
 		
 	}
@@ -97,7 +100,16 @@ class kg_product(osv.osv):
 		self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': dt_time})
 	   
 		return True
-	
+		
+	def entry_cancel(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.cancel_remark:
+			self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': dt_time})
+		else:
+			raise osv.except_osv(_('Cancel remark is must !!'),
+				_('Enter the remarks in Cancel remarks field !!'))
+		return True
+		
 	def entry_draft(self,cr,uid,ids,context=None):
 		self.write(cr, uid, ids, {'state': 'draft'})
 		return True
