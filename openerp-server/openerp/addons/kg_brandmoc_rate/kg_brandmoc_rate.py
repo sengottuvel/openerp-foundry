@@ -6,6 +6,8 @@ import openerp.addons.decimal_precision as dp
 from datetime import datetime
 import re
 import math
+from datetime import date
+
 dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
 class kg_brandmoc_rate(osv.osv):
@@ -141,7 +143,24 @@ class kg_brandmoc_rate(osv.osv):
 			vals.update({'latest_price': latest_price})
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_brandmoc_rate, self).write(cr, uid, ids, vals, context)
+	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		today = datetime.strptime(today, '%Y-%m-%d')
+		eff_date = rec.eff_date
+		eff_date = str(eff_date)
+		eff_date = datetime.strptime(eff_date, '%Y-%m-%d')
+		if eff_date > today:
+			return False
+		return True
+	
+	_constraints = [		
 		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),   
+		
+	   ]	
 	
 		
 kg_brandmoc_rate()
@@ -159,18 +178,19 @@ class ch_brandmoc_rate_details(osv.osv):
 		'brand_id': fields.many2one('kg.brand.master','Brand'),			
 		'moc_id':fields.many2one('kg.moc.master','MOC'),	
 		'rate':fields.float('Design Rate(Rs)',required=True),
+		'purchase_price':fields.float('Purchase Price(Rs)'),
 		'remarks':fields.text('Remarks'),		
 	}
 	
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.rate <= 0.00:
+		if entry.rate <= 0.00 or entry.purchase_price <= 0.00:
 			return False
 		return True
 		
 	_constraints = [		
 			  
-		(_check_values, 'System not allow to save negative and zero values..!!',['Rate']),	
+		(_check_values, 'System not allow to save negative and zero values..!!',['Rate','purchase_price']),	
 		
 	   ]
 		
