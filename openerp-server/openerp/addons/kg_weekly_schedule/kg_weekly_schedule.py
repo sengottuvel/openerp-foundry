@@ -466,7 +466,7 @@ class ch_weekly_schedule_details(osv.osv):
 			#### Loading BOT Details
 			
 			bom_bot_obj = self.pool.get('ch.bot.details')
-			cr.execute(''' select id,product_temp_id,code,qty,header_id as bom_id
+			cr.execute(''' select id,qty,header_id as bom_id
 					from ch_bot_details
 					where header_id = (select id from kg_bom where pump_model_id = %s and state='approved' and active='t') ''',[pump_model_id])
 			bom_bot_details = cr.dictfetchall()
@@ -481,35 +481,35 @@ class ch_weekly_schedule_details(osv.osv):
 					
 					'bot_line_id': bom_ms_details['id'],
 					'bom_id': bom_ms_details['bom_id'],							
-					'product_temp_id': bom_bot_details['product_temp_id'],
-					'code': bom_bot_details['code'],
+					#~ 'product_temp_id': bom_bot_details['bot_id'],
+					#~ 'code': bom_bot_details['code'],
 					'qty': bom_bot_qty,
 							  
 					})
 					
 			### Loading Consu Details
 			
-			bom_consu_obj = self.pool.get('ch.consu.details')
-			cr.execute(''' select id,product_temp_id,code,qty,header_id as bom_id
-					from ch_consu_details
-					where header_id = (select id from kg_bom where pump_model_id = %s and state='approved' and active='t') ''',[pump_model_id])
-			bom_consu_details = cr.dictfetchall()
-			for bom_consu_details in bom_consu_details:
-				if qty == 0:
-					bom_consu_qty = bom_consu_details['qty']
-				if qty > 0:
-					bom_consu_qty = qty * bom_consu_details['qty']
-					
-					
-				consu_vals.append({
-					
-					'consu_line_id': bom_ms_details['id'],
-					'bom_id': bom_ms_details['bom_id'],					
-					'product_temp_id': bom_consu_details['product_temp_id'],
-					'code': bom_consu_details['code'],
-					'qty': bom_consu_qty,
-							  
-					})
+			#~ bom_consu_obj = self.pool.get('ch.consu.details')
+			#~ cr.execute(''' select id,product_temp_id,code,qty,header_id as bom_id
+					#~ from ch_consu_details
+					#~ where header_id = (select id from kg_bom where pump_model_id = %s and state='approved' and active='t') ''',[pump_model_id])
+			#~ bom_consu_details = cr.dictfetchall()
+			#~ for bom_consu_details in bom_consu_details:
+				#~ if qty == 0:
+					#~ bom_consu_qty = bom_consu_details['qty']
+				#~ if qty > 0:
+					#~ bom_consu_qty = qty * bom_consu_details['qty']
+					#~ 
+					#~ 
+				#~ consu_vals.append({
+					#~ 
+					#~ 'consu_line_id': bom_ms_details['id'],
+					#~ 'bom_id': bom_ms_details['bom_id'],					
+					#~ 'product_temp_id': bom_consu_details['product_temp_id'],
+					#~ 'code': bom_consu_details['code'],
+					#~ 'qty': bom_consu_qty,
+							  #~ 
+					#~ })
 
 		return {'value': {'line_ids': bom_vals,'line_ids_a':machine_shop_vals,'line_ids_b':bot_vals,'line_ids_c':consu_vals}}
 	
@@ -711,7 +711,7 @@ class ch_sch_bot_details(osv.osv):
 	_columns = {
 	
 		'header_id':fields.many2one('ch.weekly.schedule.details', 'Schedule Detail', required=1, ondelete='cascade'),
-		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('type','=','bot')], ondelete='cascade',required=True),
+		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('type','=','bot')], ondelete='cascade'),
 		'bot_line_id':fields.many2one('ch.bot.details', 'BOT Line Id'),
 		'bom_id': fields.many2one('kg.bom','BOM'),
 		'code':fields.char('Item Code', size=128),	  
