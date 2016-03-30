@@ -184,7 +184,7 @@ class ch_brandmoc_rate_details(osv.osv):
 	
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.rate <= 0.00 or entry.purchase_price <= 0.00:
+		if entry.rate <= 0.00:
 			return False
 		return True
 		
