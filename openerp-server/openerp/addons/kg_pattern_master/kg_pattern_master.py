@@ -122,9 +122,9 @@ class kg_pattern_master(osv.osv):
 	def list_moc(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])		
 		if rec.moc_type == 'both':
-			moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('active','=',True),('state','=','approved')]))				
+			moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('active','=',True)]))				
 		else:	
-			moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('type','=',rec.moc_type),('state','=','approved')]))			
+			moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('type','=',rec.moc_type)]))			
 		cr.execute(""" delete from ch_mocwise_rate where header_id  = %s """ %(ids[0]))
 		for item in moc_const_obj:			
 			moc_const_rec = self.pool.get('kg.moc.construction').browse(cr,uid,item)				

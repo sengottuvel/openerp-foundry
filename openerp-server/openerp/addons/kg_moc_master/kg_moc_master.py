@@ -12,25 +12,22 @@ class kg_moc_master(osv.osv):
 	
 	_name = "kg.moc.master"
 	_description = "SAM MOC Master"
-	
+	"""
 	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
 		res={}
-		moc_const_foundry_obj = self.pool.get('ch.moc.foundry.details')
+	
 		moc_const_ms_obj = self.pool.get('ch.moc.machineshop.details')
 		moc_const_bot_obj = self.pool.get('ch.moc.bot.details')			
-		moc_const_consu_obj = self.pool.get('ch.moc.consu.details')	
-		stock_line_obj = self.pool.get('ch.stock.inward.details')		
 		for item in self.browse(cr, uid, ids, context=None):
 			res[item.id] = 'no'
-			moc_const_foundry_ids = moc_const_foundry_obj.search(cr,uid,[('moc_id','=',item.id)])
+			
 			moc_const_ms_ids = moc_const_ms_obj.search(cr,uid,[('moc_id','=',item.id)])
-			moc_const_bot_ids = moc_const_bot_obj.search(cr,uid,[('moc_id','=',item.id)])					
-			moc_const_consu_ids = moc_const_consu_obj.search(cr,uid,[('moc_id','=',item.id)])
-			stock_line_ids = stock_line_obj.search(cr,uid,[('moc_id','=',item.id)])					
-			if moc_const_foundry_ids or moc_const_ms_ids or moc_const_bot_ids or moc_const_consu_ids or stock_line_ids:
+			moc_const_bot_ids = moc_const_bot_obj.search(cr,uid,[('moc_id','=',item.id)])		
+						
+			if moc_const_ms_ids or moc_const_bot_ids:
 				res[item.id] = 'yes'		
 		return res
-	
+	"""
 	_columns = {
 			
 		'name': fields.char('Name', size=128, required=True, select=True),
@@ -46,11 +43,12 @@ class kg_moc_master(osv.osv):
 		'line_ids':fields.one2many('ch.moc.raw.material', 'header_id', "Raw Materials"),
 		'line_ids_a':fields.one2many('ch.chemical.chart', 'header_id', "Chemical Chart"),
 		'line_ids_b':fields.one2many('ch.mechanical.chart', 'header_id', "Mechanical Chart"),
+		'line_ids_c':fields.one2many('ch.fettling.process', 'header_id', "Fettling Process"),
 		
 		'weight_type': fields.selection([('ci','CI'),('ss','SS'),('non_ferrous','Non-Ferrous')],'Family Type'),
 		'alias_name': fields.char('Alias Name', size=128),
 		'moc_type': fields.selection([('foundry_moc','Foundry MOC'),('purchase_moc','Purchase MOC'),('both','Both')],'Type'),
-		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),	
+		#'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),	
 		
 		
 		### Entry Info ###
@@ -74,7 +72,7 @@ class kg_moc_master(osv.osv):
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':fields.datetime.now,	
-		'modify': 'no',
+		#'modify': 'no',
 		
 	}
 	
@@ -147,9 +145,7 @@ class kg_moc_master(osv.osv):
 
 	def entry_approve(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		chemical_obj = self.pool.get('kg.chemical.master')
-		for item in rec.line_ids_a:			
-			chemical_obj.write(cr,uid,item.chemical_id.id,{'modify': True})
+		chemical_obj = self.pool.get('kg.chemical.master')		
 		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
@@ -313,3 +309,41 @@ class ch_mechanical_chart(osv.osv):
 	   ]
 	
 ch_mechanical_chart()
+
+
+
+class ch_fettling_process(osv.osv):
+	
+	_name = "ch.fettling.process"
+	_description = "Fettling Process"
+	
+	_columns = {
+			
+		'header_id':fields.many2one('kg.moc.master', 'Fettling Entry', required=True, ondelete='cascade'),							
+		'stage_id': fields.many2one('kg.stage.master','Name', required=True,domain="[('active','=','t')]"),	
+		'seq_no':fields.integer('Sequence',required=True),
+		'remarks':fields.text('Remarks'),	
+		
+	}
+		
+	
+	def _seq_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.seq_no:
+			seq_no = rec.seq_no			
+			cr.execute(""" select seq_no from ch_fettling_process where seq_no  = '%s' """ %(seq_no))
+			data = cr.dictfetchall()			
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res		
+	
+		
+	_constraints = [		
+			  
+		(_seq_validate, 'Please Check Sequence No!!!',['Sequence No.']),		
+	   ]
+	
+ch_fettling_process()
