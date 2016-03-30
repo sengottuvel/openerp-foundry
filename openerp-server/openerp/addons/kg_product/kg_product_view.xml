@@ -40,6 +40,16 @@
 		<field name="uom_id" position="before">
 		<field name="product_type"/>
 		</field>
+		<field name="tolerance_plus" position="after">
+		<field name="od"/>
+		<field name="breadth"/>
+		
+		</field>
+		<field name="stock_in_hand" position="after">
+		<field name="length"/>
+		<field name="thickness"/>
+		<field name="weight"/>
+		</field>
 		
 		<field name="uom_po_id" position="after">
 		

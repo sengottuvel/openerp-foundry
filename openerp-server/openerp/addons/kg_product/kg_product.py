@@ -53,6 +53,11 @@ class kg_product(osv.osv):
 		'remark': fields.text('Remarks',readonly=False,states={'approved':[('readonly',True)]}),
 		'cancel_remark': fields.text('Cancel Remarks'),
 		#'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'od': fields.float('OD'),
+		'breadth': fields.float('Breadth'),
+		'length': fields.float('Length'),
+		'thickness': fields.float('Thickness'),
+		'weight': fields.float('Weight'),
 		
 	}
 	
