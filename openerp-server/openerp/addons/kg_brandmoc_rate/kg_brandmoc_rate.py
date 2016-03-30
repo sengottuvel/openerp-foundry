@@ -190,7 +190,7 @@ class ch_brandmoc_rate_details(osv.osv):
 		
 	_constraints = [		
 			  
-		(_check_values, 'System not allow to save negative and zero values..!!',['Rate','purchase_price']),	
+		(_check_values, 'System not allow to save negative and zero values..!!',['Rate']),	
 		
 	   ]
 		
