@@ -13,12 +13,14 @@ CALL_TYPE_SELECTION = [
     ('enquiry','Enquiry')
 ]
 PURPOSE_SELECTION = [
-    ('pump','Pump'),('spare','Spare'),('prj','Project')
+    ('pump','Pump'),('spare','Spare'),('prj','Project'),('pump_spare','Pump With Spare')
 ]
 STATE_SELECTION = [
     ('draft','Draft'),('moved_to_offer','Moved To Offer'),('call','Call Back'),('quote','Quote Process'),('wo_released','WO Released'),('reject','Rejected')
 ]
-
+MARKET_SELECTION = [
+	('cp','CP'),('ip','IP')
+]
 
 class kg_crm_enquiry(osv.osv):
 
@@ -33,6 +35,7 @@ class kg_crm_enquiry(osv.osv):
 		'schedule_no': fields.char('Schedule No', size=128,select=True),
 		'enquiry_date': fields.date('Enquiry Date',required=True),
 		'note': fields.char('Notes'),
+		'service_det': fields.char('Service Details'),
 		'remarks': fields.text('Remarks'),
 		'cancel_remark': fields.text('Cancel Remarks'),
 		'active': fields.boolean('Active'),
@@ -40,19 +43,21 @@ class kg_crm_enquiry(osv.osv):
 		'line_ids': fields.one2many('ch.kg.crm.enquiry', 'header_id', "Child Enquiry"),
 		'ch_line_ids': fields.one2many('ch.kg.crm.pumpmodel', 'header_id', "Child Pump Enquiry"),
 		'due_date': fields.date('Due Date',required=True),
-		'call_type': fields.selection(CALL_TYPE_SELECTION,'Call Type'),
-		'ref_mode': fields.selection([('direct','Direct'),('dealer','Through Dealer')],'Reference Mode'),
+		'call_type': fields.selection(CALL_TYPE_SELECTION,'Call Type', required=True),
+		'ref_mode': fields.selection([('direct','Direct'),('dealer','Through Dealer')],'Reference Mode', required=True),
+		'market_division': fields.selection(MARKET_SELECTION,'Marketing Division', required=True),
 		'ref_no': fields.char('Reference Number'),
-		'segment': fields.selection([('dom','Domestic'),('exp','Export')],'Segment'),
+		'segment': fields.selection([('dom','Domestic'),('exp','Export')],'Segment', required=True),
 		'customer_id': fields.many2one('res.partner','Customer Name',domain=[('customer','=',True),('contact','=',False)]),
 		'dealer_id': fields.many2one('res.partner','Dealer Name',domain=[('dealer','=',True),('contact','=',False)]),
 		'industry_id': fields.many2one('kg.industry.master','Industry'),
 		'expected_value': fields.float('Expected Value'),
-		'expected_del_date': fields.date('Expected Del Date'),
+		'expected_del_date': fields.date('Expected Del Date', required=True),
 		'purpose': fields.selection(PURPOSE_SELECTION,'Purpose'),
 		'capacity': fields.float('Capacity'),
 		'head': fields.float('Head'),
 		'chemical_id': fields.many2one('kg.chemical.master','Chemical',domain=[('purpose','=','general')]),
+		'pump_list': fields.text('Pump List'),
 		'gravity': fields.float('Gravity'),
 		'spl_gravity': fields.float('Special Gravity'),
 		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Name'),
@@ -184,8 +189,27 @@ class kg_crm_enquiry(osv.osv):
 		return True
 		
 	def entry_confirm(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.call_type == 'service':
+			enq_no = self.pool.get('ir.sequence').get(cr, uid, 'kg.crm.enquiry')
+		elif rec.call_type == 'enquiry':
+			if rec.market_division == 'cp':
+				enq_no = self.pool.get('ir.sequence').get(cr, uid, 'crm.enquiry.cp')
+			elif rec.market_division == 'ip':
+				enq_no = self.pool.get('ir.sequence').get(cr, uid, 'crm.enquiry.ip')
+			else:
+				pass
+		else:
+			pass
+		print"enq_noenq_no",enq_no
 		
-		self.write(cr, uid, ids, {'name':self.pool.get('ir.sequence').get(cr, uid, 'kg.crm.enquiry'),'state': 'moved_to_offer','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		self.write(cr, uid, ids, {
+									#'name':self.pool.get('ir.sequence').get(cr, uid, 'kg.crm.enquiry'),
+									'name':enq_no,
+									'state': 'moved_to_offer',
+									'confirm_user_id': uid, 
+									'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')
+								})
 		return True
 			
 	def entry_call_back(self,cr,uid,ids,context=None):
@@ -229,6 +253,7 @@ class ch_kg_crm_enquiry(osv.osv):
 		#'call_type': fields.related('enquiry_id','call_type', type='char', string='Call Type', store=True),
 		'call_type': fields.related('enquiry_id', 'call_type', type='selection', selection=CALL_TYPE_SELECTION, string='Call Type'),
 		
+		
 	}
 	
 	"""
@@ -265,6 +290,10 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'qty':fields.integer('Quantity'),
 		'del_date':fields.date('Delivery Date'),
 		'oth_spec':fields.char('Other Specification'),
+		'purpose_categ': fields.selection([('pump','Pump'),('spare','Spare'),('prj','Project'),('pump_spare','Pump With Spare')],'Purpose Category',required=True),
+		'line_ids': fields.one2many('ch.kg.crm.foundry.item', 'header_id', "Foundry Details"),
+		'line_ids_a': fields.one2many('ch.kg.crm.machineshop.item', 'header_id', "Machineshop Details"),
+		'line_ids_b': fields.one2many('ch.kg.crm.bot', 'header_id', "BOT Details"),
 		
 	}
 	
@@ -280,6 +309,17 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			res = False
 		return res
 	"""	
+	
+	def default_get(self, cr, uid, fields, context=None):
+		print"contextcontextcontext",context
+		if context['purpose_categ']:
+			if context['purpose_categ'] == 'pump_spare':
+				context['purpose_categ'] = ''
+			else:
+				pass
+		else:
+			pass
+		return context
 		
 	def write(self, cr, uid, ids, vals, context=None):
 		return super(ch_kg_crm_pumpmodel, self).write(cr, uid, ids, vals, context)
@@ -288,4 +328,89 @@ class ch_kg_crm_pumpmodel(osv.osv):
 ch_kg_crm_pumpmodel()
 
 
+class ch_kg_crm_foundry_item(osv.osv):
 
+	_name = "ch.kg.crm.foundry.item"
+	_description = "Child Foundry Item Details"
+	
+	_columns = {
+	
+		### Foundry Item Details ####
+		'header_id':fields.many2one('ch.kg.crm.pumpmodel', 'Pump Model Id', ondelete='cascade'),
+		'enquiry_id':fields.many2one('kg.crm.enquiry', 'Enquiry'),
+		'pump_id':fields.many2one('kg.pumpmodel.master', 'Pump'),
+		'qty':fields.integer('Quantity'),
+		'oth_spec':fields.char('Other Specification'),
+		'pattern_code': fields.many2one('kg.pattern.master','Pattern No'),
+		'pattern_name': fields.char('Pattern Name'),
+		
+	}
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		return super(ch_kg_crm_foundry_item, self).write(cr, uid, ids, vals, context)
+	
+	def onchange_pattern_name(self, cr, uid, ids, pattern_code,pattern_name):
+		value = {'pattern_name':''}
+		pattern_obj = self.pool.get('kg.pattern.master').search(cr,uid,([('id','=',pattern_code)]))
+		if pattern_obj:
+			pattern_rec = self.pool.get('kg.pattern.master').browse(cr,uid,pattern_obj[0])
+			value = {'pattern_name':pattern_rec.pattern_name}
+		return {'value': value}
+	
+ch_kg_crm_foundry_item()
+
+class ch_kg_crm_machineshop_item(osv.osv):
+
+	_name = "ch.kg.crm.machineshop.item"
+	_description = "Macine Shop Item Details"
+	
+	_columns = {
+	
+		### machineshop Item Details ####
+		'header_id':fields.many2one('ch.kg.crm.pumpmodel', 'Pump Model Id', ondelete='cascade'),
+		'enquiry_id':fields.many2one('kg.crm.enquiry', 'Enquiry'),
+		'ms_line_id':fields.many2one('ch.machineshop.details', 'Machine Shop Id'),
+		'pos_no': fields.related('ms_line_id','pos_no', type='integer', string='Position No', store=True),
+		'bom_id': fields.many2one('kg.bom','BOM'),
+		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', domain=[('type','=','ms')], ondelete='cascade',required=True),
+		'name':fields.char('Item Name', size=128),	  
+		'qty': fields.integer('Qty', required=True),
+		'flag_applicable': fields.boolean('Is Applicable'),
+		#'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
+		'remarks':fields.text('Remarks'),   
+		
+	}
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		return super(ch_kg_crm_machineshop_item, self).write(cr, uid, ids, vals, context)
+		
+	
+ch_kg_crm_machineshop_item()
+
+class ch_kg_crm_bot(osv.osv):
+
+	_name = "ch.kg.crm.bot"
+	_description = "BOT Details"
+	
+	_columns = {
+	
+		### machineshop Item Details ####
+		'header_id':fields.many2one('ch.kg.crm.pumpmodel', 'Pump Model Id', ondelete='cascade'),
+		'enquiry_id':fields.many2one('kg.crm.enquiry', 'Enquiry'),
+		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('type','=','bot')], ondelete='cascade',required=True),
+		'bot_line_id':fields.many2one('ch.bot.details', 'BOT Line Id'),
+		'bom_id': fields.many2one('kg.bom','BOM'),
+		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', domain=[('type','=','bot')], ondelete='cascade',required=True),
+		'code':fields.char('Item Code', size=128),	  
+		'qty': fields.integer('Qty', required=True),
+		'flag_applicable': fields.boolean('Is Applicable'),
+		#'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
+		'remarks':fields.text('Remarks'),   
+		
+	}
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		return super(ch_kg_crm_bot, self).write(cr, uid, ids, vals, context)
+		
+	
+ch_kg_crm_bot()

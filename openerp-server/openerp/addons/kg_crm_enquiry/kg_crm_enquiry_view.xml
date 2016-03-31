@@ -27,9 +27,11 @@
 								<field name="industry_id"/>
 								<field name="call_type"/>
 								<field name="ref_mode"/>
+								<field name="market_division"/>
 								<field name="dealer_id" attrs="{'invisible': [('ref_mode','=','direct')],'required': [('ref_mode','=','dealer')]}"/>
 								<field name="note"/>
-								<field name="purpose" attrs="{'invisible': [('call_type','=','service')]}"/>
+								<field name="purpose" attrs="{'invisible': [('call_type','=','service')],'required': [('call_type','!=','service')]}"/>
+								<field name="service_det" attrs="{'invisible': [('call_type','!=','service')],'required': [('call_type','=','service')]}"/>
 								<!--<field name="order_type" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>-->								
 							</group>											
 							<group>
@@ -51,6 +53,7 @@
 							<group>
 							<field name="head" attrs="{'invisible': [('purpose','not in',('pump'))]}"/>
 							<field name="chemical_id" attrs="{'invisible': [('purpose','not in',('pump'))]}"/>
+							<field name="pump_list" attrs="{'invisible': [('purpose','not in',('pump'))]}"/>
 							</group>
 						</group>
 						<group string="WO Details" attrs="{'invisible': [('purpose','not in',('spare'))]}">
@@ -67,13 +70,26 @@
 						</group>
 						
 						<group string="Pump Details">
-							<field name="ch_line_ids" colspan="4" nolabel="1">
-								<tree string="Pump History" editable="bottom">
+							<field name="ch_line_ids" colspan="4" nolabel="1" context="{'purpose_categ':purpose}">
+								<tree string="Pump History">
+								   <field name="purpose_categ" required="1"/>
 								   <field name="pump_id" required="1"/>
 								   <field name="qty" required="1"/>
 								   <field name="del_date" required="1"/>
 								   <field name="oth_spec" required="1"/>
 								</tree>
+							<!--	<form>
+									<group>
+										<group>
+											<field name="pump_id" required="1"/>
+											<field name="qty" required="1"/>
+										</group>
+										<group>
+											<field name="del_date" required="1"/>
+											<field name="oth_spec" required="1"/>
+										</group>
+									</group>
+								</form>-->
 							</field>
 						</group>
 							
@@ -160,6 +176,93 @@
 		</record>
 		
 	<!-- Tree View End -->
+	
+	<!-- Child Class Tree View Start -->
+		
+		<record id="t_tree_v_pumpmodel_details" model="ir.ui.view">
+			<field name="name">Pumpmodel Details Entry Tree</field>
+			<field name="model">ch.kg.crm.pumpmodel</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree string="Pumpmodel Details Entry Tree">					
+					<field name="pump_id"/>
+					<field name="qty"/>
+					<field name="del_date"/>
+					<field name="oth_spec"/>
+					<field name="purpose_categ"/>
+					
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Child Class Tree View End -->
+	
+	<!-- Child Class Form View Start -->
+		
+		<record id="t_form_v_pumpmodel_details1" model="ir.ui.view">
+			<field name="name">Pumpmodel Details Entry Form</field>
+			<field name="model">ch.kg.crm.pumpmodel</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<form string="Pump Details Entry Form">
+					<group>
+						<group>
+							<field name="pump_id" required="1"/>
+							<field name="qty" required="1"/>
+						</group>
+						<group>
+							<field name="del_date" required="1"/>
+							<field name="oth_spec" required="1"/>
+							<field name="purpose_categ"/>
+						</group>
+					</group>
+					<newline/>
+					<notebook>
+						<page string="Foundry Items" attrs="{'invisible':[('purpose_categ','not in',('spare','prj','pump_spare'))]}">
+							<field name="line_ids" colspan="4" nolabel="1">
+								<tree string="Foundry Items" editable="bottom">
+								   <field name="pattern_code" on_change="onchange_pattern_name(pattern_code,pattern_name)"/>
+								   <field name="pattern_name"/>
+								   <field name="qty"/>
+								   <field name="oth_spec"/>
+								</tree>
+							</field>
+						</page>
+						<page string="Machine Shop" attrs="{'invisible':[('purpose_categ','not in',('spare','prj','pump_spare'))]}">
+							<field name="line_ids_a" nolabel="1">
+								<tree string="Machine Shop Details Entry Tree" editable="bottom">
+									<field name="pos_no"/>		
+									<field name="ms_id"/>		
+									<field name="name"/>
+									<field name="qty"/>
+									<field name="flag_applicable"/>
+									<field name="remarks" widget="char"/>
+								</tree>
+							</field>
+						</page>
+						<page string="BOT" attrs="{'invisible':[('purpose_categ','not in',('spare','prj','pump_spare'))]}">
+							<field name="line_ids_b" nolabel="1">
+								<tree string="BOT Details Entry Tree" editable="bottom">	
+									<field name="product_temp_id"/>
+									<field name="ms_id"/>
+									<field name="code"/>
+									<field name="qty"/>
+									<field name="flag_applicable"/>
+									<field name="remarks" widget="char"/>
+								</tree>
+							</field>
+						</page>
+					</notebook>
+					
+				</form>
+			</field>
+		</record>
+		
+	<!-- Child Class Form View End -->
+	
+	
+	
+	
 	
 	<!-- Search View Start -->
 
