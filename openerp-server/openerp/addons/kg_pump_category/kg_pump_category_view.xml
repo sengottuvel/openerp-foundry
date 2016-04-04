@@ -128,7 +128,9 @@
             
             <!-- PumpCategory Master  -->
             
+<!--
 				<menuitem action="mma_pumpcate_master" name="Pump Category" id="mam_pumpcate_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="7"/>
+-->
 				
 		<!-- Menu Name End here --> 
 	
