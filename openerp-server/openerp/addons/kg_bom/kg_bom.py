@@ -33,6 +33,7 @@ class kg_bom(osv.osv):
 		'line_ids_c':fields.one2many('ch.consu.details', 'header_id', "Consumable Line"),		
 		'type': fields.selection([('new','New'),('copy','Copy'),('amendment','Amendment')],'Type', required=True),
 		'bom_type': fields.selection([('new_bom','New BOM'),('copy_bom','Copy BOM')],'Type', required=True),
+		
 		'source_bom': fields.many2one('kg.bom', 'Source BOM',domain="[('state','=','approved'), ('active','=','t')]"),
 		'copy_flag':fields.boolean('Copy Flag'),
 		
@@ -46,7 +47,8 @@ class kg_bom(osv.osv):
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
 		'revision': fields.integer('Revision'),
-		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),	
+		'category_type': fields.selection([('pump_bom','Pump BOM'),('part_list_bom','Part list BOM')],'Category', required=True),	
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -79,8 +81,11 @@ class kg_bom(osv.osv):
 	  'revision' : 0, 
 	  'copy_flag' : False, 
 	  'modify': 'no',
+	  'category_type': 'pump_bom',
 	  
 	}
+	
+	
 	
 	
 	def entry_cancel(self,cr,uid,ids,context=None):
@@ -128,6 +133,19 @@ class kg_bom(osv.osv):
 						
 		self.write(cr, uid, ids[0], {'copy_flag': True})		
 		return True
+		
+	def _pump_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.name:
+			pump_name = rec.pump_model_id						
+			cr.execute(""" select * from kg_bom where pump_model_id  = '%s' and state != '%s' """ %(pump_name.id,'reject'))
+			data = cr.dictfetchall()			
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res
 
 	def entry_confirm(self,cr,uid,ids,context=None):		
 		rec = self.browse(cr,uid,ids[0])
@@ -158,10 +176,217 @@ class kg_bom(osv.osv):
 					_('Warning !'),
 					_('Please Consumable items zero qty not accepted!!'))		 
 		old_ids = self.search(cr,uid,[('state','=','approved'),('name','=',rec.name)])
-		if old_ids:
-			bom_rec = bom_obj.browse(cr, uid, old_ids[0])			  
-			if rec.name == bom_rec.name and rec.type != 'amendment':
-				raise osv.except_osv(_('Warning !'), _('BOM Name must be uniqe!!'))	 
+		#~ if old_ids:
+			#~ bom_rec = bom_obj.browse(cr, uid, old_ids[0])			  
+			#~ if rec.name == bom_rec.name and rec.type != 'amendment':
+				#~ raise osv.except_osv(_('Warning !'), _('BOM Name must be uniqe!!'))	
+				
+		### Check Duplicates Foundry Items  start ###
+		
+		if rec.bom_type == 'copy_bom':
+			
+			cr.execute('''select 
+
+					bom_line.pattern_id,
+					bom_line.pos_no,
+					bom_line.qty
+
+					from ch_bom_line bom_line 
+
+					left join kg_bom header on header.id  = bom_line.header_id
+
+					where header.bom_type = 'copy_bom' and header.id = %s''',[rec.id])
+			
+			source_bom_ids = cr.fetchall()
+			
+			source_bom_len = len(source_bom_ids)
+			
+			
+			
+			cr.execute('''select 
+
+					bom_line.pattern_id,
+					bom_line.pos_no,
+					bom_line.qty
+
+					from ch_bom_line bom_line 
+
+					where bom_line.header_id  = %s''',[rec.source_bom.id])
+			
+			source_old_bom_ids = cr.fetchall()
+			
+			source_old_bom_len = len(source_old_bom_ids)
+							
+			cr.execute('''select 
+
+					bom_line.pattern_id,
+					bom_line.pos_no,
+					bom_line.qty
+
+					from ch_bom_line bom_line 
+
+					left join kg_bom header on header.id  = bom_line.header_id
+
+					where header.bom_type = 'copy_bom' and header.id = %s
+
+					INTERSECT
+
+					select 
+
+					bom_line.pattern_id,
+					bom_line.pos_no,
+					bom_line.qty
+
+					from ch_bom_line bom_line 
+
+					where bom_line.header_id  = %s ''',[rec.id,rec.source_bom.id])
+			repeat_ids = cr.fetchall()
+			
+			new_bom_len = len(repeat_ids)
+			
+			### Check Duplicates Foundry Items end.... ###
+			
+			
+			
+			### Check Duplicates Machine Shop Items  start ###
+			
+			cr.execute('''select 
+
+					machine_line.ms_id,
+					machine_line.pos_no,
+					machine_line.qty
+
+					from ch_machineshop_details machine_line 
+
+					left join kg_bom header on header.id  = machine_line.header_id
+
+					where header.bom_type = 'copy_bom' and header.id = %s''',[rec.id])
+			
+			ms_new_bom_ids = cr.fetchall()
+			
+			ms_new_bom_len = len(ms_new_bom_ids)
+			
+			cr.execute('''select 
+
+					machine_line.ms_id,
+					machine_line.pos_no,
+					machine_line.qty
+
+					from ch_machineshop_details machine_line 
+
+					where machine_line.header_id  = %s''',[rec.source_bom.id])
+			
+			ms_old_bom_ids = cr.fetchall()
+			
+			ms_old_bom_len = len(ms_old_bom_ids)
+							
+			cr.execute('''select 
+
+					machine_line.ms_id,
+					machine_line.pos_no,
+					machine_line.qty
+
+					from ch_machineshop_details machine_line 
+
+					left join kg_bom header on header.id  = machine_line.header_id
+
+					where header.bom_type = 'copy_bom' and header.id = %s
+
+					INTERSECT
+
+					select 
+
+					machine_line.ms_id,
+					machine_line.pos_no,
+					machine_line.qty
+
+					from ch_machineshop_details machine_line 
+
+					where machine_line.header_id  = %s ''',[rec.id,rec.source_bom.id])
+			ms_repeat_ids = cr.fetchall()
+			
+			ms_join_bom_len = len(ms_repeat_ids)
+			
+			### Check Duplicates Machine Shop end.... ###
+			
+			
+			
+			### Check Duplicates BOT Items  start ###
+			
+			
+			
+			cr.execute('''select 
+
+					bot_line.bot_id,
+					bot_line.pos_no,
+					bot_line.qty
+
+					from ch_bot_details bot_line 
+
+					left join kg_bom header on header.id  = bot_line.header_id
+
+					where header.bom_type = 'copy_bom' and header.id = %s''',[rec.id])
+			
+			bot_new_bom_ids = cr.fetchall()
+			
+			bot_new_bom_len = len(bot_new_bom_ids)
+			
+			cr.execute('''select 
+
+					bot_line.bot_id,
+					bot_line.pos_no,
+					bot_line.qty
+
+					from ch_bot_details bot_line 
+
+					where bot_line.header_id  = %s ''',[rec.source_bom.id])
+			
+			bot_old_bom_ids = cr.fetchall()
+			
+			bot_old_bom_len = len(bot_old_bom_ids)
+							
+			cr.execute('''select 
+
+					bot_line.bot_id,
+					bot_line.pos_no,
+					bot_line.qty
+
+					from ch_bot_details bot_line 
+
+					left join kg_bom header on header.id  = bot_line.header_id
+
+					where header.bom_type = 'copy_bom' and header.id = %s
+
+					INTERSECT
+
+					select 
+
+					bot_line.bot_id,
+					bot_line.pos_no,
+					bot_line.qty
+
+					from ch_bot_details bot_line 
+
+					where bot_line.header_id  = %s ''',[rec.id,rec.source_bom.id])
+			bot_repeat_ids = cr.fetchall()
+			
+			bot_join_bom_len = len(bot_repeat_ids)
+			
+			### Check Duplicates BOT end.... ###	
+			
+			bom_dup = ms_dup = bot_dup = ''		
+			if new_bom_len == source_bom_len == source_old_bom_len:			
+				bom_dup = 'yes'		
+			if ms_new_bom_len == ms_join_bom_len == ms_old_bom_len:			
+				ms_dup = 'yes'		
+			if bot_new_bom_len == bot_join_bom_len == bot_old_bom_len:
+				bot_dup = 'yes'
+			
+			
+			if bom_dup == 'yes' and ms_dup == 'yes' and bot_dup == 'yes':			
+				raise osv.except_osv(_('Warning!'),
+								_('Same BOM Details are already exist !!'))
+		
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
@@ -202,9 +427,15 @@ class kg_bom(osv.osv):
 			vals.update({'qty': qty,'planning_qty':qty})	"""
 		return super(kg_bom, self).create(cr, uid, vals, context=context)
 		
-	def write(self, cr, uid, ids, vals, context=None):	  
+	def write(self, cr, uid, ids, vals, context=None):		
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_bom, self).write(cr, uid, ids, vals, context)
+		
+	_constraints = [
+		
+		(_pump_validate, 'Pump Model name must be unique !!', ['Pump Name']),			
+		
+	]
 	
 kg_bom()
 
@@ -219,7 +450,7 @@ class ch_bom_line(osv.osv):
 		
 		'header_id':fields.many2one('kg.bom', 'BOM Name', required=True, ondelete='cascade'),  
 		'pos_no': fields.integer('Position No'),
-		'pattern_id': fields.many2one('kg.pattern.master','Pattern No', required=True,domain="[('active','=','t')]"),		
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern No', required=True,domain="[('active','=','t')]"), 		
 		'pattern_name': fields.char('Pattern Name', required=True), 
 		'remarks':fields.text('Remarks'),
 		'qty': fields.integer('Qty',required=True,),
@@ -283,7 +514,7 @@ class ch_bom_line(osv.osv):
 		if vals.get('pattern_id'):
 			pattern_rec = pattern_obj.browse(cr, uid, vals.get('pattern_id') )
 			pattern_name = pattern_rec.pattern_name
-			vals.update({'pattern_name': pattern_name})
+			vals.update({'pattern_name': pattern_name})		
 		return super(ch_bom_line, self).write(cr, uid, ids, vals, context)  
 		
 	"""_constraints = [
@@ -305,7 +536,7 @@ class ch_machineshop_details(osv.osv):
 	_columns = {
 	
 		'header_id':fields.many2one('kg.bom', 'BOM', ondelete='cascade',required=True),
-		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', ondelete='cascade',required=True),		
+		'ms_id':fields.many2one('kg.machine.shop', 'Item Code',domain = [('type','=','ms')], ondelete='cascade',required=True),		
 		'pos_no': fields.integer('Position No'),
 		'csd_no': fields.char('CSD No.'),
 		'name':fields.char('Item Name', size=128),	  
@@ -342,7 +573,6 @@ class ch_machineshop_details(osv.osv):
 		return super(ch_machineshop_details, self).write(cr, uid, ids, vals, context)   
 
 ch_machineshop_details()
-
 
 class ch_bot_details(osv.osv):
 	

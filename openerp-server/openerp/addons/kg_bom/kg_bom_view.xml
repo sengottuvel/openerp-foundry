@@ -28,7 +28,7 @@
 						</group>
 						<group>
 							<group>
-							<field name="source_bom" attrs="{'invisible':[('bom_type','=','new_bom')],'readonly': [('copy_flag','=',True)], 'required': [('bom_type','=','copy_bom')]}"/>
+								<field name="source_bom" attrs="{'invisible':[('bom_type','=','new_bom')],'readonly': [('copy_flag','=',True)], 'required': [('bom_type','=','copy_bom')]}"/>
 							</group>
 							<group>
 								<button name="copy_bom" type="object" string="Copy" class="oe_highlight" attrs="{'invisible':['|',('bom_type','=','new_bom'),('copy_flag','=',True)]}"/>
@@ -38,6 +38,7 @@
 							<group>	
 									
 								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire'])]}"/>								
+								<field name="category_type" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire'])]}"/>								
 								<field name="uom" readonly="1"/>
 								<field name="revision" readonly="1"/>
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire'])]}"/>								
@@ -46,7 +47,7 @@
 								
 								
 							
-								<field name="pump_model_id" required="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}"/>
+								<field name="pump_model_id" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')],'required': [('category_type','in',['pump_bom'])]}"/>
 								<field name="qty" readonly="1"/>
 								<field name="copy_flag" invisible="1"/>									
 								<field name="active"/>									
@@ -69,7 +70,7 @@
 								
 								<field name="pos_no" />	
 								<field name="pattern_id" on_change="onchange_pattern_name(pattern_id)"/>
-								<field name="pattern_name" readonly="1"/>										   
+								<field name="pattern_name" readonly="1"/>					   
 								<field name="qty"/>
 								<field name="remarks" widget="char"/>
 								<field name="state" invisible="1"/>
@@ -82,8 +83,8 @@
 									<tree string="Machine Shop Details Entry Tree" editable="top" >			
 										<field name="pos_no" />	
 										<field name="ms_id" on_change="onchange_machineshop_name(ms_id)"/>	
-										<field name="name" readonly="1"/>										
-										<field name="csd_no" readonly="1"/>
+										<field name="name" readonly="1"/>
+										<field name="csd_no" readonly="1"/>										
 										<field name="qty"/>
 										<field name="remarks" widget="char"/>
 									</tree>
@@ -92,9 +93,9 @@
 							<page string="BOT">
 								<field name="line_ids_b" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
 									<tree string="BOT Details Entry Tree" editable="top" >	
-										<field name="pos_no" />			
+										<field name="pos_no" />		
 										<field name="bot_id" on_change="onchange_bot_name(bot_id)"/>
-										<field name="name" readonly="1" />															
+										<field name="name" readonly="1" />																			
 										<field name="qty"/>
 										<field name="remarks" widget="char"/>
 									</tree>
@@ -208,7 +209,8 @@
 			</field>
 		</record>
 		
-	<!-- Child Class Form View End -->			
+	<!-- Child Class Form View End -->		
+	
 	
 	<!-- MS Child Class Tree View Start -->
 		
@@ -247,7 +249,9 @@
 			</field>
 		</record>
 		
-	<!-- BOT Child Class Tree View End -->	
+	<!-- BOT Child Class Tree View End -->
+	
+			
 		
            
 		<!-- Search View Start -->
@@ -306,9 +310,7 @@
 			<field name="search_view_id" ref="m_search_v_bom"/>
 			<field name="context">{"search_default_draft":1}</field>
 			
-		</record>
-		
-		
+		</record>	
 				
 				
 		
@@ -326,7 +328,7 @@
 		</record>	
 		
 		
-	<!-- Child Class  Menu Action End-->	
+	<!-- Child Class  Menu Action End-->
 	
 	
 	<!-- MS Child Class Menu Action Start-->
@@ -358,6 +360,7 @@
 	<!-- bot Child Class  Menu Action End-->
 	
 	
+        
 	
 	<!-- Menu Name Start here --> 
 	
@@ -366,7 +369,6 @@
 	
 		<!-- BOM Details  --> 
 				<menuitem action="mma_bom_details" name="BOM Details" id="mam_bom_details" parent="kg_pumpmodel_master.mpm_planning_master" sequence="5"/>   
-				
 		<!-- BOM ms Details  --> 
 				<menuitem action="mma_ms_details" name="MS Details" id="mam_ms_details" parent="kg_pumpmodel_master.mpm_planning_master" sequence="5"/>  
 				
