@@ -822,6 +822,20 @@
 		</record>
 		
 		<!-- Construction Type Master END -->
+		
+		<!-- Rejection Master Start -->
+		
+		<record id="kg_rejection_master_access" model="ir.model.access">
+			<field name="model_id" ref="kg_rejection_master.model_kg_rejection_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Rejection Master</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- Rejection Master END -->
 
 		
 		

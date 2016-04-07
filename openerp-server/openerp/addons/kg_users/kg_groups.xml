@@ -23,14 +23,14 @@
             ref('kg_bom_amendment.mam_bom_amendment'),    
             ref('kg_chemical_master.mam_chemical_master'),
             ref('kg_mechanical_master.mam_mechanical_master'),  
-            ref('kg_moc_construction.mam_mocconstruction_master'), 
-            
+            ref('kg_moc_construction.mam_mocconstruction_master'),             
             ref('kg_bom.mam_bom_details'),
             ref('kg_brandmoc_rate.mam_brandmocrate_design_master'),
             ref('kg_shift_master.mam_shift_master'),
             ref('kg_contractor_category.mam_contractor_category_master'),
             ref('kg_contractor_master.mam_contractor_master'),
             ref('kg_construction_type.mam_const_type_master'),
+            ref('kg_rejection_master.mam_rejection_master'),
             
             ref('kg_stock_inward.tpm_transactions'),
             ref('kg_stock_inward.tpm_planning_transactions'),
