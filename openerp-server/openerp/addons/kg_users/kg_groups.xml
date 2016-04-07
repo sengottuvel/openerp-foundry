@@ -30,6 +30,7 @@
             ref('kg_shift_master.mam_shift_master'),
             ref('kg_contractor_category.mam_contractor_category_master'),
             ref('kg_contractor_master.mam_contractor_master'),
+            ref('kg_construction_type.mam_const_type_master'),
             
             ref('kg_stock_inward.tpm_transactions'),
             ref('kg_stock_inward.tpm_planning_transactions'),

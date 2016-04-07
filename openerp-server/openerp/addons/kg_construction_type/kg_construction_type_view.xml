@@ -4,15 +4,15 @@
 
 	<!-- Form View Start -->
 	
-		<record id="m_form_v_mocconstruction" model="ir.ui.view">
-			<field name="name">MOC Construction Master Form</field>
-			<field name="model">kg.moc.construction</field>
+		<record id="m_form_v_const_type" model="ir.ui.view">
+			<field name="name">MOC Construction Type Master Form</field>
+			<field name="model">kg.construction.type</field>
 			<field name="arch" type="xml">
-				<form string="MOC Construction Master" version="7.0">					
+				<form string="MOC Construction Type Master" version="7.0">					
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="entry_cancel" type="object" states="reject,approved" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_cancel" type="object" string="Cancel" states="reject,approved" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 						<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
@@ -20,12 +20,11 @@
 						<group>
 							<group>						
 								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
-								<field name="constuction_type_id"/>
+								<field name="active"/>
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 							</group>
 							<group>
 								<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="active"/>								
 								<field name="state" style="width: 30%%" class="att_state_change"/>								
 							</group>
 						</group>						
@@ -34,10 +33,10 @@
 								<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							</group>
 							<group>												
-								<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','confirmed'])], 'readonly': [('state','in',['cancel'])]}"/>	
+								<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','confirmed'])], 'readonly': [('state','in',['cancel'])]}"/>		
 							</group>
 						</group>
-						<notebook>						
+						<notebook>
 							<page string="Entry Info">
 									<group>
 										<field name="company_id"/>
@@ -69,16 +68,15 @@
 
 		<!-- Tree View Start -->
 		
-		<record id="m_tree_v_mocconstruction" model="ir.ui.view">
-			<field name="name">MOC Construction Master Tree</field>
-			<field name="model">kg.moc.construction</field>
+		<record id="m_tree_v_const_type" model="ir.ui.view">
+			<field name="name">MOC Construction Type Master Tree</field>
+			<field name="model">kg.construction.type</field>
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'draft';red:state == 'confirmed'
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" 
-								toolbar="True" string="mocconstruction Master Tree">				
+								toolbar="True" string="MOC Construction Type Master Tree">				
 					<field name="code"/>
-					<field name="name"/>	
-					<field name="constuction_type_id"/>				
+					<field name="name"/>
 					<field name="state"/>
 				</tree>
 			</field>
@@ -88,11 +86,11 @@
 
 		<!-- Search View Start -->
 
-		<record id="m_search_v_mocconstruction" model="ir.ui.view">
-            <field name="name">MOC Construction Master Search</field>
-            <field name="model">kg.moc.construction</field>
+		<record id="m_search_v_const_type" model="ir.ui.view">
+            <field name="name">MOC Construction Type Master Search</field>
+            <field name="model">kg.construction.type</field>
             <field name="arch" type="xml">
-                <search string="MOC Construction Master Template">
+                <search string="Construction Type Master Template">
 					<field name="name" string="Master"  filter_domain="['|', ('name','ilike',self), ('code','ilike',self)]" />
 					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
 					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>				
@@ -111,24 +109,23 @@
 
 		<!-- Menu Action Start-->
 		
-		 <record id="mma_mocconstruction_master" model="ir.actions.act_window">
-			<field name="name">MOC Construction</field>
+		 <record id="mma_const_type_master" model="ir.actions.act_window">
+			<field name="name">MOC Construction Type</field>
 			<field name="type">ir.actions.act_window</field>
-			<field name="res_model">kg.moc.construction</field>
+			<field name="res_model">kg.construction.type</field>
 			<field name="view_type">form</field>
 			<field name="context">{}</field>
-			<field name="view_id" ref="m_tree_v_mocconstruction"/>
-			<field name="search_view_id" ref="m_search_v_mocconstruction"/>
+			<field name="view_id" ref="m_tree_v_const_type"/>
+			<field name="search_view_id" ref="m_search_v_const_type"/>
 		</record>	
 		
 		
-		<!-- Menu Action End-->
-		
+		<!-- Menu Action End-->		
 		
 		
 		<!-- Menu Name Start here --> 
 		
-			<menuitem action="mma_mocconstruction_master" name="MOC Construction" id="mam_mocconstruction_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="14"/>
+			<menuitem action="mma_const_type_master" name="MOC Construction Type" id="mam_const_type_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="22"/>
 
 		<!-- Menu Name End here --> 
 
