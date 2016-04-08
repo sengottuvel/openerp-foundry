@@ -16,13 +16,12 @@ class kg_pumpmodel_master(osv.osv):
 	
 	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
 		res={}		
-		stock_line_obj = self.pool.get('ch.stock.inward.details')
-		weekly_sch_obj = self.pool.get('ch.weekly.schedule.details')		
+		stock_line_obj = self.pool.get('ch.stock.inward.details')			
 		for item in self.browse(cr, uid, ids, context=None):
 			res[item.id] = 'no'			
 			stock_line_ids = stock_line_obj.search(cr,uid,[('pump_model_id','=',item.id)])
-			weekly_sch_ids = weekly_sch_obj.search(cr,uid,[('pump_model_id','=',item.id)])			
-			if stock_line_ids or weekly_sch_ids:
+			
+			if stock_line_ids:
 				res[item.id] = 'yes'		
 		return res
 	
@@ -40,10 +39,10 @@ class kg_pumpmodel_master(osv.osv):
 		'alias_name': fields.char('Alias Name', size=128),
 		'make_by': fields.char('Make By', size=128),
 		'delivery_lead': fields.integer('Delivery Lead Time(Weeks)', size=128),
-		'type': fields.selection([('vertical','Vertical'),('horizontal','Horizontal')],'Type' ,required=True),
-		'category_id': fields.many2one('kg.pump.category', 'Pump Category'),
+		'type': fields.selection([('vertical','Vertical'),('horizontal','Horizontal'),('others','Others')],'Type' ,required=True),
+		'category_id': fields.many2one('kg.pump.category', 'Product Category'),
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),	
-		'pump_mode': fields.selection([('only_spares','Only Spares'),('full_pump','Full Pump')],'Pump Mode',required=True),	
+		'pump_mode': fields.selection([('only_spares','Only Spares'),('full_pump','Full Product')],'Product Mode',required=True),	
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),

@@ -57,7 +57,7 @@ class kg_machine_shop(osv.osv):
 		
 		
 		'ms_type': fields.selection([('new_item','New Item'),('copy_item','Copy Item')],'Type', required=True),	
-		'source_item': fields.many2one('kg.machine.shop', 'Source Item',domain="[('type','=',type),('state','=','approved'), ('active','=','t')]"),
+		'source_item': fields.many2one('kg.machine.shop', 'Source Item',domain="[('type','=',type),('active','=','t')]"),
 		'copy_flag':fields.boolean('Copy Flag'),
 		
 		### Entry Info ###

@@ -26,10 +26,11 @@ class kg_pump_category(osv.osv):
 	_columns = {
 			
 		'name': fields.char('Name', size=128, required=True, select=True),
+		'code': fields.char('Code', size=128,),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),		
 		'active': fields.boolean('Active'),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
-		'type': fields.selection([('vertical','Vertical'),('horizontal','Horizontal')],'Type' ,required=True),
+		'type': fields.selection([('vertical','Vertical'),('horizontal','Horizontal')],'Type' ),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),

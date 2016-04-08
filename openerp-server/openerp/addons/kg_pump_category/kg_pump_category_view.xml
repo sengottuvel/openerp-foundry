@@ -24,7 +24,8 @@
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 							</group>
 							<group>
-								<field name="type" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+								<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
+								<field name="type" invisible ="1"/>								
 								<field name="state" style="width: 30%%" class="att_state_change"/>									
 							</group>
 						</group>
@@ -77,7 +78,7 @@
 								toolbar="True" string="Pump Category Master Tree">		
 					
 					<field name="name"/>					
-					<field name="type"/>					
+					<field name="code"/>					
 					<field name="state"/>
 				</tree>
 			</field>
@@ -111,7 +112,7 @@
 		<!-- Menu Action Start-->
 		
 		 <record id="mma_pumpcate_master" model="ir.actions.act_window">
-			<field name="name">Pump Category</field>
+			<field name="name">Product Category</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.pump.category</field>
 			<field name="view_type">form</field>
@@ -123,14 +124,15 @@
 		<!-- Menu Action End-->
 		
 		
+		
 		<!-- Menu Name Start here -->           
           
             
             <!-- PumpCategory Master  -->
             
-<!--
-				<menuitem action="mma_pumpcate_master" name="Pump Category" id="mam_pumpcate_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="7"/>
--->
+
+				<menuitem action="mma_pumpcate_master" name="Product Category" id="mam_pumpcate_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="7"/>
+
 				
 		<!-- Menu Name End here --> 
 	

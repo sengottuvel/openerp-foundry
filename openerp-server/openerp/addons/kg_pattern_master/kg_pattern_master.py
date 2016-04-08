@@ -64,7 +64,7 @@ class kg_pattern_master(osv.osv):
 		
 		
 		'pattern_type': fields.selection([('new_pattern','New Pattern'),('copy_pattern','Copy Pattern')],'Type', required=True),	
-		'source_pattern': fields.many2one('kg.pattern.master', 'Source Pattern',domain="[('state','=','approved'), ('active','=','t')]"),
+		'source_pattern': fields.many2one('kg.pattern.master', 'Source Pattern',domain="[('active','=','t')]"),
 		'copy_flag':fields.boolean('Copy Flag'),		
 		
 		### Entry Info ###

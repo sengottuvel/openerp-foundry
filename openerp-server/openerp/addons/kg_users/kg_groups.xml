@@ -31,6 +31,7 @@
             ref('kg_contractor_master.mam_contractor_master'),
             ref('kg_construction_type.mam_const_type_master'),
             ref('kg_rejection_master.mam_rejection_master'),
+            ref('kg_pump_category.mam_pumpcate_master'),
             
             ref('kg_stock_inward.tpm_transactions'),
             ref('kg_stock_inward.tpm_planning_transactions'),
