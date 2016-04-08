@@ -18,12 +18,29 @@
 					</header>
 					<sheet>
 						<group>
+							<group>
+								<field name="ms_type" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire'])]}"/>
+							</group>
+							<group>
+							</group>
+						</group>
+						<group>
+							<group>
+								<field name="source_item" attrs="{'invisible':[('ms_type','=','new_item')],'readonly': [('copy_flag','=',True)], 'required': [('ms_type','=','copy_item')]}"/>
+							</group>
+							<group>
+								<button name="copy_item" type="object" string="Copy" class="oe_highlight" attrs="{'invisible':['|',('ms_type','=','new_item'),('copy_flag','=',True)]}"/>
+							</group>
+						</group>					
+						
+						<group>
 							<group>						
 								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
 								<field name="uom_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>											
 								<field name="type" invisible="1"/>											
 								<field name="od"/>											
-								<field name="length"/>											
+								<field name="length"/>	
+								<field name="copy_flag" invisible="1"/>											
 								<field name="weight"/>											
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 							</group>
@@ -38,10 +55,10 @@
 						</group>
 						<group>
 							<group>	
-								<field name="moc_id"/>
+								<field name="moc_id" attrs="{'required': [('ms_type','=','new_item')]}"/>
 							</group>
 							<group>												
-								<field name="moc_type"/>												
+								<field name="moc_const_type" widget="many2many_tags"/>												
 							</group>
 							<button name="list_moc" type="object" states="draft,confirmed" string="List MOC Construction" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						</group>

@@ -52,8 +52,13 @@ class kg_machine_shop(osv.osv):
 		'thickness': fields.float('Thickness'),
 		'weight': fields.float('Weight'),
 		
-		'moc_type': fields.selection([('slurry','Slurry'),('non_slurry','Non Slurry'),('both','Both')],'Type', required=True),
-		'moc_id': fields.many2one('kg.moc.master','Default MOC', required=True,domain="[('active','=','t')]" ),		
+		'moc_const_type': fields.many2many('kg.construction.type', 'm2m_moc_construction_details', 'moc_const_id', 'const_type_id','Type', domain="[('state','=','approved'), ('active','=','t')]"),
+		'moc_id': fields.many2one('kg.moc.master','Default MOC', domain="[('active','=','t')]" ),	
+		
+		
+		'ms_type': fields.selection([('new_item','New Item'),('copy_item','Copy Item')],'Type', required=True),	
+		'source_item': fields.many2one('kg.machine.shop', 'Source Item',domain="[('type','=',type),('state','=','approved'), ('active','=','t')]"),
+		'copy_flag':fields.boolean('Copy Flag'),
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -77,6 +82,8 @@ class kg_machine_shop(osv.osv):
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':fields.datetime.now,	
 		'modify': 'no',
+		'copy_flag' : False,
+		'ms_type':'new_item', 
 		
 	}
 	
@@ -111,25 +118,191 @@ class kg_machine_shop(osv.osv):
 		
 	def list_moc(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.moc_type == 'both':
-			moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('active','=',True)]))				
-		else:	
-			moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('type','=',rec.moc_type)]))		
-		cr.execute(""" delete from ch_machine_mocwise where header_id  = %s """ %(ids[0]))
+		if rec.moc_const_type:				
+			moc_type_ids = []
+			for moc_type in rec.moc_const_type:	
+				moc_type_ids.append(moc_type.id)			
+			moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('constuction_type_id','in',moc_type_ids)]))
+		else:
+			moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('active','=',True)]))		
+		cr.execute(""" delete from ch_machine_mocwise where header_id  = %s """ %(ids[0]))		
 		for item in moc_const_obj:			
 			moc_const_rec = self.pool.get('kg.moc.construction').browse(cr,uid,item)				
 			line = self.pool.get('ch.machine.mocwise').create(cr,uid,{
-			       'header_id':rec.id,
+				   'header_id':rec.id,
 				   'moc_id':rec.moc_id.id,
 				   'code':moc_const_rec.code,
 						})				
 		return True	
+		
+		
+	def copy_item(self, cr, uid, ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		ms_raw_line_obj = self.pool.get('ch.ms.raw.material')
+		machine_mocwise_line_obj = self.pool.get('ch.machine.mocwise')		
+		cr.execute(""" delete from ch_ms_raw_material where header_id  = %s """ %(ids[0]))
+		cr.execute(""" delete from ch_machine_mocwise where header_id  = %s """ %(ids[0]))			
+		for ms_raw_line_item in rec.source_item.line_ids:			
+			vals = {
+				'header_id' : ids[0]
+				}			
+			copy_rec = ms_raw_line_obj.copy(cr, uid, ms_raw_line_item.id,vals, context) 
+			
+		for machine_mocwise_line_item in rec.source_item.line_ids_a:			
+			vals = {
+				'header_id' : ids[0]
+				}			
+			copy_rec = machine_mocwise_line_obj.copy(cr, uid, machine_mocwise_line_item.id,vals, context) 		
+		
+		self.write(cr, uid, ids[0], {'copy_flag': True,'csd_code':rec.source_item.csd_code,
+									'od':rec.source_item.od,
+									'breadth':rec.source_item.breadth,
+									'length':rec.source_item.length,
+									'thickness':rec.source_item.thickness,
+									'weight':rec.source_item.weight,
+									'notes':rec.source_item.notes,
+									'moc_id':rec.source_item.moc_id.id,											
+									'moc_const_type':[(6, 0, [x.id for x in rec.source_item.moc_const_type])], })		
+		return True
 		
 	def entry_draft(self,cr,uid,ids,context=None):
 		self.write(cr, uid, ids, {'state': 'draft'})
 		return True
 
 	def entry_confirm(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.ms_type == 'copy_item':
+			
+			### Check Duplicates Raw Materials Items start ###
+			
+			cr.execute('''select 
+
+					raw_line.product_id,
+					raw_line.uom,
+					raw_line.qty
+
+					from ch_ms_raw_material raw_line 
+
+					left join kg_machine_shop header on header.id  = raw_line.header_id
+
+					where header.ms_type = 'copy_item' and header.id = %s''',[rec.id])
+			
+			source_raw_ids = cr.fetchall()		
+			source_raw_len = len(source_raw_ids)	
+			
+			cr.execute('''select 
+
+					raw_line.product_id,
+					raw_line.uom,
+					raw_line.qty
+
+					from ch_ms_raw_material raw_line 
+
+					where raw_line.header_id  = %s''',[rec.source_item.id])
+			
+			source_old_raw_ids = cr.fetchall()
+			
+			source_old_raw_len = len(source_old_raw_ids)
+							
+			cr.execute('''select 
+
+					raw_line.product_id,
+					raw_line.uom,
+					raw_line.qty
+
+					from ch_ms_raw_material raw_line 
+
+					left join kg_machine_shop header on header.id  = raw_line.header_id
+
+					where header.ms_type = 'copy_item' and header.id = %s
+
+					INTERSECT
+
+					select 
+
+					raw_line.product_id,
+					raw_line.uom,
+					raw_line.qty
+
+					from ch_ms_raw_material raw_line 
+
+					where raw_line.header_id  = %s ''',[rec.id,rec.source_item.id])
+			repeat_ids = cr.fetchall()			
+			new_raw_len = len(repeat_ids)			
+			### Check Duplicates Raw Materials Items end.... ###
+			
+			
+			### Check Duplicates MOC Construction and Rate Details Items start ###
+			
+			cr.execute('''select 
+
+					machine_line.moc_id,
+					machine_line.code,
+					machine_line.remarks
+
+					from ch_machine_mocwise machine_line 
+
+					left join kg_machine_shop header on header.id  = machine_line.header_id
+
+					where header.ms_type = 'copy_item' and header.id = %s''',[rec.id])
+			
+			source_machine_ids = cr.fetchall()		
+			source_machine_len = len(source_machine_ids)	
+			
+			cr.execute('''select 
+
+					machine_line.moc_id,
+					machine_line.code,
+					machine_line.remarks
+
+					from ch_machine_mocwise machine_line 
+
+					where machine_line.header_id  = %s''',[rec.source_item.id])
+			
+			source_old_machine_ids = cr.fetchall()
+			
+			source_old_machine_len = len(source_old_machine_ids)
+							
+			cr.execute('''select 
+
+					machine_line.moc_id,
+					machine_line.code,
+					machine_line.remarks
+
+					from ch_machine_mocwise machine_line 
+
+					left join kg_machine_shop header on header.id  = machine_line.header_id
+
+					where header.ms_type = 'copy_item' and header.id = %s
+
+					INTERSECT
+
+					select 
+
+					machine_line.moc_id,
+					machine_line.code,
+					machine_line.remarks
+
+					from ch_machine_mocwise machine_line 
+
+					where machine_line.header_id  = %s ''',[rec.id,rec.source_item.id])
+			repeat_ids = cr.fetchall()			
+			new_machine_len = len(repeat_ids)			
+			### Check Duplicates MOC Construction and Rate Details Items end.... ###
+			
+			
+			raw_dup = machine_dup = ''		
+			if new_raw_len == source_raw_len == source_old_raw_len:			
+				raw_dup = 'yes'		
+			if new_machine_len == source_machine_len == source_old_machine_len:			
+				machine_dup = 'yes'			
+			
+			
+			if raw_dup == 'yes' and machine_dup == 'yes':			
+				raise osv.except_osv(_('Warning!'),
+								_('Same Details are already exist !!'))
+			
+			
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 

@@ -18,11 +18,29 @@
 					</header>
 					<sheet>
 						<group>
+							<group>
+								<field name="pattern_type" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire'])]}"/>
+							</group>
+							<group>
+							</group>
+						</group>
+						<group>
+							<group>
+								<field name="source_pattern" attrs="{'invisible':[('pattern_type','=','new_pattern')],'readonly': [('copy_flag','=',True)], 'required': [('pattern_type','=','copy_pattern')]}"/>
+							</group>
+							<group>
+								<button name="copy_pattern" type="object" string="Copy" class="oe_highlight" attrs="{'invisible':['|',('pattern_type','=','new_pattern'),('copy_flag','=',True)]}"/>
+							</group>
+						</group>					
+						
+						
+						<group>
 							<group>						
 								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>		
 								<field name="alias_name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>																
 								<field name="box_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>															
-								<field name="csd_code"/>															
+								<field name="csd_code"/>		
+								<field name="copy_flag" invisible="1"/>													
 								<field name="pcs_weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 								<field name="delivery_lead" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 								<field name="tolerance" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
@@ -44,10 +62,10 @@
 						</group>
 						<group>
 							<group>	
-								<field name="moc_id"/>
+								<field name="moc_id" attrs="{'required': [('pattern_type','=','new_pattern')]}" />
 							</group>
 							<group>												
-								<field name="moc_type"/>												
+								<field name="moc_const_type" widget="many2many_tags"/>											
 							</group>
 							<button name="list_moc" type="object" states="draft,confirmed" string="List MOC Construction" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						</group>
@@ -178,6 +196,7 @@
 		</record>
 		
 		<!-- Menu Action End-->
+		
 		
 		
 		<!-- Menu Name Start here --> 
