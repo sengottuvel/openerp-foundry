@@ -59,7 +59,7 @@ class kg_pattern_master(osv.osv):
 		'delivery_lead': fields.integer('Delivery Lead Time(Weeks)', size=128),
 		'csd_code': fields.char('CSD Code No.', size=128),
 		'making_cost': fields.float('Pattern Making Cost'),
-		'moc_const_type': fields.many2many('kg.construction.type', 'm2m_moc_rate_details', 'moc_const_id', 'const_type_id','Type', domain="[('state','=','approved'), ('active','=','t')]"),
+		'moc_const_type': fields.many2many('kg.construction.type', 'm2m_moc_rate_details', 'moc_const_id', 'const_type_id','Type', domain="[('active','=','t')]"),
 		'moc_id': fields.many2one('kg.moc.master','Default MOC', required=True,domain="[('active','=','t')]" ),	
 		
 		

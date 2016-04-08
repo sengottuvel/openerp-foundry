@@ -52,7 +52,7 @@ class kg_machine_shop(osv.osv):
 		'thickness': fields.float('Thickness'),
 		'weight': fields.float('Weight'),
 		
-		'moc_const_type': fields.many2many('kg.construction.type', 'm2m_moc_construction_details', 'moc_const_id', 'const_type_id','Type', domain="[('state','=','approved'), ('active','=','t')]"),
+		'moc_const_type': fields.many2many('kg.construction.type', 'm2m_moc_construction_details', 'moc_const_id', 'const_type_id','Type', domain="[('active','=','t')]"),
 		'moc_id': fields.many2one('kg.moc.master','Default MOC', domain="[('active','=','t')]" ),	
 		
 		
