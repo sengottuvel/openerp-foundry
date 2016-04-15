@@ -34,7 +34,7 @@ class kg_bom(osv.osv):
 		'type': fields.selection([('new','New'),('copy','Copy'),('amendment','Amendment')],'Type', required=True),
 		'bom_type': fields.selection([('new_bom','New BOM'),('copy_bom','Copy BOM')],'Type', required=True),
 		
-		'source_bom': fields.many2one('kg.bom', 'Source BOM',domain="[('state','=','approved'), ('active','=','t')]"),
+		'source_bom': fields.many2one('kg.bom', 'Source BOM',domain="[('active','=','t')]"),
 		'copy_flag':fields.boolean('Copy Flag'),
 		
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
