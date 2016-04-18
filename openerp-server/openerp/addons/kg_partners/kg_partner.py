@@ -105,7 +105,7 @@ class kg_partner(osv.osv):
 	'remark': fields.text('Approve/Reject'),
 	'cancel_remark': fields.text('Cancel Remarks'),
 	'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
-	
+	'user_ref_id': fields.many2one('res.users','User Name'),
 	
 	}
 	

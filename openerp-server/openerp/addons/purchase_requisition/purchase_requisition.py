@@ -182,6 +182,13 @@ class purchase_requisition_line(osv.osv):
 		'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
 		'requisition_id' : fields.many2one('purchase.requisition','Purchase Requisition', ondelete='cascade'),
 		'company_id': fields.related('requisition_id','company_id',type='many2one',relation='res.company',string='Company', store=True, readonly=True),
+		'brand_id': fields.many2one('kg.brand.master', 'Brand Name'),
+		'stock_qty': fields.float('Stock Qty'),
+		'line_ids': fields.one2many('ch.purchase.indent.wo','header_id','Ch Line Id'),
+		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode'),
+		'note': fields.text('Remarks'),
+		'pending_qty': fields.float('Pending Qty'),
+		
 	}
 
 	def onchange_product_id(self, cr, uid, ids, product_id, product_uom_id, context=None):
@@ -200,6 +207,24 @@ class purchase_requisition_line(osv.osv):
 		'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'purchase.requisition.line', context=c),
 	}
 purchase_requisition_line()
+
+
+
+class ch_purchase_indent_wo(osv.osv):
+	
+	_name = "ch.purchase.indent.wo"
+	_description = "Ch Purchase Indent WO"
+	
+	_columns = {
+
+	'header_id': fields.many2one('purchase.requisition.line', 'Purchase Indent Line', required=True, ondelete='cascade'),
+	'wo_id': fields.many2one('kg.work.order', 'WO', required=True),
+	'qty': fields.float('Indent Qty', required=True),
+	
+	}
+	
+	
+ch_purchase_indent_wo()	
 
 class purchase_order(osv.osv):
 	_inherit = "purchase.order"

@@ -746,7 +746,7 @@ class kg_purchase_amendment(osv.osv):
 				}}
 		supplier_address = partner.address_get(cr, uid, [partner_id_amend], ['default'])
 		supplier = partner.browse(cr, uid, partner_id_amend)
-		tot_add = (supplier.street or '')+ ' ' + (supplier.street2 or '') + '\n'+(supplier.city.name or '')+ ',' +(supplier.state_id.name or '') + '-' +(supplier.zip or '') + '\nPh:' + (supplier.phone or '')+ '\n' +(supplier.mobile or '')		
+		tot_add = (supplier.street or '')+ ' ' + (supplier.street2 or '') + '\n'+(supplier.city_id.name or '')+ ',' +(supplier.state_id.name or '') + '-' +(supplier.zip or '') + '\nPh:' + (supplier.phone or '')+ '\n' +(supplier.mobile or '')		
 		return {'value': {
 			'add_text_amend' : tot_add or False
 			}}

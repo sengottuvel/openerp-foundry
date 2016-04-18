@@ -714,7 +714,15 @@
             </field>
         </record>
         
-       
+        <!-- Audit Log Xml Data Start-->
+		
+        <record id="inventorymaster_model" model="audittrail.rule">
+            <field name="name">Audit Log Inventorymaster</field>
+            <field name="object_id" eval="ref('stock.model_stock_location')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+		<!-- Audit Log Xml Data End-->
         
       <!--  <menuitem action="action_location_tree"
             id="menu_action_location_tree"

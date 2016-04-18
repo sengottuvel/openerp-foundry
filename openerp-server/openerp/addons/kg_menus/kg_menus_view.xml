@@ -53,10 +53,10 @@
 				<menuitem action="base.action_city" name="City" id="cam_crm_city_master" parent="cpm_crm_master_menu" sequence="6"/>
 				
 				<!-- Chemical Master  --> 
-				<menuitem action="kg_chemical_master.mma_chemical_master" name="Chemical Master" id="cam_crm_chemical_master" parent="cpm_crm_master_menu" sequence="7"/>
+				<menuitem action="kg_chemical_master.cma_chemical_master" name="Chemical" id="cam_crm_chemical_master" parent="cpm_crm_master_menu" sequence="7"/>
 				
 				<!-- Industry Master  --> 
-				<menuitem action="kg_industry_master.mma_industry_master" name="Industry Master" id="cam_crm_industry_master" parent="cpm_crm_master_menu" sequence="8"/>
+				<menuitem action="kg_industry_master.mma_industry_master" name="Industry" id="cam_crm_industry_master" parent="cpm_crm_master_menu" sequence="8"/>
 				
 			<!-- CRM Enquiry Menu -->
 			<menuitem id="cpm_crm_enquiry_menu" name="Enquiry" parent="cpm_crm" sequence="2"/>
@@ -142,8 +142,23 @@
 				<!-- Brand/Moc/Rate-Purchase Master  --> 
 				<menuitem action="kg_brandmoc_rate.mma_brandmocrate_purchase_master" name="Brand/Moc/Rate-Purchase" id="mam_brandmocrate_purchase_master" parent="ppm_master_menu" sequence="13"/>
 				 
+				<!-- Expense Master  --> 
+				<menuitem action="kg_expense_master.mma_expense_master" name="Expense Master" id="mam_expense_master" parent="ppm_master_menu" sequence="14"/>
+				 
 				<menuitem action="purchase.purchase_rfq" id="pam_purchase_order" name="Generate PO" parent="purchase.menu_procurement_management" sequence="1"/>
                 
+                <!-- Quotations Menu -->
+				<menuitem id="qpm_quotations_menu" name="Quotations" parent="base.menu_purchase_root" sequence="15"/>
+				
+				<!-- RFQ Vendor Selection Transaction -->
+				<menuitem action="kg_quotation.kg_rfq_vendor_selection_action" id="qam_quotation" name="RFQ Vendor Selection" parent="qpm_quotations_menu" sequence="1"/>
+			        
+				<!-- Quotation Submit Transaction -->
+				<menuitem action="kg_quotation.kg_quotation_requisition_header_action" id="qam_quotation_submit" name="Quotation Submit" parent="qpm_quotations_menu" sequence="2"/>
+			      
+			    <!-- Quotation Comparison Transaction -->
+				<menuitem action="kg_quotation.kg_quotation_entry_header_action" id="qam_quotation_comp" parent="qpm_quotations_menu" sequence="3"/>
+			         
                 <!-- Service Order Menu -->
 				<menuitem id="spm_service_order_menu" name="Service" parent="base.menu_purchase_root" sequence="2"/>
 				

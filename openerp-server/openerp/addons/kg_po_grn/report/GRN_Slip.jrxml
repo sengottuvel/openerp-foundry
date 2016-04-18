@@ -131,9 +131,9 @@ left join res_partner part on (part.id = comp.partner_id)
 
 left join res_partner partner on (partner.id = grn.supplier_id)
 
-left join res_city comp_city on (comp_city.id = comp.city)
+left join res_city comp_city on (comp_city.id = partner.city_id)
 
-left join res_city partner_city on (partner_city.id = partner.city)
+left join res_city partner_city on (partner_city.id = partner.city_id)
 
 
 

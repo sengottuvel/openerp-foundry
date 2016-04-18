@@ -106,7 +106,15 @@
 			<field name="search_view_id" ref="m_search_v_inward"/>
 		</record>
 		
+		<!-- Audit Log Xml Data Start-->
 		
+        <record id="inwardmaster_model" model="audittrail.rule">
+            <field name="name">Audit Log Inwardmaster</field>
+            <field name="object_id" eval="ref('kg_inwardmaster.model_kg_inwardmaster')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+		<!-- Audit Log Xml Data End-->
     
 	<!--<menuitem action="inwardmaster_action_form" id="menu_kg_brandmaster_action_form" parent="kg_depmaster.kg_depmaster_parent_menu" sequence="4"/>
     -->

@@ -111,8 +111,9 @@ class kg_transport(osv.osv):
 		
 	def entry_reject(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
+		cur_date = datetime.datetime.now()
 		if rec.remark:
-			self.write(cr, uid, ids, {'state': 'reject','rej_user_id': uid, 'reject_date': dt_time})
+			self.write(cr, uid, ids, {'state': 'reject','rej_user_id': uid, 'reject_date': cur_date})
 		else:
 			raise osv.except_osv(_('Rejection remark is must !!'),
 				_('Enter rejection remark in remark field !!'))
@@ -120,24 +121,32 @@ class kg_transport(osv.osv):
 	
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
+		cur_date = datetime.datetime.now()
 		if rec.cancel_remark:
-			self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': dt_time})
+			self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': cur_date})
 		else:
 			raise osv.except_osv(_('Cancel remark is must !!'),
 				_('Enter the remarks in Cancel remarks field !!'))
 		return True
-			
+	
+	def entry_draft(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'draft'})
+		return True
+				
 	def unlink(self,cr,uid,ids,context=None):
 		raise osv.except_osv(_('Warning!'),
 				_('You can not delete Entry !!'))		
 	
-	def write(self, cr, uid, ids, vals, context=None):	
-		if len(str(vals['zip'])) == 6:
-			pass
-		else:
-			raise osv.except_osv(_('Check zip number !!'),
-				_('Please enter six digit number !!'))
-				
+	def write(self, cr, uid, ids, vals, context=None):
+		
+		#if vals:
+		#	if len(str(vals['zip'])) == 6:
+		#		pass
+		#	else:
+		#		raise osv.except_osv(_('Check zip number !!'),
+		#			_('Please enter six digit number !!'))
+		#else:
+		#	pass	
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_transport, self).write(cr, uid, ids, vals, context)
 			

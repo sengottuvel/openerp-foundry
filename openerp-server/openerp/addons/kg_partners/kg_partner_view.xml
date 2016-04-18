@@ -50,6 +50,7 @@
 		<field name="gst_no"/>
 		<field name="transport_id"/>
 		<field name="sector"/>
+		<field name="user_ref_id"/>
 		</field>
 		
 		<field name="ref" position="replace">

@@ -203,7 +203,7 @@
                         </group>
                     </group>
                     <notebook>
-                        <page string="Purchase Order" attrs="{'invisible': [('po_flag', '=', False),'|',('type_flag', '=', False)]}">
+                        <page string="Order Item Details" attrs="{'invisible': [('po_flag', '=', False),'|',('type_flag', '=', False)]}">
                             <field name="order_line">
                                 <tree string="Purchase Order Lines" create="false" delete="false">
                                     <field name="product_id" on_change="onchange_product_id(parent.pricelist_id,product_id,0,product_uom,parent.partner_id, parent.date_order,parent.fiscal_position,date_planned,name,price_unit,context)"/>
@@ -332,7 +332,7 @@
         </record>
 
         <record id="purchase_rfq" model="ir.actions.act_window">
-            <field name="name">Quotations</field>
+            <field name="name">Purchase Order</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">purchase.order</field>
             <field name="context">{}</field>
@@ -357,7 +357,7 @@
 				sequence="0"/>-->
 `
         <record id="purchase_form_action" model="ir.actions.act_window">
-            <field name="name">Purchase Orders</field>
+            <field name="name">Approved POS</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">purchase.order</field>
             <field name="view_mode">tree,form,graph,calendar</field>

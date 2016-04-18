@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data noupdate="0">
+	<record id="group_kg_vendor_quote" model="res.groups">
+        <field name="name">kg_vendor_quote</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="category_id" ref="base.module_category_purchase_management"/>
+        <field eval="[(6,0,[
+			ref('kg_quotation.menu_kg_vendor_quote_parent'), 
+			ref('kg_quotation.menu_kg_vendor_quote_header'), 
+			ref('kg_quotation.kg_rfq_vendor_quote_menu'),        
+			ref('base.menu_purchase_root'),
+			ref('account.menu_action_invoice_tree2'),
+			])]" name="menu_access"/>
+    </record>
+</data>
+</openerp>

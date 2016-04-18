@@ -59,13 +59,17 @@
                     </group>
                 </group>
                 <notebook>
-                    <page string="Products" attrs="{'invisible': [('pi_flag', '=', False)]}">
-                        <field name="line_ids">
-                            <tree string="Products" editable="bottom">
+                    <page string="Indent Item Details" attrs="{'invisible': [('pi_flag', '=', False)]}" default_focus="1">
+                        <field name="line_ids" colspan="4" nolabel="1" context="{'entry_mode':entry_mode}">
+                            <tree string="Products">
                                 <field name="product_id" on_change="onchange_product_id(product_id,product_uom_id)"/>
                                 <field name="product_qty"/>
-                                <field name="product_uom_id" groups="product.group_uom"/>
+                                <field name="stock_qty"/>
+                                <field name="product_uom_id" string="UOM" groups="product.group_uom"/>
+                                <field name="brand_id"/>
+                                <field name="note"/>
                             </tree>
+<!--
                             <form string="Products" version="7.0">
                                 <group>
                                     <field name="product_id" />
@@ -74,13 +78,14 @@
                                     <field name="company_id" groups="base.group_multi_company" widget="selection"/>
                                 </group>
                             </form>
+-->
                         </field>
                         <div class="oe_right oe_button_box" style="margin-top: 10px">
                             <button name="%(action_purchase_requisition_partner)d" type="action"
                                 string="Request a Quotation" icon="gtk-execute"
                                 attrs="{'invisible': [('line_ids','=',False),('state', 'not in', ('in_progress'))]}"/>
                         </div>
-                        <separator string="Quotations"/>
+                        <separator string="Quotations" invisible="1"/>
                         <field name="purchase_ids" readonly="1">
                             <tree string="Purchase Order">
                                 <field name="name" string="Reference"/>
@@ -148,7 +153,60 @@
                 </search>
             </field>
         </record>
-
+	
+	<record id="t_tree_v_purchase_indent_line" model="ir.ui.view">
+		<field name="name">Purchase Indent Line Tree</field>
+		<field name="model">purchase.requisition.line</field>
+		<field eval="8" name="priority"/>
+		<field name="arch" type="xml">
+			<tree string="Purchase Indent Line Tree">					
+				<field name="product_id"/>
+				<field name="product_qty"/>
+				<field name="product_uom_id"/>
+				<field name="brand_id"/>
+				<field name="stock_qty"/>
+				
+			</tree>
+		</field>
+	</record>
+		
+	<record id="t_form_v_purchase_indent_line" model="ir.ui.view">
+		<field name="name">Purchase Indent Line Form</field>
+		<field name="model">purchase.requisition.line</field>
+		<field eval="8" name="priority"/>
+		<field name="arch" type="xml">
+			<form string="Purchase Indent Line Entry Form">
+				<group>
+					<group>
+						<field name="product_id" required="1" on_change="onchange_product_id(product_id,product_uom_id)" attrs="{'readonly': [('entry_mode', '=', 'auto')]}"/>
+						<field name="product_qty" required="1" on_change="onchange_qty(product_qty,pending_qty)"/>
+						<field name="product_uom_id" string="UOM"/>
+					</group>
+					<group>
+						<field name="brand_id"/>
+						<field name="stock_qty" readonly="1"/>
+						<field name="note"/>
+						<field name="entry_mode" invisible="1"/>
+						<field name="pending_qty" invisible="1"/>
+					</group>
+				</group>
+				<newline/>
+				<notebook>
+					<page string="WO Details">
+						<field name="line_ids" colspan="4" nolabel="1">
+							<tree string="WO Details" editable="bottom">
+							   <field name="wo_id"/>
+							   <field name="qty"/>
+							</tree>
+						</field>
+					</page>
+				
+				</notebook>
+				
+			</form>
+		</field>
+	</record>
+		
 
     <record model="ir.actions.act_window" id="action_purchase_requisition">
         <field name="name">Purchase Requisitions</field>
@@ -170,12 +228,12 @@
           </p>
         </field>
     </record>
-
-   <!-- <menuitem
+	<!--
+    <menuitem
         id="menu_purchase_requisition_pro_mgt"
         sequence="10"
         parent="purchase.menu_procurement_management"
-        action="action_purchase_requisition" name="Purchase Requisition"/>-->
+        action="action_purchase_requisition" name="Purchase Requisition"/> -->
 
     <record model="ir.ui.view" id="product_normal_form_view_inherit">
         <field name="name">product.form.inherit</field>

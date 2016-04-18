@@ -85,7 +85,15 @@ class kg_depindent2_poindent(osv.osv):
 				remark = group[0].note
 				cur_qty=prod_browse.qty_available
 				print "current quantity,,,,,,,,,,,,,>",cur_qty		
-					
+				stock_sql = """ select sum(pending_qty) from stock_production_lot where product_id = %s group by product_id """%(prod_browse.id)
+				cr.execute(stock_sql)		
+				stock_data = cr.dictfetchall()
+				stock_qty = 0.00
+				if stock_data:
+					stock_qty = stock_data[0]
+					stock_qty = stock_qty.values()[0]
+				else:
+					stock_qty = 0.00	
 				vals = {
 			
 				'product_id':prod_browse.id,
@@ -103,6 +111,7 @@ class kg_depindent2_poindent(osv.osv):
 				'note':remark,
 				'dep_id': dep,
 				'user_id' : user,
+				'stock_qty': stock_qty,
 				
 				}
 				print "vals :", vals

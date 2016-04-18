@@ -94,7 +94,7 @@ class kg_purchase_order(osv.osv):
 
 	_columns = {
 		
-		'po_type': fields.selection([('direct', 'Direct'),('frompi', 'From PI')], 'PO Type'),
+		'po_type': fields.selection([('direct', 'Direct'),('frompi', 'From PI'),('fromquote', 'From Quote')], 'PO Type'),
 		'bill_type': fields.selection([('cash','CASH BILL'),('credit','CREDIT BILL')], 'Bill Type',states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		'po_expenses_type1': fields.selection([('freight','Freight Charges'),('others','Others')], 'Expenses Type1', readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		'po_expenses_type2': fields.selection([('freight','Freight Charges'),('others','Others')], 'Expenses Type2', readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
@@ -107,9 +107,9 @@ class kg_purchase_order(osv.osv):
 		'payment_term_id': fields.many2one('account.payment.term', 'Payment Term', readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		'pricelist_id':fields.many2one('product.pricelist', 'Pricelist', states={'approved':[('readonly',True)],'done':[('readonly',True)]}, help="The pricelist sets the currency used for this purchase order. It also computes the supplier price for the selected products/quantities."),	
 		'date_order': fields.date('PO Date',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
-		'payment_mode': fields.many2one('kg.payment.master', 'Mode of Payment', required=True,readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
+		'payment_mode': fields.many2one('kg.payment.master', 'Payment Term', required=True,readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		'delivery_type':fields.many2one('kg.deliverytype.master', 'Delivery Schedule',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
-		'delivery_mode': fields.many2one('kg.delivery.master','Delivery Type', required=True,readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
+		'delivery_mode': fields.many2one('kg.delivery.master','Delivery Term', required=True,readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		'partner_address':fields.char('Supplier Address', size=128,readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		'email':fields.char('Contact Email', size=128,readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		'contact_person':fields.char('Contact Person', size=128),
@@ -135,13 +135,13 @@ class kg_purchase_order(osv.osv):
 		'kg_seq_id':fields.many2one('ir.sequence','Document Type',domain=[('code','=','purchase.order')],
 			readonly=True, states={'draft': [('readonly', False)]}),
 		'name': fields.char('PO NO', size=64, select=True,readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
-		'user_id': fields.many2one('res.users', 'Created by'),
+		'user_id': fields.many2one('res.users', 'Created by',readonly=True),
 		'bill_flag':fields.boolean('PO Bill'),
 		'amend_flag': fields.boolean('Amendment', select=True),
 		'add_text': fields.text('Address',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		'type_flag':fields.boolean('Type Flag'),
 		'pi_flag':fields.boolean('Type Flag'),
-		'creation_date':fields.datetime('Creation Date'),
+		'creation_date':fields.datetime('Creation Date',readonly=True),
 		'delivery_address':fields.text('Delivery Address',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		'term_price':fields.selection([('inclusive','Inclusive of all Taxes and Duties')], 'Price',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}), 
 		'term_warranty':fields.char('Warranty',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
@@ -161,6 +161,11 @@ class kg_purchase_order(osv.osv):
 		'version':fields.char('Version'),
 		'purpose':fields.selection([('for_sale','For Sale'),('own_use','Own use')], 'Purpose'), 
 		'expense_line_id': fields.one2many('kg.purchase.order.expense.track','expense_id','Expense Track',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
+		'update_date' : fields.datetime('Last Updated Date',readonly=True),
+		'update_user_id' : fields.many2one('res.users','Last Updated By',readonly=True),
+		'quotation_date': fields.date('Quotation Date'),
+		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
+		
 		
 	}
 	
@@ -261,7 +266,18 @@ class kg_purchase_order(osv.osv):
 		else:
 			value = {'pi_flag': True}
 		return {'value': value}
+	
+	def onchange_company(self, cr, uid, ids, company_id,delivery_address):
+		value = {'delivery_address':''}
+		com_obj = self.pool.get('res.company').search(cr,uid,([('id','=',company_id)]))
+		com_rec = self.pool.get('res.company').browse(cr,uid,com_obj[0])
+		part_obj = self.pool.get('res.partner').search(cr,uid,([('id','=',com_rec.partner_id.id)]))
+		part_rec = self.pool.get('res.company').browse(cr,uid,part_obj[0])
 		
+		address = part_rec.street+''+ part_rec.street2+''+part_rec.city+','+part_rec.state_id.name+','+part_rec.country_id.name+','+part_rec.zip
+
+		value = {'delivery_address': address}
+		return {'value': value}	
 		
 	### Back Entry Date #####	
 		
@@ -880,7 +896,7 @@ class kg_purchase_order_line(osv.osv):
 	'received_qty':fields.float('Received Qty'),
 	'tax_amt':fields.float('tax amt'),
 	'cancel_qty':fields.float('Cancel Qty'),
-	'pi_qty':fields.float('PI Qty'),
+	'pi_qty':fields.float('Indent Qty'),
 	'group_qty':fields.float('Group Qty'),
 	'product_uom': fields.many2one('product.uom', 'UOM', readonly=True),
 	'name': fields.text('Description'),
@@ -903,7 +919,10 @@ class kg_purchase_order_line(osv.osv):
 	'po_specification':fields.text('Specification'),
 	'product_tax_amt':fields.float('Tax Amount'),
 	'brand_id':fields.many2one('kg.brand.master','Brand'),
-
+	'least_price': fields.float('Least Price'),
+	'high_price': fields.float('Highest Price'),
+	'recent_price': fields.float('Recent Price'),
+	
 	
 	}
 	
@@ -1041,8 +1060,8 @@ class kg_purchase_order_line(osv.osv):
 				'other_ch':po_rec.other_charge,
 				'kg_discount':item['kg_discount'],
 				'kg_discount_per':item['kg_discount_per'],
-				'price_unit':item['price_unit']
-			
+				'price_unit':item['price_unit'],
+				'po_no': po_rec.id,
 			
 			}
 			
@@ -1066,11 +1085,12 @@ class kg_po_line(osv.osv):
 	'kg_discount': fields.float('Discount Amount'),
 	'kg_discount_per': fields.float('Discount (%)', digits_compute= dp.get_precision('Discount')),
 	'price_unit': fields.float('Unit Price', size=120),
-	'date_order':fields.date('Date'),
-	'supp_name':fields.many2one('res.partner','Supplier Name',size=120),
+	'date_order':fields.date('PO Date'),
+	'supp_name':fields.many2one('res.partner','Supplier',size=120),
 	'tax':fields.many2one('kg.tax.structure', 'Tax Structure'),
 	'other_ch':fields.float('Other Charges',size=128),
-		
+	'po_no': fields.many2one('purchase.order','PO No'),
+	
 	}
 	
 	
@@ -1091,6 +1111,8 @@ class kg_purchase_order_expense_track(osv.osv):
 		'company_id': fields.many2one('res.company', 'Company Name'),
 		'description': fields.char('Description'),
 		'expense_amt': fields.float('Amount'),
+		'expense': fields.many2one('kg.expense.master','Expense'),
+		
 	}
 	
 	_defaults = {

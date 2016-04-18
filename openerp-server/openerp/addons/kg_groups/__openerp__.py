@@ -5,10 +5,10 @@
 
 ##############################################################################
 {
-    'name': 'KG_Department_Indent',
+    'name': 'KG Vendor Quote Users',
     'version': '0.1',
-    'author': 'sengottuvel',
-    'category': 'Department_Management',
+    'author': 'Ramya Kalaiselvan',
+    'category': 'User_Management',
     'images': ['images/purchase_requisitions.jpeg'],
     'website': 'http://www.openerp.com',
     'description': """
@@ -19,27 +19,12 @@ When a purchase order is created, you now have the opportunity to save the
 related requisition. This new object will regroup and will allow you to easily
 keep track and order all your purchase orders.
 """,
-    'depends' : ['base', 'product', 'kg_depmaster','kg_sale_projection','kg_work_order'],
-    'data': ['kg_depindent_view.xml',
-			'wizard/kg_depindent_wizard.xml',
-		    'wizard/kg_pending_depindent_wizard.xml',
-			#'kg_depindent_report.xml',
-			'depindent_report_view.xml'
-
+    'depends' : ['base','purchase','kg_quotation'],
+    'data': [
+			'kg_groups.xml',
+			'kg_quote_admin.xml',
 			],
 			
-	'test': [
-        
-        'test/ui/indent_report.yml',
-        
-    ],
-    'css': [
-        'static/src/css/state.css', 
-        
-    ],
-    
-    #'js': ['static/src/js/first_module.js'],
-	#'qweb': ['static/src/xml/base.xml'],
     'auto_install': False,
     'installable': True,
 }

@@ -25,6 +25,16 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_sub_store_user')]"/>
 		</record>
 		
+		<record id="sub_kg_product_uom" model="ir.model.access">
+			<field name="model_id" ref="product.model_product_uom"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Product Uom</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_sub_store_user')]"/>
+		</record>
+		
 		
 		<record id="sub_kg_service_indent" model="ir.model.access">
 			<field name="model_id" ref="kg_service_indent.model_kg_service_indent"/>

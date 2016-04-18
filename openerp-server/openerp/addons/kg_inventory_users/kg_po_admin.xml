@@ -756,6 +756,97 @@
 			<field eval="1" name="perm_create"/>
 			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
 		</record>
+		
+		<record id="po_admin_rfq_vendor_selection" model="ir.model.access">
+			<field name="model_id" ref="kg_quotation.model_kg_rfq_vendor_selection"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Quotation</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
+		</record>
+		
+		<record id="po_admin_quotation_requisition_header" model="ir.model.access">
+			<field name="model_id" ref="kg_quotation.model_kg_quotation_requisition_header"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Quotation Requisition Header</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
+		</record>
+		
+		<record id="po_admin_quotation_entry_header" model="ir.model.access">
+			<field name="model_id" ref="kg_quotation.model_kg_quotation_entry_header"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Quotation Entry Header</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
+		</record>
+		
+		<record id="po_admin_ch_purchase_indent_wo" model="ir.model.access">
+			<field name="model_id" ref="purchase_requisition.model_ch_purchase_indent_wo"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch Purchase Indent WO</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
+		</record>
+		
+		<record id="po_admin_kg_eork_order" model="ir.model.access">
+			<field name="model_id" ref="kg_work_order.model_kg_work_order"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">WO</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
+		</record>
+		
+		<record id="po_admin_kg_rfq_vendor_selection_line" model="ir.model.access">
+			<field name="model_id" ref="kg_quotation.model_kg_rfq_vendor_selection_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">kg rfq Vendor Selection Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
+		</record>
+		
+		<record id="po_admin_rfq_vendor_list" model="ir.model.access">
+			<field name="model_id" ref="kg_quotation.model_kg_rfq_vendor_list"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">kg rfq vendor list</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
+		</record>
+		
+		<record id="po_admin_rfq_vendor_selection" model="ir.model.access">
+			<field name="model_id" ref="kg_quotation.model_kg_rfq_vendor_selection"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">kg rfq vendor selection</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
+		</record>
+		
+		<record id="po_admin_quotation_entry_lines" model="ir.model.access">
+			<field name="model_id" ref="kg_quotation.model_kg_quotation_entry_lines"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">kg quotation entry lines</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
+		</record>
+		
 		<!-- Brand Moc Rate start -->
 		
 		<record id="po_admin_brandmoc_rate_master" model="ir.model.access">

@@ -34,8 +34,7 @@ class kg_holiday_master(osv.osv):
 				'to_date':fields.date('Valid Till',readonly=True, states={'draft':[('readonly',False)]}),
 				'active':fields.boolean('Active'),
 				'expiry_date':fields.date('Expiry Date'),
-				'state': fields.selection([('draft','Draft'),('confirm','Waiting for approval'),('approved','Approved'),
-					('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True,track_visibility='onchange',select=True),
+				'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True,track_visibility='onchange',select=True),
 				'approve_date': fields.datetime('Approved Date', readonly=True),
 				'app_user_id': fields.many2one('res.users', 'Approved By', readonly=True),
 				'confirm_date': fields.datetime('Confirm Date', readonly=True),
@@ -44,14 +43,22 @@ class kg_holiday_master(osv.osv):
 				'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
 				'cancel_date': fields.datetime('Cancel Date', readonly=True),
 				'can_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
+				'update_date': fields.datetime('Last Updated Date', readonly=True),
+				'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
 				'line_id':fields.one2many('kg.holiday.master.line','line_entry','Line id',readonly=True, states={'draft':[('readonly',False)]}),
 				'company_id': fields.many2one('res.company', 'Company Name',readonly=True),	
-				'remark': fields.text('Remarks',readonly=False,states={'approved':[('readonly',True)]}),
+				'cancel_date': fields.datetime('Cancelled Date', readonly=True),
+				'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
+				'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
+				'notes': fields.text('Notes'),
+				'remark': fields.text('Approve/Reject'),
+				'cancel_remark': fields.text('Cancel Remarks'),
+		
 				}
 
 	_defaults = {
 	
-		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_holiday_master', context=c),
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.holiday.master', context=c),
 		'date':fields.datetime.now,		
 		'state': 'draft',		
 		'active': True,
@@ -59,29 +66,25 @@ class kg_holiday_master(osv.osv):
 		
 				}
 	
-	
 	def approve_entry(self, cr, uid, ids,context=None):		
 		self.write(cr,uid,ids,{'state':'approved','app_user_id':uid,'approve_date':today})
 		return True
 		
 	def confirm_entry(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		print "entry-----------",entry
 		entry_obj = self.pool.get('kg.holiday.master')
 		start_date = entry.from_date
 		end_date = entry.to_date
 		entry_id=entry.id	
 		duplicate_ids= entry_obj.search(cr, uid, [('from_date','=',start_date),('to_date','=',end_date),('id' ,'!=', entry_id)])
-		print "du[plicate..............",duplicate_ids
 		if duplicate_ids:
 			dup_rec = entry_obj.browse(cr,uid,duplicate_ids[0])
-			print "dup_rec...............",dup_rec
 			today_date = today
-			print "today_date....................",today_date
 			dup_rec.write({'active': False})
 			dup_rec.write({'expiry_date':today_date})
-		self.write(cr,uid,ids,{'state':'confirm','conf_user_id':uid,'confirm_date':today})	
+		self.write(cr,uid,ids,{'state':'confirmed','conf_user_id':uid,'confirm_date':today})	
 		return True
+		
 	def draft_entry(self, cr, uid, ids, context=None):
 		self.write(cr, uid, ids, {'state': 'draft'})
 		return True
@@ -104,7 +107,26 @@ class kg_holiday_master(osv.osv):
 			raise osv.except_osv(_('Rejection remark is must !!'),
 				_('Enter rejection remark in remark field !!'))
 		return True
+	
+	def entry_cancel(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.cancel_remark:
+			self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': dt_time})
+		else:
+			raise osv.except_osv(_('Cancel remark is must !!'),
+				_('Enter the remarks in Cancel remarks field !!'))
+		return True
 		
+			
+	def write(self, cr, uid, ids, vals, context=None):	  
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(kg_holiday_master, self).write(cr, uid, ids, vals, context)
+	
+	def unlink(self,cr,uid,ids,context=None):
+		raise osv.except_osv(_('Warning!'),
+				_('You can not delete Entry !!'))
+				
+	"""	
 	def unlink(self,cr,uid,ids,context=None):
 		unlink_ids = []		
 		for rec in self.browse(cr,uid,ids):	
@@ -114,7 +136,7 @@ class kg_holiday_master(osv.osv):
 			else:
 				unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
-		
+	"""	
 	_constraints = [
 		
 		(_check_entry_line, 'Line entry can not be empty !!',['Line Entry']),

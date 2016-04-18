@@ -29,6 +29,7 @@ class kg_depindent(osv.osv):
 	_order = "name desc"
 	
 	_columns = {
+		
 		'name': fields.char('No', size=64, readonly=True,select=True),
 		'dep_name': fields.many2one('kg.depmaster','Department', required=True,translate=True, select=True,readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'date': fields.datetime('Creation Date',readonly=True),
@@ -36,37 +37,50 @@ class kg_depindent(osv.osv):
 		'type': fields.selection([('direct','Direct'), ('from_bom','From BoM')], 'Indent Type',readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'dep_indent_line': fields.one2many('kg.depindent.line', 'indent_id', 'Indent Lines', readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'active': fields.boolean('Active'),
-		'user_id' : fields.many2one('res.users', 'Created By', readonly=False,select=True),
+		'user_id' : fields.many2one('res.users', 'Created By', readonly=True,select=True),
 		'src_location_id': fields.many2one('stock.location', 'MainStock Location'),
 		'dest_location_id': fields.many2one('stock.location', 'DepStock Location'),
-		'state': fields.selection([('draft', 'Draft'),('confirm','Waiting For Approval'),('approved','Approved'),('cancel','Cancelled')], 'Status', track_visibility='onchange', required=True),
+		'state': fields.selection([('draft', 'Draft'),('confirm','Waiting For Approval'),('approved','Approved'),('rejected','Rejected'),('cancel','Cancelled')], 'Status', track_visibility='onchange', required=True),
 		'main_store': fields.boolean('For Main Store',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'projection_id':fields.many2one('kg.sale.projection','Projection'),
-		'remarks': fields.text('Remarks',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
+		'remarks': fields.text('Reject Remarks',readonly=True,states={'confirm':[('readonly',False)]}),
+		'cancel_remark': fields.text('Cancel Remarks',readonly=True,states={'approved':[('readonly',False)]}),
 		'project':fields.char('Project',size=100,readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'dep_project':fields.many2one('kg.project.master','Dept/Project Name',readonly=True,states={'draft': [('readonly', False)],'confirm':[('readonly',False)]}),
-		
-		'division':fields.char('Division',size=100,readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
-		'confirmed_by' : fields.many2one('res.users', 'Confirmed By', readonly=False,select=True),
-		'approved_by' : fields.many2one('res.users', 'Approved By', readonly=False,select=True),
-		'approved_date' : fields.date('Indent Date'),
+		'division':fields.many2one('kg.division.master','Division',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
+		'confirmed_by' : fields.many2one('res.users', 'Confirmed By', readonly=True,select=True),
+		'confirmed_date': fields.datetime('Confirmed Date',readonly=True),
+		'reject_date': fields.datetime('Reject Date', readonly=True),
+		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
+		'approved_by' : fields.many2one('res.users', 'Approved By', readonly=True,select=True),
+		'approved_date' : fields.datetime('Approved Date',readonly=True),
+		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
+		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
+		'update_date' : fields.datetime('Last Updated Date',readonly=True),
+		'update_user_id' : fields.many2one('res.users','Last Updated By',readonly=True),
 		'ticket_no':fields.char('Ticket No',size=200,readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'ticket_date':fields.date('Ticket Date',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
+		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode',required=True,readonly=True),
+		'indent_type': fields.selection([('production','For Production'),('own_use','For Own Use')],'Indent Type',required=True,readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
+		
+		
 	}
 	
-	_sql_constraints = [('code_uniq','unique(name)', 'Indent number must be unique!')]
+	#_sql_constraints = [('code_uniq','unique(name)', 'Indent number must be unique!')]
 
 	_defaults = {
+		
 		'type' : 'direct',
 		'state' : 'draft',
-		'active' : 'True',
+		'active' : True,
 		'date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'user_id': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).id ,
 		'ind_date': fields.date.context_today,
-
-	}
-	
-	
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.depindent', context=c),
+		'entry_mode': 'manual',
+		
+			}
 	
 	def onchange_ticket_date(self, cr, uid, ids, ticket_date):
 		print "kgggggggggggggggggg --  onchange_ticket_date called"
@@ -201,10 +215,18 @@ class kg_depindent(osv.osv):
 				if line.uom.id != product_record.uom_po_id.id:
 					new_po_qty = line.qty / product_record.po_uom_coeff
 					#self.write(cr,uid,line.id,{'po_qty' : new_po_qty})
+			seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
+			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,indent_obj.ind_date))
+			seq_name = cr.fetchone();
+			
 			self.write(cr,uid,ids,{'state':'confirm',
-						'confirmed_by':uid,
-						'name' :self.pool.get('ir.sequence').get(cr, uid, 'kg.depindent') or '/'}
-						)
+						'confirmed_by': uid,
+						'confirmed_date': datetime.now(),
+						'name': seq_name[0]
+						#'name' :self.pool.get('ir.sequence').get(cr, uid, 'kg.depindent') or '/'
+						})
+			 
 			 
 			#cr.execute("""select all_transaction_mails('Dept Indent Request Approval',%s)"""%(ids[0]))
 			""" Raj
@@ -224,8 +246,25 @@ class kg_depindent(osv.osv):
 						subtype = 'html',
 						subtype_alternative = 'plain')
 				res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
-			return True
 			"""
+			return True
+	
+	def reject_indent(self, cr, uid, ids,context=None):
+		rec = self.browse(cr, uid,ids[0])
+		if rec.remarks:
+			self.write(cr,uid,ids,{'state': 'rejected',
+								'rej_user_id': uid,
+								'reject_date': time.strftime("%Y-%m-%d"),
+							})
+		else:
+			raise osv.except_osv(_('Rejection remark is must !!'),
+				_('Enter rejection remark in remark field !!'))
+				
+	def set_to_draft(self, cr, uid, ids,context=None):
+		rec = self.browse(cr, uid,ids[0])
+		
+		self.write(cr,uid,ids,{'state': 'draft'})
+		
 	def approve_indent(self, cr, uid, ids,context=None):
 		"""
 		Indent approve
@@ -286,7 +325,10 @@ class kg_depindent(osv.osv):
 			else:
 				pass
 			
-		self.write(cr, uid,ids,{'state' : 'cancel'})
+		self.write(cr, uid,ids,{'state' : 'cancel',
+								'cancel_user_id': uid,
+								'cancel_date': time.strftime("%Y-%m-%d"),
+								})
 		return True
 	"""	
 	def create(self, cr, uid, vals,context=None):
@@ -302,6 +344,9 @@ class kg_depindent(osv.osv):
 		
 		return res
 	"""
+	def write(self, cr, uid, ids, vals, context=None):		
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(kg_depindent, self).write(cr, uid, ids, vals, context)
 		
 	def unlink(self, cr, uid, ids, context=None):
 		if context is None:
@@ -484,6 +529,8 @@ class kg_depindent_line(osv.osv):
 	'required_date': fields.date('Required Date'),
 	'brand_id': fields.many2one('kg.brand.master', 'Brand Name'),
 	'return_qty':fields.float('Return Qty'),
+	'line_id': fields.one2many('ch.depindent.wo','header_id','Ch Line Id'),
+	
 	}
 	
 	_defaults = {
@@ -496,3 +543,21 @@ class kg_depindent_line(osv.osv):
 		
 	
 kg_depindent_line()	
+
+
+
+class ch_depindent_wo(osv.osv):
+	
+	_name = "ch.depindent.wo"
+	_description = "Ch Depindent WO"
+	
+	_columns = {
+
+	'header_id': fields.many2one('kg.depindent.line', 'Dept Indent Line', required=True, ondelete='cascade'),
+	'wo_id': fields.many2one('kg.work.order', 'WO', required=True),
+	'qty': fields.float('Indent Qty', required=True),
+	
+	}
+	
+	
+ch_depindent_wo()	

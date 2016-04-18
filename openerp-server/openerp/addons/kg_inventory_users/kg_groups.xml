@@ -19,6 +19,8 @@
 			ref('kg_menus.mam_so_manual_closing'),
 			ref('kg_menus.mam_uom_master'),
 			ref('kg_menus.mam_brandmocrate_purchase_master'),
+			ref('kg_menus.qam_quotation'),
+	
 			
             ])]" name="menu_access"/>
             <field name="users" eval="[(4, ref('base.user_root'))]"/>
@@ -62,6 +64,7 @@
 			ref('kg_menus.gam_po_grn'),
 			ref('kg_menus.gam_general_grn'),
 			
+			
             ])]" name="menu_access"/>
             <field name="users" eval="[(4, ref('base.user_root'))]"/>
     </record>
@@ -78,6 +81,13 @@
 			ref('kg_menus.cpm_crm_master_menu'),
 			ref('kg_menus.cam_crm_customer_master'),
 			ref('kg_menus.cam_crm_dealer_master'),
+			ref('kg_menus.cam_crm_country_master'),
+			ref('kg_menus.cam_crm_state_master'),
+			ref('kg_menus.cam_crm_city_master'),
+			ref('kg_menus.cam_crm_chemical_master'),
+			ref('kg_menus.cam_crm_industry_master'),
+			ref('kg_menus.cpm_crm_enquiry_menu'),
+			ref('kg_menus.tma_crm_enquiry'),
 			
             ])]" name="menu_access"/>
             <field name="users" eval="[(4, ref('base.user_root'))]"/>

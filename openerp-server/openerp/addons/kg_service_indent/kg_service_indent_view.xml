@@ -3,7 +3,7 @@
     <data>
         <!--
           =====================
-          master Form view
+          Form view
           =====================
         -->
 
@@ -23,37 +23,34 @@
 		</header>
 				<group>
 					<group>
-						<field name="user_id"/>
 						<field name="name"/>
 						<field name="dep_name"/>
+						<field name="division"/>
 						<field name="origin"/>
-						<field name="confirmed_by" readonly="1"/>
-						<field name="active"/>
+						<field name="remark"/>
                     </group>
                     <group>
-						<field name="creation_date"/>
 						<field name="date"/>
 						<field name="dep_project"/>
 						<field name="gate_pass" invisible="1"/>
-						<field name="state" readonly="1"/>
-						<field name="approved_by" readonly="1"/> 
+						<field name="active"/>
+						<field name="state" style="width: 30%%" class="att_state_change" readonly="1"/>
                     </group>
 				</group>
 				<notebook>
 					<page string = "Item Details">
 					<field colspan="4" mode="tree" name="service_indent_line" nolabel="1" widget="one2many_list">
-						<tree string="Service Indent Line"> 
-							<field name="product_id"/>
-							<field name="brand_id"/>
+						<tree string="Service Indent Line" editable="bottom"> 
+							<field name="product_id" on_change="onchange_product_id(product_id,uom)"/>
 							<field name="uom"/>
-							<field name="qty"/>
-							
-							<field name="pending_qty"/>
-							<field name="issue_pending_qty"/>
-							<field name="gate_pending_qty"/>
-							<field name="note"/>
+							<field name="brand_id"/>
+							<field name="qty" on_change="onchange_qty(qty,pending_qty,issue_pending_qty)"/>
 							<field name="serial_no"/>
-							
+							<field name="ser_no" attrs="{'required': [('serial_no','=',False)]}"/>
+							<field name="note"/>
+							<field name="pending_qty" invisible="1"/>
+							<field name="issue_pending_qty" invisible="1"/>
+							<field name="gate_pending_qty" invisible="1"/>
 						</tree>
 						<form string="Indent Line">
 							<group>
@@ -72,15 +69,37 @@
 						</form>
                     </field>
                     </page>
+                    <page string="Entry Info">
+					<group>
+						<field name="company_id"/>
+					</group>
+					
+					<group>
+						<group>
+							<field name="user_id"/>
+							<field name="confirmed_by" attrs="{'invisible':[('state','in',['draft'])]}"/>
+							<field name="approved_by" attrs="{'invisible':[('state','in',['draft','confirm','approved'])]}"/>
+							<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirm','approved'])]}"/>
+							<field name="update_user_id"/>
+						</group>
+						<group>
+							<field name="creation_date"/>
+							<field name="confirmed_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+							<field name="approved_date" attrs="{'invisible':[('state','in',['draft','confirm','approved'])]}"/>
+							<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirm','approved'])]}"/>
+							<field name="update_date"/>
+						</group>
+					</group>
+				</page>
+				
 				</notebook>
-				<field name="remark" placeholder="Remarks"/>
                </form>
            </field>
         </record>
 
         <!--
         =====================
-        master Tree view
+        Tree view
         =====================
         -->
         <record id="view_kg_serviceindent_tree" model="ir.ui.view">
@@ -93,10 +112,9 @@
                     <field name="name"/>
 					<field name="date"/>
                     <field name="dep_name"/>
-                    <field name="origin"/>
-                    <field name="user_id"/>
 					<field name="state"/>
-
+					<field name="origin" invisible="1"/>
+                    <field name="user_id" invisible="1"/>
                 </tree> 
             </field>
         </record>
@@ -106,7 +124,8 @@
             <field name="model">kg.service.indent</field>
             <field name="arch" type="xml">
                 <search string="Service Indent">
-					<field name="name" string="Indent" filter_domain="['|',('name','ilike',self),('dep_id','ilike',self)"/> 
+					<field name="name" string="Indent No" filter_domain="[('name','ilike',self)]"/> 
+					<field name="dep_name" string="Department" filter_domain="[('dep_name','ilike',self)]"/> 
 					<filter icon="terp-check" name="call" string="Draft" domain="[('state','=','draft')]"/>
 					<filter icon="terp-check" name="confirm" string="Confirmed" domain="[('state','=','confirm')]"/>
 					<filter icon="terp-check" name="approved" string="Approved" domain="[('state','=','approved')]"/>					
@@ -123,7 +142,7 @@
        
        <!--
         =====================
-        master Form Action
+        Form Action
         ===================== -->
 
 
@@ -172,7 +191,7 @@
 	
         <!--
         =====================
-        master Menu Item
+        Menu Item
         =====================
         -->
         

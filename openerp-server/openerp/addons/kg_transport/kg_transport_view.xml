@@ -13,6 +13,7 @@
 				<button name="approve_transport" states="confirmed" string="Approve" type="object" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 				<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 				<button name="entry_cancel" type="object" string="Cancel" states="approved" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+				<button name="entry_draft" type="object" string="Set To Draft" states="cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 				<!--<button name="delete_transport" type="object" string="Delete Transport" />	-->
 				</header>
 					<group>

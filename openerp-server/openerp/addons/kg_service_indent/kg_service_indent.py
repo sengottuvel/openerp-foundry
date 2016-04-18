@@ -21,18 +21,25 @@ class kg_service_indent(osv.osv):
 		'date': fields.date('Indent Date',required=True,readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'service_indent_line': fields.one2many('kg.service.indent.line', 'service_id',
 					'Indent Lines',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
-		'active': fields.boolean('Active',readonly=True),
+		'active': fields.boolean('Active'),
 		'user_id' : fields.many2one('res.users', 'Created By', readonly=True),
 		'state': fields.selection([('draft', 'Draft'),('confirm','Waiting For Approval'),('approved','Approved'),('done','Done'),('cancel','Cancel')], 'Status', track_visibility='onchange', required=True),
 		'gate_pass': fields.boolean('Gate Pass', readonly=True, states={'draft':[('readonly', False)],'confirm':[('readonly',False)]}),
 		'creation_date':fields.datetime('Creation Date',required=True,readonly=True),
 		'origin': fields.char('Source Location', size=264,readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'remark': fields.text('Remarks'),
-		'confirmed_by' : fields.many2one('res.users', 'Confirmed By', readonly=False,select=True),
-		'approved_by' : fields.many2one('res.users', 'Approved By', readonly=False,select=True),
-		'approved_date' : fields.date('Approved Date'),
-		'dep_project':fields.many2one('kg.project.master','Dept/Project Name',readonly=True,states={'draft': [('readonly', False)],'confirm':[('readonly',False)]}),	
-
+		'division': fields.many2one('kg.division.master','Division'),
+		'confirmed_by' : fields.many2one('res.users', 'Confirmed By', readonly=True),
+		'confirmed_date' : fields.datetime('Confirmed Date',readonly=True),
+		'approved_by' : fields.many2one('res.users', 'Approved By', readonly=True),
+		'approved_date' : fields.datetime('Approved Date',readonly=True),
+		'cancel_user_id' : fields.many2one('res.users', 'Cancelled By', readonly=True),
+		'cancel_date' : fields.datetime('Cancelled Date',readonly=True),
+		'update_user_id' : fields.many2one('res.users', 'Last Updated By', readonly=True),
+		'update_date' : fields.datetime('Last Updated Date',readonly=True),
+		'dep_project':fields.many2one('kg.project.master','Dept/Project Name',readonly=True,states={'draft': [('readonly', False)],'confirm':[('readonly',False)]}),
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
+		
 	}
 	
 	_sql_constraints = [('code_uniq','unique(name)', 'Indent number must be unique!')]
@@ -44,7 +51,8 @@ class kg_service_indent(osv.osv):
 		'date' : fields.date.context_today,
 		'user_id': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).id ,
 		'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
-
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.service.indent', context=c),
+		
 	}
 	
 	def email_ids(self,cr,uid,ids,context = None):
@@ -79,10 +87,17 @@ class kg_service_indent(osv.osv):
 		return True
 		
 	def confirm_indent(self, cr, uid, ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.service.indent')])
+		seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+		cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,rec.date))
+		seq_name = cr.fetchone();
 		self.write(cr,uid,ids,{
-			'name':self.pool.get('ir.sequence').get(cr, uid, 'kg.service.indent') or False,
+			#'name':self.pool.get('ir.sequence').get(cr, uid, 'kg.service.indent') or False,
+			'name':seq_name[0],
 			'state': 'confirm',
-			'confirmed_by':uid
+			'confirmed_by': uid,
+			'confirmed_date': time.strftime("%Y-%m-%d"),
 			})	
 		
 		#cr.execute("""select all_transaction_mails('Service Indent Request Approval',%s)"""%(ids[0]))
@@ -137,7 +152,7 @@ class kg_service_indent(osv.osv):
 		return True
 	
 	def cancel_indent(self, cr, uid, ids, context=None):		
-		self.write(cr, uid,ids,{'state' : 'cancel'})
+		self.write(cr, uid,ids,{'state' : 'cancel','cancel_user_id': uid,'cancel_date':time.strftime('%Y-%m-%d')})
 		return True
 
 	def unlink(self, cr, uid, ids, context=None):
@@ -171,7 +186,11 @@ class kg_service_indent(osv.osv):
 		(_check_lineitem, 'You can not save this Service Indent with out Line and Zero Qty  !!',['qty']),
 
 		]	
-
+		
+	def write(self, cr, uid, ids, vals, context=None):		
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(kg_service_indent, self).write(cr, uid, ids, vals, context)
+		
 kg_service_indent()
 
 class kg_service_indent_line(osv.osv):
@@ -210,7 +229,7 @@ class kg_service_indent_line(osv.osv):
 	'line_state': fields.selection([('process','Processing'),('noprocess','NoProcess'),('pi_done','PI-Done'),('done','Done')], 'Status'),
 	'line_date': fields.date('Indent Date'),
 	'brand_id':fields.many2one('kg.brand.master','Brand'),
-	'ser_no':fields.char('Ser No', size=128),
+	'ser_no':fields.char('Old Serial No', size=128),
 	'serial_no':fields.many2one('stock.production.lot','Serial No',domain="[('product_id','=',product_id)]"),
 	'return_qty':fields.float('Return Qty'),
 	}

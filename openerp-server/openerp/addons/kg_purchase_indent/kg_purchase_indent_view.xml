@@ -1,16 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
 	<data>
-		<!--
-		<menuitem id="kg_pi_indent_menu" name="Purchase Indent" parent="stock.menu_stock_root" sequence="14"/>
-
-		<menuitem
-		id="purchase_requisition.menu_purchase_requisition_pro_mgt"
-		sequence="1"
-		parent="kg_pi_indent_menu"
-		action="purchase_requisition.action_purchase_requisition" name="Purchase Indent"/>
-		-->
-		
 		
 		<record model="ir.ui.view" id="kg_purchase_indent_form_inherit">
 		<field name="name">kg.purchase.indent.form.inherit</field>
@@ -21,11 +11,9 @@
 		<button name="tender_done" states="in_progress" string="Purchase Done" type="object" class="oe_highlight" position="replace">
 			<button name="tender_in_progress" states="draft" string="Confirm Indent" type="object" class="oe_highlight"/>
 		</button>
-		
 		<button name="tender_in_progress" states="draft" string="Confirm Indent" type="object" class="oe_highlight" position="after">
 			<button name="tender_for_approve" states="in_progress" string="Approve Indent" type="object" class="oe_highlight"/>
 		</button>
-		
 		<button name="tender_cancel" states="draft,in_progress" string="Cancel Requisition" type="object" position="replace">
 			<button name="tender_cancel" states="in_progress,approved" string="Cancel Indent" type="object"/>
 		</button>
@@ -34,15 +22,14 @@
 								string="Request a Quotation" icon="gtk-execute"
 								attrs="{'invisible': [('line_ids','=',False),('state', 'not in', ('in_progress'))]}"
 								position="replace">
-								
 		<button name="%(purchase_requisition.action_purchase_requisition_partner)d" type="action"
 								string="Request a Quotation" icon="gtk-execute"
 								attrs="{'invisible': [('line_ids','=',False),('state', 'not in', ('in_progress'))]}"
+								context="{'entry_mode':entry_mode}"
 								invisible="1"/>
 	<!--	<button name="%(purchase_requisition.action_purchase_requisition_partner)d" type="action"
 								string="Create a PO" icon="gtk-execute"
 								attrs="{'invisible': ['|',('line_ids','=',False),('state', 'not in', ('in_progress'))]}"/> -->
-							  
 		</button>
 		<field name="name" position="replace">
 		<group>
@@ -51,26 +38,19 @@
 		</group>
 		</field>
 		
-		
 		<field name="date_start" position="replace">
 			<field name="date_start" required="1"/>
-		</field>
-		
-		<field name="date_start" position="after">
-			<field name="creation_date" readonly="1"/>
-		</field>
-		
-		<field name="creation_date" readonly="1" position="after">
-			<field name="state" readonly="1"/>
-			<field name="approved_by" readonly="1"/>
+			<field name="expected_date"/>
 		</field>
 
+		<field name="expected_date" position="after">
+			<field name="active"/>
+			<field name="state" style="width: 30%%" class="att_state_change" readonly="1"/>
+		</field>
 
-		
 		<field name="user_id" position="replace">
 		<field name="name" readonly="1"/>
 		<field name="user_id" readonly="1"/>
-		<field name="confirmed_by" readonly="1"/>
 		</field>
 		<field name="date_end" position="replace">
 		<field name="dep_name" invisible="1"/>
@@ -80,39 +60,47 @@
 		<field name="exclusive" position="replace">
 		<field name="exclusive" invisible="1"/>
 		</field>
-		<field name="company_id" position="replace">
-		<field name="company_id" invisible="1"/>
-		</field>
+
 		<field name="warehouse_id" position="replace">
 		<field name="warehouse_id" invisible="1"/>
 		</field>
-		<field name="user_id" position="after">
+		<field name="user_id" position="replace">
+		<field name="user_id" invisible="1"/>
 		<field name="kg_store" invisible="1"/>
 		<field name="pi_flag" invisible="1"/>
+		<field name="division"/>
 		<field name="dep_project"/>
+		<field name="entry_mode" on_change="onchange_entry_mode(entry_mode,pi_flag)"/>
 		</field>
 		
-		<field name="dep_name" invisible="1">
-		
-		</field>
-		
+<!--
 		<field name="product_id" on_change="onchange_product_id(product_id,product_uom_id)" position="replace">
-		<field name="product_id" on_change="onchange_product_id(product_id,product_uom_id)" readonly="1"/>
-		<field name="brand_id" readonly="1"/>
+		<field name="product_id" on_change="onchange_product_id(product_id,product_uom_id)" attrs="{'readonly': [('entry_mode', '=', 'auto')]}"/>
+		<field name="brand_id" attrs="{'readonly': [('entry_mode', '=', 'auto')]}"/>
 		</field>
+-->
 		
+<!--
 		<field name="product_qty" position="replace">
 		<field name="product_qty" on_change="onchange_qty(product_qty,pending_qty)"/>
+		<field name="stock_qty" readonly="1"/>
+		<field name="entry_mode" invisible="1"/>
 		</field>
+-->
 		
+<!--
 		<field name="product_qty" position="after">
 		<field name="current_qty" readonly="1" invisible="1"/>
 		</field>
+-->
 		
+<!--
 		<field name="product_uom_id" position="replace">
-		<field name="product_uom_id" string="UOM" readonly="1"/>
+		<field name="product_uom_id" string="UOM" attrs="{'readonly': [('entry_mode', '=', 'auto')]}"/>
 		</field>
-		
+-->
+
+<!--
 		<field name="product_uom_id" position="after">
 		<field name="rate" invisible="1"/>
 		<field name="pending_qty" invisible="1"/>
@@ -126,31 +114,59 @@
 				class="oe_highlight"/>
 		
 		</field>		
+-->
 		
-		<xpath expr = "//page[@string='Products']" position="after">
-					<page string="Select Pending Dep.Indent">
-						<field name="kg_depindent_lines">
-						<tree string = "Dep Indent" editable="bottom">
-							<field name="indent_id" readonly="1"/>
-							<field name="line_date" readonly="1"/>
-							<field name="product_id" readonly="1"/>
-							<field name="uom" readonly="1"/>
-							<field name="qty" readonly="1"/>
-							<field name="pending_qty" readonly="1"/>
-							<field name="note" readonly="1"/>
-							</tree>
-							</field>						
-						 <button name="update_pil" type='object' string="Save Record"/>
-					 </page>		
+		<xpath expr = "//page[@string='Indent Item Details']" position="after" >
+			<page string="Select Pending Indent" attrs="{'invisible':[('entry_mode','=','manual')]}">
+				<field name="kg_depindent_lines">
+				<tree string = "Dep Indent" editable="bottom">
+					<field name="indent_id" string="Indent No" readonly="1"/>
+					<field name="line_date" string="Indent Date" readonly="1"/>
+					<field name="product_id" string="Item Name" readonly="1"/>
+					<field name="brand_id" string="Brand"  readonly="1"/>
+					<field name="uom" readonly="1"/>
+					<field name="qty" string="Qty" readonly="1"/>
+					
+					<field name="note" readonly="1"/>
+					<field name="pending_qty" readonly="1" invisible="1"/>
+					</tree>
+					</field>						
+				 <button name="update_pil" type='object' string="Save Record"/>
+			 </page>		
 		</xpath>
 		
-		<xpath expr = "//page[@string='Select Pending Dep.Indent']" position="after">
+		<xpath expr = "//page[@string='Select Pending Indent']" position="after">
 			<page string="Remarks">
 				<field name="remark"/>
 			</page>
 		</xpath>
-						
 		
+		<xpath expr = "//page[@string='Remarks']" position="after">
+			<page string="Entry Info">
+				<group>
+					<field name="company_id" readonly="1"/>
+				</group>
+				<group>
+					<group>
+					<field name="created_by"/>
+					<field name="confirmed_by" attrs="{'invisible':[('state','in',['draft'])]}"/>
+					<field name="rej_user_id" attrs="{'invisible':[('state','in',['draft', 'in_progress','approved','cancel','done'])]}"/>
+					<field name="approved_by" attrs="{'invisible':[('state','in',['draft', 'in_progress'])]}"/>
+					<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'in_progress','approved','done'])]}"/>
+					<field name="update_user_id"/>
+					</group>
+					<group>
+					<field name="creation_date"/>
+					<field name="confirmed_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+					<field name="reject_date" attrs="{'invisible':[('state','in',['draft', 'in_progress','approved','cancel','done'])]}"/>
+					<field name="approved_date" attrs="{'invisible':[('state','in',['draft', 'in_progress'])]}"/>
+					<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'in_progress','approved','done'])]}"/>
+					<field name="update_date"/>
+					</group>
+				</group>
+			</page>
+		</xpath>
+				
 		<xpath expr="//tree[@string='Dep Indent']" position="attributes">
 			<attribute name="create">0</attribute>
 				<attribute name="create">0</attribute>
@@ -160,11 +176,25 @@
 		
 		</field>
 		
-		
-		
 	</record>
 	
-		
+	
+	<record model="ir.ui.view" id="kg_purchase_requisition_tree">
+			<field name="name">purchase.requisition</field>
+			<field name="model">purchase.requisition</field>
+			<field name="inherit_id" ref="purchase_requisition.view_purchase_requisition_tree"/>
+			<field name="arch" type="xml">
+
+			<field name="user_id" position="replace" >
+				<field name="user_id" invisible="1"/>
+			</field>
+			<field name="user_id" position="after" >
+				<field name="expected_date"/>
+			</field>
+
+			</field>
+	</record>
+			
 	<!-- purchase indent line tree view 
 	
 	<record id="view_purchase_requisition_line_tree" model="ir.ui.view">
@@ -254,17 +284,7 @@
             <field name="view_id" ref="kg_pi_line_form_view1"/>
             <field name="act_window_id" ref="kg_piline_confirmed_action"/>
         </record>
-	
-	<!--<menuitem id="kg_pi_con_menu" name="Purchase Indent" parent="base.menu_purchase_root" sequence="1"/>-->
-		
-		
-		<!--<menuitem
-		id="kg_pi_tree_confirm_menu"
-		sequence="0"
-		parent="kg_pi_con_menu"
-		action="kg_piline_confirmed_action"/>-->
-		
-		
+
     <!-- Approved PI -->
     
     <record id="kg_pi_line_tree_view" model="ir.ui.view">
@@ -333,19 +353,7 @@
             <field name="view_id" ref="kg_pi_line_form_view"/>
             <field name="act_window_id" ref="kg_piline_approved_action"/>
         </record>
-	
-	
-		
-		
-		<!--<menuitem
-		id="kg_pi_tree_menu"
-		sequence="1"
-		parent="kg_pi_con_menu"
-		action="kg_piline_approved_action"/>-->
-		
-		
-    <!-- Cancel PI -->
-    
+
     <record id="kg_pi_line_tree_view2" model="ir.ui.view">
             <field name="name">PI Line Tree View</field>
             <field name="model">purchase.requisition.line</field>
@@ -386,6 +394,7 @@
             </field>
         </record>
 		
+		
 		<record id="kg_piline_approved_action2" model="ir.actions.act_window">
             <field name="name">Cancelled PI</field>
             <field name="type">ir.actions.act_window</field>
@@ -407,18 +416,6 @@
             <field name="view_id" ref="kg_pi_line_form_view2"/>
             <field name="act_window_id" ref="kg_piline_approved_action2"/>
         </record>
-	
-	
-		
-		
-		<!--<menuitem
-		id="kg_pi_tree_menu2"
-		sequence="1"
-		parent="kg_pi_con_menu"
-		action="kg_piline_approved_action2"/>-->
-		
-		
-		
 	
 	</data>
 </openerp>

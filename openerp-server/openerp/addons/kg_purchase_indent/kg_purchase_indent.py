@@ -24,34 +24,61 @@ class kg_purchase_indent(osv.osv):
 		'kg_store': fields.selection([('sub','Sub Store'), ('main','Main Store')], 'Store', readonly=True, states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
 		'dep_name' : fields.many2one('kg.depmaster', 'Dep.Name', readonly=True, states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
 		'state': fields.selection([('draft','Waiting for Confirmation'),('in_progress','Waiting for Approval'),('cancel','Cancelled'),('done','Purchase Done'),('approved','Approved')],
-			'Status', track_visibility='onchange', required=True, readonly=True, states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
+						'Status', track_visibility='onchange', required=True, readonly=True, states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
 		'date_start':fields.date('Indent Date', readonly=True, states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
 		'line_ids' : fields.one2many('purchase.requisition.line','requisition_id','Products to Purchase', readonly=True, states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
 		'pi_type': fields.selection([('direct','Direct'),('fromdep','From Dep Indent')], 'Type'),
 		'pi_flag': fields.boolean('pi flag'),
 		'kg_seq_id':fields.many2one('ir.sequence','Document Type',domain=[('code','=','kg.purchase.indent')],
-			readonly=True, states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),			
+						readonly=True, states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),			
 		'remark': fields.text('Remarks',readonly=False,states={'cancel':[('readonly',True)]}),
 		'dep_project':fields.many2one('kg.project.master','Dept/Project Name',readonly=True,states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
-		'approved_date' : fields.date('Indent Date'),
-		'creation_date':fields.datetime('Creation Date'),
-		'confirmed_by' : fields.many2one('res.users', 'Confirmed By', readonly=False,select=True),
-		'approved_by' : fields.many2one('res.users', 'Approved By', readonly=False,select=True),
-
-	}
+		'division':fields.many2one('kg.division.master','Division',readonly=True,states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
+		'expected_date':fields.date('Expected Date',required=True),
+		'created_by' : fields.many2one('res.users', 'Created By', readonly=True,select=True),
+		'creation_date':fields.datetime('Creation Date',readonly=True),
+		'confirmed_by' : fields.many2one('res.users', 'Confirmed By', readonly=True,select=True),
+		'confirmed_date': fields.datetime('Confirmed Date',readonly=True),
+		'approved_by' : fields.many2one('res.users', 'Approved By', readonly=True,select=True),
+		'approved_date' : fields.datetime('Apporved Date',readonly=True),
+		'update_date' : fields.datetime('Last Updated Date',readonly=True),
+		'update_user_id' : fields.many2one('res.users','Last Updated By',readonly=True),
+		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
+		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
+		'reject_date': fields.datetime('Reject Date', readonly=True),
+		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
+		'active': fields.boolean('Active'),
+		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode',required=True,readonly=False),
+		
+		}
 	
 	_defaults = {
+	
 		'exclusive': 'exclusive',
 		'kg_store': 'main',
 		'name':'',
 		'creation_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
-	}
+		'created_by': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).id,
+		'active': True,
+		'entry_mode': 'manual',
+		
+			}
 	
-	_sql_constraints = [
+	#_sql_constraints = [
 	
-		('name_uniq', 'unique(name, company_id)', 'Indent Reference must be unique per Company!'),
-	]	
+	#	('name_uniq', 'unique(name, company_id)', 'Indent Reference must be unique per Company!'),
+	#]	
 	
+	def onchange_entry_mode(self, cr, uid, ids, entry_mode, pi_flag, context=None):
+		print "callled onchange_entry_mode from KG"
+
+		value = {'pi_flag': ''}
+		if entry_mode == 'manual':
+			value = {'pi_flag': True}
+		else:
+			value = {'pi_flag': False}
+		return {'value': value}
+		
 	def email_ids(self,cr,uid,ids,context = None):
 		email_from = []
 		email_to = []
@@ -115,11 +142,15 @@ class kg_purchase_indent(osv.osv):
 		
 		obj = self.browse(cr,uid,ids[0])
 		if obj.name == '':
-			indent_no = self.pool.get('ir.sequence').get(cr, uid, 'purchase.requisition')
-			self.write(cr,uid,ids,{'name':indent_no})
+			#indent_no = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.requisitionn')
+			seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','purchase.order.requisition')])
+			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,obj.date_start))
+			seq_name = cr.fetchone();
+			self.write(cr,uid,ids,{'name':seq_name[0]})
 			
-		self.write(cr,uid,ids,{'state':'in_progress','confirmed_by':uid})
-#		cr.execute("""select all_transaction_mails('Purchase Indent Request Approval',%s)"""%(ids[0]))
+		self.write(cr,uid,ids,{'state':'in_progress','confirmed_by':uid,'confirmed_date':time.strftime("%Y-%m-%d")})
+		#cr.execute("""select all_transaction_mails('Purchase Indent Request Approval',%s)"""%(ids[0]))
 		"""Raj
 		data = cr.fetchall();
 		vals = self.email_ids(cr,uid,ids,context = context)
@@ -287,6 +318,10 @@ class kg_purchase_indent(osv.osv):
 			return True
 			cr.close()
 			"""
+	def write(self, cr, uid, ids, vals, context=None):		
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(kg_purchase_indent, self).write(cr, uid, ids, vals, context)
+		
 	def tender_cancel(self, cr, uid, ids, context=None):
 		print "callled tender_cancel from KG"
 		purchase_order_obj = self.pool.get('purchase.order')
@@ -314,7 +349,7 @@ class kg_purchase_indent(osv.osv):
 			for line in piindent.line_ids:
 				line.depindent_line_id.write({'line_state' : 'noprocess'})			
 		
-		return self.write(cr, uid, ids, {'state': 'cancel'})
+		return self.write(cr, uid, ids, {'state': 'cancel','cancel_date':time.strftime('%Y-%m-%d %H:%M:%S'),'cancel_user_id':uid})
 		
 		
 	def pi_approval(self, cr, uid, ids, context=None):
@@ -353,11 +388,9 @@ class kg_purchase_indent_line(osv.osv):
 	_columns = {
 	
 	'rate': fields.float('Last Purchase Rate',readonly=True, state={'draft': [('readonly', False)]}),
-	'note': fields.text('Remarks'),
 	'line_date':fields.datetime('Date'),
 	'line_state': fields.selection([('process', 'Approved'),('noprocess', 'Confirmed'),
 					('cancel', 'Cancel')], 'Status'),
-	'pending_qty': fields.float('Pending Qty'),
 	'current_qty':fields.float('Current Stock Quantity'),
 	'dep_indent_qty': fields.float('Dep.Indent Qty'),
 	'name': fields.char('Name', size=64),
@@ -368,8 +401,10 @@ class kg_purchase_indent_line(osv.osv):
 	'dep_id':fields.many2one('kg.depmaster', 'Department'),
 	'user_id': fields.many2one('res.users', 'Users'),
 	'cancel_remark': fields.text('Cancel Remarks'),
-	'brand_id': fields.many2one('kg.brand.master', 'Brand Name'),
 	'draft_flag':fields.boolean('Draft Flag'),
+	'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode'),
+	'src_type': fields.selection([('direct', 'Direct'),('frompi', 'From PI'),('fromquote', 'From Quotation')], 'Soruce Type'),
+	
 	}
 	
 	_defaults = {
@@ -378,16 +413,35 @@ class kg_purchase_indent_line(osv.osv):
 	'name': 'PILINE',
 	'line_date': lambda *a: time.strftime('%Y-%m-%d %H:%M:%S'),
 	'draft_flag': False,
+	'src_type': 'frompi',
 	
 	}		
 	
+	#~ def default_get(self, cr, uid, fields, context=None):
+		#~ print"contextcontextcontext",context
+		#~ 
+		#~ return context
+		
 	def onchange_product_id(self, cr, uid, ids, product_id, product_uom_id, context=None):
 		print "callled onchange_product_id from KG"
 
-		value = {'product_uom_id': ''}
+		value = {'product_uom_id': '','stock_qty':''}
+		uom = ''
+		stock_qty = 0.00
 		if product_id:
 			prod = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
-			value = {'product_uom_id': prod.uom_po_id.id}
+			uom = prod.uom_po_id.id
+		else:
+			uom = ''	
+		stock_sql = """ select sum(pending_qty) from stock_production_lot where product_id = %s group by product_id """%(product_id)
+		cr.execute(stock_sql)		
+		stock_data = cr.dictfetchall()
+		if stock_data:
+			stock_qty = stock_data[0]
+			stock_qty = stock_qty.values()[0]
+		else:
+			stock_qty = 0.00
+		value = {'product_uom_id': uom,'stock_qty': stock_qty}	
 		return {'value': value}
 			
 	def onchange_qty(self, cr, uid, ids, product_qty, pending_qty, context=None):
@@ -402,14 +456,33 @@ class kg_purchase_indent_line(osv.osv):
 		print "Line create called............"
 		if vals['product_id']:
 			prod_record = self.pool.get('product.product').browse(cr,uid,vals['product_id'])
-			vals.update({'product_uom_id':prod_record.uom_po_id.id})	  
+			stock_sql = """ select sum(pending_qty) from stock_production_lot where product_id = %s group by product_id """%(vals['product_id'])
+			cr.execute(stock_sql)		
+			stock_data = cr.dictfetchall()
+			stock_qty = 0.00
+			if stock_data:
+				stock_qty = stock_data[0]
+				stock_qty = stock_qty.values()[0]
+			else:
+				stock_qty = 0.00
+			vals.update({'product_uom_id':prod_record.uom_po_id.id,'stock_qty':stock_qty})
 		return super(kg_purchase_indent_line,self).create(cr,uid,vals,context)
 		
 	def write(self,cr,uid,ids,vals,context={}):
 		if vals.has_key('product_id') and vals['product_id']:
 			product_record = self.pool.get('product.product').browse(cr,uid,vals['product_id'])
 			if product_record.uom_po_id:
-					vals.update({'product_uom_id':prod_record.uom_po_id.id})
+				vals.update({'product_uom_id':prod_record.uom_po_id.id})
+			stock_sql = """ select sum(pending_qty) from stock_production_lot where product_id = %s group by product_id """%(vals['product_id'])
+			cr.execute(stock_sql)		
+			stock_data = cr.dictfetchall()
+			stock_qty = 0.00
+			if stock_data:
+				stock_qty = stock_data[0]
+				stock_qty = stock_qty.values()[0]
+			else:
+				stock_qty = 0.00
+			vals.update({'stock_qty':stock_qty})
 		return super(kg_purchase_indent_line,self).write(cr,uid,ids,vals,context)		
 
 	def unlink(self, cr, uid, ids, context=None):
@@ -444,3 +517,5 @@ class kg_purchase_indent_line(osv.osv):
 		return True
 
 kg_purchase_indent_line()
+
+
