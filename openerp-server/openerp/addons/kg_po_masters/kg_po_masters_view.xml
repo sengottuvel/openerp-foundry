@@ -110,15 +110,7 @@
 			<field name="search_view_id" ref="m_search_v_pay"/>
 		</record>
 		
-		<!-- Audit Log Xml Data Start-->
 		
-        <record id="payment_master_model" model="audittrail.rule">
-            <field name="name">Audit Log Payment Master</field>
-            <field name="object_id" eval="ref('kg_po_masters.model_kg_payment_master')"/>       
-            <field name="state">subscribed</field>              
-        </record>
-        
-		<!-- Audit Log Xml Data End-->
 		
 		
 		<!-- Delivery Masters -->
@@ -225,15 +217,7 @@
 			<field name="search_view_id" ref="m_search_v_del"/>
 		</record>
 		
-		<!-- Audit Log Xml Data Start-->
 		
-        <record id="delivery_master_model" model="audittrail.rule">
-            <field name="name">Audit Log Delivery Master</field>
-            <field name="object_id" eval="ref('kg_po_masters.model_kg_delivery_master')"/>       
-            <field name="state">subscribed</field>              
-        </record>
-        
-		<!-- Audit Log Xml Data End-->
 		
 		<!-- Brand Master -->
 		
@@ -339,15 +323,7 @@
 			<field name="search_view_id" ref="m_search_v_brand"/>
 		</record>
 		
-		<!-- Audit Log Xml Data Start-->
 		
-        <record id="brand_master_model" model="audittrail.rule">
-            <field name="name">Audit Log Brand Master</field>
-            <field name="object_id" eval="ref('kg_po_masters.model_kg_brand_master')"/>       
-            <field name="state">subscribed</field>              
-        </record>
-        
-		<!-- Audit Log Xml Data End-->
         
 </data>
 	</openerp>
