@@ -189,9 +189,9 @@ where po.id = $P{po_id}]]>
 					<textFieldExpression><![CDATA["SALES TAX"]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToBandHeight" x="625" y="11" width="178" height="12"/>
+					<reportElement stretchType="RelativeToBandHeight" x="635" y="11" width="168" height="12"/>
 					<textElement/>
-					<textFieldExpression><![CDATA["TIN         :"+$F{tin}]]></textFieldExpression>
+					<textFieldExpression><![CDATA["TIN         : "+$F{tin}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToBandHeight" x="489" y="47" width="136" height="13"/>
@@ -203,14 +203,14 @@ where po.id = $P{po_id}]]>
 					<textFieldExpression><![CDATA["PAN NO    :"+$F{pan}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToBandHeight" x="625" y="23" width="178" height="12"/>
+					<reportElement stretchType="RelativeToBandHeight" x="635" y="23" width="168" height="12"/>
 					<textElement/>
-					<textFieldExpression><![CDATA["CST No   :"+$F{cst}]]></textFieldExpression>
+					<textFieldExpression><![CDATA["CST No   : " +$F{cst}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToBandHeight" x="625" y="35" width="178" height="12"/>
+					<reportElement stretchType="RelativeToBandHeight" x="635" y="35" width="168" height="12"/>
 					<textElement/>
-					<textFieldExpression><![CDATA["CODE      :"]]></textFieldExpression>
+					<textFieldExpression><![CDATA["CODE      : "]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToBandHeight" x="489" y="11" width="136" height="12"/>
@@ -322,7 +322,7 @@ where po.id = $P{po_id}]]>
 						<leftPen lineWidth="0.0"/>
 					</box>
 					<textElement>
-						<font isBold="true"/>
+						<font isBold="false"/>
 					</textElement>
 					<textFieldExpression><![CDATA["  INSURANCE"]]></textFieldExpression>
 				</textField>
@@ -426,7 +426,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA["QUOTATION REF.:"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="553" y="4" width="100" height="12"/>
+				<reportElement x="564" y="4" width="104" height="12"/>
 				<textElement/>
 				<textFieldExpression><![CDATA["VENDOR CODE"]]></textFieldExpression>
 			</textField>
@@ -463,7 +463,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA["Tel : 0422 - 3053555,Fax: 0422 - 3053510,Email: purchase@sampumps.com"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="553" y="16" width="100" height="14"/>
+				<reportElement x="564" y="16" width="89" height="14"/>
 				<textElement/>
 				<textFieldExpression><![CDATA["M/s."]]></textFieldExpression>
 			</textField>
@@ -563,6 +563,13 @@ where po.id = $P{po_id}]]>
 			<line>
 				<reportElement x="801" y="0" width="1" height="92"/>
 			</line>
+			<textField>
+				<reportElement x="695" y="39" width="106" height="20"/>
+				<textElement textAlignment="Center">
+					<font size="15" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["ISO"]]></textFieldExpression>
+			</textField>
 		</band>
 	</title>
 	<columnHeader>
@@ -574,7 +581,7 @@ where po.id = $P{po_id}]]>
 					<leftPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font isBold="true"/>
+					<font isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["No."]]></textFieldExpression>
 			</textField>
@@ -585,7 +592,7 @@ where po.id = $P{po_id}]]>
 					<leftPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font isBold="true"/>
+					<font isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["RATE"]]></textFieldExpression>
 			</textField>
@@ -596,7 +603,7 @@ where po.id = $P{po_id}]]>
 					<leftPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font isBold="true"/>
+					<font isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["DLY.SCHEDULE"]]></textFieldExpression>
 			</textField>
@@ -607,7 +614,7 @@ where po.id = $P{po_id}]]>
 					<leftPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font isBold="true"/>
+					<font isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["UOM"]]></textFieldExpression>
 			</textField>
@@ -621,7 +628,7 @@ where po.id = $P{po_id}]]>
 					<leftPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font isBold="true"/>
+					<font isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["AMOUNT"]]></textFieldExpression>
 			</textField>
@@ -633,7 +640,7 @@ where po.id = $P{po_id}]]>
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font isBold="true"/>
+					<font isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["W.O.No"]]></textFieldExpression>
 			</textField>
@@ -644,7 +651,7 @@ where po.id = $P{po_id}]]>
 					<leftPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font isBold="true"/>
+					<font isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["DESCRIPTION"]]></textFieldExpression>
 			</textField>
@@ -655,7 +662,7 @@ where po.id = $P{po_id}]]>
 					<leftPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font isBold="true"/>
+					<font isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["QTY"]]></textFieldExpression>
 			</textField>
