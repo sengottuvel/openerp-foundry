@@ -175,7 +175,9 @@ class kg_rfq_vendor_selection(osv.osv):
 								'rfq_date': custom.quotation_date,
 								'partner_id':vendor_rec.partner_id.id,
 								'partner_address': vendor_rec.partner_address,
-								'partner_name': vendor_rec.partner_name,									
+								'partner_name': vendor_rec.partner_name,
+								'vendors_price': 0,
+																	
 							}
 							quote_pi_id = quote_pi_obj.create(cr, uid, merge_vals)							
 			self.write(cr, uid, ids, {'state':'approved', 'name':name})
