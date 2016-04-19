@@ -99,6 +99,7 @@ class ir_sequence(openerp.osv.osv.osv):
         'number_increment': openerp.osv.fields.integer('Increment Number', required=True, help="The next number of the sequence will be incremented by this number"),
         'padding' : openerp.osv.fields.integer('Number Padding', required=True, help="OpenERP will automatically adds some '0' on the left of the 'Next Number' to get the required padding size."),
         'company_id': openerp.osv.fields.many2one('res.company', 'Company'),
+        'reset_sequence': openerp.osv.fields.selection([('monthly_reset','Monthly Reset'),('yearly_reset','Yearly Reset'),('fiscal_reset','Financial Year Reset')],'Reset Sequence'),
     }
     _defaults = {
         'implementation': 'standard',
@@ -108,6 +109,7 @@ class ir_sequence(openerp.osv.osv.osv):
         'number_next': 1,
         'number_next_actual': 1,
         'padding' : 0,
+        'reset_sequence':'fiscal_reset'
     }
 
     def init(self, cr):
