@@ -6,10 +6,11 @@
 	<!-- Planning Admin Group -->
 	
     <record id="group_planning_admin" model="res.groups">
-		<field name="name">Planning_Admin</field>       
+		<field name="name">Planning_Admin</field> 
+		<field name="custom_group">True</field>         
 		<field name="category_id" ref="base.module_category_sales_management"/>
-        <field eval="[(6,0,[           
-            ref('kg_pumpmodel_master.mpm_masters'),
+        <field eval="[(6,0,[
+			ref('kg_pumpmodel_master.mpm_masters'),
             ref('kg_pumpmodel_master.mpm_planning_master'),              
             ref('kg_pumpmodel_master.mam_pumpmodel_master'),
             ref('kg_menus.mam_uom_master'),
@@ -18,36 +19,56 @@
             ref('kg_division_master.mam_division_master'),
             ref('kg_bom.mam_bom_master'),
             ref('kg_machine_shop.mam_machineshop_ms_master'),
-            ref('kg_machine_shop.mam_machineshop_bot_master'),            
+            ref('kg_machine_shop.mam_machineshop_bot_master'),
+            ref('kg_bom_amendment.mam_bom_amendment'),
             ref('kg_box_master.mam_box_master'),
-            ref('kg_bom_amendment.mam_bom_amendment'),    
             ref('kg_chemical_master.mam_chemical_master'),
-            ref('kg_mechanical_master.mam_mechanical_master'),  
-            ref('kg_moc_construction.mam_mocconstruction_master'),             
+            ref('kg_mechanical_master.mam_mechanical_master'),
+            ref('kg_moc_construction.mam_mocconstruction_master'),           
             ref('kg_bom.mam_bom_details'),
             ref('kg_brandmoc_rate.mam_brandmocrate_design_master'),
             ref('kg_shift_master.mam_shift_master'),
             ref('kg_contractor_category.mam_contractor_category_master'),
             ref('kg_contractor_master.mam_contractor_master'),
-            ref('kg_construction_type.mam_const_type_master'),
             ref('kg_rejection_master.mam_rejection_master'),
+            ref('kg_construction_type.mam_const_type_master'),
             ref('kg_pump_category.mam_pumpcate_master'),
-            ref('kg_attendance_reader.mpm_attendance_masters'),
-            ref('kg_attendance_reader.mpm_attendance_master'),
+            ref('kg_furnace_master.mam_furnace_master'),
+            ref('kg_ladle_master.mam_ladle_master'),
             
             ref('kg_stock_inward.tpm_transactions'),
             ref('kg_stock_inward.tpm_planning_transactions'),
             ref('kg_stock_inward.tam_stock_inward'),
-            ref('kg_weekly_schedule.tam_weekly_schedule'),
-            ref('kg_daily_planning.tam_daily_planning'),
+            ref('kg_work_order.tam_work_order'),
+            ref('kg_schedule.tam_schedule'),
             ref('kg_qc_verification.tam_qc_verification'),
             ref('kg_production.tam_production'),
-            ref('kg_production.tam_pouring'),
-            ref('kg_production.tam_casting'),
-            ref('kg_melting.tam_melting'),
-            ref('kg_pattern_request.tam_pattern_request'),
-            ref('kg_pattern_issue.tam_pattern_issue'),
-            ref('kg_pattern_issue.tam_pattern_batch_issue'),
+            ref('kg_production.tam_pattern_issue'),
+            ref('kg_production.tpm_batch_entries'),
+            ref('kg_production.tam_pattern_batch_issue'),
+            ref('kg_production.tam_core_log'),
+            ref('kg_production.tam_core_batch'),
+            ref('kg_production.tam_mould_log'),
+            ref('kg_production.tam_mould_batch'),
+            ref('kg_production.tam_pouring_completed'),
+			ref('kg_melting.tam_melting'),
+            ref('kg_pouring_log.tam_pouring_log'),
+            ref('kg_fettling.tam_fettling_inward'),
+            ref('kg_fettling.tam_batch_fettling_accept'),
+            ref('kg_fettling.tam_batch_knock_out'),
+            ref('kg_fettling.tam_batch_decoring'),
+            ref('kg_fettling.tam_batch_shot_blast'),
+            ref('kg_fettling.tam_batch_hammering'),
+            ref('kg_fettling.tam_batch_wheel_cutting'),
+            ref('kg_fettling.tam_batch_gas_cutting'),
+            ref('kg_fettling.tam_batch_arc_cutting'),
+            ref('kg_fettling.tam_batch_rough_grinding'),
+            ref('kg_fettling.tam_batch_finish_grinding'),
+            ref('kg_machineshop.tpm_ms_process'),
+            ref('kg_machineshop.tam_ms_inward'),
+            
+            
+            
             
             
             ref('kg_menus.rpm_reports'),
@@ -65,7 +86,7 @@
             ])]" name="menu_access"/>
 		<field name="users" eval="[(4, ref('base.user_root'))]"/>
             
-    </record>
+    </record> 
     
    
       

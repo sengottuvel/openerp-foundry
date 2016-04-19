@@ -17,7 +17,8 @@
     'data': [
     
 			'kg_groups.xml',
-			'kg_planning_admin.xml',
+			'foundry/kg_foundry_transactions.xml',
+			'foundry/kg_foundry_masters.xml',
 			
 			],
     'auto_install': False,
