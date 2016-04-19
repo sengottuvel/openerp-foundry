@@ -180,9 +180,9 @@ class kg_fettling(osv.osv):
 		'arc_cutting_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		
 		### HEAT TREATMENT ###
-		'heat_cycle_no':fields.char('Heat Cycle No.', size=128,select=True,required=True),
+		'heat_cycle_no':fields.char('Heat Cycle No.', size=128,select=True),
 		'heat_date': fields.date('Date',required=True),
-		'heat_specification':fields.char('Specification', size=128,required=True),
+		'heat_specification':fields.char('Specification', size=128),
 		'heat_fc_temp':fields.char('F/c initial temperature', size=128),
 		'heat_fc_off_time': fields.float('F/c switch off at'),
 		'heat_furnace_on_time': fields.float('Furnace switched on time'),
