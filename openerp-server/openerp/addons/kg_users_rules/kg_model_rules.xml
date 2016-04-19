@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data noupdate="0">
+
+
+	<record id="kg_quote_rules" model="ir.rule">
+            <field name="name">KG Quote Rules</field>
+            <field name="model_id" ref="kg_quotation.model_kg_quotation_requisition_line"/>
+            <field name="domain_force">[('user_ref_id','in',[user.id])]</field>
+            <field name="groups" eval="[(4, ref('kg_groups.group_kg_vendor_quote'))]"/>
+            <field eval="0" name="perm_unlink"/>
+            <field eval="1" name="perm_write"/>
+            <field eval="1" name="perm_read"/>
+            <field eval="0" name="perm_create"/>
+    </record>
+        
+	
+</data>
+</openerp>
