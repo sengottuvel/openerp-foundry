@@ -5,6 +5,7 @@ import time
 from datetime import date
 import openerp.addons.decimal_precision as dp
 from datetime import datetime
+import base64
 
 dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
@@ -301,8 +302,12 @@ class kg_work_order(osv.osv):
 		rec = self.browse(cr,uid,ids[0])
 		res_rec=self.pool.get('res.users').browse(cr,uid,uid)		
 		rec_user = str(res_rec.login)
+		rec_pwd = str(res_rec.password)
 		rec_work_order = str(rec.name)
-		url = 'http://iasqa1.kgisl.com/?uname='+rec_user+'&s='+rec_work_order
+		#~ url = 'http://iasqa1.kgisl.com/?uname='+rec_user+'&s='+rec_work_order
+		encoded = base64.b64encode(rec_user)
+		print "sssssssssssssssssss",encoded
+		url = 'http://10.100.9.60/DMS/login.html?xmxyypzr='+rec_user+'&mxxrqx='+rec_pwd+'&wo_no='+rec_work_order
 		
 		#url = 'http://192.168.1.150:81/pbxclick2call.php?exten='+exe_no+'&phone='+str(m_no)
 		print "url..................................", url
