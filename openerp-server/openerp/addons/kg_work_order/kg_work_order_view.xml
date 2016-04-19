@@ -205,8 +205,8 @@
 							<field name="line_ids_b" nolabel="1" context="{'order_category':order_category}" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
 								<tree string="Order BOT Details Entry Tree" editable="bottom">	
 									<field name="order_category" invisible="1"/>
-									<field name="item_name" attrs="{'readonly': [('order_category','=','pump')]}"/>
-									<field name="bot_id" attrs="{'readonly': [('order_category','=','pump')]}" />											
+									<field name="bot_id" attrs="{'readonly': [('order_category','=','pump')]}" />
+									<field name="item_name" attrs="{'readonly': [('order_category','=','pump')]}"/>										
 									<field name="qty"/>
 									<field name="flag_applicable"/>
 									<field name="remarks" widget="char"/>

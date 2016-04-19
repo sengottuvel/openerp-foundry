@@ -408,9 +408,9 @@ class ch_work_order_details(osv.osv):
 		bot_vals=[]
 		consu_vals=[]
 		
-		if order_category == False:
-			raise osv.except_osv(_('Warning!'),
-						_('Kindly select Purpose and then enter Qty !!'))
+		#~ if order_category == False:
+			#~ raise osv.except_osv(_('Warning!'),
+						#~ _('Kindly select Purpose and then enter Qty !!'))
 						
 		if pump_model_id != False:
 			
@@ -752,7 +752,7 @@ class ch_order_bot_details(osv.osv):
 		'header_id':fields.many2one('ch.work.order.details', 'Work Order Detail', required=1, ondelete='cascade'),
 		'bot_line_id':fields.many2one('ch.bot.details', 'BOT Line Id'),
 		'bot_id':fields.many2one('kg.machine.shop', 'Item Code',domain = [('type','=','bot')], ondelete='cascade',required=True),
-		'item_name': fields.related('bot_line_id','name', type='char', size=128, string='Item Name', store=True, readonly=True),
+		'item_name': fields.related('bot_id','name', type='char', size=128, string='Item Name', store=True, readonly=True),
 		'bom_id': fields.many2one('kg.bom','BOM'), 
 		'qty': fields.integer('Qty', required=True),
 		'flag_applicable': fields.boolean('Is Applicable'),
