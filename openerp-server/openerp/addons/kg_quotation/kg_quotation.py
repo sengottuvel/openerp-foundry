@@ -175,9 +175,9 @@ class kg_rfq_vendor_selection(osv.osv):
 								'rfq_date': custom.quotation_date,
 								'partner_id':vendor_rec.partner_id.id,
 								'partner_address': vendor_rec.partner_address,
-								'partner_name': vendor_rec.partner_name,
+								'partner_name': vendor_rec.partner_name,	
 								'vendors_price': 0,
-																	
+																
 							}
 							quote_pi_id = quote_pi_obj.create(cr, uid, merge_vals)							
 			self.write(cr, uid, ids, {'state':'approved', 'name':name})
@@ -343,7 +343,7 @@ class kg_quotation_requisition_line(osv.osv):
 		'email':fields.char('Email', size=128,readonly=True,),
 		'mail_flag': fields.boolean('Vendor Mail'),
 		'cmp_flag': fields.boolean('Allow Vendor For Comparison'),
-		'state': fields.selection([('draft', 'Draft'),('approved', 'Approved'),], 'State'),
+		'state': fields.selection([('draft', 'Draft'),('approved', 'Approved'),], 'State',readonly=True),
 		'freight_type':fields.selection([('Inclusive','Inclusive'),('Extra','Extra'),('To Pay','To Pay'),('Paid','Paid'),				  ('Extra at our Cost','Extra at our Cost')], 'Freight'), 		
 		'tax_type': fields.selection([('inclusive', 'Inclusive'),('exclusive', 'Exclusive'),], 'Tax'),
 		'other_charges': fields.selection([('applicable', 'Applicable'),('notapplicable', 'Not Applicable'),], 'Other Charges'),

@@ -25,7 +25,7 @@
 		<button name="%(purchase_requisition.action_purchase_requisition_partner)d" type="action"
 								string="Request a Quotation" icon="gtk-execute"
 								attrs="{'invisible': [('line_ids','=',False),('state', 'not in', ('in_progress'))]}"
-								context="{'entry_mode':entry_mode}"
+								context="{'indent_type':indent_type}"
 								invisible="1"/>
 	<!--	<button name="%(purchase_requisition.action_purchase_requisition_partner)d" type="action"
 								string="Create a PO" icon="gtk-execute"
@@ -71,6 +71,7 @@
 		<field name="division"/>
 		<field name="dep_project"/>
 		<field name="entry_mode" on_change="onchange_entry_mode(entry_mode,pi_flag)"/>
+		<field name="indent_type" on_change="onchange_indent_type(indent_type,pi_flag)"/>
 		</field>
 		
 <!--
@@ -117,7 +118,7 @@
 -->
 		
 		<xpath expr = "//page[@string='Indent Item Details']" position="after" >
-			<page string="Select Pending Indent" attrs="{'invisible':[('entry_mode','=','manual')]}">
+			<page string="Select Pending Indent" attrs="{'invisible':[('indent_type','=','direct')]}">
 				<field name="kg_depindent_lines">
 				<tree string = "Dep Indent" editable="bottom">
 					<field name="indent_id" string="Indent No" readonly="1"/>

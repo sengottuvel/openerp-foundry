@@ -9,7 +9,6 @@
 			ref('kg_quotation.menu_kg_vendor_quote_parent'), 
 			ref('kg_quotation.menu_kg_vendor_quote_header'), 
 			ref('kg_quotation.kg_rfq_vendor_quote_menu'),        
-			ref('base.menu_purchase_root'),
 			ref('account.menu_action_invoice_tree2'),
 			])]" name="menu_access"/>
     </record>

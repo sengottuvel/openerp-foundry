@@ -48,7 +48,8 @@ class kg_purchase_indent(osv.osv):
 		'reject_date': fields.datetime('Reject Date', readonly=True),
 		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
 		'active': fields.boolean('Active'),
-		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode',required=True,readonly=False),
+		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode',required=True,readonly=True),
+		'indent_type': fields.selection([('fromdi','From Dept'),('direct','Direct')],'Indent Type',required=True,readonly=False),
 		
 		}
 	
@@ -61,7 +62,8 @@ class kg_purchase_indent(osv.osv):
 		'created_by': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).id,
 		'active': True,
 		'entry_mode': 'manual',
-		
+		'indent_type': 'fromdi',
+			
 			}
 	
 	#_sql_constraints = [
@@ -74,6 +76,16 @@ class kg_purchase_indent(osv.osv):
 
 		value = {'pi_flag': ''}
 		if entry_mode == 'manual':
+			value = {'pi_flag': True}
+		else:
+			value = {'pi_flag': False}
+		return {'value': value}
+		
+	def onchange_indent_type(self, cr, uid, ids, indent_type, pi_flag, context=None):
+		print "callled onchange_indent_type from KG"
+
+		value = {'pi_flag': ''}
+		if indent_type == 'direct':
 			value = {'pi_flag': True}
 		else:
 			value = {'pi_flag': False}

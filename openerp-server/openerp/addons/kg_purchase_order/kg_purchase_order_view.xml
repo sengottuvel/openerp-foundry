@@ -105,6 +105,7 @@
 			 <field name="bill_type" required="1"/>
 			 <field name="payment_mode" />
 			 <field name="term_warranty" />
+			 <field name="po_type" on_change="onchange_type_flag(po_type)"/>
 			 <field name="bill_flag" readonly="1"/>
 			 <field name="purpose" required="1"/>
 			<field name="grn_flag" invisible="1"/>
@@ -177,7 +178,7 @@
 		</field>
 		
 		<xpath expr = "//page[@string='Incoming Shipments &amp; Invoices']" position="before">
-			<page string="Select Items">
+			<page string="Select Items" attrs="{'invisible':[('po_type','!=','frompi')]}">
 				<field name="kg_poindent_lines">
 					<tree string="PI Lines" editable="bottom">
 					<field name="requisition_id" string="Indent NO" readonly="1"/>
@@ -260,7 +261,10 @@
 			</field>
 			
 			<field name="product_qty" position="replace">
+<!--
 			<field name="product_qty" required="True" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}" on_change="onchange_qty(product_qty,pending_qty,pi_line_id,pi_qty)"/>
+-->
+			<field name="product_qty" required="True" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}"/>
 			</field>
 			
 			<field name="product_uom" 

@@ -186,6 +186,7 @@ class purchase_requisition_line(osv.osv):
 		'stock_qty': fields.float('Stock Qty'),
 		'line_ids': fields.one2many('ch.purchase.indent.wo','header_id','Ch Line Id'),
 		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode'),
+		'indent_type': fields.selection([('fromdi','From Dept'),('direct','Direct')],'Indent Type'),
 		'note': fields.text('Remarks'),
 		'pending_qty': fields.float('Pending Qty'),
 		
@@ -218,7 +219,7 @@ class ch_purchase_indent_wo(osv.osv):
 	_columns = {
 
 	'header_id': fields.many2one('purchase.requisition.line', 'Purchase Indent Line', required=True, ondelete='cascade'),
-	'wo_id': fields.integer('WO'),
+	'wo_id': fields.many2one('kg.work.order', 'WO', required=True),
 	'qty': fields.float('Indent Qty', required=True),
 	
 	}

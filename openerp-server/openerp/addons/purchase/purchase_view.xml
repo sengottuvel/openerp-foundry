@@ -203,9 +203,9 @@
                         </group>
                     </group>
                     <notebook>
-                        <page string="Order Item Details" attrs="{'invisible': [('po_flag', '=', False),'|',('type_flag', '=', False)]}">
+                        <page string="Order Item Details" attrs="{'invisible': [('type_flag', '=', False)]}">
                             <field name="order_line">
-                                <tree string="Purchase Order Lines" create="false" delete="false">
+                                <tree string="Purchase Order Lines" >
                                     <field name="product_id" on_change="onchange_product_id(parent.pricelist_id,product_id,0,product_uom,parent.partner_id, parent.date_order,parent.fiscal_position,date_planned,name,price_unit,context)"/>
                                     <field name="name" invisible="1"/>
                                     <field name="date_planned"/>
@@ -219,14 +219,14 @@
                                 </tree>
                             </field>
                             <group class="oe_subtotal_footer oe_right">
-                                <field name="amount_untaxed" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                                <field name="amount_tax" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="amount_untaxed" widget="monetary" />
+                                <field name="amount_tax" widget="monetary" />
                                 <div class="oe_subtotal_footer_separator oe_inline">
                                     <label for="amount_total"/>
                                     <button name="button_dummy"
                                         states="draft" string="(update)" type="object" class="oe_edit_only oe_link"/>
                                 </div>
-                                <field name="amount_total" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="amount_total" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" />
                             </group>
                             <div class="oe_clear"/>
                             <field name="notes" class="oe_inline" placeholder="Terms and conditions..."/>

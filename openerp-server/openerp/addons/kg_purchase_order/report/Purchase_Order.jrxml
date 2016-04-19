@@ -556,7 +556,7 @@ where po.id = $P{po_id}]]>
 					<bottomPen lineWidth="0.5"/>
 					<rightPen lineWidth="0.5"/>
 				</box>
-				<imageExpression><![CDATA["/home/opensource/SVN_Projeccts/SAM/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
 			</image>
 			<line>
 				<reportElement x="801" y="0" width="1" height="92"/>
@@ -566,7 +566,7 @@ where po.id = $P{po_id}]]>
 			</line>
 			<image>
 				<reportElement x="707" y="1" width="94" height="78"/>
-				<imageExpression><![CDATA["/home/opensource/SVN_Projeccts/SAM/openerp-server/openerp/addons/web/static/src/img/TUV_NORD.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/TUV_NORD.jpg"]]></imageExpression>
 			</image>
 		</band>
 	</title>

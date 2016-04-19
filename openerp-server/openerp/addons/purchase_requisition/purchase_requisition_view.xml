@@ -60,7 +60,7 @@
                 </group>
                 <notebook>
                     <page string="Indent Item Details" attrs="{'invisible': [('pi_flag', '=', False)]}" default_focus="1">
-                        <field name="line_ids" colspan="4" nolabel="1" context="{'entry_mode':entry_mode}">
+                        <field name="line_ids" colspan="4" nolabel="1" context="{'indent_type':indent_type}">
                             <tree string="Products">
                                 <field name="product_id" on_change="onchange_product_id(product_id,product_uom_id)"/>
                                 <field name="product_qty"/>
@@ -86,7 +86,7 @@
                                 attrs="{'invisible': [('line_ids','=',False),('state', 'not in', ('in_progress'))]}"/>
                         </div>
                         <separator string="Quotations" invisible="1"/>
-                        <field name="purchase_ids" readonly="1">
+                        <field name="purchase_ids" readonly="1"  invisible="1">
                             <tree string="Purchase Order">
                                 <field name="name" string="Reference"/>
                                 <field name="date_order" string="Order Date"/>
@@ -178,7 +178,7 @@
 			<form string="Purchase Indent Line Entry Form">
 				<group>
 					<group>
-						<field name="product_id" required="1" on_change="onchange_product_id(product_id,product_uom_id)" attrs="{'readonly': [('entry_mode', '=', 'auto')]}"/>
+						<field name="product_id" required="1" on_change="onchange_product_id(product_id,product_uom_id)" attrs="{'readonly': [('indent_type', '=', 'fromdi')]}"/>
 						<field name="product_qty" required="1" on_change="onchange_qty(product_qty,pending_qty)"/>
 						<field name="product_uom_id" string="UOM"/>
 					</group>
@@ -187,6 +187,7 @@
 						<field name="stock_qty" readonly="1"/>
 						<field name="note"/>
 						<field name="entry_mode" invisible="1"/>
+						<field name="indent_type" invisible="1"/>
 						<field name="pending_qty" invisible="1"/>
 					</group>
 				</group>

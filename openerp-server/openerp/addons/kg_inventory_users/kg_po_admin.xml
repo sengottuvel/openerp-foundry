@@ -797,7 +797,15 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
 		</record>
 		
-
+		<record id="po_admin_kg_eork_order" model="ir.model.access">
+			<field name="model_id" ref="kg_work_order.model_kg_work_order"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">WO</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
+		</record>
 		
 		<record id="po_admin_kg_rfq_vendor_selection_line" model="ir.model.access">
 			<field name="model_id" ref="kg_quotation.model_kg_rfq_vendor_selection_line"/>
@@ -833,6 +841,16 @@
 			<field name="model_id" ref="kg_quotation.model_kg_quotation_entry_lines"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">kg quotation entry lines</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
+		</record>
+		
+		<record id="po_admin_expense_master" model="ir.model.access">
+			<field name="model_id" ref="kg_expense_master.model_kg_expense_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">kg expense master</field>
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
