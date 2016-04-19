@@ -305,9 +305,10 @@ class kg_work_order(osv.osv):
 		rec_pwd = str(res_rec.password)
 		rec_work_order = str(rec.name)
 		#~ url = 'http://iasqa1.kgisl.com/?uname='+rec_user+'&s='+rec_work_order
-		encoded = base64.b64encode(rec_user)
-		print "sssssssssssssssssss",encoded
-		url = 'http://10.100.9.60/DMS/login.html?xmxyypzr='+rec_user+'&mxxrqx='+rec_pwd+'&wo_no='+rec_work_order
+		encoded_user = base64.b64encode(rec_user)
+		encoded_pwd = base64.b64encode(rec_pwd)
+		
+		url = 'http://192.168.1.7/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&wo_no='+rec_work_order
 		
 		#url = 'http://192.168.1.150:81/pbxclick2call.php?exten='+exe_no+'&phone='+str(m_no)
 		print "url..................................", url
