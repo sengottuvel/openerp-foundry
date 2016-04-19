@@ -22,7 +22,7 @@
 								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 								<field name="alias_name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 								<field name="rate" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="pro_cost" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="pro_cost"/>
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 							</group>
 							<group>
@@ -73,7 +73,16 @@
 										<field name="max" attrs="{'required': [('range_flag','=',False)]}"/>																													
 									</tree>
 								</field>																								
-							</page>							
+							</page>			
+							<page string="Fettling Process Cycle">	
+								<field name="line_ids_c" nolabel="1" >
+									<tree string="Fettling Process Cycle Tree" editable="top" >									
+										<field name="stage_id"/>								
+										<field name="seq_no"/>	
+										<field name="remarks" widget="char"/>																																								
+									</tree>
+								</field>																								
+							</page>								
 							<page string="Entry Info">
 									<group>
 										<field name="company_id"/>
@@ -158,8 +167,55 @@
 			<field name="search_view_id" ref="m_search_v_moc"/>
 		</record>
 		
-		<!-- Menu Action End-->        
+		<!-- Menu Action End-->
+		
+		 <!-- Audit Log Xml Data Start-->
+		
+
+        <record id="moc_model" model="audittrail.rule">
+            <field name="name">Audit Log MOC Master</field>
+            <field name="object_id" eval="ref('kg_moc_master.model_kg_moc_master')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+
         
+        <!-- Audit Log Xml Data End-->
+        
+         <!-- Audit Log Xml Data Start-->
+		
+
+        <record id="moc_raw_model" model="audittrail.rule">
+            <field name="name">Audit Log MOC Raw Meterials</field>
+            <field name="object_id" eval="ref('kg_moc_master.model_ch_moc_raw_material')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+
+        
+        <!-- Audit Log Xml Data End-->
+        
+         <!-- Audit Log Xml Data Start-->
+
+		
+        <record id="moc_che_model" model="audittrail.rule">
+            <field name="name">Audit Log MOC Chemical Composition</field>
+            <field name="object_id" eval="ref('kg_moc_master.model_ch_chemical_chart')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+
+        
+        <!-- Audit Log Xml Data End-->
+        
+         <!-- Audit Log Xml Data Start-->
+		
+
+        <record id="moc_mech_model" model="audittrail.rule">
+            <field name="name">Audit Log MOC Mechanical Properties</field>
+            <field name="object_id" eval="ref('kg_moc_master.model_ch_mechanical_chart')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+
+        
+        <!-- Audit Log Xml Data End-->
 		
 		<!-- Menu Name Start here --> 
 		

@@ -35,7 +35,7 @@ class kg_moc_master(osv.osv):
 		'code': fields.char('Code', size=128, required=True),
 		'active': fields.boolean('Active'),
 		'rate': fields.float('Design Rate(Rs)', required=True,),
-		'pro_cost': fields.float('Production Cost(Rs)', required=True,),
+		'pro_cost': fields.float('Production Cost(Rs)',readonly=True),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
@@ -136,7 +136,13 @@ class kg_moc_master(osv.osv):
 		return True
 
 	def entry_confirm(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		rec = self.browse(cr,uid,ids[0])
+		pro_cost = 0
+		for item in rec.line_ids:
+			pro_cost_line=item.rate * item.qty			
+			pro_cost += pro_cost_line
+		total_pro_cost=pro_cost/100
+		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),'pro_cost':total_pro_cost})
 		return True
 		
 	def entry_draft(self,cr,uid,ids,context=None):
@@ -325,14 +331,31 @@ class ch_fettling_process(osv.osv):
 		'remarks':fields.text('Remarks'),	
 		
 	}
-		
+	
+	
 	
 	def _seq_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
 		res = True
 		if rec.seq_no:
-			seq_no = rec.seq_no			
-			cr.execute(""" select seq_no from ch_fettling_process where seq_no  = '%s' """ %(seq_no))
+			seq_no = rec.seq_no					
+			cr.execute(""" select seq_no from ch_fettling_process where seq_no  = '%s' and header_id =%s """ %(seq_no,rec.header_id.id))
+			print "seq_no", seq_no,rec.header_id.id
+			data = cr.dictfetchall()	
+			print"data",data		
+			print"data len",len(data)		
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res
+			
+	def _stage_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.stage_id:
+			stage_id = rec.stage_id			
+			cr.execute(""" select stage_id from ch_fettling_process where stage_id  = '%s' and header_id =%s """ %(stage_id.id,rec.header_id.id))
 			data = cr.dictfetchall()			
 			if len(data) > 1:
 				res = False
@@ -343,7 +366,8 @@ class ch_fettling_process(osv.osv):
 		
 	_constraints = [		
 			  
-		(_seq_validate, 'Please Check Sequence No!!!',['Sequence No.']),		
+		(_seq_validate, 'Please Check Sequence No and should be unique!!!',['Sequence No.']),		
+		(_stage_validate, 'Please Check Stage Name and should be unique!!!',['Stage Name']),		
 	   ]
 	
 ch_fettling_process()
