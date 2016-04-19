@@ -148,7 +148,7 @@
 				<menuitem action="purchase.purchase_rfq" id="pam_purchase_order" name="Generate PO" parent="purchase.menu_procurement_management" sequence="1"/>
                 
                 <!-- Quotations Menu -->
-				<menuitem id="qpm_quotations_menu" name="Quotations" parent="base.menu_purchase_root" sequence="15"/>
+				<menuitem id="qpm_quotations_menu" name="Quotations" parent="base.menu_purchase_root" sequence="1"/>
 				
 				<!-- RFQ Vendor Selection Transaction -->
 				<menuitem action="kg_quotation.kg_rfq_vendor_selection_action" id="qam_quotation" name="RFQ Vendor Selection" parent="qpm_quotations_menu" sequence="1"/>
