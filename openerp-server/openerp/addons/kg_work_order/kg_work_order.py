@@ -297,6 +297,23 @@ class kg_work_order(osv.osv):
 		cr.execute(''' update ch_work_order_details set state = 'confirmed', flag_cancel='t', schedule_status = 'allow' where header_id = %s ''',[ids[0]])
 		return True
 		
+	def send_to_dms(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res_rec=self.pool.get('res.users').browse(cr,uid,uid)		
+		rec_user = str(res_rec.login)
+		rec_work_order = str(rec.name)
+		url = 'http://iasqa1.kgisl.com/?uname='+rec_user+'&s='+rec_work_order
+		
+		#url = 'http://192.168.1.150:81/pbxclick2call.php?exten='+exe_no+'&phone='+str(m_no)
+		print "url..................................", url
+		return {
+					  'name'     : 'Go to website',
+					  'res_model': 'ir.actions.act_url',
+					  'type'     : 'ir.actions.act_url',
+					  'target'   : 'current',
+					  'url'      : url
+			   }
+		
 	def entry_cancel(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.cancel_remark == False:

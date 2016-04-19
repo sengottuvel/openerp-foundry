@@ -102,6 +102,7 @@
 					<field name="order_category"/>
 					<field name="delivery_date"/>
 					<field name="order_value" sum="Total Value"/>
+					<button name="send_to_dms" type="object" string="DMS"/>
 					<field name="state"/>
 				</tree>
 			</field>
