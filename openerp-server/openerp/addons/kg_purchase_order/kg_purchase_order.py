@@ -143,7 +143,7 @@ class kg_purchase_order(osv.osv):
 		'pi_flag':fields.boolean('Type Flag'),
 		'creation_date':fields.datetime('Creation Date',readonly=True),
 		'delivery_address':fields.text('Delivery Address',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
-		'term_price':fields.selection([('inclusive','Inclusive of all Taxes and Duties')], 'Price',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}), 
+		'term_price':fields.selection([('inclusive','Inclusive of all Taxes and Duties'),('exclusive', 'Exclusive')], 'Price',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}), 
 		'term_warranty':fields.char('Warranty',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		'term_freight':fields.selection([('Inclusive','Inclusive'),('Extra','Extra'),('To Pay','To Pay'),('Paid','Paid'),
 						  ('Extra at our Cost','Extra at our Cost')], 'Freight'), 
