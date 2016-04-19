@@ -77,13 +77,13 @@ class kg_indent2_po(osv.osv):
 				
 				max_sql = """ select max(line.price_unit),min(line.price_unit) from purchase_order_line line 
 								left join purchase_order po on (po.id=line.order_id)
-								where po.state = 'approved' and line.product_id=%s """%(product_id)
+								where po.state = 'approved' and line.product_id=%s """%(prod_browse.id)
 				cr.execute(max_sql)		
 				max_data = cr.dictfetchall()
 				recent_sql = """ select line.price_unit from purchase_order_line line 
 								left join purchase_order po on (po.id=line.order_id)
 								where po.state = 'approved' and line.product_id = %s 
-								order by po.date_order desc limit 1 """%(product_id)
+								order by po.date_order desc limit 1 """%(prod_browse.id)
 				cr.execute(recent_sql)		
 				recent_data = cr.dictfetchall()
 				
