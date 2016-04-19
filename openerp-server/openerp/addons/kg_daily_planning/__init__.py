@@ -1,3 +1,3 @@
-import kg_daily_planning
+#import kg_daily_planning
 
 

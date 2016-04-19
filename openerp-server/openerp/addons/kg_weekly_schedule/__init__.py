@@ -1,3 +1,3 @@
-import kg_weekly_schedule
+#import kg_weekly_schedule
 
 

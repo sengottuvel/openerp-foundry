@@ -28,7 +28,7 @@
 								<field name="location" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="active" invisible="1"/>
 								<field name="flag_planning" invisible="1"/>
-								<field name="order_type" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<!--<field name="order_type" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>-->
 								<field name="state" style="width: 30%%" class="att_state_change"/>
 							</group>					
 						</group>
@@ -111,7 +111,7 @@
 					<field name="name"/>
 					<field name="entry_date"/>
 					<field name="division_id" invisible="1"/>
-					<field name="order_type" />
+					<!--<field name="order_type" />-->
 					<field name="delivery_date" />
 					<field name="location" />
 					<field name="state"/>
@@ -290,6 +290,29 @@
 		</record>
 		
 	<!-- Child Class Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start-->
+		
+        <record id="audit_daily_planning" model="audittrail.rule">
+            <field name="name">Audit Log Daily Planning</field>
+            <field name="object_id" eval="ref('kg_daily_planning.model_kg_daily_planning')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <record id="audit_daily_planning_line" model="audittrail.rule">
+            <field name="name">Audit Log Daily Planning Line</field>
+            <field name="object_id" eval="ref('kg_daily_planning.model_ch_daily_planning_details')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <record id="audit_stock_allocation" model="audittrail.rule">
+            <field name="name">Audit Log Stock Allocation</field>
+            <field name="object_id" eval="ref('kg_daily_planning.model_ch_stock_allocation_details')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        
+    <!-- Audit Log Xml Data End-->
 	
 	<!-- Menu Item Start -->
 	

@@ -98,19 +98,31 @@ class kg_stock_inward(osv.osv):
        
 
 	def entry_confirm(self,cr,uid,ids,context=None):
+		foundry_obj = self.pool.get('kg.foundry.stock')
+		
 		today = date.today()
 		today = str(today)
 		
 		entry = self.browse(cr,uid,ids[0])
 		for line_item in entry.line_ids:
 			#### Stock Updation Block Starts Here ###
-							
-			cr.execute(''' insert into kg_foundry_stock(company_id,division_id,location,pattern_id,
-			moc_id,stock_inward_id,qty,alloc_qty,type,creation_date,unit_price,pump_model_id)
 			
-			values(%s,%s,%s,%s,%s,%s,%s,0,'IN',%s,%s,%s)
-			''',[entry.company_id.id,entry.division_id.id or None,entry.location, line_item.pattern_id.id or None,
-			line_item.moc_id.id or None,line_item.id,line_item.qty,entry.entry_date,line_item.unit_price or 0.00,line_item.pump_model_id.id or None ])
+			foundry_stock_vals = {
+			'company_id':entry.company_id.id,
+			'division_id':entry.division_id.id or None,
+			'location':line_item.location,
+			'pattern_id':line_item.pattern_id.id or None,
+			'moc_id':line_item.moc_id.id or None,
+			'stock_inward_id':line_item.id,
+			'qty':line_item.qty,
+			'alloc_qty':0,
+			'type':'IN',
+			'creation_date':entry.entry_date,
+			'unit_price':line_item.unit_price or 0.00,
+			'pump_model_id':line_item.pump_model_id.id or None
+			}
+							
+			stock_id = foundry_obj.create(cr, uid, foundry_stock_vals)
 					
 			#### Stock Updation Block Ends Here ###
 			
@@ -122,8 +134,17 @@ class kg_stock_inward(osv.osv):
 			total = inward_total[0]
 		else:
 			total = 0.00
+			
+		### Sequence Number Generation  ###
+		inward_name = ''
+		if not entry.name:		
+			inward_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.stock.inward')])
+			rec = self.pool.get('ir.sequence').browse(cr,uid,inward_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(inward_id[0],rec.code,entry.entry_date))
+			inward_name = cr.fetchone();	
 		
-		self.write(cr, uid, ids, {'total_value':total,'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		
+		self.write(cr, uid, ids, {'name':inward_name[0],'total_value':total,'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		cr.execute(''' update ch_stock_inward_details set state = 'confirmed' where header_id = %s ''',[ids[0]])
 		return True
 		
@@ -139,8 +160,6 @@ class kg_stock_inward(osv.osv):
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
 		
 	def create(self, cr, uid, vals, context=None):
-		if vals.get('name') == None:
-			vals.update({'name' :self.pool.get('ir.sequence').get(cr, uid, 'kg.stock.inward') or '/'})
 		return super(kg_stock_inward, self).create(cr, uid, vals, context=context)
 		
 	def write(self, cr, uid, ids, vals, context=None):
@@ -225,7 +244,7 @@ class ch_stock_inward_details(osv.osv):
 	
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.qty == 0 or entry.qty < 0:
+		if entry.qty == 0 or entry.qty <= 0 or entry.each_wgt <= 0.00 or entry.unit_price <= 0.00:
 			return False
 		return True
 		

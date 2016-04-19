@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+
+	<!-- Form View Start -->
+
+		<record id="t_form_v_work_order" model="ir.ui.view">
+			<field name="name">Work Order Entry Form</field>
+			<field name="model">kg.work.order</field>
+			<field name="arch" type="xml">
+				<form string="Work Order" version="7.0">
+					<header>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<!--<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible': [('flag_cancel','=',False)]}"
+							 class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
+					</header>
+					<sheet>		
+						<group>
+							<group>
+								<field name="name" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="division_id"/>
+								<field name="order_priority" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="partner_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="delivery_date" on_change="onchange_delivery_date(delivery_date)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="flag_cancel" invisible="1"/>
+								
+							</group>											
+							<group>
+								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="location" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="order_category" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="order_value" readonly="1"/>
+								<field name="state" style="width: 30%%" class="att_state_change"/>
+								<field name="remarks" string="Remarks" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							</group>					
+						</group>
+						<!--
+						<group string="Remarks" attrs="{'invisible': [('flag_cancel','=',False)]}">
+							<group>
+								<field name="cancel_remark" attrs="{'invisible': [('flag_cancel','=',False)], 'readonly': [('state','in',['cancel'])]}"/>
+							</group>
+						</group>
+						-->
+						<notebook>
+							<page string="Work Order Details" >
+								<field colspan="4" name="line_ids" nolabel="1" context="{'order_category':order_category}">
+									<tree string = "Work Order Items">
+										<field name="order_no" readonly="1"/>
+										<field name="order_category" readonly="1"/>
+										<field name="pump_model_id" readonly="1"/>
+										<field name="qty" readonly="1"/>
+										<field name="delivery_date" readonly="1"/>
+									</tree>
+								</field>
+							</page>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+										<field name="cancel_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+										<field name="update_user_id"/>
+										
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+										<field name="cancel_date" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_work_order" model="ir.ui.view">
+			<field name="name">Work Order Entry Tree</field>
+			<field name="model">kg.work.order</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';black:state == 'confirmed';gray:state == 'cancel'" 
+								toolbar="True" string="Work Order Entry Tree">					
+					<field name="name"/>
+					<field name="entry_date"/>
+					<field name="division_id" invisible="1"/>
+					<field name="location"/>
+					<field name="order_priority"/>
+					<field name="order_category"/>
+					<field name="delivery_date"/>
+					<field name="order_value" sum="Total Value"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	
+	<!-- Child Class Tree View Start -->
+		
+		<record id="t_tree_v_work_order_details" model="ir.ui.view">
+			<field name="name">Work Order Details Entry Tree</field>
+			<field name="model">ch.work.order.details</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree string="Work Order Details Entry Tree" colors="gray:state == 'cancel'">					
+					<field name="order_no"/>
+					<field name="order_date"/>
+					<field name="order_category"/>
+					<field name="pump_model_id"/>
+					<field name="qty" sum="Total Qty"/>
+					<field name="delivery_date"/>
+				    <field name="state" invisible="1"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Child Class Tree View End -->
+	
+	<!-- Child Class Form View Start -->
+		
+		<record id="t_form_v_work_order_details" model="ir.ui.view">
+			<field name="name">Work Order Details Entry Form</field>
+			<field name="model">ch.work.order.details</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<form string="Work Order Details Entry Form">
+					<group>
+						<group>
+							<field name="order_no" readonly="1"/>
+							<field name="pump_model_id" on_change="onchange_bom_details(pump_model_id, qty,moc_construction_id, order_category,flag_standard)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="order_ref_no" invisible="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="moc_construction_id" on_change="onchange_bom_details(pump_model_id, qty,moc_construction_id, order_category,flag_standard)" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="flag_standard" on_change="onchange_bom_details(pump_model_id, qty,moc_construction_id, order_category,flag_standard)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="state" invisible="1"/>
+							<field name="flag_cancel" invisible="1"/>
+							<!--<field name="cancel_remark" attrs="{'invisible': [('flag_cancel','=',False)], 'readonly': [('state','in',['cancel'])]}"/>
+							<group attrs="{'invisible': [('flag_cancel','=',False)]}">
+								<button name="entry_cancel" type="object" string="Cancel"  class="oe_highlight"  states="confirmed"/>
+							</group>
+							-->
+						</group>
+						<group>
+							<field name="order_category" on_change="onchange_bom_details(pump_model_id, qty,moc_construction_id, order_category,flag_standard)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="qty"  on_change="onchange_bom_details(pump_model_id, qty,moc_construction_id, order_category,flag_standard)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="unit_price" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="delivery_date" on_change="onchange_delivery_date(delivery_date)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="note" string="Remarks" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+						</group>
+					</group>
+					<newline/>
+					<notebook>
+						<page string="Foundry Items">
+							<field name="line_ids" colspan="4" nolabel="1" context="{'order_category':order_category,'flag_standard':flag_standard}"  attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
+								<tree string="BOM Details" editable="bottom">
+								   <field name="order_category" invisible="1"/>
+								   <field name="pattern_id" on_change="onchange_pattern_details(pattern_id)" attrs="{'readonly': [('order_category','=','pump')]}"/>
+								   <field name="pattern_name" readonly="1"/>
+								   <field name="pos_no" attrs="{'readonly': [('order_category','=','pump')]}"/>
+								   <field name="pcs_weight" readonly="1"/>
+								   <field name="ci_weight" readonly="1"/>
+								   <field name="nonferous_weight" readonly="1"/>
+								   <field name="order_category" invisible="1"/>
+								   <field name="qty" required="1" attrs="{'readonly': [('order_category','=','pump')]}"/>
+								   <field name="unit_price" attrs="{'readonly': [('order_category','=','pump')]}"/>
+								   <field name="schedule_qty" invisible="1"/>
+								   <field name="production_qty" invisible="1"/>
+								   <field name="flag_applicable"/>
+								   <field name="flag_pattern_check"/>
+								   <field name="moc_id" attrs="{'required': [('flag_applicable','!=',False)],'readonly': [('flag_standard','=',False)]}"/>
+								   <field name="add_spec" widget="char"/>
+								   <field name="flag_standard" invisible="1"/>
+								</tree>
+							</field>
+						</page>
+						
+						<page string="Machine Shop">
+							<field name="line_ids_a" nolabel="1" context="{'order_category':order_category}" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
+								<tree string="Order Machine Shop Details Entry Tree" editable="bottom">
+									<field name="order_category" invisible="1"/>
+									<field name="pos_no" attrs="{'readonly': [('order_category','=','pump')]}"/>		
+									<field name="ms_id" attrs="{'readonly': [('order_category','=','pump')]}"/>		
+									<field name="name" attrs="{'readonly': [('order_category','=','pump')]}"/>
+									<field name="qty"/>
+									<field name="flag_applicable"/>
+									<field name="remarks" widget="char"/>
+								</tree>
+							</field>
+						</page>
+						<page string="BOT">
+							<field name="line_ids_b" nolabel="1" context="{'order_category':order_category}" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
+								<tree string="Order BOT Details Entry Tree" editable="bottom">	
+									<field name="order_category" invisible="1"/>
+									<field name="item_name" attrs="{'readonly': [('order_category','=','pump')]}"/>
+									<field name="bot_id" attrs="{'readonly': [('order_category','=','pump')]}" />											
+									<field name="qty"/>
+									<field name="flag_applicable"/>
+									<field name="remarks" widget="char"/>
+								</tree>
+							</field>
+						</page>
+							
+						<!--<page string="Consumable">
+							<field name="line_ids_c" nolabel="1" context="{'order_category':order_category}" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
+								<tree string="Order Consumable Details Entry Tree" editable="bottom">					
+									<field name="order_category" invisible="1"/>
+									<field name="product_temp_id" attrs="{'readonly': [('order_category','=','pump')]}"/>
+									<field name="code" attrs="{'readonly': [('order_category','=','pump')]}"/>											
+									<field name="qty"/>
+									<field name="flag_applicable"/>
+									<field name="remarks"  widget="char"/>
+								</tree>
+							</field>
+						</page>-->
+						
+					</notebook>
+					
+				</form>
+			</field>
+		</record>
+		
+	<!-- Child Class Form View End -->
+		
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_work_order" model="ir.ui.view">
+            <field name="name">Work Order Entry Search</field>
+            <field name="model">kg.work.order</field>
+            <field name="arch" type="xml">
+                <search string="Work Order Entry Search">
+					<field name="name" string="Transaction"  filter_domain="[('name','ilike',self)]" />
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>					
+					<filter icon="terp-check" name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>					
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="Division" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'division_id'}"/>
+						<filter string="Priority" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_priority'}"/>
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->
+	
+	<!-- Menu Action Start-->
+		
+		<record id="tma_work_order" model="ir.actions.act_window">
+			<field name="name">Work Order</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.work.order</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_work_order"/>
+			<field name="search_view_id" ref="t_search_v_work_order"/>
+			<field name="context">{"search_default_draft":1}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start
+		
+        <record id="audit_work_order" model="audittrail.rule">
+            <field name="name">Audit Log Work Order</field>
+            <field name="object_id" eval="ref('kg_work_order.model_kg_work_order')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+		
+        <record id="audit_work_order_line" model="audittrail.rule">
+            <field name="name">Audit Log Work Order Line</field>
+            <field name="object_id" eval="ref('kg_work_order.model_ch_work_order_details')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+   
+        <record id="audit_workorder_bom" model="audittrail.rule">
+            <field name="name">Audit Log Work Order BOM Details</field>
+            <field name="object_id" eval="ref('kg_work_order.model_ch_order_bom_details')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+     -->
+     
+    <!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_work_order" model="ir.sequence.type">	
+		<field name="name">KG Work Order</field>
+		<field name="code">kg.work.order</field>
+	</record>
+
+	<record forcecreate="1" id="seq_work_order" model="ir.sequence">
+	  <field name="name">KG Work Order</field>
+	  <field name="code">kg.work.order</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">WO/%(year)s /%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+        
+    <!-- Audit Log Xml Data End-->
+	
+	<!-- Menu Item Start -->
+	
+		<!-- Work Order -->
+		<menuitem  action="tma_work_order" id="tam_work_order" parent="kg_stock_inward.tpm_planning_transactions" sequence="3"/>
+	
+	<!-- Menu Item End -->
+	
+	</data>
+</openerp>

@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_ms_inward" model="ir.ui.view">
+			<field name="name">MS Inward Form</field>
+			<field name="model">kg.machineshop</field>
+			<field name="arch" type="xml">
+				<form string="MS Inward" version="7.0" create="false">
+					<header>
+						<button name="ms_accept" type="object" string="Update" class="oe_highlight"
+						attrs="{'invisible': [('state','in',['accept'])]}"/>
+					</header>
+					<sheet>		
+						
+						<group string="MS Details">
+							<group>
+								<field name="name"/>
+								<field name="inward_accept_qty" attrs="{'readonly': [('state','in',['accept'])]}"/>
+								<field name="inward_accept_user_id" string="QC by" attrs="{'readonly': [('state','in',['accept'])]}"/>
+								<field name="state" invisible="1"/>
+								<field name="stage_id" widget="selection" readonly="1"/>
+								<field name="stage_name" invisible="1"/>
+							</group>											
+							<group>
+								<field name="entry_date" attrs="{'readonly': [('state','in',['accept'])]}"/>
+								<field name="inward_reject_qty" readonly="1"/>
+								<field name="inward_reject_remarks_id" attrs="{'readonly': [('state','in',['accept'])]}"/>
+								<field name="inward_remarks" attrs="{'readonly': [('state','in',['accept'])]}"/>
+							</group>					
+						</group>
+						<group string="Work Order Details">
+							<group>
+								<field name="order_no" readonly="1"/>
+								<field name="order_priority" string="Category" readonly="1"/>
+								<field name="pattern_id" readonly="1"/>
+								<field name="moc_id" readonly="1"/>
+							</group>											
+							<group>
+								<field name="order_delivery_date"/>
+								 <field name="pump_model_id" readonly="1"/>
+								 <field name="pattern_name" readonly="1"/>
+								 <field name="fettling_qty" readonly="1"/>
+							</group>					
+						</group>
+						<notebook>
+							
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										<field name="update_user_id"/>
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_ms_inward" model="ir.ui.view">
+			<field name="name">MS Inward Tree</field>
+			<field name="model">kg.machineshop</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="MS Inward Entry Tree" create="false">					
+					<field name="name" invisible="1"/>
+					<field name="order_no"/>
+					<field name="order_delivery_date"/>
+					<field name="order_category" invisible="1"/>
+					<field name="order_priority" string="Category"/>
+					<field name="pump_model_id"/>
+					<field name="pattern_id"/>
+					<field name="pattern_name"/>
+					<field name="moc_id"/>
+					<field name="location"/>
+					<field name="fettling_qty" sum="Total Qty"/>
+					<field name="stage_id"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Search View Start -->
+
+		<record id="t_search_v_ms_inward" model="ir.ui.view">
+            <field name="name">MS Inward Entry Search</field>
+            <field name="model">kg.machineshop</field>
+            <field name="arch" type="xml">
+                <search string="MS Inward Entry Search">
+					
+					<field name="pattern_id" string="Pattern Number"  filter_domain="[('pattern_id','ilike',self)]" />
+					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
+					<field name="order_no" string="Work Order No."  filter_domain="[('order_no','ilike',self)]" />
+					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />
+					
+							
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
+						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
+						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_category'}"/>
+						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
+						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
+						<filter string="Pattern Name." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_name'}"/>
+						<filter string="MOC" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_id'}"/>
+						<filter string="Location" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'location'}"/>
+						<filter string="Stages" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'stage_id'}"/>
+						<filter string="State" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+		
+		<!-- Menu Action Start -->
+		
+		
+		<record id="tma_ms_inward" model="ir.actions.act_window">
+			<field name="name">MS Inward</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.machineshop</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="search_view_id" ref="t_search_v_ms_inward"/>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_ms_inward_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_ms_inward"/>
+            <field name="act_window_id" ref="tma_ms_inward"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_ms_inward_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_ms_inward"/>
+            <field name="act_window_id" ref="tma_ms_inward"/>
+        </record>
+		
+	<!-- Menu Action End-->
+		
+
+	
+	<!-- Audit Log Xml Data Start
+		
+        <record id="audit_production" model="audittrail.rule">
+            <field name="name">Audit Log Production</field>
+            <field name="object_id" eval="ref('kg_production.model_kg_production')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        
+        <record id="audit_stock" model="audittrail.rule">
+            <field name="name">Audit Log Foundry Stock</field>
+            <field name="object_id" eval="ref('kg_production.model_kg_foundry_stock')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+       
+    Audit Log Xml Data End-->
+    
+    <!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_ms_inward" model="ir.sequence.type">	
+		<field name="name">KG MS Inward</field>
+		<field name="code">kg.ms.inward</field>
+	</record>
+
+	<record forcecreate="1" id="seq_ms_inward" model="ir.sequence">
+	  <field name="name">KG MS Inward</field>
+	  <field name="code">kg.ms.inward</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">MS/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	<!-- Menu Item Starts Here -->
+	
+	<menuitem name="Machine Shop" id="tpm_ms_process" parent="kg_stock_inward.tpm_transactions" sequence="4"/>
+			
+		<menuitem action="tma_ms_inward" id="tam_ms_inward" parent="tpm_ms_process" sequence="1" />
+	
+	
+	
+	</data>
+</openerp>

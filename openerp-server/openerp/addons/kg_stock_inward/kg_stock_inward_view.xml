@@ -179,7 +179,41 @@
 		
 	<!-- Child Menu Action End-->
 	
+	<!-- Audit Log Xml Data Start
+		
+        <record id="audit_stock_inward" model="audittrail.rule">
+            <field name="name">Audit Log Stock Inward</field>
+            <field name="object_id" eval="ref('kg_stock_inward.model_kg_stock_inward')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+		
+        <record id="audit_stock_inward_line" model="audittrail.rule">
+            <field name="name">Audit Log Stock Inward Line</field>
+            <field name="object_id" eval="ref('kg_stock_inward.model_ch_stock_inward_details')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    -->
+        
+    <!-- Audit Log Xml Data End-->
+    
+    <!-- Sequence Number Setting Starts Here -->
 	
+	<record forcecreate="1" id="seq_type_stock_inward" model="ir.sequence.type">	
+		<field name="name">Stock Inward</field>
+		<field name="code">kg.stock.inward</field>
+	</record>
+
+	<record forcecreate="1" id="seq_stock_inward" model="ir.sequence">
+	  <field name="name">Stock Inward</field>
+	  <field name="code">kg.stock.inward</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">SI/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+    
 	<!-- Menu Item Start -->
 	
 		<!-- Parent Transaction Menu -->

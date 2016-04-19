@@ -1,0 +1,3789 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_fettling_inward" model="ir.ui.view">
+			<field name="name">Fettling Inward Form</field>
+			<field name="model">kg.fettling</field>
+			<field name="arch" type="xml">
+				<form string="Fettling Inward" version="7.0" create="false">
+					<header>
+						<button name="fettling_accept" type="object" string="Update" class="oe_highlight"
+						attrs="{'invisible': [('state','in',['accept','complete'])]}"/>
+					</header>
+					<sheet>		
+						
+						<group string="Fettling Details">
+							<group>
+								<field name="name"/>
+								<field name="inward_accept_qty" attrs="{'readonly': [('state','in',['accept','complete'])]}"/>
+								<field name="inward_accept_user_id" string="QC by" attrs="{'readonly': [('state','in',['accept','complete'])]}"/>
+								<field name="state" invisible="1"/>
+								<field name="stage_id" widget="selection" readonly="1"/>
+								<field name="stage_name" invisible="1"/>
+							</group>											
+							<group>
+								<field name="entry_date" attrs="{'readonly': [('state','in',['accept','complete'])]}"/>
+								<field name="inward_reject_qty" readonly="1"/>
+								<field name="inward_reject_remarks_id" attrs="{'readonly': [('state','in',['accept','complete'])]}"/>
+								<field name="inward_remarks" attrs="{'readonly': [('state','in',['accept','complete'])]}"/>
+							</group>					
+						</group>
+						<group string="Work Order Details">
+							<group>
+								<field name="order_no" readonly="1"/>
+								<field name="order_priority" string="Category" readonly="1"/>
+								<field name="pattern_id" readonly="1"/>
+								<field name="moc_id" readonly="1"/>
+							</group>											
+							<group>
+								<field name="order_delivery_date"/>
+								 <field name="pump_model_id" readonly="1"/>
+								 <field name="pattern_name" readonly="1"/>
+								 <field name="pour_qty" readonly="1"/>
+							</group>					
+						</group>
+						<notebook>
+							
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										<field name="update_user_id"/>
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_fettling_inward" model="ir.ui.view">
+			<field name="name">Fettling Inward Tree</field>
+			<field name="model">kg.fettling</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Fettling Inward Entry Tree" create="false">					
+					<field name="name" invisible="1"/>
+					<field name="order_no"/>
+					<field name="order_delivery_date"/>
+					<field name="order_category" invisible="1"/>
+					<field name="order_priority" string="Category"/>
+					<field name="pump_model_id"/>
+					<field name="pattern_id"/>
+					<field name="pattern_name"/>
+					<field name="moc_id"/>
+					<field name="location"/>
+					<field name="pour_qty" sum="Total Qty"/>
+					<field name="stage_id"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Search View Start -->
+
+		<record id="t_search_v_fettling_inward" model="ir.ui.view">
+            <field name="name">Fettling Inward Entry Search</field>
+            <field name="model">kg.fettling</field>
+            <field name="arch" type="xml">
+                <search string="Fettling Inward Entry Search">
+					
+					<field name="pattern_id" string="Pattern Number"  filter_domain="[('pattern_id','ilike',self)]" />
+					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
+					<field name="order_no" string="Work Order No."  filter_domain="[('order_no','ilike',self)]" />
+					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />
+					
+							
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
+						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
+						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_category'}"/>
+						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
+						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
+						<filter string="Pattern Name." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_name'}"/>
+						<filter string="MOC" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_id'}"/>
+						<filter string="Location" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'location'}"/>
+						<filter string="Stages" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'stage_id'}"/>
+						<filter string="State" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+		
+		<!-- Menu Action Start -->
+		
+		
+		<record id="tma_fettling_inward" model="ir.actions.act_window">
+			<field name="name">Fettling Inward</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.fettling</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="search_view_id" ref="t_search_v_fettling_inward"/>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_fettling_inward_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_fettling_inward"/>
+            <field name="act_window_id" ref="tma_fettling_inward"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_fettling_inward_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_fettling_inward"/>
+            <field name="act_window_id" ref="tma_fettling_inward"/>
+        </record>
+		
+	<!-- Menu Action End-->
+		
+
+	
+	<!-- Audit Log Xml Data Start
+		
+        <record id="audit_production" model="audittrail.rule">
+            <field name="name">Audit Log Production</field>
+            <field name="object_id" eval="ref('kg_production.model_kg_production')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        
+        <record id="audit_stock" model="audittrail.rule">
+            <field name="name">Audit Log Foundry Stock</field>
+            <field name="object_id" eval="ref('kg_production.model_kg_foundry_stock')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+       
+    Audit Log Xml Data End-->
+    
+    <!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_fettling_inward" model="ir.sequence.type">	
+		<field name="name">KG Fettling Inward</field>
+		<field name="code">kg.fettling.inward</field>
+	</record>
+
+	<record forcecreate="1" id="seq_fettling_inward" model="ir.sequence">
+	  <field name="name">KG Fettling Inward</field>
+	  <field name="code">kg.fettling.inward</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">Fettling/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	
+	<!-- KNOCK OUT Process Starts Here -->
+	
+	<!-- Form View Start -->
+	
+		<record id="t_form_v_knock_out" model="ir.ui.view">
+			<field name="name">Knock Out Form</field>
+			<field name="model">kg.fettling</field>
+			<field name="arch" type="xml">
+				<form string="Knock Out" version="7.0" create="false">
+					<header>
+						<button name="knockout_update" type="object" string="Update" class="oe_highlight"
+						attrs="{'invisible': [('stage_name','not in',['KNOCK OUT'])]}"/>
+					</header>
+					<sheet>		
+						<group string="Knock Out Updates">
+							<group>
+								<field name="knockout_name" readonly="1"/>
+								<field name="knockout_shift_id" required="1" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
+								<field name="knockout_qty" string="Production Qty" readonly="1"/>
+								<field name="knockout_reject_qty" readonly="1"/>
+								<field name="knockout_accept_user_id" string="QC by" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
+								<field name="stage_id" readonly="1"/>
+								<field name="stage_name" invisible="1"/>
+							</group>											
+							<group>
+								<field name="knockout_date" required="1" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
+								<field name="knockout_contractor" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
+								<field name="knockout_accept_qty" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
+								<field name="knockout_weight" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
+								<field name="knockout_reject_remarks_id" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
+								<field name="knockout_remarks" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
+							</group>					
+						</group>
+						<group string="Schedule Details">
+							<group>
+								<field name="order_no" readonly="1"/>
+								<field name="order_priority" string="Category"/>
+								<field name="pattern_id" readonly="1"/>
+							    <field name="moc_id" readonly="1"/> 
+							</group>											
+							<group>
+								<field name="order_delivery_date" readonly="1"/>
+								<field name="pump_model_id" readonly="1"/>
+								<field name="pattern_name" readonly="1"/>
+							</group>					
+						</group>
+						<notebook>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="knockout_user_id"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start  -->
+	
+		<record id="t_tree_v_knock_out" model="ir.ui.view">
+			<field name="name">Knock Out Tree</field>
+			<field name="model">kg.fettling</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Knock Out Tree" create="false">					
+					<field name="knockout_name"/>
+					<field name="knockout_date"/>
+					<field name="order_no"/>
+					<field name="order_delivery_date"/>
+					<field name="order_priority" string="Category"/>
+					<field name="pump_model_id"/>
+					<field name="pattern_id"/>
+					<field name="pattern_name"/>
+					<field name="moc_id"/>
+					<field name="location"/>
+					<field name="knockout_qty" string="Production Qty" sum="Knock Out Qty"/>
+					<field name="knockout_accept_qty" string="Completed/Accepted Qty" sum="Accepted Qty"/>
+					<field name="knockout_reject_qty" sum="Rejected Qty"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Search View Start -->
+	
+		<record id="t_search_v_knock_out" model="ir.ui.view">
+            <field name="name">Knock Out Search</field>
+            <field name="model">kg.fettling</field>
+            <field name="arch" type="xml">
+                <search string="Knock Out Search">
+					
+					<field name="pattern_id" string="Pattern Number"  filter_domain="[('pattern_id','ilike',self)]" />
+					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
+					<field name="order_no" string="Work Order No."  filter_domain="[('order_no','ilike',self)]" />
+					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />
+					
+							
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
+						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
+						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_category'}"/>
+						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
+						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
+						<filter string="Pattern Name." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_name'}"/>
+						<filter string="MOC" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_id'}"/>
+						<filter string="Location" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'location'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+        
+	<!-- Menu Action Start -->
+		
+		
+		<record id="tma_knock_out" model="ir.actions.act_window">
+			<field name="name">Knock Out</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.fettling</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="domain">[('stage_name','=',('KNOCK OUT')),('state','!=',('complete'))]</field>
+			<field name="search_view_id" ref="t_search_v_knock_out"/>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_knock_out_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_knock_out"/>
+            <field name="act_window_id" ref="tma_knock_out"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_knock_out_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_knock_out"/>
+            <field name="act_window_id" ref="tma_knock_out"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_knock_out" model="ir.sequence.type">	
+		<field name="name">KG Knock Out</field>
+		<field name="code">kg.knock.out</field>
+	</record>
+
+	<record forcecreate="1" id="seq_knock_out" model="ir.sequence">
+	  <field name="name">KG Knock Out</field>
+	  <field name="code">kg.knock.out</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">KO/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+
+	<!-- DECORING Process Starts Here -->
+	
+	<!-- Form View Start -->
+	
+		<record id="t_form_v_decoring" model="ir.ui.view">
+			<field name="name">Decoring Form</field>
+			<field name="model">kg.fettling</field>
+			<field name="arch" type="xml">
+				<form string="Decoring" version="7.0" create="false">
+					<header>
+						<button name="decoring_update" type="object" string="Update" class="oe_highlight"
+						attrs="{'invisible': [('stage_name','not in',['DECORING'])]}"/>
+					</header>
+					<sheet>		
+						<group string="Decoring Updates">
+							<group>
+								<field name="decoring_name" readonly="1"/>
+								<field name="decoring_shift_id" required="1" attrs="{'readonly': [('stage_name','not in',['DECORING'])]}"/>
+								<field name="decoring_qty" string="Production Qty" readonly="1"/>
+								<field name="decoring_reject_qty" readonly="1"/>
+								<field name="decoring_accept_user_id" string="QC by" attrs="{'readonly': [('stage_name','not in',['DECORING'])]}"/>
+								<field name="stage_id" readonly="1"/>
+								<field name="stage_name" invisible="1"/>
+							</group>											
+							<group>
+								<field name="decoring_date" required="1" attrs="{'readonly': [('stage_name','not in',['DECORING'])]}"/>
+								<field name="decoring_contractor" attrs="{'readonly': [('stage_name','not in',['DECORING'])]}"/>
+								<field name="decoring_accept_qty" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['DECORING'])]}"/>
+								<field name="decoring_weight" attrs="{'readonly': [('stage_name','not in',['DECORING'])]}"/>
+								<field name="decoring_reject_remarks_id" attrs="{'readonly': [('stage_name','not in',['DECORING'])]}"/>
+								<field name="decoring_remarks" attrs="{'readonly': [('stage_name','not in',['DECORING'])]}"/>
+							</group>					
+						</group>
+						<group string="Schedule Details">
+							<group>
+								<field name="order_no" readonly="1"/>
+								<field name="order_priority" string="Category"/>
+								<field name="pattern_id" readonly="1"/>
+							    <field name="moc_id" readonly="1"/> 
+							</group>											
+							<group>
+								<field name="order_delivery_date" readonly="1"/>
+								<field name="pump_model_id" readonly="1"/>
+								<field name="pattern_name" readonly="1"/>
+							</group>					
+						</group>
+						<notebook>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="decoring_user_id"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start  -->
+	
+		<record id="t_tree_v_decoring" model="ir.ui.view">
+			<field name="name">Decoring Tree</field>
+			<field name="model">kg.fettling</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Decoring Tree" create="false">					
+					<field name="decoring_name"/>
+					<field name="decoring_date"/>
+					<field name="order_no"/>
+					<field name="order_delivery_date"/>
+					<field name="order_priority" string="Category"/>
+					<field name="pump_model_id"/>
+					<field name="pattern_id"/>
+					<field name="pattern_name"/>
+					<field name="moc_id"/>
+					<field name="location"/>
+					<field name="decoring_qty" string="Production Qty" sum="Decoring Qty"/>
+					<field name="decoring_accept_qty" string="Completed/Accepted Qty" sum="Accepted Qty"/>
+					<field name="decoring_reject_qty" sum="Rejected Qty"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Search View Start -->
+	
+		<record id="t_search_v_decoring" model="ir.ui.view">
+            <field name="name">Decoring Search</field>
+            <field name="model">kg.fettling</field>
+            <field name="arch" type="xml">
+                <search string="Decoring Search">
+					
+					<field name="pattern_id" string="Pattern Number"  filter_domain="[('pattern_id','ilike',self)]" />
+					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
+					<field name="order_no" string="Work Order No."  filter_domain="[('order_no','ilike',self)]" />
+					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />
+					
+							
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
+						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
+						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_category'}"/>
+						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
+						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
+						<filter string="Pattern Name." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_name'}"/>
+						<filter string="MOC" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_id'}"/>
+						<filter string="Location" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'location'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+        
+	<!-- Menu Action Start -->
+		
+		
+		<record id="tma_decoring" model="ir.actions.act_window">
+			<field name="name">Decoring</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.fettling</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="domain">[('stage_name','=',('DECORING')),('state','!=',('complete'))]</field>
+			<field name="search_view_id" ref="t_search_v_decoring"/>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_decoring_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_decoring"/>
+            <field name="act_window_id" ref="tma_decoring"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_decoring_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_decoring"/>
+            <field name="act_window_id" ref="tma_decoring"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_decoring" model="ir.sequence.type">	
+		<field name="name">KG Decoring</field>
+		<field name="code">kg.decoring</field>
+	</record>
+
+	<record forcecreate="1" id="seq_decoring" model="ir.sequence">
+	  <field name="name">KG Decoring</field>
+	  <field name="code">kg.decoring</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">Decoring/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	<!-- Form View Start -->
+	
+		<record id="t_form_v_shot_blast" model="ir.ui.view">
+			<field name="name">Shot Blast Form</field>
+			<field name="model">kg.fettling</field>
+			<field name="arch" type="xml">
+				<form string="Shot Blast" version="7.0" create="false">
+					<header>
+						<button name="shot_blast_update" type="object" string="Update" class="oe_highlight"
+						attrs="{'invisible': [('stage_name','not in',['SHOT BLAST'])]}"/>
+					</header>
+					<sheet>		
+						<group string="Shot Blast Updates">
+							<group>
+								<field name="shot_blast_name" readonly="1"/>
+								<field name="shot_blast_shift_id" required="1" attrs="{'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
+								<field name="shot_blast_qty" string="Production Qty" readonly="1"/>
+								<field name="shot_blast_reject_qty" readonly="1"/>
+								<field name="shot_blast_accept_user_id" attrs="{'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
+								<field name="stage_id" readonly="1"/>
+								<field name="stage_name" invisible="1"/>
+							</group>											
+							<group>
+								<field name="shot_blast_date" required="1" attrs="{'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
+								<field name="shot_blast_contractor" attrs="{'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
+								<field name="shot_blast_accept_qty" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
+								<field name="shot_blast_weight" attrs="{'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
+								<field name="shot_blast_reject_remarks_id" attrs="{'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
+								<field name="shot_blast_remarks" attrs="{'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
+							</group>					
+						</group>
+						<group string="Schedule Details">
+							<group>
+								<field name="order_no" readonly="1"/>
+								<field name="order_priority" string="Category"/>
+								<field name="pattern_id" readonly="1"/>
+							    <field name="moc_id" readonly="1"/> 
+							</group>											
+							<group>
+								<field name="order_delivery_date" readonly="1"/>
+								<field name="pump_model_id" readonly="1"/>
+								<field name="pattern_name" readonly="1"/>
+							</group>					
+						</group>
+						<notebook>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="shot_blast_user_id"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start  -->
+	
+		<record id="t_tree_v_shot_blast" model="ir.ui.view">
+			<field name="name">SHOT BLAST Tree</field>
+			<field name="model">kg.fettling</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="SHOT BLAST Tree" create="false">					
+					<field name="shot_blast_name"/>
+					<field name="shot_blast_date"/>
+					<field name="order_no"/>
+					<field name="order_delivery_date"/>
+					<field name="order_priority" string="Category"/>
+					<field name="pump_model_id"/>
+					<field name="pattern_id"/>
+					<field name="pattern_name"/>
+					<field name="moc_id"/>
+					<field name="location"/>
+					<field name="shot_blast_qty" string="Production Qty" sum="Shot Blast Qty"/>
+					<field name="shot_blast_accept_qty" string="Completed/Accepted Qty" sum="Accepted Qty"/>
+					<field name="shot_blast_reject_qty" sum="Rejected Qty"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Search View Start -->
+	
+		<record id="t_search_v_shot_blast" model="ir.ui.view">
+            <field name="name">SHOT BLAST Search</field>
+            <field name="model">kg.fettling</field>
+            <field name="arch" type="xml">
+                <search string="SHOT BLAST Search">
+					
+					<field name="pattern_id" string="Pattern Number"  filter_domain="[('pattern_id','ilike',self)]" />
+					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
+					<field name="order_no" string="Work Order No."  filter_domain="[('order_no','ilike',self)]" />
+					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />
+					
+							
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
+						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
+						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_category'}"/>
+						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
+						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
+						<filter string="Pattern Name." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_name'}"/>
+						<filter string="MOC" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_id'}"/>
+						<filter string="Location" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'location'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+        
+	<!-- Menu Action Start -->
+		
+		
+		<record id="tma_shot_blast" model="ir.actions.act_window">
+			<field name="name">Shot Blast</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.fettling</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="domain">[('stage_name','=',('SHOT BLAST')),('state','!=',('complete'))]</field>
+			<field name="search_view_id" ref="t_search_v_shot_blast"/>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_shot_blast_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_shot_blast"/>
+            <field name="act_window_id" ref="tma_shot_blast"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_shot_blast_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_shot_blast"/>
+            <field name="act_window_id" ref="tma_shot_blast"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_shot_blast" model="ir.sequence.type">	
+		<field name="name">KG SHOT BLAST</field>
+		<field name="code">kg.shot.blast</field>
+	</record>
+
+	<record forcecreate="1" id="seq_shot_blast" model="ir.sequence">
+	  <field name="name">KG SHOT BLAST</field>
+	  <field name="code">kg.shot.blast</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">SB/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	<!-- Hammering Process Starts Here -->
+	
+	<!-- Form View Start -->
+	
+		<record id="t_form_v_hammering" model="ir.ui.view">
+			<field name="name">Hammering Form</field>
+			<field name="model">kg.fettling</field>
+			<field name="arch" type="xml">
+				<form string="Hammering" version="7.0" create="false">
+					<header>
+						<button name="hammering_update" type="object" string="Update" class="oe_highlight"
+						attrs="{'invisible': [('stage_name','not in',['HAMMERING'])]}"/>
+					</header>
+					<sheet>		
+						<group string="Hammering Updates">
+							<group>
+								<field name="hammering_name" readonly="1"/>
+								<field name="hammering_shift_id" required="1" attrs="{'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
+								<field name="hammering_qty" string="Production Qty" readonly="1"/>
+								<field name="hammering_reject_qty" readonly="1"/>
+								<field name="hammering_accept_user_id" attrs="{'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
+								<field name="stage_id" readonly="1"/>
+								<field name="stage_name" invisible="1"/>
+							</group>											
+							<group>
+								<field name="hammering_date" required="1" attrs="{'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
+								<field name="hammering_contractor" attrs="{'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
+								<field name="hammering_accept_qty" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
+								<field name="hammering_weight" attrs="{'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
+								<field name="hammering_reject_remarks_id" attrs="{'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
+								<field name="hammering_remarks" attrs="{'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
+							</group>					
+						</group>
+						<group string="Schedule Details">
+							<group>
+								<field name="order_no" readonly="1"/>
+								<field name="order_priority" string="Category"/>
+								<field name="pattern_id" readonly="1"/>
+							    <field name="moc_id" readonly="1"/> 
+							</group>											
+							<group>
+								<field name="order_delivery_date" readonly="1"/>
+								<field name="pump_model_id" readonly="1"/>
+								<field name="pattern_name" readonly="1"/>
+							</group>					
+						</group>
+						<notebook>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="hammering_user_id"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start  -->
+	
+		<record id="t_tree_v_hammering" model="ir.ui.view">
+			<field name="name">Hammering Tree</field>
+			<field name="model">kg.fettling</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Hammering Tree" create="false">					
+					<field name="hammering_name"/>
+					<field name="hammering_date"/>
+					<field name="order_no"/>
+					<field name="order_delivery_date"/>
+					<field name="order_priority" string="Category"/>
+					<field name="pump_model_id"/>
+					<field name="pattern_id"/>
+					<field name="pattern_name"/>
+					<field name="moc_id"/>
+					<field name="location"/>
+					<field name="hammering_qty" string="Production Qty" sum="Hammering Qty"/>
+					<field name="hammering_accept_qty" string="Completed/Accepted Qty" sum="Accepted Qty"/>
+					<field name="hammering_reject_qty" sum="Rejected Qty"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Search View Start -->
+	
+		<record id="t_search_v_hammering" model="ir.ui.view">
+            <field name="name">Hammering Search</field>
+            <field name="model">kg.fettling</field>
+            <field name="arch" type="xml">
+                <search string="Hammering Search">
+					
+					<field name="pattern_id" string="Pattern Number"  filter_domain="[('pattern_id','ilike',self)]" />
+					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
+					<field name="order_no" string="Work Order No."  filter_domain="[('order_no','ilike',self)]" />
+					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />
+					
+							
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
+						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
+						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_category'}"/>
+						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
+						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
+						<filter string="Pattern Name." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_name'}"/>
+						<filter string="MOC" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_id'}"/>
+						<filter string="Location" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'location'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+        
+	<!-- Menu Action Start -->
+		
+		
+		<record id="tma_hammering" model="ir.actions.act_window">
+			<field name="name">Hammering</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.fettling</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="domain">[('stage_name','=',('HAMMERING')),('state','!=',('complete'))]</field>
+			<field name="search_view_id" ref="t_search_v_hammering"/>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_hammering_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_hammering"/>
+            <field name="act_window_id" ref="tma_hammering"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_hammering_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_hammering"/>
+            <field name="act_window_id" ref="tma_hammering"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_hammering" model="ir.sequence.type">	
+		<field name="name">KG Hammering</field>
+		<field name="code">kg.hammering</field>
+	</record>
+
+	<record forcecreate="1" id="seq_hammering" model="ir.sequence">
+	  <field name="name">KG Hammering</field>
+	  <field name="code">kg.hammering</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">HM/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	
+	<!-- Wheel Cutting Process Starts Here -->
+	
+	<!-- Form View Start -->
+	
+		<record id="t_form_v_wheel_cutting" model="ir.ui.view">
+			<field name="name">Wheel Cutting Form</field>
+			<field name="model">kg.fettling</field>
+			<field name="arch" type="xml">
+				<form string="Wheel Cutting" version="7.0" create="false">
+					<header>
+						<button name="wheel_cutting_update" type="object" string="Update" class="oe_highlight"
+						attrs="{'invisible': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
+					</header>
+					<sheet>		
+						<group string="Wheel Cutting Updates">
+							<group>
+								<field name="wheel_cutting_name" readonly="1"/>
+								<field name="wheel_cutting_shift_id" required="1" attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
+								<field name="wheel_cutting_qty" string="Production Qty" readonly="1"/>
+								<field name="wheel_cutting_reject_qty" readonly="1"/>
+								<field name="wheel_cutting_accept_user_id" attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
+								<field name="stage_id" readonly="1"/>
+								<field name="stage_name" invisible="1"/>
+							</group>											
+							<group>
+								<field name="wheel_cutting_date" required="1" attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
+								<field name="wheel_cutting_contractor" attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
+								<field name="wheel_cutting_accept_qty" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
+								<field name="wheel_cutting_weight" attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
+								<field name="wheel_cutting_reject_remarks_id" attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
+								<field name="wheel_cutting_remarks" attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
+							</group>					
+						</group>
+						<group string="Schedule Details">
+							<group>
+								<field name="order_no" readonly="1"/>
+								<field name="order_priority" string="Category"/>
+								<field name="pattern_id" readonly="1"/>
+							    <field name="moc_id" readonly="1"/> 
+							</group>											
+							<group>
+								<field name="order_delivery_date" readonly="1"/>
+								<field name="pump_model_id" readonly="1"/>
+								<field name="pattern_name" readonly="1"/>
+							</group>					
+						</group>
+						<notebook>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="wheel_cutting_user_id"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start  -->
+	
+		<record id="t_tree_v_wheel_cutting" model="ir.ui.view">
+			<field name="name">Wheel Cutting Tree</field>
+			<field name="model">kg.fettling</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Wheel Cutting Tree" create="false">					
+					<field name="wheel_cutting_name"/>
+					<field name="wheel_cutting_date"/>
+					<field name="order_no"/>
+					<field name="order_delivery_date"/>
+					<field name="order_priority" string="Category"/>
+					<field name="pump_model_id"/>
+					<field name="pattern_id"/>
+					<field name="pattern_name"/>
+					<field name="moc_id"/>
+					<field name="location"/>
+					<field name="wheel_cutting_qty" string="Production Qty" sum="Wheel Cutting Qty"/>
+					<field name="wheel_cutting_accept_qty" string="Completed/Accepted Qty" sum="Accepted Qty"/>
+					<field name="wheel_cutting_reject_qty" sum="Rejected Qty"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Search View Start -->
+	
+		<record id="t_search_v_wheel_cutting" model="ir.ui.view">
+            <field name="name">Wheel Cutting Search</field>
+            <field name="model">kg.fettling</field>
+            <field name="arch" type="xml">
+                <search string="Wheel Cutting Search">
+					
+					<field name="pattern_id" string="Pattern Number"  filter_domain="[('pattern_id','ilike',self)]" />
+					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
+					<field name="order_no" string="Work Order No."  filter_domain="[('order_no','ilike',self)]" />
+					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />
+					
+							
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
+						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
+						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_category'}"/>
+						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
+						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
+						<filter string="Pattern Name." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_name'}"/>
+						<filter string="MOC" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_id'}"/>
+						<filter string="Location" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'location'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+        
+	<!-- Menu Action Start -->
+		
+		
+		<record id="tma_wheel_cutting" model="ir.actions.act_window">
+			<field name="name">Wheel Cutting</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.fettling</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="domain">[('stage_name','=',('WHEEL CUTTING')),('state','!=',('complete'))]</field>
+			<field name="search_view_id" ref="t_search_v_wheel_cutting"/>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_wheel_cutting_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_wheel_cutting"/>
+            <field name="act_window_id" ref="tma_wheel_cutting"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_wheel_cutting_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_wheel_cutting"/>
+            <field name="act_window_id" ref="tma_wheel_cutting"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_wheel_cutting" model="ir.sequence.type">	
+		<field name="name">KG Wheel Cutting</field>
+		<field name="code">kg.wheel.cutting</field>
+	</record>
+
+	<record forcecreate="1" id="seq_wheel_cutting" model="ir.sequence">
+	  <field name="name">KG Wheel Cutting</field>
+	  <field name="code">kg.wheel.cutting</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">WC/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	
+	<!-- Gas Cutting Process Starts Here -->
+	
+	<!-- Form View Start -->
+	
+		<record id="t_form_v_gas_cutting" model="ir.ui.view">
+			<field name="name">Gas Cutting Form</field>
+			<field name="model">kg.fettling</field>
+			<field name="arch" type="xml">
+				<form string="Gas Cutting" version="7.0" create="false">
+					<header>
+						<button name="gas_cutting_update" type="object" string="Update" class="oe_highlight"
+						attrs="{'invisible': [('stage_name','not in',['GAS CUTTING'])]}"/>
+					</header>
+					<sheet>		
+						<group string="Gas Cutting Updates">
+							<group>
+								<field name="gas_cutting_name" readonly="1"/>
+								<field name="gas_cutting_shift_id" required="1" attrs="{'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
+								<field name="gas_cutting_qty" string="Production Qty" readonly="1"/>
+								<field name="gas_cutting_reject_qty" readonly="1"/>
+								<field name="gas_cutting_accept_user_id" attrs="{'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
+								<field name="stage_id" readonly="1" />
+								<field name="stage_name" invisible="1"/>
+							</group>											
+							<group>
+								<field name="gas_cutting_date" required="1" attrs="{'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
+								<field name="gas_cutting_contractor" attrs="{'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
+								<field name="gas_cutting_accept_qty" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
+								<field name="gas_cutting_weight" attrs="{'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
+								<field name="gas_cutting_reject_remarks_id" attrs="{'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
+								<field name="gas_cutting_remarks" attrs="{'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
+							</group>					
+						</group>
+						<group string="Schedule Details">
+							<group>
+								<field name="order_no" readonly="1"/>
+								<field name="order_priority" string="Category"/>
+								<field name="pattern_id" readonly="1"/>
+							    <field name="moc_id" readonly="1"/> 
+							</group>											
+							<group>
+								<field name="order_delivery_date" readonly="1"/>
+								<field name="pump_model_id" readonly="1"/>
+								<field name="pattern_name" readonly="1"/>
+							</group>					
+						</group>
+						<notebook>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="gas_cutting_user_id"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start  -->
+	
+		<record id="t_tree_v_gas_cutting" model="ir.ui.view">
+			<field name="name">Gas Cutting Tree</field>
+			<field name="model">kg.fettling</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Gas Cutting Tree" create="false">					
+					<field name="gas_cutting_name"/>
+					<field name="gas_cutting_date"/>
+					<field name="order_no"/>
+					<field name="order_delivery_date"/>
+					<field name="order_priority" string="Category"/>
+					<field name="pump_model_id"/>
+					<field name="pattern_id"/>
+					<field name="pattern_name"/>
+					<field name="moc_id"/>
+					<field name="location"/>
+					<field name="gas_cutting_qty" string="Production Qty" sum="Gas Cutting Qty"/>
+					<field name="gas_cutting_accept_qty" string="Completed/Accepted Qty" sum="Accepted Qty"/>
+					<field name="gas_cutting_reject_qty" sum="Rejected Qty"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Search View Start -->
+	
+		<record id="t_search_v_gas_cutting" model="ir.ui.view">
+            <field name="name">Gas Cutting Search</field>
+            <field name="model">kg.fettling</field>
+            <field name="arch" type="xml">
+                <search string="Gas Cutting Search">
+					
+					<field name="pattern_id" string="Pattern Number"  filter_domain="[('pattern_id','ilike',self)]" />
+					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
+					<field name="order_no" string="Work Order No."  filter_domain="[('order_no','ilike',self)]" />
+					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />
+					
+							
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
+						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
+						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_category'}"/>
+						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
+						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
+						<filter string="Pattern Name." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_name'}"/>
+						<filter string="MOC" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_id'}"/>
+						<filter string="Location" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'location'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+        
+	<!-- Menu Action Start -->
+		
+		
+		<record id="tma_gas_cutting" model="ir.actions.act_window">
+			<field name="name">Gas Cutting</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.fettling</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="domain">[('stage_name','=',('GAS CUTTING')),('state','!=',('complete'))]</field>
+			<field name="search_view_id" ref="t_search_v_gas_cutting"/>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_gas_cutting_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_gas_cutting"/>
+            <field name="act_window_id" ref="tma_gas_cutting"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_gas_cutting_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_gas_cutting"/>
+            <field name="act_window_id" ref="tma_gas_cutting"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_gas_cutting" model="ir.sequence.type">	
+		<field name="name">KG Gas Cutting</field>
+		<field name="code">kg.gas.cutting</field>
+	</record>
+
+	<record forcecreate="1" id="seq_gas_cutting" model="ir.sequence">
+	  <field name="name">KG Gas Cutting</field>
+	  <field name="code">kg.gas.cutting</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">GC/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	
+	<!-- ARC Cutting Process Starts Here -->
+	
+	<!-- Form View Start -->
+	
+		<record id="t_form_v_arc_cutting" model="ir.ui.view">
+			<field name="name">ARC Cutting Form</field>
+			<field name="model">kg.fettling</field>
+			<field name="arch" type="xml">
+				<form string="ARC Cutting" version="7.0" create="false">
+					<header>
+						<button name="arc_cutting_update" type="object" string="Update" class="oe_highlight"
+						attrs="{'invisible': [('stage_name','not in',['ARC CUTTING'])]}"/>
+					</header>
+					<sheet>		
+						<group string="Arc Cutting Updates">
+							<group>
+								<field name="arc_cutting_name" readonly="1"/>
+								<field name="arc_cutting_shift_id" required="1" attrs="{'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
+								<field name="arc_cutting_qty" string="Production Qty" readonly="1"/>
+								<field name="arc_cutting_reject_qty" readonly="1"/>
+								<field name="arc_cutting_accept_user_id" attrs="{'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
+								<field name="stage_id" readonly="1"/>
+								<field name="stage_name" invisible="1"/>
+							</group>											
+							<group>
+								<field name="arc_cutting_date" required="1" attrs="{'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
+								<field name="arc_cutting_contractor" attrs="{'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
+								<field name="arc_cutting_accept_qty" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
+								<field name="arc_cutting_weight" attrs="{'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
+								<field name="arc_cutting_reject_remarks_id" attrs="{'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
+								<field name="arc_cutting_remarks" attrs="{'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
+							</group>					
+						</group>
+						<group string="Schedule Details">
+							<group>
+								<field name="order_no" readonly="1"/>
+								<field name="order_priority" string="Category"/>
+								<field name="pattern_id" readonly="1"/>
+							    <field name="moc_id" readonly="1"/> 
+							</group>											
+							<group>
+								<field name="order_delivery_date" readonly="1"/>
+								<field name="pump_model_id" readonly="1"/>
+								<field name="pattern_name" readonly="1"/>
+							</group>					
+						</group>
+						<notebook>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="arc_cutting_user_id"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start  -->
+	
+		<record id="t_tree_v_arc_cutting" model="ir.ui.view">
+			<field name="name">ARC Cutting Tree</field>
+			<field name="model">kg.fettling</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="ARC Cutting Tree" create="false">					
+					<field name="arc_cutting_name"/>
+					<field name="arc_cutting_date"/>
+					<field name="order_no"/>
+					<field name="order_delivery_date"/>
+					<field name="order_priority" string="Category"/>
+					<field name="pump_model_id"/>
+					<field name="pattern_id"/>
+					<field name="pattern_name"/>
+					<field name="moc_id"/>
+					<field name="location"/>
+					<field name="arc_cutting_qty" string="Production Qty" sum="ARC Cutting Qty"/>
+					<field name="arc_cutting_accept_qty" string="Completed/Accepted Qty" sum="Accepted Qty"/>
+					<field name="arc_cutting_reject_qty" sum="Rejected Qty"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Search View Start -->
+	
+		<record id="t_search_v_arc_cutting" model="ir.ui.view">
+            <field name="name">ARC Cutting Search</field>
+            <field name="model">kg.fettling</field>
+            <field name="arch" type="xml">
+                <search string="ARC Cutting Search">
+					
+					<field name="pattern_id" string="Pattern Number"  filter_domain="[('pattern_id','ilike',self)]" />
+					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
+					<field name="order_no" string="Work Order No."  filter_domain="[('order_no','ilike',self)]" />
+					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />
+					
+							
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
+						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
+						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_category'}"/>
+						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
+						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
+						<filter string="Pattern Name." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_name'}"/>
+						<filter string="MOC" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_id'}"/>
+						<filter string="Location" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'location'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+        
+	<!-- Menu Action Start -->
+		
+		
+		<record id="tma_arc_cutting" model="ir.actions.act_window">
+			<field name="name">ARC Cutting</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.fettling</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="domain">[('stage_name','=',('ARC CUTTING')),('state','!=',('complete'))]</field>
+			<field name="search_view_id" ref="t_search_v_arc_cutting"/>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_arc_cutting_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_arc_cutting"/>
+            <field name="act_window_id" ref="tma_arc_cutting"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_arc_cutting_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_arc_cutting"/>
+            <field name="act_window_id" ref="tma_arc_cutting"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_arc_cutting" model="ir.sequence.type">	
+		<field name="name">KG arc Cutting</field>
+		<field name="code">kg.arc.cutting</field>
+	</record>
+
+	<record forcecreate="1" id="seq_arc_cutting" model="ir.sequence">
+	  <field name="name">KG arc Cutting</field>
+	  <field name="code">kg.arc.cutting</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">AC/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	
+	<!-- Heat Treatment Process Starts Here -->
+	
+	<!-- Form View Start -->
+	
+		<record id="t_form_v_heat_treatment" model="ir.ui.view">
+			<field name="name">Heat Treatment Form</field>
+			<field name="model">kg.fettling</field>
+			<field name="arch" type="xml">
+				<form string="Heat Treatment" version="7.0" create="false">
+					<header>
+						<button name="heat_treatment_update" type="object" string="Update" class="oe_highlight"
+						attrs="{'invisible': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
+					</header>
+					<sheet>		
+						<group string="Heat Treatment Updates">
+							<group>
+								<field name="heat_cycle_no" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
+								<field name="heat_specification" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
+								<field name="heat_fc_off_time" widget="float_time" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
+								<field name="heat_treatment_type" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
+								<field name="heat_set_temp" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
+								<field name="heat_socking_hr" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
+								<field name="heat_quencing_time" widget="float_time" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
+								<field name="heat_quencing_after_temp" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
+								<field name="heat_total_qty" string="Production Qty" readonly="1"/>
+								<field name="heat_each_weight" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
+								<field name="stage_id" readonly="1"/>
+								<field name="stage_name" invisible="1"/>
+							</group>											
+							<group>
+								<field name="heat_date" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
+								<field name="heat_fc_temp" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
+								<field name="heat_furnace_on_time" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
+								<field name="heat_cooling_type" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
+								<field name="heat_set_temp_time" widget="float_time" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
+								<field name="heat_socking_comp_time" widget="float_time" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
+								<field name="heat_quencing_before_temp" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
+								<field name="heat_chloride_content" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
+								<field name="heat_qty" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
+								<field name="heat_total_weight" readonly="1"/>
+								<field name="heat_remarks" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
+							</group>					
+						</group>
+						<group string="Schedule Details">
+							<group>
+								<field name="order_no" readonly="1"/>
+								<field name="order_priority" string="Category"/>
+								<field name="pattern_id" readonly="1"/>
+							    <field name="moc_id" readonly="1"/> 
+							</group>											
+							<group>
+								<field name="order_delivery_date" readonly="1"/>
+								<field name="pump_model_id" readonly="1"/>
+								<field name="pattern_name" readonly="1"/>
+							</group>					
+						</group>
+						<notebook>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="heat_user_id"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start  -->
+	
+		<record id="t_tree_v_heat_treatment" model="ir.ui.view">
+			<field name="name">Heat Treatment Tree</field>
+			<field name="model">kg.fettling</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Heat Treatment Tree" create="false">					
+					<field name="heat_cycle_no"/>
+					<field name="heat_date"/>
+					<field name="order_no"/>
+					<field name="order_delivery_date"/>
+					<field name="order_priority" string="Category"/>
+					<field name="pump_model_id"/>
+					<field name="pattern_id"/>
+					<field name="pattern_name"/>
+					<field name="moc_id"/>
+					<field name="location"/>
+					<field name="heat_qty" sum="Heat Qty"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Search View Start -->
+	
+		<record id="t_search_v_heat_treatment" model="ir.ui.view">
+            <field name="name">Heat Treatment Search</field>
+            <field name="model">kg.fettling</field>
+            <field name="arch" type="xml">
+                <search string="Heat Treatment Search">
+					
+					<field name="pattern_id" string="Pattern Number"  filter_domain="[('pattern_id','ilike',self)]" />
+					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
+					<field name="order_no" string="Work Order No."  filter_domain="[('order_no','ilike',self)]" />
+					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />
+					
+							
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
+						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
+						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_category'}"/>
+						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
+						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
+						<filter string="Pattern Name." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_name'}"/>
+						<filter string="MOC" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_id'}"/>
+						<filter string="Location" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'location'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+        
+	<!-- Menu Action Start -->
+		
+		
+		<record id="tma_heat_treatment" model="ir.actions.act_window">
+			<field name="name">Heat Treatment</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.fettling</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="domain">[('stage_name','=',('HEAT TREATMENT')),('state','!=',('complete'))]</field>
+			<field name="search_view_id" ref="t_search_v_heat_treatment"/>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_heat_treatment_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_heat_treatment"/>
+            <field name="act_window_id" ref="tma_heat_treatment"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_heat_treatment_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_heat_treatment"/>
+            <field name="act_window_id" ref="tma_heat_treatment"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	
+	<!-- ROUGH GRINDING Process Starts Here -->
+	
+	<!-- Form View Start -->
+	
+		<record id="t_form_v_rough_grinding" model="ir.ui.view">
+			<field name="name">Rough Grinding Form</field>
+			<field name="model">kg.fettling</field>
+			<field name="arch" type="xml">
+				<form string="Rough Grinding" version="7.0" create="false">
+					<header>
+						<button name="rough_grinding_update" type="object" string="Update" class="oe_highlight"
+						attrs="{'invisible': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
+					</header>
+					<sheet>		
+						<group string="Rough Grinding Updates">
+							<group>
+								<field name="rough_grinding_name" readonly="1"/>
+								<field name="rough_grinding_shift_id" required="1" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
+								<field name="rough_grinding_qty" string="Production Qty" readonly="1"/>
+								<field name="rough_grinding_reject_qty" readonly="1"/>
+								<field name="rough_grinding_accept_user_id" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
+								<field name="stage_id" readonly="1"/>
+								<field name="stage_name" invisible="1"/>
+							</group>											
+							<group>
+								<field name="rough_grinding_date" required="1" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
+								<field name="rough_grinding_contractor" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
+								<field name="rough_grinding_accept_qty" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
+								<field name="rough_grinding_weight" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
+								<field name="rough_grinding_reject_remarks_id" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
+								<field name="rough_grinding_remarks" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
+							</group>					
+						</group>
+						<group string="Schedule Details">
+							<group>
+								<field name="order_no" readonly="1"/>
+								<field name="order_priority" string="Category"/>
+								<field name="pattern_id" readonly="1"/>
+							    <field name="moc_id" readonly="1"/> 
+							</group>											
+							<group>
+								<field name="order_delivery_date" readonly="1"/>
+								<field name="pump_model_id" readonly="1"/>
+								<field name="pattern_name" readonly="1"/>
+							</group>					
+						</group>
+						<notebook>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="rough_grinding_user_id"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start  -->
+	
+		<record id="t_tree_v_rough_grinding" model="ir.ui.view">
+			<field name="name">Rough Grinding Tree</field>
+			<field name="model">kg.fettling</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Rough Grinding Tree" create="false">					
+					<field name="rough_grinding_name"/>
+					<field name="rough_grinding_date"/>
+					<field name="order_no"/>
+					<field name="order_delivery_date"/>
+					<field name="order_priority" string="Category"/>
+					<field name="pump_model_id"/>
+					<field name="pattern_id"/>
+					<field name="pattern_name"/>
+					<field name="moc_id"/>
+					<field name="location"/>
+					<field name="rough_grinding_qty" string="Production Qty" sum="Qty"/>
+					<field name="rough_grinding_accept_qty" string="Completed/Accepted Qty" sum="Accepted Qty"/>
+					<field name="rough_grinding_reject_qty" sum="Rejected Qty"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Search View Start -->
+	
+		<record id="t_search_v_rough_grinding" model="ir.ui.view">
+            <field name="name">Rough Grinding Search</field>
+            <field name="model">kg.fettling</field>
+            <field name="arch" type="xml">
+                <search string="Rough Grinding Search">
+					
+					<field name="pattern_id" string="Pattern Number"  filter_domain="[('pattern_id','ilike',self)]" />
+					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
+					<field name="order_no" string="Work Order No."  filter_domain="[('order_no','ilike',self)]" />
+					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />
+					
+							
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
+						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
+						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_category'}"/>
+						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
+						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
+						<filter string="Pattern Name." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_name'}"/>
+						<filter string="MOC" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_id'}"/>
+						<filter string="Location" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'location'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+        
+	<!-- Menu Action Start -->
+		
+		
+		<record id="tma_rough_grinding" model="ir.actions.act_window">
+			<field name="name">Rough Grinding</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.fettling</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="domain">[('stage_name','=',('ROUGH GRINDING')),('state','!=',('complete'))]</field>
+			<field name="search_view_id" ref="t_search_v_rough_grinding"/>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_rough_grinding_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_rough_grinding"/>
+            <field name="act_window_id" ref="tma_rough_grinding"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_rough_grinding_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_rough_grinding"/>
+            <field name="act_window_id" ref="tma_rough_grinding"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_rough_grinding" model="ir.sequence.type">	
+		<field name="name">KG Rough Grinding</field>
+		<field name="code">kg.rough.grinding</field>
+	</record>
+
+	<record forcecreate="1" id="seq_rough_grinding" model="ir.sequence">
+	  <field name="name">KG Rough Grinding</field>
+	  <field name="code">kg.rough.grinding</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">RG/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	
+	<!-- Finish GRINDING Process Starts Here -->
+	
+	<!-- Form View Start -->
+	
+		<record id="t_form_v_finish_grinding" model="ir.ui.view">
+			<field name="name">Finish Grinding Form</field>
+			<field name="model">kg.fettling</field>
+			<field name="arch" type="xml">
+				<form string="Finish Grinding" version="7.0" create="false">
+					<header>
+						<button name="finish_grinding_update" type="object" string="Update" class="oe_highlight"
+						attrs="{'invisible': [('stage_name','not in',['FINISH GRINDING'])]}"/>
+					</header>
+					<sheet>		
+						<group string="Finish Grinding Updates">
+							<group>
+								<field name="finish_grinding_name" readonly="1"/>
+								<field name="finish_grinding_shift_id" required="1" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
+								<field name="finish_grinding_qty" string="Production Qty" readonly="1"/>
+								<field name="finish_grinding_reject_qty" readonly="1"/>
+								<field name="finish_grinding_accept_user_id" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
+								<field name="stage_id" readonly="1"/>
+								<field name="stage_name" invisible="1"/>
+							</group>											
+							<group>
+								<field name="finish_grinding_date" required="1" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
+								<field name="finish_grinding_contractor" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
+								<field name="finish_grinding_accept_qty" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
+								<field name="finish_grinding_weight" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
+								<field name="finish_grinding_reject_remarks_id" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
+								<field name="finish_grinding_remarks" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
+							</group>					
+						</group>
+						<group string="Schedule Details">
+							<group>
+								<field name="order_no" readonly="1"/>
+								<field name="order_priority" string="Category"/>
+								<field name="pattern_id" readonly="1"/>
+							    <field name="moc_id" readonly="1"/> 
+							</group>											
+							<group>
+								<field name="order_delivery_date" readonly="1"/>
+								<field name="pump_model_id" readonly="1"/>
+								<field name="pattern_name" readonly="1"/>
+							</group>					
+						</group>
+						<notebook>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="finish_grinding_user_id"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start  -->
+	
+		<record id="t_tree_v_finish_grinding" model="ir.ui.view">
+			<field name="name">Finish Grinding Tree</field>
+			<field name="model">kg.fettling</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Finish Grinding Tree" create="false">					
+					<field name="finish_grinding_name"/>
+					<field name="finish_grinding_date"/>
+					<field name="order_no"/>
+					<field name="order_delivery_date"/>
+					<field name="order_priority" string="Category"/>
+					<field name="pump_model_id"/>
+					<field name="pattern_id"/>
+					<field name="pattern_name"/>
+					<field name="moc_id"/>
+					<field name="location"/>
+					<field name="finish_grinding_qty" string="Production Qty" sum="Qty"/>
+					<field name="finish_grinding_accept_qty" string="Completed/Accepted Qty" sum="Accepted Qty"/>
+					<field name="finish_grinding_reject_qty" sum="Rejected Qty"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Search View Start -->
+	
+		<record id="t_search_v_finish_grinding" model="ir.ui.view">
+            <field name="name">Finish Grinding Search</field>
+            <field name="model">kg.fettling</field>
+            <field name="arch" type="xml">
+                <search string="Finish Grinding Search">
+					
+					<field name="pattern_id" string="Pattern Number"  filter_domain="[('pattern_id','ilike',self)]" />
+					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
+					<field name="order_no" string="Work Order No."  filter_domain="[('order_no','ilike',self)]" />
+					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />
+					
+							
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
+						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
+						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_category'}"/>
+						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
+						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
+						<filter string="Pattern Name." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_name'}"/>
+						<filter string="MOC" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_id'}"/>
+						<filter string="Location" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'location'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+        
+	<!-- Menu Action Start -->
+		
+		
+		<record id="tma_finish_grinding" model="ir.actions.act_window">
+			<field name="name">Finish Grinding</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.fettling</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="domain">[('stage_name','=',('FINISH GRINDING')),('state','!=',('complete'))]</field>
+			<field name="search_view_id" ref="t_search_v_finish_grinding"/>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_finish_grinding_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_finish_grinding"/>
+            <field name="act_window_id" ref="tma_finish_grinding"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_finish_grinding_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_finish_grinding"/>
+            <field name="act_window_id" ref="tma_finish_grinding"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_finish_grinding" model="ir.sequence.type">	
+		<field name="name">KG Finish Grinding</field>
+		<field name="code">kg.finish.grinding</field>
+	</record>
+
+	<record forcecreate="1" id="seq_finish_grinding" model="ir.sequence">
+	  <field name="name">KG Finish Grinding</field>
+	  <field name="code">kg.finish.grinding</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">FG/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	
+	<!-- Batch Entries Starts Here -->
+	
+	<!-- Batch - Fettling Accept Starts Here -->
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_batch_fettling_accept" model="ir.ui.view">
+			<field name="name">Batch Fettling Accept Form</field>
+			<field name="model">kg.fettling.batch.accept</field>
+			<field name="arch" type="xml">
+				<form string="Batch Entry - Fettling Accept" version="7.0"  delete="false">
+					<header>
+						<button name="entry_accept" type="object" string="Update" states="draft" class="oe_highlight"/>
+					</header>
+					<sheet>		
+						<group>
+							<group>
+								<field name="name" readonly="1"/>
+								<field name="flag_fettlingline" invisible="1"/>
+							</group>											
+							<group>
+								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+							</group>					
+						</group>
+						<notebook>
+							<page string="Fettling Items" attrs="{'invisible':[('flag_fettlingline','=',False)]}">
+								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
+									<tree string="Fettling Batch Accept Line Entry" editable="top" create="false" delete="false">	
+										<field name="fettling_inward_no" readonly="1"/>
+										<field name="pour_qty" readonly="1"/>
+										<field name="accept_qty"/>
+										<field name="reject_qty" readonly="1"/>
+										<field name="accept_user_id"/>
+										<field name="reject_user_id"/>
+										<field name="remarks" widget="char"/>
+									</tree>
+								</field>
+							</page>
+							<page string="Select Fettling Items">	
+								<field name="fettling_line_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
+								context="{'tree_view_ref' : 't_tree_v_fettling_inward'}">
+									<tree string = "Fettling Items" create="false" edit="false">
+										<field name="name"/>
+										<field name="entry_date"/>
+										<field name="order_no"/>
+										<field name="order_priority"/>
+										<field name="pump_model_id"/>
+										<field name="pattern_id"/>										
+										<field name="pattern_name"/>										
+										<field name="moc_id"/>									
+										<field name="pour_qty"/>									
+									</tree>
+								</field>
+								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
+							</page>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>										
+										<field name="update_user_id"/>
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>									
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_batch_fettling_accept" model="ir.ui.view">
+			<field name="name">Batch Fettling Accept Tree</field>
+			<field name="model">kg.fettling.batch.accept</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">	
+			<tree toolbar="True" string="Batch Fettling Accept">									
+					<field name="name"/>
+					<field name="entry_date"/>					
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_batch_fettling_accept" model="ir.ui.view">
+            <field name="name">Batch Fettling Inward Search</field>
+            <field name="model">kg.fettling.batch.accept</field>
+            <field name="arch" type="xml">
+                <search string="Pattern Batch Issue">
+					<field name="name" string="Batch No."  filter_domain="[('name','ilike',self)]" />
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+                       
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+	
+	
+	
+	<!-- Menu Action Start-->	
+		
+		<record id="tma_batch_fettling_accept" model="ir.actions.act_window">
+			<field name="name">Fettling Accept</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.fettling.batch.accept</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_batch_fettling_accept"/>
+			<field name="search_view_id" ref="t_search_v_batch_fettling_accept"/>
+			<field name="context">{"search_default_open":1}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start
+		
+        <record id="audit_pattern_issue" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Issue</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_kg_pattern_issue')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+		
+        <record id="audit_pattern_batchissue" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Batch Issue</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_issue')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <record id="audit_pattern_batchissue_line" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Batch Issue Line</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_line')"/>       
+            <field name="state">subscribed</field>              
+        </record> -->
+        
+    <!-- Audit Log Xml Data End-->
+    
+    <!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_batch_fettling_accept" model="ir.sequence.type">	
+		<field name="name">KG Batch Fettling Accept</field>
+		<field name="code">kg.fettling.batch.accept</field>
+	</record>
+
+	<record forcecreate="1" id="seq_batch_fettling_accept" model="ir.sequence">
+	  <field name="name">KG Batch Fettling Accept</field>
+	  <field name="code">kg.fettling.batch.accept</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">FettlingBatch/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	<!-- Fettling Inward Batch End Here -->
+	
+	
+	<!-- Batch - Knock Out Starts Here -->
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_batch_knock_out" model="ir.ui.view">
+			<field name="name">Batch Knock Out Form</field>
+			<field name="model">kg.batch.knock.out</field>
+			<field name="arch" type="xml">
+				<form string="Batch Entry - Knock Out" version="7.0"  delete="false">
+					<header>
+						<button name="entry_confirm" type="object" string="Update" states="draft" class="oe_highlight"/>
+					</header>
+					<sheet>		
+						<group>
+							<group>
+								<field name="name" readonly="1"/>
+								<field name="flag_batchline" invisible="1"/>
+							</group>											
+							<group>
+								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+							</group>					
+						</group>
+						<notebook>
+							<page string="Knock Out Items" attrs="{'invisible':[('flag_batchline','=',False)]}">
+								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
+									<tree string="Knock Out Line Items" editable="top" create="false" delete="false">	
+										<field name="name" readonly="1"/>
+										<field name="date"/>
+										<field name="order_no" invisible="1"/>
+										<field name="pattern_id" invisible="1"/>
+										<field name="pattern_name" invisible="1"/>
+										<field name="moc_id" invisible="1"/>
+										<field name="shift_id" required="1"/>
+										<field name="contractor_id" required="1"/>
+										<field name="qty" required="1"/>
+										<field name="accept_qty" required="1"/>
+										<field name="reject_qty" readonly="1"/>
+										<field name="weight"/>
+										<field name="accept_user_id"/>
+										<field name="reject_user_id"/>
+										<field name="remarks" widget="char"/>
+									</tree>
+								</field>
+							</page>
+							<page string="Select Knock Out Items">
+								<field name="knock_out_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
+									context="{'tree_view_ref' : 't_tree_v_knock_out'}">
+									<tree string = "Knock Out Batch Items" create="false" edit="false">
+										<field name="knockout_name"/>
+										<field name="order_no"/>
+										<field name="pump_model_id"/>
+										<field name="pattern_id"/>
+										<field name="pattern_name"/>
+										<field name="moc_id"/>
+									</tree>
+								</field>
+								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
+							</page>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>										
+										<field name="update_user_id"/>
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>									
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_batch_knock_out" model="ir.ui.view">
+			<field name="name">Batch Knock Out Tree</field>
+			<field name="model">kg.batch.knock.out</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">	
+			<tree toolbar="True" string="Batch Knock Out Tree">									
+					<field name="name"/>
+					<field name="entry_date"/>					
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_batch_knock_out" model="ir.ui.view">
+            <field name="name">Batch Knock Out Search</field>
+            <field name="model">kg.batch.knock.out</field>
+            <field name="arch" type="xml">
+                <search string="Batch Knock Out Search">
+					<field name="name" string="Batch No."  filter_domain="[('name','ilike',self)]" />
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+                       
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+	
+	
+	
+	<!-- Menu Action Start-->	
+		
+		<record id="tma_batch_knock_out" model="ir.actions.act_window">
+			<field name="name">Knock Out</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.batch.knock.out</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_batch_knock_out"/>
+			<field name="search_view_id" ref="t_search_v_batch_knock_out"/>
+			<field name="context">{"search_default_open":1}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start
+		
+        <record id="audit_pattern_issue" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Issue</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_kg_pattern_issue')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+		
+        <record id="audit_pattern_batchissue" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Batch Issue</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_issue')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <record id="audit_pattern_batchissue_line" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Batch Issue Line</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_line')"/>       
+            <field name="state">subscribed</field>              
+        </record> -->
+        
+    <!-- Audit Log Xml Data End-->
+    
+    <!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_batch_knock_out" model="ir.sequence.type">	
+		<field name="name">KG Batch Knock Out</field>
+		<field name="code">kg.batch.knock.out</field>
+	</record>
+
+	<record forcecreate="1" id="seq_batch_knock_out" model="ir.sequence">
+	  <field name="name">KG Batch Knock Out</field>
+	  <field name="code">kg.batch.knock.out</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">KOBatch/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	<!-- Batch Knock Out End Here -->
+	
+	
+	<!-- Batch - Decoring Starts Here -->
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_batch_decoring" model="ir.ui.view">
+			<field name="name">Batch Decoring Form</field>
+			<field name="model">kg.batch.decoring</field>
+			<field name="arch" type="xml">
+				<form string="Batch Entry - Decoring" version="7.0"  delete="false">
+					<header>
+						<button name="entry_confirm" type="object" string="Update" states="draft" class="oe_highlight"/>
+					</header>
+					<sheet>		
+						<group>
+							<group>
+								<field name="name" readonly="1"/>
+								<field name="flag_batchline" invisible="1"/>
+							</group>											
+							<group>
+								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+							</group>					
+						</group>
+						<notebook>
+							<page string="Decoring Items" attrs="{'invisible':[('flag_batchline','=',False)]}">
+								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
+									<tree string="Decoring Line Items" editable="top" create="false" delete="false">	
+										<field name="name" readonly="1"/>
+										<field name="date"/>
+										<field name="order_no" invisible="1"/>
+										<field name="pattern_id" invisible="1"/>
+										<field name="pattern_name" invisible="1"/>
+										<field name="moc_id" invisible="1"/>
+										<field name="shift_id" required="1"/>
+										<field name="contractor_id" required="1"/>
+										<field name="qty" required="1"/>
+										<field name="accept_qty" required="1"/>
+										<field name="reject_qty" readonly="1"/>
+										<field name="weight"/>
+										<field name="accept_user_id"/>
+										<field name="reject_user_id"/>
+										<field name="remarks" widget="char"/>
+									</tree>
+								</field>
+							</page>
+							<page string="Select Decoring Items">
+								<field name="decoring_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
+									context="{'tree_view_ref' : 't_tree_v_decoring'}">
+									<tree string = "Decoring Batch Items" create="false" edit="false">
+										<field name="decoring_name"/>
+										<field name="order_no"/>
+										<field name="pump_model_id"/>
+										<field name="pattern_id"/>
+										<field name="pattern_name"/>
+										<field name="moc_id"/>
+									</tree>
+								</field>
+								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
+							</page>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>										
+										<field name="update_user_id"/>
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>									
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_batch_decoring" model="ir.ui.view">
+			<field name="name">Batch Decoring Tree</field>
+			<field name="model">kg.batch.decoring</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">	
+			<tree toolbar="True" string="Batch Decoring Tree">									
+					<field name="name"/>
+					<field name="entry_date"/>					
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_batch_decoring" model="ir.ui.view">
+            <field name="name">Batch Decoring Search</field>
+            <field name="model">kg.batch.decoring</field>
+            <field name="arch" type="xml">
+                <search string="Batch Decoring Search">
+					<field name="name" string="Batch No."  filter_domain="[('name','ilike',self)]" />
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+                       
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+	
+	
+	
+	<!-- Menu Action Start-->	
+		
+		<record id="tma_batch_decoring" model="ir.actions.act_window">
+			<field name="name">Decoring</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.batch.decoring</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_batch_decoring"/>
+			<field name="search_view_id" ref="t_search_v_batch_decoring"/>
+			<field name="context">{"search_default_open":1}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start
+		
+        <record id="audit_pattern_issue" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Issue</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_kg_pattern_issue')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+		
+        <record id="audit_pattern_batchissue" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Batch Issue</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_issue')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <record id="audit_pattern_batchissue_line" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Batch Issue Line</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_line')"/>       
+            <field name="state">subscribed</field>              
+        </record> -->
+        
+    <!-- Audit Log Xml Data End-->
+    
+    <!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_batch_decoring" model="ir.sequence.type">	
+		<field name="name">KG Batch Decoring</field>
+		<field name="code">kg.batch.decoring</field>
+	</record>
+
+	<record forcecreate="1" id="seq_batch_decoring" model="ir.sequence">
+	  <field name="name">KG Batch Decoring</field>
+	  <field name="code">kg.batch.decoring</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">CoreBatch/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	<!-- Batch Decoring End Here -->
+	
+	
+	<!-- Batch - Shot Blast Starts Here -->
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_batch_shot_blast" model="ir.ui.view">
+			<field name="name">Batch Shot Blast Form</field>
+			<field name="model">kg.batch.shot.blast</field>
+			<field name="arch" type="xml">
+				<form string="Batch Entry - Shot Blast" version="7.0"  delete="false">
+					<header>
+						<button name="entry_confirm" type="object" string="Update" states="draft" class="oe_highlight"/>
+					</header>
+					<sheet>		
+						<group>
+							<group>
+								<field name="name" readonly="1"/>
+								<field name="flag_batchline" invisible="1"/>
+							</group>											
+							<group>
+								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+							</group>					
+						</group>
+						<notebook>
+							<page string="Shot Blast Items" attrs="{'invisible':[('flag_batchline','=',False)]}">
+								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
+									<tree string="Shot Blast Line Items" editable="top" create="false" delete="false">	
+										<field name="name" readonly="1"/>
+										<field name="date"/>
+										<field name="order_no" invisible="1"/>
+										<field name="pattern_id" invisible="1"/>
+										<field name="pattern_name" invisible="1"/>
+										<field name="moc_id" invisible="1"/>
+										<field name="shift_id" required="1"/>
+										<field name="contractor_id" required="1"/>
+										<field name="qty" required="1"/>
+										<field name="accept_qty" required="1"/>
+										<field name="reject_qty" readonly="1"/>
+										<field name="weight"/>
+										<field name="accept_user_id"/>
+										<field name="reject_user_id"/>
+										<field name="remarks" widget="char"/>
+									</tree>
+								</field>
+							</page>
+							<page string="Select Shot Blast Items">
+								<field name="shot_blast_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
+									context="{'tree_view_ref' : 't_tree_v_shot_blast'}">
+									<tree string = "Shot Blast Batch Items" create="false" edit="false">
+										<field name="shot_blast_name"/>
+										<field name="order_no"/>
+										<field name="pump_model_id"/>
+										<field name="pattern_id"/>
+										<field name="pattern_name"/>
+										<field name="moc_id"/>
+									</tree>
+								</field>
+								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
+							</page>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>										
+										<field name="update_user_id"/>
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>									
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_batch_shot_blast" model="ir.ui.view">
+			<field name="name">Batch Shot Blast Tree</field>
+			<field name="model">kg.batch.shot.blast</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">	
+			<tree toolbar="True" string="Batch Shot Blast Tree">									
+					<field name="name"/>
+					<field name="entry_date"/>					
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_batch_shot_blast" model="ir.ui.view">
+            <field name="name">Batch Shot Blast Search</field>
+            <field name="model">kg.batch.shot.blast</field>
+            <field name="arch" type="xml">
+                <search string="Batch Shot Blast Search">
+					<field name="name" string="Batch No."  filter_domain="[('name','ilike',self)]" />
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+                       
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+	
+	
+	
+	<!-- Menu Action Start -->	
+		
+		<record id="tma_batch_shot_blast" model="ir.actions.act_window">
+			<field name="name">Shot Blast</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.batch.shot.blast</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_batch_shot_blast"/>
+			<field name="search_view_id" ref="t_search_v_batch_shot_blast"/>
+			<field name="context">{"search_default_open":1}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start
+		
+        <record id="audit_pattern_issue" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Issue</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_kg_pattern_issue')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+		
+        <record id="audit_pattern_batchissue" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Batch Issue</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_issue')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <record id="audit_pattern_batchissue_line" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Batch Issue Line</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_line')"/>       
+            <field name="state">subscribed</field>              
+        </record> -->
+        
+    <!-- Audit Log Xml Data End-->
+    
+    <!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_batch_shot_blast" model="ir.sequence.type">	
+		<field name="name">KG Batch Shot Blast</field>
+		<field name="code">kg.batch.shot.blast</field>
+	</record>
+
+	<record forcecreate="1" id="seq_batch_shot_blast" model="ir.sequence">
+	  <field name="name">KG Batch Shot Blast</field>
+	  <field name="code">kg.batch.shot.blast</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">SBBatch/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	<!-- Batch Shot Blast End Here -->
+	
+	
+	
+	<!-- Batch - Hammering Starts Here -->
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_batch_hammering" model="ir.ui.view">
+			<field name="name">Batch Hammering Form</field>
+			<field name="model">kg.batch.hammering</field>
+			<field name="arch" type="xml">
+				<form string="Batch Entry - Hammering" version="7.0"  delete="false">
+					<header>
+						<button name="entry_confirm" type="object" string="Update" states="draft" class="oe_highlight"/>
+					</header>
+					<sheet>		
+						<group>
+							<group>
+								<field name="name" readonly="1"/>
+								<field name="flag_batchline" invisible="1"/>
+							</group>											
+							<group>
+								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+							</group>					
+						</group>
+						<notebook>
+							<page string="Hammering Items" attrs="{'invisible':[('flag_batchline','=',False)]}">
+								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
+									<tree string="Hammering Line Items" editable="top" create="false" delete="false">	
+										<field name="name" readonly="1"/>
+										<field name="date"/>
+										<field name="order_no" invisible="1"/>
+										<field name="pattern_id" invisible="1"/>
+										<field name="pattern_name" invisible="1"/>
+										<field name="moc_id" invisible="1"/>
+										<field name="shift_id" required="1"/>
+										<field name="contractor_id" required="1"/>
+										<field name="qty" required="1"/>
+										<field name="accept_qty" required="1"/>
+										<field name="reject_qty" readonly="1"/>
+										<field name="weight"/>
+										<field name="accept_user_id"/>
+										<field name="reject_user_id"/>
+										<field name="remarks" widget="char"/>
+									</tree>
+								</field>
+							</page>
+							<page string="Select Hammering Items">
+								<field name="hammering_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
+									context="{'tree_view_ref' : 't_tree_v_hammering'}">
+									<tree string = "Hammering Batch Items" create="false" edit="false">
+										<field name="hammering_name"/>
+										<field name="order_no"/>
+										<field name="pump_model_id"/>
+										<field name="pattern_id"/>
+										<field name="pattern_name"/>
+										<field name="moc_id"/>
+									</tree>
+								</field>
+								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
+							</page>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>										
+										<field name="update_user_id"/>
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>									
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_batch_hammering" model="ir.ui.view">
+			<field name="name">Batch Hammering Tree</field>
+			<field name="model">kg.batch.hammering</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">	
+			<tree toolbar="True" string="Batch Hammering Tree">									
+					<field name="name"/>
+					<field name="entry_date"/>					
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_batch_hammering" model="ir.ui.view">
+            <field name="name">Batch Hammering Search</field>
+            <field name="model">kg.batch.hammering</field>
+            <field name="arch" type="xml">
+                <search string="Batch Hammering Search">
+					<field name="name" string="Batch No."  filter_domain="[('name','ilike',self)]" />
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+                       
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+	
+	
+	
+	<!-- Menu Action Start-->	
+		
+		<record id="tma_batch_hammering" model="ir.actions.act_window">
+			<field name="name">Hammering</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.batch.hammering</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_batch_hammering"/>
+			<field name="search_view_id" ref="t_search_v_batch_hammering"/>
+			<field name="context">{"search_default_open":1}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start
+		
+        <record id="audit_pattern_issue" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Issue</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_kg_pattern_issue')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+		
+        <record id="audit_pattern_batchissue" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Batch Issue</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_issue')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <record id="audit_pattern_batchissue_line" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Batch Issue Line</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_line')"/>       
+            <field name="state">subscribed</field>              
+        </record> -->
+        
+    <!-- Audit Log Xml Data End-->
+    
+    <!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_batch_hammering" model="ir.sequence.type">	
+		<field name="name">KG Batch Hammering</field>
+		<field name="code">kg.batch.hammering</field>
+	</record>
+
+	<record forcecreate="1" id="seq_batch_hammering" model="ir.sequence">
+	  <field name="name">KG Batch Hammering</field>
+	  <field name="code">kg.batch.hammering</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">HammeringBatch/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	<!-- Batch Hammering End Here -->
+	
+	<!-- Batch - Wheel Cutting Starts Here -->
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_batch_wheel_cutting" model="ir.ui.view">
+			<field name="name">Batch Wheel Cutting Form</field>
+			<field name="model">kg.batch.wheel.cutting</field>
+			<field name="arch" type="xml">
+				<form string="Batch Entry - Wheel Cutting" version="7.0"  delete="false">
+					<header>
+						<button name="entry_confirm" type="object" string="Update" states="draft" class="oe_highlight"/>
+					</header>
+					<sheet>		
+						<group>
+							<group>
+								<field name="name" readonly="1"/>
+								<field name="flag_batchline" invisible="1"/>
+							</group>											
+							<group>
+								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+							</group>					
+						</group>
+						<notebook>
+							<page string="Wheel Cutting Items" attrs="{'invisible':[('flag_batchline','=',False)]}">
+								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
+									<tree string="Wheel Cutting Line Items" editable="top" create="false" delete="false">	
+										<field name="name" readonly="1"/>
+										<field name="date"/>
+										<field name="order_no" invisible="1"/>
+										<field name="pattern_id" invisible="1"/>
+										<field name="pattern_name" invisible="1"/>
+										<field name="moc_id" invisible="1"/>
+										<field name="shift_id" required="1"/>
+										<field name="contractor_id" required="1"/>
+										<field name="qty" required="1"/>
+										<field name="accept_qty" required="1"/>
+										<field name="reject_qty" readonly="1"/>
+										<field name="weight"/>
+										<field name="accept_user_id"/>
+										<field name="reject_user_id"/>
+										<field name="remarks" widget="char"/>
+									</tree>
+								</field>
+							</page>
+							<page string="Select Wheel Cutting Items">
+								<field name="wheel_cutting_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
+									context="{'tree_view_ref' : 't_tree_v_wheel_cutting'}">
+									<tree string = "Wheel Cutting Batch Items" create="false" edit="false">
+										<field name="wheel_cutting_name"/>
+										<field name="order_no"/>
+										<field name="pump_model_id"/>
+										<field name="pattern_id"/>
+										<field name="pattern_name"/>
+										<field name="moc_id"/>
+									</tree>
+								</field>
+								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
+							</page>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>										
+										<field name="update_user_id"/>
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>									
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_batch_wheel_cutting" model="ir.ui.view">
+			<field name="name">Batch Wheel Cutting Tree</field>
+			<field name="model">kg.batch.wheel.cutting</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">	
+			<tree toolbar="True" string="Batch Wheel Cutting Tree">									
+					<field name="name"/>
+					<field name="entry_date"/>					
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_batch_wheel_cutting" model="ir.ui.view">
+            <field name="name">Batch Wheel Cutting Search</field>
+            <field name="model">kg.batch.wheel.cutting</field>
+            <field name="arch" type="xml">
+                <search string="Batch Wheel Cutting Search">
+					<field name="name" string="Batch No."  filter_domain="[('name','ilike',self)]" />
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+                       
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+	
+	
+	
+	<!-- Menu Action Start-->	
+		
+		<record id="tma_batch_wheel_cutting" model="ir.actions.act_window">
+			<field name="name">Wheel Cutting</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.batch.wheel.cutting</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_batch_wheel_cutting"/>
+			<field name="search_view_id" ref="t_search_v_batch_wheel_cutting"/>
+			<field name="context">{"search_default_open":1}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start
+		
+        <record id="audit_pattern_issue" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Issue</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_kg_pattern_issue')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+		
+        <record id="audit_pattern_batchissue" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Batch Issue</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_issue')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <record id="audit_pattern_batchissue_line" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Batch Issue Line</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_line')"/>       
+            <field name="state">subscribed</field>              
+        </record> -->
+        
+    <!-- Audit Log Xml Data End-->
+    
+    <!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_batch_wheel_cutting" model="ir.sequence.type">	
+		<field name="name">KG Batch Wheel Cutting</field>
+		<field name="code">kg.batch.wheel.cutting</field>
+	</record>
+
+	<record forcecreate="1" id="seq_batch_wheel_cutting" model="ir.sequence">
+	  <field name="name">KG Batch Wheel Cutting</field>
+	  <field name="code">kg.batch.wheel.cutting</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">WCB/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	<!-- Batch Wheel Cutting End Here -->
+	
+	<!-- Batch - Gas Cutting Starts Here -->
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_batch_gas_cutting" model="ir.ui.view">
+			<field name="name">Batch Gas Cutting Form</field>
+			<field name="model">kg.batch.gas.cutting</field>
+			<field name="arch" type="xml">
+				<form string="Batch Entry - Gas Cutting" version="7.0"  delete="false">
+					<header>
+						<button name="entry_confirm" type="object" string="Update" states="draft" class="oe_highlight"/>
+					</header>
+					<sheet>		
+						<group>
+							<group>
+								<field name="name" readonly="1"/>
+								<field name="flag_batchline" invisible="1"/>
+							</group>											
+							<group>
+								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+							</group>					
+						</group>
+						<notebook>
+							<page string="Gas Cutting Items" attrs="{'invisible':[('flag_batchline','=',False)]}">
+								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
+									<tree string="Gas Cutting Line Items" editable="top" create="false" delete="false">	
+										<field name="name" readonly="1"/>
+										<field name="date"/>
+										<field name="order_no" invisible="1"/>
+										<field name="pattern_id" invisible="1"/>
+										<field name="pattern_name" invisible="1"/>
+										<field name="moc_id" invisible="1"/>
+										<field name="shift_id" required="1"/>
+										<field name="contractor_id" required="1"/>
+										<field name="qty" required="1"/>
+										<field name="accept_qty" required="1"/>
+										<field name="reject_qty" readonly="1"/>
+										<field name="weight"/>
+										<field name="accept_user_id"/>
+										<field name="reject_user_id"/>
+										<field name="remarks" widget="char"/>
+									</tree>
+								</field>
+							</page>
+							<page string="Select Gas Cutting Items">
+								<field name="gas_cutting_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
+									context="{'tree_view_ref' : 't_tree_v_Gas_cutting'}">
+									<tree string = "Gas Cutting Batch Items" create="false" edit="false">
+										<field name="gas_cutting_name"/>
+										<field name="order_no"/>
+										<field name="pump_model_id"/>
+										<field name="pattern_id"/>
+										<field name="pattern_name"/>
+										<field name="moc_id"/>
+									</tree>
+								</field>
+								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
+							</page>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>										
+										<field name="update_user_id"/>
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>									
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_batch_gas_cutting" model="ir.ui.view">
+			<field name="name">Batch Gas Cutting Tree</field>
+			<field name="model">kg.batch.gas.cutting</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">	
+			<tree toolbar="True" string="Batch Gas Cutting Tree">									
+					<field name="name"/>
+					<field name="entry_date"/>					
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_batch_gas_cutting" model="ir.ui.view">
+            <field name="name">Batch Gas Cutting Search</field>
+            <field name="model">kg.batch.gas.cutting</field>
+            <field name="arch" type="xml">
+                <search string="Batch Gas Cutting Search">
+					<field name="name" string="Batch No."  filter_domain="[('name','ilike',self)]" />
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+                       
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+	
+	
+	
+	<!-- Menu Action Start-->	
+		
+		<record id="tma_batch_gas_cutting" model="ir.actions.act_window">
+			<field name="name">Gas Cutting</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.batch.gas.cutting</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_batch_gas_cutting"/>
+			<field name="search_view_id" ref="t_search_v_batch_gas_cutting"/>
+			<field name="context">{"search_default_open":1}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start
+		
+        <record id="audit_pattern_issue" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Issue</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_kg_pattern_issue')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+		
+        <record id="audit_pattern_batchissue" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Batch Issue</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_issue')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <record id="audit_pattern_batchissue_line" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Batch Issue Line</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_line')"/>       
+            <field name="state">subscribed</field>              
+        </record> -->
+        
+    <!-- Audit Log Xml Data End-->
+    
+    <!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_batch_gas_cutting" model="ir.sequence.type">	
+		<field name="name">KG Batch Gas Cutting</field>
+		<field name="code">kg.batch.gas.cutting</field>
+	</record>
+
+	<record forcecreate="1" id="seq_batch_gas_cutting" model="ir.sequence">
+	  <field name="name">KG Batch Gas Cutting</field>
+	  <field name="code">kg.batch.gas.cutting</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">GCB/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	<!-- Batch Gas Cutting End Here -->
+	
+	<!-- Batch - Arc Cutting Starts Here -->
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_batch_arc_cutting" model="ir.ui.view">
+			<field name="name">Batch Arc Cutting Form</field>
+			<field name="model">kg.batch.arc.cutting</field>
+			<field name="arch" type="xml">
+				<form string="Batch Entry - Arc Cutting" version="7.0"  delete="false">
+					<header>
+						<button name="entry_confirm" type="object" string="Update" states="draft" class="oe_highlight"/>
+					</header>
+					<sheet>		
+						<group>
+							<group>
+								<field name="name" readonly="1"/>
+								<field name="flag_batchline" invisible="1"/>
+							</group>											
+							<group>
+								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+							</group>					
+						</group>
+						<notebook>
+							<page string="Arc Cutting Items" attrs="{'invisible':[('flag_batchline','=',False)]}">
+								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
+									<tree string="Arc Cutting Line Items" editable="top" create="false" delete="false">	
+										<field name="name" readonly="1"/>
+										<field name="date"/>
+										<field name="order_no" invisible="1"/>
+										<field name="pattern_id" invisible="1"/>
+										<field name="pattern_name" invisible="1"/>
+										<field name="moc_id" invisible="1"/>
+										<field name="shift_id" required="1"/>
+										<field name="contractor_id" required="1"/>
+										<field name="qty" required="1"/>
+										<field name="accept_qty" required="1"/>
+										<field name="reject_qty" readonly="1"/>
+										<field name="weight"/>
+										<field name="accept_user_id"/>
+										<field name="reject_user_id"/>
+										<field name="remarks" widget="char"/>
+									</tree>
+								</field>
+							</page>
+							<page string="Select Arc Cutting Items">
+								<field name="arc_cutting_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
+									context="{'tree_view_ref' : 't_tree_v_arc_cutting'}">
+									<tree string = "Arc Cutting Batch Items" create="false" edit="false">
+										<field name="arc_cutting_name"/>
+										<field name="order_no"/>
+										<field name="pump_model_id"/>
+										<field name="pattern_id"/>
+										<field name="pattern_name"/>
+										<field name="moc_id"/>
+									</tree>
+								</field>
+								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
+							</page>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>										
+										<field name="update_user_id"/>
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>									
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_batch_arc_cutting" model="ir.ui.view">
+			<field name="name">Batch Arc Cutting Tree</field>
+			<field name="model">kg.batch.arc.cutting</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">	
+			<tree toolbar="True" string="Batch Arc Cutting Tree">									
+					<field name="name"/>
+					<field name="entry_date"/>					
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_batch_arc_cutting" model="ir.ui.view">
+            <field name="name">Batch Arc Cutting Search</field>
+            <field name="model">kg.batch.arc.cutting</field>
+            <field name="arch" type="xml">
+                <search string="Batch Arc Cutting Search">
+					<field name="name" string="Batch No."  filter_domain="[('name','ilike',self)]" />
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+                       
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+	
+	
+	
+	<!-- Menu Action Start-->	
+		
+		<record id="tma_batch_arc_cutting" model="ir.actions.act_window">
+			<field name="name">Arc Cutting</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.batch.arc.cutting</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_batch_arc_cutting"/>
+			<field name="search_view_id" ref="t_search_v_batch_arc_cutting"/>
+			<field name="context">{"search_default_open":1}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start
+		
+        <record id="audit_pattern_issue" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Issue</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_kg_pattern_issue')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+		
+        <record id="audit_pattern_batchissue" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Batch Issue</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_issue')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <record id="audit_pattern_batchissue_line" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Batch Issue Line</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_line')"/>       
+            <field name="state">subscribed</field>              
+        </record> -->
+        
+    <!-- Audit Log Xml Data End-->
+    
+    <!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_batch_arc_cutting" model="ir.sequence.type">	
+		<field name="name">KG Batch Arc Cutting</field>
+		<field name="code">kg.batch.arc.cutting</field>
+	</record>
+
+	<record forcecreate="1" id="seq_batch_arc_cutting" model="ir.sequence">
+	  <field name="name">KG Batch Arc Cutting</field>
+	  <field name="code">kg.batch.arc.cutting</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">ACB/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	<!-- Batch Arc Cutting End Here -->
+	
+	<!-- Batch - Rough Grinding Starts Here -->
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_batch_rough_grinding" model="ir.ui.view">
+			<field name="name">Batch Rough Grinding Form</field>
+			<field name="model">kg.batch.rough.grinding</field>
+			<field name="arch" type="xml">
+				<form string="Batch Entry - Rough Grinding" version="7.0"  delete="false">
+					<header>
+						<button name="entry_confirm" type="object" string="Update" states="draft" class="oe_highlight"/>
+					</header>
+					<sheet>		
+						<group>
+							<group>
+								<field name="name" readonly="1"/>
+								<field name="flag_batchline" invisible="1"/>
+							</group>											
+							<group>
+								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+							</group>					
+						</group>
+						<notebook>
+							<page string="Rough Grinding Items" attrs="{'invisible':[('flag_batchline','=',False)]}">
+								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
+									<tree string="Rough Grinding Line Items" editable="top" create="false" delete="false">	
+										<field name="name" readonly="1"/>
+										<field name="date"/>
+										<field name="order_no" invisible="1"/>
+										<field name="pattern_id" invisible="1"/>
+										<field name="pattern_name" invisible="1"/>
+										<field name="moc_id" invisible="1"/>
+										<field name="shift_id" required="1"/>
+										<field name="contractor_id" required="1"/>
+										<field name="qty" required="1"/>
+										<field name="accept_qty" required="1"/>
+										<field name="reject_qty" readonly="1"/>
+										<field name="weight"/>
+										<field name="accept_user_id"/>
+										<field name="reject_user_id"/>
+										<field name="remarks" widget="char"/>
+									</tree>
+								</field>
+							</page>
+							<page string="Select Rough Grinding Items">
+								<field name="rough_grinding_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
+									context="{'tree_view_ref' : 't_tree_v_rough_grinding'}">
+									<tree string = "Rough Grinding Batch Items" create="false" edit="false">
+										<field name="rough_grinding_name"/>
+										<field name="order_no"/>
+										<field name="pump_model_id"/>
+										<field name="pattern_id"/>
+										<field name="pattern_name"/>
+										<field name="moc_id"/>
+									</tree>
+								</field>
+								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
+							</page>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>										
+										<field name="update_user_id"/>
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>									
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_batch_rough_grinding" model="ir.ui.view">
+			<field name="name">Batch Rough Grinding Tree</field>
+			<field name="model">kg.batch.rough.grinding</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">	
+			<tree toolbar="True" string="Batch Rough Grinding Tree">									
+					<field name="name"/>
+					<field name="entry_date"/>					
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_batch_rough_grinding" model="ir.ui.view">
+            <field name="name">Batch Rough Grinding Search</field>
+            <field name="model">kg.batch.rough.grinding</field>
+            <field name="arch" type="xml">
+                <search string="Batch Rough Grinding Search">
+					<field name="name" string="Batch No."  filter_domain="[('name','ilike',self)]" />
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+                       
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+	
+	
+	
+	<!-- Menu Action Start-->	
+		
+		<record id="tma_batch_rough_grinding" model="ir.actions.act_window">
+			<field name="name">Rough Grinding</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.batch.rough.grinding</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_batch_rough_grinding"/>
+			<field name="search_view_id" ref="t_search_v_batch_rough_grinding"/>
+			<field name="context">{"search_default_open":1}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start
+		
+        <record id="audit_pattern_issue" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Issue</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_kg_pattern_issue')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+		
+        <record id="audit_pattern_batchissue" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Batch Issue</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_issue')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <record id="audit_pattern_batchissue_line" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Batch Issue Line</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_line')"/>       
+            <field name="state">subscribed</field>              
+        </record> -->
+        
+    <!-- Audit Log Xml Data End-->
+    
+    <!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_batch_rough_grinding" model="ir.sequence.type">	
+		<field name="name">KG Batch Rough Grinding</field>
+		<field name="code">kg.batch.rough.grinding</field>
+	</record>
+
+	<record forcecreate="1" id="seq_batch_rough_grinding" model="ir.sequence">
+	  <field name="name">KG Batch Rough Grinding</field>
+	  <field name="code">kg.batch.rough.grinding</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">RGB/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	
+	<!-- Batch Rough Grinding End Here -->
+	
+	<!-- Batch - Finish Grinding Starts Here -->
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_batch_finish_grinding" model="ir.ui.view">
+			<field name="name">Batch Finish Grinding Form</field>
+			<field name="model">kg.batch.finish.grinding</field>
+			<field name="arch" type="xml">
+				<form string="Batch Entry - Finish Grinding" version="7.0"  delete="false">
+					<header>
+						<button name="entry_confirm" type="object" string="Update" states="draft" class="oe_highlight"/>
+					</header>
+					<sheet>		
+						<group>
+							<group>
+								<field name="name" readonly="1"/>
+								<field name="flag_batchline" invisible="1"/>
+							</group>											
+							<group>
+								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+							</group>					
+						</group>
+						<notebook>
+							<page string="Finish Grinding Items" attrs="{'invisible':[('flag_batchline','=',False)]}">
+								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
+									<tree string="Finish Grinding Line Items" editable="top" create="false" delete="false">	
+										<field name="name" readonly="1"/>
+										<field name="date"/>
+										<field name="order_no" invisible="1"/>
+										<field name="pattern_id" invisible="1"/>
+										<field name="pattern_name" invisible="1"/>
+										<field name="moc_id" invisible="1"/>
+										<field name="shift_id" required="1"/>
+										<field name="contractor_id" required="1"/>
+										<field name="qty" required="1"/>
+										<field name="accept_qty" required="1"/>
+										<field name="reject_qty" readonly="1"/>
+										<field name="weight"/>
+										<field name="accept_user_id"/>
+										<field name="reject_user_id"/>
+										<field name="remarks" widget="char"/>
+									</tree>
+								</field>
+							</page>
+							<page string="Select Finish Grinding Items">
+								<field name="finish_grinding_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
+									context="{'tree_view_ref' : 't_tree_v_finish_grinding'}">
+									<tree string = "Finish Grinding Batch Items" create="false" edit="false">
+										<field name="finish_grinding_name"/>
+										<field name="order_no"/>
+										<field name="pump_model_id"/>
+										<field name="pattern_id"/>
+										<field name="pattern_name"/>
+										<field name="moc_id"/>
+									</tree>
+								</field>
+								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
+							</page>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>										
+										<field name="update_user_id"/>
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>									
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_batch_finish_grinding" model="ir.ui.view">
+			<field name="name">Batch Finish Grinding Tree</field>
+			<field name="model">kg.batch.finish.grinding</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">	
+			<tree toolbar="True" string="Batch Finish Grinding Tree">									
+					<field name="name"/>
+					<field name="entry_date"/>					
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_batch_finish_grinding" model="ir.ui.view">
+            <field name="name">Batch Finish Grinding Search</field>
+            <field name="model">kg.batch.finish.grinding</field>
+            <field name="arch" type="xml">
+                <search string="Batch Finish Grinding Search">
+					<field name="name" string="Batch No."  filter_domain="[('name','ilike',self)]" />
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+                       
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+	
+	
+	
+	<!-- Menu Action Start-->	
+		
+		<record id="tma_batch_finish_grinding" model="ir.actions.act_window">
+			<field name="name">Finish Grinding</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.batch.finish.grinding</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_batch_finish_grinding"/>
+			<field name="search_view_id" ref="t_search_v_batch_finish_grinding"/>
+			<field name="context">{"search_default_open":1}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start
+		
+        <record id="audit_pattern_issue" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Issue</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_kg_pattern_issue')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+		
+        <record id="audit_pattern_batchissue" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Batch Issue</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_issue')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <record id="audit_pattern_batchissue_line" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Batch Issue Line</field>
+            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_line')"/>       
+            <field name="state">subscribed</field>              
+        </record> -->
+        
+    <!-- Audit Log Xml Data End-->
+    
+    <!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_batch_finish_grinding" model="ir.sequence.type">	
+		<field name="name">KG Batch Finish Grinding</field>
+		<field name="code">kg.batch.finish.grinding</field>
+	</record>
+
+	<record forcecreate="1" id="seq_batch_finish_grinding" model="ir.sequence">
+	  <field name="name">KG Batch Finish Grinding</field>
+	  <field name="code">kg.batch.finish.grinding</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">FGB/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	<!-- Batch Finish Grinding End Here -->
+	
+	
+	<!-- Fettling Process Menu Items Stars Here -->
+	
+	<menuitem name="Fettling Process" id="tpm_fettling_process" parent = "kg_stock_inward.tpm_transactions" sequence="2"/>
+			
+		<menuitem action="tma_fettling_inward" id="tam_fettling_inward" parent="tpm_fettling_process" sequence="1"/>
+		<menuitem action="tma_knock_out" id="tam_knock_out" parent="tpm_fettling_process" sequence="2"/>
+		<menuitem action="tma_decoring" id="tam_decoring" parent="tpm_fettling_process" sequence="3"/>
+		<menuitem action="tma_shot_blast" id="tam_shot_blast" parent="tpm_fettling_process" sequence="4"/>
+		<menuitem action="tma_hammering" id="tam_hammering" parent="tpm_fettling_process" sequence="5"/>
+		<menuitem action="tma_wheel_cutting" id="tam_wheel_cutting" parent="tpm_fettling_process" sequence="6"/>
+		<menuitem action="tma_gas_cutting" id="tam_gas_cutting" parent="tpm_fettling_process" sequence="7"/>
+		<menuitem action="tma_arc_cutting" id="tam_arc_cutting" parent="tpm_fettling_process" sequence="8"/>
+		<menuitem action="tma_heat_treatment" id="tam_heat_treatment" parent="tpm_fettling_process" sequence="9"/>
+		<menuitem action="tma_rough_grinding" id="tam_rough_grinding" parent="tpm_fettling_process" sequence="10"/>
+		<menuitem action="tma_finish_grinding" id="tam_finish_grinding" parent="tpm_fettling_process" sequence="11"/>
+			
+	<menuitem name="Batch Entries" id="tpm_fettling_batch_process" parent="kg_stock_inward.tpm_transactions" sequence="3"/>
+			
+		<menuitem action="tma_batch_fettling_accept" id="tam_batch_fettling_accept" parent="tpm_fettling_batch_process" sequence="1"/>
+		<menuitem action="tma_batch_knock_out" id="tam_batch_knock_out" parent="tpm_fettling_batch_process" sequence="2"/>
+		<menuitem action="tma_batch_decoring" id="tam_batch_decoring" parent="tpm_fettling_batch_process" sequence="3"/>
+		<menuitem action="tma_batch_shot_blast" id="tam_batch_shot_blast" parent="tpm_fettling_batch_process" sequence="4"/>
+		<menuitem action="tma_batch_hammering" id="tam_batch_hammering" parent="tpm_fettling_batch_process" sequence="5"/>
+		<menuitem action="tma_batch_wheel_cutting" id="tam_batch_wheel_cutting" parent="tpm_fettling_batch_process" sequence="6"/>
+		<menuitem action="tma_batch_gas_cutting" id="tam_batch_gas_cutting" parent="tpm_fettling_batch_process" sequence="7"/>
+		<menuitem action="tma_batch_arc_cutting" id="tam_batch_arc_cutting" parent="tpm_fettling_batch_process" sequence="8"/>
+		<menuitem action="tma_batch_rough_grinding" id="tam_batch_rough_grinding" parent="tpm_fettling_batch_process" sequence="9"/>
+		<menuitem action="tma_batch_finish_grinding" id="tam_batch_finish_grinding" parent="tpm_fettling_batch_process" sequence="10"/>
+		
+		
+	<!-- Fettling Process Menu Items Ends Here -->
+	
+	
+	
+	
+	
+	</data>
+</openerp>

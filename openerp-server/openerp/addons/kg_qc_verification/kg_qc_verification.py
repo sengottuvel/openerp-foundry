@@ -8,6 +8,19 @@ from datetime import datetime
 
 dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
+ORDER_PRIORITY = [
+   ('normal','Normal'),
+   ('emergency','Emergency')
+]
+
+ORDER_CATEGORY = [
+   ('pump','Pump'),
+   ('spare','Spare'),
+   ('pump_spare','Pump and Spare'),
+   ('service','Service'),
+   ('project','Project')
+]
+
 
 class kg_qc_verification(osv.osv):
 
@@ -20,46 +33,43 @@ class kg_qc_verification(osv.osv):
 		### Header Details ####
 		'name': fields.char('QC No', size=128,select=True,readonly=True),
 		'entry_date': fields.date('QC Date',required=True),
-		'planning_id': fields.many2one('kg.daily.planning','Schedule No.'),
-		'planning_date': fields.related('planning_id','entry_date', type='date', string='Schedule Date', store=True, readonly=True),
+		'schedule_id': fields.many2one('kg.schedule','Schedule No.'),
+		'schedule_date': fields.related('schedule_id','entry_date', type='date', string='Schedule Date', store=True, readonly=True),
 		'division_id': fields.many2one('kg.division.master','Division'),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location'),
 		'remark': fields.text('Remarks'),
 		
 		'active': fields.boolean('Active'),
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled'),('reject','Rejected')],'Status', readonly=True),
-		'planning_line_id': fields.many2one('ch.daily.planning.details','Planning Line Item'),
-		'allocation_id': fields.many2one('ch.stock.allocation.details','Allocation'),
-		'schedule_id': fields.many2one('kg.weekly.schedule','Work Order No.'),
-		'schedule_line_id': fields.many2one('ch.weekly.schedule.details','Schedule Line'),
+		'schedule_line_id': fields.many2one('ch.schedule.details','Schedule Line Item'),
+		'allocation_id': fields.many2one('ch.stock.allocation.detail','Allocation'),
+		'order_id': fields.many2one('kg.work.order','Work Order No.'),
+		'order_line_id': fields.many2one('ch.work.order.details','Order Line'),
 		
 		
-		'bom_id': fields.related('planning_line_id','bom_id', type='many2one', relation='kg.bom', string='BOM Id', store=True, readonly=True),
-		'bom_line_id': fields.related('planning_line_id','bom_line_id', type='many2one', relation='ch.bom.line', string='BOM Line Id', store=True, readonly=True),
-		'sch_bomline_id': fields.related('planning_line_id','sch_bomline_id', type='many2one', relation='ch.sch.bom.details', string='Schedule BOM Line Id', store=True, readonly=True),
+		'bom_id': fields.related('schedule_line_id','bom_id', type='many2one', relation='kg.bom', string='BOM Id', store=True, readonly=True),
+		'bom_line_id': fields.related('schedule_line_id','bom_line_id', type='many2one', relation='ch.bom.line', string='BOM Line Id', store=True, readonly=True),
+		'order_bomline_id': fields.related('schedule_line_id','order_bomline_id', type='many2one', relation='ch.order.bom.details', string='Schedule BOM Line Id', store=True, readonly=True),
 		
-		'order_ref_no': fields.related('schedule_id','name', type='char', string='Order Reference', store=True, readonly=True),
-		'order_type': fields.selection([('work_order','Normal'),('emergency','Emergency'),('project','Project')],'Order Type'),
+		'order_no': fields.related('order_line_id','order_no', type='char', string='WO No.', store=True, readonly=True),
+		'order_priority': fields.related('order_id','order_priority', type='selection', selection=ORDER_PRIORITY, string='Priority', store=True, readonly=True),
+		'order_category': fields.related('order_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
+
 		
 		'pump_model_id': fields.related('schedule_line_id','pump_model_id', type='many2one', relation='kg.pumpmodel.master', string='Pump Model', store=True, readonly=True),
-		'pattern_id': fields.related('planning_line_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern No.', store=True, readonly=True),
+		'pattern_id': fields.related('schedule_line_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern No.', store=True, readonly=True),
 		'pattern_name': fields.related('pattern_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
-		#'part_name_id': fields.related('schedule_line_id','part_name_id', type='many2one', relation='product.product', string='Part Name', store=True, readonly=True),
-		'type': fields.related('schedule_line_id','type', type='char', string='Purpose', store=True, readonly=True),
-		'moc_id': fields.related('sch_bomline_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
+		'moc_id': fields.related('order_bomline_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
 		
 		'stage_id': fields.many2one('kg.stage.master','Stage', readonly=True),
 		
-		'stock_qty': fields.related('allocation_id','stock_qty', type='integer', size=100, string='Stock Qty', store=True, readonly=True),
-		'allocated_qty': fields.related('allocation_id','qty', type='integer', size=100, string='Allocated Qty', store=True, readonly=True),
+		'stock_qty': fields.related('schedule_line_id','stock_qty', type='integer', string='Stock Qty', store=True, readonly=True),
+		'allocated_qty': fields.integer('Allocated Qty',readonly=True),
 		'qty': fields.integer('Qty', required=True),
 		'rework_qty': fields.integer('Rework Qty'),
 		'reject_qty': fields.integer('Rejection Qty'),
 		'position_no': fields.char('Pos No.'),
 		'diameter': fields.char('Diameter'),
-		
-		'transac_state': fields.selection([('in_qc','In QC'),('sent_for_produc','Sent for Production'),
-			('complete','Completed'),('cancel','Cancelled'),('reject','Rejected')],'Transaction Status', readonly=True),
 		'cancel_remark': fields.text('Cancel Remarks'),
 		'reject_remark': fields.text('Rejection Remarks'),
 		
@@ -91,7 +101,6 @@ class kg_qc_verification(osv.osv):
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':time.strftime('%Y-%m-%d %H:%M:%S'),
 		'state': 'draft',	
-		'transac_state': 'in_qc',	
 		'active': True,
 		
 		
@@ -129,6 +138,7 @@ class kg_qc_verification(osv.osv):
        
 
 	def entry_confirm(self,cr,uid,ids,context=None):
+		"""
 		production_obj = self.pool.get('kg.production')
 		schedule_line_obj = self.pool.get('ch.weekly.schedule.details')
 		planning_line_obj = self.pool.get('ch.daily.planning.details')
@@ -211,30 +221,9 @@ class kg_qc_verification(osv.osv):
 					''',
 					[stock_item['qty'], entry.id, entry.schedule_id.id, entry.schedule_line_id.id, 
 					entry.planning_id.id, entry.planning_line_id.id, stock_item['allocation_id'],entry.sch_bomline_id.id])
+		"""
+		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		
-		
-		
-		if entry.sch_bomline_id.transac_state == 'sent_for_produc':
-			sch_bomline_obj.write(cr, uid, entry.sch_bomline_id.id, {'transac_state':'sent_for_produc'})
-			schedule_line_obj.write(cr, uid, entry.schedule_line_id.id, {'transac_state':'sent_for_produc'})
-			planning_line_obj.write(cr, uid, entry.planning_line_id.id, {'transac_state':'sent_for_produc'})
-		if entry.sch_bomline_id.transac_state == 'sent_for_qc':
-			planning_line_obj.write(cr, uid, entry.planning_line_id.id, {'transac_state':'complete'})
-			if entry.sch_bomline_id.planning_qty == entry.sch_bomline_id.qty:
-				sch_bomline_obj.write(cr, uid, entry.sch_bomline_id.id, {'transac_state':'complete'})
-				schedule_line_obj.write(cr, uid, entry.schedule_line_id.id, {'transac_state':'complete'})
-			if entry.sch_bomline_id.planning_qty == 0:
-				sch_bomline_obj.write(cr, uid, entry.sch_bomline_id.id, {'transac_state':'complete'})
-				schedule_line_obj.write(cr, uid, entry.schedule_line_id.id, {'transac_state':'complete'})
-			if entry.sch_bomline_id.qty > entry.sch_bomline_id.planning_qty :
-				sch_bomline_obj.write(cr, uid, entry.sch_bomline_id.id, {'transac_state':'partial'})
-				schedule_line_obj.write(cr, uid, entry.schedule_line_id.id, {'transac_state':'partial'})
-				
-
-		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-			'name' :self.pool.get('ir.sequence').get(cr, uid, 'kg.qc.verification') or '/'})
-		
-
 		return True
 		
 	def entry_cancel(self,cr,uid,ids,context=None):
@@ -244,24 +233,8 @@ class kg_qc_verification(osv.osv):
 			raise osv.except_osv(_('Warning!'),
 						_('Cancellation Remarks is must !!'))
 		cr.execute(''' update kg_foundry_stock set qty = 0 where planning_line_id = %s and allocation_id = %s ''',[entry.planning_line_id.id, entry.allocation_id.id])
-		self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S'),'transac_state':'cancel'})
-		return True
-		
-		
-	"""def entry_reject(self,cr,uid,ids,context=None):
-		entry = self.browse(cr,uid,ids[0])
-		if entry.reject_remark == False:
-			raise osv.except_osv(_('Warning!'),
-						_('Rejection Remarks is must !!'))
-
-		### Updation in Stock Table
-		cr.execute(''' delete from kg_foundry_stock where planning_line_id = %s and allocation_id = %s ''',[entry.planning_line_id.id, entry.allocation_id.id])
-		### Updation in PLanning
-		cr.execute(''' update ch_daily_planning_details set transac_state = 're_allocate' where id = %s and header_id = %s ''',[entry.planning_line_id.id, entry.planning_id.id])
-		self.write(cr, uid, ids, {'state': 'reject','transac_state':'reject','reject_user_id': uid, 'reject_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		return True
-	"""
-		
+		self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		return True	
 		
 	def entry_draft(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
