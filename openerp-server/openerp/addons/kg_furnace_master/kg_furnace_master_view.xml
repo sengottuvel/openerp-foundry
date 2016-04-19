@@ -122,15 +122,7 @@
 		
 		<!-- Menu Action End-->
 		
-		 <!-- Audit Log Xml Data Start -->
 		
-        <record id="furnace_model" model="audittrail.rule">
-            <field name="name">Audit Log Furnace Master</field>
-            <field name="object_id" eval="ref('kg_furnace_master.model_kg_furnace_master')"/>       
-            <field name="state">subscribed</field>              
-        </record>
-        
-        <!-- Audit Log Xml Data End-->
 		
 		<!-- Menu Name Start here --> 
 		

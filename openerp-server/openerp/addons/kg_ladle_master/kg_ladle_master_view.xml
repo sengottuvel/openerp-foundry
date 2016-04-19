@@ -122,15 +122,7 @@
 		
 		<!-- Menu Action End-->
 		
-		 <!-- Audit Log Xml Data Start -->
-		
-        <record id="ladle_model" model="audittrail.rule">
-            <field name="name">Audit Log Ladle Master</field>
-            <field name="object_id" eval="ref('kg_ladle_master.model_kg_ladle_master')"/>       
-            <field name="state">subscribed</field>              
-        </record>
-        
-        <!-- Audit Log Xml Data End-->
+		 
 		
 		<!-- Menu Name Start here --> 
 		
