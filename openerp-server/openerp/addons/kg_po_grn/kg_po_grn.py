@@ -111,7 +111,7 @@ class kg_po_grn(osv.osv):
 					domain="[('state','=','approved'), '&', ('order_line.pending_qty','>','0'), '&', ('grn_flag','=',False), '&', ('partner_id','=',supplier_id), '&', ('order_line.line_state','!=','cancel')]"), 
 		'po_ids':fields.many2many('purchase.order', 'multiple_po', 'grn_id', 'po_id', 'PO Nos',
 					domain="[('state','=','approved'), '&', ('order_line.pending_qty','>','0'), '&', ('grn_flag','=',False), '&', \
-							 ('partner_id','=',supplier_id), '&', ('order_line.line_state','!=','cancel')]",required=True), 
+							 ('partner_id','=',supplier_id), '&', ('order_line.line_state','!=','cancel')]"), 
 		'po_name': fields.char('PO NO',readonly=True),
 		'order_no': fields.char('Order NO',readonly=True),
 		'order_date': fields.char('Order Date',readonly=True),

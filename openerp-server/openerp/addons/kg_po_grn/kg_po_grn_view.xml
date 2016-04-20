@@ -95,7 +95,7 @@
                  <group string="PO Details" attrs="{'invisible': [('grn_type','!=','from_po')]}">
 					<group>
 						<field name="po_id" on_change="onchange_po_id(po_id)" invisible="1"/>
-						<field name="po_ids" widget="many2many_tags"/>
+						<field name="po_ids" widget="many2many_tags" attrs="{'required': [('grn_type','=','from_po')]}"/>
                     </group>
                     <group>
 						<field name="confirm_flag" invisible="1"/>
