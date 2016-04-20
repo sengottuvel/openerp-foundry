@@ -302,9 +302,10 @@ class kg_purchase_indent(osv.osv):
 								
 				else:
 					if not pi_lines[i].depindent_line_id:
-						raise osv.except_osv(
-							_('Direct Purchase Indent System Not Allow'),
-							_('System not allow to raise Purchase Indent with out Dep.Indent Line for %s' %(product)))
+						#~ raise osv.except_osv(
+							#~ _('Direct Purchase Indent System Not Allow'),
+							#~ _('System not allow to raise Purchase Indent with out Dep.Indent Line for %s' %(product)))
+						pass
 					if pi_lines[i].group_flag == True:
 						self.update_product_group(cr,uid,ids,line=pi_lines[i])
 					else:
