@@ -28,7 +28,7 @@
 				
 				
 					<button name="unaccounted_cash_GRN_register_scheduler" string="Unaccounted GRN - Cash" type="object" 
-						class="oe_highlight"  invisible="0"/>	
+						class="oe_highlight"  invisible="1"/>	
 				
 					<button name="grn_register_scheduler_mail" string="GRN Register" type="object" 
 						class="oe_highlight" invisible="0"/>	

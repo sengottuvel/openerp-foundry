@@ -45,7 +45,8 @@ class kg_inwardmaster(osv.osv):
 		
 	_columns = {
 		
-		'name': fields.char('Inward Type', size=128, required=True, select=True,readonly=False,states={'approved':[('readonly',True)]}),
+		'name': fields.char('Name', size=128, required=True, select=True,readonly=False,states={'approved':[('readonly',True)]}),
+		'code': fields.char('Code',readonly=False,states={'approved':[('readonly',True)]}),
 		'creation_date':fields.datetime('Creation Date',readonly=True),
 		'bill': fields.boolean('Bill Indication',readonly=False,states={'approved':[('readonly',True)]}),
 		'return': fields.boolean('Return Indication',readonly=False,states={'approved':[('readonly',True)]}),

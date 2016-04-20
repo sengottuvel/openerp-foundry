@@ -13,7 +13,7 @@
 					
 					<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
-					<button name="unaccounted_grn_credit_register_scheduler" type="object" string="Unaccount GRN - Credit" class="oe_highlight"  invisible="0"/>
+					<button name="unaccounted_grn_credit_register_scheduler" type="object" string="Unaccount GRN - Credit" class="oe_highlight"  invisible="1"/>
 					<button name="invoice_to_helpdesk" type="object" string="Export to CRM" class="oe_highlight"  invisible="1"/>
 					
 					
