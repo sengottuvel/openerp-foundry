@@ -423,7 +423,7 @@ class kg_general_grn(osv.osv):
 		if grn_entry.grn_dc == 'dc_invoice' and grn_entry.bill == 'applicable':
 			partner = self.pool.get('res.partner')
 			supplier = partner.browse(cr, uid, grn_entry.supplier_id.id)
-			tot_add = (supplier.street or '')+ ' ' + (supplier.street2 or '') + '\n'+(supplier.city.name or '')+ ',' +(supplier.state_id.name or '') + '-' +(supplier.zip or '') + '\nPh:' + (supplier.phone or '')+ '\n' +(supplier.mobile or '')
+			tot_add = (supplier.street or '')+ ' ' + (supplier.street2 or '') + '\n'+(supplier.city_id.name or '')+ ',' +(supplier.state_id.name or '') + '-' +(supplier.zip or '') + '\nPh:' + (supplier.phone or '')+ '\n' +(supplier.mobile or '')
 			invoice_no = pi_obj.create(cr, uid, {
 						'created_by': uid,
 						'creation_date': today,
