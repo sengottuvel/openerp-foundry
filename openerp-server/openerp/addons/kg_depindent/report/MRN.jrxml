@@ -62,8 +62,9 @@ part.phone as phone,
 part.fax as fax,
 part.email as email,
 indent.name as mrn_name,
-to_char(indent.ind_date::date,'dd-mm-YYYY') as mrn_date
-
+to_char(indent.ind_date::date,'dd-mm-YYYY') as mrn_date,
+division.name as division,
+project.name as project
 
 from kg_depindent indent
 
@@ -71,20 +72,21 @@ left join res_users users on (users.id = indent.user_id)
 
 left join res_company comp on (comp.id = users.company_id)
 
+left join res_partner comppart on (comppart.id = comp.partner_id)
+
 left join res_partner part on (part.id = comp.partner_id)
 
 left join res_partner part_user on (part_user.id = users.partner_id)
 
+left join res_city comp_city on (comp_city.id = comppart.city_id)
 
-left join res_city comp_city on (comp_city.id = comp.city)
+left join res_country_state comp_state on (comp_state.id = comppart.state_id)
 
+left join res_country comp_country on (comp_country.id = comppart.country_id)
 
-left join res_country_state comp_state on (comp_state.id = comp.state_id)
+left join kg_division_master division on (division.id = indent.division)
 
-
-left join res_country comp_country on (comp_country.id = comp.country_id)
-
-
+left join kg_project_master project on (project.id = indent.dep_project)
 
 where indent.id = $P{indent_id}]]>
 	</queryString>
@@ -102,6 +104,8 @@ where indent.id = $P{indent_id}]]>
 	<field name="email" class="java.lang.String"/>
 	<field name="mrn_name" class="java.lang.String"/>
 	<field name="mrn_date" class="java.lang.String"/>
+	<field name="division" class="java.lang.String"/>
+	<field name="project" class="java.lang.String"/>
 	<group name="GRN Line Group">
 		<groupExpression><![CDATA[]]></groupExpression>
 		<groupHeader>
@@ -125,8 +129,8 @@ where indent.id = $P{indent_id}]]>
 								<textElement/>
 								<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 							</textField>
-							<textField isBlankWhenNull="true">
-								<reportElement x="40" y="0" width="137" height="20"/>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement x="40" y="0" width="173" height="20"/>
 								<box leftPadding="2">
 									<leftPen lineWidth="0.25"/>
 									<bottomPen lineWidth="0.25"/>
@@ -171,7 +175,7 @@ where indent.id = $P{indent_id}]]>
 								<textFieldExpression><![CDATA[$F{product_uom}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement x="177" y="0" width="133" height="20"/>
+								<reportElement x="213" y="0" width="97" height="20"/>
 								<box leftPadding="2">
 									<leftPen lineWidth="0.25"/>
 									<bottomPen lineWidth="0.25"/>
@@ -224,7 +228,7 @@ where indent.id = $P{indent_id}]]>
 					<bottomPen lineWidth="0.0"/>
 				</box>
 				<textElement/>
-				<textFieldExpression><![CDATA[$F{street1}+","+$F{street2}+","+$F{city}+"-"+$F{zip}+"."]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{street1}+" "+$F{street2}+" "+$F{city}+"-"+$F{zip}+"."]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="802" height="20" isRemoveLineWhenBlank="true"/>
@@ -313,7 +317,7 @@ where indent.id = $P{indent_id}]]>
 				<textFieldExpression><![CDATA["S. No."]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="41" y="130" width="137" height="19"/>
+				<reportElement x="41" y="130" width="173" height="19"/>
 				<box leftPadding="2">
 					<topPen lineWidth="0.25"/>
 					<bottomPen lineWidth="0.25"/>
@@ -325,7 +329,7 @@ where indent.id = $P{indent_id}]]>
 				<textFieldExpression><![CDATA["Product / Service"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="178" y="130" width="133" height="19"/>
+				<reportElement x="214" y="130" width="97" height="19"/>
 				<box leftPadding="2">
 					<topPen lineWidth="0.25"/>
 					<bottomPen lineWidth="0.25"/>
@@ -469,22 +473,6 @@ where indent.id = $P{indent_id}]]>
 				<textFieldExpression><![CDATA["Purpose"]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="146" y="20" width="152" height="25"/>
-				<box topPadding="2" leftPadding="0" bottomPadding="2"/>
-				<textElement verticalAlignment="Middle">
-					<font size="10"/>
-				</textElement>
-				<textFieldExpression><![CDATA[]]></textFieldExpression>
-			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="146" y="45" width="152" height="25"/>
-				<box topPadding="2" leftPadding="0" bottomPadding="2"/>
-				<textElement verticalAlignment="Middle">
-					<font size="10"/>
-				</textElement>
-				<textFieldExpression><![CDATA[]]></textFieldExpression>
-			</textField>
-			<textField isBlankWhenNull="true">
 				<reportElement x="133" y="70" width="165" height="25"/>
 				<box topPadding="2" leftPadding="0" bottomPadding="2"/>
 				<textElement verticalAlignment="Middle">
@@ -539,6 +527,18 @@ where indent.id = $P{indent_id}]]>
 					<font size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[":"]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="146" y="20" width="152" height="25"/>
+				<box topPadding="8" leftPadding="2"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{division}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="146" y="45" width="152" height="25"/>
+				<box topPadding="8" leftPadding="2"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{project}]]></textFieldExpression>
 			</textField>
 		</band>
 	</columnHeader>
