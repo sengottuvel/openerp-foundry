@@ -266,6 +266,7 @@ class kg_purchase_order(osv.osv):
 			value = {'type_flag': True}
 		else:
 			value = {'pi_flag': True}
+		print"valueeeeeeeeE",value
 		return {'value': value}
 	
 	def onchange_company(self, cr, uid, ids, company_id,delivery_address):
@@ -980,18 +981,21 @@ class kg_purchase_order_line(osv.osv):
 			
 		return True
 	
-	#~ def onchange_qty(self, cr, uid, ids,product_qty,pending_qty,pi_line_id,pi_qty):
-		#~ logger.info('[KG OpenERP] Class: kg_purchase_order_line, Method: onchange_qty called...')
-		#~ #if pi_line_id == False:
-			#~ raise osv.except_osv(_('PO From PI Only!'),_("You must select a PO lines From PI !") )
-		#~ # Need to do block flow
-		#~ value = {'pending_qty': ''}
-		#~ if product_qty and product_qty > pi_qty:
-			#~ raise osv.except_osv(_(' If PO From PI !!'),_("PO Qty can not be greater than Indent Qty !") )
-		#~ 
-		#~ else:
-			#~ value = {'pending_qty': product_qty}
-		#~ return {'value': value}
+	def onchange_qty(self, cr, uid, ids,product_qty,pending_qty,pi_line_id,pi_qty):
+		logger.info('[KG OpenERP] Class: kg_purchase_order_line, Method: onchange_qty called...')
+		#if pi_line_id == False:
+			#raise osv.except_osv(_('PO From PI Only!'),_("You must select a PO lines From PI !") )
+		# Need to do block flow
+		value = {'pending_qty': ''}
+		if pi_line_id:
+			if product_qty and product_qty > pi_qty:
+				raise osv.except_osv(_(' If PO From PI !!'),_("PO Qty can not be greater than Indent Qty !") )
+			else:
+				value = {'pending_qty': product_qty}
+		else:
+			value = {'pending_qty': product_qty}
+		
+		return {'value': value}
 		
 	def pol_cancel(self, cr, uid, ids, context=None):
 		logger.info('[KG OpenERP] Class: kg_purchase_order_line, Method: pol_cancel called...')
