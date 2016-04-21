@@ -198,23 +198,34 @@ class kg_crm_enquiry(osv.osv):
 		return True
 		
 	def entry_confirm(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])
-		if rec.call_type == 'service':
-			enq_no = self.pool.get('ir.sequence').get(cr, uid, 'kg.crm.enquiry')
-		elif rec.call_type == 'enquiry':
-			if rec.market_division == 'cp':
-				enq_no = self.pool.get('ir.sequence').get(cr, uid, 'crm.enquiry.cp')
-			elif rec.market_division == 'ip':
-				enq_no = self.pool.get('ir.sequence').get(cr, uid, 'crm.enquiry.ip')
+		entry = self.browse(cr,uid,ids[0])
+		if entry.call_type == 'service':		
+			off_no = ''	
+			qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.crm.enquiry')])
+			rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.enquiry_date))
+			off_no = cr.fetchone();
+		elif entry.call_type == 'product':
+			if entry.market_division == 'cp':				
+				off_no = ''	
+				qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','crm.enquiry.cp')])
+				rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
+				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.enquiry_date))
+				off_no = cr.fetchone();
+			elif entry.market_division == 'ip':				
+				off_no = ''	
+				qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','crm.enquiry.ip')])
+				rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
+				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.enquiry_date))
+				off_no = cr.fetchone();
 			else:
 				pass
 		else:
 			pass
-		print"enq_noenq_no",enq_no
-		
+	
 		self.write(cr, uid, ids, {
 									#'name':self.pool.get('ir.sequence').get(cr, uid, 'kg.crm.enquiry'),
-									'name':enq_no,
+									'name':off_no[0],
 									'state': 'moved_to_offer',
 									'confirm_user_id': uid, 
 									'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')

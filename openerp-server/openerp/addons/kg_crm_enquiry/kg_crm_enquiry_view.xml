@@ -347,6 +347,49 @@
 		
 	<!-- Menu Action End-->
 	
+	<!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_crm_service" model="ir.sequence.type">	
+		<field name="name">CRM Enquiry</field>
+		<field name="code">kg.crm.enquiry</field>
+	</record>
+
+	<record forcecreate="1" id="crm_service" model="ir.sequence">
+	  <field name="name">CRM Enquiry</field>
+	  <field name="code">kg.crm.enquiry</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">CRM/%(year)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<record forcecreate="1" id="seq_crm_cp" model="ir.sequence.type">	
+		<field name="name">CRM Enquiry CP</field>
+		<field name="code">crm.enquiry.cp</field>
+	</record>
+
+	<record forcecreate="1" id="crm_cp" model="ir.sequence">
+	  <field name="name">CRM Enquiry CP</field>
+	  <field name="code">crm.enquiry.cp</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">CRM/CP/%(year)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<record forcecreate="1" id="seq_crm_ip" model="ir.sequence.type">	
+		<field name="name">CRM Enquiry IP</field>
+		<field name="code">crm.enquiry.ip</field>
+	</record>
+
+	<record forcecreate="1" id="crm_ip" model="ir.sequence">
+	  <field name="name">CRM Enquiry IP</field>
+	  <field name="code">crm.enquiry.ip</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">CRM/IP/%(year)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
 	
 	
 	
