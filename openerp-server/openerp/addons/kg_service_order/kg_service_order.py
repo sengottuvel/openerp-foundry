@@ -104,10 +104,8 @@ class kg_service_order(osv.osv):
 		'partner_address':fields.char('Supplier Address', size=128, readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'service_order_line': fields.one2many('kg.service.order.line', 'service_id', 'Order Lines', 
 					readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
-		'active': fields.boolean('Active',readonly=True),
-		'user_id' : fields.many2one('res.users', 'Created By', readonly=False),
+		'active': fields.boolean('Active'),
 		'state': fields.selection([('draft', 'Draft'),('confirm','Waiting For Approval'),('approved','Approved'),('inv','Invoiced'),('cancel','Cancel')], 'Status', track_visibility='onchange'),
-		
 		'payment_mode': fields.many2one('kg.payment.master', 'Mode of Payment', 
 		          required=True, readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'delivery_type':fields.many2one('kg.deliverytype.master', 'Delivery Schedule', 
@@ -154,10 +152,9 @@ class kg_service_order(osv.osv):
 		'freight_charges':fields.selection([('Inclusive','Inclusive'),('Extra','Extra'),('To Pay','To Pay'),('Paid','Paid'),
 						  ('Extra at our Cost','Extra at our Cost')],'Freight Charges',readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'price':fields.selection([('inclusive','Inclusive of all Taxes and Duties'),('exclusive','Excluding All Taxes and Duties')],'Price',readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
-		'company_id': fields.many2one('res.company', 'Company'),
+		'company_id': fields.many2one('res.company','Company',readonly=True),
 		'today_date':fields.date('Date'),
 		'text_amt':fields.text('Amount In Text'),
-		'creation_date':fields.datetime('Creation Date',readonly=True),
 		'quot_ref_no':fields.char('Quot.Ref',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'so_type': fields.selection([('amc','AMC'),('service', 'Service'),('labor', 'Labor Only')], 'Type',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'amc_from': fields.date('AMC From Date',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
@@ -170,14 +167,21 @@ class kg_service_order(osv.osv):
 		'grn_flag':fields.boolean('GRN Flag'),
 		'button_flag':fields.boolean('Button Flag',invisible=True),
 		'so_reonly_flag':fields.boolean('SO Flag'),
-		'approved_by': fields.many2one('res.users', 'Approved By', readonly=True),
-		'confirmed_by': fields.many2one('res.users', 'Confirmed By',readonly=True),
-		'approved_date': fields.date('Approved Date'),
-		'confirmed_date': fields.date('Confirmed Date'),
 		'payment_type': fields.selection([('cash', 'Cash'), ('credit', 'Credit')], 'Payment Type',readonly=True,states={'draft':[('readonly',False)]}),
 		'version':fields.char('Version'),
 		'expense_line_id': fields.one2many('kg.service.order.expense.track','expense_id','Expense Track'),
 		
+		# Entry Info
+		'user_id' : fields.many2one('res.users', 'Created By', readonly=True),
+		'creation_date':fields.datetime('Creation Date',readonly=True),
+		'approved_by': fields.many2one('res.users', 'Approved By', readonly=True),
+		'confirmed_by': fields.many2one('res.users', 'Confirmed By',readonly=True),
+		'approved_date': fields.datetime('Approved Date',readonly=True),
+		'confirmed_date': fields.datetime('Confirmed Date',readonly=True),
+		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
+		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
+		'update_date' : fields.datetime('Last Updated Date',readonly=True),
+		'update_user_id' : fields.many2one('res.users','Last Updated By',readonly=True),
 	}
 	#_sql_constraints = [('code_uniq','unique(name)', 'Service Order number must be unique!')]
 
@@ -275,10 +279,13 @@ class kg_service_order(osv.osv):
 			'pricelist_id': supplier.property_product_pricelist_purchase.id,
 			'partner_address' : address,
 			}}
-			
+	
+	def write(self, cr, uid, ids, vals, context=None):		
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(kg_service_order, self).write(cr, uid, ids, vals, context)
+				
 	def button_dummy(self, cr, uid, ids, context=None):
 		return True
-	
 	
 	def draft_order(self, cr, uid, ids,context=None):		
 		self.write(cr,uid,ids,{'state':'draft'})
@@ -287,6 +294,8 @@ class kg_service_order(osv.osv):
 	def confirm_order(self, cr, uid, ids,context=None):
 		service_line_obj = self.pool.get('kg.service.order.line')
 		today_date = datetime.date(today)
+		rec = self.browse(cr,uid,ids[0])
+		
 		for t in self.browse(cr,uid,ids):
 			date_order = t.date
 			date_order1 = datetime.strptime(date_order, '%Y-%m-%d')
@@ -316,8 +325,16 @@ class kg_service_order(osv.osv):
 				product_tax_amt = self._amount_line_tax(cr, uid, line, context=context)
 				cr.execute("""update kg_service_order_line set product_tax_amt = %s where id = %s"""%(product_tax_amt,line.id))	
 				service_line_obj.write(cr,uid,line.id,{'state':'confirm'})		
-			self.write(cr,uid,ids,{'state':'confirm','confirmed_by':uid,'confirmed_date':time.strftime('%Y-%m-%d'),
-								'so_reonly_flag':'True','name': self.pool.get('ir.sequence').get(cr, uid, 'kg.service.order'),})
+			seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.service.order')])
+			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,rec.date))
+			seq_name = cr.fetchone();
+			self.write(cr,uid,ids,{ 'state':'confirm',
+									'confirmed_by':uid,
+									'confirmed_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+								    'so_reonly_flag':'True',
+								    'name': seq_name[0],
+								    })
 			#cr.execute("""select all_transaction_mails('Serive Order Approval',%s)"""%(ids[0]))
 			"""Raj
 			data = cr.fetchall();
@@ -357,7 +374,7 @@ class kg_service_order(osv.osv):
 			else:
 				pass	
 		text_amount = number_to_text_convert_india.amount_to_text_india(rec.amount_total,"INR:")
-		self.write(cr,uid,ids,{'state':'approved','approved_by':uid,'text_amt':text_amount,'approved_date':fields.date.context_today(self,cr,uid,context=context)})
+		self.write(cr,uid,ids,{'state':'approved','approved_by':uid,'text_amt':text_amount,'approved_date':time.strftime('%Y-%m-%d %H:%M:%S')})
 		obj = self.browse(cr,uid,ids[0])
 		product_obj = self.pool.get('product.product')
 		cr.execute(""" select serindent_line_id from kg_serindent_so_line where so_id = %s """ %(str(ids[0])))
@@ -422,7 +439,7 @@ class kg_service_order(osv.osv):
 		cr.close()
 		
 	def cancel_order(self, cr, uid, ids, context=None):		
-		self.write(cr, uid,ids,{'state' : 'cancel'})
+		self.write(cr, uid,ids,{'state' : 'cancel','cancel_date':time.strftime('%Y-%m-%d %H:%M:%S'),'cancel_user_id':uid})
 		return True
 			
 	def unlink(self, cr, uid, ids, context=None):

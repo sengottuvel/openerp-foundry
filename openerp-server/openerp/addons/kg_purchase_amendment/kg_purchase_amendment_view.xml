@@ -3,7 +3,7 @@
     <data>
         <!--
           =====================
-          master Form view
+          Form view
           =====================
         -->
 
@@ -16,7 +16,7 @@
 		<header>
                 <button name="approve_amend" states="confirm" string="Approve" type="object" class="oe_highlight" />
                 <button name="confirm_amend" states="draft" string="Confirm" type="object" class="oe_highlight"/>
-                <button name="cancel_amend" states="draft,confirm,amend" string="Cancel" type="object" class="oe_highlight" groups="kg_inventory_users.group_kg_main_user"/>
+                <button name="cancel_amend" states="draft,confirm,amend" string="Cancel" type="object" class="oe_highlight"/>
 			<!--	<button name="approve_amend" states="confirm" string="Approve" type="object" class="oe_highlight" /> 
                 <button name="cancel_amend" states="confirm,done" string="Cancel" type="object" class="oe_highlight"/> -->
                 <button name="make_amend" string="Load PO Data" type="object" class="oe_highlight"
@@ -26,8 +26,6 @@
 		</header>
 				<group>
                     <group>
-					.
-					<field name="created_by" readonly="1"/>
                     <field name="name" required="1"/>
                     <field name="po_id" attrs = "{'readonly':[('amend_flag','=',True)]}"
 									on_change="onchange_poid(po_id, pricelist_id)"/>
@@ -39,7 +37,6 @@
                      <field name="price"/>
                     <field name="delivery_address" invisible="1"/>
                     <field name="bill_type" />
-                   
                     <field name="payment_mode"/>
                     <field name="delivery_type" invisible="1"/>
                     <field name="delivery_mode"/>
@@ -50,31 +47,21 @@
 					<field name="po_expenses_type2" invisible="1"/>
                     <field name="value2" invisible="1"/>
                     <field name="amend_flag" invisible="1"/>
-                    
-                    
-                    <field name="confirmed_by" readonly="1"/>
-                    <field name="approved_by" readonly="1"/>
-                    <field name="state" readonly="1"/>
+                    <field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
                     <field name="pricelist_id" invisible="1"/>
                     <field name="grn_flag" invisible="1"/>
-                    
-
                     </group>
                     <group>
-					<field name="creation_date" readonly="1"/>	 
                     <field name="date" required="1" attrs = "{'readonly':[('state','!=','amend')]}"/>
                     <field name="active"/>
-
 					<field name="po_date_amend"/>
 					<field name="quot_ref_no_amend"/>
-                    
                     <field name="partner_id_amend" on_change="onchange_partner_id(partner_id_amend,add_text_amend)"/>
                     <field name="add_text_amend"/>
                     <field name="dep_project_name_amend"/>
                     <field name="price_amend"/>
                     <field name="delivery_address_amend" invisible="1"/>
                     <field name="bill_type_amend"/>
-                   
                     <field name="payment_mode_amend"/>
                     <field name="delivery_type_amend" invisible="1"/>
                     <field name="delivery_mode_amend"/>
@@ -84,9 +71,6 @@
                     <field name="value1_amend" invisible="1"/>
 					<field name="po_expenses_type2_amend" invisible="1"/>
                     <field name="value2_amend" invisible="1"/>
-                    
-                    <field name="confirmed_date" readonly="1"/>
-                    <field name="approved_date" readonly="1"/>
                     </group>
 				</group>
 				
@@ -102,21 +86,38 @@
 								<field name="kg_discount_amend" invisible="1"/>
 								<field name="taxes_id_amend" widget="many2many_tags" invisible="1"/>
 								<field name="price_subtotal"/>
-								
 							</tree>
                    </field>				
 				<field name="terms" class="oe_inline" placeholder="Terms and conditions..."/>
 				</page>		
-				
-				
-				
 				<page string="Remarks">					
 					<field name="remark"/>				
 				</page>
 				<page string="Cancel Remarks" attrs = "{'invisible':[('state','=','approved')]}">					
 					<field name="cancel_note" attrs = "{'readonly':[('state','=','cancel')]}"/>				
 				</page>
-			
+				<page string="Entry Info">
+					<group>
+						<field name="company_id"/>
+					</group>
+					
+					<group>
+						<group>
+							<field name="created_by"/>
+							<field name="confirmed_by" attrs="{'invisible':[('state','in',['draft','amend'])]}"/>
+							<field name="approved_by" attrs="{'invisible':[('state','in',['draft','amend','confirm'])]}"/>
+							<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft','amend','confirm','approved'])]}"/>
+							<field name="update_user_id"/>
+						</group>
+						<group>
+							<field name="creation_date"/>
+							<field name="confirmed_date" attrs="{'invisible':[('state','in',['draft','amend'])]}"/>
+							<field name="approved_date" attrs="{'invisible':[('state','in',['draft','amend','confirm'])]}"/>
+							<field name="cancel_date" attrs="{'invisible':[('state','in',['draft','amend','confirm','approved'])]}"/>
+							<field name="update_date"/>
+						</group>
+					</group>
+				</page>
 				</notebook>		
 				
 			</form>
@@ -154,7 +155,6 @@
 							
 							<field name="product_uom"/>
 							<field name="pi_line_id"/>
-							
 							<field name="product_qty_amend"
 								on_change="onchange_qty(product_qty,product_qty_amend,pending_qty,pending_qty_amend)" required="1"/>
 							<field name="brand_id_amend"/>	
@@ -188,7 +188,7 @@
 
         <!--
         =====================
-        master Tree view
+        Tree view
         =====================
         -->
         <record id="view_kg_poamendment_tree" model="ir.ui.view">
@@ -211,9 +211,35 @@
             </field>
         </record>
        
+       <!-- Search View Start -->
+
+		<record id="t_search_v_purchase_amend" model="ir.ui.view">
+            <field name="name">Purchase Amend Search</field>
+            <field name="model">kg.purchase.amendment</field>
+            <field name="arch" type="xml">
+                <search string="Purchase Amendment Search">
+					<field name="name" string="Amendment No" filter_domain="[('name','ilike',self)]" />
+					<field name="partner_id" string="Supplier" filter_domain="[('partner_id','ilike',self)]" />
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="amend" string="Processing" domain="[('state','=','amend')]"/>					
+					<filter icon="terp-check" name="confirm" string="Confirmed" domain="[('state','=','confirm')]"/>					
+					<filter icon="terp-check" name="approved" string="Approved" domain="[('state','=','approved')]"/>					
+					<filter icon="terp-check" name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>					
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="Supplier" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'partner_id'}"/>
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+                        <filter string="Amendment Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'date'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->
+	
        <!--
         =====================
-        master Form Action
+        Form Action
         ===================== -->
 
 
@@ -223,23 +249,9 @@
 			<field name="res_model">kg.purchase.amendment</field>
 			<field name="view_type">form</field>
 			<field name="view_id" ref="view_kg_poamendment_tree"/>
+			<field name="search_view_id" ref="t_search_v_purchase_amend"/>
 	</record>
 	
-	
-	
-        <!--
-        =====================
-        master Menu Item
-        =====================
-        -->
-	<!--<menuitem 
-	
-            id="menu_kg_poamendment" 
-            name="PO Amendment" 
-            parent="purchase.menu_procurement_management"
-            sequence="16"
-            action="action_kg_poamendment_form"/>-->
-           
-	
+      	
     </data>
 </openerp>

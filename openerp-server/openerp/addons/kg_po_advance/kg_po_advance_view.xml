@@ -9,63 +9,75 @@
 			<field name="model">kg.po.advance</field>
 			<field name="arch" type="xml">
 				<form string="PO Advance" version="7.0">
-				
 				<header>
-					<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" groups="kg_inventory_users.group_kg_main_user"/>
-					<button name="entry_approve" type="object" string="Approve" attrs="{'invisible': [('state','!=','confirmed')]}" class="oe_highlight" groups="kg_inventory_users.group_kg_main_user"/>
+					<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" />
+					<button name="entry_approve" type="object" string="Approve" attrs="{'invisible': [('state','!=','confirmed')]}" class="oe_highlight"/>
 					<button name="entry_draft" type="object" string="Set Draft" states="cancel" class="oe_highlight"/>
 					<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 					<button name="entry_cancel" type="object" string="Cancel" states="approved" class="oe_highlight"/>
-					
 				</header>
-					
 					<group>
 						<group>
-							<field name="created_by"/>
 							<field name="name"/>
 							<field name="supplier_id"/>
 							<field name="po_id" on_change = "onchange_po_id(po_id,advance_amt)"/>
 							<field name="advance_amt" on_change = "onchane_adv_amt(po_id,advance_amt,net_amt)"/>
 							<field name="bal_adv" />
-							<field name="conf_user_id" attrs="{'invisible': [('confirm_flag','=',False)]}"/>
-							<field name="app_user_id" attrs="{'invisible': [('approve_flag','=',False)]}"/>
 							<field name="confirm_flag" invisible="1"/>
 							<field name="approve_flag" invisible="1"/>
 							<field name="active"/>	
 						</group>
 						<group>
-							<field name="creation_date"/>
 							<field name="advance_date"/>
 							<field name="net_amt"/>
 							<field name="balance_advance_amt"/>
 							<field name="amt_paid_so_far"/>
-							<field name="confirmed_date" attrs="{'invisible': [('confirm_flag','=',False)]}"/>
-							<field name="approved_date" attrs="{'invisible': [('approve_flag','=',False)]}"/>
-							<field name="state" invisible="1"/>
+							<field name="state" style="width: 30%%" class="att_state_change"/>
 							<field name="line_state" invisible="1"/>
 						</group>
 					</group>
 					<separator string = "PO Advance Details"/>
 					<button name="load_po_details" type="object" string="Load PO Advance Details" attrs="{'invisible':[('confirm_flag','=',True)]}"/>
-					<group>
-						<group>
+					<notebook>
+						<page string="Advance Details">
 							<field name="line_ids" nolabel="1">
 								<tree editable="bottom">
 									<field name="advance_no" />
 									<field name="advance_date" />
 									<field name="adv_amt" />
 									<field name="balance_net_amt" />
-									
 								</tree>
 							</field>
-						</group>
-					</group>
+						</page>
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<group>
+									<field name="created_by"/>
+									<field name="conf_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="rej_user_id" attrs="{'invisible':[('state','not in',['reject'])]}"/>
+									<field name="app_user_id" attrs="{'invisible':[('state','in',['draft','rejected','confirmed'])]}"/>
+									<field name="can_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="creation_date"/>
+									<field name="confirmed_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="reject_date" attrs="{'invisible':[('state','not in',['reject'])]}"/>
+									<field name="approved_date" attrs="{'invisible':[('state','in',['draft','rejected','confirmed'])]}"/>
+									<field name="cancel_date" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>
 					<group>
 						<field name="remark" placeholder="Remarks"/>
 					</group>
 					</form>
 			</field> 
-	  
 
 		</record>
 		
@@ -83,15 +95,12 @@
 					<field name="name"/>
 					<field name="po_id"/>
 					<field name="advance_date"/>
-					<field name="created_by"/>
-					<field name="creation_date"/>
+					<field name="supplier_id"/>
 					<field name="state"/>
 				</tree>
 			</field>
 		</record>
 		
-	
-	 
 	<!-- Search View -->
 		
 	<record id="po_advance_search_view" model="ir.ui.view">
@@ -100,14 +109,15 @@
 		<field name="arch" type="xml">
 			<search string="PO Advance">
 				<field name="name" string="Advance No" filter_domain="[('name','ilike',self)]"/>
+				<field name="supplier_id" string="Supplier" filter_domain="[('supplier_id','ilike',self)]"/>
 				<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
 				<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>
 				<filter icon="terp-check" name="approved" string="Approved" domain="[('state','=','approved')]"/>
 				<separator/>
 				<group expand="0" string="Group By...">
-					<filter string="Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'advance_date'}"/>
-					<filter string="Created By" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'created_by'}"/>
+					<filter string="Supplier" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'supplier_id'}"/>
 					<filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+					<filter string="Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'advance_date'}"/>
 				</group>
 			</search>
 		</field>
@@ -125,16 +135,6 @@
 			<field name="search_view_id" ref="po_advance_search_view"/>
 		</record>
 			 
-	 <!-- Menu Items -->
-		
-			<!--<menuitem id="kg_advance_menu" name="Advance"
-						parent="base.menu_purchase_root" sequence="4" />
-			<menuitem 
-				id="menu_kg_po_advance" 
-				name="PO Advance" 
-				parent="kg_advance_menu"
-				sequence="1"
-				action="kg_po_advance_action_form"/>-->
 
 </data>
 	</openerp>

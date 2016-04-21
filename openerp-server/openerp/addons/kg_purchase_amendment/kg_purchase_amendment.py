@@ -19,7 +19,6 @@ class kg_purchase_amendment(osv.osv):
 	
 	_name = "kg.purchase.amendment"	
 	_order = "date desc"
-
 	
 	def _amount_line_tax(self, cr, uid, line, context=None):
 		val = 0.0
@@ -74,14 +73,12 @@ class kg_purchase_amendment(osv.osv):
 	
 	_columns = {
 		
-		
 		'name': fields.char('Amendment NO', size=128, readonly=True),
 		'date':fields.date('Amendment Date',readonly=False,states={'draft':[('readonly',False)]}),
 		'po_id':fields.many2one('purchase.order','PO.NO', required=True,
 			domain="[('state','=','approved'),'&',('order_line.line_state','!=','cancel'),'&',('order_line.line_bill','=', False),'&',('order_line.pending_qty','>',0)]",
 			readonly=True,states={'amend':[('readonly',False)]}),
 		'po_date':fields.date('PO Date', readonly=True),
-		'po_date_amend':fields.date('Amend PO Date',states={'draft':[('readonly',False)]}),
 		'partner_id':fields.many2one('res.partner', 'Supplier', readonly=True),
 		'pricelist_id':fields.many2one('product.pricelist', 'Pricelist', required=True, states={'confirmed':[('readonly',True)], 'approved':[('readonly',True)]}),
 		'currency_id': fields.related('pricelist_id', 'currency_id', type="many2one", relation="res.currency", string="Currency",readonly=True, required=True),
@@ -105,12 +102,8 @@ class kg_purchase_amendment(osv.osv):
 		'amend_flag':fields.boolean('Amend Flag'),
 		'state':fields.selection([('draft', 'Draft'),('amend', 'Processing'),('confirm', 'Confirmed'),('approved', 'Approved'),('cancel','Cancel')], 'Status'),
 		'amendment_line':fields.one2many('kg.purchase.amendment.line', 'amendment_id', 'Amendment Line'),
-		
 		'add_text': fields.text('Address',readonly=True),
-		'add_text_amend': fields.text('Amend Address'),
-		
 		'delivery_address':fields.text('Delivery Address'),
-				
 		'other_charge': fields.float('Other Charges(+)',readonly=True),
 		'discount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Discount(-)',
 			store={
@@ -135,18 +128,20 @@ class kg_purchase_amendment(osv.osv):
 			}, multi="sums",help="The total amount"),
 		'grn_flag': fields.boolean('GRN'),
 		
-			
 		# Amendment Fields:
-		'partner_id_amend':fields.many2one('res.partner', 'Amend Supplier'),
+		
+		'po_date_amend':fields.date('Amend PO Date',readonly=False,states={'approved':[('readonly',True)]}),
+		'quot_ref_no_amend':fields.char('Amend Your Quot. Ref.',readonly=False,states={'approved':[('readonly',True)]}),
+		'partner_id_amend':fields.many2one('res.partner', 'Amend Supplier',readonly=False,states={'approved':[('readonly',True)]}),
+		'add_text_amend': fields.text('Amend Address',readonly=False,states={'approved':[('readonly',True)]}),
+		'dep_project_name_amend':fields.char('Amend Dept/Project Name',readonly=False,states={'approved':[('readonly',True)]}),
+		'price_amend':fields.selection([('inclusive','Inclusive of all Taxes and Duties')], 'Amend Price',readonly=False,states={'approved':[('readonly',True)]}),
 		'delivery_address_amend':fields.text('Amend Delivery Address'),
-		'bill_type_amend': fields.selection([('cash','Cash Bill'),('credit','Credit Bill')], 'Amend Bill Type', 
-			states={'confirm':[('readonly', True)]}),
-		'payment_mode_amend': fields.many2one('kg.payment.master',
-			'Amend Mode of Payment', states={'confirm':[('readonly', True)]}),
+		'bill_type_amend': fields.selection([('cash','Cash Bill'),('credit','Credit Bill')], 'Amend Bill Type',readonly=False,states={'approved':[('readonly',True)]}),
+		'payment_mode_amend': fields.many2one('kg.payment.master','Amend Mode of Payment',readonly=False,states={'approved':[('readonly',True)]}),
 		'delivery_type_amend':fields.many2one('kg.deliverytype.master', 'Amend Delivery Schedule',
 					states={'confirm':[('readonly', True)]}),
-		'delivery_mode_amend': fields.many2one('kg.delivery.master', 'Amend Delivery Type',
-			states={'confirm':[('readonly', True)]}),
+		'delivery_mode_amend': fields.many2one('kg.delivery.master', 'Amend Delivery Type',readonly=False,states={'approved':[('readonly',True)]}),
 		'po_expenses_type1_amend': fields.selection([('freight','Freight Charges'),('others','Others')], 'Amend Expenses Type1',
 			states={'confirm':[('readonly', True)]}),
 		'po_expenses_type2_amend': fields.selection([('freight','Freight Charges'),('others','Others')], 'Amend Expenses Type2',
@@ -155,28 +150,25 @@ class kg_purchase_amendment(osv.osv):
 		'value2_amend':fields.float('Amend Value2', states={'confirm':[('readonly', True)]}),
 		'remark': fields.text('Remarks', states={'confirm':[('readonly', True)]}),
 		'terms': fields.text('Terms & Conditions', states={'confirm':[('readonly', True)]}),
-		'term_warranty_amend':fields.char('Amend Warranty', states={'confirm':[('readonly', True)]}),
+		'term_warranty_amend':fields.char('Amend Warranty',readonly=False,states={'approved':[('readonly',True)]}),
 		'term_freight_amend':fields.selection([('Inclusive','Inclusive'),('Extra','Extra'),('To Pay','To Pay'),('Paid','Paid'),
-						  ('Extra at our Cost','Extra at our Cost')], 'Amend Freight', states={'confirm':[('readonly', True)]}),
-		'quot_ref_no_amend':fields.char('Amend Your Quot. Ref.', states={'confirm':[('readonly', True)]}),
-		'price_amend':fields.selection([('inclusive','Inclusive of all Taxes and Duties')], 'Amend Price', states={'confirm':[('readonly', True)]}),
-		'created_by':fields.many2one('res.users','Created By',readonly=True),
-		'creation_date':fields.datetime('Creation Date',readonly=True),
-		
-		'confirmed_by':fields.many2one('res.users','Confirmed By',readonly=True),
-		'confirmed_date':fields.datetime('Confirmed Date',readonly=True),
-		
-		'approved_by':fields.many2one('res.users','Approved By',readonly=True),
-		'approved_date':fields.datetime('Approved Date',readonly=True),
-		
+						  ('Extra at our Cost','Extra at our Cost')], 'Amend Freight',readonly=False,states={'approved':[('readonly',True)]}),
 		'dep_project_name':fields.char('Dept/Project Name',readonly=True),
-		'dep_project_name_amend':fields.char('Amend Dept/Project Name', states={'confirm':[('readonly', True)]}),
-		
 		'dep_project':fields.many2one('kg.project.master','Dept/Project Name',readonly=True),
 		'dep_project_amend':fields.many2one('kg.project.master','Amend Dept/Project Name', states={'confirm':[('readonly', True)]}),
 		
-			
-		
+		# Entry Info
+		'created_by':fields.many2one('res.users','Created By',readonly=True),
+		'creation_date':fields.datetime('Creation Date',readonly=True),
+		'confirmed_by':fields.many2one('res.users','Confirmed By',readonly=True),
+		'confirmed_date':fields.datetime('Confirmed Date',readonly=True),
+		'approved_by':fields.many2one('res.users','Approved By',readonly=True),
+		'approved_date':fields.datetime('Approved Date',readonly=True),
+		'update_user_id':fields.many2one('res.users','Last Updated By',readonly=True),
+		'update_date':fields.datetime('Last Updated Date',readonly=True),
+		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
+		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		
 	}
 	
@@ -187,15 +179,11 @@ class kg_purchase_amendment(osv.osv):
 	'active' : True,
 	'name' : '/',
 	'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
-	
 	'created_by': lambda obj, cr, uid, context: uid,
 	'pricelist_id': 2,
+	'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.purchase.amendment', context=c),
 	
 	}
-	
-	
-			
-	
 	
 	def onchange_poid(self, cr, uid, ids,po_id, pricelist_id):
 		print "onchange_poid called***************************", ids
@@ -210,7 +198,6 @@ class kg_purchase_amendment(osv.osv):
 		else:
 			print "No Change"
 			
-	
 	def unlink(self, cr, uid, ids, context=None):
 		if context is None:
 			context = {}
@@ -339,7 +326,6 @@ class kg_purchase_amendment(osv.osv):
 						'term_freight':po_order.term_freight,
 						'term_freight_amend':po_order.term_freight,
 						'amendment_line' : [],
-							
 						'amount_untaxed':po_order.amount_untaxed,
 						'amount_tax':po_order.amount_tax,
 						'amount_total':po_order.amount_total,
@@ -354,11 +340,7 @@ class kg_purchase_amendment(osv.osv):
 			amend_line_obj = self.pool.get('kg.purchase.amendment.line')
 			wf_service = netsvc.LocalService("workflow")
 			order_lines=po_order.order_line
-			self.write(cr,uid,ids[0],{'state':'draft',
-								  
-								  
-								  
-								   })
+			self.write(cr,uid,ids[0],{'state':'draft',})
 			for order_line in order_lines:
 				if order_line.line_state != 'cancel' and order_line.line_bill == False:
 					amend_line = amend_line_obj.create(cr, uid, self._prepare_amend_line(cr, uid, po_order, order_line, amend_id,
@@ -376,7 +358,6 @@ class kg_purchase_amendment(osv.osv):
 				else:
 					print "NO Qty or Cancel"
 				
-
 			wf_service.trg_validate(uid, 'kg.purchase.amendment', amend_id, 'button_confirm', cr)
 			return [amend_id]
 			cr.close()
@@ -412,10 +393,8 @@ class kg_purchase_amendment(osv.osv):
 						raise osv.except_osv(
 						_('If you want to increase PO Qty'),
 						_('Select PI for this Product')) 
-						
 					else:
 						for ele in amend_line.kg_poindent_lines:
-							
 							
 							if ele.product_id.id == amend_line.product_id.id:
 								if (amend_line.product_qty_amend - amend_line.product_qty) <= ele.pending_qty:
@@ -423,17 +402,12 @@ class kg_purchase_amendment(osv.osv):
 									amend_line_obj.write(cr,uid,amend_line.id,{'pi_line_id':ele.id})
 									line_pending = ele.pending_qty - (amend_line.product_qty_amend - amend_line.product_qty)
 									pi_line_obj.write(cr,uid,ele.id,{'pending_qty': line_pending}) 
-								
-									
 								else:
 									raise osv.except_osv(
 										_('Amendment Qty is greater than indent qty'),
 										_('')) 	
-					
 				else:
 					pass
-						
-					
 			else:
 				grn_id = self.pool.get('po.grn.line').search(cr, uid, [('po_line_id','=',amend_line.po_line_id.id)])
 				print "-------------------------------------------------------------grn_id---->",grn_id
@@ -443,30 +417,21 @@ class kg_purchase_amendment(osv.osv):
 					grn_bro = self.pool.get('po.grn.line').browse(cr, uid, grn_id[0])
 					if grn_bro.po_grn_qty <= amend_line.product_qty_amend:
 						pass
-						
-						
 					else:
-						
 						raise osv.except_osv(
 								_('You can not decrease PO Qty'),
 								_('Because GRN is already created'))
-								
 				else:
 					pass
-					
-					
 			if amend_line.product_qty != amend_line.product_qty_amend:
 				if amend_line.pending_qty == 0 and not amend_line.kg_poindent_lines:
 					raise osv.except_osv(
 					_('All Qty has received for this PO !'),
 					_('You can not increase PO Qty for product %s')%(amend_line.product_id.name))
-			
 			else:
 				pass		
-			
-		
-		self.write(cr,uid,ids[0],{'state':'confirm',
-								  
+		self.write(cr,uid,ids[0],{
+								  'state':'confirm',
 								  'confirmed_by':uid,
 								  'confirmed_date':today,
 								  
@@ -483,17 +448,16 @@ class kg_purchase_amendment(osv.osv):
 					_('Please give reason for this cancellation'),
 					_(''))
 		else:	
-	
-		
 			self.write(cr,uid,ids[0],{'state':'cancel'})
-						
 		
 		return True
-		
-		
+	
+	def write(self, cr, uid, ids, vals, context=None):		
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(kg_purchase_amendment, self).write(cr, uid, ids, vals, context)
+			
 	def approve_amend(self,cr,uid,ids,context={}):
 		
-			
 		amend_obj = self.browse(cr,uid,ids[0])
 		po_obj = self.pool.get('purchase.order')
 		product_obj = self.pool.get('product.product')
@@ -590,11 +554,6 @@ class kg_purchase_amendment(osv.osv):
 						raise osv.except_osv(
 						_('If you want to increase PO Qty'),
 						_('Select PI for this Product')) 
-						
-					
-							
-					
-					
 				else:
 					pi_product_qty = pi_line_record.product_qty
 					pi_pending_qty = pi_line_record.pending_qty
@@ -606,7 +565,6 @@ class kg_purchase_amendment(osv.osv):
 						amend_pro_qty = re_qty - pi_pending_qty 
 						pi_product_qty += amend_pro_qty
 						pi_line_obj.write(cr,uid,pol_record.pi_line_id.id,{'pending_qty' : 0,'product_qty' : pi_product_qty})
-					
 			else:
 				grn_id = self.pool.get('po.grn.line').search(cr, uid, [('po_line_id','=',amend_line.po_line_id.id)])
 				print "-------------------------------------------------------------grn_id---->",grn_id
@@ -620,13 +578,10 @@ class kg_purchase_amendment(osv.osv):
 						re_qty = amend_line.product_qty - amend_line.product_qty_amend
 						pi_pending_qty += re_qty
 						pi_line_obj.write(cr,uid,pol_record.pi_line_id.id,{'pending_qty' : pi_pending_qty})
-						
 					else:
-						
 						raise osv.except_osv(
 								_('You can not decrease PO Qty'),
 								_('Because GRN is already created'))
-								
 				else:
 					pi_line_record = pi_line_obj.browse(cr, uid,pol_record.pi_line_id.id)
 					pi_pending_qty = pi_line_record.pending_qty
@@ -656,8 +611,6 @@ class kg_purchase_amendment(osv.osv):
 														 'received_qty':amend_line.received_qty,
 														 })
 				
-			
-					
 			if amend_line.product_qty != amend_line.product_qty_amend:
 				
 				if amend_line.pending_qty == 0 and not amend_line.kg_poindent_lines:
@@ -681,14 +634,11 @@ class kg_purchase_amendment(osv.osv):
 				po_line_obj.write(cr,uid,po_line_id,{
 					'brand_id': amend_line.brand_id_amend.id})	
 
-				
 			if amend_line.kg_discount != amend_line.kg_discount_amend:
 				
 				print "kg_disc_amt_per_amend...................", amend_line.kg_disc_amt_per_amend
 				print "kg_discount_amend...........", amend_line.kg_discount_amend
-				
 				po_line_obj.write(cr,uid,po_line_id,{'kg_discount': amend_line.kg_discount_amend})
-				
 				
 			if amend_line.kg_discount_per != amend_line.kg_discount_per_amend:
 				print "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",amend_line.kg_disc_amt_per_amend
@@ -718,12 +668,9 @@ class kg_purchase_amendment(osv.osv):
 			for i in range(len(val)):
 				print "IIIIIIIIIIIIIIIIIIIII", val[i]
 				cr.execute(""" INSERT INTO purchase_order_taxe (ord_id,tax_id) VALUES(%s,%s) """ %(po_line_id,val[i]))
-					
-				
 			else:
 				print "NO PO Line Changs"
 			amend_line.write({'line_state': 'done'})
-			
 			
 		print "Tax Calculation Methods are Going to Call"
 		
@@ -732,7 +679,6 @@ class kg_purchase_amendment(osv.osv):
 		po_obj._amount_all(cr,uid,[po_id],field_name=None,arg=False,context=None)
 		self.write(cr,uid,ids,{'state' : 'approved' ,'approved_by':uid,
 								  'approved_date':today,})
-		
 		return True
 		cr.close()
 		
@@ -756,7 +702,6 @@ kg_purchase_amendment()
 
 
 class kg_purchase_amendment_line(osv.osv):
-	
 	
 	_name = "kg.purchase.amendment.line"
 	
@@ -835,7 +780,6 @@ class kg_purchase_amendment_line(osv.osv):
 		else:
 			print "NO changes"
 			
-	
 	def onchange_discount_value_calc(self, cr, uid, ids, kg_discount_per_amend,product_qty_amend,price_unit_amend):
 		print "Amend =======>onchange_discount_value_calc called"
 
@@ -910,7 +854,6 @@ class kg_purchase_amendment_line(osv.osv):
 				raise osv.except_osv(_('Invalid Action!'), _('Cannot delete a sales order line which is in state \'%s\'.') %(rec.line_state,))
 		return super(kg_purchase_amendment_line, self).unlink(cr, uid, ids, context=context)	
 		"""
-	
 	
 kg_purchase_amendment_line()
 

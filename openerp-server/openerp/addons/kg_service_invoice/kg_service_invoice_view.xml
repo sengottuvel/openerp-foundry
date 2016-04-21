@@ -3,7 +3,7 @@
     <data>
         <!--
           =====================
-          master Form view
+          Form view
           =====================
         -->
 
@@ -13,7 +13,6 @@
 		<field name="type">form</field>
 		<field name="arch" type="xml">
 		<form string="Service Invoice" version="7.0">
-			
 			<header>
 				<button name="draft_order" states="cancel" string="Draft" type="object" class="oe_highlight"/>
                 <button name="confirm_order" states="draft" string="Confirm" type="object"/>
@@ -21,7 +20,6 @@
                 <button name="cancel_order" states="done" string="Cancle" type="object" class="oe_highlight"/>
                 <button name="so_direct_print" states="done" string="Print SO" type="object" class="oe_highlight"/>
                 <field name="state" widget="statusbar" statusbar_visible="draft,confirm,done,cancel" statusbar_colors='{"draft":"blue"}'/>
-
 			</header>
                 <group>
                     <group>
@@ -30,13 +28,11 @@
                     <field name="user_id" on_change="onchange_user_id(user_id)" invisible="1"/>
                     <field name="service_order_id"/>
                     <field name="service_order_date"/>
-                   
                     <field name="pricelist_id" invisible="1"/>
                     <field name="payment_mode"/>
                     <field name="dep_project"/>
                     <field name="state" readonly="1"/>
-                     <field name="active"/>
-                    
+                    <field name="active"/>
                     </group> 
                     <group>					
 					<field name="date"/>
@@ -45,9 +41,6 @@
 					<field name="supplier_invoice_date"/>
 					<field name="dep_name"/>
 					<field name="payment_type"/>
-					<field name="creation_date"/>
-                   
-                    
                     </group>
 				</group>
 					
@@ -103,11 +96,33 @@
 				<page string="Remarks">
 					<field name="remark"/>				
 				</page>
-				
+				<page string="Entry Info">
+					<group>
+						<field name="company_id"/>
+					</group>
+					<group>
+						<group>
+							<field name="user_id"/>
+							<field name="conf_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+							<field name="rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirm','approved','cancel'])]}"/>
+							<field name="app_user_id" attrs="{'invisible':[('state','in',['draft','confirm'])]}"/>
+							<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirm','approved'])]}"/>
+							<field name="update_user_id"/>
+						</group>
+						<group>
+							<field name="creation_date"/>
+							<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+							<field name="reject_date" attrs="{'invisible':[('state','in',['draft', 'confirm','approved','cancel'])]}"/>
+							<field name="approved_date" attrs="{'invisible':[('state','in',['draft','confirm'])]}"/>
+							<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirm','approved'])]}"/>
+							<field name="update_date"/>
+						</group>
+					</group>
+				</page>
 				</notebook>		
 			</form>
 		</field>
-	</record>
+		</record>
         
         <!-- Service Invoice Line Form  View -->
         
@@ -144,7 +159,7 @@
 
         <!--
         =====================
-        master Tree view
+        Tree view
         =====================
         -->
         <record id="view_kg_serviceinv_tree" model="ir.ui.view">
@@ -158,16 +173,14 @@
                     <field name="dep_name"/>
                     <field name="user_id"/>
 					<field name="state"/>
-
                 </tree> 
             </field>
         </record>
        
        <!--
         =====================
-        master Form Action
+        Form Action
         ===================== -->
-
 
 	<record id="action_kg_serviceinv_form" model="ir.actions.act_window">
 			<field name="name">Direct Service Bill</field>
@@ -177,13 +190,6 @@
 			<field name="view_id" ref="view_kg_serviceinv_tree"/>
 	</record>
 	
-	
-        <!--
-        =====================
-        master Menu Item
-        =====================
-        -->
-        
 	
     </data>
 </openerp>

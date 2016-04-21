@@ -76,8 +76,8 @@ class kg_service_invoice(osv.osv):
 			result[line.service_id.id] = True
 		return result.keys()
 	
-	
 	_columns = {
+	
 		'name': fields.char('Service Bill No', size=64,readonly=True, states={'draft': [('readonly', False)]}),
 		'dep_name': fields.many2one('kg.depmaster','Dep.Name', translate=True, select=True,readonly=True, states={'draft': [('readonly', False)]}),
 		'date': fields.date('Date', required=True, readonly=True),
@@ -88,7 +88,6 @@ class kg_service_invoice(osv.osv):
 		'service_invoice_line': fields.one2many('kg.service.invoice.line', 'service_id', 'Order Lines', 
 					readonly=True, states={'draft':[('readonly',False)]}),
 		'active': fields.boolean('Active'),
-		'user_id' : fields.many2one('res.users', 'User', readonly=True),
 		'state': fields.selection([('draft', 'Draft'),('confirm','Waiting For Approval'),('approved','Approved'),('done','Done'),('cancel','Cancel')], 'Status', track_visibility='onchange'),
 		'payment_mode': fields.many2one('kg.payment.master', 'Mode of Payment', 
 		          required=True, readonly=True, states={'draft':[('readonly',False)]}),
@@ -121,7 +120,6 @@ class kg_service_invoice(osv.osv):
 			store=True, multi="sums",help="The total amount"),
 		
 		'remark': fields.text('Remarks', readonly=True, states={'draft': [('readonly', False)]}),
-		'creation_date':fields.datetime('Creation Date', readonly=True),
 		'service_order_id':fields.many2one('kg.service.order','Service Order No', readonly=True),
 		'service_order_date':fields.date('Service Order Date', readonly=True),
 		'supplier_invoice_no':fields.char('Supplier Invoice No',readonly=True, states={'draft': [('readonly', False)]} ),
@@ -129,9 +127,25 @@ class kg_service_invoice(osv.osv):
 		'payment_type': fields.selection([('cash', 'Cash'), ('credit', 'Credit')], 'Payment Type',states={'draft':[('readonly',False)]}),
 		'dep_project':fields.many2one('kg.project.master','Dept/Project Name',readonly=True,states={'draft': [('readonly', False)]}),	
 		'expense_line_id': fields.one2many('kg.service.invoice.expense.track','expense_id','Expense Track'),
-	
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
+		
+		# Entry Info
+		'user_id' : fields.many2one('res.users', 'User', readonly=True),
+		'creation_date':fields.datetime('Creation Date', readonly=True),
+		'conf_user_id' : fields.many2one('res.users', 'Confirmed By', readonly=True),
+		'confirm_date': fields.datetime('Confirmed Date',readonly=True),
+		'reject_date': fields.datetime('Reject Date', readonly=True),
+		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
+		'app_user_id' : fields.many2one('res.users', 'Approved By', readonly=True),
+		'approved_date' : fields.datetime('Approved Date',readonly=True),
+		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
+		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
+		'update_date' : fields.datetime('Last Updated Date',readonly=True),
+		'update_user_id' : fields.many2one('res.users','Last Updated By',readonly=True),
+		
 	}
-	_sql_constraints = [('code_uniq','unique(name)', 'Service Order number must be unique!')]
+	
+	#~ _sql_constraints = [('code_uniq','unique(name)', 'Service Order number must be unique!')]
 
 	_defaults = {
 		'state' : 'draft',
@@ -139,7 +153,8 @@ class kg_service_invoice(osv.osv):
 		'date' : fields.date.context_today,
 		'user_id': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).id ,
 		'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
-
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.service.invoice', context=c),
+		
 	}
 	
 	def onchange_partner_id(self, cr, uid, ids, partner_id):
@@ -152,7 +167,7 @@ class kg_service_invoice(osv.osv):
 		supplier_address = partner.address_get(cr, uid, [partner_id], ['default'])
 		supplier = partner.browse(cr, uid, partner_id)
 		street = supplier.street or ''
-		city = supplier.city.name or ''
+		city = supplier.city_id.name or ''
 		address = street+ city or ''
 
 		return {'value': {
@@ -163,7 +178,10 @@ class kg_service_invoice(osv.osv):
 	def button_dummy(self, cr, uid, ids, context=None):
 		return True
 	
-	
+	def write(self, cr, uid, ids, vals, context=None):		
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(kg_service_invoice, self).write(cr, uid, ids, vals, context)
+		
 	def draft_order(self, cr, uid, ids,context=None):
 		"""
 		Draft Order
@@ -188,12 +206,20 @@ class kg_service_invoice(osv.osv):
 					_('Error'),
 					_('Service invoice quantity can not be zero'))			
 					
-			self.write(cr,uid,ids,{'state':'confirm'})
+			self.write(cr,uid,ids,{ 'state':'confirm',
+									'conf_user_id': uid,
+									'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+									
+									})
 			return True
 			
 	def approve_order(self, cr, uid, ids,context=None):
 		
-		self.write(cr,uid,ids,{'state':'approved'})
+		self.write(cr,uid,ids,{ 'state':'approved',
+								'app_user_id': uid,
+								'approved_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								
+								})
 		return True		
 	
 		
@@ -202,7 +228,11 @@ class kg_service_invoice(osv.osv):
 		Cancel order
 		"""
 		
-		self.write(cr, uid,ids,{'state' : 'cancel'})
+		self.write(cr, uid,ids,{'state' : 'cancel',
+								'cancel_user_id': uid,
+								'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								
+								})
 		return True
 
 		
@@ -221,7 +251,6 @@ class kg_service_invoice(osv.osv):
 		osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
 		return True
 
-		
 	def onchange_user_id(self, cr, uid, ids, user_id, context=None):
 		value = {'dep_name': ''}
 		if user_id:
@@ -229,8 +258,6 @@ class kg_service_invoice(osv.osv):
 			value = {'dep_name': user.dep_name.id}
 		return {'value': value}		
 	
-	
-			
 	def so_direct_print(self, cr, uid, ids, context=None):
 		assert len(ids) == 1, 'This option should only be used for a single id at a time'
 		wf_service = netsvc.LocalService("workflow")
@@ -241,8 +268,6 @@ class kg_service_invoice(osv.osv):
 				 'form': self.read(cr, uid, ids[0], context=context),
 		}
 		return {'type': 'ir.actions.report.xml', 'report_name': 'service.order.report', 'datas': datas, 'nodestroy': True}
-		
-			
 	
 	## The below part for create SO bill from SO ##
 	
@@ -272,8 +297,6 @@ class kg_service_invoice(osv.osv):
 		else:
 			return map(lambda x: x.id, taxes)	
 	
-		
-
 kg_service_invoice()
 
 class kg_service_invoice_line(osv.osv):
@@ -294,7 +317,6 @@ class kg_service_invoice_line(osv.osv):
 			value = {'product_uom': prod.uom_id.id}
 		return {'value': value}
 	
-		
 	def _amount_line(self, cr, uid, ids, prop, arg, context=None):
 		cur_obj=self.pool.get('res.currency')
 		tax_obj = self.pool.get('account.tax')
@@ -311,13 +333,11 @@ class kg_service_invoice_line(osv.osv):
 			res[line.id] =  taxes['total']
 		return res
 	
-	
-	
 	_columns = {
 
 	'service_id': fields.many2one('kg.service.invoice', 'Service.order.NO', required=True, ondelete='cascade'),
 	'price_subtotal': fields.function(_amount_line, string='Linetotal', digits_compute= dp.get_precision('Account')),
-	'product_id': fields.many2one('product.product', 'Product',required=True,domain=[('type','=','service')]),
+	'product_id': fields.many2one('product.product', 'Product',required=True),
 	'product_uom': fields.many2one('product.uom', 'UOM', required=True),
 	'product_qty': fields.float('Quantity', required=True),
 	'soindent_qty':fields.float('SOIndent Qty'),
@@ -330,7 +350,6 @@ class kg_service_invoice_line(osv.osv):
 	'kg_discount_per': fields.float('Discount (%)', digits_compute= dp.get_precision('Discount')),
 	'kg_discount_per_value': fields.float('Discount(%)Value', digits_compute= dp.get_precision('Discount')),
 	'note': fields.text('Remarks'),
-	
 	
 	}
 	
@@ -345,7 +364,6 @@ class kg_service_invoice_line(osv.osv):
 		else:
 			return {'value': {'kg_disc_amt_per': 0.0}}
 		
-	
 kg_service_invoice_line()	
 
 
@@ -353,7 +371,6 @@ class kg_service_invoice_expense_track(osv.osv):
 
 	_name = "kg.service.invoice.expense.track"
 	_description = "kg expense track"
-	
 	
 	_columns = {
 		

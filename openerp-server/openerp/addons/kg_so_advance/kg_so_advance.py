@@ -31,32 +31,15 @@ class kg_so_advance(osv.osv):
 	_description = "SO Advance"
 	_columns = {
 	
-		'created_by' : fields.many2one('res.users', 'Created By', readonly=True),
-		'creation_date':fields.datetime('Creation Date',required=True,readonly=True),
-		
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),		
-		
-		'approved_date': fields.datetime('Approved Date', readonly=True),
-		'app_user_id': fields.many2one('res.users', 'Approved By', readonly=True),
-		
-		'confirmed_date': fields.datetime('Confirmed Date', readonly=True),
-		'conf_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
-		
-		'reject_date': fields.datetime('Rejected Date', readonly=True),
-		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
-		
-		'cancel_date': fields.datetime('Canceled Date', readonly=True),
-		'can_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
-		
 		'confirm_flag':fields.boolean('Confirm Flag'),
 		'approve_flag':fields.boolean('Expiry Flag'),
-		
 		'name':fields.char('Advance No',readonly=True),
 		'advance_date':fields.date('Advance Date',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'state': fields.selection([('draft','Draft'),('confirmed','Waiting for approval'),('approved','Approved'),('update','Update'),
 				('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True,track_visibility='onchange',select=True),
 		'line_ids':fields.one2many('kg.so.advance.line','advance_header_id','Line Id',readonly=True),
-		'active': fields.boolean('Active',readonly=True),
+		'active': fields.boolean('Active'),
 		'remark': fields.text('Remarks',readonly=True, states={'draft':[('readonly',False)]}),
 		'supplier_id':fields.many2one('res.partner','Supplier',required=True,readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'so_id':fields.many2one('kg.service.order','SO No',
@@ -69,6 +52,20 @@ class kg_so_advance(osv.osv):
 		'amt_paid_so_far':fields.float('Advance Paid So far',readonly=True),
 		'bal_adv':fields.float('Balance Advance',readonly=True),
 		'line_state':fields.selection([('draft','Draft'),('loaded','Loaded')],'Status'),
+		
+		# Entry Info
+		'created_by' : fields.many2one('res.users', 'Created By', readonly=True),
+		'creation_date':fields.datetime('Creation Date',required=True,readonly=True),
+		'approved_date': fields.datetime('Approved Date', readonly=True),
+		'app_user_id': fields.many2one('res.users', 'Approved By', readonly=True),
+		'confirmed_date': fields.datetime('Confirmed Date', readonly=True),
+		'conf_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
+		'reject_date': fields.datetime('Rejected Date', readonly=True),
+		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
+		'cancel_date': fields.datetime('Canceled Date', readonly=True),
+		'can_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
+		'update_date' : fields.datetime('Last Updated Date',readonly=True),
+		'update_user_id' : fields.many2one('res.users','Last Updated By',readonly=True),
 		
 	}
 	
@@ -130,7 +127,6 @@ class kg_so_advance(osv.osv):
 		else:
 			return True
 	
-	
 	_constraints = [        
               
         (_check_adv_amt, 'System not allow to save SO Advance with Advance Amount as Zero .!!',['amount']),
@@ -138,6 +134,10 @@ class kg_so_advance(osv.osv):
         
        ]
 	
+	def write(self, cr, uid, ids, vals, context=None):		
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(kg_so_advance, self).write(cr, uid, ids, vals, context)
+		
 	def load_so_details(self,cr,uid,ids,context = None):
 		rec = self.browse(cr,uid,ids[0])
 		adv_amt = 0.00
@@ -220,16 +220,20 @@ class kg_so_advance(osv.osv):
 				raise osv.except_osv(
 					_('Please check the advance amount.'),
 					_('Advance Amount Should not be greater than Net Amount!'))
-					
+		seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.so.advance')])
+		seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+		cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,advance_rec.advance_date))
+		seq_name = cr.fetchone();			
 		self.write(cr,uid,ids[0],{'state':'confirmed',
 								  'confirm_flag':'True',
 								  'conf_user_id':uid,
 								  'confirmed_date':dt_time,
 								  'balance_advance_amt':bal_amt,
 								  'amt_paid_so_far':adv_amt,
-								  'name': self.pool.get('ir.sequence').get(cr, uid, 'kg.so.advance') or '',
+								  'name': seq_name[0]
 								   })
-		cr.execute("""select all_transaction_mails('SO Advance Approval',%s)"""%(ids[0]))
+		#cr.execute("""select all_transaction_mails('SO Advance Approval',%s)"""%(ids[0]))
+		"""Raj
 		data = cr.fetchall();
 		vals = self.email_ids(cr,uid,ids,context = context)
 		if (not vals['email_to']) or (not vals['email_cc']):
@@ -246,49 +250,52 @@ class kg_so_advance(osv.osv):
 					subtype = 'html',
 					subtype_alternative = 'plain')
 			res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)						   
+		"""
 		return True	
 	
 	def entry_approve(self, cr, uid, ids,context=None):
 		advance_rec = self.browse(cr,uid,ids[0])
-		if advance_rec.conf_user_id.id == uid:
-				raise osv.except_osv(
-						_('Warning'),
-						_('Approve cannot be done by same user'))
+		#~ if advance_rec.conf_user_id.id == uid:
+				#~ raise osv.except_osv(
+						#~ _('Warning'),
+						#~ _('Approve cannot be done by same user'))
+		#~ else:
+		adv_amt = 0.00
+		cr.execute("""select name,advance_date,advance_amt,net_amt from kg_so_advance where so_id = %s and state = 'approved'"""%(advance_rec.so_id.id))
+		data = cr.dictfetchall()
+		adv_amt = 0.00
+		for pre_rec in data:
+			adv_amt += pre_rec['advance_amt']
+		#adv_amt += advance_rec.advance_amt
+		bal_amt = advance_rec.net_amt - (advance_rec.advance_amt + adv_amt) 
+		self.write(cr,uid,ids[0],{'state':'approved',
+								  'approve_flag':'True',
+								  'app_user_id':uid,
+								  'approved_date':dt_time,
+								  'amt_paid_so_far':adv_amt,
+								  'balance_advance_amt':bal_amt,
+								  'bal_adv':advance_rec.advance_amt,
+								  'update':True
+								   })	
+		#cr.execute("""select all_transaction_mails('SO Advance Approval',%s)"""%(ids[0]))
+		"""Raj
+		data = cr.fetchall();
+		vals = self.email_ids(cr,uid,ids,context = context)
+		if (not vals['email_to']) or (not vals['email_cc']):
+			pass
 		else:
-			adv_amt = 0.00
-			cr.execute("""select name,advance_date,advance_amt,net_amt from kg_so_advance where so_id = %s and state = 'approved'"""%(advance_rec.so_id.id))
-			data = cr.dictfetchall()
-			adv_amt = 0.00
-			for pre_rec in data:
-				adv_amt += pre_rec['advance_amt']
-			#adv_amt += advance_rec.advance_amt
-			bal_amt = advance_rec.net_amt - (advance_rec.advance_amt + adv_amt) 
-			self.write(cr,uid,ids[0],{'state':'approved',
-									  'approve_flag':'True',
-									  'app_user_id':uid,
-									  'approved_date':dt_time,
-									  'amt_paid_so_far':adv_amt,
-									  'balance_advance_amt':bal_amt,
-									  'bal_adv':advance_rec.advance_amt,
-									  'update':True
-									   })	
-			cr.execute("""select all_transaction_mails('SO Advance Approval',%s)"""%(ids[0]))
-			data = cr.fetchall();
-			vals = self.email_ids(cr,uid,ids,context = context)
-			if (not vals['email_to']) or (not vals['email_cc']):
-				pass
-			else:
-				ir_mail_server = self.pool.get('ir.mail_server')
-				msg = ir_mail_server.build_email(
-						email_from = vals['email_from'][0],
-						email_to = vals['email_to'],
-						subject = "	SO Advance - Approved",
-						body = data[0][0],
-						email_cc = vals['email_cc'],
-						object_id = ids[0] and ('%s-%s' % (ids[0], 'kg.so.advance')),
-						subtype = 'html',
-						subtype_alternative = 'plain')
-				res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)						   
+			ir_mail_server = self.pool.get('ir.mail_server')
+			msg = ir_mail_server.build_email(
+					email_from = vals['email_from'][0],
+					email_to = vals['email_to'],
+					subject = "	SO Advance - Approved",
+					body = data[0][0],
+					email_cc = vals['email_cc'],
+					object_id = ids[0] and ('%s-%s' % (ids[0], 'kg.so.advance')),
+					subtype = 'html',
+					subtype_alternative = 'plain')
+			res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)						   
+		"""
 		return True
 		
 		

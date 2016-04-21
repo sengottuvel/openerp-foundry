@@ -10,8 +10,8 @@
 				<field name="arch" type="xml">
 				<form string="SO Amendment Form" version="7.0">
 				<header>
-					<button name="entry_reject" type="object" string="Reject" states="confirm" class="oe_highlight" confirm="Are you sure to proceed ?" groups="kg_inventory_users.group_kg_main_user"/>
-					<button name="approve_amend" type="object" string="Approve" states="confirm" class="oe_highlight" confirm="Are you sure to proceed ?" groups="kg_inventory_users.group_kg_main_user"/>
+					<button name="entry_reject" type="object" string="Reject" states="confirm" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+					<button name="approve_amend" type="object" string="Approve" states="confirm" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					<button name="entry_draft" type="object" string="Set Draft" states="cancel" class="oe_highlight"/>
 					<button name="confirm_amend" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 					<button name="entry_cancel" type="object" string="Cancel" states="approved" class="oe_highlight" confirm="Are you sure to proceed ?"/>
@@ -19,8 +19,6 @@
 				</header>			
 					<group>
 						<group>
-							
-							<field name="user_id"/>
 							<field name="name"/>
 							<field name="so_id"/>
 							<field name="so_date"/>	
@@ -35,7 +33,6 @@
 							<field name="price"/>
 						</group>											
 						<group>
-							<field name="date"/>							
 							<field name="trans_date"/>					
 							<field name="active"/>		
 							<field name="so_date_amend"/>	
@@ -48,10 +45,8 @@
 							<field name="dep_name_amend"/>
 							<field name="warranty_amend"/>
 							<field name="price_amend"/>
-							
 							<field name="amend_flag" invisible="1"/>		
-												
-							<field name="state"/>							
+							<field name="state" style="width: 30%%" class="att_state_change"/>							
 						</group>					
 					</group>				   
 					<notebook>
@@ -63,14 +58,12 @@
 								<field name="product_qty_amend"/>
 								<field name="brand_id_amend" readonly="1"/>								
 								<field name="price_unit_amend"/>								
-													
 								<field name="price_subtotal"/>								
 							</tree>					
 							<form string="SO Amendment Line" >
 								<group>
 									<group>
 										<field name="product_id"/>										
-																	
 										<field name="product_qty"/>
 										<field name="brand_id"/>											
 										<field name="note"/>											
@@ -85,18 +78,39 @@
 										<field name="discount" invisible="1"/>	
 										<field name="price_unit_amend" invisible="0"/>										
 										<field name="taxes_id_amend" widget="many2many_tags" invisible="1"/>
-								
-										
 									</group>
 									<field name="kg_soindent_lines" nolabel="1"/>
 								</group>
-								
 							</form>
 						</field>
 						</page>	
 						<page string="Reject Remark">
 							<field name="remark" placeholder="Remarks"/>
-						</page>				
+						</page>
+						<page string="Entry Info">
+					<group>
+						<field name="company_id"/>
+					</group>
+					
+					<group>
+						<group>
+							<field name="user_id"/>
+							<field name="conf_user_id" attrs="{'invisible':[('state','in',['draft','amend'])]}"/>
+							<field name="rej_user_id" attrs="{'invisible':[('state','not in',['reject'])]}"/>
+							<field name="app_user_id" attrs="{'invisible':[('state','in',['draft','amend','confirm'])]}"/>
+							<field name="can_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+							<field name="update_user_id"/>
+						</group>
+						<group>
+							<field name="date"/>
+							<field name="confirm_date" attrs="{'invisible':[('state','in',['draft','amend'])]}"/>
+							<field name="reject_date" attrs="{'invisible':[('state','not in',['reject'])]}"/>
+							<field name="approve_date" attrs="{'invisible':[('state','in',['draft','amend','confirm'])]}"/>
+							<field name="cancel_date" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+							<field name="update_date"/>
+						</group>
+					</group>
+				</page>	
 					</notebook>					
 					
 					<group class="oe_subtotal_footer oe_right">
@@ -136,30 +150,32 @@
 			</field>
 		</record>
 		
-	<!-- Search View -->
-		
-		<record id="kg_so_amendment_sample_search_view" model="ir.ui.view">
-            <field name="name">SO Amendment</field>
+
+	<!-- Search View Start -->
+
+		<record id="t_search_v_so_amend" model="ir.ui.view">
+            <field name="name">SO Amend Search</field>
             <field name="model">kg.so.amendment</field>
             <field name="arch" type="xml">
-                <search string="SO Amendment">
-					<field name="name" string="SO Amendment" filter_domain="['|',('name','ilike',self),('partner_id','ilike',self)]"/>
+                <search string="SO Amendment Search">
+					<field name="name" string="Amendment SO No" filter_domain="[('name','ilike',self)]" />
+					<field name="partner_id" string="Supplier" filter_domain="[('partner_id','ilike',self)]" />
 					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
-					<filter icon="terp-check" name="confirm" string="Confirmed" domain="[('state','=','confirm')]"/>
-					<filter icon="terp-check" name="approved" string="Approved" domain="[('state','=','approved')]"/>
-					<filter icon="terp-check" name="rejected" string="Rejected" domain="[('state','=','reject')]"/>
-					<filter icon="terp-check" name="cancel" string="Cancel" domain="[('state','=','cancel')]"/>
+					<filter icon="terp-check" name="amend" string="Processing" domain="[('state','=','amend')]"/>					
+					<filter icon="terp-check" name="confirm" string="Confirmed" domain="[('state','=','confirm')]"/>					
+					<filter icon="terp-check" name="approved" string="Approved" domain="[('state','=','approved')]"/>					
+					<filter icon="terp-check" name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>					
 					<separator/>
                     <group expand="0" string="Group By...">
-                        <filter string="Buyer" icon="terp-personal" domain="[]" context="{'group_by':'partner_id'}"/>
-                        <filter string="Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'trans_date'}"/>
-                        <filter string="Created By" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'user_id'}"/>
+						<filter string="Supplier" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'partner_id'}"/>
                         <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+                        <filter string="Amend Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'trans_date'}"/>
 					</group>
                 </search>
 			</field>
-		</record>		
-			
+		</record>
+		
+	<!-- Search View End -->		
         
 	<!-- Menu Action -->			
 		
@@ -171,7 +187,7 @@
 			<field name="context">{}</field>
 			<field name="domain">[('state','!=','amend')]</field>
 			<field name="view_id" ref="kg_so_amendment_sample_tree_view"/>
-			<field name="search_view_id" ref="kg_so_amendment_sample_search_view"/>
+			<field name="search_view_id" ref="t_search_v_so_amend"/>
 		</record>	
 		
 	<!-- Menu Items
