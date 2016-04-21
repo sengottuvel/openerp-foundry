@@ -443,7 +443,7 @@ class ch_work_order_details(osv.osv):
 			cr.execute(''' select bom.id,bom.header_id,bom.pattern_id,bom.pattern_name,bom.qty, bom.pos_no,pattern.pcs_weight, pattern.ci_weight,pattern.nonferous_weight
 					from ch_bom_line as bom
 					LEFT JOIN kg_pattern_master pattern on pattern.id = bom.pattern_id
-					where bom.header_id = (select id from kg_bom where pump_model_id = %s and state='approved' and active='t') ''',[pump_model_id])
+					where bom.header_id = (select id from kg_bom where pump_model_id = %s  and active='t') ''',[pump_model_id])
 			bom_details = cr.dictfetchall()
 			if order_category == 'pump' :
 				for bom_details in bom_details:
@@ -498,7 +498,7 @@ class ch_work_order_details(osv.osv):
 				bom_ms_obj = self.pool.get('ch.machineshop.details')
 				cr.execute(''' select id,pos_no,ms_id,name,qty,header_id as bom_id
 						from ch_machineshop_details
-						where header_id = (select id from kg_bom where pump_model_id = %s and state='approved' and active='t') ''',[pump_model_id])
+						where header_id = (select id from kg_bom where pump_model_id = %s and active='t') ''',[pump_model_id])
 				bom_ms_details = cr.dictfetchall()
 				for bom_ms_details in bom_ms_details:
 					if qty == 0:
@@ -524,7 +524,7 @@ class ch_work_order_details(osv.osv):
 				bom_bot_obj = self.pool.get('ch.bot.details')
 				cr.execute(''' select id,bot_id,qty,header_id as bom_id
 						from ch_bot_details
-						where header_id = (select id from kg_bom where pump_model_id = %s and state='approved' and active='t') ''',[pump_model_id])
+						where header_id = (select id from kg_bom where pump_model_id = %s and active='t') ''',[pump_model_id])
 				bom_bot_details = cr.dictfetchall()
 				for bom_bot_details in bom_bot_details:
 					if qty == 0:

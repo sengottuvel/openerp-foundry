@@ -32,15 +32,20 @@
 								<field name="note"/>
 								<field name="purpose" attrs="{'invisible': [('call_type','=','service')],'required': [('call_type','!=','service')]}"/>
 								<field name="service_det" attrs="{'invisible': [('call_type','!=','service')],'required': [('call_type','=','service')]}"/>
-								<!--<field name="order_type" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>-->								
+								<!--<field name="order_type" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>-->		
+								<field name="scope_of_supply"/>						
+								<field name="pump"/>							
 							</group>											
 							<group>
+								<field name="enquiry_no"/>
 								<field name="enquiry_date"/>
 								<field name="due_date" on_change="onchange_due_date(due_date)"/>
-								<field name="expected_del_date"/>
-								<field name="expected_value"/>
-								<field name="ref_no"/>
-								<field name="segment"/>
+								<field name="del_date"/>
+								<field name="expected_value"/>								
+								<field name="segment"/>							
+								<field name="drive"/>
+								<field name="transmision"/>
+								<field name="acces"/>
 								<field name="state" style="width: 30%%" class="att_state_change"/>
 							</group>	
 						</group>
@@ -72,24 +77,11 @@
 						<group string="Pump Details">
 							<field name="ch_line_ids" colspan="4" nolabel="1" context="{'purpose_categ':purpose}">
 								<tree string="Pump History">
-								   <field name="purpose_categ" required="1"/>
-								   <field name="pump_id" required="1"/>
-								   <field name="qty" required="1"/>
-								   <field name="del_date" required="1"/>
-								   <field name="oth_spec" required="1"/>
+									<field name="equipment_no" required="1"/>
+									<field name="quantity_in_no" required="1"/>
+									<field name="description" required="1"/>							  
 								</tree>
-							<!--	<form>
-									<group>
-										<group>
-											<field name="pump_id" required="1"/>
-											<field name="qty" required="1"/>
-										</group>
-										<group>
-											<field name="del_date" required="1"/>
-											<field name="oth_spec" required="1"/>
-										</group>
-									</group>
-								</form>-->
+								
 							</field>
 						</group>
 							
@@ -168,8 +160,7 @@
 								toolbar="True" string="Enquiry Entry Tree">					
 					<field name="name"/>
 					<field name="enquiry_date"/>
-					<field name="customer_id"/>
-					<field name="purpose"/>
+					<field name="customer_id"/>					
 					<field name="state"/>
 				</tree>
 			</field>
@@ -185,12 +176,9 @@
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
 				<tree string="Pumpmodel Details Entry Tree">					
-					<field name="pump_id"/>
-					<field name="qty"/>
-					<field name="del_date"/>
-					<field name="oth_spec"/>
-					<field name="purpose_categ"/>
-					
+					<field name="equipment_no"/>
+					<field name="quantity_in_no"/>
+					<field name="description"/>					
 				</tree>
 			</field>
 		</record>
@@ -204,56 +192,114 @@
 			<field name="model">ch.kg.crm.pumpmodel</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<form string="Pump Details Entry Form">
-					<group>
-						<group>
-							<field name="pump_id" required="1"/>
-							<field name="qty" required="1"/>
+				<form string="Pumpmodel Details" version="7.0">
+					<sheet>
+						<group string="Item Details">
+							<group>
+								<field name="equipment_no" />																
+								<field name="quantity_in_no" />																
+							</group>											
+							<group>
+								<field name="description" />													
+							</group>					
 						</group>
-						<group>
-							<field name="del_date" required="1"/>
-							<field name="oth_spec" required="1"/>
-							<field name="purpose_categ"/>
+					
+						<group string="Liquid Specifications">
+							<group>
+								<field name="solid_concen" />																
+								<field name="viscosity" />																
+								<field name="max_size_mm" />																
+								<field name="npsh_avl" />																
+							</group>											
+							<group>
+								<field name="slurry_correction_in" />													
+								<field name="temperature" />													
+								<field name="suction_condition" />													
+								<field name="suction_pressure" />													
+							</group>					
 						</group>
-					</group>
-					<newline/>
+						<group string="Duty Parameters">
+							<group>
+								<field name="capacity_in" />																							
+							</group>											
+							<group>
+								<field name="head_in" />													
+							</group>					
+						</group>
+					
+						<group string="Pump Specification">
+							<group>
+								<field name="pump_type" />																							
+								<field name="pump_id" />																							
+								<field name="number_of_stages" />																							
+								<field name="size_suctionx" />																							
+								<field name="flange_standard" />																							
+								<field name="efficiency_in" />																							
+								<field name="npsh_r_m" />																							
+								<field name="best_efficiency" />																							
+								<field name="bkw_water" />																							
+								<field name="bkw_liq" />																							
+								<field name="impeller_type" />																							
+								<field name="impeller_number" />																							
+								<field name="impeller_dia_max" />																							
+								<field name="impeller_dia_min" />																							
+								<field name="impeller_dia_rated" />																							
+								<field name="impeller_tip_speed" />																							
+								<field name="maximum_allowable_soild" />																							
+								<field name="hydrostatic_test_pressure" />																							
+								<field name="full_load_rpm" />																							
+								<field name="belt_loss_in_kw" />																							
+							</group>											
+							<group>
+								<field name="casing_design" />													
+								<field name="max_allowable_test" />													
+								<field name="shut_off_head" />													
+								<field name="minimum_contionuous" />													
+								<field name="specific_speed" />													
+								<field name="suction_specific_speed" />													
+								<field name="sealing_water_pressure" />													
+								<field name="sealing_water_capcity" />													
+								<field name="gd_sq_value" />													
+								<field name="critical_speed" />													
+								<field name="bearing_make" />													
+								<field name="bearing_number_nde" />													
+								<field name="bearing_qty_nde" />													
+								<field name="type_of_drive" />													
+								<field name="end_of_the_curve" />													
+								<field name="motor_frequency_hz" />													
+								<field name="motor_margin" />													
+								<field name="motor_kw" />													
+								<field name="speed_in_pump" />													
+								<field name="speed_in_motor" />													
+								<field name="engine_kw" />													
+							</group>					
+						</group>
+						
+						<group>
+							<group>
+								<field name="moc_const_id" />																							
+							</group>											
+							<group>																	
+							</group>					
+						</group>
+						
 					<notebook>
-						<page string="Foundry Items" attrs="{'invisible':[('purpose_categ','not in',('spare','prj','pump_spare'))]}">
-							<field name="line_ids" colspan="4" nolabel="1">
-								<tree string="Foundry Items" editable="bottom">
-								   <field name="pattern_code" on_change="onchange_pattern_name(pattern_code,pattern_name)"/>
-								   <field name="pattern_name"/>
-								   <field name="qty"/>
-								   <field name="oth_spec"/>
+						<page string="Material of Construction">
+							<field name="line_ids_moc_a" >
+								<tree string="Material of Construction Details Entry Tree" editable="top" >											
+									<field name="pattern_id" on_change="onchange_pattern_name(pattern_id)"/>
+									<field name="pattern_name" readonly="1"/>					   
+									<field name="moc_id"/>
+									<field name="remarks" widget="char"/>										
 								</tree>
-							</field>
-						</page>
-						<page string="Machine Shop" attrs="{'invisible':[('purpose_categ','not in',('spare','prj','pump_spare'))]}">
-							<field name="line_ids_a" nolabel="1">
-								<tree string="Machine Shop Details Entry Tree" editable="bottom">
-									<field name="pos_no"/>		
-									<field name="ms_id"/>		
-									<field name="name"/>
-									<field name="qty"/>
-									<field name="flag_applicable"/>
-									<field name="remarks" widget="char"/>
-								</tree>
-							</field>
-						</page>
-						<page string="BOT" attrs="{'invisible':[('purpose_categ','not in',('spare','prj','pump_spare'))]}">
-							<field name="line_ids_b" nolabel="1">
-								<tree string="BOT Details Entry Tree" editable="bottom">	
-									<field name="product_temp_id"/>
-									<field name="ms_id"/>
-									<field name="code"/>
-									<field name="qty"/>
-									<field name="flag_applicable"/>
-									<field name="remarks" widget="char"/>
-								</tree>
-							</field>
+							</field>								
 						</page>
 					</notebook>
-					
+						
+					</sheet>
+				
+				
+		
 				</form>
 			</field>
 		</record>
