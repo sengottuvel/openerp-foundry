@@ -692,6 +692,37 @@
 		<!-- Melting Log Chemistry Details Line End -->
 		
 		
+		<!-- Department Indent Start --> 
+		
+		<record id="t_foundry_dep_indent" model="ir.model.access">
+			<field name="model_id" ref="kg_depindent.model_kg_depindent"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Dep Indent</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		
+		<!-- Department Indent End -->
+		
+		<!-- Department Indent Line Start --> 
+		
+		<record id="t_foundry_dep_indent_line" model="ir.model.access">
+			<field name="model_id" ref="kg_depindent.model_kg_depindent_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Dep Indent Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		
+		<!-- Department Indent LINE End -->
+		
+		
     </data>
 </openerp>
 	

@@ -31,7 +31,7 @@ class kg_work_order(osv.osv):
 	_order = "entry_date desc"
 	
 	def _get_default_division(self, cr, uid, context=None):
-		res = self.pool.get('kg.division.master').search(cr, uid, [('code','=','SAM'),('state','=','approved'), ('active','=','t')], context=context)
+		res = self.pool.get('kg.division.master').search(cr, uid, [('code','=','SAM'), ('active','=','t')], context=context)
 		return res and res[0] or False
 
 	_columns = {
@@ -39,7 +39,7 @@ class kg_work_order(osv.osv):
 		### Header Details ####
 		'name': fields.char('WO No.', size=128,select=True,required=True),
 		'entry_date': fields.date('WO Date',required=True),
-		'division_id': fields.many2one('kg.division.master','Division',readonly=True,required=True,domain="[('state','=','approved'), ('active','=','t')]"),
+		'division_id': fields.many2one('kg.division.master','Division',readonly=True,required=True,domain="[('active','=','t')]"),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location', required=True),
 		'note': fields.text('Notes'),
 		'remarks': fields.text('Remarks'),
@@ -375,7 +375,7 @@ class ch_work_order_details(osv.osv):
 		'order_date': fields.related('header_id','entry_date', type='date', string='Date', store=True, readonly=True),
 		'order_priority': fields.related('header_id','order_priority', type='selection', selection=ORDER_PRIORITY, string='Priority', store=True, readonly=True),
 		'order_ref_no': fields.related('header_id','name', type='char', string='Work Order No.', store=True, readonly=True),
-		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True,domain="[('state','=','approved'), ('active','=','t')]"),
+		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True,domain="[('active','=','t')]"),
 		'order_no': fields.char('Order No.', size=128,select=True),
 		'order_category': fields.selection([('pump','Pump'),('spare','Spare'),('pump_spare','Pump and Spare')],'Purpose', required=True),
 		'qty': fields.integer('Qty', required=True),
@@ -393,7 +393,7 @@ class ch_work_order_details(osv.osv):
 		'unit_price': fields.float('Unit Price',required=True),
 		### Used for Schedule Purpose
 		'schedule_status':fields.selection([('allow','Allow to Schedule'),('not_allow','Not Allow to Schedule')],'Schedule Status', readonly=True),
-		'moc_construction_id':fields.many2one('kg.moc.construction','MOC Construction',domain="[('state','=','approved'), ('active','=','t')]"),
+		'moc_construction_id':fields.many2one('kg.moc.construction','MOC Construction',domain="[('active','=','t')]"),
 
 	}
 	
@@ -655,13 +655,13 @@ class ch_order_bom_details(osv.osv):
 		
 		'bom_id': fields.many2one('kg.bom','BOM'),
 		'bom_line_id': fields.many2one('ch.bom.line','BOM Line'),
-		'pattern_id': fields.many2one('kg.pattern.master','Pattern No',domain="[('state','=','approved'), ('active','=','t')]"),
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern No',domain="[ ('active','=','t')]"),
 		'pattern_name': fields.char('Pattern Name'),
 		'pcs_weight': fields.related('pattern_id','pcs_weight', type='float', string='SS Weight(kgs)', store=True),
 		'ci_weight': fields.related('pattern_id','ci_weight', type='float', string='CI Weight(kgs)', store=True),
 		'nonferous_weight': fields.related('pattern_id','nonferous_weight', type='float', string='Non-Ferrous Weight(kgs)', store=True),
 		'pos_no': fields.related('bom_line_id','pos_no', type='integer', string='Position No', store=True),
-		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','=','approved'), ('active','=','t')]"),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),
 		'qty': fields.integer('Qty'),
 		'unit_price': fields.float('Unit Price'),
 		'schedule_qty': fields.integer('Schedule Pending Qty'),
