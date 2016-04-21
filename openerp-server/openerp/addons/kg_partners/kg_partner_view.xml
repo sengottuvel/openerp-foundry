@@ -47,6 +47,7 @@
 		<field name="company_type"/>
 		<field name="grade"/>
 		<field name="pan_no"/>
+		<field name="adhar_id"/>
 		<field name="gst_no"/>
 		<field name="transport_id"/>
 		<field name="sector"/>

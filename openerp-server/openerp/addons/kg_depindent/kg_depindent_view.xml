@@ -57,8 +57,7 @@
 								<field name="product_id" on_change="onchange_product_id(product_id,uom,po_uom)"/>
 								<field name="brand_id"/>
 								<field name="uom" on_change="onchange_product_uom(product_id, uom, po_uom,qty)"/>
-								<field name="qty" attrs="{'readonly': [('uom', '=', False)]}"
-										on_change="onchange_qty(uom,product_id,qty,pending_qty,issue_pending_qty,po_qty)"/>
+								<field name="qty" on_change="onchange_qty(uom,product_id,qty,pending_qty,issue_pending_qty,po_qty)"/>
 								<field name="pending_qty" invisible="1"/>
 								<field name="issue_pending_qty" invisible="1"/>
 								<field name="line_state" invisible="1"/>
