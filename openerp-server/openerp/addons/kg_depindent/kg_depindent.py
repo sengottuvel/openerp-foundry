@@ -284,7 +284,7 @@ class kg_depindent(osv.osv):
 				raise osv.except_osv(
 						_('Error'),
 						_('Department Indent quantity can not be zero'))
-		self.write(cr,uid,ids,{'state':'approved','approved_by':uid,'approved_date':time.strftime("%Y-%m-%d")})
+		self.write(cr,uid,ids,{'state':'approved','approved_by':uid,'approved_date':time.strftime('%Y-%m-%d %H:%M:%S')})
 		#cr.execute("""select all_transaction_mails('Dept Indent Request Approval',%s)"""%(ids[0]))
 		"""Raj
 		data = cr.fetchall();
@@ -554,7 +554,7 @@ class ch_depindent_wo(osv.osv):
 	_columns = {
 
 	'header_id': fields.many2one('kg.depindent.line', 'Dept Indent Line', required=True, ondelete='cascade'),
-	'wo_id': fields.integer('WO'),
+	'wo_id': fields.many2one('kg.work.order', 'WO', required=True),
 	'qty': fields.float('Indent Qty', required=True),
 	
 	}

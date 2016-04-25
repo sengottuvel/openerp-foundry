@@ -99,9 +99,9 @@ class kg_general_grn(osv.osv):
 
 
 	_columns = {
+		
 		'name': fields.char('GRN NO',readonly=True),
-		'creation_date':fields.date('Creation Date',required=True,readonly=True),
-
+		'active': fields.boolean('Active'),
 		'grn_date':fields.date('GRN Date',required=True,readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'supplier_id':fields.many2one('res.partner','Supplier',domain=[('supplier','=',True)],readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'dc_no': fields.char('DC NO', required=True,readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
@@ -109,11 +109,9 @@ class kg_general_grn(osv.osv):
 		'bill': fields.selection([
 			('applicable', 'Applicable'),
 			('not_applicable', 'Not Applicable')], 'Bill',required=True,readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
-		'user_id':fields.many2one('res.users','Created By',readonly=True),
 		'grn_line':fields.one2many('kg.general.grn.line','grn_id','Line Entry',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'other_charge': fields.float('Other Charges',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'amount_total': fields.float('Total Amount',readonly=True),
-
 		'sub_total': fields.float('Line Total',readonly=True),
 		'state': fields.selection([('draft', 'Draft'), ('confirmed', 'Confirmed'), ('done', 'Done'), ('cancel', 'Cancelled'),('inv','Invoiced'),('reject','Reject')], 'Status',readonly=True),
 		'expiry_flag':fields.boolean('Expiry Flag'),
@@ -150,28 +148,31 @@ class kg_general_grn(osv.osv):
 		'value1':fields.float('Value1', readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'value2':fields.float('Value2', readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'type':fields.selection([('out','out'),('in','in')], 'Type'),
-		'company_id':fields.many2one('res.company','Company'),
+		'company_id':fields.many2one('res.company','Company',readonly=True),
 		'invoice_flag':fields.boolean('Invoice Flag'),
-
-		'confirmed_by' : fields.many2one('res.users', 'Confirmed By'),
-		'approved_by' : fields.many2one('res.users', 'Approved By'),
-		'confirmed_date' : fields.date('Confirmed date'),
-		'approved_date' : fields.date('Approved date'),
 		'po_id':fields.many2one('purchase.order', 'PO NO',
 					domain="[('state','=','approved'), '&', ('order_line.pending_qty','>','0'), '&', ('grn_flag','=',False), '&', ('partner_id','=',supplier_id), '&', ('order_line.line_state','!=','cancel')]"),
 		'po_date':fields.date('PO Date',readonly=True),
 		'order_no': fields.char('Order NO'),
 		'order_date':fields.char('Order Date'),
-		'payment_type': fields.selection([('cash', 'Cash'), ('credit', 'Credit')], 'Payment Type'),
+		'payment_type': fields.selection([('cash', 'Cash'), ('credit', 'Credit')], 'Payment Type',readonly=True,states={'confirmed':[('readonly',False)],'draft': [('readonly', False)]}),
 		'dep_project':fields.many2one('kg.project.master','Dept/Project Name',readonly=True,states={'draft': [('readonly', False)]}),
 		'reject_remark':fields.text('Cancel Remarks', readonly=True, states={'confirmed':[('readonly',False)]}),
-
 		'grn_dc': fields.selection([('dc_invoice','DC & Invoice'),('only_grn','Only grn')], 'GRN Type',
 										required=True, readonly=False, states={'done':[('readonly',True)]}),
-
 		'sup_invoice_no':fields.char('Supplier Invoice No',size=200, readonly=False, states={'done':[('readonly',True)]}),
 		'sup_invoice_date':fields.date('Supplier Invoice Date', readonly=False, states={'done':[('readonly',True)]}),
 		'expense_line_id': fields.one2many('kg.gen.grn.expense.track','expense_id','Expense Track'),
+		
+		# Entry Info
+		'creation_date':fields.datetime('Creation Date',required=True,readonly=True),
+		'confirmed_by' : fields.many2one('res.users', 'Confirmed By',readonly=True),
+		'approved_by' : fields.many2one('res.users', 'Approved By',readonly=True),
+		'confirmed_date' : fields.datetime('Confirmed date',readonly=True),
+		'approved_date' : fields.datetime('Approved date',readonly=True),
+		'user_id':fields.many2one('res.users','Created By',readonly=True),
+		'update_date' : fields.datetime('Last Updated Date',readonly=True),
+		'update_user_id' : fields.many2one('res.users','Last Updated By',readonly=True),
 		
 	}
 
@@ -242,6 +243,10 @@ class kg_general_grn(osv.osv):
 		val['email_cc'] = email_cc
 		return val
 	
+	def write(self, cr, uid, ids, vals, context=None):		
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(kg_general_grn, self).write(cr, uid, ids, vals, context)
+		
 	def onchange_grn_date(self, cr, uid, ids, grn_date):
 
 		exp_grn_qty = 0
@@ -310,7 +315,11 @@ class kg_general_grn(osv.osv):
 	def kg_grn_confirm(self, cr, uid, ids,context=None):
 		grn_entry = self.browse(cr, uid, ids[0])
 		if not grn_entry.name:
-			self.write(cr,uid,ids[0],{'name':self.pool.get('ir.sequence').get(cr, uid, 'kg.po.grn')})
+			seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.po.grn')])
+			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,grn_entry.creation_date))
+			seq_name = cr.fetchone();
+			self.write(cr,uid,ids[0],{'name':seq_name[0]})
 		exp_grn_qty = 0
 		line_tot = 0
 		grn_date = grn_entry.grn_date
@@ -377,8 +386,12 @@ class kg_general_grn(osv.osv):
 			line.write({'line_total':grn_price})
 			line_tot += grn_price
 		tot_amt = line_tot + grn_entry.other_charge
-		self.write(cr,uid,ids[0],{'sub_total':line_tot,'amount_total':tot_amt,'state':'confirmed','confirmed_by':uid,
-									'confirmed_date':time.strftime('%Y-%m-%d')})
+		self.write(cr,uid,ids[0],{'sub_total':line_tot,
+								  'amount_total':tot_amt,
+								  'state':'confirmed',
+								  'confirmed_by':uid,
+								  'confirmed_date':time.strftime('%Y-%m-%d %H:%M:%S')
+								  })
 		#cr.execute("""select all_transaction_mails('General GRN Approval',%s)"""%(ids[0]))
 		"""Raj
 		data = cr.fetchall();
@@ -409,7 +422,7 @@ class kg_general_grn(osv.osv):
 		#			_('Approve cannot be done by Confirmed user'))
 		#else:
 		lot_obj = self.pool.get('stock.production.lot')
-		self.write(cr,uid,ids[0],{'state':'done','approved_by':uid,'approved_date':time.strftime('%Y-%m-%d')})
+		self.write(cr,uid,ids[0],{'state':'done','approved_by':uid,'approved_date':time.strftime('%Y-%m-%d %H:%M:%S')})
 		if grn_entry.bill == 'applicable':
 			self.write(cr,uid,ids[0],{'invoice_flag':'True'})
 		stock_move_obj=self.pool.get('stock.move')
@@ -834,7 +847,7 @@ class kg_general_grn(osv.osv):
 
 	_defaults = {
 
-		'creation_date':fields.date.context_today,
+		'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'user_id': lambda obj, cr, uid, context: uid,
 		'bill':'not_applicable',
 		'state':'draft',
@@ -843,7 +856,8 @@ class kg_general_grn(osv.osv):
 		'name':'',
 		'type':'in',
 		'company_id' : lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.general.grn', context=c),
-
+		'active': True,
+		
 	}
 
 

@@ -97,12 +97,6 @@ class kg_po_grn(osv.osv):
 
 	_columns = {
 		
-		'created_by':fields.many2one('res.users','Created By',readonly=True),
-		'creation_date':fields.datetime('Creation Date',required=True,readonly=True),
-		'confirmed_by':fields.many2one('res.users','Confirmed By',readonly=True),
-		'confirmed_date':fields.datetime('Confirmed Date',readonly=True),
-		'approved_by':fields.many2one('res.users','Approved By',readonly=True),
-		'approved_date':fields.datetime('Approved Date',readonly=True),
 		'name': fields.char('GRN NO',readonly=True),
 		'grn_date':fields.date('GRN Date',required=True,readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'dc_no': fields.char('DC NO', required=True,readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
@@ -133,7 +127,7 @@ class kg_po_grn(osv.osv):
 		'approve_flag':fields.boolean('Expiry Flag'),
 		'bill_flag':fields.boolean('Bill Flag'),
 		'invoice_flag':fields.boolean('Invoice Flag'),
-		'company_id':fields.many2one('res.company','Company'),
+		'company_id':fields.many2one('res.company','Company',readonly=True),
 
 		'other_charge': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Other Charges(+)',
 			 multi="sums", help="The amount without tax", track_visibility='always'),	  
@@ -185,7 +179,17 @@ class kg_po_grn(osv.osv):
 		'sup_invoice_no':fields.char('Supplier Invoice No',size=200, readonly=False, states={'done':[('readonly',True)]}),
 		'sup_invoice_date':fields.date('Supplier Invoice Date', readonly=False, states={'done':[('readonly',True)]}),
 		'expense_line_id': fields.one2many('kg.po.grn.expense.track','expense_id','Expense Track'),
-	
+		
+		# Entry Info
+		'created_by':fields.many2one('res.users','Created By',readonly=True),
+		'creation_date':fields.datetime('Creation Date',required=True,readonly=True),
+		'confirmed_by':fields.many2one('res.users','Confirmed By',readonly=True),
+		'confirmed_date':fields.datetime('Confirmed Date',readonly=True),
+		'approved_by':fields.many2one('res.users','Approved By',readonly=True),
+		'approved_date':fields.datetime('Approved Date',readonly=True),
+		'update_date' : fields.datetime('Last Updated Date',readonly=True),
+		'update_user_id' : fields.many2one('res.users','Last Updated By',readonly=True),
+		
 	}
 	
 	_defaults = {
@@ -259,6 +263,10 @@ class kg_po_grn(osv.osv):
 		val['email_cc'] = email_cc
 		return val
 	
+	def write(self, cr, uid, ids, vals, context=None):		
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(kg_po_grn, self).write(cr, uid, ids, vals, context)
+		
 	def onchange_grn_date(self, cr, uid, ids, grn_date):
 		today_date = today.strftime('%Y-%m-%d')
 		back_list = []
@@ -667,8 +675,11 @@ class kg_po_grn(osv.osv):
 					_('Warning'),
 					_('GRN Entry is not allowed for this date!'))
 		if grn_entry.name == '':
-			grn_no = self.pool.get('ir.sequence').get(cr, uid, 'kg.po.grn')
-			self.write(cr,uid,ids,{'name':grn_no})
+			seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.po.grn')])
+			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,grn_entry.grn_date))
+			seq_name = cr.fetchone();
+			self.write(cr,uid,ids,{'name':seq_name[0]})
 		if grn_entry.dc_date and grn_entry.dc_date > grn_entry.grn_date:
 			raise osv.except_osv(_('DC Date Error!'),_('DC Date Should Be Less Than GRN Date.'))			
 		if not grn_entry.line_ids:

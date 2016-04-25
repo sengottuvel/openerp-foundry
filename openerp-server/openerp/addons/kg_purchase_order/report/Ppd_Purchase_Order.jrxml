@@ -225,7 +225,7 @@ where po.id = $P{po_id}]]>
 					<textElement>
 						<font size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA["ECC No: AAECSO282MXM001"]]></textFieldExpression>
+					<textFieldExpression><![CDATA["ECC No: AAECSO282MXM005"]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToBandHeight" x="489" y="35" width="136" height="12"/>
@@ -236,7 +236,7 @@ where po.id = $P{po_id}]]>
 					<textElement>
 						<font size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA["DIVISION  : I,COIMBATORE "]]></textFieldExpression>
+					<textFieldExpression><![CDATA["DIVISION  : IV,COIMBATORE "]]></textFieldExpression>
 				</textField>
 				<textField>
 					<reportElement x="489" y="23" width="136" height="12"/>
@@ -247,7 +247,7 @@ where po.id = $P{po_id}]]>
 					<textElement>
 						<font size="9"/>
 					</textElement>
-					<textFieldExpression><![CDATA["RANGE    : IA "]]></textFieldExpression>
+					<textFieldExpression><![CDATA["RANGE    : IV A "]]></textFieldExpression>
 				</textField>
 				<line>
 					<reportElement x="0" y="60" width="802" height="1"/>

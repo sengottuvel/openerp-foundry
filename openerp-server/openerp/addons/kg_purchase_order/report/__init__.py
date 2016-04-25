@@ -20,6 +20,7 @@
 ##############################################################################
 
 import onscreen_purchase_order_report
+import onscreen_ppd_purchase_order_report
 
 
 

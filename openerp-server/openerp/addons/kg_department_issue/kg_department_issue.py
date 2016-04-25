@@ -30,15 +30,6 @@ class kg_department_issue(osv.osv):
 			
 	_columns = {
 		
-		'created_by':fields.many2one('res.users','Created By',readonly=True),
-		'creation_date':fields.datetime('Creation Date',required=True,readonly=True),
-		
-		'confirmed_by':fields.many2one('res.users','Confirmed By',readonly=True),
-		'confirmed_date':fields.datetime('Confirmed Date',required=True,readonly=True),
-		
-		'approved_by':fields.many2one('res.users','Approved By',readonly=True),
-		'approved_date':fields.datetime('Approved Date',required=True,readonly=True),
-		
 		'name': fields.char('Issue NO',readonly=True),
 		'issue_date':fields.date('Issue Date',required=True,readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
 		
@@ -50,20 +41,15 @@ class kg_department_issue(osv.osv):
 				  readonly=True, states={'draft': [('readonly', False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
 
 		'outward_type': fields.many2one('kg.outwardmaster', 'Outward Type',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
-		
 		'department_id': fields.many2one('kg.depmaster','Department',required=True,readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
-		
 		'state': fields.selection([('draft', 'Draft'),
 			('confirmed', 'Waiting for Confirmation'),
 			('approve', 'Waiting for Approval'),
 			('done', 'Issued'),('cancel', 'Cancelled')], 'Status',readonly=True),
 		
 		'type': fields.selection([('in', 'IN'), ('out', 'OUT'), ('internal', 'Internal')], 'Type'),
-		
 		'active':fields.boolean('Active'),
-		
-		'company_id':fields.many2one('res.company','Company'),
-		
+		'company_id':fields.many2one('res.company','Company',readonly=True),
 		'confirm_flag':fields.boolean('Confirm Flag'),
 		'approve_flag':fields.boolean('Expiry Flag'),
 		'products_flag':fields.boolean('Products Flag'),
@@ -76,11 +62,20 @@ class kg_department_issue(osv.osv):
 		'kg_service_indent_line':fields.many2many('kg.service.indent.line', 'kg_service_indent_picking', 'kg_serviceline_id', 'service_issue', 'Service Indent', 
 				 domain="[('service_id.state','=','approved'),'&', ('service_id.dep_name','=',department_id),'&', ('issue_pending_qty','>','0')]", 
 				  readonly=True, states={'draft': [('readonly', False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
-	
 		#'save_flag':fields.boolean('Save Flag'),
 		'issue_return':fields.boolean('Issue Return'),
-	
-	
+		
+		# Entry Info
+		
+		'created_by':fields.many2one('res.users','Created By',readonly=True),
+		'creation_date':fields.datetime('Creation Date',required=True,readonly=True),
+		'confirmed_by':fields.many2one('res.users','Confirmed By',readonly=True),
+		'confirmed_date':fields.datetime('Confirmed Date',required=True,readonly=True),
+		'approved_by':fields.many2one('res.users','Approved By',readonly=True),
+		'approved_date':fields.datetime('Approved Date',required=True,readonly=True),
+		'update_date' : fields.datetime('Last Updated Date',readonly=True),
+		'update_user_id' : fields.many2one('res.users','Last Updated By',readonly=True),
+		
 	
 	}
 	
@@ -160,6 +155,10 @@ class kg_department_issue(osv.osv):
 		val['email_cc'] = email_cc
 		return val
 	
+	def write(self, cr, uid, ids, vals, context=None):		
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(kg_department_issue, self).write(cr, uid, ids, vals, context)
+		
 	def onchange_user_id(self, cr, uid, ids, user_id, context=None):
 		value = {'department_id': ''}
 		if user_id:
@@ -242,9 +241,6 @@ class kg_department_issue(osv.osv):
 					'issue_type':'material'
 					}
 					
-				
-					
-				
 				if ids:
 					self.write(cr,uid,ids[0],{'issue_line_ids':[(0,0,vals)]})
 			"""	
@@ -256,8 +252,6 @@ class kg_department_issue(osv.osv):
 			"""			
 		self.write(cr,uid,ids,res)
 		return True
-		
-		
 		
 	def update_serviceindent_to_issue(self,cr,uid,ids,context=None):
 		
@@ -276,17 +270,12 @@ class kg_department_issue(osv.osv):
 			move_obj.unlink(cr,uid,issue_lines)
 		
 		dep_rec = dep_obj.browse(cr, uid, obj.user_id.dep_name.id)
-		
-
 		issue_dep_id = obj.department_id.id
-		
 		obj.write({'state': 'confirmed'})
 		obj.write({'products_flag': True})
 		if obj.kg_service_indent_line:
 			serviceindent_line_ids = map(lambda x:x.id,obj.kg_service_indent_line)
 			serviceindent_line_browse = serviceindent_line_obj.browse(cr,uid,serviceindent_line_ids)
-			
-			
 			serviceindent_line_browse = sorted(serviceindent_line_browse, key=lambda k: k.product_id.id)
 			groups = []
 			for key, group in groupby(serviceindent_line_browse, lambda x: x.product_id.id):
@@ -297,14 +286,9 @@ class kg_department_issue(osv.osv):
 				prod_browse = group[0].product_id
 				brand_id = group[0].brand_id.id				
 				uom =False
-				
 				indent = group[0].service_id
-				
 				dep = indent.dep_name.id
-				
-						
 				uom = group[0].uom.id or False
-				
 				serviceindent_obj = self.pool.get('kg.service.indent').browse(cr, uid, indent.id)
 				dep_stock_location = serviceindent_obj.dep_name.stock_location.id
 				main_location = serviceindent_obj.dep_name.main_location.id
@@ -323,10 +307,6 @@ class kg_department_issue(osv.osv):
 					'service_indent_line_id' : group[0].id,
 					'issue_type':'service'
 					}
-					
-				
-					
-				
 				if ids:
 					self.write(cr,uid,ids[0],{'issue_line_ids':[(0,0,vals)]})
 			"""	
@@ -348,10 +328,14 @@ class kg_department_issue(osv.osv):
 		dep_issue_line_obj = self.pool.get('kg.department.issue.line')
 		
 		if obj_rec.name == '':
-			issue_name = self.pool.get('ir.sequence').get(cr, uid, 'kg.department.issue') or ''
+			seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.department.issue')])
+			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,obj_rec.issue_date))
+			seq_name = cr.fetchone();
+			issue_name = seq_name[0]
 			obj_rec.write({'name': issue_name})
 			
-		obj_rec.write({'state': 'approve','confirmed_by':uid,'confirmed_date':time.strftime('%Y-%m-%d')})
+		obj_rec.write({'state': 'approve','confirmed_by':uid,'confirmed_date':time.strftime('%Y-%m-%d %H:%M:%S')})
 		#cr.execute("""select all_transaction_mails('Issue Request Approval',%s)"""%(ids[0]))
 		"""Raj
 		data = cr.fetchall();
@@ -419,7 +403,7 @@ class kg_department_issue(osv.osv):
 		po_obj = self.pool.get('purchase.order')
 		lot_obj = self.pool.get('stock.production.lot')
 		item_issue_obj = self.pool.get('kg.item.wise.dept.issue')
-		issue_record.write({'state': 'done','approved_by':uid,'approved_date':time.strftime('%Y-%m-%d')})
+		issue_record.write({'state': 'done','approved_by':uid,'approved_date':time.strftime('%Y-%m-%d %H:%M:%S')})
 		#cr.execute("""select all_transaction_mails('Issue Request Approval',%s)"""%(ids[0]))
 		"""Raj
 		data = cr.fetchall();
@@ -752,11 +736,10 @@ class kg_department_issue_line(osv.osv):
 		'indent_line_id':fields.many2one('kg.depindent.line','Department Indent Line'),
 		'service_indent_line_id':fields.many2one('kg.service.indent.line','Service Indent Line'),
 		'issue_type': fields.selection([('material', 'Material'), ('service', 'Service')], 'Issue Type'),
-		#'kg_grn_moves': fields.many2many('stock.production.lot','kg_department_issue_details','grn_id','lot_id', 'GRN Entry',
-		#			domain="[('product_id','=',product_id), '&',('grn_type','=','issue_type'), '&', ('pending_qty','>','0'), '&', ('lot_type','!=','out')]",
-		#			),
 		'kg_grn_moves': fields.many2many('stock.production.lot','kg_department_issue_details','grn_id','lot_id', 'GRN Entry',
-							),
+					domain="[('product_id','=',product_id),'&',('grn_type','=','issue_type'),'&', ('pending_qty','>','0'), '&', ('lot_type','!=','out')]",
+					),
+		#'kg_grn_moves': fields.many2many('stock.production.lot','kg_department_issue_details','grn_id','lot_id', 'GRN Entry'),
 		'kg_itemwise_issue_line':fields.one2many('kg.item.wise.dept.issue','issue_line_id','Item wise Department Issue',readonly=True),
 		'state': fields.selection([('draft', 'Draft'), ('confirmed', 'Confirmed'),('done', 'Done'), ('cancel', 'Cancelled')], 'Status',readonly=True),
 		'remarks': fields.text('Remarks'),
