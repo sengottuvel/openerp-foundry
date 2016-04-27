@@ -19,7 +19,7 @@ When a purchase order is created, you now have the opportunity to save the
 related requisition. This new object will regroup and will allow you to easily
 keep track and order all your purchase orders.
 """,
-    'depends' : ['base', 'product', 'kg_depmaster','kg_sale_projection'],
+    'depends' : ['base', 'product', 'kg_depmaster','kg_sale_projection','kg_po_masters'],
     'data': ['kg_depindent_view.xml',
 			'wizard/kg_depindent_wizard.xml',
 		    'wizard/kg_pending_depindent_wizard.xml',

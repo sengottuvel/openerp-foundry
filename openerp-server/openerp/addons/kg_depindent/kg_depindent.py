@@ -527,7 +527,7 @@ class kg_depindent_line(osv.osv):
 	'dep_id': fields.many2one('kg.depmaster','Department Name'),
 	'pi_cancel': fields.boolean('Cancel'),
 	'required_date': fields.date('Required Date'),
-	#~ 'brand_id': fields.many2one('kg.brand.master', 'Brand Name'),
+	'brand_id': fields.many2one('kg.brand.master', 'Brand Name'),
 	'return_qty':fields.float('Return Qty'),
 	'line_id': fields.one2many('ch.depindent.wo','header_id','Ch Line Id'),
 	
