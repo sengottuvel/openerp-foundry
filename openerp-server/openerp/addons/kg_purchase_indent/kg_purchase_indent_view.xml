@@ -124,7 +124,9 @@
 					<field name="indent_id" string="Indent No" readonly="1"/>
 					<field name="line_date" string="Indent Date" readonly="1"/>
 					<field name="product_id" string="Item Name" readonly="1"/>
+<!--
 					<field name="brand_id" string="Brand"  readonly="1"/>
+-->
 					<field name="uom" readonly="1"/>
 					<field name="qty" string="Qty" readonly="1"/>
 					
