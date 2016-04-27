@@ -232,10 +232,15 @@ class kg_schedule(osv.osv):
 								flag_allocate = False
 								flag_manual = True
 								allocation_qty = 0
+							elif bom_item.flag_pattern_check == True or bom_item.pattern_id.pattern_state != 'active':
+								flag_allocate = False
+								flag_manual = True
+								allocation_qty = 0
 							else:
 								flag_allocate = True
 								flag_manual = False
 								allocation_qty = alloc_qty
+								
 							
 							allocation_item_vals = {
 													
@@ -465,10 +470,12 @@ class kg_schedule(osv.osv):
 							'core_no': core_name[0],
 							'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
 							'core_qty': schedule_qty,
+							'core_rem_qty': schedule_qty,
 							'core_state': 'pending',
 							'mould_no': mould_name[0],
 							'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
 							'mould_qty': schedule_qty,
+							'mould_rem_qty': schedule_qty,
 							'mould_state': 'pending',		
 						}
 						
@@ -480,14 +487,40 @@ class kg_schedule(osv.osv):
 					
 			cr.execute("""
 				select product_id,sum(indent_qty) as indent_qty from 
-				(select (raw.qty * order_bom.qty) as indent_qty,raw.product_id
-				from ch_moc_raw_material as raw
-				left join ch_order_bom_details order_bom on raw.header_id = order_bom.moc_id
-				where order_bom.flag_applicable = 't' and order_bom.header_id in (select distinct order_line_id 
-				from ch_schedule_details  where header_id = %s and qty > 0
-				) )
-				as sub_query
-				group by product_id"""%(entry.id))
+
+					(
+
+					select (raw.qty * order_bom.qty) as indent_qty,raw.product_id
+					from ch_moc_raw_material as raw
+					left join ch_order_bom_details order_bom on raw.header_id = order_bom.moc_id
+					where order_bom.flag_applicable = 't' and order_bom.header_id in (select distinct order_line_id 
+					from ch_schedule_details  where header_id = %s and qty > 0
+					) 
+
+					union
+
+					select (raw.qty * order_ms.qty) as indent_qty,raw.product_id
+					from ch_moc_raw_material as raw
+					left join ch_order_machineshop_details order_ms on raw.header_id = order_ms.moc_id
+					where order_ms.flag_applicable = 't' and order_ms.header_id in (select distinct order_line_id 
+					from ch_schedule_details  where header_id = %s and qty > 0
+					) 
+
+					union
+
+					select (raw.qty * order_bot.qty) as indent_qty,raw.product_id
+					from ch_moc_raw_material as raw
+					left join ch_order_bot_details order_bot on raw.header_id = order_bot.moc_id
+					where order_bot.flag_applicable = 't' and order_bot.header_id in (select distinct order_line_id 
+					from ch_schedule_details  where header_id = %s and qty > 0
+					) 
+
+
+
+					)
+
+					as sub_query
+					group by product_id"""%(entry.id,entry.id,entry.id))
 			indent_moc_details = cr.dictfetchall();
 			
 			### Creation of Department Indent Header ###
@@ -513,6 +546,57 @@ class kg_schedule(osv.osv):
 				
 				indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
 				
+				
+				cr.execute("""
+					select product_id,order_line_id,sum(indent_qty) as indent_qty from 
+
+					(
+
+					select (raw.qty * order_bom.qty) as indent_qty,raw.product_id,order_bom.header_id as order_line_id
+					from ch_moc_raw_material as raw
+					left join ch_order_bom_details order_bom on raw.header_id = order_bom.moc_id
+					where order_bom.flag_applicable = 't' and order_bom.header_id in (select order_line_id from 
+					ch_schedule_details where header_id = %s and qty > 0
+					)
+
+					union
+
+					select (raw.qty * order_ms.qty) as indent_qty,raw.product_id,order_ms.header_id as order_line_id
+					from ch_moc_raw_material as raw
+					left join ch_order_machineshop_details order_ms on raw.header_id = order_ms.moc_id
+					where order_ms.flag_applicable = 't' and order_ms.header_id in (select distinct order_line_id 
+					from ch_schedule_details  where header_id = %s and qty > 0
+					) 
+
+					union
+
+					select (raw.qty * order_bot.qty) as indent_qty,raw.product_id,order_bot.header_id as order_line_id
+					from ch_moc_raw_material as raw
+					left join ch_order_bot_details order_bot on raw.header_id = order_bot.moc_id
+					where order_bot.flag_applicable = 't' and order_bot.header_id in (select distinct order_line_id 
+					from ch_schedule_details  where header_id = %s and qty > 0
+					)  
+					)
+					as sub_query
+					where product_id = %s
+					group by product_id,order_line_id
+					"""%(entry.id,entry.id,entry.id,indent_item['product_id']))
+				indent_wo_details = cr.dictfetchall();
+				
+				for indent_wo_item in indent_wo_details:
+					
+					indent_wo_line_obj = self.pool.get('ch.depindent.wo')
+					order_line_rec = self.pool.get('ch.work.order.details').browse(cr, uid, indent_wo_item['order_line_id'])
+					
+					indent_wo_line_vals = {
+					'header_id':indent_line_id,
+					'wo_id':order_line_rec.order_no,
+					'qty':indent_wo_item['indent_qty'],
+					}
+					
+					indent_wo_line_id = indent_wo_line_obj.create(cr, uid, indent_wo_line_vals)
+				
+			
 		
 		else:
 			raise osv.except_osv(_('Warning !'), _('System not allow to confirm an entry without Schedule details!!'))
@@ -614,6 +698,7 @@ class ch_schedule_details(osv.osv):
 		'order_ref_no': fields.related('order_id','name', type='char', string='Order Reference', store=True, readonly=True),
 		'pump_model_id': fields.related('order_line_id','pump_model_id', type='many2one', relation='kg.pumpmodel.master', string='Pump Model', store=True, readonly=True),
 		'pattern_id': fields.related('order_bomline_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern Number', store=True, readonly=True),
+		'pattern_name': fields.related('pattern_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
 		'moc_id': fields.related('order_bomline_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
 		'order_qty': fields.related('order_bomline_id','qty', type='integer', size=100, string='Order Qty', store=True, readonly=True),
 		

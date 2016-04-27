@@ -31,16 +31,40 @@ class kg_work_order(osv.osv):
 	_order = "entry_date desc"
 	
 	def _get_default_division(self, cr, uid, context=None):
-		res = self.pool.get('kg.division.master').search(cr, uid, [('code','=','SAM'), ('active','=','t')], context=context)
+		res = self.pool.get('kg.division.master').search(cr, uid, [('code','=','SAM'),('state','=','approved'), ('active','=','t')], context=context)
 		return res and res[0] or False
+		
+	def _get_order_value(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		
+		for entry in self.browse(cr, uid, ids, context=context):
+			cr.execute(''' select sum(qty * unit_price) from ch_work_order_details where header_id = %s
+			and  order_category = 'pump' ''',[entry.id])
+			pump_wo_value = cr.fetchone()
+			
+			cr.execute(''' select sum(line.qty * header.unit_price) from ch_order_bom_details as line
+				left join ch_work_order_details header on header.id = line.header_id where header.header_id = %s 
+				and header.order_category='spare' ''',[entry.id])
+			spare_wo_value = cr.fetchone()
+			if pump_wo_value[0] == None:
+				pump_value = 0.00
+			else:
+				pump_value= pump_wo_value[0]
+			if spare_wo_value[0] == None:
+				spare_value = 0.00
+			else:
+				spare_value=spare_wo_value[0]
+			wo_value = pump_value + spare_value
+			result[entry.id] = wo_value
+		return result
 
 	_columns = {
 	
 		### Header Details ####
 		'name': fields.char('WO No.', size=128,select=True,required=True),
 		'entry_date': fields.date('WO Date',required=True),
-		'division_id': fields.many2one('kg.division.master','Division',readonly=True,required=True,domain="[('active','=','t')]"),
-		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location', required=True),
+		'division_id': fields.many2one('kg.division.master','Division',readonly=True,required=True,domain="[('state','=','approved'), ('active','=','t')]"),
+		'location': fields.selection([('ipd','IPD'),('ppd','PPD'),('export','Export')],'Location', required=True),
 		'note': fields.text('Notes'),
 		'remarks': fields.text('Remarks'),
 		'cancel_remark': fields.text('Cancel Remarks'),
@@ -50,7 +74,7 @@ class kg_work_order(osv.osv):
 		'flag_cancel': fields.boolean('Cancellation Flag'),
 		'order_priority': fields.selection(ORDER_PRIORITY,'Priority', required=True),
 		'delivery_date': fields.date('Delivery Date',required=True),
-		'order_value': fields.float('Work Order Value(lakh)'),
+		'order_value': fields.function(_get_order_value, string='WO Value', method=True, store=True, type='float'),
 		'order_category': fields.selection(ORDER_CATEGORY,'Category'),
 		'partner_id': fields.many2one('res.partner','Customer'),
 		'progress_state': fields.selection([
@@ -94,6 +118,13 @@ class kg_work_order(osv.osv):
 		'delivery_date' : lambda * a: time.strftime('%Y-%m-%d'),
 	
 	}
+	
+	def onchange_priority(self, cr, uid, ids, order_category):
+		if order_category in ('pump','project','pump_spare'):
+			priority = 'normal'
+		else:
+			priority = 'emergency'
+		return {'value': {'order_priority': priority}}
 
 	def _future_entry_date_check(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -298,28 +329,6 @@ class kg_work_order(osv.osv):
 		cr.execute(''' update ch_work_order_details set state = 'confirmed', flag_cancel='t', schedule_status = 'allow' where header_id = %s ''',[ids[0]])
 		return True
 		
-	def send_to_dms(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])
-		res_rec=self.pool.get('res.users').browse(cr,uid,uid)		
-		rec_user = str(res_rec.login)
-		rec_pwd = str(res_rec.password)
-		rec_work_order = str(rec.name)
-		#~ url = 'http://iasqa1.kgisl.com/?uname='+rec_user+'&s='+rec_work_order
-		encoded_user = base64.b64encode(rec_user)
-		encoded_pwd = base64.b64encode(rec_pwd)
-		
-		url = 'http://192.168.1.7/DMS/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&wo_no='+rec_work_order
-		
-		#url = 'http://192.168.1.150:81/pbxclick2call.php?exten='+exe_no+'&phone='+str(m_no)
-		print "url..................................", url
-		return {
-					  'name'     : 'Go to website',
-					  'res_model': 'ir.actions.act_url',
-					  'type'     : 'ir.actions.act_url',
-					  'target'   : 'current',
-					  'url'      : url
-			   }
-		
 	def entry_cancel(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.cancel_remark == False:
@@ -343,6 +352,27 @@ class kg_work_order(osv.osv):
 			
 		
 		return True
+		
+	def send_to_dms(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res_rec=self.pool.get('res.users').browse(cr,uid,uid)		
+		rec_user = str(res_rec.login)
+		rec_pwd = str(res_rec.password)
+		rec_work_order = str(rec.name)
+		#~ url = 'http://iasqa1.kgisl.com/?uname='+rec_user+'&s='+rec_work_order
+		encoded_user = base64.b64encode(rec_user)
+		encoded_pwd = base64.b64encode(rec_pwd)
+		
+		url = 'http://10.100.9.60/DMS/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&wo_no='+rec_work_order
+		
+		#url = 'http://192.168.1.150:81/pbxclick2call.php?exten='+exe_no+'&phone='+str(m_no)
+		return {
+					  'name'     : 'Go to website',
+					  'res_model': 'ir.actions.act_url',
+					  'type'     : 'ir.actions.act_url',
+					  'target'   : 'current',
+					  'url'      : url
+			   }
 		
 		
 	def unlink(self,cr,uid,ids,context=None):
@@ -377,7 +407,7 @@ class ch_work_order_details(osv.osv):
 		'order_ref_no': fields.related('header_id','name', type='char', string='Work Order No.', store=True, readonly=True),
 		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True,domain="[('active','=','t')]"),
 		'order_no': fields.char('Order No.', size=128,select=True),
-		'order_category': fields.selection([('pump','Pump'),('spare','Spare'),('pump_spare','Pump and Spare')],'Purpose', required=True),
+		'order_category': fields.selection([('pump','Pump'),('spare','Spare')],'Purpose', required=True),
 		'qty': fields.integer('Qty', required=True),
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),
 		'note': fields.text('Notes'),
@@ -393,8 +423,22 @@ class ch_work_order_details(osv.osv):
 		'unit_price': fields.float('Unit Price',required=True),
 		### Used for Schedule Purpose
 		'schedule_status':fields.selection([('allow','Allow to Schedule'),('not_allow','Not Allow to Schedule')],'Schedule Status', readonly=True),
-		'moc_construction_id':fields.many2one('kg.moc.construction','MOC Construction',domain="[('active','=','t')]"),
-
+		'moc_construction_id':fields.many2one('kg.moc.construction','MOC Construction Code',domain="[('state','=','approved'), ('active','=','t')]"),
+		'moc_construction_name':fields.related('moc_construction_id','name', type='char', string='MOC Construction Name.', store=True, readonly=True),
+		### Used for VO ###
+		'rpm': fields.selection([('1450','1450'),('2900','2900')],'RPM', required=True),
+		'setting_height':fields.float('Setting Height (MM)',required=True),
+		'bed_length':fields.float('Bed Length(MM)',required=True),
+		'shaft_sealing': fields.selection([('g_p','G.P'),('m_s','M.S'),('f_s','F.S')],'Shaft Sealing',required=True),
+		'motor_power':fields.float('Motor Power',required=True),
+		'bush_bearing': fields.selection([('grease','Grease'),('cft_ext','CFT-EXT'),
+			('cft_self','CFT-SELF'),('cut_less_rubber','Cut less Rubber')],'Bush Bearing',required=True),
+		'delivery_pipe_size':fields.float('Delivery Pipe Size(MM)',required=True),
+		'lubrication': fields.selection([('grease','Grease'),('cft_ext','CFT-EXT'),
+			('cft_self','CFT-SELF'),('cut_less_rubber','Cut less Rubber')],'Lubrication',required=True),
+		
+		
+		
 	}
 	
 	
@@ -443,7 +487,7 @@ class ch_work_order_details(osv.osv):
 			cr.execute(''' select bom.id,bom.header_id,bom.pattern_id,bom.pattern_name,bom.qty, bom.pos_no,pattern.pcs_weight, pattern.ci_weight,pattern.nonferous_weight
 					from ch_bom_line as bom
 					LEFT JOIN kg_pattern_master pattern on pattern.id = bom.pattern_id
-					where bom.header_id = (select id from kg_bom where pump_model_id = %s  and active='t') ''',[pump_model_id])
+					where bom.header_id = (select id from kg_bom where pump_model_id = %s and active='t') ''',[pump_model_id])
 			bom_details = cr.dictfetchall()
 			if order_category == 'pump' :
 				for bom_details in bom_details:
@@ -473,6 +517,16 @@ class ch_work_order_details(osv.osv):
 							moc_id = False
 					else:
 						moc_id = False
+					wgt = 0.00	
+					if moc_id != False:
+						moc_rec = moc_obj.browse(cr, uid, moc_id)
+						if moc_rec.weight_type == 'ci':
+							wgt =  bom_details['ci_weight']
+						if moc_rec.weight_type == 'ss':
+							wgt = bom_details['pcs_weight']
+						if moc_rec.weight_type == 'non_ferrous':
+							wgt = bom_details['nonferous_weight']
+						
 						
 					bom_vals.append({
 														
@@ -480,9 +534,7 @@ class ch_work_order_details(osv.osv):
 						'bom_line_id': bom_details['id'],
 						'pattern_id': bom_details['pattern_id'],
 						'pattern_name': bom_details['pattern_name'],						
-						'pcs_weight': bom_details['pcs_weight'] or 0.00,						
-						'ci_weight': bom_details['ci_weight'] or 0.00,				  
-						'nonferous_weight': bom_details['nonferous_weight'] or 0.00,				  
+						'weight': wgt or 0.00,								  
 						'pos_no': bom_details['pos_no'],				  
 						'qty' : bom_qty,				   
 						'schedule_qty' : bom_qty,				  
@@ -506,16 +558,21 @@ class ch_work_order_details(osv.osv):
 					if qty > 0:
 						bom_ms_qty = qty * bom_ms_details['qty']
 						
+					if bom_ms_details['pos_no'] == None:
+						pos_no = 0
+					else:
+						pos_no = bom_ms_details['pos_no']
 						
 					machine_shop_vals.append({
 						
-						'pos_no':bom_ms_details['pos_no'],					
+						'pos_no':pos_no,					
 						'ms_line_id': bom_ms_details['id'],
 						'bom_id': bom_ms_details['bom_id'],
 						'ms_id': bom_ms_details['ms_id'],
 						'name': bom_ms_details['name'],
 						'qty': bom_ms_qty,
 						'flag_applicable' : applicable,
+						'flag_standard':flag_standard	
 								  
 						})
 						
@@ -524,7 +581,7 @@ class ch_work_order_details(osv.osv):
 				bom_bot_obj = self.pool.get('ch.bot.details')
 				cr.execute(''' select id,bot_id,qty,header_id as bom_id
 						from ch_bot_details
-						where header_id = (select id from kg_bom where pump_model_id = %s and active='t') ''',[pump_model_id])
+						where header_id = (select id from kg_bom where pump_model_id = %s and  active='t') ''',[pump_model_id])
 				bom_bot_details = cr.dictfetchall()
 				for bom_bot_details in bom_bot_details:
 					if qty == 0:
@@ -540,15 +597,23 @@ class ch_work_order_details(osv.osv):
 						'bot_id': bom_bot_details['bot_id'],
 						'qty': bom_bot_qty,
 						'flag_applicable' : applicable,
+						'flag_standard':flag_standard	
 								  
 						})
+						
 						
 		if order_category in ('spare','pump_spare'):
 			header_qty = 1
 		else:
-			header_qty = qty	
+			header_qty = qty
+			
+		if moc_construction_id:
+			moc_cons_rec = self.pool.get('kg.moc.construction').browse(cr, uid, moc_construction_id)
+			moc_construction_name = moc_cons_rec.name
+		else:
+			moc_construction_name = ''
 
-		return {'value': {'qty':header_qty,'line_ids': bom_vals,'line_ids_a':machine_shop_vals,'line_ids_b':bot_vals,'line_ids_c':consu_vals}}
+		return {'value': {'moc_construction_name':moc_construction_name,'qty':header_qty,'line_ids': bom_vals,'line_ids_a':machine_shop_vals,'line_ids_b':bot_vals,'line_ids_c':consu_vals}}
 	
 	def entry_cancel(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
@@ -655,13 +720,14 @@ class ch_order_bom_details(osv.osv):
 		
 		'bom_id': fields.many2one('kg.bom','BOM'),
 		'bom_line_id': fields.many2one('ch.bom.line','BOM Line'),
-		'pattern_id': fields.many2one('kg.pattern.master','Pattern No',domain="[ ('active','=','t')]"),
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern No',domain="[('state','=','approved'), ('active','=','t')]"),
 		'pattern_name': fields.char('Pattern Name'),
-		'pcs_weight': fields.related('pattern_id','pcs_weight', type='float', string='SS Weight(kgs)', store=True),
-		'ci_weight': fields.related('pattern_id','ci_weight', type='float', string='CI Weight(kgs)', store=True),
-		'nonferous_weight': fields.related('pattern_id','nonferous_weight', type='float', string='Non-Ferrous Weight(kgs)', store=True),
+		'weight': fields.float('Weight(kgs)'),
+		#~ 'pcs_weight': fields.related('pattern_id','pcs_weight', type='float', string='SS Weight(kgs)', store=True),
+		#~ 'ci_weight': fields.related('pattern_id','ci_weight', type='float', string='CI Weight(kgs)', store=True),
+		#~ 'nonferous_weight': fields.related('pattern_id','nonferous_weight', type='float', string='Non-Ferrous Weight(kgs)', store=True),
 		'pos_no': fields.related('bom_line_id','pos_no', type='integer', string='Position No', store=True),
-		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','=','approved'), ('active','=','t')]"),
 		'qty': fields.integer('Qty'),
 		'unit_price': fields.float('Unit Price'),
 		'schedule_qty': fields.integer('Schedule Pending Qty'),
@@ -686,36 +752,55 @@ class ch_order_bom_details(osv.osv):
 	def default_get(self, cr, uid, fields, context=None):
 		return context
 		
-	def onchange_pattern_details(self, cr, uid, ids, pattern_id):
+	def onchange_pattern_details(self, cr, uid, ids, pattern_id, moc_id):
+		wgt = 0.00
 		pattern_obj = self.pool.get('kg.pattern.master')
-		if pattern_id:
-			pattern_rec = pattern_obj.browse(cr, uid, pattern_id)
-			pattern_name = pattern_rec.pattern_name
-			ss_wgt = pattern_rec.pcs_weight
-			ci_wgt = pattern_rec.ci_weight
-			non_fer_wgt = pattern_rec.nonferous_weight
-		return {'value': {'pattern_name': pattern_name,'pcs_weight':ss_wgt,'ci_weight':ci_wgt,'nonferous_weight':non_fer_wgt}}
+		moc_obj = self.pool.get('kg.moc.master')
+		pattern_rec = pattern_obj.browse(cr, uid, pattern_id)
+		pattern_name = pattern_rec.pattern_name
+		if moc_id:
+			moc_rec = moc_obj.browse(cr, uid, moc_id)
+			if moc_rec.weight_type == 'ci':
+				wgt = pattern_rec.ci_weight
+			if moc_rec.weight_type == 'ss':
+				wgt = pattern_rec.pcs_weight
+			if moc_rec.weight_type == 'non_ferrous':
+				wgt = pattern_rec.nonferous_weight
+			
+		return {'value': {'pattern_name': pattern_name,'weight':wgt}}
 	
 	def create(self, cr, uid, vals, context=None):
-		if vals.get('pattern_id'):
-			pattern_obj = self.pool.get('kg.pattern.master')
+		wgt = 0.00
+		pattern_obj = self.pool.get('kg.pattern.master')
+		moc_obj = self.pool.get('kg.moc.master')
+		if vals.get('pattern_id') and vals.get('moc_id'):
 			pattern_rec = pattern_obj.browse(cr, uid, vals.get('pattern_id'))
 			pattern_name = pattern_rec.pattern_name
-			ss_wgt = pattern_rec.pcs_weight
-			ci_wgt = pattern_rec.ci_weight
-			non_fer_wgt = pattern_rec.nonferous_weight
-			vals.update({'pattern_name': pattern_name,'pcs_weight':ss_wgt,'ci_weight':ci_wgt,'nonferous_weight':non_fer_wgt})
+			moc_rec = moc_obj.browse(cr, uid, vals.get('moc_id'))
+			if moc_rec.weight_type == 'ci':
+				wgt = pattern_rec.ci_weight
+			if moc_rec.weight_type == 'ss':
+				wgt = pattern_rec.pcs_weight
+			if moc_rec.weight_type == 'non_ferrous':
+				wgt = pattern_rec.nonferous_weight
+			vals.update({'pattern_name': pattern_name,'weight':wgt})
 		return super(ch_order_bom_details, self).create(cr, uid, vals, context=context)
 	
 	def write(self, cr, uid, ids, vals, context=None):
-		if vals.get('pattern_id'):
-			pattern_obj = self.pool.get('kg.pattern.master')
+		wgt = 0.00
+		pattern_obj = self.pool.get('kg.pattern.master')
+		moc_obj = self.pool.get('kg.moc.master')
+		if vals.get('pattern_id') and vals.get('moc_id'):
 			pattern_rec = pattern_obj.browse(cr, uid, vals.get('pattern_id'))
 			pattern_name = pattern_rec.pattern_name
-			ss_wgt = pattern_rec.pcs_weight
-			ci_wgt = pattern_rec.ci_weight
-			non_fer_wgt = pattern_rec.nonferous_weight
-			vals.update({'pattern_name': pattern_name,'pcs_weight':ss_wgt,'ci_weight':ci_wgt,'nonferous_weight':non_fer_wgt})
+			moc_rec = moc_obj.browse(cr, uid, vals.get('moc_id'))
+			if moc_rec.weight_type == 'ci':
+				wgt = pattern_rec.ci_weight
+			if moc_rec.weight_type == 'ss':
+				wgt = pattern_rec.pcs_weight
+			if moc_rec.weight_type == 'non_ferrous':
+				wgt = pattern_rec.nonferous_weight
+			vals.update({'pattern_name': pattern_name,'weight':wgt})
 		return super(ch_order_bom_details, self).write(cr, uid, ids, vals, context)
 		
 		
@@ -746,11 +831,13 @@ class ch_order_machineshop_details(osv.osv):
 		'pos_no': fields.related('ms_line_id','pos_no', type='integer', string='Position No', store=True),
 		'bom_id': fields.many2one('kg.bom','BOM'),
 		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', ondelete='cascade',required=True),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','=','approved'), ('active','=','t')]"),
 		'name':fields.char('Item Name', size=128),	  
 		'qty': fields.integer('Qty', required=True),
 		'flag_applicable': fields.boolean('Is Applicable'),
 		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
-		'remarks':fields.text('Remarks'),   
+		'remarks':fields.text('Remarks'), 
+		'flag_standard': fields.boolean('Non Standard'),  
 	
 	}   
 	
@@ -776,15 +863,18 @@ class ch_order_bot_details(osv.osv):
 		'bot_line_id':fields.many2one('ch.bot.details', 'BOT Line Id'),
 		'bot_id':fields.many2one('kg.machine.shop', 'Item Code',domain = [('type','=','bot')], ondelete='cascade',required=True),
 		'item_name': fields.related('bot_id','name', type='char', size=128, string='Item Name', store=True, readonly=True),
-		'bom_id': fields.many2one('kg.bom','BOM'), 
+		'bom_id': fields.many2one('kg.bom','BOM'),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','=','approved'), ('active','=','t')]"),
 		'qty': fields.integer('Qty', required=True),
 		'flag_applicable': fields.boolean('Is Applicable'),
 		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
-		'remarks':fields.text('Remarks'),   
+		'remarks':fields.text('Remarks'),
+		'flag_standard': fields.boolean('Non Standard'), 
 	
 	}
 	
 	def default_get(self, cr, uid, fields, context=None):
+		print "botttttttttttttttttttttttt",fields,context
 		return context
 	
 		
@@ -843,6 +933,13 @@ class kg_sequence_generate_det(osv.osv):
         'fiscal_year_id' : fields.integer('Fiscal Year ID'),
     }
 kg_sequence_generate_det()
+
+
+
+	
+	
+
+
 
 
 

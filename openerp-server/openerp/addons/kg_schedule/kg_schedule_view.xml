@@ -48,6 +48,7 @@
 											<field name="order_category" string="Purpose"/>
 											<field name="pump_model_id"/>
 											<field name="pattern_id"/>
+											<field name="pattern_name"/>
 											<field name="moc_id" />
 											<field name="order_qty" string="WO Qty"/>
 											<field name="stock_qty" string="Stock Qty"/>

@@ -19,7 +19,7 @@
 							<group>
 								<field name="name" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="division_id"/>
-								<field name="order_priority" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="order_category" on_change="onchange_priority(order_category)" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="partner_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="delivery_date" on_change="onchange_delivery_date(delivery_date)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="flag_cancel" invisible="1"/>
@@ -28,8 +28,8 @@
 							<group>
 								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="location" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
-								<field name="order_category" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
-								<field name="order_value" readonly="1"/>
+								<field name="order_priority" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="order_value" string="WO Value" readonly="1"/>
 								<field name="state" style="width: 30%%" class="att_state_change"/>
 								<field name="remarks" string="Remarks" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							</group>					
@@ -43,7 +43,7 @@
 						-->
 						<notebook>
 							<page string="Work Order Details" >
-								<field colspan="4" name="line_ids" nolabel="1" context="{'order_category':order_category}">
+								<field colspan="4" name="line_ids" nolabel="1" context="{'order_category':order_category,'delivery_date':delivery_date}">
 									<tree string = "Work Order Items">
 										<field name="order_no" readonly="1"/>
 										<field name="order_category" readonly="1"/>
@@ -125,6 +125,7 @@
 					<field name="pump_model_id"/>
 					<field name="qty" sum="Total Qty"/>
 					<field name="delivery_date"/>
+					
 				    <field name="state" invisible="1"/>
 				</tree>
 			</field>
@@ -146,6 +147,11 @@
 							<field name="pump_model_id" on_change="onchange_bom_details(pump_model_id, qty,moc_construction_id, order_category,flag_standard)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="order_ref_no" invisible="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="moc_construction_id" on_change="onchange_bom_details(pump_model_id, qty,moc_construction_id, order_category,flag_standard)" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="rpm" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="bed_length" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="motor_power" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="delivery_pipe_size" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="unit_price" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="flag_standard" on_change="onchange_bom_details(pump_model_id, qty,moc_construction_id, order_category,flag_standard)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="state" invisible="1"/>
 							<field name="flag_cancel" invisible="1"/>
@@ -158,7 +164,11 @@
 						<group>
 							<field name="order_category" on_change="onchange_bom_details(pump_model_id, qty,moc_construction_id, order_category,flag_standard)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="qty"  on_change="onchange_bom_details(pump_model_id, qty,moc_construction_id, order_category,flag_standard)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
-							<field name="unit_price" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="moc_construction_name"/>
+							<field name="setting_height" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="shaft_sealing" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="bush_bearing" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="lubrication" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="delivery_date" on_change="onchange_delivery_date(delivery_date)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="note" string="Remarks" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 						</group>
@@ -169,12 +179,16 @@
 							<field name="line_ids" colspan="4" nolabel="1" context="{'order_category':order_category,'flag_standard':flag_standard}"  attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
 								<tree string="BOM Details" editable="bottom">
 								   <field name="order_category" invisible="1"/>
-								   <field name="pattern_id" on_change="onchange_pattern_details(pattern_id)" attrs="{'readonly': [('order_category','=','pump')]}"/>
+								   <field name="pattern_id"  attrs="{'readonly': [('order_category','=','pump')]}"/>
 								   <field name="pattern_name" readonly="1"/>
+<!--
 								   <field name="pos_no" attrs="{'readonly': [('order_category','=','pump')]}"/>
-								   <field name="pcs_weight" readonly="1"/>
+-->
+								   <field name="weight" readonly="1"/>
+<!--
 								   <field name="ci_weight" readonly="1"/>
 								   <field name="nonferous_weight" readonly="1"/>
+-->
 								   <field name="order_category" invisible="1"/>
 								   <field name="qty" required="1" attrs="{'readonly': [('order_category','=','pump')]}"/>
 								   <field name="unit_price" attrs="{'readonly': [('order_category','=','pump')]}"/>
@@ -182,7 +196,7 @@
 								   <field name="production_qty" invisible="1"/>
 								   <field name="flag_applicable"/>
 								   <field name="flag_pattern_check"/>
-								   <field name="moc_id" attrs="{'required': [('flag_applicable','!=',False)],'readonly': [('flag_standard','=',False)]}"/>
+								   <field name="moc_id" on_change="onchange_pattern_details(pattern_id,moc_id)" attrs="{'required': [('flag_applicable','!=',False)],'readonly': [('flag_standard','=',False)]}"/>
 								   <field name="add_spec" widget="char"/>
 								   <field name="flag_standard" invisible="1"/>
 								</tree>
@@ -190,7 +204,7 @@
 						</page>
 						
 						<page string="Machine Shop">
-							<field name="line_ids_a" nolabel="1" context="{'order_category':order_category}" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
+							<field name="line_ids_a" nolabel="1" context="{'order_category':order_category,'flag_standard':flag_standard}" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
 								<tree string="Order Machine Shop Details Entry Tree" editable="bottom">
 									<field name="order_category" invisible="1"/>
 									<field name="pos_no" attrs="{'readonly': [('order_category','=','pump')]}"/>		
@@ -198,19 +212,23 @@
 									<field name="name" attrs="{'readonly': [('order_category','=','pump')]}"/>
 									<field name="qty"/>
 									<field name="flag_applicable"/>
+									<field name="moc_id" attrs="{'required': [('flag_applicable','!=',False)],'readonly': [('flag_standard','=',False)]}"/>
 									<field name="remarks" widget="char"/>
+									<field name="flag_standard" invisible="1"/>
 								</tree>
 							</field>
 						</page>
 						<page string="BOT">
-							<field name="line_ids_b" nolabel="1" context="{'order_category':order_category}" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
+							<field name="line_ids_b" nolabel="1" context="{'order_category':order_category,'flag_standard':flag_standard}" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
 								<tree string="Order BOT Details Entry Tree" editable="bottom">	
 									<field name="order_category" invisible="1"/>
-									<field name="bot_id" attrs="{'readonly': [('order_category','=','pump')]}" />
-									<field name="item_name" attrs="{'readonly': [('order_category','=','pump')]}"/>										
+									<field name="item_name" attrs="{'readonly': [('order_category','=','pump')]}"/>
+									<field name="bot_id" attrs="{'readonly': [('order_category','=','pump')]}" />											
 									<field name="qty"/>
 									<field name="flag_applicable"/>
+									<field name="moc_id" attrs="{'required': [('flag_applicable','!=',False)],'readonly': [('flag_standard','=',False)]}"/>
 									<field name="remarks" widget="char"/>
+									<field name="flag_standard" invisible="1"/>
 								</tree>
 							</field>
 						</page>
@@ -323,6 +341,7 @@
 		<menuitem  action="tma_work_order" id="tam_work_order" parent="kg_stock_inward.tpm_planning_transactions" sequence="3"/>
 	
 	<!-- Menu Item End -->
+	
 	
 	</data>
 </openerp>

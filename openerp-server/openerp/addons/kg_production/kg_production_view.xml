@@ -567,8 +567,9 @@
 								<field name="core_no" readonly="1"/>
 								<field name="core_shift_id" required="1" attrs="{'readonly': [('core_state','in',['done'])]}"/>
 								<field name="core_operator" attrs="{'required':[('core_by','=','comp_employee')],'invisible':[('core_by','!=','comp_employee')],'readonly': [('core_state','in',['done'])]}"/>
-								<field name="core_moulder" string="Moulder Count"  attrs="{'required':[('core_by','=','comp_employee')],'invisible':[('core_by','!=','comp_employee')],'readonly': [('core_state','in',['done'])]}"/>
+								<field name="core_moulder" string="Moulder Count"  invisible="1"/>
 								<field name="core_hardness" attrs="{'readonly': [('core_state','in',['done'])]}"/>
+								<field name="core_pan_no" attrs="{'invisible':[('core_by','!=','contractor')],'readonly': [('core_state','in',['done'])]}"/>
 								<field name="core_remarks" attrs="{'readonly': [('core_state','in',['done'])]}"/>
 							</group>											
 							<group>
@@ -583,17 +584,18 @@
 						<group string="Schedule Details">
 							<group>
 								<field name="order_no" readonly="1"/>
-								<field name="order_priority" string="Category"/>
-								<field name="pattern_id" readonly="1"/>
-							    <field name="moc_id" readonly="1"/>
+								<field name="pump_model_id" readonly="1"/>
+								<field name="pattern_name" readonly="1"/>
 							    <field name="total_core_qty" string="Total core Qty" invisible="1"/>
+							    <field name="qty" string="Schedule Qty" readonly="1"/>
 							    
 							</group>											
 							<group>
-								<field name="order_delivery_date" readonly="1"/>
-								<field name="pump_model_id" readonly="1"/>
-								<field name="pattern_name" readonly="1"/>
-								<field name="qty" string="Schedule Qty" readonly="1"/>
+								<field name="order_delivery_date" invisible="1"/>
+								<field name="order_priority" string="Category"/>
+								<field name="pattern_id" readonly="1"/>
+								<field name="moc_id" readonly="1"/>
+								<field name="core_rem_qty" string="Remaining Qty"/>
 							</group>					
 						</group>
 						<notebook>
@@ -630,7 +632,7 @@
 					<field name="core_no"/>
 					<field name="core_date"/>
 					<field name="order_no"/>
-					<field name="order_delivery_date"/>
+					<field name="order_delivery_date" invisible="1"/>
 					<field name="order_priority" string="Category"/>
 					<field name="pump_model_id"/>
 					<field name="pattern_id"/>
@@ -638,6 +640,7 @@
 					<field name="moc_id"/>
 					<field name="location"/>
 					<field name="qty" string="Schedule Qty" sum="Total Qty"/>
+					<field name="core_rem_qty" string="Remaining Qty"/>
 					<field name="core_state"/>
 				</tree>
 			</field>
@@ -663,8 +666,7 @@
 					<separator/>
                     <group expand="0" string="Group By...">
 						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
-						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
-						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_category'}"/>
+						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_priority'}"/>
 						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
 						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
 						<filter string="Pattern Name." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_name'}"/>
@@ -944,6 +946,7 @@
 								<field name="mould_operator" attrs="{'required':[('mould_by','=','comp_employee')],'invisible':[('mould_by','!=','comp_employee')],'readonly': [('mould_state','in',['done'])]}"/>
 								<field name="mould_moulder" string="Moulder Count"  attrs="{'required':[('mould_by','=','comp_employee')],'invisible':[('mould_by','!=','comp_employee')],'readonly': [('mould_state','in',['done'])]}"/>
 								<field name="mould_hardness" attrs="{'readonly': [('mould_state','in',['done'])]}"/>
+								<field name="mould_pan_no" attrs="{'invisible':[('mould_by','!=','contractor')],'readonly': [('mould_state','in',['done'])]}"/>
 								<field name="mould_remarks" attrs="{'readonly': [('mould_state','in',['done'])]}"/>
 							</group>											
 							<group>
@@ -959,17 +962,19 @@
 						<group string="Schedule Details">
 							<group>
 								<field name="order_no" readonly="1"/>
-								<field name="order_priority" string="Category"/>
-								<field name="pattern_id" readonly="1"/>
-							    <field name="moc_id" readonly="1"/>
-							    <field name="total_mould_qty" string="Total mould Qty" invisible="1"/>
-							    
-							</group>											
-							<group>
-								<field name="order_delivery_date" readonly="1"/>
 								<field name="pump_model_id" readonly="1"/>
 								<field name="pattern_name" readonly="1"/>
-								<field name="qty" string="Schedule Qty" readonly="1"/>
+							    <field name="total_mould_qty" string="Total mould Qty" invisible="1"/>
+							    <field name="qty" string="Schedule Qty" readonly="1"/>
+							   
+							</group>											
+							<group>
+								<field name="order_delivery_date" invisible="1"/>
+								<field name="order_priority" string="Category"/>
+								<field name="pattern_id" readonly="1"/>
+								<field name="moc_id" readonly="1"/>
+								<field name="mould_rem_qty" string="Remaining Qty"/>
+
 							</group>					
 						</group>
 						<notebook>
@@ -1006,7 +1011,7 @@
 					<field name="mould_no"/>
 					<field name="mould_date"/>
 					<field name="order_no"/>
-					<field name="order_delivery_date"/>
+					<field name="order_delivery_date" invisible="1"/>
 					<field name="order_priority" string="Category"/>
 					<field name="pump_model_id"/>
 					<field name="pattern_id"/>
@@ -1014,6 +1019,7 @@
 					<field name="moc_id"/>
 					<field name="location"/>
 					<field name="qty" string="Schedule Qty" sum="Total Qty"/>
+					<field name="mould_rem_qty" string="Remaining Qty"/>
 					<field name="mould_state"/>
 				</tree>
 			</field>
@@ -1039,8 +1045,7 @@
 					<separator/>
                     <group expand="0" string="Group By...">
 						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
-						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
-						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_category'}"/>
+						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_priority'}"/>
 						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
 						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
 						<filter string="Pattern Name." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_name'}"/>
