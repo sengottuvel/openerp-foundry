@@ -12,6 +12,7 @@ class kg_moc_construction(osv.osv):
 
 	_name = "kg.moc.construction"
 	_description = "MOC Construction Master"
+	_rec_name = "code"
 	
 	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
 		res={}
