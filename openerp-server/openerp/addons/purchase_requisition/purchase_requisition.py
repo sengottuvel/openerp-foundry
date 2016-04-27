@@ -219,7 +219,7 @@ class ch_purchase_indent_wo(osv.osv):
 	_columns = {
 
 	'header_id': fields.many2one('purchase.requisition.line', 'Purchase Indent Line', required=True, ondelete='cascade'),
-	'wo_id': fields.integer('WO'),
+	'wo_id': fields.char('WO'),
 	'qty': fields.float('Indent Qty', required=True),
 	
 	}

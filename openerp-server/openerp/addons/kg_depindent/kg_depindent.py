@@ -554,7 +554,7 @@ class ch_depindent_wo(osv.osv):
 	_columns = {
 
 	'header_id': fields.many2one('kg.depindent.line', 'Dept Indent Line', required=True, ondelete='cascade'),
-	'wo_id': fields.many2one('kg.work.order', 'WO', required=True),
+	'wo_id': fields.char('WO', required=True),
 	'qty': fields.float('Indent Qty', required=True),
 	
 	}
