@@ -58,6 +58,7 @@ class kg_product(osv.osv):
 		'length': fields.float('Length'),
 		'thickness': fields.float('Thickness'),
 		'weight': fields.float('Weight'),
+		'po_uom_in_kgs': fields.float('PO UOM in kgs'),
 		
 	}
 	

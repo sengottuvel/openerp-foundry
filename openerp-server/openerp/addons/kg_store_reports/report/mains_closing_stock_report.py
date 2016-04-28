@@ -71,9 +71,9 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 		else:
 			pro_type=''
 			
-		
+		print "date............"	, type(form['date'])
 		location_rec = self.pool.get('stock.location').browse(self.cr,self.uid,location)
-		
+		print "location_rec.........................", location_rec, location_rec.location_type
 		
 		if location_rec.location_type == 'main':
 			lo_type = 'in'
@@ -97,13 +97,14 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 				   
 			   
 		data=self.cr.dictfetchall()
-	
+		print "in_data ::::::::::::::=====>>>>", data
+		
 		gr_total=0.0
 		gr_total1=0.0
 		for item in data:
 			lot_obj = self.pool.get('stock.production.lot')
 			lot_id = lot_obj.search(self.cr, self.uid,[('product_id','=',item['in_pro_id']),('lot_type','=','in')])
-			
+			print "exp____lot_id",lot_id
 			if lot_id:
 				for lot in lot_id:
 					lot_rec = lot_obj.browse(self.cr,self.uid,lot)
@@ -120,26 +121,28 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 				
 				out_date = "'"+form['date']+"'"
 				
-				out_sql = """ select product_id,sum(product_qty) from stock_move where product_id=%s and move_type='out' and state='done' and date::date <=%s and location_id != 254 group by product_id """%(product_id,out_date)
+				out_sql = """ select product_id,sum(product_qty) from stock_move where product_id=%s and move_type='out' and state='done' and date::date <=%s and location_id != 8 group by product_id """%(product_id,out_date)
 				self.cr.execute(out_sql)			
 				out_data = self.cr.dictfetchall()
-			
+				print "out_data...........................", out_data
 				if out_data:
 					out_qty = [d['sum'] for d in out_data if 'sum' in d]
-					
+					print "product_id................",product_id
+					print "in_qty.................",in_qty
+					print "out_qty.................",out_qty[0]
 					op_qty = in_qty - out_qty[0]
-					
+					print "cl_qty..............",op_qty
 				else:
 					op_qty = in_qty		
 					
 				item['close_qty'] = op_qty
-				
+				print "op_qty.........yyyyyyyyyyyy.....item['op_qty']..........", item['close_qty']
 				
 				#####
 				if item['close_qty']:
 					spl_obj=self.pool.get('stock.production.lot')
 					spl_id=spl_obj.search(self.cr,self.uid,[('product_id','=',product_id),('lot_type','=','in')])
-					
+					print "innnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",spl_id
 							
 					
 					value=0
@@ -162,28 +165,28 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 										
 		
 
-		
+		print "----------------------------->>>>",data
 		
 		data_renew = []
 		val = 0.0
 		val1 = 0.0
 		data.sort(key=lambda data: data['product_name'])
 		for item in data:
-			
+			print "&&***&&&",item
 			if item['close_qty'] > 0.0:
 				val = item['closing_value']
 				gr_total += val
-
+				print "gr_total1.............",gr_total
 				item['gr_total'] = gr_total
 				data_renew.append(item)
-				
+				print "-----===========data_renew==========>",data_renew
 			else:
 				pass
 				
 		
 				
 		data = data_renew
-		
+		print "=================data============>",data
 		return data
 			
 			   

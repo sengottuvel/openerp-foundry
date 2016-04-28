@@ -721,7 +721,7 @@ class kg_department_issue_line(osv.osv):
 		
 		'issue_date':fields.date('PO GRN Date'),
 		'issue_id':fields.many2one('kg.department.issue','Department Issue Entry'),
-		'name':fields.char('Product'),
+		'name': fields.related('issue_id','name', type='char', string='Issue No'),
 		'product_id':fields.many2one('product.product','Product Name',required=True),
 		'uom_id':fields.many2one('product.uom','UOM',readonly=True),
 		'issue_qty':fields.float('Issue Quantity',required=True),
@@ -737,7 +737,7 @@ class kg_department_issue_line(osv.osv):
 		'service_indent_line_id':fields.many2one('kg.service.indent.line','Service Indent Line'),
 		'issue_type': fields.selection([('material', 'Material'), ('service', 'Service')], 'Issue Type'),
 		'kg_grn_moves': fields.many2many('stock.production.lot','kg_department_issue_details','grn_id','lot_id', 'GRN Entry',
-					domain="[('product_id','=',product_id),'&',('grn_type','=','issue_type'),'&', ('pending_qty','>','0'), '&', ('lot_type','!=','out')]",
+					domain="[('product_id','=',product_id),'&',('grn_type','=',issue_type),'&', ('pending_qty','>',0), '&', ('lot_type','!=','out')]",
 					),
 		#'kg_grn_moves': fields.many2many('stock.production.lot','kg_department_issue_details','grn_id','lot_id', 'GRN Entry'),
 		'kg_itemwise_issue_line':fields.one2many('kg.item.wise.dept.issue','issue_line_id','Item wise Department Issue',readonly=True),

@@ -116,12 +116,10 @@
 			<group>
 			<field name="po_expenses_type1" invisible="1"/>
 			<field name="value1" invisible="1"/>
-						
 			</group>
 			<group>
 			<field name="po_expenses_type2" invisible="1"/>
 			<field name="value2" invisible="1"/>
-						
 			</group>
 		</group>
 		</field>
@@ -302,6 +300,7 @@
 				
 				<field name="price_unit" position="replace">
 					<field name="price_unit" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}"/>
+					
 				</field>
 				
 				<field name="price_unit" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}" position="after">
@@ -309,6 +308,9 @@
 							attrs="{'invisible': [('cancel_qty','=',0)]}"/>				
 				<field name="received_qty" readonly="1"
 						attrs="{'invisible': [('received_qty','=',0)]}" />
+<!--
+				<field name = "price_type"/>
+-->
 				<field name = "cancel_flag" invisible="1"/>
 				<!--<field name="cancel_remark" attrs="{'readonly': [('cancel_flag','=', False)]}"/>-->
 		

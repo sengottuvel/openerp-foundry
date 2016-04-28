@@ -1559,6 +1559,7 @@ class stock_production_lot(osv.osv):
 		'date': lambda *a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'name': lambda x, y, z, c: x.pool.get('ir.sequence').get(y, z, 'stock.lot.serial'),
 		'product_id': lambda x, y, z, c: c.get('product_id', False),
+		'lot_type':'in'
 	}
 	_sql_constraints = [
 		('name_ref_uniq', 'unique (name, ref)', 'The combination of Serial Number and internal reference must be unique !'),

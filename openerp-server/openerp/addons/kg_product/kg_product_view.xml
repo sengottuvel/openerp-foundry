@@ -52,8 +52,8 @@
 		</field>
 		
 		<field name="uom_po_id" position="after">
-		
 		<field name="po_uom_coeff" placeholder="UOM * PO Coeff = 1 POM" attrs="{'readonly':[('state','=','approved')]}"/>
+		<field name="po_uom_in_kgs"/>
 		</field>
 			
 		<field name="list_price" position="replace">

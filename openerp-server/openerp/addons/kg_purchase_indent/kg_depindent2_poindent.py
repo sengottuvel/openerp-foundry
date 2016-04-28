@@ -78,13 +78,14 @@ class kg_depindent2_poindent(osv.osv):
 				prod_browse = group[0].product_id
 				brand_id = group[0].brand_id.id			
 				uom = group[0].uom.id or False
-				po_uom = group[0].po_uom.id or False
+				po_uom = prod_browse.uom_po_id.id or False
 				depindent_id= group[0].id
 				po_qty = group[0].po_qty
 				#pending_qty = group[0].pending_qty
 				remark = group[0].note
 				cur_qty=prod_browse.qty_available
 				print "current quantity,,,,,,,,,,,,,>",cur_qty		
+				pending_qty = pending_qty / prod_browse.po_uom_coeff
 				stock_sql = """ select sum(pending_qty) from stock_production_lot where product_id = %s group by product_id """%(prod_browse.id)
 				cr.execute(stock_sql)		
 				stock_data = cr.dictfetchall()

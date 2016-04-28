@@ -5,7 +5,6 @@ import time
 from openerp import tools
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
-
 import decimal_precision as dp
 from itertools import groupby
 from datetime import datetime, timedelta,date
@@ -16,7 +15,6 @@ from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
 from email.MIMEImage import MIMEImage
 import logging
-
 
 from tools import number_to_text_convert_india
 logger = logging.getLogger('server')
@@ -924,7 +922,7 @@ class kg_purchase_order_line(osv.osv):
 	'least_price': fields.float('Least Price'),
 	'high_price': fields.float('Highest Price'),
 	'recent_price': fields.float('Recent Price'),
-	
+	'price_type': fields.selection([('po_uom','PO UOM'),('per_kg','Per Kg')],'Price Type'),
 	
 	}
 	

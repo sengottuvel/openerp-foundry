@@ -480,21 +480,32 @@ class kg_general_grn(osv.osv):
 				cr.execute(del_sql1)
 
 			print data1
+			
+			if line.uom_id.id != line.product_id.uom_po_id.id:
+				product_uom = line.product_id.uom_id.id
+				po_coeff = line.product_id.po_uom_coeff
+				product_qty = line.grn_qty * po_coeff
+				price_unit = line.price_subtotal / product_qty
+			elif line.uom_id.id == line.product_id.uom_id.id:
+				product_uom = line.product_id.uom_id.id
+				product_qty = line.grn_qty
+				price_unit = line.price_subtotal / product_qty
+			
 			stock_move_obj.create(cr,uid,
 				{
 				'general_grn_id':line.id,
 				'product_id': line.product_id.id,
 				'brand_id':line.brand_id.id,
 				'name':line.product_id.name,
-				'product_qty': line.grn_qty,
-				'po_to_stock_qty':line.grn_qty,
+				'product_qty': product_qty,
+				'po_to_stock_qty':product_qty,
 				'stock_uom':line.uom_id.id,
 				'product_uom': line.uom_id.id,
 				'location_id': grn_entry.supplier_id.property_stock_supplier.id,
 				'location_dest_id': dest_location_id,
 				'move_type': 'in',
 				'state': 'done',
-				'price_unit': line.price_unit or 0.0,
+				'price_unit': price_unit or 0.0,
 				'origin':'General GRN',
 				'stock_rate':line.price_unit or 0.0,
 				})
@@ -522,24 +533,43 @@ class kg_general_grn(osv.osv):
 			# This code will create Production lot
 			if line.exp_batch_id:
 				for exp in line.exp_batch_id:
+					if line.uom_id.id != line.product_id.uom_po_id.id:
+						product_uom = line.product_id.uom_id.id
+						po_coeff = line.product_id.po_uom_coeff
+						product_qty = exp.product_qty * po_coeff
+						price_unit = line.price_subtotal / product_qty
+					elif line.uom_id.id == line.product_id.uom_id.id:
+						product_uom = line.product_id.uom_id.id
+						product_qty = exp.product_qty
+						price_unit = line.price_subtotal / product_qty
 					lot_obj.create(cr,uid,
 						{
 						'grn_no':line.grn_id.name,
 						'product_id':line.product_id.id,
 						'brand_id':line.brand_id.id,
 						'product_uom':line.uom_id.id,
-						'product_qty':exp.product_qty,
-						'pending_qty':exp.product_qty,
-						'issue_qty':exp.product_qty,
+						'product_qty':product_qty,
+						'pending_qty':product_qty,
+						'issue_qty':product_qty,
 						'batch_no':exp.batch_no,
 						'expiry_date':exp.exp_date,
-						'price_unit':line.price_unit or 0.0,
+						'price_unit':price_unit or 0.0,
 						'po_uom':line.uom_id.id,
 						'grn_type':'material'
 						#'po_qty':move_record.po_to_stock_qty,
 					})
 
 			else:
+				if line.uom_id.id != line.product_id.uom_po_id.id:
+					product_uom = line.product_id.uom_id.id
+					po_coeff = line.product_id.po_uom_coeff
+					product_qty = line.grn_qty * po_coeff
+					price_unit =  line.price_subtotal / product_qty
+				elif line.uom_id.id == line.product_id.uom_id.id:
+					product_uom = line.product_id.uom_id.id
+					product_qty = line.grn_qty
+					price_unit = line.price_subtotal / product_qty
+							
 				lot_obj.create(cr,uid,
 
 					{
@@ -548,12 +578,12 @@ class kg_general_grn(osv.osv):
 					'product_id':line.product_id.id,
 					'brand_id':line.brand_id.id,
 					'product_uom':line.uom_id.id,
-					'product_qty':line.grn_qty,
-					'pending_qty':line.grn_qty,
-					'issue_qty':line.grn_qty,
+					'product_qty':product_qty,
+					'pending_qty':product_qty,
+					'issue_qty':product_qty,
 					'batch_no':line.grn_id.name,
 					#'expiry_date':exp.exp_date,
-					'price_unit':line.price_unit or 0.0,
+					'price_unit':price_unit or 0.0,
 					'po_uom':line.uom_id.id,
 					'batch_no':line.grn_id.name,
 					'grn_type':'material'

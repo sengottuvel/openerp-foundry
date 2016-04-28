@@ -457,9 +457,6 @@ class kg_depindent_line(osv.osv):
 		return True
 		"""
 
-			
-		
-		
 	"""
 	def _get_prd_qty_pnd(self, cr, uid, ids, name, arg, context=None):
 		depindent_obj=self.pool.get('kg.depindent')
@@ -510,7 +507,7 @@ class kg_depindent_line(osv.osv):
 
 	'indent_id': fields.many2one('kg.depindent', 'Dep.Indent.NO', required=True, ondelete='cascade'),
 	'line_date': fields.date('Date', required=True, readonly=True),
-	'product_id': fields.many2one('product.product', 'Product', required=True,domain = [('state','=','approved')]),
+	'product_id': fields.many2one('product.product', 'Product', required=True),
 	'uom': fields.many2one('product.uom', 'UOM', required=True),
 	'po_uom': fields.many2one('product.uom', 'PO UOM'),
 	'qty': fields.float('Indent Qty', required=True),

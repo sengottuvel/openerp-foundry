@@ -10,6 +10,9 @@ from datetime import timedelta
 from dateutil import relativedelta
 import openerp.addons.decimal_precision as dp
 
+RETURN_TYPE_SELECTION = [
+    ('replacement','Excess Return'),('noreturn','Damage/Replacement Return')
+]
 
 class kg_issue_return(osv.osv):
 
@@ -17,7 +20,6 @@ class kg_issue_return(osv.osv):
 	_description = "KG Issue Return"
 	_order = "date desc"
 
-	
 	_columns = {
 	
 		'name': fields.char('Issue Return No', size=64, readonly=True),
@@ -26,23 +28,28 @@ class kg_issue_return(osv.osv):
 		'issue_return_line': fields.one2many('kg.issue.return.line', 'issue_return_id',
 					'Issue Return Lines',readonly=True,states={'draft':[('readonly',False)]}),
 		'active': fields.boolean('Active'),
-		'user_id' : fields.many2one('res.users', 'Created By', readonly=True),
 		'state': fields.selection([('draft', 'Draft'),('confirm','Waiting For Approval'),('approved','Approved'),('done','Done'),('cancel','Cancel')], 'Status', track_visibility='onchange', required=True),
 		'gate_pass': fields.boolean('Gate Pass', readonly=False,states={'approved':[('readonly',True)]}),
-		'creation_date':fields.datetime('Creation Date',required=True,readonly=True),
 		'origin': fields.char('Source Location', size=264,readonly=True,states={'draft':[('readonly',False)]}),
 		'remark': fields.text('Remarks'),
-		
-		'confirmed_by' : fields.many2one('res.users', 'Confirmed By', readonly=False,select=True),
-		'approved_by' : fields.many2one('res.users', 'Approved By', readonly=False,select=True),
 		'dep_issue_no':fields.many2one('kg.department.issue','Department Issue No',domain = "[('state','=','done'),('department_id','=',dep_name),('issue_return','=',False)]", readonly=True,states={'draft':[('readonly',False)]}),
 		'depissue_date':fields.date('Department Issue Date',readonly=True),
-		'return_type':fields.selection([('replacement','Excess Return'),('noreturn','Damage/Replacement Return')],'Return Type',readonly=True,states={'draft':[('readonly',False)]}),
+		'return_type':fields.selection(RETURN_TYPE_SELECTION,'Return Type',readonly=True,states={'draft':[('readonly',False)]}),
 		'reject_location':fields.many2one('stock.location','Reject Location',domain = [('scrap_location','=',True)],readonly=True,states={'draft':[('readonly',False)]}),
 		'rj_flag':fields.boolean('Reject Flag'),
 		'excess_flag':fields.boolean('Excess Flag'),
 		'list_flag':fields.boolean('List Flag'),
-		'company_id':fields.many2one('res.company','Company'),
+		'company_id':fields.many2one('res.company','Company',readonly=True),
+		
+		# Entry Info
+		'user_id' : fields.many2one('res.users', 'Created By', readonly=True),
+		'creation_date':fields.datetime('Creation Date',required=True,readonly=True),
+		'confirmed_by' : fields.many2one('res.users', 'Confirmed By', readonly=False,select=True),
+		'approved_by' : fields.many2one('res.users', 'Approved By', readonly=False,select=True),
+		'confirmed_date': fields.datetime('Confirmed Date',readonly=True),
+		'approved_date' : fields.datetime('Approved Date',readonly=True),
+		'update_date' : fields.datetime('Last Updated Date',readonly=True),
+		'update_user_id' : fields.many2one('res.users','Last Updated By',readonly=True),
 		
 	}
 	
@@ -61,13 +68,16 @@ class kg_issue_return(osv.osv):
 		
 	}
 	
-	def onchange_didate(self,cr,uid,ids,dep_issue_no,context=None):
-		value = {'depissue_date': ''}
-		issue_browse = self.pool.get('kg.department.issue').browse(cr,uid,dep_issue_no)
-		value = {'depissue_date' : issue_browse.issue_date}
-		return {'value':value}
+	#~ def onchange_didate(self,cr,uid,ids,dep_issue_no,context=None):
+		#~ value = {'depissue_date': ''}
+		#~ issue_browse = self.pool.get('kg.department.issue').browse(cr,uid,dep_issue_no)
+		#~ value = {'depissue_date' : issue_browse.issue_date}
+		#~ return {'value':value}
 
-
+	def write(self, cr, uid, ids, vals, context=None):		
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(kg_issue_return, self).write(cr, uid, ids, vals, context)
+		
 	def onchange_qty(self,cr,uid,ids,return_type,context=None):
 		value = {'rj_flag': '','excess_flag':'','excess_flag' : False}
 		if return_type == 'noreturn':	
@@ -77,12 +87,12 @@ class kg_issue_return(osv.osv):
 			value = {'excess_flag' : True,'rj_flag':False}
 
 		return {'value': value}
-
+		
+	
 
 	def list_issue(self, cr, uid, ids,context=None):
 		
 		rec  = self.browse(cr,uid,ids[0])
-		print "rec",rec
 		return_qty = 0
 		excess_return_qty = 0
 		if rec.list_flag == False:
@@ -96,11 +106,8 @@ class kg_issue_return(osv.osv):
 					excess_return_qty = 0
 				else:
 					excess_return_qty = line.excess_return_qty
-				print "excess_return_qty + return_qty",excess_return_qty + return_qty
-				print "line.issue_qty",line.issue_qty
 				qty = line.issue_qty - (excess_return_qty + return_qty)
-				print "qty",qty
-				#atop
+				
 				if qty == 0:
 					rec.dep_issue_no.write({'issue_return':True})
 				else:
@@ -127,7 +134,7 @@ class kg_issue_return(osv.osv):
 
 		rec.write({'list_flag':True})
 		return True
-		
+	
 	def confirm_issue_return(self, cr, uid, ids,context=None):
 		rec  = self.browse(cr,uid,ids[0])
 		if not rec.issue_return_line:
@@ -159,13 +166,19 @@ class kg_issue_return(osv.osv):
 					raise osv.except_osv(
 						_('Warning'),
 						_('Select Reject Location for %s to proceed')%(line.product_id.name))
-
+		seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.issue.return')])
+		seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+		cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,rec.date))
+		seq_name = cr.fetchone();
 		self.write(cr,uid,ids,{
-			'name':self.pool.get('ir.sequence').get(cr, uid, 'kg.issue.return') or False,
+			'name':seq_name[0],
 			'state': 'confirm',
-			'confirmed_by':uid
+			'confirmed_by':uid,
+			'confirmed_date': time.strftime('%Y-%m-%d %H:%M:%S'),
 			})	
+		
 		return True
+		
 			
 	def approve_indent(self, cr, uid, ids,context=None):
 		obj = self.browse(cr,uid,ids[0])
@@ -213,15 +226,10 @@ class kg_issue_return(osv.osv):
 				if line.dep_issue_no_line.indent_line_id.indent_id.state == 'inprogress':
 					line.dep_issue_no_line.indent_line_id.write({'state':'inprogress'})
 					line.dep_issue_no_line.indent_line_id.write({'line_state':'noprocess'})
-
-
 				#if line.dep_issue_no_line.indent_line_id.indent_id.state not in ['draft','save','confirm','approved']:
 					#raise osv.except_osv(
 						#_('Warning'),
 						#_('You're not allowed to update the DI which in the state %s') % (line.dep_issue_no_line.indent_line_id.indent_id.state))
-				
-				
-
 				lot_vals = {
 					'product_id':line.product_id.id,
 					'product_uom':line.uom.id,
@@ -239,8 +247,6 @@ class kg_issue_return(osv.osv):
 					raise osv.except_osv(
 						_('Warning!!'),
 						_('There no line information to load!!'))
-				print"line.idline.idline.id",line.id
-				print"obj.idobj.idobj.id",obj.id
 				form_vals = {
 			
 					'product_id':line.product_id.id,
@@ -249,7 +255,7 @@ class kg_issue_return(osv.osv):
 					'product_qty':line.issue_pending_qty,
 					'product_uos_qty':line.issue_pending_qty,
 					'name':line.product_id.name,
-					'location_id':14,
+					'location_id':obj.dep_name.stock_location.id,
 					'location_dest_id':line.reject_location.id,
 					'state':'done',
 					'move_type':'out',
@@ -296,8 +302,8 @@ class kg_issue_return(osv.osv):
 					'product_qty':line.issue_pending_qty,
 					'product_uos_qty':line.issue_pending_qty,
 					'name':line.product_id.name,
-					'location_id':223,
-					'location_dest_id':47,
+					'location_id':obj.dep_name.stock_location.id,
+					'location_dest_id':obj.dep_name.main_location.id,
 					'state':'done',
 					'move_type':'in',
 					'return_id':obj.id,
@@ -312,8 +318,8 @@ class kg_issue_return(osv.osv):
 					raise osv.except_osv(
 						_('Warning!!'),
 						_('There no line information to load!!'))
-
-		self.write(cr,uid,ids,{'state':'approved','approved_by':uid})
+			
+		self.write(cr,uid,ids,{'state':'approved','approved_by':uid,'aproved_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 	
 	def cancel_indent(self, cr, uid, ids, context=None):		
@@ -358,7 +364,8 @@ class kg_issue_return_line(osv.osv):
 	
 	_name = "kg.issue.return.line"
 	_description = "Issue Return Line"
-
+	
+	
 	def onchange_product_id(self, cr, uid, ids, product_id, uom,context=None):
 			
 		value = {'uom': ''}
@@ -378,11 +385,12 @@ class kg_issue_return_line(osv.osv):
 	
 	
 	_columns = {
-
+	
 	'issue_return_id': fields.many2one('kg.issue.return', 'Indent No', required=True, ondelete='cascade'),
+	#~ 'dep_issue_no_line': fields.many2many('kg.department.issue.line','is_ret_line','line_id','dep_is_line_id','Issue No',domain="[('product_id','=',product_id)]"),
 	'product_id': fields.many2one('product.product', 'Product', required=True,domain = [('state','=','approved'),'|',('type','=','service')]),
 	'uom': fields.many2one('product.uom', 'UOM', required=True),
-	'qty': fields.float('Issued Quantity', required=True),
+	'qty': fields.float('Issued Quantity', required=False),
 	'pending_qty':fields.float('Pending Qty'),
 	'issue_pending_qty':fields.float('Return Qty'),
 	'gate_pending_qty':fields.float('Gate Pass Pending Qty'),
@@ -391,13 +399,12 @@ class kg_issue_return_line(osv.osv):
 	'line_date': fields.date('Indent Date'),
 	'requested_by' : fields.many2one('res.users', 'Approved By', readonly=False,select=True),
 	'return_type':fields.selection([('replacement','Excess Return'),('noreturn','Damage/Replacement Return')],'Return Type'),
-	'dep_issue_no_line':fields.many2one('kg.department.issue.line','Department Issue Line'),
+	'dep_issue_no_line':fields.many2one('kg.department.issue.line','Department Issue Line',domain="[('product_id','=',product_id)]"),
 	'price_unit':fields.float('Unit Price'),
 	'reject_location':fields.many2one('stock.location','Reject Location',domain = [('scrap_location','=',True)]),
 	'rj_flag':fields.boolean('Reject Flag'),
 	'excess_flag':fields.boolean('Excess Flag'),
 	'returned_qty':fields.float('Returned Qty'),
-
 
 	}
 
@@ -407,8 +414,61 @@ class kg_issue_return_line(osv.osv):
 		'rj_flag':False,
 		'excess_flag':False,
 
-
 	}
+	
+	
+	def create(self, cr, uid, vals, context=None):
+		production_obj = self.pool.get('kg.department.issue.line')
+		if vals.get('dep_issue_no_line'):		  
+			dep_line_rec = production_obj.browse(cr, uid, vals.get('dep_issue_no_line') )
+			if dep_line_rec.return_qty == None or dep_line_rec.return_qty == False:
+				return_qty = 0
+			else:
+				return_qty = dep_line_rec.return_qty
+			if dep_line_rec.excess_return_qty == None or dep_line_rec.excess_return_qty == False:
+				excess_return_qty = 0
+			else:
+				excess_return_qty = dep_line_rec.excess_return_qty
+			qty = dep_line_rec.issue_qty - (excess_return_qty + return_qty)
+			vals.update({'qty': qty})
+		return super(kg_issue_return_line, self).create(cr, uid, vals, context=context)
+		
+	def onchange_line(self,cr,uid,ids,dep_issue_no_line,issue_pending_qty,issue_return_id,context=None):
+		value = {'issue_pending_qty': '','qty': '','line_state': '','price_unit': '','returned_qty': '','reject_location':''}
+		#~ s= [dep_issue_no_line][0][0][2]
+		#~ print"sssssssss",s
+		dep_line_obj = self.pool.get('kg.department.issue.line').search(cr,uid,[('id','=',dep_issue_no_line)])
+		
+		for line in dep_line_obj:
+			dep_line_rec = self.pool.get('kg.department.issue.line').browse(cr,uid,line)
+			if dep_line_rec.return_qty == None or dep_line_rec.return_qty == False:
+				return_qty = 0
+			else:
+				return_qty = dep_line_rec.return_qty
+			if dep_line_rec.excess_return_qty == None or dep_line_rec.excess_return_qty == False:
+				excess_return_qty = 0
+			else:
+				excess_return_qty = dep_line_rec.excess_return_qty
+			qty = dep_line_rec.issue_qty - (excess_return_qty + return_qty)
+			if qty == 0:
+				dep_line_rec.issue_id.write({'issue_return':True})
+			else:
+				dep_line_rec.issue_id.write({'issue_return':False})
+			if qty > 0:
+				value = {
+					
+					'qty':qty,
+					'line_state':'process',
+					'issue_pending_qty':qty,
+					'price_unit':dep_line_rec.price_unit,
+					'returned_qty':qty,
+					'reject_location':14
+				}
+		
+		#~ if rec.list_flag == False:
+		#~ value = {'issue_pending_qty' : 15}
+		return {'value': value}
+			
 	def onchange_qty(self,cr,uid,ids,return_type,context=None):
 		value = {'rj_flag': '','excess_flag':''}
 		if return_type == 'noreturn':	
@@ -419,5 +479,7 @@ class kg_issue_return_line(osv.osv):
 
 		return {'value': value}
 
-	
+	def default_get(self, cr, uid, fields, context=None):
+		return context
+		
 kg_issue_return_line()	
