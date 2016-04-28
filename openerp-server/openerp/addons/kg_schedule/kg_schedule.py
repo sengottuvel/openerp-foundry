@@ -529,7 +529,8 @@ class kg_schedule(osv.osv):
 			dep_indent_vals = {
 				'name':'',
 				'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
-				'dep_name':1
+				'dep_name':1,
+				'entry_mode':'auto'
 				}
 				
 			indent_id = dep_indent_obj.create(cr, uid, dep_indent_vals)
