@@ -28,14 +28,32 @@ class kg_moc_master(osv.osv):
 				res[item.id] = 'yes'		
 		return res
 	"""
+	
+	def _production_cost(self, cursor, user, ids, name, arg, context=None):	
+		res = {}
+		total_pro_cost = 0.00
+		for purchase in self.browse(cursor, user, ids, context=context):
+			print"purchase"	,purchase
+			pro_cost = 0	
+			for item in purchase.line_ids:
+				print"item",item
+				pro_cost_line=item.rate * item.qty			
+				pro_cost += pro_cost_line
+				total_pro_cost=pro_cost/100			
+			res[purchase.id] = total_pro_cost
+		return res
+		
+		
+		
+	
 	_columns = {
 			
 		'name': fields.char('Name', size=128, required=True, select=True),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'code': fields.char('Code', size=128, required=True),
 		'active': fields.boolean('Active'),
-		'rate': fields.float('Design Rate(Rs)', required=True,),
-		'pro_cost': fields.float('Production Cost(Rs)',readonly=True),
+		'rate': fields.float('Design Rate(Rs)', required=True),		
+		'pro_cost': fields.function(_production_cost, string='Production Cost(Rs)', type='float'),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
@@ -48,6 +66,7 @@ class kg_moc_master(osv.osv):
 		'weight_type': fields.selection([('ci','CI'),('ss','SS'),('non_ferrous','Non-Ferrous')],'Family Type'),
 		'alias_name': fields.char('Alias Name', size=128),
 		'moc_type': fields.selection([('foundry_moc','Foundry MOC'),('purchase_moc','Purchase MOC'),('both','Both')],'Type'),
+		'product_id': fields.many2one('product.product','Equivalent Rejection Material'),	
 		#'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),	
 		
 		
@@ -137,12 +156,8 @@ class kg_moc_master(osv.osv):
 
 	def entry_confirm(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		pro_cost = 0
-		for item in rec.line_ids:
-			pro_cost_line=item.rate * item.qty			
-			pro_cost += pro_cost_line
-		total_pro_cost=pro_cost/100
-		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),'pro_cost':total_pro_cost})
+		
+		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 		
 	def entry_draft(self,cr,uid,ids,context=None):
