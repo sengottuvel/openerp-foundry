@@ -490,6 +490,7 @@ class ch_pouring_details(osv.osv):
 	_columns = {
 			
 		'header_id':fields.many2one('kg.pouring.log', 'Pouring Log', required=True, ondelete='cascade'),
+		'melting_id': fields.related('header_id','melting_id', type='many2one', relation='kg.melting', string='Heat No.', store=True, readonly=True),
 		'order_line_id':fields.many2one('ch.work.order.details','WO No.',domain="[('state','=','confirmed')]"),
 		'moc_id': fields.related('header_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),		
 		### Reference table as kg_production bcoz mould completed pattern only want to display
