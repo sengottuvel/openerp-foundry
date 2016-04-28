@@ -23,6 +23,8 @@
 								<field name="division_id" readonly="1"/>
 								<field name="order_id" readonly="1"/>
 								<field name="pattern_id" readonly="1"/>
+								<field name="moc_id" readonly="1"/>
+								<field name="total_weight" readonly="1"/>
 								<field name="stage_id" invisible="1"/>
 							</group>											
 							<group>
@@ -31,7 +33,7 @@
 								<field name="location" readonly="1"/>
 								<field name="pump_model_id" readonly="1"/>
 								<field name="pattern_name" readonly="1"/>
-								<field name="moc_id" readonly="1"/>
+								<field name="each_weight" readonly="1"/>
 								<field name="active" invisible="1"/>
 								<field name="state" style="width: 30%%" class="att_state_change"/>	
 							</group>					
@@ -100,18 +102,21 @@
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'draft';black:state == 'confirmed'" 
 								toolbar="True" string="QC Verification Entry Tree" create="false">					
-					<field name="name"/>
-					<field name="entry_date"/>
+					<field name="name" invisible="1"/>
+					<field name="entry_date" string="Date"/>
+					<field name="order_no"/>
 					<field name="division_id" invisible="1"/>
-					<field name="location" />
-					<field name="order_no" invisible="1"/>
-					<field name="schedule_id"/>
-					<field name="pump_model_id"/>
-					<field name="pattern_id"/>
-					<field name="pattern_name"/>
+					<field name="location" invisible="1"/>
+					<field name="schedule_id" invisible="1"/>
+					<field name="pump_model_id" invisible="1"/>
+					<field name="pattern_id" string="Part No."/>
+					<field name="pattern_name" string="Part Name."/>
 					<field name="moc_id"/>
-					<field name="allocated_qty" sum="Total Qty"/>
+					<field name="allocated_qty" sum="Total Qty" invisible="1"/>
 					<field name="qty" sum="Total Qty"/>
+					<field name="each_weight"/>
+					<field name="total_weight"/>
+					<field name="remark"/>
 					<field name="state"/>
 				</tree>
 			</field>

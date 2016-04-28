@@ -37,6 +37,32 @@ class kg_production(osv.osv):
 	def _get_default_division(self, cr, uid, context=None):
 		res = self.pool.get('kg.division.master').search(cr, uid, [('code','=','SAM'),('state','=','approved'), ('active','=','t')], context=context)
 		return res and res[0] or False
+		
+		
+	def _get_each_weight(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		wgt = 0.00
+		
+		for entry in self.browse(cr, uid, ids, context=context):
+			
+			if entry.moc_id.weight_type == 'ci':
+				wgt = entry.pattern_id.ci_weight
+			if entry.moc_id.weight_type == 'ss':
+				wgt = entry.pattern_id.pcs_weight
+			if entry.moc_id.weight_type == 'non_ferrous':
+				wgt = entry.pattern_id.nonferous_weight
+				
+		result[entry.id]= wgt
+		
+		return result
+		
+	def _get_total_weight(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		total_weight = 0.00
+		for entry in self.browse(cr, uid, ids, context=context):
+			total_weight = entry.qty * entry.each_weight		
+		result[entry.id]= total_weight
+		return result
 	
 	_columns = {
 	
@@ -54,6 +80,7 @@ class kg_production(osv.osv):
 		'schedule_id': fields.many2one('kg.schedule','Schedule No.'),
 		'schedule_date': fields.related('schedule_id','entry_date', type='date', string='Schedule Date', store=True, readonly=True),
 		'schedule_line_id': fields.many2one('ch.schedule.details','Schedule Line Item'),
+		'sch_remarks': fields.text('Remarks'),
 		
 		### Work Order Details ###
 		'order_bomline_id': fields.related('schedule_line_id','order_bomline_id', type='many2one', relation='ch.order.bom.details', string='Order BOM Line Id', store=True, readonly=True),
@@ -66,6 +93,7 @@ class kg_production(osv.osv):
 		'order_category': fields.related('order_line_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'order_priority': fields.selection(ORDER_PRIORITY, string='Priority', store=True, readonly=True),
 		
+		
 		'pump_model_id': fields.related('order_line_id','pump_model_id', type='many2one', relation='kg.pumpmodel.master', string='Pump Model', store=True, readonly=True),
 		'pattern_id': fields.related('schedule_line_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern Number', store=True, readonly=True),
 		'pattern_code': fields.related('pattern_id','name', type='char', string='Pattern Code', store=True, readonly=True),
@@ -73,6 +101,9 @@ class kg_production(osv.osv):
 		'moc_id': fields.related('schedule_line_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
 		'schedule_qty': fields.related('schedule_line_id','qty', type='integer', size=100, string='Schedule Qty', store=True, readonly=True),
 		'qty': fields.integer('Qty', required=True),
+		'each_weight': fields.function(_get_each_weight, string='Each Weight(Kgs)', method=True, store=True, type='float'),
+		'total_weight': fields.function(_get_total_weight, string='Total Weight(Kgs)', method=True, store=True, type='float'),
+		
 		
 		### Status Field ###
 		
@@ -116,6 +147,7 @@ class kg_production(osv.osv):
 		'core_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'core_pan_no':fields.char('PAN No.', size=128),
 		'core_remarks': fields.text('Remarks'),
+		
 		
 		### Mould Log ###
 		'mould_no': fields.char('Mould Log No.', size=128,readonly=True),
@@ -199,10 +231,12 @@ class kg_production(osv.osv):
 		'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
 		'core_qty': entry_rec.qty,
 		'core_state': 'pending',
+		'core_remarks': entry_rec.order_bomline_id.add_spec,
 		'mould_no': mould_name[0],
 		'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
 		'mould_qty': entry_rec.qty,
 		'mould_state': 'pending',
+		'core_remarks': entry_rec.order_bomline_id.add_spec,
 		'state' : 'issue_done',
 		'issue_state' : 'issued',
 		})

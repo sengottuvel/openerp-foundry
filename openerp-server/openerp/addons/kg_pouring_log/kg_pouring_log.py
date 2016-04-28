@@ -53,6 +53,7 @@ class kg_pouring_log(osv.osv):
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_pouring_log', context=c),
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
+		'entry_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'active': True,
 		'state':'draft'
 		

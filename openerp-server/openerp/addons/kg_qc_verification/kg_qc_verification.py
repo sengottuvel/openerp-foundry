@@ -28,6 +28,31 @@ class kg_qc_verification(osv.osv):
 	_description = "QC Verification"
 	_order = "entry_date desc"
 	
+	def _get_each_weight(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		wgt = 0.00
+		
+		for entry in self.browse(cr, uid, ids, context=context):
+			
+			if entry.moc_id.weight_type == 'ci':
+				wgt = entry.pattern_id.ci_weight
+			if entry.moc_id.weight_type == 'ss':
+				wgt = entry.pattern_id.pcs_weight
+			if entry.moc_id.weight_type == 'non_ferrous':
+				wgt = entry.pattern_id.nonferous_weight
+				
+		result[entry.id]= wgt
+		
+		return result
+		
+	def _get_total_weight(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		total_weight = 0.00
+		for entry in self.browse(cr, uid, ids, context=context):
+			total_weight = entry.qty * entry.each_weight		
+		result[entry.id]= total_weight
+		return result
+	
 	_columns = {
 	
 		### Header Details ####
@@ -72,6 +97,8 @@ class kg_qc_verification(osv.osv):
 		'diameter': fields.char('Diameter'),
 		'cancel_remark': fields.text('Cancel Remarks'),
 		'reject_remark': fields.text('Rejection Remarks'),
+		'each_weight': fields.function(_get_each_weight, string='Each Weight(Kgs)', method=True, store=True, type='float'),
+		'total_weight': fields.function(_get_total_weight, string='Total Weight(Kgs)', method=True, store=True, type='float'),
 		
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),

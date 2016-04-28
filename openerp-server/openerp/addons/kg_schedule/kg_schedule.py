@@ -411,6 +411,7 @@ class kg_schedule(osv.osv):
 							'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
 							'issue_qty': 1,
 							'issue_state': issue_state,
+							'sch_remarks': schedule_item.order_bomline_id.add_spec,
 							
 						}
 						
@@ -462,6 +463,7 @@ class kg_schedule(osv.osv):
 							'pattern_id' : schedule_item.pattern_id.id,
 							'pattern_name' : schedule_item.pattern_id.pattern_name,	
 							'moc_id' : schedule_item.moc_id.id,
+							'sch_remarks': schedule_item.order_bomline_id.add_spec,
 							'request_state': 'done',
 							'issue_no': issue_name[0],
 							'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
@@ -472,11 +474,13 @@ class kg_schedule(osv.osv):
 							'core_qty': schedule_qty,
 							'core_rem_qty': schedule_qty,
 							'core_state': 'pending',
+							'core_remarks': schedule_item.order_bomline_id.add_spec,
 							'mould_no': mould_name[0],
 							'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
 							'mould_qty': schedule_qty,
 							'mould_rem_qty': schedule_qty,
-							'mould_state': 'pending',		
+							'mould_state': 'pending',
+							'mould_remarks': schedule_item.order_bomline_id.add_spec,	
 						}
 						
 						

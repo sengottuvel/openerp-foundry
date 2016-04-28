@@ -16,6 +16,7 @@
 								<field name="division_id" invisible="1" readonly="1"/>
 								<field name="order_no" readonly="1"/>
 								<field name="order_priority" string="Category" readonly="1"/>
+								<field name="sch_remarks" readonly="1"/>
 							</group>											
 							<group>
 								<field name="entry_date" invisible="1"/>
@@ -30,11 +31,13 @@
 							<group>
 							    <field name="pump_model_id" readonly="1"/>
 							    <field name="pattern_name" readonly="1"/>
+							    <field name="each_weight" readonly="1"/>
 							    <field name="qty" readonly="1"/>
 							</group>											
 							<group>
 								<field name="pattern_id" readonly="1"/>
 								<field name="moc_id" readonly="1"/>
+								<field name="total_weight" readonly="1"/>
 								
 							</group>					
 						</group>
@@ -74,19 +77,22 @@
 			<field name="model">kg.production</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<tree toolbar="True" string="Prodution Entry Tree" create="false">					
-					<field name="name" invisible="1"/>
+				<tree toolbar="True" string="Prodution Entry Tree" create="false">
+					<field name="order_delivery_date" string="Date"/>
 					<field name="order_no"/>
-					<field name="order_delivery_date"/>
-					<field name="order_category" invisible="1"/>
 					<field name="order_priority" string="Category"/>
-					<field name="pump_model_id"/>
-					<field name="pattern_id"/>
-					<field name="pattern_name"/>
+					<field name="pattern_id" string="Part No."/>
+					<field name="pattern_name" string="Part Name."/>
 					<field name="moc_id"/>
-					<field name="location"/>
 					<field name="qty" string="Schedule Qty" sum="Total Qty"/>
+					<field name="each_weight"/>
+					<field name="total_weight"/>
+					<field name="sch_remarks"/>
 					<field name="state"/>
+					<field name="name" invisible="1"/>
+					<field name="order_category" invisible="1"/>
+					<field name="pump_model_id" invisible="1"/>
+					<field name="location" invisible="1"/>
 				</tree>
 			</field>
 		</record>
@@ -587,6 +593,7 @@
 								<field name="pump_model_id" readonly="1"/>
 								<field name="pattern_name" readonly="1"/>
 							    <field name="total_core_qty" string="Total core Qty" invisible="1"/>
+							    <field name="each_weight" readonly="1"/>
 							    <field name="qty" string="Schedule Qty" readonly="1"/>
 							    
 							</group>											
@@ -595,6 +602,7 @@
 								<field name="order_priority" string="Category"/>
 								<field name="pattern_id" readonly="1"/>
 								<field name="moc_id" readonly="1"/>
+								<field name="total_weight" readonly="1"/>
 								<field name="core_rem_qty" string="Remaining Qty"/>
 							</group>					
 						</group>
@@ -629,18 +637,21 @@
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
 				<tree toolbar="True" string="Core Log Tree" create="false">					
-					<field name="core_no"/>
+					<field name="core_no" invisible="1"/>
 					<field name="core_date"/>
 					<field name="order_no"/>
 					<field name="order_delivery_date" invisible="1"/>
 					<field name="order_priority" string="Category"/>
-					<field name="pump_model_id"/>
-					<field name="pattern_id"/>
-					<field name="pattern_name"/>
+					<field name="pump_model_id" invisible="1"/>
+					<field name="pattern_id" string="Part No."/>
+					<field name="pattern_name"  string="Part Name"/>
 					<field name="moc_id"/>
-					<field name="location"/>
+					<field name="location" invisible="1"/>
 					<field name="qty" string="Schedule Qty" sum="Total Qty"/>
+					<field name="each_weight"/>
+					<field name="total_weight"/>
 					<field name="core_rem_qty" string="Remaining Qty"/>
+					<field name="core_remarks"/>
 					<field name="core_state"/>
 				</tree>
 			</field>
@@ -965,6 +976,7 @@
 								<field name="pump_model_id" readonly="1"/>
 								<field name="pattern_name" readonly="1"/>
 							    <field name="total_mould_qty" string="Total mould Qty" invisible="1"/>
+							    <field name="each_weight" readonly="1"/>
 							    <field name="qty" string="Schedule Qty" readonly="1"/>
 							   
 							</group>											
@@ -973,6 +985,7 @@
 								<field name="order_priority" string="Category"/>
 								<field name="pattern_id" readonly="1"/>
 								<field name="moc_id" readonly="1"/>
+								<field name="total_weight" readonly="1"/>
 								<field name="mould_rem_qty" string="Remaining Qty"/>
 
 							</group>					
@@ -1008,18 +1021,21 @@
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
 				<tree toolbar="True" string="Mould Log Tree" create="false">					
-					<field name="mould_no"/>
+					<field name="mould_no" invisible="1"/>
 					<field name="mould_date"/>
 					<field name="order_no"/>
 					<field name="order_delivery_date" invisible="1"/>
 					<field name="order_priority" string="Category"/>
-					<field name="pump_model_id"/>
-					<field name="pattern_id"/>
-					<field name="pattern_name"/>
+					<field name="pump_model_id" invisible="1"/>
+					<field name="pattern_id" string="Part No."/>
+					<field name="pattern_name" string="Part Name"/>
 					<field name="moc_id"/>
-					<field name="location"/>
+					<field name="location" invisible="1"/>
 					<field name="qty" string="Schedule Qty" sum="Total Qty"/>
+					<field name="each_weight"/>
+					<field name="total_weight"/>
 					<field name="mould_rem_qty" string="Remaining Qty"/>
+					<field name="mould_remarks"/>
 					<field name="mould_state"/>
 				</tree>
 			</field>
@@ -1309,30 +1325,127 @@
 	
 	<!-- Pouring Completed List -->
 	
+	<record id="t_form_v_pouring_completed" model="ir.ui.view">
+			<field name="name">Pouring Completed</field>
+			<field name="model">kg.production</field>
+			<field name="arch" type="xml">
+				<form string="Pouring Completed" version="7.0" create="false" edit="false">
+					<sheet>		
+						<group string="Work Order Details">
+							<group>
+								<field name="name" invisible="1"/>
+								<field name="division_id" invisible="1" readonly="1"/>
+								<field name="order_no" readonly="1"/>
+								<field name="order_priority" string="Category" readonly="1"/>
+								<field name="pour_remarks" readonly="1"/>
+							</group>											
+							<group>
+								<field name="entry_date" invisible="1"/>
+								<field name="order_delivery_date"/>
+								<field name="location" readonly="1"/>
+								<field name="order_date" invisible="1" readonly="1"/>
+								<field name="order_category" invisible="1" readonly="1"/>
+								<field name="state" style="width: 30%%" class="att_state_change"/>	
+							</group>					
+						</group>
+						<group string="Specification">
+							<group>
+							    <field name="pump_model_id" readonly="1"/>
+							    <field name="pattern_name" readonly="1"/>
+							    <field name="each_weight" readonly="1"/>
+							    <field name="qty" readonly="1"/>
+							</group>											
+							<group>
+								<field name="pattern_id" readonly="1"/>
+								<field name="moc_id" readonly="1"/>
+								<field name="total_weight" readonly="1"/>
+								
+							</group>					
+						</group>
+						<notebook>
+							
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										<field name="update_user_id"/>
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_pouring_completed" model="ir.ui.view">
+			<field name="name">Pouring Completed</field>
+			<field name="model">kg.production</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Pouring Completed Tree" create="false">
+					<field name="order_delivery_date" string="Date"/>
+					<field name="order_no"/>
+					<field name="order_priority" string="Category"/>
+					<field name="pattern_id" string="Part No."/>
+					<field name="pattern_name" string="Part Name."/>
+					<field name="moc_id"/>
+					<field name="qty" string="Schedule Qty" sum="Total Qty"/>
+					<field name="each_weight"/>
+					<field name="total_weight"/>
+					<field name="pour_remarks"/>
+					<field name="state"/>
+					<field name="name" invisible="1"/>
+					<field name="order_category" invisible="1"/>
+					<field name="pump_model_id" invisible="1"/>
+					<field name="location" invisible="1"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	
+	
 	
 	<!-- Menu Action Start -->
 		
 		
 		<record id="tma_pouring_completed" model="ir.actions.act_window">
-			<field name="name">Completed List</field>
+			<field name="name">Pouring Completed</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.production</field>
 			<field name="view_type">form</field>
 			<field name="context">{}</field>
-			<field name="domain">[('state','=','pour_com')]</field>
+			<field name="domain">[('pour_state','=','done')]</field>
 			<field name="search_view_id" ref="t_search_v_production"/>
 		</record>
 		
 		 <record model="ir.actions.act_window.view" id="tma_pouring_completed_tree_view">
             <field name="sequence" eval="1"/>
             <field name="view_mode">tree</field>
-            <field name="view_id" ref="t_tree_v_production"/>
+            <field name="view_id" ref="t_tree_v_pouring_completed"/>
             <field name="act_window_id" ref="tma_pouring_completed"/>
         </record>
         <record model="ir.actions.act_window.view" id="tma_pouring_completed_form_view">
             <field name="sequence" eval="2"/>
             <field name="view_mode">form</field>
-            <field name="view_id" ref="t_form_v_production"/>
+            <field name="view_id" ref="t_form_v_pouring_completed"/>
             <field name="act_window_id" ref="tma_pouring_completed"/>
         </record>
 		
