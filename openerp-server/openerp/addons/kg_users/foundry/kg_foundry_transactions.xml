@@ -722,6 +722,21 @@
 		
 		<!-- Department Indent LINE End -->
 		
+		<!-- Department Indent WO Line Start --> 
+		
+		<record id="t_foundry_dep_indent_wo_line" model="ir.model.access">
+			<field name="model_id" ref="kg_depindent.model_ch_depindent_wo"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Dep Indent WO Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		
+		<!-- Department Indent WO LINE End -->
+		
 		
     </data>
 </openerp>
