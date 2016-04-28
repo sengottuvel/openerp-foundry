@@ -474,6 +474,8 @@ class ch_work_order_details(osv.osv):
 		machine_shop_vals=[]
 		bot_vals=[]
 		consu_vals=[]
+		moc_obj = self.pool.get('kg.moc.master')
+		
 		
 		#~ if order_category == False:
 			#~ raise osv.except_osv(_('Warning!'),
