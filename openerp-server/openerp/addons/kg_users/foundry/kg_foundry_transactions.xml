@@ -737,6 +737,20 @@
 		
 		<!-- Department Indent WO LINE End -->
 		
+		<!-- Mechanical Properties Start -->
+		
+		<record id="m_ch_mech_properties_access" model="ir.model.access">
+			<field name="model_id" ref="kg_melting.model_ch_mechanical_properties"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Mechanical Properties</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- Mechanical Properties END -->
+		
 		
     </data>
 </openerp>

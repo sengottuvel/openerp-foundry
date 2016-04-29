@@ -28,6 +28,7 @@ class kg_melting(osv.osv):
 		
 		'line_ids':fields.one2many('ch.melting.charge.details', 'header_id', "Charge Details"),
 		'line_ids_a':fields.one2many('ch.melting.chemistry.details', 'header_id', "Chemistry Details"),
+		'line_ids_b':fields.one2many('ch.mechanical.properties', 'header_id', "Mechanical Properties"),
 		
 		## Furnace Log Book Start
 		'moc_id': fields.many2one('kg.moc.master','MOC', required=True,domain="[('active','=','t')]"),
@@ -45,18 +46,28 @@ class kg_melting(osv.osv):
 		'final_reading_type': fields.selection([('unit','Units'),('ton','Ton')],'Final Reading Type', required=True),	
 		'initial_reading': fields.float('Initial Reading',required=True),
 		'initial_reading_type': fields.selection([('unit','Units'),('ton','Ton')],'Initial Reading Type', required=True),	
+		
+		'total_units': fields.float('Total Units',readonly=True),		
+		'amount': fields.float('Amount',required=True),		
+		
 		'pouring_temp': fields.float('Pouring Temp',required=True),
 		'pouring_hrs': fields.float('Pouring Hours',required=True),
 		'pouring_hrs_type': fields.selection([('am','AM'),('pm','PM')],'Pouring Hr Type', required=True),
-		'ret': fields.char('ret',required=True),	
-		'met': fields.char('Met',required=True),	
+		'ret': fields.char('Return Metal',required=True),			
 		'tapping_temp': fields.float('Tepping Temp',required=True),	
 		'pouring_finished': fields.float('Pouring Finished at',required=True),
 		'pouring_finished_time_type': fields.selection([('am','AM'),('pm','PM')],'Time Type', required=True),
-		'liquid_metal_wt': fields.float('Liquid Metal Wt.',required=True),	
-		'ingot_wt': fields.float('Ingot Wt.',required=True),	
+		'liquid_metal_wt': fields.float('Liquid Metal Wt.',required=True,digits_compute=dp.get_precision('Final')),	
+		'ingot_wt': fields.float('Ingot Wt.',required=True,digits_compute=dp.get_precision('Final')),	
 		
 		'load_item': fields.boolean('Load Item'),
+		
+		##### Worker Details ####
+		'supervisor_name': fields.many2one('res.partner','Supervisor Name', required=True,domain="[('active','=','t')]"),
+		'done_by': fields.selection([('company_employee','Company Employee'),('contractor','Contractor')],'Done By', required=True),		
+		'employee_id': fields.many2many('res.partner', 'm2m_moc_employee_details', 'melting_emp_id', 'employee_id','Name',required=True, domain="[('active','=','t')]"),
+		'helper_count': fields.float('Helper Count',required=True),	
+		'contractor_id': fields.many2one('res.partner','Contractor Name', required=True,domain="[('active','=','t')]"),
 		
 		
 		### Entry Info ####
@@ -85,6 +96,7 @@ class kg_melting(osv.osv):
 		'crt_date':time.strftime('%Y-%m-%d %H:%M:%S'),
 		'active': True,
 		'state':'draft',
+		
 		
 		
 		
@@ -129,9 +141,14 @@ class kg_melting(osv.osv):
 		return True
 	
 	def entry_confirm(self,cr,uid,ids,context=None):
-		entry = self.browse(cr,uid,ids[0])		
-				
-		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		entry = self.browse(cr,uid,ids[0])
+		power_details=entry.final_reading - entry.initial_reading
+		total_value=power_details*1000
+		for item in entry.line_ids:
+			total = item.first_addition + item.second_addition
+			print"total",total
+			self.pool.get('ch.melting.charge.details').write(cr, uid, item.id, {'total_weight': total})	
+		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),'total_units': total_value})
 		return True
 		
 	def entry_cancel(self,cr,uid,ids,context=None):
@@ -167,12 +184,13 @@ class ch_melting_charge_details(osv.osv):
 			
 		'header_id':fields.many2one('kg.melting', 'Melting Entry', required=True, ondelete='cascade'),							
 		'product_id': fields.many2one('product.product','Raw Materials', required=True,domain="[('active','=','t'),('product_type','in',('raw','ms','bot'))]"),	
-		'first_addition':fields.float('First Addition'),
-		'second_addition':fields.float('Second Addition'),
-		'total_weight':fields.float('Total Weight(kg.)'),
+		'first_addition':fields.float('First Addition',digits_compute=dp.get_precision('Final')),
+		'second_addition':fields.float('Second Addition',digits_compute=dp.get_precision('Final')),
+		'total_weight':fields.float('Total Weight(kg.)',digits_compute=dp.get_precision('Final')),
 		'remarks':fields.text('Remarks'),	
 		
 	}
+	
 	
 	
 ch_melting_charge_details()
@@ -186,16 +204,73 @@ class ch_melting_chemistry_details(osv.osv):
 			
 		'header_id':fields.many2one('kg.melting', 'Chemistry Entry', required=True, ondelete='cascade'),							
 		'chemistry_id': fields.many2one('kg.chemical.master','Name', required=True,domain="[('active','=','t')]"),	
-		'required_chemistry':fields.float('Required Chemistry'),
-		'bath_1':fields.float('Bath 1'),
-		'bath_2':fields.float('Bath 2'),
-		'final':fields.float('Final'),
+		'required_chemistry':fields.float('Required Chemistry',digits_compute=dp.get_precision('Required Chemistry')),
+		'bath_1':fields.float('Bath 1',digits_compute=dp.get_precision('Bath 1')),
+		'bath_2':fields.float('Bath 2',digits_compute=dp.get_precision('Bath 2')),
+		'final':fields.float('Final',digits_compute=dp.get_precision('Final')),
 		'remarks':fields.text('Remarks'),	
 		
 	}
 	
 	
 ch_melting_chemistry_details()
+
+class ch_mechanical_properties(osv.osv):
+	
+	_name = "ch.mechanical.properties"
+	_description = "Mechanical Properties"
+	
+	_columns = {
+			
+		'header_id':fields.many2one('kg.melting', 'Melting Entry', required=True, ondelete='cascade'),
+		'uom': fields.char('UOM',size=128),						
+		'mechanical_id': fields.many2one('kg.mechanical.master','Name', required=True,domain="[('active','=','t')]"),	
+		'min':fields.float('Min',required=True,digits_compute=dp.get_precision('Min Value')),
+		'max':fields.float('Max',required=True,digits_compute=dp.get_precision('Max Value')),
+		'range_flag': fields.boolean('No Max Range'),			
+		
+	}
+	
+	def _check_values(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		if entry.range_flag == False:
+			print"www"
+			if entry.min > entry.max:
+				return False
+		return True
+		
+	def onchange_uom_name(self, cr, uid, ids, mechanical_id, context=None):
+		
+		value = {'uom': ''}
+		if mechanical_id:
+			uom_rec = self.pool.get('kg.mechanical.master').browse(cr, uid, mechanical_id, context=context)
+			value = {'uom': uom_rec.uom.name}
+			
+		return {'value': value}
+		
+	def create(self, cr, uid, vals, context=None):
+		mech_obj = self.pool.get('kg.mechanical.master')
+		if vals.get('mechanical_id'):		  
+			uom_rec = mech_obj.browse(cr, uid, vals.get('mechanical_id') )
+			uom_name = uom_rec.uom.name
+			vals.update({'uom': uom_name})
+		return super(ch_mechanical_properties, self).create(cr, uid, vals, context=context)
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		mech_obj = self.pool.get('kg.mechanical.master')
+		if vals.get('mechanical_id'):
+			uom_rec = mech_obj.browse(cr, uid, vals.get('mechanical_id') )
+			uom_name = uom_rec.uom.name
+			vals.update({'uom': uom_name})
+		return super(ch_mechanical_properties, self).write(cr, uid, ids, vals, context)  
+		
+	_constraints = [		
+			  
+		(_check_values, 'Please Check the Min & Max values ,Min value should be less than Max value.!!',['Mechanical Chart']),		
+	   ]
+	
+ch_mechanical_properties()
+
 
 
 

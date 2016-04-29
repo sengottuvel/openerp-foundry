@@ -32,6 +32,19 @@
 							</group>					
 						</group>
 						
+						<group string="Worker Details">
+							<group>
+								
+								<field name="supervisor_name" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+								<field name="employee_id" attrs="{'invisible': [('done_by','=','contractor')],'readonly': [('state','not in',['draft'])]}" widget="many2many_tags"/>
+								<field name="contractor_id" attrs="{'invisible': [('done_by','=','company_employee')],'readonly': [('state','not in',['draft'])]}"/>								
+							</group>											
+							<group>
+								<field name="done_by" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+								<field name="helper_count" attrs="{'invisible': [('done_by','=','contractor')],'readonly': [('state','not in',['draft'])]}"/>								
+							</group>					
+						</group>
+						
 						<group string="Power Control Details">
 							<group>
 								<label for="time" string="Time"/>
@@ -67,9 +80,21 @@
 										<field name="initial_reading" style="width: 43%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 										<field name="initial_reading_type" style="width: 20%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 									</div>
+								</div>														
+							</group>	
+							<newline/>
+							<group>
+								<label for="total_units" string="Total Units"/>
+								<div>
+									<div class="address_format">
+										<field name="total_units" style="width: 40%%" />Units																
+									</div>
 								</div>
-														
-							</group>					
+							</group>	
+							<newline/>
+							<group>						
+									<field name="amount" style="width: 40%%" />	
+							</group>				
 						</group>
 						<group string="Temp Details">
 							<group>
@@ -84,11 +109,10 @@
 							</group>
 							<newline/>
 							<group>
-								<label for="ret" string="Ret"/>
+								<label for="ret" string="Return Metal"/>
 								<div>
 									<div class="address_format">
-										<field name="ret" style="width: 40%%" attrs="{'readonly': [('state','not in',['draft'])]}"/> Met
-										<field name="met" nolabel="1" style="width: 20%%" attrs="{'readonly': [('state','not in',['draft'])]}"/> Wt.										
+										<field name="ret" style="width: 40%%" attrs="{'readonly': [('state','not in',['draft'])]}"/> Weight.										 										
 									</div>
 								</div>
 							</group>
@@ -122,20 +146,20 @@
 						</group>
 						<button name="load_item" type="object" string="Load Item" class="oe_highlight" attrs="{'invisible':[('load_item','=',True)]}"/>
 						<notebook>							
-							<page string="Charge Details">	
-								<field name="line_ids" nolabel="1" >
+							<page string="Raw Materials Details">	
+								<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel','reject'])]}" >
 									<tree string="Charge Details Entry Tree" editable="top" >									
 										<field name="product_id" />										   
 										<field name="first_addition" required="1"/>
 										<field name="second_addition" required="1" />
-										<field name="total_weight" required="1"/>
+										<field name="total_weight" readonly="1"/>
 										<field name="remarks" widget="char"/>														
 									</tree>
 								</field>																								
 							</page>
 							
 							<page string="Chemistry Details">	
-								<field name="line_ids_a" nolabel="1" >
+								<field name="line_ids_a" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel','reject'])]}" >
 									<tree string="Chemistry Details Entry Tree" editable="top" >									
 										<field name="chemistry_id" />										   
 										<field name="required_chemistry" required="1"/>
@@ -146,6 +170,18 @@
 									</tree>
 								</field>																								
 							</page>
+							
+							<page string="Mechanical Properties">	
+								<field name="line_ids_b" nolabel="1" >
+									<tree string="Mechanical Properties chart Tree" editable="top" >									
+										<field name="mechanical_id" on_change="onchange_uom_name(mechanical_id)"/>											
+										<field name="uom" readonly="1" />											
+										<field name="min"/>	
+										<field name="range_flag" />				   
+										<field name="max" attrs="{'required': [('range_flag','=',False)]}"/>																													
+									</tree>
+								</field>																								
+							</page>			
 							<page string="Entry Info">
 								<group>
 									<field name="company_id"/>
@@ -234,7 +270,21 @@
 		
 	<!-- Menu Action End-->
 	
-	
+	<!-- Audit Log Xml Data Start-->
+		
+        <record id="audit_melting_log" model="audittrail.rule">
+            <field name="name">Audit Log Melting</field>
+            <field name="object_id" eval="ref('kg_melting.model_kg_melting')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+         <record id="audit_melting_charge_details_log" model="audittrail.rule">
+            <field name="name">Audit Log Melting Charge Details</field>
+            <field name="object_id" eval="ref('kg_melting.model_ch_melting_charge_details')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->
     
      <!-- Sequence Number Setting Starts Here -->
 	
