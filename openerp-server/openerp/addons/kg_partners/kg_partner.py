@@ -107,6 +107,8 @@ class kg_partner(osv.osv):
 	'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
 	'user_ref_id': fields.many2one('res.users','User Name'),
 	'adhar_id': fields.char('Adhar ID'),
+	'contractor': fields.boolean('Contractor'),
+	'tin_flag': fields.boolean('TIN Flag'),
 	
 	}
 	
@@ -117,6 +119,7 @@ class kg_partner(osv.osv):
 	  'created_by': lambda obj, cr, uid, context: uid,
 	  'partner_state': 'draft',
 	  'modify': 'no',
+	  'tin_flag': False,
 		 
 	}
 

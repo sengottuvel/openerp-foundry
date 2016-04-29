@@ -150,8 +150,27 @@
 		
 		
 						
-		<!-- Menu Action End-->		
+		<!-- Menu Action End-->
 		
+		 <!-- Audit Log Xml Data Start-->
+		
+        <record id="brandmocrate_model" model="audittrail.rule">
+            <field name="name">Audit Log Brand Moc Rate Master</field>
+            <field name="object_id" eval="ref('kg_brandmoc_rate.model_kg_brandmoc_rate')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+		<!-- Audit Log Xml Data End-->
+		
+		 <!-- Audit Log Xml Data Start-->
+		
+        <record id="brandmocrate_details_model" model="audittrail.rule">
+            <field name="name">Audit Log Brand Moc Rate Details Master</field>
+            <field name="object_id" eval="ref('kg_brandmoc_rate.model_ch_brandmoc_rate_details')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+		<!-- Audit Log Xml Data End-->
 		
 		<!-- Menu Name Start here --> 
 		

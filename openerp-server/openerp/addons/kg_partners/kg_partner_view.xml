@@ -25,7 +25,8 @@
 		</field>
 		<field name="is_company" position="replace">
 		<field name="is_company" invisible="1"/>
-		<field name="tin_no" attrs = "{'required':[('group_flag','!=',True)]}" placeholder="TIN Number"/>
+		
+		<field name="tin_no" attrs = "{'required':[('group_flag','!=',True),('tin_flag','=',False)]}" placeholder="TIN Number"/>
 		</field>
 		
 		<field name="zip" position="replace">
@@ -83,6 +84,8 @@
 		</field>
 		<field name="title" position="replace">
 		<field name="group_flag" invisible="1"/>
+		<field name="contractor" invisible="1"/>
+		<field name="tin_flag" invisible="1"/>
 		</field>
 		<field name="city" position="replace">
 		<field name="city" invisible="1"/>
@@ -289,7 +292,7 @@
 		<field name="res_model">res.partner</field>
 		<field name="view_type">form</field>
 		<field name="view_mode">tree,form,kanban</field>
-		<field name="context">{'default_customer': True,'default_supplier': False}</field>
+		<field name="context">{'default_customer': True,'default_supplier': False,'default_contractor': False,'default_dealer': False,'default_group_flag': False}</field>
 		<field name="domain">[('customer','=',True),('contact','=',False)]</field>
 		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
 		<field name="search_view_id" ref="partner_group_view"/>-->
@@ -302,11 +305,24 @@
 		<field name="res_model">res.partner</field>
 		<field name="view_type">form</field>
 		<field name="view_mode">tree,form,kanban</field>
-		<field name="context">{'default_dealer': True,'default_customer': False,'default_supplier': False}</field>
+		<field name="context">{'default_dealer': True,'default_customer': False,'default_supplier': False,'default_contractor': False,'default_group_flag': False}</field>
 		<field name="domain">[('dealer','=',True),('contact','=',False)]</field>
 		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
 		<field name="search_view_id" ref="partner_group_view"/>-->
 	</record>
+	
+	<record id="kg_action_contractor_form" model="ir.actions.act_window">
+		<field name="name">Contractor</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="res_model">res.partner</field>
+		<field name="view_type">form</field>
+		<field name="view_mode">tree,form,kanban</field>
+		<field name="context">{'default_contractor': True,'default_dealer': False,'default_customer': False,'default_supplier': False,'default_group_flag': False,'default_tin_flag': True}</field>
+		<field name="domain">[('contractor','=',True),('contact','=',False)]</field>
+		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
+		<field name="search_view_id" ref="partner_group_view"/>-->
+	</record>
+	
         
 	<record id="kg_action_group_form" model="ir.actions.act_window">
 		<field name="name">Groups</field>
@@ -314,7 +330,7 @@
 		<field name="res_model">res.partner</field>
 		<field name="view_type">form</field>
 		<field name="view_mode">tree,form,kanban</field>
-		<field name="context">{'default_group_flag': True,'default_dealer': False,'default_customer': False,'default_supplier': False}</field>
+		<field name="context">{'default_group_flag': True,'default_dealer': False,'default_customer': False,'default_supplier': False,'default_contractor': False}</field>
 		<field name="domain">[('dealer','=',True),('contact','=',False)]</field>
 		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
 		<field name="search_view_id" ref="partner_group_view"/>-->

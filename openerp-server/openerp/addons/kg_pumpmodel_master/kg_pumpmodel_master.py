@@ -36,6 +36,8 @@ class kg_pumpmodel_master(osv.osv):
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
 		
+		'line_ids':fields.one2many('ch.vo.mapping', 'header_id', "VO Mapping"),
+		
 		'alias_name': fields.char('Alias Name', size=128),
 		'make_by': fields.char('Make By', size=128),
 		'delivery_lead': fields.integer('Delivery Lead Time(Weeks)', size=128),
@@ -54,8 +56,19 @@ class kg_pumpmodel_master(osv.osv):
 		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
-		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),		
-				
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
+		
+		######### CRM Data Added ###########
+		
+		'impeller_type': fields.selection([('open','Open'),('semi_open','Semi Open'),('close','Closed')],'Impeller Type',required=True),
+		'crm_type': fields.selection([('pull_out','End Suction Back Pull Out'),('split_case','Split Case'),('multistage','Multistage'),('twin_casing','Twin Casing'),('single_casing','Single Casing'),('self_priming','Self Priming'),('vo_vs4','VO-VS4'),('vg_vs5','VG-VS5')],'Type',required=True),
+		'impeller_number': fields.integer('Impeller Number of vanes', required=True),
+		'impeller_dia_max': fields.float('Impeller Dia Max mm', required=True),
+		'impeller_dia_min': fields.float('Impeller Dia Min mm', required=True),
+		'maximum_allowable_soild': fields.float('Maximum Allowable Soild Size - MM', required=True),
+		'max_allowable_test': fields.float('Max Allowable Test Pressure', required=True),
+		'number_of_stages': fields.integer('Number of stages', required=True),
+		
 	}
 	
 	_defaults = {
@@ -130,6 +143,19 @@ class kg_pumpmodel_master(osv.osv):
 		return True
 
 	def entry_confirm(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])		
+		line = rec.line_ids
+		if rec.line_ids:
+								
+			cr.execute(""" select count from
+				( select count(rpm),rpm from ch_vo_mapping where header_id = %s group by rpm ) as dup
+				where count > 1 """ %(rec.id))
+			data = cr.dictfetchall()			
+			if len(data) > 0:
+				raise osv.except_osv(_('VO Mapping Check !!'),
+				_('Not allow same RPM in VO Mapping!!'))
+			else:
+				pass		
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 		

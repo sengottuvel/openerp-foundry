@@ -136,12 +136,23 @@
 		</record>	
 		
 		
-		<!-- Menu Action End-->		
-	
+		<!-- Menu Action End-->
+		
+		 <!-- Audit Log Xml Data Start -->
+		
+        <record id="contractor_model" model="audittrail.rule">
+            <field name="name">Audit Log Contractor Master</field>
+            <field name="object_id" eval="ref('kg_contractor_master.model_kg_contractor_master')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <!-- Audit Log Xml Data End-->
 		
 		<!-- Menu Name Start here --> 
 		
+<!--
 			<menuitem action="mma_contractor_master" name="Contractor" id="mam_contractor_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="19"/>
+-->
 
 		<!-- Menu Name End here --> 
 

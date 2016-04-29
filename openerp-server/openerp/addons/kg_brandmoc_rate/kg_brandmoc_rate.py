@@ -181,18 +181,18 @@ class ch_brandmoc_rate_details(osv.osv):
 		'purchase_price':fields.float('Purchase Price(Rs)'),
 		'remarks':fields.text('Remarks'),		
 	}
-	
+	"""
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.rate <= 0.00:
+		if entry.rate <= 0.00 or entry.purchase_price <= 0.00:
 			return False
 		return True
 		
 	_constraints = [		
 			  
-		(_check_values, 'System not allow to save negative and zero values..!!',['Rate']),	
+		(_check_values, 'System not allow to save negative and zero values..!!',['Rate','purchase_price']),	
 		
 	   ]
 		
-	
+	"""
 ch_brandmoc_rate_details()
