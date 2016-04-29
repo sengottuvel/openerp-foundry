@@ -29,7 +29,7 @@
             ref('kg_brandmoc_rate.mam_brandmocrate_design_master'),
             ref('kg_shift_master.mam_shift_master'),
             ref('kg_contractor_category.mam_contractor_category_master'),
-            ref('kg_contractor_master.mam_contractor_master'),
+            ref('kg_menus.mam_contractor_master123'),
             ref('kg_rejection_master.mam_rejection_master'),
             ref('kg_construction_type.mam_const_type_master'),
             ref('kg_pump_category.mam_pumpcate_master'),

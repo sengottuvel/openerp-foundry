@@ -676,6 +676,30 @@
 		
 		<!-- Ladle Master END -->
 		
+		<!-- Partners rights -->
+		
+		<record id="po_kg_delivery_address" model="ir.model.access">
+			<field name="model_id" ref="kg_partners.model_kg_delivery_address"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Delivery Adress</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
+		</record>
+		
+		<record id="po_kg_billing_address" model="ir.model.access">
+			<field name="model_id" ref="kg_partners.model_kg_billing_address"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Billing Adress</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
+		</record>
+		
+		<!-- Partners rights End -->
+		
 		
 		
     </data>
