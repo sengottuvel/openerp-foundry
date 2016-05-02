@@ -210,12 +210,15 @@
 								<field name="viscosity" />																
 								<field name="max_size_mm" />																
 								<field name="npsh_avl" />																
+								<field name="suction_pressure_kg" />																
+								<field name="differential_pressure_kg" />																
 							</group>											
 							<group>
 								<field name="slurry_correction_in" />													
 								<field name="temperature" />													
 								<field name="suction_condition" />													
 								<field name="suction_pressure" />													
+								<field name="discharge_pressure_kg" />													
 							</group>					
 						</group>
 						<group string="Duty Parameters">
@@ -230,29 +233,32 @@
 						<group string="Pump Specification">
 							<group>
 								<field name="pump_type" />																							
-								<field name="pump_id" />																							
-								<field name="number_of_stages" />																							
+								<field name="pump_id" on_change="onchange_pumpmodel(pump_id)"/>																							
+								<field name="number_of_stages" />
+								<field name="impeller_type" />
+								<field name="impeller_dia_min" />																															
 								<field name="size_suctionx" />																							
 								<field name="flange_standard" />																							
 								<field name="efficiency_in" />																							
 								<field name="npsh_r_m" />																							
 								<field name="best_efficiency" />																							
 								<field name="bkw_water" />																							
-								<field name="bkw_liq" />																							
-								<field name="impeller_type" />																							
-								<field name="impeller_number" />																							
-								<field name="impeller_dia_max" />																							
-								<field name="impeller_dia_min" />																							
+								<field name="bkw_liq" />																												
 								<field name="impeller_dia_rated" />																							
-								<field name="impeller_tip_speed" />																							
-								<field name="maximum_allowable_soild" />																							
+								<field name="impeller_tip_speed" />																								
 								<field name="hydrostatic_test_pressure" />																							
 								<field name="full_load_rpm" />																							
 								<field name="belt_loss_in_kw" />																							
+																													
 							</group>											
 							<group>
+																				
+								<field name="maximum_allowable_soild" />			
+								<field name="impeller_number" />							
+								<field name="impeller_dia_max" />	
+								<field name="max_allowable_test" />										
+								<field name="crm_type" />										
 								<field name="casing_design" />													
-								<field name="max_allowable_test" />													
 								<field name="shut_off_head" />													
 								<field name="minimum_contionuous" />													
 								<field name="specific_speed" />													

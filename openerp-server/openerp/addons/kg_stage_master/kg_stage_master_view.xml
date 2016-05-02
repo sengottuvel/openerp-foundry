@@ -20,6 +20,7 @@
 						<group>
 							<group>						
 								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+								<field name="category" />								
 								<!--<field name="stage_seq_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>-->
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 							</group>
@@ -78,6 +79,7 @@
 								toolbar="True" string="Stage Master Tree">				
 					<field name="code"/>
 					<field name="name"/>
+					<field name="category"/>
 					<field name="state"/>
 				</tree>
 			</field>
@@ -121,8 +123,17 @@
 		</record>		
 		
 		
-		<!-- Menu Action End-->	
+		<!-- Menu Action End-->
 		
+		 <!-- Audit Log Xml Data Start-->
+		
+        <record id="stage_model" model="audittrail.rule">
+            <field name="name">Audit Log Stage Master</field>
+            <field name="object_id" eval="ref('kg_stage_master.model_kg_stage_master')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <!-- Audit Log Xml Data End-->
 		
 		<!-- Menu Name Start here --> 
 		

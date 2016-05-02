@@ -69,9 +69,9 @@ class kg_crm_enquiry(osv.osv):
 		########## Karthikeyan Added Start here ################
 		'enquiry_no': fields.char('Enquiry No.', size=128,select=True,required=True),
 		'scope_of_supply': fields.selection([('bare_pump','Bare pump'),('pump_with_acces','Pump with Accessories')],'Scope of Supply', required=True),
-		'pump': fields.selection([('gld_packing','With GLD Packing'),('mc_seal','M/C Seal'),('dynamic_seal','Dynamic seal')],'Pump', required=True),
+		'pump': fields.selection([('gld_packing','Gland Packing'),('mc_seal','M/C Seal'),('dynamic_seal','Dynamic seal')],'Shaft Shalling', required=True),
 		'drive': fields.selection([('motor','Motor'),('vfd','VFD'),('engine','Engine')],'Drive', required=True),
-		'transmision': fields.selection([('cpl','CPL'),('belt','BELT'),('fc','FC'),('gear_box','Gear Box'),('fc_gear_box','FC with Gear box')],'Transmision', required=True),
+		'transmision': fields.selection([('cpl','Coupling'),('belt','Belt Drive'),('fc','Fluid Coupling'),('gear_box','Gear Box'),('fc_gear_box','Fluid Coupling With Gear Box')],'Transmision', required=True),
 		'acces': fields.selection([('yes','Yes'),('no','No')],'Accessories', required=True),
 		
 		### Entry Info ####
@@ -94,6 +94,8 @@ class kg_crm_enquiry(osv.osv):
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':time.strftime('%Y-%m-%d %H:%M:%S'),
 		'state': 'draft',
+		'pump': 'gld_packing',
+		'transmision': 'cpl',
 		'ref_mode': 'direct',
 		'call_type': 'service',
 		'active': True,
@@ -114,7 +116,19 @@ class kg_crm_enquiry(osv.osv):
 			raise osv.except_osv(_('Warning!'),
 						_('System not allow to save with past date !!'))
 		
-	def _future_entry_date_check(self,cr,uid,ids,context=None):
+	def _future_enquiry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		today = datetime.strptime(today, '%Y-%m-%d')
+		enquiry_date = rec.enquiry_date
+		enquiry_date = str(enquiry_date)
+		enquiry_date = datetime.strptime(enquiry_date, '%Y-%m-%d')
+		if enquiry_date <= today:
+			return True
+		return False
+		
+	def _future_due_date_check(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		today = date.today()
 		today = str(today)
@@ -122,7 +136,7 @@ class kg_crm_enquiry(osv.osv):
 		due_date = rec.due_date
 		due_date = str(due_date)
 		due_date = datetime.strptime(due_date, '%Y-%m-%d')
-		if due_date >= today:
+		if due_date <= today:
 			return True
 		return False
 		
@@ -162,7 +176,8 @@ class kg_crm_enquiry(osv.osv):
 	
 	_constraints = [		
 		
-		(_future_entry_date_check, 'System not allow to save with past date. !!',['Due Date']),
+		(_future_enquiry_date_check, 'System not allow to save with past date. !!',['Enquiry Date']),
+		(_future_due_date_check, 'System not allow to save with past date. !!',['Due Date']),
 		#(_check_duplicates, 'System not allow to do duplicate entry !!',['']),
 		#(_check_lineitems, 'System not allow to save with empty Work Order Details !!',['']),
 		#(_Validation, 'Special Character Not Allowed in Work Order No.', ['']),
@@ -314,6 +329,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'line_ids': fields.one2many('ch.kg.crm.foundry.item', 'header_id', "Foundry Details"),
 		'line_ids_a': fields.one2many('ch.kg.crm.machineshop.item', 'header_id', "Machineshop Details"),
 		'line_ids_b': fields.one2many('ch.kg.crm.bot', 'header_id', "BOT Details"),
+		'line_ids_moc_a': fields.one2many('ch.moc.construction', 'header_id', "MOC Construction"),
 		
 		
 		
@@ -330,34 +346,30 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'temperature': fields.selection([('normal','NORMAL'),('jacketting','JACKETTING'),('centre_line','CENTRE LINE')],'Temperature in C', required=True),
 		'suction_condition': fields.selection([('positive','Positive'),('negative','Negative')],'Suction Condition', required=True),
 		'suction_pressure': fields.selection([('normal','Normal'),('centre_line','Centre Line')],'Suction pressure', required=True),
-		'npsh_avl': fields.integer('NPSH-AVL', required=True),
+		'npsh_avl': fields.integer('NPSH-AVL', required=True),		
+		'suction_pressure_kg': fields.float('Suction Pressure - kg/cm2', required=True),
+		'discharge_pressure_kg': fields.float('Discharge Pressure - kg/cm2', required=True),
+		'differential_pressure_kg': fields.float('Differential Pressure - kg/cm2', required=True),
 		
 		########## Karthikeyan Duty Parameters Added Start here ################	
 		
-		'capacity_in': fields.integer('Capacity in M3 / hr Wat / Liq', required=True),
-		'head_in': fields.integer('Head in M Wat / Liq', required=True),
+		'capacity_in': fields.integer('Capacity in M3 / hr', required=True),
+		'head_in': fields.integer('Total Head in Mlc', required=True),
 		
 		########## Karthikeyan Pump Specification Added Start here ################	
-		'pump_type': fields.char('Pump Type', required=True),
-		'casing_design': fields.char('Casing Design', required=True),
-		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True,domain="[('active','=','t')]"),				
-		'number_of_stages': fields.integer('Number of stages', required=True),
+		'pump_type': fields.char('Pump Model', required=True),		
+		'casing_design': fields.selection([('base','Base'),('center_line','Center Line')],'Casing Feet Location', required=True),
+		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Type', required=True,domain="[('active','=','t')]"),		
 		'size_suctionx': fields.char('Size-SuctionX Delivery- in mm', required=True),
 		'flange_standard': fields.char('Flange Standard', required=True),
 		'efficiency_in': fields.float('Efficiency in % Wat/Liq', required=True),
 		'npsh_r_m': fields.float('NPSH R - M', required=True),
 		'best_efficiency': fields.float('Best Efficiency NPSH in M', required=True),
 		'bkw_water': fields.float('BKW Water', required=True),
-		'bkw_liq': fields.float('BKW Liq', required=True),
-		'impeller_type': fields.char('Impeller Type', required=True),
-		'impeller_number': fields.float('Impeller Number of vanes', required=True),
-		'impeller_dia_max': fields.float('Impeller Dia Max mm', required=True),
-		'impeller_dia_min': fields.float('Impeller Dia Min mm', required=True),
+		'bkw_liq': fields.float('BKW Liq', required=True),		
 		'impeller_dia_rated': fields.float('Impeller Dia Rated mm', required=True),
-		'impeller_tip_speed': fields.float('Impeller Tip Speed -M/Sec', required=True),
-		'maximum_allowable_soild': fields.float('Maximum Allowable Soild Size - MM', required=True),
-		'hydrostatic_test_pressure': fields.float('Hydrostatic Test Pressure - Kg/cm2', required=True),
-		'max_allowable_test': fields.float('Max Allowable Test Pressure', required=True),
+		'impeller_tip_speed': fields.float('Impeller Tip Speed -M/Sec', required=True),		
+		'hydrostatic_test_pressure': fields.float('Hydrostatic Test Pressure - Kg/cm2', required=True),		
 		'shut_off_head': fields.float('Shut off Head in M', required=True),
 		'minimum_contionuous': fields.float('Minimum Contionuous Flow - M3/hr', required=True),
 		'specific_speed': fields.float('Specific Speed', required=True),
@@ -379,7 +391,21 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'full_load_rpm': fields.float('Full Load RPM', required=True),
 		'engine_kw': fields.float('Engine KW', required=True),
 		'belt_loss_in_kw': fields.float('Belt Loss in Kw - 3% of BKW', required=True),
-		'line_ids_moc_a': fields.one2many('ch.moc.construction', 'header_id', "MOC Construction"),
+		'type_make_selection': fields.selection([('base','Base'),('center_line','Center Line')],'Type Make Selection', required=True),
+		
+		
+		##### Product model values ##########
+		#'impeller_type': fields.char('Impeller Type', readonly=True),
+		'impeller_type': fields.selection([('open','Open'),('semi_open','Semi Open'),('close','Closed')],'Impeller Type',readonly=True),
+		'impeller_number': fields.float('Impeller Number of vanes', readonly=True),
+		'impeller_dia_max': fields.float('Impeller Dia Max mm', readonly=True),
+		'impeller_dia_min': fields.float('Impeller Dia Min mm', readonly=True),
+		'maximum_allowable_soild': fields.float('Maximum Allowable Soild Size - MM', readonly=True),
+		'max_allowable_test': fields.float('Max Allowable Test Pressure', readonly=True),
+		'number_of_stages': fields.integer('Number of stages', readonly=True),
+		#'crm_type': fields.char('Type', readonly=True),
+		'crm_type': fields.selection([('pull_out','End Suction Back Pull Out'),('split_case','Split Case'),('multistage','Multistage'),('twin_casing','Twin Casing'),('single_casing','Single Casing'),('self_priming','Self Priming'),('vo_vs4','VO-VS4'),('vg_vs5','VG-VS5')],'Type',readonly=True),
+		
 		
 		'moc_const_id':fields.many2one('kg.moc.construction', 'MOC Construction',domain = [('active','=','t')],required=True),
 		
@@ -409,8 +435,37 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			pass
 		return context
 		"""
+		
+		
+	def onchange_pumpmodel(self, cr, uid, ids, pump_id, context=None):
+		
+		value = {'impeller_type': '','impeller_number': '','impeller_dia_max': '','impeller_dia_min': '','maximum_allowable_soild': '','max_allowable_test': '','number_of_stages': '','crm_type': ''}
+		if pump_id:
+			pump_rec = self.pool.get('kg.pumpmodel.master').browse(cr, uid, pump_id, context=context)
+			value = {'impeller_type': pump_rec.impeller_type,'impeller_number': pump_rec.impeller_number,'impeller_dia_max': pump_rec.impeller_dia_max,
+			'impeller_dia_min': pump_rec.impeller_dia_min,'maximum_allowable_soild': pump_rec.maximum_allowable_soild,'max_allowable_test': pump_rec.max_allowable_test,
+			'number_of_stages': pump_rec.number_of_stages,'crm_type': pump_rec.crm_type}
+			
+		return {'value': value}
+		
+	def create(self, cr, uid, vals, context=None):
+		pump_obj = self.pool.get('kg.pumpmodel.master')
+		if vals.get('pump_id'):		  
+			pump_rec = pump_obj.browse(cr, uid, vals.get('pump_id'))			
+			vals.update({'impeller_type': pump_rec.impeller_type,'impeller_number': pump_rec.impeller_number,'impeller_dia_max': pump_rec.impeller_dia_max,
+			'impeller_dia_min': pump_rec.impeller_dia_min,'maximum_allowable_soild': pump_rec.maximum_allowable_soild,'max_allowable_test': pump_rec.max_allowable_test,
+			'number_of_stages': pump_rec.number_of_stages,'crm_type': pump_rec.crm_type})
+		return super(ch_kg_crm_pumpmodel, self).create(cr, uid, vals, context=context)
+		
 	def write(self, cr, uid, ids, vals, context=None):
-		return super(ch_kg_crm_pumpmodel, self).write(cr, uid, ids, vals, context)
+		pump_obj = self.pool.get('kg.pumpmodel.master')
+		if vals.get('pump_id'):
+			pump_rec = pump_obj.browse(cr, uid, vals.get('pump_id'))			
+			vals.update({'impeller_type': pump_rec.impeller_type,'impeller_number': pump_rec.impeller_number,'impeller_dia_max': pump_rec.impeller_dia_max,
+			'impeller_dia_min': pump_rec.impeller_dia_min,'maximum_allowable_soild': pump_rec.maximum_allowable_soild,'max_allowable_test': pump_rec.max_allowable_test,
+			'number_of_stages': pump_rec.number_of_stages,'crm_type': pump_rec.crm_type})
+		return super(ch_kg_crm_pumpmodel, self).write(cr, uid, ids, vals, context)  
+	
 		
 	
 ch_kg_crm_pumpmodel()
@@ -511,7 +566,7 @@ class ch_moc_construction(osv.osv):
 	_columns = {
 	
 		
-		'header_id':fields.many2one('ch.kg.crm.enquiry', 'Header Id', ondelete='cascade'),
+		'header_id':fields.many2one('ch.kg.crm.pumpmodel', 'Header Id', ondelete='cascade'),
 		'moc_id':fields.many2one('kg.moc.construction', 'MOC Construction',domain = [('active','=','t')],required=True),
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern No', required=True,domain="[('active','=','t')]"), 		
 		'pattern_name': fields.char('Pattern Name'), 	

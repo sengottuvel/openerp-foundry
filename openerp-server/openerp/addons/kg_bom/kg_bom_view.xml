@@ -38,7 +38,7 @@
 							<group>	
 									
 								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire'])]}"/>								
-								<field name="category_type" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire'])]}"/>								
+								<field name="category_type" invisible="1"/>								
 								<field name="uom" readonly="1"/>
 								<field name="revision" readonly="1"/>
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire'])]}"/>								
@@ -298,19 +298,37 @@
 		
 		<!--Child Class Search View End -->
 			
-		<!-- Menu Action Start-->
+		<!-- Menu Action Pump BOM Start-->
 		
-		<record id="mma_bom_master" model="ir.actions.act_window">
-			<field name="name">BOM</field>
+		<record id="mma_pumpbom_master" model="ir.actions.act_window">
+			<field name="name">Pump BOM</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.bom</field>
 			<field name="view_type">form</field>
-			<field name="context">{}</field>
+			<field name="context">{'default_category_type': 'pump_bom',"search_default_draft":1}</field>
+			<field name="domain">[('category_type','=','pump_bom')]</field>
 			<field name="view_id" ref="m_tree_v_bom"/>
 			<field name="search_view_id" ref="m_search_v_bom"/>
-			<field name="context">{"search_default_draft":1}</field>
 			
-		</record>	
+			
+		</record>
+		
+		
+		<!-- Menu Action Part LIst BOM  Start-->
+		
+		<record id="mma_partlistbom_master" model="ir.actions.act_window">
+			<field name="name">Part List BOM</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.bom</field>
+			<field name="view_type">form</field>
+			<field name="context">{'default_category_type': 'part_list_bom',"search_default_draft":1}</field>
+			<field name="domain">[('category_type','=','part_list_bom')]</field>
+			<field name="view_id" ref="m_tree_v_bom"/>
+			<field name="search_view_id" ref="m_search_v_bom"/>
+			
+			
+		</record>
+		
 				
 				
 		
@@ -359,13 +377,62 @@
 		
 	<!-- bot Child Class  Menu Action End-->
 	
-	
+	 <!-- Audit Log Xml Data Start-->
+		
+        <record id="bom_model" model="audittrail.rule">
+            <field name="name">Audit Log BOM</field>
+            <field name="object_id" eval="ref('kg_bom.model_kg_bom')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->
+    
+	 <!-- Audit Log Xml Data Start-->
+		
+        <record id="bom_line_model" model="audittrail.rule">
+            <field name="name">Audit Log BOM Line</field>
+            <field name="object_id" eval="ref('kg_bom.model_ch_bom_line')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->
+    
+     <!-- Audit Log Xml Data Start-->
+		
+        <record id="bom_machine_model" model="audittrail.rule">
+            <field name="name">Audit Log BOM Machine Shop</field>
+            <field name="object_id" eval="ref('kg_bom.model_ch_machineshop_details')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->
+    
+     <!-- Audit Log Xml Data Start-->
+		
+        <record id="bom_bot_model" model="audittrail.rule">
+            <field name="name">Audit Log BOM BOT</field>
+            <field name="object_id" eval="ref('kg_bom.model_ch_bot_details')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->
+    
+     <!-- Audit Log Xml Data Start-->
+		
+        <record id="bom_consu_model" model="audittrail.rule">
+            <field name="name">Audit Log BOM Consumable</field>
+            <field name="object_id" eval="ref('kg_bom.model_ch_consu_details')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->
         
 	
 	<!-- Menu Name Start here --> 
 	
 		<!-- BOM Master  --> 
-				<menuitem action="mma_bom_master" name="BOM" id="mam_bom_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="4"/> 
+				<menuitem action="mma_pumpbom_master" name="Pump BOM" id="mam_bom_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="4"/> 
+				<menuitem action="mma_partlistbom_master" name="Part List BOM" id="mam_partlistbom_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="4"/> 
 	
 		<!-- BOM Details  --> 
 				<menuitem action="mma_bom_details" name="BOM Details" id="mam_bom_details" parent="kg_pumpmodel_master.mpm_planning_master" sequence="5"/>   

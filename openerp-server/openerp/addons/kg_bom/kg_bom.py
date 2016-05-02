@@ -34,7 +34,7 @@ class kg_bom(osv.osv):
 		'type': fields.selection([('new','New'),('copy','Copy'),('amendment','Amendment')],'Type', required=True),
 		'bom_type': fields.selection([('new_bom','New BOM'),('copy_bom','Copy BOM')],'Type', required=True),
 		
-		'source_bom': fields.many2one('kg.bom', 'Source BOM',domain="[('active','=','t')]"),
+		'source_bom': fields.many2one('kg.bom', 'Source BOM',domain="[('state','=','approved'), ('active','=','t')]"),
 		'copy_flag':fields.boolean('Copy Flag'),
 		
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
@@ -80,8 +80,7 @@ class kg_bom(osv.osv):
 	  'uom':'Nos', 
 	  'revision' : 0, 
 	  'copy_flag' : False, 
-	  'modify': 'no',
-	  'category_type': 'pump_bom',
+	  'modify': 'no',	  
 	  
 	}
 	
@@ -138,11 +137,12 @@ class kg_bom(osv.osv):
 		rec = self.browse(cr,uid,ids[0])
 		res = True
 		if rec.name:
-			pump_name = rec.pump_model_id						
-			cr.execute(""" select * from kg_bom where pump_model_id  = '%s' and state != '%s' """ %(pump_name.id,'reject'))
-			data = cr.dictfetchall()			
-			if len(data) > 1:
-				res = False
+			pump_name = rec.pump_model_id
+			if rec.category_type =='pump_bom':									
+				cr.execute(""" select * from kg_bom where pump_model_id  = '%s' and state != '%s' """ %(pump_name.id,'reject'))
+				data = cr.dictfetchall()			
+				if len(data) > 1:
+					res = False
 			else:
 				res = True				
 		return res
