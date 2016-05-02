@@ -157,13 +157,15 @@ class kg_purchase_order(osv.osv):
 		'approve_flag':fields.boolean('Expiry Flag'),
 		'frieght_flag':fields.boolean('Expiry Flag'),
 		'version':fields.char('Version'),
-		'purpose':fields.selection([('for_sale','For Sale'),('own_use','Own use')], 'Purpose'), 
+		'purpose':fields.selection([('for_sale','For Production'),('own_use','Own use')], 'Purpose'), 
 		'expense_line_id': fields.one2many('kg.purchase.order.expense.track','expense_id','Expense Track',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		'update_date' : fields.datetime('Last Updated Date',readonly=True),
 		'update_user_id' : fields.many2one('res.users','Last Updated By',readonly=True),
 		'quotation_date': fields.date('Quotation Date'),
 		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
-		
+		'insurance': fields.selection([('sam','By Sam'),('supplier','By Supplier'),('na','N/A')],'Insurance',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
+		'excise_duty': fields.selection([('inclusive','Inclusive'),('extra','Extra')],'Excise Duty',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
+		'division': fields.selection([('ppd','PPD'),('ipd','IPD'),('foundry','Foundry')],'Division',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		
 	}
 	
@@ -412,8 +414,20 @@ class kg_purchase_order(osv.osv):
 					_('Warning'),
 					_('PO Entry is not allowed!'))
 		if obj.name == False:
-			po_no = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order')
-			self.write(cr,uid,ids,{'name':po_no})
+			if obj.division == 'ipd':
+				seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','purchase.order')])
+				seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,obj.date_order))
+			elif obj.division == 'ppd':
+				seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','ppd.purchase.order')])
+				seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,obj.date_order))
+			elif obj.division == 'foundry':
+				seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','fou.purchase.order')])
+				seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,obj.date_order))
+			seq_name = cr.fetchone();
+			self.write(cr,uid,ids,{'name':seq_name[0]})
 		"""if obj.frieght_flag == True and obj.value1 == 0.00: 
 			raise osv.except_osv(
 					_('Warning'),

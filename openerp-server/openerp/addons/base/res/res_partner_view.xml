@@ -137,7 +137,7 @@
                         <group>
                         
                             <field name="name" placeholder="Name" />
-                        
+							<field name="code" placeholder="Code"  attrs = "{'invisible':[('supplier','!=',True)]}"/>
                         </group>
                         <group>
 							<field name="is_company" on_change="onchange_type(is_company)" class="oe_inline"/>

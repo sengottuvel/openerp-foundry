@@ -13,6 +13,7 @@
 		<field name="partner_id" context="{'search_default_supplier':1,'default_supplier':1,'default_customer':0}" domain="[('supplier','=',True)]" position="replace">
 			<field name="kg_seq_id" invisible="1"/>
 			<field name="name" readonly="1"/>
+			<field name="division" required="1"/>
 			<field name="partner_id" on_change="onchange_partner_id(partner_id,add_text)" context="{'search_default_supplier':1,'default_supplier':1,'default_customer':0}" />
 		</field>
 		
@@ -24,6 +25,8 @@
 			<field name="delivery_mode" />
 			<field name="term_freight" on_change="onchange_frieght_flag(term_freight)" />
 			<field name="state"/>
+			<field name="insurance"/>
+			<field name="excise_duty"/>
 			<field name="type_flag" invisible="1" />
 			<field name="confirm_flag" invisible="1"/>
 			<field name="approve_flag" invisible="1"/>	

@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.0000000000000064"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.y" value="333"/>
 	<subDataset name="PO List">
 		<parameter name="po_id" class="java.lang.Integer"/>
 		<queryString>
@@ -29,15 +29,31 @@ where line.order_id = $P{po_id}]]>
 	<parameter name="po_id" class="java.lang.Integer"/>
 	<queryString>
 		<![CDATA[select
+(CASE WHEN po.insurance = 'sam'
+THEN 'By Sam'
+WHEN po.insurance = 'supplier'
+THEN 'By Supplier'
+WHEN po.insurance = 'na'
+THEN 'N/A'
+ELSE ''
+end ) as insurance,
+(CASE WHEN po.excise_duty = 'inclusive'
+THEN 'Inclusive'
+WHEN po.excise_duty = 'extra'
+THEN 'Extra'
+ELSE ''
+end ) as excise_duty,
 trim(TO_CHAR((po.amount_untaxed)::float, '999G999G99G999G99G99G990D99')) as amount,
 trim(TO_CHAR((po.amount_total)::float, '999G999G99G999G99G99G990D99')) as amount_total,
 partner.name as partner_name,
+partner.code as partner_code,
 partner.street as street1,
 partner.street2 as street2,
 city.name as city,
 po.name as po_no,
 to_char(po.date_order,'dd/mm/yyyy') as po_date,
 po.quot_ref_no as ref_no,
+po.division as division,
 pay.name as payment_mode,
 del.name as delivery_mode,
 po.state as status,
@@ -54,15 +70,19 @@ left join res_partner compart on(compart.id=company.partner_id)
 
 where po.id = $P{po_id}]]>
 	</queryString>
+	<field name="insurance" class="java.lang.String"/>
+	<field name="excise_duty" class="java.lang.String"/>
 	<field name="amount" class="java.lang.String"/>
 	<field name="amount_total" class="java.lang.String"/>
 	<field name="partner_name" class="java.lang.String"/>
+	<field name="partner_code" class="java.lang.String"/>
 	<field name="street1" class="java.lang.String"/>
 	<field name="street2" class="java.lang.String"/>
 	<field name="city" class="java.lang.String"/>
 	<field name="po_no" class="java.lang.String"/>
 	<field name="po_date" class="java.lang.String"/>
 	<field name="ref_no" class="java.lang.String"/>
+	<field name="division" class="java.lang.String"/>
 	<field name="payment_mode" class="java.lang.String"/>
 	<field name="delivery_mode" class="java.lang.String"/>
 	<field name="status" class="java.lang.String"/>
@@ -73,7 +93,7 @@ where po.id = $P{po_id}]]>
 		<groupHeader>
 			<band height="16">
 				<componentElement>
-					<reportElement x="0" y="0" width="802" height="16"/>
+					<reportElement x="0" y="0" width="624" height="16"/>
 					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 						<datasetRun subDataset="PO List">
 							<datasetParameter name="po_id">
@@ -81,7 +101,7 @@ where po.id = $P{po_id}]]>
 							</datasetParameter>
 							<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 						</datasetRun>
-						<jr:listContents height="16" width="802">
+						<jr:listContents height="16" width="624">
 							<textField>
 								<reportElement x="0" y="0" width="38" height="16"/>
 								<box topPadding="1">
@@ -136,44 +156,44 @@ where po.id = $P{po_id}]]>
 								<textElement textAlignment="Right"/>
 								<textFieldExpression><![CDATA[$F{amount}+" "]]></textFieldExpression>
 							</textField>
-							<textField isBlankWhenNull="true">
-								<reportElement x="624" y="0" width="113" height="16"/>
-								<box topPadding="1">
-									<leftPen lineWidth="0.5"/>
-									<bottomPen lineWidth="0.5"/>
-								</box>
-								<textElement/>
-								<textFieldExpression><![CDATA[]]></textFieldExpression>
-							</textField>
-							<textField isBlankWhenNull="true">
-								<reportElement x="737" y="0" width="64" height="16"/>
-								<box topPadding="1">
-									<leftPen lineWidth="0.5"/>
-									<bottomPen lineWidth="0.5"/>
-								</box>
-								<textElement/>
-								<textFieldExpression><![CDATA[]]></textFieldExpression>
-							</textField>
 						</jr:listContents>
 					</jr:list>
 				</componentElement>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="624" y="0" width="113" height="16"/>
+					<box topPadding="2">
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{delivery_mode}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="736" y="0" width="65" height="16"/>
+					<box>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement/>
+					<textFieldExpression><![CDATA[""]]></textFieldExpression>
+				</textField>
 			</band>
 		</groupHeader>
 	</group>
 	<background>
-		<band height="555">
-			<image>
-				<reportElement x="1" y="0" width="800" height="555">
-					<printWhenExpression><![CDATA[new Boolean(($F{status}.equals("draft")))]]></printWhenExpression>
-				</reportElement>
-				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images/Draft.jpg"]]></imageExpression>
-			</image>
+		<band height="539">
 			<frame>
-				<reportElement x="0" y="0" width="801" height="555"/>
+				<reportElement x="0" y="0" width="801" height="539"/>
 				<box>
 					<leftPen lineWidth="0.5"/>
 					<rightPen lineWidth="0.5"/>
 				</box>
+				<image>
+					<reportElement x="2" y="0" width="799" height="524"/>
+					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images/Draft.jpg"]]></imageExpression>
+				</image>
 			</frame>
 		</band>
 	</background>
@@ -186,12 +206,12 @@ where po.id = $P{po_id}]]>
 				</graphicElement>
 			</line>
 			<textField>
-				<reportElement x="39" y="62" width="300" height="15"/>
+				<reportElement x="54" y="50" width="316" height="12"/>
 				<box leftPadding="5" rightPadding="5">
 					<leftPen lineWidth="0.0"/>
 				</box>
 				<textElement/>
-				<textFieldExpression><![CDATA["Avinashi Road, Neelambur, Coimbatore - 641 062. Tamilnadu."]]></textFieldExpression>
+				<textFieldExpression><![CDATA["P.B.No. 7006, Avinashilingam Home Science College P.O.,"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="339" y="33" width="52" height="13"/>
@@ -234,8 +254,8 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA[" DATE :"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="RelativeToBandHeight" x="1" y="75" width="369" height="18"/>
-				<box leftPadding="5" rightPadding="5">
+				<reportElement stretchType="RelativeToBandHeight" x="1" y="74" width="369" height="19"/>
+				<box topPadding="2" leftPadding="5" rightPadding="5">
 					<leftPen lineWidth="0.0"/>
 				</box>
 				<textElement>
@@ -261,9 +281,9 @@ where po.id = $P{po_id}]]>
 				</graphicElement>
 			</line>
 			<textField>
-				<reportElement x="54" y="16" width="307" height="18"/>
+				<reportElement x="54" y="8" width="337" height="18"/>
 				<textElement>
-					<font size="13" isBold="true"/>
+					<font fontName="DejaVu Serif" size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["SAM TURBO INDUSTRY PRIVATE LIMITED"]]></textFieldExpression>
 			</textField>
@@ -347,6 +367,20 @@ where po.id = $P{po_id}]]>
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{partner_name}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="607" y="3" width="129" height="17"/>
+				<box topPadding="2"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{partner_code}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="102" y="62" width="266" height="12"/>
+				<box topPadding="0"/>
+				<textElement/>
+				<textFieldExpression><![CDATA["Mettupalayam Road, Coimbatore - 641043."]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>
@@ -441,7 +475,7 @@ where po.id = $P{po_id}]]>
 		</band>
 	</columnHeader>
 	<lastPageFooter>
-		<band height="124">
+		<band height="139">
 			<textField>
 				<reportElement x="198" y="12" width="146" height="13"/>
 				<box topPadding="1">
@@ -546,13 +580,6 @@ where po.id = $P{po_id}]]>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
 			</line>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="22" y="35" width="163" height="13"/>
-				<textElement>
-					<font size="8" isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{delivery_mode}]]></textFieldExpression>
-			</textField>
 			<textField>
 				<reportElement x="209" y="62" width="282" height="15"/>
 				<box topPadding="1">
@@ -778,6 +805,29 @@ where po.id = $P{po_id}]]>
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA["DT.19/01/95."]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1" y="124" width="800" height="15"/>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["All Correspondence to-Avanashi Road, Neelambur, Coimbatore - 641 062"]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="2" y="88" width="196" height="20"/>
+				<box topPadding="2"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{insurance}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="199" y="35" width="145" height="20"/>
+				<box topPadding="2"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{excise_duty}]]></textFieldExpression>
 			</textField>
 		</band>
 	</lastPageFooter>
