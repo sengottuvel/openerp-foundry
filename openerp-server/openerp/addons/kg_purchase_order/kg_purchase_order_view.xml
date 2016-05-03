@@ -111,6 +111,8 @@
 			 <field name="po_type" on_change="onchange_type_flag(po_type)"/>
 			 <field name="bill_flag" readonly="1"/>
 			 <field name="purpose" required="1"/>
+			 <field name="mode_of_dispatch"/>
+			 <field name="revision" invisible="1"/>
 			<field name="grn_flag" invisible="1"/>
 		 </field>
 		
@@ -363,6 +365,7 @@
 			
 			<field name="name" string="Reference" position="replace">
 			<field name="name" string="Purchase Order No"/>
+			<field name="revision"/>
 			</field>
 			
 			<field name="minimum_planned_date" invisible="context.get('quotation_only', False)" position="replace">

@@ -157,7 +157,7 @@ class kg_purchase_order(osv.osv):
 		'approve_flag':fields.boolean('Expiry Flag'),
 		'frieght_flag':fields.boolean('Expiry Flag'),
 		'version':fields.char('Version'),
-		'purpose':fields.selection([('for_sale','For Production'),('own_use','Own use')], 'Purpose'), 
+		'purpose':fields.selection([('for_sale','For Production'),('own_use','Own use')], 'Purpose',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}), 
 		'expense_line_id': fields.one2many('kg.purchase.order.expense.track','expense_id','Expense Track',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		'update_date' : fields.datetime('Last Updated Date',readonly=True),
 		'update_user_id' : fields.many2one('res.users','Last Updated By',readonly=True),
@@ -166,6 +166,8 @@ class kg_purchase_order(osv.osv):
 		'insurance': fields.selection([('sam','By Sam'),('supplier','By Supplier'),('na','N/A')],'Insurance',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		'excise_duty': fields.selection([('inclusive','Inclusive'),('extra','Extra')],'Excise Duty',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		'division': fields.selection([('ppd','PPD'),('ipd','IPD'),('foundry','Foundry')],'Division',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
+		'revision': fields.integer('Revision',readonly=True),
+		'mode_of_dispatch': fields.many2one('kg.dispatch.master','Mode of Dispatch',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		
 	}
 	

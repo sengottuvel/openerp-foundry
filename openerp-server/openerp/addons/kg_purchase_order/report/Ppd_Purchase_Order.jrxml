@@ -54,6 +54,7 @@ po.name as po_no,
 to_char(po.date_order,'dd/mm/yyyy') as po_date,
 po.quot_ref_no as ref_no,
 po.division as division,
+dis.name as mode_of_dispatch,
 pay.name as payment_mode,
 del.name as delivery_mode,
 po.state as status,
@@ -65,6 +66,7 @@ left join res_partner partner on(partner.id=po.partner_id)
 left join res_city city on(city.id=partner.city_id)
 left join kg_payment_master pay on(pay.id=po.payment_mode)
 left join kg_delivery_master del on(del.id=po.delivery_mode)
+left join kg_dispatch_master dis on(dis.id=po.mode_of_dispatch)
 left join res_company company on(company.id=po.company_id)
 left join res_partner compart on(compart.id=company.partner_id)
 
@@ -83,6 +85,7 @@ where po.id = $P{po_id}]]>
 	<field name="po_date" class="java.lang.String"/>
 	<field name="ref_no" class="java.lang.String"/>
 	<field name="division" class="java.lang.String"/>
+	<field name="mode_of_dispatch" class="java.lang.String"/>
 	<field name="payment_mode" class="java.lang.String"/>
 	<field name="delivery_mode" class="java.lang.String"/>
 	<field name="status" class="java.lang.String"/>
@@ -832,6 +835,14 @@ where po.id = $P{po_id}]]>
 					<font isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{excise_duty}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="1" y="35" width="197" height="20"/>
+				<box topPadding="2"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{mode_of_dispatch}]]></textFieldExpression>
 			</textField>
 		</band>
 	</lastPageFooter>

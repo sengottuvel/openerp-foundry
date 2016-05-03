@@ -149,7 +149,7 @@
 				<menuitem action="kg_expense_master.mma_expense_master" name="Expense Master" id="mam_expense_master" parent="ppm_master_menu" sequence="14"/>
 				 
 				<!-- Dispatch Master  --> 
-				<menuitem action="kg_dispatch_master.mma_dispatch_master" name="Dispatch" id="mam_dispatch_master" parent="ppm_master_menu" sequence="15"/>
+				<menuitem action="kg_dispatch_master.mma_dispatch_master" name="Mode Of Dispatch" id="mam_dispatch_master" parent="ppm_master_menu" sequence="15"/>
 				 
 				<menuitem action="purchase.purchase_rfq" id="pam_purchase_order" name="Generate PO" parent="purchase.menu_procurement_management" sequence="1"/>
                 
