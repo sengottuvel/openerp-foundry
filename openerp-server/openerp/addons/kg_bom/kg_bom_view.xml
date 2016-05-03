@@ -377,55 +377,7 @@
 		
 	<!-- bot Child Class  Menu Action End-->
 	
-	 <!-- Audit Log Xml Data Start-->
-		
-        <record id="bom_model" model="audittrail.rule">
-            <field name="name">Audit Log BOM</field>
-            <field name="object_id" eval="ref('kg_bom.model_kg_bom')"/>       
-            <field name="state">subscribed</field>              
-        </record>
-        
-    <!-- Audit Log Xml Data End-->
-    
-	 <!-- Audit Log Xml Data Start-->
-		
-        <record id="bom_line_model" model="audittrail.rule">
-            <field name="name">Audit Log BOM Line</field>
-            <field name="object_id" eval="ref('kg_bom.model_ch_bom_line')"/>       
-            <field name="state">subscribed</field>              
-        </record>
-        
-    <!-- Audit Log Xml Data End-->
-    
-     <!-- Audit Log Xml Data Start-->
-		
-        <record id="bom_machine_model" model="audittrail.rule">
-            <field name="name">Audit Log BOM Machine Shop</field>
-            <field name="object_id" eval="ref('kg_bom.model_ch_machineshop_details')"/>       
-            <field name="state">subscribed</field>              
-        </record>
-        
-    <!-- Audit Log Xml Data End-->
-    
-     <!-- Audit Log Xml Data Start-->
-		
-        <record id="bom_bot_model" model="audittrail.rule">
-            <field name="name">Audit Log BOM BOT</field>
-            <field name="object_id" eval="ref('kg_bom.model_ch_bot_details')"/>       
-            <field name="state">subscribed</field>              
-        </record>
-        
-    <!-- Audit Log Xml Data End-->
-    
-     <!-- Audit Log Xml Data Start-->
-		
-        <record id="bom_consu_model" model="audittrail.rule">
-            <field name="name">Audit Log BOM Consumable</field>
-            <field name="object_id" eval="ref('kg_bom.model_ch_consu_details')"/>       
-            <field name="state">subscribed</field>              
-        </record>
-        
-    <!-- Audit Log Xml Data End-->
+	
         
 	
 	<!-- Menu Name Start here --> 
