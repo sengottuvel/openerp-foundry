@@ -38,6 +38,7 @@ class kg_payment_master(osv.osv):
 	_columns = {
 		
 		'name': fields.char('Payment Name', size=128, required=True,readonly=False,states={'approved':[('readonly',True)]}),
+		'code': fields.char('Code', size=128, readonly=False,states={'approved':[('readonly',True)]}),
 		'active':fields.boolean('Active'),
 		'creation_date':fields.datetime('Creation Date',readonly=True),
 		'notes': fields.text('Notes'),
@@ -150,7 +151,7 @@ class kg_delivery_master(osv.osv):
 		
 	_columns = {
 		
-		'name': fields.char('Delivery Type', size=128, required=True,readonly=False,states={'approved':[('readonly',True)]}),
+		'name': fields.char('Name', size=128, required=True,readonly=False,states={'approved':[('readonly',True)]}),
 		'active':fields.boolean('Active'),
 		'creation_date':fields.datetime('Creation Date',readonly=True),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),

@@ -122,10 +122,10 @@
 				<menuitem action="product.product_uom_form_action" name="Units of Measure" id="mam_uom_master" parent="ppm_master_menu" sequence="5"/>
 				
 				<!-- Payment Master  --> 
-				<menuitem action="kg_po_masters.payment_master_action_form" name="Payment Master" id="mam_payment_master" parent="ppm_master_menu" sequence="5"/>
+				<menuitem action="kg_po_masters.payment_master_action_form" name="Payment Terms" id="mam_payment_master" parent="ppm_master_menu" sequence="5"/>
 				
 				<!-- Delivery Master  --> 
-				<menuitem action="kg_po_masters.delivery_master_action_form" name="Delivery Master" id="mam_delivery_master" parent="ppm_master_menu" sequence="7"/>
+				<menuitem action="kg_po_masters.delivery_master_action_form" name="Delivery Term" id="mam_delivery_master" parent="ppm_master_menu" sequence="7"/>
 			
 				<!-- Brand Master  --> 
 				<menuitem action="kg_po_masters.brand_master_action_form" name="Brand Master" id="mam_po_master" parent="ppm_master_menu" sequence="8"/>
@@ -147,6 +147,9 @@
 				 
 				<!-- Expense Master  --> 
 				<menuitem action="kg_expense_master.mma_expense_master" name="Expense Master" id="mam_expense_master" parent="ppm_master_menu" sequence="14"/>
+				 
+				<!-- Dispatch Master  --> 
+				<menuitem action="kg_dispatch_master.mma_dispatch_master" name="Dispatch" id="mam_dispatch_master" parent="ppm_master_menu" sequence="15"/>
 				 
 				<menuitem action="purchase.purchase_rfq" id="pam_purchase_order" name="Generate PO" parent="purchase.menu_procurement_management" sequence="1"/>
                 
