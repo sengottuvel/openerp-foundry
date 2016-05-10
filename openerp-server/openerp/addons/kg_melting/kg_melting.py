@@ -57,8 +57,8 @@ class kg_melting(osv.osv):
 		'tapping_temp': fields.float('Tepping Temp',required=True),	
 		'pouring_finished': fields.float('Pouring Finished at',required=True),
 		'pouring_finished_time_type': fields.selection([('am','AM'),('pm','PM')],'Time Type', required=True),
-		'liquid_metal_wt': fields.float('Liquid Metal Wt.',required=True,digits_compute=dp.get_precision('Final')),	
-		'ingot_wt': fields.float('Ingot Wt.',required=True,digits_compute=dp.get_precision('Final')),	
+		'liquid_metal_wt': fields.float('Liquid Metal Wt.',required=True,digits=(16,3)),	
+		'ingot_wt': fields.float('Ingot Wt.',required=True,digits=(16,3)),	
 		
 		'load_item': fields.boolean('Load Item'),
 		
@@ -184,9 +184,9 @@ class ch_melting_charge_details(osv.osv):
 			
 		'header_id':fields.many2one('kg.melting', 'Melting Entry', required=True, ondelete='cascade'),							
 		'product_id': fields.many2one('product.product','Raw Materials', required=True,domain="[('active','=','t'),('product_type','in',('raw','ms','bot'))]"),	
-		'first_addition':fields.float('First Addition',digits_compute=dp.get_precision('Final')),
-		'second_addition':fields.float('Second Addition',digits_compute=dp.get_precision('Final')),
-		'total_weight':fields.float('Total Weight(kg.)',digits_compute=dp.get_precision('Final')),
+		'first_addition':fields.float('First Addition',digits=(16,3)),
+		'second_addition':fields.float('Second Addition',digits=(16,3)),
+		'total_weight':fields.float('Total Weight(kg.)',digits=(16,3)),
 		'remarks':fields.text('Remarks'),	
 		
 	}
@@ -204,10 +204,10 @@ class ch_melting_chemistry_details(osv.osv):
 			
 		'header_id':fields.many2one('kg.melting', 'Chemistry Entry', required=True, ondelete='cascade'),							
 		'chemistry_id': fields.many2one('kg.chemical.master','Name', required=True,domain="[('active','=','t')]"),	
-		'required_chemistry':fields.float('Required Chemistry',digits_compute=dp.get_precision('Required Chemistry')),
-		'bath_1':fields.float('Bath 1',digits_compute=dp.get_precision('Bath 1')),
-		'bath_2':fields.float('Bath 2',digits_compute=dp.get_precision('Bath 2')),
-		'final':fields.float('Final',digits_compute=dp.get_precision('Final')),
+		'required_chemistry':fields.float('Required Chemistry',digits=(16,3)),
+		'bath_1':fields.float('Bath 1',digits=(16,3)),
+		'bath_2':fields.float('Bath 2',digits=(16,3)),
+		'final':fields.float('Final',digits=(16,3)),
 		'remarks':fields.text('Remarks'),	
 		
 	}
@@ -225,8 +225,8 @@ class ch_mechanical_properties(osv.osv):
 		'header_id':fields.many2one('kg.melting', 'Melting Entry', required=True, ondelete='cascade'),
 		'uom': fields.char('UOM',size=128),						
 		'mechanical_id': fields.many2one('kg.mechanical.master','Name', required=True,domain="[('active','=','t')]"),	
-		'min':fields.float('Min',required=True,digits_compute=dp.get_precision('Min Value')),
-		'max':fields.float('Max',required=True,digits_compute=dp.get_precision('Max Value')),
+		'min':fields.float('Min',required=True,digits=(16,3)),
+		'max':fields.float('Max',required=True,digits=(16,3)),
 		'range_flag': fields.boolean('No Max Range'),			
 		
 	}

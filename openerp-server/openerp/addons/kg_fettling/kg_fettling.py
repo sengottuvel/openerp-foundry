@@ -1062,7 +1062,7 @@ class kg_fettling(osv.osv):
 						gas_cutting_qty = entry.shot_blast_accept_qty
 						### Sequence Number Generation ###
 						gas_cutting_name = ''	
-						shot_blast_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
+						gas_cutting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,gas_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(gas_cutting_seq_id[0],seq_rec.code))
 						gas_cutting_name = cr.fetchone();
