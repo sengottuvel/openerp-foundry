@@ -231,7 +231,7 @@
 							</group>											
 							<group>
 								<field name="knockout_date" required="1" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
-								<field name="knockout_contractor" required="1" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
+								<field name="knockout_contractor" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
 								<field name="knockout_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
 								<field name="knockout_weight" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
 								<field name="knockout_reject_remarks_id" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
@@ -407,7 +407,7 @@
 							</group>											
 							<group>
 								<field name="decoring_date" required="1" attrs="{'readonly': [('stage_name','not in',['DECORING'])]}"/>
-								<field name="decoring_contractor" required="1" attrs="{'readonly': [('stage_name','not in',['DECORING'])]}"/>
+								<field name="decoring_contractor" attrs="{'readonly': [('stage_name','not in',['DECORING'])]}"/>
 								<field name="decoring_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['DECORING'])]}"/>
 								<field name="decoring_weight" attrs="{'readonly': [('stage_name','not in',['DECORING'])]}"/>
 								<field name="decoring_reject_remarks_id" attrs="{'readonly': [('stage_name','not in',['DECORING'])]}"/>
@@ -581,7 +581,7 @@
 							</group>											
 							<group>
 								<field name="shot_blast_date" required="1" attrs="{'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
-								<field name="shot_blast_contractor" required="1" attrs="{'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
+								<field name="shot_blast_contractor" attrs="{'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
 								<field name="shot_blast_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
 								<field name="shot_blast_weight" attrs="{'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
 								<field name="shot_blast_reject_remarks_id" attrs="{'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
@@ -757,7 +757,7 @@
 							</group>											
 							<group>
 								<field name="hammering_date" required="1" attrs="{'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
-								<field name="hammering_contractor" required="1" attrs="{'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
+								<field name="hammering_contractor" attrs="{'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
 								<field name="hammering_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
 								<field name="hammering_weight" attrs="{'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
 								<field name="hammering_reject_remarks_id" attrs="{'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
@@ -934,7 +934,7 @@
 							</group>											
 							<group>
 								<field name="wheel_cutting_date" required="1" attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
-								<field name="wheel_cutting_contractor" required="1" attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
+								<field name="wheel_cutting_contractor"  attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
 								<field name="wheel_cutting_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
 								<field name="wheel_cutting_weight" attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
 								<field name="wheel_cutting_reject_remarks_id" attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
@@ -1107,7 +1107,7 @@
 							</group>											
 							<group>
 								<field name="gas_cutting_date" required="1" attrs="{'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
-								<field name="gas_cutting_contractor" required="1" attrs="{'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
+								<field name="gas_cutting_contractor"  attrs="{'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
 								<field name="gas_cutting_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
 								<field name="gas_cutting_weight" attrs="{'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
 								<field name="gas_cutting_reject_remarks_id" attrs="{'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
@@ -1284,7 +1284,7 @@
 							</group>											
 							<group>
 								<field name="arc_cutting_date" required="1" attrs="{'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
-								<field name="arc_cutting_contractor" required="1" attrs="{'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
+								<field name="arc_cutting_contractor"  attrs="{'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
 								<field name="arc_cutting_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
 								<field name="arc_cutting_weight" attrs="{'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
 								<field name="arc_cutting_reject_remarks_id" attrs="{'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
@@ -1626,7 +1626,7 @@
 							</group>											
 							<group>
 								<field name="rough_grinding_date" required="1" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
-								<field name="rough_grinding_contractor" required="1" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
+								<field name="rough_grinding_contractor" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
 								<field name="rough_grinding_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
 								<field name="rough_grinding_weight" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
 								<field name="rough_grinding_reject_remarks_id" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
@@ -1803,7 +1803,7 @@
 							</group>											
 							<group>
 								<field name="finish_grinding_date" required="1" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
-								<field name="finish_grinding_contractor" required="1" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
+								<field name="finish_grinding_contractor" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
 								<field name="finish_grinding_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
 								<field name="finish_grinding_weight" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
 								<field name="finish_grinding_reject_remarks_id" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>

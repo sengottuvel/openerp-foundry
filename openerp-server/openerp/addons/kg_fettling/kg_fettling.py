@@ -470,7 +470,11 @@ class kg_fettling(osv.osv):
 					self.write(cr, uid, ids, {'stage_id': stage_item['stage_id']})
 			else:
 				### MS Inward Process Creation ###
-				self.ms_inward_update(cr, uid, [entry.id],entry.inward_accept_qty)
+				if entry.stage_id.id == False:
+					raise osv.except_osv(_('Warning!'),
+					_('Kindly configure Fettling Stages in MOC %s !!')%(entry.moc_id.name))
+				else:
+					self.ms_inward_update(cr, uid, [entry.id],entry.inward_accept_qty)
 			
 		if reject_qty > 0:
 			#### NC Creation for reject Qty ###
