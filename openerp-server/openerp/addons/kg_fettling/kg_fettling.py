@@ -261,6 +261,7 @@ class kg_fettling(osv.osv):
 		'crt_date':time.strftime('%Y-%m-%d %H:%M:%S'),
 		'active': True,
 		'division_id':_get_default_division,
+		'state':'waiting',
 		### Fettling Inward ###
 		'inward_accept_user_id':lambda obj, cr, uid, context: uid,
 		### Knock Out ###
@@ -2594,7 +2595,7 @@ class kg_fettling_batch_accept(osv.osv):
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed')],'Status', readonly=True),
 
 		'fettling_line_ids':fields.many2many('kg.fettling','m2m_fettling_inward_details' , 'batch_id', 'fettling_id', 'Fettling Lines',
-			domain="[('state','=','open')]"),
+			domain="[('state','=','waiting')]"),
 			
 		'line_ids': fields.one2many('ch.fettling.batch.accept.line', 'header_id', "Fettling Line Details"),
 		

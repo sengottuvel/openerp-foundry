@@ -85,8 +85,8 @@
 					<field name="pattern_name" string="Part Name."/>
 					<field name="moc_id"/>
 					<field name="qty" string="Schedule Qty" sum="Total Qty"/>
-					<field name="each_weight"/>
-					<field name="total_weight"/>
+					<field name="each_weight" sum="Total Each Weight"/>
+					<field name="total_weight" sum="Total Weight"/>
 					<field name="sch_remarks"/>
 					<field name="state"/>
 					<field name="name" invisible="1"/>
@@ -124,7 +124,7 @@
                     <group expand="0" string="Group By...">
 						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
 						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
-						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_category'}"/>
+						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_priority'}"/>
 						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
 						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
 						<filter string="Pattern Name." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_name'}"/>
@@ -300,7 +300,7 @@
                     <group expand="0" string="Group By...">
 						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
 						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
-						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_category'}"/>
+						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_priority'}"/>
 						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
 						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
 						<filter string="Pattern Name." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_name'}"/>
@@ -648,8 +648,8 @@
 					<field name="moc_id"/>
 					<field name="location" invisible="1"/>
 					<field name="qty" string="Schedule Qty" sum="Total Qty"/>
-					<field name="each_weight"/>
-					<field name="total_weight"/>
+					<field name="each_weight" sum="Total Each Weight"/>
+					<field name="total_weight" sum="Total Weight"/>
 					<field name="core_rem_qty" string="Remaining Qty"/>
 					<field name="core_remarks"/>
 					<field name="core_state"/>
@@ -1032,8 +1032,8 @@
 					<field name="moc_id"/>
 					<field name="location" invisible="1"/>
 					<field name="qty" string="Schedule Qty" sum="Total Qty"/>
-					<field name="each_weight"/>
-					<field name="total_weight"/>
+					<field name="each_weight" sum="Total Each Weight"/>
+					<field name="total_weight" sum="Total Weight"/>
 					<field name="mould_rem_qty" string="Remaining Qty"/>
 					<field name="mould_remarks"/>
 					<field name="mould_state"/>
@@ -1406,8 +1406,8 @@
 					<field name="pattern_name" string="Part Name."/>
 					<field name="moc_id"/>
 					<field name="qty" string="Schedule Qty" sum="Total Qty"/>
-					<field name="each_weight"/>
-					<field name="total_weight"/>
+					<field name="each_weight" sum="Total Each Weight"/>
+					<field name="total_weight" sum="Total Weight"/>
 					<field name="pour_remarks"/>
 					<field name="state"/>
 					<field name="name" invisible="1"/>
