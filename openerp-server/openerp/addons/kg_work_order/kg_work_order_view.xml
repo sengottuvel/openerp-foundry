@@ -13,6 +13,7 @@
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<!--<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible': [('flag_cancel','=',False)]}"
 							 class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
+						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 					</header>
 					<sheet>		
 						<group>

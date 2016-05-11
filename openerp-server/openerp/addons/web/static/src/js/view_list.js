@@ -282,8 +282,10 @@ instance.web.ListView = instance.web.View.extend( /** @lends instance.web.ListVi
                     .prop('disabled', this.grouped);
                     
             this.$buttons.find('.oe_list_issue')
-                    .click(this.proxy('pattern_issue'))  
+                    .click(this.proxy('pattern_issue'))                    
+                    
         }
+        
 
         // Pager
         if (!this.$pager) {
@@ -291,7 +293,7 @@ instance.web.ListView = instance.web.View.extend( /** @lends instance.web.ListVi
             if (this.options.$buttons) {
                 this.$pager.appendTo(this.options.$pager);
             } else {
-                this.$el.find('.oe_list_pager').replaceWith(this.$pager);
+                this.$el.find('.c').replaceWith(this.$pager);
             }
 
             this.$pager
@@ -706,6 +708,8 @@ instance.web.ListView = instance.web.View.extend( /** @lends instance.web.ListVi
 		this.reload_content();
 		
     },
+    
+    
     /**
      * Handles deletion of all selected lines
      */
@@ -986,7 +990,7 @@ instance.web.ListView.List = instance.web.Class.extend( /** @lends instance.web.
                 if ($target.attr('disabled')) {
                     return;
                 }
-                $target.attr('disabled', 'disabled');
+                //$target.attr('disabled', 'disabled');
 
                 // note: $.data converts data to number if it's composed only
                 // of digits, nice when storing actual numbers, not nice when

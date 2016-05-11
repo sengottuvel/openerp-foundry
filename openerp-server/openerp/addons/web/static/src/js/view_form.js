@@ -832,12 +832,13 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
                 } else if (f.name !== 'id' && (!self.datarecord.id || f._dirty_flag)) {
                     // Special case 'id' field, do not save this field
                     // on 'create' : save all non readonly fields
-                    // on 'edit' : save non readonly modified fields
-                    //if (!f.get("readonly")) {
-                       // values[f.name] = f.get_value();
-                    //} else {
-                       // readonly_values[f.name] = f.get_value();
-                    //}
+                    // on 'edit' : save non readonly modified fields'
+                    
+                    //~ if (!f.get("readonly")) {
+                        //~ values[f.name] = f.get_value();
+                    //~ } else {
+                        //~ readonly_values[f.name] = f.get_value();
+                    //~ }
                     values[f.name] = f.get_value();
 					if (f.get("readonly"))
 						readonly_values[f.name] = f.get_value();
@@ -1976,8 +1977,8 @@ instance.web.form.WidgetButton = instance.web.form.FormWidget.extend({
     },
     check_disable: function() {
         var disabled = (this.force_disabled || !this.view.is_interactible_record());
-        this.$el.prop('disabled', disabled);
-        this.$el.css('color', disabled ? 'grey' : '');
+        //this.$el.prop('disabled', disabled);
+        //this.$el.css('color', disabled ? 'grey' : '');
     }
 });
 
