@@ -264,9 +264,7 @@ class ch_stock_inward_details(osv.osv):
 		pattern_name = False
 		pattern_obj = self.pool.get('kg.pattern.master')
 		moc_obj = self.pool.get('kg.moc.master')
-		if vals.get('pattern_id') != False:
-			pattern_rec = pattern_obj.browse(cr, uid, vals.get('pattern_id'))
-			pattern_name = pattern_rec.pattern_name
+		
 		
 		if vals.get('moc_id') != None:
 			moc_rec = moc_obj.browse(cr, uid, vals.get('moc_id') )
@@ -278,7 +276,7 @@ class ch_stock_inward_details(osv.osv):
 		total_weight = qty * each_weight
 		total_value = total_weight * mat_amt
 		vals.update({
-		'pattern_name': pattern_name,
+		
 		'each_wgt': each_weight,
 		'unit_price': mat_amt,
 		'total_wgt': total_weight,
@@ -296,11 +294,6 @@ class ch_stock_inward_details(osv.osv):
 		moc_obj = self.pool.get('kg.moc.master')
 		inward_obj = self.pool.get('kg.stock.inward')
 		entry_rec = self.browse(cr, uid, ids[0] )
-		
-		if vals.get('pattern_id') != None:
-			if vals.get('pattern_id') != False: 
-				pattern_rec = pattern_obj.browse(cr, uid, vals.get('pattern_id'))
-				pattern_name = pattern_rec.pattern_name
 		
 		if entry_rec.stock_type == 'pattern':
 			if vals.get('moc_id') == None: 
@@ -332,7 +325,7 @@ class ch_stock_inward_details(osv.osv):
 		
 		
 		vals.update({
-		'pattern_name': pattern_name,
+		
 		'each_wgt': each_weight,
 		'unit_price': mat_amt,
 		'total_wgt': total_weight,

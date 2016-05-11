@@ -833,11 +833,14 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
                     // Special case 'id' field, do not save this field
                     // on 'create' : save all non readonly fields
                     // on 'edit' : save non readonly modified fields
-                    if (!f.get("readonly")) {
-                        values[f.name] = f.get_value();
-                    } else {
-                        readonly_values[f.name] = f.get_value();
-                    }
+                    //if (!f.get("readonly")) {
+                       // values[f.name] = f.get_value();
+                    //} else {
+                       // readonly_values[f.name] = f.get_value();
+                    //}
+                    values[f.name] = f.get_value();
+					if (f.get("readonly"))
+						readonly_values[f.name] = f.get_value();
                 }
             }
             if (form_invalid) {
