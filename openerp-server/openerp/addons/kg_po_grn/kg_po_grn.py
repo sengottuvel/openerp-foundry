@@ -466,6 +466,7 @@ class kg_po_grn(osv.osv):
 							'billing_type':'cost',
 							'order_no': order_line.order_id.name,
 							'order_date': order_line.order_id.date_order,
+							'price_type': order_line.price_type,
 						})
 					else:
 						print "NO Qty or Cancel"
@@ -939,11 +940,15 @@ class kg_po_grn(osv.osv):
 					
 					product_qty= 0
 					#s=po_line_id.pending_qty+po_line_id.pending_qty/100*line.product_id.tolerance_plus
+					print"po_line_id.product_qty",po_line_id.product_qty
+					print"po_line_id.product_qty/100",po_line_id.product_qty/100
+					print"line.product_id.tolerance_plus",line.product_id.tolerance_plus
 					product_qty=po_line_id.product_qty+po_line_id.product_qty/100*line.product_id.tolerance_plus
+					
 					print"product_qty",product_qty
 					if line.po_grn_qty <= product_qty:
 						print"aaaaaaaaAA",line.po_line_id
-						po_rec = self.pool.get('po.grn.line').search(cr,uid,[('po_line_id','=',line.po_line_id.id),('po_grn_id','!=',line.id)])
+						po_rec = self.pool.get('po.grn.line').search(cr,uid,[('po_line_id','=',line.po_line_id.id)])
 						print"po_recpo_recpo_rec",po_rec
 						po_grn_qty= 0
 						if po_rec:
@@ -951,11 +956,12 @@ class kg_po_grn(osv.osv):
 								po_recc = self.pool.get('po.grn.line').browse(cr,uid,ele)
 								print"po_reccpo_recc",po_recc.po_grn_qty
 								po_grn_qty += po_recc.po_grn_qty
-						print"po_grn_qty",po_grn_qty+line.po_grn_qty
+						print"po_grn_qty",po_grn_qty
+						print"product_qty",product_qty
 						d = 0
 						d = product_qty - po_grn_qty
 						print"dddddddD",d
-						if line.po_grn_qty <= d:
+						if line.po_grn_qty <= product_qty:
 							if po_line_pending_qty < 0:
 								po_line_pending_qty = 0
 							else:
@@ -1212,21 +1218,21 @@ class kg_po_grn(osv.osv):
 								product_uom = line.product_id.uom_id.id
 								po_coeff = line.product_id.po_uom_coeff
 								product_qty = exp.product_qty * po_coeff
-								price_unit =  line.price_unit
+								price_unit = line.price_subtotal / product_qty
 							elif line.uom_id.id == line.product_id.uom_id.id:
 								product_uom = line.product_id.uom_id.id
 								product_qty = exp.product_qty
-								price_unit = line.price_unit
+								price_unit = line.price_subtotal / product_qty
 						if line.billing_type == 'free':
 							if line.uom_id.id != line.product_id.uom_id.id:
 								product_uom = line.product_id.uom_id.id
 								po_coeff = line.product_id.po_uom_coeff
 								product_qty = exp.product_qty * po_coeff
-								price_unit =  line.price_unit
+								price_unit = line.price_subtotal / product_qty
 							elif line.uom_id.id == line.product_id.uom_id.id:
 								product_uom = line.product_id.uom_id.id
 								product_qty = exp.product_qty
-								price_unit =  line.price_unit
+								price_unit = line.price_subtotal / product_qty
 						lot_obj.create(cr,uid,
 							{
 							'grn_no':line.po_grn_id.name,
@@ -1649,6 +1655,22 @@ class po_grn_line(osv.osv):
 	_name = "po.grn.line"
 	_description = "PO GRN Line"
 
+	#~ def _amount_line(self, cr, uid, ids, prop, arg, context=None):
+		#~ cur_obj=self.pool.get('res.currency')
+		#~ tax_obj = self.pool.get('account.tax')
+		#~ res = {}
+		#~ if context is None:
+			#~ context = {}
+		#~ for line in self.browse(cr, uid, ids, context=context):
+			#~ amt_to_per = (line.kg_discount / (line.po_grn_qty * line.price_unit or 1.0 )) * 100
+			#~ kg_discount_per = line.kg_discount_per
+			#~ tot_discount_per = amt_to_per + kg_discount_per
+			#~ price = line.price_unit * (1 - (tot_discount_per or 0.0) / 100.0)
+			#~ taxes = tax_obj.compute_all(cr, uid, line.grn_tax_ids, price, line.po_grn_qty, line.product_id, line.po_grn_id.supplier_id)
+			#~ cur = line.po_grn_id.supplier_id.property_product_pricelist_purchase.currency_id
+			#~ res[line.id] = cur_obj.round(cr, uid, cur, taxes['total'])
+		#~ return res  
+	
 	def _amount_line(self, cr, uid, ids, prop, arg, context=None):
 		cur_obj=self.pool.get('res.currency')
 		tax_obj = self.pool.get('account.tax')
@@ -1656,15 +1678,38 @@ class po_grn_line(osv.osv):
 		if context is None:
 			context = {}
 		for line in self.browse(cr, uid, ids, context=context):
-			amt_to_per = (line.kg_discount / (line.po_grn_qty * line.price_unit or 1.0 )) * 100
+			# Qty Calculation
+			if line.price_type == 'per_kg':								
+				if line.product_id.po_uom_in_kgs > 0:
+					qty = line.po_grn_qty / line.product_id.po_uom_in_kgs
+				else:
+					qty = line.po_grn_qty
+			else:
+				qty = line.po_grn_qty
+			print"price_unit",line.price_unit
+			print"qtyqtyqty",qty
+			# Price Calculation
+			price_amt = 0
+			if line.price_type == 'per_kg':
+				if line.product_id.po_uom_in_kgs > 0:
+					price_amt = line.po_grn_qty / line.product_id.po_uom_in_kgs * line.price_unit
+			else:
+				price_amt = qty * line.price_unit
+			
+			print"price_amtprice_amtprice_amt",price_amt
+			
+			amt_to_per = (line.kg_discount / (qty * line.price_unit or 1.0 )) * 100
 			kg_discount_per = line.kg_discount_per
 			tot_discount_per = amt_to_per + kg_discount_per
 			price = line.price_unit * (1 - (tot_discount_per or 0.0) / 100.0)
-			taxes = tax_obj.compute_all(cr, uid, line.grn_tax_ids, price, line.po_grn_qty, line.product_id, line.po_grn_id.supplier_id)
+			#~ price = line.price_unit * (1 - (tot_discount_per or 0.0) / 100.0)
+			#~ taxes = tax_obj.compute_all(cr, uid, line.taxes_id, price, line.product_qty, line.product_id, line.order_id.partner_id)
+			taxes = tax_obj.compute_all(cr, uid, line.grn_tax_ids, price, qty, line.product_id, line.po_grn_id.supplier_id)
 			cur = line.po_grn_id.supplier_id.property_product_pricelist_purchase.currency_id
 			res[line.id] = cur_obj.round(cr, uid, cur, taxes['total'])
-		return res  
-		
+			print"resssssssssssss",res
+		return res
+			
 	_columns = {
 		
 		'po_grn_date':fields.date('PO GRN Date'),
@@ -1708,6 +1753,7 @@ class po_grn_line(osv.osv):
 		'order_no': fields.char('Order NO',readonly=True),
 		'order_date': fields.char('Order Date',readonly=True),
 		'product_tax_amt':fields.float('Tax Amount'),  
+		'price_type': fields.selection([('po_uom','PO UOM'),('per_kg','Per Kg')],'Price Type'),
 		
 	}
 	
