@@ -76,12 +76,12 @@
 				<menuitem id="ipm_dep_indent_menu" name="Department Indent" parent="ipm_indent" sequence="1"/>
 				
 				<!-- Department Indent -->
-<!--
 				<menuitem action="kg_depindent.action_kg_depindent_form" id="iam_depindent" name="Department Indent" parent="ipm_dep_indent_menu" sequence="1"/>
--->
 
 				<!-- Department Indent Line-->
+<!--
 				<menuitem action="kg_depindent.action_kg_depindent_line_form" id="iam_depindent_line" name="Item Details" parent="ipm_dep_indent_menu" sequence="2"/>
+-->
 
 				<!-- Purchase Transaction Menu -->
 				<menuitem id="ipm_purchase_indent_menu" name="Purchase Indent" parent="ipm_indent" sequence="2"/>
