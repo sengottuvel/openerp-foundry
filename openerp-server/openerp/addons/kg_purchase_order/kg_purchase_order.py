@@ -168,7 +168,7 @@ class kg_purchase_order(osv.osv):
 		'division': fields.selection([('ppd','PPD'),('ipd','IPD'),('foundry','Foundry')],'Division',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		'revision': fields.integer('Revision',readonly=True),
 		'mode_of_dispatch': fields.many2one('kg.dispatch.master','Mode of Dispatch',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
-		
+		'item_quality_term': fields.many2one('kg.item.quality.master','Item Quality Term',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 	}
 	
 	_defaults = {
@@ -939,6 +939,7 @@ class kg_purchase_order_line(osv.osv):
 	'high_price': fields.float('Highest Price'),
 	'recent_price': fields.float('Recent Price'),
 	'price_type': fields.selection([('po_uom','PO UOM'),('per_kg','Per Kg')],'Price Type'),
+	'line_id': fields.one2many('ch.purchase.wo','header_id','Ch Line Id'),
 	
 	}
 	
@@ -1143,4 +1144,19 @@ class kg_purchase_order_expense_track(osv.osv):
 	
 kg_purchase_order_expense_track()
 
+class ch_purchase_wo(osv.osv):
+	
+	_name = "ch.purchase.wo"
+	_description = "Ch Depindent WO"
+	
+	_columns = {
+
+	'header_id': fields.many2one('purchase.order.line', 'PO Line'),
+	'wo_id': fields.char('WO', required=True),
+	'qty': fields.float('Indent Qty', required=True),
+	
+	}
+	
+	
+ch_purchase_wo()
 

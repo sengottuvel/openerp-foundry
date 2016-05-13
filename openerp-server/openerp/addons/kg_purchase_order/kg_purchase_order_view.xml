@@ -27,6 +27,7 @@
 			<field name="state"/>
 			<field name="insurance"/>
 			<field name="excise_duty"/>
+			<field name="item_quality_term"/>
 			<field name="type_flag" invisible="1" />
 			<field name="confirm_flag" invisible="1"/>
 			<field name="approve_flag" invisible="1"/>	
@@ -350,7 +351,19 @@
 						<field name="po_specification" nolabel="1"/>
 					</page>
 				</xpath>
-		
+				
+				<xpath expr = "//page[@string='Notes']" position="after">
+					<page string="Order Item Details">
+						<field name="line_id"/>
+							<tree string="WO Line">
+<!--
+						    <field name="wo_id"/>
+						    <field name="qty"/>
+-->
+							</tree>
+					</page>
+				</xpath>
+				
         </field>
     </record>
     
