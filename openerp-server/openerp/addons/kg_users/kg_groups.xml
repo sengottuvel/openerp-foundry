@@ -54,8 +54,23 @@
 			ref('kg_melting.tam_melting'),
             ref('kg_pouring_log.tam_pouring_log'),
             
-            ref('kg_fettling.tpm_fettling_batch_process'),
+            
+            ref('kg_fettling.tpm_fettling_process'),
             ref('kg_fettling.tam_fettling_inward'),
+            ref('kg_fettling.tam_fettling_accepted'),
+            ref('kg_fettling.tam_knock_out'),
+            ref('kg_fettling.tam_decoring'),
+            ref('kg_fettling.tam_shot_blast'),
+            ref('kg_fettling.tam_hammering'),
+            ref('kg_fettling.tam_wheel_cutting'),
+            ref('kg_fettling.tam_gas_cutting'),
+            ref('kg_fettling.tam_arc_cutting'),
+            ref('kg_fettling.tam_heat_treatment'),
+            ref('kg_fettling.tam_rough_grinding'),
+            ref('kg_fettling.tam_finish_grinding'),
+            
+            
+            ref('kg_fettling.tpm_fettling_batch_process'),
             ref('kg_fettling.tam_batch_fettling_accept'),
             ref('kg_fettling.tam_batch_knock_out'),
             ref('kg_fettling.tam_batch_decoring'),
