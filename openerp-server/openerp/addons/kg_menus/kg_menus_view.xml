@@ -78,11 +78,17 @@
 				<!-- Department Indent -->
 				<menuitem action="kg_depindent.action_kg_depindent_form" id="iam_depindent" name="Department Indent" parent="ipm_dep_indent_menu" sequence="1"/>
 
+				<!-- Department Indent Line-->
+				<menuitem action="kg_depindent.action_kg_depindent_line_form" id="iam_depindent_line" name="Item Details" parent="ipm_dep_indent_menu" sequence="2"/>
+
 				<!-- Purchase Transaction Menu -->
 				<menuitem id="ipm_purchase_indent_menu" name="Purchase Indent" parent="ipm_indent" sequence="2"/>
 				
 				<!-- Purchase Indent -->
 				<menuitem action="purchase_requisition.action_purchase_requisition" id="iam_pruchase_indent" name="Purchase Indent" parent="ipm_purchase_indent_menu" sequence="1"/>
+			
+				<!-- Purchase Indent Line-->
+				<menuitem action="kg_purchase_indent.kg_piline_confirmed_action" id="iam_pruchase_indent_line" name="Item Details" parent="ipm_purchase_indent_menu" sequence="2"/>
 			
 				<!-- Service Transaction Menu -->
 				<menuitem id="ipm_service_indent_menu" name="Service Entry" parent="ipm_indent" sequence="3"/>
@@ -151,6 +157,9 @@
 				<!-- Dispatch Master  --> 
 				<menuitem action="kg_dispatch_master.mma_dispatch_master" name="Mode Of Dispatch" id="mam_dispatch_master" parent="ppm_master_menu" sequence="15"/>
 				 
+				<!-- Item Quality Master  --> 
+				<menuitem action="kg_item_quality_master.mma_item_quality_master" name="Item Quality Term" id="mam_item_quality_master" parent="ppm_master_menu" sequence="16"/>
+				 
 				<menuitem action="purchase.purchase_rfq" id="pam_purchase_order" name="Generate PO" parent="purchase.menu_procurement_management" sequence="1"/>
                 
                 <!-- Quotations Menu -->
@@ -187,7 +196,7 @@
 				<menuitem action="kg_so_advance.kg_so_advance_action_form" id="aam_so_advance" name="SO Advance" parent="apm_advance_menu" sequence="2"/>
 			    
 			    <!-- Service Invoice Menu -->
-				<menuitem id="spm_service_invoice_menu" name="Bills" parent="base.menu_purchase_root" sequence="4" groups="base.group_no_one"/>
+				<menuitem id="spm_service_invoice_menu" name="Bills" parent="base.menu_purchase_root" sequence="4"/>
 				   
 				<!-- Service Invoice Transaction -->
 				<menuitem action="kg_service_invoice.action_kg_serviceinv_form" id="aam_service_invoice" name="Service Bill" parent="spm_service_invoice_menu" sequence="2"/>
