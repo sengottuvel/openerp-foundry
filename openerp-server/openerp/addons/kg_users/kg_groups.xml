@@ -57,7 +57,7 @@
             
             ref('kg_fettling.tpm_fettling_process'),
             ref('kg_fettling.tam_fettling_inward'),
-            ref('kg_fettling.tam_fettling_accepted'),
+            
             ref('kg_fettling.tam_knock_out'),
             ref('kg_fettling.tam_decoring'),
             ref('kg_fettling.tam_shot_blast'),
