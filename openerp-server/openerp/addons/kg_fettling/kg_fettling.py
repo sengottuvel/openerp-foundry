@@ -8,6 +8,11 @@ from datetime import datetime
 
 dt_time = lambda * a: time.strftime('%m/%d/%Y %H:%M:%S')
 
+today = date.today()
+today = str(today)
+today = datetime.strptime(today, '%Y-%m-%d')
+
+
 ORDER_PRIORITY = [
    ('1','MS NC'),
    ('2','NC'),
@@ -72,6 +77,7 @@ class kg_fettling(osv.osv):
 		'pour_qty': fields.related('production_id','pour_qty', type='integer', size=100, string='Poured Qty', store=True, readonly=True),
 		'stage_id':fields.many2one('kg.stage.master','Stage'),
 		'stage_name': fields.related('stage_id','name', type='char', size=128, string='Stage Name', store=True, readonly=True),
+		'melting_id': fields.related('production_id','pour_heat_id', type='many2one', relation='kg.melting', string='Heat No.', store=True, readonly=True),
 		
 		#### Fettling Inward ####
 		'inward_accept_qty': fields.integer('Accepted Qty', required=True),
@@ -87,6 +93,7 @@ class kg_fettling(osv.osv):
 		'knockout_date': fields.date('Date'),
 		'knockout_shift_id':fields.many2one('kg.shift.master','Shift'),
 		'knockout_contractor':fields.many2one('res.partner','Contractor'),
+		'knockout_employee': fields.char('Employee',size=128),
 		'knockout_qty': fields.integer('Total Qty'),
 		'knockout_accept_qty': fields.integer('Accepted Qty'),
 		'knockout_reject_qty': fields.integer('Rejected Qty'),
@@ -96,12 +103,14 @@ class kg_fettling(osv.osv):
 		'knockout_accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'knockout_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		'knockout_reject_date': fields.date('Rejection Date'),
+		'knockout_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		
 		### DECORING ###
 		'decoring_name': fields.char('Production Entry Code', size=128,select=True,readonly=True),
 		'decoring_date': fields.date('Date'),
 		'decoring_shift_id':fields.many2one('kg.shift.master','Shift'),
 		'decoring_contractor':fields.many2one('res.partner','Contractor'),
+		'decoring_employee': fields.char('Employee',size=128),
 		'decoring_qty': fields.integer('Total Qty'),
 		'decoring_accept_qty': fields.integer('Accepted Qty'),
 		'decoring_reject_qty': fields.integer('Rejected Qty'),
@@ -111,12 +120,14 @@ class kg_fettling(osv.osv):
 		'decoring_accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'decoring_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		'decoring_reject_date': fields.date('Rejection Date'),
+		'decoring_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		
 		### Shot Blast ###
 		'shot_blast_name': fields.char('Production Entry Code', size=128,select=True,readonly=True),
 		'shot_blast_date': fields.date('Date'),
 		'shot_blast_shift_id':fields.many2one('kg.shift.master','Shift'),
 		'shot_blast_contractor':fields.many2one('res.partner','Contractor'),
+		'shot_blast_employee': fields.char('Employee',size=128),
 		'shot_blast_qty': fields.integer('Total Qty'),
 		'shot_blast_accept_qty': fields.integer('Accepted Qty'),
 		'shot_blast_reject_qty': fields.integer('Rejected Qty'),
@@ -126,12 +137,14 @@ class kg_fettling(osv.osv):
 		'shot_blast_accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'shot_blast_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		'shot_blast_reject_date': fields.date('Rejection Date'),
+		'shot_blast_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		
 		### Hammering ###
 		'hammering_name': fields.char('Production Entry Code', size=128,select=True,readonly=True),
 		'hammering_date': fields.date('Date'),
 		'hammering_shift_id':fields.many2one('kg.shift.master','Shift'),
 		'hammering_contractor':fields.many2one('res.partner','Contractor'),
+		'hammering_employee': fields.char('Employee',size=128),
 		'hammering_qty': fields.integer('Total Qty'),
 		'hammering_accept_qty': fields.integer('Accepted Qty'),
 		'hammering_reject_qty': fields.integer('Rejected Qty'),
@@ -141,12 +154,14 @@ class kg_fettling(osv.osv):
 		'hammering_accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'hammering_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		'hammering_reject_date': fields.date('Rejection Date'),
+		'hammering_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		
 		### Wheel Cutting ###
 		'wheel_cutting_name': fields.char('Production Entry Code', size=128,select=True,readonly=True),
 		'wheel_cutting_date': fields.date('Date'),
 		'wheel_cutting_shift_id':fields.many2one('kg.shift.master','Shift'),
 		'wheel_cutting_contractor':fields.many2one('res.partner','Contractor'),
+		'wheel_cutting_employee': fields.char('Employee',size=128),
 		'wheel_cutting_qty': fields.integer('Total Qty'),
 		'wheel_cutting_accept_qty': fields.integer('Accepted Qty'),
 		'wheel_cutting_reject_qty': fields.integer('Rejected Qty'),
@@ -156,12 +171,14 @@ class kg_fettling(osv.osv):
 		'wheel_cutting_accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'wheel_cutting_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		'wheel_cutting_reject_date': fields.date('Rejection Date'),
+		'wheel_cutting_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		
 		### Gas Cutting ###
 		'gas_cutting_name': fields.char('Production Entry Code', size=128,select=True,readonly=True),
 		'gas_cutting_date': fields.date('Date'),
 		'gas_cutting_shift_id':fields.many2one('kg.shift.master','Shift'),
 		'gas_cutting_contractor':fields.many2one('res.partner','Contractor'),
+		'gas_cutting_employee': fields.char('Employee',size=128),
 		'gas_cutting_qty': fields.integer('Total Qty'),
 		'gas_cutting_accept_qty': fields.integer('Accepted Qty'),
 		'gas_cutting_reject_qty': fields.integer('Rejected Qty'),
@@ -171,12 +188,14 @@ class kg_fettling(osv.osv):
 		'gas_cutting_accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'gas_cutting_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		'gas_cutting_reject_date': fields.date('Rejection Date'),
+		'gas_cutting_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		
 		### ARC Cutting ###
 		'arc_cutting_name': fields.char('Production Entry Code', size=128,select=True,readonly=True),
 		'arc_cutting_date': fields.date('Date'),
 		'arc_cutting_shift_id':fields.many2one('kg.shift.master','Shift'),
 		'arc_cutting_contractor':fields.many2one('res.partner','Contractor'),
+		'arc_cutting_employee': fields.char('Employee',size=128),
 		'arc_cutting_qty': fields.integer('Total Qty'),
 		'arc_cutting_accept_qty': fields.integer('Accepted Qty'),
 		'arc_cutting_reject_qty': fields.integer('Rejected Qty'),
@@ -186,6 +205,7 @@ class kg_fettling(osv.osv):
 		'arc_cutting_accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'arc_cutting_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		'arc_cutting_reject_date': fields.date('Rejection Date'),
+		'arc_cutting_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		
 		### HEAT TREATMENT ###
 		'heat_cycle_no':fields.char('Heat Cycle No.', size=128,select=True),
@@ -210,27 +230,54 @@ class kg_fettling(osv.osv):
 		'heat_total_weight':fields.integer('Total Weight'),
 		'heat_remarks': fields.text('Remarks'),
 		'heat_user_id': fields.many2one('res.users', 'Updated By', readonly=True),
+		'heat_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'heat_contractor':fields.many2one('res.partner','Contractor'),
+		'heat_employee': fields.char('Employee',size=128),
 		
 		### Rough Grinding ###
 		'rough_grinding_name': fields.char('Production Entry Code', size=128,select=True,readonly=True),
 		'rough_grinding_date': fields.date('Date'),
 		'rough_grinding_shift_id':fields.many2one('kg.shift.master','Shift'),
 		'rough_grinding_contractor':fields.many2one('res.partner','Contractor'),
+		'rough_grinding_employee': fields.char('Employee',size=128),
 		'rough_grinding_qty': fields.integer('Total Qty'),
 		'rough_grinding_accept_qty': fields.integer('Accepted Qty'),
 		'rough_grinding_reject_qty': fields.integer('Rejected Qty'),
+		'rough_grinding_rework_qty': fields.integer('Re-work Qty'),
 		'rough_grinding_weight':fields.integer('Weight(kgs)'),
 		'rough_grinding_remarks': fields.text('Remarks'),
 		'rough_grinding_user_id': fields.many2one('res.users', 'Updated By', readonly=True),
 		'rough_grinding_accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'rough_grinding_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		'rough_grinding_reject_date': fields.date('Rejection Date'),
+		'rough_grinding_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		
+		### Welding ###
+		'welding_name': fields.char('Production Entry Code', size=128,select=True,readonly=True),
+		'welding_date': fields.date('Date'),
+		'welding_shift_id':fields.many2one('kg.shift.master','Shift'),
+		'welding_contractor':fields.many2one('res.partner','Contractor'),
+		'welding_employee': fields.char('Employee',size=128),
+		'welding_qty': fields.integer('Total Qty'),
+		'welding_accept_qty': fields.integer('Accepted Qty'),
+		'welding_reject_qty': fields.integer('Rejected Qty'),
+		'welding_weight':fields.integer('Weight(kgs)'),
+		'welding_remarks': fields.text('Remarks'),
+		'welding_user_id': fields.many2one('res.users', 'Updated By', readonly=True),
+		'welding_accept_user_id': fields.many2one('res.users', 'Accepted By'),
+		'welding_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'welding_reject_date': fields.date('Rejection Date'),
+		'welding_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'welding_stage_id':fields.many2one('kg.stage.master','Stage'),
+		'welding_stage_name': fields.related('welding_stage_id','name', type='char', size=128, string='Stage Name', store=True, readonly=True),
+		'welding_state': fields.selection([('progress','Progress'),('done','Done')],'Welding Status'),
 		
 		### Finish Grinding ###
 		'finish_grinding_name': fields.char('Production Entry Code', size=128,select=True),
 		'finish_grinding_date': fields.date('Date'),
 		'finish_grinding_shift_id':fields.many2one('kg.shift.master','Shift'),
 		'finish_grinding_contractor':fields.many2one('res.partner','Contractor'),
+		'finish_grinding_employee': fields.char('Employee',size=128),
 		'finish_grinding_qty': fields.integer('Total Qty'),
 		'finish_grinding_accept_qty': fields.integer('Accepted Qty'),
 		'finish_grinding_reject_qty': fields.integer('Rejected Qty'),
@@ -240,6 +287,25 @@ class kg_fettling(osv.osv):
 		'finish_grinding_accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'finish_grinding_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		'finish_grinding_reject_date': fields.date('Rejection Date'),
+		'finish_grinding_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'flag_reshot_blast_applicable': fields.boolean('Re-Shot Blasting Applicable'),
+		
+		### Re shot Blasting ###
+		'reshot_blasting_name': fields.char('Production Entry Code', size=128,select=True),
+		'reshot_blasting_date': fields.date('Date'),
+		'reshot_blasting_shift_id':fields.many2one('kg.shift.master','Shift'),
+		'reshot_blasting_contractor':fields.many2one('res.partner','Contractor'),
+		'reshot_blasting_employee': fields.char('Employee',size=128),
+		'reshot_blasting_qty': fields.integer('Total Qty'),
+		'reshot_blasting_accept_qty': fields.integer('Accepted Qty'),
+		'reshot_blasting_reject_qty': fields.integer('Rejected Qty'),
+		'reshot_blasting_weight':fields.integer('Weight(kgs)'),
+		'reshot_blasting_remarks': fields.text('Remarks'),
+		'reshot_blasting_user_id': fields.many2one('res.users', 'Updated By', readonly=True),
+		'reshot_blasting_accept_user_id': fields.many2one('res.users', 'Accepted By'),
+		'reshot_blasting_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'reshot_blasting_reject_date': fields.date('Rejection Date'),
+		'reshot_blasting_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
@@ -303,6 +369,15 @@ class kg_fettling(osv.osv):
 		'finish_grinding_user_id':lambda obj, cr, uid, context: uid,
 		'finish_grinding_date':lambda * a: time.strftime('%Y-%m-%d'),
 		'finish_grinding_accept_user_id':lambda obj, cr, uid, context: uid,
+		### Re Shot Blasting ###
+		'reshot_blasting_user_id':lambda obj, cr, uid, context: uid,
+		'reshot_blasting_date':lambda * a: time.strftime('%Y-%m-%d'),
+		'reshot_blasting_accept_user_id':lambda obj, cr, uid, context: uid,
+		### Re Shot Blasting ###
+		'welding_user_id':lambda obj, cr, uid, context: uid,
+		'welding_date':lambda * a: time.strftime('%Y-%m-%d'),
+		'welding_accept_user_id':lambda obj, cr, uid, context: uid,
+		
 		
 	}
 	
@@ -367,9 +442,31 @@ class kg_fettling(osv.osv):
 		if entry.inward_accept_qty <= 0:
 			raise osv.except_osv(_('Warning!'),
 						_('System not allow to save negative or zero values !!'))
-		if reject_qty > 0 and not entry.inward_reject_remarks_id:
+						
+		if reject_qty > 0:
+			if entry.inward_reject_qty == 0:
+				raise osv.except_osv(_('Warning!'),
+				_('Kindly Enter Rejection Qty !!'))
+			if entry.inward_reject_qty < reject_qty:
+				raise osv.except_osv(_('Warning!'),
+				_('Kindly Check Rejection Qty !!'))
+				
+					
+		if entry.inward_reject_qty > 0 and not entry.inward_reject_remarks_id:
 			raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
+				
+		if entry.inward_reject_qty > reject_qty:
+			raise osv.except_osv(_('Warning!'),
+				_('Kindly check the rejection Qty !!'))
+				
+		entry_date = entry.entry_date
+		entry_date = str(entry_date)
+		entry_date = datetime.strptime(entry_date, '%Y-%m-%d')
+		
+		if entry_date > today:
+			raise osv.except_osv(_('Warning!'),
+				_('System not allow to save with future date !!'))
 		
 		if entry.inward_accept_qty > 0:
 			cr.execute(""" select fettling.stage_id,stage.name as stage_name,fettling.seq_no from ch_fettling_process as fettling
@@ -390,7 +487,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,knockout_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(knockout_seq_id[0],seq_rec.code))
 						knockout_name = cr.fetchone();
-						self.write(cr, uid, ids, {'knockout_qty': knockout_qty,'knockout_name':knockout_name[0]})
+						self.write(cr, uid, ids, {'knockout_qty': knockout_qty,'knockout_accept_qty':knockout_qty,'knockout_name':knockout_name[0]})
 					if stage_item['stage_name'] == 'DECORING':
 						decoring_qty = entry.inward_accept_qty
 						### Sequence Number Generation ###
@@ -399,7 +496,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,decoring_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(decoring_seq_id[0],seq_rec.code))
 						decoring_name = cr.fetchone();
-						self.write(cr, uid, ids, {'decoring_qty': decoring_qty,'decoring_name':decoring_name[0]})
+						self.write(cr, uid, ids, {'decoring_qty': decoring_qty,'decoring_accept_qty':decoring_qty,'decoring_name':decoring_name[0]})
 					if stage_item['stage_name'] == 'SHOT BLAST':
 						shot_blast_qty = entry.inward_accept_qty
 						### Sequence Number Generation ###
@@ -408,7 +505,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,shot_blast_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(shot_blast_seq_id[0],seq_rec.code))
 						shot_blast_name = cr.fetchone();
-						self.write(cr, uid, ids, {'shot_blast_qty': shot_blast_qty,'shot_blast_name':shot_blast_name[0]})
+						self.write(cr, uid, ids, {'shot_blast_qty': shot_blast_qty,'shot_blast_accept_qty':shot_blast_qty,'shot_blast_name':shot_blast_name[0]})
 					if stage_item['stage_name'] == 'HAMMERING':
 						hammering_qty = entry.inward_accept_qty
 						### Sequence Number Generation ###
@@ -417,7 +514,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,hammering_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(hammering_seq_id[0],seq_rec.code))
 						hammering_name = cr.fetchone();
-						self.write(cr, uid, ids, {'hammering_qty': hammering_qty,'hammering_name':hammering_name[0]})
+						self.write(cr, uid, ids, {'hammering_qty': hammering_qty,'hammering_accept_qty': hammering_qty,'hammering_name':hammering_name[0]})
 					if stage_item['stage_name'] == 'WHEEL CUTTING':
 						wheel_cutting_qty = entry.inward_accept_qty
 						### Sequence Number Generation ###
@@ -426,16 +523,16 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,wheel_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(wheel_cutting_seq_id[0],seq_rec.code))
 						wheel_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'wheel_cutting_qty': wheel_cutting_qty,'wheel_cutting_name':wheel_cutting_name[0]})
+						self.write(cr, uid, ids, {'wheel_cutting_qty': wheel_cutting_qty,'wheel_cutting_accept_qty': wheel_cutting_qty,'wheel_cutting_name':wheel_cutting_name[0]})
 					if stage_item['stage_name'] == 'GAS CUTTING':
 						gas_cutting_qty = entry.inward_accept_qty
 						### Sequence Number Generation ###
 						gas_cutting_name = ''	
-						gas_cutting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
+						shot_blast_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,gas_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(gas_cutting_seq_id[0],seq_rec.code))
 						gas_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'gas_cutting_qty': gas_cutting_qty,'gas_cutting_name':gas_cutting_name[0]})
+						self.write(cr, uid, ids, {'gas_cutting_qty': gas_cutting_qty,'gas_cutting_accept_qty': gas_cutting_qty,'gas_cutting_name':gas_cutting_name[0]})
 					if stage_item['stage_name'] == 'ARC CUTTING':
 						arc_cutting_qty = entry.inward_accept_qty
 						### Sequence Number Generation ###
@@ -444,10 +541,10 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,arc_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(arc_cutting_seq_id[0],seq_rec.code))
 						arc_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'arc_cutting_qty': arc_cutting_qty,'arc_cutting_name':arc_cutting_name[0]})
+						self.write(cr, uid, ids, {'arc_cutting_qty': arc_cutting_qty,'arc_cutting_accept_qty': arc_cutting_qty,'arc_cutting_name':arc_cutting_name[0]})
 					if stage_item['stage_name'] == 'HEAT TREATMENT':
 						heat_total_qty = entry.inward_accept_qty
-						self.write(cr, uid, ids, {'heat_total_qty': heat_total_qty})
+						self.write(cr, uid, ids, {'heat_total_qty': heat_total_qty,'heat_qty':heat_total_qty})
 					if stage_item['stage_name'] == 'ROUGH GRINDING':
 						rough_grinding_qty = entry.inward_accept_qty
 						### Sequence Number Generation ###
@@ -456,7 +553,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,rough_grinding_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(rough_grinding_seq_id[0],seq_rec.code))
 						rough_grinding_name = cr.fetchone();
-						self.write(cr, uid, ids, {'rough_grinding_qty': rough_grinding_qty,'rough_grinding_name':rough_grinding_name[0]})
+						self.write(cr, uid, ids, {'rough_grinding_qty': rough_grinding_qty,'rough_grinding_accept_qty': rough_grinding_qty,'rough_grinding_name':rough_grinding_name[0]})
 					if stage_item['stage_name'] == 'FINISH GRINDING':
 						finish_grinding_qty = entry.inward_accept_qty
 						### Sequence Number Generation ###
@@ -465,7 +562,18 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,finish_grinding_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(finish_grinding_seq_id[0],seq_rec.code))
 						finish_grinding_name = cr.fetchone();
-						self.write(cr, uid, ids, {'finish_grinding_qty': finish_grinding_qty,'finish_grinding_name':finish_grinding_name[0]})
+						self.write(cr, uid, ids, {'finish_grinding_qty': finish_grinding_qty,'finish_grinding_accept_qty': finish_grinding_qty,'finish_grinding_name':finish_grinding_name[0]})
+						
+					if stage_item['stage_name'] == 'RE SHOT BLASTING':
+						### Next Stage Qty ###
+						reshot_blasting_qty = entry.reshot_blasting_accept_qty
+						### Sequence Number Generation ###
+						reshot_blasting_name = ''	
+						reshot_blasting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.reshot.blasting')])
+						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,reshot_blasting_seq_id[0])
+						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(reshot_blasting_seq_id[0],seq_rec.code))
+						reshot_blasting_name = cr.fetchone();
+						self.write(cr, uid, ids, {'reshot_blasting_qty': reshot_blasting_qty,'reshot_blasting_accept_qty': reshot_blasting_qty,'reshot_blasting_accept_qty': reshot_blasting_qty,'reshot_blasting_name':reshot_blasting_name[0]})
 						
 					self.write(cr, uid, ids, {'stage_id': stage_item['stage_id']})
 			else:
@@ -475,8 +583,8 @@ class kg_fettling(osv.osv):
 					_('Kindly configure Fettling Stages in MOC %s !!')%(entry.moc_id.name))
 				else:
 					self.ms_inward_update(cr, uid, [entry.id],entry.inward_accept_qty)
-			
-		if reject_qty > 0:
+					
+		if entry.inward_reject_qty > 0:
 			#### NC Creation for reject Qty ###
 			
 			### Production Number ###
@@ -517,8 +625,8 @@ class kg_fettling(osv.osv):
 				'schedule_line_id': entry.schedule_line_id.id,
 				'order_id': entry.order_id.id,
 				'order_line_id': entry.order_line_id.id,
-				'qty' : reject_qty,              
-				'schedule_qty' : reject_qty,              
+				'qty' : entry.inward_reject_qty,              
+				'schedule_qty' : entry.inward_reject_qty,              
 				'state' : 'issue_done',
 				'order_category':entry.order_category,
 				'order_priority': '2',
@@ -532,21 +640,19 @@ class kg_fettling(osv.osv):
 				'issue_state': 'issued',
 				'core_no': core_name[0],
 				'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-				'core_qty': reject_qty,
-				'core_rem_qty': reject_qty,
+				'core_qty': entry.inward_reject_qty,
+				'core_rem_qty': entry.inward_reject_qty,
 				'core_state': 'pending',
 				'mould_no': mould_name[0],
 				'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-				'mould_qty': reject_qty,
-				'mould_rem_qty': reject_qty,
+				'mould_qty': entry.inward_reject_qty,
+				'mould_rem_qty': entry.inward_reject_qty,
 				'mould_state': 'pending',		
 			}
 			production_id = production_obj.create(cr, uid, production_vals)
 			
 		
-		reject_qty = entry.pour_qty - entry.inward_accept_qty
-		
-		self.write(cr, uid, ids, {'state': 'accept','inward_reject_qty':reject_qty,'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		self.write(cr, uid, ids, {'state': 'accept','update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 
 		return True
 		
@@ -557,12 +663,34 @@ class kg_fettling(osv.osv):
 		entry = self.browse(cr, uid, ids[0])
 		reject_qty = entry.knockout_qty - entry.knockout_accept_qty
 		
-		if entry.knockout_qty <= 0 or entry.knockout_accept_qty <= 0:
+		if entry.knockout_qty <= 0 or entry.knockout_accept_qty < 0:
 			raise osv.except_osv(_('Warning!'),
 						_('System not allow to save negative or zero values !!'))
-		if reject_qty > 0 and not entry.knockout_reject_remarks_id:
+						
+		if reject_qty > 0:
+			if entry.knockout_reject_qty == 0:
+				raise osv.except_osv(_('Warning!'),
+				_('Kindly Enter Rejection Qty !!'))
+			if entry.knockout_reject_qty < reject_qty:
+				raise osv.except_osv(_('Warning!'),
+				_('Kindly Check Rejection Qty !!'))
+						
+		if entry.knockout_reject_qty > 0 and not entry.knockout_reject_remarks_id:
 			raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
+				
+		if entry.knockout_reject_qty > reject_qty:
+			raise osv.except_osv(_('Warning!'),
+				_('Kindly check the rejection Qty !!'))
+				
+		knockout_date = entry.knockout_date
+		knockout_date = str(knockout_date)
+		knockout_date = datetime.strptime(knockout_date, '%Y-%m-%d')
+		
+		if knockout_date > today:
+			raise osv.except_osv(_('Warning!'),
+				_('System not allow to save with future date !!'))
+				
 		if entry.knockout_accept_qty > 0:
 			cr.execute(""" select fettling.stage_id,stage.name as stage_name,fettling.seq_no from ch_fettling_process as fettling
 				left join kg_moc_master moc on fettling.header_id = moc.id
@@ -591,7 +719,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,knockout_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(knockout_seq_id[0],seq_rec.code))
 						knockout_name = cr.fetchone();
-						self.write(cr, uid, ids, {'knockout_qty': knockout_qty,'knockout_name':knockout_name[0]})
+						self.write(cr, uid, ids, {'knockout_qty': knockout_qty,'knockout_accept_qty':knockout_qty,'knockout_name':knockout_name[0]})
 					
 					if stage_item['stage_name'] == 'DECORING':
 						### Next Stage Qty ###
@@ -602,7 +730,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,decoring_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(decoring_seq_id[0],seq_rec.code))
 						decoring_name = cr.fetchone();
-						self.write(cr, uid, ids, {'decoring_qty': decoring_qty,'decoring_name':decoring_name[0]})
+						self.write(cr, uid, ids, {'decoring_qty': decoring_qty,'decoring_accept_qty':decoring_qty,'decoring_name':decoring_name[0]})
 					
 					if stage_item['stage_name'] == 'SHOT BLAST':
 						### Next Stage Qty ###
@@ -613,7 +741,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,shot_blast_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(shot_blast_seq_id[0],seq_rec.code))
 						shot_blast_name = cr.fetchone();
-						self.write(cr, uid, ids, {'shot_blast_qty': shot_blast_qty,'shot_blast_name':shot_blast_name[0]})
+						self.write(cr, uid, ids, {'shot_blast_qty': shot_blast_qty,'shot_blast_accept_qty':shot_blast_qty,'shot_blast_name':shot_blast_name[0]})
 					
 					if stage_item['stage_name'] == 'HAMMERING':
 						### Next Stage Qty ###
@@ -624,7 +752,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,hammering_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(hammering_seq_id[0],seq_rec.code))
 						hammering_name = cr.fetchone();
-						self.write(cr, uid, ids, {'hammering_qty': hammering_qty,'hammering_name':hammering_name[0]})
+						self.write(cr, uid, ids, {'hammering_qty': hammering_qty,'hammering_accept_qty': hammering_qty,'hammering_name':hammering_name[0]})
 					
 					if stage_item['stage_name'] == 'WHEEL CUTTING':
 						### Next Stage Qty ###
@@ -635,18 +763,18 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,wheel_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(wheel_cutting_seq_id[0],seq_rec.code))
 						wheel_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'wheel_cutting_qty': wheel_cutting_qty,'wheel_cutting_name':wheel_cutting_name[0]})
+						self.write(cr, uid, ids, {'wheel_cutting_qty': wheel_cutting_qty,'wheel_cutting_accept_qty': wheel_cutting_qty,'wheel_cutting_name':wheel_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'GAS CUTTING':
 						### Next Stage Qty ###
 						gas_cutting_qty = entry.knockout_accept_qty
 						### Sequence Number Generation ###
 						gas_cutting_name = ''	
-						gas_cutting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
+						shot_blast_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,gas_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(gas_cutting_seq_id[0],seq_rec.code))
 						gas_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'gas_cutting_qty': gas_cutting_qty,'gas_cutting_name':gas_cutting_name[0]})
+						self.write(cr, uid, ids, {'gas_cutting_qty': gas_cutting_qty,'gas_cutting_accept_qty': gas_cutting_qty,'gas_cutting_name':gas_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'ARC CUTTING':
 						### Next Stage Qty ###
@@ -657,12 +785,12 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,arc_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(arc_cutting_seq_id[0],seq_rec.code))
 						arc_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'arc_cutting_qty': arc_cutting_qty,'arc_cutting_name':arc_cutting_name[0]})
+						self.write(cr, uid, ids, {'arc_cutting_qty': arc_cutting_qty,'arc_cutting_accept_qty': arc_cutting_qty,'arc_cutting_name':arc_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'HEAT TREATMENT':
 						### Next Stage Qty ###
 						heat_total_qty = entry.knockout_accept_qty
-						self.write(cr, uid, ids, {'heat_total_qty': heat_total_qty})
+						self.write(cr, uid, ids, {'heat_total_qty': heat_total_qty,'heat_qty':heat_total_qty})
 					
 					if stage_item['stage_name'] == 'ROUGH GRINDING':
 						### Next Stage Qty ###
@@ -673,7 +801,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,rough_grinding_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(rough_grinding_seq_id[0],seq_rec.code))
 						rough_grinding_name = cr.fetchone();
-						self.write(cr, uid, ids, {'rough_grinding_qty': rough_grinding_qty,'rough_grinding_name':rough_grinding_name[0]})
+						self.write(cr, uid, ids, {'rough_grinding_qty': rough_grinding_qty,'rough_grinding_accept_qty': rough_grinding_qty,'rough_grinding_name':rough_grinding_name[0]})
 					
 					if stage_item['stage_name'] == 'FINISH GRINDING':
 						### Next Stage Qty ###
@@ -684,7 +812,18 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,finish_grinding_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(finish_grinding_seq_id[0],seq_rec.code))
 						finish_grinding_name = cr.fetchone();
-						self.write(cr, uid, ids, {'finish_grinding_qty': finish_grinding_qty,'finish_grinding_name':finish_grinding_name[0]})
+						self.write(cr, uid, ids, {'finish_grinding_qty': finish_grinding_qty,'finish_grinding_accept_qty': finish_grinding_qty,'finish_grinding_name':finish_grinding_name[0]})
+						
+					if stage_item['stage_name'] == 'RE SHOT BLASTING':
+						### Next Stage Qty ###
+						reshot_blasting_qty = entry.knockout_accept_qty
+						### Sequence Number Generation ###
+						reshot_blasting_name = ''	
+						reshot_blasting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.reshot.blasting')])
+						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,reshot_blasting_seq_id[0])
+						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(reshot_blasting_seq_id[0],seq_rec.code))
+						reshot_blasting_name = cr.fetchone();
+						self.write(cr, uid, ids, {'reshot_blasting_qty': reshot_blasting_qty,'reshot_blasting_accept_qty': reshot_blasting_qty,'reshot_blasting_name':reshot_blasting_name[0]})
 					
 					
 					self.write(cr, uid, ids, {'stage_id': stage_item['stage_id']})
@@ -693,7 +832,7 @@ class kg_fettling(osv.osv):
 				### MS Inward Process Creation ###
 				self.ms_inward_update(cr, uid, [entry.id],entry.knockout_accept_qty)
 			
-		if reject_qty > 0:
+		if entry.knockout_reject_qty > 0:
 			#### NC Creation for reject Qty ###
 			
 			### Production Number ###
@@ -734,8 +873,8 @@ class kg_fettling(osv.osv):
 				'schedule_line_id': entry.schedule_line_id.id,
 				'order_id': entry.order_id.id,
 				'order_line_id': entry.order_line_id.id,
-				'qty' : reject_qty,              
-				'schedule_qty' : reject_qty,              
+				'qty' : entry.knockout_reject_qty,              
+				'schedule_qty' : entry.knockout_reject_qty,              
 				'state' : 'issue_done',
 				'order_category':entry.order_category,
 				'order_priority': '2',
@@ -749,15 +888,15 @@ class kg_fettling(osv.osv):
 				'issue_state': 'issued',
 				'core_no': core_name[0],
 				'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-				'core_qty': reject_qty,
+				'core_qty': entry.knockout_reject_qty,
 				'core_state': 'pending',
 				'mould_no': mould_name[0],
 				'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-				'mould_qty': reject_qty,
+				'mould_qty': entry.knockout_reject_qty,
 				'mould_state': 'pending',		
 			}
 			production_id = production_obj.create(cr, uid, production_vals)
-		self.write(cr, uid, ids, {'knockout_reject_qty': reject_qty,'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		self.write(cr, uid, ids, {'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 		
 		
@@ -767,12 +906,33 @@ class kg_fettling(osv.osv):
 		entry = self.browse(cr, uid, ids[0])
 		reject_qty = entry.decoring_qty - entry.decoring_accept_qty
 		
-		if entry.decoring_qty <= 0 or entry.decoring_accept_qty <= 0:
+		if entry.decoring_qty <= 0 or entry.decoring_accept_qty < 0:
 			raise osv.except_osv(_('Warning!'),
 						_('System not allow to save negative or zero values !!'))
-		if reject_qty > 0 and not entry.decoring_reject_remarks_id:
+						
+		if reject_qty > 0:
+			if entry.decoring_reject_qty == 0:
+				raise osv.except_osv(_('Warning!'),
+				_('Kindly Enter Rejection Qty !!'))
+			if entry.decoring_reject_qty < reject_qty:
+				raise osv.except_osv(_('Warning!'),
+				_('Kindly Check Rejection Qty !!'))
+				
+		if entry.decoring_reject_qty > 0 and not entry.decoring_reject_remarks_id:
 			raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
+				
+		if entry.decoring_reject_qty > reject_qty:
+			raise osv.except_osv(_('Warning!'),
+				_('Kindly check the rejection Qty !!'))
+				
+		decoring_date = entry.decoring_date
+		decoring_date = str(decoring_date)
+		decoring_date = datetime.strptime(decoring_date, '%Y-%m-%d')
+		
+		if decoring_date > today:
+			raise osv.except_osv(_('Warning!'),
+				_('System not allow to save with future date !!'))
 		
 		if entry.decoring_accept_qty > 0:
 			cr.execute(""" select fettling.stage_id,stage.name as stage_name,fettling.seq_no from ch_fettling_process as fettling
@@ -802,7 +962,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,knockout_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(knockout_seq_id[0],seq_rec.code))
 						knockout_name = cr.fetchone();
-						self.write(cr, uid, ids, {'knockout_qty': knockout_qty,'knockout_name':knockout_name[0]})
+						self.write(cr, uid, ids, {'knockout_qty': knockout_qty,'knockout_accept_qty':knockout_qty,'knockout_name':knockout_name[0]})
 					
 					if stage_item['stage_name'] == 'DECORING':
 						### Next Stage Qty ###
@@ -813,7 +973,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,decoring_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(decoring_seq_id[0],seq_rec.code))
 						decoring_name = cr.fetchone();
-						self.write(cr, uid, ids, {'decoring_qty': decoring_qty,'decoring_name':decoring_name[0]})
+						self.write(cr, uid, ids, {'decoring_qty': decoring_qty,'decoring_accept_qty':decoring_qty,'decoring_name':decoring_name[0]})
 					
 					if stage_item['stage_name'] == 'SHOT BLAST':
 						### Next Stage Qty ###
@@ -824,7 +984,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,shot_blast_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(shot_blast_seq_id[0],seq_rec.code))
 						shot_blast_name = cr.fetchone();
-						self.write(cr, uid, ids, {'shot_blast_qty': shot_blast_qty,'shot_blast_name':shot_blast_name[0]})
+						self.write(cr, uid, ids, {'shot_blast_qty': shot_blast_qty,'shot_blast_accept_qty':shot_blast_qty,'shot_blast_name':shot_blast_name[0]})
 					
 					if stage_item['stage_name'] == 'HAMMERING':
 						### Next Stage Qty ###
@@ -835,7 +995,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,hammering_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(hammering_seq_id[0],seq_rec.code))
 						hammering_name = cr.fetchone();
-						self.write(cr, uid, ids, {'hammering_qty': hammering_qty,'hammering_name':hammering_name[0]})
+						self.write(cr, uid, ids, {'hammering_qty': hammering_qty,'hammering_accept_qty': hammering_qty,'hammering_name':hammering_name[0]})
 					
 					if stage_item['stage_name'] == 'WHEEL CUTTING':
 						### Next Stage Qty ###
@@ -846,18 +1006,18 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,wheel_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(wheel_cutting_seq_id[0],seq_rec.code))
 						wheel_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'wheel_cutting_qty': wheel_cutting_qty,'wheel_cutting_name':wheel_cutting_name[0]})
+						self.write(cr, uid, ids, {'wheel_cutting_qty': wheel_cutting_qty,'wheel_cutting_accept_qty': wheel_cutting_qty,'wheel_cutting_name':wheel_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'GAS CUTTING':
 						### Next Stage Qty ###
 						gas_cutting_qty = entry.decoring_accept_qty
 						### Sequence Number Generation ###
 						gas_cutting_name = ''	
-						gas_cutting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
+						shot_blast_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,gas_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(gas_cutting_seq_id[0],seq_rec.code))
 						gas_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'gas_cutting_qty': gas_cutting_qty,'gas_cutting_name':gas_cutting_name[0]})
+						self.write(cr, uid, ids, {'gas_cutting_qty': gas_cutting_qty,'gas_cutting_accept_qty': gas_cutting_qty,'gas_cutting_name':gas_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'ARC CUTTING':
 						### Next Stage Qty ###
@@ -868,12 +1028,12 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,arc_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(arc_cutting_seq_id[0],seq_rec.code))
 						arc_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'arc_cutting_qty': arc_cutting_qty,'arc_cutting_name':arc_cutting_name[0]})
+						self.write(cr, uid, ids, {'arc_cutting_qty': arc_cutting_qty,'arc_cutting_accept_qty': arc_cutting_qty,'arc_cutting_name':arc_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'HEAT TREATMENT':
 						### Next Stage Qty ###
 						heat_total_qty = entry.decoring_accept_qty
-						self.write(cr, uid, ids, {'heat_total_qty': heat_total_qty})
+						self.write(cr, uid, ids, {'heat_total_qty': heat_total_qty,'heat_qty':heat_total_qty})
 					
 					if stage_item['stage_name'] == 'ROUGH GRINDING':
 						### Next Stage Qty ###
@@ -884,7 +1044,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,rough_grinding_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(rough_grinding_seq_id[0],seq_rec.code))
 						rough_grinding_name = cr.fetchone();
-						self.write(cr, uid, ids, {'rough_grinding_qty': rough_grinding_qty,'rough_grinding_name':rough_grinding_name[0]})
+						self.write(cr, uid, ids, {'rough_grinding_qty': rough_grinding_qty,'rough_grinding_accept_qty': rough_grinding_qty,'rough_grinding_name':rough_grinding_name[0]})
 					
 					if stage_item['stage_name'] == 'FINISH GRINDING':
 						### Next Stage Qty ###
@@ -895,7 +1055,18 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,finish_grinding_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(finish_grinding_seq_id[0],seq_rec.code))
 						finish_grinding_name = cr.fetchone();
-						self.write(cr, uid, ids, {'finish_grinding_qty': finish_grinding_qty,'finish_grinding_name':finish_grinding_name[0]})
+						self.write(cr, uid, ids, {'finish_grinding_qty': finish_grinding_qty,'finish_grinding_accept_qty': finish_grinding_qty,'finish_grinding_name':finish_grinding_name[0]})
+						
+					if stage_item['stage_name'] == 'RE SHOT BLASTING':
+						### Next Stage Qty ###
+						reshot_blasting_qty = entry.decoring_accept_qty
+						### Sequence Number Generation ###
+						reshot_blasting_name = ''	
+						reshot_blasting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.reshot.blasting')])
+						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,reshot_blasting_seq_id[0])
+						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(reshot_blasting_seq_id[0],seq_rec.code))
+						reshot_blasting_name = cr.fetchone();
+						self.write(cr, uid, ids, {'reshot_blasting_qty': reshot_blasting_qty,'reshot_blasting_accept_qty': reshot_blasting_qty,'reshot_blasting_name':reshot_blasting_name[0]})
 					
 					self.write(cr, uid, ids, {'stage_id': stage_item['stage_id']})
 					
@@ -903,7 +1074,7 @@ class kg_fettling(osv.osv):
 				### MS Inward Process Creation ###
 				self.ms_inward_update(cr, uid, [entry.id],entry.decoring_accept_qty)
 			
-		if reject_qty > 0:
+		if entry.decoring_reject_qty > 0:
 			#### NC Creation for reject Qty ###
 			
 			### Production Number ###
@@ -944,8 +1115,8 @@ class kg_fettling(osv.osv):
 				'schedule_line_id': entry.schedule_line_id.id,
 				'order_id': entry.order_id.id,
 				'order_line_id': entry.order_line_id.id,
-				'qty' : reject_qty,              
-				'schedule_qty' : reject_qty,              
+				'qty' : entry.decoring_reject_qty,              
+				'schedule_qty' : entry.decoring_reject_qty,              
 				'state' : 'issue_done',
 				'order_category':entry.order_category,
 				'order_priority': '2',
@@ -959,15 +1130,15 @@ class kg_fettling(osv.osv):
 				'issue_state': 'issued',
 				'core_no': core_name[0],
 				'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-				'core_qty': reject_qty,
+				'core_qty': entry.decoring_reject_qty,
 				'core_state': 'pending',
 				'mould_no': mould_name[0],
 				'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-				'mould_qty': reject_qty,
+				'mould_qty': entry.decoring_reject_qty,
 				'mould_state': 'pending',		
 			}
 			production_id = production_obj.create(cr, uid, production_vals)
-		self.write(cr, uid, ids, {'decoring_reject_qty': reject_qty,'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		self.write(cr, uid, ids, {'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 		
 		
@@ -976,12 +1147,34 @@ class kg_fettling(osv.osv):
 		entry = self.browse(cr, uid, ids[0])
 		reject_qty = entry.shot_blast_qty - entry.shot_blast_accept_qty
 		
-		if entry.shot_blast_qty <= 0 or entry.shot_blast_accept_qty <= 0:
+		if entry.shot_blast_qty <= 0 or entry.shot_blast_accept_qty < 0:
 			raise osv.except_osv(_('Warning!'),
 						_('System not allow to save negative or zero values !!'))
-		if reject_qty > 0 and not entry.shot_blast_reject_remarks_id:
+						
+						
+		if reject_qty > 0:
+			if entry.shot_blast_reject_qty == 0:
+				raise osv.except_osv(_('Warning!'),
+				_('Kindly Enter Rejection Qty !!'))
+			if entry.shot_blast_reject_qty < reject_qty:
+				raise osv.except_osv(_('Warning!'),
+				_('Kindly Check Rejection Qty !!'))
+						
+		if entry.shot_blast_reject_qty > 0 and not entry.shot_blast_reject_remarks_id:
 			raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
+				
+		if entry.shot_blast_reject_qty > reject_qty:
+			raise osv.except_osv(_('Warning!'),
+				_('Kindly check the rejection Qty !!'))
+				
+		shot_blast_date = entry.shot_blast_date
+		shot_blast_date = str(shot_blast_date)
+		shot_blast_date = datetime.strptime(shot_blast_date, '%Y-%m-%d')
+		
+		if shot_blast_date > today:
+			raise osv.except_osv(_('Warning!'),
+				_('System not allow to save with future date !!'))
 		
 		if entry.shot_blast_accept_qty > 0:
 			cr.execute(""" select fettling.stage_id,stage.name as stage_name,fettling.seq_no from ch_fettling_process as fettling
@@ -1011,7 +1204,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,knockout_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(knockout_seq_id[0],seq_rec.code))
 						knockout_name = cr.fetchone();
-						self.write(cr, uid, ids, {'knockout_qty': knockout_qty,'knockout_name':knockout_name[0]})
+						self.write(cr, uid, ids, {'knockout_qty': knockout_qty,'knockout_accept_qty':knockout_qty,'knockout_name':knockout_name[0]})
 					
 					if stage_item['stage_name'] == 'DECORING':
 						### Next Stage Qty ###
@@ -1022,7 +1215,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,decoring_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(decoring_seq_id[0],seq_rec.code))
 						decoring_name = cr.fetchone();
-						self.write(cr, uid, ids, {'decoring_qty': decoring_qty,'decoring_name':decoring_name[0]})
+						self.write(cr, uid, ids, {'decoring_qty': decoring_qty,'decoring_accept_qty':decoring_qty,'decoring_name':decoring_name[0]})
 					
 					if stage_item['stage_name'] == 'SHOT BLAST':
 						### Next Stage Qty ###
@@ -1033,7 +1226,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,shot_blast_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(shot_blast_seq_id[0],seq_rec.code))
 						shot_blast_name = cr.fetchone();
-						self.write(cr, uid, ids, {'shot_blast_qty': shot_blast_qty,'shot_blast_name':shot_blast_name[0]})
+						self.write(cr, uid, ids, {'shot_blast_qty': shot_blast_qty,'shot_blast_accept_qty':shot_blast_qty,'shot_blast_name':shot_blast_name[0]})
 					
 					if stage_item['stage_name'] == 'HAMMERING':
 						### Next Stage Qty ###
@@ -1044,7 +1237,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,hammering_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(hammering_seq_id[0],seq_rec.code))
 						hammering_name = cr.fetchone();
-						self.write(cr, uid, ids, {'hammering_qty': hammering_qty,'hammering_name':hammering_name[0]})
+						self.write(cr, uid, ids, {'hammering_qty': hammering_qty,'hammering_accept_qty': hammering_qty,'hammering_name':hammering_name[0]})
 					
 					if stage_item['stage_name'] == 'WHEEL CUTTING':
 						### Next Stage Qty ###
@@ -1055,18 +1248,18 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,wheel_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(wheel_cutting_seq_id[0],seq_rec.code))
 						wheel_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'wheel_cutting_qty': wheel_cutting_qty,'wheel_cutting_name':wheel_cutting_name[0]})
+						self.write(cr, uid, ids, {'wheel_cutting_qty': wheel_cutting_qty,'wheel_cutting_accept_qty': wheel_cutting_qty,'wheel_cutting_name':wheel_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'GAS CUTTING':
 						### Next Stage Qty ###
 						gas_cutting_qty = entry.shot_blast_accept_qty
 						### Sequence Number Generation ###
 						gas_cutting_name = ''	
-						gas_cutting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
+						shot_blast_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,gas_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(gas_cutting_seq_id[0],seq_rec.code))
 						gas_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'gas_cutting_qty': gas_cutting_qty,'gas_cutting_name':gas_cutting_name[0]})
+						self.write(cr, uid, ids, {'gas_cutting_qty': gas_cutting_qty,'gas_cutting_accept_qty': gas_cutting_qty,'gas_cutting_name':gas_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'ARC CUTTING':
 						### Next Stage Qty ###
@@ -1077,12 +1270,12 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,arc_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(arc_cutting_seq_id[0],seq_rec.code))
 						arc_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'arc_cutting_qty': arc_cutting_qty,'arc_cutting_name':arc_cutting_name[0]})
+						self.write(cr, uid, ids, {'arc_cutting_qty': arc_cutting_qty,'arc_cutting_accept_qty': arc_cutting_qty,'arc_cutting_name':arc_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'HEAT TREATMENT':
 						### Next Stage Qty ###
 						heat_total_qty = entry.shot_blast_accept_qty
-						self.write(cr, uid, ids, {'heat_total_qty': heat_total_qty})
+						self.write(cr, uid, ids, {'heat_total_qty': heat_total_qty,'heat_qty':heat_total_qty})
 					
 					if stage_item['stage_name'] == 'ROUGH GRINDING':
 						### Next Stage Qty ###
@@ -1093,7 +1286,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,rough_grinding_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(rough_grinding_seq_id[0],seq_rec.code))
 						rough_grinding_name = cr.fetchone();
-						self.write(cr, uid, ids, {'rough_grinding_qty': rough_grinding_qty,'rough_grinding_name':rough_grinding_name[0]})
+						self.write(cr, uid, ids, {'rough_grinding_qty': rough_grinding_qty,'rough_grinding_accept_qty': rough_grinding_qty,'rough_grinding_name':rough_grinding_name[0]})
 					
 					if stage_item['stage_name'] == 'FINISH GRINDING':
 						### Next Stage Qty ###
@@ -1104,7 +1297,18 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,finish_grinding_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(finish_grinding_seq_id[0],seq_rec.code))
 						finish_grinding_name = cr.fetchone();
-						self.write(cr, uid, ids, {'finish_grinding_qty': finish_grinding_qty,'finish_grinding_name':finish_grinding_name[0]})
+						self.write(cr, uid, ids, {'finish_grinding_qty': finish_grinding_qty,'finish_grinding_accept_qty': finish_grinding_qty,'finish_grinding_name':finish_grinding_name[0]})
+						
+					if stage_item['stage_name'] == 'RE SHOT BLASTING':
+						### Next Stage Qty ###
+						reshot_blasting_qty = entry.shot_blast_accept_qty
+						### Sequence Number Generation ###
+						reshot_blasting_name = ''	
+						reshot_blasting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.reshot.blasting')])
+						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,reshot_blasting_seq_id[0])
+						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(reshot_blasting_seq_id[0],seq_rec.code))
+						reshot_blasting_name = cr.fetchone();
+						self.write(cr, uid, ids, {'reshot_blasting_qty': reshot_blasting_qty,'reshot_blasting_accept_qty': reshot_blasting_qty,'reshot_blasting_name':reshot_blasting_name[0]})
 					
 					self.write(cr, uid, ids, {'stage_id': stage_item['stage_id']})
 					
@@ -1112,7 +1316,7 @@ class kg_fettling(osv.osv):
 				### MS Inward Process Creation ###
 				self.ms_inward_update(cr, uid, [entry.id],entry.shot_blast_accept_qty)
 			
-		if reject_qty > 0:
+		if entry.shot_blast_reject_qty > 0:
 			#### NC Creation for reject Qty ###
 			
 			### Production Number ###
@@ -1153,8 +1357,8 @@ class kg_fettling(osv.osv):
 				'schedule_line_id': entry.schedule_line_id.id,
 				'order_id': entry.order_id.id,
 				'order_line_id': entry.order_line_id.id,
-				'qty' : reject_qty,              
-				'schedule_qty' : reject_qty,              
+				'qty' : entry.shot_blast_reject_qty,              
+				'schedule_qty' : entry.shot_blast_reject_qty,              
 				'state' : 'issue_done',
 				'order_category':entry.order_category,
 				'order_priority': '2',
@@ -1168,15 +1372,15 @@ class kg_fettling(osv.osv):
 				'issue_state': 'issued',
 				'core_no': core_name[0],
 				'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-				'core_qty': reject_qty,
+				'core_qty': entry.shot_blast_reject_qty,
 				'core_state': 'pending',
 				'mould_no': mould_name[0],
 				'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-				'mould_qty': reject_qty,
+				'mould_qty': entry.shot_blast_reject_qty,
 				'mould_state': 'pending',		
 			}
 			production_id = production_obj.create(cr, uid, production_vals)
-		self.write(cr, uid, ids, {'shot_blast_reject_qty': reject_qty,'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		self.write(cr, uid, ids, {'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 		
 		
@@ -1185,12 +1389,33 @@ class kg_fettling(osv.osv):
 		entry = self.browse(cr, uid, ids[0])
 		reject_qty = entry.hammering_qty - entry.hammering_accept_qty
 		
-		if entry.hammering_qty <= 0 or entry.hammering_accept_qty <= 0:
+		if entry.hammering_qty <= 0 or entry.hammering_accept_qty < 0:
 			raise osv.except_osv(_('Warning!'),
 						_('System not allow to save negative or zero values !!'))
-		if reject_qty > 0 and not entry.hammering_reject_remarks_id:
+						
+		if reject_qty > 0:
+			if entry.hammering_reject_qty == 0:
+				raise osv.except_osv(_('Warning!'),
+				_('Kindly Enter Rejection Qty !!'))
+			if entry.hammering_reject_qty < reject_qty:
+				raise osv.except_osv(_('Warning!'),
+				_('Kindly Check Rejection Qty !!'))
+						
+		if entry.hammering_reject_qty > 0 and not entry.hammering_reject_remarks_id:
 			raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
+				
+		if entry.hammering_reject_qty > reject_qty:
+			raise osv.except_osv(_('Warning!'),
+				_('Kindly check the rejection Qty !!'))
+				
+		hammering_date = entry.hammering_date
+		hammering_date = str(hammering_date)
+		hammering_date = datetime.strptime(hammering_date, '%Y-%m-%d')
+		
+		if hammering_date > today:
+			raise osv.except_osv(_('Warning!'),
+				_('System not allow to save with future date !!'))
 		
 		if entry.hammering_accept_qty > 0:
 			cr.execute(""" select fettling.stage_id,stage.name as stage_name,fettling.seq_no from ch_fettling_process as fettling
@@ -1220,7 +1445,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,knockout_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(knockout_seq_id[0],seq_rec.code))
 						knockout_name = cr.fetchone();
-						self.write(cr, uid, ids, {'knockout_qty': knockout_qty,'knockout_name':knockout_name[0]})
+						self.write(cr, uid, ids, {'knockout_qty': knockout_qty,'knockout_accept_qty':knockout_qty,'knockout_name':knockout_name[0]})
 					
 					if stage_item['stage_name'] == 'DECORING':
 						### Next Stage Qty ###
@@ -1231,7 +1456,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,decoring_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(decoring_seq_id[0],seq_rec.code))
 						decoring_name = cr.fetchone();
-						self.write(cr, uid, ids, {'decoring_qty': decoring_qty,'decoring_name':decoring_name[0]})
+						self.write(cr, uid, ids, {'decoring_qty': decoring_qty,'decoring_accept_qty':decoring_qty,'decoring_name':decoring_name[0]})
 					
 					if stage_item['stage_name'] == 'SHOT BLAST':
 						### Next Stage Qty ###
@@ -1242,7 +1467,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,shot_blast_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(shot_blast_seq_id[0],seq_rec.code))
 						shot_blast_name = cr.fetchone();
-						self.write(cr, uid, ids, {'shot_blast_qty': shot_blast_qty,'shot_blast_name':shot_blast_name[0]})
+						self.write(cr, uid, ids, {'shot_blast_qty': shot_blast_qty,'shot_blast_accept_qty':shot_blast_qty,'shot_blast_name':shot_blast_name[0]})
 					
 					if stage_item['stage_name'] == 'HAMMERING':
 						### Next Stage Qty ###
@@ -1253,7 +1478,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,hammering_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(hammering_seq_id[0],seq_rec.code))
 						hammering_name = cr.fetchone();
-						self.write(cr, uid, ids, {'hammering_qty': hammering_qty,'hammering_name':hammering_name[0]})
+						self.write(cr, uid, ids, {'hammering_qty': hammering_qty,'hammering_accept_qty': hammering_qty,'hammering_name':hammering_name[0]})
 					
 					if stage_item['stage_name'] == 'WHEEL CUTTING':
 						### Next Stage Qty ###
@@ -1264,18 +1489,18 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,wheel_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(wheel_cutting_seq_id[0],seq_rec.code))
 						wheel_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'wheel_cutting_qty': wheel_cutting_qty,'wheel_cutting_name':wheel_cutting_name[0]})
+						self.write(cr, uid, ids, {'wheel_cutting_qty': wheel_cutting_qty,'wheel_cutting_accept_qty': wheel_cutting_qty,'wheel_cutting_name':wheel_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'GAS CUTTING':
 						### Next Stage Qty ###
 						gas_cutting_qty = entry.hammering_accept_qty
 						### Sequence Number Generation ###
 						gas_cutting_name = ''	
-						gas_cutting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
+						shot_blast_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,gas_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(gas_cutting_seq_id[0],seq_rec.code))
 						gas_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'gas_cutting_qty': gas_cutting_qty,'gas_cutting_name':gas_cutting_name[0]})
+						self.write(cr, uid, ids, {'gas_cutting_qty': gas_cutting_qty,'gas_cutting_accept_qty': gas_cutting_qty,'gas_cutting_name':gas_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'ARC CUTTING':
 						### Next Stage Qty ###
@@ -1286,12 +1511,12 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,arc_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(arc_cutting_seq_id[0],seq_rec.code))
 						arc_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'arc_cutting_qty': arc_cutting_qty,'arc_cutting_name':arc_cutting_name[0]})
+						self.write(cr, uid, ids, {'arc_cutting_qty': arc_cutting_qty,'arc_cutting_accept_qty': arc_cutting_qty,'arc_cutting_name':arc_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'HEAT TREATMENT':
 						### Next Stage Qty ###
 						heat_total_qty = entry.hammering_accept_qty
-						self.write(cr, uid, ids, {'heat_total_qty': heat_total_qty})
+						self.write(cr, uid, ids, {'heat_total_qty': heat_total_qty,'heat_qty':heat_total_qty})
 					
 					if stage_item['stage_name'] == 'ROUGH GRINDING':
 						### Next Stage Qty ###
@@ -1302,7 +1527,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,rough_grinding_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(rough_grinding_seq_id[0],seq_rec.code))
 						rough_grinding_name = cr.fetchone();
-						self.write(cr, uid, ids, {'rough_grinding_qty': rough_grinding_qty,'rough_grinding_name':rough_grinding_name[0]})
+						self.write(cr, uid, ids, {'rough_grinding_qty': rough_grinding_qty,'rough_grinding_accept_qty': rough_grinding_qty,'rough_grinding_name':rough_grinding_name[0]})
 					
 					if stage_item['stage_name'] == 'FINISH GRINDING':
 						### Next Stage Qty ###
@@ -1313,7 +1538,18 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,finish_grinding_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(finish_grinding_seq_id[0],seq_rec.code))
 						finish_grinding_name = cr.fetchone();
-						self.write(cr, uid, ids, {'finish_grinding_qty': finish_grinding_qty,'finish_grinding_name':finish_grinding_name[0]})
+						self.write(cr, uid, ids, {'finish_grinding_qty': finish_grinding_qty,'finish_grinding_accept_qty': finish_grinding_qty,'finish_grinding_name':finish_grinding_name[0]})
+						
+					if stage_item['stage_name'] == 'RE SHOT BLASTING':
+						### Next Stage Qty ###
+						reshot_blasting_qty = entry.hammering_accept_qty
+						### Sequence Number Generation ###
+						reshot_blasting_name = ''	
+						reshot_blasting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.reshot.blasting')])
+						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,reshot_blasting_seq_id[0])
+						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(reshot_blasting_seq_id[0],seq_rec.code))
+						reshot_blasting_name = cr.fetchone();
+						self.write(cr, uid, ids, {'reshot_blasting_qty': reshot_blasting_qty,'reshot_blasting_accept_qty': reshot_blasting_qty,'reshot_blasting_name':reshot_blasting_name[0]})
 					
 					self.write(cr, uid, ids, {'stage_id': stage_item['stage_id']})
 					
@@ -1321,7 +1557,7 @@ class kg_fettling(osv.osv):
 				### MS Inward Process Creation ###
 				self.ms_inward_update(cr, uid, [entry.id],entry.hammering_accept_qty)
 			
-		if reject_qty > 0:
+		if entry.hammering_reject_qty > 0:
 			#### NC Creation for reject Qty ###
 			
 			### Production Number ###
@@ -1362,8 +1598,8 @@ class kg_fettling(osv.osv):
 				'schedule_line_id': entry.schedule_line_id.id,
 				'order_id': entry.order_id.id,
 				'order_line_id': entry.order_line_id.id,
-				'qty' : reject_qty,              
-				'schedule_qty' : reject_qty,              
+				'qty' : entry.hammering_reject_qty,              
+				'schedule_qty' : entry.hammering_reject_qty,              
 				'state' : 'issue_done',
 				'order_category':entry.order_category,
 				'order_priority': '2',
@@ -1377,15 +1613,15 @@ class kg_fettling(osv.osv):
 				'issue_state': 'issued',
 				'core_no': core_name[0],
 				'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-				'core_qty': reject_qty,
+				'core_qty': entry.hammering_reject_qty,
 				'core_state': 'pending',
 				'mould_no': mould_name[0],
 				'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-				'mould_qty': reject_qty,
+				'mould_qty': entry.hammering_reject_qty,
 				'mould_state': 'pending',		
 			}
 			production_id = production_obj.create(cr, uid, production_vals)
-		self.write(cr, uid, ids, {'hammering_reject_qty': reject_qty,'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		self.write(cr, uid, ids, {'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 		
 	def wheel_cutting_update(self,cr,uid,ids,context=None):
@@ -1393,12 +1629,33 @@ class kg_fettling(osv.osv):
 		entry = self.browse(cr, uid, ids[0])
 		reject_qty = entry.wheel_cutting_qty - entry.wheel_cutting_accept_qty
 		
-		if entry.wheel_cutting_qty <= 0 or entry.wheel_cutting_accept_qty <= 0:
+		if entry.wheel_cutting_qty <= 0 or entry.wheel_cutting_accept_qty < 0:
 			raise osv.except_osv(_('Warning!'),
 						_('System not allow to save negative or zero values !!'))
-		if reject_qty > 0 and not entry.wheel_cutting_reject_remarks_id:
+						
+		if reject_qty > 0:
+			if entry.wheel_cutting_reject_qty == 0:
+				raise osv.except_osv(_('Warning!'),
+				_('Kindly Enter Rejection Qty !!'))
+			if entry.wheel_cutting_reject_qty < reject_qty:
+				raise osv.except_osv(_('Warning!'),
+				_('Kindly Check Rejection Qty !!'))
+						
+		if entry.wheel_cutting_reject_qty > 0 and not entry.wheel_cutting_reject_remarks_id:
 			raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
+				
+		if entry.wheel_cutting_reject_qty > reject_qty:
+			raise osv.except_osv(_('Warning!'),
+				_('Kindly check the rejection Qty !!'))
+				
+		wheel_cutting_date = entry.wheel_cutting_date
+		wheel_cutting_date = str(wheel_cutting_date)
+		wheel_cutting_date = datetime.strptime(wheel_cutting_date, '%Y-%m-%d')
+		
+		if wheel_cutting_date > today:
+			raise osv.except_osv(_('Warning!'),
+				_('System not allow to save with future date !!'))
 		
 		if entry.wheel_cutting_accept_qty > 0:
 			cr.execute(""" select fettling.stage_id,stage.name as stage_name,fettling.seq_no from ch_fettling_process as fettling
@@ -1428,7 +1685,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,knockout_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(knockout_seq_id[0],seq_rec.code))
 						knockout_name = cr.fetchone();
-						self.write(cr, uid, ids, {'knockout_qty': knockout_qty,'knockout_name':knockout_name[0]})
+						self.write(cr, uid, ids, {'knockout_qty': knockout_qty,'knockout_accept_qty':knockout_qty,'knockout_name':knockout_name[0]})
 					
 					if stage_item['stage_name'] == 'DECORING':
 						### Next Stage Qty ###
@@ -1439,7 +1696,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,decoring_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(decoring_seq_id[0],seq_rec.code))
 						decoring_name = cr.fetchone();
-						self.write(cr, uid, ids, {'decoring_qty': decoring_qty,'decoring_name':decoring_name[0]})
+						self.write(cr, uid, ids, {'decoring_qty': decoring_qty,'decoring_accept_qty':decoring_qty,'decoring_name':decoring_name[0]})
 					
 					if stage_item['stage_name'] == 'SHOT BLAST':
 						### Next Stage Qty ###
@@ -1450,7 +1707,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,shot_blast_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(shot_blast_seq_id[0],seq_rec.code))
 						shot_blast_name = cr.fetchone();
-						self.write(cr, uid, ids, {'shot_blast_qty': shot_blast_qty,'shot_blast_name':shot_blast_name[0]})
+						self.write(cr, uid, ids, {'shot_blast_qty': shot_blast_qty,'shot_blast_accept_qty':shot_blast_qty,'shot_blast_name':shot_blast_name[0]})
 					
 					if stage_item['stage_name'] == 'HAMMERING':
 						### Next Stage Qty ###
@@ -1461,7 +1718,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,hammering_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(hammering_seq_id[0],seq_rec.code))
 						hammering_name = cr.fetchone();
-						self.write(cr, uid, ids, {'hammering_qty': hammering_qty,'hammering_name':hammering_name[0]})
+						self.write(cr, uid, ids, {'hammering_qty': hammering_qty,'hammering_accept_qty': hammering_qty,'hammering_name':hammering_name[0]})
 					
 					if stage_item['stage_name'] == 'WHEEL CUTTING':
 						### Next Stage Qty ###
@@ -1472,7 +1729,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,wheel_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(wheel_cutting_seq_id[0],seq_rec.code))
 						wheel_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'wheel_cutting_qty': wheel_cutting_qty,'wheel_cutting_name':wheel_cutting_name[0]})
+						self.write(cr, uid, ids, {'wheel_cutting_qty': wheel_cutting_qty,'wheel_cutting_accept_qty': wheel_cutting_qty,'wheel_cutting_name':wheel_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'GAS CUTTING':
 						### Next Stage Qty ###
@@ -1483,7 +1740,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,gas_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(gas_cutting_seq_id[0],seq_rec.code))
 						gas_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'gas_cutting_qty': gas_cutting_qty,'gas_cutting_name':gas_cutting_name[0]})
+						self.write(cr, uid, ids, {'gas_cutting_qty': gas_cutting_qty,'gas_cutting_accept_qty': gas_cutting_qty,'gas_cutting_name':gas_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'ARC CUTTING':
 						### Next Stage Qty ###
@@ -1494,12 +1751,12 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,arc_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(arc_cutting_seq_id[0],seq_rec.code))
 						arc_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'arc_cutting_qty': arc_cutting_qty,'arc_cutting_name':arc_cutting_name[0]})
+						self.write(cr, uid, ids, {'arc_cutting_qty': arc_cutting_qty,'arc_cutting_accept_qty': arc_cutting_qty,'arc_cutting_name':arc_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'HEAT TREATMENT':
 						### Next Stage Qty ###
 						heat_total_qty = entry.wheel_cutting_accept_qty
-						self.write(cr, uid, ids, {'heat_total_qty': heat_total_qty})
+						self.write(cr, uid, ids, {'heat_total_qty': heat_total_qty,'heat_qty':heat_total_qty})
 					
 					if stage_item['stage_name'] == 'ROUGH GRINDING':
 						### Next Stage Qty ###
@@ -1510,7 +1767,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,rough_grinding_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(rough_grinding_seq_id[0],seq_rec.code))
 						rough_grinding_name = cr.fetchone();
-						self.write(cr, uid, ids, {'rough_grinding_qty': rough_grinding_qty,'rough_grinding_name':rough_grinding_name[0]})
+						self.write(cr, uid, ids, {'rough_grinding_qty': rough_grinding_qty,'rough_grinding_accept_qty': rough_grinding_qty,'rough_grinding_name':rough_grinding_name[0]})
 					
 					if stage_item['stage_name'] == 'FINISH GRINDING':
 						### Next Stage Qty ###
@@ -1521,7 +1778,18 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,finish_grinding_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(finish_grinding_seq_id[0],seq_rec.code))
 						finish_grinding_name = cr.fetchone();
-						self.write(cr, uid, ids, {'finish_grinding_qty': finish_grinding_qty,'finish_grinding_name':finish_grinding_name[0]})
+						self.write(cr, uid, ids, {'finish_grinding_qty': finish_grinding_qty,'finish_grinding_accept_qty': finish_grinding_qty,'finish_grinding_name':finish_grinding_name[0]})
+						
+					if stage_item['stage_name'] == 'RE SHOT BLASTING':
+						### Next Stage Qty ###
+						reshot_blasting_qty = entry.wheel_cutting_accept_qty
+						### Sequence Number Generation ###
+						reshot_blasting_name = ''	
+						reshot_blasting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.reshot.blasting')])
+						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,reshot_blasting_seq_id[0])
+						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(reshot_blasting_seq_id[0],seq_rec.code))
+						reshot_blasting_name = cr.fetchone();
+						self.write(cr, uid, ids, {'reshot_blasting_qty': reshot_blasting_qty,'reshot_blasting_accept_qty': reshot_blasting_qty,'reshot_blasting_name':reshot_blasting_name[0]})
 					
 					self.write(cr, uid, ids, {'stage_id': stage_item['stage_id']})
 					
@@ -1529,7 +1797,7 @@ class kg_fettling(osv.osv):
 				### MS Inward Process Creation ###
 				self.ms_inward_update(cr, uid, [entry.id],entry.wheel_cutting_accept_qty)
 			
-		if reject_qty > 0:
+		if entry.wheel_cutting_reject_qty > 0:
 			#### NC Creation for reject Qty ###
 			
 			### Production Number ###
@@ -1570,8 +1838,8 @@ class kg_fettling(osv.osv):
 				'schedule_line_id': entry.schedule_line_id.id,
 				'order_id': entry.order_id.id,
 				'order_line_id': entry.order_line_id.id,
-				'qty' : reject_qty,              
-				'schedule_qty' : reject_qty,              
+				'qty' : entry.wheel_cutting_reject_qty,              
+				'schedule_qty' : entry.wheel_cutting_reject_qty,              
 				'state' : 'issue_done',
 				'order_category':entry.order_category,
 				'order_priority': '2',
@@ -1585,15 +1853,15 @@ class kg_fettling(osv.osv):
 				'issue_state': 'issued',
 				'core_no': core_name[0],
 				'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-				'core_qty': reject_qty,
+				'core_qty': entry.wheel_cutting_reject_qty,
 				'core_state': 'pending',
 				'mould_no': mould_name[0],
 				'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-				'mould_qty': reject_qty,
+				'mould_qty': entry.wheel_cutting_reject_qty,
 				'mould_state': 'pending',		
 			}
 			production_id = production_obj.create(cr, uid, production_vals)
-		self.write(cr, uid, ids, {'wheel_cutting_reject_qty': reject_qty,'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		self.write(cr, uid, ids, {'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 		
 	def gas_cutting_update(self,cr,uid,ids,context=None):
@@ -1601,12 +1869,33 @@ class kg_fettling(osv.osv):
 		entry = self.browse(cr, uid, ids[0])
 		reject_qty = entry.gas_cutting_qty - entry.gas_cutting_accept_qty
 		
-		if entry.gas_cutting_qty <= 0 or entry.gas_cutting_accept_qty <= 0:
+		if entry.gas_cutting_qty <= 0 or entry.gas_cutting_accept_qty < 0:
 			raise osv.except_osv(_('Warning!'),
 						_('System not allow to save negative or zero values !!'))
-		if reject_qty > 0 and not entry.gas_cutting_reject_remarks_id:
+						
+		if reject_qty > 0:
+			if entry.gas_cutting_reject_qty == 0:
+				raise osv.except_osv(_('Warning!'),
+				_('Kindly Enter Rejection Qty !!'))
+			if entry.gas_cutting_reject_qty < reject_qty:
+				raise osv.except_osv(_('Warning!'),
+				_('Kindly Check Rejection Qty !!'))
+						
+		if entry.gas_cutting_reject_qty > 0 and not entry.gas_cutting_reject_remarks_id:
 			raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
+				
+		if entry.gas_cutting_reject_qty > reject_qty:
+			raise osv.except_osv(_('Warning!'),
+				_('Kindly check the rejection Qty !!'))
+				
+		gas_cutting_date = entry.gas_cutting_date
+		gas_cutting_date = str(gas_cutting_date)
+		gas_cutting_date = datetime.strptime(gas_cutting_date, '%Y-%m-%d')
+		
+		if gas_cutting_date > today:
+			raise osv.except_osv(_('Warning!'),
+				_('System not allow to save with future date !!'))
 		
 		if entry.gas_cutting_accept_qty > 0:
 			cr.execute(""" select fettling.stage_id,stage.name as stage_name,fettling.seq_no from ch_fettling_process as fettling
@@ -1636,7 +1925,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,knockout_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(knockout_seq_id[0],seq_rec.code))
 						knockout_name = cr.fetchone();
-						self.write(cr, uid, ids, {'knockout_qty': knockout_qty,'knockout_name':knockout_name[0]})
+						self.write(cr, uid, ids, {'knockout_qty': knockout_qty,'knockout_accept_qty':knockout_qty,'knockout_name':knockout_name[0]})
 					
 					if stage_item['stage_name'] == 'DECORING':
 						### Next Stage Qty ###
@@ -1647,7 +1936,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,decoring_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(decoring_seq_id[0],seq_rec.code))
 						decoring_name = cr.fetchone();
-						self.write(cr, uid, ids, {'decoring_qty': decoring_qty,'decoring_name':decoring_name[0]})
+						self.write(cr, uid, ids, {'decoring_qty': decoring_qty,'decoring_accept_qty':decoring_qty,'decoring_name':decoring_name[0]})
 					
 					if stage_item['stage_name'] == 'SHOT BLAST':
 						### Next Stage Qty ###
@@ -1658,7 +1947,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,shot_blast_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(shot_blast_seq_id[0],seq_rec.code))
 						shot_blast_name = cr.fetchone();
-						self.write(cr, uid, ids, {'shot_blast_qty': shot_blast_qty,'shot_blast_name':shot_blast_name[0]})
+						self.write(cr, uid, ids, {'shot_blast_qty': shot_blast_qty,'shot_blast_accept_qty':shot_blast_qty,'shot_blast_name':shot_blast_name[0]})
 					
 					if stage_item['stage_name'] == 'HAMMERING':
 						### Next Stage Qty ###
@@ -1669,7 +1958,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,hammering_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(hammering_seq_id[0],seq_rec.code))
 						hammering_name = cr.fetchone();
-						self.write(cr, uid, ids, {'hammering_qty': hammering_qty,'hammering_name':hammering_name[0]})
+						self.write(cr, uid, ids, {'hammering_qty': hammering_qty,'hammering_accept_qty': hammering_qty,'hammering_name':hammering_name[0]})
 					
 					if stage_item['stage_name'] == 'WHEEL CUTTING':
 						### Next Stage Qty ###
@@ -1680,18 +1969,18 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,wheel_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(wheel_cutting_seq_id[0],seq_rec.code))
 						wheel_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'wheel_cutting_qty': wheel_cutting_qty,'wheel_cutting_name':wheel_cutting_name[0]})
+						self.write(cr, uid, ids, {'wheel_cutting_qty': wheel_cutting_qty,'wheel_cutting_accept_qty': wheel_cutting_qty,'wheel_cutting_name':wheel_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'GAS CUTTING':
 						### Next Stage Qty ###
 						gas_cutting_qty = entry.gas_cutting_accept_qty
 						### Sequence Number Generation ###
 						gas_cutting_name = ''	
-						gas_cutting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
+						shot_blast_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,gas_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(gas_cutting_seq_id[0],seq_rec.code))
 						gas_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'gas_cutting_qty': gas_cutting_qty,'gas_cutting_name':gas_cutting_name[0]})
+						self.write(cr, uid, ids, {'gas_cutting_qty': gas_cutting_qty,'gas_cutting_accept_qty': gas_cutting_qty,'gas_cutting_name':gas_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'ARC CUTTING':
 						### Next Stage Qty ###
@@ -1702,12 +1991,12 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,arc_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(arc_cutting_seq_id[0],seq_rec.code))
 						arc_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'arc_cutting_qty': arc_cutting_qty,'arc_cutting_name':arc_cutting_name[0]})
+						self.write(cr, uid, ids, {'arc_cutting_qty': arc_cutting_qty,'arc_cutting_accept_qty': arc_cutting_qty,'arc_cutting_name':arc_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'HEAT TREATMENT':
 						### Next Stage Qty ###
 						heat_total_qty = entry.gas_cutting_accept_qty
-						self.write(cr, uid, ids, {'heat_total_qty': heat_total_qty})
+						self.write(cr, uid, ids, {'heat_total_qty': heat_total_qty,'heat_qty':heat_total_qty})
 					
 					if stage_item['stage_name'] == 'ROUGH GRINDING':
 						### Next Stage Qty ###
@@ -1718,7 +2007,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,rough_grinding_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(rough_grinding_seq_id[0],seq_rec.code))
 						rough_grinding_name = cr.fetchone();
-						self.write(cr, uid, ids, {'rough_grinding_qty': rough_grinding_qty,'rough_grinding_name':rough_grinding_name[0]})
+						self.write(cr, uid, ids, {'rough_grinding_qty': rough_grinding_qty,'rough_grinding_accept_qty': rough_grinding_qty,'rough_grinding_name':rough_grinding_name[0]})
 					
 					if stage_item['stage_name'] == 'FINISH GRINDING':
 						### Next Stage Qty ###
@@ -1729,7 +2018,18 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,finish_grinding_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(finish_grinding_seq_id[0],seq_rec.code))
 						finish_grinding_name = cr.fetchone();
-						self.write(cr, uid, ids, {'finish_grinding_qty': finish_grinding_qty,'finish_grinding_name':finish_grinding_name[0]})
+						self.write(cr, uid, ids, {'finish_grinding_qty': finish_grinding_qty,'finish_grinding_accept_qty': finish_grinding_qty,'finish_grinding_name':finish_grinding_name[0]})
+						
+					if stage_item['stage_name'] == 'RE SHOT BLASTING':
+						### Next Stage Qty ###
+						reshot_blasting_qty = entry.gas_cutting_accept_qty
+						### Sequence Number Generation ###
+						reshot_blasting_name = ''	
+						reshot_blasting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.reshot.blasting')])
+						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,reshot_blasting_seq_id[0])
+						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(reshot_blasting_seq_id[0],seq_rec.code))
+						reshot_blasting_name = cr.fetchone();
+						self.write(cr, uid, ids, {'reshot_blasting_qty': reshot_blasting_qty,'reshot_blasting_accept_qty': reshot_blasting_qty,'reshot_blasting_name':reshot_blasting_name[0]})
 					
 					self.write(cr, uid, ids, {'stage_id': stage_item['stage_id']})
 					
@@ -1737,7 +2037,7 @@ class kg_fettling(osv.osv):
 				### MS Inward Process Creation ###
 				self.ms_inward_update(cr, uid, [entry.id],entry.gas_cutting_accept_qty)
 			
-		if reject_qty > 0:
+		if entry.gas_cutting_reject_qty > 0:
 			#### NC Creation for reject Qty ###
 			
 			### Production Number ###
@@ -1778,8 +2078,8 @@ class kg_fettling(osv.osv):
 				'schedule_line_id': entry.schedule_line_id.id,
 				'order_id': entry.order_id.id,
 				'order_line_id': entry.order_line_id.id,
-				'qty' : reject_qty,              
-				'schedule_qty' : reject_qty,              
+				'qty' : entry.gas_cutting_reject_qty,              
+				'schedule_qty' : entry.gas_cutting_reject_qty,              
 				'state' : 'issue_done',
 				'order_category':entry.order_category,
 				'order_priority': '2',
@@ -1793,15 +2093,15 @@ class kg_fettling(osv.osv):
 				'issue_state': 'issued',
 				'core_no': core_name[0],
 				'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-				'core_qty': reject_qty,
+				'core_qty': entry.gas_cutting_reject_qty,
 				'core_state': 'pending',
 				'mould_no': mould_name[0],
 				'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-				'mould_qty': reject_qty,
+				'mould_qty': entry.gas_cutting_reject_qty,
 				'mould_state': 'pending',		
 			}
 			production_id = production_obj.create(cr, uid, production_vals)
-		self.write(cr, uid, ids, {'gas_cutting_reject_qty': reject_qty,'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		self.write(cr, uid, ids, {'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 		
 		
@@ -1810,12 +2110,34 @@ class kg_fettling(osv.osv):
 		entry = self.browse(cr, uid, ids[0])
 		reject_qty = entry.arc_cutting_qty - entry.arc_cutting_accept_qty
 		
-		if entry.arc_cutting_qty <= 0 or entry.arc_cutting_accept_qty <= 0:
+		if entry.arc_cutting_qty <= 0 or entry.arc_cutting_accept_qty < 0:
 			raise osv.except_osv(_('Warning!'),
 						_('System not allow to save negative or zero values !!'))
-		if reject_qty > 0 and not entry.arc_cutting_reject_remarks_id:
+						
+						
+		if reject_qty > 0:
+			if entry.arc_cutting_reject_qty == 0:
+				raise osv.except_osv(_('Warning!'),
+				_('Kindly Enter Rejection Qty !!'))
+			if entry.arc_cutting_reject_qty < reject_qty:
+				raise osv.except_osv(_('Warning!'),
+				_('Kindly Check Rejection Qty !!'))
+						
+		if entry.arc_cutting_reject_qty > 0 and not entry.arc_cutting_reject_remarks_id:
 			raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
+				
+		if entry.arc_cutting_reject_qty > reject_qty:
+			raise osv.except_osv(_('Warning!'),
+				_('Kindly check the rejection Qty !!'))
+				
+		arc_cutting_date = entry.arc_cutting_date
+		arc_cutting_date = str(arc_cutting_date)
+		arc_cutting_date = datetime.strptime(arc_cutting_date, '%Y-%m-%d')
+		
+		if arc_cutting_date > today:
+			raise osv.except_osv(_('Warning!'),
+				_('System not allow to save with future date !!'))
 		
 		if entry.arc_cutting_accept_qty > 0:
 			cr.execute(""" select fettling.stage_id,stage.name as stage_name,fettling.seq_no from ch_fettling_process as fettling
@@ -1845,7 +2167,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,knockout_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(knockout_seq_id[0],seq_rec.code))
 						knockout_name = cr.fetchone();
-						self.write(cr, uid, ids, {'knockout_qty': knockout_qty,'knockout_name':knockout_name[0]})
+						self.write(cr, uid, ids, {'knockout_qty': knockout_qty,'knockout_accept_qty':knockout_qty,'knockout_name':knockout_name[0]})
 					
 					if stage_item['stage_name'] == 'DECORING':
 						### Next Stage Qty ###
@@ -1856,7 +2178,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,decoring_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(decoring_seq_id[0],seq_rec.code))
 						decoring_name = cr.fetchone();
-						self.write(cr, uid, ids, {'decoring_qty': decoring_qty,'decoring_name':decoring_name[0]})
+						self.write(cr, uid, ids, {'decoring_qty': decoring_qty,'decoring_accept_qty':decoring_qty,'decoring_name':decoring_name[0]})
 					
 					if stage_item['stage_name'] == 'SHOT BLAST':
 						### Next Stage Qty ###
@@ -1867,7 +2189,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,shot_blast_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(shot_blast_seq_id[0],seq_rec.code))
 						shot_blast_name = cr.fetchone();
-						self.write(cr, uid, ids, {'shot_blast_qty': shot_blast_qty,'shot_blast_name':shot_blast_name[0]})
+						self.write(cr, uid, ids, {'shot_blast_qty': shot_blast_qty,'shot_blast_accept_qty':shot_blast_qty,'shot_blast_name':shot_blast_name[0]})
 					
 					if stage_item['stage_name'] == 'HAMMERING':
 						### Next Stage Qty ###
@@ -1878,7 +2200,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,hammering_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(hammering_seq_id[0],seq_rec.code))
 						hammering_name = cr.fetchone();
-						self.write(cr, uid, ids, {'hammering_qty': hammering_qty,'hammering_name':hammering_name[0]})
+						self.write(cr, uid, ids, {'hammering_qty': hammering_qty,'hammering_accept_qty': hammering_qty,'hammering_name':hammering_name[0]})
 					
 					if stage_item['stage_name'] == 'WHEEL CUTTING':
 						### Next Stage Qty ###
@@ -1889,18 +2211,18 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,wheel_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(wheel_cutting_seq_id[0],seq_rec.code))
 						wheel_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'wheel_cutting_qty': wheel_cutting_qty,'wheel_cutting_name':wheel_cutting_name[0]})
+						self.write(cr, uid, ids, {'wheel_cutting_qty': wheel_cutting_qty,'wheel_cutting_accept_qty': wheel_cutting_qty,'wheel_cutting_name':wheel_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'GAS CUTTING':
 						### Next Stage Qty ###
 						gas_cutting_qty = entry.arc_cutting_accept_qty
 						### Sequence Number Generation ###
 						gas_cutting_name = ''	
-						gas_cutting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
+						shot_blast_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,gas_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(gas_cutting_seq_id[0],seq_rec.code))
 						gas_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'gas_cutting_qty': gas_cutting_qty,'gas_cutting_name':gas_cutting_name[0]})
+						self.write(cr, uid, ids, {'gas_cutting_qty': gas_cutting_qty,'gas_cutting_accept_qty': gas_cutting_qty,'gas_cutting_name':gas_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'ARC CUTTING':
 						### Next Stage Qty ###
@@ -1911,12 +2233,12 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,arc_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(arc_cutting_seq_id[0],seq_rec.code))
 						arc_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'arc_cutting_qty': arc_cutting_qty,'arc_cutting_name':arc_cutting_name[0]})
+						self.write(cr, uid, ids, {'arc_cutting_qty': arc_cutting_qty,'arc_cutting_accept_qty': arc_cutting_qty,'arc_cutting_name':arc_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'HEAT TREATMENT':
 						### Next Stage Qty ###
 						heat_total_qty = entry.arc_cutting_accept_qty
-						self.write(cr, uid, ids, {'heat_total_qty': heat_total_qty})
+						self.write(cr, uid, ids, {'heat_total_qty': heat_total_qty,'heat_qty':heat_total_qty})
 					
 					if stage_item['stage_name'] == 'ROUGH GRINDING':
 						### Next Stage Qty ###
@@ -1927,7 +2249,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,rough_grinding_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(rough_grinding_seq_id[0],seq_rec.code))
 						rough_grinding_name = cr.fetchone();
-						self.write(cr, uid, ids, {'rough_grinding_qty': rough_grinding_qty,'rough_grinding_name':rough_grinding_name[0]})
+						self.write(cr, uid, ids, {'rough_grinding_qty': rough_grinding_qty,'rough_grinding_accept_qty': rough_grinding_qty,'rough_grinding_name':rough_grinding_name[0]})
 					
 					if stage_item['stage_name'] == 'FINISH GRINDING':
 						### Next Stage Qty ###
@@ -1938,7 +2260,18 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,finish_grinding_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(finish_grinding_seq_id[0],seq_rec.code))
 						finish_grinding_name = cr.fetchone();
-						self.write(cr, uid, ids, {'finish_grinding_qty': finish_grinding_qty,'finish_grinding_name':finish_grinding_name[0]})
+						self.write(cr, uid, ids, {'finish_grinding_qty': finish_grinding_qty,'finish_grinding_accept_qty': finish_grinding_qty,'finish_grinding_name':finish_grinding_name[0]})
+						
+					if stage_item['stage_name'] == 'RE SHOT BLASTING':
+						### Next Stage Qty ###
+						reshot_blasting_qty = entry.arc_cutting_accept_qty
+						### Sequence Number Generation ###
+						reshot_blasting_name = ''	
+						reshot_blasting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.reshot.blasting')])
+						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,reshot_blasting_seq_id[0])
+						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(reshot_blasting_seq_id[0],seq_rec.code))
+						reshot_blasting_name = cr.fetchone();
+						self.write(cr, uid, ids, {'reshot_blasting_qty': reshot_blasting_qty,'reshot_blasting_accept_qty': reshot_blasting_qty,'reshot_blasting_name':reshot_blasting_name[0]})
 					
 					self.write(cr, uid, ids, {'stage_id': stage_item['stage_id']})
 					
@@ -1946,7 +2279,7 @@ class kg_fettling(osv.osv):
 				### MS Inward Process Creation ###
 				self.ms_inward_update(cr, uid, [entry.id],entry.arc_cutting_accept_qty)
 			
-		if reject_qty > 0:
+		if entry.arc_cutting_reject_qty > 0:
 			#### NC Creation for reject Qty ###
 			
 			### Production Number ###
@@ -1987,8 +2320,8 @@ class kg_fettling(osv.osv):
 				'schedule_line_id': entry.schedule_line_id.id,
 				'order_id': entry.order_id.id,
 				'order_line_id': entry.order_line_id.id,
-				'qty' : reject_qty,              
-				'schedule_qty' : reject_qty,              
+				'qty' : entry.arc_cutting_reject_qty,              
+				'schedule_qty' : entry.arc_cutting_reject_qty,              
 				'state' : 'issue_done',
 				'order_category':entry.order_category,
 				'order_priority': '2',
@@ -2002,15 +2335,15 @@ class kg_fettling(osv.osv):
 				'issue_state': 'issued',
 				'core_no': core_name[0],
 				'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-				'core_qty': reject_qty,
+				'core_qty': entry.arc_cutting_reject_qty,
 				'core_state': 'pending',
 				'mould_no': mould_name[0],
 				'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-				'mould_qty': reject_qty,
+				'mould_qty': entry.arc_cutting_reject_qty,
 				'mould_state': 'pending',		
 			}
 			production_id = production_obj.create(cr, uid, production_vals)
-		self.write(cr, uid, ids, {'arc_cutting_reject_qty': reject_qty,'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		self.write(cr, uid, ids, {'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 		
 	def heat_treatment_update(self,cr,uid,ids,context=None):
@@ -2018,9 +2351,17 @@ class kg_fettling(osv.osv):
 		production_obj = self.pool.get('kg.production')
 		entry = self.browse(cr, uid, ids[0])
 		
-		if entry.heat_qty <= 0 or entry.heat_each_weight <= 0:
+		if entry.heat_qty <= 0 or entry.heat_each_weight < 0:
 			raise osv.except_osv(_('Warning!'),
 						_('System not allow to save negative or zero values !!'))
+						
+		heat_date = entry.heat_date
+		heat_date = str(heat_date)
+		heat_date = datetime.strptime(heat_date, '%Y-%m-%d')
+		
+		if heat_date > today:
+			raise osv.except_osv(_('Warning!'),
+				_('System not allow to save with future date !!'))
 		
 		if entry.heat_qty > 0:
 			cr.execute(""" select fettling.stage_id,stage.name as stage_name,fettling.seq_no from ch_fettling_process as fettling
@@ -2050,7 +2391,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,knockout_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(knockout_seq_id[0],seq_rec.code))
 						knockout_name = cr.fetchone();
-						self.write(cr, uid, ids, {'knockout_qty': knockout_qty,'knockout_name':knockout_name[0]})
+						self.write(cr, uid, ids, {'knockout_qty': knockout_qty,'knockout_accept_qty':knockout_qty,'knockout_name':knockout_name[0]})
 					
 					if stage_item['stage_name'] == 'DECORING':
 						### Next Stage Qty ###
@@ -2061,7 +2402,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,decoring_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(decoring_seq_id[0],seq_rec.code))
 						decoring_name = cr.fetchone();
-						self.write(cr, uid, ids, {'decoring_qty': decoring_qty,'decoring_name':decoring_name[0]})
+						self.write(cr, uid, ids, {'decoring_qty': decoring_qty,'decoring_accept_qty':decoring_qty,'decoring_name':decoring_name[0]})
 					
 					if stage_item['stage_name'] == 'SHOT BLAST':
 						### Next Stage Qty ###
@@ -2072,7 +2413,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,shot_blast_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(shot_blast_seq_id[0],seq_rec.code))
 						shot_blast_name = cr.fetchone();
-						self.write(cr, uid, ids, {'shot_blast_qty': shot_blast_qty,'shot_blast_name':shot_blast_name[0]})
+						self.write(cr, uid, ids, {'shot_blast_qty': shot_blast_qty,'shot_blast_accept_qty':shot_blast_qty,'shot_blast_name':shot_blast_name[0]})
 					
 					if stage_item['stage_name'] == 'HAMMERING':
 						### Next Stage Qty ###
@@ -2083,7 +2424,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,hammering_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(hammering_seq_id[0],seq_rec.code))
 						hammering_name = cr.fetchone();
-						self.write(cr, uid, ids, {'hammering_qty': hammering_qty,'hammering_name':hammering_name[0]})
+						self.write(cr, uid, ids, {'hammering_qty': hammering_qty,'hammering_accept_qty': hammering_qty,'hammering_name':hammering_name[0]})
 					
 					if stage_item['stage_name'] == 'WHEEL CUTTING':
 						### Next Stage Qty ###
@@ -2094,18 +2435,18 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,wheel_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(wheel_cutting_seq_id[0],seq_rec.code))
 						wheel_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'wheel_cutting_qty': wheel_cutting_qty,'wheel_cutting_name':wheel_cutting_name[0]})
+						self.write(cr, uid, ids, {'wheel_cutting_qty': wheel_cutting_qty,'wheel_cutting_accept_qty': wheel_cutting_qty,'wheel_cutting_name':wheel_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'GAS CUTTING':
 						### Next Stage Qty ###
 						gas_cutting_qty = entry.heat_qty
 						### Sequence Number Generation ###
 						gas_cutting_name = ''	
-						gas_cutting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
+						shot_blast_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,gas_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(gas_cutting_seq_id[0],seq_rec.code))
 						gas_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'gas_cutting_qty': gas_cutting_qty,'gas_cutting_name':gas_cutting_name[0]})
+						self.write(cr, uid, ids, {'gas_cutting_qty': gas_cutting_qty,'gas_cutting_accept_qty': gas_cutting_qty,'gas_cutting_name':gas_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'ARC CUTTING':
 						### Next Stage Qty ###
@@ -2116,12 +2457,12 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,arc_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(arc_cutting_seq_id[0],seq_rec.code))
 						arc_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'arc_cutting_qty': arc_cutting_qty,'arc_cutting_name':arc_cutting_name[0]})
+						self.write(cr, uid, ids, {'arc_cutting_qty': arc_cutting_qty,'arc_cutting_accept_qty': arc_cutting_qty,'arc_cutting_name':arc_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'HEAT TREATMENT':
 						### Next Stage Qty ###
 						heat_total_qty = entry.heat_qty
-						self.write(cr, uid, ids, {'heat_total_qty': heat_total_qty})
+						self.write(cr, uid, ids, {'heat_total_qty': heat_total_qty,'heat_qty':heat_total_qty})
 					
 					if stage_item['stage_name'] == 'ROUGH GRINDING':
 						### Next Stage Qty ###
@@ -2132,7 +2473,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,rough_grinding_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(rough_grinding_seq_id[0],seq_rec.code))
 						rough_grinding_name = cr.fetchone();
-						self.write(cr, uid, ids, {'rough_grinding_qty': rough_grinding_qty,'rough_grinding_name':rough_grinding_name[0]})
+						self.write(cr, uid, ids, {'rough_grinding_qty': rough_grinding_qty,'rough_grinding_accept_qty': rough_grinding_qty,'rough_grinding_name':rough_grinding_name[0]})
 					
 					if stage_item['stage_name'] == 'FINISH GRINDING':
 						### Next Stage Qty ###
@@ -2143,7 +2484,18 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,finish_grinding_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(finish_grinding_seq_id[0],seq_rec.code))
 						finish_grinding_name = cr.fetchone();
-						self.write(cr, uid, ids, {'finish_grinding_qty': finish_grinding_qty,'finish_grinding_name':finish_grinding_name[0]})
+						self.write(cr, uid, ids, {'finish_grinding_qty': finish_grinding_qty,'finish_grinding_accept_qty': finish_grinding_qty,'finish_grinding_name':finish_grinding_name[0]})
+						
+					if stage_item['stage_name'] == 'RE SHOT BLASTING':
+						### Next Stage Qty ###
+						reshot_blasting_qty = entry.heat_qty
+						### Sequence Number Generation ###
+						reshot_blasting_name = ''	
+						reshot_blasting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.reshot.blasting')])
+						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,reshot_blasting_seq_id[0])
+						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(reshot_blasting_seq_id[0],seq_rec.code))
+						reshot_blasting_name = cr.fetchone();
+						self.write(cr, uid, ids, {'reshot_blasting_qty': reshot_blasting_qty,'reshot_blasting_accept_qty': reshot_blasting_qty,'reshot_blasting_name':reshot_blasting_name[0]})
 					
 					self.write(cr, uid, ids, {'stage_id': stage_item['stage_id']})
 					
@@ -2162,12 +2514,33 @@ class kg_fettling(osv.osv):
 		entry = self.browse(cr, uid, ids[0])
 		reject_qty = entry.rough_grinding_qty - entry.rough_grinding_accept_qty
 		
-		if entry.rough_grinding_qty <= 0 or entry.rough_grinding_accept_qty <= 0:
+		if entry.rough_grinding_qty <= 0 or entry.rough_grinding_accept_qty < 0:
 			raise osv.except_osv(_('Warning!'),
 						_('System not allow to save negative or zero values !!'))
-		if reject_qty > 0 and not entry.rough_grinding_reject_remarks_id:
+						
+		if reject_qty > 0:
+			if entry.rough_grinding_reject_qty == 0:
+				raise osv.except_osv(_('Warning!'),
+				_('Kindly Enter Rejection Qty !!'))
+			if entry.rough_grinding_reject_qty < reject_qty:
+				raise osv.except_osv(_('Warning!'),
+				_('Kindly Check Rejection Qty !!'))
+						
+		if entry.rough_grinding_reject_qty > 0 and not entry.rough_grinding_reject_remarks_id:
 			raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
+				
+		if entry.rough_grinding_reject_qty > reject_qty:
+			raise osv.except_osv(_('Warning!'),
+				_('Kindly check the rejection Qty !!'))
+				
+		rough_grinding_date = entry.rough_grinding_date
+		rough_grinding_date = str(rough_grinding_date)
+		rough_grinding_date = datetime.strptime(rough_grinding_date, '%Y-%m-%d')
+		
+		if rough_grinding_date > today:
+			raise osv.except_osv(_('Warning!'),
+				_('System not allow to save with future date !!'))
 		
 		if entry.rough_grinding_accept_qty > 0:
 			cr.execute(""" select fettling.stage_id,stage.name as stage_name,fettling.seq_no from ch_fettling_process as fettling
@@ -2197,7 +2570,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,knockout_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(knockout_seq_id[0],seq_rec.code))
 						knockout_name = cr.fetchone();
-						self.write(cr, uid, ids, {'knockout_qty': knockout_qty,'knockout_name':knockout_name[0]})
+						self.write(cr, uid, ids, {'knockout_qty': knockout_qty,'knockout_accept_qty':knockout_qty,'knockout_name':knockout_name[0]})
 					
 					if stage_item['stage_name'] == 'DECORING':
 						### Next Stage Qty ###
@@ -2208,7 +2581,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,decoring_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(decoring_seq_id[0],seq_rec.code))
 						decoring_name = cr.fetchone();
-						self.write(cr, uid, ids, {'decoring_qty': decoring_qty,'decoring_name':decoring_name[0]})
+						self.write(cr, uid, ids, {'decoring_qty': decoring_qty,'decoring_accept_qty':decoring_qty,'decoring_name':decoring_name[0]})
 					
 					if stage_item['stage_name'] == 'SHOT BLAST':
 						### Next Stage Qty ###
@@ -2219,7 +2592,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,shot_blast_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(shot_blast_seq_id[0],seq_rec.code))
 						shot_blast_name = cr.fetchone();
-						self.write(cr, uid, ids, {'shot_blast_qty': shot_blast_qty,'shot_blast_name':shot_blast_name[0]})
+						self.write(cr, uid, ids, {'shot_blast_qty': shot_blast_qty,'shot_blast_accept_qty':shot_blast_qty,'shot_blast_name':shot_blast_name[0]})
 					
 					if stage_item['stage_name'] == 'HAMMERING':
 						### Next Stage Qty ###
@@ -2230,7 +2603,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,hammering_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(hammering_seq_id[0],seq_rec.code))
 						hammering_name = cr.fetchone();
-						self.write(cr, uid, ids, {'hammering_qty': hammering_qty,'hammering_name':hammering_name[0]})
+						self.write(cr, uid, ids, {'hammering_qty': hammering_qty,'hammering_accept_qty': hammering_qty,'hammering_name':hammering_name[0]})
 					
 					if stage_item['stage_name'] == 'WHEEL CUTTING':
 						### Next Stage Qty ###
@@ -2241,18 +2614,18 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,wheel_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(wheel_cutting_seq_id[0],seq_rec.code))
 						wheel_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'wheel_cutting_qty': wheel_cutting_qty,'wheel_cutting_name':wheel_cutting_name[0]})
+						self.write(cr, uid, ids, {'wheel_cutting_qty': wheel_cutting_qty,'wheel_cutting_accept_qty': wheel_cutting_qty,'wheel_cutting_name':wheel_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'GAS CUTTING':
 						### Next Stage Qty ###
 						gas_cutting_qty = entry.rough_grinding_accept_qty
 						### Sequence Number Generation ###
 						gas_cutting_name = ''	
-						gas_cutting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
+						shot_blast_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,gas_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(gas_cutting_seq_id[0],seq_rec.code))
 						gas_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'gas_cutting_qty': gas_cutting_qty,'gas_cutting_name':gas_cutting_name[0]})
+						self.write(cr, uid, ids, {'gas_cutting_qty': gas_cutting_qty,'gas_cutting_accept_qty': gas_cutting_qty,'gas_cutting_name':gas_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'ARC CUTTING':
 						### Next Stage Qty ###
@@ -2263,12 +2636,12 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,arc_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(arc_cutting_seq_id[0],seq_rec.code))
 						arc_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'arc_cutting_qty': arc_cutting_qty,'arc_cutting_name':arc_cutting_name[0]})
+						self.write(cr, uid, ids, {'arc_cutting_qty': arc_cutting_qty,'arc_cutting_accept_qty': arc_cutting_qty,'arc_cutting_name':arc_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'HEAT TREATMENT':
 						### Next Stage Qty ###
 						heat_total_qty = entry.rough_grinding_accept_qty
-						self.write(cr, uid, ids, {'heat_total_qty': heat_total_qty})
+						self.write(cr, uid, ids, {'heat_total_qty': heat_total_qty,'heat_qty':heat_total_qty})
 					
 					if stage_item['stage_name'] == 'ROUGH GRINDING':
 						### Next Stage Qty ###
@@ -2279,7 +2652,7 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,rough_grinding_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(rough_grinding_seq_id[0],seq_rec.code))
 						rough_grinding_name = cr.fetchone();
-						self.write(cr, uid, ids, {'rough_grinding_qty': rough_grinding_qty,'rough_grinding_name':rough_grinding_name[0]})
+						self.write(cr, uid, ids, {'rough_grinding_qty': rough_grinding_qty,'rough_grinding_accept_qty': rough_grinding_qty,'rough_grinding_name':rough_grinding_name[0]})
 					
 					if stage_item['stage_name'] == 'FINISH GRINDING':
 						### Next Stage Qty ###
@@ -2290,15 +2663,39 @@ class kg_fettling(osv.osv):
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,finish_grinding_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(finish_grinding_seq_id[0],seq_rec.code))
 						finish_grinding_name = cr.fetchone();
-						self.write(cr, uid, ids, {'finish_grinding_qty': finish_grinding_qty,'finish_grinding_name':finish_grinding_name[0]})
+						self.write(cr, uid, ids, {'finish_grinding_qty': finish_grinding_qty,'finish_grinding_accept_qty': finish_grinding_qty,'finish_grinding_name':finish_grinding_name[0]})
+						
+					if stage_item['stage_name'] == 'RE SHOT BLASTING':
+						### Next Stage Qty ###
+						reshot_blasting_qty = entry.rough_grinding_accept_qty
+						### Sequence Number Generation ###
+						reshot_blasting_name = ''	
+						reshot_blasting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.reshot.blasting')])
+						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,reshot_blasting_seq_id[0])
+						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(reshot_blasting_seq_id[0],seq_rec.code))
+						reshot_blasting_name = cr.fetchone();
+						self.write(cr, uid, ids, {'reshot_blasting_qty': reshot_blasting_qty,'reshot_blasting_accept_qty': reshot_blasting_qty,'reshot_blasting_name':reshot_blasting_name[0]})
 					
 					self.write(cr, uid, ids, {'stage_id': stage_item['stage_id']})
 					
 			else:
 				### MS Inward Process Creation ###
 				self.ms_inward_update(cr, uid, [entry.id],entry.rough_grinding_accept_qty)
+				
+				
+		if entry.rough_grinding_rework_qty:
+			### Next Stage Qty ###
+			welding_qty = entry.rough_grinding_rework_qty
+			### Sequence Number Generation ###
+			welding_name = ''	
+			welding_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.welding')])
+			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,welding_seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(welding_seq_id[0],seq_rec.code))
+			welding_name = cr.fetchone();
+			welding_stage_id = self.pool.get('kg.stage.master').search(cr, uid, [('name','=','WELDING')])
+			self.write(cr, uid, ids, {'welding_state':'progress','welding_stage_id':welding_stage_id[0], 'welding_qty': welding_qty,'welding_accept_qty': welding_qty,'welding_name':welding_name[0]})
 			
-		if reject_qty > 0:
+		if entry.rough_grinding_reject_qty > 0:
 			#### NC Creation for reject Qty ###
 			
 			### Production Number ###
@@ -2339,8 +2736,8 @@ class kg_fettling(osv.osv):
 				'schedule_line_id': entry.schedule_line_id.id,
 				'order_id': entry.order_id.id,
 				'order_line_id': entry.order_line_id.id,
-				'qty' : reject_qty,              
-				'schedule_qty' : reject_qty,              
+				'qty' : entry.rough_grinding_reject_qty,              
+				'schedule_qty' : entry.rough_grinding_reject_qty,              
 				'state' : 'issue_done',
 				'order_category':entry.order_category,
 				'order_priority': '2',
@@ -2354,15 +2751,174 @@ class kg_fettling(osv.osv):
 				'issue_state': 'issued',
 				'core_no': core_name[0],
 				'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-				'core_qty': reject_qty,
+				'core_qty': entry.rough_grinding_reject_qty,
 				'core_state': 'pending',
 				'mould_no': mould_name[0],
 				'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-				'mould_qty': reject_qty,
+				'mould_qty': entry.rough_grinding_reject_qty,
 				'mould_state': 'pending',		
 			}
 			production_id = production_obj.create(cr, uid, production_vals)
-		self.write(cr, uid, ids, {'rough_grinding_reject_qty': reject_qty,'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		self.write(cr, uid, ids, {'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		return True
+		
+	def welding_update(self,cr,uid,ids,context=None):
+		production_obj = self.pool.get('kg.production')
+		entry = self.browse(cr, uid, ids[0])
+		reject_qty = entry.welding_qty - entry.welding_accept_qty
+		
+		if entry.welding_qty <= 0 or entry.welding_accept_qty <= 0:
+			raise osv.except_osv(_('Warning!'),
+						_('System not allow to save negative or zero values !!'))
+						
+		if reject_qty > 0:
+			if entry.welding_reject_qty == 0:
+				raise osv.except_osv(_('Warning!'),
+				_('Kindly Enter Rejection Qty !!'))
+			if entry.welding_reject_qty < reject_qty:
+				raise osv.except_osv(_('Warning!'),
+				_('Kindly Check Rejection Qty !!'))
+						
+		if entry.welding_reject_qty > 0 and not entry.welding_reject_remarks_id:
+			raise osv.except_osv(_('Warning!'),
+				_('Remarks is must for Rejection !!'))
+				
+		if entry.welding_reject_qty > reject_qty:
+			raise osv.except_osv(_('Warning!'),
+				_('Kindly check the rejection Qty !!'))
+				
+		welding_date = entry.welding_date
+		welding_date = str(welding_date)
+		welding_date = datetime.strptime(welding_date, '%Y-%m-%d')
+		
+		if welding_date > today:
+			raise osv.except_osv(_('Warning!'),
+				_('System not allow to save with future date !!'))
+		
+		if entry.welding_accept_qty > 0:
+			
+			fettling_obj = self.pool.get('kg.fettling')
+		
+			### Sequence Number Generation ###
+			fettling_name = ''	
+			fettling_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.fettling.inward')])
+			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,fettling_seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(fettling_seq_id[0],seq_rec.code))
+			fettling_name = cr.fetchone();
+			
+			### Rough Grinding Details ###
+			
+			### Next Stage Qty ###
+			rough_grinding_qty = entry.welding_accept_qty
+			### Sequence Number Generation ###
+			rough_grinding_name = ''	
+			rough_grinding_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.rough.grinding')])
+			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,rough_grinding_seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(rough_grinding_seq_id[0],seq_rec.code))
+			rough_grinding_name = cr.fetchone();
+			rough_grinding_stage_id = self.pool.get('kg.stage.master').search(cr, uid, [('name','=','ROUGH GRINDING')])
+			
+			fettling_vals = {
+			'name': fettling_name[0],
+			'location':entry.location,
+			'schedule_id':entry.schedule_id.id,
+			'schedule_date':entry.schedule_date,
+			'schedule_line_id':entry.schedule_line_id.id,
+			'order_bomline_id':entry.order_bomline_id.id,
+			'order_id':entry.order_id.id,
+			'order_line_id':entry.order_line_id.id,
+			'order_no':entry.order_no,
+			'order_delivery_date':entry.order_delivery_date,
+			'order_date':entry.order_date,
+			'order_category':entry.order_category,
+			'order_priority':entry.order_priority,
+			'pump_model_id':entry.pump_model_id.id,
+			'pattern_id':entry.pattern_id.id,
+			'pattern_code':entry.pattern_code,
+			'pattern_name':entry.pattern_name,
+			'moc_id':entry.moc_id.id,
+			'schedule_qty':entry.schedule_qty,
+			'production_id':entry.production_id.id,
+			'pour_qty':entry.pour_qty,
+			'inward_accept_qty':entry.inward_accept_qty,
+			'state':'accept',
+			'stage_id':rough_grinding_stage_id[0],
+			'rough_grinding_qty': rough_grinding_qty,
+			'rough_grinding_accept_qty': rough_grinding_qty,
+			'rough_grinding_name':rough_grinding_name[0],
+			
+			}
+				
+			fettling_id = fettling_obj.create(cr, uid, fettling_vals)
+			
+			self.write(cr, uid, ids, {'welding_state':'done'})
+				
+		if entry.welding_reject_qty > 0:
+			#### NC Creation for reject Qty ###
+			
+			### Production Number ###
+			produc_name = ''	
+			produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
+			rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry.entry_date))
+			produc_name = cr.fetchone();
+			
+			### Issue Number ###
+			issue_name = ''	
+			issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
+			rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry.entry_date))
+			issue_name = cr.fetchone();
+			
+			### Core Log Number ###
+			core_name = ''	
+			core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
+			rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry.entry_date))
+			core_name = cr.fetchone();
+			
+			### Mould Log Number ###
+			mould_name = ''	
+			mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
+			rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry.entry_date))
+			mould_name = cr.fetchone();
+			
+			production_vals = {
+									
+				'name': produc_name[0],
+				'schedule_id': entry.schedule_id.id,
+				'schedule_date': entry.schedule_date,
+				'division_id': entry.division_id.id,
+				'location' : entry.location,
+				'schedule_line_id': entry.schedule_line_id.id,
+				'order_id': entry.order_id.id,
+				'order_line_id': entry.order_line_id.id,
+				'qty' : entry.welding_reject_qty,              
+				'schedule_qty' : entry.welding_reject_qty,              
+				'state' : 'issue_done',
+				'order_category':entry.order_category,
+				'order_priority': '2',
+				'pattern_id' : entry.pattern_id.id,
+				'pattern_name' : entry.pattern_id.pattern_name,	
+				'moc_id' : entry.moc_id.id,
+				'request_state': 'done',
+				'issue_no': issue_name[0],
+				'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+				'issue_qty': 1,
+				'issue_state': 'issued',
+				'core_no': core_name[0],
+				'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+				'core_qty': entry.welding_reject_qty,
+				'core_state': 'pending',
+				'mould_no': mould_name[0],
+				'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+				'mould_qty': entry.welding_reject_qty,
+				'mould_state': 'pending',		
+			}
+			production_id = production_obj.create(cr, uid, production_vals)
+			
+		self.write(cr, uid, ids, {'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 		
 	def finish_grinding_update(self,cr,uid,ids,context=None):
@@ -2370,14 +2926,291 @@ class kg_fettling(osv.osv):
 		entry = self.browse(cr, uid, ids[0])
 		reject_qty = entry.finish_grinding_qty - entry.finish_grinding_accept_qty
 	
-		if entry.finish_grinding_qty <= 0 or entry.finish_grinding_accept_qty <= 0:
+		if entry.finish_grinding_qty <= 0 or entry.finish_grinding_accept_qty < 0:
 			raise osv.except_osv(_('Warning!'),
 						_('System not allow to save negative or zero values !!'))
-		if reject_qty > 0 and not entry.finish_grinding_reject_remarks_id:
+						
+		if reject_qty > 0:
+			if entry.finish_grinding_reject_qty == 0:
+				raise osv.except_osv(_('Warning!'),
+				_('Kindly Enter Rejection Qty !!'))
+			if entry.finish_grinding_reject_qty < reject_qty:
+				raise osv.except_osv(_('Warning!'),
+				_('Kindly Check Rejection Qty !!'))
+						
+		if entry.finish_grinding_reject_qty > 0 and not entry.finish_grinding_reject_remarks_id:
 			raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
+				
+		if entry.finish_grinding_reject_qty > reject_qty:
+			raise osv.except_osv(_('Warning!'),
+				_('Kindly check the rejection Qty !!'))
+				
+		finish_grinding_date = entry.finish_grinding_date
+		finish_grinding_date = str(finish_grinding_date)
+		finish_grinding_date = datetime.strptime(finish_grinding_date, '%Y-%m-%d')
 		
-		if entry.finish_grinding_accept_qty > 0:
+		if finish_grinding_date > today:
+			raise osv.except_osv(_('Warning!'),
+				_('System not allow to save with future date !!'))
+				
+		if entry.flag_reshot_blast_applicable == True and entry.finish_grinding_accept_qty > 0:
+			### Next Stage Qty ###
+			reshot_blasting_qty = entry.finish_grinding_accept_qty
+			### Sequence Number Generation ###
+			reshot_blasting_name = ''	
+			reshot_blasting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.reshot.blasting')])
+			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,reshot_blasting_seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(reshot_blasting_seq_id[0],seq_rec.code))
+			reshot_blasting_name = cr.fetchone();
+			stage_id = self.pool.get('kg.stage.master').search(cr, uid, [('name','=','RE SHOT BLASTING')])
+			self.write(cr, uid, ids, {'stage_id':stage_id[0],'reshot_blasting_qty': reshot_blasting_qty,'reshot_blasting_accept_qty': reshot_blasting_qty,'reshot_blasting_name':reshot_blasting_name[0]})
+		
+		else:	
+		
+		
+			if entry.finish_grinding_accept_qty > 0:
+				cr.execute(""" select fettling.stage_id,stage.name as stage_name,fettling.seq_no from ch_fettling_process as fettling
+					left join kg_moc_master moc on fettling.header_id = moc.id
+					left join kg_stage_master stage on fettling.stage_id = stage.id
+					where moc.id = %s and moc.state = 'approved' and moc.active = 't' and fettling.seq_no >
+					(
+					select fettling.seq_no from ch_fettling_process as fettling
+					left join kg_moc_master moc on fettling.header_id = moc.id
+					where moc.id = %s and moc.state = 'approved' and active = 't'and fettling.stage_id = %s
+					)
+					 
+					order by fettling.seq_no asc limit 1 
+					 """%(entry.moc_id.id,entry.moc_id.id,entry.stage_id.id))
+				fettling_stage_id = cr.dictfetchall();
+				
+				if fettling_stage_id:
+					
+				
+					for stage_item in fettling_stage_id:
+						
+						if stage_item['stage_name'] == 'KNOCK OUT':
+							### Next Stage Qty ###
+							knockout_qty = entry.finish_grinding_accept_qty
+							### Sequence Number Generation ###
+							knockout_name = ''	
+							knockout_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.knock.out')])
+							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,knockout_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(knockout_seq_id[0],seq_rec.code))
+							knockout_name = cr.fetchone();
+							self.write(cr, uid, ids, {'knockout_qty': knockout_qty,'knockout_accept_qty':knockout_qty,'knockout_name':knockout_name[0]})
+						
+						if stage_item['stage_name'] == 'DECORING':
+							### Next Stage Qty ###
+							decoring_qty = entry.finish_grinding_accept_qty
+							### Sequence Number Generation ###
+							decoring_name = ''	
+							decoring_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.decoring')])
+							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,decoring_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(decoring_seq_id[0],seq_rec.code))
+							decoring_name = cr.fetchone();
+							self.write(cr, uid, ids, {'decoring_qty': decoring_qty,'decoring_accept_qty':decoring_qty,'decoring_name':decoring_name[0]})
+						
+						if stage_item['stage_name'] == 'SHOT BLAST':
+							### Next Stage Qty ###
+							shot_blast_qty = entry.finish_grinding_accept_qty
+							### Sequence Number Generation ###
+							shot_blast_name = ''	
+							shot_blast_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.shot.blast')])
+							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,shot_blast_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(shot_blast_seq_id[0],seq_rec.code))
+							shot_blast_name = cr.fetchone();
+							self.write(cr, uid, ids, {'shot_blast_qty': shot_blast_qty,'shot_blast_accept_qty':shot_blast_qty,'shot_blast_name':shot_blast_name[0]})
+						
+						if stage_item['stage_name'] == 'HAMMERING':
+							### Next Stage Qty ###
+							hammering_qty = entry.finish_grinding_accept_qty
+							### Sequence Number Generation ###
+							hammering_name = ''	
+							hammering_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.hammering')])
+							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,hammering_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(hammering_seq_id[0],seq_rec.code))
+							hammering_name = cr.fetchone();
+							self.write(cr, uid, ids, {'hammering_qty': hammering_qty,'hammering_accept_qty': hammering_qty,'hammering_name':hammering_name[0]})
+						
+						if stage_item['stage_name'] == 'WHEEL CUTTING':
+							### Next Stage Qty ###
+							wheel_cutting_qty = entry.finish_grinding_accept_qty
+							### Sequence Number Generation ###
+							wheel_cutting_name = ''	
+							wheel_cutting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.wheel.cutting')])
+							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,wheel_cutting_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(wheel_cutting_seq_id[0],seq_rec.code))
+							wheel_cutting_name = cr.fetchone();
+							self.write(cr, uid, ids, {'wheel_cutting_qty': wheel_cutting_qty,'wheel_cutting_accept_qty': wheel_cutting_qty,'wheel_cutting_name':wheel_cutting_name[0]})
+						
+						if stage_item['stage_name'] == 'GAS CUTTING':
+							### Next Stage Qty ###
+							gas_cutting_qty = entry.finish_grinding_accept_qty
+							### Sequence Number Generation ###
+							gas_cutting_name = ''	
+							shot_blast_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
+							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,gas_cutting_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(gas_cutting_seq_id[0],seq_rec.code))
+							gas_cutting_name = cr.fetchone();
+							self.write(cr, uid, ids, {'gas_cutting_qty': gas_cutting_qty,'gas_cutting_accept_qty': gas_cutting_qty,'gas_cutting_name':gas_cutting_name[0]})
+						
+						if stage_item['stage_name'] == 'ARC CUTTING':
+							### Next Stage Qty ###
+							arc_cutting_qty = entry.finish_grinding_accept_qty
+							### Sequence Number Generation ###
+							arc_cutting_name = ''	
+							arc_cutting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.arc.cutting')])
+							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,arc_cutting_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(arc_cutting_seq_id[0],seq_rec.code))
+							arc_cutting_name = cr.fetchone();
+							self.write(cr, uid, ids, {'arc_cutting_qty': arc_cutting_qty,'arc_cutting_accept_qty': arc_cutting_qty,'arc_cutting_name':arc_cutting_name[0]})
+						
+						if stage_item['stage_name'] == 'HEAT TREATMENT':
+							### Next Stage Qty ###
+							heat_total_qty = entry.finish_grinding_accept_qty
+							self.write(cr, uid, ids, {'heat_total_qty': heat_total_qty,'heat_qty':heat_total_qty})
+						
+						if stage_item['stage_name'] == 'ROUGH GRINDING':
+							### Next Stage Qty ###
+							rough_grinding_qty = entry.finish_grinding_accept_qty
+							### Sequence Number Generation ###
+							rough_grinding_name = ''	
+							rough_grinding_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.rough.grinding')])
+							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,rough_grinding_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(rough_grinding_seq_id[0],seq_rec.code))
+							rough_grinding_name = cr.fetchone();
+							self.write(cr, uid, ids, {'rough_grinding_qty': rough_grinding_qty,'rough_grinding_accept_qty': rough_grinding_qty,'rough_grinding_name':rough_grinding_name[0]})
+						
+						if stage_item['stage_name'] == 'FINISH GRINDING':
+							### Next Stage Qty ###
+							finish_grinding_qty = entry.finish_grinding_accept_qty
+							### Sequence Number Generation ###
+							finish_grinding_name = ''	
+							finish_grinding_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.finish.grinding')])
+							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,finish_grinding_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(finish_grinding_seq_id[0],seq_rec.code))
+							finish_grinding_name = cr.fetchone();
+							self.write(cr, uid, ids, {'finish_grinding_qty': finish_grinding_qty,'finish_grinding_accept_qty': finish_grinding_qty,'finish_grinding_name':finish_grinding_name[0]})
+							
+						if stage_item['stage_name'] == 'RE SHOT BLASTING':
+							### Next Stage Qty ###
+							reshot_blasting_qty = entry.finish_grinding_accept_qty
+							### Sequence Number Generation ###
+							reshot_blasting_name = ''	
+							reshot_blasting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.reshot.blasting')])
+							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,reshot_blasting_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(reshot_blasting_seq_id[0],seq_rec.code))
+							reshot_blasting_name = cr.fetchone();
+							self.write(cr, uid, ids, {'reshot_blasting_qty': reshot_blasting_qty,'reshot_blasting_accept_qty': reshot_blasting_qty,'reshot_blasting_name':reshot_blasting_name[0]})
+						
+						self.write(cr, uid, ids, {'stage_id': stage_item['stage_id']})
+						
+				else:
+					###  MS Inward Process Creation ###
+					self.ms_inward_update(cr, uid, [entry.id],entry.finish_grinding_accept_qty)
+			
+		if entry.finish_grinding_reject_qty > 0:
+			#### NC Creation for reject Qty ###
+			
+			### Production Number ###
+			produc_name = ''	
+			produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
+			rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry.entry_date))
+			produc_name = cr.fetchone();
+			
+			### Issue Number ###
+			issue_name = ''	
+			issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
+			rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry.entry_date))
+			issue_name = cr.fetchone();
+			
+			### Core Log Number ###
+			core_name = ''	
+			core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
+			rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry.entry_date))
+			core_name = cr.fetchone();
+			
+			### Mould Log Number ###
+			mould_name = ''	
+			mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
+			rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry.entry_date))
+			mould_name = cr.fetchone();
+			
+			production_vals = {
+									
+				'name': produc_name[0],
+				'schedule_id': entry.schedule_id.id,
+				'schedule_date': entry.schedule_date,
+				'division_id': entry.division_id.id,
+				'location' : entry.location,
+				'schedule_line_id': entry.schedule_line_id.id,
+				'order_id': entry.order_id.id,
+				'order_line_id': entry.order_line_id.id,
+				'qty' : entry.finish_grinding_reject_qty,              
+				'schedule_qty' : entry.finish_grinding_reject_qty,              
+				'state' : 'issue_done',
+				'order_category':entry.order_category,
+				'order_priority': '2',
+				'pattern_id' : entry.pattern_id.id,
+				'pattern_name' : entry.pattern_id.pattern_name,	
+				'moc_id' : entry.moc_id.id,
+				'request_state': 'done',
+				'issue_no': issue_name[0],
+				'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+				'issue_qty': 1,
+				'issue_state': 'issued',
+				'core_no': core_name[0],
+				'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+				'core_qty': entry.finish_grinding_reject_qty,
+				'core_state': 'pending',
+				'mould_no': mould_name[0],
+				'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+				'mould_qty': entry.finish_grinding_reject_qty,
+				'mould_state': 'pending',		
+			}
+			production_id = production_obj.create(cr, uid, production_vals)
+		self.write(cr, uid, ids, {'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		return True
+		
+	def reshot_blasting_update(self,cr,uid,ids,context=None):
+		production_obj = self.pool.get('kg.production')
+		entry = self.browse(cr, uid, ids[0])
+		reject_qty = entry.reshot_blasting_qty - entry.reshot_blasting_accept_qty
+	
+		if entry.reshot_blasting_qty <= 0 or entry.reshot_blasting_accept_qty < 0:
+			raise osv.except_osv(_('Warning!'),
+						_('System not allow to save negative or zero values !!'))
+						
+		if reject_qty > 0:
+			if entry.reshot_blasting_reject_qty == 0:
+				raise osv.except_osv(_('Warning!'),
+				_('Kindly Enter Rejection Qty !!'))
+			if entry.reshot_blasting_reject_qty < reject_qty:
+				raise osv.except_osv(_('Warning!'),
+				_('Kindly Check Rejection Qty !!'))
+						
+		if entry.reshot_blasting_reject_qty > 0 and not entry.reshot_blasting_reject_remarks_id:
+			raise osv.except_osv(_('Warning!'),
+				_('Remarks is must for Rejection !!'))
+				
+		if entry.reshot_blasting_reject_qty > reject_qty:
+			raise osv.except_osv(_('Warning!'),
+				_('Kindly check the rejection Qty !!'))
+				
+		reshot_blasting_date = entry.reshot_blasting_date
+		reshot_blasting_date = str(reshot_blasting_date)
+		reshot_blasting_date = datetime.strptime(reshot_blasting_date, '%Y-%m-%d')
+		
+		if reshot_blasting_date > today:
+			raise osv.except_osv(_('Warning!'),
+				_('System not allow to save with future date !!'))
+		
+		if entry.reshot_blasting_accept_qty > 0:
 			cr.execute(""" select fettling.stage_id,stage.name as stage_name,fettling.seq_no from ch_fettling_process as fettling
 				left join kg_moc_master moc on fettling.header_id = moc.id
 				left join kg_stage_master stage on fettling.stage_id = stage.id
@@ -2399,115 +3232,126 @@ class kg_fettling(osv.osv):
 					
 					if stage_item['stage_name'] == 'KNOCK OUT':
 						### Next Stage Qty ###
-						knockout_qty = entry.finish_grinding_accept_qty
+						knockout_qty = entry.reshot_blasting_accept_qty
 						### Sequence Number Generation ###
 						knockout_name = ''	
 						knockout_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.knock.out')])
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,knockout_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(knockout_seq_id[0],seq_rec.code))
 						knockout_name = cr.fetchone();
-						self.write(cr, uid, ids, {'knockout_qty': knockout_qty,'knockout_name':knockout_name[0]})
+						self.write(cr, uid, ids, {'knockout_qty': knockout_qty,'knockout_accept_qty':knockout_qty,'knockout_name':knockout_name[0]})
 					
 					if stage_item['stage_name'] == 'DECORING':
 						### Next Stage Qty ###
-						decoring_qty = entry.finish_grinding_accept_qty
+						decoring_qty = entry.reshot_blasting_accept_qty
 						### Sequence Number Generation ###
 						decoring_name = ''	
 						decoring_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.decoring')])
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,decoring_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(decoring_seq_id[0],seq_rec.code))
 						decoring_name = cr.fetchone();
-						self.write(cr, uid, ids, {'decoring_qty': decoring_qty,'decoring_name':decoring_name[0]})
+						self.write(cr, uid, ids, {'decoring_qty': decoring_qty,'decoring_accept_qty':decoring_qty,'decoring_name':decoring_name[0]})
 					
 					if stage_item['stage_name'] == 'SHOT BLAST':
 						### Next Stage Qty ###
-						shot_blast_qty = entry.finish_grinding_accept_qty
+						shot_blast_qty = entry.reshot_blasting_accept_qty
 						### Sequence Number Generation ###
 						shot_blast_name = ''	
 						shot_blast_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.shot.blast')])
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,shot_blast_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(shot_blast_seq_id[0],seq_rec.code))
 						shot_blast_name = cr.fetchone();
-						self.write(cr, uid, ids, {'shot_blast_qty': shot_blast_qty,'shot_blast_name':shot_blast_name[0]})
+						self.write(cr, uid, ids, {'shot_blast_qty': shot_blast_qty,'shot_blast_accept_qty':shot_blast_qty,'shot_blast_name':shot_blast_name[0]})
 					
 					if stage_item['stage_name'] == 'HAMMERING':
 						### Next Stage Qty ###
-						hammering_qty = entry.finish_grinding_accept_qty
+						hammering_qty = entry.reshot_blasting_accept_qty
 						### Sequence Number Generation ###
 						hammering_name = ''	
 						hammering_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.hammering')])
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,hammering_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(hammering_seq_id[0],seq_rec.code))
 						hammering_name = cr.fetchone();
-						self.write(cr, uid, ids, {'hammering_qty': hammering_qty,'hammering_name':hammering_name[0]})
+						self.write(cr, uid, ids, {'hammering_qty': hammering_qty,'hammering_accept_qty': hammering_qty,'hammering_name':hammering_name[0]})
 					
 					if stage_item['stage_name'] == 'WHEEL CUTTING':
 						### Next Stage Qty ###
-						wheel_cutting_qty = entry.finish_grinding_accept_qty
+						wheel_cutting_qty = entry.reshot_blasting_accept_qty
 						### Sequence Number Generation ###
 						wheel_cutting_name = ''	
 						wheel_cutting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.wheel.cutting')])
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,wheel_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(wheel_cutting_seq_id[0],seq_rec.code))
 						wheel_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'wheel_cutting_qty': wheel_cutting_qty,'wheel_cutting_name':wheel_cutting_name[0]})
+						self.write(cr, uid, ids, {'wheel_cutting_qty': wheel_cutting_qty,'wheel_cutting_accept_qty': wheel_cutting_qty,'wheel_cutting_name':wheel_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'GAS CUTTING':
 						### Next Stage Qty ###
-						gas_cutting_qty = entry.finish_grinding_accept_qty
+						gas_cutting_qty = entry.reshot_blasting_accept_qty
 						### Sequence Number Generation ###
 						gas_cutting_name = ''	
-						gas_cutting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
+						shot_blast_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,gas_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(gas_cutting_seq_id[0],seq_rec.code))
 						gas_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'gas_cutting_qty': gas_cutting_qty,'gas_cutting_name':gas_cutting_name[0]})
+						self.write(cr, uid, ids, {'gas_cutting_qty': gas_cutting_qty,'gas_cutting_accept_qty': gas_cutting_qty,'gas_cutting_name':gas_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'ARC CUTTING':
 						### Next Stage Qty ###
-						arc_cutting_qty = entry.finish_grinding_accept_qty
+						arc_cutting_qty = entry.reshot_blasting_accept_qty
 						### Sequence Number Generation ###
 						arc_cutting_name = ''	
 						arc_cutting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.arc.cutting')])
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,arc_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(arc_cutting_seq_id[0],seq_rec.code))
 						arc_cutting_name = cr.fetchone();
-						self.write(cr, uid, ids, {'arc_cutting_qty': arc_cutting_qty,'arc_cutting_name':arc_cutting_name[0]})
+						self.write(cr, uid, ids, {'arc_cutting_qty': arc_cutting_qty,'arc_cutting_accept_qty': arc_cutting_qty,'arc_cutting_name':arc_cutting_name[0]})
 					
 					if stage_item['stage_name'] == 'HEAT TREATMENT':
 						### Next Stage Qty ###
-						heat_total_qty = entry.finish_grinding_accept_qty
-						self.write(cr, uid, ids, {'heat_total_qty': heat_total_qty})
+						heat_total_qty = entry.reshot_blasting_accept_qty
+						self.write(cr, uid, ids, {'heat_total_qty': heat_total_qty,'heat_qty':heat_total_qty})
 					
 					if stage_item['stage_name'] == 'ROUGH GRINDING':
 						### Next Stage Qty ###
-						rough_grinding_qty = entry.finish_grinding_accept_qty
+						rough_grinding_qty = entry.reshot_blasting_accept_qty
 						### Sequence Number Generation ###
 						rough_grinding_name = ''	
 						rough_grinding_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.rough.grinding')])
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,rough_grinding_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(rough_grinding_seq_id[0],seq_rec.code))
 						rough_grinding_name = cr.fetchone();
-						self.write(cr, uid, ids, {'rough_grinding_qty': rough_grinding_qty,'rough_grinding_name':rough_grinding_name[0]})
+						self.write(cr, uid, ids, {'rough_grinding_qty': rough_grinding_qty,'rough_grinding_accept_qty': rough_grinding_qty,'rough_grinding_name':rough_grinding_name[0]})
 					
 					if stage_item['stage_name'] == 'FINISH GRINDING':
 						### Next Stage Qty ###
-						finish_grinding_qty = entry.finish_grinding_accept_qty
+						finish_grinding_qty = entry.reshot_blasting_accept_qty
 						### Sequence Number Generation ###
 						finish_grinding_name = ''	
 						finish_grinding_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.finish.grinding')])
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,finish_grinding_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(finish_grinding_seq_id[0],seq_rec.code))
 						finish_grinding_name = cr.fetchone();
-						self.write(cr, uid, ids, {'finish_grinding_qty': finish_grinding_qty,'finish_grinding_name':finish_grinding_name[0]})
+						self.write(cr, uid, ids, {'finish_grinding_qty': finish_grinding_qty,'finish_grinding_accept_qty': finish_grinding_qty,'finish_grinding_name':finish_grinding_name[0]})
+						
+					if stage_item['stage_name'] == 'RE SHOT BLASTING':
+						### Next Stage Qty ###
+						reshot_blasting_qty = entry.reshot_blasting_accept_qty
+						### Sequence Number Generation ###
+						reshot_blasting_name = ''	
+						reshot_blasting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.reshot.blasting')])
+						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,reshot_blasting_seq_id[0])
+						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(reshot_blasting_seq_id[0],seq_rec.code))
+						reshot_blasting_name = cr.fetchone();
+						self.write(cr, uid, ids, {'reshot_blasting_qty': reshot_blasting_qty,'reshot_blasting_accept_qty': reshot_blasting_qty,'reshot_blasting_name':reshot_blasting_name[0]})
 					
 					self.write(cr, uid, ids, {'stage_id': stage_item['stage_id']})
 					
 			else:
 				###  MS Inward Process Creation ###
-				self.ms_inward_update(cr, uid, [entry.id],entry.finish_grinding_accept_qty)
+				self.ms_inward_update(cr, uid, [entry.id],entry.reshot_blasting_accept_qty)
 			
-		if reject_qty > 0:
+		if entry.reshot_blasting_reject_qty > 0:
 			#### NC Creation for reject Qty ###
 			
 			### Production Number ###
@@ -2548,8 +3392,8 @@ class kg_fettling(osv.osv):
 				'schedule_line_id': entry.schedule_line_id.id,
 				'order_id': entry.order_id.id,
 				'order_line_id': entry.order_line_id.id,
-				'qty' : reject_qty,              
-				'schedule_qty' : reject_qty,              
+				'qty' : entry.reshot_blasting_reject_qty,              
+				'schedule_qty' : entry.reshot_blasting_reject_qty,              
 				'state' : 'issue_done',
 				'order_category':entry.order_category,
 				'order_priority': '2',
@@ -2563,15 +3407,15 @@ class kg_fettling(osv.osv):
 				'issue_state': 'issued',
 				'core_no': core_name[0],
 				'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-				'core_qty': reject_qty,
+				'core_qty': entry.reshot_blasting_reject_qty,
 				'core_state': 'pending',
 				'mould_no': mould_name[0],
 				'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-				'mould_qty': reject_qty,
+				'mould_qty': entry.reshot_blasting_reject_qty,
 				'mould_state': 'pending',		
 			}
 			production_id = production_obj.create(cr, uid, production_vals)
-		self.write(cr, uid, ids, {'finish_grinding_reject_qty': reject_qty,'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		self.write(cr, uid, ids, {'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 	
 	def unlink(self,cr,uid,ids,context=None):

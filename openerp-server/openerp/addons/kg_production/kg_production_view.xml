@@ -386,7 +386,7 @@
 						<group>
 							<group>
 								<field name="name" readonly="1"/>
-								<field name="remarks" attrs="{'readonly': [('state','in',['issue'])]}" invisible="1"/>
+								<field name="remarks" attrs="{'readonly': [('state','in',['issue'])]}"/>
 								<field name="flag_issueline" invisible="1"/>
 							</group>											
 							<group>
@@ -762,28 +762,43 @@
 						<group>
 							<group>
 								<field name="name" readonly="1"/>
-								<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}" invisible="1"/>
+								<field name="core_date" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="core_by" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="core_operator" attrs="{'required':[('core_by','=','comp_employee')],'invisible':[('core_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="core_contractor" attrs="{'required':[('core_by','=','contractor')],'invisible':[('core_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
 								<field name="flag_issueline" invisible="1"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
 							</group>											
 							<group>
 								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+								<field name="core_shift_id" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="core_helper" attrs="{'required':[('core_by','=','comp_employee')],'invisible':[('core_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="core_pan_no" attrs="{'invisible':[('core_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="core_hardness" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								
+								
 							</group>					
 						</group>
 						<notebook>
 							<page string="Core Items" attrs="{'invisible':[('flag_issueline','=',False)]}">
 								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
 									<tree string="Issue Line Entry" editable="top" create="false" delete="false">	
-										<field name="core_no" readonly="1"/>
+										<field name="core_date" required="1"/>
+										<field name="core_no" invisible="1"/>
 										<field name="order_no" readonly="1"/>
 										<field name="pump_model_id" readonly="1"/>
-										<field name="pattern_id" readonly="1"/>
-										<field name="core_date" required="1"/>
+										<field name="pattern_id" string="Part No." readonly="1"/>
+										<field name="pattern_name" invisible="1"/>
+										<field name="moc_id" invisible="1"/>
 										<field name="core_shift_id" required="1"/>
-										<field name="core_contractor" required="1"/>
-										<field name="core_moulder" required="1"/>
-										<field name="core_helper" required="1"/>
+										<field name="core_by" required="1"/>
+										<field name="core_contractor" attrs="{'required':[('core_by','=','contractor')]}"/>
+										<field name="core_pan_no"/>
+										<field name="core_operator" attrs="{'required':[('core_by','=','comp_employee')]}"/>
+										<field name="core_helper" attrs="{'required':[('core_by','=','comp_employee')]}" string="Helper Count"/>
 										<field name="core_hardness"/>
+										<field name="production_qty" readonly="1"/>
 										<field name="core_qty" required="1"/>
 										<field name="remarks" widget="char"/>
 									</tree>
@@ -1142,33 +1157,48 @@
 					<header>
 						<button name="entry_confirm" type="object" string="Update" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
-					<sheet>		
+					<sheet>
 						<group>
 							<group>
 								<field name="name" readonly="1"/>
-								<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}" invisible="1"/>
+								<field name="mould_date" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="mould_by" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="mould_contractor" attrs="{'required':[('mould_by','=','contractor')],'invisible':[('mould_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="mould_operator" attrs="{'required':[('mould_by','=','comp_employee')],'invisible':[('mould_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
 								<field name="flag_issueline" invisible="1"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
 							</group>											
 							<group>
 								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
-							</group>					
+								<field name="mould_shift_id" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="mould_moulder" attrs="{'required':[('mould_by','=','comp_employee')],'invisible':[('mould_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="mould_helper" attrs="{'required':[('mould_by','=','comp_employee')],'invisible':[('mould_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="mould_pan_no" attrs="{'invisible':[('mould_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="mould_hardness" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								
+								
+							</group>
 						</group>
 						<notebook>
 							<page string="Mould Items" attrs="{'invisible':[('flag_issueline','=',False)]}">
 								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
 									<tree string="Issue Line Entry" editable="top" create="false" delete="false">	
-										<field name="mould_no" readonly="1"/>
+										<field name="mould_date" required="1"/>
+										<field name="mould_no" invisible="1"/>
 										<field name="order_no" readonly="1"/>
 										<field name="pump_model_id" readonly="1"/>
-										<field name="pattern_id" readonly="1"/>
-										<field name="mould_date" required="1"/>
+										<field name="pattern_id" string="Part No." readonly="1"/>
+										<field name="mould_box_id" readonly="1"/>
 										<field name="mould_shift_id" required="1"/>
-										<field name="mould_contractor" required="1"/>
-										<field name="mould_box_id" required="1"/>																	
-										<field name="mould_moulder" required="1"/>																	
-										<field name="mould_helper" required="1"/>
+										<field name="mould_by" required="1"/>												
+										<field name="mould_contractor" attrs="{'required':[('mould_by','=','contractor')]}"/>												
+										<field name="mould_pan_no" attrs="{'required':[('mould_by','=','contractor')]}"/>												
+										<field name="mould_operator" attrs="{'required':[('mould_by','=','comp_employee')]}"/>																	
+										<field name="mould_helper" attrs="{'required':[('mould_by','=','comp_employee')]}"/>																	
+										<field name="mould_moulder" attrs="{'required':[('mould_by','=','comp_employee')]}"/>
 										<field name="mould_hardness"/>
+										<field name="production_qty" readonly="1"/>
 										<field name="mould_qty" required="1"/>
 										<field name="remarks" widget="char"/>
 									</tree>
@@ -1322,6 +1352,113 @@
 	
 	<!-- Mould Batch Issue End Here -->
 	
+	<!-- Core/Mould Completed List -->
+	
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_core_mould_completed" model="ir.ui.view">
+			<field name="name">Core/Mould Completed</field>
+			<field name="model">kg.production</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Core/Mould Completed Tree" create="false">
+					<field name="order_delivery_date" string="Date"/>
+					<field name="order_no"/>
+					<field name="pattern_id" string="Part No."/>
+					<field name="pattern_name" string="Part Name."/>
+					<field name="moc_id"/>
+					<field name="qty" string="Schedule Qty" sum="Total Qty"/>
+					<field name="each_weight" sum="Total Each Weight"/>
+					<field name="total_weight" sum="Total Weight"/>
+					<field name="total_core_qty" string="Core Qty" sum="Total Core Qty"/>
+					<field name="total_mould_qty" string="Mould Qty" sum="Total Mould Qty"/>
+					<field name="difference_qty" string="Difference Qty" sum="Total Difference Qty"/>
+					
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	
+	
+	
+	<!-- Menu Action Start -->
+		
+		
+		<record id="tma_core_mould_completed" model="ir.actions.act_window">
+			<field name="name">Core/Mould Completed</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.production</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="domain">['|',('core_state','!=','pending'),('mould_state','!=','pending')]</field>
+			<field name="search_view_id" ref="t_search_v_production"/>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_core_mould_completed_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_core_mould_completed"/>
+            <field name="act_window_id" ref="tma_core_mould_completed"/>
+        </record>
+        
+        <record model="ir.actions.act_window.view" id="tma_core_mould_completed_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_pouring_completed"/>
+            <field name="act_window_id" ref="tma_core_mould_completed"/>
+        </record>
+       
+		
+	<!-- Menu Action End-->
+		
+	<!-- Menu Item Start -->
+	
+		<!-- Production -->
+		<menuitem action="tma_core_mould_completed" id="tam_core_mould_completed" parent="kg_stock_inward.tpm_planning_transactions" sequence="13"/>
+	
+	<!-- Menu Item End -->
+	
+	
+	
+	<!-- Pouring Pending List -->
+	
+	<!-- Menu Action Start -->
+		
+		
+		<record id="tma_pouring_pending" model="ir.actions.act_window">
+			<field name="name">Pouring Pending</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.production</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="domain">[('pour_state','in',('pending','partial')),('state','=','mould_com')]</field>
+			<field name="search_view_id" ref="t_search_v_production"/>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_pouring_pending_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_pouring_completed"/>
+            <field name="act_window_id" ref="tma_pouring_pending"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_pouring_pending_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_pouring_completed"/>
+            <field name="act_window_id" ref="tma_pouring_pending"/>
+        </record>
+		
+	<!-- Menu Action End-->
+		
+	<!-- Menu Item Start -->
+	
+		<!-- Production -->
+		<menuitem action="tma_pouring_pending" id="tam_pouring_pending" parent="kg_stock_inward.tpm_planning_transactions" sequence="14"/>
+	
+	<!-- Menu Item End -->
 	
 	<!-- Pouring Completed List -->
 	
@@ -1391,6 +1528,8 @@
 	<!-- Form View End -->
 		
 	
+	
+	
 	<!-- Tree View Start -->
 		
 		<record id="t_tree_v_pouring_completed" model="ir.ui.view">
@@ -1454,7 +1593,7 @@
 	<!-- Menu Item Start -->
 	
 		<!-- Production -->
-		<menuitem action="tma_pouring_completed" id="tam_pouring_completed" parent="kg_stock_inward.tpm_planning_transactions" sequence="13"/>
+		<menuitem action="tma_pouring_completed" id="tam_pouring_completed" parent="kg_stock_inward.tpm_planning_transactions" sequence="15"/>
 	
 	<!-- Menu Item End -->
 	

@@ -26,23 +26,24 @@
 							</group>											
 							<group>
 								<field name="entry_date" attrs="{'readonly': [('state','in',['accept','complete'])]}"/>
-								<field name="inward_reject_qty" readonly="1"/>
+								<field name="inward_reject_qty" attrs="{'readonly': [('state','in',['accept','complete'])]}"/>
 								<field name="inward_reject_remarks_id" attrs="{'readonly': [('state','in',['accept','complete'])]}"/>
 								<field name="inward_remarks" attrs="{'readonly': [('state','in',['accept','complete'])]}"/>
 							</group>					
 						</group>
-						<group string="Work Order Details">
+						<group string="Schedule Details">
 							<group>
 								<field name="order_no" readonly="1"/>
 								<field name="order_priority" string="Category" readonly="1"/>
 								<field name="pattern_id" readonly="1"/>
 								<field name="moc_id" readonly="1"/>
+								<field name="pour_qty" readonly="1"/>
 							</group>											
 							<group>
 								<field name="order_delivery_date"/>
 								 <field name="pump_model_id" readonly="1"/>
 								 <field name="pattern_name" readonly="1"/>
-								 <field name="pour_qty" readonly="1"/>
+								 <field name="melting_id" readonly="1"/>
 							</group>					
 						</group>
 						<notebook>
@@ -150,6 +151,7 @@
 			<field name="res_model">kg.fettling</field>
 			<field name="view_type">form</field>
 			<field name="context">{}</field>
+			<field name="domain">[('state','=','waiting')]</field>
 			<field name="search_view_id" ref="t_search_v_fettling_inward"/>
 		</record>
 		
@@ -204,6 +206,37 @@
 	
 	<!-- Sequence Number Setting Ends Here -->
 	
+	<!-- Fettling Inward Screen -->
+	
+	<!-- Menu Action Start -->
+		
+		
+		<record id="tma_fettling_accepted" model="ir.actions.act_window">
+			<field name="name">Fettling Accepted</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.fettling</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="domain">[('state','=','accept')]</field>
+			<field name="search_view_id" ref="t_search_v_fettling_inward"/>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_fettling_accepted_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_fettling_inward"/>
+            <field name="act_window_id" ref="tma_fettling_accepted"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_fettling_accepted_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_fettling_inward"/>
+            <field name="act_window_id" ref="tma_fettling_accepted"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Ends Here -->
 	
 	<!-- KNOCK OUT Process Starts Here -->
 	
@@ -223,16 +256,17 @@
 							<group>
 								<field name="knockout_name" readonly="1"/>
 								<field name="knockout_shift_id" required="1" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
-								<field name="knockout_qty" string="Production Qty" readonly="1"/>
-								<field name="knockout_reject_qty" required="1" readonly="1"/>
-								
+								<field name="knockout_contractor" attrs="{'required':[('knockout_by','=','contractor')],'invisible':[('knockout_by','!=','contractor')],'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
+								<field name="knockout_employee" attrs="{'required':[('knockout_by','=','comp_employee')],'invisible':[('knockout_by','!=','comp_employee')],'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
+								<field name="knockout_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
+								<field name="knockout_reject_qty" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
 								<field name="stage_id" readonly="1"/>
 								<field name="stage_name" invisible="1"/>
 							</group>											
 							<group>
 								<field name="knockout_date" required="1" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
-								<field name="knockout_contractor" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
-								<field name="knockout_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
+								<field name="knockout_by" required="1" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>		
+								<field name="knockout_qty" string="Production Qty" readonly="1"/>
 								<field name="knockout_weight" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
 								<field name="knockout_reject_remarks_id" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
 								<field name="knockout_remarks" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
@@ -249,6 +283,7 @@
 								<field name="order_delivery_date" readonly="1"/>
 								<field name="pump_model_id" readonly="1"/>
 								<field name="pattern_name" readonly="1"/>
+								<field name="melting_id" readonly="1"/>
 							</group>					
 						</group>
 						<notebook>
@@ -399,16 +434,17 @@
 							<group>
 								<field name="decoring_name" readonly="1"/>
 								<field name="decoring_shift_id" required="1" attrs="{'readonly': [('stage_name','not in',['DECORING'])]}"/>
-								<field name="decoring_qty" string="Production Qty" readonly="1"/>
-								<field name="decoring_reject_qty" required="1" readonly="1"/>
-								
+								<field name="decoring_contractor" attrs="{'required':[('decoring_by','=','contractor')],'invisible':[('decoring_by','!=','contractor')],'readonly': [('stage_name','not in',['DECORING'])]}"/>
+								<field name="decoring_employee" attrs="{'required':[('decoring_by','=','comp_employee')],'invisible':[('decoring_by','!=','comp_employee')],'readonly': [('stage_name','not in',['DECORING'])]}"/>
+								<field name="decoring_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['DECORING'])]}"/>
+								<field name="decoring_reject_qty" attrs="{'readonly': [('stage_name','not in',['DECORING'])]}"/>
 								<field name="stage_id" readonly="1"/>
 								<field name="stage_name" invisible="1"/>
 							</group>											
 							<group>
 								<field name="decoring_date" required="1" attrs="{'readonly': [('stage_name','not in',['DECORING'])]}"/>
-								<field name="decoring_contractor" attrs="{'readonly': [('stage_name','not in',['DECORING'])]}"/>
-								<field name="decoring_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['DECORING'])]}"/>
+								<field name="decoring_by" required="1" attrs="{'readonly': [('stage_name','not in',['DECORING'])]}"/>
+								<field name="decoring_qty" string="Production Qty" readonly="1"/>
 								<field name="decoring_weight" attrs="{'readonly': [('stage_name','not in',['DECORING'])]}"/>
 								<field name="decoring_reject_remarks_id" attrs="{'readonly': [('stage_name','not in',['DECORING'])]}"/>
 								<field name="decoring_remarks" attrs="{'readonly': [('stage_name','not in',['DECORING'])]}"/>
@@ -425,6 +461,7 @@
 								<field name="order_delivery_date" readonly="1"/>
 								<field name="pump_model_id" readonly="1"/>
 								<field name="pattern_name" readonly="1"/>
+								<field name="melting_id" readonly="1"/>
 							</group>					
 						</group>
 						<notebook>
@@ -573,16 +610,17 @@
 							<group>
 								<field name="shot_blast_name" readonly="1"/>
 								<field name="shot_blast_shift_id" required="1" attrs="{'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
-								<field name="shot_blast_qty" string="Production Qty" readonly="1"/>
-								<field name="shot_blast_reject_qty" required="1" readonly="1"/>
-								
+								<field name="shot_blast_contractor" attrs="{'required':[('shot_blast_by','=','contractor')],'invisible':[('shot_blast_by','!=','contractor')],'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
+								<field name="shot_blast_employee" attrs="{'required':[('shot_blast_by','=','comp_employee')],'invisible':[('shot_blast_by','!=','comp_employee')],'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
+								<field name="shot_blast_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
+								<field name="shot_blast_reject_qty" attrs="{'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
 								<field name="stage_id" readonly="1"/>
 								<field name="stage_name" invisible="1"/>
 							</group>											
 							<group>
 								<field name="shot_blast_date" required="1" attrs="{'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
-								<field name="shot_blast_contractor" attrs="{'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
-								<field name="shot_blast_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
+								<field name="shot_blast_by" required="1" attrs="{'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
+								<field name="shot_blast_qty" string="Production Qty" readonly="1"/>
 								<field name="shot_blast_weight" attrs="{'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
 								<field name="shot_blast_reject_remarks_id" attrs="{'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
 								<field name="shot_blast_remarks" attrs="{'readonly': [('stage_name','not in',['SHOT BLAST'])]}"/>
@@ -599,6 +637,7 @@
 								<field name="order_delivery_date" readonly="1"/>
 								<field name="pump_model_id" readonly="1"/>
 								<field name="pattern_name" readonly="1"/>
+								<field name="melting_id" readonly="1"/>
 							</group>					
 						</group>
 						<notebook>
@@ -749,16 +788,17 @@
 							<group>
 								<field name="hammering_name" readonly="1"/>
 								<field name="hammering_shift_id" required="1" attrs="{'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
-								<field name="hammering_qty" string="Production Qty" readonly="1"/>
-								<field name="hammering_reject_qty" required="1" readonly="1"/>
-								
+								<field name="hammering_contractor" attrs="{'required':[('hammering_by','=','contractor')],'invisible':[('hammering_by','!=','contractor')],'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
+								<field name="hammering_employee" attrs="{'required':[('hammering_by','=','comp_employee')],'invisible':[('hammering_by','!=','comp_employee')],'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
+								<field name="hammering_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
+								<field name="hammering_reject_qty" attrs="{'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
 								<field name="stage_id" readonly="1"/>
 								<field name="stage_name" invisible="1"/>
 							</group>											
 							<group>
 								<field name="hammering_date" required="1" attrs="{'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
-								<field name="hammering_contractor" attrs="{'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
-								<field name="hammering_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
+								<field name="hammering_by" required="1" attrs="{'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
+								<field name="hammering_qty" string="Production Qty" readonly="1"/>
 								<field name="hammering_weight" attrs="{'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
 								<field name="hammering_reject_remarks_id" attrs="{'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
 								<field name="hammering_remarks" attrs="{'readonly': [('stage_name','not in',['HAMMERING'])]}"/>
@@ -775,6 +815,7 @@
 								<field name="order_delivery_date" readonly="1"/>
 								<field name="pump_model_id" readonly="1"/>
 								<field name="pattern_name" readonly="1"/>
+								<field name="melting_id" readonly="1"/>
 							</group>					
 						</group>
 						<notebook>
@@ -926,16 +967,17 @@
 							<group>
 								<field name="wheel_cutting_name" readonly="1"/>
 								<field name="wheel_cutting_shift_id" required="1" attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
-								<field name="wheel_cutting_qty" string="Production Qty" readonly="1"/>
-								<field name="wheel_cutting_reject_qty" required="1" readonly="1"/>
-								<field name="wheel_cutting_accept_user_id" attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
+								<field name="wheel_cutting_contractor" attrs="{'required':[('wheel_cutting_by','=','contractor')],'invisible':[('wheel_cutting_by','!=','contractor')],'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
+								<field name="wheel_cutting_employee" attrs="{'required':[('wheel_cutting_by','=','comp_employee')],'invisible':[('wheel_cutting_by','!=','comp_employee')],'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
+								<field name="wheel_cutting_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
+								<field name="wheel_cutting_reject_qty" attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
 								<field name="stage_id" readonly="1"/>
 								<field name="stage_name" invisible="1"/>
 							</group>											
 							<group>
 								<field name="wheel_cutting_date" required="1" attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
-								<field name="wheel_cutting_contractor"  attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
-								<field name="wheel_cutting_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
+								<field name="wheel_cutting_by" required="1" attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
+								<field name="wheel_cutting_qty" string="Production Qty" readonly="1"/>
 								<field name="wheel_cutting_weight" attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
 								<field name="wheel_cutting_reject_remarks_id" attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
 								<field name="wheel_cutting_remarks" attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
@@ -952,6 +994,7 @@
 								<field name="order_delivery_date" readonly="1"/>
 								<field name="pump_model_id" readonly="1"/>
 								<field name="pattern_name" readonly="1"/>
+								<field name="melting_id" readonly="1"/>
 							</group>					
 						</group>
 						<notebook>
@@ -963,6 +1006,9 @@
 									<field name="active"/>
 								</group>
 								<group>
+									<group>
+										<field name="wheel_cutting_accept_user_id" attrs="{'readonly': [('stage_name','not in',['WHEEL CUTTING'])]}"/>
+									</group>
 									<group>
 										<field name="wheel_cutting_user_id"/>
 									</group>
@@ -1100,15 +1146,17 @@
 							<group>
 								<field name="gas_cutting_name" readonly="1"/>
 								<field name="gas_cutting_shift_id" required="1" attrs="{'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
-								<field name="gas_cutting_qty" required="1" string="Production Qty" readonly="1"/>
-								<field name="gas_cutting_reject_qty" required="1" readonly="1"/>
+								<field name="gas_cutting_contractor" attrs="{'required':[('gas_cutting_by','=','contractor')],'invisible':[('gas_cutting_by','!=','contractor')],'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
+								<field name="gas_cutting_employee" attrs="{'required':[('gas_cutting_by','=','comp_employee')],'invisible':[('gas_cutting_by','!=','comp_employee')],'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
+								<field name="gas_cutting_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
+								<field name="gas_cutting_reject_qty" attrs="{'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
 								<field name="stage_id" readonly="1" />
 								<field name="stage_name" invisible="1"/>
 							</group>											
 							<group>
 								<field name="gas_cutting_date" required="1" attrs="{'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
-								<field name="gas_cutting_contractor"  attrs="{'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
-								<field name="gas_cutting_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
+								<field name="gas_cutting_by" required="1" attrs="{'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
+								<field name="gas_cutting_qty" required="1" string="Production Qty" readonly="1"/>
 								<field name="gas_cutting_weight" attrs="{'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
 								<field name="gas_cutting_reject_remarks_id" attrs="{'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
 								<field name="gas_cutting_remarks" attrs="{'readonly': [('stage_name','not in',['GAS CUTTING'])]}"/>
@@ -1125,6 +1173,7 @@
 								<field name="order_delivery_date" readonly="1"/>
 								<field name="pump_model_id" readonly="1"/>
 								<field name="pattern_name" readonly="1"/>
+								<field name="melting_id" readonly="1"/>
 							</group>					
 						</group>
 						<notebook>
@@ -1276,16 +1325,17 @@
 							<group>
 								<field name="arc_cutting_name" readonly="1"/>
 								<field name="arc_cutting_shift_id" required="1" attrs="{'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
-								<field name="arc_cutting_qty" string="Production Qty" readonly="1"/>
-								<field name="arc_cutting_reject_qty" required="1" readonly="1"/>
-								
+								<field name="arc_cutting_contractor" attrs="{'required':[('arc_cutting_by','=','contractor')],'invisible':[('arc_cutting_by','!=','contractor')],'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
+								<field name="arc_cutting_employee" attrs="{'required':[('arc_cutting_by','=','comp_employee')],'invisible':[('arc_cutting_by','!=','comp_employee')],'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
+								<field name="arc_cutting_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
+								<field name="arc_cutting_reject_qty" attrs="{'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
 								<field name="stage_id" readonly="1"/>
 								<field name="stage_name" invisible="1"/>
 							</group>											
 							<group>
 								<field name="arc_cutting_date" required="1" attrs="{'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
-								<field name="arc_cutting_contractor"  attrs="{'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
-								<field name="arc_cutting_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
+								<field name="arc_cutting_by" required="1" attrs="{'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
+								<field name="arc_cutting_qty" string="Production Qty" readonly="1"/>
 								<field name="arc_cutting_weight" attrs="{'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
 								<field name="arc_cutting_reject_remarks_id" attrs="{'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
 								<field name="arc_cutting_remarks" attrs="{'readonly': [('stage_name','not in',['ARC CUTTING'])]}"/>
@@ -1302,6 +1352,7 @@
 								<field name="order_delivery_date" readonly="1"/>
 								<field name="pump_model_id" readonly="1"/>
 								<field name="pattern_name" readonly="1"/>
+								<field name="melting_id" readonly="1"/>
 							</group>					
 						</group>
 						<notebook>
@@ -1461,6 +1512,7 @@
 								<field name="heat_quencing_after_temp" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
 								<field name="heat_total_qty" required="1" string="Production Qty" readonly="1"/>
 								<field name="heat_each_weight" required="1" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
+								<field name="heat_by" required="1" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
 								<field name="stage_id" readonly="1"/>
 								<field name="stage_name" invisible="1"/>
 							</group>											
@@ -1475,6 +1527,8 @@
 								<field name="heat_chloride_content" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
 								<field name="heat_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
 								<field name="heat_total_weight" required="1" readonly="1"/>
+								<field name="heat_contractor" attrs="{'required':[('heat_by','=','contractor')],'invisible':[('heat_by','!=','contractor')],'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
+								<field name="heat_employee" attrs="{'required':[('heat_by','=','comp_employee')],'invisible':[('heat_by','!=','comp_employee')],'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
 								<field name="heat_remarks" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
 							</group>					
 						</group>
@@ -1489,6 +1543,7 @@
 								<field name="order_delivery_date" readonly="1"/>
 								<field name="pump_model_id" readonly="1"/>
 								<field name="pattern_name" readonly="1"/>
+								<field name="melting_id" readonly="1"/>
 							</group>					
 						</group>
 						<notebook>
@@ -1618,16 +1673,18 @@
 							<group>
 								<field name="rough_grinding_name" readonly="1"/>
 								<field name="rough_grinding_shift_id" required="1" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
-								<field name="rough_grinding_qty" string="Production Qty" readonly="1"/>
-								<field name="rough_grinding_reject_qty" required="1" readonly="1"/>
-								
+								<field name="rough_grinding_contractor" attrs="{'required':[('rough_grinding_by','=','contractor')],'invisible':[('rough_grinding_by','!=','contractor')],'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
+								<field name="rough_grinding_employee" attrs="{'required':[('rough_grinding_by','=','comp_employee')],'invisible':[('rough_grinding_by','!=','comp_employee')],'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
+								<field name="rough_grinding_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
+								<field name="rough_grinding_rework_qty" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
 								<field name="stage_id" readonly="1"/>
 								<field name="stage_name" invisible="1"/>
 							</group>											
 							<group>
 								<field name="rough_grinding_date" required="1" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
-								<field name="rough_grinding_contractor" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
-								<field name="rough_grinding_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
+								<field name="rough_grinding_by" required="1" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
+								<field name="rough_grinding_qty" string="Production Qty" readonly="1"/>
+								<field name="rough_grinding_reject_qty" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
 								<field name="rough_grinding_weight" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
 								<field name="rough_grinding_reject_remarks_id" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
 								<field name="rough_grinding_remarks" attrs="{'readonly': [('stage_name','not in',['ROUGH GRINDING'])]}"/>
@@ -1644,6 +1701,7 @@
 								<field name="order_delivery_date" readonly="1"/>
 								<field name="pump_model_id" readonly="1"/>
 								<field name="pattern_name" readonly="1"/>
+								<field name="melting_id" readonly="1"/>
 							</group>					
 						</group>
 						<notebook>
@@ -1776,6 +1834,186 @@
 	
 	<!-- Sequence Number Setting Ends Here -->
 	
+	<!-- WELDING Process Starts Here -->
+	
+	<!-- Form View Start -->
+	
+		<record id="t_form_v_welding" model="ir.ui.view">
+			<field name="name">Welding Form</field>
+			<field name="model">kg.fettling</field>
+			<field name="arch" type="xml">
+				<form string="Welding" version="7.0" create="false">
+					<header>
+						<button name="welding_update" type="object" string="Update" class="oe_highlight"
+						attrs="{'invisible': [('welding_stage_name','not in',['WELDING'])]}"/>
+					</header>
+					<sheet>		
+						<group string="Welding Updates">
+							<group>
+								<field name="welding_name" readonly="1"/>
+								<field name="welding_shift_id" required="1" attrs="{'readonly': [('welding_stage_name','not in',['WELDING'])]}"/>
+								<field name="welding_contractor" attrs="{'required':[('welding_by','=','contractor')],'invisible':[('welding_by','!=','contractor')],'readonly': [('welding_stage_name','not in',['WELDING'])]}"/>
+								<field name="welding_employee" attrs="{'required':[('welding_by','=','comp_employee')],'invisible':[('welding_by','!=','comp_employee')],'readonly': [('welding_stage_name','not in',['WELDING'])]}"/>
+								<field name="welding_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('welding_stage_name','not in',['WELDING'])]}"/>
+								<field name="welding_reject_qty" attrs="{'readonly': [('welding_stage_name','not in',['WELDING'])]}"/>
+								<field name="welding_stage_id" readonly="1"/>
+								<field name="stage_name" invisible="1"/>
+								<field name="welding_stage_name" invisible="1"/>
+								<field name="welding_state" invisible="1"/>
+							</group>											
+							<group>
+								<field name="welding_date" required="1" attrs="{'readonly': [('welding_stage_name','not in',['WELDING'])]}"/>
+								<field name="welding_by" required="1" attrs="{'readonly': [('welding_stage_name','not in',['WELDING'])]}"/>
+								<field name="welding_qty" string="Production Qty" readonly="1"/>
+								<field name="welding_weight" attrs="{'readonly': [('welding_stage_name','not in',['WELDING'])]}"/>
+								<field name="welding_reject_remarks_id" attrs="{'readonly': [('welding_stage_name','not in',['WELDING'])]}"/>
+								<field name="welding_remarks" attrs="{'readonly': [('welding_stage_name','not in',['WELDING'])]}"/>
+							</group>					
+						</group>
+						<group string="Schedule Details">
+							<group>
+								<field name="order_no" readonly="1"/>
+								<field name="order_priority" string="Category"/>
+								<field name="pattern_id" readonly="1"/>
+							    <field name="moc_id" readonly="1"/> 
+							</group>											
+							<group>
+								<field name="order_delivery_date" readonly="1"/>
+								<field name="pump_model_id" readonly="1"/>
+								<field name="pattern_name" readonly="1"/>
+								<field name="melting_id" readonly="1"/>
+							</group>					
+						</group>
+						<notebook>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="welding_accept_user_id" attrs="{'readonly': [('welding_stage_name','not in',['WELDING'])]}"/>
+									</group>
+									<group>
+										<field name="welding_user_id"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start  -->
+	
+		<record id="t_tree_v_welding" model="ir.ui.view">
+			<field name="name">Welding Tree</field>
+			<field name="model">kg.fettling</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Welding Tree" create="false">					
+					<field name="welding_name"/>
+					<field name="welding_date"/>
+					<field name="order_no"/>
+					<field name="order_delivery_date"/>
+					<field name="order_priority" string="Category"/>
+					<field name="pump_model_id"/>
+					<field name="pattern_id"/>
+					<field name="pattern_name"/>
+					<field name="moc_id"/>
+					<field name="location"/>
+					<field name="welding_qty" string="Production Qty" sum="Qty"/>
+					<field name="welding_accept_qty" string="Completed/Accepted Qty" sum="Accepted Qty"/>
+					<field name="welding_reject_qty" sum="Rejected Qty"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Search View Start -->
+	
+		<record id="t_search_v_welding" model="ir.ui.view">
+            <field name="name">Welding Search</field>
+            <field name="model">kg.fettling</field>
+            <field name="arch" type="xml">
+                <search string="Welding Search">
+					
+					<field name="pattern_id" string="Pattern Number"  filter_domain="[('pattern_id','ilike',self)]" />
+					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
+					<field name="order_no" string="Work Order No."  filter_domain="[('order_no','ilike',self)]" />
+					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />
+					
+							
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
+						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
+						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_category'}"/>
+						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
+						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
+						<filter string="Pattern Name." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_name'}"/>
+						<filter string="MOC" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_id'}"/>
+						<filter string="Location" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'location'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+        
+	<!-- Menu Action Start -->
+		
+		
+		<record id="tma_welding" model="ir.actions.act_window">
+			<field name="name">Welding</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.fettling</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="domain">[('welding_stage_name','=',('WELDING')),('welding_state','=',('progress'))]</field>
+			<field name="search_view_id" ref="t_search_v_welding"/>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_welding_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_welding"/>
+            <field name="act_window_id" ref="tma_welding"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_welding_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_welding"/>
+            <field name="act_window_id" ref="tma_welding"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_welding" model="ir.sequence.type">	
+		<field name="name">KG WELDING</field>
+		<field name="code">kg.welding</field>
+	</record>
+
+	<record forcecreate="1" id="seq_welding" model="ir.sequence">
+	  <field name="name">KG WELDING</field>
+	  <field name="code">kg.welding</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">WEL/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
 	
 	<!-- Finish GRINDING Process Starts Here -->
 	
@@ -1795,16 +2033,18 @@
 							<group>
 								<field name="finish_grinding_name" readonly="1"/>
 								<field name="finish_grinding_shift_id" required="1" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
-								<field name="finish_grinding_qty" string="Production Qty" readonly="1"/>
-								<field name="finish_grinding_reject_qty" required="1" readonly="1"/>
-								
+								<field name="finish_grinding_contractor" attrs="{'required':[('finish_grinding_by','=','contractor')],'invisible':[('finish_grinding_by','!=','contractor')],'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
+								<field name="finish_grinding_employee" attrs="{'required':[('finish_grinding_by','=','comp_employee')],'invisible':[('finish_grinding_by','!=','comp_employee')],'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
+								<field name="finish_grinding_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
+								<field name="finish_grinding_reject_qty" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
 								<field name="stage_id" readonly="1"/>
 								<field name="stage_name" invisible="1"/>
+								<field name="flag_reshot_blast_applicable" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
 							</group>											
 							<group>
 								<field name="finish_grinding_date" required="1" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
-								<field name="finish_grinding_contractor" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
-								<field name="finish_grinding_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
+								<field name="finish_grinding_by" required="1" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
+								<field name="finish_grinding_qty" string="Production Qty" readonly="1"/>
 								<field name="finish_grinding_weight" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
 								<field name="finish_grinding_reject_remarks_id" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
 								<field name="finish_grinding_remarks" attrs="{'readonly': [('stage_name','not in',['FINISH GRINDING'])]}"/>
@@ -1821,6 +2061,7 @@
 								<field name="order_delivery_date" readonly="1"/>
 								<field name="pump_model_id" readonly="1"/>
 								<field name="pattern_name" readonly="1"/>
+								<field name="melting_id" readonly="1"/>
 							</group>					
 						</group>
 						<notebook>
@@ -1948,6 +2189,185 @@
 	  <field name="code">kg.finish.grinding</field>
 	  <field name="padding" eval="3"/>
 	  <field name="prefix">FG/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	
+	<!-- Re Shot Blasting Process Starts Here -->
+	
+	<!-- Form View Start -->
+	
+		<record id="t_form_v_reshot_blasting" model="ir.ui.view">
+			<field name="name">Re Shot Blasting Form</field>
+			<field name="model">kg.fettling</field>
+			<field name="arch" type="xml">
+				<form string="Re Shot Blasting" version="7.0" create="false">
+					<header>
+						<button name="reshot_blasting_update" type="object" string="Update" class="oe_highlight"
+						attrs="{'invisible': [('stage_name','not in',['RE SHOT BLASTING'])]}"/>
+					</header>
+					<sheet>		
+						<group string="Re Shot Blasting Updates">
+							<group>
+								<field name="reshot_blasting_name" readonly="1"/>
+								<field name="reshot_blasting_shift_id" required="1" attrs="{'readonly': [('stage_name','not in',['RE SHOT BLASTING'])]}"/>
+								<field name="reshot_blasting_contractor" attrs="{'required':[('reshot_blasting_by','=','contractor')],'invisible':[('reshot_blasting_by','!=','contractor')],'readonly': [('stage_name','not in',['RE SHOT BLASTING'])]}"/>
+								<field name="reshot_blasting_employee" attrs="{'required':[('reshot_blasting_by','=','comp_employee')],'invisible':[('reshot_blasting_by','!=','comp_employee')],'readonly': [('stage_name','not in',['RE SHOT BLASTING'])]}"/>
+								<field name="reshot_blasting_accept_qty" required="1" string="Completed/Accepted Qty" attrs="{'readonly': [('stage_name','not in',['RE SHOT BLASTING'])]}"/>
+								<field name="reshot_blasting_reject_qty" attrs="{'readonly': [('stage_name','not in',['RE SHOT BLASTING'])]}"/>
+								<field name="stage_id" readonly="1"/>
+								<field name="stage_name" invisible="1"/>
+							</group>											
+							<group>
+								<field name="reshot_blasting_date" required="1" attrs="{'readonly': [('stage_name','not in',['RE SHOT BLASTING'])]}"/>
+								<field name="reshot_blasting_by" required="1" attrs="{'readonly': [('stage_name','not in',['RE SHOT BLASTING'])]}"/>
+								<field name="reshot_blasting_qty" string="Production Qty" readonly="1"/>
+								<field name="reshot_blasting_weight" attrs="{'readonly': [('stage_name','not in',['RE SHOT BLASTING'])]}"/>
+								<field name="reshot_blasting_reject_remarks_id" attrs="{'readonly': [('stage_name','not in',['RE SHOT BLASTING'])]}"/>
+								<field name="reshot_blasting_remarks" attrs="{'readonly': [('stage_name','not in',['RE SHOT BLASTING'])]}"/>
+							</group>					
+						</group>
+						<group string="Schedule Details">
+							<group>
+								<field name="order_no" readonly="1"/>
+								<field name="order_priority" string="Category"/>
+								<field name="pattern_id" readonly="1"/>
+							    <field name="moc_id" readonly="1"/> 
+							</group>											
+							<group>
+								<field name="order_delivery_date" readonly="1"/>
+								<field name="pump_model_id" readonly="1"/>
+								<field name="pattern_name" readonly="1"/>
+								<field name="melting_id" readonly="1"/>
+							</group>					
+						</group>
+						<notebook>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="reshot_blasting_accept_user_id" attrs="{'readonly': [('stage_name','not in',['RE SHOT BLASTING'])]}"/>
+									</group>
+									<group>
+										<field name="reshot_blasting_user_id"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start  -->
+	
+		<record id="t_tree_v_reshot_blasting" model="ir.ui.view">
+			<field name="name">Re Shot Blasting Tree</field>
+			<field name="model">kg.fettling</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Re Shot Blasting Tree" create="false">					
+					<field name="reshot_blasting_name"/>
+					<field name="reshot_blasting_date"/>
+					<field name="order_no"/>
+					<field name="order_delivery_date"/>
+					<field name="order_priority" string="Category"/>
+					<field name="pump_model_id"/>
+					<field name="pattern_id"/>
+					<field name="pattern_name"/>
+					<field name="moc_id"/>
+					<field name="location"/>
+					<field name="reshot_blasting_qty" string="Production Qty" sum="Qty"/>
+					<field name="reshot_blasting_accept_qty" string="Completed/Accepted Qty" sum="Accepted Qty"/>
+					<field name="reshot_blasting_reject_qty" sum="Rejected Qty"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Search View Start -->
+	
+		<record id="t_search_v_reshot_blasting" model="ir.ui.view">
+            <field name="name">Re Shot Blasting Search</field>
+            <field name="model">kg.fettling</field>
+            <field name="arch" type="xml">
+                <search string="Re Shot Blasting Search">
+					
+					<field name="pattern_id" string="Pattern Number"  filter_domain="[('pattern_id','ilike',self)]" />
+					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
+					<field name="order_no" string="Work Order No."  filter_domain="[('order_no','ilike',self)]" />
+					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />
+					
+							
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
+						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
+						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_category'}"/>
+						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
+						<filter string="Pattern No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
+						<filter string="Pattern Name." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_name'}"/>
+						<filter string="MOC" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_id'}"/>
+						<filter string="Location" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'location'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+        
+	<!-- Menu Action Start -->
+		
+		
+		<record id="tma_reshot_blasting" model="ir.actions.act_window">
+			<field name="name">Re Shot Blasting</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.fettling</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="domain">[('stage_name','=',('RE SHOT BLASTING')),('state','!=',('complete'))]</field>
+			<field name="search_view_id" ref="t_search_v_reshot_blasting"/>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_reshot_blasting_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_reshot_blasting"/>
+            <field name="act_window_id" ref="tma_reshot_blasting"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_reshot_blasting_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_reshot_blasting"/>
+            <field name="act_window_id" ref="tma_reshot_blasting"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_reshot_blasting" model="ir.sequence.type">	
+		<field name="name">KG Re Shot Blasting</field>
+		<field name="code">kg.reshot.blasting</field>
+	</record>
+
+	<record forcecreate="1" id="seq_reshot_blasting" model="ir.sequence">
+	  <field name="name">KG Re Shot Blasting</field>
+	  <field name="code">kg.reshot.blasting</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">SB/%(year)s/%(month)s/</field>
 	  <field name="reset_sequence">fiscal_reset</field>
 	</record>
 	
@@ -3783,16 +4203,19 @@
 	<menuitem name="Fettling Process" id="tpm_fettling_process" parent = "kg_stock_inward.tpm_transactions" sequence="2"/>
 			
 		<menuitem action="tma_fettling_inward" id="tam_fettling_inward" parent="tpm_fettling_process" sequence="1"/>
-		<menuitem action="tma_knock_out" id="tam_knock_out" parent="tpm_fettling_process" sequence="2"/>
-		<menuitem action="tma_decoring" id="tam_decoring" parent="tpm_fettling_process" sequence="3"/>
-		<menuitem action="tma_shot_blast" id="tam_shot_blast" parent="tpm_fettling_process" sequence="4"/>
-		<menuitem action="tma_hammering" id="tam_hammering" parent="tpm_fettling_process" sequence="5"/>
-		<menuitem action="tma_wheel_cutting" id="tam_wheel_cutting" parent="tpm_fettling_process" sequence="6"/>
-		<menuitem action="tma_gas_cutting" id="tam_gas_cutting" parent="tpm_fettling_process" sequence="7"/>
-		<menuitem action="tma_arc_cutting" id="tam_arc_cutting" parent="tpm_fettling_process" sequence="8"/>
-		<menuitem action="tma_heat_treatment" id="tam_heat_treatment" parent="tpm_fettling_process" sequence="9"/>
-		<menuitem action="tma_rough_grinding" id="tam_rough_grinding" parent="tpm_fettling_process" sequence="10"/>
-		<menuitem action="tma_finish_grinding" id="tam_finish_grinding" parent="tpm_fettling_process" sequence="11"/>
+		<menuitem action="tma_fettling_accepted" id="tam_fettling_accepted" parent="tpm_fettling_process" sequence="2"/>
+		<menuitem action="tma_knock_out" id="tam_knock_out" parent="tpm_fettling_process" sequence="3"/>
+		<menuitem action="tma_decoring" id="tam_decoring" parent="tpm_fettling_process" sequence="4"/>
+		<menuitem action="tma_shot_blast" id="tam_shot_blast" parent="tpm_fettling_process" sequence="5"/>
+		<menuitem action="tma_hammering" id="tam_hammering" parent="tpm_fettling_process" sequence="6"/>
+		<menuitem action="tma_wheel_cutting" id="tam_wheel_cutting" parent="tpm_fettling_process" sequence="7"/>
+		<menuitem action="tma_gas_cutting" id="tam_gas_cutting" parent="tpm_fettling_process" sequence="8"/>
+		<menuitem action="tma_arc_cutting" id="tam_arc_cutting" parent="tpm_fettling_process" sequence="9"/>
+		<menuitem action="tma_heat_treatment" id="tam_heat_treatment" parent="tpm_fettling_process" sequence="10"/>
+		<menuitem action="tma_rough_grinding" id="tam_rough_grinding" parent="tpm_fettling_process" sequence="11"/>
+		<menuitem action="tma_welding" id="tam_welding" parent="tpm_fettling_process" sequence="12"/>
+		<menuitem action="tma_finish_grinding" id="tam_finish_grinding" parent="tpm_fettling_process" sequence="13"/>
+		<menuitem action="tma_reshot_blasting" id="tam_reshot_blasting" parent="tpm_fettling_process" sequence="14"/>
 			
 	<menuitem name="Batch Entries" id="tpm_fettling_batch_process" parent="kg_stock_inward.tpm_transactions" sequence="3"/>
 			

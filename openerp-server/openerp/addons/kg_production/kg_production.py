@@ -63,6 +63,14 @@ class kg_production(osv.osv):
 			total_weight = entry.qty * entry.each_weight		
 		result[entry.id]= total_weight
 		return result
+		
+	def _get_difference_qty(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		diff_qty = 0.00
+		for entry in self.browse(cr, uid, ids, context=context):
+			diff_qty = entry.total_core_qty - entry.total_mould_qty		
+		result[entry.id]= diff_qty
+		return result
 	
 	_columns = {
 	
@@ -174,6 +182,9 @@ class kg_production(osv.osv):
 		'pour_heat_id':fields.many2one('kg.melting','Heat Id',domain="[('state','=','confirmed'), ('active','=','t')]"),
 		'pour_remarks': fields.text('Remarks'),
 		
+		### Core vs Mould Qty ###
+		'difference_qty': fields.function(_get_difference_qty, string='Difference', store=True, type='float'),
+		
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		
@@ -246,7 +257,7 @@ class kg_production(osv.osv):
 		
 		entry_rec = self.browse(cr, uid, ids[0])
 		if entry_rec.core_by == 'comp_employee':
-			if entry_rec.core_moulder <= 0 or entry_rec.core_helper <= 0 or entry_rec.core_qty <=0:
+			if entry_rec.core_helper <= 0 or entry_rec.core_helper <= 0 or entry_rec.core_qty <=0:
 				raise osv.except_osv(_('Warning!'),
 							_('System not allow to save negative or zero values !!'))
 							
@@ -309,7 +320,7 @@ class kg_production(osv.osv):
 			state = 'mould_com'
 		if total_mould_qty > sch_qty:
 			raise osv.except_osv(_('Warning!'),
-						_('Mould Qty should be greater than Schedule Qty !!'))
+						_('Mould Qty should not be greater than Schedule Qty !!'))
 						
 		if mould_state == 'partial':
 			mould_entry_qty = 0
@@ -486,6 +497,7 @@ class kg_pattern_batch_issue(osv.osv):
 					'header_id': entry.id,
 					'production_id':item.id,
 					'qty':item.issue_qty,
+					'remarks':entry.remarks
 					
 				}
 				
@@ -607,6 +619,15 @@ class kg_core_batch(osv.osv):
 		'line_ids': fields.one2many('ch.core.batch.line', 'header_id', "Request Line Details"),
 		
 		'flag_issueline':fields.boolean('Issue Line Created'),
+		
+		'core_date': fields.date('Core Date'),
+		'core_shift_id':fields.many2one('kg.shift.master','Shift'),
+		'core_contractor':fields.many2one('res.partner','Contractor'),
+		'core_operator': fields.integer('Operator'),
+		'core_helper': fields.integer('Helper'),
+		'core_hardness': fields.char('Core Hardness'),
+		'core_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'core_pan_no':fields.char('PAN No.', size=128),
 
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
@@ -628,6 +649,7 @@ class kg_core_batch(osv.osv):
 		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
+		'core_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'active': True,
 		'state':'draft'
 		
@@ -647,12 +669,23 @@ class kg_core_batch(osv.osv):
 		
 			for item in entry.core_line_ids:
 				
+				core_qty = item.qty - item.total_core_qty
 				
 				vals = {
 				
 					'header_id': entry.id,
 					'production_id':item.id,
-					'core_qty':item.qty,
+					'core_qty':core_qty,
+					'production_qty':core_qty,
+					'core_date': entry.core_date,
+					'core_shift_id': entry.core_shift_id.id,
+					'core_contractor':entry.core_contractor.id,
+					'core_operator': entry.core_operator,
+					'core_helper': entry.core_helper,
+					'core_hardness': entry.core_hardness,
+					'remarks':entry.remarks,
+					'core_by':entry.core_by,
+					'core_pan_no':entry.core_pan_no,
 					
 				}
 				
@@ -674,8 +707,10 @@ class kg_core_batch(osv.osv):
 		
 		for req_item in entry.line_ids:
 			production_obj.write(cr, uid,req_item.production_id.id,{'core_remarks':req_item.remarks,'core_date':req_item.core_date,
-			'core_shift_id':req_item.core_shift_id.id,'core_contractor':req_item.core_contractor.id,'core_moulder':req_item.core_moulder,
-			'core_helper':req_item.core_helper,'core_qty':req_item.core_qty,'core_hardness':req_item.core_hardness})
+			'core_shift_id':req_item.core_shift_id.id,'core_contractor':req_item.core_contractor.id,'core_operator':req_item.core_operator,
+			'core_helper':req_item.core_helper,'core_qty':req_item.core_qty,'core_hardness':req_item.core_hardness,
+			'core_by':req_item.core_by,'core_pan_no':req_item.core_pan_no
+			})
 			production_obj.core_update(cr, uid, [req_item.production_id.id])
 			
 		### Core Batch Sequence Number Generation  ###
@@ -722,14 +757,18 @@ class ch_core_batch_line(osv.osv):
 		'core_date': fields.date('Core Date'),
 		'core_shift_id':fields.many2one('kg.shift.master','Shift'),
 		'core_contractor':fields.many2one('res.partner','Contractor'),
-		'core_moulder': fields.integer('Moulder'),
+		'core_operator': fields.integer('Operator'),
 		'core_helper': fields.integer('Helper'),
-		'core_qty': fields.integer('Qty'),
+		'core_qty': fields.integer('Completed Qty'),
 		'core_hardness': fields.char('Core Hardness'),
+		'core_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'production_qty': fields.integer('Production Qty'),
+		'core_pan_no':fields.char('PAN No.', size=128),
 		
 		'pump_model_id': fields.related('production_id','pump_model_id', type='many2one', relation='kg.pumpmodel.master', string='Pump Model', store=True, readonly=True),
 		'pattern_id': fields.related('production_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern Number', store=True, readonly=True),
 		'pattern_name': fields.related('production_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
+		'moc_id': fields.related('production_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
 		
 		
 		'remarks': fields.text('Remarks'),	
@@ -787,6 +826,17 @@ class kg_mould_batch(osv.osv):
 		'line_ids': fields.one2many('ch.mould.batch.line', 'header_id', "Request Line Details"),
 		
 		'flag_issueline':fields.boolean('Issue Line Created'),
+		
+		'mould_date': fields.date('Mould Date'),
+		'mould_shift_id':fields.many2one('kg.shift.master','Shift'),
+		'mould_contractor':fields.many2one('res.partner','Contractor'),
+		'mould_moulder': fields.integer('Moulder'),
+		'mould_operator': fields.integer('Operator'),
+		'mould_helper': fields.integer('Helper Count'),
+		'mould_qty': fields.integer('Qty'),		
+		'mould_hardness': fields.char('Mould Hardness'),
+		'mould_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'mould_pan_no':fields.char('PAN No.', size=128),
 
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
@@ -808,6 +858,7 @@ class kg_mould_batch(osv.osv):
 		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
+		'mould_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'active': True,
 		'state':'draft'
 		
@@ -827,12 +878,24 @@ class kg_mould_batch(osv.osv):
 		
 			for item in entry.mould_line_ids:
 				
+				mould_qty = item.qty - item.total_mould_qty
 				
 				vals = {
 				
 					'header_id': entry.id,
 					'production_id':item.id,
-					'mould_qty':item.qty,
+					'mould_qty':mould_qty,
+					'production_qty':mould_qty,
+					'mould_date': entry.mould_date,
+					'mould_shift_id':entry.mould_shift_id.id,
+					'mould_contractor':entry.mould_contractor.id,
+					'mould_moulder': entry.mould_moulder,
+					'mould_operator': entry.mould_operator,
+					'mould_helper': entry.mould_helper,
+					'mould_hardness': entry.mould_hardness,
+					'remarks':entry.remarks,
+					'mould_by':entry.mould_by,
+					'mould_pan_no':entry.mould_pan_no,
 					
 				}
 				
@@ -855,7 +918,8 @@ class kg_mould_batch(osv.osv):
 		for req_item in entry.line_ids:
 			production_obj.write(cr, uid,req_item.production_id.id,{'mould_remarks':req_item.remarks,'mould_date':req_item.mould_date,
 			'mould_shift_id':req_item.mould_shift_id.id,'mould_contractor':req_item.mould_contractor.id,'mould_moulder':req_item.mould_moulder,
-			'mould_helper':req_item.mould_helper,'mould_qty':req_item.mould_qty,'mould_hardness':req_item.mould_hardness,'mould_box_id':req_item.mould_box_id.id})
+			'mould_helper':req_item.mould_helper,'mould_qty':req_item.mould_qty,'mould_hardness':req_item.mould_hardness,'mould_box_id':req_item.mould_box_id.id,
+			'mould_by':req_item.mould_by,'mould_pan_no':req_item.mould_pan_no,'mould_operator':req_item.mould_operator})
 			production_obj.mould_update(cr, uid, [req_item.production_id.id])
 			
 		### Mould Batch Sequence Number Generation  ###
@@ -902,16 +966,19 @@ class ch_mould_batch_line(osv.osv):
 		'mould_shift_id':fields.many2one('kg.shift.master','Shift'),
 		'mould_contractor':fields.many2one('res.partner','Contractor'),
 		'mould_moulder': fields.integer('Moulder'),
-		'mould_box_id':fields.many2one('kg.box.master','Box Size'),
 		'mould_helper': fields.integer('Helper'),
-		'mould_qty': fields.integer('Qty'),		
-		'mould_hardness': fields.char('Mould Hardness'),		
+		'mould_operator': fields.integer('Operator'),
+		'mould_qty': fields.integer('Completed Qty'),		
+		'mould_hardness': fields.char('Mould Hardness'),
+		'mould_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'mould_pan_no':fields.char('PAN No.', size=128),
+		'production_qty': fields.integer('Production Qty'),		
 		
 		'pump_model_id': fields.related('production_id','pump_model_id', type='many2one', relation='kg.pumpmodel.master', string='Pump Model', store=True, readonly=True),
 		'pattern_id': fields.related('production_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern Number', store=True, readonly=True),
 		'pattern_name': fields.related('production_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
-		
-		
+		'mould_box_id': fields.related('pattern_id','box_id', type='many2one', relation='kg.box.master', string='Box Size', store=True, readonly=True),
+		'moc_id': fields.related('production_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
 		'remarks': fields.text('Remarks'),	
 		
 		

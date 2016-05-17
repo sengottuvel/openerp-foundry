@@ -50,6 +50,8 @@
             ref('kg_production.tam_core_batch'),
             ref('kg_production.tam_mould_log'),
             ref('kg_production.tam_mould_batch'),
+             ref('kg_production.tam_core_mould_completed'),
+            ref('kg_production.tam_pouring_pending'),
             ref('kg_production.tam_pouring_completed'),
 			ref('kg_melting.tam_melting'),
             ref('kg_pouring_log.tam_pouring_log'),
@@ -57,7 +59,7 @@
             
             ref('kg_fettling.tpm_fettling_process'),
             ref('kg_fettling.tam_fettling_inward'),
-            
+             ref('kg_fettling.tam_fettling_accepted'),
             ref('kg_fettling.tam_knock_out'),
             ref('kg_fettling.tam_decoring'),
             ref('kg_fettling.tam_shot_blast'),
