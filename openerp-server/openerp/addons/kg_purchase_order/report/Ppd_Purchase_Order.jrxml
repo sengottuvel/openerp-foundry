@@ -37,7 +37,7 @@ end as tax_name
 
 from purchase_order_line po_line
 
-where po_line.order_id in ($P{po_id}) order by po_line.id limit 1 ]]>
+where po_line.order_id in ($P{po_id}) order by po_line.id limit 1]]>
 		</queryString>
 		<field name="tax_name" class="java.lang.String"/>
 	</subDataset>
@@ -72,6 +72,7 @@ po.division as division,
 dis.name as mode_of_dispatch,
 pay.name as payment_mode,
 del.name as delivery_mode,
+term.name as quality_term,
 po.state as status,
 compart.tin_no as tin_no,
 compart.cst_no as cst_no
@@ -84,7 +85,7 @@ left join kg_delivery_master del on(del.id=po.delivery_mode)
 left join kg_dispatch_master dis on(dis.id=po.mode_of_dispatch)
 left join res_company company on(company.id=po.company_id)
 left join res_partner compart on(compart.id=company.partner_id)
-
+left join kg_item_quality_master term on(term.id=po.item_quality_term)
 where po.id = $P{po_id}]]>
 	</queryString>
 	<field name="insurance" class="java.lang.String"/>
@@ -103,6 +104,7 @@ where po.id = $P{po_id}]]>
 	<field name="mode_of_dispatch" class="java.lang.String"/>
 	<field name="payment_mode" class="java.lang.String"/>
 	<field name="delivery_mode" class="java.lang.String"/>
+	<field name="quality_term" class="java.lang.String"/>
 	<field name="status" class="java.lang.String"/>
 	<field name="tin_no" class="java.lang.String"/>
 	<field name="cst_no" class="java.lang.String"/>
@@ -655,7 +657,7 @@ where po.id = $P{po_id}]]>
 				<textElement textAlignment="Center">
 					<font size="9" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["NOTE: VAT EXTRA.RATE PER KG."+" RS. "+$F{amount_total}+"/-"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["NOTE: "+ $F{quality_term}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement x="369" y="1" width="60" height="11"/>
@@ -861,7 +863,7 @@ where po.id = $P{po_id}]]>
 			</textField>
 			<componentElement>
 				<reportElement x="345" y="35" width="143" height="28"/>
-				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 					<datasetRun subDataset="Tax">
 						<datasetParameter name="po_id">
 							<datasetParameterExpression><![CDATA[$P{po_id}]]></datasetParameterExpression>
