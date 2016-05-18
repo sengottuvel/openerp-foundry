@@ -117,6 +117,7 @@ class kg_indent2_po(osv.osv):
 				'least_price': min_val or 0,
 				'high_price': max_val or 0,
 				'recent_price': recent_val or 0,
+				'moc_id': group[0].moc_id.id,
 				
 				}
 				poindent_line_obj.write(cr,uid,po_pi_id,{'line_state' : 'process','draft_flag':True})

@@ -164,7 +164,7 @@ class kg_purchase_order(osv.osv):
 		'quotation_date': fields.date('Quotation Date'),
 		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
 		'insurance': fields.selection([('sam','By Sam'),('supplier','By Supplier'),('na','N/A')],'Insurance',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
-		'excise_duty': fields.selection([('inclusive','Inclusive'),('extra','Extra')],'Excise Duty',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
+		'excise_duty': fields.selection([('inclusive','Inclusive'),('extra','Extra'),('nil','Nil')],'Excise Duty',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		'division': fields.selection([('ppd','PPD'),('ipd','IPD'),('foundry','Foundry')],'Division',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		'revision': fields.integer('Revision',readonly=True),
 		'mode_of_dispatch': fields.many2one('kg.dispatch.master','Mode of Dispatch',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
@@ -185,6 +185,7 @@ class kg_purchase_order(osv.osv):
 	'version':'00',
 	'pricelist_id': 2,
 	'type_flag': False,
+	'insurance': 'na',
 	
 	}
 	
@@ -548,7 +549,22 @@ class kg_purchase_order(osv.osv):
 						cr.execute(sql)
 					
 				line_obj.write(cr,uid,po_lines[i].id,{'pending_qty':po_lines[i].product_qty})
-				
+			
+			prod_obj = self.pool.get('product.product')
+			prod_obj.write(cr,uid,po_lines[i].product_id.id,{'latest_price' : po_lines[i].price_unit})
+			
+			bmr_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',po_lines[i].product_id.id)])
+			if bmr_obj:
+				bmr_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,bmr_obj[0])
+				for item in bmr_rec.line_ids:
+					if item.brand_id.id == po_lines[i].brand_id.id and item.moc_id.id == po_lines[i].moc_id.id:
+						self.pool.get('ch.brandmoc.rate.details').write(cr,uid,item.id,{'purchase_price' : po_lines[i].price_unit})
+					elif item.brand_id.id == po_lines[i].brand_id.id or item.moc_id.id == po_lines[i].moc_id.id:
+						self.pool.get('ch.brandmoc.rate.details').write(cr,uid,item.id,{'purchase_price' : po_lines[i].price_unit})
+					else:
+						pass
+						
+			
 		#self.send_email(cr,uid,ids)
 		#cr.execute("""select all_transaction_mails('Purchase Order Approval',%s)"""%(ids[0]))
 		"""Raj
@@ -940,6 +956,7 @@ class kg_purchase_order_line(osv.osv):
 	'recent_price': fields.float('Recent Price'),
 	'price_type': fields.selection([('po_uom','PO UOM'),('per_kg','Per Kg')],'Price Type'),
 	'line_id': fields.one2many('ch.purchase.wo','header_id','Ch Line Id'),
+	'moc_id': fields.many2one('kg.moc.master','MOC'),
 	
 	}
 	

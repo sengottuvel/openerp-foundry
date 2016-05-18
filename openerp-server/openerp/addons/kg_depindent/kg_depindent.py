@@ -527,6 +527,7 @@ class kg_depindent_line(osv.osv):
 	'brand_id': fields.many2one('kg.brand.master', 'Brand Name'),
 	'return_qty':fields.float('Return Qty'),
 	'line_id': fields.one2many('ch.depindent.wo','header_id','Ch Line Id'),
+	'moc_id': fields.many2one('kg.moc.master','MOC'),
 	
 	}
 	

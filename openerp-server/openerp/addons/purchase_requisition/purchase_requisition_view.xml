@@ -67,6 +67,7 @@
                                 <field name="stock_qty"/>
                                 <field name="product_uom_id" string="UOM" groups="product.group_uom"/>
                                 <field name="brand_id"/>
+                                <field name="moc_id"/>
                                 <field name="note"/>
                             </tree>
 <!--
@@ -184,6 +185,7 @@
 					</group>
 					<group>
 						<field name="brand_id"/>
+						<field name="moc_id"/>
 						<field name="stock_qty" readonly="1"/>
 						<field name="note"/>
 						<field name="entry_mode" invisible="1"/>

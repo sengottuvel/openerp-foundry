@@ -262,6 +262,7 @@
 				on_change="onchange_product_id(parent.pricelist_id,product_id,0,product_uom,parent.partner_id, parent.date_order,parent.fiscal_position,date_planned,name,price_unit,context)" 
 				attrs="{'readonly': [('line_flag', '=', True)]}" position="after">
 				<field name="brand_id"/>
+				<field name="moc_id"/>
 			</field>
 			
 			<field name="product_qty" position="replace">

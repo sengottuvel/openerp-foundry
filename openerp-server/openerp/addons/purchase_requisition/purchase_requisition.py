@@ -189,6 +189,7 @@ class purchase_requisition_line(osv.osv):
 		'indent_type': fields.selection([('fromdi','From Dept'),('direct','Direct')],'Indent Type'),
 		'note': fields.text('Remarks'),
 		'pending_qty': fields.float('Pending Qty'),
+		'moc_id': fields.many2one('kg.moc.master','MOC'),
 		
 	}
 

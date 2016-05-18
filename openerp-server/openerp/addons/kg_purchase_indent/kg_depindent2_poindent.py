@@ -116,6 +116,7 @@ class kg_depindent2_poindent(osv.osv):
 				'dep_id': dep,
 				'user_id' : user,
 				'stock_qty': stock_qty,
+				'moc_id': group[0].moc_id.id,
 				
 				}
 				print "vals :", vals
