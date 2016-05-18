@@ -87,6 +87,7 @@ class kg_work_order(osv.osv):
 		('rfd','RFD'),
 		('dispatched','Dispatched'),
 		],'Progress Status', readonly=True),
+		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode', readonly=True),
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		
@@ -113,6 +114,7 @@ class kg_work_order(osv.osv):
 		'crt_date':time.strftime('%Y-%m-%d %H:%M:%S'),
 		'state': 'draft',
 		'order_priority': 'normal',
+		'entry_mode': 'manual',
 		'active': True,
 		'division_id':_get_default_division,
 		'delivery_date' : lambda * a: time.strftime('%Y-%m-%d'),
@@ -367,11 +369,11 @@ class kg_work_order(osv.osv):
 		
 		#url = 'http://192.168.1.150:81/pbxclick2call.php?exten='+exe_no+'&phone='+str(m_no)
 		return {
-					  'name'     : 'Go to website',
+					  'name'	 : 'Go to website',
 					  'res_model': 'ir.actions.act_url',
-					  'type'     : 'ir.actions.act_url',
+					  'type'	 : 'ir.actions.act_url',
 					  'target'   : 'current',
-					  'url'      : url
+					  'url'	  : url
 			   }
 		
 		
@@ -544,7 +546,8 @@ class ch_work_order_details(osv.osv):
 						'flag_applicable' : applicable,
 						'order_category':	order_category,
 						'moc_id': moc_id,
-						'flag_standard':flag_standard	  
+						'flag_standard':flag_standard,
+						'entry_mode':'auto'  
 						})
 						
 				#### Loading Machine Shop details
@@ -574,7 +577,8 @@ class ch_work_order_details(osv.osv):
 						'name': bom_ms_details['name'],
 						'qty': bom_ms_qty,
 						'flag_applicable' : applicable,
-						'flag_standard':flag_standard	
+						'flag_standard':flag_standard,
+						'entry_mode':'auto'
 								  
 						})
 						
@@ -599,8 +603,8 @@ class ch_work_order_details(osv.osv):
 						'bot_id': bom_bot_details['bot_id'],
 						'qty': bom_bot_qty,
 						'flag_applicable' : applicable,
-						'flag_standard':flag_standard	
-								  
+						'flag_standard':flag_standard,
+						'entry_mode':'auto'			  
 						})
 						
 						
@@ -739,6 +743,7 @@ class ch_order_bom_details(osv.osv):
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),			   
 		'flag_standard': fields.boolean('Non Standard'),
 		'flag_pattern_check': fields.boolean('Is Pattern Check'),
+		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode', readonly=True),
 	
 	}
 	
@@ -748,7 +753,7 @@ class ch_order_bom_details(osv.osv):
 		'state': 'draft',
 		'flag_applicable': False,
 		'flag_pattern_check': False,
-		
+		'entry_mode':'manual'
 	}
 	
 	def default_get(self, cr, uid, fields, context=None):
@@ -839,9 +844,16 @@ class ch_order_machineshop_details(osv.osv):
 		'flag_applicable': fields.boolean('Is Applicable'),
 		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'remarks':fields.text('Remarks'), 
-		'flag_standard': fields.boolean('Non Standard'),  
+		'flag_standard': fields.boolean('Non Standard'), 
+		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode', readonly=True),
 	
-	}   
+	}
+	
+	_defaults = {
+		
+		'entry_mode':'manual'
+		
+	} 
 	
 	def default_get(self, cr, uid, fields, context=None):
 		return context
@@ -871,12 +883,18 @@ class ch_order_bot_details(osv.osv):
 		'flag_applicable': fields.boolean('Is Applicable'),
 		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'remarks':fields.text('Remarks'),
-		'flag_standard': fields.boolean('Non Standard'), 
+		'flag_standard': fields.boolean('Non Standard'),
+		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode', readonly=True),
 	
 	}
 	
+	_defaults = {
+		
+		'entry_mode':'manual'
+		
+	}
+	
 	def default_get(self, cr, uid, fields, context=None):
-		print "botttttttttttttttttttttttt",fields,context
 		return context
 	
 		
@@ -923,17 +941,17 @@ ch_order_consu_details()
 ### For Sequence No Generation ###
 
 class kg_sequence_generate_det(osv.osv):
-    _name = 'kg.sequence.generate.det'
-    _order = 'name'
-    _columns = {
-        'name': fields.char('Name',size=64),
-        'ir_sequence_id': fields.many2one('ir.sequence', 'Sequence'),
-        'seq_month' : fields.integer('Sequence Month'),
-        'seq_year' : fields.integer('Sequence Year'),
-        'seq_next_number' : fields.integer('Sequence Next Number'),
-        'fiscal_year_code' : fields.char('Fiscal Year Code',size=64),
-        'fiscal_year_id' : fields.integer('Fiscal Year ID'),
-    }
+	_name = 'kg.sequence.generate.det'
+	_order = 'name'
+	_columns = {
+		'name': fields.char('Name',size=64),
+		'ir_sequence_id': fields.many2one('ir.sequence', 'Sequence'),
+		'seq_month' : fields.integer('Sequence Month'),
+		'seq_year' : fields.integer('Sequence Year'),
+		'seq_next_number' : fields.integer('Sequence Next Number'),
+		'fiscal_year_code' : fields.char('Fiscal Year Code',size=64),
+		'fiscal_year_id' : fields.integer('Fiscal Year ID'),
+	}
 kg_sequence_generate_det()
 
 

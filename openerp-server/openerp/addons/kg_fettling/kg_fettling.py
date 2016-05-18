@@ -456,9 +456,9 @@ class kg_fettling(osv.osv):
 			raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
 				
-		if entry.inward_reject_qty > reject_qty:
-			raise osv.except_osv(_('Warning!'),
-				_('Kindly check the rejection Qty !!'))
+		#~ if entry.inward_reject_qty > reject_qty:
+			#~ raise osv.except_osv(_('Warning!'),
+				#~ _('Kindly check the rejection Qty !!'))
 				
 		entry_date = entry.entry_date
 		entry_date = str(entry_date)
@@ -625,8 +625,8 @@ class kg_fettling(osv.osv):
 				'schedule_line_id': entry.schedule_line_id.id,
 				'order_id': entry.order_id.id,
 				'order_line_id': entry.order_line_id.id,
-				'qty' : entry.inward_reject_qty,              
-				'schedule_qty' : entry.inward_reject_qty,              
+				'qty' : entry.inward_reject_qty,			  
+				'schedule_qty' : entry.inward_reject_qty,			  
 				'state' : 'issue_done',
 				'order_category':entry.order_category,
 				'order_priority': '2',
@@ -679,9 +679,9 @@ class kg_fettling(osv.osv):
 			raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
 				
-		if entry.knockout_reject_qty > reject_qty:
-			raise osv.except_osv(_('Warning!'),
-				_('Kindly check the rejection Qty !!'))
+		#~ if entry.knockout_reject_qty > reject_qty:
+			#~ raise osv.except_osv(_('Warning!'),
+				#~ _('Kindly check the rejection Qty !!'))
 				
 		knockout_date = entry.knockout_date
 		knockout_date = str(knockout_date)
@@ -873,8 +873,8 @@ class kg_fettling(osv.osv):
 				'schedule_line_id': entry.schedule_line_id.id,
 				'order_id': entry.order_id.id,
 				'order_line_id': entry.order_line_id.id,
-				'qty' : entry.knockout_reject_qty,              
-				'schedule_qty' : entry.knockout_reject_qty,              
+				'qty' : entry.knockout_reject_qty,			  
+				'schedule_qty' : entry.knockout_reject_qty,			  
 				'state' : 'issue_done',
 				'order_category':entry.order_category,
 				'order_priority': '2',
@@ -922,9 +922,9 @@ class kg_fettling(osv.osv):
 			raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
 				
-		if entry.decoring_reject_qty > reject_qty:
-			raise osv.except_osv(_('Warning!'),
-				_('Kindly check the rejection Qty !!'))
+		#~ if entry.decoring_reject_qty > reject_qty:
+			#~ raise osv.except_osv(_('Warning!'),
+				#~ _('Kindly check the rejection Qty !!'))
 				
 		decoring_date = entry.decoring_date
 		decoring_date = str(decoring_date)
@@ -1115,8 +1115,8 @@ class kg_fettling(osv.osv):
 				'schedule_line_id': entry.schedule_line_id.id,
 				'order_id': entry.order_id.id,
 				'order_line_id': entry.order_line_id.id,
-				'qty' : entry.decoring_reject_qty,              
-				'schedule_qty' : entry.decoring_reject_qty,              
+				'qty' : entry.decoring_reject_qty,			  
+				'schedule_qty' : entry.decoring_reject_qty,			  
 				'state' : 'issue_done',
 				'order_category':entry.order_category,
 				'order_priority': '2',
@@ -1164,9 +1164,9 @@ class kg_fettling(osv.osv):
 			raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
 				
-		if entry.shot_blast_reject_qty > reject_qty:
-			raise osv.except_osv(_('Warning!'),
-				_('Kindly check the rejection Qty !!'))
+		#~ if entry.shot_blast_reject_qty > reject_qty:
+			#~ raise osv.except_osv(_('Warning!'),
+				#~ _('Kindly check the rejection Qty !!'))
 				
 		shot_blast_date = entry.shot_blast_date
 		shot_blast_date = str(shot_blast_date)
@@ -1357,8 +1357,8 @@ class kg_fettling(osv.osv):
 				'schedule_line_id': entry.schedule_line_id.id,
 				'order_id': entry.order_id.id,
 				'order_line_id': entry.order_line_id.id,
-				'qty' : entry.shot_blast_reject_qty,              
-				'schedule_qty' : entry.shot_blast_reject_qty,              
+				'qty' : entry.shot_blast_reject_qty,			  
+				'schedule_qty' : entry.shot_blast_reject_qty,			  
 				'state' : 'issue_done',
 				'order_category':entry.order_category,
 				'order_priority': '2',
@@ -1405,9 +1405,9 @@ class kg_fettling(osv.osv):
 			raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
 				
-		if entry.hammering_reject_qty > reject_qty:
-			raise osv.except_osv(_('Warning!'),
-				_('Kindly check the rejection Qty !!'))
+		#~ if entry.hammering_reject_qty > reject_qty:
+			#~ raise osv.except_osv(_('Warning!'),
+				#~ _('Kindly check the rejection Qty !!'))
 				
 		hammering_date = entry.hammering_date
 		hammering_date = str(hammering_date)
@@ -1598,8 +1598,8 @@ class kg_fettling(osv.osv):
 				'schedule_line_id': entry.schedule_line_id.id,
 				'order_id': entry.order_id.id,
 				'order_line_id': entry.order_line_id.id,
-				'qty' : entry.hammering_reject_qty,              
-				'schedule_qty' : entry.hammering_reject_qty,              
+				'qty' : entry.hammering_reject_qty,			  
+				'schedule_qty' : entry.hammering_reject_qty,			  
 				'state' : 'issue_done',
 				'order_category':entry.order_category,
 				'order_priority': '2',
@@ -1645,9 +1645,9 @@ class kg_fettling(osv.osv):
 			raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
 				
-		if entry.wheel_cutting_reject_qty > reject_qty:
-			raise osv.except_osv(_('Warning!'),
-				_('Kindly check the rejection Qty !!'))
+		#~ if entry.wheel_cutting_reject_qty > reject_qty:
+			#~ raise osv.except_osv(_('Warning!'),
+				#~ _('Kindly check the rejection Qty !!'))
 				
 		wheel_cutting_date = entry.wheel_cutting_date
 		wheel_cutting_date = str(wheel_cutting_date)
@@ -1838,8 +1838,8 @@ class kg_fettling(osv.osv):
 				'schedule_line_id': entry.schedule_line_id.id,
 				'order_id': entry.order_id.id,
 				'order_line_id': entry.order_line_id.id,
-				'qty' : entry.wheel_cutting_reject_qty,              
-				'schedule_qty' : entry.wheel_cutting_reject_qty,              
+				'qty' : entry.wheel_cutting_reject_qty,			  
+				'schedule_qty' : entry.wheel_cutting_reject_qty,			  
 				'state' : 'issue_done',
 				'order_category':entry.order_category,
 				'order_priority': '2',
@@ -1885,9 +1885,9 @@ class kg_fettling(osv.osv):
 			raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
 				
-		if entry.gas_cutting_reject_qty > reject_qty:
-			raise osv.except_osv(_('Warning!'),
-				_('Kindly check the rejection Qty !!'))
+		#~ if entry.gas_cutting_reject_qty > reject_qty:
+			#~ raise osv.except_osv(_('Warning!'),
+				#~ _('Kindly check the rejection Qty !!'))
 				
 		gas_cutting_date = entry.gas_cutting_date
 		gas_cutting_date = str(gas_cutting_date)
@@ -2078,8 +2078,8 @@ class kg_fettling(osv.osv):
 				'schedule_line_id': entry.schedule_line_id.id,
 				'order_id': entry.order_id.id,
 				'order_line_id': entry.order_line_id.id,
-				'qty' : entry.gas_cutting_reject_qty,              
-				'schedule_qty' : entry.gas_cutting_reject_qty,              
+				'qty' : entry.gas_cutting_reject_qty,			  
+				'schedule_qty' : entry.gas_cutting_reject_qty,			  
 				'state' : 'issue_done',
 				'order_category':entry.order_category,
 				'order_priority': '2',
@@ -2127,9 +2127,9 @@ class kg_fettling(osv.osv):
 			raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
 				
-		if entry.arc_cutting_reject_qty > reject_qty:
-			raise osv.except_osv(_('Warning!'),
-				_('Kindly check the rejection Qty !!'))
+		#~ if entry.arc_cutting_reject_qty > reject_qty:
+			#~ raise osv.except_osv(_('Warning!'),
+				#~ _('Kindly check the rejection Qty !!'))
 				
 		arc_cutting_date = entry.arc_cutting_date
 		arc_cutting_date = str(arc_cutting_date)
@@ -2320,8 +2320,8 @@ class kg_fettling(osv.osv):
 				'schedule_line_id': entry.schedule_line_id.id,
 				'order_id': entry.order_id.id,
 				'order_line_id': entry.order_line_id.id,
-				'qty' : entry.arc_cutting_reject_qty,              
-				'schedule_qty' : entry.arc_cutting_reject_qty,              
+				'qty' : entry.arc_cutting_reject_qty,			  
+				'schedule_qty' : entry.arc_cutting_reject_qty,			  
 				'state' : 'issue_done',
 				'order_category':entry.order_category,
 				'order_priority': '2',
@@ -2517,22 +2517,23 @@ class kg_fettling(osv.osv):
 		if entry.rough_grinding_qty <= 0 or entry.rough_grinding_accept_qty < 0:
 			raise osv.except_osv(_('Warning!'),
 						_('System not allow to save negative or zero values !!'))
-						
-		if reject_qty > 0:
-			if entry.rough_grinding_reject_qty == 0:
-				raise osv.except_osv(_('Warning!'),
-				_('Kindly Enter Rejection Qty !!'))
-			if entry.rough_grinding_reject_qty < reject_qty:
-				raise osv.except_osv(_('Warning!'),
-				_('Kindly Check Rejection Qty !!'))
+		
+		if entry.rough_grinding_rework_qty == 0:				
+			if reject_qty > 0:
+				if entry.rough_grinding_reject_qty == 0:
+					raise osv.except_osv(_('Warning!'),
+					_('Kindly Enter Rejection Qty !!'))
+				if entry.rough_grinding_reject_qty < reject_qty:
+					raise osv.except_osv(_('Warning!'),
+					_('Kindly Check Rejection Qty !!'))
 						
 		if entry.rough_grinding_reject_qty > 0 and not entry.rough_grinding_reject_remarks_id:
 			raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
 				
-		if entry.rough_grinding_reject_qty > reject_qty:
-			raise osv.except_osv(_('Warning!'),
-				_('Kindly check the rejection Qty !!'))
+		#~ if entry.rough_grinding_reject_qty > reject_qty:
+			#~ raise osv.except_osv(_('Warning!'),
+				#~ _('Kindly check the rejection Qty !!'))
 				
 		rough_grinding_date = entry.rough_grinding_date
 		rough_grinding_date = str(rough_grinding_date)
@@ -2736,8 +2737,8 @@ class kg_fettling(osv.osv):
 				'schedule_line_id': entry.schedule_line_id.id,
 				'order_id': entry.order_id.id,
 				'order_line_id': entry.order_line_id.id,
-				'qty' : entry.rough_grinding_reject_qty,              
-				'schedule_qty' : entry.rough_grinding_reject_qty,              
+				'qty' : entry.rough_grinding_reject_qty,			  
+				'schedule_qty' : entry.rough_grinding_reject_qty,			  
 				'state' : 'issue_done',
 				'order_category':entry.order_category,
 				'order_priority': '2',
@@ -2783,9 +2784,9 @@ class kg_fettling(osv.osv):
 			raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
 				
-		if entry.welding_reject_qty > reject_qty:
-			raise osv.except_osv(_('Warning!'),
-				_('Kindly check the rejection Qty !!'))
+		#~ if entry.welding_reject_qty > reject_qty:
+			#~ raise osv.except_osv(_('Warning!'),
+				#~ _('Kindly check the rejection Qty !!'))
 				
 		welding_date = entry.welding_date
 		welding_date = str(welding_date)
@@ -2894,8 +2895,8 @@ class kg_fettling(osv.osv):
 				'schedule_line_id': entry.schedule_line_id.id,
 				'order_id': entry.order_id.id,
 				'order_line_id': entry.order_line_id.id,
-				'qty' : entry.welding_reject_qty,              
-				'schedule_qty' : entry.welding_reject_qty,              
+				'qty' : entry.welding_reject_qty,			  
+				'schedule_qty' : entry.welding_reject_qty,			  
 				'state' : 'issue_done',
 				'order_category':entry.order_category,
 				'order_priority': '2',
@@ -2942,9 +2943,9 @@ class kg_fettling(osv.osv):
 			raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
 				
-		if entry.finish_grinding_reject_qty > reject_qty:
-			raise osv.except_osv(_('Warning!'),
-				_('Kindly check the rejection Qty !!'))
+		#~ if entry.finish_grinding_reject_qty > reject_qty:
+			#~ raise osv.except_osv(_('Warning!'),
+				#~ _('Kindly check the rejection Qty !!'))
 				
 		finish_grinding_date = entry.finish_grinding_date
 		finish_grinding_date = str(finish_grinding_date)
@@ -3151,8 +3152,8 @@ class kg_fettling(osv.osv):
 				'schedule_line_id': entry.schedule_line_id.id,
 				'order_id': entry.order_id.id,
 				'order_line_id': entry.order_line_id.id,
-				'qty' : entry.finish_grinding_reject_qty,              
-				'schedule_qty' : entry.finish_grinding_reject_qty,              
+				'qty' : entry.finish_grinding_reject_qty,			  
+				'schedule_qty' : entry.finish_grinding_reject_qty,			  
 				'state' : 'issue_done',
 				'order_category':entry.order_category,
 				'order_priority': '2',
@@ -3198,9 +3199,9 @@ class kg_fettling(osv.osv):
 			raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
 				
-		if entry.reshot_blasting_reject_qty > reject_qty:
-			raise osv.except_osv(_('Warning!'),
-				_('Kindly check the rejection Qty !!'))
+		#~ if entry.reshot_blasting_reject_qty > reject_qty:
+			#~ raise osv.except_osv(_('Warning!'),
+				#~ _('Kindly check the rejection Qty !!'))
 				
 		reshot_blasting_date = entry.reshot_blasting_date
 		reshot_blasting_date = str(reshot_blasting_date)
@@ -3392,8 +3393,8 @@ class kg_fettling(osv.osv):
 				'schedule_line_id': entry.schedule_line_id.id,
 				'order_id': entry.order_id.id,
 				'order_line_id': entry.order_line_id.id,
-				'qty' : entry.reshot_blasting_reject_qty,              
-				'schedule_qty' : entry.reshot_blasting_reject_qty,              
+				'qty' : entry.reshot_blasting_reject_qty,			  
+				'schedule_qty' : entry.reshot_blasting_reject_qty,			  
 				'state' : 'issue_done',
 				'order_category':entry.order_category,
 				'order_priority': '2',
