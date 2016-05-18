@@ -8,7 +8,7 @@
 			<field name="arch" type="xml">
 				<form string="RFQ-Vendor Selection">
 					<field name="name" readonly="1"	/>
-					<field name="rfq_name" required="1" attrs="{'readonly': [('state', '!=', 'draft')]}" />
+					<field name="rfq_name" attrs="{'readonly': [('state', '!=', 'draft')]}" />
 					<newline/>
 					<field name="quotation_date"/>
 					<newline/>
