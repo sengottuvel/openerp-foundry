@@ -210,7 +210,7 @@ class kg_purchase_indent(osv.osv):
 				else:
 					print "Line have enough Qty"
 					
-			self.write(cr,uid,ids,{'state':'approved','approved_by':uid,'approved_date':time.strftime("%Y-%m-%d")})
+			self.write(cr,uid,ids,{'state':'approved','approved_by':uid,'approved_date':time.strftime('%Y-%m-%d %H:%M:%S')})
 			cr.execute(""" select depindent_line_id from kg_depindent_pi_line where pi_id = %s """ %(str(ids[0])))
 			data = cr.dictfetchall()
 			val = [d['depindent_line_id'] for d in data if 'depindent_line_id' in d] # Get a values form list of dict if the dict have with empty values
@@ -387,7 +387,7 @@ class kg_purchase_indent(osv.osv):
 			
 	_constraints = [
 	
-		(_check_line,'You can not save this Purchase Indent with out Line and Zero Qty !',['line_ids']),
+		#(_check_line,'You can not save this Purchase Indent with out Line and Zero Qty !',['line_ids']),
 	]   	   	
 		
 kg_purchase_indent()
@@ -401,7 +401,7 @@ class kg_purchase_indent_line(osv.osv):
 	_columns = {
 	
 	'rate': fields.float('Last Purchase Rate',readonly=True, state={'draft': [('readonly', False)]}),
-	'line_date':fields.datetime('Date'),
+	'line_date':fields.datetime('Indent Date'),
 	'line_state': fields.selection([('process', 'Approved'),('noprocess', 'Confirmed'),
 					('cancel', 'Cancel')], 'Status'),
 	'current_qty':fields.float('Current Stock Quantity'),
@@ -465,38 +465,38 @@ class kg_purchase_indent_line(osv.osv):
 			value = {'pending_qty': product_qty}
 		return {'value': value}
 		
-	def create(self,cr,uid,vals,context={}):
-		print "Line create called............"
-		if vals['product_id']:
-			prod_record = self.pool.get('product.product').browse(cr,uid,vals['product_id'])
-			stock_sql = """ select sum(pending_qty) from stock_production_lot where product_id = %s group by product_id """%(vals['product_id'])
-			cr.execute(stock_sql)		
-			stock_data = cr.dictfetchall()
-			stock_qty = 0.00
-			if stock_data:
-				stock_qty = stock_data[0]
-				stock_qty = stock_qty.values()[0]
-			else:
-				stock_qty = 0.00
-			vals.update({'product_uom_id':prod_record.uom_po_id.id,'stock_qty':stock_qty})
-		return super(kg_purchase_indent_line,self).create(cr,uid,vals,context)
-		
-	def write(self,cr,uid,ids,vals,context={}):
-		if vals.has_key('product_id') and vals['product_id']:
-			product_record = self.pool.get('product.product').browse(cr,uid,vals['product_id'])
-			if product_record.uom_po_id:
-				vals.update({'product_uom_id':prod_record.uom_po_id.id})
-			stock_sql = """ select sum(pending_qty) from stock_production_lot where product_id = %s group by product_id """%(vals['product_id'])
-			cr.execute(stock_sql)		
-			stock_data = cr.dictfetchall()
-			stock_qty = 0.00
-			if stock_data:
-				stock_qty = stock_data[0]
-				stock_qty = stock_qty.values()[0]
-			else:
-				stock_qty = 0.00
-			vals.update({'stock_qty':stock_qty})
-		return super(kg_purchase_indent_line,self).write(cr,uid,ids,vals,context)		
+	#~ def create(self,cr,uid,vals,context={}):
+		#~ print "Line create called............"
+		#~ if vals['product_id']:
+			#~ prod_record = self.pool.get('product.product').browse(cr,uid,vals['product_id'])
+			#~ stock_sql = """ select sum(pending_qty) from stock_production_lot where product_id = %s group by product_id """%(vals['product_id'])
+			#~ cr.execute(stock_sql)		
+			#~ stock_data = cr.dictfetchall()
+			#~ stock_qty = 0.00
+			#~ if stock_data:
+				#~ stock_qty = stock_data[0]
+				#~ stock_qty = stock_qty.values()[0]
+			#~ else:
+				#~ stock_qty = 0.00
+			#~ vals.update({'product_uom_id':prod_record.uom_po_id.id,'stock_qty':stock_qty})
+		#~ return super(kg_purchase_indent_line,self).create(cr,uid,vals,context)
+		#~ 
+	#~ def write(self,cr,uid,ids,vals,context={}):
+		#~ if vals.has_key('product_id') and vals['product_id']:
+			#~ product_record = self.pool.get('product.product').browse(cr,uid,vals['product_id'])
+			#~ if product_record.uom_po_id:
+				#~ vals.update({'product_uom_id':prod_record.uom_po_id.id})
+			#~ stock_sql = """ select sum(pending_qty) from stock_production_lot where product_id = %s group by product_id """%(vals['product_id'])
+			#~ cr.execute(stock_sql)		
+			#~ stock_data = cr.dictfetchall()
+			#~ stock_qty = 0.00
+			#~ if stock_data:
+				#~ stock_qty = stock_data[0]
+				#~ stock_qty = stock_qty.values()[0]
+			#~ else:
+				#~ stock_qty = 0.00
+			#~ vals.update({'stock_qty':stock_qty})
+		#~ return super(kg_purchase_indent_line,self).write(cr,uid,ids,vals,context)		
 
 	def unlink(self, cr, uid, ids, context=None):
 		print "kgggggggggggggg line unlike called ids ===", ids

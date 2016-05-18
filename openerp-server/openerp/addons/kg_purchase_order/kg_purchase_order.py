@@ -300,10 +300,10 @@ class kg_purchase_order(osv.osv):
 			back_list.append(backk_date)
 		holiday_obj = self.pool.get('kg.holiday.master.line')
 		holiday_ids = holiday_obj.search(cr, uid, [('leave_date','in',back_list)])
-		if date_order > today_date:
-			raise osv.except_osv(
-					_('Warning'),
-					_('PO Date should be less than or equal to current date!'))	
+		#~ if date_order > today_date:
+			#~ raise osv.except_osv(
+					#~ _('Warning'),
+					#~ _('PO Date should be less than or equal to current date!'))	
 		if holiday_ids:
 			hol_bk_date = date.today() - timedelta(days=(2+len(holiday_ids)))
 			hol_back_date = hol_bk_date.strftime('%Y-%m-%d')
@@ -386,10 +386,10 @@ class kg_purchase_order(osv.osv):
 		sql = """ select id,name,date_order from purchase_order where state != 'draft' and state != 'cancel 'order by id desc limit 1 """
 		cr.execute(sql)
 		data = cr.dictfetchall()
-		if date_order1 > today_date:
-			raise osv.except_osv(
-					_('Warning'),
-					_('PO Date should be less than or equal to current date!'))
+		#~ if date_order1 > today_date:
+			#~ raise osv.except_osv(
+					#~ _('Warning'),
+					#~ _('PO Date should be less than or equal to current date!'))
 		if data:
 			if data[0]['date_order'] > date_order:
 				raise osv.except_osv(

@@ -506,13 +506,13 @@ class kg_depindent_line(osv.osv):
 	_columns = {
 
 	'indent_id': fields.many2one('kg.depindent', 'Dep.Indent.NO', required=True, ondelete='cascade'),
-	'line_date': fields.date('Date', required=True, readonly=True),
+	'line_date': fields.date('Indent Date', required=True, readonly=True),
 	'product_id': fields.many2one('product.product', 'Product', required=True),
 	'uom': fields.many2one('product.uom', 'UOM', required=True),
 	'po_uom': fields.many2one('product.uom', 'PO UOM'),
 	'qty': fields.float('Indent Qty', required=True),
 	'po_qty': fields.float('PO Qty',),
-	'pending_qty': fields.float('PI Pending Qty'),
+	'pending_qty': fields.float('Pending Qty'),
 	'issue_pending_qty': fields.float('Issue.Pending Qty'),
 	#'main_store_qty': fields.float('Main Store Qty'),
 	'main_store_qty': fields.function(_stock_qty, type='float', string='Quantity On Hand'),

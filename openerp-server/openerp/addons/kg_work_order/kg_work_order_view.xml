@@ -200,7 +200,7 @@
 								   <field name="moc_id" on_change="onchange_pattern_details(pattern_id,moc_id)" attrs="{'required': [('flag_applicable','!=',False)],'readonly': [('flag_standard','=',False)]}"/>
 								   <field name="add_spec" widget="char"/>
 								   <field name="flag_standard" invisible="1"/>
-								   <field name="entry_mode" invisible="0"/>
+								   <field name="entry_mode" invisible="1"/>
 								</tree>
 							</field>
 						</page>

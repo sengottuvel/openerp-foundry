@@ -743,7 +743,7 @@ class ch_order_bom_details(osv.osv):
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),			   
 		'flag_standard': fields.boolean('Non Standard'),
 		'flag_pattern_check': fields.boolean('Is Pattern Check'),
-		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode', readonly=True),
+		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
 	
 	}
 	
@@ -757,6 +757,7 @@ class ch_order_bom_details(osv.osv):
 	}
 	
 	def default_get(self, cr, uid, fields, context=None):
+		context.update({'entry_mode': 'manual'})
 		return context
 		
 	def onchange_pattern_details(self, cr, uid, ids, pattern_id, moc_id):
@@ -845,7 +846,7 @@ class ch_order_machineshop_details(osv.osv):
 		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'remarks':fields.text('Remarks'), 
 		'flag_standard': fields.boolean('Non Standard'), 
-		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode', readonly=True),
+		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
 	
 	}
 	
@@ -856,6 +857,7 @@ class ch_order_machineshop_details(osv.osv):
 	} 
 	
 	def default_get(self, cr, uid, fields, context=None):
+		context.update({'entry_mode': 'manual'})
 		return context
 		
 	def create(self, cr, uid, vals, context=None):
@@ -884,7 +886,7 @@ class ch_order_bot_details(osv.osv):
 		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'remarks':fields.text('Remarks'),
 		'flag_standard': fields.boolean('Non Standard'),
-		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode', readonly=True),
+		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
 	
 	}
 	
@@ -895,6 +897,7 @@ class ch_order_bot_details(osv.osv):
 	}
 	
 	def default_get(self, cr, uid, fields, context=None):
+		context.update({'entry_mode': 'manual'})
 		return context
 	
 		

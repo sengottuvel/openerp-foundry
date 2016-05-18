@@ -64,6 +64,7 @@ class kg_depindent2_poindent(osv.osv):
 				print "*******************************"
 				print "key ====>", key, "group ====>>", group
 				qty = sum(map(lambda x:float(x.po_qty),group))
+				
 				pending_qty = sum(map(lambda x:float(x.pending_qty),group)) #TODO: qty
 				depindent_line_ids = map(lambda x:x.id,group)
 				if len(depindent_line_ids) > 1:
@@ -95,6 +96,8 @@ class kg_depindent2_poindent(osv.osv):
 					stock_qty = stock_qty.values()[0]
 				else:
 					stock_qty = 0.00	
+					
+				
 				vals = {
 			
 				'product_id':prod_browse.id,

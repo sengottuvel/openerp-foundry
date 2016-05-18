@@ -44,7 +44,7 @@
                     <field name="uom_id" string="Store UOM" groups="product.group_uom"/>
                     <field name="qty_available"/>
                     <field name="sales_price" invisible="1"/>
-                    <field name="latest_price" invisible="1"/>                   
+                    <field name="latest_price"/>                   
                     <field name="virtual_available" invisible="1"/>
                     <field name="lst_price" invisible="1"/>
                     <field name="price" invisible="1"/>
