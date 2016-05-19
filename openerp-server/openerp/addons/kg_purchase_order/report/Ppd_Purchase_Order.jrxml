@@ -669,8 +669,8 @@ where po.id = $P{po_id}]]>
 				</textElement>
 				<textFieldExpression><![CDATA["G M - PURCHASE"]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="39" y="1" width="330" height="11"/>
+			<textField isBlankWhenNull="true">
+				<reportElement x="39" y="1" width="449" height="11"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
@@ -681,26 +681,6 @@ where po.id = $P{po_id}]]>
 					<font size="9" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[" NOTE: "+ $F{quality_term}]]></textFieldExpression>
-			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="369" y="1" width="60" height="11"/>
-				<box>
-					<topPen lineWidth="0.0"/>
-					<leftPen lineWidth="0.0"/>
-					<bottomPen lineWidth="0.0"/>
-					<rightPen lineWidth="0.0"/>
-				</box>
-				<textElement/>
-			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="429" y="1" width="61" height="11"/>
-				<box>
-					<topPen lineWidth="0.0"/>
-					<leftPen lineWidth="0.0"/>
-					<bottomPen lineWidth="0.0"/>
-					<rightPen lineWidth="0.0"/>
-				</box>
-				<textElement/>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement x="489" y="1" width="64" height="11"/>

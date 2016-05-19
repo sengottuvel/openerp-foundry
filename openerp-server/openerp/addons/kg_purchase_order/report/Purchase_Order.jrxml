@@ -668,7 +668,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA["G M - PURCHASE"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="39" y="1" width="330" height="11"/>
+				<reportElement x="39" y="1" width="449" height="11"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
