@@ -174,7 +174,7 @@ class kg_purchase_order(osv.osv):
 	_defaults = {
 	
 	'bill_type' :'credit',
-	'date_order': fields.date.context_today,
+	'date_order': lambda * a: time.strftime('%Y-%m-%d'),
 	'po_type': 'frompi',
 	'name': lambda self, cr, uid, c: self.pool.get('purchase.order').browse(cr, uid, id, c).id,
 	'user_id': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).id,
@@ -391,11 +391,11 @@ class kg_purchase_order(osv.osv):
 			#~ raise osv.except_osv(
 					#~ _('Warning'),
 					#~ _('PO Date should be less than or equal to current date!'))
-		if data:
-			if data[0]['date_order'] > date_order:
-				raise osv.except_osv(
-					_('Warning'),
-					_('Current PO Date should be greater than or equal to Previous PO date!'))				
+		#~ if data:
+			#~ if data[0]['date_order'] > date_order:
+				#~ raise osv.except_osv(
+					#~ _('Warning'),
+					#~ _('Current PO Date should be greater than or equal to Previous PO date!'))				
 			
 		if holiday_ids:
 			hol_bk_date = date.today() - timedelta(days=(2+len(holiday_ids)))

@@ -378,11 +378,17 @@ class product_category(osv.osv):
 		'conf_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
 		'reject_date': fields.datetime('Reject Date', readonly=True),
 		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
+		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
+		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
+		'update_date': fields.datetime('Last Updated Date', readonly=True),
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
 		'state': fields.selection([('draft','Draft'),('confirm','Waiting for approval'),('approved','Approved'),
-				('reject','Rejected')],'Status', readonly=True),
+				('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'remark': fields.text('Remarks',readonly=False,states={'approved':[('readonly',True)]}),
-		
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'flag_isparent': fields.boolean('Is Parent'),
+		'cancel_remark': fields.text('Cancel Remarks'),
+		
 	}
 	
 	_sql_constraints = [
@@ -397,6 +403,7 @@ class product_category(osv.osv):
 		'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'product.category', context=c),
 	}
 
 	_parent_name = "parent_id"
@@ -446,6 +453,19 @@ class product_category(osv.osv):
 				_('Enter rejection remark in remark field !!'))
 		return True
 		
+	def entry_cancel(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.cancel_remark:
+			self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': dt_time})
+		else:
+			raise osv.except_osv(_('Cancel remark is must !!'),
+				_('Enter the remarks in Cancel remarks field !!'))
+		return True
+		
+	def write(self, cr, uid, ids, vals, context=None):	  
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(product_category, self).write(cr, uid, ids, vals, context)
+			
 	def unlink(self,cr,uid,ids,context=None):
 		unlink_ids = []		
 		for rec in self.browse(cr,uid,ids):	
