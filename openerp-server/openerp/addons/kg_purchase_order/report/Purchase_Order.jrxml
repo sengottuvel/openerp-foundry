@@ -77,6 +77,8 @@ end ) as insurance,
 THEN 'Inclusive'
 WHEN po.excise_duty = 'extra'
 THEN 'Extra'
+WHEN po.excise_duty = 'nil'
+THEN 'Nil'
 ELSE ''
 end ) as excise_duty,
 trim(TO_CHAR((po.amount_total)::float, '999G999G99G999G99G99G990D99')) as amount,

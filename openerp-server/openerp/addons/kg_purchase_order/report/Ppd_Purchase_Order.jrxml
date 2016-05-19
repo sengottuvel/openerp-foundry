@@ -76,6 +76,8 @@ end ) as insurance,
 THEN 'Inclusive'
 WHEN po.excise_duty = 'extra'
 THEN 'Extra'
+WHEN po.excise_duty = 'nil'
+THEN 'Nil'
 ELSE ''
 end ) as excise_duty,
 trim(TO_CHAR((po.amount_total)::float, '999G999G99G999G99G99G990D99')) as amount,
@@ -892,7 +894,7 @@ where po.id = $P{po_id}]]>
 						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 					</datasetRun>
 					<jr:listContents height="28" width="143">
-						<textField>
+						<textField isBlankWhenNull="true">
 							<reportElement x="0" y="1" width="143" height="20"/>
 							<box topPadding="2"/>
 							<textElement textAlignment="Center">
