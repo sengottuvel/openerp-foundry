@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.210000000000008"/>
-	<property name="ireport.x" value="0"/>
+	<property name="ireport.x" value="69"/>
 	<property name="ireport.y" value="34"/>
 	<subDataset name="PO List">
 		<parameter name="po_id" class="java.lang.Integer"/>
@@ -199,7 +199,7 @@ where po.id = $P{po_id}]]>
 								<textElement textAlignment="Right"/>
 								<textFieldExpression><![CDATA[$F{amount}+" "]]></textFieldExpression>
 							</textField>
-							<textField>
+							<textField isBlankWhenNull="true">
 								<reportElement x="624" y="0" width="114" height="16"/>
 								<box topPadding="2" leftPadding="2" rightPadding="0">
 									<leftPen lineWidth="0.5"/>
@@ -209,7 +209,7 @@ where po.id = $P{po_id}]]>
 								<textElement/>
 								<textFieldExpression><![CDATA[$F{delivery_mode}]]></textFieldExpression>
 							</textField>
-							<textField>
+							<textField isBlankWhenNull="true">
 								<reportElement x="737" y="0" width="64" height="16"/>
 								<box topPadding="2" leftPadding="2">
 									<leftPen lineWidth="0.5"/>

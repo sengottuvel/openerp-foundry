@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.3310000000000088"/>
-	<property name="ireport.x" value="0"/>
+	<property name="ireport.x" value="166"/>
 	<property name="ireport.y" value="49"/>
 	<subDataset name="PO List">
 		<parameter name="po_id" class="java.lang.Integer"/>
@@ -32,8 +32,7 @@ left join ch_purchase_wo wo on(wo.header_id=line.id)
 left join purchase_order po on(po.id=line.order_id)
 left join kg_delivery_master del on(del.id=po.delivery_mode)
 where line.order_id = $P{po_id}
-group by 1,3,4,5,6,7,8,9,10
-]]>
+group by 1,3,4,5,6,7,8,9,10]]>
 		</queryString>
 		<field name="line_id" class="java.lang.Integer"/>
 		<field name="seq_no" class="java.lang.Long"/>
@@ -159,7 +158,7 @@ where po.id = $P{po_id}]]>
 									<bottomPen lineWidth="0.5"/>
 								</box>
 								<textElement/>
-								<textFieldExpression><![CDATA[" "+$F{product}+" "+$F{brand_name}+" " ]]></textFieldExpression>
+								<textFieldExpression><![CDATA[" "+$F{product}+" "+$F{brand_name}+" "+$F{moc_name}]]></textFieldExpression>
 							</textField>
 							<textField>
 								<reportElement x="368" y="0" width="60" height="16"/>
@@ -198,7 +197,7 @@ where po.id = $P{po_id}]]>
 								<textElement textAlignment="Right"/>
 								<textFieldExpression><![CDATA[$F{amount}+" "]]></textFieldExpression>
 							</textField>
-							<textField>
+							<textField isBlankWhenNull="true">
 								<reportElement x="624" y="0" width="113" height="16"/>
 								<box topPadding="2" leftPadding="2">
 									<leftPen lineWidth="0.5"/>
@@ -208,7 +207,7 @@ where po.id = $P{po_id}]]>
 								<textElement/>
 								<textFieldExpression><![CDATA[$F{delivery_mode}]]></textFieldExpression>
 							</textField>
-							<textField>
+							<textField isBlankWhenNull="true">
 								<reportElement x="738" y="0" width="63" height="16"/>
 								<box topPadding="2" leftPadding="2">
 									<leftPen lineWidth="0.5"/>
