@@ -253,20 +253,22 @@ where po.id = $P{po_id}]]>
 				</graphicElement>
 			</line>
 			<textField>
-				<reportElement x="54" y="50" width="316" height="12"/>
+				<reportElement x="72" y="50" width="291" height="12"/>
 				<box leftPadding="5" rightPadding="5">
 					<leftPen lineWidth="0.0"/>
 				</box>
-				<textElement/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
 				<textFieldExpression><![CDATA["P.B.No. 7006, Avinashilingam Home Science College P.O.,"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="339" y="33" width="52" height="13"/>
+				<reportElement x="364" y="33" width="51" height="13"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[" DATE  :"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="339" y="46" width="115" height="13"/>
+				<reportElement x="364" y="46" width="114" height="13"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[" QUOTATION REF.:"]]></textFieldExpression>
 			</textField>
@@ -276,13 +278,13 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA[" VENDOR CODE"]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="338" y="0" width="1" height="91"/>
+				<reportElement x="363" y="0" width="1" height="91"/>
 				<graphicElement>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
 			</line>
 			<textField>
-				<reportElement x="338" y="3" width="154" height="17"/>
+				<reportElement x="363" y="3" width="130" height="17"/>
 				<box topPadding="1" leftPadding="4" rightPadding="4">
 					<leftPen lineWidth="0.0"/>
 					<bottomPen lineWidth="0.5"/>
@@ -294,7 +296,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA["PURCHASE ORDER"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="338" y="78" width="81" height="12"/>
+				<reportElement x="363" y="78" width="80" height="12"/>
 				<textElement>
 					<font isBold="false"/>
 				</textElement>
@@ -328,7 +330,7 @@ where po.id = $P{po_id}]]>
 				</graphicElement>
 			</line>
 			<textField>
-				<reportElement x="54" y="8" width="337" height="18"/>
+				<reportElement x="72" y="8" width="315" height="18"/>
 				<textElement>
 					<font fontName="DejaVu Serif" size="11" isBold="true"/>
 				</textElement>
@@ -338,21 +340,21 @@ where po.id = $P{po_id}]]>
 				<reportElement x="0" y="0" width="801" height="1"/>
 			</line>
 			<textField>
-				<reportElement x="391" y="33" width="67" height="13"/>
+				<reportElement x="416" y="33" width="66" height="13"/>
 				<textElement>
 					<font isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{po_date}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="391" y="21" width="78" height="13"/>
+				<reportElement x="416" y="21" width="77" height="13"/>
 				<textElement>
 					<font isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{po_no}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="454" y="45" width="38" height="13"/>
+				<reportElement x="415" y="59" width="77" height="13"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[$F{ref_no}]]></textFieldExpression>
 			</textField>
@@ -390,13 +392,6 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA["Kindly Supply The Following Items Subject To The Terms & Conditions Printed Over Leaf"]]></textFieldExpression>
 			</textField>
 			<image>
-				<reportElement x="0" y="1" width="54" height="59"/>
-				<box>
-					<leftPen lineWidth="0.75"/>
-				</box>
-				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
-			</image>
-			<image>
 				<reportElement x="737" y="8" width="64" height="66"/>
 				<box>
 					<rightPen lineWidth="0.5"/>
@@ -404,7 +399,7 @@ where po.id = $P{po_id}]]>
 				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/TUV_NORD.jpg"]]></imageExpression>
 			</image>
 			<textField>
-				<reportElement x="338" y="20" width="53" height="13"/>
+				<reportElement x="363" y="20" width="52" height="13"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[" PO No :"]]></textFieldExpression>
 			</textField>
@@ -429,6 +424,10 @@ where po.id = $P{po_id}]]>
 				<textElement/>
 				<textFieldExpression><![CDATA["Mettupalayam Road, Coimbatore - 641043."]]></textFieldExpression>
 			</textField>
+			<image>
+				<reportElement x="1" y="4" width="71" height="82"/>
+				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
+			</image>
 		</band>
 	</title>
 	<columnHeader>
@@ -522,7 +521,7 @@ where po.id = $P{po_id}]]>
 		</band>
 	</columnHeader>
 	<lastPageFooter>
-		<band height="154">
+		<band height="205">
 			<textField>
 				<reportElement x="199" y="27" width="146" height="13"/>
 				<box>
