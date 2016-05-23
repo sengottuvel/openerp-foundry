@@ -521,7 +521,7 @@ where po.id = $P{po_id}]]>
 		</band>
 	</columnHeader>
 	<lastPageFooter>
-		<band height="205">
+		<band height="154">
 			<textField>
 				<reportElement x="199" y="27" width="146" height="13"/>
 				<box>

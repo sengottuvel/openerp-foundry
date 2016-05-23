@@ -540,13 +540,15 @@
 				  <group>
                     <group>
 						<field name="name" attrs="{'readonly': [('state','=', 'approved')]}"/>
-						<field name="usage" string="Usage Location" attrs="{'readonly': [('state','=', 'approved')]}"/>
-						<field name="scrap_location" attrs="{'readonly': [('state','=', 'approved')]}"/>
+						<field name="usage" string="Usage Type" attrs="{'readonly': [('state','=', 'approved')]}"/>
+						<field name="scrap_location" attrs="{'readonly': [('state','=', 'approved')]}" invisible="1"/>
+						<field name="entry_mode" invisible="1"/>
 						<field name="modify" invisible="1"/>
+						<field name="custom" invisible="1"/>
                     </group>
                     <group>
 						<field name="location_id" attrs="{'readonly': [('state','=', 'approved')]}"/>
-						<field name="location_type" attrs="{'readonly': [('state','=', 'approved')]}"/>
+						<field name="location_type" string="Location Category" attrs="{'readonly': [('state','=', 'approved')]}"/>
 						<field name="active"/>
 						<field name="state" style="width: 30%%" class="att_state_change"/>
                     </group>
@@ -587,7 +589,7 @@
                     <notebook>
 						<page string="Entry Info">
 							<group>
-								<field name="company_id"/>
+								<field name="company_id" readonly="1"/>
 							</group>
 							<group>
 							<group>
@@ -643,12 +645,13 @@
             <field name="priority" eval="2"/>
             <field name="arch" type="xml">
                 <tree string="Stock Location" colors="blue:usage=='view';darkred:usage=='internal'">
-                    <field name="complete_name"/>
+                    <field name="complete_name" invisible="1"/>
                     <field name="name"/>
-                    <field name="usage"/>
+                    <field name="usage" string="Usage Type"/>
                     <field name="location_type"/>
                     <field name="state"/>
                     <field name="modify" invisible="1"/>
+                    <field name="custom" invisible="1"/>
                     <field name="stock_real" invisible="'product_id' not in context"/>
                     <field name="stock_virtual" invisible="'product_id' not in context"/>
                 </tree>
@@ -656,13 +659,17 @@
         </record>
 
         <record id="action_location_form" model="ir.actions.act_window">
-            <field name="name">Locations</field>
+            <field name="name">Stock Locations</field>
             <field name="res_model">stock.location</field>
             <field name="type">ir.actions.act_window</field>
             <field name="view_type">form</field>
             <field name="view_id" ref="view_location_tree2"/>
             <field name="search_view_id" ref="view_location_search"/>
+            <field name="context">{'default_custom': True}</field>
+			<field name="domain">[('custom','=',True)]</field>
+<!--
             <field name="context">{'search_default_in_location':1}</field>
+-->
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
                 Click to add a location.
@@ -714,7 +721,15 @@
             </field>
         </record>
         
-       
+        <!-- Audit Log Xml Data Start-->
+		
+        <record id="inventorymaster_model" model="audittrail.rule">
+            <field name="name">Audit Log Inventorymaster</field>
+            <field name="object_id" eval="ref('stock.model_stock_location')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+		<!-- Audit Log Xml Data End-->
         
       <!--  <menuitem action="action_location_tree"
             id="menu_action_location_tree"

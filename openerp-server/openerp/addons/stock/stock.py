@@ -167,7 +167,7 @@ class stock_location(osv.osv):
 	_columns = {
 		'name': fields.char('Location Name', size=64, required=True, translate=True),
 		'active': fields.boolean('Active', help="By unchecking the active field, you may hide a location without deleting it."),
-		'usage': fields.selection([('supplier', 'Supplier Location'), ('view', 'View'), ('internal', 'Internal Location'), ('customer', 'Customer Location'), ('inventory', 'Inventory'), ('procurement', 'Procurement'), ('production', 'Production'), ('transit', 'Transit Location for Inter-Companies Transfers')], 'Location Type', required=True,
+		'usage': fields.selection([('supplier', 'Supplier Location'), ('view', 'View'), ('internal', 'Internal Location'), ('customer', 'Customer Location'), ('inventory', 'Inventory'), ('procurement', 'Procurement'), ('production', 'Production'), ('transit', 'Transit Location for Inter-Companies Transfers'),('consumption','Consumption'),('scrap','Scrap')], 'Location Type', required=True,
 				 help="""* Supplier Location: Virtual location representing the source location for products coming from your suppliers
 					   \n* View: Virtual location used to create a hierarchical structures for your warehouse, aggregating its child locations ; can't directly contain products
 					   \n* Internal Location: Physical locations inside your own warehouses,
@@ -252,6 +252,8 @@ class stock_location(osv.osv):
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel Remarks'),
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
+		'custom': fields.boolean('Custom'),
+		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode'),
 		
 	}
 	
@@ -271,6 +273,7 @@ class stock_location(osv.osv):
 		'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'state': 'draft',
 		'modify': 'no',
+		'entry_mode': 'manual',
 		
 	}
 	
