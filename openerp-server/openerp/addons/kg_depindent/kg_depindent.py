@@ -266,9 +266,7 @@ class kg_depindent(osv.osv):
 		self.write(cr,uid,ids,{'state': 'draft'})
 		
 	def approve_indent(self, cr, uid, ids,context=None):
-		"""
-		Indent approve
-		"""
+		rec = self.browse(cr,uid,ids[0])
 		for t in self.browse(cr,uid,ids):
 			#if t.confirmed_by.id == uid:
 			#	raise osv.except_osv(
@@ -284,7 +282,20 @@ class kg_depindent(osv.osv):
 				raise osv.except_osv(
 						_('Error'),
 						_('Department Indent quantity can not be zero'))
+		if rec.dep_indent_line:
+			for line in rec.dep_indent_line:
+				#~ indent_qty = sum(line.qty for line in rec.dep_indent_line)
+				indent_qty = line.qty
+				if line.line_id:
+					total = sum(wo.qty for wo in line.line_id)
+					if total <= indent_qty:
+						pass
+					else:
+						raise osv.except_osv(
+							_('Warning!'),
+							_('Please Check WO Qty'))
 		self.write(cr,uid,ids,{'state':'approved','approved_by':uid,'approved_date':time.strftime('%Y-%m-%d %H:%M:%S')})
+		
 		#cr.execute("""select all_transaction_mails('Dept Indent Request Approval',%s)"""%(ids[0]))
 		"""Raj
 		data = cr.fetchall();

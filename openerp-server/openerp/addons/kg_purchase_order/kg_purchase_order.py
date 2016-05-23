@@ -512,6 +512,15 @@ class kg_purchase_order(osv.osv):
 		data = cr.dictfetchall()
 		val = [d['piline_id'] for d in data if 'piline_id' in d] # Get a values form list of dict if the dict have with empty values
 		for i in range(len(po_lines)):
+			po_qty=po_lines[i].product_qty
+			if po_lines[i].line_id:
+				total = sum(wo.qty for wo in po_lines[i].line_id)
+				if total <= po_qty:
+					pass
+				else:
+					raise osv.except_osv(
+						_('Warning!'),
+						_('Please Check WO Qty'))
 			if obj.po_type == 'frompi':
 				if po_lines[i].pi_line_id and po_lines[i].group_flag == False:
 					pi_line_id=po_lines[i].pi_line_id

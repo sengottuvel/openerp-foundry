@@ -219,10 +219,20 @@ class kg_purchase_indent(osv.osv):
 				product_id = pi_lines[i].product_id.id
 				product_record = product_obj.browse(cr, uid, product_id)
 				product = pi_lines[i].product_id.name
+				pi_used_qty = pi_lines[i].product_qty
+					
+				if pi_lines[i].line_ids:
+					total = sum(wo.qty for wo in pi_lines[i].line_ids)
+					if total <= pi_used_qty:
+						pass
+					else:
+						raise osv.except_osv(
+							_('Warning!'),
+							_('Please Check WO Qty'))
 				if pi_lines[i].depindent_line_id and pi_lines[i].group_flag == False:
 					depindent_line_id=pi_lines[i].depindent_line_id
 					orig_depindent_qty = pi_lines[i].dep_indent_qty
-					pi_used_qty = pi_lines[i].product_qty
+					
 					po_uom_qty = pi_lines[i].po_uom_qty
 					pending_stock_depindent_qty = pi_lines[i].dep_indent_qty -  pi_lines[i].po_uom_qty
 					pending_po_depindent_qty = pi_lines[i].po_uom_qty - pi_lines[i].po_uom_qty
@@ -269,8 +279,6 @@ class kg_purchase_indent(osv.osv):
 									print "pi_lines[i].pending_qty...............",pi_lines[i].pending_qty
 									indent_line_obj.write(cr,uid,depindent_line_id.id, {'line_state' : 'noprocess'})
 					else:
-						
-						
 						if pi_used_qty > po_uom_qty:
 							pending_stock_depindent_qty = 0.0
 							pending_po_depindent_qty = 0.0

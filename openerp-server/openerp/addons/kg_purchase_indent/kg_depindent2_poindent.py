@@ -59,12 +59,10 @@ class kg_depindent2_poindent(osv.osv):
 					groups.append(map(lambda r:r,group))
 					print "key ====", key , "Group ======", group, 'Groupsssssss ====', groups
 				
-			
 			for key,group in enumerate(groups):
 				print "*******************************"
 				print "key ====>", key, "group ====>>", group
 				qty = sum(map(lambda x:float(x.po_qty),group))
-				
 				pending_qty = sum(map(lambda x:float(x.pending_qty),group)) #TODO: qty
 				depindent_line_ids = map(lambda x:x.id,group)
 				if len(depindent_line_ids) > 1:
@@ -96,7 +94,6 @@ class kg_depindent2_poindent(osv.osv):
 					stock_qty = stock_qty.values()[0]
 				else:
 					stock_qty = 0.00	
-					
 				
 				vals = {
 			
@@ -117,16 +114,18 @@ class kg_depindent2_poindent(osv.osv):
 				'user_id' : user,
 				'stock_qty': stock_qty,
 				'moc_id': group[0].moc_id.id,
+				'requisition_id': obj.id,
 				
 				}
 				print "vals :", vals
-				
 				if pending_qty == 0:
-				
 					depindent_line_obj.write(cr,uid,depindent_id,{'line_state' : 'process'})
-				
 				if ids:
-					self.write(cr,uid,ids[0],{'line_ids':[(0,0,vals)]})
+					#~ self.write(cr,uid,ids[0],{'line_ids':[(0,0,vals)]})
+					line_id = self.pool.get('purchase.requisition.line').create(cr,uid,vals)
+					for wo in group[0].line_id:
+						self.pool.get('ch.purchase.indent.wo').create(cr,uid,{'header_id':line_id,'wo_id':wo.wo_id,'qty':wo.qty})
+						
 			"""	
 			if ids:
 				if obj.line_ids:

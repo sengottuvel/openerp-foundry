@@ -285,7 +285,7 @@
 		</record>
 		
 		<record id="kg_piline_confirmed_action" model="ir.actions.act_window">
-            <field name="name">Confirmed PI</field>
+            <field name="name">Item Details</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">purchase.requisition.line</field>
             <field name="view_type">form</field>
