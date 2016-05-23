@@ -21,6 +21,7 @@
 							<group>						
 								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
+								<field name="type" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 							</group>
 							<group>
 								<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
