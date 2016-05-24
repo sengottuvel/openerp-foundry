@@ -528,7 +528,7 @@ class kg_fettling(osv.osv):
 						gas_cutting_qty = entry.inward_accept_qty
 						### Sequence Number Generation ###
 						gas_cutting_name = ''	
-						shot_blast_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
+						gas_cutting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,gas_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(gas_cutting_seq_id[0],seq_rec.code))
 						gas_cutting_name = cr.fetchone();
@@ -770,7 +770,7 @@ class kg_fettling(osv.osv):
 						gas_cutting_qty = entry.knockout_accept_qty
 						### Sequence Number Generation ###
 						gas_cutting_name = ''	
-						shot_blast_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
+						gas_cutting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,gas_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(gas_cutting_seq_id[0],seq_rec.code))
 						gas_cutting_name = cr.fetchone();
@@ -1013,7 +1013,7 @@ class kg_fettling(osv.osv):
 						gas_cutting_qty = entry.decoring_accept_qty
 						### Sequence Number Generation ###
 						gas_cutting_name = ''	
-						shot_blast_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
+						gas_cutting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,gas_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(gas_cutting_seq_id[0],seq_rec.code))
 						gas_cutting_name = cr.fetchone();
@@ -1255,7 +1255,7 @@ class kg_fettling(osv.osv):
 						gas_cutting_qty = entry.shot_blast_accept_qty
 						### Sequence Number Generation ###
 						gas_cutting_name = ''	
-						shot_blast_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
+						gas_cutting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,gas_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(gas_cutting_seq_id[0],seq_rec.code))
 						gas_cutting_name = cr.fetchone();
@@ -1496,7 +1496,7 @@ class kg_fettling(osv.osv):
 						gas_cutting_qty = entry.hammering_accept_qty
 						### Sequence Number Generation ###
 						gas_cutting_name = ''	
-						shot_blast_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
+						gas_cutting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,gas_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(gas_cutting_seq_id[0],seq_rec.code))
 						gas_cutting_name = cr.fetchone();
@@ -1976,7 +1976,7 @@ class kg_fettling(osv.osv):
 						gas_cutting_qty = entry.gas_cutting_accept_qty
 						### Sequence Number Generation ###
 						gas_cutting_name = ''	
-						shot_blast_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
+						gas_cutting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,gas_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(gas_cutting_seq_id[0],seq_rec.code))
 						gas_cutting_name = cr.fetchone();
@@ -2218,7 +2218,7 @@ class kg_fettling(osv.osv):
 						gas_cutting_qty = entry.arc_cutting_accept_qty
 						### Sequence Number Generation ###
 						gas_cutting_name = ''	
-						shot_blast_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
+						gas_cutting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,gas_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(gas_cutting_seq_id[0],seq_rec.code))
 						gas_cutting_name = cr.fetchone();
@@ -2442,7 +2442,7 @@ class kg_fettling(osv.osv):
 						gas_cutting_qty = entry.heat_qty
 						### Sequence Number Generation ###
 						gas_cutting_name = ''	
-						shot_blast_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
+						gas_cutting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,gas_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(gas_cutting_seq_id[0],seq_rec.code))
 						gas_cutting_name = cr.fetchone();
@@ -2622,7 +2622,7 @@ class kg_fettling(osv.osv):
 						gas_cutting_qty = entry.rough_grinding_accept_qty
 						### Sequence Number Generation ###
 						gas_cutting_name = ''	
-						shot_blast_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
+						gas_cutting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
 						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,gas_cutting_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(gas_cutting_seq_id[0],seq_rec.code))
 						gas_cutting_name = cr.fetchone();
