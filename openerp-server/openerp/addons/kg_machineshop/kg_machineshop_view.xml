@@ -21,7 +21,7 @@
 								<field name="inward_accept_qty" attrs="{'readonly': [('state','in',['accept'])]}"/>
 								<field name="inward_accept_user_id" string="QC by" attrs="{'readonly': [('state','in',['accept'])]}"/>
 								<field name="state" invisible="1"/>
-								<field name="stage_id" widget="selection" readonly="1"/>
+								<field name="stage_id" widget="selection" invisible="1"/>
 								<field name="stage_name" invisible="1"/>
 							</group>											
 							<group>
@@ -37,12 +37,14 @@
 								<field name="order_priority" string="Category" readonly="1"/>
 								<field name="pattern_id" readonly="1"/>
 								<field name="moc_id" readonly="1"/>
+								<field name="each_weight" readonly="1"/>
 							</group>											
 							<group>
 								<field name="order_delivery_date"/>
 								 <field name="pump_model_id" readonly="1"/>
 								 <field name="pattern_name" readonly="1"/>
-								 <field name="fettling_qty" readonly="1"/>
+								 <field name="fettling_qty" string="Fettling Completed Qty" readonly="1"/>
+								 <field name="total_weight" readonly="1"/>
 							</group>					
 						</group>
 						<notebook>
@@ -92,8 +94,12 @@
 					<field name="pattern_name"/>
 					<field name="moc_id"/>
 					<field name="location"/>
-					<field name="fettling_qty" sum="Total Qty"/>
-					<field name="stage_id"/>
+					<field name="fettling_qty" string="Fettling completed Qty" sum="Total Fettling Qty"/>
+					<field name="inward_accept_qty" string="MS Accepted Qty" sum="Total MS Qty"/>
+					<field name="inward_pending_qty" string="Pending Qty" sum="Total Pending Qty"/>
+					<field name="each_weight" sum="Total Each Weight"/>
+					<field name="total_weight" sum="Total Weight"/>
+					<field name="stage_id" invisible="1"/>
 					<field name="state"/>
 				</tree>
 			</field>

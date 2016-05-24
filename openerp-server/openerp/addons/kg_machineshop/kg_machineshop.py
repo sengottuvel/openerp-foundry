@@ -36,6 +36,38 @@ class kg_machineshop(osv.osv):
 	def _get_default_division(self, cr, uid, context=None):
 		res = self.pool.get('kg.division.master').search(cr, uid, [('code','=','SAM'),('state','=','approved'), ('active','=','t')], context=context)
 		return res and res[0] or False
+		
+	def _get_pending_qty(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		for entry in self.browse(cr, uid, ids, context=context):
+			pending_qty = entry.fettling_qty - entry.inward_accept_qty
+			result[entry.id] = pending_qty
+		return result
+		
+	def _get_each_weight(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		wgt = 0.00
+		
+		for entry in self.browse(cr, uid, ids, context=context):
+			
+			if entry.moc_id.weight_type == 'ci':
+				wgt = entry.pattern_id.ci_weight
+			if entry.moc_id.weight_type == 'ss':
+				wgt = entry.pattern_id.pcs_weight
+			if entry.moc_id.weight_type == 'non_ferrous':
+				wgt = entry.pattern_id.nonferous_weight
+				
+		result[entry.id]= wgt
+		
+		return result
+		
+	def _get_total_weight(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		total_weight = 0.00
+		for entry in self.browse(cr, uid, ids, context=context):
+			total_weight = entry.inward_accept_qty * entry.each_weight		
+		result[entry.id]= total_weight
+		return result
 	
 	_columns = {
 	
@@ -78,6 +110,9 @@ class kg_machineshop(osv.osv):
 		'inward_accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'inward_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		'inward_remarks': fields.text('Remarks'),
+		'inward_pending_qty': fields.function(_get_pending_qty, string='Pending Qty', method=True, store=True, type='integer'),
+		'each_weight': fields.function(_get_each_weight, string='Each Weight(Kgs)', method=True, store=True, type='float'),
+		'total_weight': fields.function(_get_total_weight, string='Total Weight(Kgs)', method=True, store=True, type='float'),
 		'state': fields.selection([('waiting','Waiting for Accept'),('accept','Accepted')],'Status', readonly=True),
 		
 
@@ -105,5 +140,9 @@ class kg_machineshop(osv.osv):
 		'inward_accept_user_id':lambda obj, cr, uid, context: uid,
 		
 	}
+	
+	def ms_accept(self,cr,uid,ids, context=None):
+		self.write(cr,uid, ids,{'state':'accept'})
+		return True
 	
 kg_machineshop()

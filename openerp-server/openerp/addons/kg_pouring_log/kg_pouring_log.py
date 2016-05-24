@@ -29,6 +29,9 @@ class kg_pouring_log(osv.osv):
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('approve','Approved')],'Status'),
 		'remark': fields.text('Remarks'),
 		'note': fields.text('Notes'),
+		'shift_id': fields.many2one('kg.shift.master','Shift'),
+		'supervisor': fields.char('Supervisor', size=128),
+		'pour_close_team': fields.char('Pouring Closing Team', size=128),
 
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),

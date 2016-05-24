@@ -18,11 +18,14 @@
 							<group>
 								<field name="name" readonly="1"/>
 								<field name="melting_id" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+								<field name="shift_id" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+								<field name="pour_close_team" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 								<field name="remark" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 							</group>											
 							<group>
 								<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 								<field name="moc_id" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+								<field name="supervisor" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
 							</group>					
 						</group>
