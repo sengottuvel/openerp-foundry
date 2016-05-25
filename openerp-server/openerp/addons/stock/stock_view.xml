@@ -541,6 +541,7 @@
                     <group>
 						<field name="name" attrs="{'readonly': [('state','=', 'approved')]}"/>
 						<field name="usage" string="Usage Type" attrs="{'readonly': [('state','=', 'approved')]}"/>
+						<field name="is_parent" attrs="{'readonly': [('state','=', 'approved')]}"/>
 						<field name="scrap_location" attrs="{'readonly': [('state','=', 'approved')]}" invisible="1"/>
 						<field name="entry_mode" invisible="1"/>
 						<field name="modify" invisible="1"/>

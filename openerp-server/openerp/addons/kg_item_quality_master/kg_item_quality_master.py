@@ -31,7 +31,7 @@ class kg_item_quality_master(osv.osv):
 		'code': fields.char('Code', size=128),
 		'active': fields.boolean('Active'),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
-		'type': fields.selection([('pf','P&F'),('quality','Quality'),('vat','VAT'),('discount','Discount'),('vat_discount','VAT & Discount'),('vat_quality','VAT & Quality'),('freight','Freight'),('others','Others')],'Type', readonly=True),
+		'type': fields.selection([('pf','P&F'),('quality','Quality'),('taxation','Taxation'),('discount','Discount'),('pricing','Pricing'),('freight','Freight'),('others','Others')],'Type', required=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),

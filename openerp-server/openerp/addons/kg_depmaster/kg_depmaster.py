@@ -48,16 +48,16 @@ class kg_depmaster(osv.osv):
 		return res
 		
 	_columns = {
-		'name': fields.char('Dep.Code', size=64, required=True, readonly=True),
+		'name': fields.char('Dep.Code', size=64, required=True,readonly=False,states={'approved':[('readonly',True)]}),
 		'dep_name': fields.char('Dep.Name', size=64, required=True, translate=True,readonly=False,states={'approved':[('readonly',True)]}),
 		'consumerga': fields.many2one('account.account', 'Consumer GL/AC', size=64, translate=True, select=2),
 		'cost': fields.many2one('account.account','Cost Centre', size=64, translate=True, select=2),
 		'stock_location': fields.many2one('stock.location', 'Dep.Stock Location', size=64, translate=True, 
-					select=True, required=True, domain=[('usage','<>','view')],readonly=False,states={'approved':[('readonly',True)]}),
+					select=True, domain=[('usage','<>','view')],readonly=False,states={'approved':[('readonly',True)]}),
 		'main_location': fields.many2one('stock.location', 'Main Stock Location', size=64, translate=True, 
-					select=True, required=True, domain=[('usage','<>','view')],readonly=False,states={'approved':[('readonly',True)]}),
+					select=True, domain=[('usage','<>','view')],readonly=False,states={'approved':[('readonly',True)]}),
 		'used_location': fields.many2one('stock.location', 'Used Stock Location', size=64, translate=True, 
-					select=True, required=True, domain=[('usage','<>','view')],readonly=False,states={'approved':[('readonly',True)]}),
+					select=True, domain=[('usage','<>','view')],readonly=False,states={'approved':[('readonly',True)]}),
 		'creation_date':fields.datetime('Creation Date',readonly=True),
 		'product_id': fields.many2many('product.product', 'product_deparment', 'depmaster_id', 'product_depid', 'Product'),
 		'issue_period': fields.selection([('weekly','Weekly'), ('15th','15th Once'), ('monthly', 'Monthly')], 'Stock Issue Period'),
@@ -81,6 +81,9 @@ class kg_depmaster(osv.osv):
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel Remarks'),
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
+		'is_parent': fields.boolean('Is Parent',readonly=False,states={'approved':[('readonly',True)]}),
+		'parent_dept': fields.many2one('kg.depmaster','Parent Department',domain="[('is_parent','=',True)]",readonly=False,states={'approved':[('readonly',True)]}),
+		'item_request': fields.boolean('Item Request Applicable',readonly=False,states={'approved':[('readonly',True)]}),
 		
 	}
 
@@ -92,31 +95,38 @@ class kg_depmaster(osv.osv):
 		'active': True,
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
-		'name':'/',
 		'modify': 'no',
+		'item_request': True,
 		
 	}
 	
 	_sql_constraints = [
-		('code_uniq', 'unique(name)', 'Department code must be unique!'),
 		('name_uniq', 'unique(dep_name)', 'Department name must be unique !'),
 	]
 	
 	def create(self, cr, uid, vals, context=None):
 		v_name = None 
-		if vals.get('name','/')=='/':
-			vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'kg.depmaster') or '/'
-		if vals.get('dep_name'): 
-			v_name = vals['dep_name'].strip() 
-			vals['dep_name'] = v_name.capitalize() 
+		#~ if vals.get('dep_name'): 
+			#~ v_name = vals['dep_name'].strip() 
+			#~ vals['dep_name'] = v_name.capitalize() 
+		if len(vals.get('name')) <= 4:
+			pass
+		else:
+			raise osv.except_osv(_('Warning!'),
+				_('Please Specify 4 Digit !!'))
 		order =  super(kg_depmaster, self).create(cr, uid, vals, context=context) 
 		return order
 		
 	def write(self, cr, uid, ids, vals, context=None):
 		v_name = None 
-		if vals.get('dep_name'): 
-			v_name = vals['dep_name'].strip() 
-			vals['dep_name'] = v_name.capitalize()
+		#~ if vals.get('dep_name'): 
+			#~ v_name = vals['dep_name'].strip() 
+			#~ vals['dep_name'] = v_name.capitalize()
+		if len(vals.get('name')) <= 4:
+			pass
+		else:
+			raise osv.except_osv(_('Warning!'),
+				_('Please Specify 4 Digit !!'))
 		order =  super(kg_depmaster, self).write(cr, uid, ids, vals, context=context) 
 		return order
 	
@@ -125,6 +135,23 @@ class kg_depmaster(osv.osv):
 		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		
+		if rec.item_request == True:
+			dup_obj = self.pool.get('stock.location').search(cr,uid,[('name','=',rec.dep_name)])
+			if dup_obj:
+				pass
+			else:
+				stock_location_id = self.pool.get('stock.location').create(cr,uid,{'name':rec.dep_name,'usage':'internal','location_type':'sub','custom':True,'entry_mode':'auto','state':'approved'})
+				self.write(cr,uid,ids,{'stock_location':stock_location_id})
+				stock_obj = self.pool.get('stock.location').search(cr,uid,[('location_type','=','main')])
+				if stock_obj:
+					stock_rec = self.pool.get('stock.location').browse(cr,uid,stock_obj[0])
+					self.write(cr,uid,ids,{'main_location':stock_rec.id})
+				con_stock_obj = self.pool.get('stock.location').search(cr,uid,[('usage','=','consumption')])
+				if con_stock_obj:
+					con_stock_rec = self.pool.get('stock.location').browse(cr,uid,con_stock_obj[0])
+					self.write(cr,uid,ids,{'used_location':con_stock_rec.id})
 		self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': dt_time})
 		return True
 	

@@ -183,7 +183,7 @@ class stock_location(osv.osv):
 		'stock_real': fields.function(_product_value, type='float', string='Real Stock', multi="stock"),
 		'stock_virtual': fields.function(_product_value, type='float', string='Virtual Stock', multi="stock"),
 
-		'location_id': fields.many2one('stock.location', 'Parent Location', select=True, ondelete='cascade'),
+		'location_id': fields.many2one('stock.location', 'Parent Location', select=True, ondelete='cascade',domain="[('is_parent','=',True)]"),
 		'child_ids': fields.one2many('stock.location', 'location_id', 'Contains'),
 
 		'chained_journal_id': fields.many2one('stock.journal', 'Chaining Journal',help="Inventory Journal in which the chained move will be written, if the Chaining Type is not Transparent (no journal is used if left empty)"),
@@ -254,6 +254,7 @@ class stock_location(osv.osv):
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
 		'custom': fields.boolean('Custom'),
 		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode'),
+		'is_parent': fields.boolean('Is Parent'),
 		
 	}
 	

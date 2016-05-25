@@ -1065,7 +1065,7 @@ class kg_purchase_order_line(osv.osv):
 			print "rec ===================>>>>>", rec, "context====>", context
 			parent_rec = rec.order_id
 			print "parent_rec.state", parent_rec.state
-			if parent_rec.state not in ['draft']:
+			if parent_rec.state not in ['draft','confirmed']:
 				print "iffffffffffff"
 				raise osv.except_osv(_('Invalid Action!'), _('Cannot delete a purchase order line which is in state \'%s\'.') %(parent_rec.state,))
 			else:
