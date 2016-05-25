@@ -19,10 +19,9 @@ else
 '['||moc.name||']' end as moc_name,
 case when line.brand_id is null then ''
 else
-'['||brand||']' end as brand_name,
+'['||brand.name||']' end as brand_name,
 del.name as delivery_mode,
 STRING_AGG(wo.wo_id, ', ' ORDER BY wo.wo_id) wo_no
-
 from
 purchase_order_line line
 left join product_product prod on(prod.id=line.product_id)
