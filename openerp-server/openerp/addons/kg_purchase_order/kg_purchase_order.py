@@ -1065,17 +1065,21 @@ class kg_purchase_order_line(osv.osv):
 			print "rec ===================>>>>>", rec, "context====>", context
 			parent_rec = rec.order_id
 			print "parent_rec.state", parent_rec.state
+			
 			if parent_rec.state not in ['draft','confirmed']:
 				print "iffffffffffff"
 				raise osv.except_osv(_('Invalid Action!'), _('Cannot delete a purchase order line which is in state \'%s\'.') %(parent_rec.state,))
 			else:
-				order_id = parent_rec.id
-				pi_line_rec = rec.pi_line_id
-				pi_line_id = rec.pi_line_id.id
-				pi_line_rec.write({'line_state' : 'process','draft_flag':False})
-				del_sql = """ delete from kg_poindent_po_line where po_order_id=%s and piline_id=%s """ %(order_id,pi_line_id)
-				cr.execute(del_sql)				
-				return super(kg_purchase_order_line, self).unlink(cr, uid, ids, context=context)
+				if parent_rec.po_type == 'direct' or parent_rec.po_type == 'fromquote':
+					pass
+				else:
+					order_id = parent_rec.id
+					pi_line_rec = rec.pi_line_id
+					pi_line_id = rec.pi_line_id.id
+					pi_line_rec.write({'line_state' : 'process','draft_flag':False})
+					del_sql = """ delete from kg_poindent_po_line where po_order_id=%s and piline_id=%s """ %(order_id,pi_line_id)
+					cr.execute(del_sql)				
+					return super(kg_purchase_order_line, self).unlink(cr, uid, ids, context=context)
 				
 	def get_old_details(self,cr,uid,ids,context=None):
 		print "ids..................",ids
