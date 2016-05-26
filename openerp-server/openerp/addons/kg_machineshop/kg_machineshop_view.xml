@@ -37,14 +37,15 @@
 								<field name="order_priority" string="Category" readonly="1"/>
 								<field name="pattern_id" readonly="1"/>
 								<field name="moc_id" readonly="1"/>
-								<field name="each_weight" readonly="1"/>
+								<field name="fettling_qty" string="Fettling Completed Qty" readonly="1"/>
+								<field name="total_weight" readonly="1"/>
 							</group>											
 							<group>
 								<field name="order_delivery_date"/>
-								 <field name="pump_model_id" readonly="1"/>
-								 <field name="pattern_name" readonly="1"/>
-								 <field name="fettling_qty" string="Fettling Completed Qty" readonly="1"/>
-								 <field name="total_weight" readonly="1"/>
+								<field name="pump_model_id" readonly="1"/>
+								<field name="pattern_name" readonly="1"/>
+								<field name="melting_id" readonly="1"/>
+								<field name="each_weight" readonly="1"/>
 							</group>					
 						</group>
 						<notebook>
@@ -170,22 +171,15 @@
 		
 
 	
-	<!-- Audit Log Xml Data Start
+	<!-- Audit Log Xml Data Start -->
 		
-        <record id="audit_production" model="audittrail.rule">
-            <field name="name">Audit Log Production</field>
-            <field name="object_id" eval="ref('kg_production.model_kg_production')"/>       
-            <field name="state">subscribed</field>              
-        </record>
-        
-        
-        <record id="audit_stock" model="audittrail.rule">
-            <field name="name">Audit Log Foundry Stock</field>
-            <field name="object_id" eval="ref('kg_production.model_kg_foundry_stock')"/>       
+        <record id="audit_machineshop" model="audittrail.rule">
+            <field name="name">Audit Log Machine Shop</field>
+            <field name="object_id" eval="ref('kg_machineshop.model_kg_machineshop')"/>       
             <field name="state">subscribed</field>              
         </record>
        
-    Audit Log Xml Data End-->
+    <!-- Audit Log Xml Data End-->
     
     <!-- Sequence Number Setting Starts Here -->
 	

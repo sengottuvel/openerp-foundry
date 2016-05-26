@@ -100,6 +100,7 @@ class kg_machineshop(osv.osv):
 		'moc_id': fields.related('schedule_line_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
 		'schedule_qty': fields.related('schedule_line_id','qty', type='integer', size=100, string='Schedule Qty', store=True, readonly=True),
 		'fettling_id':fields.many2one('kg.fettling','Fettling'),
+		'melting_id': fields.related('fettling_id','melting_id', type='many2one', relation='kg.melting', string='Heat No.', store=True, readonly=True),
 		'fettling_qty': fields.integer('Fettling Qty',readonly=True),
 		'stage_id':fields.many2one('kg.stage.master','Stage'),
 		'stage_name': fields.related('stage_id','name', type='char', size=128, string='Stage Name', store=True, readonly=True ),
@@ -138,6 +139,7 @@ class kg_machineshop(osv.osv):
 		'division_id':_get_default_division,
 		### MS Inward ###
 		'inward_accept_user_id':lambda obj, cr, uid, context: uid,
+		
 		
 	}
 	

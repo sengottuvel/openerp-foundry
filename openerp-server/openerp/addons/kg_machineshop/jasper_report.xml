@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+		<report string="MS Inspection Copy"
+        model="kg.machineshop"
+        auto="True"
+        name="onscreen_ms_inward_report"
+        rml="kg_machineshop/report/ms_inward_report.jrxml"
+        id="ms_inward_jasper_report_menu" 
+        menu="True"
+        header="False"
+        />
+
+    </data>
+</openerp>

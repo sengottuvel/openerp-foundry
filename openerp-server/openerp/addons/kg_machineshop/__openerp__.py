@@ -10,7 +10,7 @@
     'author': 'Sangeetha',    
     'depends' : ['base','kg_stock_inward','kg_production'],
     'data': [
-		'kg_machineshop_view.xml'
+		'kg_machineshop_view.xml','jasper_report.xml'
 		],
     'css': ['static/src/css/state.css'], 
     'auto_install': False,
