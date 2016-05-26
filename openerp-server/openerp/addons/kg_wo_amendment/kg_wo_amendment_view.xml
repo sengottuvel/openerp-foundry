@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+
+	<!-- Form View Start -->
+
+		<record id="t_form_v_wo_amendment" model="ir.ui.view">
+			<field name="name">WO Amendment Entry Form</field>
+			<field name="model">kg.wo.amendment</field>
+			<field name="arch" type="xml">
+				<form string="Work Order" version="7.0">
+					<header>
+						<button name="entry_confirm" type="object" string="Confirm" class="oe_highlight" 
+						 attrs="{'invisible': [('flag_confirm','=',False)]}" confirm="Are you sure to proceed ?"/>
+						<button name="load_wo_data" type="object" string="Load WO Data" class="oe_highlight"
+						 attrs="{'invisible': [('flag_amend','!=',False)]}" />
+						
+					</header>
+					<sheet>
+						<group>
+							<group string="WO Details">
+								<field name="wo_id" attrs="{'readonly': [('flag_amend','!=',False)]}"/>
+								<field name="wo_date" readonly="1"/>
+								<field name="wo_division_id" readonly="1"/>
+								<field name="wo_location" readonly="1"/>
+								<field name="wo_order_category" readonly="1"/>
+								<field name="wo_order_priority" readonly="1"/>
+								<field name="wo_partner_id" readonly="1"/>
+								<field name="wo_delivery_date" readonly="1"/>
+								<field name="wo_order_value" readonly="1"/>
+								<field name="wo_remarks" readonly="1"/>
+								
+							</group>											
+							<group string="Amendment Details">
+								<field name="name" readonly="1"/>
+								<field name="entry_date" readonly="1" string="Creation Date"/>
+								<field name="wo_amend_date" readonly="1" attrs="{'required': [('flag_amend','!=',False)]}" />
+								<field name="wo_amend_division_id" />
+								<field name="wo_amend_location" attrs="{'required': [('flag_amend','!=',False)],'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="wo_amend_order_category" readonly="1" attrs="{'required': [('flag_amend','!=',False)]}"/>
+								<field name="wo_amend_order_priority" readonly="1" attrs="{'required': [('flag_amend','!=',False)]}"/>
+								<field name="wo_amend_partner_id" attrs="{'required': [('flag_amend','!=',False)],'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="wo_amend_delivery_date" attrs="{'required': [('flag_amend','!=',False)],'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="wo_amend_order_value" readonly="1"/>
+								<field name="wo_amend_remarks" attrs="{'required': [('flag_amend','!=',False)],'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="state"/>
+								<field name="flag_amend" invisible="1"/>
+								<field name="flag_confirm" invisible="1"/>
+							
+							
+							
+							</group>					
+						</group>
+						
+						<notebook>
+
+							<page string="Work Order Details" >
+								<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"
+								context="{'order_category':wo_amend_order_category,'delivery_date':wo_amend_delivery_date}">
+									<tree string = "Work Order Items">
+										<field name="order_no" readonly="1"/>
+										<field name="order_category" readonly="1"/>
+										<field name="pump_model_id" readonly="1"/>
+										<field name="qty" readonly="1"/>
+										<field name="delivery_date" readonly="1"/>
+									</tree>
+								</field>
+							</page>
+
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+										<field name="cancel_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+										<field name="update_user_id"/>
+										
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+										<field name="cancel_date" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_wo_amendment" model="ir.ui.view">
+			<field name="name">WO Amendment Entry Tree</field>
+			<field name="model">kg.wo.amendment</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';black:state == 'confirmed';gray:state == 'cancel'" 
+								toolbar="True" string="WO Amendment Entry Tree">					
+					<field name="name"/>
+					<field name="entry_date"/>
+					<field name="wo_id"/>
+					<field name="wo_date"/>
+					<field name="wo_amend_order_value" sum="Total Value"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Child Class Form View Start -->
+		
+		<record id="t_form_v_amend_work_order_details" model="ir.ui.view">
+			<field name="name">Work Order Details Amendment Entry Form</field>
+			<field name="model">ch.amend.work.order.details</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<form string="WO Amendment Details Entry Form">
+					<group>
+						<group>
+							<field name="order_no" readonly="1"/>
+							<field name="pump_model_id"  on_change="onchange_pumpmodel_type(pump_model_id)" attrs="{'readonly': ['|',('flag_load_bom','!=',False),('amend_mode','=','from_wo')]}"/>
+							<field name="pump_model_type" invisible="1"/>
+							
+							<field name="moc_construction_id" on_change="onchange_moccons_name(moc_construction_id)" required="1"  attrs="{'readonly': ['|',('flag_load_bom','!=',False),('amend_mode','=','from_wo')]}"/>
+							<field name="rpm"   attrs="{'readonly': ['|',('flag_load_bom','!=',False),('amend_mode','=','from_wo')], 'required': [('pump_model_type','=','vertical')]}"/>
+							<field name="bed_length"   attrs="{'readonly': ['|',('flag_load_bom','!=',False),('amend_mode','=','from_wo')], 'required': [('pump_model_type','=','vertical')]}"/>
+							<field name="motor_power"  attrs="{'readonly': ['|',('flag_load_bom','!=',False),('amend_mode','=','from_wo')], 'required': [('pump_model_type','=','vertical')]}"/>
+							<field name="delivery_pipe_size"  attrs="{'readonly': ['|',('flag_load_bom','!=',False),('amend_mode','=','from_wo')], 'required': [('pump_model_type','=','vertical')]}"/>
+							<field name="bp"  attrs="{'readonly': ['|',('flag_load_bom','!=',False),('amend_mode','=','from_wo')], 'required': [('pump_model_type','=','vertical')]}"/>
+							<field name="unit_price"  attrs="{'readonly': ['|',('flag_load_bom','!=',False),('amend_mode','=','from_wo')]}"/>
+							<field name="flag_standard"  attrs="{'readonly': ['|',('flag_load_bom','!=',False),('amend_mode','=','from_wo')], 'required': [('pump_model_type','=','vertical')]}"/>
+							<field name="amend_mode" invisible="1"/>
+						</group>
+						<group>
+							
+							<field name="order_category" attrs="{'readonly': ['|',('flag_load_bom','!=',False),('amend_mode','=','from_wo')]}"/>
+							<field name="qty"  required="1" attrs="{'readonly': ['|',('flag_load_bom','!=',False),('amend_mode','=','from_wo')]}"/>
+							<field name="moc_construction_name"/>
+							<field name="setting_height"  attrs="{'readonly': ['|',('flag_load_bom','!=',False),('amend_mode','=','from_wo')], 'required': [('pump_model_type','=','vertical')]}"/>
+							<field name="shaft_sealing"  attrs="{'readonly': ['|',('flag_load_bom','!=',False),('amend_mode','=','from_wo')], 'required': [('pump_model_type','=','vertical')]}"/>
+							<field name="bush_bearing"  attrs="{'readonly': ['|',('flag_load_bom','!=',False),('amend_mode','=','from_wo')], 'required': [('pump_model_type','=','vertical')]}"/>
+							<field name="lubrication"  attrs="{'readonly': ['|',('flag_load_bom','!=',False),('amend_mode','=','from_wo')], 'required': [('pump_model_type','=','vertical')]}"/>
+							<field name="shaft_ext"  attrs="{'readonly': ['|',('flag_load_bom','!=',False),('amend_mode','=','from_wo')], 'required': [('pump_model_type','=','vertical')]}"/>
+							<field name="delivery_date" on_change="onchange_delivery_date(delivery_date)"  attrs="{'readonly': ['|',('flag_load_bom','!=',False),('amend_mode','=','from_wo')]}"/>
+							<field name="note" string="Remarks"  attrs="{'readonly': ['|',('flag_load_bom','!=',False),('amend_mode','=','from_wo')]}"/>
+						</group>
+					</group>
+					<newline/>
+					<group>
+						<group string="Amendment Details" attrs="{'invisible': ['|',('amend_mode','!=','from_wo')]}">
+							<field name="amend_unit_price" />
+						</group>
+					</group>
+					<newline/>
+					<group>
+						<group>
+							<field name="flag_load_bom"  attrs="{'readonly': ['|',('flag_load_bom','!=',False),('amend_mode','=','from_wo')]}"
+							on_change="onchange_bom_details(pump_model_id, qty,moc_construction_id,order_category,flag_standard,rpm,setting_height,bed_length,shaft_sealing,motor_power,bush_bearing,delivery_pipe_size,lubrication,unit_price,delivery_date,note,bp,shaft_ext)"/>
+						</group>
+						<group></group>
+					</group>
+					
+					<newline/>
+					<notebook>
+						<page string="Foundry Items">
+							<field name="line_ids" colspan="4" nolabel="1" context="{'order_category':order_category,'flag_standard':flag_standard}" 
+								attrs="{'readonly': [('amend_mode','=','from_wo')]}">
+								<tree string="BOM Details" editable="bottom">
+								   <field name="order_category" invisible="1"/>
+								   <field name="pattern_id"  attrs="{'readonly': [('entry_mode','=','auto')]}"/>
+								   <field name="pattern_name" readonly="1"/>
+								   <field name="weight" readonly="1"/>
+								   <field name="order_category" invisible="1"/>
+								   <field name="qty" required="1"/>
+								   <field name="unit_price"/>
+								   <field name="schedule_qty" invisible="1"/>
+								   <field name="production_qty" invisible="1"/>
+								   <field name="flag_applicable"/>
+								   <field name="flag_pattern_check"/>
+								   <field name="moc_id" on_change="onchange_pattern_details(pattern_id,moc_id)" attrs="{'required': [('flag_applicable','!=',False)],'readonly': [('flag_standard','=',False)]}"/>
+								   <field name="add_spec" widget="char"/>
+								   <field name="flag_standard" invisible="1"/>
+								   <field name="entry_mode" invisible="1"/>
+								</tree>
+							</field>
+						</page>
+						
+						<page string="Machine Shop">
+							<field name="line_ids_a" nolabel="1" context="{'order_category':order_category,'flag_standard':flag_standard}" 
+								attrs="{'readonly': [('amend_mode','=','from_wo')]}">
+								<tree string="Order Machine Shop Details Entry Tree" editable="bottom">
+									<field name="order_category" invisible="1"/>
+									<field name="pos_no" attrs="{'readonly': [('entry_mode','=','auto')]}"/>		
+									<field name="ms_id" attrs="{'readonly': [('entry_mode','=','auto')]}"/>		
+									<field name="name" attrs="{'readonly': [('entry_mode','=','auto')]}"/>
+									<field name="qty"/>
+									<field name="flag_applicable"/>
+									<field name="moc_id" attrs="{'required': [('flag_applicable','!=',False)],'readonly': [('flag_standard','=',False)]}"/>
+									<field name="remarks" widget="char"/>
+									<field name="flag_standard" invisible="1"/>
+									<field name="entry_mode" invisible="1"/>
+								</tree>
+							</field>
+						</page>
+						<page string="BOT">
+							<field name="line_ids_b" nolabel="1" context="{'order_category':order_category,'flag_standard':flag_standard}"
+								attrs="{'readonly': [('amend_mode','=','from_wo')]}">
+								<tree string="Order BOT Details Entry Tree" editable="bottom">	
+									<field name="order_category" invisible="1"/>
+									<field name="item_name" attrs="{'readonly': [('entry_mode','=','auto')]}"/>
+									<field name="bot_id" attrs="{'readonly': [('entry_mode','=','auto')]}"/>											
+									<field name="qty"/>
+									<field name="flag_applicable"/>
+									<field name="moc_id" attrs="{'required': [('flag_applicable','!=',False)],'readonly': [('flag_standard','=',False)]}"/>
+									<field name="remarks" widget="char"/>
+									<field name="flag_standard" invisible="1"/>
+									<field name="entry_mode" invisible="1"/>
+								</tree>
+							</field>
+						</page>
+						
+					</notebook>
+					
+				</form>
+			</field>
+		</record>
+		
+	<!-- Child Class Form View End -->
+	
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_wo_amendment" model="ir.ui.view">
+            <field name="name">WO Amendment Entry Search</field>
+            <field name="model">kg.wo.amendment</field>
+            <field name="arch" type="xml">
+                <search string="WO Amendment Entry Search">
+					<field name="name" string="Amendment No."  filter_domain="[('name','ilike',self)]" />
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>					
+					<filter icon="terp-check" name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>					
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'wo_id'}"/>
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->
+	
+	<!-- Menu Action Start-->
+		
+		<record id="tma_wo_amendment" model="ir.actions.act_window">
+			<field name="name">WO Amendment</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.wo.amendment</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_wo_amendment"/>
+			<field name="search_view_id" ref="t_search_v_wo_amendment"/>
+			<field name="context">{"search_default_draft":1}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start -->
+		
+        <record id="audit_wo_amendment" model="audittrail.rule">
+            <field name="name">Audit Log WO Amendment</field>
+            <field name="object_id" eval="ref('kg_wo_amendment.model_kg_wo_amendment')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+	<!-- Audit Log Xml Data Start -->	
+     
+    <!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_wo_amendment" model="ir.sequence.type">	
+		<field name="name">KG WO Amendment</field>
+		<field name="code">kg.wo.amendment</field>
+	</record>
+
+	<record forcecreate="1" id="seq_wo_amendment" model="ir.sequence">
+	  <field name="name">KG WO Amendment</field>
+	  <field name="code">kg.wo.amendment</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">WO/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+        
+    <!-- Audit Log Xml Data End-->
+	
+	<!-- Menu Item Start -->
+	
+		<!-- Work Order Amendment-->
+		<menuitem  action="tma_wo_amendment" id="tam_wo_amendment" parent="kg_stock_inward.tpm_planning_transactions" sequence="4"/>
+	
+	<!-- Menu Item End -->
+	
+	
+	</data>
+</openerp>
