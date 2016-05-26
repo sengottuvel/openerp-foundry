@@ -231,7 +231,7 @@ where po.id = $P{po_id}]]>
 				<reportElement x="1" y="0" width="800" height="539">
 					<printWhenExpression><![CDATA[new Boolean(($F{status}.equals("draft")))]]></printWhenExpression>
 				</reportElement>
-				<imageExpression><![CDATA["/home/opensource/SVN_Projeccts/SAM/openerp-server/openerp/addons/kg_purchase_order/images/Draft.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images/Draft.jpg"]]></imageExpression>
 			</image>
 			<frame>
 				<reportElement x="0" y="0" width="801" height="539"/>
@@ -479,7 +479,7 @@ where po.id = $P{po_id}]]>
 				<box>
 					<rightPen lineWidth="0.5"/>
 				</box>
-				<imageExpression><![CDATA["/home/opensource/SVN_Projeccts/SAM/openerp-server/openerp/addons/web/static/src/img/TUV_NORD.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/TUV_NORD.jpg"]]></imageExpression>
 			</image>
 			<textField>
 				<reportElement x="339" y="19" width="52" height="13"/>
@@ -509,7 +509,7 @@ where po.id = $P{po_id}]]>
 			</textField>
 			<image>
 				<reportElement x="2" y="2" width="63" height="71"/>
-				<imageExpression><![CDATA["/home/opensource/SVN_Projeccts/SAM/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
 			</image>
 			<line>
 				<reportElement x="0" y="-1" width="801" height="1"/>

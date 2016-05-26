@@ -175,7 +175,7 @@
 						<notebook>							
 							<page string="Raw Materials Details">	
 								<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel','reject'])]}" context="{'moc_id':moc_id}">
-									<tree string="Charge Details Entry Tree" editable="top" >									
+									<tree string="Charge Details Entry Tree" editable="top" create="false" >									
 										<field name="product_id" />										   
 										<field name="moc_id" invisible="1"/>
 										<field name="first_addition" required="1"/>
