@@ -88,6 +88,7 @@ class kg_work_order(osv.osv):
 		('dispatched','Dispatched'),
 		],'Progress Status', readonly=True),
 		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode', readonly=True),
+		'version':fields.char('Version'),
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		
@@ -118,7 +119,7 @@ class kg_work_order(osv.osv):
 		'active': True,
 		'division_id':_get_default_division,
 		'delivery_date' : lambda * a: time.strftime('%Y-%m-%d'),
-	
+		'version': '00',
 	}
 	
 	def onchange_priority(self, cr, uid, ids, order_category):

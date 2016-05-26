@@ -295,7 +295,7 @@
 	<!-- Menu Item Start -->
 	
 		<!-- Schedule -->
-		<menuitem action="tma_schedule" id="tam_schedule" parent="kg_stock_inward.tpm_planning_transactions" sequence="4"/>
+		<menuitem action="tma_schedule" id="tam_schedule" parent="kg_stock_inward.tpm_planning_transactions" sequence="5"/>
 	
 	<!-- Menu Item End -->
 	

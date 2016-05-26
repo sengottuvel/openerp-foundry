@@ -97,6 +97,7 @@
 								toolbar="True" string="Work Order Entry Tree">					
 					<field name="name"/>
 					<field name="entry_date"/>
+					<field name="version" string="Revision"/>
 					<field name="division_id" invisible="1"/>
 					<field name="location"/>
 					<field name="order_priority"/>
