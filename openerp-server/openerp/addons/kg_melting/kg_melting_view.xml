@@ -36,8 +36,8 @@
 							<group>
 								
 								<field name="supervisor_name" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-								<field name="employee_id" attrs="{'invisible': [('done_by','=','contractor')],'readonly': [('state','not in',['draft'])]}" widget="many2many_tags"/>
-								<field name="contractor_id" attrs="{'invisible': [('done_by','=','company_employee')],'readonly': [('state','not in',['draft'])]}"/>								
+								<field name="employee_id" attrs="{'required': [('done_by','=','company_employee')],'invisible': [('done_by','=','contractor')],'readonly': [('state','not in',['draft'])]}" widget="many2many_tags"/>
+								<field name="contractor_id" attrs="{'required': [('done_by','=','contractor')],'invisible': [('done_by','=','company_employee')],'readonly': [('state','not in',['draft'])]}"/>								
 							</group>											
 							<group>
 								<field name="done_by" attrs="{'readonly': [('state','not in',['draft'])]}"/>
@@ -65,23 +65,23 @@
 						</group>
 						<group string="Power Consumption">
 							<group>
+								<label for="initial_reading" string="Initial Reading"/>
+								<div>
+									<div class="address_format">
+										<field name="initial_reading" on_change="onchange_reading(initial_reading,final_reading)" style="width: 40%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+										<field name="initial_reading_type" style="width: 20%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+									</div>
+								</div>														
+							</group>
+							<group>
 								<label for="final_reading" string="Final Reading"/>
 								<div>
 									<div class="address_format">
-										<field name="final_reading" style="width: 40%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+										<field name="final_reading" on_change="onchange_reading(initial_reading,final_reading)" style="width: 43%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 										<field name="final_reading_type" style="width: 20%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 									</div>
 								</div>
 							</group>											
-							<group>
-								<label for="initial_reading" string="Initial Reading"/>
-								<div>
-									<div class="address_format">
-										<field name="initial_reading" style="width: 43%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-										<field name="initial_reading_type" style="width: 20%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-									</div>
-								</div>														
-							</group>	
 							<newline/>
 							<group>
 								<label for="total_units" string="Total Units"/>
@@ -133,11 +133,38 @@
 										<field name="pouring_finished"  widget="float_time" style="width: 15%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 										<field name="pouring_finished_time_type" style="width: 10%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>Liquid Metal Wt(kgs).
 										<field name="liquid_metal_wt" style="width: 15%%" attrs="{'readonly': [('state','not in',['draft'])]}"/> Ingot Wt(kgs).
-										<field name="ingot_wt" style="width: 15%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>									
+										<field name="ingot_wt" style="width: 15%%" attrs="{'readonly': [('state','not in',['draft'])]}" on_change="onchange_weight(liquid_metal_wt,ingot_wt)"/>									
 									</div>
 								</div>								
-							</group>								
+							</group>	
+							<newline/>
+							<group>
+								<label for="total_weight_metal" string="Total Weight"/>
+								<div>
+									<div class="address_format">
+										<field name="total_weight_metal" readonly="1"/>																
+									</div>									
+								</div>								
+							</group>										
 						</group>
+						<newline/>
+							<group>
+								<label for="various" string="Various(kg)"/>
+								<div>
+									<div class="address_format">
+										<field name="various" readonly="1"/>																
+									</div>
+								</div>		
+						</group>
+						<newline/>
+							<group>
+								<label for="melt_cost" string="Melting Cost(Rs.)"/>
+								<div>
+									<div class="address_format">
+										<field name="melt_cost" readonly="1"/>																
+									</div>									
+								</div>								
+							</group>	
 						<newline/>
 						<group>
 							<group>
@@ -147,12 +174,14 @@
 						<button name="load_item" type="object" string="Load Item" class="oe_highlight" attrs="{'invisible':[('load_item','=',True)]}"/>
 						<notebook>							
 							<page string="Raw Materials Details">	
-								<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel','reject'])]}" >
+								<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel','reject'])]}" context="{'moc_id':moc_id}">
 									<tree string="Charge Details Entry Tree" editable="top" >									
 										<field name="product_id" />										   
+										<field name="moc_id" invisible="1"/>
 										<field name="first_addition" required="1"/>
-										<field name="second_addition" required="1" />
-										<field name="total_weight" readonly="1"/>
+										<field name="second_addition" required="1" on_change="onchange_purchase_rate(product_id,moc_id,first_addition,second_addition)"/>
+										<field name="total_weight" readonly="1" sum="Total Value" on_change="onchange_purchase_rate(product_id,moc_id,first_addition,second_addition)"/>
+										<field name="total_amount" readonly="1" sum="Total Value"/>
 										<field name="remarks" widget="char"/>														
 									</tree>
 								</field>																								
@@ -268,7 +297,23 @@
 			<field name="context">{"search_default_draft":1}</field>
 		</record>
 		
-	<!-- Menu Action End-->	
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start-->
+		
+        <record id="audit_melting_log" model="audittrail.rule">
+            <field name="name">Audit Log Melting</field>
+            <field name="object_id" eval="ref('kg_melting.model_kg_melting')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+         <record id="audit_melting_charge_details_log" model="audittrail.rule">
+            <field name="name">Audit Log Melting Charge Details</field>
+            <field name="object_id" eval="ref('kg_melting.model_ch_melting_charge_details')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->
     
      <!-- Sequence Number Setting Starts Here -->
 	
