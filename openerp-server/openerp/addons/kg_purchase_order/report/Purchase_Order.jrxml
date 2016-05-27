@@ -145,8 +145,8 @@ where po.id = $P{po_id}]]>
 							<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 						</datasetRun>
 						<jr:listContents height="16" width="801">
-							<textField>
-								<reportElement x="0" y="0" width="38" height="16"/>
+							<textField isStretchWithOverflow="true">
+								<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="38" height="16"/>
 								<box topPadding="1">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -154,8 +154,8 @@ where po.id = $P{po_id}]]>
 								<textElement textAlignment="Center"/>
 								<textFieldExpression><![CDATA[$F{seq_no}]]></textFieldExpression>
 							</textField>
-							<textField>
-								<reportElement x="38" y="0" width="330" height="16"/>
+							<textField isStretchWithOverflow="true">
+								<reportElement stretchType="RelativeToTallestObject" x="38" y="0" width="330" height="16"/>
 								<box topPadding="1">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -163,8 +163,8 @@ where po.id = $P{po_id}]]>
 								<textElement/>
 								<textFieldExpression><![CDATA[" "+$F{product}+" "+$F{brand_name}+" "+$F{moc_name}]]></textFieldExpression>
 							</textField>
-							<textField>
-								<reportElement x="368" y="0" width="60" height="16"/>
+							<textField isStretchWithOverflow="true">
+								<reportElement stretchType="RelativeToTallestObject" x="368" y="0" width="60" height="16"/>
 								<box topPadding="1" rightPadding="3">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -172,8 +172,8 @@ where po.id = $P{po_id}]]>
 								<textElement textAlignment="Right"/>
 								<textFieldExpression><![CDATA[$F{product_qty}+" "]]></textFieldExpression>
 							</textField>
-							<textField>
-								<reportElement x="428" y="0" width="60" height="16"/>
+							<textField isBlankWhenNull="true">
+								<reportElement stretchType="RelativeToTallestObject" x="428" y="0" width="60" height="16"/>
 								<box topPadding="1" rightPadding="3">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -181,8 +181,8 @@ where po.id = $P{po_id}]]>
 								<textElement textAlignment="Right"/>
 								<textFieldExpression><![CDATA[$F{uom}+" "]]></textFieldExpression>
 							</textField>
-							<textField>
-								<reportElement x="488" y="0" width="64" height="16"/>
+							<textField isStretchWithOverflow="true">
+								<reportElement stretchType="RelativeToTallestObject" x="488" y="0" width="64" height="16"/>
 								<box topPadding="1" rightPadding="3">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -190,8 +190,8 @@ where po.id = $P{po_id}]]>
 								<textElement textAlignment="Right"/>
 								<textFieldExpression><![CDATA[$F{price}+" "]]></textFieldExpression>
 							</textField>
-							<textField>
-								<reportElement x="552" y="0" width="72" height="16"/>
+							<textField isStretchWithOverflow="true">
+								<reportElement stretchType="RelativeToTallestObject" x="552" y="0" width="72" height="16"/>
 								<box topPadding="1" rightPadding="3">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -201,7 +201,7 @@ where po.id = $P{po_id}]]>
 								<textFieldExpression><![CDATA[$F{amount}+" "]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement x="624" y="0" width="114" height="16"/>
+								<reportElement stretchType="RelativeToTallestObject" x="624" y="0" width="114" height="16"/>
 								<box topPadding="2" leftPadding="2" rightPadding="0">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -211,7 +211,7 @@ where po.id = $P{po_id}]]>
 								<textFieldExpression><![CDATA[$F{delivery_mode}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement x="737" y="0" width="64" height="16"/>
+								<reportElement stretchType="RelativeToTallestObject" x="737" y="0" width="64" height="16"/>
 								<box topPadding="2" leftPadding="2">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
