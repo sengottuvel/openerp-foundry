@@ -24,7 +24,7 @@ class kg_melting(osv.osv):
 			for line in entry.line_ids:				
 				melt_cost += line.total_amount			
 				grand_total += line.total_weight					
-			if grand_total:								
+			if grand_total != 0:								
 				various_formula = ((entry.total_weight_metal/grand_total)/grand_total)	* 100
 			else:
 				pass
