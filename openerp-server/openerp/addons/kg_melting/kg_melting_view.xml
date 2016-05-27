@@ -36,8 +36,8 @@
 							<group>
 								
 								<field name="supervisor_name" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-								<field name="employee_id" attrs="{'required': [('done_by','=','company_employee')],'invisible': [('done_by','=','contractor')],'readonly': [('state','not in',['draft'])]}" widget="many2many_tags"/>
-								<field name="contractor_id" attrs="{'required': [('done_by','=','contractor')],'invisible': [('done_by','=','company_employee')],'readonly': [('state','not in',['draft'])]}"/>								
+								<field name="employee_id" attrs="{'invisible': [('done_by','=','contractor')],'readonly': [('state','not in',['draft'])]}" widget="many2many_tags"/>
+								<field name="contractor_id" attrs="{'invisible': [('done_by','=','company_employee')],'readonly': [('state','not in',['draft'])]}"/>								
 							</group>											
 							<group>
 								<field name="done_by" attrs="{'readonly': [('state','not in',['draft'])]}"/>

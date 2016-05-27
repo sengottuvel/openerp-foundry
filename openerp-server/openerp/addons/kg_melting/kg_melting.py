@@ -93,10 +93,10 @@ class kg_melting(osv.osv):
 		'load_item': fields.boolean('Load Item'),
 		
 		##### Worker Details ####
-		'supervisor_name': fields.many2one('res.partner','Supervisor Name', required=True,domain="[('active','=','t')]"),
-		'done_by': fields.selection([('company_employee','Company Employee'),('contractor','Contractor')],'Done By', required=True),		
+		'supervisor_name': fields.many2one('res.partner','Supervisor Name', domain="[('active','=','t')]"),
+		'done_by': fields.selection([('company_employee','Company Employee'),('contractor','Contractor')],'Done By'),		
 		'employee_id': fields.many2many('res.partner', 'm2m_moc_employee_details', 'melting_emp_id', 'employee_id','Name'),
-		'helper_count': fields.float('Helper Count',required=True),	
+		'helper_count': fields.float('Helper Count'),	
 		'contractor_id': fields.many2one('res.partner','Contractor Name'),
 		
 		
