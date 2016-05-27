@@ -23,9 +23,11 @@ class kg_melting(osv.osv):
 		for entry in self.browse(cr, uid, ids, context=context):
 			for line in entry.line_ids:				
 				melt_cost += line.total_amount			
-				grand_total += line.total_weight	
-				
-			various_formula = ((entry.total_weight_metal/grand_total)/grand_total)	* 100
+				grand_total += line.total_weight					
+			if grand_total:								
+				various_formula = ((entry.total_weight_metal/grand_total)/grand_total)	* 100
+			else:
+				pass
 			result[entry.id] = various_formula
 		return result
 		
