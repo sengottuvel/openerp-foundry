@@ -299,7 +299,7 @@
 		
 	<!-- Menu Action End-->
 	
-	<!-- Audit Log Xml Data Start-->
+	<!-- Audit Log Xml Data Start
 		
         <record id="audit_melting_log" model="audittrail.rule">
             <field name="name">Audit Log Melting</field>
@@ -313,7 +313,7 @@
             <field name="state">subscribed</field>              
         </record>
         
-    <!-- Audit Log Xml Data End-->
+    Audit Log Xml Data End-->
     
      <!-- Sequence Number Setting Starts Here -->
 	
