@@ -262,8 +262,9 @@ class ch_melting_charge_details(osv.osv):
 						where header.product_id = %s and line.moc_id = %s
 								  ''',[product_id,moc_id])
 		purchase_price= cr.fetchone()
-		if purchase_price[0]:
-			purchase_price = purchase_price[0]
+		if purchase_price:
+			if purchase_price[0]:
+				purchase_price = purchase_price[0]
 		else:
 			purchase_price =0
 		total = first_addition + second_addition
