@@ -37,6 +37,8 @@ class kg_pumpmodel_master(osv.osv):
 		'cancel_remark': fields.text('Cancel'),
 		
 		'line_ids':fields.one2many('ch.vo.mapping', 'header_id', "VO Mapping"),
+		'line_ids_a':fields.one2many('ch.alpha.value', 'header_id', "Alpha Value"),
+		'line_ids_b':fields.one2many('ch.delivery.pipe', 'header_id', "Delivery Pipe"),
 		
 		'alias_name': fields.char('Alias Name', size=128),
 		'make_by': fields.char('Make By', size=128),
@@ -144,7 +146,28 @@ class kg_pumpmodel_master(osv.osv):
 
 	def entry_confirm(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])		
-		line = rec.line_ids
+		line = rec.line_ids	
+		if rec.line_ids_b:			
+			cr.execute(""" select count from
+				( select count(delivery_size),delivery_size from ch_delivery_pipe where header_id = %s group by delivery_size ) as dup
+				where count > 1 """ %(rec.id))
+			data = cr.dictfetchall()			
+			if len(data) > 0:
+				raise osv.except_osv(_('Delivery Pipe Check !!'),
+				_('Not allow same Delivery Size!!'))
+			else:
+				pass
+			
+		if rec.line_ids_a:			
+			cr.execute(""" select count from
+				( select count(alpha_type),alpha_type from ch_alpha_value where header_id = %s group by alpha_type ) as dup
+				where count > 1 """ %(rec.id))
+			data = cr.dictfetchall()			
+			if len(data) > 0:
+				raise osv.except_osv(_('Alpha Value Check !!'),
+				_('Not allow same Alpha type!!'))
+			else:
+				pass	
 		if rec.line_ids:
 								
 			cr.execute(""" select count from
@@ -199,3 +222,42 @@ class kg_pumpmodel_master(osv.osv):
 	]
 	
 kg_pumpmodel_master()
+
+
+
+
+class ch_alpha_value(osv.osv):
+	
+	_name = "ch.alpha.value"
+	_description = "Alpha Value"
+	
+	_columns = {
+			
+		'header_id':fields.many2one('kg.pumpmodel.master', 'Alpha Entry', required=True, ondelete='cascade'),							
+		'alpha_type': fields.selection([('a','A'),('a1','A1'),('a2','A2')],'Alpha Type', required=True),
+		'alpha_value':fields.float('Alpha Value',required=True),
+		'remarks':fields.text('Remarks'),	
+		
+	}
+	
+ch_alpha_value()
+
+
+
+class ch_delivery_pipe(osv.osv):
+	
+	_name = "ch.delivery.pipe"
+	_description = "Delivery Pipe"
+	
+	_columns = {
+			
+		'header_id':fields.many2one('kg.pumpmodel.master', 'Delivery Entry', required=True, ondelete='cascade'),	
+		'delivery_size':fields.integer('Delivery Size',required=True),
+		'b_value':fields.float('Bend B',required=True),
+		'h_value':fields.float('Above BP H',required=True),
+		'remarks':fields.text('Remarks'),	
+		
+	}
+	
+ch_delivery_pipe()
+

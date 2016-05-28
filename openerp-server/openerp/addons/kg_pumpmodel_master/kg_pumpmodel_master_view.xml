@@ -51,6 +51,26 @@
 							</group>
 						</group>
 						<notebook>
+							<page string="Alpha Value">	
+								<field name="line_ids_a" nolabel="1" >
+									<tree string="Alpha Value Entry Tree" editable="top" >									
+										<field name="alpha_type" />										
+										<field name="alpha_value" />
+										<field name="remarks" widget="char"/>														
+									</tree>
+								</field>																								
+							</page>
+							
+							<page string="Delivery Pipe">	
+								<field name="line_ids_b" nolabel="1" >
+									<tree string="Delivery Pipe Entry Tree" editable="top" >									
+										<field name="delivery_size" />										
+										<field name="b_value" />
+										<field name="h_value" />										
+										<field name="remarks" widget="char"/>														
+									</tree>
+								</field>																								
+							</page>
 							<page string="Entry Info">
 									<group>
 										<field name="company_id"/>
@@ -140,9 +160,21 @@
 		
 		<!-- Audit Log Xml Data Start-->
 		
-        <record id="pump _model" model="audittrail.rule">
+        <record id="pump_model" model="audittrail.rule">
             <field name="name">Audit Log Pumpmodel Master</field>
             <field name="object_id" eval="ref('kg_pumpmodel_master.model_kg_pumpmodel_master')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+         <record id="pump_ch_alpha_value_model" model="audittrail.rule">
+            <field name="name">Audit Log Alpha Value</field>
+            <field name="object_id" eval="ref('kg_pumpmodel_master.model_ch_alpha_value')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+         <record id="pump_ch_delivery_pipe_model" model="audittrail.rule">
+            <field name="name">Audit Log Delivery Pipe</field>
+            <field name="object_id" eval="ref('kg_pumpmodel_master.model_ch_delivery_pipe')"/>       
             <field name="state">subscribed</field>              
         </record>
         

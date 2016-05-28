@@ -44,8 +44,8 @@ class kg_brandmoc_rate(osv.osv):
 		'line_ids':fields.one2many('ch.brandmoc.rate.details', 'header_id', "Raw Materials"),
 		
 		
-		#'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
-		'latest_price':fields.float('Latest Price(Rs)',readonly=True),
+		#'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),	
+		'latest_price': fields.related('product_id','latest_price', type='float', string='Latest Price(Rs)', store=True),
 		'category_type': fields.selection([('purchase_item','Purchase Item'),('design_item','Design Item')],'Category'),
 		
 		### Entry Info ###
@@ -110,13 +110,7 @@ class kg_brandmoc_rate(osv.osv):
 			raise osv.except_osv(_('Rejection remark is must !!'),
 				_('Enter the remarks in rejection remark field !!'))
 		return True
-		
-	def onchange_latest_price(self, cr, uid, ids, product_id, context=None):		
-		value = {'latest_price': ''}
-		if product_id:
-			pro_rec = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
-			value = {'latest_price': pro_rec.latest_price}			
-		return {'value': value}
+	
 		
 	def unlink(self,cr,uid,ids,context=None):
 		unlink_ids = []		
@@ -178,7 +172,7 @@ class ch_brandmoc_rate_details(osv.osv):
 		'brand_id': fields.many2one('kg.brand.master','Brand'),			
 		'moc_id':fields.many2one('kg.moc.master','MOC'),	
 		'rate':fields.float('Design Rate(Rs)',required=True),
-		'purchase_price':fields.float('Purchase Price(Rs)'),
+		'purchase_price':fields.float('Purchase Price(Rs)',readonly=True),
 		'remarks':fields.text('Remarks'),		
 	}
 	"""
