@@ -1362,7 +1362,8 @@
 			<field name="model">kg.production</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<tree toolbar="True" string="Core/Mould Completed Tree" create="false">
+				<tree toolbar="True" string="Core/Mould Completed Tree" colors="red:difference_qty &lt; 0;green:difference_qty &gt;= 0;"  
+				create="false">
 					<field name="order_delivery_date" string="Date"/>
 					<field name="order_no"/>
 					<field name="pattern_id" string="Part No."/>
