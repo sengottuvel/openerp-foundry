@@ -1071,7 +1071,7 @@ class kg_purchase_order_line(osv.osv):
 				raise osv.except_osv(_('Invalid Action!'), _('Cannot delete a purchase order line which is in state \'%s\'.') %(parent_rec.state,))
 			else:
 				if parent_rec.po_type == 'direct' or parent_rec.po_type == 'fromquote':
-					pass
+					return super(kg_purchase_order_line, self).unlink(cr, uid, ids, context=context)
 				else:
 					order_id = parent_rec.id
 					pi_line_rec = rec.pi_line_id
