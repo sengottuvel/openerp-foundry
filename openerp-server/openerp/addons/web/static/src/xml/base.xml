@@ -381,16 +381,28 @@
 </t>
 <t t-name="Menu.secondary">
     <div t-foreach="widget.data.data.children" t-as="menu" style="display: none" class="oe_secondary_menu" t-att-data-menu-parent="menu.id">
+        <!-- Commented by Sangeetha 
         <t t-foreach="menu.children" t-as="menu">
             <div class="oe_secondary_menu_section">
                 <t t-esc="menu.name"/>
+        -->
                 <!--
                     Shall the section be still clickable ?
                     <t t-call="Menu.link"/>
                 -->
-            </div>
+         <!--   </div>
             <t t-call="Menu.secondary.submenu"/>
-        </t>
+            
+        </t> Ends Here -->
+        <!-- Added by Sangeetha -->
+        <div t-if="menu.children.length" class="oe_secondary_menu_section">
+			<li t-foreach="menu.children" t-as="menu">
+				<t t-call="Menu.link"/>
+				<t t-call="Menu.secondary.submenu"/>
+			</li>
+		</div>
+		<!-- End Here -->
+        
     </div>
 </t>
 <t t-name="Menu.secondary.submenu">
