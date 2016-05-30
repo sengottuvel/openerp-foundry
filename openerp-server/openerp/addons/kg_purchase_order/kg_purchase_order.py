@@ -397,25 +397,25 @@ class kg_purchase_order(osv.osv):
 					#~ _('Warning'),
 					#~ _('Current PO Date should be greater than or equal to Previous PO date!'))				
 			
-		if holiday_ids:
-			hol_bk_date = date.today() - timedelta(days=(2+len(holiday_ids)))
-			hol_back_date = hol_bk_date.strftime('%Y-%m-%d')
-			if date_order < hol_back_date:
-				raise osv.except_osv(
-					_('Warning'),
-					_('PO Entry is not allowed for this date!'))
-		elif (x for x in back_list if calendar.day_name[x.weekday()]  == 'Sunday'):
-			hol_bk_date = date.today() - timedelta(days=3)
-			hol_back_date = hol_bk_date.strftime('%Y-%m-%d')
-			if date_order < hol_back_date:
-				raise osv.except_osv(
-					_('Warning'),
-					_('PO Entry is not allowed for this date!'))		
-		else:
-			if date_order <= back_date:
-				raise osv.except_osv(
-					_('Warning'),
-					_('PO Entry is not allowed!'))
+		#~ if holiday_ids:
+			#~ hol_bk_date = date.today() - timedelta(days=(2+len(holiday_ids)))
+			#~ hol_back_date = hol_bk_date.strftime('%Y-%m-%d')
+			#~ if date_order < hol_back_date:
+				#~ raise osv.except_osv(
+					#~ _('Warning'),
+					#~ _('PO Entry is not allowed for this date!'))
+		#~ elif (x for x in back_list if calendar.day_name[x.weekday()]  == 'Sunday'):
+			#~ hol_bk_date = date.today() - timedelta(days=3)
+			#~ hol_back_date = hol_bk_date.strftime('%Y-%m-%d')
+			#~ if date_order < hol_back_date:
+				#~ raise osv.except_osv(
+					#~ _('Warning'),
+					#~ _('PO Entry is not allowed for this date!'))		
+		#~ else:
+			#~ if date_order <= back_date:
+				#~ raise osv.except_osv(
+					#~ _('Warning'),
+					#~ _('PO Entry is not allowed!'))
 		if obj.name == False:
 			if obj.division == 'ipd':
 				seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','purchase.order')])
