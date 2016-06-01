@@ -57,7 +57,7 @@
 							<field name="taken_by"/>
 							<field name="state"/>	
 							<field name="in_state"/>						
-							<field name="indent_flag" invisible="0"/>
+							<field name="indent_flag" invisible="1"/>
 							<field name="approve_flag"  invisible="1"/>						
 							<field name="approved_by" readonly="1" attrs="{'invisible': [('approve_flag','=',False)]}"/>						
 							<field name="approved_date" readonly="1" attrs="{'invisible': [('approve_flag','=',False)]}"/>			
