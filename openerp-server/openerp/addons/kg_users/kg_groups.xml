@@ -139,7 +139,7 @@
             ref('kg_pump_category.mam_pumpcate_master'),
             ref('kg_furnace_master.mam_furnace_master'),
             ref('kg_ladle_master.mam_ladle_master'),
-            ref('kg_vo_master.mam_vo_master'), 
+            
                 
             
             
