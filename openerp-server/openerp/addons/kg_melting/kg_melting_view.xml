@@ -201,13 +201,14 @@
 							</page>
 							
 							<page string="Mechanical Properties">	
-								<field name="line_ids_b" nolabel="1" >
+								<field name="line_ids_b" nolabel="1" context="{'moc_id':moc_id}" >
 									<tree string="Mechanical Properties chart Tree" editable="top" >									
-										<field name="mechanical_id" on_change="onchange_uom_name(mechanical_id)"/>											
+										<field name="mechanical_id" on_change="onchange_uom_name(mechanical_id)"/>	
+										<field name="moc_id" invisible="1"/>										
 										<field name="uom" readonly="1" />											
-										<field name="min"/>	
-										<field name="range_flag" />				   
-										<field name="max" attrs="{'required': [('range_flag','=',False)]}"/>																													
+										<field name="mech_value" on_change="onchange_mpa_value(mech_value)"/>	
+										<field name="mpa_value" />				   
+																																						
 									</tree>
 								</field>																								
 							</page>			
@@ -299,21 +300,6 @@
 		
 	<!-- Menu Action End-->
 	
-	<!-- Audit Log Xml Data Start
-		
-        <record id="audit_melting_log" model="audittrail.rule">
-            <field name="name">Audit Log Melting</field>
-            <field name="object_id" eval="ref('kg_melting.model_kg_melting')"/>       
-            <field name="state">subscribed</field>              
-        </record>
-        
-         <record id="audit_melting_charge_details_log" model="audittrail.rule">
-            <field name="name">Audit Log Melting Charge Details</field>
-            <field name="object_id" eval="ref('kg_melting.model_ch_melting_charge_details')"/>       
-            <field name="state">subscribed</field>              
-        </record>
-        
-    Audit Log Xml Data End-->
     
      <!-- Sequence Number Setting Starts Here -->
 	

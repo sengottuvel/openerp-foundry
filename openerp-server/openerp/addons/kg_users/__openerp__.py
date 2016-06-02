@@ -18,6 +18,7 @@
     
 			'kg_groups.xml',
 			'foundry/kg_foundry_transactions.xml',
+			'foundry/kg_foundry_masters_access.xml',
 			'foundry/kg_foundry_masters.xml',
 			
 			],

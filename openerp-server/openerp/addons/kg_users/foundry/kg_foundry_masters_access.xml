@@ -1,0 +1,826 @@
+<?xml version="1.0" ?>
+<openerp>
+<data noupdate="0">       
+        
+      
+        <!-- Planning Admin - Model Access Rights for user -->
+        
+       <!-- Product Master -->
+		
+       
+        <record id="m_foundry_part_name_access" model="ir.model.access">
+			<field name="model_id" ref="product.model_product_product"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Part Name</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		 <!-- Product Template -->
+		
+		 <record id="m_foundry_part_temp_access" model="ir.model.access">
+			<field name="model_id" ref="product.model_product_template"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Product Template</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- Units of Measure -->
+		
+		<record id="m_foundry_uom_access" model="ir.model.access">
+			<field name="model_id" ref="product.model_product_uom"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Units of Measure</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- Pump Model -->
+		
+		<record id="m_foundry_pumpmodel_master_access" model="ir.model.access">
+			<field name="model_id" ref="kg_pumpmodel_master.model_kg_pumpmodel_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Pump Model Master</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- MOC -->
+		
+		<record id="m_foundry_moc_master_access" model="ir.model.access">
+			<field name="model_id" ref="kg_moc_master.model_kg_moc_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">MOC Master</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- Pattern -->
+		
+		<record id="m_foundry_pattern_master_access" model="ir.model.access">
+			<field name="model_id" ref="kg_pattern_master.model_kg_pattern_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Pattern Master</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- Division -->
+		
+		<record id="m_foundry_division_master_access" model="ir.model.access">
+			<field name="model_id" ref="kg_division_master.model_kg_division_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Division Master</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- Division -->
+		
+		<record id="m_foundry_stage_master_access" model="ir.model.access">
+			<field name="model_id" ref="kg_stage_master.model_kg_stage_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Stage Master</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- BOM -->
+		
+		<record id="m_foundry_bom_access" model="ir.model.access">
+			<field name="model_id" ref="kg_bom.model_kg_bom"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">BOM</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- BOM Child Class --> 
+		
+		<record id="m_foundry_bom_details_access" model="ir.model.access">
+			<field name="model_id" ref="kg_bom.model_ch_bom_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">BOM Details</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- Consumable -->
+		
+		<record id="m_foundry_consu_master_access" model="ir.model.access">
+			<field name="model_id" ref="kg_bom.model_ch_consu_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Consumable Master</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- Consumable end -->
+		
+		<!-- Consumable -->
+		
+		<record id="m_foundry_bot_master_access" model="ir.model.access">
+			<field name="model_id" ref="kg_bom.model_ch_bot_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">BOT Master</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- Consumable end -->
+		
+		<!-- Machine Shop -->
+		
+		<record id="m_foundry_machineshop_item_access" model="ir.model.access">
+			<field name="model_id" ref="kg_bom.model_ch_machineshop_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">BOT Master</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		
+		<!-- Machineshop end -->
+		
+		<!-- MOC Wise Rate  -->
+		
+		<record id="m_foundry_mocwise_rate_access" model="ir.model.access">
+			<field name="model_id" ref="kg_pattern_master.model_ch_mocwise_rate"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">MOC Wise Rate</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- MOC Wise Rate end -->
+		
+		<!-- Pattern History -->
+		
+		<record id="m_foundry_pattern_history_access" model="ir.model.access">
+			<field name="model_id" ref="kg_pattern_master.model_ch_pattern_history"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Pattern History</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!--Pattern History end -->
+		
+		<!-- Pattern Attachments -->
+		
+		<record id="m_foundry_pattern_attachment_access" model="ir.model.access">
+			<field name="model_id" ref="kg_pattern_master.model_ch_pattern_attachment"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Pattern Attachments</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!--Pattern Attachments end -->
+		
+		<!-- Machine Shop -->
+		
+		<record id="m_foundry_machineshop_master_access" model="ir.model.access">
+			<field name="model_id" ref="kg_machine_shop.model_kg_machine_shop"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Machine Shop Master</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		
+		<!-- Machineshop end -->
+		
+		<!-- Machine Shop -->
+		
+		<record id="m_foundry_box_master_access" model="ir.model.access">
+			<field name="model_id" ref="kg_box_master.model_kg_box_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">BOX Master</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		
+		<!-- Machineshop end -->
+		
+		<!-- Machine Shop --> 
+		
+		<record id="m_foundry_moc_raw_material_access" model="ir.model.access">
+			<field name="model_id" ref="kg_moc_master.model_ch_moc_raw_material"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Raw Material</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		
+		<!-- Machineshop end -->
+			
+		<!-- BOM -->
+		
+		<record id="m_foundry_bom_amendment_access" model="ir.model.access">
+			<field name="model_id" ref="kg_bom_amendment.model_kg_bom_amendment"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">BOM Amendment</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- BOM Child Class --> 
+		
+		<record id="m_foundry_bom_details_amendment_access" model="ir.model.access">
+			<field name="model_id" ref="kg_bom_amendment.model_ch_bom_line_amendment"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">BOM Details Amendment</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- BOM Child Class --> 
+		
+		<!-- Consumable -->
+		
+		<record id="m_foundry_consu_master_amendment_access" model="ir.model.access">
+			<field name="model_id" ref="kg_bom_amendment.model_ch_consu_details_amendment"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Consumable Master Amendment</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- Consumable end -->
+		
+		<!-- Consumable -->
+		
+		<record id="m_foundry_bot_master_amendment_access" model="ir.model.access">
+			<field name="model_id" ref="kg_bom_amendment.model_ch_bot_details_amendment"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">BOT Master Amendment</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- Consumable end -->
+		
+		<!-- Machine Shop -->
+		
+		<record id="m_foundry_machineshop_item_amendment_access" model="ir.model.access">
+			<field name="model_id" ref="kg_bom_amendment.model_ch_machineshop_details_amendment"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">BOT Master_amendment</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		
+		<!-- Machineshop end -->
+		
+		<!-- Chemical Master -->
+		
+		<record id="m_foundry_chemical_master_access" model="ir.model.access">
+			<field name="model_id" ref="kg_chemical_master.model_kg_chemical_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Chemical Master</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- Mechanical Master -->
+		
+		<record id="m_foundry_mechanical_master_access" model="ir.model.access">
+			<field name="model_id" ref="kg_mechanical_master.model_kg_mechanical_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Mechanical Master</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- Chemical Composition Tap -->
+		
+		<record id="m_foundry_chemical_composition_master_access" model="ir.model.access">
+			<field name="model_id" ref="kg_moc_master.model_ch_chemical_chart"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Chemical Composition</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- Mechanical Properties Tap -->
+		
+		<record id="m_foundry_mechanical_properties_master_access" model="ir.model.access">
+			<field name="model_id" ref="kg_moc_master.model_ch_mechanical_chart"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Mechanical Properties</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- MOC Construction -->
+		
+		<record id="m_foundry_mocconstruction_master_access" model="ir.model.access">
+			<field name="model_id" ref="kg_moc_construction.model_kg_moc_construction"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">MOC Construction</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- Pump Category Model Master-->
+		
+		<record id="m_foundry_pump_cate_model_master_access" model="ir.model.access">
+			<field name="model_id" ref="kg_pump_category.model_kg_pump_category"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Pump Category Master</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		
+		<!-- Pump Category Model Master end -->
+		
+		<!-- Machine Shop Raw Materials start -->
+		
+		<record id="m_foundry_machineshop_raw_master_access" model="ir.model.access">
+			<field name="model_id" ref="kg_machine_shop.model_ch_ms_raw_material"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Machine Shop Raw Materials</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		
+		<!-- Machineshop end Raw Materials end-->
+		
+		
+		<!-- Brand Moc Rate start -->
+		
+		<record id="m_foundry_brandmoc_rate_master_access" model="ir.model.access">
+			<field name="model_id" ref="kg_brandmoc_rate.model_kg_brandmoc_rate"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Brand Moc Rate</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		
+		<!-- Brand Moc Rate end-->
+		
+		<!-- Brand Moc Rate Details start -->
+		
+		<record id="m_foundry_brandmoc_rate_details_master_access" model="ir.model.access">
+			<field name="model_id" ref="kg_brandmoc_rate.model_ch_brandmoc_rate_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Brand Moc Rate Details</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		
+		<!-- Brand Moc Rate Details end-->
+		
+		<!-- Shift Master start -->
+		
+		<record id="m_foundry_shift_master_access" model="ir.model.access">
+			<field name="model_id" ref="kg_shift_master.model_kg_shift_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Shift Master</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>		
+		
+		<!-- Shift Master end-->
+		
+		<!-- Contractor Category start -->
+		
+		<record id="m_foundry_contractor_category_access" model="ir.model.access">
+			<field name="model_id" ref="kg_contractor_category.model_kg_contractor_category"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Contractor Category Master</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>		
+		
+		<!-- Contractor Category end-->
+		
+				
+		<!-- Machine Shop Rate Details-->
+		
+		<record id="m_foundry_machineshop_rate_master_access" model="ir.model.access">
+			<field name="model_id" ref="kg_machine_shop.model_ch_machine_mocwise"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Machine Shop Rate Details</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		
+		<!-- Machineshop Rate Details end -->
+		
+		<!-- Fettling Process Cycle Start --> 
+		
+		<record id="m_foundry_moc_fettling_process_access" model="ir.model.access">
+			<field name="model_id" ref="kg_moc_master.model_ch_fettling_process"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Fettling Process Cycle</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		
+		<!-- Fettling Process Cycle end -->
+	
+		<!-- Users Access Rights Start Here -->
+		
+		<record id="m_foundry_res_users_view_access" model="ir.model.access">
+			<field name="model_id" ref="base.model_res_users"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Users</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>	
+		
+		<record id="m_foundry_res_groups_view_access" model="ir.model.access">
+			<field name="model_id" ref="base.model_res_groups"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Groups</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>	
+		
+		
+		<record id="m_foundry_depmaster_view_access" model="ir.model.access">
+			<field name="model_id" ref="kg_depmaster.model_kg_depmaster"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Dep Master</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>	
+		
+		<record id="m_foundry_mail_alias_view_access" model="ir.model.access">
+			<field name="model_id" ref="mail.model_mail_alias"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Mail Alias</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>	
+		
+		
+		<record id="m_foundry_mail_message_view_access" model="ir.model.access">
+			<field name="model_id" ref="mail.model_mail_message"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Mail Message</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>	
+		
+		<record id="m_foundry_mail_group_view_access" model="ir.model.access">
+			<field name="model_id" ref="mail.model_mail_group"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Mail Group</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>	
+		
+		
+		<record id="m_foundry_password_wizard_view_access" model="ir.model.access">
+			<field name="model_id" ref="base.model_change_password_wizard"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Password Wizard</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>	
+		
+		
+		<record id="m_foundry_password_user_view_access" model="ir.model.access">
+			<field name="model_id" ref="base.model_change_password_user"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Password User</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>	
+		
+		<!-- Users Access Rights END -->
+		
+		<!-- Rejection Master Start -->
+		
+		<record id="m_foundry_rejection_master_read_access" model="ir.model.access">
+			<field name="model_id" ref="kg_rejection_master.model_kg_rejection_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Rejection Master</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- Rejection Master END -->
+		
+		<!-- Construction Type Master Start -->
+		
+		<record id="m_construction_type_master_read_access" model="ir.model.access">
+			<field name="model_id" ref="kg_construction_type.model_kg_construction_type"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Construction Type</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- Construction Type Master END -->
+		
+		<!-- Ladle Master Start -->
+		
+		<record id="m_ladle_master_read_access" model="ir.model.access">
+			<field name="model_id" ref="kg_ladle_master.model_kg_ladle_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ladle</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- Ladle Master END -->
+		
+		<!-- Furnace Master Start -->
+		
+		<record id="m_furnace_master_read_access" model="ir.model.access">
+			<field name="model_id" ref="kg_furnace_master.model_kg_furnace_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Furnace</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- Ladle Master END -->
+		
+		
+		<!-- VO Master Start -->
+		
+		<record id="m_vo_master_read_access" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_kg_vo_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">VO</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- VO Master END -->
+		
+		<!-- VO Power Series Master Start -->
+		
+		<record id="m_vo_ch_power_series_read_access" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_ch_power_series"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">VO Power Series</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- VO Power Series Master END -->
+		
+		<!-- VO Bed Start -->
+		
+		<record id="m_vo_ch_bed_assembly_read_access" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_ch_bed_assembly"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">VO Bed</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- VO Bed END -->
+		
+		<!-- VO Motor Start -->
+		
+		<record id="m_vo_ch_motor_assembly_read_access" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_ch_motor_assembly"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">VO Motor</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- VO Motor END -->
+		
+		<!-- VO ColumnPipe Start -->
+		
+		<record id="m_vo_ch_columnpipe_assembly_read_access" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_ch_columnpipe_assembly"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">VO ColumnPipe</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- VO ColumnPipe END -->
+		
+		<!-- VO DeliveryPipe Start -->
+		
+		<record id="m_vo_ch_deliverypipe_assembly_read_access" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_ch_deliverypipe_assembly"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">VO DeliveryPipe</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- VO DeliveryPipe END -->
+		
+		<!-- VO Casing Start -->
+		
+		<record id="m_vo_ch_casing_assembly_read_access" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_ch_casing_assembly"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">VO Casing</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- VO Casing END -->
+		
+		<!-- VO Lubricant Start -->
+		
+		<record id="m_vo_ch_lubricant_read_access" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_ch_lubricant"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">VO Lubricant</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- VO Lubricant END -->
+		
+		<!-- VO Mapping Start -->
+		
+		<record id="m_ch_vo_mapping_read_access" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_ch_vo_mapping"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">VO Mapping</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- VO Mapping END -->
+		
+		<!-- Mechanical Properties Start -->
+		
+		<record id="m_ch_mech_properties_read_access" model="ir.model.access">
+			<field name="model_id" ref="kg_melting.model_ch_mechanical_properties"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Mechanical Properties</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- Mechanical Properties END -->
+		
+		
+		<!-- PumpModel Master Alpha Start -->
+		
+		<record id="m_ch_alpha_value_read_access" model="ir.model.access">
+			<field name="model_id" ref="kg_pumpmodel_master.model_ch_alpha_value"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Alpha Value</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- PumpModel Master Alpha END -->
+		
+		<!-- PumpModel Master Delivery Pipe Start -->
+		
+		<record id="m_ch_delivery_pipe_read_access" model="ir.model.access">
+			<field name="model_id" ref="kg_pumpmodel_master.model_ch_delivery_pipe"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Delivery Pipe</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- PumpModel Master Delivery Pipe END -->
+		
+		
+		
+    </data>
+</openerp>
+	

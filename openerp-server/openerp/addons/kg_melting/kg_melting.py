@@ -20,14 +20,15 @@ class kg_melting(osv.osv):
 		melt_cost = 0
 		grand_total = 0
 		various_formula = 0
-		for entry in self.browse(cr, uid, ids, context=context):
+		for entry in self.browse(cr, uid, ids, context=context):			
 			for line in entry.line_ids:				
 				melt_cost += line.total_amount			
-				grand_total += line.total_weight					
+				grand_total += line.total_weight	
 			if grand_total != 0:								
 				various_formula = ((entry.total_weight_metal/grand_total)/grand_total)	* 100
 			else:
 				pass
+			
 			result[entry.id] = various_formula
 		return result
 		
@@ -261,10 +262,12 @@ class ch_melting_charge_details(osv.osv):
 						left join ch_brandmoc_rate_details line on line.header_id = header.id
 						where header.product_id = %s and line.moc_id = %s
 								  ''',[product_id,moc_id])
-		purchase_price= cr.fetchone()
-		if purchase_price:
+		purchase_price= cr.fetchone()		
+		if purchase_price is not None:
 			if purchase_price[0]:
 				purchase_price = purchase_price[0]
+			else:
+				purchase_price =0
 		else:
 			purchase_price =0
 		total = first_addition + second_addition
@@ -313,18 +316,27 @@ class ch_mechanical_properties(osv.osv):
 		'header_id':fields.many2one('kg.melting', 'Melting Entry', required=True, ondelete='cascade'),
 		'uom': fields.char('UOM',size=128),						
 		'mechanical_id': fields.many2one('kg.mechanical.master','Name', required=True,domain="[('active','=','t')]"),	
-		'min':fields.float('Min',required=True,digits=(16,3)),
-		'max':fields.float('Max',required=True,digits=(16,3)),
-		'range_flag': fields.boolean('No Max Range'),			
+		'mech_value':fields.float('Value',required=True),
+		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'mpa_value':fields.float('MPA Value',readonly=True),		
 		
 	}
+	def default_get(self, cr, uid, fields, context=None):
+		return context
 	
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.range_flag == False:			
-			if entry.min > entry.max:
-				return False
-		return True
+		print "entry.mech_value,entry.mech_value,entry.moc_id.id,entry.mechanical_id.id]",entry.mech_value,entry.mech_value,entry.moc_id.id,entry.mechanical_id.id					
+		cr.execute(''' select name,header_id from ch_mechanical_chart 
+						where %s BETWEEN min AND max and %s <= max
+						and header_id = %s and mechanical_id = %s and range_flag != 't'
+							  ''',[entry.mech_value,entry.mech_value,entry.moc_id.id,entry.mechanical_id.id])
+		values= cr.fetchone()
+		print "values",values		
+		if values:
+			return True
+		else:
+			return False
 		
 	def onchange_uom_name(self, cr, uid, ids, mechanical_id, context=None):
 		
@@ -335,25 +347,36 @@ class ch_mechanical_properties(osv.osv):
 			
 		return {'value': value}
 		
-	def create(self, cr, uid, vals, context=None):
+	def onchange_mpa_value(self, cr, uid, ids, mech_value, context=None):
+		
+		value = {'mpa_value': ''}
+		if value:
+			print"mech_value",mech_value
+			mpa = mech_value * 9.8067
+			print"mpa",mpa		
+			value = {'mpa_value': mpa}
+			print"value_mpa",value				
+		return {'value': value}
+		
+	def create(self, cr, uid, vals, context=None):		
 		mech_obj = self.pool.get('kg.mechanical.master')
 		if vals.get('mechanical_id'):		  
 			uom_rec = mech_obj.browse(cr, uid, vals.get('mechanical_id') )
-			uom_name = uom_rec.uom.name
+			uom_name = uom_rec.uom.name			
 			vals.update({'uom': uom_name})
 		return super(ch_mechanical_properties, self).create(cr, uid, vals, context=context)
 		
-	def write(self, cr, uid, ids, vals, context=None):
+	def write(self, cr, uid, ids, vals, context=None):		
 		mech_obj = self.pool.get('kg.mechanical.master')
 		if vals.get('mechanical_id'):
 			uom_rec = mech_obj.browse(cr, uid, vals.get('mechanical_id') )
-			uom_name = uom_rec.uom.name
+			uom_name = uom_rec.uom.name			
 			vals.update({'uom': uom_name})
 		return super(ch_mechanical_properties, self).write(cr, uid, ids, vals, context)  
 		
 	_constraints = [		
 			  
-		(_check_values, 'Please Check the Min & Max values ,Min value should be less than Max value.!!',['Mechanical Chart']),		
+		(_check_values, 'Specified Mechanical Properties has not available in MOC Master and check the values !!',['Mechanical Chart']),		
 	   ]
 	
 ch_mechanical_properties()

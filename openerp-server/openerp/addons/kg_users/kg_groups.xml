@@ -107,6 +107,47 @@
             
     </record> 
     
+    
+     <!-- Planning Master Access Group -->
+	
+    <record id="group_planning_master_access" model="res.groups">
+		<field name="name">Planning_Master_Access</field> 
+		<field name="custom_group">True</field>         
+		<field name="category_id" ref="base.module_category_sales_management"/>
+        <field eval="[(6,0,[
+			ref('kg_pumpmodel_master.mpm_masters'),
+            ref('kg_pumpmodel_master.mpm_planning_master'),              
+            ref('kg_pumpmodel_master.mam_pumpmodel_master'),
+            ref('kg_menus.mam_uom_master'),
+            ref('kg_stage_master.mam_stage_master'),
+            ref('kg_moc_master.mam_moc_master'),
+            ref('kg_division_master.mam_division_master'),
+            ref('kg_bom.mam_bom_master'),
+            ref('kg_machine_shop.mam_machineshop_ms_master'),
+            ref('kg_machine_shop.mam_machineshop_bot_master'),
+            ref('kg_bom_amendment.mam_bom_amendment'),
+            ref('kg_box_master.mam_box_master'),
+            ref('kg_chemical_master.mam_chemical_master'),
+            ref('kg_mechanical_master.mam_mechanical_master'),
+            ref('kg_moc_construction.mam_mocconstruction_master'),           
+            ref('kg_bom.mam_bom_details'),
+            ref('kg_brandmoc_rate.mam_brandmocrate_design_master'),
+            ref('kg_shift_master.mam_shift_master'),
+            ref('kg_contractor_category.mam_contractor_category_master'),            
+            ref('kg_rejection_master.mam_rejection_master'),
+            ref('kg_construction_type.mam_const_type_master'),
+            ref('kg_pump_category.mam_pumpcate_master'),
+            ref('kg_furnace_master.mam_furnace_master'),
+            ref('kg_ladle_master.mam_ladle_master'),
+            ref('kg_vo_master.mam_vo_master'), 
+                
+            
+            
+            ])]" name="menu_access"/>
+		<field name="users" eval="[(4, ref('base.user_root'))]"/>
+            
+    </record> 
+    
    
       
 </data>
