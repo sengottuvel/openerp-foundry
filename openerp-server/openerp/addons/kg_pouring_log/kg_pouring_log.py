@@ -63,6 +63,22 @@ class kg_pouring_log(osv.osv):
 		
 	}
 	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = datetime.today()
+		entry_date = rec.entry_date
+		entry_date = str(entry_date)
+		entry_date = datetime.strptime(entry_date, '%Y-%m-%d %H:%M:%S')
+		if entry_date > today:
+			return False
+		return True
+		
+	_constraints = [		
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
+		
+	   ]
+	
 
 	def entry_confirm(self,cr,uid,ids,context=None):
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})

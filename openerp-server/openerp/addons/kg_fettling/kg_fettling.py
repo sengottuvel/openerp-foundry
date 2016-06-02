@@ -220,7 +220,8 @@ class kg_fettling(osv.osv):
 		'heat_set_temp_time':fields.float('Set temperature reached on (hrs.)'),
 		'heat_socking_hr':fields.char('Socking hours(hrs.)', size=128),
 		'heat_socking_comp_time':fields.float('Socking completed at(hrs.)'),
-		'heat_quencing_time':fields.float('Quenching time'),
+		'heat_quencing_time':fields.float('Quenching time(Sec.)'),
+		'heat_quenc_time':fields.integer('Quenching time(Sec.)'),
 		'heat_quencing_before_temp':fields.char('Quenching temp Before', size=128),
 		'heat_quencing_after_temp':fields.char('Quenching temp After', size=128),
 		'heat_chloride_content':fields.char('Chloride Content', size=128),
@@ -380,6 +381,58 @@ class kg_fettling(osv.osv):
 		
 		
 	}
+	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		entry_date = str(rec.entry_date)
+		if entry_date > today:
+			return False
+		knockout_date = str(rec.knockout_date)
+		if knockout_date > today:
+			return False
+		decoring_date = str(rec.decoring_date)
+		if decoring_date > today:
+			return False
+		shot_blast_date = str(rec.shot_blast_date)
+		if shot_blast_date > today:
+			return False
+		hammering_date = str(rec.hammering_date)
+		if hammering_date > today:
+			return False
+		wheel_cutting_date = str(rec.wheel_cutting_date)
+		if wheel_cutting_date > today:
+			return False
+		gas_cutting_date = str(rec.gas_cutting_date)
+		if gas_cutting_date > today:
+			return False
+		arc_cutting_date = str(rec.arc_cutting_date)
+		if arc_cutting_date > today:
+			return False
+		heat_date = str(rec.heat_date)
+		if heat_date > today:
+			return False
+		rough_grinding_date = str(rec.rough_grinding_date)
+		if rough_grinding_date > today:
+			return False
+		welding_date = str(rec.welding_date)
+		if welding_date > today:
+			return False
+		finish_grinding_date = str(rec.finish_grinding_date)
+		if finish_grinding_date > today:
+			return False
+		reshot_blasting_date = str(rec.reshot_blasting_date)
+		if reshot_blasting_date > today:
+			return False
+		return True
+		
+	_constraints = [		
+			  
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
+  
+	   ]
 	
 	def ms_inward_update(self,cr,uid,ids,inward_qty,context=None):
 		ms_obj = self.pool.get('kg.machineshop')

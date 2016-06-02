@@ -217,6 +217,9 @@ class kg_production(osv.osv):
 		'return_state':'received', 
 		'pour_state':'pending', 
 		'division_id':_get_default_division,
+		'issue_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+		'core_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+		'mould_date':time.strftime('%Y-%m-%d %H:%M:%S'),
 		
 	}
 	
@@ -396,11 +399,17 @@ class kg_production(osv.osv):
 		rec = self.browse(cr,uid,ids[0])
 		today = date.today()
 		today = str(today)
-		today = datetime.strptime(today, '%Y-%m-%d')
-		entry_date = rec.entry_date
-		entry_date = str(entry_date)
-		entry_date = datetime.strptime(entry_date, '%Y-%m-%d')
+		entry_date = str(rec.entry_date)
 		if entry_date > today:
+			return False
+		issue_date = str(rec.issue_date)
+		if issue_date > today:
+			return False
+		core_date = str(rec.core_date)
+		if core_date > today:
+			return False
+		mould_date = str(rec.mould_date)
+		if mould_date > today:
 			return False
 		return True
 		
@@ -476,7 +485,23 @@ class kg_pattern_batch_issue(osv.osv):
 		'state':'draft'
 		
 		
-	}	
+	}
+	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		entry_date = str(rec.entry_date)
+		if entry_date > today:
+			return False
+		return True
+		
+	_constraints = [		
+			  
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
+  
+	   ]
 
 	def update_line_items(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])		
@@ -654,7 +679,23 @@ class kg_core_batch(osv.osv):
 		'state':'draft'
 		
 		
-	}	
+	}
+	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		entry_date = str(rec.entry_date)
+		if entry_date > today:
+			return False
+		return True
+		
+	_constraints = [		
+			  
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
+  
+	   ]	
 
 	def update_line_items(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])		
@@ -863,7 +904,23 @@ class kg_mould_batch(osv.osv):
 		'state':'draft'
 		
 		
-	}	
+	}
+	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		entry_date = str(rec.entry_date)
+		if entry_date > today:
+			return False
+		return True
+		
+	_constraints = [		
+			  
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
+  
+	   ]
 
 	def update_line_items(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])		

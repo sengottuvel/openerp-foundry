@@ -1508,7 +1508,8 @@
 								<field name="heat_treatment_type" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
 								<field name="heat_set_temp" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
 								<field name="heat_socking_hr" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
-								<field name="heat_quencing_time" widget="float_time" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
+								<field name="heat_quencing_time" widget="float_time" invisibel="1" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
+								<field name="heat_quenc_time" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
 								<field name="heat_quencing_after_temp" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
 								<field name="heat_total_qty" required="1" string="Production Qty" readonly="1"/>
 								<field name="heat_each_weight" required="1" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>

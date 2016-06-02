@@ -178,7 +178,7 @@ class kg_work_order(osv.osv):
 	
 	_constraints = [		
 		
-		#(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
 		#(_check_duplicates, 'System not allow to do duplicate entry !!',['']),
 		(_check_lineitems, 'System not allow to save with empty Work Order Details !!',['']),
 		(_Validation, 'Special Character Not Allowed in Work Order No.', ['']),
