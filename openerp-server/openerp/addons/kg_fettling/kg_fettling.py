@@ -479,6 +479,7 @@ class kg_fettling(osv.osv):
 		
 		### Schedule List Updation ###
 		production_obj = self.pool.get('kg.production')
+		print "entry_rec.production_id.id",entry_rec.production_id.id
 		production_obj.write(cr, uid, entry_rec.production_id.id, {'state': 'moved_to_ms'})
 		
 		### Fettling Status Updation ###
