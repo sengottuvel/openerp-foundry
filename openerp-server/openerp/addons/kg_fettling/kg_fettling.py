@@ -420,6 +420,7 @@ class kg_fettling(osv.osv):
 		if welding_date > today:
 			return False
 		finish_grinding_date = str(rec.finish_grinding_date)
+		print "finish_grinding_date",finish_grinding_date
 		if finish_grinding_date > today:
 			return False
 		reshot_blasting_date = str(rec.reshot_blasting_date)
@@ -430,7 +431,7 @@ class kg_fettling(osv.osv):
 	_constraints = [		
 			  
 		
-		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
+		(_future_entry_date_check, 'SSystem not allow to save with future date. !!',['']),
   
 	   ]
 	
