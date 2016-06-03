@@ -420,7 +420,7 @@ class kg_fettling(osv.osv):
 		if welding_date > today:
 			return False
 		finish_grinding_date = str(rec.finish_grinding_date)
-		print "finish_grinding_date",finish_grinding_date
+		
 		if finish_grinding_date > today:
 			return False
 		reshot_blasting_date = str(rec.reshot_blasting_date)
@@ -431,7 +431,7 @@ class kg_fettling(osv.osv):
 	_constraints = [		
 			  
 		
-		(_future_entry_date_check, 'SSystem not allow to save with future date. !!',['']),
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
   
 	   ]
 	
@@ -479,8 +479,8 @@ class kg_fettling(osv.osv):
 		
 		### Schedule List Updation ###
 		production_obj = self.pool.get('kg.production')
-		print "entry_rec.production_id.id",entry_rec.production_id.id
-		production_obj.write(cr, uid, entry_rec.production_id.id, {'state': 'moved_to_ms'})
+		cr.execute(''' update kg_production set state = 'moved_to_ms' where id = %s ''',[entry_rec.production_id.id])
+		#~ production_obj.write(cr, uid, entry_rec.production_id.id, {'state': 'moved_to_ms'})
 		
 		### Fettling Status Updation ###
 		self.write(cr, uid, ids, {'state': 'complete'})
@@ -3042,7 +3042,7 @@ class kg_fettling(osv.osv):
 				
 				if fettling_stage_id:
 					
-					print "fettling_stage_idfettling_stage_idfettling_stage_idfettling_stage_id",fettling_stage_id
+					
 					for stage_item in fettling_stage_id:
 						
 						if stage_item['stage_name'] == 'KNOCK OUT':
@@ -3164,7 +3164,7 @@ class kg_fettling(osv.osv):
 						
 				else:
 					###  MS Inward Process Creation ###
-					print "eeeeeeeeeeeeeeeeeelssssssss"
+					
 					self.ms_inward_update(cr, uid, [entry.id],entry.finish_grinding_accept_qty)
 			
 		if entry.finish_grinding_reject_qty > 0:

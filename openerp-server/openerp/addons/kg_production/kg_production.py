@@ -416,7 +416,7 @@ class kg_production(osv.osv):
 	_constraints = [		
 			  
 		
-		(_future_entry_date_check, 'SSSSystem not allow to save with future date. !!',['']),
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
   
 	   ]
 		
