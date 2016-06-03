@@ -3041,7 +3041,7 @@ class kg_fettling(osv.osv):
 				
 				if fettling_stage_id:
 					
-				
+					print "fettling_stage_idfettling_stage_idfettling_stage_idfettling_stage_id",fettling_stage_id
 					for stage_item in fettling_stage_id:
 						
 						if stage_item['stage_name'] == 'KNOCK OUT':
@@ -3163,6 +3163,7 @@ class kg_fettling(osv.osv):
 						
 				else:
 					###  MS Inward Process Creation ###
+					print "eeeeeeeeeeeeeeeeeelssssssss"
 					self.ms_inward_update(cr, uid, [entry.id],entry.finish_grinding_accept_qty)
 			
 		if entry.finish_grinding_reject_qty > 0:
