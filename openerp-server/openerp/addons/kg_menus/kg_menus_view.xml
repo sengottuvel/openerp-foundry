@@ -212,7 +212,12 @@
 				
 				<!-- SO Menu -->
 				<menuitem name="SO Register" parent="rpm_report_menu" action="kg_po_reports.action_so_stm_report" id="ram_po_register_report" sequence="2"/>
-				 
+			
+			<menuitem id="rpm_excel_report_menu" name="Excel Reports" parent="base.menu_purchase_root" sequence="7"/>
+				
+				<!-- PO Menu -->
+				<menuitem name="PO Register" parent="rpm_excel_report_menu" action="kg_po_reports.action_po_reg_report" id="ram_excel_po_register_reports" sequence="1"/>
+				 	 
 		<!-- Warehouse Menu -->
 		        
 			<!-- Store Masters Menu -->
