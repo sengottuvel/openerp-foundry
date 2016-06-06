@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="view_po_reg_rep_form" model="ir.ui.view">
+            <field name="name">PO Register</field>
+            <field name="model">kg.excel.po.register</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+			<form string="PO Register" version="7.0">             			 
+				<header>
+					<button name="produce_xls" states="draft" string="Download Report" type="object" class="oe_highlight"/>
+				</header>
+				<group>
+					<group>
+					 <field name="date_from"/>
+					 <field name="supplier" widget="many2many_tags"/>
+					 <field name="status"/>
+					 </group>
+					 <group>
+					 <field name="date_to"/>
+					 <field name="product_id" widget="many2many_tags"/>
+					 <field name="state"/>
+					 <field name="rep_data" nolabel="1" readonly="1" width="100" filename="name"/>
+					 </group>
+				</group>
+			</form>
+            </field>
+        </record>
+        
+        <record id="view_po_reg_rep_tree" model="ir.ui.view">
+            <field name="name">PO Register</field>
+            <field name="model">kg.excel.po.register</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+             <tree string="PO Register">
+				 
+				 <field name="creation_date"/>
+				 <field name="date_from"/>
+				 <field name="date_to"/>
+				 <field name="rep_data"/>
+				 <field name="state"/>				 
+                
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_po_reg_report" model="ir.actions.act_window">
+			<field name="name">PO Register</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.excel.po.register</field>
+			<field name="view_type">form</field>
+			<field name="view_id" ref="view_po_reg_rep_tree"/>
+		</record>
+        
+    </data>
+</openerp>
+
