@@ -246,7 +246,9 @@
 				<menuitem action="kg_po_grn.action_kg_po_grn" id="gam_po_grn" name="GRN" parent="gpm_grn_issue_menu" sequence="2"/>
 				
 				<!-- GRN Register Transaction Menu -->
+<!--
 				<menuitem action="kg_common_grn.kg_common_grn_action_form" id="gam_grn_register" name="GRN Register" parent="gpm_grn_issue_menu" sequence="3"/>
+-->
 				
 				<!-- Dept Issue Transaction Menu -->
 				<menuitem action="kg_department_issue.action_kg_department_issue" id="gam_dept_issue" name="Store Issue" parent="gpm_grn_issue_menu" sequence="4"/>
@@ -255,10 +257,14 @@
 				<menuitem action="kg_issue_return.action_kg_issuereturn_form" id="iam_issue_return" name="Issue Return" parent="gpm_grn_issue_menu" sequence="5"/>
 				
 				<!-- Physical Stock Transaction Menu -->
+<!--
 				<menuitem action="kg_physical_stock.action_kg_physicalstock_form" id="iam_physical_stock" name="Physical Stock Entry" parent="gpm_grn_issue_menu" sequence="6"/>
+-->
 				
 				<!-- Consumption Transaction Menu -->
+<!--
 				<menuitem action="stock.action_picking_tree6" id="gam_consumption_entry" name="Consumption Entry" parent="gpm_grn_issue_menu" sequence="7"/>
+-->
 				
 				<!-- Gate Pass -->
 				<menuitem id="gpm_gate_pass_menu" name="Gate Pass" parent="stock.menu_stock_root" sequence="2"/>
