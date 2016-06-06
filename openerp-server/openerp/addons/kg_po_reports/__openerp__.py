@@ -34,7 +34,9 @@ keep track and order all your purchase orders.
             'wizard/kg_category_count_wizard.xml',
             'wizard/kg_purchase_invoice_reg_wiz.xml',
             'report/excel/kg_gate_pass_excel.xml',
+            'excel/kg_excel_po_register.xml',
 			],
+			
 	'test': [
         'test/ui/print_report.yml',
           ],
