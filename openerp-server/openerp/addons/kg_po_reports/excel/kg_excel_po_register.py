@@ -318,7 +318,7 @@ class kg_excel_po_register(osv.osv):
 						item2_2['po_ad_amt']=0
 						item2_2['total']=0
 						item2_2['pending_days']=0
-						item2_2['tax']=item1['tax']
+						#~ item2_2['tax']=item1['tax']
 						new_data.append(item2_2)
 						delete_items.append(item2)
 				
