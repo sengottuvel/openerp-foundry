@@ -700,6 +700,176 @@
 		
 		<!-- Partners rights End -->
 		
+		<!-- VO Master Start -->
+		
+		<record id="m_vo_master_access" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_kg_vo_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">VO</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- VO Master END -->
+		
+		<!-- VO Power Series Master Start -->
+		
+		<record id="m_vo_ch_power_series_access" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_ch_power_series"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">VO Power Series</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- VO Power Series Master END -->
+		
+		<!-- VO Bed Start -->
+		
+		<record id="m_vo_ch_bed_assembly_access" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_ch_bed_assembly"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">VO Bed</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- VO Bed END -->
+		
+		<!-- VO Motor Start -->
+		
+		<record id="m_vo_ch_motor_assembly_access" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_ch_motor_assembly"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">VO Motor</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- VO Motor END -->
+		
+		<!-- VO ColumnPipe Start -->
+		
+		<record id="m_vo_ch_columnpipe_assembly_access" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_ch_columnpipe_assembly"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">VO ColumnPipe</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- VO ColumnPipe END -->
+		
+		<!-- VO DeliveryPipe Start -->
+		
+		<record id="m_vo_ch_deliverypipe_assembly_access" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_ch_deliverypipe_assembly"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">VO DeliveryPipe</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- VO DeliveryPipe END -->
+		
+		<!-- VO Casing Start -->
+		
+		<record id="m_vo_ch_casing_assembly_access" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_ch_casing_assembly"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">VO Casing</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- VO Casing END -->
+		
+		<!-- VO Lubricant Start -->
+		
+		<record id="m_vo_ch_lubricant_access" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_ch_lubricant"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">VO Lubricant</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- VO Lubricant END -->
+		
+		<!-- VO Mapping Start -->
+		
+		<record id="m_ch_vo_mapping_access" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_ch_vo_mapping"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">VO Mapping</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- VO Mapping END -->
+		
+		<!-- Mechanical Properties Start -->
+		
+		<record id="m_ch_mech_properties_access" model="ir.model.access">
+			<field name="model_id" ref="kg_melting.model_ch_mechanical_properties"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Mechanical Properties</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- Mechanical Properties END -->
+		
+		
+		<!-- PumpModel Master Alpha Start -->
+		
+		<record id="m_ch_alpha_value_access" model="ir.model.access">
+			<field name="model_id" ref="kg_pumpmodel_master.model_ch_alpha_value"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Alpha Value</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- PumpModel Master Alpha END -->
+		
+		<!-- PumpModel Master Delivery Pipe Start -->
+		
+		<record id="m_ch_delivery_pipe_access" model="ir.model.access">
+			<field name="model_id" ref="kg_pumpmodel_master.model_ch_delivery_pipe"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Delivery Pipe</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- PumpModel Master Delivery Pipe END -->
+
+		
 		
 		
     </data>

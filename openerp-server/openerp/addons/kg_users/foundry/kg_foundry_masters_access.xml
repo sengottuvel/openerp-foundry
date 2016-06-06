@@ -649,7 +649,146 @@
 		
 		<!-- Ladle Master END -->
 		
+		<!-- Furnace Master Start -->
 		
+		<record id="m_furnace_master_read_access" model="ir.model.access">
+			<field name="model_id" ref="kg_furnace_master.model_kg_furnace_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Furnace</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- Ladle Master END -->
+		
+		
+		<!-- VO Master Start -->
+		
+		<record id="m_vo_master_read_access" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_kg_vo_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">VO</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- VO Master END -->
+		
+		<!-- VO Power Series Master Start -->
+		
+		<record id="m_vo_ch_power_series_read_access" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_ch_power_series"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">VO Power Series</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- VO Power Series Master END -->
+		
+		<!-- VO Bed Start -->
+		
+		<record id="m_vo_ch_bed_assembly_read_access" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_ch_bed_assembly"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">VO Bed</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- VO Bed END -->
+		
+		<!-- VO Motor Start -->
+		
+		<record id="m_vo_ch_motor_assembly_read_access" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_ch_motor_assembly"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">VO Motor</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- VO Motor END -->
+		
+		<!-- VO ColumnPipe Start -->
+		
+		<record id="m_vo_ch_columnpipe_assembly_read_access" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_ch_columnpipe_assembly"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">VO ColumnPipe</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- VO ColumnPipe END -->
+		
+		<!-- VO DeliveryPipe Start -->
+		
+		<record id="m_vo_ch_deliverypipe_assembly_read_access" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_ch_deliverypipe_assembly"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">VO DeliveryPipe</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- VO DeliveryPipe END -->
+		
+		<!-- VO Casing Start -->
+		
+		<record id="m_vo_ch_casing_assembly_read_access" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_ch_casing_assembly"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">VO Casing</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- VO Casing END -->
+		
+		<!-- VO Lubricant Start -->
+		
+		<record id="m_vo_ch_lubricant_read_access" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_ch_lubricant"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">VO Lubricant</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- VO Lubricant END -->
+		
+		<!-- VO Mapping Start -->
+		
+		<record id="m_ch_vo_mapping_read_access" model="ir.model.access">
+			<field name="model_id" ref="kg_vo_master.model_ch_vo_mapping"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">VO Mapping</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- VO Mapping END -->
 		
 		<!-- Mechanical Properties Start -->
 		
@@ -693,6 +832,8 @@
 		</record>
 		
 		<!-- PumpModel Master Delivery Pipe END -->
+		
+		
 		
 		
 		
