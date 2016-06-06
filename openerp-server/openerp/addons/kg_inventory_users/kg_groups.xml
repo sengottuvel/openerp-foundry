@@ -20,7 +20,7 @@
 			ref('kg_menus.mam_uom_master'),
 			ref('kg_menus.mam_brandmocrate_purchase_master'),
 			ref('kg_menus.qam_quotation'),
-	
+			ref('kg_menus.rpm_excel_report_menu'),
 			
             ])]" name="menu_access"/>
             <field name="users" eval="[(4, ref('base.user_root'))]"/>
