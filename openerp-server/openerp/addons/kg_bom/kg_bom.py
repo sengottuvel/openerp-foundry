@@ -450,7 +450,8 @@ class ch_bom_line(osv.osv):
 		
 		'header_id':fields.many2one('kg.bom', 'BOM Name', required=True, ondelete='cascade'),  
 		'pos_no': fields.integer('Position No'),
-		'pattern_id': fields.many2one('kg.pattern.master','Pattern No', required=True,domain="[('active','=','t')]"), 		
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern No', required=True,domain="[('active','=','t')]"), 	
+		'csd_no': fields.char('CSD No.', size=128),	
 		'pattern_name': fields.char('Pattern Name', required=True), 
 		'remarks':fields.text('Remarks'),
 		'qty': fields.integer('Qty',required=True,),
@@ -489,14 +490,20 @@ class ch_bom_line(osv.osv):
 			if duplicate_id[0] != None:
 				return False
 		return True 
+		
+	def _check_line_qty(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])		
+		if entry.qty <= 0:			
+			return False
+		return True
 
 	
 	def onchange_pattern_name(self, cr, uid, ids, pattern_id, context=None):
 		
-		value = {'pattern_name': ''}
+		value = {'pattern_name': '','csd_no':''}
 		if pattern_id:
 			pro_rec = self.pool.get('kg.pattern.master').browse(cr, uid, pattern_id, context=context)
-			value = {'pattern_name': pro_rec.pattern_name}
+			value = {'pattern_name': pro_rec.pattern_name,'csd_no':pro_rec.csd_code}
 			
 		return {'value': value}
 		
@@ -506,7 +513,7 @@ class ch_bom_line(osv.osv):
 		if vals.get('pattern_id'):		  
 			pattern_rec = pattern_obj.browse(cr, uid, vals.get('pattern_id') )
 			pattern_name = pattern_rec.pattern_name
-			vals.update({'pattern_name': pattern_name})
+			vals.update({'pattern_name': pattern_name,'csd_no':pattern_rec.csd_code})
 		return super(ch_bom_line, self).create(cr, uid, vals, context=context)
 		
 	def write(self, cr, uid, ids, vals, context=None):
@@ -514,14 +521,14 @@ class ch_bom_line(osv.osv):
 		if vals.get('pattern_id'):
 			pattern_rec = pattern_obj.browse(cr, uid, vals.get('pattern_id') )
 			pattern_name = pattern_rec.pattern_name
-			vals.update({'pattern_name': pattern_name})		
+			vals.update({'pattern_name': pattern_name,'csd_no':pattern_rec.csd_code})		
 		return super(ch_bom_line, self).write(cr, uid, ids, vals, context)  
 		
-	"""_constraints = [
+	_constraints = [
 		
-		(_check_line_duplicates, 'Pattern Name must be unique !!', ['Pattern Name']),	   
+		(_check_line_qty, 'Foundry Items Qty Zero and negative not accept', ['Qty']),	   
 		
-	]"""
+	]
 
 	
 ch_bom_line()

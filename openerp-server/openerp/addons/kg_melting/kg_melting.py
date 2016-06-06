@@ -139,6 +139,13 @@ class kg_melting(osv.osv):
         ('name_uniq', 'unique(name)', 'Heat No. must be unique !!'),
     ]
 	
+	def _check_values(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])			
+		if entry.initial_reading < entry.final_reading :
+			return True
+		else:
+			return False
+	
 	
 	### Added by Sangeetha ###
 	def onchange_reading(self,cr, uid, ids, initial_reading,final_reading, context=None):
@@ -231,6 +238,11 @@ class kg_melting(osv.osv):
 	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_melting, self).write(cr, uid, ids, vals, context)
+	
+	_constraints = [		
+			  
+		(_check_values, ' Initial Reading should not be less than Final Reading check the values !!',['Reading Details']),		
+	   ]
 	
 	
 kg_melting()
