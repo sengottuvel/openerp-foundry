@@ -24,10 +24,13 @@
 			<field name="term_price" />
 			<field name="delivery_mode" />
 			<field name="term_freight" on_change="onchange_frieght_flag(term_freight)" />
-			<field name="state"/>
+			<field name="state" style="width: 30%%" class="att_state_change"/>
 			<field name="insurance"/>
 			<field name="excise_duty"/>
+<!--
 			<field name="item_quality_term"/>
+-->
+			<field name="item_quality_term_id" widget="many2many_tags"/>
 			<field name="type_flag" invisible="1" />
 			<field name="confirm_flag" invisible="1"/>
 			<field name="approve_flag" invisible="1"/>	
@@ -88,7 +91,8 @@
 		
 		<button name="purchase_confirm" states="draft" string="Confirm Order" position="replace">
 			<button name="purchase_confirm" states="confirmed" string="Approve PO" confirm="Are you sure to proceed ?" />
-			<button name="action_cancel" string="Cancel PO" confirm="Are you sure to proceed ?" type="object" states="confirmed,approved" />
+			<button name="action_reject" string="Reject PO" confirm="Are you sure to proceed ?" type="object" states="confirmed" />
+			<button name="action_cancel" string="Cancel PO" confirm="Are you sure to proceed ?" type="object" states="approved" />
 		</button>
 		
 		<button name="purchase_confirm" states="confirmed" string="Approve PO" position="after">
@@ -109,7 +113,7 @@
 			 <field name="bill_type" required="1"/>
 			 <field name="payment_mode" />
 			 <field name="term_warranty" />
-			 <field name="po_type" on_change="onchange_type_flag(po_type)"/>
+			 <field name="po_type" required="1" on_change="onchange_type_flag(po_type)"/>
 			 <field name="bill_flag" readonly="1"/>
 			 <field name="purpose" required="1"/>
 			 <field name="mode_of_dispatch"/>
@@ -197,7 +201,7 @@
 					<field name="dep_id" readonly="1" invisible="1"/>
 					</tree>
 					</field>
-				 <button name="update_poline" type='object' string="Save Record"/>
+				 <button name="update_poline" type='object' string="Save Record" states="draft,confirmed"/>
 			 </page>
 		</xpath>
 		
@@ -225,14 +229,18 @@
 			<group>
 				<group>
 					<field name="user_id" on_change="onchange_user(user_id,location_id)"/>
-					<field name="confirmed_by" attrs="{'invisible': [('approve_flag','=',False)]}"/>
-					<field name="approved_by" attrs="{'invisible': [('approve_flag','=',False)]}"/>
+					<field name="confirmed_by" attrs="{'invisible': [('state','=','draft')]}"/>
+					<field name="rej_user_id" attrs="{'invisible': [('state','not in',('reject'))]}"/>
+					<field name="approved_by" attrs="{'invisible': [('state','in',('draft','confirmed','reject'))]}"/>
+					<field name="cancel_user_id" attrs="{'invisible': [('state','not in',('cancel'))]}"/>
 					<field name="update_user_id"/>
 				</group>
 				<group>
 					<field name="creation_date"/>
-					<field name="confirmed_date" attrs="{'invisible': [('confirm_flag','=',False)]}"/>
-					<field name="approved_date" attrs="{'invisible': [('confirm_flag','=',False)]}"/>
+					<field name="confirmed_date" attrs="{'invisible': [('state','=','draft')]}"/>
+					<field name="reject_date" attrs="{'invisible': [('state','not in',('reject'))]}"/>
+					<field name="approved_date" attrs="{'invisible': [('state','in',('draft','confirmed','reject'))]}"/>
+					<field name="cancel_date" attrs="{'invisible': [('state','not in',('cancel'))]}"/>
 					<field name="update_date"/>
 				</group>
 			</group>
@@ -315,9 +323,7 @@
 							attrs="{'invisible': [('cancel_qty','=',0)]}"/>				
 				<field name="received_qty" readonly="1"
 						attrs="{'invisible': [('received_qty','=',0)]}" />
-<!--
-				<field name = "price_type"/>
--->
+				<field name = "price_type"  required="1"/>
 				<field name = "cancel_flag" invisible="1"/>
 				<!--<field name="cancel_remark" attrs="{'readonly': [('cancel_flag','=', False)]}"/>-->
 		
@@ -428,7 +434,7 @@
 		<field name="model">purchase.order.line</field>
 		<field name="type">tree</field>
 		<field name="arch" type="xml">
-			<tree string="PO Line Tree View" create="false">					
+			<tree string="PO Line Tree View" create="false" delete="false">					
 				<field name="order_id" string="PO No"/>
 				<field name="date_planned" string="PO Date"/>
 				<field name="product_id"/>

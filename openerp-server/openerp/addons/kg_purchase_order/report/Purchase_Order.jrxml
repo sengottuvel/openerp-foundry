@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.0000000000000064"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.y" value="96"/>
 	<subDataset name="PO List">
 		<parameter name="po_id" class="java.lang.Integer"/>
 		<queryString>
@@ -19,9 +19,10 @@ else
 '['||moc.name||']' end as moc_name,
 case when line.brand_id is null then ''
 else
-'['||brand.name||']' end as brand_name,
+'['||brand||']' end as brand_name,
 del.name as delivery_mode,
 STRING_AGG(wo.wo_id, ', ' ORDER BY wo.wo_id) wo_no
+
 from
 purchase_order_line line
 left join product_product prod on(prod.id=line.product_id)
@@ -94,10 +95,13 @@ po.division as division,
 dis.name as mode_of_dispatch,
 pay.name as payment_mode,
 del.name as delivery_mode,
-term.name as quality_term,
 po.state as status,
 compart.tin_no as tin_no,
-compart.cst_no as cst_no
+compart.cst_no as cst_no,
+case when po.id is not null then
+(SELECT CAST(string_agg(name, ',') AS text)
+FROM kg_item_quality_master where id in (select term_id from general_term where po_id=po.id))
+end as general_term
 from
 purchase_order po
 left join res_partner partner on(partner.id=po.partner_id)
@@ -107,7 +111,7 @@ left join kg_delivery_master del on(del.id=po.delivery_mode)
 left join kg_dispatch_master dis on(dis.id=po.mode_of_dispatch)
 left join res_company company on(company.id=po.company_id)
 left join res_partner compart on(compart.id=company.partner_id)
-left join kg_item_quality_master term on(term.id=po.item_quality_term)
+
 
 where po.id = $P{po_id}]]>
 	</queryString>
@@ -127,10 +131,10 @@ where po.id = $P{po_id}]]>
 	<field name="mode_of_dispatch" class="java.lang.String"/>
 	<field name="payment_mode" class="java.lang.String"/>
 	<field name="delivery_mode" class="java.lang.String"/>
-	<field name="quality_term" class="java.lang.String"/>
 	<field name="status" class="java.lang.String"/>
 	<field name="tin_no" class="java.lang.String"/>
 	<field name="cst_no" class="java.lang.String"/>
+	<field name="general_term" class="java.lang.String"/>
 	<group name="PO Group">
 		<groupExpression><![CDATA[$F{amount}]]></groupExpression>
 		<groupHeader>
@@ -145,8 +149,8 @@ where po.id = $P{po_id}]]>
 							<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 						</datasetRun>
 						<jr:listContents height="16" width="801">
-							<textField isStretchWithOverflow="true">
-								<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="38" height="16"/>
+							<textField>
+								<reportElement x="0" y="0" width="38" height="16"/>
 								<box topPadding="1">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -154,8 +158,8 @@ where po.id = $P{po_id}]]>
 								<textElement textAlignment="Center"/>
 								<textFieldExpression><![CDATA[$F{seq_no}]]></textFieldExpression>
 							</textField>
-							<textField isStretchWithOverflow="true">
-								<reportElement stretchType="RelativeToTallestObject" x="38" y="0" width="330" height="16"/>
+							<textField>
+								<reportElement x="38" y="0" width="330" height="16"/>
 								<box topPadding="1">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -163,8 +167,8 @@ where po.id = $P{po_id}]]>
 								<textElement/>
 								<textFieldExpression><![CDATA[" "+$F{product}+" "+$F{brand_name}+" "+$F{moc_name}]]></textFieldExpression>
 							</textField>
-							<textField isStretchWithOverflow="true">
-								<reportElement stretchType="RelativeToTallestObject" x="368" y="0" width="60" height="16"/>
+							<textField>
+								<reportElement x="368" y="0" width="60" height="16"/>
 								<box topPadding="1" rightPadding="3">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -172,8 +176,8 @@ where po.id = $P{po_id}]]>
 								<textElement textAlignment="Right"/>
 								<textFieldExpression><![CDATA[$F{product_qty}+" "]]></textFieldExpression>
 							</textField>
-							<textField isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="428" y="0" width="60" height="16"/>
+							<textField>
+								<reportElement x="428" y="0" width="60" height="16"/>
 								<box topPadding="1" rightPadding="3">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -181,8 +185,8 @@ where po.id = $P{po_id}]]>
 								<textElement textAlignment="Right"/>
 								<textFieldExpression><![CDATA[$F{uom}+" "]]></textFieldExpression>
 							</textField>
-							<textField isStretchWithOverflow="true">
-								<reportElement stretchType="RelativeToTallestObject" x="488" y="0" width="64" height="16"/>
+							<textField>
+								<reportElement x="488" y="0" width="64" height="16"/>
 								<box topPadding="1" rightPadding="3">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -190,8 +194,8 @@ where po.id = $P{po_id}]]>
 								<textElement textAlignment="Right"/>
 								<textFieldExpression><![CDATA[$F{price}+" "]]></textFieldExpression>
 							</textField>
-							<textField isStretchWithOverflow="true">
-								<reportElement stretchType="RelativeToTallestObject" x="552" y="0" width="72" height="16"/>
+							<textField>
+								<reportElement x="552" y="0" width="72" height="16"/>
 								<box topPadding="1" rightPadding="3">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -201,7 +205,7 @@ where po.id = $P{po_id}]]>
 								<textFieldExpression><![CDATA[$F{amount}+" "]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="624" y="0" width="114" height="16"/>
+								<reportElement x="624" y="0" width="114" height="16"/>
 								<box topPadding="2" leftPadding="2" rightPadding="0">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -211,7 +215,7 @@ where po.id = $P{po_id}]]>
 								<textFieldExpression><![CDATA[$F{delivery_mode}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="737" y="0" width="64" height="16"/>
+								<reportElement x="737" y="0" width="64" height="16"/>
 								<box topPadding="2" leftPadding="2">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -243,98 +247,16 @@ where po.id = $P{po_id}]]>
 			</frame>
 		</band>
 	</background>
-	<columnHeader>
-		<band height="124" splitType="Stretch">
+	<title>
+		<band height="104" splitType="Stretch">
+			<line>
+				<reportElement x="736" y="0" width="1" height="91"/>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</line>
 			<textField>
-				<reportElement x="0" y="108" width="38" height="16"/>
-				<box topPadding="2">
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center">
-					<font isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA["No."]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="488" y="108" width="64" height="16"/>
-				<box topPadding="2">
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center">
-					<font isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA["RATE"]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="624" y="108" width="113" height="16"/>
-				<box topPadding="2">
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center">
-					<font isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA["DLY.SCHEDULE"]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="428" y="108" width="60" height="16"/>
-				<box topPadding="2">
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center">
-					<font isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA["UOM"]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="552" y="108" width="72" height="16"/>
-				<box topPadding="2">
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center">
-					<font isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA["AMOUNT"]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="737" y="108" width="65" height="16"/>
-				<box topPadding="2">
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.75"/>
-				</box>
-				<textElement textAlignment="Center">
-					<font isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA["W.O.No"]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="38" y="108" width="330" height="16"/>
-				<box topPadding="2">
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center">
-					<font isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA["DESCRIPTION"]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="368" y="108" width="60" height="16"/>
-				<box topPadding="2">
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center">
-					<font isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA["QTY"]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="72" y="54" width="291" height="12"/>
+				<reportElement x="72" y="50" width="291" height="12"/>
 				<box leftPadding="5" rightPadding="5">
 					<leftPen lineWidth="0.0"/>
 				</box>
@@ -344,22 +266,28 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA["P.B.No. 7006, Avinashilingam Home Science College P.O.,"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="364" y="37" width="51" height="13"/>
+				<reportElement x="364" y="33" width="51" height="13"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[" DATE  :"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="364" y="50" width="114" height="13"/>
+				<reportElement x="364" y="46" width="114" height="13"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[" QUOTATION REF.:"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="492" y="8" width="115" height="12"/>
+				<reportElement x="492" y="4" width="115" height="12"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[" VENDOR CODE"]]></textFieldExpression>
 			</textField>
+			<line>
+				<reportElement x="363" y="0" width="1" height="91"/>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</line>
 			<textField>
-				<reportElement x="363" y="7" width="130" height="17"/>
+				<reportElement x="363" y="3" width="130" height="17"/>
 				<box topPadding="1" leftPadding="4" rightPadding="4">
 					<leftPen lineWidth="0.0"/>
 					<bottomPen lineWidth="0.5"/>
@@ -371,14 +299,14 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA["PURCHASE ORDER"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="363" y="82" width="80" height="12"/>
+				<reportElement x="363" y="78" width="80" height="12"/>
 				<textElement>
 					<font isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[" DATE :"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="RelativeToBandHeight" x="1" y="78" width="369" height="19"/>
+				<reportElement stretchType="RelativeToBandHeight" x="1" y="74" width="369" height="19"/>
 				<box topPadding="2" leftPadding="5" rightPadding="5">
 					<leftPen lineWidth="0.0"/>
 				</box>
@@ -388,65 +316,74 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA[" Tel : 0422 - 3053555,Fax: 0422 - 3053510,Email: purchase@sampumps.com"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="492" y="24" width="101" height="14"/>
+				<reportElement x="492" y="20" width="101" height="14"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[" M/s."]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="0" y="95" width="801" height="1"/>
+				<reportElement x="492" y="0" width="1" height="90"/>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="0" y="91" width="801" height="1"/>
 				<graphicElement>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
 			</line>
 			<textField>
-				<reportElement x="72" y="12" width="315" height="18"/>
+				<reportElement x="72" y="8" width="315" height="18"/>
 				<textElement>
 					<font fontName="DejaVu Serif" size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["SAM TURBO INDUSTRY PRIVATE LIMITED"]]></textFieldExpression>
 			</textField>
+			<line>
+				<reportElement x="0" y="0" width="801" height="1"/>
+			</line>
 			<textField>
-				<reportElement x="416" y="37" width="66" height="13"/>
+				<reportElement x="416" y="33" width="66" height="13"/>
 				<textElement>
 					<font isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{po_date}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="416" y="25" width="77" height="13"/>
+				<reportElement x="416" y="21" width="77" height="13"/>
 				<textElement>
 					<font isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{po_no}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="415" y="63" width="77" height="13"/>
+				<reportElement x="415" y="59" width="77" height="13"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[$F{ref_no}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="503" y="54" width="233" height="12"/>
+				<reportElement stretchType="RelativeToBandHeight" x="503" y="50" width="233" height="12"/>
 				<textElement>
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{street1}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="503" y="66" width="233" height="12"/>
+				<reportElement stretchType="RelativeToBandHeight" x="503" y="62" width="233" height="12"/>
 				<textElement>
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{street2}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="503" y="78" width="233" height="12"/>
+				<reportElement stretchType="RelativeToBandHeight" x="503" y="74" width="233" height="12"/>
 				<textElement>
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{city}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="95" width="801" height="13"/>
+				<reportElement x="0" y="91" width="801" height="13"/>
 				<box topPadding="1">
 					<leftPen lineWidth="0.5"/>
 					<bottomPen lineWidth="0.5"/>
@@ -458,26 +395,26 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA["Kindly Supply The Following Items Subject To The Terms & Conditions Printed Over Leaf"]]></textFieldExpression>
 			</textField>
 			<image>
-				<reportElement x="737" y="12" width="64" height="66"/>
+				<reportElement x="737" y="8" width="64" height="66"/>
 				<box>
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/TUV_NORD.jpg"]]></imageExpression>
 			</image>
 			<textField>
-				<reportElement x="363" y="24" width="52" height="13"/>
+				<reportElement x="363" y="20" width="52" height="13"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[" PO No :"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="503" y="39" width="233" height="11"/>
+				<reportElement x="503" y="35" width="233" height="11"/>
 				<textElement>
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{partner_name}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="607" y="7" width="129" height="17"/>
+				<reportElement x="607" y="3" width="129" height="17"/>
 				<box topPadding="2"/>
 				<textElement>
 					<font isBold="true"/>
@@ -485,61 +422,182 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA[$F{partner_code}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="102" y="66" width="266" height="12"/>
+				<reportElement x="102" y="62" width="266" height="12"/>
 				<box topPadding="0"/>
 				<textElement/>
 				<textFieldExpression><![CDATA["Mettupalayam Road, Coimbatore - 641043."]]></textFieldExpression>
 			</textField>
 			<image>
-				<reportElement x="1" y="8" width="71" height="82"/>
+				<reportElement x="1" y="4" width="71" height="82"/>
 				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
 			</image>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="16" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="38" height="15"/>
+				<box topPadding="2">
+					<leftPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["No."]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="488" y="0" width="64" height="15"/>
+				<box topPadding="2">
+					<leftPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["RATE"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="624" y="0" width="113" height="15"/>
+				<box topPadding="2">
+					<leftPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["DLY.SCHEDULE"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="428" y="0" width="60" height="15"/>
+				<box topPadding="2">
+					<leftPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["UOM"]]></textFieldExpression>
+			</textField>
 			<line>
-				<reportElement x="736" y="-1" width="1" height="96"/>
+				<reportElement x="0" y="15" width="801" height="1"/>
 				<graphicElement>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
 			</line>
-			<line>
-				<reportElement x="363" y="0" width="1" height="95"/>
-				<graphicElement>
-					<pen lineWidth="0.5"/>
-				</graphicElement>
-			</line>
-			<line>
-				<reportElement x="493" y="0" width="1" height="95"/>
-				<graphicElement>
-					<pen lineWidth="0.5"/>
-				</graphicElement>
-			</line>
-			<line>
-				<reportElement x="0" y="-1" width="801" height="1"/>
-				<graphicElement>
-					<pen lineWidth="0.5"/>
-				</graphicElement>
-			</line>
+			<textField>
+				<reportElement x="552" y="0" width="72" height="16"/>
+				<box topPadding="2">
+					<leftPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["AMOUNT"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="737" y="0" width="65" height="16"/>
+				<box topPadding="2">
+					<leftPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["W.O.No"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="38" y="0" width="330" height="16"/>
+				<box topPadding="2">
+					<leftPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["DESCRIPTION"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="368" y="1" width="60" height="15"/>
+				<box topPadding="2">
+					<leftPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["QTY"]]></textFieldExpression>
+			</textField>
 		</band>
 	</columnHeader>
-	<pageFooter>
-		<band height="16">
-			<textField>
-				<reportElement x="307" y="0" width="80" height="16"/>
-				<box topPadding="1"/>
-				<textElement textAlignment="Right"/>
-				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+	<columnFooter>
+		<band height="92">
+			<textField isStretchWithOverflow="true">
+				<reportElement x="0" y="0" width="38" height="92"/>
+				<box topPadding="2">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Bottom">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" NOTE: "]]></textFieldExpression>
 			</textField>
-			<textField evaluationTime="Report">
-				<reportElement x="388" y="0" width="40" height="16"/>
-				<box topPadding="1"/>
+			<textField isBlankWhenNull="true">
+				<reportElement x="489" y="0" width="64" height="92"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Bottom">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["  TOTAL"]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="553" y="0" width="72" height="92"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{amount}+" "]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="625" y="0" width="113" height="92"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
 				<textElement/>
-				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="738" y="0" width="65" height="92"/>
+				<box>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement/>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="38" y="-1" width="450" height="93" isPrintWhenDetailOverflows="true"/>
+				<box topPadding="2">
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{general_term}]]></textFieldExpression>
 			</textField>
 		</band>
-	</pageFooter>
+	</columnFooter>
 	<lastPageFooter>
-		<band height="169">
+		<band height="127">
 			<textField>
-				<reportElement x="199" y="27" width="146" height="13"/>
+				<reportElement x="199" y="0" width="146" height="13"/>
 				<box>
 					<topPen lineWidth="0.5"/>
 				</box>
@@ -547,7 +605,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA["EXCISE DUTY"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="345" y="27" width="146" height="13"/>
+				<reportElement x="345" y="0" width="146" height="13"/>
 				<box>
 					<topPen lineWidth="0.5"/>
 				</box>
@@ -555,7 +613,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA["SALES TAX"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="627" y="27" width="175" height="12"/>
+				<reportElement stretchType="RelativeToBandHeight" x="627" y="0" width="175" height="12"/>
 				<box topPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -566,7 +624,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA[" TIN       : "+$F{tin_no}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="491" y="63" width="136" height="13"/>
+				<reportElement stretchType="RelativeToBandHeight" x="491" y="36" width="136" height="13"/>
 				<box topPadding="1" leftPadding="4" rightPadding="4">
 					<leftPen lineWidth="0.0"/>
 					<rightPen lineWidth="0.5"/>
@@ -577,7 +635,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA["PAN NO    : AAECSO282M"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="627" y="39" width="53" height="12"/>
+				<reportElement stretchType="RelativeToBandHeight" x="627" y="12" width="53" height="12"/>
 				<box topPadding="1">
 					<leftPen lineWidth="0.5"/>
 				</box>
@@ -587,7 +645,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA[" CST No: "]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="627" y="51" width="42" height="12"/>
+				<reportElement stretchType="RelativeToBandHeight" x="627" y="24" width="42" height="12"/>
 				<box topPadding="1"/>
 				<textElement>
 					<font size="8"/>
@@ -595,7 +653,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA[" CODE  : "]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="491" y="27" width="136" height="12"/>
+				<reportElement stretchType="RelativeToBandHeight" x="491" y="0" width="136" height="12"/>
 				<box topPadding="2">
 					<topPen lineWidth="0.5"/>
 				</box>
@@ -605,7 +663,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA[" ECC No    : AAECSO282MXM001"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="491" y="51" width="136" height="12"/>
+				<reportElement stretchType="RelativeToBandHeight" x="491" y="24" width="136" height="12"/>
 				<box leftPadding="4" rightPadding="4">
 					<leftPen lineWidth="0.0"/>
 					<rightPen lineWidth="0.5"/>
@@ -616,7 +674,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA["DIVISION  : I,COIMBATORE "]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="491" y="39" width="136" height="12"/>
+				<reportElement x="491" y="12" width="136" height="12"/>
 				<box topPadding="1" leftPadding="4" rightPadding="4">
 					<leftPen lineWidth="0.0"/>
 					<rightPen lineWidth="0.5"/>
@@ -627,25 +685,25 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA["RANGE   : IA "]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="198" y="27" width="1" height="110"/>
+				<reportElement x="198" y="0" width="1" height="110"/>
 				<graphicElement>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
 			</line>
 			<line>
-				<reportElement x="490" y="27" width="1" height="110"/>
+				<reportElement x="490" y="0" width="1" height="110"/>
 				<graphicElement>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
 			</line>
 			<line>
-				<reportElement x="344" y="27" width="1" height="49"/>
+				<reportElement x="344" y="0" width="1" height="49"/>
 				<graphicElement>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
 			</line>
 			<textField>
-				<reportElement x="210" y="77" width="282" height="15"/>
+				<reportElement x="210" y="50" width="282" height="15"/>
 				<box topPadding="1">
 					<rightPen lineWidth="0.0"/>
 				</box>
@@ -653,7 +711,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA["PAYMENT TERMS"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="503" y="77" width="301" height="15"/>
+				<reportElement x="503" y="50" width="301" height="15"/>
 				<box topPadding="1">
 					<rightPen lineWidth="0.0"/>
 				</box>
@@ -663,107 +721,31 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA["For SAM TURBO INDUSTRY PRIVATE LIMITED"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="225" y="108" width="253" height="15"/>
+				<reportElement stretchType="RelativeToBandHeight" x="225" y="81" width="253" height="15"/>
 				<textElement>
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{payment_mode}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="503" y="123" width="153" height="14"/>
+				<reportElement x="503" y="96" width="153" height="14"/>
 				<textElement>
 					<font isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["MANAGING DIRECTOR"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="680" y="123" width="124" height="15"/>
+				<reportElement x="680" y="96" width="124" height="15"/>
 				<box>
 					<rightPen lineWidth="0.0"/>
 				</box>
 				<textElement>
 					<font isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["PURCHASE TEAM"]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true">
-				<reportElement x="0" y="1" width="492" height="11"/>
-				<box>
-					<topPen lineWidth="0.0"/>
-					<leftPen lineWidth="0.0"/>
-					<bottomPen lineWidth="0.0"/>
-					<rightPen lineWidth="0.0"/>
-				</box>
-				<textElement>
-					<font size="9" isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[" NOTE: "+ $F{quality_term}]]></textFieldExpression>
-			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="369" y="1" width="60" height="11"/>
-				<box>
-					<topPen lineWidth="0.0"/>
-					<leftPen lineWidth="0.0"/>
-					<bottomPen lineWidth="0.0"/>
-					<rightPen lineWidth="0.0"/>
-				</box>
-				<textElement/>
-			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="429" y="1" width="61" height="11"/>
-				<box>
-					<topPen lineWidth="0.0"/>
-					<leftPen lineWidth="0.0"/>
-					<bottomPen lineWidth="0.0"/>
-					<rightPen lineWidth="0.0"/>
-				</box>
-				<textElement/>
-			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="489" y="1" width="64" height="11"/>
-				<box>
-					<topPen lineWidth="0.0"/>
-					<leftPen lineWidth="0.0"/>
-					<bottomPen lineWidth="0.0"/>
-					<rightPen lineWidth="0.0"/>
-				</box>
-				<textElement>
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA["  TOTAL"]]></textFieldExpression>
-			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="553" y="1" width="72" height="11"/>
-				<box>
-					<topPen lineWidth="0.0"/>
-					<leftPen lineWidth="0.0"/>
-					<bottomPen lineWidth="0.0"/>
-					<rightPen lineWidth="0.0"/>
-				</box>
-				<textElement textAlignment="Right">
-					<font size="9"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{amount}+" "]]></textFieldExpression>
-			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="625" y="1" width="113" height="11"/>
-				<box>
-					<topPen lineWidth="0.0"/>
-					<leftPen lineWidth="0.0"/>
-					<bottomPen lineWidth="0.0"/>
-					<rightPen lineWidth="0.0"/>
-				</box>
-				<textElement/>
-			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="738" y="1" width="65" height="11"/>
-				<box>
-					<rightPen lineWidth="0.0"/>
-				</box>
-				<textElement/>
+				<textFieldExpression><![CDATA["G M - PURCHASE"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="2" y="78" width="111" height="14"/>
+				<reportElement x="2" y="51" width="111" height="14"/>
 				<box topPadding="1">
 					<rightPen lineWidth="0.0"/>
 				</box>
@@ -773,19 +755,19 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA["  INSURANCE"]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="0" y="137" width="801" height="1"/>
+				<reportElement x="0" y="110" width="801" height="1"/>
 				<graphicElement>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
 			</line>
 			<line>
-				<reportElement x="0" y="40" width="490" height="1"/>
+				<reportElement x="0" y="13" width="490" height="1"/>
 				<graphicElement>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
 			</line>
 			<textField>
-				<reportElement x="0" y="27" width="199" height="13"/>
+				<reportElement x="0" y="0" width="199" height="13"/>
 				<box>
 					<topPen lineWidth="0.5"/>
 				</box>
@@ -793,13 +775,13 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA["MODE OF DESPATCH"]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="0" y="74" width="801" height="4"/>
+				<reportElement x="0" y="47" width="801" height="4"/>
 				<graphicElement>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
 			</line>
 			<textField isBlankWhenNull="true">
-				<reportElement x="680" y="38" width="63" height="12"/>
+				<reportElement x="680" y="11" width="63" height="12"/>
 				<box topPadding="1"/>
 				<textElement>
 					<font size="8"/>
@@ -807,7 +789,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA[$F{cst_no}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="669" y="51" width="11" height="12"/>
+				<reportElement x="669" y="24" width="11" height="12"/>
 				<box topPadding="1">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -820,7 +802,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA["1"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="680" y="51" width="13" height="12"/>
+				<reportElement x="680" y="24" width="13" height="12"/>
 				<box topPadding="1">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -833,7 +815,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="693" y="51" width="13" height="12"/>
+				<reportElement x="693" y="24" width="13" height="12"/>
 				<box topPadding="1">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -846,7 +828,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA["8"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="743" y="38" width="59" height="12"/>
+				<reportElement x="743" y="11" width="59" height="12"/>
 				<box topPadding="1"/>
 				<textElement>
 					<font size="8"/>
@@ -854,17 +836,14 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA["DT.19/01/95."]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="139" width="802" height="15"/>
-				<box>
-					<bottomPen lineWidth="0.5"/>
-				</box>
+				<reportElement x="2" y="112" width="800" height="15"/>
 				<textElement>
 					<font size="12" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["All Correspondence to-Avanashi Road, Neelambur, Coimbatore - 641 062"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement x="3" y="103" width="196" height="20"/>
+				<reportElement x="3" y="76" width="196" height="20"/>
 				<box topPadding="2"/>
 				<textElement textAlignment="Center">
 					<font isBold="true"/>
@@ -872,7 +851,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA[$F{insurance}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement x="200" y="50" width="145" height="20"/>
+				<reportElement x="200" y="23" width="145" height="20"/>
 				<box topPadding="2"/>
 				<textElement textAlignment="Center">
 					<font isBold="true"/>
@@ -880,7 +859,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA[$F{excise_duty}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement x="1" y="50" width="198" height="20"/>
+				<reportElement x="1" y="23" width="198" height="20"/>
 				<box topPadding="2"/>
 				<textElement textAlignment="Center">
 					<font isBold="true"/>
@@ -888,7 +867,7 @@ where po.id = $P{po_id}]]>
 				<textFieldExpression><![CDATA[$F{mode_of_dispatch}]]></textFieldExpression>
 			</textField>
 			<componentElement>
-				<reportElement x="345" y="50" width="144" height="24"/>
+				<reportElement x="345" y="23" width="144" height="24"/>
 				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 					<datasetRun subDataset="Tax">
 						<datasetParameter name="po_id">
@@ -908,16 +887,6 @@ where po.id = $P{po_id}]]>
 					</jr:listContents>
 				</jr:list>
 			</componentElement>
-			<textField>
-				<reportElement x="323" y="154" width="80" height="15"/>
-				<textElement textAlignment="Right"/>
-				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
-			</textField>
-			<textField evaluationTime="Report">
-				<reportElement x="403" y="154" width="40" height="15"/>
-				<textElement/>
-				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
-			</textField>
 		</band>
 	</lastPageFooter>
 </jasperReport>
