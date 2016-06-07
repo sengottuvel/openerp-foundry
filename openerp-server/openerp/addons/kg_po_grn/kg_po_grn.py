@@ -105,18 +105,18 @@ class kg_po_grn(osv.osv):
 					domain="[('state','=','approved'), '&', ('order_line.pending_qty','>','0'), '&', ('grn_flag','=',False), '&', ('partner_id','=',supplier_id), '&', ('order_line.line_state','!=','cancel')]"), 
 		'po_ids':fields.many2many('purchase.order', 'multiple_po', 'grn_id', 'po_id', 'PO Nos',
 					domain="[('state','=','approved'), '&', ('order_line.pending_qty','>','0'), '&', ('grn_flag','=',False), '&', \
-							 ('partner_id','=',supplier_id), '&', ('order_line.line_state','!=','cancel')]"), 
+							 ('partner_id','=',supplier_id), '&', ('order_line.line_state','!=','cancel')]",readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}), 
 		'po_name': fields.char('PO NO',readonly=True),
 		'order_no': fields.char('Order NO',readonly=True),
 		'order_date': fields.char('Order Date',readonly=True),
 		'pos_date': fields.char('PO Date',readonly=True),
 		'po_date':fields.date('PO Date',readonly=True),
-		'supplier_id':fields.many2one('res.partner','Supplier',domain=[('supplier','=',True)],required=True),
+		'supplier_id':fields.many2one('res.partner','Supplier',domain=[('supplier','=',True)],required=True,readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'billing_status': fields.selection([
 			('applicable', 'Applicable'),
 			('not_applicable', 'Not Applicable')], 'Billing Status',required=True,readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'inward_type': fields.many2one('kg.inwardmaster', 'Inward Type',readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
-		'line_ids':fields.one2many('po.grn.line','po_grn_id','Line Entry',readonly=False, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
+		'line_ids':fields.one2many('po.grn.line','po_grn_id','Line Entry',readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'department_id': fields.many2one('kg.depmaster','Department',readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'state': fields.selection([('item_load','Draft'),('draft', 'Waiting for Confirmation'), ('confirmed', 'Waiting for Approval'), ('done', 'Done'), ('inv', 'Invoiced'), ('cancel', 'Cancelled'),('reject','Rejected')], 'Status',readonly=True),
 		'type': fields.selection([('in', 'IN'), ('out', 'OUT'), ('internal', 'Internal')], 'Type'),
@@ -127,7 +127,6 @@ class kg_po_grn(osv.osv):
 		'approve_flag':fields.boolean('Expiry Flag'),
 		'bill_flag':fields.boolean('Bill Flag'),
 		'invoice_flag':fields.boolean('Invoice Flag'),
-		'company_id':fields.many2one('res.company','Company',readonly=True),
 
 		'other_charge': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Other Charges(+)',
 			 multi="sums", help="The amount without tax", track_visibility='always'),	  
@@ -163,11 +162,11 @@ class kg_po_grn(osv.osv):
 		'so_id':fields.many2one('kg.service.order', 'SO NO',
 					domain="[('state','=','approved'), '&', ('service_order_line.pending_qty','>','0'), '&', ('grn_flag','=',False), '&', ('partner_id','=',supplier_id),'&',('so_type','=','service')]"), 
 		'so_ids':fields.many2many('kg.service.order', 'multiple_so', 'grn_id', 'so_id', 'SO NO',
-					domain="[('state','=','approved'), '&', ('service_order_line.pending_qty','>','0'), '&', ('grn_flag','=',False), '&', ('partner_id','=',supplier_id),'&',('so_type','=','service')]"), 
+					domain="[('state','=','approved'), '&', ('service_order_line.pending_qty','>','0'), '&', ('grn_flag','=',False), '&', ('partner_id','=',supplier_id),'&',('so_type','=','service')]",readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}), 
 		'gp_line_ids':fields.many2many('kg.gate.pass.line', 'multiple_gp', 'grn_id', 'gp_line_id', 'Gate Pass No',
 					domain="[('gate_id.state','=','done'), '&', ('grn_pending_qty','>','0'), '&', ('so_flag','=',False)]"), 
 		'gp_ids':fields.many2many('kg.gate.pass', 'multiple_gate', 'grn_id', 'gp_id', 'Gate Pass No',
-					domain="[('state','=','done'), '&', ('gate_line.grn_pending_qty','>','0'), '&', ('gate_line.so_flag','=',False),'&', ('partner_id','=',supplier_id)]"), 
+					domain="[('state','=','done'), '&', ('gate_line.grn_pending_qty','>','0'), '&', ('gate_line.so_flag','=',False),'&', ('partner_id','=',supplier_id)]",readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}), 
 		'so_date':fields.date('SO Date',readonly=True),
 		'so_name': fields.char('SO NO',readonly=True),
 		'gp_date':fields.char('GP Date',readonly=True),
@@ -176,17 +175,23 @@ class kg_po_grn(osv.osv):
 		'payment_type': fields.selection([('cash', 'Cash'), ('credit', 'Credit')], 'Payment Type',required=True, readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'dep_project':fields.many2one('kg.project.master','Dept/Project Name',readonly=False,states={'readonly': [('readonly', True)]}),	
 		'reject_remark':fields.text('Cancel Remarks', readonly=True, states={'confirmed':[('readonly',False)]}),
-		'sup_invoice_no':fields.char('Supplier Invoice No',size=200, readonly=False, states={'done':[('readonly',True)]}),
-		'sup_invoice_date':fields.date('Supplier Invoice Date', readonly=False, states={'done':[('readonly',True)]}),
-		'expense_line_id': fields.one2many('kg.po.grn.expense.track','expense_id','Expense Track'),
+		'sup_invoice_no':fields.char('Supplier Invoice No',size=200, readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
+		'sup_invoice_date':fields.date('Supplier Invoice Date', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
+		'expense_line_id': fields.one2many('kg.po.grn.expense.track','expense_id','Expense Track',readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		
 		# Entry Info
+		
+		'company_id':fields.many2one('res.company','Company',readonly=True),
 		'created_by':fields.many2one('res.users','Created By',readonly=True),
 		'creation_date':fields.datetime('Creation Date',required=True,readonly=True),
 		'confirmed_by':fields.many2one('res.users','Confirmed By',readonly=True),
 		'confirmed_date':fields.datetime('Confirmed Date',readonly=True),
+		'reject_date': fields.datetime('Reject Date', readonly=True),
+		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
 		'approved_by':fields.many2one('res.users','Approved By',readonly=True),
 		'approved_date':fields.datetime('Approved Date',readonly=True),
+		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
+		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'update_date' : fields.datetime('Last Updated Date',readonly=True),
 		'update_user_id' : fields.many2one('res.users','Last Updated By',readonly=True),
 		
@@ -366,7 +371,25 @@ class kg_po_grn(osv.osv):
 		if not grn.reject_remark:
 			raise osv.except_osv(_('Remarks is must !!'), _('Enter Remarks for GRN Rejection !!!'))
 		else:
-			self.write(cr, uid, ids[0], {'state' : 'draft'})
+			self.write(cr, uid, ids[0], {'state' : 'reject','rej_user_id': uid,'reject_date': time.strftime("%Y-%m-%d %H:%M:%S")})
+		for line in grn.grn_line:
+			if grn.grn_type == 'from_po':
+				po_id.write(cr, uid, line.po_line_id.order_id.id, {'grn_flag' : False})
+			if grn.grn_type == 'from_so':
+				so_id.write(cr, uid, line.so_line_id.service_id.id, {'grn_flag' : False})   
+			
+		return True  
+
+	# Cancel Method #
+	
+	def grn_cancel(self, cr, uid, ids, context=None):
+		grn = self.browse(cr, uid, ids[0])
+		po_id = self.pool.get('purchase.order')
+		so_id = self.pool.get('kg.service.order')
+		if not grn.remark:
+			raise osv.except_osv(_('Remarks is must !!'), _('Enter Remarks for GRN Cancellation !!!'))
+		else:
+			self.write(cr, uid, ids[0], {'state' : 'cancel','cancel_user_id': uid,'cancel_date': time.strftime("%Y-%m-%d %H:%M:%S")})
 		for line in grn.grn_line:
 			if grn.grn_type == 'from_po':
 				po_id.write(cr, uid, line.po_line_id.order_id.id, {'grn_flag' : False})
@@ -441,6 +464,7 @@ class kg_po_grn(osv.osv):
 				po_grn_id = grn_entry_obj.id
 				order_lines=po_record.order_line
 				for order_line in order_lines:
+					print"'price_type': order_line.price_type",order_line.price_type,
 					if order_line.pending_qty > 0 and order_line.line_state != 'cancel':
 						po_grn_line_obj.create(cr, uid, {
 							'name': order_line.product_id.name or '/',
@@ -1681,13 +1705,11 @@ class po_grn_line(osv.osv):
 			# Qty Calculation
 			if line.price_type == 'per_kg':								
 				if line.product_id.po_uom_in_kgs > 0:
-					qty = line.po_grn_qty / line.product_id.po_uom_in_kgs
+					qty = line.po_grn_qty * line.product_id.po_uom_in_kgs
 				else:
 					qty = line.po_grn_qty
 			else:
 				qty = line.po_grn_qty
-			print"price_unit",line.price_unit
-			print"qtyqtyqty",qty
 			# Price Calculation
 			price_amt = 0
 			if line.price_type == 'per_kg':
@@ -1695,8 +1717,6 @@ class po_grn_line(osv.osv):
 					price_amt = line.po_grn_qty / line.product_id.po_uom_in_kgs * line.price_unit
 			else:
 				price_amt = qty * line.price_unit
-			
-			print"price_amtprice_amtprice_amt",price_amt
 			
 			amt_to_per = (line.kg_discount / (qty * line.price_unit or 1.0 )) * 100
 			kg_discount_per = line.kg_discount_per
@@ -1785,7 +1805,8 @@ class po_grn_line(osv.osv):
 	_defaults = {
 	
 		'state':'draft',
-		'billing_type':'free'
+		'billing_type':'free',
+		'price_type': 'po_uom',
 		
 	}   
 
