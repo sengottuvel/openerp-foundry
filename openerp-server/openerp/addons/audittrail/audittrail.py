@@ -460,8 +460,8 @@ class audittrail_objects_proxy(object_proxy):
             # if at least one modification has been found
             for model_id, resource_id in lines:
 				print"resource_id",resource_id
-				if resource_id:
-					print"pool.get(model.model).name_get(cr, uid, [resource_id])[0][1]",pool.get(model.model).name_get(cr, uid, [resource_id])[0][1]
+				if pool.get(model.model).name_get(cr, uid, [resource_id])[0][1]:
+					
 					name = pool.get(model.model).name_get(cr, uid, [resource_id])[0][1]
 					vals = {
 						'method': method,
