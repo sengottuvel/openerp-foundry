@@ -141,10 +141,13 @@ class kg_stock_inward(osv.osv):
 			inward_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.stock.inward')])
 			rec = self.pool.get('ir.sequence').browse(cr,uid,inward_id[0])
 			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(inward_id[0],rec.code,entry.entry_date))
-			inward_name = cr.fetchone();	
+			inward_name = cr.fetchone();
+			inward_name = inward_name[0]
+		else:
+			inward_name = entry.name
 		
 		
-		self.write(cr, uid, ids, {'name':inward_name[0],'total_value':total,'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		self.write(cr, uid, ids, {'name':inward_name,'total_value':total,'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		cr.execute(''' update ch_stock_inward_details set state = 'confirmed' where header_id = %s ''',[ids[0]])
 		return True
 		
