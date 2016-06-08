@@ -34,7 +34,7 @@ class kg_pumpseries_master(osv.osv):
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
-		'fluid_id': fields.many2one('kg.fluid.master','Liquid Handled'),
+		'fluid_id': fields.many2one('kg.fluid.master','Liquid Handled',domain="[('state','not in',('reject','cancel'))]"),
 		'pump_capacity': fields.float('Pump capacity'),
 		'pump_head': fields.float('Pump Head'),
 		'temperature': fields.float('Temperature'),
