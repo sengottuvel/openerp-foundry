@@ -357,7 +357,6 @@
 	
 	<!-- Sequence Number Setting Starts Here -->
 	
-<!--
 	<record forcecreate="1" id="seq_crm_service" model="ir.sequence.type">	
 		<field name="name">CRM Enquiry</field>
 		<field name="code">kg.crm.enquiry</field>
@@ -396,7 +395,6 @@
 	  <field name="prefix">CRM/IP/%(year)s/</field>
 	  <field name="reset_sequence">fiscal_reset</field>
 	</record>
--->
 	
 	<!-- Sequence Number Setting Ends Here -->
 	
