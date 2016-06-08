@@ -86,6 +86,9 @@
 			ref('kg_menus.cam_crm_city_master'),
 			ref('kg_menus.cam_crm_chemical_master'),
 			ref('kg_menus.cam_crm_industry_master'),
+			ref('kg_menus.mam_fluid_master_menu'),
+			ref('kg_menus.mam_primemover_master_menu'),
+			ref('kg_menus.mam_pumpseries_master_menu'),
 			ref('kg_menus.cpm_crm_enquiry_menu'),
 			ref('kg_menus.tma_crm_enquiry'),
 			

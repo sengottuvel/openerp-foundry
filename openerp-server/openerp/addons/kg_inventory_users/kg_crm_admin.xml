@@ -272,6 +272,56 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
 		</record>
 		
+		<record id="crm_admin_fluid_master" model="ir.model.access">
+			<field name="model_id" ref="kg_fluid_master.model_kg_fluid_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Fluid Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_primemover" model="ir.model.access">
+			<field name="model_id" ref="kg_primemover_master.model_kg_primemover_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Primemover Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_pumpseries" model="ir.model.access">
+			<field name="model_id" ref="kg_pumpseries_master.model_kg_pumpseries_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Pumpseries Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_brand_master" model="ir.model.access">
+			<field name="model_id" ref="kg_po_masters.model_kg_brand_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Brand Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_moc_master" model="ir.model.access">
+			<field name="model_id" ref="kg_moc_master.model_kg_moc_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">MOC Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
 		
     </data>
 </openerp>
