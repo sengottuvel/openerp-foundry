@@ -61,13 +61,38 @@
 				<!-- Industry Master  --> 
 				<menuitem action="kg_industry_master.mma_industry_master" name="Sector" id="cam_crm_industry_master" parent="cpm_crm_master_menu" sequence="8"/>
 				
+				<!--Fluid Master Menu -->
+				<menuitem name="Fluid" parent="cpm_crm_master_menu" action="kg_fluid_master.mma_fluid_master" id="mam_fluid_master_menu" sequence="9"/>
+				
+				<!--Primemover Master Menu -->
+				<menuitem name="Primemover" parent="cpm_crm_master_menu" action="kg_primemover_master.mma_primemover_master" id="mam_primemover_master_menu" sequence="10"/>
+				
+				<!--Pumpseries Master Menu -->
+				<menuitem name="Pumpseries" parent="cpm_crm_master_menu" action="kg_pumpseries_master.mma_pumpseries_master" id="mam_pumpseries_master_menu" sequence="11"/>
+		
 			<!-- CRM Enquiry Menu -->
 			<menuitem id="cpm_crm_enquiry_menu" name="Enquiry" parent="cpm_crm" sequence="2"/>
 				
 				<!-- Enquiry --> 
 				<menuitem action="kg_crm_enquiry.tma_crm_enquiry" name="Enquiry" id="tma_crm_enquiry" parent="cpm_crm_enquiry_menu" sequence="1"/>
 				
+		<!-- MS Process Menu -->
+		
+		<menuitem name="MS Process" id="mpm_crm" sequence="20"/>
+		
+			<!-- MS Master Menu -->
+			<menuitem id="mpm_ms_master_menu" name="Masters" parent="mpm_crm" sequence="1"/>
 				
+				<!--Openration Master Menu -->
+				<menuitem name="Operation" parent="mpm_ms_master_menu" action="kg_operation_master.mma_operation_master" id="mam_operation_master_menu" sequence="1"/>
+				
+				<!--Dimension Master Menu -->
+				<menuitem name="Dimension" parent="mpm_ms_master_menu" action="kg_dimension_master.mma_dimension_master" id="mam_dimension_master_menu" sequence="2"/>
+		
+				<!--Posotion Number Master Menu -->
+				<menuitem name="Position Number" parent="mpm_ms_master_menu" action="kg_position_number.mma_position_number_master" id="mam_position_number_menu" sequence="3"/>
+				
+						
 		<!-- Indent Menu -->
 		
 		<menuitem name="Indents" id="ipm_indent" sequence="20"/>
