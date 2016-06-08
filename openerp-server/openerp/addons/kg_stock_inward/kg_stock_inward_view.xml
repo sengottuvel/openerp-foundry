@@ -35,8 +35,8 @@
 										<field name="pump_model_id" attrs="{'required': [('stock_type','=','pump')]}"/>
 										<field name="pattern_id" attrs="{'required': [('stock_type','=','pattern')]}" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt,unit_price)"/>
 										<field name="pattern_name" readonly="1"/>
-										<field name="moc_id" attrs="{'required': [('stock_type','=','pattern')],'readonly': [('stock_type','=','pump')]}" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt,unit_price)"/>
-										<field name="moc_construction_id" attrs="{'required': [('stock_type','=','pump')],'readonly': [('stock_type','=','pattern')]}"/>
+										<field name="moc_id" attrs="{'required': [('stock_type','=','pattern')]}" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt,unit_price)"/>
+										<field name="moc_construction_id" attrs="{'required': [('stock_type','=','pump')]}"/>
 										<field name="qty" on_change="onchange_stock_qty(pattern_id,moc_id,qty,each_wgt,unit_price)"/>
 										<field name="serial_no"  attrs="{'readonly': [('stock_type','=','pattern')]}"/>
 										<field name="heat_no"  attrs="{'readonly': [('stock_type','=','pump')]}"/>
