@@ -1,0 +1,58 @@
+<?xml version="1.0" ?>
+<openerp>
+<data noupdate="0">       
+
+       
+        <record id="m_ms_operation_master" model="ir.model.access">
+			<field name="model_id" ref="kg_operation_master.model_kg_operation_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Operation Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Machineshop Master Admin')]"/>
+		</record>
+		
+        <record id="m_ms_dimension_master" model="ir.model.access">
+			<field name="model_id" ref="kg_dimension_master.model_kg_dimension_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Dimension Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Machineshop Master Admin')]"/>
+		</record>
+		
+        <record id="m_ms_position_number" model="ir.model.access">
+			<field name="model_id" ref="kg_position_number.model_kg_position_number"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Position Number Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Machineshop Master Admin')]"/>
+		</record>
+		
+        <record id="m_ms_ch_position_number" model="ir.model.access">
+			<field name="model_id" ref="kg_position_number.model_ch_kg_position_number"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch Position Number Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Machineshop Master Admin')]"/>
+		</record>
+		
+        <record id="m_ms_ch_dimension" model="ir.model.access">
+			<field name="model_id" ref="kg_position_number.model_kg_dimension"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Dimension Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Machineshop Master Admin')]"/>
+		</record>
+		
+	
+    </data>
+</openerp>		
