@@ -110,7 +110,7 @@
 		<!-- Menu Action Start-->
 		
 		 <record id="mma_industry_master" model="ir.actions.act_window">
-			<field name="name">Industry Composition</field>
+			<field name="name">Sector Master</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.industry.master</field>
 			<field name="view_type">form</field>

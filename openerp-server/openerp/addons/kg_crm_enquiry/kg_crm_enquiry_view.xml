@@ -219,6 +219,7 @@
 								<field name="suction_condition" />													
 								<field name="suction_pressure" />													
 								<field name="discharge_pressure_kg" />													
+								<field name="fluid_id" />													
 							</group>					
 						</group>
 						<group string="Duty Parameters">
@@ -249,6 +250,7 @@
 								<field name="hydrostatic_test_pressure" />																							
 								<field name="full_load_rpm" />																							
 								<field name="belt_loss_in_kw" />																							
+								<field name="primemover_id" />																							
 																													
 							</group>											
 							<group>
@@ -355,6 +357,7 @@
 	
 	<!-- Sequence Number Setting Starts Here -->
 	
+<!--
 	<record forcecreate="1" id="seq_crm_service" model="ir.sequence.type">	
 		<field name="name">CRM Enquiry</field>
 		<field name="code">kg.crm.enquiry</field>
@@ -393,6 +396,7 @@
 	  <field name="prefix">CRM/IP/%(year)s/</field>
 	  <field name="reset_sequence">fiscal_reset</field>
 	</record>
+-->
 	
 	<!-- Sequence Number Setting Ends Here -->
 	

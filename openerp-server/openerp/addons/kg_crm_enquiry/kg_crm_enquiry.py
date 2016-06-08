@@ -330,7 +330,8 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'line_ids_a': fields.one2many('ch.kg.crm.machineshop.item', 'header_id', "Machineshop Details"),
 		'line_ids_b': fields.one2many('ch.kg.crm.bot', 'header_id', "BOT Details"),
 		'line_ids_moc_a': fields.one2many('ch.moc.construction', 'header_id', "MOC Construction"),
-		
+		'fluid_id': fields.many2one('kg.fluid.master','Fluid'),
+		'primemover_id': fields.many2one('kg.primemover.master','Primemover'),
 		
 		
 		########## Karthikeyan Item Details Added Start here ################
