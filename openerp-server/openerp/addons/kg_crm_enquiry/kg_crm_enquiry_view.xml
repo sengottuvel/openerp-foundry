@@ -233,7 +233,7 @@
 					
 						<group string="Pump Specification">
 							<group>
-								<field name="pump_type" />																							
+								<field name="pumpseries_id"/>																							
 								<field name="pump_id" on_change="onchange_pumpmodel(pump_id)"/>																							
 								<field name="number_of_stages" />
 								<field name="impeller_type" />
