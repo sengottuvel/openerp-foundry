@@ -181,6 +181,7 @@ class kg_production(osv.osv):
 		'pour_weight':fields.integer('Weight(kgs)'),
 		'pour_heat_id':fields.many2one('kg.melting','Heat Id',domain="[('state','=','confirmed'), ('active','=','t')]"),
 		'pour_remarks': fields.text('Remarks'),
+		'pour_date': fields.date('Pouring Date'),
 		
 		### Core vs Mould Qty ###
 		'difference_qty': fields.function(_get_difference_qty, string='Difference', store=True, type='float'),
@@ -220,6 +221,7 @@ class kg_production(osv.osv):
 		'issue_date':time.strftime('%Y-%m-%d %H:%M:%S'),
 		'core_date':time.strftime('%Y-%m-%d %H:%M:%S'),
 		'mould_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+		'difference_qty': 0
 		
 	}
 	
@@ -350,50 +352,6 @@ class kg_production(osv.osv):
 		'mould_pan_no':upper_pan_no
 		})
 		return True
-		
-	def fettling_inward_update(self,cr,uid,ids,context=None):
-		entry_rec = self.browse(cr, uid, ids[0])
-		fettling_obj = self.pool.get('kg.fettling')
-		
-		### Sequence Number Generation ###
-		fettling_name = ''	
-		fettling_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.fettling.inward')])
-		seq_rec = self.pool.get('ir.sequence').browse(cr,uid,fettling_seq_id[0])
-		cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(fettling_seq_id[0],seq_rec.code))
-		fettling_name = cr.fetchone();
-		
-		fettling_vals = {
-		'name': fettling_name[0],
-		'location':entry_rec.location,
-		'schedule_id':entry_rec.schedule_id.id,
-		'schedule_date':entry_rec.schedule_date,
-		'schedule_line_id':entry_rec.schedule_line_id.id,
-		'order_bomline_id':entry_rec.order_bomline_id.id,
-		'order_id':entry_rec.order_id.id,
-		'order_line_id':entry_rec.order_line_id.id,
-		'order_no':entry_rec.order_no,
-		'order_delivery_date':entry_rec.order_delivery_date,
-		'order_date':entry_rec.order_date,
-		'order_category':entry_rec.order_category,
-		'order_priority':entry_rec.order_priority,
-		'pump_model_id':entry_rec.pump_model_id.id,
-		'pattern_id':entry_rec.pattern_id.id,
-		'pattern_code':entry_rec.pattern_code,
-		'pattern_name':entry_rec.pattern_name,
-		'moc_id':entry_rec.moc_id.id,
-		'schedule_qty':entry_rec.schedule_qty,
-		'production_id':entry_rec.id,
-		'pour_qty':entry_rec.pour_qty,
-		'inward_accept_qty':entry_rec.pour_qty,
-		'state':'waiting'
-		
-		}
-			
-		fettling_id = fettling_obj.create(cr, uid, fettling_vals)
-		
-		self.write(cr, uid, ids, {'state': 'fettling_inprogress'})
-
-		return True
 	
 	def _future_entry_date_check(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -416,7 +374,7 @@ class kg_production(osv.osv):
 	_constraints = [		
 			  
 		
-		#~ (_future_entry_date_check, 'System not allow to save with future date. !!',['']),
+		(_future_entry_date_check, 'dddSystem not allow to save with future date. !!',['']),
   
 	   ]
 		
@@ -501,7 +459,7 @@ class kg_pattern_batch_issue(osv.osv):
 		
 		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
   
-	   ]
+	   ]	
 
 	def update_line_items(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])		
@@ -695,7 +653,7 @@ class kg_core_batch(osv.osv):
 		
 		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
   
-	   ]	
+	   ]
 
 	def update_line_items(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])		

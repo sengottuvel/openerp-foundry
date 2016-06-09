@@ -501,23 +501,24 @@ class kg_schedule(osv.osv):
 					from ch_schedule_details  where header_id = %s and qty > 0
 					) 
 
-					union
+					union all
 
 					select (raw.qty * order_ms.qty) as indent_qty,raw.product_id
-					from ch_moc_raw_material as raw
-					left join ch_order_machineshop_details order_ms on raw.header_id = order_ms.moc_id
+					from ch_ms_raw_material as raw
+					left join ch_order_machineshop_details order_ms on raw.header_id = order_ms.ms_id
 					where order_ms.flag_applicable = 't' and order_ms.header_id in (select distinct order_line_id 
 					from ch_schedule_details  where header_id = %s and qty > 0
 					) 
 
-					union
+
+					union all
 
 					select (raw.qty * order_bot.qty) as indent_qty,raw.product_id
-					from ch_moc_raw_material as raw
-					left join ch_order_bot_details order_bot on raw.header_id = order_bot.moc_id
+					from ch_ms_raw_material as raw
+					left join ch_order_bot_details order_bot on raw.header_id = order_bot.bot_id
 					where order_bot.flag_applicable = 't' and order_bot.header_id in (select distinct order_line_id 
 					from ch_schedule_details  where header_id = %s and qty > 0
-					) 
+					)
 
 
 

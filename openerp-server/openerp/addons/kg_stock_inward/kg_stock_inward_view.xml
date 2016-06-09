@@ -179,7 +179,7 @@
 		
 	<!-- Child Menu Action End-->
 	
-	<!-- Audit Log Xml Data Start
+	<!-- Audit Log Xml Data Start -->
 		
         <record id="audit_stock_inward" model="audittrail.rule">
             <field name="name">Audit Log Stock Inward</field>
@@ -193,12 +193,13 @@
             <field name="state">subscribed</field>              
         </record>
         
-    -->
+    
         
     <!-- Audit Log Xml Data End-->
     
     <!-- Sequence Number Setting Starts Here -->
 	
+<!--
 	<record forcecreate="1" id="seq_type_stock_inward" model="ir.sequence.type">	
 		<field name="name">Stock Inward</field>
 		<field name="code">kg.stock.inward</field>
@@ -212,6 +213,7 @@
 	  <field name="reset_sequence">fiscal_reset</field>
 	</record>
 	
+-->
 	<!-- Sequence Number Setting Ends Here -->
     
 	<!-- Menu Item Start -->

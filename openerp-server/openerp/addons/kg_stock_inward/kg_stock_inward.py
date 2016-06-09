@@ -268,7 +268,6 @@ class ch_stock_inward_details(osv.osv):
 		pattern_obj = self.pool.get('kg.pattern.master')
 		moc_obj = self.pool.get('kg.moc.master')
 		
-		
 		if vals.get('moc_id') != None:
 			moc_rec = moc_obj.browse(cr, uid, vals.get('moc_id') )
 			mat_amt = moc_rec.rate

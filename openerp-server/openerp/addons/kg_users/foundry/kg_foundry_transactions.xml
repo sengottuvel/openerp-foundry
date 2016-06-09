@@ -751,6 +751,79 @@
 		
 		<!-- Mechanical Properties END -->
 		
+		<!-- WO Amendment Start --> 
+		
+		<record id="t_foundry_wo_amendment" model="ir.model.access">
+			<field name="model_id" ref="kg_wo_amendment.model_kg_wo_amendment"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">WO Amendment</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		
+		<!-- WO Amendment End -->
+		
+		
+		<!-- Work Order Amendment (Child Class) Start-->
+		
+		<record id="t_foundry_ch_amend_work_order_details" model="ir.model.access">
+			<field name="model_id" ref="kg_wo_amendment.model_ch_amend_work_order_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">WO Amendment Details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- Work Order Amendment  (Child Class) End-->
+		
+		<!-- Work Order Amendment  BOM Child Class Start --> 
+		
+		<record id="t_foundry_orderbom_details" model="ir.model.access">
+			<field name="model_id" ref="kg_wo_amendment.model_ch_amend_order_bom_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Order BOM Details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- Work Order Amendment  BOM Child Class End --> 
+		
+		
+		<!-- Work Order Amendment  Machine Shop Items Start --> 
+		
+		<record id="t_foundry_order_machineshop_item" model="ir.model.access">
+			<field name="model_id" ref="kg_wo_amendment.model_ch_amend_order_machineshop_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Work Order Machine Shop Items</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- Work Order Amendment  Machine Shop Items End -->
+		
+		<!-- Work Order Amendment  BOT Start --> 
+		
+		<record id="t_foundry_sch_bot" model="ir.model.access">
+			<field name="model_id" ref="kg_wo_amendment.model_ch_amend_order_bot_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Work Order BOT Items</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- Work Order Amendment  BOT End --> 
+		
 		
     </data>
 </openerp>

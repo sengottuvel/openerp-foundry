@@ -17,7 +17,7 @@
 						<group>
 							<group>
 								<field name="name" readonly="1"/>
-								<field name="melting_id" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+								<field name="melting_id" on_change="onchange_melting_id(melting_id)" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 								<field name="shift_id" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 								<field name="pour_close_team" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 								<field name="remark" attrs="{'readonly': [('state','not in',['draft'])]}"/>
@@ -31,7 +31,7 @@
 						</group>
 						<notebook>
 							<page string="Pouring Details">	
-								<field name="line_ids" context="{'moc_id':moc_id}" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}">
+								<field name="line_ids"  context="{'moc_id':moc_id}" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}">
 									<tree string="Pouring Details Entry Tree" editable="top" >									
 										<field name="order_line_id" on_change="onchange_pattern_name(order_line_id,production_id)"/>																					
 										<field name="production_id" on_change="onchange_pattern_name(order_line_id,production_id)"/>																				
@@ -149,6 +149,22 @@
 	  <field name="reset_sequence">fiscal_reset</field>
 	</record>
 	
+	
+	<!-- Audit Log Xml Data Start -->
+		
+        <record id="audit_pouring_log" model="audittrail.rule">
+            <field name="name">Audit Log Pouring Log</field>
+            <field name="object_id" eval="ref('kg_pouring_log.model_kg_pouring_log')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <record id="audit_pouring_details" model="audittrail.rule">
+            <field name="name">Audit Log Pouring Details</field>
+            <field name="object_id" eval="ref('kg_pouring_log.model_ch_pouring_details')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+   <!--  Audit Log Xml Data End-->
 
 	<!-- Menu Item Start -->
 	

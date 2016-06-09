@@ -32,7 +32,7 @@ class kg_pouring_log(osv.osv):
 		'shift_id': fields.many2one('kg.shift.master','Shift'),
 		'supervisor': fields.char('Supervisor', size=128),
 		'pour_close_team': fields.char('Pouring Closing Team', size=128),
-
+		
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		
@@ -63,6 +63,18 @@ class kg_pouring_log(osv.osv):
 		
 	}
 	
+	def onchange_melting_id(self, cr, uid, ids, melting_id, context=None):
+		if melting_id:
+			melting_rec = self.pool.get('kg.melting').browse(cr, uid, melting_id, context=context)
+		value = {
+		'moc_id': melting_rec.moc_id.id,
+		'entry_date': melting_rec.entry_date,
+		
+		}
+		return {'value': value}
+	
+	
+	
 	def _future_entry_date_check(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		today = datetime.today()
@@ -78,9 +90,62 @@ class kg_pouring_log(osv.osv):
 		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
 		
 	   ]
+	   
+	def fettling_inward_update(self,cr,uid,ids,production_id,pour_id,pour_line_id,pour_qty,context=None):
+		
+		production_rec = self.pool.get('kg.production').browse(cr, uid, production_id)
+		### Fettling Process Creation ###
+		fettling_obj = self.pool.get('kg.fettling')
+
+		### Sequence Number Generation ###
+		fettling_name = ''	
+		fettling_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.fettling.inward')])
+		seq_rec = self.pool.get('ir.sequence').browse(cr,uid,fettling_seq_id[0])
+		cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(fettling_seq_id[0],seq_rec.code))
+		fettling_name = cr.fetchone();
+		
+		fettling_vals = {
+		'name': fettling_name[0],
+		'location':production_rec.location,
+		'schedule_id':production_rec.schedule_id.id,
+		'schedule_date':production_rec.schedule_date,
+		'schedule_line_id':production_rec.schedule_line_id.id,
+		'order_bomline_id':production_rec.order_bomline_id.id,
+		'order_id':production_rec.order_id.id,
+		'order_line_id':production_rec.order_line_id.id,
+		'order_no':production_rec.order_no,
+		'order_delivery_date':production_rec.order_delivery_date,
+		'order_date':production_rec.order_date,
+		'order_category':production_rec.order_category,
+		'order_priority':production_rec.order_priority,
+		'pump_model_id':production_rec.pump_model_id.id,
+		'pattern_id':production_rec.pattern_id.id,
+		'pattern_code':production_rec.pattern_code,
+		'pattern_name':production_rec.pattern_name,
+		'moc_id':production_rec.moc_id.id,
+		'schedule_qty':production_rec.schedule_qty,
+		'production_id':production_rec.id,
+		'pour_qty':pour_qty,
+		'inward_accept_qty':pour_qty,
+		'state':'waiting',
+		'pour_id': pour_id,
+		'pour_line_id': pour_line_id
+		
+		
+		}
+			
+		fettling_id = fettling_obj.create(cr, uid, fettling_vals)
+
+		return True
 	
 
 	def entry_confirm(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
+		for line_item in entry.line_ids:
+			pour_qty = line_item.production_id.mould_qty - line_item.production_id.pour_qty
+			if line_item.qty > pour_qty:
+				raise osv.except_osv(_('Warning!'),
+						_('Pouring qty should not be exceed than Mould Qty for pattern  %s !!')%(line_item.production_id.pattern_code))
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 		
@@ -90,7 +155,6 @@ class kg_pouring_log(osv.osv):
 		
 		for line_item in entry.line_ids:
 			#### Pouring Updation When User Gives Work Order ###
-			
 			if line_item.order_line_id and line_item.order_line_id.id != False:
 				rem_qty = line_item.qty
 				cr.execute(''' select id,order_priority,qty,pour_qty from kg_production
@@ -132,11 +196,13 @@ class kg_pouring_log(osv.osv):
 						'pour_weight': line_item.weight,
 						'pour_state': pour_status,
 						'state':status,
-						'pour_remarks':line_item.remarks
+						'pour_remarks':line_item.remarks,
+						'pour_date':entry.entry_date
 						})
 						if pour_status == 'done' and status == 'pour_com':
 							### Fettling Process Creation ###
-							production_obj.fettling_inward_update(cr, uid, [wo_produc_item['id']])
+							self.fettling_inward_update(cr, uid, ids, wo_produc_item['id'],entry.id,line_item.id,tot_pour_qty)
+							production_obj.write(cr, uid, [wo_produc_item['id']], {'state': 'fettling_inprogress'})
 						
 						if pouring_qty > rem_qty:
 							rem_qty = pouring_qty - rem_qty
@@ -199,11 +265,15 @@ class kg_pouring_log(osv.osv):
 						'pour_weight': line_item.weight,
 						'pour_state': pour_status,
 						'state':status,
-						'pour_remarks':line_item.remarks
+						'pour_remarks':line_item.remarks,
+						'pour_date':entry.entry_date
 						})
 						if pour_status == 'done' and status == 'pour_com':
 							### Fettling Process Creation ###
-							production_obj.fettling_inward_update(cr, uid, [msnc_item['id']])
+							#~ production_obj.fettling_inward_update(cr, uid, [msnc_item['id']])
+							self.fettling_inward_update(cr, uid, ids, msnc_item['id'],entry.id,line_item.id,tot_pour_qty)
+							production_obj.write(cr, uid, [msnc_item['id']], {'state': 'fettling_inprogress'})
+						
 						if pouring_qty > rem_qty:
 							rem_qty = pouring_qty - rem_qty
 						else:
@@ -249,11 +319,14 @@ class kg_pouring_log(osv.osv):
 							'pour_weight': line_item.weight,
 							'pour_state': pour_status,
 							'state':status,
-							'pour_remarks':line_item.remarks
+							'pour_remarks':line_item.remarks,
+							'pour_date':entry.entry_date
 							})
 							if pour_status == 'done' and status == 'pour_com':
 								### Fettling Process Creation ###
-								production_obj.fettling_inward_update(cr, uid, [nc_item['id']])
+								#~ production_obj.fettling_inward_update(cr, uid, [nc_item['id']])
+								self.fettling_inward_update(cr, uid, ids, nc_item['id'],entry.id,line_item.id,tot_pour_qty)
+								production_obj.write(cr, uid, [nc_item['id']], {'state': 'fettling_inprogress'})
 							if pouring_qty > rem_qty:
 								rem_qty = pouring_qty - rem_qty
 							else:
@@ -299,11 +372,14 @@ class kg_pouring_log(osv.osv):
 							'pour_weight': line_item.weight,
 							'pour_state': pour_status,
 							'state':status,
-							'pour_remarks':line_item.remarks
+							'pour_remarks':line_item.remarks,
+							'pour_date':entry.entry_date
 							})
 							if pour_status == 'done' and status == 'pour_com':
 								### Fettling Process Creation ###
-								production_obj.fettling_inward_update(cr, uid, [service_item['id']])
+								#~ production_obj.fettling_inward_update(cr, uid, [service_item['id']])
+								self.fettling_inward_update(cr, uid, ids, service_item['id'],entry.id,line_item.id,tot_pour_qty)
+								production_obj.write(cr, uid, [service_item['id']], {'state': 'fettling_inprogress'})
 							if pouring_qty > rem_qty:
 								rem_qty = pouring_qty - rem_qty
 							else:
@@ -329,7 +405,6 @@ class kg_pouring_log(osv.osv):
 								pour_qty = 0
 							else:
 								pour_qty = emer_item['pour_qty']
-							print "vvvvvvvvvvvvvvvvvvv",emer_item,emer_item['pour_qty'],pour_qty
 							emer_production_qty = emer_item['qty'] - pour_qty
 							if emer_production_qty > rem_qty:
 								pouring_qty = rem_qty
@@ -350,11 +425,15 @@ class kg_pouring_log(osv.osv):
 							'pour_weight': line_item.weight,
 							'pour_state': pour_status,
 							'state':status,
-							'pour_remarks':line_item.remarks
+							'pour_remarks':line_item.remarks,
+							'pour_date':entry.entry_date
 							})
 							if pour_status == 'done' and status == 'pour_com':
 								### Fettling Process Creation ###
-								production_obj.fettling_inward_update(cr, uid, [emer_item['id']])
+								#~ production_obj.fettling_inward_update(cr, uid, [emer_item['id']])
+								self.fettling_inward_update(cr, uid, ids, emer_item['id'],entry.id,line_item.id,tot_pour_qty)
+								production_obj.write(cr, uid, [emer_item['id']], {'state': 'fettling_inprogress'})
+								
 							if pouring_qty > rem_qty:
 								rem_qty = pouring_qty - rem_qty
 							else:
@@ -393,8 +472,6 @@ class kg_pouring_log(osv.osv):
 								pour_status = 'done'
 								status = 'pour_com'
 								
-							print "ggggggggggggggggggggggggggggggggggg",tot_pour_qty
-								
 							production_obj.write(cr, uid, [spare_item['id']], 
 							{
 							'pour_qty': tot_pour_qty,
@@ -402,11 +479,14 @@ class kg_pouring_log(osv.osv):
 							'pour_weight': line_item.weight,
 							'pour_state': pour_status,
 							'state':status,
-							'pour_remarks':line_item.remarks
+							'pour_remarks':line_item.remarks,
+							'pour_date':entry.entry_date
 							})
 							if pour_status == 'done' and status == 'pour_com':
 								### Fettling Process Creation ###
-								production_obj.fettling_inward_update(cr, uid, [spare_item['id']])
+								#~ production_obj.fettling_inward_update(cr, uid, [spare_item['id']])
+								self.fettling_inward_update(cr, uid, ids, spare_item['id'],entry.id,line_item.id,tot_pour_qty)
+								production_obj.write(cr, uid, [spare_item['id']], {'state': 'fettling_inprogress'})
 							if pouring_qty > rem_qty:
 								rem_qty = pouring_qty - rem_qty
 							else:
@@ -453,11 +533,14 @@ class kg_pouring_log(osv.osv):
 							'pour_weight': line_item.weight,
 							'pour_state': pour_status,
 							'state':status,
-							'pour_remarks':line_item.remarks
+							'pour_remarks':line_item.remarks,
+							'pour_date':entry.entry_date
 							})
 							if pour_status == 'done' and status == 'pour_com':
 								### Fettling Process Creation ###
-								production_obj.fettling_inward_update(cr, uid, [normal_item['id']])
+								#~ production_obj.fettling_inward_update(cr, uid, [normal_item['id']])
+								self.fettling_inward_update(cr, uid, ids, normal_item['id'],entry.id,line_item.id,tot_pour_qty)
+								production_obj.write(cr, uid, [normal_item['id']], {'state': 'fettling_inprogress'})
 							if pouring_qty > rem_qty:
 								rem_qty = pouring_qty - rem_qty
 							else:
@@ -546,7 +629,7 @@ class ch_pouring_details(osv.osv):
 			production_rec = self.pool.get('kg.production').browse(cr, uid, production_id, context=context)
 			if order_line_id != False:
 				if production_rec.order_line_id.id == order_line_id:
-					pour_qty = production_rec.qty	
+					pour_qty = production_rec.mould_qty - production_rec.pour_qty
 			else:
 				pour_qty = 0
 			value = {'qty':pour_qty,'pattern_name': production_rec.pattern_name}
