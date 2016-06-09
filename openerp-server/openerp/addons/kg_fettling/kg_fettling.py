@@ -78,6 +78,8 @@ class kg_fettling(osv.osv):
 		'stage_id':fields.many2one('kg.stage.master','Stage'),
 		'stage_name': fields.related('stage_id','name', type='char', size=128, string='Stage Name', store=True, readonly=True),
 		'melting_id': fields.related('production_id','pour_heat_id', type='many2one', relation='kg.melting', string='Heat No.', store=True, readonly=True),
+		'pour_date': fields.related('production_id','pour_date', type='date', string='Pouring date', store=True, readonly=True),
+		'pre_stage_date': fields.date('Previous stage completed on'),
 		
 		#### Fettling Inward ####
 		'inward_accept_qty': fields.integer('Accepted Qty', required=True),
@@ -235,6 +237,7 @@ class kg_fettling(osv.osv):
 		'heat_contractor':fields.many2one('res.partner','Contractor'),
 		'heat_employee': fields.char('Employee',size=128),
 		
+		
 		### Rough Grinding ###
 		'rough_grinding_name': fields.char('Production Entry Code', size=128,select=True,readonly=True),
 		'rough_grinding_date': fields.date('Date'),
@@ -390,11 +393,9 @@ class kg_fettling(osv.osv):
 		if entry_date > today:
 			return False
 		knockout_date = str(rec.knockout_date)
-		print "knockout_date",knockout_date
 		if knockout_date > today:
 			return False
 		decoring_date = str(rec.decoring_date)
-		print "decoring_date",decoring_date
 		if decoring_date > today:
 			return False
 		shot_blast_date = str(rec.shot_blast_date)
@@ -711,7 +712,7 @@ class kg_fettling(osv.osv):
 			production_id = production_obj.create(cr, uid, production_vals)
 			
 		
-		self.write(cr, uid, ids, {'state': 'accept','update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		self.write(cr, uid, ids, {'pre_stage_date':entry.entry_date,'state': 'accept','update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 
 		return True
 		
@@ -759,7 +760,7 @@ class kg_fettling(osv.osv):
 				order by fettling.seq_no asc limit 1 
 				 """%(entry.moc_id.id,entry.moc_id.id,entry.stage_id.id))
 			fettling_stage_id = cr.dictfetchall();
-			print "fettling_stage_id",fettling_stage_id
+			
 			if fettling_stage_id:
 			
 				for stage_item in fettling_stage_id:
@@ -880,14 +881,19 @@ class kg_fettling(osv.osv):
 						self.write(cr, uid, ids, {'reshot_blasting_date':time.strftime('%Y-%m-%d'),'reshot_blasting_qty': reshot_blasting_qty,'reshot_blasting_accept_qty': reshot_blasting_qty,'reshot_blasting_name':reshot_blasting_name[0]})
 					
 					
-					self.write(cr, uid, ids, {'stage_id': stage_item['stage_id']})
+					self.write(cr, uid, ids, {'pre_stage_date':entry.knockout_date,'stage_id': stage_item['stage_id']})
 					
 			else:
 				### MS Inward Process Creation ###
 				self.ms_inward_update(cr, uid, [entry.id],entry.knockout_accept_qty)
 			
 		if entry.knockout_reject_qty > 0:
-			print "cddddddddddddddd"
+			
+			### Full Rejection Update ###
+			full_reject_qty = entry.knockout_qty - entry.knockout_reject_qty
+			if full_reject_qty == 0:
+				self.write(cr, uid, ids, {'state':'complete'})
+				
 			#### NC Creation for reject Qty ###
 			
 			### Production Number ###
@@ -1120,13 +1126,19 @@ class kg_fettling(osv.osv):
 						reshot_blasting_name = cr.fetchone();
 						self.write(cr, uid, ids, {'reshot_blasting_date':time.strftime('%Y-%m-%d'),'reshot_blasting_qty': reshot_blasting_qty,'reshot_blasting_accept_qty': reshot_blasting_qty,'reshot_blasting_name':reshot_blasting_name[0]})
 					
-					self.write(cr, uid, ids, {'stage_id': stage_item['stage_id']})
+					self.write(cr, uid, ids, {'pre_stage_date':entry.decoring_date,'stage_id': stage_item['stage_id']})
 					
 			else:
 				### MS Inward Process Creation ###
 				self.ms_inward_update(cr, uid, [entry.id],entry.decoring_accept_qty)
 			
 		if entry.decoring_reject_qty > 0:
+			
+			### Full Rejection Update ###
+			full_reject_qty = entry.decoring_qty - entry.decoring_reject_qty
+			if full_reject_qty == 0:
+				self.write(cr, uid, ids, {'state':'complete'})
+			
 			#### NC Creation for reject Qty ###
 			
 			### Production Number ###
@@ -1358,13 +1370,19 @@ class kg_fettling(osv.osv):
 						reshot_blasting_name = cr.fetchone();
 						self.write(cr, uid, ids, {'reshot_blasting_date':time.strftime('%Y-%m-%d'),'reshot_blasting_qty': reshot_blasting_qty,'reshot_blasting_accept_qty': reshot_blasting_qty,'reshot_blasting_name':reshot_blasting_name[0]})
 					
-					self.write(cr, uid, ids, {'stage_id': stage_item['stage_id']})
+					self.write(cr, uid, ids, {'pre_stage_date':entry.shot_blast_date,'stage_id': stage_item['stage_id']})
 					
 			else:
 				### MS Inward Process Creation ###
 				self.ms_inward_update(cr, uid, [entry.id],entry.shot_blast_accept_qty)
 			
 		if entry.shot_blast_reject_qty > 0:
+			
+			### Full Rejection Update ###
+			full_reject_qty = entry.shot_blast_qty - entry.shot_blast_reject_qty
+			if full_reject_qty == 0:
+				self.write(cr, uid, ids, {'state':'complete'})
+			
 			#### NC Creation for reject Qty ###
 			
 			### Production Number ###
@@ -1596,13 +1614,18 @@ class kg_fettling(osv.osv):
 						reshot_blasting_name = cr.fetchone();
 						self.write(cr, uid, ids, {'reshot_blasting_date':time.strftime('%Y-%m-%d'),'reshot_blasting_qty': reshot_blasting_qty,'reshot_blasting_accept_qty': reshot_blasting_qty,'reshot_blasting_name':reshot_blasting_name[0]})
 					
-					self.write(cr, uid, ids, {'stage_id': stage_item['stage_id']})
+					self.write(cr, uid, ids, {'pre_stage_date':entry.hammering_date,'stage_id': stage_item['stage_id']})
 					
 			else:
 				### MS Inward Process Creation ###
 				self.ms_inward_update(cr, uid, [entry.id],entry.hammering_accept_qty)
 			
 		if entry.hammering_reject_qty > 0:
+			
+			### Full Rejection Update ###
+			full_reject_qty = entry.hammering_qty - entry.hammering_reject_qty
+			if full_reject_qty == 0:
+				self.write(cr, uid, ids, {'state':'complete'})
 			#### NC Creation for reject Qty ###
 			
 			### Production Number ###
@@ -1833,13 +1856,18 @@ class kg_fettling(osv.osv):
 						reshot_blasting_name = cr.fetchone();
 						self.write(cr, uid, ids, {'reshot_blasting_date':time.strftime('%Y-%m-%d'),'reshot_blasting_qty': reshot_blasting_qty,'reshot_blasting_accept_qty': reshot_blasting_qty,'reshot_blasting_name':reshot_blasting_name[0]})
 					
-					self.write(cr, uid, ids, {'stage_id': stage_item['stage_id']})
+					self.write(cr, uid, ids, {'pre_stage_date':entry.wheel_cutting_date,'stage_id': stage_item['stage_id']})
 					
 			else:
 				### MS Inward Process Creation ###
 				self.ms_inward_update(cr, uid, [entry.id],entry.wheel_cutting_accept_qty)
 			
 		if entry.wheel_cutting_reject_qty > 0:
+			
+			### Full Rejection Update ###
+			full_reject_qty = entry.wheel_cutting_qty - entry.wheel_cutting_reject_qty
+			if full_reject_qty == 0:
+				self.write(cr, uid, ids, {'state':'complete'})
 			#### NC Creation for reject Qty ###
 			
 			### Production Number ###
@@ -2070,13 +2098,18 @@ class kg_fettling(osv.osv):
 						reshot_blasting_name = cr.fetchone();
 						self.write(cr, uid, ids, {'reshot_blasting_date':time.strftime('%Y-%m-%d'),'reshot_blasting_qty': reshot_blasting_qty,'reshot_blasting_accept_qty': reshot_blasting_qty,'reshot_blasting_name':reshot_blasting_name[0]})
 					
-					self.write(cr, uid, ids, {'stage_id': stage_item['stage_id']})
+					self.write(cr, uid, ids, {'pre_stage_date':entry.gas_cutting_date,'stage_id': stage_item['stage_id']})
 					
 			else:
 				### MS Inward Process Creation ###
 				self.ms_inward_update(cr, uid, [entry.id],entry.gas_cutting_accept_qty)
 			
 		if entry.gas_cutting_reject_qty > 0:
+			
+			### Full Rejection Update ###
+			full_reject_qty = entry.gas_cutting_qty - entry.gas_cutting_reject_qty
+			if full_reject_qty == 0:
+				self.write(cr, uid, ids, {'state':'complete'})
 			#### NC Creation for reject Qty ###
 			
 			### Production Number ###
@@ -2309,13 +2342,18 @@ class kg_fettling(osv.osv):
 						reshot_blasting_name = cr.fetchone();
 						self.write(cr, uid, ids, {'reshot_blasting_date':time.strftime('%Y-%m-%d'),'reshot_blasting_qty': reshot_blasting_qty,'reshot_blasting_accept_qty': reshot_blasting_qty,'reshot_blasting_name':reshot_blasting_name[0]})
 					
-					self.write(cr, uid, ids, {'stage_id': stage_item['stage_id']})
+					self.write(cr, uid, ids, {'pre_stage_date':entry.arc_cutting_date,'stage_id': stage_item['stage_id']})
 					
 			else:
 				### MS Inward Process Creation ###
 				self.ms_inward_update(cr, uid, [entry.id],entry.arc_cutting_accept_qty)
 			
 		if entry.arc_cutting_reject_qty > 0:
+			
+			### Full Rejection Update ###
+			full_reject_qty = entry.arc_cutting_qty - entry.arc_cutting_reject_qty
+			if full_reject_qty == 0:
+				self.write(cr, uid, ids, {'state':'complete'})
 			#### NC Creation for reject Qty ###
 			
 			### Production Number ###
@@ -2533,7 +2571,7 @@ class kg_fettling(osv.osv):
 						reshot_blasting_name = cr.fetchone();
 						self.write(cr, uid, ids, {'reshot_blasting_date':time.strftime('%Y-%m-%d'),'reshot_blasting_qty': reshot_blasting_qty,'reshot_blasting_accept_qty': reshot_blasting_qty,'reshot_blasting_name':reshot_blasting_name[0]})
 					
-					self.write(cr, uid, ids, {'stage_id': stage_item['stage_id']})
+					self.write(cr, uid, ids, {'pre_stage_date':entry.heat_date,'stage_id': stage_item['stage_id']})
 					
 			else:
 				### MS Inward Process Creation ###
@@ -2710,7 +2748,7 @@ class kg_fettling(osv.osv):
 						reshot_blasting_name = cr.fetchone();
 						self.write(cr, uid, ids, {'reshot_blasting_date':time.strftime('%Y-%m-%d'),'reshot_blasting_qty': reshot_blasting_qty,'reshot_blasting_accept_qty': reshot_blasting_qty,'reshot_blasting_name':reshot_blasting_name[0]})
 					
-					self.write(cr, uid, ids, {'stage_id': stage_item['stage_id']})
+					self.write(cr, uid, ids, {'pre_stage_date':entry.rough_grinding_date,'stage_id': stage_item['stage_id']})
 					
 			else:
 				### MS Inward Process Creation ###
@@ -2730,6 +2768,11 @@ class kg_fettling(osv.osv):
 			self.write(cr, uid, ids, {'welding_date':time.strftime('%Y-%m-%d'),'welding_state':'progress','welding_stage_id':welding_stage_id[0], 'welding_qty': welding_qty,'welding_accept_qty': welding_qty,'welding_name':welding_name[0]})
 			
 		if entry.rough_grinding_reject_qty > 0:
+			
+			### Full Rejection Update ###
+			full_reject_qty = entry.rough_grinding_qty - entry.rough_grinding_reject_qty
+			if full_reject_qty == 0:
+				self.write(cr, uid, ids, {'state':'complete'})
 			#### NC Creation for reject Qty ###
 			
 			### Production Number ###
@@ -2886,6 +2929,11 @@ class kg_fettling(osv.osv):
 			self.write(cr, uid, ids, {'welding_state':'done'})
 				
 		if entry.welding_reject_qty > 0:
+			
+			### Full Rejection Update ###
+			full_reject_qty = entry.welding_qty - entry.welding_reject_qty
+			if full_reject_qty == 0:
+				self.write(cr, uid, ids, {'state':'complete'})
 			#### NC Creation for reject Qty ###
 			
 			### Production Number ###
@@ -3134,13 +3182,19 @@ class kg_fettling(osv.osv):
 							reshot_blasting_name = cr.fetchone();
 							self.write(cr, uid, ids, {'reshot_blasting_date':time.strftime('%Y-%m-%d'),'reshot_blasting_qty': reshot_blasting_qty,'reshot_blasting_accept_qty': reshot_blasting_qty,'reshot_blasting_name':reshot_blasting_name[0]})
 						
-						self.write(cr, uid, ids, {'stage_id': stage_item['stage_id']})
+						self.write(cr, uid, ids, {'pre_stage_date':entry.finish_grinding_date,'stage_id': stage_item['stage_id']})
 						
 				else:
 					###  MS Inward Process Creation ###
 					self.ms_inward_update(cr, uid, [entry.id],entry.finish_grinding_accept_qty)
 			
 		if entry.finish_grinding_reject_qty > 0:
+			
+			### Full Rejection Update ###
+			full_reject_qty = entry.finish_grinding_qty - entry.finish_grinding_reject_qty
+			if full_reject_qty == 0:
+				self.write(cr, uid, ids, {'state':'complete'})
+			
 			#### NC Creation for reject Qty ###
 			
 			### Production Number ###
@@ -3373,13 +3427,18 @@ class kg_fettling(osv.osv):
 						reshot_blasting_name = cr.fetchone();
 						self.write(cr, uid, ids, {'reshot_blasting_date':time.strftime('%Y-%m-%d'),'reshot_blasting_qty': reshot_blasting_qty,'reshot_blasting_accept_qty': reshot_blasting_qty,'reshot_blasting_name':reshot_blasting_name[0]})
 					
-					self.write(cr, uid, ids, {'stage_id': stage_item['stage_id']})
+					self.write(cr, uid, ids, {'pre_stage_date':entry.reshot_blasting_date,'stage_id': stage_item['stage_id']})
 					
 			else:
 				###  MS Inward Process Creation ###
 				self.ms_inward_update(cr, uid, [entry.id],entry.reshot_blasting_accept_qty)
 			
 		if entry.reshot_blasting_reject_qty > 0:
+			
+			### Full Rejection Update ###
+			full_reject_qty = entry.reshot_blasting_qty - entry.reshot_blasting_reject_qty
+			if full_reject_qty == 0:
+				self.write(cr, uid, ids, {'state':'complete'})
 			#### NC Creation for reject Qty ###
 			
 			### Production Number ###
@@ -3476,7 +3535,7 @@ class kg_fettling_batch_accept(osv.osv):
 		'line_ids': fields.one2many('ch.fettling.batch.accept.line', 'header_id', "Fettling Line Details"),
 		
 		'flag_fettlingline':fields.boolean('Fettling Line Created'),
-
+		
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		
@@ -3538,7 +3597,8 @@ class kg_fettling_batch_accept(osv.osv):
 					'header_id': entry.id,
 					'fettling_id':item.id,
 					'accept_qty':item.pour_qty,
-					'reject_qty':0
+					'reject_qty':0,
+					'remarks':entry.remarks
 				}
 				
 				line_id = line_obj.create(cr, uid,vals)
@@ -3558,15 +3618,16 @@ class kg_fettling_batch_accept(osv.osv):
 		### Updation against Bactch Fettling Accept ###
 		for accept_item in entry.line_ids:
 			reject_qty = accept_item.pour_qty - accept_item.accept_qty
-			if reject_qty > 0 and accept_item.remarks == False:
+			if accept_item.reject_qty > 0 and accept_item.reject_remarks_id.id == False:
 				raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
 			
 			fettling_obj.write(cr, uid,accept_item.fettling_id.id,{
-			'remarks':accept_item.remarks,
+			'inward_remarks':accept_item.remarks,
 			'inward_accept_qty': accept_item.accept_qty,
-			'inward_reject_qty': reject_qty,
+			'inward_reject_qty': accept_item.reject_qty,
 			'inward_accept_user_id': accept_item.accept_user_id.id,
+			'inward_reject_remarks_id': accept_item.reject_remarks_id.id
 			})
 			fettling_obj.fettling_accept(cr, uid, [accept_item.fettling_id.id])
 			
@@ -3611,7 +3672,8 @@ class ch_fettling_batch_accept_line(osv.osv):
 		'reject_qty': fields.integer('Rejected Qty'),
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
-		'remarks': fields.text('Remarks'),	
+		'remarks': fields.text('Remarks'),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		
 		
 	}
@@ -3654,11 +3716,19 @@ class kg_batch_knock_out(osv.osv):
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed')],'Status', readonly=True),
 
 		'knock_out_ids':fields.many2many('kg.fettling','m2m_knockout_details' , 'batch_id', 'knockout_id', 'Knockout Items',
-			domain="[('stage_name','=','KNOCK OUT')]"),
+			domain="[('stage_name','=','KNOCK OUT'),('state','=','accept')]"),
 			
 		'line_ids': fields.one2many('ch.batch.knockout.line', 'header_id', "Batch Line Details"),
 		
 		'flag_batchline':fields.boolean('Batch Line Created'),
+		
+		'knockout_date': fields.date('Date', store=True, required=True),
+		'shift_id':fields.many2one('kg.shift.master','Shift'),
+		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'employee_name': fields.char('Employee',size=128),
+		'weight':fields.integer('Weight(kgs)'),
+		
 
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
@@ -3678,6 +3748,7 @@ class kg_batch_knock_out(osv.osv):
 	
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_batch_knock_out', context=c),
 		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'knockout_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'active': True,
@@ -3691,7 +3762,10 @@ class kg_batch_knock_out(osv.osv):
 		today = date.today()
 		today = str(today)
 		entry_date = str(rec.entry_date)
+		knockout_date = str(rec.knockout_date)
 		if entry_date > today:
+			return False
+		if knockout_date > today:
 			return False
 		return True
 		
@@ -3720,6 +3794,15 @@ class kg_batch_knock_out(osv.osv):
 				
 					'header_id': entry.id,
 					'knockout_id':item.id,
+					'qty': item.knockout_qty,
+					'accept_qty': item.knockout_qty,
+					'date': entry.knockout_date,
+					'shift_id': entry.shift_id.id,
+					'done_by': entry.done_by,
+					'contractor_id': entry.contractor_id.id,
+					'employee_name': entry.employee_name,
+					'weight': entry.weight,
+					'remarks':  entry.remarks
 				}
 				
 				line_id = line_obj.create(cr, uid,vals)
@@ -3736,18 +3819,25 @@ class kg_batch_knock_out(osv.osv):
 						_('System not allow to confirm without Line Items !!'))
 						
 						
-		### Updation against Bactch Fettling Accept ###
+		### Updation against Bactch Knock Out ###
 		for item in entry.line_ids:
 			reject_qty = item.qty - item.accept_qty
-			if reject_qty > 0 and item.remarks == False:
+			if item.reject_qty > 0 and item.reject_remarks_id.id == False:
 				raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
 			
 			fettling_obj.write(cr, uid,item.knockout_id.id,{
-			'remarks':item.remarks,
+			'knockout_remarks':item.remarks,
 			'knockout_accept_qty': item.accept_qty,
-			'knockout_reject_qty': reject_qty,
+			'knockout_reject_qty': item.reject_qty,
 			'knockout_accept_user_id': item.accept_user_id.id,
+			'knockout_reject_remarks_id': item.reject_remarks_id.id,
+			'knockout_date': item.date,
+			'knockout_shift_id': item.shift_id.id,
+			'knockout_contractor': item.contractor_id.id,
+			'knockout_employee': item.employee_name,
+			'knockout_by': item.done_by,
+			'knockout_weight': item.weight,
 			})
 			fettling_obj.knockout_update(cr, uid, [item.knockout_id.id])
 			
@@ -3799,7 +3889,10 @@ class ch_batch_knockout_line(osv.osv):
 		'weight':fields.integer('Weight(kgs)'),
 		'remarks': fields.text('Remarks'),
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
-		'accept_user_id': fields.many2one('res.users', 'Accepted By'),	
+		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
+		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'employee_name': fields.char('Employee',size=128),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		
 		
 	}
@@ -3811,6 +3904,23 @@ class ch_batch_knockout_line(osv.osv):
 		'accept_user_id':lambda obj, cr, uid, context: uid,
 		
 	}
+	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		entry_date = str(rec.date)
+		if entry_date > today:
+			return False
+		return True
+		
+	_constraints = [		
+			  
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['Line Items']),
+  
+	   ]
+	
 	
 	
 	def create(self, cr, uid, vals, context=None):
@@ -3843,11 +3953,18 @@ class kg_batch_decoring(osv.osv):
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed')],'Status', readonly=True),
 
 		'decoring_ids':fields.many2many('kg.fettling','m2m_decoring_details' , 'batch_id', 'decoring_id', 'Decoring Items',
-			domain="[('stage_name','=','DECORING')]"),
+			domain="[('stage_name','=','DECORING'),('state','=','accept')]"),
 			
 		'line_ids': fields.one2many('ch.batch.decoring.line', 'header_id', "Batch Line Details"),
 		
 		'flag_batchline':fields.boolean('Batch Line Created'),
+		
+		'decoring_date': fields.date('Date', store=True, required=True),
+		'shift_id':fields.many2one('kg.shift.master','Shift'),
+		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'employee_name': fields.char('Employee',size=128),
+		'weight':fields.integer('Weight(kgs)'),
 
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
@@ -3867,6 +3984,7 @@ class kg_batch_decoring(osv.osv):
 	
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_batch_decoring', context=c),
 		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'decoring_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'active': True,
@@ -3880,7 +3998,10 @@ class kg_batch_decoring(osv.osv):
 		today = date.today()
 		today = str(today)
 		entry_date = str(rec.entry_date)
+		decoring_date = str(rec.decoring_date)
 		if entry_date > today:
+			return False
+		if decoring_date > today:
 			return False
 		return True
 		
@@ -3909,6 +4030,15 @@ class kg_batch_decoring(osv.osv):
 				
 					'header_id': entry.id,
 					'decoring_id':item.id,
+					'qty': item.decoring_qty,
+					'accept_qty': item.decoring_qty,
+					'date': entry.decoring_date,
+					'shift_id': entry.shift_id.id,
+					'done_by': entry.done_by,
+					'contractor_id': entry.contractor_id.id,
+					'employee_name': entry.employee_name,
+					'weight': entry.weight,
+					'remarks':  entry.remarks
 				}
 				
 				line_id = line_obj.create(cr, uid,vals)
@@ -3925,18 +4055,25 @@ class kg_batch_decoring(osv.osv):
 						_('System not allow to confirm without Line Items !!'))
 						
 						
-		### Updation against Bactch Fettling Accept ###
+		### Updation against Bactch Decoring ###
 		for item in entry.line_ids:
 			reject_qty = item.qty - item.accept_qty
-			if reject_qty > 0 and item.remarks == False:
+			if item.reject_qty > 0 and item.reject_remarks_id.id == False:
 				raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
 			
 			fettling_obj.write(cr, uid,item.decoring_id.id,{
-			'remarks':item.remarks,
+			'decoring_remarks':item.remarks,
 			'decoring_accept_qty': item.accept_qty,
-			'decoring_reject_qty': reject_qty,
+			'decoring_reject_qty': item.reject_qty,
 			'decoring_accept_user_id': item.accept_user_id.id,
+			'decoring_reject_remarks_id': item.reject_remarks_id.id,
+			'decoring_date': item.date,
+			'decoring_shift_id': item.shift_id.id,
+			'decoring_contractor': item.contractor_id.id,
+			'decoring_employee': item.employee_name,
+			'decoring_by': item.done_by,
+			'decoring_weight': item.weight,
 			})
 			fettling_obj.decoring_update(cr, uid, [item.decoring_id.id])
 			
@@ -3988,7 +4125,10 @@ class ch_batch_decoring_line(osv.osv):
 		'weight':fields.integer('Weight(kgs)'),
 		'remarks': fields.text('Remarks'),
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
-		'accept_user_id': fields.many2one('res.users', 'Accepted By'),	
+		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
+		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'employee_name': fields.char('Employee',size=128),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),	
 		
 		
 	}
@@ -4000,6 +4140,22 @@ class ch_batch_decoring_line(osv.osv):
 		'accept_user_id':lambda obj, cr, uid, context: uid,
 		
 	}
+	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		entry_date = str(rec.date)
+		if entry_date > today:
+			return False
+		return True
+		
+	_constraints = [		
+			  
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['Line Items']),
+  
+	   ]
 	
 	
 	def create(self, cr, uid, vals, context=None):
@@ -4031,11 +4187,18 @@ class kg_batch_shot_blast(osv.osv):
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed')],'Status', readonly=True),
 
 		'shot_blast_ids':fields.many2many('kg.fettling','m2m_shot_blast_details' , 'batch_id', 'shot_blast_id', 'Shot Blast Items',
-			domain="[('stage_name','=','SHOT BLAST')]"),
+			domain="[('stage_name','=','SHOT BLAST'),('state','=','accept')]"),
 			
 		'line_ids': fields.one2many('ch.batch.shot.blast.line', 'header_id', "Batch Line Details"),
 		
 		'flag_batchline':fields.boolean('Batch Line Created'),
+		
+		'shot_blast_date': fields.date('Date', store=True, required=True),
+		'shift_id':fields.many2one('kg.shift.master','Shift'),
+		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'employee_name': fields.char('Employee',size=128),
+		'weight':fields.integer('Weight(kgs)'),
 
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
@@ -4055,6 +4218,7 @@ class kg_batch_shot_blast(osv.osv):
 	
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_batch_shot_blast', context=c),
 		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'shot_blast_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'active': True,
@@ -4068,7 +4232,10 @@ class kg_batch_shot_blast(osv.osv):
 		today = date.today()
 		today = str(today)
 		entry_date = str(rec.entry_date)
+		shot_blast_date = str(rec.shot_blast_date)
 		if entry_date > today:
+			return False
+		if shot_blast_date > today:
 			return False
 		return True
 		
@@ -4097,6 +4264,15 @@ class kg_batch_shot_blast(osv.osv):
 				
 					'header_id': entry.id,
 					'shot_blast_id':item.id,
+					'qty': item.shot_blast_qty,
+					'accept_qty': item.shot_blast_qty,
+					'date': entry.shot_blast_date,
+					'shift_id': entry.shift_id.id,
+					'done_by': entry.done_by,
+					'contractor_id': entry.contractor_id.id,
+					'employee_name': entry.employee_name,
+					'weight': entry.weight,
+					'remarks':  entry.remarks
 				}
 				
 				line_id = line_obj.create(cr, uid,vals)
@@ -4113,18 +4289,25 @@ class kg_batch_shot_blast(osv.osv):
 						_('System not allow to confirm without Line Items !!'))
 						
 						
-		### Updation against Bactch Fettling Accept ###
+		### Updation against Bactch Shot Blast ###
 		for item in entry.line_ids:
 			reject_qty = item.qty - item.accept_qty
-			if reject_qty > 0 and item.remarks == False:
+			if item.reject_qty > 0 and item.reject_remarks_id.id == False:
 				raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
 			
 			fettling_obj.write(cr, uid,item.shot_blast_id.id,{
-			'remarks':item.remarks,
+			'shot_blast_remarks':item.remarks,
 			'shot_blast_accept_qty': item.accept_qty,
-			'shot_blast_reject_qty': reject_qty,
+			'shot_blast_reject_qty': item.reject_qty,
 			'shot_blast_accept_user_id': item.accept_user_id.id,
+			'shot_blast_reject_remarks_id': item.reject_remarks_id.id,
+			'shot_blast_date': item.date,
+			'shot_blast_shift_id': item.shift_id.id,
+			'shot_blast_contractor': item.contractor_id.id,
+			'shot_blast_employee': item.employee_name,
+			'shot_blast_by': item.done_by,
+			'shot_blast_weight': item.weight,
 			})
 			fettling_obj.shot_blast_update(cr, uid, [item.shot_blast_id.id])
 			
@@ -4176,7 +4359,10 @@ class ch_batch_shot_blast_line(osv.osv):
 		'weight':fields.integer('Weight(kgs)'),
 		'remarks': fields.text('Remarks'),
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
-		'accept_user_id': fields.many2one('res.users', 'Accepted By'),	
+		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
+		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'employee_name': fields.char('Employee',size=128),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		
 		
 	}
@@ -4188,6 +4374,22 @@ class ch_batch_shot_blast_line(osv.osv):
 		'accept_user_id':lambda obj, cr, uid, context: uid,
 		
 	}
+	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		entry_date = str(rec.date)
+		if entry_date > today:
+			return False
+		return True
+		
+	_constraints = [		
+			  
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['Line Items']),
+  
+	   ]
 	
 	
 	def create(self, cr, uid, vals, context=None):
@@ -4218,11 +4420,18 @@ class kg_batch_hammering(osv.osv):
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed')],'Status', readonly=True),
 
 		'hammering_ids':fields.many2many('kg.fettling','m2m_hammering_details' , 'batch_id', 'hammering_id', 'Hammering Items',
-			domain="[('stage_name','=','HAMMERING')]"),
+			domain="[('stage_name','=','HAMMERING'),('state','=','accept')]"),
 			
 		'line_ids': fields.one2many('ch.batch.hammering.line', 'header_id', "Batch Line Details"),
 		
 		'flag_batchline':fields.boolean('Batch Line Created'),
+		
+		'hammering_date': fields.date('Date', store=True, required=True),
+		'shift_id':fields.many2one('kg.shift.master','Shift'),
+		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'employee_name': fields.char('Employee',size=128),
+		'weight':fields.integer('Weight(kgs)'),
 
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
@@ -4242,6 +4451,7 @@ class kg_batch_hammering(osv.osv):
 	
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_batch_hammering', context=c),
 		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'hammering_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'active': True,
@@ -4255,7 +4465,10 @@ class kg_batch_hammering(osv.osv):
 		today = date.today()
 		today = str(today)
 		entry_date = str(rec.entry_date)
+		hammering_date = str(rec.hammering_date)
 		if entry_date > today:
+			return False
+		if hammering_date > today:
 			return False
 		return True
 		
@@ -4284,6 +4497,15 @@ class kg_batch_hammering(osv.osv):
 				
 					'header_id': entry.id,
 					'hammering_id':item.id,
+					'qty': item.hammering_qty,
+					'accept_qty': item.hammering_qty,
+					'date': entry.hammering_date,
+					'shift_id': entry.shift_id.id,
+					'done_by': entry.done_by,
+					'contractor_id': entry.contractor_id.id,
+					'employee_name': entry.employee_name,
+					'weight': entry.weight,
+					'remarks':  entry.remarks
 				}
 				
 				line_id = line_obj.create(cr, uid,vals)
@@ -4300,18 +4522,25 @@ class kg_batch_hammering(osv.osv):
 						_('System not allow to confirm without Line Items !!'))
 						
 						
-		### Updation against Bactch Fettling Accept ###
+		### Updation against Bactch Hammering ###
 		for item in entry.line_ids:
 			reject_qty = item.qty - item.accept_qty
-			if reject_qty > 0 and item.remarks == False:
+			if item.reject_qty > 0 and item.reject_remarks_id.id == False:
 				raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
 			
 			fettling_obj.write(cr, uid,item.hammering_id.id,{
-			'remarks':item.remarks,
+			'hammering_remarks':item.remarks,
 			'hammering_accept_qty': item.accept_qty,
-			'hammering_reject_qty': reject_qty,
+			'hammering_reject_qty': item.reject_qty,
 			'hammering_accept_user_id': item.accept_user_id.id,
+			'hammering_reject_remarks_id': item.reject_remarks_id.id,
+			'hammering_date': item.date,
+			'hammering_shift_id': item.shift_id.id,
+			'hammering_contractor': item.contractor_id.id,
+			'hammering_employee': item.employee_name,
+			'hammering_by': item.done_by,
+			'hammering_weight': item.weight,
 			})
 			fettling_obj.hammering_update(cr, uid, [item.hammering_id.id])
 			
@@ -4364,6 +4593,9 @@ class ch_batch_hammering_line(osv.osv):
 		'remarks': fields.text('Remarks'),
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),	
+		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'employee_name': fields.char('Employee',size=128),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		
 		
 	}
@@ -4375,6 +4607,22 @@ class ch_batch_hammering_line(osv.osv):
 		'accept_user_id':lambda obj, cr, uid, context: uid,
 		
 	}
+	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		entry_date = str(rec.date)
+		if entry_date > today:
+			return False
+		return True
+		
+	_constraints = [		
+			  
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['Line Items']),
+  
+	   ]
 	
 	
 	def create(self, cr, uid, vals, context=None):
@@ -4406,11 +4654,18 @@ class kg_batch_wheel_cutting(osv.osv):
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed')],'Status', readonly=True),
 
 		'wheel_cutting_ids':fields.many2many('kg.fettling','m2m_wheel_cutting_details' , 'batch_id', 'wheel_cutting_id', 'Wheel Cutting Items',
-			domain="[('stage_name','=','WHEEL CUTTING')]"),
+			domain="[('stage_name','=','WHEEL CUTTING'),('state','=','accept')]"),
 			
 		'line_ids': fields.one2many('ch.batch.wheel.cutting.line', 'header_id', "Batch Line Details"),
 		
 		'flag_batchline':fields.boolean('Batch Line Created'),
+		
+		'wheel_cutting_date': fields.date('Date', store=True, required=True),
+		'shift_id':fields.many2one('kg.shift.master','Shift'),
+		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'employee_name': fields.char('Employee',size=128),
+		'weight':fields.integer('Weight(kgs)'),
 
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
@@ -4430,6 +4685,7 @@ class kg_batch_wheel_cutting(osv.osv):
 	
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_batch_wheel_cutting', context=c),
 		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'wheel_cutting_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'active': True,
@@ -4443,7 +4699,10 @@ class kg_batch_wheel_cutting(osv.osv):
 		today = date.today()
 		today = str(today)
 		entry_date = str(rec.entry_date)
+		wheel_cutting_date = str(rec.wheel_cutting_date)
 		if entry_date > today:
+			return False
+		if wheel_cutting_date > today:
 			return False
 		return True
 		
@@ -4472,6 +4731,15 @@ class kg_batch_wheel_cutting(osv.osv):
 				
 					'header_id': entry.id,
 					'wheel_cutting_id':item.id,
+					'qty': item.wheel_cutting_qty,
+					'accept_qty': item.wheel_cutting_qty,
+					'date': entry.wheel_cutting_date,
+					'shift_id': entry.shift_id.id,
+					'done_by': entry.done_by,
+					'contractor_id': entry.contractor_id.id,
+					'employee_name': entry.employee_name,
+					'weight': entry.weight,
+					'remarks':  entry.remarks
 				}
 				
 				line_id = line_obj.create(cr, uid,vals)
@@ -4488,18 +4756,25 @@ class kg_batch_wheel_cutting(osv.osv):
 						_('System not allow to confirm without Line Items !!'))
 						
 						
-		### Updation against Bactch Fettling Accept ###
+		### Updation against Bactch Wheel Cutting ###
 		for item in entry.line_ids:
 			reject_qty = item.qty - item.accept_qty
-			if reject_qty > 0 and item.remarks == False:
+			if item.reject_qty > 0 and item.reject_remarks_id.id == False:
 				raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
 			
 			fettling_obj.write(cr, uid,item.wheel_cutting_id.id,{
-			'remarks':item.remarks,
+			'wheel_cutting_remarks':item.remarks,
 			'wheel_cutting_accept_qty': item.accept_qty,
-			'wheel_cutting_reject_qty': reject_qty,
+			'wheel_cutting_reject_qty': item.reject_qty,
 			'wheel_cutting_accept_user_id': item.accept_user_id.id,
+			'wheel_cutting_reject_remarks_id': item.reject_remarks_id.id,
+			'wheel_cutting_date': item.date,
+			'wheel_cutting_shift_id': item.shift_id.id,
+			'wheel_cutting_contractor': item.contractor_id.id,
+			'wheel_cutting_employee': item.employee_name,
+			'wheel_cutting_by': item.done_by,
+			'wheel_cutting_weight': item.weight,
 			})
 			fettling_obj.wheel_cutting_update(cr, uid, [item.wheel_cutting_id.id])
 			
@@ -4552,6 +4827,9 @@ class ch_batch_wheel_cutting_line(osv.osv):
 		'remarks': fields.text('Remarks'),
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),	
+		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'employee_name': fields.char('Employee',size=128),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		
 		
 	}
@@ -4563,6 +4841,22 @@ class ch_batch_wheel_cutting_line(osv.osv):
 		'accept_user_id':lambda obj, cr, uid, context: uid,
 		
 	}
+	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		entry_date = str(rec.date)
+		if entry_date > today:
+			return False
+		return True
+		
+	_constraints = [		
+			  
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['Line Items']),
+  
+	   ]
 	
 	
 	def create(self, cr, uid, vals, context=None):
@@ -4594,11 +4888,18 @@ class kg_batch_gas_cutting(osv.osv):
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed')],'Status', readonly=True),
 
 		'gas_cutting_ids':fields.many2many('kg.fettling','m2m_gas_cutting_details' , 'batch_id', 'gas_cutting_id', 'gas Cutting Items',
-			domain="[('stage_name','=','GAS CUTTING')]"),
+			domain="[('stage_name','=','GAS CUTTING'),('state','=','accept')]"),
 			
 		'line_ids': fields.one2many('ch.batch.gas.cutting.line', 'header_id', "Batch Line Details"),
 		
 		'flag_batchline':fields.boolean('Batch Line Created'),
+		
+		'gas_cutting_date': fields.date('Date', store=True, required=True),
+		'shift_id':fields.many2one('kg.shift.master','Shift'),
+		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'employee_name': fields.char('Employee',size=128),
+		'weight':fields.integer('Weight(kgs)'),
 
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
@@ -4618,6 +4919,7 @@ class kg_batch_gas_cutting(osv.osv):
 	
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_batch_gas_cutting', context=c),
 		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'gas_cutting_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'active': True,
@@ -4631,7 +4933,10 @@ class kg_batch_gas_cutting(osv.osv):
 		today = date.today()
 		today = str(today)
 		entry_date = str(rec.entry_date)
+		gas_cutting_date = str(rec.gas_cutting_date)
 		if entry_date > today:
+			return False
+		if gas_cutting_date > today:
 			return False
 		return True
 		
@@ -4660,6 +4965,15 @@ class kg_batch_gas_cutting(osv.osv):
 				
 					'header_id': entry.id,
 					'gas_cutting_id':item.id,
+					'qty': item.gas_cutting_qty,
+					'accept_qty': item.gas_cutting_qty,
+					'date': entry.gas_cutting_date,
+					'shift_id': entry.shift_id.id,
+					'done_by': entry.done_by,
+					'contractor_id': entry.contractor_id.id,
+					'employee_name': entry.employee_name,
+					'weight': entry.weight,
+					'remarks':  entry.remarks
 				}
 				
 				line_id = line_obj.create(cr, uid,vals)
@@ -4676,18 +4990,25 @@ class kg_batch_gas_cutting(osv.osv):
 						_('System not allow to confirm without Line Items !!'))
 						
 						
-		### Updation against Bactch Fettling Accept ###
+		### Updation against Bactch Gas Cutting ###
 		for item in entry.line_ids:
 			reject_qty = item.qty - item.accept_qty
-			if reject_qty > 0 and item.remarks == False:
+			if item.reject_qty > 0 and item.reject_remarks_id.id == False:
 				raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
 			
 			fettling_obj.write(cr, uid,item.gas_cutting_id.id,{
-			'remarks':item.remarks,
+			'gas_cutting_remarks':item.remarks,
 			'gas_cutting_accept_qty': item.accept_qty,
-			'gas_cutting_reject_qty': reject_qty,
+			'gas_cutting_reject_qty': item.reject_qty,
 			'gas_cutting_accept_user_id': item.accept_user_id.id,
+			'gas_cutting_reject_remarks_id': item.reject_remarks_id.id,
+			'gas_cutting_date': item.date,
+			'gas_cutting_shift_id': item.shift_id.id,
+			'gas_cutting_contractor': item.contractor_id.id,
+			'gas_cutting_employee': item.employee_name,
+			'gas_cutting_by': item.done_by,
+			'gas_cutting_weight': item.weight,
 			})
 			fettling_obj.gas_cutting_update(cr, uid, [item.gas_cutting_id.id])
 			
@@ -4739,7 +5060,10 @@ class ch_batch_gas_cutting_line(osv.osv):
 		'weight':fields.integer('Weight(kgs)'),
 		'remarks': fields.text('Remarks'),
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
-		'accept_user_id': fields.many2one('res.users', 'Accepted By'),	
+		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
+		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'employee_name': fields.char('Employee',size=128),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),	
 		
 		
 	}
@@ -4751,6 +5075,22 @@ class ch_batch_gas_cutting_line(osv.osv):
 		'accept_user_id':lambda obj, cr, uid, context: uid,
 		
 	}
+	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		entry_date = str(rec.date)
+		if entry_date > today:
+			return False
+		return True
+		
+	_constraints = [		
+			  
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['Line Items']),
+  
+	   ]
 	
 	
 	def create(self, cr, uid, vals, context=None):
@@ -4781,11 +5121,18 @@ class kg_batch_arc_cutting(osv.osv):
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed')],'Status', readonly=True),
 
 		'arc_cutting_ids':fields.many2many('kg.fettling','m2m_arc_cutting_details' , 'batch_id', 'arc_cutting_id', 'Arc Cutting Items',
-			domain="[('stage_name','=','ARC CUTTING')]"),
+			domain="[('stage_name','=','ARC CUTTING'),('state','=','accept')]"),
 			
 		'line_ids': fields.one2many('ch.batch.arc.cutting.line', 'header_id', "Batch Line Details"),
 		
 		'flag_batchline':fields.boolean('Batch Line Created'),
+		
+		'arc_cutting_date': fields.date('Date', store=True, required=True),
+		'shift_id':fields.many2one('kg.shift.master','Shift'),
+		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'employee_name': fields.char('Employee',size=128),
+		'weight':fields.integer('Weight(kgs)'),
 
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
@@ -4805,6 +5152,7 @@ class kg_batch_arc_cutting(osv.osv):
 	
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_batch_arc_cutting', context=c),
 		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'arc_cutting_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'active': True,
@@ -4818,7 +5166,10 @@ class kg_batch_arc_cutting(osv.osv):
 		today = date.today()
 		today = str(today)
 		entry_date = str(rec.entry_date)
+		arc_cutting_date = str(rec.arc_cutting_date)
 		if entry_date > today:
+			return False
+		if arc_cutting_date > today:
 			return False
 		return True
 		
@@ -4847,6 +5198,15 @@ class kg_batch_arc_cutting(osv.osv):
 				
 					'header_id': entry.id,
 					'arc_cutting_id':item.id,
+					'qty': item.arc_cutting_qty,
+					'accept_qty': item.arc_cutting_qty,
+					'date': entry.arc_cutting_date,
+					'shift_id': entry.shift_id.id,
+					'done_by': entry.done_by,
+					'contractor_id': entry.contractor_id.id,
+					'employee_name': entry.employee_name,
+					'weight': entry.weight,
+					'remarks':  entry.remarks
 				}
 				
 				line_id = line_obj.create(cr, uid,vals)
@@ -4863,18 +5223,25 @@ class kg_batch_arc_cutting(osv.osv):
 						_('System not allow to confirm without Line Items !!'))
 						
 						
-		### Updation against Bactch Fettling Accept ###
+		### Updation against Bactch Arc Cutting ###
 		for item in entry.line_ids:
 			reject_qty = item.qty - item.accept_qty
-			if reject_qty > 0 and item.remarks == False:
+			if item.reject_qty > 0 and item.reject_remarks_id.id == False:
 				raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
 			
 			fettling_obj.write(cr, uid,item.arc_cutting_id.id,{
-			'remarks':item.remarks,
+			'arc_cutting_remarks':item.remarks,
 			'arc_cutting_accept_qty': item.accept_qty,
-			'arc_cutting_reject_qty': reject_qty,
+			'arc_cutting_reject_qty': item.reject_qty,
 			'arc_cutting_accept_user_id': item.accept_user_id.id,
+			'arc_cutting_reject_remarks_id': item.reject_remarks_id.id,
+			'arc_cutting_date': item.date,
+			'arc_cutting_shift_id': item.shift_id.id,
+			'arc_cutting_contractor': item.contractor_id.id,
+			'arc_cutting_employee': item.employee_name,
+			'arc_cutting_by': item.done_by,
+			'arc_cutting_weight': item.weight,
 			})
 			fettling_obj.arc_cutting_update(cr, uid, [item.arc_cutting_id.id])
 			
@@ -4926,7 +5293,10 @@ class ch_batch_arc_cutting_line(osv.osv):
 		'weight':fields.integer('Weight(kgs)'),
 		'remarks': fields.text('Remarks'),
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
-		'accept_user_id': fields.many2one('res.users', 'Accepted By'),	
+		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
+		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'employee_name': fields.char('Employee',size=128),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),	
 		
 		
 	}
@@ -4939,6 +5309,22 @@ class ch_batch_arc_cutting_line(osv.osv):
 		
 	}
 	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		entry_date = str(rec.date)
+		if entry_date > today:
+			return False
+		return True
+		
+	_constraints = [		
+			  
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['Line Items']),
+  
+	   ]
+	
 	
 	def create(self, cr, uid, vals, context=None):
 		return super(ch_batch_arc_cutting_line, self).create(cr, uid, vals, context=context)
@@ -4950,6 +5336,239 @@ class ch_batch_arc_cutting_line(osv.osv):
 		
 	
 ch_batch_arc_cutting_line()
+
+
+class kg_batch_heat_treatment(osv.osv):
+
+	_name = "kg.batch.heat.treatment"
+	_description = "Heat Treatment Batch"
+	
+	
+	_columns = {
+	
+		### Header Details ####
+		'name': fields.char('Batch No.', size=128,select=True),
+		'entry_date': fields.date('Batch Date',required=True),
+		'remarks': fields.text('Remarks'),
+		'cancel_remark': fields.text('Cancel Remarks'),
+		'active': fields.boolean('Active'),
+		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed')],'Status', readonly=True),
+
+		'heat_treatment_ids':fields.many2many('kg.fettling','m2m_heat_treatment_details' , 'batch_id', 'heat_treatment_id', 'Heat Treatment Items',
+			domain="[('stage_name','=','HEAT TREATMENT'),('state','=','accept')]"),
+			
+		'line_ids': fields.one2many('ch.batch.heat.treatment.line', 'header_id', "Batch Line Details"),
+		
+		'flag_batchline':fields.boolean('Batch Line Created'),
+		
+		'heat_cycle_no':fields.char('Heat Cycle No.', size=128),
+		'heat_treatment_date': fields.date('Date',required=True),
+		'heat_specification':fields.char('Specification', size=128),
+		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'employee_name': fields.char('Employee',size=128),
+		'each_weight':fields.integer('Each Weight(kgs)'),
+
+		### Entry Info ####
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
+		
+		'crt_date': fields.datetime('Creation Date',readonly=True),
+		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
+		
+		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
+		'confirm_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),		
+		
+		'update_date': fields.datetime('Last Updated Date', readonly=True),
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),	
+		
+	}
+	
+	_defaults = {
+	
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_batch_heat_treatment', context=c),
+		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'heat_treatment_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'user_id': lambda obj, cr, uid, context: uid,
+		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
+		'active': True,
+		'state':'draft'
+		
+		
+	}
+	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		entry_date = str(rec.entry_date)
+		heat_treatment_date = str(rec.heat_treatment_date)
+		if entry_date > today:
+			return False
+		if heat_treatment_date > today:
+			return False
+		return True
+		
+	_constraints = [		
+			  
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
+  
+	   ]	
+
+	def update_line_items(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])		
+		fettling_obj = self.pool.get('kg.fettling')
+		line_obj = self.pool.get('ch.batch.heat.treatment.line')
+		
+		del_sql = """ delete from ch_batch_heat_treatment_line where header_id=%s """ %(ids[0])
+		cr.execute(del_sql)
+		
+		
+		if entry.heat_treatment_ids:
+		
+			for item in entry.heat_treatment_ids:
+				
+				
+				vals = {
+				
+					'header_id': entry.id,
+					'heat_treatment_id':item.id,
+					'qty': item.heat_total_qty,
+					'accept_qty': item.heat_total_qty,
+					'date': entry.heat_treatment_date,
+					'done_by': entry.done_by,
+					'contractor_id': entry.contractor_id.id,
+					'employee_name': entry.employee_name,
+					'each_weight': entry.each_weight,
+					'remarks':  entry.remarks,
+					'heat_cycle_no': entry.heat_cycle_no,
+					'heat_specification': entry.heat_specification,
+				}
+				
+				
+				
+				line_id = line_obj.create(cr, uid,vals)
+				
+			self.write(cr, uid, ids, {'flag_batchline': True})
+			
+		return True
+		
+	def entry_confirm(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
+		fettling_obj = self.pool.get('kg.fettling')		
+		if not entry.line_ids:
+			raise osv.except_osv(_('Warning!'),
+						_('System not allow to confirm without Line Items !!'))
+						
+						
+		### Updation against Bactch Heat Treatment ###
+		for item in entry.line_ids:
+			#~ reject_qty = item.qty - item.accept_qty
+			#~ if item.reject_qty > 0 and item.reject_remarks_id.id == False:
+				#~ raise osv.except_osv(_('Warning!'),
+				#~ _('Remarks is must for Rejection !!'))
+			
+			fettling_obj.write(cr, uid,item.heat_treatment_id.id,{
+			'heat_remarks':item.remarks,
+			'heat_qty': item.accept_qty,
+			'heat_date': item.date,
+			'heat_contractor': item.contractor_id.id,
+			'heat_employee': item.employee_name,
+			'heat_by': item.done_by,
+			'heat_each_weight': item.each_weight,
+			'heat_cycle_no': item.heat_cycle_no,
+			'heat_specification': item.heat_specification,
+			})
+			fettling_obj.heat_treatment_update(cr, uid, [item.heat_treatment_id.id])
+			
+		### Sequence Number Generation  ###
+		batch_name = ''	
+		batch_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.batch.heat.treatment')])
+		seq_rec = self.pool.get('ir.sequence').browse(cr,uid,batch_seq_id[0])
+		cr.execute("""select generatesequenceno(%s,'%s','%s') """%(batch_seq_id[0],seq_rec.code,entry.entry_date))
+		batch_name = cr.fetchone();
+		self.write(cr, uid, ids, {'name':batch_name[0],'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+	
+		return True
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(kg_batch_heat_treatment, self).write(cr, uid, ids, vals, context)
+		
+	def unlink(self,cr,uid,ids,context=None):
+		unlink_ids = []		
+		for rec in self.browse(cr,uid,ids):
+			if rec.state != 'draft':
+				raise osv.except_osv(_('Warning!'),
+						_('You can not delete this entry !!'))
+		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
+	
+kg_batch_heat_treatment()
+
+
+class ch_batch_heat_treatment_line(osv.osv):
+
+	_name = "ch.batch.heat.treatment.line"
+	_description = "Heat Treatment Batch Line"
+	
+	_columns = {
+	
+		'header_id':fields.many2one('kg.batch.heat.treatment', 'Header', required=1, ondelete='cascade'),		
+		'heat_treatment_id':fields.many2one('kg.fettling', 'Fettling'),
+		'order_no': fields.related('heat_treatment_id','order_no', type='char', string='WO No.', store=True, readonly=True),
+		'pattern_id': fields.related('heat_treatment_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern Number', store=True, readonly=True),
+		'pattern_name': fields.related('heat_treatment_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
+		'moc_id': fields.related('heat_treatment_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
+		'date': fields.date('Date', store=True, required=True),
+		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'qty': fields.integer('Total Qty'),
+		'accept_qty': fields.integer('Accepted Qty'),
+		'each_weight':fields.integer('Each Weight(kgs)'),
+		'remarks': fields.text('Remarks'),
+		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
+		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'employee_name': fields.char('Employee',size=128),
+		'heat_cycle_no':fields.char('Heat Cycle No.', size=128),
+		'heat_specification':fields.char('Specification', size=128),
+			
+		
+		
+	}
+	
+	_defaults = {
+		
+		'date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'accept_user_id':lambda obj, cr, uid, context: uid,
+		
+	}
+	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		entry_date = str(rec.date)
+		if entry_date > today:
+			return False
+		return True
+		
+	_constraints = [		
+			  
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['Line Items']),
+  
+	   ]
+	
+	
+	def create(self, cr, uid, vals, context=None):
+		return super(ch_batch_heat_treatment_line, self).create(cr, uid, vals, context=context)
+		
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		return super(ch_batch_heat_treatment_line, self).write(cr, uid, ids, vals, context)
+		
+		
+	
+ch_batch_heat_treatment_line()
 
 
 class kg_batch_rough_grinding(osv.osv):
@@ -4969,11 +5588,18 @@ class kg_batch_rough_grinding(osv.osv):
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed')],'Status', readonly=True),
 
 		'rough_grinding_ids':fields.many2many('kg.fettling','m2m_rough_grinding_details' , 'batch_id', 'rough_grinding_id', 'Rough Grinding Items',
-			domain="[('stage_name','=','ROUGH GRINDING')]"),
+			domain="[('stage_name','=','ROUGH GRINDING'),('state','=','accept')]"),
 			
 		'line_ids': fields.one2many('ch.batch.rough.grinding.line', 'header_id', "Batch Line Details"),
 		
 		'flag_batchline':fields.boolean('Batch Line Created'),
+		
+		'rough_grinding_date': fields.date('Date', store=True, required=True),
+		'shift_id':fields.many2one('kg.shift.master','Shift'),
+		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'employee_name': fields.char('Employee',size=128),
+		'weight':fields.integer('Weight(kgs)'),
 
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
@@ -4993,6 +5619,7 @@ class kg_batch_rough_grinding(osv.osv):
 	
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_batch_rough_grinding', context=c),
 		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'rough_grinding_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'active': True,
@@ -5006,7 +5633,10 @@ class kg_batch_rough_grinding(osv.osv):
 		today = date.today()
 		today = str(today)
 		entry_date = str(rec.entry_date)
+		rough_grinding_date = str(rec.rough_grinding_date)
 		if entry_date > today:
+			return False
+		if rough_grinding_date > today:
 			return False
 		return True
 		
@@ -5035,6 +5665,15 @@ class kg_batch_rough_grinding(osv.osv):
 				
 					'header_id': entry.id,
 					'rough_grinding_id':item.id,
+					'qty': item.rough_grinding_qty,
+					'accept_qty': item.rough_grinding_qty,
+					'date': entry.rough_grinding_date,
+					'shift_id': entry.shift_id.id,
+					'done_by': entry.done_by,
+					'contractor_id': entry.contractor_id.id,
+					'employee_name': entry.employee_name,
+					'weight': entry.weight,
+					'remarks':  entry.remarks
 				}
 				
 				line_id = line_obj.create(cr, uid,vals)
@@ -5051,18 +5690,26 @@ class kg_batch_rough_grinding(osv.osv):
 						_('System not allow to confirm without Line Items !!'))
 						
 						
-		### Updation against Bactch Fettling Accept ###
+		### Updation against Bactch Rough Grinding ###
 		for item in entry.line_ids:
 			reject_qty = item.qty - item.accept_qty
-			if reject_qty > 0 and item.remarks == False:
+			if item.reject_qty > 0 and item.reject_remarks_id.id == False:
 				raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
 			
 			fettling_obj.write(cr, uid,item.rough_grinding_id.id,{
-			'remarks':item.remarks,
+			'rough_grinding_remarks':item.remarks,
 			'rough_grinding_accept_qty': item.accept_qty,
-			'rough_grinding_reject_qty': reject_qty,
+			'rough_grinding_reject_qty': item.reject_qty,
+			'rough_grinding_rework_qty': item.rework_qty,
 			'rough_grinding_accept_user_id': item.accept_user_id.id,
+			'rough_grinding_reject_remarks_id': item.reject_remarks_id.id,
+			'rough_grinding_date': item.date,
+			'rough_grinding_shift_id': item.shift_id.id,
+			'rough_grinding_contractor': item.contractor_id.id,
+			'rough_grinding_employee': item.employee_name,
+			'rough_grinding_by': item.done_by,
+			'rough_grinding_weight': item.weight,
 			})
 			fettling_obj.rough_grinding_update(cr, uid, [item.rough_grinding_id.id])
 			
@@ -5111,10 +5758,14 @@ class ch_batch_rough_grinding_line(osv.osv):
 		'qty': fields.integer('Total Qty'),
 		'accept_qty': fields.integer('Accepted Qty'),
 		'reject_qty': fields.integer('Rejected Qty'),
+		'rework_qty': fields.integer('Rework Qty'),
 		'weight':fields.integer('Weight(kgs)'),
 		'remarks': fields.text('Remarks'),
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),	
+		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'employee_name': fields.char('Employee',size=128),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		
 		
 	}
@@ -5127,6 +5778,22 @@ class ch_batch_rough_grinding_line(osv.osv):
 		
 	}
 	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		entry_date = str(rec.date)
+		if entry_date > today:
+			return False
+		return True
+		
+	_constraints = [		
+			  
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['Line Items']),
+  
+	   ]
+	
 	
 	def create(self, cr, uid, vals, context=None):
 		return super(ch_batch_rough_grinding_line, self).create(cr, uid, vals, context=context)
@@ -5138,6 +5805,241 @@ class ch_batch_rough_grinding_line(osv.osv):
 		
 	
 ch_batch_rough_grinding_line()
+
+
+
+class kg_batch_welding(osv.osv):
+
+	_name = "kg.batch.welding"
+	_description = "Welding Batch"
+	
+	
+	_columns = {
+	
+		### Header Details ####
+		'name': fields.char('Batch No.', size=128,select=True),
+		'entry_date': fields.date('Batch Date',required=True),
+		'remarks': fields.text('Remarks'),
+		'cancel_remark': fields.text('Cancel Remarks'),
+		'active': fields.boolean('Active'),
+		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed')],'Status', readonly=True),
+
+		'welding_ids':fields.many2many('kg.fettling','m2m_welding_details' , 'batch_id', 'welding_id', 'Welding Items',
+			domain="[('welding_stage_name','=','WELDING'),('welding_state','=','progress')]"),
+			
+		'line_ids': fields.one2many('ch.batch.welding.line', 'header_id', "Batch Line Details"),
+		
+		'flag_batchline':fields.boolean('Batch Line Created'),
+		
+		'welding_date': fields.date('Date', store=True, required=True),
+		'shift_id':fields.many2one('kg.shift.master','Shift'),
+		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'employee_name': fields.char('Employee',size=128),
+		'weight':fields.integer('Weight(kgs)'),
+
+		### Entry Info ####
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
+		
+		'crt_date': fields.datetime('Creation Date',readonly=True),
+		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
+		
+		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
+		'confirm_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),		
+		
+		'update_date': fields.datetime('Last Updated Date', readonly=True),
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),	
+		
+	}
+	
+	_defaults = {
+	
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_batch_welding', context=c),
+		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'welding_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'user_id': lambda obj, cr, uid, context: uid,
+		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
+		'active': True,
+		'state':'draft'
+		
+		
+	}
+	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		entry_date = str(rec.entry_date)
+		welding_date = str(rec.welding_date)
+		if entry_date > today:
+			return False
+		if welding_date > today:
+			return False
+		return True
+		
+	_constraints = [		
+			  
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
+  
+	   ]	
+
+	def update_line_items(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])		
+		fettling_obj = self.pool.get('kg.fettling')
+		line_obj = self.pool.get('ch.batch.welding.line')
+		
+		del_sql = """ delete from ch_batch_welding_line where header_id=%s """ %(ids[0])
+		cr.execute(del_sql)
+		
+		
+		if entry.welding_ids:
+		
+			for item in entry.welding_ids:
+				
+				
+				vals = {
+				
+					'header_id': entry.id,
+					'welding_id':item.id,
+					'qty': item.welding_qty,
+					'accept_qty': item.welding_qty,
+					'date': entry.welding_date,
+					'shift_id': entry.shift_id.id,
+					'done_by': entry.done_by,
+					'contractor_id': entry.contractor_id.id,
+					'employee_name': entry.employee_name,
+					'weight': entry.weight,
+					'remarks':  entry.remarks
+				}
+				
+				line_id = line_obj.create(cr, uid,vals)
+				
+			self.write(cr, uid, ids, {'flag_batchline': True})
+			
+		return True
+		
+	def entry_confirm(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
+		fettling_obj = self.pool.get('kg.fettling')		
+		if not entry.line_ids:
+			raise osv.except_osv(_('Warning!'),
+						_('System not allow to confirm without Line Items !!'))
+						
+						
+		### Updation against Bactch WELDING ###
+		for item in entry.line_ids:
+			reject_qty = item.qty - item.accept_qty
+			if item.reject_qty > 0 and item.reject_remarks_id.id == False:
+				raise osv.except_osv(_('Warning!'),
+				_('Remarks is must for Rejection !!'))
+			
+			fettling_obj.write(cr, uid,item.welding_id.id,{
+			'welding_remarks':item.remarks,
+			'welding_accept_qty': item.accept_qty,
+			'welding_reject_qty': item.reject_qty,
+			'welding_accept_user_id': item.accept_user_id.id,
+			'welding_reject_remarks_id': item.reject_remarks_id.id,
+			'welding_date': item.date,
+			'welding_shift_id': item.shift_id.id,
+			'welding_contractor': item.contractor_id.id,
+			'welding_employee': item.employee_name,
+			'welding_by': item.done_by,
+			'welding_weight': item.weight,
+			})
+			fettling_obj.welding_update(cr, uid, [item.welding_id.id])
+			
+		### Sequence Number Generation  ###
+		batch_name = ''	
+		batch_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.batch.welding')])
+		seq_rec = self.pool.get('ir.sequence').browse(cr,uid,batch_seq_id[0])
+		cr.execute("""select generatesequenceno(%s,'%s','%s') """%(batch_seq_id[0],seq_rec.code,entry.entry_date))
+		batch_name = cr.fetchone();
+		self.write(cr, uid, ids, {'name':batch_name[0],'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+	
+		return True
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(kg_batch_welding, self).write(cr, uid, ids, vals, context)
+		
+	def unlink(self,cr,uid,ids,context=None):
+		unlink_ids = []		
+		for rec in self.browse(cr,uid,ids):
+			if rec.state != 'draft':
+				raise osv.except_osv(_('Warning!'),
+						_('You can not delete this entry !!'))
+		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
+	
+kg_batch_welding()
+
+
+class ch_batch_welding_line(osv.osv):
+
+	_name = "ch.batch.welding.line"
+	_description = "Welding Batch Line"
+	
+	_columns = {
+	
+		'header_id':fields.many2one('kg.batch.welding', 'Header', required=1, ondelete='cascade'),		
+		'welding_id':fields.many2one('kg.fettling', 'Fettling'),
+		'name': fields.related('welding_id','welding_name', type='char', string='Production Entry Code', store=True, readonly=True),
+		'order_no': fields.related('welding_id','order_no', type='char', string='WO No.', store=True, readonly=True),
+		'pattern_id': fields.related('welding_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern Number', store=True, readonly=True),
+		'pattern_name': fields.related('welding_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
+		'moc_id': fields.related('welding_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
+		'date': fields.date('Date', store=True, required=True),
+		'shift_id':fields.many2one('kg.shift.master','Shift'),
+		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'qty': fields.integer('Total Qty'),
+		'accept_qty': fields.integer('Accepted Qty'),
+		'reject_qty': fields.integer('Rejected Qty'),
+		'weight':fields.integer('Weight(kgs)'),
+		'remarks': fields.text('Remarks'),
+		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
+		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
+		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'employee_name': fields.char('Employee',size=128),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),	
+		
+		
+	}
+	
+	_defaults = {
+		
+		'date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'reject_user_id':lambda obj, cr, uid, context: uid,
+		'accept_user_id':lambda obj, cr, uid, context: uid,
+		
+	}
+	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		entry_date = str(rec.date)
+		if entry_date > today:
+			return False
+		return True
+		
+	_constraints = [		
+			  
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['Line Items']),
+  
+	   ]
+	
+	
+	def create(self, cr, uid, vals, context=None):
+		return super(ch_batch_welding_line, self).create(cr, uid, vals, context=context)
+		
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		return super(ch_batch_welding_line, self).write(cr, uid, ids, vals, context)
+		
+		
+	
+ch_batch_welding_line()
 
 
 class kg_batch_finish_grinding(osv.osv):
@@ -5157,11 +6059,18 @@ class kg_batch_finish_grinding(osv.osv):
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed')],'Status', readonly=True),
 
 		'finish_grinding_ids':fields.many2many('kg.fettling','m2m_finish_grinding_details' , 'batch_id', 'finish_grinding_id', 'Finish Grinding Items',
-			domain="[('stage_name','=','FINISH GRINDING')]"),
+			domain="[('stage_name','=','FINISH GRINDING'),('state','=','accept')]"),
 			
 		'line_ids': fields.one2many('ch.batch.finish.grinding.line', 'header_id', "Batch Line Details"),
 		
 		'flag_batchline':fields.boolean('Batch Line Created'),
+		
+		'finish_grinding_date': fields.date('Date', store=True, required=True),
+		'shift_id':fields.many2one('kg.shift.master','Shift'),
+		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'employee_name': fields.char('Employee',size=128),
+		'weight':fields.integer('Weight(kgs)'),
 
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
@@ -5181,6 +6090,7 @@ class kg_batch_finish_grinding(osv.osv):
 	
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_batch_finish_grinding', context=c),
 		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'finish_grinding_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'active': True,
@@ -5194,7 +6104,10 @@ class kg_batch_finish_grinding(osv.osv):
 		today = date.today()
 		today = str(today)
 		entry_date = str(rec.entry_date)
+		finish_grinding_date = str(rec.finish_grinding_date)
 		if entry_date > today:
+			return False
+		if finish_grinding_date > today:
 			return False
 		return True
 		
@@ -5223,6 +6136,15 @@ class kg_batch_finish_grinding(osv.osv):
 				
 					'header_id': entry.id,
 					'finish_grinding_id':item.id,
+					'qty': item.finish_grinding_qty,
+					'accept_qty': item.finish_grinding_qty,
+					'date': entry.finish_grinding_date,
+					'shift_id': entry.shift_id.id,
+					'done_by': entry.done_by,
+					'contractor_id': entry.contractor_id.id,
+					'employee_name': entry.employee_name,
+					'weight': entry.weight,
+					'remarks':  entry.remarks
 				}
 				
 				line_id = line_obj.create(cr, uid,vals)
@@ -5239,18 +6161,25 @@ class kg_batch_finish_grinding(osv.osv):
 						_('System not allow to confirm without Line Items !!'))
 						
 						
-		### Updation against Bactch Fettling Accept ###
+		### Updation against Bactch Finish Grinding ###
 		for item in entry.line_ids:
 			reject_qty = item.qty - item.accept_qty
-			if reject_qty > 0 and item.remarks == False:
+			if item.reject_qty > 0 and item.reject_remarks_id.id == False:
 				raise osv.except_osv(_('Warning!'),
 				_('Remarks is must for Rejection !!'))
 			
 			fettling_obj.write(cr, uid,item.finish_grinding_id.id,{
-			'remarks':item.remarks,
+			'finish_grinding_remarks':item.remarks,
 			'finish_grinding_accept_qty': item.accept_qty,
-			'finish_grinding_reject_qty': reject_qty,
+			'finish_grinding_reject_qty': item.reject_qty,
 			'finish_grinding_accept_user_id': item.accept_user_id.id,
+			'finish_grinding_reject_remarks_id': item.reject_remarks_id.id,
+			'finish_grinding_date': item.date,
+			'finish_grinding_shift_id': item.shift_id.id,
+			'finish_grinding_contractor': item.contractor_id.id,
+			'finish_grinding_employee': item.employee_name,
+			'finish_grinding_by': item.done_by,
+			'finish_grinding_weight': item.weight,
 			})
 			fettling_obj.finish_grinding_update(cr, uid, [item.finish_grinding_id.id])
 			
@@ -5302,7 +6231,10 @@ class ch_batch_finish_grinding_line(osv.osv):
 		'weight':fields.integer('Weight(kgs)'),
 		'remarks': fields.text('Remarks'),
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
-		'accept_user_id': fields.many2one('res.users', 'Accepted By'),	
+		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
+		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'employee_name': fields.char('Employee',size=128),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),	
 		
 		
 	}
@@ -5315,6 +6247,22 @@ class ch_batch_finish_grinding_line(osv.osv):
 		
 	}
 	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		entry_date = str(rec.date)
+		if entry_date > today:
+			return False
+		return True
+		
+	_constraints = [		
+			  
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['Line Items']),
+  
+	   ]
+	
 	
 	def create(self, cr, uid, vals, context=None):
 		return super(ch_batch_finish_grinding_line, self).create(cr, uid, vals, context=context)
@@ -5326,6 +6274,241 @@ class ch_batch_finish_grinding_line(osv.osv):
 		
 	
 ch_batch_finish_grinding_line()
+
+class kg_batch_reshot_blasting(osv.osv):
+
+	_name = "kg.batch.reshot.blasting"
+	_description = "Reshot Blasting Batch"
+	
+	
+	_columns = {
+	
+		### Header Details ####
+		'name': fields.char('Batch No.', size=128,select=True),
+		'entry_date': fields.date('Batch Date',required=True),
+		'remarks': fields.text('Remarks'),
+		'cancel_remark': fields.text('Cancel Remarks'),
+		'active': fields.boolean('Active'),
+		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed')],'Status', readonly=True),
+
+		'reshot_blasting_ids':fields.many2many('kg.fettling','m2m_reshot_blasting_details' , 'batch_id', 'reshot_blasting_id', 'Reshot Blasting Items',
+			domain="[('stage_name','=','RE SHOT BLASTING'),('state','=','accept')]"),
+			
+		'line_ids': fields.one2many('ch.batch.reshot.blasting.line', 'header_id', "Batch Line Details"),
+		
+		'flag_batchline':fields.boolean('Batch Line Created'),
+		
+		'reshot_blasting_date': fields.date('Date', required=True),
+		'shift_id':fields.many2one('kg.shift.master','Shift'),
+		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'employee_name': fields.char('Employee',size=128),
+		'weight':fields.integer('Weight(kgs)'),
+
+		### Entry Info ####
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
+		
+		'crt_date': fields.datetime('Creation Date',readonly=True),
+		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
+		
+		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
+		'confirm_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),		
+		
+		'update_date': fields.datetime('Last Updated Date', readonly=True),
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),	
+		
+	}
+	
+	_defaults = {
+	
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_batch_reshot_blasting', context=c),
+		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'reshot_blasting_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'user_id': lambda obj, cr, uid, context: uid,
+		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
+		'active': True,
+		'state':'draft'
+		
+		
+	}
+	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		entry_date = str(rec.entry_date)
+		reshot_blasting_date = str(rec.reshot_blasting_date)
+		if entry_date > today:
+			return False
+		if reshot_blasting_date > today:
+			return False
+		return True
+		
+	_constraints = [		
+			  
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
+  
+	   ]	
+
+	def update_line_items(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])		
+		fettling_obj = self.pool.get('kg.fettling')
+		line_obj = self.pool.get('ch.batch.reshot.blasting.line')
+		
+		del_sql = """ delete from ch_batch_reshot_blasting_line where header_id=%s """ %(ids[0])
+		cr.execute(del_sql)
+		
+		
+		if entry.reshot_blasting_ids:
+		
+			for item in entry.reshot_blasting_ids:
+				
+				
+				vals = {
+				
+					'header_id': entry.id,
+					'reshot_blasting_id':item.id,
+					'qty': item.reshot_blasting_qty,
+					'accept_qty': item.reshot_blasting_qty,
+					'date': entry.reshot_blasting_date,
+					'shift_id': entry.shift_id.id,
+					'done_by': entry.done_by,
+					'contractor_id': entry.contractor_id.id,
+					'employee_name': entry.employee_name,
+					'weight': entry.weight,
+					'remarks':  entry.remarks
+				}
+				
+				line_id = line_obj.create(cr, uid,vals)
+				
+			self.write(cr, uid, ids, {'flag_batchline': True})
+			
+		return True
+		
+	def entry_confirm(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
+		fettling_obj = self.pool.get('kg.fettling')		
+		if not entry.line_ids:
+			raise osv.except_osv(_('Warning!'),
+						_('System not allow to confirm without Line Items !!'))
+						
+						
+		### Updation against Bactch Reshot Blast ###
+		for item in entry.line_ids:
+			reject_qty = item.qty - item.accept_qty
+			if item.reject_qty > 0 and item.reject_remarks_id.id == False:
+				raise osv.except_osv(_('Warning!'),
+				_('Remarks is must for Rejection !!'))
+			
+			fettling_obj.write(cr, uid,item.reshot_blasting_id.id,{
+			'reshot_blasting_remarks':item.remarks,
+			'reshot_blasting_accept_qty': item.accept_qty,
+			'reshot_blasting_reject_qty': item.reject_qty,
+			'reshot_blasting_accept_user_id': item.accept_user_id.id,
+			'reshot_blasting_reject_remarks_id': item.reject_remarks_id.id,
+			'reshot_blasting_date': item.date,
+			'reshot_blasting_shift_id': item.shift_id.id,
+			'reshot_blasting_contractor': item.contractor_id.id,
+			'reshot_blasting_employee': item.employee_name,
+			'reshot_blasting_by': item.done_by,
+			'reshot_blasting_weight': item.weight,
+			})
+			fettling_obj.reshot_blasting_update(cr, uid, [item.reshot_blasting_id.id])
+			
+		### Sequence Number Generation  ###
+		batch_name = ''	
+		batch_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.batch.reshot.blasting')])
+		seq_rec = self.pool.get('ir.sequence').browse(cr,uid,batch_seq_id[0])
+		cr.execute("""select generatesequenceno(%s,'%s','%s') """%(batch_seq_id[0],seq_rec.code,entry.entry_date))
+		batch_name = cr.fetchone();
+		self.write(cr, uid, ids, {'name':batch_name[0],'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+	
+		return True
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(kg_batch_reshot_blasting, self).write(cr, uid, ids, vals, context)
+		
+	def unlink(self,cr,uid,ids,context=None):
+		unlink_ids = []		
+		for rec in self.browse(cr,uid,ids):
+			if rec.state != 'draft':
+				raise osv.except_osv(_('Warning!'),
+						_('You can not delete this entry !!'))
+		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
+	
+kg_batch_reshot_blasting()
+
+
+class ch_batch_reshot_blasting_line(osv.osv):
+
+	_name = "ch.batch.reshot.blasting.line"
+	_description = "Reshot Blasting Batch Line"
+	
+	_columns = {
+	
+		'header_id':fields.many2one('kg.batch.reshot.blasting', 'Header', required=1, ondelete='cascade'),		
+		'reshot_blasting_id':fields.many2one('kg.fettling', 'Fettling'),
+		'name': fields.related('reshot_blasting_id','reshot_blasting_name', type='char', string='Production Entry Code', store=True, readonly=True),
+		'order_no': fields.related('reshot_blasting_id','order_no', type='char', string='WO No.', store=True, readonly=True),
+		'pattern_id': fields.related('reshot_blasting_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern Number', store=True, readonly=True),
+		'pattern_name': fields.related('reshot_blasting_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
+		'moc_id': fields.related('reshot_blasting_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
+		'date': fields.date('Date', store=True, required=True),
+		'shift_id':fields.many2one('kg.shift.master','Shift'),
+		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'qty': fields.integer('Total Qty'),
+		'accept_qty': fields.integer('Accepted Qty'),
+		'reject_qty': fields.integer('Rejected Qty'),
+		'weight':fields.integer('Weight(kgs)'),
+		'remarks': fields.text('Remarks'),
+		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
+		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
+		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'employee_name': fields.char('Employee',size=128),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),	
+		
+		
+	}
+	
+	_defaults = {
+		
+		'date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'reject_user_id':lambda obj, cr, uid, context: uid,
+		'accept_user_id':lambda obj, cr, uid, context: uid,
+		
+	}
+	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		entry_date = str(rec.date)
+		if entry_date > today:
+			return False
+		return True
+		
+	_constraints = [		
+			  
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['Line Items']),
+  
+	   ]
+	
+	
+	def create(self, cr, uid, vals, context=None):
+		return super(ch_batch_reshot_blasting_line, self).create(cr, uid, vals, context=context)
+		
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		return super(ch_batch_reshot_blasting_line, self).write(cr, uid, ids, vals, context)
+		
+		
+	
+ch_batch_reshot_blasting_line()
+
+
 
 
 

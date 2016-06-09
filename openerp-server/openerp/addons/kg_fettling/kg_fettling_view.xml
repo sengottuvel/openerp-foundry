@@ -29,6 +29,7 @@
 								<field name="inward_reject_qty" attrs="{'readonly': [('state','in',['accept','complete'])]}"/>
 								<field name="inward_reject_remarks_id" attrs="{'readonly': [('state','in',['accept','complete'])]}"/>
 								<field name="inward_remarks" attrs="{'readonly': [('state','in',['accept','complete'])]}"/>
+								
 							</group>					
 						</group>
 						<group string="Schedule Details">
@@ -37,13 +38,14 @@
 								<field name="order_priority" string="Category" readonly="1"/>
 								<field name="pattern_id" readonly="1"/>
 								<field name="moc_id" readonly="1"/>
-								<field name="pour_qty" readonly="1"/>
+								<field name="pour_date" readonly="1"/>
 							</group>											
 							<group>
 								<field name="order_delivery_date"/>
 								 <field name="pump_model_id" readonly="1"/>
 								 <field name="pattern_name" readonly="1"/>
 								 <field name="melting_id" readonly="1"/>
+								 <field name="pour_qty" readonly="1"/>
 							</group>					
 						</group>
 						<notebook>
@@ -172,22 +174,16 @@
 		
 
 	
-	<!-- Audit Log Xml Data Start
+	<!-- Audit Log Xml Data Start -->
 		
-        <record id="audit_production" model="audittrail.rule">
-            <field name="name">Audit Log Production</field>
-            <field name="object_id" eval="ref('kg_production.model_kg_production')"/>       
+        <record id="audit_fettling" model="audittrail.rule">
+            <field name="name">Audit Log Fettling</field>
+            <field name="object_id" eval="ref('kg_fettling.model_kg_fettling')"/>       
             <field name="state">subscribed</field>              
         </record>
         
-        
-        <record id="audit_stock" model="audittrail.rule">
-            <field name="name">Audit Log Foundry Stock</field>
-            <field name="object_id" eval="ref('kg_production.model_kg_foundry_stock')"/>       
-            <field name="state">subscribed</field>              
-        </record>
        
-    Audit Log Xml Data End-->
+    <!-- Audit Log Xml Data End-->
     
     <!-- Sequence Number Setting Starts Here -->
 	
@@ -262,6 +258,7 @@
 								<field name="knockout_reject_qty" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
 								<field name="stage_id" readonly="1"/>
 								<field name="stage_name" invisible="1"/>
+								
 							</group>											
 							<group>
 								<field name="knockout_date" required="1" attrs="{'readonly': [('stage_name','not in',['KNOCK OUT'])]}"/>
@@ -278,12 +275,14 @@
 								<field name="order_priority" string="Category"/>
 								<field name="pattern_id" readonly="1"/>
 							    <field name="moc_id" readonly="1"/> 
+							    <field name="pour_date" readonly="1"/> 
 							</group>											
 							<group>
 								<field name="order_delivery_date" readonly="1"/>
 								<field name="pump_model_id" readonly="1"/>
 								<field name="pattern_name" readonly="1"/>
 								<field name="melting_id" readonly="1"/>
+								<field name="pre_stage_date" readonly="1"/> 
 							</group>					
 						</group>
 						<notebook>
@@ -428,6 +427,7 @@
 					<header>
 						<button name="decoring_update" type="object" string="Update" class="oe_highlight"
 						attrs="{'invisible': [('stage_name','not in',['DECORING'])]}"/>
+						
 					</header>
 					<sheet>		
 						<group string="Decoring Updates">
@@ -456,12 +456,14 @@
 								<field name="order_priority" string="Category"/>
 								<field name="pattern_id" readonly="1"/>
 							    <field name="moc_id" readonly="1"/> 
+							    <field name="pour_date" readonly="1"/> 
 							</group>											
 							<group>
 								<field name="order_delivery_date" readonly="1"/>
 								<field name="pump_model_id" readonly="1"/>
 								<field name="pattern_name" readonly="1"/>
 								<field name="melting_id" readonly="1"/>
+								<field name="pre_stage_date" readonly="1"/> 
 							</group>					
 						</group>
 						<notebook>
@@ -631,13 +633,15 @@
 								<field name="order_no" readonly="1"/>
 								<field name="order_priority" string="Category"/>
 								<field name="pattern_id" readonly="1"/>
-							    <field name="moc_id" readonly="1"/> 
+							    <field name="moc_id" readonly="1"/>
+							    <field name="pour_date" readonly="1"/> 
 							</group>											
 							<group>
 								<field name="order_delivery_date" readonly="1"/>
 								<field name="pump_model_id" readonly="1"/>
 								<field name="pattern_name" readonly="1"/>
 								<field name="melting_id" readonly="1"/>
+								<field name="pre_stage_date" readonly="1"/> 
 							</group>					
 						</group>
 						<notebook>
@@ -809,13 +813,15 @@
 								<field name="order_no" readonly="1"/>
 								<field name="order_priority" string="Category"/>
 								<field name="pattern_id" readonly="1"/>
-							    <field name="moc_id" readonly="1"/> 
+							    <field name="moc_id" readonly="1"/>
+							    <field name="pour_date" readonly="1"/>  
 							</group>											
 							<group>
 								<field name="order_delivery_date" readonly="1"/>
 								<field name="pump_model_id" readonly="1"/>
 								<field name="pattern_name" readonly="1"/>
 								<field name="melting_id" readonly="1"/>
+								<field name="pre_stage_date" readonly="1"/> 
 							</group>					
 						</group>
 						<notebook>
@@ -989,12 +995,14 @@
 								<field name="order_priority" string="Category"/>
 								<field name="pattern_id" readonly="1"/>
 							    <field name="moc_id" readonly="1"/> 
+							    <field name="pour_date" readonly="1"/> 
 							</group>											
 							<group>
 								<field name="order_delivery_date" readonly="1"/>
 								<field name="pump_model_id" readonly="1"/>
 								<field name="pattern_name" readonly="1"/>
 								<field name="melting_id" readonly="1"/>
+								<field name="pre_stage_date" readonly="1"/> 
 							</group>					
 						</group>
 						<notebook>
@@ -1167,13 +1175,15 @@
 								<field name="order_no" readonly="1"/>
 								<field name="order_priority" string="Category"/>
 								<field name="pattern_id" readonly="1"/>
-							    <field name="moc_id" readonly="1"/> 
+							    <field name="moc_id" readonly="1"/>
+							    <field name="pour_date" readonly="1"/> 
 							</group>											
 							<group>
 								<field name="order_delivery_date" readonly="1"/>
 								<field name="pump_model_id" readonly="1"/>
 								<field name="pattern_name" readonly="1"/>
 								<field name="melting_id" readonly="1"/>
+								<field name="pre_stage_date" readonly="1"/> 
 							</group>					
 						</group>
 						<notebook>
@@ -1346,13 +1356,15 @@
 								<field name="order_no" readonly="1"/>
 								<field name="order_priority" string="Category"/>
 								<field name="pattern_id" readonly="1"/>
-							    <field name="moc_id" readonly="1"/> 
+							    <field name="moc_id" readonly="1"/>
+							    <field name="pour_date" readonly="1"/>  
 							</group>											
 							<group>
 								<field name="order_delivery_date" readonly="1"/>
 								<field name="pump_model_id" readonly="1"/>
 								<field name="pattern_name" readonly="1"/>
 								<field name="melting_id" readonly="1"/>
+								<field name="pre_stage_date" readonly="1"/> 
 							</group>					
 						</group>
 						<notebook>
@@ -1508,7 +1520,7 @@
 								<field name="heat_treatment_type" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
 								<field name="heat_set_temp" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
 								<field name="heat_socking_hr" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
-								<field name="heat_quencing_time" widget="float_time" invisibel="1" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
+								<field name="heat_quencing_time" invisible="1" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
 								<field name="heat_quenc_time" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
 								<field name="heat_quencing_after_temp" attrs="{'readonly': [('stage_name','not in',['HEAT TREATMENT'])]}"/>
 								<field name="heat_total_qty" required="1" string="Production Qty" readonly="1"/>
@@ -1538,13 +1550,15 @@
 								<field name="order_no" readonly="1"/>
 								<field name="order_priority" string="Category"/>
 								<field name="pattern_id" readonly="1"/>
-							    <field name="moc_id" readonly="1"/> 
+							    <field name="moc_id" readonly="1"/>
+							    <field name="pour_date" readonly="1"/>  
 							</group>											
 							<group>
 								<field name="order_delivery_date" readonly="1"/>
 								<field name="pump_model_id" readonly="1"/>
 								<field name="pattern_name" readonly="1"/>
 								<field name="melting_id" readonly="1"/>
+								<field name="pre_stage_date" readonly="1"/> 
 							</group>					
 						</group>
 						<notebook>
@@ -1696,13 +1710,15 @@
 								<field name="order_no" readonly="1"/>
 								<field name="order_priority" string="Category"/>
 								<field name="pattern_id" readonly="1"/>
-							    <field name="moc_id" readonly="1"/> 
+							    <field name="moc_id" readonly="1"/>
+							    <field name="pour_date" readonly="1"/>  
 							</group>											
 							<group>
 								<field name="order_delivery_date" readonly="1"/>
 								<field name="pump_model_id" readonly="1"/>
 								<field name="pattern_name" readonly="1"/>
 								<field name="melting_id" readonly="1"/>
+								<field name="pre_stage_date" readonly="1"/> 
 							</group>					
 						</group>
 						<notebook>
@@ -1877,12 +1893,14 @@
 								<field name="order_priority" string="Category"/>
 								<field name="pattern_id" readonly="1"/>
 							    <field name="moc_id" readonly="1"/> 
+							    <field name="pour_date" readonly="1"/> 
 							</group>											
 							<group>
 								<field name="order_delivery_date" readonly="1"/>
 								<field name="pump_model_id" readonly="1"/>
 								<field name="pattern_name" readonly="1"/>
 								<field name="melting_id" readonly="1"/>
+								<field name="pre_stage_date" readonly="1"/> 
 							</group>					
 						</group>
 						<notebook>
@@ -2056,13 +2074,15 @@
 								<field name="order_no" readonly="1"/>
 								<field name="order_priority" string="Category"/>
 								<field name="pattern_id" readonly="1"/>
-							    <field name="moc_id" readonly="1"/> 
+							    <field name="moc_id" readonly="1"/>
+							    <field name="pour_date" readonly="1"/>  
 							</group>											
 							<group>
 								<field name="order_delivery_date" readonly="1"/>
 								<field name="pump_model_id" readonly="1"/>
 								<field name="pattern_name" readonly="1"/>
 								<field name="melting_id" readonly="1"/>
+								<field name="pre_stage_date" readonly="1"/> 
 							</group>					
 						</group>
 						<notebook>
@@ -2236,12 +2256,14 @@
 								<field name="order_priority" string="Category"/>
 								<field name="pattern_id" readonly="1"/>
 							    <field name="moc_id" readonly="1"/> 
+							    <field name="pour_date" readonly="1"/> 
 							</group>											
 							<group>
 								<field name="order_delivery_date" readonly="1"/>
 								<field name="pump_model_id" readonly="1"/>
 								<field name="pattern_name" readonly="1"/>
 								<field name="melting_id" readonly="1"/>
+								<field name="pre_stage_date" readonly="1"/> 
 							</group>					
 						</group>
 						<notebook>
@@ -2374,6 +2396,28 @@
 	
 	<!-- Sequence Number Setting Ends Here -->
 	
+	<!-- Common Tree View Start for Batch -->
+	
+		<record id="t_tree_v_common_batch_tree" model="ir.ui.view">
+			<field name="name">Batch Tree</field>
+			<field name="model">kg.fettling</field>
+			<field name="priority" eval="2"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Batch Tree" create="false">					
+					<field name="order_no"/>
+					<field name="order_delivery_date"/>
+					<field name="order_priority" string="Category"/>
+					<field name="pump_model_id"/>
+					<field name="pattern_id"/>
+					<field name="pattern_name"/>
+					<field name="moc_id"/>
+					<field name="location"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
 	
 	<!-- Batch Entries Starts Here -->
 	
@@ -2394,10 +2438,12 @@
 							<group>
 								<field name="name" readonly="1"/>
 								<field name="flag_fettlingline" invisible="1"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+								
 							</group>											
 							<group>
 								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+								<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
 							</group>					
 						</group>
 						<notebook>
@@ -2407,16 +2453,17 @@
 										<field name="fettling_inward_no" readonly="1"/>
 										<field name="pour_qty" readonly="1"/>
 										<field name="accept_qty"/>
-										<field name="reject_qty" readonly="1"/>
+										<field name="reject_qty"/>
+										<field name="reject_remarks_id" attrs="{'required': [('reject_qty','>',0)]}"/>
 										<field name="accept_user_id"/>
-										<field name="reject_user_id"/>
+										<field name="reject_user_id" invisible="1"/>
 										<field name="remarks" widget="char"/>
 									</tree>
 								</field>
 							</page>
 							<page string="Select Fettling Items">	
 								<field name="fettling_line_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
-								context="{'tree_view_ref' : 't_tree_v_fettling_inward'}">
+								context="{'tree_view_ref' : 't_tree_v_common_batch_tree'}">
 									<tree string = "Fettling Items" create="false" edit="false">
 										<field name="name"/>
 										<field name="entry_date"/>
@@ -2513,25 +2560,19 @@
 		
 	<!-- Menu Action End-->
 	
-	<!-- Audit Log Xml Data Start
+	<!-- Audit Log Xml Data Start -->
 		
-        <record id="audit_pattern_issue" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Issue</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_kg_pattern_issue')"/>       
+        <record id="audit_batch_fettling_accept" model="audittrail.rule">
+            <field name="name">Audit Log Batch Fettling Accept</field>
+            <field name="object_id" eval="ref('kg_fettling.model_kg_fettling_batch_accept')"/>       
             <field name="state">subscribed</field>              
         </record>
 		
-        <record id="audit_pattern_batchissue" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Batch Issue</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_issue')"/>       
+        <record id="audit_batch_fettling_accept_line" model="audittrail.rule">
+            <field name="name">Audit Log Batch Fettling Accept Line</field>
+            <field name="object_id" eval="ref('kg_fettling.model_ch_fettling_batch_accept_line')"/>       
             <field name="state">subscribed</field>              
         </record>
-        
-        <record id="audit_pattern_batchissue_line" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Batch Issue Line</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_line')"/>       
-            <field name="state">subscribed</field>              
-        </record> -->
         
     <!-- Audit Log Xml Data End-->
     
@@ -2572,10 +2613,17 @@
 							<group>
 								<field name="name" readonly="1"/>
 								<field name="flag_batchline" invisible="1"/>
+								<field name="knockout_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="done_by" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="weight" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
 							</group>											
 							<group>
 								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+								<field name="shift_id" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')],'invisible':[('done_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')],'invisible':[('done_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>	
 							</group>					
 						</group>
 						<notebook>
@@ -2589,20 +2637,23 @@
 										<field name="pattern_name" invisible="1"/>
 										<field name="moc_id" invisible="1"/>
 										<field name="shift_id" required="1"/>
-										<field name="contractor_id" required="1"/>
-										<field name="qty" required="1"/>
+										<field name="done_by" required="1"/>
+										<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')]}"/>
+										<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')]}"/>
+										<field name="qty" string="Production Qty" required="1"/>
 										<field name="accept_qty" required="1"/>
-										<field name="reject_qty" readonly="1"/>
+										<field name="reject_qty"/>
 										<field name="weight"/>
 										<field name="accept_user_id"/>
-										<field name="reject_user_id"/>
+										<field name="reject_user_id" invisible="1"/>
+										<field name="reject_remarks_id" attrs="{'required':[('reject_qty','>',0)]}"/>
 										<field name="remarks" widget="char"/>
 									</tree>
 								</field>
 							</page>
 							<page string="Select Knock Out Items">
 								<field name="knock_out_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
-									context="{'tree_view_ref' : 't_tree_v_knock_out'}">
+									context="{'tree_view_ref' : 't_tree_v_common_batch_tree'}">
 									<tree string = "Knock Out Batch Items" create="false" edit="false">
 										<field name="knockout_name"/>
 										<field name="order_no"/>
@@ -2696,25 +2747,19 @@
 		
 	<!-- Menu Action End-->
 	
-	<!-- Audit Log Xml Data Start
+	<!-- Audit Log Xml Data Start -->
 		
-        <record id="audit_pattern_issue" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Issue</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_kg_pattern_issue')"/>       
+        <record id="audit_batch_knockout" model="audittrail.rule">
+            <field name="name">Audit Log Batch Knock Out</field>
+            <field name="object_id" eval="ref('kg_fettling.model_kg_batch_knock_out')"/>       
             <field name="state">subscribed</field>              
         </record>
 		
-        <record id="audit_pattern_batchissue" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Batch Issue</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_issue')"/>       
+        <record id="audit_batch_knockout_line" model="audittrail.rule">
+            <field name="name">Audit Log Knock Out Line</field>
+            <field name="object_id" eval="ref('kg_fettling.model_ch_batch_knockout_line')"/>       
             <field name="state">subscribed</field>              
         </record>
-        
-        <record id="audit_pattern_batchissue_line" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Batch Issue Line</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_line')"/>       
-            <field name="state">subscribed</field>              
-        </record> -->
         
     <!-- Audit Log Xml Data End-->
     
@@ -2755,10 +2800,17 @@
 							<group>
 								<field name="name" readonly="1"/>
 								<field name="flag_batchline" invisible="1"/>
+								<field name="decoring_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="done_by" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="weight" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
 							</group>											
 							<group>
 								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+								<field name="shift_id" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')],'invisible':[('done_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')],'invisible':[('done_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
 							</group>					
 						</group>
 						<notebook>
@@ -2772,20 +2824,23 @@
 										<field name="pattern_name" invisible="1"/>
 										<field name="moc_id" invisible="1"/>
 										<field name="shift_id" required="1"/>
-										<field name="contractor_id" required="1"/>
-										<field name="qty" required="1"/>
+										<field name="done_by" required="1"/>
+										<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')]}"/>
+										<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')]}"/>
+										<field name="qty" string="Production Qty" required="1"/>
 										<field name="accept_qty" required="1"/>
-										<field name="reject_qty" readonly="1"/>
+										<field name="reject_qty"/>
 										<field name="weight"/>
 										<field name="accept_user_id"/>
-										<field name="reject_user_id"/>
+										<field name="reject_user_id" invisible="1"/>
+										<field name="reject_remarks_id" attrs="{'required':[('reject_qty','>',0)]}"/>
 										<field name="remarks" widget="char"/>
 									</tree>
 								</field>
 							</page>
 							<page string="Select Decoring Items">
 								<field name="decoring_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
-									context="{'tree_view_ref' : 't_tree_v_decoring'}">
+									context="{'tree_view_ref' : 't_tree_v_common_batch_tree'}">
 									<tree string = "Decoring Batch Items" create="false" edit="false">
 										<field name="decoring_name"/>
 										<field name="order_no"/>
@@ -2879,25 +2934,19 @@
 		
 	<!-- Menu Action End-->
 	
-	<!-- Audit Log Xml Data Start
+	<!-- Audit Log Xml Data Start -->
 		
-        <record id="audit_pattern_issue" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Issue</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_kg_pattern_issue')"/>       
+        <record id="audit_batch_decoring" model="audittrail.rule">
+            <field name="name">Audit Log Batch Decoring</field>
+            <field name="object_id" eval="ref('kg_fettling.model_kg_batch_decoring')"/>       
             <field name="state">subscribed</field>              
         </record>
 		
-        <record id="audit_pattern_batchissue" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Batch Issue</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_issue')"/>       
+        <record id="audit_batch_decoring_line" model="audittrail.rule">
+            <field name="name">Audit Log Batch Decoring Line</field>
+            <field name="object_id" eval="ref('kg_fettling.model_ch_batch_decoring_line')"/>       
             <field name="state">subscribed</field>              
         </record>
-        
-        <record id="audit_pattern_batchissue_line" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Batch Issue Line</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_line')"/>       
-            <field name="state">subscribed</field>              
-        </record> -->
         
     <!-- Audit Log Xml Data End-->
     
@@ -2938,10 +2987,17 @@
 							<group>
 								<field name="name" readonly="1"/>
 								<field name="flag_batchline" invisible="1"/>
+								<field name="shot_blast_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="done_by" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="weight" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
 							</group>											
 							<group>
 								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+								<field name="shift_id" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')],'invisible':[('done_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')],'invisible':[('done_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
 							</group>					
 						</group>
 						<notebook>
@@ -2955,20 +3011,23 @@
 										<field name="pattern_name" invisible="1"/>
 										<field name="moc_id" invisible="1"/>
 										<field name="shift_id" required="1"/>
-										<field name="contractor_id" required="1"/>
-										<field name="qty" required="1"/>
+										<field name="done_by" required="1"/>
+										<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')]}"/>
+										<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')]}"/>
+										<field name="qty" string="Production Qty" required="1"/>
 										<field name="accept_qty" required="1"/>
-										<field name="reject_qty" readonly="1"/>
+										<field name="reject_qty"/>
 										<field name="weight"/>
 										<field name="accept_user_id"/>
-										<field name="reject_user_id"/>
+										<field name="reject_user_id" invisible="1"/>
+										<field name="reject_remarks_id" attrs="{'required':[('reject_qty','>',0)]}"/>
 										<field name="remarks" widget="char"/>
 									</tree>
 								</field>
 							</page>
 							<page string="Select Shot Blast Items">
 								<field name="shot_blast_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
-									context="{'tree_view_ref' : 't_tree_v_shot_blast'}">
+									context="{'tree_view_ref' : 't_tree_v_common_batch_tree'}">
 									<tree string = "Shot Blast Batch Items" create="false" edit="false">
 										<field name="shot_blast_name"/>
 										<field name="order_no"/>
@@ -3062,25 +3121,19 @@
 		
 	<!-- Menu Action End-->
 	
-	<!-- Audit Log Xml Data Start
+	<!-- Audit Log Xml Data Start -->
 		
-        <record id="audit_pattern_issue" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Issue</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_kg_pattern_issue')"/>       
+        <record id="audit_batch_shot_blast" model="audittrail.rule">
+            <field name="name">Audit Log Shot Blast</field>
+            <field name="object_id" eval="ref('kg_fettling.model_kg_batch_shot_blast')"/>       
             <field name="state">subscribed</field>              
         </record>
 		
-        <record id="audit_pattern_batchissue" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Batch Issue</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_issue')"/>       
+        <record id="audit_batch_shot_blast_line" model="audittrail.rule">
+            <field name="name">Audit Log Batch Shot Blast Line</field>
+            <field name="object_id" eval="ref('kg_fettling.model_ch_batch_shot_blast_line')"/>       
             <field name="state">subscribed</field>              
         </record>
-        
-        <record id="audit_pattern_batchissue_line" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Batch Issue Line</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_line')"/>       
-            <field name="state">subscribed</field>              
-        </record> -->
         
     <!-- Audit Log Xml Data End-->
     
@@ -3122,10 +3175,17 @@
 							<group>
 								<field name="name" readonly="1"/>
 								<field name="flag_batchline" invisible="1"/>
+								<field name="hammering_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="done_by" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="weight" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
 							</group>											
 							<group>
 								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+								<field name="shift_id" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')],'invisible':[('done_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')],'invisible':[('done_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>	
 							</group>					
 						</group>
 						<notebook>
@@ -3139,20 +3199,23 @@
 										<field name="pattern_name" invisible="1"/>
 										<field name="moc_id" invisible="1"/>
 										<field name="shift_id" required="1"/>
-										<field name="contractor_id" required="1"/>
-										<field name="qty" required="1"/>
+										<field name="done_by" required="1"/>
+										<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')]}"/>
+										<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')]}"/>
+										<field name="qty" string="Production Qty" required="1"/>
 										<field name="accept_qty" required="1"/>
-										<field name="reject_qty" readonly="1"/>
+										<field name="reject_qty"/>
 										<field name="weight"/>
 										<field name="accept_user_id"/>
-										<field name="reject_user_id"/>
+										<field name="reject_user_id" invisible="1"/>
+										<field name="reject_remarks_id" attrs="{'required':[('reject_qty','>',0)]}"/>
 										<field name="remarks" widget="char"/>
 									</tree>
 								</field>
 							</page>
 							<page string="Select Hammering Items">
 								<field name="hammering_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
-									context="{'tree_view_ref' : 't_tree_v_hammering'}">
+									context="{'tree_view_ref' : 't_tree_v_common_batch_tree'}">
 									<tree string = "Hammering Batch Items" create="false" edit="false">
 										<field name="hammering_name"/>
 										<field name="order_no"/>
@@ -3246,25 +3309,19 @@
 		
 	<!-- Menu Action End-->
 	
-	<!-- Audit Log Xml Data Start
+	<!-- Audit Log Xml Data Start -->
 		
-        <record id="audit_pattern_issue" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Issue</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_kg_pattern_issue')"/>       
+        <record id="audit_batch_hammering" model="audittrail.rule">
+            <field name="name">Audit Log Hammering</field>
+            <field name="object_id" eval="ref('kg_fettling.model_kg_batch_hammering')"/>       
             <field name="state">subscribed</field>              
         </record>
 		
-        <record id="audit_pattern_batchissue" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Batch Issue</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_issue')"/>       
+        <record id="audit_batch_hammering_line" model="audittrail.rule">
+            <field name="name">Audit Log Batch Hammering Line</field>
+            <field name="object_id" eval="ref('kg_fettling.model_ch_batch_hammering_line')"/>       
             <field name="state">subscribed</field>              
         </record>
-        
-        <record id="audit_pattern_batchissue_line" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Batch Issue Line</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_line')"/>       
-            <field name="state">subscribed</field>              
-        </record> -->
         
     <!-- Audit Log Xml Data End-->
     
@@ -3304,10 +3361,17 @@
 							<group>
 								<field name="name" readonly="1"/>
 								<field name="flag_batchline" invisible="1"/>
+								<field name="wheel_cutting_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="done_by" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="weight" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
 							</group>											
 							<group>
 								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+								<field name="shift_id" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')],'invisible':[('done_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')],'invisible':[('done_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
 							</group>					
 						</group>
 						<notebook>
@@ -3321,20 +3385,23 @@
 										<field name="pattern_name" invisible="1"/>
 										<field name="moc_id" invisible="1"/>
 										<field name="shift_id" required="1"/>
-										<field name="contractor_id" required="1"/>
-										<field name="qty" required="1"/>
+										<field name="done_by" required="1"/>
+										<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')]}"/>
+										<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')]}"/>
+										<field name="qty" string="Production Qty" required="1"/>
 										<field name="accept_qty" required="1"/>
-										<field name="reject_qty" readonly="1"/>
+										<field name="reject_qty"/>
 										<field name="weight"/>
 										<field name="accept_user_id"/>
-										<field name="reject_user_id"/>
+										<field name="reject_user_id" invisible="1"/>
+										<field name="reject_remarks_id" attrs="{'required':[('reject_qty','>',0)]}"/>
 										<field name="remarks" widget="char"/>
 									</tree>
 								</field>
 							</page>
 							<page string="Select Wheel Cutting Items">
 								<field name="wheel_cutting_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
-									context="{'tree_view_ref' : 't_tree_v_wheel_cutting'}">
+									context="{'tree_view_ref' : 't_tree_v_common_batch_tree'}">
 									<tree string = "Wheel Cutting Batch Items" create="false" edit="false">
 										<field name="wheel_cutting_name"/>
 										<field name="order_no"/>
@@ -3428,25 +3495,19 @@
 		
 	<!-- Menu Action End-->
 	
-	<!-- Audit Log Xml Data Start
+	<!-- Audit Log Xml Data Start -->
 		
-        <record id="audit_pattern_issue" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Issue</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_kg_pattern_issue')"/>       
+        <record id="audit_batch_wheel_cutting" model="audittrail.rule">
+            <field name="name">Audit Log Wheel Cutting</field>
+            <field name="object_id" eval="ref('kg_fettling.model_kg_batch_wheel_cutting')"/>       
             <field name="state">subscribed</field>              
         </record>
 		
-        <record id="audit_pattern_batchissue" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Batch Issue</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_issue')"/>       
+        <record id="audit_batch_wheel_cutting_line" model="audittrail.rule">
+            <field name="name">Audit Log Batch Wheel Cutting Line</field>
+            <field name="object_id" eval="ref('kg_fettling.model_ch_batch_wheel_cutting_line')"/>       
             <field name="state">subscribed</field>              
         </record>
-        
-        <record id="audit_pattern_batchissue_line" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Batch Issue Line</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_line')"/>       
-            <field name="state">subscribed</field>              
-        </record> -->
         
     <!-- Audit Log Xml Data End-->
     
@@ -3486,10 +3547,17 @@
 							<group>
 								<field name="name" readonly="1"/>
 								<field name="flag_batchline" invisible="1"/>
+								<field name="gas_cutting_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="done_by" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="weight" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
 							</group>											
 							<group>
 								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+								<field name="shift_id" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')],'invisible':[('done_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')],'invisible':[('done_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>	
 							</group>					
 						</group>
 						<notebook>
@@ -3503,20 +3571,23 @@
 										<field name="pattern_name" invisible="1"/>
 										<field name="moc_id" invisible="1"/>
 										<field name="shift_id" required="1"/>
-										<field name="contractor_id" required="1"/>
-										<field name="qty" required="1"/>
+										<field name="done_by" required="1"/>
+										<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')]}"/>
+										<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')]}"/>
+										<field name="qty" string="Production Qty" required="1"/>
 										<field name="accept_qty" required="1"/>
-										<field name="reject_qty" readonly="1"/>
+										<field name="reject_qty"/>
 										<field name="weight"/>
 										<field name="accept_user_id"/>
-										<field name="reject_user_id"/>
+										<field name="reject_user_id" invisible="1"/>
+										<field name="reject_remarks_id" attrs="{'required':[('reject_qty','>',0)]}"/>
 										<field name="remarks" widget="char"/>
 									</tree>
 								</field>
 							</page>
 							<page string="Select Gas Cutting Items">
 								<field name="gas_cutting_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
-									context="{'tree_view_ref' : 't_tree_v_Gas_cutting'}">
+									context="{'tree_view_ref' : 't_tree_v_common_batch_tree'}">
 									<tree string = "Gas Cutting Batch Items" create="false" edit="false">
 										<field name="gas_cutting_name"/>
 										<field name="order_no"/>
@@ -3610,25 +3681,19 @@
 		
 	<!-- Menu Action End-->
 	
-	<!-- Audit Log Xml Data Start
+	<!-- Audit Log Xml Data Start -->
 		
-        <record id="audit_pattern_issue" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Issue</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_kg_pattern_issue')"/>       
+        <record id="audit_batch_gas_cutting" model="audittrail.rule">
+            <field name="name">Audit Log Gas Cutting</field>
+            <field name="object_id" eval="ref('kg_fettling.model_kg_batch_gas_cutting')"/>       
             <field name="state">subscribed</field>              
         </record>
 		
-        <record id="audit_pattern_batchissue" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Batch Issue</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_issue')"/>       
+        <record id="audit_batch_gas_cutting_line" model="audittrail.rule">
+            <field name="name">Audit Log Batch Gas Cutting Line</field>
+            <field name="object_id" eval="ref('kg_fettling.model_ch_batch_gas_cutting_line')"/>       
             <field name="state">subscribed</field>              
         </record>
-        
-        <record id="audit_pattern_batchissue_line" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Batch Issue Line</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_line')"/>       
-            <field name="state">subscribed</field>              
-        </record> -->
         
     <!-- Audit Log Xml Data End-->
     
@@ -3668,10 +3733,17 @@
 							<group>
 								<field name="name" readonly="1"/>
 								<field name="flag_batchline" invisible="1"/>
+								<field name="arc_cutting_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="done_by" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="weight" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
 							</group>											
 							<group>
 								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+								<field name="shift_id" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')],'invisible':[('done_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')],'invisible':[('done_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
 							</group>					
 						</group>
 						<notebook>
@@ -3685,20 +3757,23 @@
 										<field name="pattern_name" invisible="1"/>
 										<field name="moc_id" invisible="1"/>
 										<field name="shift_id" required="1"/>
-										<field name="contractor_id" required="1"/>
-										<field name="qty" required="1"/>
+										<field name="done_by" required="1"/>
+										<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')]}"/>
+										<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')]}"/>
+										<field name="qty" string="Production Qty" required="1"/>
 										<field name="accept_qty" required="1"/>
-										<field name="reject_qty" readonly="1"/>
+										<field name="reject_qty"/>
 										<field name="weight"/>
 										<field name="accept_user_id"/>
-										<field name="reject_user_id"/>
+										<field name="reject_user_id" invisible="1"/>
+										<field name="reject_remarks_id" attrs="{'required':[('reject_qty','>',0)]}"/>
 										<field name="remarks" widget="char"/>
 									</tree>
 								</field>
 							</page>
 							<page string="Select Arc Cutting Items">
 								<field name="arc_cutting_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
-									context="{'tree_view_ref' : 't_tree_v_arc_cutting'}">
+									context="{'tree_view_ref' : 't_tree_v_common_batch_tree'}">
 									<tree string = "Arc Cutting Batch Items" create="false" edit="false">
 										<field name="arc_cutting_name"/>
 										<field name="order_no"/>
@@ -3792,25 +3867,19 @@
 		
 	<!-- Menu Action End-->
 	
-	<!-- Audit Log Xml Data Start
+	<!-- Audit Log Xml Data Start -->
 		
-        <record id="audit_pattern_issue" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Issue</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_kg_pattern_issue')"/>       
+        <record id="audit_batch_arc_cutting" model="audittrail.rule">
+            <field name="name">Audit Log Arc Cutting</field>
+            <field name="object_id" eval="ref('kg_fettling.model_kg_batch_arc_cutting')"/>       
             <field name="state">subscribed</field>              
         </record>
 		
-        <record id="audit_pattern_batchissue" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Batch Issue</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_issue')"/>       
+        <record id="audit_batch_arc_cutting_line" model="audittrail.rule">
+            <field name="name">Audit Log Batch Arc Cutting Line</field>
+            <field name="object_id" eval="ref('kg_fettling.model_ch_batch_arc_cutting_line')"/>       
             <field name="state">subscribed</field>              
         </record>
-        
-        <record id="audit_pattern_batchissue_line" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Batch Issue Line</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_line')"/>       
-            <field name="state">subscribed</field>              
-        </record> -->
         
     <!-- Audit Log Xml Data End-->
     
@@ -3833,6 +3902,189 @@
 	
 	<!-- Batch Arc Cutting End Here -->
 	
+	<!-- Batch - Heat Treatment Starts Here -->
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_batch_heat_treatment" model="ir.ui.view">
+			<field name="name">Batch Heat Treatment Form</field>
+			<field name="model">kg.batch.heat.treatment</field>
+			<field name="arch" type="xml">
+				<form string="Batch Entry - Heat Treatment" version="7.0"  delete="false">
+					<header>
+						<button name="entry_confirm" type="object" string="Update" states="draft" class="oe_highlight"/>
+					</header>
+					<sheet>		
+						<group>
+							<group>
+								<field name="name" readonly="1"/>
+								<field name="flag_batchline" invisible="1"/>
+								<field name="heat_treatment_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="heat_specification" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="each_weight" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
+							</group>											
+							<group>
+								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="heat_cycle_no" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="done_by" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')],'invisible':[('done_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')],'invisible':[('done_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							</group>					
+						</group>
+						<notebook>
+							<page string="Heat Treatment Items" attrs="{'invisible':[('flag_batchline','=',False)]}">
+								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
+									<tree string="Heat Treatment Line Items" editable="top" create="false" delete="false">	
+										<field name="heat_cycle_no" required="1"/>
+										<field name="date" required="1"/>
+										<field name="heat_specification" required="1"/>
+										<field name="order_no" invisible="1"/>
+										<field name="pattern_id" invisible="1"/>
+										<field name="pattern_name" invisible="1"/>
+										<field name="moc_id" invisible="1"/>
+										<field name="done_by" required="1"/>
+										<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')]}"/>
+										<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')]}"/>
+										<field name="qty" string="Production Qty" required="1"/>
+										<field name="accept_qty" required="1"/>
+										<field name="each_weight" required="1"/>
+										<field name="accept_user_id"/>
+										<field name="remarks" widget="char"/>
+									</tree>
+								</field>
+							</page>
+							<page string="Select Heat Treatment Items">
+								<field name="heat_treatment_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
+									context="{'tree_view_ref' : 't_tree_v_common_batch_tree'}">
+									<tree string = "Heat Treatment Batch Items" create="false" edit="false">
+										<field name="order_no"/>
+										<field name="pump_model_id"/>
+										<field name="pattern_id"/>
+										<field name="pattern_name"/>
+										<field name="moc_id"/>
+									</tree>
+								</field>
+								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
+							</page>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>										
+										<field name="update_user_id"/>
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>									
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_batch_heat_treatment" model="ir.ui.view">
+			<field name="name">Batch Heat Treatment Tree</field>
+			<field name="model">kg.batch.heat.treatment</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">	
+			<tree toolbar="True" string="Batch Heat Treatment Tree">									
+					<field name="name"/>
+					<field name="entry_date"/>					
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_batch_heat_treatment" model="ir.ui.view">
+            <field name="name">Batch Heat Treatment Search</field>
+            <field name="model">kg.batch.heat.treatment</field>
+            <field name="arch" type="xml">
+                <search string="Batch Heat Treatment Search">
+					<field name="name" string="Batch No."  filter_domain="[('name','ilike',self)]" />
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+                       
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+	
+	
+	
+	<!-- Menu Action Start-->	
+		
+		<record id="tma_batch_heat_treatment" model="ir.actions.act_window">
+			<field name="name">Heat Treatment</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.batch.heat.treatment</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_batch_heat_treatment"/>
+			<field name="search_view_id" ref="t_search_v_batch_heat_treatment"/>
+			<field name="context">{"search_default_open":1}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start -->
+		
+        <record id="audit_batch_heat_treatment" model="audittrail.rule">
+            <field name="name">Audit Log Heat Treatment</field>
+            <field name="object_id" eval="ref('kg_fettling.model_kg_batch_heat_treatment')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+		
+        <record id="audit_batch_heat_treatment_line" model="audittrail.rule">
+            <field name="name">Audit Log Batch Heat Treatment Line</field>
+            <field name="object_id" eval="ref('kg_fettling.model_ch_batch_heat_treatment_line')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->
+    
+    <!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_batch_heat_treatment" model="ir.sequence.type">	
+		<field name="name">KG Batch Heat Treatment</field>
+		<field name="code">kg.batch.heat.treatment</field>
+	</record>
+
+	<record forcecreate="1" id="seq_batch_heat_treatment" model="ir.sequence">
+	  <field name="name">KG Batch Heat Treatment</field>
+	  <field name="code">kg.batch.heat.treatment</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">HTB/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	<!-- Batch Heat Treatment End Here -->
+	
 	<!-- Batch - Rough Grinding Starts Here -->
 	
 	<!-- Form View Start -->
@@ -3850,10 +4102,17 @@
 							<group>
 								<field name="name" readonly="1"/>
 								<field name="flag_batchline" invisible="1"/>
+								<field name="rough_grinding_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="done_by" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="weight" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
 							</group>											
 							<group>
 								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+								<field name="shift_id" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')],'invisible':[('done_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')],'invisible':[('done_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>	
 							</group>					
 						</group>
 						<notebook>
@@ -3867,20 +4126,24 @@
 										<field name="pattern_name" invisible="1"/>
 										<field name="moc_id" invisible="1"/>
 										<field name="shift_id" required="1"/>
-										<field name="contractor_id" required="1"/>
-										<field name="qty" required="1"/>
+										<field name="done_by" required="1"/>
+										<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')]}"/>
+										<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')]}"/>
+										<field name="qty" string="Production Qty" required="1"/>
 										<field name="accept_qty" required="1"/>
-										<field name="reject_qty" readonly="1"/>
+										<field name="reject_qty"/>
+										<field name="rework_qty"/>
 										<field name="weight"/>
 										<field name="accept_user_id"/>
-										<field name="reject_user_id"/>
+										<field name="reject_user_id" invisible="1"/>
+										<field name="reject_remarks_id" attrs="{'required':[('reject_qty','>',0)]}"/>
 										<field name="remarks" widget="char"/>
 									</tree>
 								</field>
 							</page>
 							<page string="Select Rough Grinding Items">
 								<field name="rough_grinding_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
-									context="{'tree_view_ref' : 't_tree_v_rough_grinding'}">
+									context="{'tree_view_ref' : 't_tree_v_common_batch_tree'}">
 									<tree string = "Rough Grinding Batch Items" create="false" edit="false">
 										<field name="rough_grinding_name"/>
 										<field name="order_no"/>
@@ -3974,25 +4237,19 @@
 		
 	<!-- Menu Action End-->
 	
-	<!-- Audit Log Xml Data Start
+	<!-- Audit Log Xml Data Start -->
 		
-        <record id="audit_pattern_issue" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Issue</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_kg_pattern_issue')"/>       
+        <record id="audit_batch_rough_grinding" model="audittrail.rule">
+            <field name="name">Audit Log Rough Grinding</field>
+            <field name="object_id" eval="ref('kg_fettling.model_kg_batch_rough_grinding')"/>       
             <field name="state">subscribed</field>              
         </record>
 		
-        <record id="audit_pattern_batchissue" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Batch Issue</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_issue')"/>       
+        <record id="audit_batch_rough_grinding_line" model="audittrail.rule">
+            <field name="name">Audit Log Batch Rough Grinding Line</field>
+            <field name="object_id" eval="ref('kg_fettling.model_ch_batch_rough_grinding_line')"/>       
             <field name="state">subscribed</field>              
         </record>
-        
-        <record id="audit_pattern_batchissue_line" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Batch Issue Line</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_line')"/>       
-            <field name="state">subscribed</field>              
-        </record> -->
         
     <!-- Audit Log Xml Data End-->
     
@@ -4016,6 +4273,192 @@
 	
 	<!-- Batch Rough Grinding End Here -->
 	
+	<!-- Batch - Welding Starts Here -->
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_batch_welding" model="ir.ui.view">
+			<field name="name">Batch Welding Form</field>
+			<field name="model">kg.batch.welding</field>
+			<field name="arch" type="xml">
+				<form string="Batch Entry - Welding" version="7.0"  delete="false">
+					<header>
+						<button name="entry_confirm" type="object" string="Update" states="draft" class="oe_highlight"/>
+					</header>
+					<sheet>		
+						<group>
+							<group>
+								<field name="name" readonly="1"/>
+								<field name="flag_batchline" invisible="1"/>
+								<field name="welding_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="done_by" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="weight" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
+							</group>											
+							<group>
+								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="shift_id" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')],'invisible':[('done_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')],'invisible':[('done_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>	
+							</group>					
+						</group>
+						<notebook>
+							<page string="Welding Items" attrs="{'invisible':[('flag_batchline','=',False)]}">
+								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
+									<tree string="Welding Line Items" editable="top" create="false" delete="false">	
+										<field name="name" readonly="1"/>
+										<field name="date"/>
+										<field name="order_no" invisible="1"/>
+										<field name="pattern_id" invisible="1"/>
+										<field name="pattern_name" invisible="1"/>
+										<field name="moc_id" invisible="1"/>
+										<field name="shift_id" required="1"/>
+										<field name="done_by" required="1"/>
+										<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')]}"/>
+										<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')]}"/>
+										<field name="qty" string="Production Qty" required="1"/>
+										<field name="accept_qty" required="1"/>
+										<field name="reject_qty"/>
+										<field name="weight"/>
+										<field name="accept_user_id"/>
+										<field name="reject_user_id" invisible="1"/>
+										<field name="reject_remarks_id" attrs="{'required':[('reject_qty','>',0)]}"/>
+										<field name="remarks" widget="char"/>
+									</tree>
+								</field>
+							</page>
+							<page string="Select Welding Items">
+								<field name="welding_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
+									context="{'tree_view_ref' : 't_tree_v_common_batch_tree'}">
+									<tree string = "Welding Batch Items" create="false" edit="false">
+										<field name="welding_name"/>
+										<field name="order_no"/>
+										<field name="pump_model_id"/>
+										<field name="pattern_id"/>
+										<field name="pattern_name"/>
+										<field name="moc_id"/>
+									</tree>
+								</field>
+								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
+							</page>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>										
+										<field name="update_user_id"/>
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>									
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_batch_welding" model="ir.ui.view">
+			<field name="name">Batch Welding Tree</field>
+			<field name="model">kg.batch.welding</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">	
+			<tree toolbar="True" string="Batch Welding Tree">									
+					<field name="name"/>
+					<field name="entry_date"/>					
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_batch_welding" model="ir.ui.view">
+            <field name="name">Batch Welding Search</field>
+            <field name="model">kg.batch.welding</field>
+            <field name="arch" type="xml">
+                <search string="Batch Welding Search">
+					<field name="name" string="Batch No."  filter_domain="[('name','ilike',self)]" />
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+                       
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+	
+	
+	
+	<!-- Menu Action Start-->	
+		
+		<record id="tma_batch_welding" model="ir.actions.act_window">
+			<field name="name">Welding</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.batch.welding</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_batch_welding"/>
+			<field name="search_view_id" ref="t_search_v_batch_welding"/>
+			<field name="context">{"search_default_open":1}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start -->
+		
+        <record id="audit_batch_welding" model="audittrail.rule">
+            <field name="name">Audit Log Welding</field>
+            <field name="object_id" eval="ref('kg_fettling.model_kg_batch_welding')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+		
+        <record id="audit_batch_welding_line" model="audittrail.rule">
+            <field name="name">Audit Log Batch Welding Line</field>
+            <field name="object_id" eval="ref('kg_fettling.model_ch_batch_welding_line')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->
+    
+    <!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_batch_welding" model="ir.sequence.type">	
+		<field name="name">KG Batch Welding</field>
+		<field name="code">kg.batch.welding</field>
+	</record>
+
+	<record forcecreate="1" id="seq_batch_welding" model="ir.sequence">
+	  <field name="name">KG Batch Welding</field>
+	  <field name="code">kg.batch.welding</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">WEL/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	<!-- Batch Welding End Here -->
+	
 	<!-- Batch - Finish Grinding Starts Here -->
 	
 	<!-- Form View Start -->
@@ -4033,10 +4476,17 @@
 							<group>
 								<field name="name" readonly="1"/>
 								<field name="flag_batchline" invisible="1"/>
+								<field name="finish_grinding_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="done_by" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="weight" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
 							</group>											
 							<group>
 								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+								<field name="shift_id" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')],'invisible':[('done_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')],'invisible':[('done_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>	
 							</group>					
 						</group>
 						<notebook>
@@ -4050,20 +4500,23 @@
 										<field name="pattern_name" invisible="1"/>
 										<field name="moc_id" invisible="1"/>
 										<field name="shift_id" required="1"/>
-										<field name="contractor_id" required="1"/>
-										<field name="qty" required="1"/>
+										<field name="done_by" required="1"/>
+										<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')]}"/>
+										<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')]}"/>
+										<field name="qty" string="Production Qty" required="1"/>
 										<field name="accept_qty" required="1"/>
-										<field name="reject_qty" readonly="1"/>
+										<field name="reject_qty"/>
 										<field name="weight"/>
 										<field name="accept_user_id"/>
-										<field name="reject_user_id"/>
+										<field name="reject_user_id" invisible="1"/>
+										<field name="reject_remarks_id" attrs="{'required':[('reject_qty','>',0)]}"/>
 										<field name="remarks" widget="char"/>
 									</tree>
 								</field>
 							</page>
 							<page string="Select Finish Grinding Items">
 								<field name="finish_grinding_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
-									context="{'tree_view_ref' : 't_tree_v_finish_grinding'}">
+									context="{'tree_view_ref' : 't_tree_v_common_batch_tree'}">
 									<tree string = "Finish Grinding Batch Items" create="false" edit="false">
 										<field name="finish_grinding_name"/>
 										<field name="order_no"/>
@@ -4157,25 +4610,19 @@
 		
 	<!-- Menu Action End-->
 	
-	<!-- Audit Log Xml Data Start
+	<!-- Audit Log Xml Data Start -->
 		
-        <record id="audit_pattern_issue" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Issue</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_kg_pattern_issue')"/>       
+        <record id="audit_batch_finish_grinding" model="audittrail.rule">
+            <field name="name">Audit Log Finish Grinding</field>
+            <field name="object_id" eval="ref('kg_fettling.model_kg_batch_finish_grinding')"/>       
             <field name="state">subscribed</field>              
         </record>
 		
-        <record id="audit_pattern_batchissue" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Batch Issue</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_issue')"/>       
+        <record id="audit_batch_finish_grinding_line" model="audittrail.rule">
+            <field name="name">Audit Log Batch Finish Grinding Line</field>
+            <field name="object_id" eval="ref('kg_fettling.model_ch_batch_finish_grinding_line')"/>       
             <field name="state">subscribed</field>              
         </record>
-        
-        <record id="audit_pattern_batchissue_line" model="audittrail.rule">
-            <field name="name">Audit Log Pattern Batch Issue Line</field>
-            <field name="object_id" eval="ref('kg_pattern_issue.model_ch_pattern_batch_line')"/>       
-            <field name="state">subscribed</field>              
-        </record> -->
         
     <!-- Audit Log Xml Data End-->
     
@@ -4197,6 +4644,192 @@
 	<!-- Sequence Number Setting Ends Here -->
 	
 	<!-- Batch Finish Grinding End Here -->
+	
+	<!-- Batch - Reshot Blasting Starts Here -->
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_batch_reshot_blasting" model="ir.ui.view">
+			<field name="name">Batch Re Shot Blasting Form</field>
+			<field name="model">kg.batch.reshot.blasting</field>
+			<field name="arch" type="xml">
+				<form string="Batch Entry - Re Shot Blasting" version="7.0"  delete="false">
+					<header>
+						<button name="entry_confirm" type="object" string="Update" states="draft" class="oe_highlight"/>
+					</header>
+					<sheet>		
+						<group>
+							<group>
+								<field name="name" readonly="1"/>
+								<field name="flag_batchline" invisible="1"/>
+								<field name="reshot_blasting_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="done_by" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="weight" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
+							</group>											
+							<group>
+								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="shift_id" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')],'invisible':[('done_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')],'invisible':[('done_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>	
+							</group>					
+						</group>
+						<notebook>
+							<page string="Re Shot Blasting Items" attrs="{'invisible':[('flag_batchline','=',False)]}">
+								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
+									<tree string="Re Shot Blasting Line Items" editable="top" create="false" delete="false">	
+										<field name="name" readonly="1"/>
+										<field name="date"/>
+										<field name="order_no" invisible="1"/>
+										<field name="pattern_id" invisible="1"/>
+										<field name="pattern_name" invisible="1"/>
+										<field name="moc_id" invisible="1"/>
+										<field name="shift_id" required="1"/>
+										<field name="done_by" required="1"/>
+										<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')]}"/>
+										<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')]}"/>
+										<field name="qty" string="Production Qty" required="1"/>
+										<field name="accept_qty" required="1"/>
+										<field name="reject_qty"/>
+										<field name="weight"/>
+										<field name="accept_user_id"/>
+										<field name="reject_user_id" invisible="1"/>
+										<field name="reject_remarks_id" attrs="{'required':[('reject_qty','>',0)]}"/>
+										<field name="remarks" widget="char"/>
+									</tree>
+								</field>
+							</page>
+							<page string="Select Re Shot Blasting Items">
+								<field name="reshot_blasting_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
+									context="{'tree_view_ref' : 't_tree_v_common_batch_tree'}">
+									<tree string = "Re Shot Blasting Batch Items" create="false" edit="false">
+										<field name="reshot_blasting_name"/>
+										<field name="order_no"/>
+										<field name="pump_model_id"/>
+										<field name="pattern_id"/>
+										<field name="pattern_name"/>
+										<field name="moc_id"/>
+									</tree>
+								</field>
+								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
+							</page>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>										
+										<field name="update_user_id"/>
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>									
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_batch_reshot_blasting" model="ir.ui.view">
+			<field name="name">Batch Re Shot Blasting Tree</field>
+			<field name="model">kg.batch.reshot.blasting</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">	
+			<tree toolbar="True" string="Batch Re Shot Blasting Tree">									
+					<field name="name"/>
+					<field name="entry_date"/>					
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_batch_reshot_blasting" model="ir.ui.view">
+            <field name="name">Batch Re Shot Blasting Search</field>
+            <field name="model">kg.batch.reshot.blasting</field>
+            <field name="arch" type="xml">
+                <search string="Batch Re Shot Blasting Search">
+					<field name="name" string="Batch No."  filter_domain="[('name','ilike',self)]" />
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+                       
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+	
+	
+	
+	<!-- Menu Action Start-->	
+		
+		<record id="tma_batch_reshot_blasting" model="ir.actions.act_window">
+			<field name="name">Re Shot Blasting</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.batch.reshot.blasting</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_batch_reshot_blasting"/>
+			<field name="search_view_id" ref="t_search_v_batch_reshot_blasting"/>
+			<field name="context">{"search_default_open":1}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start -->
+		
+        <record id="audit_batch_reshot_blasting" model="audittrail.rule">
+            <field name="name">Audit Log Re Shot Blasting</field>
+            <field name="object_id" eval="ref('kg_fettling.model_kg_batch_reshot_blasting')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+		
+        <record id="audit_batch_reshot_blasting_line" model="audittrail.rule">
+            <field name="name">Audit Log Batch Re Shot Blasting Line</field>
+            <field name="object_id" eval="ref('kg_fettling.model_ch_batch_reshot_blasting_line')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->
+    
+    <!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_batch_reshot_blasting" model="ir.sequence.type">	
+		<field name="name">KG Batch Re Shot Blasting</field>
+		<field name="code">kg.batch.reshot.blasting</field>
+	</record>
+
+	<record forcecreate="1" id="seq_batch_reshot_blasting" model="ir.sequence">
+	  <field name="name">KG Batch Re Shot Blasting</field>
+	  <field name="code">kg.batch.reshot.blasting</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">RB/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	<!-- Batch Re Shot Blasting End Here -->
 	
 	
 	<!-- Fettling Process Menu Items Stars Here -->
@@ -4228,8 +4861,11 @@
 		<menuitem action="tma_batch_wheel_cutting" id="tam_batch_wheel_cutting" parent="tpm_fettling_batch_process" sequence="6"/>
 		<menuitem action="tma_batch_gas_cutting" id="tam_batch_gas_cutting" parent="tpm_fettling_batch_process" sequence="7"/>
 		<menuitem action="tma_batch_arc_cutting" id="tam_batch_arc_cutting" parent="tpm_fettling_batch_process" sequence="8"/>
-		<menuitem action="tma_batch_rough_grinding" id="tam_batch_rough_grinding" parent="tpm_fettling_batch_process" sequence="9"/>
-		<menuitem action="tma_batch_finish_grinding" id="tam_batch_finish_grinding" parent="tpm_fettling_batch_process" sequence="10"/>
+		<menuitem action="tma_batch_heat_treatment" id="tam_batch_heat_treatment" parent="tpm_fettling_batch_process" sequence="9"/>
+		<menuitem action="tma_batch_rough_grinding" id="tam_batch_rough_grinding" parent="tpm_fettling_batch_process" sequence="10"/>
+		<menuitem action="tma_batch_welding" id="tam_batch_welding" parent="tpm_fettling_batch_process" sequence="11"/>
+		<menuitem action="tma_batch_finish_grinding" id="tam_batch_finish_grinding" parent="tpm_fettling_batch_process" sequence="12"/>
+		<menuitem action="tma_batch_reshot_blasting" id="tam_batch_reshot_blasting" parent="tpm_fettling_batch_process" sequence="13"/>
 		
 		
 	<!-- Fettling Process Menu Items Ends Here -->
