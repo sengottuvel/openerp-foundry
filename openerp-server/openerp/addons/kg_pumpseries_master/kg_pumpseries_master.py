@@ -28,19 +28,19 @@ class kg_pumpseries_master(osv.osv):
 			
 		'name': fields.char('Name', size=128, required=True, select=True),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
-		'code': fields.integer('Code',required=True, size=128),
+		'code': fields.char('Code',required=True, size=128),
 		'active': fields.boolean('Active'),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
 		'fluid_id': fields.many2one('kg.fluid.master','Liquid Handled',domain="[('state','not in',('reject','cancel'))]"),
-		'pump_capacity': fields.float('Pump capacity'),
-		'pump_head': fields.float('Pump Head'),
+		'pump_capacity': fields.float('Pump capacity(M3/hr)'),
+		'pump_head': fields.float('Pump Head(Mts)'),
 		'temperature': fields.float('Temperature'),
-		'working_pressure': fields.float('Working Pressure'),
-		'speed': fields.float('Speed'),
-		'suction_orientation': fields.selection([('auxial','AUXIAL'),('side','SIDE')],'Suction Orientation',required=True),
+		'working_pressure': fields.float('Working Pressure(Kg/cm2)'),
+		'speed': fields.float('Speed(Rpm)'),
+		'suction_orientation': fields.selection([('axial','AXIAL'),('side','SIDE')],'Suction Orientation'),
 		'discharge_orientation': fields.selection([('top_side','TOP SIDE'),('bot_side','BOTTOM SIDE'),('top','TOP'),('top_cen_line','TOP CENTER LINE')],'Discharge Orientation',required=True),
 		#'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
 		
@@ -107,9 +107,9 @@ class kg_pumpseries_master(osv.osv):
 		rec = self.browse(cr,uid,ids[0])
 		res = True
 		if rec.code:
-			#~ pumpseries_code = rec.code
-			code=rec.code		
-			cr.execute(""" select code from kg_pumpseries_master where code  = '%s' """ %(code))
+			pumpseries_code = rec.code
+			code=pumpseries_code.upper()
+			cr.execute(""" select upper(code) from kg_pumpseries_master where upper(code) = '%s' """ %(code))
 			data = cr.dictfetchall()			
 			if len(data) > 1:
 				res = False

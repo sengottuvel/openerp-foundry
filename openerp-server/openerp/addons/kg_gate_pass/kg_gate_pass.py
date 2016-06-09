@@ -17,41 +17,53 @@ class kg_gate_pass(osv.osv):
 	_description = "KG Gate Pass"
 	_order = "date desc"
 
-	
 	_columns = {
+		
 		'name': fields.char('Gate Pass No', size=128, readonly=True),
-		'dep_id': fields.many2one('kg.depmaster','Department Name', select=True,readonly=True, states={'draft':[('readonly',False)]}),
-		'date': fields.date('Gate Pass Date',readonly=True, states={'draft':[('readonly',False)]}),
-		'return_date': fields.date('Expected Return Date',readonly=True, states={'draft':[('readonly',False)]}),
+		'dep_id': fields.many2one('kg.depmaster','Source Location', select=True,readonly=True, states={'draft':[('readonly',False)]}),
+		'date': fields.date('Gate Pass Date',readonly=True, states={'draft':[('readonly',False)]},required=True),
+		'return_date': fields.date('Expected Return Date',readonly=True, states={'draft':[('readonly',False)]},required=True),
 		'partner_id': fields.many2one('res.partner', 'Supplier',readonly=True, states={'draft':[('readonly',False)]}),
 		'gate_line': fields.one2many('kg.gate.pass.line', 'gate_id', 'Gate Pass Line',readonly=True, states={'draft':[('readonly',False)]}),
 		'out_type': fields.many2one('kg.outwardmaster', 'OutwardType',readonly=True, states={'draft':[('readonly',False)]}),
 		'origin': fields.many2one('kg.service.indent', 'Origin', readonly=True),
-		'user_id': fields.many2one('res.users', 'Created By',readonly=True),
-		'creation_date':fields.datetime('Creation Date',readonly=True),
-		'note': fields.text('Remarks',readonly=True, states={'draft':[('readonly',False)]}),
-		'state': fields.selection([('draft', 'Draft'), ('confirmed', 'Waiting for Approval'), ('done', 'Delivered'), ('cancel', 'Cancelled')], 'Out Status',readonly=True),
-		'in_state': fields.selection([('open', 'OPEN'),('pending', 'Pending'), ('done', 'Received'), ('cancel', 'Cancelled')], 'In Status',readonly=True),
+		'note': fields.text('Remarks',readonly=False, states={'confirmed':[('readonly',False)],'done':[('readonly',False)]}),
+		'state': fields.selection([('draft', 'Draft'), ('confirmed', 'Waiting for Approval'), ('done', 'Delivered'), ('cancel', 'Cancelled'), ('reject', 'Rejected')], 'Out Status',readonly=True),
+		'in_state': fields.selection([('pending', 'Pending'), ('partial', 'Partial'), ('done', 'Received'), ('cancel', 'Cancelled')], 'In Status',readonly=True),
+		#~ 'in_state': fields.selection([('open', 'OPEN'),('pending', 'Pending'), ('done', 'Received'), ('cancel', 'Cancelled')], 'In Status',readonly=True),
 		'si_indent_ids':fields.many2many('kg.service.indent.line','s_indent_gp_entry' , 'si_id', 'gp_id', 'Service Indent Lines',
 			domain="[('service_id.state','=','approved'), '&', ('pending_qty','>','0')]", 
 			readonly=True, states={'draft': [('readonly', False)]}),
 		'indent_flag': fields.boolean('Indent'),
 		'transport':fields.char('Transport', size=128,readonly=True, states={'draft':[('readonly',False)]}),
+		'transport_id':fields.many2one('kg.transport','Transport',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'taken_by':fields.char('Taken By', size=128,readonly=True, states={'draft':[('readonly',False)]}),
 		'received_by':fields.char('Received By', size=128,readonly=True, states={'draft':[('readonly',False)]}),
 		'project':fields.char('Project',size=100,readonly=True,states={'draft':[('readonly',False)]}),
 		'division':fields.char('Division',size=100,readonly=True,states={'draft':[('readonly',False)]}),
-		'confirmed_by' : fields.many2one('res.users', 'Confirmed By', readonly=False,select=True),
-		'confirmed_date':fields.date('Confirmed Date',readonly=True),
-		'approved_by' : fields.many2one('res.users', 'Approved By', readonly=False,select=True),
-		'approved_date':fields.date('Approved Date',readonly=True),
 		'confirm_flag':fields.boolean('Confirm Flag'),
 		'approve_flag':fields.boolean('Expiry Flag'),
+		'mode': fields.selection([('direct', 'Direct'), ('frm_indent', 'From Indent')], 'Entry Mode',required=True,readonly=True, states={'draft':[('readonly',False)]}),
 		'gp_type': fields.selection([('from_so', 'From SI'), ('direct', 'Direct')], 'GP Type',readonly=True),
 		'dep_project':fields.many2one('kg.project.master','Dept/Project Name',readonly=True,states={'draft': [('readonly', False)]}),	
-
+		'remark': fields.text('Remarks'),
 		
-				
+		# Entry Info
+		
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),		
+		'user_id': fields.many2one('res.users', 'Created By',readonly=True),
+		'creation_date':fields.datetime('Creation Date',readonly=True),
+		'confirmed_by' : fields.many2one('res.users', 'Confirmed By', readonly=True,select=True),
+		'confirmed_date':fields.datetime('Confirmed Date',readonly=True),
+		'reject_date': fields.datetime('Reject Date', readonly=True),
+		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
+		'approved_by' : fields.many2one('res.users', 'Approved By', readonly=True,select=True),
+		'approved_date':fields.datetime('Approved Date',readonly=True),
+		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
+		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
+		'update_date': fields.datetime('Last Updated Date', readonly=True),
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
+		
 	}
 	
 	_defaults = {
@@ -61,7 +73,8 @@ class kg_gate_pass(osv.osv):
 		'state':'draft',
 		'name': '',
 		'user_id': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).id ,
-		'in_state': 'open',
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.gate.pass', context=c),
+		'in_state': 'pending',
 		'indent_flag': False,
 		'gp_type':'from_so',
 	}	
@@ -147,18 +160,47 @@ class kg_gate_pass(osv.osv):
 		val['email_to'] = email_to
 		val['email_cc'] = email_cc
 		return val	
-				
+	
+	def write(self, cr, uid, ids, vals, context=None):		
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(kg_gate_pass, self).write(cr, uid, ids, vals, context)
+	
+	def cancel_entry(self, cr, uid, ids, context=None):
+		rec = self.browse(cr.uid.ids[0])
+		if not rec.remark:
+			raise osv.except_osv(_('Rejection remark is must !!'),
+				_('Enter rejection remark in remark field !!'))
+		self.write(cr, uid,ids,{'state' : 'cancel',
+								'cancel_user_id': uid,
+								'cancel_date': time.strftime("%Y-%m-%d %H:%M:%S"),
+								})
+												
+	def reject_entry(self, cr, uid, ids, context=None):
+		rec = self.browse(cr.uid.ids[0])
+		if not rec.remark:
+			raise osv.except_osv(_('Rejection remark is must !!'),
+				_('Enter rejection remark in remark field !!'))
+		self.write(cr, uid,ids,{'state' : 'cancel',
+								'rej_user_id': uid,
+								'reject_date': time.strftime("%Y-%m-%d %H:%M:%S"),
+								})
+												
 	def confirm_entry(self, cr, uid, ids, context=None):	
 		entry = self.browse(cr,uid,ids[0])
-		if entry.name == '':
-			pass_no = self.pool.get('ir.sequence').get(cr, uid, 'kg.gate.pass') or ''
-		for line in entry.gate_line:
-			if line.qty > line.indent_qty:
-				raise osv.except_osv(_('Warning!'),
-						_('You cannot increase qty more than indent qty'))	
+		#~ if entry.name == '':
+			#~ pass_no = self.pool.get('ir.sequence').get(cr, uid, 'kg.gate.pass') or ''
+		seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gate.pass')])
+		seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+		cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry.date))
+		seq_name = cr.fetchone();
+		if entry.mode == 'frm_indent':
+			for line in entry.gate_line:
+				if line.qty > line.indent_qty:
+					raise osv.except_osv(_('Warning!'),
+							_('You cannot increase qty more than indent qty'))	
 			
-		self.write(cr,uid,ids[0],{'state':'confirmed','name':pass_no,'confirmed_by':uid,
-						'confirm_flag':True,'confirmed_date':time.strftime('%Y-%m-%d')})
+		self.write(cr,uid,ids[0],{'state':'confirmed','name':seq_name[0],'confirmed_by':uid,
+						'confirm_flag':True,'confirmed_date':time.strftime('%Y-%m-%d %H:%M:%S')})
 						
 		#cr.execute("""select all_transaction_mails('Gate Pass Request Approval',%s)"""%(ids[0]))
 		"""Raj
@@ -187,13 +229,16 @@ class kg_gate_pass(osv.osv):
 		#	raise osv.except_osv(
 		#			_('Warning'),
 		#			_('Approve cannot be done by Confirmed user'))
-		for line in rec.gate_line:
-			indent_pen_qty = line.indent_qty - line.qty
-			gp_qty = line.qty
-			old_indent_pen_qty = line.si_line_id.pending_qty
-			new_pen_qty = old_indent_pen_qty - gp_qty
-			line.si_line_id.write({'gate_pending_qty':new_pen_qty})
-		rec.write({'state': 'done','approved_by':uid,'approve_flag':True,'approved_date':time.strftime('%Y-%m-%d')})	
+		if rec.mode == 'frm_indent':
+			for line in rec.gate_line:
+				indent_pen_qty = line.indent_qty - line.qty
+				gp_qty = line.qty
+				old_indent_pen_qty = line.si_line_id.pending_qty
+				new_pen_qty = old_indent_pen_qty - gp_qty
+				line.si_line_id.write({'gate_pending_qty':new_pen_qty})
+		else:
+			pass
+		rec.write({'state': 'done','approved_by':uid,'approve_flag':True,'approved_date':time.strftime('%Y-%m-%d %H:%M:%S')})	
 		#cr.execute("""select all_transaction_mails('Gate Pass Request Approval',%s)"""%(ids[0]))
 		"""Raj
 		data = cr.fetchall();
@@ -215,7 +260,6 @@ class kg_gate_pass(osv.osv):
 		"""
 		return True
 		
-		
 	def gate_pass_print(self, cr, uid, ids, context=None):
 				
 		#assert len(ids) == 1, 'This option should only be used for a single id at a time'
@@ -227,7 +271,6 @@ class kg_gate_pass(osv.osv):
 				 'form': self.read(cr, uid, ids[0], context=context),
 		}
 		return {'type': 'ir.actions.report.xml', 'report_name': 'gate.pass.report', 'datas': datas, 'nodestroy': True}
-
 
 	def create_gp_line(self,cr,uid,ids,context=False):
 				
@@ -338,7 +381,6 @@ class kg_gate_pass(osv.osv):
 					#dep_line_obj.write(cr,uid, bro_record.id, {'line_state' : 'noprocess'})
 					if remain_qty < 0:
 						break			
-			
 			else:
 				if pi_used_qty <= po_uom_qty:
 					pending_po_depindent_qty =  po_uom_qty - pi_used_qty
@@ -360,7 +402,6 @@ class kg_gate_pass(osv.osv):
 					if remain_qty < 0:
 						break		
 		return True
-	
 	
 	def gate_pass_register_scheduler(self,cr,uid,ids=0,context = None):
 		cr.execute(""" SELECT current_database();""")
@@ -389,11 +430,6 @@ class kg_gate_pass(osv.osv):
 			db[0]['current_database'] = 'Others'
 			
 		line_rec = self.pool.get('kg.gate.pass').search(cr, uid, [('state','=','done'),('approved_date','=',time.strftime('%Y-%m-%d'))])
-		
-		
-		print "---------------------------->",line_rec	
-			
-			
 
 		if line_rec:	
 			
@@ -428,8 +464,6 @@ class kg_gate_pass(osv.osv):
 						subtype = 'html',
 						subtype_alternative = 'plain')
 				res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
-				
-				
 		else:
 			pass		
 				
@@ -463,9 +497,6 @@ class kg_gate_pass(osv.osv):
 			
 		line_rec = self.pool.get('kg.gate.pass').search(cr, uid, [('state','=','done'),('in_state','!=','done'),('approved_date','<=',time.strftime('%Y-%m-%d'))])
 		
-		
-		print "---------------------------->",line_rec		
-				
 		if line_rec:
 			
 			cr.execute("""select all_daily_auto_scheduler_mails('Open Gate Pass Register')""")
@@ -503,9 +534,9 @@ class kg_gate_pass_line(osv.osv):
 	_columns = {
 
 	'gate_id': fields.many2one('kg.gate.pass', 'Gate Pass', ondelete='cascade'),
-	'product_id': fields.many2one('product.product', 'Item Name', readonly=True),
+	'product_id': fields.many2one('product.product', 'Item Name',domain=[('state','not in',('reject','cancel'))]),
 	'brand_id': fields.many2one('kg.brand.master', 'Brand Name'),
-	'uom': fields.many2one('product.uom', 'UOM', readonly=True),
+	'uom': fields.many2one('product.uom', 'UOM'),
 	'qty': fields.float('Quantity'),
 	'indent_qty': fields.float('Indent Qty'),
 	'grn_pending_qty': fields.float('GRN pending Qty'),
@@ -513,9 +544,11 @@ class kg_gate_pass_line(osv.osv):
 	'note': fields.text('Remarks'),
 	'si_line_id':fields.many2one('kg.service.indent.line', 'Service Indent Line'),
 	'group_flag':fields.boolean('Group By'),
-	'ser_no':fields.char('Serial No', size=128, readonly=True),
+	'ser_no':fields.char('Serial No', size=128),
 	'so_flag':fields.boolean('SO Flag'),
-	'serial_no':fields.many2one('stock.production.lot','Serial No',domain="[('product_id','=',product_id)]", readonly=True),	
+	'serial_no':fields.many2one('stock.production.lot','Serial No',domain="[('product_id','=',product_id)]"),	
+	'mode': fields.selection([('direct', 'Direct'), ('frm_indent', 'From Indent')], 'Mode'),
+	
 	}
 	
 	def onchange_uom(self, cr, uid, ids,product_id):
@@ -526,4 +559,14 @@ class kg_gate_pass_line(osv.osv):
 		else:
 			return {'value': {'uom': False}}
 	
+	def onchange_pending_qty(self, cr, uid, ids,qty,grn_pending_qty,so_pending_qty):
+		value = {'grn_pending_qty': '','so_pending_qty':''}
+		value = {'grn_pending_qty': qty,'so_pending_qty': qty}
+		return {'value': value}
+		
+	def default_get(self, cr, uid, fields, context=None):
+		print"contextcontextcontext",context
+		
+		return context
+		
 kg_gate_pass_line()

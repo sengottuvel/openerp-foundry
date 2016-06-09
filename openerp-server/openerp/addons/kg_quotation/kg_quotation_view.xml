@@ -6,14 +6,19 @@
 			<field name="model">kg.rfq.vendor.selection</field>
 			<field name="type">form</field>
 			<field name="arch" type="xml">
-				<form string="RFQ-Vendor Selection">
-					<field name="name" readonly="1"	/>
-					<field name="rfq_name" attrs="{'readonly': [('state', '!=', 'draft')]}" />
-					<newline/>
-					<field name="quotation_date"/>
-					<newline/>
-					<field name="quote_submission_date" required="1" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
-					<field name="state" invisible="1" readonly="0"/>
+				<form string="RFQ-Vendor Selection" version="7.0" delete="false">
+					<group>
+						<group>
+							<field name="name" readonly="1"	/>
+							<field name="quote_submission_date" required="1" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+							<field name="active"/>
+						</group>
+						<group>
+							<field name="rfq_name" attrs="{'readonly': [('state', '!=', 'draft')]}" />
+							<field name="quotation_date" attrs="{'readonly': [('state', '!=', 'draft')]}"/>							
+							<field name="state" style="width: 30%%" class="att_state_change"/>
+						</group>
+					</group>
 					<notebook colspan="4">
 						<page string="Select Items">
 							<field name="requisition_line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state', '!=', 'draft')]}">
@@ -37,7 +42,7 @@
 						<button name="proceed" string="Proceed" type="object" states='draft'/>
 						</page>
 						<page string="Quotation Details">
-							<field name="line_id" colspan="4" nolabel="1" >
+							<field name="line_id" colspan="4" nolabel="1" attrs="{'readonly': [('state', '!=', 'draft')]}">
 								<tree string="Quotation Lines" create="false" editable="bottom">
 									<field name="purchase_requisition_id" invisible="1"/>
 									<field name="product_id" readonly="1"/>
@@ -99,7 +104,7 @@
 			<field name="model">kg.rfq.vendor.selection</field>
 			<field name="type">tree</field>
 			<field name="arch" type="xml">
-				<tree colors="blue:state in ('approved');" string="Quotations">
+				<tree colors="blue:state in ('draft');red:state in ('approved','rfq_approved');black:state in ('comparison_confirmed','comparison_approved');" string="Quotations" delete="false">
 					<field name="name"/>
 					<field name="rfq_name"/>
 					<field name="quotation_date"/>					
@@ -117,19 +122,36 @@
 			<field name="domain"></field>
 		</record>
 
+		<!-- Sequence Number Setting Starts Here -->
+	
+		<record forcecreate="1" id="seq_type_rfq_vendor_selection" model="ir.sequence.type">	
+			<field name="name">Kg RFQ Vendor Selection</field>
+			<field name="code">kg.rfq.vendor.selection</field>
+		</record>
 
+		<record forcecreate="1" id="seq_req_vendor_selection" model="ir.sequence">
+		  <field name="name">Kg RFQ Vendor Selection</field>
+		  <field name="code">kg.rfq.vendor.selection</field>
+		  <field name="padding" eval="3"/>
+		  <field name="prefix">RFQ/%(year)s/</field>
+		  <field name="reset_sequence">fiscal_reset</field>
+		</record>
+		
 		<record id="kg_quotation_requisition_header_form" model="ir.ui.view">
             <field name="name">kg.quotation.requisition.header.form</field>
             <field name="model">kg.quotation.requisition.header</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
-                <form string="Request for Quotation" create="false" >
+                <form string="Request for Quotation" create="false" delete="false" version="7.0" >
 					<group>
-						<field name="rfq_no_id" readonly="1"/>
-						<field name="state" invisible="1"/>
-					</group>
-					<group>
-						<field name="quotation_date" required="1"/>
+						<group>
+							<field name="rfq_no_id" readonly="1"/>
+							<field name="active"/>
+						</group>
+						<group>
+							<field name="quotation_date" required="1"/>
+							<field name="state" style="width: 30%%" class="att_state_change"/>
+						</group>
 					</group>
 					<newline/>
 					<field name="line_ids" colspan="4" nolabel="1">
@@ -147,7 +169,7 @@
 					<group colspan="2" col="2">
 					<button name="app_quotation" type="object" states="draft" string="Approve"  icon="gtk-execute"/>
 					<button name="rej_quotation" type="object" states="draft" string="Reject" icon="gtk-execute"/>
-					<button name="create_revision1" string="Create Revision" type="object" states='approved'/>
+					<button name="create_revision1" string="Create Revision" type="object" attrs="{'invisible': [('state','not in',['approved']),('revised_flag','=',True)]}"/>
 					</group>
 					<group colspan="2" col="2">
 					</group>
@@ -175,7 +197,7 @@
             <field name="model">kg.quotation.requisition.header</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
-                <tree colors="blue:state in ('approved');" string="Request for Quotation" create="false" >
+                <tree colors="blue:state in ('approved');" string="Request for Quotation" create="false" delete="false" >
 					<field name="name" invisible="1"/>
 					<field name="rfq_no_id" readonly="1"/>
 					<field name="quotation_date"/>
@@ -190,7 +212,10 @@
             <field name="res_model">kg.quotation.requisition.header</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
+<!--
             <field name="context">{"search_default_state":'draft'}</field>
+-->
+            <field name="context">{}</field>
         </record>
         
 		<record model="ir.ui.view" id="kg_quotation_entry_header_form">
@@ -203,12 +228,13 @@
 						<group>
 						<field name="rfq_no_id" on_change="onchange_partner_id(rfq_no_id)" attrs="{'readonly': [('state', '!=', 'draft')]}" />
 						<field name="rfq_name" readonly="1"/>
+						<field name="active"/>
 						<field name="quote_list_flag" invisible="1"/>
 						</group>
 						<group>
 						<field name="rfq_date" readonly="1"/>
-						<field name="comparision_date" required="0"/>
-						<field name="state" invisible="1"/>
+						<field name="comparision_date"/>
+						<field name="state" style="width: 30%%" class="att_state_change"/>
 						<field name="vendor_1_id" invisible="1" readonly="1"/>
 						<field name="vendor_2_id" invisible="1" readonly="1"/>
 						<field name="vendor_3_id" invisible="1" readonly="1"/>
@@ -465,7 +491,7 @@
 						<field name="remarks" colspan="4" attrs="{'invisible': [('state','=','draft')],'readonly': [('state',' in',('approved','cancel'))]}"/>
 					<group colspan="14" col="14">
 						<group colspan="4" col="4">
-						<button name="send_for_approval" type="object" states='draft' string="Send for Approval"  icon="gtk-execute"/>
+						<button name="send_for_approval" type="object" states='draft' string="Confirm"  icon="gtk-execute"/>
 						<button name="approve_quote" type="object" states='confirmed' string="Approve"  icon="gtk-execute"/>
 						<button name="approve_po_quote" type="object" states='confirmed' string="Approve &amp; Generate PO"  icon="gtk-execute"/>
 						<button name="po_generate" type="object" states='approved' string="Generate PO"  icon="gtk-execute"/>
@@ -510,7 +536,7 @@
 			<field name="model">kg.quotation.requisition.line</field>
 			<field name="type">form</field>
 			<field name="arch" type="xml">
-				<form string="RFQ Quotation Line" version="7.0">
+				<form string="RFQ Quotation Line" version="7.0" delete="false" create="false">
 					<header>
 					<button name="entry_submit" states="draft" string="Submit" type="object" class="oe_highlight"/>
 					</header>
@@ -522,6 +548,7 @@
 							<field name="cmp_flag" attrs="{'readonly': [('state','=','approved')]}" />
 							<field name="freight_type" attrs="{'required': [('cmp_flag','=',True)],'readonly': [('state','=','approved')]}"/>
 							<field name="other_charges" attrs="{'required': [('cmp_flag','=',True)],'readonly': [('state','=','approved')]}"/>
+							<field name="active"/>
 						</group>
 						<group>
 							<field name="due_date"/>

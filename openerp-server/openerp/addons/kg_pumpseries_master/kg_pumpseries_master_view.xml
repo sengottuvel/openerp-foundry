@@ -32,7 +32,7 @@
 							<group>
 								<field name="discharge_orientation" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 								<field name="pump_capacity" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
-								<field name="temperature" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+								<field name="temperature" string="Temperature(℃ )" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>		
 							</group>
 							<group string=" ">

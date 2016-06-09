@@ -3,92 +3,81 @@
     <data>
         <!--
           =====================
-          master Form view
+          Form view
           =====================
         -->
 
-        <record id="view_gate_pass_form" model="ir.ui.view">
+		<record id="view_gate_pass_form" model="ir.ui.view">
             <field name="name">view.gate.pass.form</field>
             <field name="model">kg.gate.pass</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
-                <form string="Gate Pass" version="7.0">
+                <form string="Gate Pass" version="7.0" delete="false">
 					<header>
-						
-						
-					<button name="confirm_entry" string="Confirm" type="object" states="draft" 
-						class="oe_highlight"/>
-						
-					<button name="approve_entry" string="Approve" type="object" states="confirmed" 
-						class="oe_highlight" />
-						
-					<button name="gate_pass_register_scheduler" string="Gate Pass Register" type="object" states="done" 
-						class="oe_highlight"  invisible="0"/>
-						
-					<button name="open_gate_pass_register_scheduler" string="Open Gate Pass Register" type="object" states="done" 
-						class="oe_highlight"  invisible="0"/>
-						
-					
+					<button name="confirm_entry" string="Confirm" type="object" states="draft" class="oe_highlight"/>
+					<button name="approve_entry" string="Approve" type="object" states="confirmed" class="oe_highlight" />
+					<button name="cancel_entry" string="Cancel" type="object" states="done" class="oe_highlight" />
+					<button name="reject_entry" string="Reject" type="object" states="confirmed" class="oe_highlight" />
+					<button name="gate_pass_register_scheduler" string="Gate Pass Register" type="object" states="done" class="oe_highlight"  invisible="1"/>
+					<button name="open_gate_pass_register_scheduler" string="Open Gate Pass Register" type="object" states="done" class="oe_highlight"  invisible="1"/>
 					<!--<button name="gate_pass_print" string="Print Gate Pass" states="done" type="object" class="oe_highlight"/>-->
 					<button name="inward_update" string="Received" states="done" type="object" class="oe_highlight" invisible="1"/>
 					</header>
-										
 					
 					<group>
 						<group>
-							<field name="creation_date"/>
-							<field name="name" required="0"/>
+							<field name="name"/>
 							<field name="partner_id" required="1"/>
 							<field name="out_type" required="1"/>
-							<field name="division"/>
-							<field name="transport"/>
-							<field name="received_by"/>
+							<field name="mode"/>
+							<field name="transport_id"/>
+							<field name="remark"/>
+							<field name="division" invisible="1"/>
+							<field name="received_by" invisible="1"/>
 							<field name="gp_type" invisible="1"/>
-							<field name="confirm_flag"  invisible="1"/>
-							<field name="confirmed_by" readonly="1" attrs="{'invisible': [('confirm_flag','=',False)]}"/>
-							<field name="confirmed_date" readonly="1" attrs="{'invisible': [('confirm_flag','=',False)]}"/>
+							<field name="confirm_flag" invisible="1"/>
 						</group>						
 						<group>
-							<field name="user_id"/>
 							<field name="date"/>
-							<field name="dep_id" required="1"/>
 							<field name="return_date"/>
-							<field name="dep_project"/>
-							<field name="taken_by"/>
-							<field name="state"/>	
+							<field name="dep_id" required="1"/>
+							<field name="state" style="width: 30%%" class="att_state_change"/>	
 							<field name="in_state"/>						
 							<field name="indent_flag" invisible="1"/>
-							<field name="approve_flag"  invisible="1"/>						
-							<field name="approved_by" readonly="1" attrs="{'invisible': [('approve_flag','=',False)]}"/>						
-							<field name="approved_date" readonly="1" attrs="{'invisible': [('approve_flag','=',False)]}"/>			
+							<field name="dep_project" invisible="1"/>
+							<field name="taken_by" invisible="1"/>
+							<field name="approve_flag" invisible="1"/>						
 						</group>
 					</group>
 					<notebook>
-						<page string="Outward Details" attrs="{'invisible': [('indent_flag','=',False)]}" >
-						<field colspan="4" string="Gate Pass Line" mode="tree" name="gate_line" nolabel="1" widget="one2many_list">									 
+						<page string="Outward Details" attrs="{'invisible':[('mode','in',['frm_indent']),('indent_flag','=',False)]}">
+						<field colspan="4" string="Gate Pass Line" mode="tree" name="gate_line" nolabel="1" widget="one2many_list" context="{'mode':mode}">									 
 							<tree string="Gate Pass Line"> 
 								<field name="product_id"/>
 								<field name="brand_id"/>
+								<field name="serial_no"/>
 								<field name="ser_no"/>
 								<field name="uom"/>
 								<field name="qty"/>
 								<field name="note"/>
+								<field name="mode" invisible="1"/>
 							</tree>
 							<form string="Gate Pass Line " >
-								<field name="product_id" on_change="onchange_uom(product_id)" required="1"/>
-								<field name="brand_id"/>
-								<field name="ser_no"/>
-								<field name="serial_no"/>
-								<field name="so_flag" invisible="1"/>
-									
-								<field name="uom" required="1"/>
-								<field name="qty" required="1"/>
+								<field name="product_id" attrs="{'readonly':[('mode','in',['frm_indent'])]}" on_change="onchange_uom(product_id)" required="1"/>
+								<field name="brand_id" attrs="{'readonly':[('mode','in',['frm_indent'])]}"/>
+								<field name="serial_no" attrs="{'readonly':[('mode','in',['frm_indent'])]}"/>
+								<field name="ser_no" attrs="{'readonly':[('mode','in',['frm_indent'])]}"/>
+								<field name="uom" attrs="{'readonly':[('mode','in',['frm_indent'])]}" required="1"/>
 								<field name="note"/>
+								<field name="qty" required="1" on_change="onchange_pending_qty(qty,grn_pending_qty,so_pending_qty)"/>
+								<field name="so_flag" invisible="1"/>
+								<field name="mode" invisible="1"/>
+								<field name="grn_pending_qty" invisible="1"/>
+								<field name="so_pending_qty" invisible="1"/>
 							</form>
 						</field>
 						</page>
-
-						<page string="Select Service Indent">
+						<page string="Select Service Indent" attrs="{'invisible':[('mode','in',['direct'])]}">
 							<field name="si_indent_ids" colspan="4" nolabel="1"  >
 								<tree string = "Service Indent" editable="bottom">
 									<field name="service_id" readonly="1"/>
@@ -97,21 +86,41 @@
 									<field name="uom" readonly="1"/>
 									<field name="qty" readonly="1"/>
 								</tree>
-								
 						</field>							
-						<button name="create_gp_line" type='object' string="Save Record"/>
-
+						<button name="create_gp_line" type='object' string="Save Record" states="draft,pending"/>
 						</page>
-
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<group>
+									<field name="user_id"/>
+									<field name="confirmed_by" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="rej_user_id" attrs="{'invisible':[('state','not in',['reject'])]}"/>
+									<field name="approved_by" attrs="{'invisible':[('state','in',['draft','confirmed','reject'])]}"/>
+									<field name="cancel_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="creation_date"/>
+									<field name="confirmed_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="reject_date" attrs="{'invisible':[('state','not in',['reject'])]}"/>
+									<field name="approved_date" attrs="{'invisible':[('state','in',['draft','confirmed','reject'])]}"/>
+									<field name="cancel_date" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
 					</notebook>                     
-                    <field name="note"/>
+                    <field name="note" placeholder="Remarks"/>
                </form>
            </field>
         </record>
 
         <!--
         =====================
-        master Tree view
+        Tree view
         =====================
         -->
         <record id="gate_pass_tree_view" model="ir.ui.view">
@@ -120,21 +129,42 @@
             <field name="type">tree</field>
             <field name="arch" type="xml">
                 <tree colors="red:state == 'confirm';blue:state == 'draft';black:state == 'done'" 
-							string="Gate Pass" toolbar="1" >
+							string="Gate Pass" toolbar="1" delete="false">
                     <field name="name"/>
                     <field name="date"/>
                     <field name="partner_id"/>
                     <field name="dep_id"/>
                     <field name="out_type"/>
-                   
                     <field name="state"/>
                     <field name="in_state"/>
-                   
                 </tree> 
             </field>
         </record>
-       
-       <record id="gate_pass_line_tree_view" model="ir.ui.view">
+		
+		<!-- Search View -->
+		
+		<record id="kg_gate_pass_search_view" model="ir.ui.view">
+            <field name="name">Gate Pass</field>
+            <field name="model">kg.gate.pass</field>
+            <field name="arch" type="xml">
+                <search string="Gate Pass">
+					<field name="name" string="Gate Pass" filter_domain="[('name','ilike',self)]"/>
+					<field name="partner_id" string="Supplier" filter_domain="[('partner_id','ilike',self)]"/>
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>
+					<filter icon="terp-check" name="done" string="Delivered" domain="[('state','=','done')]"/>
+					<filter icon="terp-check" name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Supplier" icon="terp-personal" domain="[]" context="{'group_by':'partner_id'}"/>
+                        <filter string="Gate Pass Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'date'}"/>
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+					</group>
+                </search>
+			</field>
+		</record>	
+		
+		<record id="gate_pass_line_tree_view" model="ir.ui.view">
             <field name="name">gate.pass.line.tree.view</field>
             <field name="model">kg.gate.pass.line</field>
             <field name="type">tree</field>
@@ -145,33 +175,23 @@
                     <field name="brand_id"/>
                     <field name="uom"/>
                     <field name="qty"/>
-                    
-                   
                 </tree> 
             </field>
         </record>
-       
+        
        <!--
         =====================
-        master Form Action
+        Form Action
         ===================== -->
 
-
-	<record id="action_gate_pass" model="ir.actions.act_window">
-			<field name="name">Gate Pass</field>
-			<field name="type">ir.actions.act_window</field>
-			<field name="res_model">kg.gate.pass</field>
-			<field name="view_type">form</field>
-			<field name="view_id" ref="gate_pass_tree_view"/>
-	</record>
+		<record id="action_gate_pass" model="ir.actions.act_window">
+				<field name="name">Gate Pass</field>
+				<field name="type">ir.actions.act_window</field>
+				<field name="res_model">kg.gate.pass</field>
+				<field name="view_type">form</field>
+				<field name="view_id" ref="gate_pass_tree_view"/>
+				<field name="search_view_id" ref="kg_gate_pass_search_view"/>
+		</record>
 	
-        <!--
-        =====================
-        master Menu Item
-        =====================
-        -->
-        
-	
-            
     </data>
 </openerp>

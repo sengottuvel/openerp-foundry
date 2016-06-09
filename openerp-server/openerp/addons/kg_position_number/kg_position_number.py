@@ -168,6 +168,16 @@ class kg_position_number(osv.osv):
 		return res
 		
 	def entry_confirm(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		
+		operation_sql = """ select count(id) from ch_kg_position_number where header_id = %s and is_last_operation = True """%(rec.id)
+		cr.execute(operation_sql)		
+		operation_data = cr.dictfetchall()
+		
+		if not operation_data[0]['count'] == 1:
+			raise osv.except_osv(_('Warning!'),
+				_('Please select anynoe operation is last operation !!'))
+				
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 		
@@ -176,6 +186,16 @@ class kg_position_number(osv.osv):
 		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		
+		operation_sql = """ select count(id) from ch_kg_position_number where header_id = %s and is_last_operation = True """%(rec.id)
+		cr.execute(operation_sql)		
+		operation_data = cr.dictfetchall()
+		
+		if not operation_data[0]['count'] == 1:
+			raise osv.except_osv(_('Warning!'),
+				_('Please select anynoe operation is last operation !!'))
+				
 		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
@@ -201,13 +221,19 @@ class kg_position_number(osv.osv):
 	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_position_number, self).write(cr, uid, ids, vals, context)
-		
+	
+	def _check_line(self, cr, uid, ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if not rec.line_ids:			
+			return False
+		return True	
 	
 	_constraints = [
 		#(_Validation, 'Special Character Not Allowed !!!', ['Check Name']),
 		#(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
 		#~ (_name_validate, 'Position name must be unique !!', ['name']),		
 		(_code_validate, 'Position code must be unique !!', ['code']),		
+		(_check_line,'You can not save this with out Operation Details !',['line_ids']),
 		
 	]
 	

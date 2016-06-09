@@ -1032,7 +1032,7 @@ class kg_po_grn(osv.osv):
 					gp_line_pending_qty = pending_qty - grn_qty
 					#rec_qty += line.po_grn_qty
 					if gp_line_pending_qty > 0:
-						status = 'pending'
+						status = 'partial'
 					else:
 						status = 'done'
 					gp_obj.write(cr, uid, [line.gp_line_id.gate_id.id],
@@ -1442,6 +1442,13 @@ class kg_po_grn(osv.osv):
 							  'approve_flag':'True',
 							  'approved_by':uid,
 							  'approved_date':today })
+		#~ sql = """ select * from kg_gate_pass_line where grn_pending_qty > 0 and gate_id = %s"""%(grn_entry.so_id.gp_id.id)
+		#~ cr.execute(sql)
+		#~ data = cr.dictfetchall()
+		#~ if data:
+			#~ gate_obj.write(cr,uid,grn_entry.so_id.gp_id.id,{'in_state':'pending'})
+		#~ else:
+			#~ gate_obj.write(cr,uid,grn_entry.so_id.gp_id.id,{'in_state':'done'})
 		#cr.execute("""select all_transaction_mails('PO/SO GRN Approval',%s)"""%(ids[0]))
 		"""Raj
 		data = cr.fetchall();
@@ -1463,13 +1470,7 @@ class kg_po_grn(osv.osv):
 		if grn_entry.billing_status == 'applicable':
 			self.write(cr,uid,ids[0],{'invoice_flag':'True'})
 		if grn_entry.grn_type == 'from_so' and grn_entry.so_id.gp_id:"""
-			#sql = """ select * from kg_gate_pass_line where grn_pending_qty > 0 and gate_id = %s"""%(grn_entry.so_id.gp_id.id)
-			#cr.execute(sql)
-			#data = cr.dictfetchall()
-			#if data:
-			#	gate_obj.write(cr,uid,grn_entry.so_id.gp_id.id,{'in_state':'pending'})
-			#else:
-			#	gate_obj.write(cr,uid,grn_entry.so_id.gp_id.id,{'in_state':'done'})
+			
 		
 		return True
 		
