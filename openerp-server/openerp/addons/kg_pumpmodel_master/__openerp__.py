@@ -9,7 +9,7 @@
     'version': '0.1',
     'author': 'karthikeyan',
     'category': 'BASE',        
-    'depends' : ['base'],
+    'depends' : ['base','kg_pump_category','kg_pumpseries_master'],
     'data': ['kg_pumpmodel_master_view.xml'],
     'css': ['static/src/css/state.css'], 
     'auto_install': False,
