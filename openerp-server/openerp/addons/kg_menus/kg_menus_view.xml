@@ -69,6 +69,9 @@
 				
 				<!--Pumpseries Master Menu -->
 				<menuitem name="Pumpseries" parent="cpm_crm_master_menu" action="kg_pumpseries_master.mma_pumpseries_master" id="mam_pumpseries_master_menu" sequence="11"/>
+			
+				<!--Flange Master Menu -->
+				<menuitem name="Flange" parent="cpm_crm_master_menu" action="kg_flange_master.mma_flange_master" id="mam_flange_master_menu" sequence="12"/>
 		
 			<!-- CRM Enquiry Menu -->
 			<menuitem id="cpm_crm_enquiry_menu" name="Enquiry" parent="cpm_crm" sequence="2"/>
