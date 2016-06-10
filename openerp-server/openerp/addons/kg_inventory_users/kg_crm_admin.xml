@@ -332,6 +332,17 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
 		</record>
 		
+		<record id="crm_admin_flange" model="ir.model.access">
+			<field name="model_id" ref="kg_flange_master.model_kg_flange_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Flange Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		
     </data>
 </openerp>
 	

@@ -11,6 +11,8 @@
 				<header>			
 					<button name="planning_vs_production_register_scheduler_mail" string="Planning vs Production Mail" type="object" class="oe_highlight"/>							
 					<button name="daily_stock_statement_scheduler_mail" string="Stock Statement Mail" type="object" class="oe_highlight"/>							
+					<button name="transaction_summary_list_scheduler_mail" string="Transaction Summary" type="object" class="oe_highlight"/>							
+					<button name="userwise_summary_list_scheduler_mail" string="UserWise Summary" type="object" class="oe_highlight"/>							
 				</header>			
 								   
 				</form>

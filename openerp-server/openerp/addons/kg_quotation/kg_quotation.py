@@ -279,14 +279,13 @@ class kg_rfq_vendor_selection_line(osv.osv):
 		'due_date': fields.date('Due Date'),
 		'remarks': fields.text('Remarks'),
 		'brand_id': fields.many2one('kg.brand.master','Brand'),
-		'revised_flag': fields.boolean('Revised Button Flag'),
+		
 		
 	}
 	
 	_defaults = {
 		'name': '/',
 		'state': 'draft',
-		'revised_flag': False,
 		
 	}	
 	
@@ -307,14 +306,17 @@ class kg_quotation_requisition_header(osv.osv):
 		'rfq_no_id': fields.many2one('kg.rfq.vendor.selection', 'Comparison No.', required=True,),
 		'line_ids': fields.one2many('kg.quotation.requisition.line', 'header_id', 'RFQ Lines', readonly=False, states={'approved':[('readonly',True)],'reject':[('readonly',True)]}),
 		'active': fields.boolean('Active'),
+		'revised_flag': fields.boolean('Revised Button Flag'),
 		
 	}
 	_defaults = {
+		
 		'user_id': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).id ,
 		'quotation_date': lambda *a: time.strftime('%Y-%m-%d'),
 		'state': 'draft',
 		'name': '/',
 		'active': True,
+		'revised_flag': False,
 		
 	}
 	

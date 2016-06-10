@@ -172,6 +172,7 @@
 					<button name="create_revision1" string="Create Revision" type="object" attrs="{'invisible': [('state','not in',['approved']),('revised_flag','=',True)]}"/>
 					</group>
 					<group colspan="2" col="2">
+						<field name="revised_flag" invisible="1"/>
 					</group>
 					</group>								
 					
@@ -202,20 +203,43 @@
 					<field name="rfq_no_id" readonly="1"/>
 					<field name="quotation_date"/>
 					<field name="state"/>
+					<field name="revised_flag" invisible="1"/>
                 </tree>
             </field>
         </record>
-        
+       
+       <record id="quotation_group_view" model="ir.ui.view">
+            <field name="name">Quotation</field>
+            <field name="model">kg.quotation.requisition.header</field>
+            <field name="arch" type="xml">
+                <search string="Quotation Form">
+				<!--	<field name="name" string="Forms" filter_domain="['|',('name','ilike',self),
+									('buyer_id','ilike',self)"/> 		-->
+					<field name="rfq_no_id" string="Comparison No" filter_domain="[('rfq_no_id','ilike',self)]" />
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="approved" string="Approved" domain="[('state','=','approved')]"/>
+					<filter icon="terp-check" name="reject" string="Rejected" domain="[('state','=','reject')]"/>
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Comparison No" name="group_quote" icon="terp-personal" domain="[]" context="{'group_by':'rfq_no_id'}"/>
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+                       
+					</group>
+                </search>
+			</field>
+		</record>
+		 
         <record id="kg_quotation_requisition_header_action" model="ir.actions.act_window">
             <field name="name">Quotation Submit</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">kg.quotation.requisition.header</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
+			<field name="context">{'search_default_draft':1,'search_default_approved':1,'search_default_reject':1}</field>
+			<field name="search_view_id" ref="quotation_group_view"/>
 <!--
-            <field name="context">{"search_default_state":'draft'}</field>
--->
             <field name="context">{}</field>
+-->
         </record>
         
 		<record model="ir.ui.view" id="kg_quotation_entry_header_form">
