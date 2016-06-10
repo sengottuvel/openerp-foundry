@@ -330,70 +330,71 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'line_ids_a': fields.one2many('ch.kg.crm.machineshop.item', 'header_id', "Machineshop Details"),
 		'line_ids_b': fields.one2many('ch.kg.crm.bot', 'header_id', "BOT Details"),
 		'line_ids_moc_a': fields.one2many('ch.moc.construction', 'header_id', "MOC Construction"),
-		'fluid_id': fields.many2one('kg.fluid.master','Fluid'),
-		'primemover_id': fields.many2one('kg.primemover.master','Primemover'),
-		'pumpseries_id': fields.many2one('kg.pumpseries.master','Pumpseries'),
 		
 		########## Karthikeyan Item Details Added Start here ################
-		'equipment_no': fields.char('Equipment No', required=True),
-		'quantity_in_no': fields.integer('Quantity in No', required=True),
-		'description': fields.char('Description', required=True),
+		'equipment_no': fields.char('Equipment No'),
+		'quantity_in_no': fields.integer('Quantity in No'),
+		'description': fields.char('Description'),
 		
 		########## Karthikeyan Liquid Specifications Added Start here ################
-		'solid_concen': fields.float('Solid Concentration in %', required=True),
-		'viscosity': fields.float('Viscosity correction factors', required=True),
-		'max_size_mm': fields.float('Max Size-mm', required=True),
-		'slurry_correction_in': fields.float('Slurry Correction in', required=True),
-		'temperature': fields.selection([('normal','NORMAL'),('jacketting','JACKETTING'),('centre_line','CENTRE LINE')],'Temperature in C', required=True),
-		'suction_condition': fields.selection([('positive','Positive'),('negative','Negative')],'Suction Condition', required=True),
-		'suction_pressure': fields.selection([('normal','Normal'),('centre_line','Centre Line')],'Suction pressure', required=True),
-		'npsh_avl': fields.integer('NPSH-AVL', required=True),		
-		'suction_pressure_kg': fields.float('Suction Pressure - kg/cm2', required=True),
-		'discharge_pressure_kg': fields.float('Discharge Pressure - kg/cm2', required=True),
-		'differential_pressure_kg': fields.float('Differential Pressure - kg/cm2', required=True),
+		'solid_concen': fields.float('Solid Concentration in %'),
+		'max_size_mm': fields.float('Max Size-mm'),
+		'fluid_id': fields.many2one('kg.fluid.master','Liquid',domain="[('state','not in',('reject','cancel'))]"),
+		'temperature_in_c': fields.float('Temperature in C'),
+		'density': fields.integer('Density(kg/m3)'),
+		'viscosity': fields.integer('Viscosity in CST'),
+		'npsh_avl': fields.integer('NPSH-AVL'),
 		
 		########## Karthikeyan Duty Parameters Added Start here ################	
 		
-		'capacity_in': fields.integer('Capacity in M3 / hr', required=True),
-		'head_in': fields.integer('Total Head in Mlc', required=True),
+		'capacity_in': fields.integer('Capacity in M3 / hr',),
+		'head_in': fields.integer('Total Head in Mlc'),
+		'viscosity_crt_factor': fields.float('Viscosity correction factors'),
+		'suction_pressure': fields.selection([('normal','Normal'),('centre_line','Centre Line')],'Suction pressure'),
+		'differential_pressure_kg': fields.float('Differential Pressure - kg/cm2'),
+		'slurry_correction_in': fields.float('Slurry Correction in'),
+		'temperature': fields.selection([('normal','NORMAL'),('jacketting','JACKETTING'),('centre_line','CENTRE LINE')],'Temperature Condition'),
+		'suction_condition': fields.selection([('positive','Positive'),('negative','Negative')],'Suction Condition'),
+		'discharge_pressure_kg': fields.float('Discharge Pressure - kg/cm2'),
+		'suction_pressure_kg': fields.float('Suction Pressure - kg/cm2'),
 		
 		########## Karthikeyan Pump Specification Added Start here ################	
 		'pump_type': fields.char('Pump Model', required=True),		
-		'casing_design': fields.selection([('base','Base'),('center_line','Center Line')],'Casing Feet Location', required=True),
+		'casing_design': fields.selection([('base','Base'),('center_line','Center Line')],'Casing Feet Location'),
 		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Type', required=True,domain="[('active','=','t')]"),		
-		'size_suctionx': fields.char('Size-SuctionX Delivery- in mm', required=True),
-		'flange_standard': fields.char('Flange Standard', required=True),
-		'efficiency_in': fields.float('Efficiency in % Wat/Liq', required=True),
-		'npsh_r_m': fields.float('NPSH R - M', required=True),
-		'best_efficiency': fields.float('Best Efficiency NPSH in M', required=True),
-		'bkw_water': fields.float('BKW Water', required=True),
-		'bkw_liq': fields.float('BKW Liq', required=True),		
-		'impeller_dia_rated': fields.float('Impeller Dia Rated mm', required=True),
-		'impeller_tip_speed': fields.float('Impeller Tip Speed -M/Sec', required=True),		
-		'hydrostatic_test_pressure': fields.float('Hydrostatic Test Pressure - Kg/cm2', required=True),		
-		'shut_off_head': fields.float('Shut off Head in M', required=True),
-		'minimum_contionuous': fields.float('Minimum Contionuous Flow - M3/hr', required=True),
-		'specific_speed': fields.float('Specific Speed', required=True),
-		'suction_specific_speed': fields.float('Suction Specific Speed', required=True),
-		'sealing_water_pressure': fields.float('Sealing Water Pressure Kg/cm^2', required=True),
-		'sealing_water_capcity': fields.float('Sealing Water Capcity- m3/hr', required=True),
-		'gd_sq_value': fields.float('GD SQ value', required=True),
-		'critical_speed': fields.float('Critical Speed', required=True),
-		'bearing_make': fields.float('Bearing Make', required=True),
-		'bearing_number_nde': fields.float('BEARING NUMBER NDE / DE', required=True),
-		'bearing_qty_nde': fields.float('Bearing qty NDE / DE', required=True),
-		'type_of_drive': fields.selection([('motor_direct','Motor-direct'),('vfd','VFD'),('belt_drive','Belt drive'),('fc_gb','FC GB'),('engine','ENGINE')],'Type of Drive', required=True),
-		'end_of_the_curve': fields.float('End of the curve - KW(Rated) liquid', required=True),
-		'motor_frequency_hz': fields.float('Motor frequency HZ', required=True),
-		'motor_margin': fields.integer('Motor Margin(%)', required=True),
-		'motor_kw': fields.float('Motor KW', required=True),
-		'speed_in_pump': fields.float('Speed in RPM-Pump', required=True),
-		'speed_in_motor': fields.float('Speed in RPM-Motor', required=True),
-		'full_load_rpm': fields.float('Full Load RPM', required=True),
-		'engine_kw': fields.float('Engine KW', required=True),
-		'belt_loss_in_kw': fields.float('Belt Loss in Kw - 3% of BKW', required=True),
-		'type_make_selection': fields.selection([('base','Base'),('center_line','Center Line')],'Type Make Selection', required=True),
-		
+		'size_suctionx': fields.char('Size-SuctionX Delivery- in mm'),
+		'flange_standard': fields.many2one('kg.flange.master','Flange Standard'),
+		'efficiency_in': fields.float('Efficiency in % Wat/Liq'),
+		'npsh_r_m': fields.float('NPSH R - M'),
+		'best_efficiency': fields.float('Best Efficiency NPSH in M'),
+		'bkw_water': fields.float('BKW Water'),
+		'bkw_liq': fields.float('BKW Liq'),		
+		'impeller_dia_rated': fields.float('Impeller Dia Rated mm'),
+		'impeller_tip_speed': fields.float('Impeller Tip Speed -M/Sec'),		
+		'hydrostatic_test_pressure': fields.float('Hydrostatic Test Pressure - Kg/cm2'),		
+		'shut_off_head': fields.float('Shut off Head in M'),
+		'minimum_contionuous': fields.float('Minimum Contionuous Flow - M3/hr'),
+		'specific_speed': fields.float('Specific Speed'),
+		'suction_specific_speed': fields.float('Suction Specific Speed'),
+		'sealing_water_pressure': fields.float('Sealing Water Pressure Kg/cm^2'),
+		'sealing_water_capcity': fields.float('Sealing Water Capcity- m3/hr'),
+		'gd_sq_value': fields.float('GD SQ value'),
+		'critical_speed': fields.float('Critical Speed'),
+		'bearing_make': fields.many2one('kg.brand.master','Bearing Make'),
+		'bearing_number_nde': fields.float('BEARING NUMBER NDE / DE'),
+		'bearing_qty_nde': fields.float('Bearing qty NDE / DE'),
+		'type_of_drive': fields.selection([('motor_direct','Motor-direct'),('vfd','VFD'),('belt_drive','Belt drive'),('fc_gb','FC GB'),('engine','ENGINE')],'Transmission'),
+		'end_of_the_curve': fields.float('End of the curve - KW(Rated) liquid'),
+		'motor_frequency_hz': fields.float('Motor frequency HZ'),
+		'motor_margin': fields.integer('Motor Margin(%)'),
+		'motor_kw': fields.float('Motor KW'),
+		'speed_in_pump': fields.float('Speed in RPM-Pump'),
+		'speed_in_motor': fields.float('Speed in RPM-Motor'),
+		'full_load_rpm': fields.float('Full Load RPM'),
+		'engine_kw': fields.float('Engine KW'),
+		'belt_loss_in_kw': fields.float('Belt Loss in Kw - 3% of BKW'),
+		'type_make_selection': fields.selection([('base','Base'),('center_line','Center Line')],'Type Make Selection'),
+		'engine_rpm': fields.float('Engine(RPM)'),
 		
 		##### Product model values ##########
 		#'impeller_type': fields.char('Impeller Type', readonly=True),
@@ -406,9 +407,16 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'number_of_stages': fields.integer('Number of stages', readonly=True),
 		#'crm_type': fields.char('Type', readonly=True),
 		'crm_type': fields.selection([('pull_out','End Suction Back Pull Out'),('split_case','Split Case'),('multistage','Multistage'),('twin_casing','Twin Casing'),('single_casing','Single Casing'),('self_priming','Self Priming'),('vo_vs4','VO-VS4'),('vg_vs5','VG-VS5')],'Type',readonly=True),
-		
-		
+		'pumpseries_id': fields.many2one('kg.pumpseries.master','Pumpseries'),
+		'primemover_id': fields.many2one('kg.primemover.master','Primemover'),
+		'primemover_categ': fields.selection([('engine','Engine'),('motor','Motor')],'Primemover Category'),
 		'moc_const_id':fields.many2one('kg.moc.construction', 'MOC Construction',domain = [('active','=','t')],required=True),
+		
+	}
+	
+	_defaults = {
+		
+		'temperature': 'normal',
 		
 	}
 	
@@ -436,16 +444,35 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			pass
 		return context
 		"""
+	
+	def onchange_type_of_drive(self,cr,uid,ids,type_of_drive,primemover_categ,context=None):
 		
+		value = {'primemover_categ':''}
+		if type_of_drive == 'engine':
+			value = {'primemover_categ':'engine'}
+		else:
+			value = {'primemover_categ':''}
+		return {'value': value}
+		
+	def onchange_liquid(self, cr, uid, ids, fluid_id, context=None):
+		
+		value = {'viscosity': '','temperature_in_c': '','density': ''}
+		if fluid_id:
+			liquid_rec = self.pool.get('kg.fluid.master').browse(cr, uid, fluid_id, context=context)
+			value = {'viscosity': liquid_rec.viscosity,'temperature_in_c': liquid_rec.temperature,
+					 'density': liquid_rec.density}
+			
+		return {'value': value}
 		
 	def onchange_pumpmodel(self, cr, uid, ids, pump_id, context=None):
 		
-		value = {'impeller_type': '','impeller_number': '','impeller_dia_max': '','impeller_dia_min': '','maximum_allowable_soild': '','max_allowable_test': '','number_of_stages': '','crm_type': ''}
+		value = {'impeller_type': '','impeller_number': '','impeller_dia_max': '','impeller_dia_min': '','maximum_allowable_soild': '','max_allowable_test': '','number_of_stages': '','crm_type': '','bearing_number_nde':'','bearing_qty_nde':'','sealing_water_pressure':''}
 		if pump_id:
 			pump_rec = self.pool.get('kg.pumpmodel.master').browse(cr, uid, pump_id, context=context)
 			value = {'impeller_type': pump_rec.impeller_type,'impeller_number': pump_rec.impeller_number,'impeller_dia_max': pump_rec.impeller_dia_max,
 			'impeller_dia_min': pump_rec.impeller_dia_min,'maximum_allowable_soild': pump_rec.maximum_allowable_soild,'max_allowable_test': pump_rec.max_allowable_test,
-			'number_of_stages': pump_rec.number_of_stages,'crm_type': pump_rec.crm_type}
+			'number_of_stages': pump_rec.number_of_stages,'crm_type': pump_rec.crm_type,'bearing_number_nde':pump_rec.bearing_no,'bearing_qty_nde':pump_rec.bearing_qty,
+			'sealing_water_pressure':pump_rec.sealing_water_pressure}
 			
 		return {'value': value}
 		

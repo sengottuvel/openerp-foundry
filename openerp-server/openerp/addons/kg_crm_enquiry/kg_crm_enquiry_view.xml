@@ -206,34 +206,36 @@
 					
 						<group string="Liquid Specifications">
 							<group>
+								<field name="fluid_id" on_change="onchange_liquid(fluid_id)"/>	
 								<field name="solid_concen" />																
 								<field name="viscosity" />																
-								<field name="max_size_mm" />																
 								<field name="npsh_avl" />																
-								<field name="suction_pressure_kg" />																
-								<field name="differential_pressure_kg" />																
 							</group>											
 							<group>
-								<field name="slurry_correction_in" />													
-								<field name="temperature" />													
-								<field name="suction_condition" />													
-								<field name="suction_pressure" />													
-								<field name="discharge_pressure_kg" />													
-								<field name="fluid_id" />													
+								<field name="temperature_in_c" />
+								<field name="density" />
+								<field name="max_size_mm" />
 							</group>					
 						</group>
 						<group string="Duty Parameters">
 							<group>
-								<field name="capacity_in" />																							
-							</group>											
+								<field name="capacity_in" />
+								<field name="suction_pressure" />
+								<field name="slurry_correction_in" />
+								<field name="suction_pressure_kg" />
+								<field name="viscosity_crt_factor" />
+							</group>
 							<group>
-								<field name="head_in" />													
+								<field name="head_in" />
+								<field name="differential_pressure_kg" />
+								<field name="suction_condition" />
+								<field name="discharge_pressure_kg" />
+								<field name="temperature" />
 							</group>					
 						</group>
 					
 						<group string="Pump Specification">
 							<group>
-								<field name="pumpseries_id"/>																							
 								<field name="pump_id" on_change="onchange_pumpmodel(pump_id)"/>																							
 								<field name="number_of_stages" />
 								<field name="impeller_type" />
@@ -249,50 +251,51 @@
 								<field name="impeller_tip_speed" />																								
 								<field name="hydrostatic_test_pressure" />																							
 								<field name="full_load_rpm" />																							
-								<field name="belt_loss_in_kw" />																							
-								<field name="primemover_id" />																							
-																													
+								<field name="belt_loss_in_kw" attrs="{'invisible':[('type_of_drive','not in',['belt_drive'])]}"/>
+								<field name="motor_frequency_hz" attrs="{'invisible':[('type_of_drive','not in',['belt_drive'])]}"/>
+								<field name="motor_margin" attrs="{'invisible':[('type_of_drive','not in',['belt_drive'])]}"/>
+								<field name="motor_kw" attrs="{'invisible':[('type_of_drive','not in',['belt_drive'])]}"/>
+								<field name="speed_in_pump" attrs="{'invisible':[('type_of_drive','not in',['belt_drive'])]}"/>
+								<field name="speed_in_motor" attrs="{'invisible':[('type_of_drive','not in',['belt_drive'])]}"/>
+								<field name="primemover_categ" attrs="{'invisible':[('type_of_drive','not in',['engine'])]}"/>
+								<field name="engine_rpm" attrs="{'invisible':[('type_of_drive','not in',['engine'])]}"/>
+								<field name="end_of_the_curve" attrs="{'invisible':[('type_of_drive','not in',['engine','belt_drive'])]}"/>
+								<field name="engine_kw" attrs="{'invisible':[('type_of_drive','not in',['engine'])]}"/>
+								<field name="primemover_id" invisible="1"/>
+								<field name="pumpseries_id" invisible="1"/>
 							</group>											
 							<group>
-																				
-								<field name="maximum_allowable_soild" />			
-								<field name="impeller_number" />							
-								<field name="impeller_dia_max" />	
-								<field name="max_allowable_test" />										
-								<field name="crm_type" />										
-								<field name="casing_design" />													
-								<field name="shut_off_head" />													
-								<field name="minimum_contionuous" />													
-								<field name="specific_speed" />													
-								<field name="suction_specific_speed" />													
-								<field name="sealing_water_pressure" />													
-								<field name="sealing_water_capcity" />													
-								<field name="gd_sq_value" />													
-								<field name="critical_speed" />													
-								<field name="bearing_make" />													
-								<field name="bearing_number_nde" />													
-								<field name="bearing_qty_nde" />													
-								<field name="type_of_drive" />													
-								<field name="end_of_the_curve" />													
-								<field name="motor_frequency_hz" />													
-								<field name="motor_margin" />													
-								<field name="motor_kw" />													
-								<field name="speed_in_pump" />													
-								<field name="speed_in_motor" />													
-								<field name="engine_kw" />													
-							</group>					
+								<field name="maximum_allowable_soild" />
+								<field name="impeller_number" />
+								<field name="impeller_dia_max" />
+								<field name="max_allowable_test" />
+								<field name="crm_type" />
+								<field name="casing_design" />
+								<field name="shut_off_head" />
+								<field name="minimum_contionuous" />
+								<field name="specific_speed" />
+								<field name="suction_specific_speed" />
+								<field name="sealing_water_pressure" />
+								<field name="sealing_water_capcity" />
+								<field name="gd_sq_value" />
+								<field name="critical_speed" />
+								<field name="bearing_make" />
+								<field name="bearing_number_nde" />
+								<field name="bearing_qty_nde" />
+								<field name="type_of_drive" on_change="onchange_type_of_drive(type_of_drive,primemover_categ)"/>
+							</group>
 						</group>
 						
 						<group>
 							<group>
-								<field name="moc_const_id" />																							
-							</group>											
-							<group>																	
-							</group>					
+								<field name="moc_const_id" />
+							</group>
+							<group>
+							</group>
 						</group>
 						
 					<notebook>
-						<page string="Material of Construction">
+						<page string="MOC part details">
 							<field name="line_ids_moc_a" >
 								<tree string="Material of Construction Details Entry Tree" editable="top" >											
 									<field name="pattern_id" on_change="onchange_pattern_name(pattern_id)"/>
