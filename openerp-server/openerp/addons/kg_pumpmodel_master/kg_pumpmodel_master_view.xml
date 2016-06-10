@@ -27,6 +27,18 @@
 								<field name="impeller_dia_max"/>								
 								<field name="crm_type"/>								
 								<field name="pump_mode"/>
+								
+								<field name="pump_size"/>
+								<field name="bearing_qty"/>
+								<field name="series_id"/>
+								<field name="discharge"/>
+								<field name="rotation_type"/>
+								<field name="wear_ring_type"/>
+								<field name="feet_location"/>
+								<field name="discharge_orientation"/>
+								<field name="employee_id"/>
+								
+								
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 							</group>
 							<group>
@@ -38,6 +50,16 @@
 								<field name="max_allowable_test" />								
 								<field name="number_of_stages" />												
 								<field name="delivery_lead" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="bearing_no" />		
+								<field name="sealing_water_pressure" />									
+								<field name="suction" />		
+								<field name="stage_type" />		
+								<field name="packing_type" />		
+								<field name="lubrication_type" />		
+								<field name="suction_orientation" />		
+								<field name="companion_flange" />		
+								<field name="max_solid_size" />		
+								
 								<field name="active"/>		
 								<field name="state" style="width: 30%%" class="att_state_change"/>									
 							</group>
@@ -156,7 +178,8 @@
 			<field name="search_view_id" ref="m_search_v_pumpmodel"/>
 		</record>			
 		
-		<!-- Menu Action End-->	
+		<!-- Menu Action End-->
+		
 		
 		
 		<!-- Menu Name Start here --> 

@@ -71,6 +71,25 @@ class kg_pumpmodel_master(osv.osv):
 		'max_allowable_test': fields.float('Max Allowable Test Pressure', required=True),
 		'number_of_stages': fields.integer('Number of stages', required=True),
 		
+		'pump_size': fields.float('Pump size(mm)', required=True),
+		'bearing_no': fields.integer('Bearing No', required=True),
+		'bearing_qty': fields.float('Bearing qty', required=True),
+		'sealing_water_pressure': fields.float('Sealing Water Pressure', required=True),
+		'series_id': fields.many2one('kg.pumpseries.master', 'Series',required=True),
+		'suction': fields.float('Suction', required=True),
+		'discharge': fields.float('Discharge', required=True),
+		'stage_type': fields.selection([('single','Single'),('multi','Multi'),('double','Double')],'Stage Type',required=True),
+		'rotation_type': fields.selection([('clock_wise','Clock Wise'),('anti_clock_wise','Anti Clock Wise')],'Rotation',required=True),
+		'packing_type': fields.selection([('ptfe','PTFE'),('gp','GP'),('mechanical_seal','Mechanical Seal'),('dynamic_seal','Dynamic seal')],'Packing',required=True),
+		'wear_ring_type': fields.selection([('yes','Yes'),('no','NO')],'Wear Ring',required=True),
+		'lubrication_type': fields.selection([('grease','Grease'),('oil','Oil')],'Lubrication',required=True),
+		'feet_location': fields.selection([('base','Base'),('center_line','Center Line')],'Feet Location',required=True),
+		'suction_orientation': fields.selection([('auxial','Auxial'),('side','Side')],'Suction Orientation',required=True),
+		'discharge_orientation': fields.selection([('top_side','Top-side'),('bottom_side','Bottom-Side'),('top','Top'),('top_center_line','Top Center line')],'Discharge Orientation',required=True),
+		'companion_flange': fields.char('Companion Flange', required=True),
+		'employee_id': fields.many2one('res.users', 'User Type'),
+		'max_solid_size': fields.char('Max Solid size'),
+		
 	}
 	
 	_defaults = {
