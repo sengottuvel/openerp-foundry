@@ -61,8 +61,8 @@
 				<!-- Industry Master  --> 
 				<menuitem action="kg_industry_master.mma_industry_master" name="Sector" id="cam_crm_industry_master" parent="cpm_crm_master_menu" sequence="8"/>
 				
-				<!--Fluid Master Menu -->
-				<menuitem name="Fluid" parent="cpm_crm_master_menu" action="kg_fluid_master.mma_fluid_master" id="mam_fluid_master_menu" sequence="9"/>
+				<!--Liquid Master Menu -->
+				<menuitem name="Liquid" parent="cpm_crm_master_menu" action="kg_fluid_master.mma_fluid_master" id="mam_fluid_master_menu" sequence="9"/>
 				
 				<!--Primemover Master Menu -->
 				<menuitem name="Primemover" parent="cpm_crm_master_menu" action="kg_primemover_master.mma_primemover_master" id="mam_primemover_master_menu" sequence="10"/>
