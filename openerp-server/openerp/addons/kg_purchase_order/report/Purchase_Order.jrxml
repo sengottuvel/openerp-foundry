@@ -742,7 +742,7 @@ where po.id = $P{po_id}]]>
 				<textElement>
 					<font isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["G M - PURCHASE"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["PURCHASE TEAM"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="2" y="51" width="111" height="14"/>

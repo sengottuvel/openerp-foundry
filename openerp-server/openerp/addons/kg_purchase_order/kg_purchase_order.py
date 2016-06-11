@@ -34,12 +34,41 @@ class kg_purchase_order(osv.osv):
 		amt_to_per = (line.kg_discount / (line.product_qty * line.price_unit or 1.0 )) * 100
 		kg_discount_per = line.kg_discount_per
 		tot_discount_per = amt_to_per + kg_discount_per
+		
+		if line.price_type == 'per_kg':	
+			if line.product_id.po_uom_in_kgs > 0:
+				qty = line.product_qty * line.product_id.po_uom_in_kgs
+			else:
+				qty = line.product_qty
+				
 		for c in self.pool.get('account.tax').compute_all(cr, uid, line.taxes_id,
-			line.price_unit * (1-(tot_discount_per or 0.0)/100.0), line.product_qty, line.product_id,
+			line.price_unit * (1-(tot_discount_per or 0.0)/100.0), qty, line.product_id,
 				line.order_id.partner_id)['taxes']:
 			 
 			val += c.get('amount', 0.0)
 		return val	
+	
+	#~ def _amount_line_tax(self, cr, uid, line, context=None):
+		#~ # Qty Calculation
+		#~ if line.price_type == 'per_kg':								
+			#~ if line.product_id.po_uom_in_kgs > 0:
+				#~ qty = line.product_qty * line.product_id.po_uom_in_kgs
+			#~ else:
+				#~ qty = line.product_qty
+		#~ else:
+			#~ qty = line.product_qty
+		#~ # Price Calculation
+		#~ price_amt = 0
+		#~ if line.price_type == 'per_kg':
+			#~ if line.product_id.po_uom_in_kgs > 0:
+				#~ price_amt = line.product_qty / line.product_id.po_uom_in_kgs * line.price_unit
+		#~ else:
+			#~ price_amt = qty * line.price_unit
+		#~ val = 0.0		
+		#~ for c in self.pool.get('account.tax').compute_all(cr, uid, line.taxes_id, price_amt * (1-(line.kg_discount_per or 0.0)/100.0), qty, line.product_id, line.order_id.partner_id)['taxes']:
+			#~ val += c.get('amount', 0.0)
+				#~ 
+		#~ return val	
 	
 	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
 		logger.info('[KG OpenERP] Class: kg_purchase_order, Method: _amount_all called...')
@@ -71,9 +100,11 @@ class kg_purchase_order(osv.osv):
 				#for c in self.pool.get('account.tax').compute_all(cr, uid, line.taxes_id, line.price_unit, line.product_qty, line.product_id, order.partner_id)['taxes']:
 				val += self._amount_line_tax(cr, uid, line, context=context)
 				val3 += tot_discount
+
 			res[order.id]['other_charge']= other_charges_amt or 0
 			res[order.id]['amount_tax']=(round(val,0))
 			res[order.id]['amount_untaxed']=(round(val1,0)) - (round(val,0)) + (round(val3,0))
+			
 			res[order.id]['discount']=(round(val3,0))
 			res[order.id]['amount_total']=res[order.id]['amount_untaxed'] - res[order.id]['discount'] + res[order.id]['amount_tax'] + res[order.id]['other_charge']
 			

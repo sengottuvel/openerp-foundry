@@ -27,9 +27,7 @@
 			<field name="state" style="width: 30%%" class="att_state_change"/>
 			<field name="insurance"/>
 			<field name="excise_duty"/>
-<!--
 			<field name="item_quality_term"/>
--->
 			<field name="item_quality_term_id" widget="many2many_tags"/>
 			<field name="type_flag" invisible="1" />
 			<field name="confirm_flag" invisible="1"/>
