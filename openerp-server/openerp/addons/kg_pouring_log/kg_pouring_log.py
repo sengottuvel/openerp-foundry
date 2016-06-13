@@ -629,7 +629,7 @@ class ch_pouring_details(osv.osv):
 			production_rec = self.pool.get('kg.production').browse(cr, uid, production_id, context=context)
 			if order_line_id != False:
 				if production_rec.order_line_id.id == order_line_id:
-					pour_qty = production_rec.mould_qty - production_rec.pour_qty
+					pour_qty = production_rec.total_mould_qty - production_rec.pour_qty
 			else:
 				pour_qty = 0
 			value = {'qty':pour_qty,'pattern_name': production_rec.pattern_name}
