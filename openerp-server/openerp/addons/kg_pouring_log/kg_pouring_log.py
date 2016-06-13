@@ -632,6 +632,10 @@ class ch_pouring_details(osv.osv):
 					pour_qty = production_rec.total_mould_qty - production_rec.pour_qty
 			else:
 				pour_qty = 0
+			print "production_rec",production_rec
+			print "production_rec.total_mould_qty",production_rec.total_mould_qty
+			print "production_rec.pour_qty",production_rec.pour_qty
+			print "pour_qtypour_qty",pour_qty
 			value = {'qty':pour_qty,'pattern_name': production_rec.pattern_name}
 		return {'value': value}
 		
