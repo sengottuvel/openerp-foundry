@@ -34,7 +34,7 @@ class kg_purchase_order(osv.osv):
 		amt_to_per = (line.kg_discount / (line.product_qty * line.price_unit or 1.0 )) * 100
 		kg_discount_per = line.kg_discount_per
 		tot_discount_per = amt_to_per + kg_discount_per
-		
+		qty = 0
 		if line.price_type == 'per_kg':	
 			if line.product_id.po_uom_in_kgs > 0:
 				qty = line.product_qty * line.product_id.po_uom_in_kgs
