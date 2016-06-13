@@ -636,6 +636,8 @@ class ch_pouring_details(osv.osv):
 			print "production_rec.total_mould_qty",production_rec.total_mould_qty
 			print "production_rec.pour_qty",production_rec.pour_qty
 			print "pour_qtypour_qty",pour_qty
+			print "order_line_id",order_line_id
+			print "production_rec.order_line_id.id",production_rec.order_line_id.id
 			value = {'qty':pour_qty,'pattern_name': production_rec.pattern_name}
 		return {'value': value}
 		
