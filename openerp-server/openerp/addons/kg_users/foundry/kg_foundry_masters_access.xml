@@ -834,6 +834,27 @@
 		<!-- PumpModel Master Delivery Pipe END -->
 		
 		
+		<record id="m_foundry_mocconstruction_master_offer_access" model="ir.model.access">
+			<field name="model_id" ref="kg_moc_construction.model_ch_offer_materials"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">MOC Construction Offer line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<record id="m_foundry_offer_materials_access" model="ir.model.access">
+			<field name="model_id" ref="kg_offer_materials.model_kg_offer_materials"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Offer Materials</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		
 		
 		
 		

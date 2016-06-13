@@ -8,36 +8,39 @@ import re
 import math
 dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
-class kg_moc_construction(osv.osv):
+class kg_offer_materials(osv.osv):
 
-	_name = "kg.moc.construction"
-	_description = "MOC Construction Master"
-	_rec_name = "code"
+	_name = "kg.offer.materials"
+	_description = "Materials Master"
+	
+	
 	"""
 	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
 		res={}
-		ch_weekly_obj = self.pool.get('ch.weekly.schedule.details')			
+		stock_obj = self.pool.get('kg.stock.inward')
+		weekly_sch_obj = self.pool.get('kg.weekly.schedule')				
 		for item in self.browse(cr, uid, ids, context=None):
 			res[item.id] = 'no'
-			ch_weekly_ids = ch_weekly_obj.search(cr,uid,[('moc_construction_id','=',item.id)])			
-			if ch_weekly_ids:
+			stock_ids = stock_obj.search(cr,uid,[('division_id','=',item.id)])
+			weekly_sch_ids = weekly_sch_obj.search(cr,uid,[('division_id','=',item.id)])			
+			if stock_ids or weekly_sch_ids:
 				res[item.id] = 'yes'		
 		return res
-	"""
+		
+		"""
+	
 	_columns = {
+	
 			
 		'name': fields.char('Name', size=128, required=True, select=True),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
-		'code': fields.char('Code', size=128, required=True),		
+		'code': fields.char('Code', size=128, required=True),
 		'active': fields.boolean('Active'),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
-		'cancel_remark': fields.text('Cancel'),			
-		
+		'cancel_remark': fields.text('Cancel'),
 		#'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
-		'constuction_type_id': fields.many2one('kg.construction.type','Construction Type', required=True,domain="[('active','=','t')]"),
-		'line_ids':fields.one2many('ch.offer.materials', 'header_id', "Offer Materials"),	
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -55,7 +58,7 @@ class kg_moc_construction(osv.osv):
 	
 	_defaults = {
 	
-		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.moc.construction', context=c),
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.offer.materials', context=c),
 		'active': True,
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
@@ -66,8 +69,8 @@ class kg_moc_construction(osv.osv):
 	
 	_sql_constraints = [
 	
-		('name', 'unique(name)', 'Name must be unique!!'),
-		('code', 'unique(code)', 'Code must be unique!!'),
+		('name', 'unique(name)', 'Name must be unique per Company !!'),
+		('code', 'unique(code)', 'Code must be unique per Company !!'),
 	]
 	
 	"""def _Validation(self, cr, uid, ids, context=None):
@@ -89,9 +92,9 @@ class kg_moc_construction(osv.osv):
 		rec = self.browse(cr,uid,ids[0])
 		res = True
 		if rec.name:
-			moc_name = rec.name
-			name=moc_name.upper()			
-			cr.execute(""" select upper(name) from kg_moc_construction where upper(name)  = '%s' """ %(name))
+			offermaterials_name = rec.name
+			name=offermaterials_name.upper()			
+			cr.execute(""" select upper(name) from kg_offer_materials where upper(name)  = '%s' """ %(name))
 			data = cr.dictfetchall()			
 			if len(data) > 1:
 				res = False
@@ -103,9 +106,9 @@ class kg_moc_construction(osv.osv):
 		rec = self.browse(cr,uid,ids[0])
 		res = True
 		if rec.code:
-			moc_code = rec.code
-			code=moc_code.upper()			
-			cr.execute(""" select upper(code) from kg_moc_construction where upper(code)  = '%s' """ %(code))
+			offermaterials_code = rec.code
+			code=offermaterials_code.upper()			
+			cr.execute(""" select upper(code) from kg_offer_materials where upper(code)  = '%s' """ %(code))
 			data = cr.dictfetchall()			
 			if len(data) > 1:
 				res = False
@@ -123,10 +126,8 @@ class kg_moc_construction(osv.osv):
 		return True
 
 	def entry_confirm(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])		
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
-		
 	def entry_draft(self,cr,uid,ids,context=None):
 		self.write(cr, uid, ids, {'state': 'draft'})
 		return True
@@ -156,49 +157,15 @@ class kg_moc_construction(osv.osv):
 		
 	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
-		return super(kg_moc_construction, self).write(cr, uid, ids, vals, context)
+		return super(kg_offer_materials, self).write(cr, uid, ids, vals, context)
 		
 	
 	_constraints = [
 		#(_Validation, 'Special Character Not Allowed !!!', ['Check Name']),
 		#(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
-		(_name_validate, 'MOC Construction name must be unique !!', ['name']),		
-		(_code_validate, 'MOC Construction code must be unique !!', ['code']),		
+		(_name_validate, 'Offer Materials name must be unique !!', ['name']),		
+		(_code_validate, 'Offer Materials code must be unique !!', ['code']),		
 		
 	]
 	
-kg_moc_construction()
-
-
-
-
-
-class ch_offer_materials(osv.osv):
-	
-	_name = "ch.offer.materials"
-	_description = "Offer Materials"
-	
-	_columns = {
-			
-		'header_id':fields.many2one('kg.moc.construction', 'MOC Construction Entry', required=True, ondelete='cascade'),			
-		'offer_id': fields.many2one('kg.offer.materials', 'Offer Name', required=True,domain = [('active','=','t')]),
-		'moc_id': fields.many2one('kg.moc.master', 'MOC Name', required=True,domain = [('active','=','t')]),
-		'remarks':fields.text('Remarks'),		
-	}
-	def _check_values(self, cr, uid, ids, context=None):
-		entry = self.browse(cr,uid,ids[0])
-		cr.execute(""" select offer_id from ch_offer_materials where offer_id  = '%s' """ %(entry.offer_id.id))
-		data = cr.dictfetchall()			
-		if len(data) > 1:		
-			return False
-		return True
-		
-	_constraints = [		
-			  
-		(_check_values, 'Please Check the same offer not allowed..!!',['Offer Name']),	
-		
-	   ]
-	
-ch_offer_materials()
-
-
+kg_offer_materials()
