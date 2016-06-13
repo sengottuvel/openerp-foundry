@@ -142,7 +142,7 @@ class kg_pouring_log(osv.osv):
 	def entry_confirm(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		for line_item in entry.line_ids:
-			pour_qty = line_item.production_id.mould_qty - line_item.production_id.pour_qty
+			pour_qty = line_item.production_id.total_mould_qty - line_item.production_id.pour_qty
 			if line_item.qty > pour_qty:
 				raise osv.except_osv(_('Warning!'),
 						_('Pouring qty should not be exceed than Mould Qty for pattern  %s !!')%(line_item.production_id.pattern_code))
@@ -632,12 +632,6 @@ class ch_pouring_details(osv.osv):
 					pour_qty = production_rec.total_mould_qty - production_rec.pour_qty
 			else:
 				pour_qty = 0
-			print "production_rec",production_rec
-			print "production_rec.total_mould_qty",production_rec.total_mould_qty
-			print "production_rec.pour_qty",production_rec.pour_qty
-			print "pour_qtypour_qty",pour_qty
-			print "order_line_id",order_line_id
-			print "production_rec.order_line_id.id",production_rec.order_line_id.id
 			value = {'qty':pour_qty,'pattern_name': production_rec.pattern_name}
 		return {'value': value}
 		
