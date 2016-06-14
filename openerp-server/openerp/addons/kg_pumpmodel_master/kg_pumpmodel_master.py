@@ -84,7 +84,7 @@ class kg_pumpmodel_master(osv.osv):
 		'wear_ring_type': fields.selection([('yes','Yes'),('no','NO')],'Wear Ring',required=True),
 		'lubrication_type': fields.selection([('grease','Grease'),('oil','Oil')],'Lubrication',required=True),
 		'feet_location': fields.selection([('base','Base'),('center_line','Center Line')],'Feet Location',required=True),
-		'suction_orientation': fields.selection([('auxial','Auxial'),('side','Side')],'Suction Orientation',required=True),
+		'suction_orientation': fields.selection([('axial','Axial'),('side','Side')],'Suction Orientation',required=True),
 		'discharge_orientation': fields.selection([('top_side','Top-side'),('bottom_side','Bottom-Side'),('top','Top'),('top_center_line','Top Center line')],'Discharge Orientation',required=True),
 		'companion_flange': fields.char('Companion Flange', required=True),
 		'employee_id': fields.many2one('res.users', 'User Type'),
