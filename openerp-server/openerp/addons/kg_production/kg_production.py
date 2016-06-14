@@ -182,7 +182,7 @@ class kg_production(osv.osv):
 		'pour_weight':fields.integer('Weight(kgs)'),
 		'pour_heat_id':fields.many2one('kg.melting','Heat Id',domain="[('state','=','confirmed'), ('active','=','t')]"),
 		'pour_remarks': fields.text('Remarks'),
-		'pour_date': fields.date('Pouring Date'),
+		'pour_date': fields.datetime('Pouring Date'),
 		
 		### Core vs Mould Qty ###
 		'difference_qty': fields.function(_get_difference_qty, string='Difference', store=True, type='float'),
