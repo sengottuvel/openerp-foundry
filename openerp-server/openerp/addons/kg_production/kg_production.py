@@ -119,6 +119,7 @@ class kg_production(osv.osv):
 		('issue_pending','Issue Pending'),
 		('issue_done','Issue Done'),
 		('mould_com','Moulding Completed'),
+		('pour_pending','Pouring Pending'),
 		('pour_com','Pouring Completed'),
 		('casting_com','Casting Completed'),
 		('fettling_inprogress','Fettling In Progress'),

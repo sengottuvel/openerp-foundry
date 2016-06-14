@@ -657,7 +657,10 @@
             <field name="arch" type="xml">
                 <search string="Core Log Search">
 					
-					<field name="core_no" string="Core Number"  filter_domain="[('core_no','ilike',self)]" />
+					<field name="order_no" string="Work Order No."  filter_domain="[('order_no','ilike',self)]" />
+					<field name="pattern_id" string="Pattern Number"  filter_domain="[('pattern_id','ilike',self)]" />
+					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
+					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />
 							
 					<filter icon="terp-check" name="pending" string="Pending" domain="[('core_state','=','pending')]"/>
 					<filter icon="terp-check" name="partial" string="Partial" domain="[('core_state','=','partial')]"/>
@@ -1051,7 +1054,10 @@
             <field name="arch" type="xml">
                 <search string="Mould Log Search">
 					
-					<field name="mould_no" string="Mould Number"  filter_domain="[('mould_no','ilike',self)]" />
+					<field name="order_no" string="Work Order No."  filter_domain="[('order_no','ilike',self)]" />
+					<field name="pattern_id" string="Pattern Number"  filter_domain="[('pattern_id','ilike',self)]" />
+					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
+					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />
 							
 					<filter icon="terp-check" name="pending" string="Pending" domain="[('mould_state','=','pending')]"/>
 					<filter icon="terp-check" name="partial" string="Partial" domain="[('mould_state','=','partial')]"/>
@@ -1475,7 +1481,7 @@
 			<field name="res_model">kg.production</field>
 			<field name="view_type">form</field>
 			<field name="context">{}</field>
-			<field name="domain">[('pour_state','in',('pending','partial')),('state','=','mould_com')]</field>
+			<field name="domain">[('pour_state','in',('pending','partial')),('state','in',('mould_com','pour_pending'))]</field>
 			<field name="search_view_id" ref="t_search_v_pour_pending"/>
 		</record>
 		

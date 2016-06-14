@@ -143,9 +143,12 @@ class kg_pouring_log(osv.osv):
 		entry = self.browse(cr,uid,ids[0])
 		for line_item in entry.line_ids:
 			pour_qty = line_item.production_id.total_mould_qty - line_item.production_id.pour_qty
+			if pour_qty == 0:
+				raise osv.except_osv(_('Warning!'),
+						_(' There is no Mould completed qty for pattern %s !!')%(line_item.production_id.pattern_code))
 			if line_item.qty > pour_qty:
 				raise osv.except_osv(_('Warning!'),
-						_('Pouring qty should not be exceed than Mould Qty for pattern  %s !!')%(line_item.production_id.pattern_code))
+						_('Pouring qty should not be exceed than Mould Qty for pattern  %s, You can pour upto %s qty !!')%(line_item.production_id.pattern_code,pour_qty))
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 		
@@ -162,8 +165,7 @@ class kg_pouring_log(osv.osv):
 					where
 					pattern_id = %s and
 					moc_id = %s and
-					state in ('mould_com') and
-					mould_state in ('done') and
+					mould_state in ('partial','done') and
 					pour_state in ('pending','partial') and
 					order_line_id = %s
 					
@@ -199,9 +201,13 @@ class kg_pouring_log(osv.osv):
 						'pour_remarks':line_item.remarks,
 						'pour_date':entry.entry_date
 						})
-						if pour_status == 'done' and status == 'pour_com':
+						if pour_status in ('partial','done') and status in ('mould_com','pour_com'):
+							if pour_status == 'partial':
+								production_status = 'pour_pending'
+							if pour_status == 'done':
+								production_status = 'pour_com' 
 							### Fettling Process Creation ###
-							self.fettling_inward_update(cr, uid, ids, wo_produc_item['id'],entry.id,line_item.id,tot_pour_qty)
+							self.fettling_inward_update(cr, uid, ids, wo_produc_item['id'],entry.id,line_item.id,pouring_qty)
 							production_obj.write(cr, uid, [wo_produc_item['id']], {'state': 'fettling_inprogress'})
 						
 						if pouring_qty > rem_qty:
@@ -268,10 +274,14 @@ class kg_pouring_log(osv.osv):
 						'pour_remarks':line_item.remarks,
 						'pour_date':entry.entry_date
 						})
-						if pour_status == 'done' and status == 'pour_com':
+						if pour_status in ('partial','done') and status in ('mould_com','pour_com'):
+							if pour_status == 'partial':
+								production_status = 'pour_pending'
+							if pour_status == 'done':
+								production_status = 'pour_com' 
 							### Fettling Process Creation ###
 							#~ production_obj.fettling_inward_update(cr, uid, [msnc_item['id']])
-							self.fettling_inward_update(cr, uid, ids, msnc_item['id'],entry.id,line_item.id,tot_pour_qty)
+							self.fettling_inward_update(cr, uid, ids, msnc_item['id'],entry.id,line_item.id,pouring_qty)
 							production_obj.write(cr, uid, [msnc_item['id']], {'state': 'fettling_inprogress'})
 						
 						if pouring_qty > rem_qty:
@@ -322,10 +332,14 @@ class kg_pouring_log(osv.osv):
 							'pour_remarks':line_item.remarks,
 							'pour_date':entry.entry_date
 							})
-							if pour_status == 'done' and status == 'pour_com':
+							if pour_status in ('partial','done') and status in ('mould_com','pour_com'):
+								if pour_status == 'partial':
+									production_status = 'pour_pending'
+								if pour_status == 'done':
+									production_status = 'pour_com' 
 								### Fettling Process Creation ###
 								#~ production_obj.fettling_inward_update(cr, uid, [nc_item['id']])
-								self.fettling_inward_update(cr, uid, ids, nc_item['id'],entry.id,line_item.id,tot_pour_qty)
+								self.fettling_inward_update(cr, uid, ids, nc_item['id'],entry.id,line_item.id,pouring_qty)
 								production_obj.write(cr, uid, [nc_item['id']], {'state': 'fettling_inprogress'})
 							if pouring_qty > rem_qty:
 								rem_qty = pouring_qty - rem_qty
@@ -375,10 +389,14 @@ class kg_pouring_log(osv.osv):
 							'pour_remarks':line_item.remarks,
 							'pour_date':entry.entry_date
 							})
-							if pour_status == 'done' and status == 'pour_com':
+							if pour_status in ('partial','done') and status in ('mould_com','pour_com'):
+								if pour_status == 'partial':
+									production_status = 'pour_pending'
+								if pour_status == 'done':
+									production_status = 'pour_com' 
 								### Fettling Process Creation ###
 								#~ production_obj.fettling_inward_update(cr, uid, [service_item['id']])
-								self.fettling_inward_update(cr, uid, ids, service_item['id'],entry.id,line_item.id,tot_pour_qty)
+								self.fettling_inward_update(cr, uid, ids, service_item['id'],entry.id,line_item.id,pouring_qty)
 								production_obj.write(cr, uid, [service_item['id']], {'state': 'fettling_inprogress'})
 							if pouring_qty > rem_qty:
 								rem_qty = pouring_qty - rem_qty
@@ -428,10 +446,14 @@ class kg_pouring_log(osv.osv):
 							'pour_remarks':line_item.remarks,
 							'pour_date':entry.entry_date
 							})
-							if pour_status == 'done' and status == 'pour_com':
+							if pour_status in ('partial','done') and status in ('mould_com','pour_com'):
+								if pour_status == 'partial':
+									production_status = 'pour_pending'
+								if pour_status == 'done':
+									production_status = 'pour_com' 
 								### Fettling Process Creation ###
 								#~ production_obj.fettling_inward_update(cr, uid, [emer_item['id']])
-								self.fettling_inward_update(cr, uid, ids, emer_item['id'],entry.id,line_item.id,tot_pour_qty)
+								self.fettling_inward_update(cr, uid, ids, emer_item['id'],entry.id,line_item.id,pouring_qty)
 								production_obj.write(cr, uid, [emer_item['id']], {'state': 'fettling_inprogress'})
 								
 							if pouring_qty > rem_qty:
@@ -482,10 +504,14 @@ class kg_pouring_log(osv.osv):
 							'pour_remarks':line_item.remarks,
 							'pour_date':entry.entry_date
 							})
-							if pour_status == 'done' and status == 'pour_com':
+							if pour_status in ('partial','done') and status in ('mould_com','pour_com'):
+								if pour_status == 'partial':
+									production_status = 'pour_pending'
+								if pour_status == 'done':
+									production_status = 'pour_com' 
 								### Fettling Process Creation ###
 								#~ production_obj.fettling_inward_update(cr, uid, [spare_item['id']])
-								self.fettling_inward_update(cr, uid, ids, spare_item['id'],entry.id,line_item.id,tot_pour_qty)
+								self.fettling_inward_update(cr, uid, ids, spare_item['id'],entry.id,line_item.id,pouring_qty)
 								production_obj.write(cr, uid, [spare_item['id']], {'state': 'fettling_inprogress'})
 							if pouring_qty > rem_qty:
 								rem_qty = pouring_qty - rem_qty
@@ -536,10 +562,14 @@ class kg_pouring_log(osv.osv):
 							'pour_remarks':line_item.remarks,
 							'pour_date':entry.entry_date
 							})
-							if pour_status == 'done' and status == 'pour_com':
+							if pour_status in ('partial','done') and status in ('mould_com','pour_com'):
+								if pour_status == 'partial':
+									production_status = 'pour_pending'
+								if pour_status == 'done':
+									production_status = 'pour_com' 
 								### Fettling Process Creation ###
 								#~ production_obj.fettling_inward_update(cr, uid, [normal_item['id']])
-								self.fettling_inward_update(cr, uid, ids, normal_item['id'],entry.id,line_item.id,tot_pour_qty)
+								self.fettling_inward_update(cr, uid, ids, normal_item['id'],entry.id,line_item.id,pouring_qty)
 								production_obj.write(cr, uid, [normal_item['id']], {'state': 'fettling_inprogress'})
 							if pouring_qty > rem_qty:
 								rem_qty = pouring_qty - rem_qty
@@ -596,7 +626,8 @@ class ch_pouring_details(osv.osv):
 		'order_line_id':fields.many2one('ch.work.order.details','WO No.',domain="[('state','=','confirmed')]"),
 		'moc_id': fields.related('header_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),		
 		### Reference table as kg_production bcoz mould completed pattern only want to display
-		'production_id': fields.many2one('kg.production','Pattern No', required=True,domain="[('state','=','mould_com'),('moc_id','=',moc_id)]"),			
+		'production_id': fields.many2one('kg.production','Pattern No', required=True,
+		domain="[('mould_state','in',('partial','done')),('pour_state','in',('pending','partial')),('moc_id','=',moc_id)]"),
 		'pattern_name':fields.char('Pattern Name'),
 		'qty':fields.integer('Qty'),
 		'weight':fields.float('Weight(Kgs)'),
