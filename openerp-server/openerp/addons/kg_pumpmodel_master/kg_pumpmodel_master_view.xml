@@ -37,7 +37,7 @@
 								<field name="feet_location"/>
 								<field name="discharge_orientation"/>
 								<field name="employee_id"/>
-								
+								<field name="sealing_water_capacity"/>
 								
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 							</group>

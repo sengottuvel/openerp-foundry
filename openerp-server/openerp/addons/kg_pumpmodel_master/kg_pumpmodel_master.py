@@ -89,6 +89,7 @@ class kg_pumpmodel_master(osv.osv):
 		'companion_flange': fields.char('Companion Flange', required=True),
 		'employee_id': fields.many2one('res.users', 'User Type'),
 		'max_solid_size': fields.char('Max Solid size'),
+		'sealing_water_capacity': fields.float('Sealing Water Capacity - m3/hr'),
 		
 	}
 	

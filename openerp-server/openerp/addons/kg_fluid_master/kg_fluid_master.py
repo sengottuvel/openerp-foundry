@@ -26,19 +26,20 @@ class kg_fluid_master(osv.osv):
 	"""
 	_columns = {
 			
-		'name': fields.char('Fluid Name', size=128, required=True, select=True),
+		'name': fields.char('Name', size=128, required=True, select=True),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'active': fields.boolean('Active'),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
-		'fluid_level': fields.float('Fluid Level'),
+		'fluid_level': fields.float('Liquid Level'),
 		'viscosity': fields.integer('Viscosity (SSU)'),
 		'specific_gravity': fields.float('Specific Gravity',required=True),
 		'density': fields.integer('Density'),
 		'checmical_concentration': fields.char('Chemical Concentration'),
-		'solid_concentration': fields.char('Solid Concentration'),
+		'solid_concentration': fields.float('Solid Concentration'),
+		'max_particle_size_mm': fields.float('Max Particle Size-mm'),
 		'ph': fields.float('PH'),
 		'temperature': fields.float('Temperature'),
 		#'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		

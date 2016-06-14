@@ -59,6 +59,7 @@ class kg_primemover_master(osv.osv):
 		'shaft_dia': fields.float('Shaft Dia',required=True),
 		'ambient_temp': fields.float('Ambient Temp',required=True),
 		'temprise_class': fields.char('TempRise Class',required=True),
+		'primemover_categ': fields.selection([('engine','Engine'),('motor','Motor')],'Primemover Category',required=True),
 		#'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
 		
 		### Entry Info ###

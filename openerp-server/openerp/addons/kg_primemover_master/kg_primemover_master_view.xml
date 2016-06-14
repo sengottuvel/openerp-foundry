@@ -20,6 +20,7 @@
 						<group>
 							<group>						
 								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+								<field name="primemover_categ" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 								<field name="frequency" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 								<field name="pole" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 								<field name="framesize" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
@@ -31,9 +32,9 @@
 								<field name="shaft_dia" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 								<field name="temprise_class" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 								<field name="noise_level" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
-								<field name="radiator_mtg" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
 								<field name="weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
-								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
+								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="radiator_mtg" invisible="1"/>	
 							</group>
 							<group>
 								<field name="manufacturer" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
@@ -44,13 +45,13 @@
 								<field name="speed" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="article_no" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="ambient_temp" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="moc_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="gd2" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="primemover_type" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="space_heater" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="characteristics" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="active"/>
-								<field name="state" style="width: 30%%" class="att_state_change"/>								
+								<field name="state" style="width: 30%%" class="att_state_change"/>	
+								<field name="moc_id" invisible="1"/>
 							</group>
 						</group>						
 						<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
