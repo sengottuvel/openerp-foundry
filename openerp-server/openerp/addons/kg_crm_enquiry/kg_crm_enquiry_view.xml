@@ -241,6 +241,7 @@
 								<field name="pumpseries_id"/>																						
 								<field name="shaft_sealing"/>
 								<field name="scope_of_supply"/>
+								<field name="drive"/>
 								<field name="number_of_stages" />
 								<field name="impeller_type" />
 								<field name="impeller_dia_min" />																															
