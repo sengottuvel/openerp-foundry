@@ -1083,6 +1083,16 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
 		</record>
 		
+		<record id="po_admin_service_order_master" model="ir.model.access">
+			<field name="model_id" ref="kg_service_order.model_kg_service_order"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Service Order</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
 		
 		<!-- Contractor Master Access end-->
 		
