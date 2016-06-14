@@ -495,10 +495,10 @@ class ch_kg_crm_pumpmodel(osv.osv):
 	
 	def onchange_primemover(self, cr, uid, ids, primemover_id, context=None):
 		
-		value = {'motor_frequency_hz': '','motor_kw': '','speed_in_motor': '','engine_kw':''}
-		if prime_id:
+		value = {'motor_kw': '','speed_in_motor': '','engine_kw':''}
+		if primemover_id:
 			prime_rec = self.pool.get('kg.primemover.master').browse(cr, uid, primemover_id, context=context)
-			value = {'motor_frequency_hz': prime_rec.frequency,'motor_kw': prime_rec.power_kw,'speed_in_motor': prime_rec.speed,'engine_kw': prime_rec.power_kw}
+			value = {'motor_kw': prime_rec.power_kw,'speed_in_motor': prime_rec.speed,'engine_kw': prime_rec.power_kw}
 			
 		return {'value': value}
 			
