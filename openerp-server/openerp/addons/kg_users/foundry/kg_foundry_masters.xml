@@ -685,7 +685,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
 		</record>
 		
 		<record id="po_kg_billing_address" model="ir.model.access">
@@ -695,7 +695,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_purchase_admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
 		</record>
 		
 		<!-- Partners rights End -->
@@ -888,9 +888,203 @@
 			<field eval="1" name="perm_create"/>
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
 		</record>
-
 		
 		
+		<!-- Contractor Master Access start-->
+		
+		
+		<record id="f_po_admin_po_advance_master" model="ir.model.access">
+			<field name="model_id" ref="kg_po_advance.model_kg_po_advance"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">PO Advance</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<record id="f_po_admin_so_advance_master" model="ir.model.access">
+			<field name="model_id" ref="kg_so_advance.model_kg_so_advance"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">SO Advance</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<record id="po_admin_purchase_invoice_master" model="ir.model.access">
+			<field name="model_id" ref="kg_purchase_invoice.model_kg_purchase_invoice"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Purchase Invoice</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<record id="po_admin_contractor_inward_master" model="ir.model.access">
+			<field name="model_id" ref="kg_contractor_inward.model_kg_contractor_inward"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Contractor Inward</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<record id="po_admin_so_manual_closing_master" model="ir.model.access">
+			<field name="model_id" ref="kg_so_manual_closing.model_kg_so_manual_closing"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">SO Manual Closing</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<record id="po_admin_po_manual_closing_master" model="ir.model.access">
+			<field name="model_id" ref="kg_po_manual_closing.model_kg_po_manual_closing"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">PO Manual Closing</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<record id="po_admin_gate_pass_master" model="ir.model.access">
+			<field name="model_id" ref="kg_gate_pass.model_kg_gate_pass"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Gate Pass</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<record id="po_kg_purchase_order_master" model="ir.model.access">
+			<field name="model_id" ref="purchase.model_purchase_order"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Purchase Order</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<record id="po_kg_purchase_amendment_master" model="ir.model.access">
+			<field name="model_id" ref="kg_purchase_amendment.model_kg_purchase_amendment"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Purchase Amendment</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<record id="so_kg_so_amendment1_master" model="ir.model.access">
+			<field name="model_id" ref="kg_so_amendment.model_kg_so_amendment"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">SO Amendment</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<record id="po_admin_general_grn_master" model="ir.model.access">
+			<field name="model_id" ref="kg_general_grn.model_kg_general_grn"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">General GRN</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<record id="po_admin_po_grn_master" model="ir.model.access">
+			<field name="model_id" ref="kg_po_grn.model_kg_po_grn"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">PO GRN</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<record id="po_admin_common_grn_master" model="ir.model.access">
+			<field name="model_id" ref="kg_common_grn.model_kg_common_grn"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Common GRN</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<record id="po_kg_service_invoice_master" model="ir.model.access">
+			<field name="model_id" ref="kg_service_invoice.model_kg_service_invoice"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Service Invoice</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<record id="po_kg_brand_master_master" model="ir.model.access">
+			<field name="model_id" ref="kg_po_masters.model_kg_brand_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Brand Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+			
+		<record id="po_kg_delivery_master_master" model="ir.model.access">
+			<field name="model_id" ref="kg_po_masters.model_kg_delivery_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Delivery Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+			
+		<record id="po_kg_payment_master_master" model="ir.model.access">
+			<field name="model_id" ref="kg_po_masters.model_kg_payment_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Payment Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<record id="po_kg_delivery_address_master" model="ir.model.access">
+			<field name="model_id" ref="kg_partners.model_kg_delivery_address"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Delivery Adress</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<record id="po_kg_billing_address_master" model="ir.model.access">
+			<field name="model_id" ref="kg_partners.model_kg_billing_address"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Billing Adress</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		
+		<!-- Contractor Master Access end-->
 		
     </data>
 </openerp>
