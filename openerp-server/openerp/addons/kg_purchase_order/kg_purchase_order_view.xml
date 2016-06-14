@@ -27,12 +27,13 @@
 			<field name="state" style="width: 30%%" class="att_state_change"/>
 			<field name="insurance"/>
 			<field name="excise_duty"/>
-			<field name="item_quality_term"/>
+			
 			<field name="item_quality_term_id" widget="many2many_tags"/>
 			<field name="type_flag" invisible="1" />
 			<field name="confirm_flag" invisible="1"/>
 			<field name="approve_flag" invisible="1"/>	
 			<field name="frieght_flag" invisible="1"/>	
+			<field name="item_quality_term" invisible="1"/>	
 		</field>
 		
 		<label string="Request for Quotation " attrs="{'invisible': [('state','not in',('draft','sent'))]}" position="replace">
