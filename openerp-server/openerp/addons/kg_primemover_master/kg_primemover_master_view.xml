@@ -8,33 +8,31 @@
 			<field name="name">Primemover Master Form</field>
 			<field name="model">kg.primemover.master</field>
 			<field name="arch" type="xml">
-				<form string="Primemover Master" version="7.0">					
+				<form string="Primemover Master" version="7.0">
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_cancel" type="object" states="reject,approved" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>	
-						<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>	
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
+						<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
 					<sheet>
 						<group>
-							<group>						
-								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
-								<field name="primemover_categ" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
-								<field name="frequency" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
-								<field name="pole" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
-								<field name="framesize" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
-								<field name="mounting" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
-								<field name="efficiency" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
-								<field name="power_hp" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
-								<field name="specification" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
-								<field name="price" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
-								<field name="shaft_dia" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
-								<field name="temprise_class" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
-								<field name="noise_level" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
-								<field name="weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
+							<group>
+								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="primemover_categ" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="frequency" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="pole" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="framesize" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="mounting" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="efficiency" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="power_hp" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="specification" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="price" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="shaft_dia" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="temprise_class" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="radiator_mtg" invisible="1"/>	
+								<field name="radiator_mtg" invisible="1"/>
 							</group>
 							<group>
 								<field name="manufacturer" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
@@ -46,11 +44,12 @@
 								<field name="article_no" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="ambient_temp" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="gd2" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="primemover_type" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="space_heater" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="characteristics" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="noise_level" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="active"/>
-								<field name="state" style="width: 30%%" class="att_state_change"/>	
+								<field name="state" style="width: 30%%" class="att_state_change"/>
 								<field name="moc_id" invisible="1"/>
 							</group>
 						</group>						

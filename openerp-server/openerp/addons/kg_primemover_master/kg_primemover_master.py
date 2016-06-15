@@ -218,7 +218,7 @@ class kg_primemover_master(osv.osv):
 		(_check_power_kw,'You can not save this Power KW with Zero value !',['Power KW']),
 		(_check_efficiency,'You can not save this Efficiency with Zero value !',['Efficiency']),
 		(_check_speed,'You can not save this Speed with Zero value !',['Speed']),
-		(_check_power_hp,'You can not save this Power HP with Zero value !',['Power HP']),
+		#~ (_check_power_hp,'You can not save this Power HP with Zero value !',['Power HP']),
 		(_check_ambient_temp,'You can not save this Ambient Temp with Zero value !',['Ambient Temp']),
 		(_check_price,'You can not save this Price with Zero value !',['Price']),
 		(_check_shaft_dia,'You can not save this Shaft Dia with Zero value !',['Shaft Dia']),

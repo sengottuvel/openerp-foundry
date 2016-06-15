@@ -50,7 +50,29 @@
 								<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','confirmed'])], 'readonly': [('state','in',['cancel'])]}"/>	
 							</group>
 						</group>
+						
+						
 						<notebook>
+							<page string="Flange Details">
+								<field name="line_ids" colspan="4" nolabel="1">
+									<tree string="Flange History" editable="1">
+										<field name="flange_id" required="1" on_change="onchange_flange(flange_id,name)"/>
+										<field name="flange_type" required="1"/>
+										<field name="name" invisible="1"/>
+									</tree>
+									<form string="Flange History">
+										<group>
+											<group>
+												<field name="flange_id" required="1" on_change="onchange_flange(flange_id,name)"/>
+											</group>
+											<group>
+												<field name="flange_type" required="1"/>
+												<field name="name" invisible="1"/>
+											</group>
+										</group>
+									</form>
+								</field>
+							</page>
 							<page string="Entry Info">
 									<group>
 										<field name="company_id"/>

@@ -42,6 +42,7 @@ class kg_pumpseries_master(osv.osv):
 		'speed': fields.float('Speed(Rpm)'),
 		'suction_orientation': fields.selection([('axial','AXIAL'),('side','SIDE')],'Suction Orientation'),
 		'discharge_orientation': fields.selection([('top_side','TOP SIDE'),('bot_side','BOTTOM SIDE'),('top','TOP'),('top_cen_line','TOP CENTER LINE')],'Discharge Orientation',required=True),
+		'line_ids': fields.one2many('ch.pumpseries.flange', 'header_id', "Child Pumpseries Flange",readonly=False, states={'approved':[('readonly',True)]}),
 		#'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
 		
 		### Entry Info ###
@@ -176,3 +177,34 @@ class kg_pumpseries_master(osv.osv):
 	]
 	
 kg_pumpseries_master()
+
+class ch_pumpseries_flange(osv.osv):
+
+	_name = "ch.pumpseries.flange"
+	_description = "Ch Pumpseries Flange Details"
+	
+	_columns = {
+	
+		'name': fields.char('Name'),
+		'header_id':fields.many2one('kg.pumpseries.master', 'Header Id', ondelete='cascade'),
+		'flange_id':fields.many2one('kg.flange.master', 'Flange Standard',required=True),
+		'flange_type': fields.selection([('standard','Standard'),('optional','Optional')],'Flange Type'),
+		
+	}
+	
+	_defaults = {
+	
+				'flange_type': 'standard',
+				
+				}
+				
+	def onchange_flange(self, cr, uid, ids, flange_id, name, context=None):
+		value = {'name': ''}
+		if flange_id:
+			flange_rec = self.pool.get('kg.flange.master').browse(cr, uid, flange_id, context=context)
+			value = {'name': flange_rec.name}
+			
+		return {'value': value}
+		
+	
+ch_pumpseries_flange()
