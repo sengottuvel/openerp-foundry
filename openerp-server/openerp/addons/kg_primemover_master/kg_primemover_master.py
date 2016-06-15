@@ -192,7 +192,8 @@ class kg_primemover_master(osv.osv):
 	def _check_power_hp(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])
 		if rec.power_hp <= 0:
-			return False					
+			return False	
+		return True				
 	def _check_ambient_temp(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])
 		if rec.ambient_temp <= 0:
@@ -218,7 +219,7 @@ class kg_primemover_master(osv.osv):
 		(_check_power_kw,'You can not save this Power KW with Zero value !',['Power KW']),
 		(_check_efficiency,'You can not save this Efficiency with Zero value !',['Efficiency']),
 		(_check_speed,'You can not save this Speed with Zero value !',['Speed']),
-		#~ (_check_power_hp,'You can not save this Power HP with Zero value !',['Power HP']),
+		(_check_power_hp,'You can not save this Power HP with Zero value !',['Power HP']),
 		(_check_ambient_temp,'You can not save this Ambient Temp with Zero value !',['Ambient Temp']),
 		(_check_price,'You can not save this Price with Zero value !',['Price']),
 		(_check_shaft_dia,'You can not save this Shaft Dia with Zero value !',['Shaft Dia']),
