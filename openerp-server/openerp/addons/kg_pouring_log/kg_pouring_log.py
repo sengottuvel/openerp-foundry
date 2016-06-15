@@ -129,8 +129,8 @@ class kg_pouring_log(osv.osv):
 		'pour_qty':pour_qty,
 		'inward_accept_qty':pour_qty,
 		'state':'waiting',
-		#~ 'pour_id': pour_id,
-		#~ 'pour_line_id': pour_line_id
+		'pour_id': pour_id,
+		'pour_line_id': pour_line_id
 		
 		
 		}
@@ -239,8 +239,7 @@ class kg_pouring_log(osv.osv):
 						where
 						pattern_id = %s and
 						moc_id = %s and
-						state in ('mould_com') and
-						mould_state in ('done') and
+						mould_state in ('partial','done') and
 						pour_state in ('pending','partial') and
 						order_priority = '1'
 						
@@ -299,8 +298,7 @@ class kg_pouring_log(osv.osv):
 						where
 						pattern_id = %s and
 						moc_id = %s and
-						state in ('mould_com') and
-						mould_state in ('done') and
+						mould_state in ('partial','done') and
 						pour_state in ('pending','partial') and
 						order_priority = '2'
 						
@@ -357,8 +355,7 @@ class kg_pouring_log(osv.osv):
 						where
 						pattern_id = %s and
 						moc_id = %s and
-						state in ('mould_com') and
-						mould_state in ('done') and
+						mould_state in ('partial','done') and
 						pour_state in ('pending','partial') and
 						order_priority = '3'
 						
@@ -415,8 +412,7 @@ class kg_pouring_log(osv.osv):
 						where
 						pattern_id = %s and
 						moc_id = %s and
-						state in ('mould_com') and
-						mould_state in ('done') and
+						mould_state in ('partial','done') and
 						pour_state in ('pending','partial') and
 						order_priority = '4'
 						
@@ -474,8 +470,7 @@ class kg_pouring_log(osv.osv):
 						where
 						pattern_id = %s and
 						moc_id = %s and
-						state in ('mould_com') and
-						mould_state in ('done') and
+						mould_state in ('partial','done') and
 						pour_state in ('pending','partial') and
 						order_priority = '5'
 						
@@ -532,8 +527,7 @@ class kg_pouring_log(osv.osv):
 						where
 						pattern_id = %s and
 						moc_id = %s and
-						state in ('mould_com') and
-						mould_state in ('done') and
+						mould_state in ('partial','done') and
 						pour_state in ('pending','partial') and
 						order_priority = '6'
 						

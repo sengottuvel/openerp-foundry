@@ -79,8 +79,10 @@ class kg_fettling(osv.osv):
 		'stage_id':fields.many2one('kg.stage.master','Stage'),
 		'stage_name': fields.related('stage_id','name', type='char', size=128, string='Stage Name', store=True, readonly=True),
 		'melting_id': fields.related('production_id','pour_heat_id', type='many2one', relation='kg.melting', string='Heat No.', store=True, readonly=True),
-		'pour_date': fields.related('production_id','pour_date', type='datetime', string='Pouring date', store=True, readonly=True),
 		'pre_stage_date': fields.date('Previous stage completed on'),
+		'pour_id':fields.many2one('kg.pouring.log','Pour Id'),
+		'pour_line_id':fields.many2one('ch.pouring.details','Pour Id'),
+		'pour_date': fields.related('pour_id','entry_date', type='datetime', string='Pouring date', store=True, readonly=True),
 		
 		#### Fettling Inward ####
 		'inward_accept_qty': fields.integer('Accepted Qty', required=True),
