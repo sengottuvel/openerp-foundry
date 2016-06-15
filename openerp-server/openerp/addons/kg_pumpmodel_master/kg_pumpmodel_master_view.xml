@@ -19,7 +19,8 @@
 					<sheet>
 						<group>
 							<group>						
-								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>		
+								<field name="series_id"/>						
 								<field name="alias_name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="type"/>															
 								<field name="impeller_type"/>								
@@ -29,8 +30,7 @@
 								<field name="pump_mode"/>
 								
 								<field name="pump_size"/>
-								<field name="bearing_qty"/>
-								<field name="series_id"/>
+								<field name="bearing_qty"/>								
 								<field name="discharge"/>
 								<field name="rotation_type"/>
 								<field name="wear_ring_type"/>
