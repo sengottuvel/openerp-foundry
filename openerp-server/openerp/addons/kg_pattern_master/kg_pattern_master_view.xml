@@ -46,6 +46,8 @@
 								<field name="tolerance" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 								<field name="mould_rate" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" invisible="1"/>
 								<field name="location" />									
+								<field name="offer_info" />									
+								<field name="corless_pattern" />									
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>					
 							</group>
 							<group>
@@ -55,6 +57,8 @@
 								<field name="making_cost"/>								
 								<field name="ci_weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>													
 								<field name="nonferous_weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>													
+								<field name="dynamic_length"/>									
+								<field name="length_type" attrs="{'required': [('dynamic_length','=',True)]}"/>									
 								<field name="active"/>									
 								<field name="pattern_state" style="width: 50%%" class="att_state_change"/>							
 								<field name="state" style="width: 30%%" class="att_state_change"/>							
@@ -62,7 +66,7 @@
 						</group>
 						<group>
 							<group>	
-								<field name="moc_id" attrs="{'required': [('pattern_type','=','new_pattern')]}" />
+								<field name="moc_id" />
 							</group>
 							<group>												
 								<field name="moc_const_type" widget="many2many_tags"/>											
@@ -197,8 +201,7 @@
 		
 		<!-- Menu Action End-->
 		
-		
-		
+				
 		<!-- Menu Name Start here --> 
 		
 			<menuitem action="mma_pattern_master" name="Pattern" id="mam_pattern_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="0"/>

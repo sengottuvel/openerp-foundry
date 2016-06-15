@@ -48,9 +48,12 @@ class kg_pattern_master(osv.osv):
 		'cancel_remark': fields.text('Cancel'),
 		'line_ids':fields.one2many('ch.mocwise.rate', 'header_id', "MOC Wise Rate"),
 		'line_ids_a':fields.one2many('ch.pattern.attachment', 'header_id', "Attachments"),
-		'line_ids_b':fields.one2many('ch.pattern.history', 'header_id', "Pattern History"),
+		'line_ids_b':fields.one2many('ch.pattern.history', 'header_id', "Pattern History"),	
 		
-		
+		'offer_info': fields.boolean('Offer Info'),
+		'dynamic_length': fields.boolean('Dynamic Length'),	
+		'corless_pattern': fields.boolean('Corless Pattern'),
+		'length_type': fields.selection([('single_column_pipe','Single Column Pipe'),('single_shaft','Single Shaft'),('delivery_pipe','Delivery Pipe'),('drive_column_pipe','Drive Column Pipe'),('pump_column_pipe','Pump Column Pipe'),('pump_shaft','Pump Shaft'),('drive_shaft','Drive Shaft')],'Length Type'),		
 		
 		'tolerance': fields.float('Tolerance(-%)'),
 		'nonferous_weight': fields.float('Non-Ferrous Weight(kgs)'),		
@@ -60,7 +63,7 @@ class kg_pattern_master(osv.osv):
 		'csd_code': fields.char('CSD Code No.', size=128),
 		'making_cost': fields.float('Pattern Making Cost'),
 		'moc_const_type': fields.many2many('kg.construction.type', 'm2m_moc_rate_details', 'moc_const_id', 'const_type_id','Type', domain="[('active','=','t')]"),
-		'moc_id': fields.many2one('kg.moc.master','Default MOC', required=True,domain="[('active','=','t')]" ),	
+		'moc_id': fields.many2one('kg.moc.master','Default MOC',domain="[('active','=','t')]" ),	
 		
 		
 		'pattern_type': fields.selection([('new_pattern','New Pattern'),('copy_pattern','Copy Pattern')],'Type', required=True),	
