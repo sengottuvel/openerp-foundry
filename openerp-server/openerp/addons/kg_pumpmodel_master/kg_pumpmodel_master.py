@@ -75,7 +75,7 @@ class kg_pumpmodel_master(osv.osv):
 		'bearing_no': fields.integer('Bearing No', required=True),
 		'bearing_qty': fields.float('Bearing qty', required=True),
 		'sealing_water_pressure': fields.float('Sealing Water Pressure', required=True),
-		'series_id': fields.many2one('kg.pumpseries.master', 'Series',required=True),
+		'series_id': fields.many2one('kg.pumpseries.master', 'Series',required=True,domain = [('state','not in',('reject','cancel'))]),
 		'suction': fields.float('Suction', required=True),
 		'discharge': fields.float('Discharge', required=True),
 		'stage_type': fields.selection([('single','Single'),('multi','Multi'),('double','Double')],'Stage Type',required=True),
