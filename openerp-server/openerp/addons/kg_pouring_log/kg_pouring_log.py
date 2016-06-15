@@ -64,13 +64,14 @@ class kg_pouring_log(osv.osv):
 	}
 	
 	def onchange_melting_id(self, cr, uid, ids, melting_id, context=None):
+		value = {'moc_id': False}
 		if melting_id:
 			melting_rec = self.pool.get('kg.melting').browse(cr, uid, melting_id, context=context)
-		value = {
-		'moc_id': melting_rec.moc_id.id,
-		'entry_date': melting_rec.entry_date,
-		
-		}
+			value = {
+			'moc_id': melting_rec.moc_id.id,
+			'entry_date': melting_rec.entry_date,
+			
+			}
 		return {'value': value}
 	
 	
