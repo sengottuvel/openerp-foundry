@@ -128,8 +128,8 @@ class kg_pouring_log(osv.osv):
 		'pour_qty':pour_qty,
 		'inward_accept_qty':pour_qty,
 		'state':'waiting',
-		'pour_id': pour_id,
-		'pour_line_id': pour_line_id
+		#~ 'pour_id': pour_id,
+		#~ 'pour_line_id': pour_line_id
 		
 		
 		}
@@ -207,8 +207,9 @@ class kg_pouring_log(osv.osv):
 							if pour_status == 'done':
 								production_status = 'pour_com' 
 							### Fettling Process Creation ###
-							self.fettling_inward_update(cr, uid, ids, wo_produc_item['id'],entry.id,line_item.id,pouring_qty)
-							production_obj.write(cr, uid, [wo_produc_item['id']], {'state': 'fettling_inprogress'})
+							if pouring_qty > 0:
+								self.fettling_inward_update(cr, uid, ids, wo_produc_item['id'],entry.id,line_item.id,pouring_qty)
+								production_obj.write(cr, uid, [wo_produc_item['id']], {'state': production_status})
 						
 						if pouring_qty > rem_qty:
 							rem_qty = pouring_qty - rem_qty
@@ -281,8 +282,9 @@ class kg_pouring_log(osv.osv):
 								production_status = 'pour_com' 
 							### Fettling Process Creation ###
 							#~ production_obj.fettling_inward_update(cr, uid, [msnc_item['id']])
-							self.fettling_inward_update(cr, uid, ids, msnc_item['id'],entry.id,line_item.id,pouring_qty)
-							production_obj.write(cr, uid, [msnc_item['id']], {'state': 'fettling_inprogress'})
+							if pouring_qty > 0:
+								self.fettling_inward_update(cr, uid, ids, msnc_item['id'],entry.id,line_item.id,pouring_qty)
+								production_obj.write(cr, uid, [msnc_item['id']], {'state': production_status})
 						
 						if pouring_qty > rem_qty:
 							rem_qty = pouring_qty - rem_qty
@@ -339,8 +341,9 @@ class kg_pouring_log(osv.osv):
 									production_status = 'pour_com' 
 								### Fettling Process Creation ###
 								#~ production_obj.fettling_inward_update(cr, uid, [nc_item['id']])
-								self.fettling_inward_update(cr, uid, ids, nc_item['id'],entry.id,line_item.id,pouring_qty)
-								production_obj.write(cr, uid, [nc_item['id']], {'state': 'fettling_inprogress'})
+								if pouring_qty > 0:
+									self.fettling_inward_update(cr, uid, ids, nc_item['id'],entry.id,line_item.id,pouring_qty)
+									production_obj.write(cr, uid, [nc_item['id']], {'state': production_status})
 							if pouring_qty > rem_qty:
 								rem_qty = pouring_qty - rem_qty
 							else:
