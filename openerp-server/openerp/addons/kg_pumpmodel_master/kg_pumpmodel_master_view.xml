@@ -58,7 +58,7 @@
 								<field name="lubrication_type" />		
 								<field name="suction_orientation" />		
 								<field name="companion_flange" />		
-								<field name="max_solid_size" />		
+								<field name="max_solid_size" invisible="1" />		
 								
 								<field name="active"/>		
 								<field name="state" style="width: 30%%" class="att_state_change"/>									

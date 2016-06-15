@@ -67,7 +67,7 @@ class kg_pumpmodel_master(osv.osv):
 		'impeller_number': fields.integer('Impeller Number of vanes', required=True),
 		'impeller_dia_max': fields.float('Impeller Dia Max mm', required=True),
 		'impeller_dia_min': fields.float('Impeller Dia Min mm', required=True),
-		'maximum_allowable_soild': fields.float('Maximum Allowable Soild Size - MM', required=True),
+		'maximum_allowable_soild': fields.float('Maximum Allowable Solid Size - mm', required=True),
 		'max_allowable_test': fields.float('Max Allowable Test Pressure', required=True),
 		'number_of_stages': fields.integer('Number of stages', required=True),
 		
