@@ -14,7 +14,7 @@ class kg_machine_shop(osv.osv):
 	_description = "SAM MOC Master"
 	_rec_name = 'code'
 	
-	
+	"""
 	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
 		res={}
 		ms_line_obj = self.pool.get('ch.machineshop.details')
@@ -27,7 +27,7 @@ class kg_machine_shop(osv.osv):
 			moc_const_ms_ids = moc_const_ms_obj.search(cr,uid,[('ms_id','=',item.id)])					
 			if ms_line_ids or ms_line_amend_ids or moc_const_ms_ids:
 				res[item.id] = 'yes'		
-		return res
+		return res """
 	
 	_columns = {
 			
@@ -44,13 +44,16 @@ class kg_machine_shop(osv.osv):
 		'line_ids_a':fields.one2many('ch.machine.mocwise', 'header_id', "Machine Shop MOC Wise"),
 		
 		'csd_code': fields.char('CSD Code No.', size=128),
-		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
+		#'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
 		'type': fields.selection([('ms','MS Item'),('bot','BOT')],'Type'),
 		'od': fields.float('OD'),
 		'length': fields.float('Length'),
 		'breadth': fields.float('Breadth'),
 		'thickness': fields.float('Thickness'),
 		'weight': fields.float('Weight'),
+		
+		'dynamic_length': fields.boolean('Dynamic Length'),			
+		'length_type': fields.selection([('single_column_pipe','Single Column Pipe'),('single_shaft','Single Shaft'),('delivery_pipe','Delivery Pipe'),('drive_column_pipe','Drive Column Pipe'),('pump_column_pipe','Pump Column Pipe'),('pump_shaft','Pump Shaft'),('drive_shaft','Drive Shaft')],'Length Type'),		
 		
 		'moc_const_type': fields.many2many('kg.construction.type', 'm2m_moc_construction_details', 'moc_const_id', 'const_type_id','Type', domain="[('active','=','t')]"),
 		'moc_id': fields.many2one('kg.moc.master','Default MOC', domain="[('active','=','t')]" ),	
@@ -81,7 +84,7 @@ class kg_machine_shop(osv.osv):
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':fields.datetime.now,	
-		'modify': 'no',
+		#'modify': 'no',
 		'copy_flag' : False,
 		'ms_type':'new_item', 
 		

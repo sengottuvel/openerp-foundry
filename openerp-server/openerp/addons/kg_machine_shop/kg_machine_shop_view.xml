@@ -49,13 +49,15 @@
 								<field name="csd_code"/>
 								<field name="breadth"/>
 								<field name="thickness"/>
+								<field name="dynamic_length" attrs="{'invisible':[('type','=','bot')]}"/>									
+								<field name="length_type" attrs="{'invisible':[('type','=','bot')],'required': [('dynamic_length','=',True)]}"/>		
 								<field name="active"/>									
 								<field name="state" style="width: 30%%" class="att_state_change"/>								
 							</group>
 						</group>
 						<group>
 							<group>	
-								<field name="moc_id" attrs="{'required': [('ms_type','=','new_item')]}"/>
+								<field name="moc_id" />
 							</group>
 							<group>												
 								<field name="moc_const_type" widget="many2many_tags"/>												
@@ -188,6 +190,7 @@
 				
 		<!-- Menu Action End-->
 		
+			
 		
 		
 		<!-- Menu Name Start here --> 
