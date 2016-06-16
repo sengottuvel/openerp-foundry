@@ -155,7 +155,9 @@ class kg_general_grn(osv.osv):
 		'payment_type': fields.selection([('cash', 'Cash'), ('credit', 'Credit')], 'Payment Type',readonly=True,states={'confirmed':[('readonly',False)],'draft': [('readonly', False)]}),
 		'dep_project':fields.many2one('kg.project.master','Dept/Project Name',readonly=True,states={'draft': [('readonly', False)]}),
 		'reject_remark':fields.text('Cancel Remarks', readonly=True, states={'confirmed':[('readonly',False)]}),
-		'grn_dc': fields.selection([('dc_invoice','DC & Invoice'),('only_grn','Only grn')], 'GRN Type',
+		#~ 'grn_dc': fields.selection([('dc_invoice','DC & Invoice'),('only_grn','Only grn')], 'GRN Type',
+										#~ required=True, readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
+		'grn_dc': fields.selection([('only_grn','Only grn')], 'GRN Type',
 										required=True, readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'sup_invoice_no':fields.char('Supplier Invoice No',size=200, readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'sup_invoice_date':fields.date('Supplier Invoice Date', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
@@ -875,6 +877,7 @@ class kg_general_grn(osv.osv):
 		'type':'in',
 		'company_id' : lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.general.grn', context=c),
 		'active': True,
+		'grn_dc': 'only_grn',
 		
 	}
 

@@ -157,7 +157,9 @@ class kg_po_grn(osv.osv):
 		'value2':fields.float('Value2',  readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'grn_type': fields.selection([('from_po','Purchase Order'),('from_so','Service Order'),('from_gp','Gate Pass')], 'GRN From', 
 										required=True, readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),			  
-		'grn_dc': fields.selection([('dc_invoice','DC & Invoice'),('only_grn','Only grn')], 'GRN Type', 
+		#~ 'grn_dc': fields.selection([('dc_invoice','DC & Invoice'),('only_grn','Only grn')], 'GRN Type', 
+										#~ required=True, readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),			  
+		'grn_dc': fields.selection([('only_grn','Only grn')], 'GRN Type', 
 										required=True, readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),			  
 		'so_id':fields.many2one('kg.service.order', 'SO NO',
 					domain="[('state','=','approved'), '&', ('service_order_line.pending_qty','>','0'), '&', ('grn_flag','=',False), '&', ('partner_id','=',supplier_id),'&',('so_type','=','service')]"), 
@@ -211,7 +213,8 @@ class kg_po_grn(osv.osv):
 		'approve_flag':False,
 		'company_id' : lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.po.grn', context=c),
 		#'payment_type':'credit',
-		#'grn_dc':'only_grn',
+		'grn_dc':'only_grn',
+		
 	}
 	
 	### Back Entry Date ###
@@ -964,27 +967,16 @@ class kg_po_grn(osv.osv):
 					
 					product_qty= 0
 					#s=po_line_id.pending_qty+po_line_id.pending_qty/100*line.product_id.tolerance_plus
-					print"po_line_id.product_qty",po_line_id.product_qty
-					print"po_line_id.product_qty/100",po_line_id.product_qty/100
-					print"line.product_id.tolerance_plus",line.product_id.tolerance_plus
 					product_qty=po_line_id.product_qty+po_line_id.product_qty/100*line.product_id.tolerance_plus
-					
-					print"product_qty",product_qty
 					if line.po_grn_qty <= product_qty:
-						print"aaaaaaaaAA",line.po_line_id
 						po_rec = self.pool.get('po.grn.line').search(cr,uid,[('po_line_id','=',line.po_line_id.id)])
-						print"po_recpo_recpo_rec",po_rec
 						po_grn_qty= 0
 						if po_rec:
 							for ele in po_rec:
 								po_recc = self.pool.get('po.grn.line').browse(cr,uid,ele)
-								print"po_reccpo_recc",po_recc.po_grn_qty
 								po_grn_qty += po_recc.po_grn_qty
-						print"po_grn_qty",po_grn_qty
-						print"product_qty",product_qty
 						d = 0
 						d = product_qty - po_grn_qty
-						print"dddddddD",d
 						if line.po_grn_qty <= product_qty:
 							if po_line_pending_qty < 0:
 								po_line_pending_qty = 0
@@ -1443,12 +1435,19 @@ class kg_po_grn(osv.osv):
 							  'approved_by':uid,
 							  'approved_date':today })
 		#~ sql = """ select * from kg_gate_pass_line where grn_pending_qty > 0 and gate_id = %s"""%(grn_entry.so_id.gp_id.id)
-		#~ cr.execute(sql)
-		#~ data = cr.dictfetchall()
-		#~ if data:
-			#~ gate_obj.write(cr,uid,grn_entry.so_id.gp_id.id,{'in_state':'pending'})
-		#~ else:
-			#~ gate_obj.write(cr,uid,grn_entry.so_id.gp_id.id,{'in_state':'done'})
+		so_ids = [x.id for x in grn_entry.so_ids]
+		for i in so_ids:
+			so_grn_sea = self.pool.get('kg.service.order').search(cr,uid,[('id','=',i)])
+			so_grn_rec = self.pool.get('kg.service.order').browse(cr,uid,so_grn_sea[0])
+			if grn_entry.grn_type == 'from_so':
+				sql = """ select * from kg_gate_pass_line where grn_pending_qty > 0 and gate_id in (%s)"""%(so_grn_rec.gp_id.id)
+				cr.execute(sql)
+				data = cr.dictfetchall()
+				if data:
+					gate_obj.write(cr,uid,so_grn_rec.gp_id.id,{'in_state':'partial'})
+				else:
+					gate_obj.write(cr,uid,so_grn_rec.gp_id.id,{'in_state':'done'})
+		
 		#cr.execute("""select all_transaction_mails('PO/SO GRN Approval',%s)"""%(ids[0]))
 		"""Raj
 		data = cr.fetchall();
