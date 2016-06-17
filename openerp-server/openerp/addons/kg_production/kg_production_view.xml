@@ -1165,7 +1165,7 @@
 								<field name="mould_moulder" attrs="{'required':[('mould_by','=','comp_employee')],'invisible':[('mould_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
 								<field name="mould_helper" attrs="{'required':[('mould_by','=','comp_employee')],'invisible':[('mould_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
 								<field name="mould_pan_no" attrs="{'invisible':[('mould_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="mould_hardness" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="mould_hardness" required="0" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
 								<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
 								
 								

@@ -410,7 +410,7 @@ class ch_work_order_details(osv.osv):
 		'order_priority': fields.related('header_id','order_priority', type='selection', selection=ORDER_PRIORITY, string='Priority', store=True, readonly=True),
 		'order_ref_no': fields.related('header_id','name', type='char', string='Work Order No.', store=True, readonly=True),
 		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True,domain="[('active','=','t')]"),
-		'pump_model_type':fields.related('pump_model_id','type', type='selection',selection=[('vertical','Vertical'),('horizontal','Horizontal'),('others','Others')], string='Pump Model Type.', store=True, readonly=True),
+		'pump_model_type':fields.selection([('vertical','Vertical'),('horizontal','Horizontal'),('others','Others')], 'Type'),
 		'order_no': fields.char('Order No.', size=128,select=True),
 		'order_category': fields.selection([('pump','Pump'),('spare','Spare')],'Purpose', required=True),
 		'qty': fields.integer('Qty', required=True),
@@ -503,7 +503,7 @@ class ch_work_order_details(osv.osv):
 		
 	def onchange_bom_details(self, cr, uid, ids, pump_model_id, qty,moc_construction_id, order_category,flag_standard,
 		rpm,setting_height,bed_length,shaft_sealing,motor_power,bush_bearing,delivery_pipe_size,lubrication,unit_price,delivery_date,note,
-		bp,shaft_ext):
+		bp,shaft_ext,pump_model_type):
 		
 		
 		bom_vals=[]
@@ -515,7 +515,7 @@ class ch_work_order_details(osv.osv):
 			
 			pump_model_rec = self.pool.get('kg.pumpmodel.master').browse(cr, uid, pump_model_id)
 			
-			if pump_model_rec.type == 'horizontal':
+			if pump_model_type == 'horizontal':
 				
 				#### Loading Foundry Items
 				
@@ -641,7 +641,7 @@ class ch_work_order_details(osv.osv):
 							})
 							
 			
-			if pump_model_rec.type == 'vertical':
+			if pump_model_type == 'vertical':
 				
 				bed_bom_obj = self.pool.get('ch.order.bom.details')
 				
