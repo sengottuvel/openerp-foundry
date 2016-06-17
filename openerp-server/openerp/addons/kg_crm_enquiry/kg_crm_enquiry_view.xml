@@ -214,8 +214,9 @@
 							</group>											
 							<group>
 								<field name="temperature_in_c" />
-								<field name="density" />
+								<field name="specific_gravity" />
 								<field name="max_particle_size_mm" />
+								<field name="density" />
 							</group>					
 						</group>
 						<group string="Duty Parameters">
@@ -227,47 +228,45 @@
 								<field name="viscosity_crt_factor" />
 							</group>
 							<group>
-								<field name="head_in" />
+								<field name="head_in" on_change="onchange_head_in(head_in,discharge_pressure_kg,sealing_water_pressure)"/>
 								<field name="differential_pressure_kg" />
 								<field name="suction_condition" />
-								<field name="discharge_pressure_kg" />
+								<field name="discharge_pressure_kg" on_change="onchange_head_in(head_in,discharge_pressure_kg,sealing_water_pressure)"/>
 								<field name="temperature" />
 							</group>					
 						</group>
 					
 						<group string="Pump Specification">
 							<group>
-								<field name="pump_id" on_change="onchange_pumpmodel(pump_id)"/>	
-								<field name="pumpseries_id" on_change="onchange_pumpseries(pumpseries_id,flange_standard,flange_type)"/>																						
+								<field name="pump_id" on_change="onchange_pumpmodel(pump_id)"/>
+								<field name="pumpseries_id" on_change="onchange_pumpseries(pumpseries_id,flange_standard,flange_type)"/>
 								<field name="shaft_sealing"/>
-								<field name="scope_of_supply"/>
-								<field name="drive"/>
+								<field name="scope_of_supply" on_change="onchange_scope_of_supply(scope_of_supply,primemover_categ)"/>
 								<field name="number_of_stages" />
 								<field name="impeller_type" />
 								<field name="impeller_dia_min" />																															
-								<field name="size_suctionx" />	
-								<field name="flange_type" on_change="onchange_flange_type(flange_type,flange_standard)"/>																						
+								<field name="size_suctionx" />
+								<field name="flange_type" on_change="onchange_flange_type(flange_type,flange_standard)"/>
 								<field name="flange_standard" />
-								<field name="efficiency_in" />																							
-								<field name="npsh_r_m" />																							
-								<field name="best_efficiency" />																							
-								<field name="bkw_water" />																							
-								<field name="bkw_liq" />																												
-								<field name="impeller_dia_rated" />																							
-								<field name="impeller_tip_speed" />																								
-								<field name="hydrostatic_test_pressure" />																							
-								<field name="full_load_rpm" />
-								<field name="primemover_categ" on_change="onchange_prime_categ(primemover_categ,type_of_drive)"/>
-								<field name="primemover_id" on_change="onchange_primemover(primemover_id)"/>
-								<field name="belt_loss_in_kw" attrs="{'invisible':[('type_of_drive','not in',['belt_drive'])]}"/>
+								<field name="efficiency_in" on_change="onchange_bkw_liq(bkw_water,bkw_liq,capacity_in,head_in,specific_gravity,efficiency_in,motor_margin)"/>
+								<field name="npsh_r_m" />
+								<field name="best_efficiency" />
+								<field name="bkw_water" />
+								<field name="bkw_liq" on_change="onchange_belt_loss_in_kw(belt_loss_in_kw,bkw_liq)"/>
+								<field name="impeller_dia_rated" on_change="onchange_impeller_tip_speed(impeller_tip_speed,impeller_dia_rated,full_load_rpm)"/>
+								<field name="impeller_tip_speed"/>
+								<field name="hydrostatic_test_pressure" />
+								<field name="full_load_rpm" on_change="onchange_impeller_tip_speed(impeller_tip_speed,impeller_dia_rated,full_load_rpm)"/>
+								<field name="belt_loss_in_kw" on_change="onchange_belt_loss_in_kw(belt_loss_in_kw,bkw_liq)" attrs="{'invisible':[('type_of_drive','not in',['belt_drive'])]}"/>
 								<field name="frequency" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
 								<field name="motor_margin" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
 								<field name="motor_kw" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
-								<field name="speed_in_pump" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
+								<field name="speed_in_pump" attrs="{'invisible':[('type_of_drive','in',['motor_direct','fc_gb'])]}"/>
 								<field name="speed_in_motor" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
-								<field name="engine_rpm" attrs="{'invisible':[('type_of_drive','not in',['engine'])]}"/>
-								<field name="end_of_the_curve" attrs="{'invisible':[('type_of_drive','not in',['engine','belt_drive','motor_direct'])]}"/>
-								<field name="engine_kw" attrs="{'invisible':[('type_of_drive','not in',['engine'])]}"/>
+								<field name="engine_rpm" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
+								<field name="end_of_the_curve" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
+								<field name="engine_kw" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
+								<field name="drive" invisible="1"/>
 							</group>											
 							<group>
 								<field name="maximum_allowable_soild" />
@@ -287,7 +286,9 @@
 								<field name="bearing_make" />
 								<field name="bearing_number_nde" />
 								<field name="bearing_qty_nde" />
-								<field name="type_of_drive" on_change="onchange_type_of_drive(type_of_drive,primemover_categ)"/>
+								<field name="type_of_drive"/>
+								<field name="primemover_categ"/>
+								<field name="primemover_id" on_change="onchange_primemover(primemover_id)"/>
 							</group>
 						</group>
 						<group string="Accessories">
@@ -304,6 +305,7 @@
 								<field name="flag_standard"/>
 							</group>
 							<group>
+								<button name="load_non_standard" type="object" string="Load" class="oe_highlight"/>
 							</group>
 						</group>
 						

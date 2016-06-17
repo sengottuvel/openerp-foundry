@@ -343,13 +343,14 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'fluid_id': fields.many2one('kg.fluid.master','Liquid',domain="[('state','not in',('reject','cancel'))]"),
 		'temperature_in_c': fields.float('Temperature in C'),
 		'density': fields.integer('Density(kg/m3)'),
+		'specific_gravity': fields.float('Specific Gravity'),
 		'viscosity': fields.integer('Viscosity in CST'),
 		'npsh_avl': fields.integer('NPSH-AVL'),
 		
 		########## Karthikeyan Duty Parameters Added Start here ################	
 		
 		'capacity_in': fields.integer('Capacity in M3 / hr',),
-		'head_in': fields.integer('Total Head in Mlc'),
+		'head_in': fields.float('Total Head in Mlc'),
 		'viscosity_crt_factor': fields.float('Viscosity correction factors'),
 		'suction_pressure': fields.selection([('normal','Normal'),('centre_line','Centre Line')],'Suction pressure'),
 		'differential_pressure_kg': fields.float('Differential Pressure - kg/cm2'),
@@ -365,7 +366,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Type', required=True,domain="[('active','=','t')]"),		
 		'size_suctionx': fields.char('Size-SuctionX Delivery- in mm'),
 		'flange_standard': fields.many2one('ch.pumpseries.flange','Flange Standard',domain="[('flange_type','=',flange_type),('header_id','=',pumpseries_id)]"),
-		'efficiency_in': fields.float('Efficiency in % Wat/Liq'),
+		'efficiency_in': fields.float('Efficiency in % Wat'),
 		'npsh_r_m': fields.float('NPSH R - M'),
 		'best_efficiency': fields.float('Best Efficiency NPSH in M'),
 		'bkw_water': fields.float('BKW Water'),
@@ -382,9 +383,9 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'gd_sq_value': fields.float('GD SQ value'),
 		'critical_speed': fields.float('Critical Speed'),
 		'bearing_make': fields.many2one('kg.brand.master','Bearing Make'),
-		'bearing_number_nde': fields.float('BEARING NUMBER NDE / DE'),
+		'bearing_number_nde': fields.char('BEARING NUMBER NDE / DE'),
 		'bearing_qty_nde': fields.float('Bearing qty NDE / DE'),
-		'type_of_drive': fields.selection([('motor_direct','Motor-direct'),('vfd','VFD'),('belt_drive','Belt drive'),('fc_gb','FC GB'),('engine','ENGINE')],'Transmission'),
+		'type_of_drive': fields.selection([('motor_direct','Motor-direct'),('belt_drive','Belt drive'),('fc_gb','FC GB')],'Transmission'),
 		'end_of_the_curve': fields.float('End of the curve - KW(Rated) liquid'),
 		'motor_frequency_hz': fields.float('Motor frequency HZ'),
 		'frequency': fields.selection([('50','50'),('60','60')],'Motor frequency (HZ)'),
@@ -392,14 +393,14 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'motor_kw': fields.float('Motor KW'),
 		'speed_in_pump': fields.float('Speed in RPM-Pump'),
 		'speed_in_motor': fields.float('Speed in RPM-Motor'),
-		'full_load_rpm': fields.float('Full Load RPM'),
+		'full_load_rpm': fields.float('Speed in RPM'),
 		'engine_kw': fields.float('Engine KW'),
 		'belt_loss_in_kw': fields.float('Belt Loss in Kw - 3% of BKW'),
 		'type_make_selection': fields.selection([('base','Base'),('center_line','Center Line')],'Type Make Selection'),
 		'engine_rpm': fields.float('Engine(RPM)'),
 		'shaft_sealing': fields.selection([('gld_packing','Gland Packing'),('mc_seal','M/C Seal'),('dynamic_seal','Dynamic seal')],'Shaft Sealing'),
 		'scope_of_supply': fields.selection([('bare_pump','Bare Pump'),('pump_with_acces','Pump With Accessories'),('pump_with_acces_motor','Pump With Accessories And Motor')],'Scope of Supply'),
-		'drive': fields.selection([('motor','Motor'),('vfd','VFD'),('engine','Engine')],'Drive'),
+		'drive': fields.selection([('motor','MOTOR'),('vfd','VFD'),('engine','ENGINE')],'Drive'),
 		'flange_type': fields.selection([('standard','Standard'),('optional','Optional')],'Flange Type',required=True),
 		
 		'flag_standard': fields.boolean('Non Standard'),
@@ -417,7 +418,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'crm_type': fields.selection([('pull_out','End Suction Back Pull Out'),('split_case','Split Case'),('multistage','Multistage'),('twin_casing','Twin Casing'),('single_casing','Single Casing'),('self_priming','Self Priming'),('vo_vs4','VO-VS4'),('vg_vs5','VG-VS5')],'Type'),
 		'pumpseries_id': fields.many2one('kg.pumpseries.master','Pumpseries',required=True),
 		'primemover_id': fields.many2one('kg.primemover.master','Primemover'),
-		'primemover_categ': fields.selection([('engine','Engine'),('motor','Motor')],'Primemover Category'),
+		'primemover_categ': fields.selection([('engine','ENGINE'),('motor','MOTOR'),('vfd','VFD')],'Primemover Category'),
 		'moc_const_id':fields.many2one('kg.moc.construction', 'MOC Construction',domain = [('active','=','t')],required=True),
 		
 		# Accesssories 
@@ -485,23 +486,50 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			
 		return {'value': value}
 			
-	def onchange_type_of_drive(self,cr,uid,ids,type_of_drive,primemover_categ,context=None):
-		
-		value = {'primemover_categ':''}
-		if type_of_drive == 'engine':
-			value = {'primemover_categ':'engine'}
-		else:
-			value = {'primemover_categ':''}
+	def onchange_bkw_liq(self, cr, uid, ids, bkw_water, bkw_liq, capacity_in, head_in, specific_gravity, efficiency_in, motor_margin, context=None):
+		value = {'bkw_water': '','bkw_liq': '','capacity_in': '','head_in': '','specific_gravity': '','efficiency_in': '','motor_margin': ''}
+		total = 0.00
+		if efficiency_in:
+			total = ((capacity_in * head_in * specific_gravity) / 367.00 ) / efficiency_in
+			total = round(total,2)
+			value = {'bkw_liq': total,'bkw_water':total,'motor_margin':total}
 		return {'value': value}
-		
-	def onchange_prime_categ(self,cr,uid,ids,primemover_categ,type_of_drive,context=None):
-		
-		value = {'type_of_drive':''}
-		if primemover_categ == 'engine':
-			value = {'type_of_drive':'engine'}
-		else:
-			value = {'type_of_drive':type_of_drive}
+			
+	def onchange_impeller_tip_speed(self, cr, uid, ids, impeller_tip_speed, impeller_dia_rated, full_load_rpm, context=None):
+		value = {'impeller_tip_speed': '','impeller_dia_rated': '','full_load_rpm': ''}
+		total = 0.00
+		if full_load_rpm or impeller_dia_rated:
+			total = ((3.14 * impeller_dia_rated * full_load_rpm) / 60.00 ) / 100.00
+			total = round(total,2)
+			value = {'impeller_tip_speed': total}
 		return {'value': value}
+			
+	def onchange_belt_loss_in_kw(self, cr, uid, ids, belt_loss_in_kw, bkw_liq, context=None):
+		value = {'belt_loss_in_kw': '','bkw_liq': ''}
+		total = 0.00
+		if belt_loss_in_kw or bkw_liq:
+			total = (bkw_liq / 100.00) * 103.00
+			total = round(total,2)
+			value = {'belt_loss_in_kw': total}
+		return {'value': value}
+			
+	#~ def onchange_type_of_drive(self,cr,uid,ids,type_of_drive,primemover_categ,context=None):
+		#~ 
+		#~ value = {'primemover_categ':''}
+		#~ if type_of_drive == 'engine':
+			#~ value = {'primemover_categ':'engine'}
+		#~ else:
+			#~ value = {'primemover_categ':primemover_categ}
+		#~ return {'value': value}
+		
+	#~ def onchange_prime_categ(self,cr,uid,ids,primemover_categ,type_of_drive,context=None):
+		#~ 
+		#~ value = {'type_of_drive':''}
+		#~ if primemover_categ == 'engine':
+			#~ value = {'type_of_drive':'engine'}
+		#~ else:
+			#~ value = {'type_of_drive':type_of_drive}
+		#~ return {'value': value}
 	
 	def onchange_primemover(self, cr, uid, ids, primemover_id, context=None):
 		
@@ -514,12 +542,19 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			
 	def onchange_liquid(self, cr, uid, ids, fluid_id, context=None):
 		
-		value = {'viscosity': '','temperature_in_c': '','density': '','solid_concen':'','max_particle_size_mm':''}
+		value = {'viscosity': '','temperature_in_c': '','specific_gravity': '','solid_concen':'','max_particle_size_mm':''}
 		if fluid_id:
 			liquid_rec = self.pool.get('kg.fluid.master').browse(cr, uid, fluid_id, context=context)
 			value = {'viscosity': liquid_rec.viscosity,'temperature_in_c': liquid_rec.temperature,
-					 'density': liquid_rec.density,'solid_concen':liquid_rec.solid_concentration,
+					 'specific_gravity': liquid_rec.specific_gravity,'solid_concen':liquid_rec.solid_concentration,
 					 'max_particle_size_mm':liquid_rec.max_particle_size_mm}
+			
+		return {'value': value}
+		
+	def onchange_head_in(self, cr, uid, ids, head_in, discharge_pressure_kg, sealing_water_pressure, context=None):
+		value = {'head_in': '','discharge_pressure_kg': '','sealing_water_pressure':''}
+		if head_in or discharge_pressure_kg:
+			value = {'head_in': head_in,'discharge_pressure_kg': head_in / 10.00,'sealing_water_pressure': (head_in / 10.00) + 1}
 			
 		return {'value': value}
 		
@@ -550,6 +585,14 @@ class ch_kg_crm_pumpmodel(osv.osv):
 				
 		return True
 		
+	def onchange_scope_of_supply(self, cr, uid, ids, scope_of_supply, primemover_categ, context=None):
+		
+		value = {'primemover_categ': ''}
+		if scope_of_supply == 'pump_with_acces_motor':
+			value = {'primemover_categ': 'motor'}
+		return {'value': value}
+
+		
 	def create(self, cr, uid, vals, context=None):
 		pump_obj = self.pool.get('kg.pumpmodel.master')
 		if vals.get('pump_id'):		  
@@ -568,7 +611,22 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			'number_of_stages': pump_rec.number_of_stages,'crm_type': pump_rec.crm_type})
 		return super(ch_kg_crm_pumpmodel, self).write(cr, uid, ids, vals, context)  
 	
+	def load_non_standard(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
 		
+		if rec.flag_standard == True:
+			cons_obj = self.pool.get('ch.moc.construction').search(cr,uid,[('header_id','=',rec.id)])
+			if cons_obj:
+				for item in cons_obj:
+					cons_rec = self.pool.get('ch.moc.construction').browse(cr,uid,item)
+					self.pool.get('ch.moc.construction').write(cr, uid, cons_rec.id, {'flag_standard': True})
+		elif rec.flag_standard == False:
+			cons_obj = self.pool.get('ch.moc.construction').search(cr,uid,[('header_id','=',rec.id)])
+			if cons_obj:
+				for item in cons_obj:
+					cons_rec = self.pool.get('ch.moc.construction').browse(cr,uid,item)
+					self.pool.get('ch.moc.construction').write(cr, uid, cons_rec.id, {'flag_standard': False})
+		return True	
 	
 ch_kg_crm_pumpmodel()
 

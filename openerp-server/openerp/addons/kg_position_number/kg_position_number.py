@@ -254,6 +254,8 @@ class ch_kg_position_number(osv.osv):
 		'in_house_cost': fields.float('In-House Cost'),
 		'total_cost': fields.float('Total Cost'),
 		'sc_cost': fields.float('Sub-Contractor Cost'),
+		'stage_id': fields.many2one('kg.stage.master','Stage', required=True), 		
+		'clamping_area': fields.char('Clamping Area', required=True), 	
 		'remark': fields.text('Remarks'),
 		'line_ids': fields.one2many('kg.dimension','header_id','Dimension'),
 	}
@@ -275,8 +277,6 @@ class kg_dimension(osv.osv):
 		
 		'header_id':fields.many2one('ch.kg.position.number', 'Position No', required=True, ondelete='cascade'),  
 		'dimension_id': fields.many2one('kg.dimension.master','Dimension', required=True), 		
-		'stage_id': fields.many2one('kg.stage.master','Stage', required=True), 		
-		'clamping_area': fields.char('Clamping Area', required=True), 		
 		'description': fields.char('Description', required=True), 		
 		'min_val': fields.float('Minimum Value'), 
 		'max_val': fields.float('Maximum Value'), 
