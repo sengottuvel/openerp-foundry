@@ -187,7 +187,7 @@ class ch_pumpseries_flange(osv.osv):
 	
 		'name': fields.char('Name'),
 		'header_id':fields.many2one('kg.pumpseries.master', 'Header Id', ondelete='cascade'),
-		'flange_id':fields.many2one('kg.flange.master', 'Flange Standard',required=True),
+		'flange_id':fields.many2one('kg.flange.master', 'Flange Standard',required=True,domain="[('state','not in',('reject','cancel'))]"),
 		'flange_type': fields.selection([('standard','Standard'),('optional','Optional')],'Flange Type'),
 		
 	}
