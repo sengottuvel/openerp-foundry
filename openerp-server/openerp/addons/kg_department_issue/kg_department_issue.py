@@ -27,29 +27,24 @@ class kg_department_issue(osv.osv):
 	_description = "Department Issue"
 	_order = "issue_date desc"
 
-			
 	_columns = {
 		
 		'name': fields.char('Issue NO',readonly=True),
 		'issue_date':fields.date('Issue Date',required=True,readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
-		
 		'issue_line_ids':fields.one2many('kg.department.issue.line','issue_id','Line Entry',
 						 readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
-		
 		'kg_dep_indent_line':fields.many2many('kg.depindent.line', 'kg_department_indent_picking', 'kg_depline_id', 'stock_picking_id', 'Department Indent', 
 				 domain="[('indent_id.state','=','approved'), '&', ('indent_id.main_store','=',False),'&', ('indent_id.dep_name','=',department_id),'&', ('issue_pending_qty','>','0'),'&', ('pi_cancel' ,'!=', 'True')]", 
-				  readonly=True, states={'draft': [('readonly', False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
-
+				 readonly=True, states={'draft': [('readonly', False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
 		'outward_type': fields.many2one('kg.outwardmaster', 'Outward Type',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
 		'department_id': fields.many2one('kg.depmaster','Department',required=True,readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
 		'state': fields.selection([('draft', 'Draft'),
 			('confirmed', 'Waiting for Confirmation'),
 			('approve', 'Waiting for Approval'),
-			('done', 'Issued'),('cancel', 'Cancelled')], 'Status',readonly=True),
+			('done', 'Issued'),('cancel', 'Cancelled'),('reject', 'Rejected')], 'Status',readonly=True),
 		
 		'type': fields.selection([('in', 'IN'), ('out', 'OUT'), ('internal', 'Internal')], 'Type'),
 		'active':fields.boolean('Active'),
-		'company_id':fields.many2one('res.company','Company',readonly=True),
 		'confirm_flag':fields.boolean('Confirm Flag'),
 		'approve_flag':fields.boolean('Expiry Flag'),
 		'products_flag':fields.boolean('Products Flag'),
@@ -58,24 +53,29 @@ class kg_department_issue(osv.osv):
 		'project':fields.char('Project',size=100,readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
 		'building':fields.char('Building',size=100,readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
 		'issue_type': fields.selection([('material', 'Material'), ('service', 'Service')], 'Issue Type'),
-		
 		'kg_service_indent_line':fields.many2many('kg.service.indent.line', 'kg_service_indent_picking', 'kg_serviceline_id', 'service_issue', 'Service Indent', 
 				 domain="[('service_id.state','=','approved'),'&', ('service_id.dep_name','=',department_id),'&', ('issue_pending_qty','>','0')]", 
 				  readonly=True, states={'draft': [('readonly', False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
 		#'save_flag':fields.boolean('Save Flag'),
 		'issue_return':fields.boolean('Issue Return'),
-		
+		'dep_issue_type':fields.selection([('from_indent','From Indent'),('direct','Direct')],'Issue Type',required=True,
+					readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
+					
 		# Entry Info
 		
+		'company_id':fields.many2one('res.company','Company',readonly=True),
 		'created_by':fields.many2one('res.users','Created By',readonly=True),
 		'creation_date':fields.datetime('Creation Date',required=True,readonly=True),
 		'confirmed_by':fields.many2one('res.users','Confirmed By',readonly=True),
 		'confirmed_date':fields.datetime('Confirmed Date',required=True,readonly=True),
 		'approved_by':fields.many2one('res.users','Approved By',readonly=True),
 		'approved_date':fields.datetime('Approved Date',required=True,readonly=True),
+		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
+		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
+		'reject_date': fields.datetime('Cancelled Date', readonly=True),
+		'rej_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'update_date' : fields.datetime('Last Updated Date',readonly=True),
 		'update_user_id' : fields.many2one('res.users','Last Updated By',readonly=True),
-		
 	
 	}
 	
@@ -96,8 +96,8 @@ class kg_department_issue(osv.osv):
 		'issue_return':False,
 		'company_id' : lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.department.issue', context=c),
 		'user_id': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).id ,
+
 	}
-	
 	
 	def email_ids(self,cr,uid,ids,context = None):
 		email_from = []
@@ -117,7 +117,6 @@ class kg_department_issue(osv.osv):
 						email_to.append(mail_line_rec.mail_id)
 					if mail_line_rec.cc_address:
 						email_cc.append(mail_line_rec.mail_id)
-						
 			else:
 				pass			
 						
@@ -155,10 +154,40 @@ class kg_department_issue(osv.osv):
 		val['email_cc'] = email_cc
 		return val
 	
+	def onchange_direct_issue(self,cr,uid,ids,dep_iss_type,products_flag,context = None):
+		value = {'products_flag':'','state':''}
+		state = 'draft'
+		if dep_iss_type == 'from_in' or dep_iss_type == 'direct':
+			product_flag = True
+			state = 'draft'
+		else:
+			product_flag = False
+		if dep_iss_type == 'direct':
+			state = 'confirmed'
+		return {'value':{'products_flag':product_flag,'state':state}}
+		
 	def write(self, cr, uid, ids, vals, context=None):		
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_department_issue, self).write(cr, uid, ids, vals, context)
-		
+	
+	def cancel_issue(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr,uid,ids[0])
+		if not rec.remark:
+			raise osv.except_osv(
+				_('Remarks Needed !!'),
+				_('Enter Remark in Remarks Tab....'))
+		self.write(cr, uid,ids,{'state' : 'cancel','cancel_date':time.strftime('%Y-%m-%d %H:%M:%S'),'cancel_user_id':uid})
+		return True
+			
+	def cancel_reject(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr,uid,ids[0])
+		if not rec.remark:
+			raise osv.except_osv(
+				_('Remarks Needed !!'),
+				_('Enter Remark in Remarks Tab....'))
+		self.write(cr, uid,ids,{'state' : 'cancel','reject_date':time.strftime('%Y-%m-%d %H:%M:%S'),'rej_user_id':uid})
+		return True
+				
 	def onchange_user_id(self, cr, uid, ids, user_id, context=None):
 		value = {'department_id': ''}
 		if user_id:
@@ -176,7 +205,6 @@ class kg_department_issue(osv.osv):
 				 'form': self.read(cr, uid, ids[0], context=context),
 		}
 		return {'type': 'ir.actions.report.xml', 'report_name': 'issueslip.on.screen.report', 'datas': datas, 'nodestroy': True}
-		
 		
 	def update_depindent_to_issue(self,cr,uid,ids,context=None):
 		depindent_line_obj = self.pool.get('kg.depindent.line')
@@ -202,8 +230,6 @@ class kg_department_issue(osv.osv):
 		if obj.kg_dep_indent_line:
 			depindent_line_ids = map(lambda x:x.id,obj.kg_dep_indent_line)
 			depindent_line_browse = depindent_line_obj.browse(cr,uid,depindent_line_ids)
-			
-			
 			depindent_line_browse = sorted(depindent_line_browse, key=lambda k: k.product_id.id)
 			groups = []
 			for key, group in groupby(depindent_line_browse, lambda x: x.product_id.id):
@@ -214,14 +240,9 @@ class kg_department_issue(osv.osv):
 				prod_browse = group[0].product_id
 				brand_id = group[0].brand_id.id				
 				uom =False
-				
 				indent = group[0].indent_id
-				
 				dep = indent.dep_name.id
-				
-						
 				uom = group[0].uom.id or False
-				
 				depindent_obj = self.pool.get('kg.depindent').browse(cr, uid, indent.id)
 				dep_stock_location = depindent_obj.dest_location_id.id
 				main_location = depindent_obj.src_location_id.id
@@ -423,18 +444,36 @@ class kg_department_issue(osv.osv):
 					subtype_alternative = 'plain')
 			res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
 		"""	
+		
+		
 		#### Updating Department Issue to Stock Move ####			
 		for line_ids in issue_record.issue_line_ids:
 			if issue_record.issue_type == 'material':
-				indent_id = line_ids.indent_line_id.indent_id.id
-				depindent_obj = self.pool.get('kg.depindent').browse(cr, uid, indent_id)
-				dep_stock_location = depindent_obj.dest_location_id.id
-				main_location = depindent_obj.src_location_id.id
+				if issue_record.dep_issue_type == 'from_indent':
+					indent_id = line_ids.indent_line_id.indent_id.id
+					depindent_obj = self.pool.get('kg.depindent').browse(cr, uid, indent_id)
+					dep_stock_location = depindent_obj.dest_location_id.id
+					main_location = depindent_obj.src_location_id.id
+				else:
+					stock_main_store = self.pool.get('stock.location').search(cr,uid,[('custom','=',True),('location_type','=','main')])
+					main_location = stock_main_store[0]
+					dep_stock_location = issue_record.department_id.stock_location.id
+					
+				#~ indent_id = line_ids.indent_line_id.indent_id.id
+				#~ depindent_obj = self.pool.get('kg.depindent').browse(cr, uid, indent_id)
+				#~ dep_stock_location = depindent_obj.dest_location_id.id
+				#~ main_location = depindent_obj.src_location_id.id
 			if issue_record.issue_type == 'service':
-				indent_id = line_ids.service_indent_line_id.service_id.id
-				depindent_obj = self.pool.get('kg.service.indent').browse(cr, uid, indent_id)
-				dep_stock_location = depindent_obj.dep_name.stock_location.id
-				main_location = depindent_obj.dep_name.main_location.id
+				if issue_record.dep_issue_type == 'from_indent':
+					indent_id = line_ids.service_indent_line_id.service_id.id
+					depindent_obj = self.pool.get('kg.service.indent').browse(cr, uid, indent_id)
+					dep_stock_location = depindent_obj.dep_name.stock_location.id
+					main_location = depindent_obj.dep_name.main_location.id
+				else:
+					stock_main_store = self.pool.get('stock.location').search(cr,uid,[('custom','=',True),('location_type','=','main')])
+					main_location = stock_main_store[0]
+					dep_stock_location = issue_record.department_id.stock_location.id
+				
 			stock_move_obj.create(cr,uid,
 			{
 			'dept_issue_id':issue_record.id,
@@ -453,6 +492,7 @@ class kg_department_issue(osv.osv):
 			'price_unit': line_ids.price_unit or 0.0,
 			'stock_rate':line_ids.price_unit or 0.0,
 			})
+			
 			lot_sql = """ select lot_id from kg_department_issue_details where grn_id=%s""" %(line_ids.id)
 			cr.execute(lot_sql)
 			lot_data = cr.dictfetchall()
@@ -716,7 +756,6 @@ class kg_department_issue_line(osv.osv):
 	_name = "kg.department.issue.line"
 	_description = "Department Issue Line"
 
-	
 	_columns = {
 		
 		'issue_date':fields.date('PO GRN Date'),
@@ -755,9 +794,19 @@ class kg_department_issue_line(osv.osv):
 	
 		'state':'draft',
 		
-		
 	}
 	
+	#~ def default_get(self, cr, uid, fields, context=None):
+		#~ print"contextcontextcontext",context
+		#~ return context
+		
+	def onchange_product_id(self, cr, uid, ids, product_id,context=None):
+		value = {'uom_id': ''}
+		if product_id:
+			prod = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
+			value = {'uom_id': prod.uom_id.id}
+		return {'value': value}
+		
 	def update_lines(self, cr, uid, ids, context=None):
 		
 		dep_issue_obj = self.pool.get('kg.item.wise.dept.issue')
@@ -793,9 +842,6 @@ class kg_item_wise_dept_issue(osv.osv):
 	_name = "kg.item.wise.dept.issue"
 	_description = "Item wise Department Issue"
 
-	
-		
-		
 	_columns = {
 		
 		'issue_line_id':fields.many2one('kg.department.issue.line','Department Issue Line Entry'),
@@ -808,8 +854,6 @@ class kg_item_wise_dept_issue(osv.osv):
 		'batch_no':fields.char('Batch No',size=120),
 		'issue_date':fields.date('Issue Date'),
 		'lot_id':fields.many2one('stock.production.lot','Lot Id'),
-		
-		
 		
 	}
 	
@@ -824,9 +868,6 @@ class kg_dept_issue_stock_move(osv.osv):
 	_name = "stock.move"
 	_inherit = "stock.move"
 
-	
-	
-	
 	_columns = {
 		
 		'dept_issue_id':fields.many2one('kg.department.issue','Department Issue'),
@@ -835,15 +876,5 @@ class kg_dept_issue_stock_move(osv.osv):
 	}
 	
 	
-	
 kg_dept_issue_stock_move()
-
-
-
-
-
-
-
-
-
 

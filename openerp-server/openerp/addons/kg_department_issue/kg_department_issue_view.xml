@@ -13,12 +13,11 @@
             <field name="arch" type="xml">
             <form string="Department Issue" version="7.0">
 				<header>
-					<button name="confirm_issue" string="Confirm" type="object" states="confirmed" 
-						class="oe_highlight"/>
-					<button name="department_issue_scheduler" string="Issue Register" type="object" states="done" 
-						class="oe_highlight"  invisible="0"/>
-					<button name="action_process" states="approve" string="Issue to Substore" type="object" 
-					     class="oe_highlight"/>
+					<button name="confirm_issue" string="Confirm" type="object" states="confirmed" class="oe_highlight"/>
+					<button name="department_issue_scheduler" string="Issue Register" type="object" states="done" class="oe_highlight" invisible="1"/>
+					<button name="action_process" states="approve" string="Issue to Substore" type="object" class="oe_highlight"/>
+					<button name="cancel_issue" states="done" string="Cancel" type="object" class="oe_highlight"/>
+					<button name="cancel_reject" states="approve" string="Reject" type="object" class="oe_highlight"/>
 					<!--<button name="print_issue_slip" states="done" string="Print Issue Slip" type="object"
 						class="oe_highlight"/> -->
 				<!--	
@@ -46,6 +45,7 @@
 						</group>
 						<group>
 							<field name="issue_date"/>
+							<field name="dep_issue_type" on_change = "onchange_direct_issue(dep_issue_type,products_flag)"/>
 							<field name="outward_type"/>
 							<field name="building"/>
 							<field name="active"/>
@@ -53,7 +53,7 @@
 					</group>
 					<group string = "Type">
 						<group>
-							<field name="issue_type" required="1" attrs="{'readonly': [('products_flag','=',True)]}"/>
+							<field name="issue_type" required="1" />
 						</group>
 						<group>
 							<field name="approve_flag" invisible="1"/>
@@ -62,8 +62,9 @@
 					<notebook>
 					<page string="Products" attrs="{'invisible': [('products_flag','=',False)]}" >
 						<field name="issue_line_ids" nolabel="1"/>
+						
 					</page>
-					<page string="Select Pending Department Indent" attrs="{'invisible': [('issue_type','!=','material')]}">
+					<page string="Select Pending Department Indent" attrs="{'invisible': ['|',('dep_issue_type','=','direct'),('issue_type','in',('service'))]}">
 						<field name="kg_dep_indent_line" colspan="4" nolabel="1"  >
 							<tree string = "Dep Indent" editable="bottom">
 								<field name="indent_id" readonly="1"/>
@@ -73,9 +74,9 @@
 								<field name="issue_pending_qty" readonly="1"/>
 							</tree>
 						</field>
-						<button name="update_depindent_to_issue" type='object' string="Save Record"/>
+						<button name="update_depindent_to_issue" type='object' states="draft,confirmed" string="Save Record"/>
 					</page>
-					<page string="Select Pending Service Indent" attrs="{'invisible': [('issue_type','!=','service')]}">
+					<page string="Select Pending Service Indent" attrs="{'invisible': ['|',('dep_issue_type','=','direct'),('issue_type','in',('material'))]}">
 						<field name="kg_service_indent_line" colspan="4" nolabel="1"  >
 								<tree string = "Service Indent" editable="bottom">
 									<field name="service_id" readonly="1"/>
@@ -85,7 +86,7 @@
 									<field name="issue_pending_qty" readonly="1"/>
 								</tree>
 						</field>
-						<button name="update_serviceindent_to_issue" type='object' string="Save Record"/>
+						<button name="update_serviceindent_to_issue" type='object' states="draft,confirmed" string="Save Record"/>
 					</page>
 					<page string = "Remarks">
 						<field name="remarks"/>
@@ -126,7 +127,8 @@
             <field name="model">kg.department.issue</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
-				<tree string="Department Issue">
+				<tree colors="blue:state in ('draft','confirmed');red:state == 'approve';gray:state in ('reject','cancel');black:state == 'done'" 
+								string="Department Issue" toolbar="1" >   
 					<field name="name"/>
 					<field name="issue_date"/>
 					<field name="department_id"/>
@@ -149,17 +151,17 @@
 				<form string="Department Issue Line" version="7.0">
 				  <group string="Product Details">
 					<group>
-						<field name="product_id" readonly = "1"/>               
-						<field name="indent_qty" readonly = "1"/>               
-						<field name="location_id" readonly = "1"/>
+						<field name="product_id" on_change="onchange_product_id(product_id)"/>               
+						<field name="indent_qty" readonly="1"/>               
+						<field name="location_id"/>
 						<field name="remarks"/>
                     </group> 
                     <group>
-						<field name="brand_id" readonly = "1"/>
-						<field name="uom_id" readonly = "1"/>
+						<field name="brand_id"/>
+						<field name="uom_id"/>
 						<field name="issue_qty"/>
-						<field name="location_dest_id" readonly = "1"/>
-						<field name="issue_type" invisible="1"/>
+						<field name="location_dest_id"/>
+						<field name="issue_type" required="1"/>
 					</group>
                   </group>
                   <group string = "GRN Details">
@@ -184,7 +186,6 @@
                 </form> 
             </field>
         </record>
-        
         
         <record id="kg_department_issue_line_tree" model="ir.ui.view">
             <field name="name">kg.department.issue.line.tree.view</field>
@@ -224,8 +225,6 @@
                 </search>
 			</field>
 		</record>
-		
-	<!-- Search View End -->
 	
         <!--
         =====================
@@ -233,7 +232,7 @@
         ===================== -->
     
 		<record id="action_kg_department_issue" model="ir.actions.act_window">
-			<field name="name">Department Issue</field>
+			<field name="name">Store Issue</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.department.issue</field>
 			<field name="view_type">form</field>
