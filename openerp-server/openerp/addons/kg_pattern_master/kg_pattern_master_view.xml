@@ -113,6 +113,17 @@
 									</tree>
 								</field>																								
 							</page>
+							<page string="Latest Weight details">	
+								<field name="line_ids_c" nolabel="1" >
+									<tree string="Latest Weight details Tree" editable="top" >									
+										<field name="weight_type" />											
+										<field name="pouring_weight"/>				   
+										<field name="casting_weight"/>				   
+										<field name="finished_casting_weight"/>										
+																							
+									</tree>
+								</field>																								
+							</page>
 							<page string="Entry Info">
 									<group>
 										<field name="company_id"/>

@@ -49,6 +49,7 @@ class kg_pattern_master(osv.osv):
 		'line_ids':fields.one2many('ch.mocwise.rate', 'header_id', "MOC Wise Rate"),
 		'line_ids_a':fields.one2many('ch.pattern.attachment', 'header_id', "Attachments"),
 		'line_ids_b':fields.one2many('ch.pattern.history', 'header_id', "Pattern History"),	
+		'line_ids_c':fields.one2many('ch.latest.weight', 'header_id', "Latest Weight details", readonly=True),	
 		
 		'offer_info': fields.boolean('Offer Info'),
 		'dynamic_length': fields.boolean('Dynamic Length'),	
@@ -599,5 +600,24 @@ class ch_pattern_attachment(osv.osv):
 		
 	   ]
 ch_pattern_attachment()
+
+
+class ch_latest_weight(osv.osv):
+	
+	_name = "ch.latest.weight"
+	_description = "Latest Weight details"
+	
+	_columns = {  
+			
+		'header_id':fields.many2one('kg.pattern.master', 'Latest Weight details', required=True, ondelete='cascade'),	
+		'weight_type': fields.selection([('ci','CI'),('ss','SS'),('non_ferrous','Non-Ferrous')],'Family Type'),	
+		'pouring_weight': fields.float('Pouring weight'),	
+		'casting_weight': fields.float('Casting weight'),	
+		'finished_casting_weight': fields.float('Finished Casting Weight'),	
+		
+	}
+	
+	
+ch_latest_weight()
 
 
