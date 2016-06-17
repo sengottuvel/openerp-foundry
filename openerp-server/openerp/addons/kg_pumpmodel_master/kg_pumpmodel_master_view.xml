@@ -19,8 +19,8 @@
 					<sheet>
 						<group>
 							<group>						
-								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>		
-								<field name="series_id"/>						
+								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="series_id"/>								
 								<field name="alias_name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="type"/>															
 								<field name="impeller_type"/>								
@@ -39,6 +39,7 @@
 								<field name="employee_id"/>
 								<field name="sealing_water_capacity"/>
 								
+								
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 							</group>
 							<group>
@@ -54,11 +55,11 @@
 								<field name="sealing_water_pressure" />									
 								<field name="suction" />		
 								<field name="stage_type" />		
-								<field name="packing_type" />		
+								<field name="packing_type" invisible="1"/>		
 								<field name="lubrication_type" />		
 								<field name="suction_orientation" />		
-								<field name="companion_flange" />		
-								<field name="max_solid_size" invisible="1" />		
+								<field name="companion_flange" invisible="1"/>		
+								<field name="max_solid_size" invisible="1"/>		
 								
 								<field name="active"/>		
 								<field name="state" style="width: 30%%" class="att_state_change"/>									
@@ -179,7 +180,6 @@
 		</record>			
 		
 		<!-- Menu Action End-->
-		
 		
 		
 		<!-- Menu Name Start here --> 
