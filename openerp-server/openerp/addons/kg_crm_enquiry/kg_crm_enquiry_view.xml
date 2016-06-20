@@ -252,7 +252,7 @@
 								<field name="npsh_r_m" />
 								<field name="best_efficiency" />
 								<field name="bkw_water" />
-								<field name="bkw_liq" on_change="onchange_belt_loss_in_kw(belt_loss_in_kw,bkw_liq)"/>
+								<field name="bkw_liq" on_change="onchange_belt_loss_in_kw(belt_loss_in_kw,bkw_liq,motor_margin)"/>
 								<field name="impeller_dia_rated" on_change="onchange_impeller_tip_speed(impeller_tip_speed,impeller_dia_rated,full_load_rpm)"/>
 								<field name="impeller_tip_speed"/>
 								<field name="hydrostatic_test_pressure" />
@@ -261,11 +261,31 @@
 								<field name="frequency" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
 								<field name="motor_margin" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
 								<field name="motor_kw" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
+<!--
 								<field name="speed_in_pump" attrs="{'invisible':[('type_of_drive','in',['motor_direct','fc_gb'])]}"/>
+-->
 								<field name="speed_in_motor" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
 								<field name="engine_rpm" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
 								<field name="end_of_the_curve" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
+								<field name="critical_speed"/>
 								<field name="engine_kw" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
+								
+<!--
+								<field name="gear_box_loss" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="fluid_coupling_loss" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="mototr_out_put_power" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="higher_speed_rpm" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="head_higher_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="effy_hign_speed_point" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="pump_input_hign_speed_point" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="gearbox_loss" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="fluidcoupling_loss" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="lower_speed_rpm" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="head_lower_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="effy_lower_speed_point" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="pump_input_lower_speed_point" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+-->
+								
 								<field name="drive" invisible="1"/>
 							</group>											
 							<group>
@@ -282,12 +302,11 @@
 								<field name="sealing_water_pressure" />
 								<field name="sealing_water_capacity" />
 								<field name="gd_sq_value" />
-								<field name="critical_speed" />
 								<field name="bearing_make" />
 								<field name="bearing_number_nde" />
 								<field name="bearing_qty_nde" />
-								<field name="type_of_drive"/>
 								<field name="primemover_categ"/>
+								<field name="type_of_drive"/>
 								<field name="primemover_id" on_change="onchange_primemover(primemover_id)"/>
 							</group>
 						</group>

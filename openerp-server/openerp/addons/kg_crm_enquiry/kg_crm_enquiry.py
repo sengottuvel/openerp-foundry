@@ -364,7 +364,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'pump_type': fields.char('Pump Model', required=True),		
 		'casing_design': fields.selection([('base','Base'),('center_line','Center Line')],'Casing Feet Location'),
 		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Type', required=True,domain="[('active','=','t')]"),		
-		'size_suctionx': fields.char('Size-SuctionX Delivery- in mm'),
+		'size_suctionx': fields.char('Size-SuctionX Delivery(mm)'),
 		'flange_standard': fields.many2one('ch.pumpseries.flange','Flange Standard',domain="[('flange_type','=',flange_type),('header_id','=',pumpseries_id)]"),
 		'efficiency_in': fields.float('Efficiency in % Wat'),
 		'npsh_r_m': fields.float('NPSH R - M'),
@@ -389,7 +389,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'end_of_the_curve': fields.float('End of the curve - KW(Rated) liquid'),
 		'motor_frequency_hz': fields.float('Motor frequency HZ'),
 		'frequency': fields.selection([('50','50'),('60','60')],'Motor frequency (HZ)'),
-		'motor_margin': fields.integer('Motor Margin(%)'),
+		'motor_margin': fields.float('Motor Margin(%)'),
 		'motor_kw': fields.float('Motor KW'),
 		'speed_in_pump': fields.float('Speed in RPM-Pump'),
 		'speed_in_motor': fields.float('Speed in RPM-Motor'),
@@ -420,6 +420,21 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'primemover_id': fields.many2one('kg.primemover.master','Primemover'),
 		'primemover_categ': fields.selection([('engine','ENGINE'),('motor','MOTOR'),('vfd','VFD')],'Primemover Category'),
 		'moc_const_id':fields.many2one('kg.moc.construction', 'MOC Construction',domain = [('active','=','t')],required=True),
+		
+		# FC GB
+		#~ 'gear_box_loss': fields.float('Gear Box Loss **'),
+		#~ 'fluid_coupling_loss': fields.float('Fluid Coupling Loss **'),
+		#~ 'mototr_out_put_power': fields.float('Motor Out Put Power'),
+		#~ 'higher_speed_rpm': fields.float('Higher Speed(rpm)'),
+		#~ 'head_higher_speed': fields.float('Head At Higher Speed'),
+		#~ 'effy_hign_speed_point': fields.float('Efficiency At High Speed Point'),
+		#~ 'pump_input_hign_speed_point': fields.float('Pump Input At High Speed Point'),
+		#~ 'gearbox_loss' fields.float('Gear Box Loss'),
+		#~ 'fluidcoupling_loss': fields.float('Fluid Coupling Loss'),
+		#~ 'lower_speed_rpm': fields.float('Lower Speed(rpm)'),
+		#~ 'head_lower_speed': fields.float('Head At Lower Speed'),
+		#~ 'effy_lower_speed_point': fields.float('Efficiency At Lower Speed Point'),
+		#~ 'pump_input_lower_speed_point': fields.float('Pump Input At Lower Speed'),
 		
 		# Accesssories 
 		'acces': fields.selection([('yes','Yes'),('no','No')],'Accessories'),
@@ -553,8 +568,10 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		
 	def onchange_head_in(self, cr, uid, ids, head_in, discharge_pressure_kg, sealing_water_pressure, context=None):
 		value = {'head_in': '','discharge_pressure_kg': '','sealing_water_pressure':''}
+		total = 0.00
 		if head_in or discharge_pressure_kg:
-			value = {'head_in': head_in,'discharge_pressure_kg': head_in / 10.00,'sealing_water_pressure': (head_in / 10.00) + 1}
+			total = (head_in / 10.00) + 1
+			value = {'head_in': head_in,'discharge_pressure_kg': head_in / 10.00,'sealing_water_pressure': total}
 			
 		return {'value': value}
 		
@@ -562,14 +579,14 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		
 		value = {'impeller_type': '','impeller_number': '','impeller_dia_max': '','impeller_dia_min': '','maximum_allowable_soild': '',
 				'max_allowable_test': '','number_of_stages': '','crm_type': '','bearing_number_nde':'','bearing_qty_nde':'',
-				'sealing_water_pressure':'','pumpseries_id':'','crm_type':'','casing_design':'','sealing_water_capacity':''}
+				'sealing_water_pressure':'','pumpseries_id':'','crm_type':'','casing_design':'','sealing_water_capacity':'','size_suctionx':''}
 		if pump_id:
 			pump_rec = self.pool.get('kg.pumpmodel.master').browse(cr, uid, pump_id, context=context)
 			value = {'impeller_type': pump_rec.impeller_type,'impeller_number': pump_rec.impeller_number,'impeller_dia_max': pump_rec.impeller_dia_max,
 			'impeller_dia_min': pump_rec.impeller_dia_min,'maximum_allowable_soild': pump_rec.maximum_allowable_soild,'max_allowable_test': pump_rec.max_allowable_test,
 			'number_of_stages': pump_rec.number_of_stages,'crm_type': pump_rec.crm_type,'bearing_number_nde':pump_rec.bearing_no,'bearing_qty_nde':pump_rec.bearing_qty,
 			'sealing_water_pressure':pump_rec.sealing_water_pressure,'pumpseries_id':pump_rec.series_id.id,'crm_type':pump_rec.crm_type,'casing_design':pump_rec.feet_location,
-			'sealing_water_capacity':pump_rec.sealing_water_capacity}
+			'sealing_water_capacity':pump_rec.sealing_water_capacity,'size_suctionx':pump_rec.pump_size}
 			
 		return {'value': value}
 		

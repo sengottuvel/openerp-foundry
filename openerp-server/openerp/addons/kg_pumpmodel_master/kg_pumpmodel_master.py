@@ -71,7 +71,7 @@ class kg_pumpmodel_master(osv.osv):
 		'max_allowable_test': fields.float('Max Allowable Test Pressure', required=True),
 		'number_of_stages': fields.integer('Number of stages', required=True),
 		
-		'pump_size': fields.char('Pump size(mm)', required=True),
+		'pump_size': fields.char('Size-SuctionX Delivery(mm)', required=True),
 		'bearing_no': fields.char('Bearing No', required=True),
 		'bearing_qty': fields.float('Bearing qty', required=True),
 		'sealing_water_pressure': fields.float('Sealing Water Pressure', required=True),
