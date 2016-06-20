@@ -786,7 +786,7 @@
 		<record id="t_foundry_order_amd_bom_details" model="ir.model.access">
 			<field name="model_id" ref="kg_wo_amendment.model_ch_amend_order_bom_details"/>
 			<field eval="1" name="perm_read"/>
-			<field name="name">Order BOM Details</field>
+			<field name="name">BOM Details Amendment</field>
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
@@ -801,7 +801,7 @@
 		<record id="t_foundry_order_amd_machineshop_item" model="ir.model.access">
 			<field name="model_id" ref="kg_wo_amendment.model_ch_amend_order_machineshop_details"/>
 			<field eval="1" name="perm_read"/>
-			<field name="name">Work Order Machine Shop Items</field>
+			<field name="name">Work Order Amendment Machine Shop Items</field>
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
@@ -815,7 +815,7 @@
 		<record id="t_foundry_amd_sch_bot" model="ir.model.access">
 			<field name="model_id" ref="kg_wo_amendment.model_ch_amend_order_bot_details"/>
 			<field eval="1" name="perm_read"/>
-			<field name="name">Work Order BOT Items</field>
+			<field name="name">Work Order Amendment BOT Items</field>
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
