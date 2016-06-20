@@ -783,7 +783,7 @@
 		
 		<!-- Work Order Amendment  BOM Child Class Start --> 
 		
-		<record id="t_foundry_orderbom_details" model="ir.model.access">
+		<record id="t_foundry_order_amd_bom_details" model="ir.model.access">
 			<field name="model_id" ref="kg_wo_amendment.model_ch_amend_order_bom_details"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">Order BOM Details</field>
@@ -798,7 +798,7 @@
 		
 		<!-- Work Order Amendment  Machine Shop Items Start --> 
 		
-		<record id="t_foundry_order_machineshop_item" model="ir.model.access">
+		<record id="t_foundry_order_amd_machineshop_item" model="ir.model.access">
 			<field name="model_id" ref="kg_wo_amendment.model_ch_amend_order_machineshop_details"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">Work Order Machine Shop Items</field>
@@ -812,7 +812,7 @@
 		
 		<!-- Work Order Amendment  BOT Start --> 
 		
-		<record id="t_foundry_sch_bot" model="ir.model.access">
+		<record id="t_foundry_amd_sch_bot" model="ir.model.access">
 			<field name="model_id" ref="kg_wo_amendment.model_ch_amend_order_bot_details"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">Work Order BOT Items</field>
