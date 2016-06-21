@@ -41,7 +41,7 @@ class kg_fluid_master(osv.osv):
 		'solid_concentration': fields.float('Solid Concentration'),
 		'max_particle_size_mm': fields.float('Max Particle Size-mm'),
 		'ph': fields.float('PH'),
-		'temperature': fields.float('Temperature'),
+		'temperature': fields.char('Temperature'),
 		#'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
 		
 		### Entry Info ###
