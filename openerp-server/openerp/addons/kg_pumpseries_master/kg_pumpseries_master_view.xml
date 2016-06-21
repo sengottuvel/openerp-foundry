@@ -15,6 +15,7 @@
 						<button name="entry_cancel" type="object" states="reject,approved" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>	
 						<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>	
+						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 					</header>
 					<sheet>
 						<group>
@@ -113,6 +114,7 @@
 								toolbar="True" string="Pumpseries Master Tree">				
 					<field name="code"/>
 					<field name="name"/>
+					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>					
 					<field name="state"/>
 				</tree>
 			</field>
