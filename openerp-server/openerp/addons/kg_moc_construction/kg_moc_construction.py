@@ -185,9 +185,10 @@ class ch_offer_materials(osv.osv):
 		'moc_id': fields.many2one('kg.moc.master', 'MOC Name', required=True,domain = [('active','=','t')]),
 		'remarks':fields.text('Remarks'),		
 	}
+	
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		cr.execute(""" select offer_id from ch_offer_materials where offer_id  = '%s' """ %(entry.offer_id.id))
+		cr.execute(""" select offer_id from ch_offer_materials where offer_id  = '%s' and header_id = '%s' """ %(entry.offer_id.id,entry.header_id.id))
 		data = cr.dictfetchall()			
 		if len(data) > 1:		
 			return False
