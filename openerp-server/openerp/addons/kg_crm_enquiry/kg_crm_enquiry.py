@@ -139,8 +139,8 @@ class kg_crm_enquiry(osv.osv):
 		due_date = str(due_date)
 		due_date = datetime.strptime(due_date, '%Y-%m-%d')
 		if due_date <= today:
-			return True
-		return False
+			return False
+		return True
 		
 	def _check_duplicates(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
@@ -213,6 +213,7 @@ class kg_crm_enquiry(osv.osv):
 		else:
 			pass
 		return True
+		
 	def send_to_dms(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		res_rec=self.pool.get('res.users').browse(cr,uid,uid)		
@@ -524,10 +525,13 @@ class ch_kg_crm_pumpmodel(osv.osv):
 	def onchange_bkw_liq(self, cr, uid, ids, bkw_water, bkw_liq, capacity_in, head_in, specific_gravity, efficiency_in, motor_margin, context=None):
 		value = {'bkw_water': '','bkw_liq': '','capacity_in': '','head_in': '','specific_gravity': '','efficiency_in': '','motor_margin': ''}
 		total = 0.00
+		water_total = 0.00
 		if efficiency_in:
 			total = ((capacity_in * head_in * specific_gravity) / 367.00 ) / efficiency_in
 			total = round(total,2)
-			value = {'bkw_liq': total * 100 ,'bkw_water':total * 100, 'motor_margin':total}
+			water_total = ((capacity_in * head_in * 1) / 367.00 ) / efficiency_in
+			water_total = round(water_total,2)
+			value = {'bkw_liq': total * 100 ,'bkw_water':water_total * 100, 'motor_margin':total}
 		return {'value': value}
 			
 	def onchange_impeller_tip_speed(self, cr, uid, ids, impeller_tip_speed, impeller_dia_rated, full_load_rpm, context=None):
