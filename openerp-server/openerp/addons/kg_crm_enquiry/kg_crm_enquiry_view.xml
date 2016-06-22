@@ -12,7 +12,7 @@
 					<header>
 						<button name="entry_confirm" type="object" string="Process Offer" states="draft" class="oe_highlight"/>
 						<button name="entry_call_back" type="object" string="Call Back" states="draft" class="oe_highlight"/>
-						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
+						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>	
 						<!--<field name="state" widget="statusbar" 
 						statusbar_visible="draft,moved_to_offer,call,quote"
 						statusbar_colors='{
@@ -162,8 +162,8 @@
 								toolbar="True" string="Enquiry Entry Tree">					
 					<field name="name"/>
 					<field name="enquiry_date"/>
-					<field name="customer_id"/>		
-					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>					
+					<field name="customer_id"/>	
+					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>							
 					<field name="state"/>
 				</tree>
 			</field>
@@ -326,17 +326,11 @@
 						</group>
 						<group>
 							<group>
-								<group>
 								<field name="moc_const_id" on_change="onchange_moc(moc_const_id,flag_standard)"/>
-								<field name="flag_standard" colspan="1"/>
-								</group>
-								<group>
-								<button name="load_non_standard" type="object" string="Load" class="oe_highlight" colspan="1"/>
-								</group>
-								
+								<field name="flag_standard" on_change="onchange_moc(moc_const_id,flag_standard)"/>
 							</group>
-							<group>
-							</group>
+							<goup>
+							</goup>
 						</group>
 						
 					<notebook>

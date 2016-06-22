@@ -113,7 +113,7 @@ class kg_crm_enquiry(osv.osv):
 		due_date = str(due_date)
 		due_date = datetime.strptime(due_date, '%Y-%m-%d')
 		if due_date >= today:
-			return True
+			return False
 		else:
 			raise osv.except_osv(_('Warning!'),
 						_('System not allow to save with past date !!'))
@@ -502,12 +502,8 @@ class ch_kg_crm_pumpmodel(osv.osv):
 	def onchange_moc(self, cr, uid, ids, moc_const_id,flag_standard):
 		moc_const_vals=[]
 		if moc_const_id != False:
-			
 			moc_const_rec = self.pool.get('kg.moc.construction').browse(cr, uid, moc_const_id)
-			
 			for item in moc_const_rec.line_ids:
-				
-			
 				moc_const_vals.append({
 																
 								'moc_id': item.moc_id.id,
@@ -516,7 +512,6 @@ class ch_kg_crm_pumpmodel(osv.osv):
 								'flag_standard':flag_standard,
 								
 								})
-							
 		return {'value': {'line_ids_moc_a': moc_const_vals}}
 	
 	def onchange_flange_type(self, cr, uid, ids, flange_standard, flange_type, context=None):
