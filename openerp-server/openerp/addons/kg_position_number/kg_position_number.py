@@ -26,7 +26,7 @@ class kg_position_number(osv.osv):
 	"""
 	_columns = {
 			
-		'name': fields.char('Position No', size=128, required=True, select=True),
+		'name': fields.char('Position No', required=True, select=True),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'code': fields.char('Code', size=128),
 		'active': fields.boolean('Active'),
@@ -35,7 +35,7 @@ class kg_position_number(osv.osv):
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
 		'position_type': fields.selection([('new','NEW'),('copy','COPY')],'Type',required=True),
-		'position_no': fields.many2one('kg.position.number','Source Position',domain="[('active','=',True)]"),
+		'position_no': fields.many2one('kg.position.number','Source Position',domain="[('active','=',True),('state','=','approved')]"),
 		'line_ids': fields.one2many('ch.kg.position.number','header_id','Operation Configuration',readonly=False,states={'approved':[('readonly',True)]}),
 		'copy_flag':fields.boolean('Copy Flag'),		
 		
@@ -144,28 +144,19 @@ class kg_position_number(osv.osv):
 					'header_id' : copy_rec
 					}			
 				copy_recs = dimension_obj.copy(cr, uid, dimension_line_item.id, vals, context) 
+		
+		if rec.name == rec.position_no.name:
+			raise osv.except_osv(_('Warning !!'),
+				_('Kindly Change Position No. !!'))
 			
 		self.write(cr, uid, ids[0], {
 									'copy_flag': True,
-									'name':rec.position_no.name,
+									#~ 'name':rec.position_no.name,
 									'notes':rec.position_no.notes,
 									
 									})		
 									
 		return True
-		
-	def _pump_validate(self, cr, uid,ids, context=None):
-		rec = self.browse(cr,uid,ids[0])
-		res = True
-		if rec.name:
-			pump_name = rec.pump_model_id						
-			cr.execute(""" select * from kg_bom where pump_model_id  = '%s' and state != '%s' """ %(pump_name.id,'reject'))
-			data = cr.dictfetchall()			
-			if len(data) > 1:
-				res = False
-			else:
-				res = True				
-		return res
 		
 	def entry_confirm(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -177,7 +168,80 @@ class kg_position_number(osv.osv):
 		if not operation_data[0]['count'] == 1:
 			raise osv.except_osv(_('Warning!'),
 				_('Please select anynoe operation is last operation !!'))
-				
+		
+		if rec.position_type == 'copy':
+			
+			cr.execute('''select 
+					position_line.clamping_area,
+					position_line.operation_id,
+					position_line.stage_id,
+					position_line.is_last_operation,
+					position_line.total_cost,
+					position_line.remark,
+					position_line.time_consumption,
+					position_line.in_house_cost,
+					position_line.sc_cost
+					from ch_kg_position_number position_line 
+					left join kg_position_number header on header.id  = position_line.header_id
+					where header.position_type = 'copy' and header.id = %s''',[rec.id])
+			source_position_ids = cr.fetchall()
+			source_position_len = len(source_position_ids)
+			
+			cr.execute('''select 
+					position_line.clamping_area,
+					position_line.operation_id,
+					position_line.stage_id,
+					position_line.is_last_operation,
+					position_line.total_cost,
+					position_line.remark,
+					position_line.time_consumption,
+					position_line.in_house_cost,
+					position_line.sc_cost
+					from ch_kg_position_number position_line 
+					where position_line.header_id  = %s''',[rec.position_no.id])
+			source_old_position_ids = cr.fetchall()
+			source_old_position_len = len(source_old_position_ids)	
+			
+			cr.execute('''select 
+
+					position_line.clamping_area,
+					position_line.operation_id,
+					position_line.stage_id,
+					position_line.is_last_operation,
+					position_line.total_cost,
+					position_line.remark,
+					position_line.time_consumption,
+					position_line.in_house_cost,
+					position_line.sc_cost
+					from ch_kg_position_number position_line 
+					left join kg_position_number header on header.id  = position_line.header_id
+					where header.position_type = 'copy' and header.id = %s
+
+					INTERSECT
+
+					select 
+					position_line.clamping_area,
+					position_line.operation_id,
+					position_line.stage_id,
+					position_line.is_last_operation,
+					position_line.total_cost,
+					position_line.remark,
+					position_line.time_consumption,
+					position_line.in_house_cost,
+					position_line.sc_cost
+					from ch_kg_position_number position_line 
+					where position_line.header_id  = %s ''',[rec.id,rec.position_no.id])
+			repeat_ids = cr.fetchall()
+			new_position_len = len(repeat_ids)
+			
+			pos_dup = ''
+			if new_position_len  == source_position_len == source_old_position_len:
+				pos_dup = 'yes'
+			
+			if pos_dup == 'yes':
+				raise osv.except_osv(_('Warning!'),
+								_('Same Operation Details are already exist !!'))
+								
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 		
@@ -231,9 +295,9 @@ class kg_position_number(osv.osv):
 	_constraints = [
 		#(_Validation, 'Special Character Not Allowed !!!', ['Check Name']),
 		#(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
-		#~ (_name_validate, 'Position name must be unique !!', ['name']),		
+		(_name_validate, 'Position No must be unique !!', ['Position No']),		
 		(_code_validate, 'Position code must be unique !!', ['code']),		
-		(_check_line,'You can not save this with out Operation Details !',['line_ids']),
+		#~ (_check_line,'You can not save this with out Operation Details !',['line_ids']),
 		
 	]
 	
@@ -248,13 +312,13 @@ class ch_kg_position_number(osv.osv):
 	_columns = {
 		
 		'header_id':fields.many2one('kg.position.number', 'Position No', required=True, ondelete='cascade'),  
-		'operation_id': fields.many2one('kg.operation.master','Operation', required=True), 		
+		'operation_id': fields.many2one('kg.operation.master','Operation', required=True,domain="[('state','not in',('reject','cancel'))]"), 		
 		'is_last_operation': fields.boolean('Is Last Operation'), 
-		'time_consumption':fields.float('Time Consumption'),
-		'in_house_cost': fields.float('In-House Cost'),
+		'time_consumption':fields.float('Time Consumption(Hrs)'),
+		'in_house_cost': fields.float('In-house Cost/hr'),
 		'total_cost': fields.float('Total Cost'),
 		'sc_cost': fields.float('Sub-Contractor Cost'),
-		'stage_id': fields.many2one('kg.stage.master','Stage', required=True), 		
+		'stage_id': fields.many2one('kg.stage.master','Stage', required=True,domain="[('state','not in',('reject','cancel'))]"), 		
 		'clamping_area': fields.char('Clamping Area', required=True), 	
 		'remark': fields.text('Remarks'),
 		'line_ids': fields.one2many('kg.dimension','header_id','Dimension'),
@@ -276,7 +340,7 @@ class kg_dimension(osv.osv):
 	_columns = {
 		
 		'header_id':fields.many2one('ch.kg.position.number', 'Position No', required=True, ondelete='cascade'),  
-		'dimension_id': fields.many2one('kg.dimension.master','Dimension', required=True), 		
+		'dimension_id': fields.many2one('kg.dimension.master','Dimension', required=True,domain="[('state','not in',('reject','cancel'))]"),
 		'description': fields.char('Description', required=True), 		
 		'min_val': fields.float('Minimum Value'), 
 		'max_val': fields.float('Maximum Value'), 
@@ -284,4 +348,17 @@ class kg_dimension(osv.osv):
 		
 	}
 	
+	def _check_total(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+			
+		if rec.max_val < rec.min_val:
+			return False					
+		return True
+		
+	_constraints = [
+	
+		(_check_total,'Maximum Value Should Be Greater Than Minimum Value !',['Minimum Value']),
+		
+		]
+		
 kg_dimension()

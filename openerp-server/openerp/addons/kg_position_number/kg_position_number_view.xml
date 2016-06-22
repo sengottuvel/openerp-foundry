@@ -29,7 +29,7 @@
 								<field name="position_no" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'required': [('position_type','=','copy')],'invisible': [('position_type','=','new')]}"/>
 							</group>
 							<group>
-								<button name="copy_position" type="object" string="Copy" class="oe_highlight"  attrs="{'invisible': [('position_type','in',['new']),('copy_flag','=',True)]}"/>
+								<button name="copy_position" type="object" string="Copy" class="oe_highlight"  attrs="{'invisible': ['|',('position_type','in',['new']),('copy_flag','=',True)]}"/>
 							</group>
 						</group>
 						
@@ -204,8 +204,8 @@
 								<tree string="Diemnsion Details" editable="bottom">
 								   <field name="dimension_id"/>
 								   <field name="description"/>
-								   <field name="min_val"/>
-								   <field name="max_val"/>
+								   <field name="min_val" />
+								   <field name="max_val" />
 								   <field name="remark"/>
 								</tree>
 							</field>

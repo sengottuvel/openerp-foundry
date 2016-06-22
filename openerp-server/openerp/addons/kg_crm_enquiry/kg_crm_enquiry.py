@@ -213,18 +213,19 @@ class kg_crm_enquiry(osv.osv):
 		else:
 			pass
 		return True
-		
 	def send_to_dms(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		res_rec=self.pool.get('res.users').browse(cr,uid,uid)		
 		rec_user = str(res_rec.login)
 		rec_pwd = str(res_rec.password)
-		rec_number = str(rec.enquiry_no)		
+		rec_number = str(rec.enquiry_no)
+		#~ url = 'http://iasqa1.kgisl.com/?uname='+rec_user+'&s='+rec_work_order
 		encoded_user = base64.b64encode(rec_user)
 		encoded_pwd = base64.b64encode(rec_pwd)
 		
-		url = 'http://192.168.1.7/DMS/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&enquiry='+rec_number	
+		url = 'http://10.100.9.60/DMS/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&wo_no='+rec_number
 		
+		#url = 'http://192.168.1.150:81/pbxclick2call.php?exten='+exe_no+'&phone='+str(m_no)
 		return {
 					  'name'	 : 'Go to website',
 					  'res_model': 'ir.actions.act_url',
@@ -422,7 +423,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'belt_loss_in_kw': fields.float('Belt Loss in Kw - 3% of BKW'),
 		'type_make_selection': fields.selection([('base','Base'),('center_line','Center Line')],'Type Make Selection'),
 		'engine_rpm': fields.float('Engine(RPM)'),
-		'shaft_sealing': fields.selection([('gld_packing','Gland Packing'),('mc_seal','M/C Seal'),('dynamic_seal','Dynamic seal')],'Shaft Sealing'),
+		'shaft_sealing': fields.selection([('gld_packing_tiga','Gland Packing-TIGA'),('gld_packing_ptfe','Gland Packing-PTFE'),('mc_seal','M/C Seal'),('dynamic_seal','Dynamic seal')],'Shaft Sealing'),
 		'scope_of_supply': fields.selection([('bare_pump','Bare Pump'),('pump_with_acces','Pump With Accessories'),('pump_with_acces_motor','Pump With Accessories And Motor')],'Scope of Supply'),
 		'drive': fields.selection([('motor','MOTOR'),('vfd','VFD'),('engine','ENGINE')],'Drive'),
 		'flange_type': fields.selection([('standard','Standard'),('optional','Optional')],'Flange Type',required=True),

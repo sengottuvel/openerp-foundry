@@ -35,7 +35,7 @@ class kg_fluid_master(osv.osv):
 		'cancel_remark': fields.text('Cancel'),
 		'fluid_level': fields.float('Liquid Level'),
 		'viscosity': fields.integer('Viscosity (SSU)'),
-		'specific_gravity': fields.float('Specific Gravity',required=True),
+		'specific_gravity': fields.float('Specific Gravity'),
 		'density': fields.integer('Density'),
 		'checmical_concentration': fields.char('Chemical Concentration'),
 		'solid_concentration': fields.float('Solid Concentration'),
