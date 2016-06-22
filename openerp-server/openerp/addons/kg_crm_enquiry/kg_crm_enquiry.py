@@ -213,6 +213,7 @@ class kg_crm_enquiry(osv.osv):
 		else:
 			pass
 		return True
+		
 	def send_to_dms(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		res_rec=self.pool.get('res.users').browse(cr,uid,uid)		
@@ -222,7 +223,7 @@ class kg_crm_enquiry(osv.osv):
 		encoded_user = base64.b64encode(rec_user)
 		encoded_pwd = base64.b64encode(rec_pwd)
 		
-		url = 'http://192.168.1.7/DMS/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&wo_no='+rec_number	
+		url = 'http://192.168.1.7/DMS/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&enquiry='+rec_number	
 		
 		return {
 					  'name'	 : 'Go to website',
@@ -231,6 +232,7 @@ class kg_crm_enquiry(osv.osv):
 					  'target'   : 'current',
 					  'url'	  : url
 			   }
+		
 		
 	def entry_confirm(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
@@ -360,16 +362,19 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'solid_concen': fields.float('Solid Concentration in %'),
 		'max_particle_size_mm': fields.float('Max Particle Size-mm'),
 		'fluid_id': fields.many2one('kg.fluid.master','Liquid',domain="[('state','not in',('reject','cancel'))]"),
-		'temperature_in_c': fields.float('Temperature in C'),
+		'temperature_in_c': fields.char('Temperature in C'),
 		'density': fields.integer('Density(kg/m3)'),
 		'specific_gravity': fields.float('Specific Gravity'),
 		'viscosity': fields.integer('Viscosity in CST'),
 		'npsh_avl': fields.integer('NPSH-AVL'),
+		'capacity_in_liquid': fields.integer('Capacity in M3/hr(Liquid)'),
+		'head_in_liquid': fields.float('Total Head in Mlc(Liquid)'),
+		'consistency': fields.float('Consistency In %'),
 		
 		########## Karthikeyan Duty Parameters Added Start here ################	
 		
-		'capacity_in': fields.integer('Capacity in M3 / hr',),
-		'head_in': fields.float('Total Head in Mlc'),
+		'capacity_in': fields.integer('Capacity in M3/hr(Water)',),
+		'head_in': fields.float('Total Head in Mlc(Water)'),
 		'viscosity_crt_factor': fields.float('Viscosity correction factors'),
 		'suction_pressure': fields.selection([('normal','Normal'),('centre_line','Centre Line')],'Suction pressure'),
 		'differential_pressure_kg': fields.float('Differential Pressure - kg/cm2'),
@@ -380,7 +385,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'suction_pressure_kg': fields.float('Suction Pressure - kg/cm2'),
 		
 		########## Karthikeyan Pump Specification Added Start here ################	
-		'pump_type': fields.char('Pump Model', required=True),		
+		'pump_type': fields.char('Pump Model'),		
 		'casing_design': fields.selection([('base','Base'),('center_line','Center Line')],'Casing Feet Location'),
 		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Type', required=True,domain="[('active','=','t')]"),		
 		'size_suctionx': fields.char('Size-SuctionX Delivery(mm)'),
@@ -421,7 +426,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'scope_of_supply': fields.selection([('bare_pump','Bare Pump'),('pump_with_acces','Pump With Accessories'),('pump_with_acces_motor','Pump With Accessories And Motor')],'Scope of Supply'),
 		'drive': fields.selection([('motor','MOTOR'),('vfd','VFD'),('engine','ENGINE')],'Drive'),
 		'flange_type': fields.selection([('standard','Standard'),('optional','Optional')],'Flange Type',required=True),
-		
+		'pre_suppliy_ref': fields.char('Previous Supply Reference'),
 		'flag_standard': fields.boolean('Non Standard'),
 		
 		##### Product model values ##########
@@ -526,7 +531,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		if efficiency_in:
 			total = ((capacity_in * head_in * specific_gravity) / 367.00 ) / efficiency_in
 			total = round(total,2)
-			value = {'bkw_liq': total,'bkw_water':total,'motor_margin':total}
+			value = {'bkw_liq': total * 100 ,'bkw_water':total * 100, 'motor_margin':total}
 		return {'value': value}
 			
 	def onchange_impeller_tip_speed(self, cr, uid, ids, impeller_tip_speed, impeller_dia_rated, full_load_rpm, context=None):
@@ -576,12 +581,12 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			
 	def onchange_liquid(self, cr, uid, ids, fluid_id, context=None):
 		
-		value = {'viscosity': '','temperature_in_c': '','specific_gravity': '','solid_concen':'','max_particle_size_mm':''}
+		value = {'viscosity': '','temperature_in_c': '','specific_gravity': '','solid_concen':'','max_particle_size_mm':'','consistency':''}
 		if fluid_id:
 			liquid_rec = self.pool.get('kg.fluid.master').browse(cr, uid, fluid_id, context=context)
 			value = {'viscosity': liquid_rec.viscosity,'temperature_in_c': liquid_rec.temperature,
 					 'specific_gravity': liquid_rec.specific_gravity,'solid_concen':liquid_rec.solid_concentration,
-					 'max_particle_size_mm':liquid_rec.max_particle_size_mm}
+					 'max_particle_size_mm':liquid_rec.max_particle_size_mm,'consistency':liquid_rec.consistency}
 			
 		return {'value': value}
 		

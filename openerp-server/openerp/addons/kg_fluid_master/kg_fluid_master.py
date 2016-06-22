@@ -42,6 +42,7 @@ class kg_fluid_master(osv.osv):
 		'max_particle_size_mm': fields.float('Max Particle Size-mm'),
 		'ph': fields.float('PH'),
 		'temperature': fields.char('Temperature'),
+		'consistency': fields.float('Consistency In %'),
 		#'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
 		
 		### Entry Info ###

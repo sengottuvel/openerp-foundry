@@ -162,7 +162,7 @@
 								toolbar="True" string="Enquiry Entry Tree">					
 					<field name="name"/>
 					<field name="enquiry_date"/>
-					<field name="customer_id"/>	
+					<field name="customer_id"/>		
 					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>					
 					<field name="state"/>
 				</tree>
@@ -209,16 +209,19 @@
 					
 						<group string="Liquid Specifications">
 							<group>
-								<field name="fluid_id" on_change="onchange_liquid(fluid_id)"/>	
-								<field name="solid_concen" />																
-								<field name="viscosity" />																
-								<field name="npsh_avl" />																
+								<field name="fluid_id" on_change="onchange_liquid(fluid_id)"/>
+								<field name="solid_concen" />
+								<field name="viscosity" />
+								<field name="npsh_avl" />
+								<field name="capacity_in_liquid" />
+								<field name="consistency" />
 							</group>											
 							<group>
 								<field name="temperature_in_c" />
 								<field name="specific_gravity" />
 								<field name="max_particle_size_mm" />
 								<field name="density" />
+								<field name="head_in_liquid" />
 							</group>					
 						</group>
 						<group string="Duty Parameters">
@@ -242,6 +245,7 @@
 							<group>
 								<field name="pump_id" on_change="onchange_pumpmodel(pump_id)"/>
 								<field name="pumpseries_id" on_change="onchange_pumpseries(pumpseries_id,flange_standard,flange_type)"/>
+								<field name="pre_suppliy_ref"/>
 								<field name="shaft_sealing"/>
 								<field name="scope_of_supply" on_change="onchange_scope_of_supply(scope_of_supply,primemover_categ)"/>
 								<field name="number_of_stages" />
@@ -322,11 +326,16 @@
 						</group>
 						<group>
 							<group>
+								<group>
 								<field name="moc_const_id" on_change="onchange_moc(moc_const_id,flag_standard)"/>
-								<field name="flag_standard"/>
+								<field name="flag_standard" colspan="1"/>
+								</group>
+								<group>
+								<button name="load_non_standard" type="object" string="Load" class="oe_highlight" colspan="1"/>
+								</group>
+								
 							</group>
 							<group>
-								<button name="load_non_standard" type="object" string="Load" class="oe_highlight"/>
 							</group>
 						</group>
 						

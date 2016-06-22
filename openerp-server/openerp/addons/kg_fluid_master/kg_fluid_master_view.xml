@@ -32,6 +32,7 @@
 								<field name="fluid_level" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="checmical_concentration" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="temperature" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="consistency"/>
 								<field name="active"/>
 								<field name="state" style="width: 30%%" class="att_state_change"/>								
 							</group>
