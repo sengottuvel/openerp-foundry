@@ -218,7 +218,7 @@ class kg_crm_enquiry(osv.osv):
 		res_rec=self.pool.get('res.users').browse(cr,uid,uid)		
 		rec_user = str(res_rec.login)
 		rec_pwd = str(res_rec.password)
-		rec_code = str(rec.code)		
+		rec_number = str(rec.enquiry_no)		
 		encoded_user = base64.b64encode(rec_user)
 		encoded_pwd = base64.b64encode(rec_pwd)
 		
