@@ -202,6 +202,7 @@ class kg_pouring_log(osv.osv):
 						'pour_remarks':line_item.remarks,
 						'pour_date':entry.entry_date
 						})
+						print "wo_produc_item['id']",wo_produc_item['id']
 						if pour_status in ('partial','done') and status in ('mould_com','pour_com'):
 							if pour_status == 'partial':
 								production_status = 'pour_pending'
@@ -275,6 +276,7 @@ class kg_pouring_log(osv.osv):
 						'pour_remarks':line_item.remarks,
 						'pour_date':entry.entry_date
 						})
+						print "msnc_item['id']",msnc_item['id']
 						if pour_status in ('partial','done') and status in ('mould_com','pour_com'):
 							if pour_status == 'partial':
 								production_status = 'pour_pending'
@@ -333,6 +335,7 @@ class kg_pouring_log(osv.osv):
 							'pour_remarks':line_item.remarks,
 							'pour_date':entry.entry_date
 							})
+							print "nc_item['id']",nc_item['id']
 							if pour_status in ('partial','done') and status in ('mould_com','pour_com'):
 								if pour_status == 'partial':
 									production_status = 'pour_pending'
@@ -390,6 +393,7 @@ class kg_pouring_log(osv.osv):
 							'pour_remarks':line_item.remarks,
 							'pour_date':entry.entry_date
 							})
+							print "service_item['id']",service_item['id']
 							if pour_status in ('partial','done') and status in ('mould_com','pour_com'):
 								if pour_status == 'partial':
 									production_status = 'pour_pending'
@@ -447,6 +451,7 @@ class kg_pouring_log(osv.osv):
 							'pour_remarks':line_item.remarks,
 							'pour_date':entry.entry_date
 							})
+							print "emer_item['id']",emer_item['id']
 							if pour_status in ('partial','done') and status in ('mould_com','pour_com'):
 								if pour_status == 'partial':
 									production_status = 'pour_pending'
@@ -505,6 +510,7 @@ class kg_pouring_log(osv.osv):
 							'pour_remarks':line_item.remarks,
 							'pour_date':entry.entry_date
 							})
+							print "spare_item['id']",spare_item['id']
 							if pour_status in ('partial','done') and status in ('mould_com','pour_com'):
 								if pour_status == 'partial':
 									production_status = 'pour_pending'
@@ -563,6 +569,7 @@ class kg_pouring_log(osv.osv):
 							'pour_remarks':line_item.remarks,
 							'pour_date':entry.entry_date
 							})
+							print "normal_item['id']",normal_item['id']
 							if pour_status in ('partial','done') and status in ('mould_com','pour_com'):
 								if pour_status == 'partial':
 									production_status = 'pour_pending'
