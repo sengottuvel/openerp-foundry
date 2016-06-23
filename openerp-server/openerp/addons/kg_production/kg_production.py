@@ -359,17 +359,22 @@ class kg_production(osv.osv):
 		today = date.today()
 		today = str(today)
 		entry_date = str(rec.entry_date)
+		print "entry_date",entry_date
 		if entry_date > today:
 			return False
 		issue_date = str(rec.issue_date)
+		print "issue_date",issue_date
 		if issue_date > today:
 			return False
 		core_date = str(rec.core_date)
+		print "core_date",core_date
 		if core_date > today:
 			return False
 		mould_date = str(rec.mould_date)
+		print "mould_date",mould_date
 		if mould_date > today:
 			return False
+		
 		return True
 		
 	_constraints = [		
