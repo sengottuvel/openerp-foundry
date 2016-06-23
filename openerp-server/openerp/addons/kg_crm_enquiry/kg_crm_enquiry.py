@@ -448,23 +448,23 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'moc_const_id':fields.many2one('kg.moc.construction', 'MOC Construction',domain = [('active','=','t')],required=True),
 		
 		# FC GB
-		#~ 'gear_box_loss_rated': fields.float('Gear Box Loss-Rated'),
-		#~ 'fluid_coupling_loss_rated': fields.float('Fluid Coupling Loss-Rated'),
-		#~ 'mototr_output_power_rated': fields.float('Motor Output Power-Rated'),
-		#~ 'higher_speed_rpm': fields.float('Higher Speed(Rpm)'),
-		#~ 'head_higher_speed': fields.float('Head At Higher Speed'),
-		#~ 'effy_high_speed': fields.float('Efficiency At High Speed'),
-		#~ 'pump_input_higher_speed': fields.float('Pump Input At Higher Speed'),
-		#~ 'gear_box_loss_high_speed' fields.float('Gear Box Loss-High Speed'),
-		#~ 'fluid_coupling_loss': fields.float('Fluid Coupling Loss-High Speed'),
-		#~ 'mototr_output_power_high_speed': fields.float('Motor Output Power-High Speed'),
-		#~ 'lower_speed_rpm': fields.float('Lower Speed(Rpm)'),
-		#~ 'head_lower_speed': fields.float('Head At Lower Speed'),
-		#~ 'effy_lower_speed_point': fields.float('Efficiency At Lower Speed Point'),
-		#~ 'pump_input_lower_speed': fields.float('Pump Input At Lower Speed'),
-		#~ 'gear_box_loss_lower_speed' fields.float('Gear Box Loss-Lower Speed'),
-		#~ 'fluid_coupling_loss_lower_speed': fields.float('Fluid Coupling Loss-Lower Speed'),
-		#~ 'mototr_output_power_lower_speed': fields.float('Motor Output Power-Lower Speed'),
+		'gear_box_loss_rated': fields.float('Gear Box Loss-Rated'),
+		'fluid_coupling_loss_rated': fields.float('Fluid Coupling Loss-Rated'),
+		'mototr_output_power_rated': fields.float('Motor Output Power-Rated'),
+		'higher_speed_rpm': fields.float('Higher Speed(Rpm)'),
+		'head_higher_speed': fields.float('Head At Higher Speed'),
+		'effy_high_speed': fields.float('Efficiency At High Speed'),
+		'pump_input_higher_speed': fields.float('Pump Input At Higher Speed'),
+		'gear_box_loss_high_speed': fields.float('Gear Box Loss-High Speed'),
+		'fluid_coupling_loss': fields.float('Fluid Coupling Loss-High Speed'),
+		'motor_output_power_high_speed': fields.float('Motor Output Power-High Speed'),
+		'lower_speed_rpm': fields.float('Lower Speed(Rpm)'),
+		'head_lower_speed': fields.float('Head At Lower Speed'),
+		'effy_lower_speed_point': fields.float('Efficiency At Lower Speed Point'),
+		'pump_input_lower_speed': fields.float('Pump Input At Lower Speed'),
+		'gear_box_loss_lower_speed': fields.float('Gear Box Loss-Lower Speed'),
+		'fluid_coupling_loss_lower_speed': fields.float('Fluid Coupling Loss-Lower Speed'),
+		'mototr_output_power_lower_speed': fields.float('Motor Output Power-Lower Speed'),
 		
 		# Accesssories 
 		'acces': fields.selection([('yes','Yes'),('no','No')],'Accessories'),
@@ -504,6 +504,12 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		return context
 		"""
 	
+	def onchange_capacity_in_liquid(self, cr, uid, ids, capacity_in_liquid, head_in_liquid, context=None):
+		value = {'capacity_in_liquid':'','head_in_liquid': ''}
+		if capacity_in_liquid or head_in_liquid:
+			value = {'capacity_in': capacity_in_liquid,'head_in':head_in_liquid}
+		return {'value': value}
+		
 	def onchange_moc(self, cr, uid, ids, moc_const_id,flag_standard):
 		moc_const_vals=[]
 		if moc_const_id != False:
@@ -533,8 +539,8 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		if efficiency_in:
 			total = ((capacity_in * head_in * specific_gravity) / 367.00 ) / efficiency_in
 			water_total = ((capacity_in * head_in * 1) / 367.00 ) / efficiency_in
-			water_total = round(water_total,2)
-			value = {'bkw_liq': total * 100 ,'bkw_water':water_total * 100, 'motor_margin':total}
+			#~ water_total = round(water_total,2)
+			value = {'bkw_liq': total * 100 ,'bkw_water':water_total * 100, 'motor_margin':total*100}
 		return {'value': value}
 			
 	def onchange_impeller_tip_speed(self, cr, uid, ids, impeller_tip_speed, impeller_dia_rated, full_load_rpm, context=None):
@@ -636,7 +642,58 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			value = {'primemover_categ': 'motor'}
 		return {'value': value}
 
-		
+	def onchange_type_of_drive(self, cr, uid, ids, type_of_drive, bkw_liq, context=None):
+		value = {'gear_box_loss_rated': '','gear_box_loss_high_speed':''}
+		total = 0.00
+		if type_of_drive == 'fc_gb':
+			total = bkw_liq * 0.02
+			value = {'gear_box_loss_rated': total,'gear_box_loss_high_speed':total}
+		return {'value': value}
+			
+	def onchange_pump_input_higher_speed(self,cr,uid,ids,capacity_in,head_higher_speed,specific_gravity,effy_high_speed,type_of_drive,context=None):
+		value = {'pump_input_higher_speed': 0.00}
+		total = 0.00
+		if type_of_drive == 'fc_gb' and head_higher_speed != 0.00 and effy_high_speed != 0.00:
+			total = (((capacity_in * head_higher_speed * specific_gravity) / 367.00) / (effy_high_speed / 100.00))
+			value = {'pump_input_higher_speed': total}
+		return {'value': value}
+			
+	def onchange_mototr_output_power_rated(self, cr, uid, ids, gear_box_loss_rated, fluid_coupling_loss_rated, bkw_liq, type_of_drive, context=None):
+		value = {'mototr_output_power_rated': ''}
+		total = 0.00
+		if type_of_drive == 'fc_gb':
+			total = bkw_liq + gear_box_loss_rated + fluid_coupling_loss_rated 
+			value = {'mototr_output_power_rated': total}
+		return {'value': value}
+			
+	def onchange_motor_output_power_high_speed(self,cr,uid,ids,pump_input_higher_speed,gear_box_loss_high_speed,fluid_coupling_loss,type_of_drive,context=None):
+		value = {'motor_output_power_high_speed': ''}
+		total = 0.00
+		if type_of_drive == 'fc_gb':
+			total = pump_input_higher_speed + gear_box_loss_high_speed + fluid_coupling_loss 
+			value = {'motor_output_power_high_speed': total}
+		return {'value': value}
+			
+	def onchange_pump_input_lower_speed(self,cr,uid,ids,effy_lower_speed_point,specific_gravity,head_lower_speed,capacity_in,type_of_drive,context=None):
+		value = {'pump_input_lower_speed': '','gear_box_loss_lower_speed':0}
+		total = 0.00
+		gear_total = 0.00
+		if type_of_drive == 'fc_gb' and effy_lower_speed_point != 0.00 and specific_gravity != 0.00 and capacity_in != 0.00 and effy_lower_speed_point != 0.00:
+			total = (((capacity_in * head_lower_speed * specific_gravity) / 367.00) / (effy_lower_speed_point / 100.00))
+			value = {'pump_input_lower_speed': total,'gear_box_loss_lower_speed': 0.00}
+		if total > 0.00:
+			gear_total = (total / 100.00 ) * 2.00
+			value = {'pump_input_lower_speed': total,'gear_box_loss_lower_speed': gear_total}
+		return {'value': value}
+			
+	def onchange_mototr_output_power_lower_speed(self,cr,uid,ids,pump_input_lower_speed,gear_box_loss_lower_speed,fluid_coupling_loss_lower_speed,type_of_drive,context=None):
+		value = {'mototr_output_power_lower_speed': 0}
+		total = 0.00
+		if type_of_drive == 'fc_gb' and pump_input_lower_speed != 0.00 and gear_box_loss_lower_speed != 0.00 and fluid_coupling_loss_lower_speed != 0.00:
+			total = pump_input_lower_speed + gear_box_loss_lower_speed + fluid_coupling_loss_lower_speed
+			value = {'mototr_output_power_lower_speed': total}
+		return {'value': value}
+			
 	def create(self, cr, uid, vals, context=None):
 		pump_obj = self.pool.get('kg.pumpmodel.master')
 		if vals.get('pump_id'):		  

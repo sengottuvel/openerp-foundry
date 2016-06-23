@@ -213,7 +213,7 @@
 								<field name="solid_concen" />
 								<field name="viscosity" />
 								<field name="npsh_avl" />
-								<field name="capacity_in_liquid" />
+								<field name="capacity_in_liquid" on_change="onchange_capacity_in_liquid(capacity_in_liquid,head_in_liquid)"/>
 								<field name="consistency" />
 							</group>											
 							<group>
@@ -221,7 +221,7 @@
 								<field name="specific_gravity" />
 								<field name="max_particle_size_mm" />
 								<field name="density" />
-								<field name="head_in_liquid" />
+								<field name="head_in_liquid" on_change="onchange_capacity_in_liquid(capacity_in_liquid,head_in_liquid)"/>
 							</group>					
 						</group>
 						<group string="Duty Parameters">
@@ -276,26 +276,16 @@
 								<field name="critical_speed"/>
 								<field name="engine_kw" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
 								
-<!--
 								<field name="gear_box_loss_rated" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="fluid_coupling_loss_rated" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="fluid_coupling_loss_rated" on_change="onchange_mototr_output_power_rated(gear_box_loss_rated,fluid_coupling_loss_rated,bkw_liq,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
 								<field name="mototr_output_power_rated" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
 								<field name="higher_speed_rpm" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="head_higher_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="effy_high_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="pump_input_higher_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="gear_box_loss_high_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="fluid_coupling_loss" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="mototr_output_power_high_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="lower_speed_rpm" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="head_lower_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="effy_lower_speed_point" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="pump_input_lower_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="gear_box_loss_lower_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="fluid_coupling_loss_lower_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="mototr_output_power_lower_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
--->
-								
+								<field name="head_higher_speed" on_change="onchange_pump_input_higher_speed(capacity_in,head_higher_speed,specific_gravity,effy_high_speed,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="effy_high_speed" on_change="onchange_pump_input_higher_speed(capacity_in,head_higher_speed,specific_gravity,effy_high_speed,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="pump_input_higher_speed" on_change="onchange_motor_output_power_high_speed(pump_input_higher_speed,gear_box_loss_high_speed,fluid_coupling_loss,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="gear_box_loss_high_speed" on_change="onchange_motor_output_power_high_speed(pump_input_higher_speed,gear_box_loss_high_speed,fluid_coupling_loss,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="fluid_coupling_loss" on_change="onchange_motor_output_power_high_speed(pump_input_higher_speed,gear_box_loss_high_speed,fluid_coupling_loss,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="motor_output_power_high_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
 								<field name="drive" invisible="1"/>
 							</group>											
 							<group>
@@ -316,8 +306,15 @@
 								<field name="bearing_number_nde" />
 								<field name="bearing_qty_nde" />
 								<field name="primemover_categ"/>
-								<field name="type_of_drive"/>
+								<field name="type_of_drive" on_change="onchange_type_of_drive(type_of_drive,bkw_liq)"/>
 								<field name="primemover_id" on_change="onchange_primemover(primemover_id)"/>
+								<field name="lower_speed_rpm" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="head_lower_speed" on_change="onchange_pump_input_lower_speed(effy_lower_speed_point,specific_gravity,head_lower_speed,capacity_in,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="effy_lower_speed_point" on_change="onchange_pump_input_lower_speed(effy_lower_speed_point,specific_gravity,head_lower_speed,capacity_in,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="pump_input_lower_speed" on_change="onchange_mototr_output_power_lower_speed(pump_input_lower_speed,gear_box_loss_lower_speed,fluid_coupling_loss_lower_speed,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="gear_box_loss_lower_speed" on_change="onchange_mototr_output_power_lower_speed(pump_input_lower_speed,gear_box_loss_lower_speed,fluid_coupling_loss_lower_speed,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="fluid_coupling_loss_lower_speed" on_change="onchange_mototr_output_power_lower_speed(pump_input_lower_speed,gear_box_loss_lower_speed,fluid_coupling_loss_lower_speed,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="mototr_output_power_lower_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
 							</group>
 						</group>
 						<group string="Accessories">
