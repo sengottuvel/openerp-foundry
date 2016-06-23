@@ -229,6 +229,14 @@ class kg_production(osv.osv):
 	def pattern_issue_update(self,cr,uid,ids,context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		
+		today = datetime.today()
+		issue_date = entry_rec.issue_date
+		issue_date = str(issue_date)
+		issue_date = datetime.strptime(issue_date, '%Y-%m-%d %H:%M:%S')
+		if issue_date > today:
+			raise osv.except_osv(_('Warning!'),
+							_('System not allow to save with future date. !!'))
+		
 		### Core Log Number ###
 		core_name = ''	
 		core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
