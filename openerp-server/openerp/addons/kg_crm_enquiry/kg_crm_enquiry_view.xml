@@ -277,19 +277,23 @@
 								<field name="engine_kw" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
 								
 <!--
-								<field name="gear_box_loss" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="fluid_coupling_loss" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="mototr_out_put_power" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="gear_box_loss_rated" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="fluid_coupling_loss_rated" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="mototr_output_power_rated" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
 								<field name="higher_speed_rpm" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
 								<field name="head_higher_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="effy_hign_speed_point" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="pump_input_hign_speed_point" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="gearbox_loss" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="fluidcoupling_loss" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="effy_high_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="pump_input_higher_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="gear_box_loss_high_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="fluid_coupling_loss" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="mototr_output_power_high_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
 								<field name="lower_speed_rpm" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
 								<field name="head_lower_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
 								<field name="effy_lower_speed_point" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="pump_input_lower_speed_point" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="pump_input_lower_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="gear_box_loss_lower_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="fluid_coupling_loss_lower_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="mototr_output_power_lower_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
 -->
 								
 								<field name="drive" invisible="1"/>

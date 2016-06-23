@@ -448,19 +448,23 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'moc_const_id':fields.many2one('kg.moc.construction', 'MOC Construction',domain = [('active','=','t')],required=True),
 		
 		# FC GB
-		#~ 'gear_box_loss': fields.float('Gear Box Loss **'),
-		#~ 'fluid_coupling_loss': fields.float('Fluid Coupling Loss **'),
-		#~ 'mototr_out_put_power': fields.float('Motor Out Put Power'),
-		#~ 'higher_speed_rpm': fields.float('Higher Speed(rpm)'),
+		#~ 'gear_box_loss_rated': fields.float('Gear Box Loss-Rated'),
+		#~ 'fluid_coupling_loss_rated': fields.float('Fluid Coupling Loss-Rated'),
+		#~ 'mototr_output_power_rated': fields.float('Motor Output Power-Rated'),
+		#~ 'higher_speed_rpm': fields.float('Higher Speed(Rpm)'),
 		#~ 'head_higher_speed': fields.float('Head At Higher Speed'),
-		#~ 'effy_hign_speed_point': fields.float('Efficiency At High Speed Point'),
-		#~ 'pump_input_hign_speed_point': fields.float('Pump Input At High Speed Point'),
-		#~ 'gearbox_loss' fields.float('Gear Box Loss'),
-		#~ 'fluidcoupling_loss': fields.float('Fluid Coupling Loss'),
-		#~ 'lower_speed_rpm': fields.float('Lower Speed(rpm)'),
+		#~ 'effy_high_speed': fields.float('Efficiency At High Speed'),
+		#~ 'pump_input_higher_speed': fields.float('Pump Input At Higher Speed'),
+		#~ 'gear_box_loss_high_speed' fields.float('Gear Box Loss-High Speed'),
+		#~ 'fluid_coupling_loss': fields.float('Fluid Coupling Loss-High Speed'),
+		#~ 'mototr_output_power_high_speed': fields.float('Motor Output Power-High Speed'),
+		#~ 'lower_speed_rpm': fields.float('Lower Speed(Rpm)'),
 		#~ 'head_lower_speed': fields.float('Head At Lower Speed'),
 		#~ 'effy_lower_speed_point': fields.float('Efficiency At Lower Speed Point'),
-		#~ 'pump_input_lower_speed_point': fields.float('Pump Input At Lower Speed'),
+		#~ 'pump_input_lower_speed': fields.float('Pump Input At Lower Speed'),
+		#~ 'gear_box_loss_lower_speed' fields.float('Gear Box Loss-Lower Speed'),
+		#~ 'fluid_coupling_loss_lower_speed': fields.float('Fluid Coupling Loss-Lower Speed'),
+		#~ 'mototr_output_power_lower_speed': fields.float('Motor Output Power-Lower Speed'),
 		
 		# Accesssories 
 		'acces': fields.selection([('yes','Yes'),('no','No')],'Accessories'),
@@ -528,7 +532,6 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		water_total = 0.00
 		if efficiency_in:
 			total = ((capacity_in * head_in * specific_gravity) / 367.00 ) / efficiency_in
-			total = round(total,2)
 			water_total = ((capacity_in * head_in * 1) / 367.00 ) / efficiency_in
 			water_total = round(water_total,2)
 			value = {'bkw_liq': total * 100 ,'bkw_water':water_total * 100, 'motor_margin':total}
@@ -768,8 +771,8 @@ class ch_moc_construction(osv.osv):
 	
 		
 		'header_id':fields.many2one('ch.kg.crm.pumpmodel', 'Header Id', ondelete='cascade'),
-		'moc_id':fields.many2one('kg.moc.master', 'MOC Name',domain = "[('active','=','t'),'&',('state','not in',('raject','cancel')]",required=True),
-		'offer_id':fields.many2one('kg.offer.materials', 'Offer Name',domain = "[('active','=','t'),'&',('state','not in',('raject','cancel')]",required=True),
+		'moc_id':fields.many2one('kg.moc.master', 'MOC Name',domain = "[('active','=','t'),'&',('state','not in',('raject','cancel'))]",required=True),
+		'offer_id':fields.many2one('kg.offer.materials', 'Offer Name',domain = "[('active','=','t'),'&',('state','not in',('raject','cancel'))]",required=True),
 		#~ 'pattern_id': fields.many2one('kg.pattern.master','Pattern No', required=True,domain="[('active','=','t')]"), 		
 		#~ 'pattern_name': fields.char('Pattern Name'), 	
 		'remarks':fields.text('Remarks'),   
