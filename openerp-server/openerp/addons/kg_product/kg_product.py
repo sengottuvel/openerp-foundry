@@ -24,6 +24,10 @@ from openerp.tools.translate import _
 
 import openerp.addons.decimal_precision as dp
 
+UOM_CONVERSATION = [
+    ('one_dimension','One Dimension'),('two_dimension','Two Dimension')
+]
+
 
 class kg_product(osv.osv):
 	
@@ -35,9 +39,10 @@ class kg_product(osv.osv):
 
 		'capital': fields.boolean('Capital Goods'),
 		'abc': fields.boolean('ABC Analysis'),
-		'po_uom_coeff': fields.float('PO Coeff', digits=(16,4),  required=True, help="One Purchase Unit of Measure = Value of(PO Coeff)UOM"),
-		'product_type': fields.selection([('raw','Foundry Raw Materials'),('ms','MS Item'),('bot','BOT'),('consu', 'Consumables'),('capital','Capitals and Asset'),('service','Service Items')], 'Product Type', 
-				required=True),
+		'po_uom_coeff': fields.float('PO Coeff', digits=(16,4), required=True, help="One Purchase Unit of Measure = Value of(PO Coeff)UOM"),
+		'product_type': fields.selection([('raw','Foundry Raw Materials'),('ms','MS Item'),('bot','BOT'),('consu', 'Consumables'),
+											('capital','Capitals and Asset'),('service','Service Items'),('coupling','Coupling'),
+											('mechanical_seal','Mechanical Seal')], 'Product Type',required=True),
 		'crt_date': fields.datetime('Creation Date',readonly=True),
 		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
 		'approve_date': fields.datetime('Approved Date', readonly=True),
@@ -59,6 +64,20 @@ class kg_product(osv.osv):
 		'thickness': fields.float('Thickness'),
 		'weight': fields.float('Weight'),
 		'po_uom_in_kgs': fields.float('PO UOM in kgs'),
+		'uom_conversation_factor': fields.selection(UOM_CONVERSATION,'UOM Conversation Factor',required=True),
+		'coupling_type': fields.selection([('rss','RSS'),('sw','SW')],'Coupling Type'),
+		'service_factor': fields.float('Service Factor'),
+		'power_kw': fields.float('Power in KW'),
+		'speed_in_rpm': fields.float('Speed In RPM'),
+		'max_bore': fields.float('MAX Bore'),
+		'coupling_size': fields.float('Coupling Size'),
+		'spacer_length': fields.float('Spacer Length'),
+		'liquid_id': fields.many2one('kg.fluid.master','Liquid'),
+		'mechanical_type': fields.char('Type'),
+		'operating_condition': fields.char('Operating Condition'),
+		'face_combination': fields.char('Face Combination'),
+		'api_plan': fields.char('API Plan'),
+		'gland_placement': fields.char('Gland Placement'),
 		
 	}
 	

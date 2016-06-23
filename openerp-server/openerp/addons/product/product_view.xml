@@ -301,7 +301,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">tree,form,kanban</field>
             <field name="context">{'default_product_type': 'consu',}</field>
-			<field name="domain">[('product_type','in',('consu','capital','service')),]</field>
+			<field name="domain">[('product_type','in',('consu','capital','service','coupling','mechanical_seal')),]</field>
             <field name="view_id" ref="product_product_tree_view"/>
             <field name="search_view_id" ref="product_search_form_view"/>
             <field name="help" type="html">

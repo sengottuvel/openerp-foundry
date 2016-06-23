@@ -39,6 +39,7 @@
 		</field>
 		<field name="uom_id" position="before">
 		<field name="product_type"/>
+		<field name="uom_conversation_factor"/>
 		</field>
 		<field name="tolerance_plus" position="after">
 		<field name="od"/>
@@ -92,6 +93,41 @@
 							<field name="approve_date" attrs="{'invisible':[('state','in',['draft', 'confirm','reject'])]}"/>
 							<field name="reject_date" attrs="{'invisible':[('state','in',['draft', 'confirm','approved'])]}"/>	
 							<field name="update_date"/>						
+						</group>
+					</group>
+				</page>
+		</xpath>
+		
+		<xpath expr = "//page[@string='Entry Info']" position="before">
+				<page string="Coupling Details" attrs="{'invisible':[('product_type','not in',('coupling'))]}">
+					<group>
+						<group>
+							<field name="coupling_type" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
+							<field name="power_kw" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
+							<field name="max_bore" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
+							<field name="spacer_length" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
+						</group>
+						<group>
+							<field name="service_factor" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
+							<field name="speed_in_rpm" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
+							<field name="coupling_size" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
+						</group>
+					</group>
+				</page>
+		</xpath>
+		
+		<xpath expr = "//page[@string='Coupling Details']" position="before">
+				<page string="Mechanical Seal Details" attrs="{'invisible':[('product_type','not in',('mechanical_seal'))]}">
+					<group>
+						<group>
+							<field name="liquid_id" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
+							<field name="operating_condition" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
+							<field name="api_plan" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
+						</group>
+						<group>
+							<field name="mechanical_type" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
+							<field name="face_combination" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
+							<field name="gland_placement" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
 						</group>
 					</group>
 				</page>
@@ -150,7 +186,7 @@
 		<field name="view_type">form</field>
 		<field name="view_mode">tree,form,kanban</field>
 		<field name="context">{'default_product_type': 'ms',}</field>
-		<field name="domain">[('product_type','in',('raw','ms','bot')),]</field>
+		<field name="domain">[('product_type','in',('raw','ms','bot','coupling','mechanical_seal')),]</field>
 		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
 		-->
 	</record>
