@@ -232,7 +232,7 @@ class kg_production(osv.osv):
 		today = datetime.today()
 		issue_date = entry_rec.issue_date
 		issue_date = str(issue_date)
-		issue_date = datetime.strptime(issue_date, '%Y-%m-%d %H:%M:%S')
+		issue_date = datetime.strptime(issue_date, '%Y-%m-%d')
 		if issue_date > today:
 			raise osv.except_osv(_('Warning!'),
 							_('System not allow to save with future date. !!'))
@@ -274,7 +274,7 @@ class kg_production(osv.osv):
 		today = datetime.today()
 		core_date = entry_rec.core_date
 		core_date = str(core_date)
-		core_date = datetime.strptime(core_date, '%Y-%m-%d %H:%M:%S')
+		core_date = datetime.strptime(core_date, '%Y-%m-%d')
 		if core_date > today:
 			raise osv.except_osv(_('Warning!'),
 							_('System not allow to save with future date. !!'))
@@ -328,7 +328,7 @@ class kg_production(osv.osv):
 		today = datetime.today()
 		mould_date = entry_rec.mould_date
 		mould_date = str(mould_date)
-		mould_date = datetime.strptime(mould_date, '%Y-%m-%d %H:%M:%S')
+		mould_date = datetime.strptime(mould_date, '%Y-%m-%d')
 		if mould_date > today:
 			raise osv.except_osv(_('Warning!'),
 							_('System not allow to save with future date. !!'))
