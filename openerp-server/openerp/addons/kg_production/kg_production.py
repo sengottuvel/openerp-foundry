@@ -262,6 +262,15 @@ class kg_production(osv.osv):
 	def core_update(self,cr,uid,ids,context=None):
 		
 		entry_rec = self.browse(cr, uid, ids[0])
+		
+		today = datetime.today()
+		core_date = entry_rec.core_date
+		core_date = str(core_date)
+		core_date = datetime.strptime(core_date, '%Y-%m-%d %H:%M:%S')
+		if core_date > today:
+			raise osv.except_osv(_('Warning!'),
+							_('System not allow to save with future date. !!'))
+		
 		if entry_rec.core_by == 'comp_employee':
 			if entry_rec.core_helper <= 0 or entry_rec.core_helper <= 0 or entry_rec.core_qty <=0:
 				raise osv.except_osv(_('Warning!'),
@@ -307,6 +316,15 @@ class kg_production(osv.osv):
 		
 	def mould_update(self,cr,uid,ids,context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
+		
+		today = datetime.today()
+		mould_date = entry_rec.mould_date
+		mould_date = str(mould_date)
+		mould_date = datetime.strptime(mould_date, '%Y-%m-%d %H:%M:%S')
+		if mould_date > today:
+			raise osv.except_osv(_('Warning!'),
+							_('System not allow to save with future date. !!'))
+		
 		
 		if entry_rec.mould_by == 'comp_employee':
 			if entry_rec.mould_moulder <= 0 or entry_rec.mould_helper <= 0 or entry_rec.mould_qty <=0:
@@ -359,19 +377,15 @@ class kg_production(osv.osv):
 		today = date.today()
 		today = str(today)
 		entry_date = str(rec.entry_date)
-		print "entry_date",entry_date
 		if entry_date > today:
 			return False
 		issue_date = str(rec.issue_date)
-		print "issue_date",issue_date
 		if issue_date > today:
 			return False
 		core_date = str(rec.core_date)
-		print "core_date",core_date
 		if core_date > today:
 			return False
 		mould_date = str(rec.mould_date)
-		print "mould_date",mould_date
 		if mould_date > today:
 			return False
 		
@@ -380,7 +394,7 @@ class kg_production(osv.osv):
 	_constraints = [		
 			  
 		
-		(_future_entry_date_check, 'dddSystem not allow to save with future date. !!',['']),
+		#~ (_future_entry_date_check, 'dddSystem not allow to save with future date. !!',['']),
   
 	   ]
 		
