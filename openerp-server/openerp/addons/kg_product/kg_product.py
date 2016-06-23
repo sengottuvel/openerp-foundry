@@ -35,7 +35,7 @@ class kg_product(osv.osv):
 
 		'capital': fields.boolean('Capital Goods'),
 		'abc': fields.boolean('ABC Analysis'),
-		'po_uom_coeff': fields.float('PO Coeff', digits=(16,4), required=True, help="One Purchase Unit of Measure = Value of(PO Coeff)UOM"),
+		'po_uom_coeff': fields.float('PO Coeff', digits=(16,4),  required=True, help="One Purchase Unit of Measure = Value of(PO Coeff)UOM"),
 		'product_type': fields.selection([('raw','Foundry Raw Materials'),('ms','MS Item'),('bot','BOT'),('consu', 'Consumables'),('capital','Capitals and Asset'),('service','Service Items')], 'Product Type', 
 				required=True),
 		'crt_date': fields.datetime('Creation Date',readonly=True),
