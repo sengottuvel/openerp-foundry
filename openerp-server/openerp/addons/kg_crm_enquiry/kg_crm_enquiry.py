@@ -540,20 +540,20 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		return {'value': value}
 		
 	def onchange_bkw_liq(self, cr, uid, ids, bkw_water, bkw_liq, capacity_in, head_in, specific_gravity, efficiency_in, motor_margin, context=None):
-		value = {'bkw_water': '','bkw_liq': '','capacity_in': '','head_in': '','specific_gravity': '','efficiency_in': '','motor_margin': ''}
+		value = {'bkw_water': '','bkw_liq': '','capacity_in': '','head_in': '','specific_gravity': '','efficiency_in': ''}
 		total = 0.00
 		water_total = 0.00
 		if efficiency_in:
 			total = ((capacity_in * head_in * specific_gravity) / 367.00 ) / efficiency_in
 			water_total = ((capacity_in * head_in * 1) / 367.00 ) / efficiency_in
 			#~ water_total = round(water_total,2)
-			value = {'bkw_liq': total * 100 ,'bkw_water':water_total * 100, 'motor_margin':total*100}
+			value = {'bkw_liq': total * 100 ,'bkw_water':water_total * 100}
 		return {'value': value}
 			
 	def onchange_motor_margin(self, cr, uid, ids, motor_kw, bkw_liq,context=None):
 		value = {'motor_margin': 0}
 		total = 0.00
-		total = bkw_liq / motor_kw
+		total = (((bkw_liq / motor_kw) * 100) - 100)
 		value = {'motor_margin': total}
 		return {'value': value}
 			
