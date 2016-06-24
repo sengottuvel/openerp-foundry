@@ -185,7 +185,7 @@ where po.id = $P{po_id}]]>
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
 								</box>
-								<textElement textAlignment="Right"/>
+								<textElement textAlignment="Center"/>
 								<textFieldExpression><![CDATA[$F{uom}+" "]]></textFieldExpression>
 							</textField>
 							<textField>
