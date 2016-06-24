@@ -229,7 +229,7 @@
 								<field name="capacity_in" />
 								<field name="suction_pressure" />
 								<field name="slurry_correction_in" />
-								<field name="suction_pressure_kg" />
+								<field name="suction_pressure_kg" on_change="onchange_differential_pressure_kg(suction_pressure_kg,discharge_pressure_kg,sealing_water_pressure)"/>
 								<field name="viscosity_crt_factor" />
 							</group>
 							<group>
@@ -265,8 +265,8 @@
 								<field name="full_load_rpm" on_change="onchange_impeller_tip_speed(impeller_tip_speed,impeller_dia_rated,full_load_rpm)"/>
 								<field name="belt_loss_in_kw" on_change="onchange_belt_loss_in_kw(belt_loss_in_kw,bkw_liq)" attrs="{'invisible':[('type_of_drive','not in',['belt_drive'])]}"/>
 								<field name="frequency" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
+								<field name="motor_kw" on_change="onchange_motor_margin(motor_kw,bkw_liq)"  attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
 								<field name="motor_margin" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
-								<field name="motor_kw" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
 <!--
 								<field name="speed_in_pump" attrs="{'invisible':[('type_of_drive','in',['motor_direct','fc_gb'])]}"/>
 -->
@@ -296,7 +296,7 @@
 								<field name="minimum_contionuous" />
 								<field name="specific_speed" />
 								<field name="suction_specific_speed" />
-								<field name="sealing_water_pressure" />
+								<field name="sealing_water_pressure" on_change="onchange_differential_pressure_kg(suction_pressure_kg,discharge_pressure_kg,sealing_water_pressure)"/>
 								<field name="sealing_water_capacity" />
 								<field name="gd_sq_value" />
 								<field name="bearing_make" />

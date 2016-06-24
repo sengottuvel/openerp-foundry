@@ -91,6 +91,7 @@ class kg_pumpmodel_master(osv.osv):
 		'employee_id': fields.many2one('res.users', 'User Type'),
 		'max_solid_size': fields.char('Max Solid size'),
 		'sealing_water_capacity': fields.float('Sealing Water Capacity - m3/hr'),
+		'gd_sq_value': fields.float('GD SQ value'),
 		
 	}
 	

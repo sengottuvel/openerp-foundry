@@ -532,6 +532,13 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			
 		return {'value': value}
 			
+	def onchange_differential_pressure_kg(self,cr,uid,ids,suction_pressure_kg,discharge_pressure_kg,sealing_water_pressure,context=None):
+		value = {'differential_pressure_kg': 0}
+		total = 0.00
+		total = suction_pressure_kg + discharge_pressure_kg + sealing_water_pressure
+		value = {'differential_pressure_kg': total}
+		return {'value': value}
+		
 	def onchange_bkw_liq(self, cr, uid, ids, bkw_water, bkw_liq, capacity_in, head_in, specific_gravity, efficiency_in, motor_margin, context=None):
 		value = {'bkw_water': '','bkw_liq': '','capacity_in': '','head_in': '','specific_gravity': '','efficiency_in': '','motor_margin': ''}
 		total = 0.00
@@ -543,11 +550,18 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			value = {'bkw_liq': total * 100 ,'bkw_water':water_total * 100, 'motor_margin':total*100}
 		return {'value': value}
 			
+	def onchange_motor_margin(self, cr, uid, ids, motor_kw, bkw_liq,context=None):
+		value = {'motor_margin': 0}
+		total = 0.00
+		total = bkw_liq / motor_kw
+		value = {'motor_margin': total}
+		return {'value': value}
+			
 	def onchange_impeller_tip_speed(self, cr, uid, ids, impeller_tip_speed, impeller_dia_rated, full_load_rpm, context=None):
 		value = {'impeller_tip_speed': '','impeller_dia_rated': '','full_load_rpm': ''}
 		total = 0.00
 		if full_load_rpm or impeller_dia_rated:
-			total = ((3.14 * impeller_dia_rated * full_load_rpm) / 60.00 ) / 100.00
+			total = ((3.14 * impeller_dia_rated * full_load_rpm) / 60.00 ) / 1000.00
 			total = round(total,2)
 			value = {'impeller_tip_speed': total}
 		return {'value': value}
@@ -612,14 +626,14 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		
 		value = {'impeller_type': '','impeller_number': '','impeller_dia_max': '','impeller_dia_min': '','maximum_allowable_soild': '',
 				'max_allowable_test': '','number_of_stages': '','crm_type': '','bearing_number_nde':'','bearing_qty_nde':'',
-				'pumpseries_id':'','crm_type':'','casing_design':'','sealing_water_capacity':'','size_suctionx':''}
+				'pumpseries_id':'','crm_type':'','casing_design':'','sealing_water_capacity':'','size_suctionx':'','gd_sq_value':''}
 		if pump_id:
 			pump_rec = self.pool.get('kg.pumpmodel.master').browse(cr, uid, pump_id, context=context)
 			value = {'impeller_type': pump_rec.impeller_type,'impeller_number': pump_rec.impeller_number,'impeller_dia_max': pump_rec.impeller_dia_max,
 			'impeller_dia_min': pump_rec.impeller_dia_min,'maximum_allowable_soild': pump_rec.maximum_allowable_soild,'max_allowable_test': pump_rec.max_allowable_test,
 			'number_of_stages': pump_rec.number_of_stages,'crm_type': pump_rec.crm_type,'bearing_number_nde':pump_rec.bearing_no,'bearing_qty_nde':pump_rec.bearing_qty,
 			'pumpseries_id':pump_rec.series_id.id,'crm_type':pump_rec.crm_type,'casing_design':pump_rec.feet_location,
-			'sealing_water_capacity':pump_rec.sealing_water_capacity,'size_suctionx':pump_rec.pump_size}
+			'sealing_water_capacity':pump_rec.sealing_water_capacity,'size_suctionx':pump_rec.pump_size,'gd_sq_value':pump_rec.gd_sq_value}
 			
 		return {'value': value}
 		
