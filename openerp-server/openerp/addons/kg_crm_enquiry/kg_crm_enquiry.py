@@ -354,6 +354,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'line_ids_a': fields.one2many('ch.kg.crm.machineshop.item', 'header_id', "Machineshop Details"),
 		'line_ids_b': fields.one2many('ch.kg.crm.bot', 'header_id', "BOT Details"),
 		'line_ids_moc_a': fields.one2many('ch.moc.construction', 'header_id', "MOC Construction"),
+		'line_ids_access_a': fields.one2many('ch.kg.crm.accessories', 'header_id', "Accessories"),
 		
 		########## Karthikeyan Item Details Added Start here ################
 		'equipment_no': fields.char('Equipment No'),
@@ -431,6 +432,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'drive': fields.selection([('motor','MOTOR'),('vfd','VFD'),('engine','ENGINE')],'Drive'),
 		'flange_type': fields.selection([('standard','Standard'),('optional','Optional')],'Flange Type',required=True),
 		'pre_suppliy_ref': fields.char('Previous Supply Reference'),
+		'market_division': fields.selection([('cp','CP'),('ip','IP')],'Market Division'),
 		'flag_standard': fields.boolean('Non Standard'),
 		
 		##### Product model values ##########
@@ -482,10 +484,10 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		
 	}
 	
-	"""
+	
 	def default_get(self, cr, uid, fields, context=None):
 		return context
-	
+	"""
 	def create(self, cr, uid, vals, context=None):
 		header_rec = self.pool.get('kg.crm.enquiry').browse(cr, uid,vals['header_id'])
 		if header_rec.state == 'draft':
@@ -650,18 +652,26 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			
 		return {'value': value}
 		
-	def onchange_pumpmodel(self, cr, uid, ids, pump_id, context=None):
+	def onchange_pumpmodel(self, cr, uid, ids, pump_id, market_division,suction_pressure_kg,discharge_pressure_kg, context=None):
 		
 		value = {'impeller_type': '','impeller_number': '','impeller_dia_max': '','impeller_dia_min': '','maximum_allowable_soild': '',
 				'max_allowable_test': '','number_of_stages': '','crm_type': '','bearing_number_nde':'','bearing_qty_nde':'',
-				'pumpseries_id':'','crm_type':'','casing_design':'','sealing_water_capacity':'','size_suctionx':'','gd_sq_value':''}
+				'pumpseries_id':'','crm_type':'','casing_design':'','sealing_water_capacity':'','size_suctionx':'','gd_sq_value':'',
+				'sealing_water_pressure':''}
+		total = 0.00
 		if pump_id:
 			pump_rec = self.pool.get('kg.pumpmodel.master').browse(cr, uid, pump_id, context=context)
+			if market_division == 'cp':
+				total = suction_pressure_kg + ((discharge_pressure_kg / 100.00) * 40) + pump_rec.sealing_water_pressure
+			if market_division == 'ip':
+				total = suction_pressure_kg + discharge_pressure_kg + pump_rec.sealing_water_pressure
+				
 			value = {'impeller_type': pump_rec.impeller_type,'impeller_number': pump_rec.impeller_number,'impeller_dia_max': pump_rec.impeller_dia_max,
 			'impeller_dia_min': pump_rec.impeller_dia_min,'maximum_allowable_soild': pump_rec.maximum_allowable_soild,'max_allowable_test': pump_rec.max_allowable_test,
 			'number_of_stages': pump_rec.number_of_stages,'crm_type': pump_rec.crm_type,'bearing_number_nde':pump_rec.bearing_no,'bearing_qty_nde':pump_rec.bearing_qty,
 			'pumpseries_id':pump_rec.series_id.id,'crm_type':pump_rec.crm_type,'casing_design':pump_rec.feet_location,
-			'sealing_water_capacity':pump_rec.sealing_water_capacity,'size_suctionx':pump_rec.pump_size,'gd_sq_value':pump_rec.gd_sq_value}
+			'sealing_water_capacity':pump_rec.sealing_water_capacity,'size_suctionx':pump_rec.pump_size,'gd_sq_value':pump_rec.gd_sq_value,
+			'sealing_water_pressure':total}
 			
 		return {'value': value}
 		
@@ -912,3 +922,26 @@ class ch_moc_construction(osv.osv):
 	
 	
 ch_moc_construction()
+
+class ch_kg_crm_accessories(osv.osv):
+
+	_name = "ch.kg.crm.accessories"
+	_description = "Ch KG CRM Accessories"
+	
+	_columns = {
+	
+		
+		'header_id':fields.many2one('ch.kg.crm.pumpmodel', 'Header Id', ondelete='cascade'),
+		'base_plate':fields.selection([('yes','YES'),('no','NO')],'Base Plate'),
+		'base_plate_item':fields.selection([('ms','MS'),('ss','SS')],'Item Details'),
+		'coupling_guard':fields.selection([('yes','YES'),('no','NO')],'Coupling Guard'),
+		'coupling_guard_item':fields.selection([('ms','MS'),('ss','SS')],'Item Details'),
+		'fou_bolts':fields.selection([('yes','YES'),('no','NO')],'Foundation Bolts'),
+		'fou_bolts_item':fields.selection([('ms','MS'),('ss','SS')],'Item Details'),
+		'product_id': fields.many2one('product.product','Coupling', domain="[('active','=','t'),('product_type','=','coupling')]"),
+		
+	}
+	
+ch_moc_construction()
+
+

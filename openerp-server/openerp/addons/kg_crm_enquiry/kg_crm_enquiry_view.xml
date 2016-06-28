@@ -77,7 +77,7 @@
 						</group>
 						
 						<group string="Pump Details">
-							<field name="ch_line_ids" colspan="4" nolabel="1" context="{'purpose_categ':purpose}">
+							<field name="ch_line_ids" colspan="4" nolabel="1" context="{'market_division':market_division}">
 								<tree string="Pump History">
 									<field name="equipment_no" required="1"/>
 									<field name="quantity_in_no" required="1"/>
@@ -243,7 +243,7 @@
 					
 						<group string="Pump Specification">
 							<group>
-								<field name="pump_id" on_change="onchange_pumpmodel(pump_id)"/>
+								<field name="pump_id" on_change="onchange_pumpmodel(pump_id,market_division,suction_pressure_kg,discharge_pressure_kg)"/>
 								<field name="pumpseries_id" on_change="onchange_pumpseries(pumpseries_id,flange_standard,flange_type)"/>
 								<field name="pre_suppliy_ref"/>
 								<field name="shaft_sealing"/>
@@ -321,16 +321,34 @@
 								<field name="gear_box_loss_lower_speed" on_change="onchange_mototr_output_power_lower_speed(pump_input_lower_speed,gear_box_loss_lower_speed,fluid_coupling_loss_lower_speed,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
 								<field name="fluid_coupling_loss_lower_speed" on_change="onchange_mototr_output_power_lower_speed(pump_input_lower_speed,gear_box_loss_lower_speed,fluid_coupling_loss_lower_speed,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
 								<field name="mototr_output_power_lower_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+								<field name="market_division" invisible="1"/>
 							</group>
 						</group>
 						<group string="Accessories">
 							<group>
 								<field name="acces"/>
 							</group>
+<!--
 							<group>
 								<field name="acces_type" attrs="{'required':[('acces','=','yes')]}"/>
 							</group>
+-->
 						</group>
+						<notebook attrs="{'invisible': [('acces','!=','yes')]}">
+						<page string="Accessories">
+							<field name="line_ids_access_a">
+								<tree string="Accessories Entry Tree" editable="top" >
+									<field name="product_id" required="1"/>
+									<field name="base_plate"/>
+									<field name="base_plate_item" attrs="{'required': [('base_plate','=','yes')]}"/>				   
+									<field name="coupling_guard"/>										
+									<field name="coupling_guard_item" attrs="{'required': [('base_plate','=','yes')]}"/>										
+									<field name="fou_bolts"/>										
+									<field name="fou_bolts_item" attrs="{'required': [('base_plate','=','yes')]}"/>										
+								</tree>
+							</field>								
+						</page>
+					</notebook>
 						<group>
 							<group>
 								<field name="moc_const_id" on_change="onchange_moc(moc_const_id,flag_standard)"/>
@@ -349,8 +367,8 @@
 									<field name="remarks" widget="char" attrs="{'readonly': [('flag_standard','=',False)]}"/>										
 									<field name="flag_standard" invisible="1"/>										
 								</tree>
-							</field>								
-						</page>
+							</field>	
+						</page>							
 					</notebook>
 					</sheet>
 				</form>
