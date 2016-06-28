@@ -262,15 +262,16 @@
 								<field name="impeller_dia_rated" on_change="onchange_impeller_tip_speed(impeller_tip_speed,impeller_dia_rated,full_load_rpm)"/>
 								<field name="impeller_tip_speed"/>
 								<field name="hydrostatic_test_pressure" />
+								<field name="setting_height" />
 								<field name="full_load_rpm" on_change="onchange_impeller_tip_speed(impeller_tip_speed,impeller_dia_rated,full_load_rpm)"/>
 								<field name="belt_loss_in_kw" on_change="onchange_belt_loss_in_kw(belt_loss_in_kw,bkw_liq)" attrs="{'invisible':[('type_of_drive','not in',['belt_drive'])]}"/>
 								<field name="frequency" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
-								<field name="motor_kw" on_change="onchange_motor_margin(motor_kw,bkw_liq)"  attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
+								<field name="motor_kw" on_change="onchange_motor_margin(motor_kw,bkw_liq)"  attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct','fc_gb'])]}"/>
 								<field name="motor_margin" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
 <!--
 								<field name="speed_in_pump" attrs="{'invisible':[('type_of_drive','in',['motor_direct','fc_gb'])]}"/>
 -->
-								<field name="speed_in_motor" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
+								<field name="speed_in_motor" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct','fc_gb'])]}"/>
 								<field name="engine_rpm" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
 								<field name="end_of_the_curve" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
 								<field name="critical_speed"/>
@@ -292,7 +293,8 @@
 								<field name="max_allowable_test" />
 								<field name="crm_type" />
 								<field name="casing_design" />
-								<field name="shut_off_head" />
+								<field name="shut_off_head" on_change="onchange_shut_off_pressure(shut_off_head)"/>
+								<field name="shut_off_pressure" on_change="onchange_hydrostatic_test_pressure(shut_off_pressure,discharge_pressure_kg)"/>
 								<field name="minimum_contionuous" />
 								<field name="specific_speed" />
 								<field name="suction_specific_speed" />
@@ -303,8 +305,12 @@
 								<field name="bearing_number_nde" />
 								<field name="bearing_qty_nde" />
 								<field name="primemover_categ"/>
+<!--
 								<field name="type_of_drive" on_change="onchange_type_of_drive(type_of_drive,bkw_liq)"/>
+-->
+								<field name="type_of_drive"/>
 								<field name="primemover_id" on_change="onchange_primemover(primemover_id)"/>
+								<field name="operation_range"/>
 								<field name="gear_box_loss_high_speed" on_change="onchange_motor_output_power_high_speed(pump_input_higher_speed,gear_box_loss_high_speed,fluid_coupling_loss,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
 								<field name="fluid_coupling_loss" on_change="onchange_motor_output_power_high_speed(pump_input_higher_speed,gear_box_loss_high_speed,fluid_coupling_loss,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
 								<field name="motor_output_power_high_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>

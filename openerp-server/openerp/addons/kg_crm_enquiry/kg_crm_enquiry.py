@@ -382,7 +382,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'differential_pressure_kg': fields.float('Differential Pressure - kg/cm2'),
 		'slurry_correction_in': fields.float('Slurry Correction in'),
 		'temperature': fields.selection([('normal','NORMAL'),('jacketting','JACKETTING'),('centre_line','CENTRE LINE')],'Temperature Condition'),
-		'suction_condition': fields.selection([('positive','Positive'),('negative','Negative')],'Suction Condition'),
+		'suction_condition': fields.selection([('positive','Positive'),('negative','Negative'),('flooded','Flooded'),('sub_merged','Sub Merged')],'Suction Condition'),
 		'discharge_pressure_kg': fields.float('Discharge Pressure - kg/cm2'),
 		'suction_pressure_kg': fields.float('Suction Pressure - kg/cm2'),
 		
@@ -400,7 +400,9 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'impeller_dia_rated': fields.float('Impeller Dia Rated mm'),
 		'impeller_tip_speed': fields.float('Impeller Tip Speed -M/Sec'),		
 		'hydrostatic_test_pressure': fields.float('Hydrostatic Test Pressure - Kg/cm2'),		
+		'setting_height': fields.char('Setting Height'),		
 		'shut_off_head': fields.float('Shut off Head in M'),
+		'shut_off_pressure': fields.float('Shut off Pressure'),
 		'minimum_contionuous': fields.float('Minimum Contionuous Flow - M3/hr'),
 		'specific_speed': fields.float('Specific Speed'),
 		'suction_specific_speed': fields.float('Suction Specific Speed'),
@@ -411,7 +413,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'bearing_make': fields.many2one('kg.brand.master','Bearing Make'),
 		'bearing_number_nde': fields.char('BEARING NUMBER NDE / DE'),
 		'bearing_qty_nde': fields.float('Bearing qty NDE / DE'),
-		'type_of_drive': fields.selection([('motor_direct','Motor-direct'),('belt_drive','Belt drive'),('fc_gb','FC GB')],'Transmission'),
+		'type_of_drive': fields.selection([('motor_direct','Motor-direct'),('belt_drive','Belt drive'),('fc_gb','Fluid Coupling Gear Box')],'Transmission'),
 		'end_of_the_curve': fields.float('End of the curve - KW(Rated) liquid'),
 		'motor_frequency_hz': fields.float('Motor frequency HZ'),
 		'frequency': fields.selection([('50','50'),('60','60')],'Motor frequency (HZ)'),
@@ -444,6 +446,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'crm_type': fields.selection([('pull_out','End Suction Back Pull Out'),('split_case','Split Case'),('multistage','Multistage'),('twin_casing','Twin Casing'),('single_casing','Single Casing'),('self_priming','Self Priming'),('vo_vs4','VO-VS4'),('vg_vs5','VG-VS5')],'Type'),
 		'pumpseries_id': fields.many2one('kg.pumpseries.master','Pumpseries',required=True),
 		'primemover_id': fields.many2one('kg.primemover.master','Primemover'),
+		'operation_range': fields.char('Operation Range'),
 		'primemover_categ': fields.selection([('engine','ENGINE'),('motor','MOTOR'),('vfd','VFD')],'Primemover Category'),
 		'moc_const_id':fields.many2one('kg.moc.construction', 'MOC Construction',domain = [('active','=','t')],required=True),
 		
@@ -548,6 +551,31 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			water_total = ((capacity_in * head_in * 1) / 367.00 ) / efficiency_in
 			#~ water_total = round(water_total,2)
 			value = {'bkw_liq': total * 100 ,'bkw_water':water_total * 100}
+		return {'value': value}
+			
+	def onchange_shut_off_pressure(self, cr, uid, ids, shut_off_head, context=None):
+		value = {'shut_off_pressure': 0}
+		total = 0.00
+		if shut_off_head:
+			total = shut_off_head / 10.00
+			value = {'shut_off_pressure': total}
+		return {'value': value}
+			
+	def onchange_hydrostatic_test_pressure(self, cr, uid, ids, shut_off_pressure, discharge_pressure_kg, context=None):
+		value = {'hydrostatic_test_pressure': 0}
+		tot_1 = 0.00
+		tot_2 = 0.00
+		total = 0.00
+		if shut_off_pressure and discharge_pressure_kg:
+			tot_1 = shut_off_pressure * 1.5
+			tot_2 = discharge_pressure_kg * 2
+			if tot_1 < tot_2:
+				total = tot_2
+			elif tot_2 < tot_1:
+				total = tot_1
+			else:
+				total = total
+			value = {'hydrostatic_test_pressure': total}
 		return {'value': value}
 			
 	def onchange_motor_margin(self, cr, uid, ids, motor_kw, bkw_liq,context=None):
@@ -656,13 +684,13 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			value = {'primemover_categ': 'motor'}
 		return {'value': value}
 
-	def onchange_type_of_drive(self, cr, uid, ids, type_of_drive, bkw_liq, context=None):
-		value = {'gear_box_loss_rated': '','gear_box_loss_high_speed':''}
-		total = 0.00
-		if type_of_drive == 'fc_gb':
-			total = bkw_liq * 0.02
-			value = {'gear_box_loss_rated': total,'gear_box_loss_high_speed':total}
-		return {'value': value}
+	#~ def onchange_type_of_drive(self, cr, uid, ids, type_of_drive, bkw_liq, context=None):
+		#~ value = {'gear_box_loss_high_speed':''}
+		#~ total = 0.00
+		#~ if type_of_drive == 'fc_gb':
+			#~ total = bkw_liq * 0.02
+			#~ value = {'gear_box_loss_high_speed':total}
+		#~ return {'value': value}
 			
 	def onchange_pump_input_higher_speed(self,cr,uid,ids,capacity_in,head_higher_speed,specific_gravity,effy_high_speed,type_of_drive,context=None):
 		value = {'pump_input_higher_speed': 0.00}
@@ -689,15 +717,15 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		return {'value': value}
 			
 	def onchange_pump_input_lower_speed(self,cr,uid,ids,effy_lower_speed_point,specific_gravity,head_lower_speed,capacity_in,type_of_drive,context=None):
-		value = {'pump_input_lower_speed': '','gear_box_loss_lower_speed':0}
+		value = {'pump_input_lower_speed': ''}
 		total = 0.00
 		gear_total = 0.00
 		if type_of_drive == 'fc_gb' and effy_lower_speed_point != 0.00 and specific_gravity != 0.00 and capacity_in != 0.00 and effy_lower_speed_point != 0.00:
 			total = (((capacity_in * head_lower_speed * specific_gravity) / 367.00) / (effy_lower_speed_point / 100.00))
-			value = {'pump_input_lower_speed': total,'gear_box_loss_lower_speed': 0.00}
+			value = {'pump_input_lower_speed': total}
 		if total > 0.00:
 			gear_total = (total / 100.00 ) * 2.00
-			value = {'pump_input_lower_speed': total,'gear_box_loss_lower_speed': gear_total}
+			value = {'pump_input_lower_speed': total}
 		return {'value': value}
 			
 	def onchange_mototr_output_power_lower_speed(self,cr,uid,ids,pump_input_lower_speed,gear_box_loss_lower_speed,fluid_coupling_loss_lower_speed,type_of_drive,context=None):
