@@ -341,7 +341,7 @@ class ch_mechanical_properties(osv.osv):
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
 		print "entry.mech_value,entry.mech_value,entry.moc_id.id,entry.mechanical_id.id]",entry.mech_value,entry.mech_value,entry.moc_id.id,entry.mechanical_id.id					
-		cr.execute(''' select name,header_id from ch_mechanical_chart 
+		cr.execute(''' select header_id from ch_mechanical_chart 
 						where case 
 						when range_flag = 't' then
 						%s >= min
