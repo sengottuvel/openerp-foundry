@@ -329,6 +329,8 @@ class ch_mechanical_properties(osv.osv):
 		'uom': fields.char('UOM',size=128),						
 		'mechanical_id': fields.many2one('kg.mechanical.master','Name', required=True,domain="[('active','=','t')]"),	
 		'mech_value':fields.float('Value',required=True),
+		'min':fields.float('Min'),
+		'max':fields.float('Max'),
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
 		'mpa_value':fields.float('MPA Value',readonly=True),		
 		
@@ -339,10 +341,19 @@ class ch_mechanical_properties(osv.osv):
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
 		print "entry.mech_value,entry.mech_value,entry.moc_id.id,entry.mechanical_id.id]",entry.mech_value,entry.mech_value,entry.moc_id.id,entry.mechanical_id.id					
-		cr.execute(''' select header_id from ch_mechanical_chart 
-						where %s BETWEEN min AND max and %s <= max
-						and header_id = %s and mechanical_id = %s and range_flag != 't'
-							  ''',[entry.mech_value,entry.mech_value,entry.moc_id.id,entry.mechanical_id.id])
+		cr.execute(''' select name,header_id from ch_mechanical_chart 
+						where case 
+						when range_flag = 't' then
+						%s >= min
+						when range_flag = 'f' then
+						%s >= min and
+						%s <= max
+						end
+
+						and
+						header_id = %s and mechanical_id = %s	
+	 
+							  ''',[entry.mech_value,entry.mech_value,entry.mech_value,entry.moc_id.id,entry.mechanical_id.id])
 		values= cr.fetchone()
 		print "values",values		
 		if values:
@@ -392,12 +403,3 @@ class ch_mechanical_properties(osv.osv):
 	   ]
 	
 ch_mechanical_properties()
-
-
-
-
-
-
-
-
-
