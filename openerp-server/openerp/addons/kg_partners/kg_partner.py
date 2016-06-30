@@ -10,7 +10,7 @@ import openerp.exceptions
 from openerp.osv import fields,osv
 from openerp.osv.orm import browse_record
 from openerp.tools.translate import _
-
+import re
 
 class kg_partner(osv.osv):
 
@@ -58,6 +58,7 @@ class kg_partner(osv.osv):
 	
 	'city_id' : fields.many2one('res.city', 'City'),
 	'tin_no' : fields.char('TIN'),
+	'vat_no' : fields.char('VAT'),
 	'pan_no' : fields.char('PAN'),
 	'tan_no' : fields.char('TAN'),
 	'cst_no' : fields.char('CST'),
@@ -91,9 +92,9 @@ class kg_partner(osv.osv):
 	'updated_by': fields.many2one('res.users','Last Updated By',readonly=True),
 	'con_designation': fields.char('Designation'),
 	'con_whatsapp': fields.char('Whatsapp No'),
-	'acc_number': fields.char('Whatsapp No'),
-	'bank_name': fields.char('Whatsapp No'),
-	'bank_bic': fields.char('Whatsapp No'),
+	#~ 'acc_number': fields.char('Whatsapp No'),
+	#~ 'bank_name': fields.char('Whatsapp No'),
+	#~ 'bank_bic': fields.char('Whatsapp No'),
 	'delivery_ids':fields.one2many('kg.delivery.address', 'src_id', 'Delivery Address'),
 	'billing_ids':fields.one2many('kg.billing.address', 'bill_id', 'Billing Address'),
 	'consult_ids':fields.one2many('kg.consultant.fee', 'consult_id', 'Consultant Fees'),
@@ -109,6 +110,7 @@ class kg_partner(osv.osv):
 	'adhar_id': fields.char('Adhar ID'),
 	'contractor': fields.boolean('Contractor'),
 	'tin_flag': fields.boolean('TIN Flag'),
+	'mobile_2': fields.char('Mobile2'),
 	
 	}
 	
@@ -130,13 +132,30 @@ class kg_partner(osv.osv):
 		return {}
 	
 	def onchange_zip(self,cr,uid,ids,zip,context=None):
-		if len(str(zip)) == 6:
+		if len(str(zip)) in (6,7,8):
 			value = {'zip':zip}
 		else:
 			raise osv.except_osv(_('Check zip number !!'),
-				_('Please enter six digit number !!'))
-		
+				_('Please enter 6-8 digit number !!'))
+		if zip.isdigit() == False:
+			raise osv.except_osv(_('Check zip number !!'),
+				_('Please enter numeric values !!'))
 		return {'value': value}
+			
+	#~ def onchange_tin_cst(self,cr,uid,ids,tin_no,cst_no,context=None):
+		#~ if tin_no:
+			#~ if len(str(tin_no)) == 11:
+				#~ value = {'tin_no':tin_no}
+			#~ else:
+				#~ raise osv.except_osv(_('Check TIN number !!'),
+					#~ _('Please enter 11 digit number !!'))
+		#~ if cst_no:
+			#~ if len(str(cst_no)) == 11:
+				#~ value = {'cst_no':cst_no}
+			#~ else:
+				#~ raise osv.except_osv(_('Check CST number !!'),
+					#~ _('Please enter 11 digit number !!'))
+		#~ return {'value': value}
 			
 	def confirm_partner(self, cr, uid, ids, context=None): 
 		rec = self.browse(cr, uid, ids[0])
@@ -181,7 +200,108 @@ class kg_partner(osv.osv):
 		#		_('Please enter six digit number !!'))
 		vals.update({'updated_date': time.strftime('%Y-%m-%d %H:%M:%S'),'updated_by':uid})
 		return super(kg_partner, self).write(cr, uid, ids, vals, context)
+	
+	def _check_zip(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+		if len(str(rec.zip)) in (6,7,8) and rec.zip.isdigit() == True:
+			return True
+		return False
 		
+	def _check_tin(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+		if rec.tin_no:
+			if len(str(rec.tin_no)) == 11 and rec.tin_no.isdigit() == True:
+				return True
+		else:
+			return True
+		return False
+		
+	def _check_cst(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+		if rec.cst_no:
+			if len(str(rec.cst_no)) == 11 and rec.cst_no.isdigit() == True:
+				return True
+		else:
+			return True
+		return False
+		
+	def _check_vat(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+		if rec.vat_no:
+			if len(str(rec.vat_no)) == 15:
+				return True
+		else:
+			return True
+		return False
+	
+	def _check_phone(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+		if rec.phone:
+			if len(str(rec.phone)) in (8,9,10,11,12,13,14,15) and rec.phone.isdigit() == True:
+				return True
+		else:
+			return True
+		return False
+	
+	def _check_website(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.website != False:
+			#~ if re.match('www?.(?:www)?(?:[\w-]{2,255}(?:\.\w{2,6}){1,2})(?:/[\w&%?#-]{1,300})?',rec.website):
+			if re.match('www.(?:www)?(?:[\w-]{2,255}(?:\.\w{2,6}){1,2})(?:/[\w&%?#-]{1,300})?',rec.website):
+				return True
+			else:
+				return False
+		return True
+
+	def _check_ifsc(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.bank_ids:
+			for item in rec.bank_ids:
+				if item.bank_bic:
+					if len(str(item.bank_bic)) == 11:
+						return True
+				else:
+					return True
+		else:
+			return True
+		return False
+			
+	def _check_acc_no(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.bank_ids:
+			for item in rec.bank_ids:
+				if item.acc_number:
+					if len(str(item.acc_number)) in (6,7,8,9,10,11,12,13,14,15,16,17,18) and item.acc_number.isdigit() == True:
+						return True
+				else:
+					return True
+		else:
+			return True
+		return False
+		
+	def _check_mobile_no(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+		if rec.mobile:
+			if len(str(rec.mobile)) in (10,11,12) and rec.mobile.isdigit() == True:
+				return True
+		else:
+			return True
+		return False
+			
+	_constraints = [
+	
+		(_check_zip,'Check Zip size !',['ZIP']),
+		(_check_tin,'Check TIN size !',['TIN']),
+		(_check_cst,'Check CST size !',['CST']),
+		(_check_vat,'Check VAT size !',['VAT']),
+		(_check_website,'Check Website !',['Website']),
+		(_check_phone,'Check Phone size !',['Phone']),
+		(_check_ifsc,'Check IFSC size !',['IFSC']),
+		(_check_acc_no,'Check A/C No. size !',['A/C No.']),
+		(_check_mobile_no,'Check Mobile No. size !',['Mobile']),
+		
+		]
+			
 kg_partner()
 
 

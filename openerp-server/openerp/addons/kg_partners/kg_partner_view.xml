@@ -39,6 +39,7 @@
 		<field name="tds" attrs = "{'required':[('company_type','=','individual')],'invisible':[('customer','=',True)]}"/>
 		<field name="tan_no"/>
 		<field name="cst_no"/>
+		<field name="vat_no"/>
 		<field name="cheque_in_favour"/>
 		<field name="economic_category" attrs="{'invisible':['|',('supplier','=',True),('dealer','=',True)]}"/>
 		<field name="dealer_id"  attrs="{'invisible':['|',('supplier','=',True),('dealer','=',True)]}"/>
@@ -75,6 +76,10 @@
 			</group>
 		</xpath>
 				
+		<field name="mobile" position="after">
+		<field name="mobile_2"/>
+		</field>
+		
 		<field name="color" position="replace">
 		<field name="delivery_id" attrs = "{'invisible':[('dealer','=',True)]}"/>
 		</field>
@@ -95,9 +100,11 @@
 		<field name="category_id" invisible="1"/>
 		<field name="con_designation" invisible="1"/>
 		<field name="con_whatsapp" invisible="1"/>
+<!--
 		<field name="acc_number" invisible="1"/>
 		<field name="bank_name" invisible="1"/>
 		<field name="bank_bic" invisible="1"/>
+-->
 		<field name="partner_state" invisible="1"/> 
 		<field name="dealer" invisible="1"/> 
 		<field name="modify" invisible="1"/> 
@@ -176,15 +183,23 @@
 		<xpath expr = "//page[@string='Billing Address']" position="after">
 				<page string="Bank Details">
 					<group>
-				<field name="bank_ids" nolabel="1" context="{'default_acc_number': acc_number, 'default_bank_name': bank_name, 'default_bank_bic': bank_bic}">
+				<field name="bank_ids" nolabel="1" context="{'default_partner_id': active_id, 'form_view_ref': 'base.view_partner_bank_form'}">
 				<form string="Bank" version="7.0">
 				<sheet>
 				<group>
-					<group>
-						<field name="acc_number"/>
-						<field name="bank_name"/>
+					
+						<field name="acc_number" colspan="4"/>
+					<group string="Bank Account Owner">
+						<field name="owner_name"/>
+						<field name="street"/>
+						<field name="city"/>
+						<field name="state_id" string="State"/>
+						<field name="country_id"/>
+						<field name="zip"/>
 					</group>
-					<group>
+					<group string="Information About The Bank">
+						<field name="bank"/>
+						<field name="bank_name"/>
 						<field name="bank_bic"/>
 					</group>
 				</group>	
