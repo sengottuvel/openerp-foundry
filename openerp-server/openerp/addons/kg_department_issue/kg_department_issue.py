@@ -99,24 +99,6 @@ class kg_department_issue(osv.osv):
 
 	}
 	
-	def update_seq(self, cr, uid, ids, context=None):
-		rec = self.browse(cr, uid, ids[0])
-		sql_check = """ select id,issue_date,* from kg_department_issue where state in ('approve','done') order by issue_date """
-		cr.execute(sql_check)
-		data = cr.dictfetchall()
-		name_data = ''
-		nos= 0
-		if data:
-			for item in data:
-				print"item['id']item['id']",item['id']
-				nos += 1
-				name_data = 'DIS/16-17/' + str(nos)
-				obj = self.search(cr,uid,[('id','=',item['id'])])
-				obj_rec = self.write(cr,uid,obj[0],{'name':name_data})
-					
-				
-		return True
-		
 	def email_ids(self,cr,uid,ids,context = None):
 		email_from = []
 		email_to = []
