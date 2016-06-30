@@ -313,7 +313,7 @@ class kg_general_grn(osv.osv):
 	def kg_grn_confirm(self, cr, uid, ids,context=None):
 		grn_entry = self.browse(cr, uid, ids[0])
 		if not grn_entry.name:
-			seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.general.grn')])
+			seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.po.grn')])
 			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
 			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,grn_entry.creation_date))
 			seq_name = cr.fetchone();

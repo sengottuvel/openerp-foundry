@@ -13,6 +13,7 @@
             <field name="arch" type="xml">
             <form string="Department Issue" version="7.0">
 				<header>
+					<button name="update_seq" string="Update Seq" type="object" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					<button name="confirm_issue" string="Confirm" type="object" states="confirmed" class="oe_highlight"/>
 					<button name="department_issue_scheduler" string="Issue Register" type="object" states="done" class="oe_highlight" invisible="1"/>
 					<button name="action_process" states="approve" string="Issue to Substore" type="object" class="oe_highlight"/>
