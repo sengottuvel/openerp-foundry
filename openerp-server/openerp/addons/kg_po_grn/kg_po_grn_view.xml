@@ -14,7 +14,6 @@
             <field name="arch" type="xml">
             <form string="PO GRN" version="7.0">
 				<header>
-					<button name="update_seq" string="Update Seq" type="object" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					<button name="po_grn_confirm" string="Confirm" type="object" states="draft" 
 						class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					<button name="grn_reject" string="Reject" type="object" states="confirmed" class="oe_highlight"/>
