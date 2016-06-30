@@ -20,8 +20,9 @@ class kg_users(osv.osv):
 	
 	_columns = {
 	
-	'dep_name' : fields.many2one('kg.depmaster', 'Dep.Name', required=True),
-		
+	'dep_name': fields.many2one('kg.depmaster', 'Dep.Name', required=True),
+	'special_approval': fields.boolean('Special Approval'),
+	
 	}
 		
 kg_users()

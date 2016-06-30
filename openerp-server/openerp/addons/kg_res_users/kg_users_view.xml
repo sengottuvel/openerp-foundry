@@ -9,16 +9,140 @@
         <field name="arch" type="xml">	
         	
 		<field name="company_id" position="after">
-
 		<field name="dep_name"/>
-		</field>
-		
-	
-
-		
+		</field>		
+		<field name="active" position="after">
+		<field name="special_approval"/>
+		</field>		
 		
 		</field>
 	</record>
+	
+	
+	
+	
+	<!-- Res Users Start Here -->
+		
+		 <record id="m_form_v_users" model="ir.ui.view">
+            <field name="name">res.users.form</field>
+            <field name="model">res.users</field>
+            <field name="arch" type="xml">
+                <form string="Users" version="7.0">
+                    <field name="id" invisible="1"/>
+                    <sheet>
+                        <div class="oe_right oe_button_box">
+                            <button string="Change Password" type="action" name="%(base.change_password_wizard_action)d"
+                                help="Change the user password."/>
+                        </div>
+                        <field name="image" widget='image' class="oe_avatar oe_left" options='{"preview_image": "image_medium"}'/>
+                        <div class="oe_title">
+                            <label for="name" class="oe_edit_only"/>
+                            <h1><field name="name"/></h1>
+                            <label for="login" class="oe_edit_only"/>
+                            <h2><field name="login"/></h2>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="company_id" context="{'user_preference': 0}"/>
+                                <field name="dep_name"/>
+                            </group>
+                            <group>
+                                <field name="active"/>
+                            </group>
+                        </group>
+
+                        <notebook colspan="4">
+                            <page string="Preferences">
+                                <group>
+                                    <group name="preferences">
+                                        <field name="lang"/>
+                                        <field name="tz"/>
+                                    </group>
+                                    <group groups="base.group_no_one">
+                                        <field name="action_id"/>                                        
+                                    </group>
+                                </group>
+                                <group>
+                                    <field name="email" widget="email"/>                                   
+                                </group>
+                            </page>
+                            <page string="Access Rights">
+                                <group string="Allowed Companies" groups="base.group_multi_company">
+                                    <field name="company_ids" nolabel="1" widget="many2many_tags"/>
+                                </group>
+                                <group col="4">
+                                    <field name="groups_id" domain="[('custom_group','=','t')]"/>
+                                </group>
+                            </page>
+                             <!-- Added by Sangeetha -->
+                            <page string="Menus">
+								<group>
+									<field name="user_menu_access" nolabel="1"/>
+								</group>
+                            </page>
+                            <!-- Ends Here -->
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="view_users_tree_new" model="ir.ui.view">
+            <field name="name">res.users.tree</field>
+            <field name="model">res.users</field>
+            <field name="arch" type="xml">
+                <tree string="Users">
+                    <field name="name"/>
+                    <field name="login"/>
+                    <field name="email"/>
+                </tree>
+            </field>
+        </record>
+        <record id="view_users_search_new" model="ir.ui.view">
+            <field name="name">res.users.search</field>
+            <field name="model">res.users</field>
+            <field name="arch" type="xml">
+                <search string="Users">
+                    <field name="name" filter_domain="['|', ('name','ilike',self), ('login','ilike',self)]" string="User"/>
+                    <field name="company_ids" string="Company" groups="base.group_multi_company"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="mma_res_users_new" model="ir.actions.act_window">
+            <field name="name">Users</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">res.users</field>
+            <field name="view_type">form</field>
+            <field name="view_id" ref="view_users_tree_new"/>
+            <field name="search_view_id" ref="view_users_search_new"/>
+            <field name="help">Create and manage users that will connect to the system. Users can be deactivated should there be a period of time during which they will/should not connect to the system. You can assign them groups in order to give them specific access to the applications they need to use in the system.</field>
+        </record>
+       <record id="res_user_new_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_users_tree_new"/>
+            <field name="act_window_id" ref="mma_res_users_new"/>
+        </record>
+        <record id="res_user_new_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="m_form_v_users"/>
+            <field name="act_window_id" ref="mma_res_users_new"/>
+        </record>
+      
+       <!-- Users Rights Masters Menu -->
+            <menuitem name="Users Rights" id="mam_user_rights_form" parent = "kg_pumpmodel_master.mpm_masters" sequence="5" />
+<!--
+            groups ="kg_users.group_planning_admin"/>
+-->
+      
+        
+        <menuitem action="mma_res_users_new" name="Users" id="mam_res_usres_form" parent="mam_user_rights_form" sequence="25" />
+<!--
+        groups ="kg_users.group_planning_admin"/>
+-->
+	
+	
 	
     </data>
 </openerp>
