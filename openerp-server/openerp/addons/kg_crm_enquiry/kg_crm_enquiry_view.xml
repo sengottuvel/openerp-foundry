@@ -51,6 +51,7 @@
 								<field name="acces" invisible="1"/>
 							</group>	
 						</group>
+<!--
 						<group string="Boundry Parameters" attrs="{'invisible': [('purpose','not in',('pump'))]}">
 							<group>
 							<field name="capacity" attrs="{'invisible': [('purpose','not in',('pump'))]}"/>
@@ -63,6 +64,7 @@
 							<field name="pump_list" attrs="{'invisible': [('purpose','not in',('pump'))]}"/>
 							</group>
 						</group>
+-->
 						<group string="WO Details" attrs="{'invisible': [('purpose','not in',('spare'))]}">
 							<group>
 							<field name="pump_id" attrs="{'invisible': [('purpose','not in',('spare'))]}"/>
@@ -304,6 +306,7 @@
 								<field name="bearing_make" />
 								<field name="bearing_number_nde" />
 								<field name="bearing_qty_nde" />
+								<field name="lubrication_type" />
 								<field name="primemover_categ"/>
 <!--
 								<field name="type_of_drive" on_change="onchange_type_of_drive(type_of_drive,bkw_liq)"/>

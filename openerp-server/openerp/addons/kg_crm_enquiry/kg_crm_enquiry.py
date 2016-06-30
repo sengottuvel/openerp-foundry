@@ -383,7 +383,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'differential_pressure_kg': fields.float('Differential Pressure - kg/cm2'),
 		'slurry_correction_in': fields.float('Slurry Correction in'),
 		'temperature': fields.selection([('normal','NORMAL'),('jacketting','JACKETTING'),('centre_line','CENTRE LINE')],'Temperature Condition'),
-		'suction_condition': fields.selection([('positive','Positive'),('negative','Negative'),('flooded','Flooded'),('sub_merged','Sub Merged')],'Suction Condition'),
+		'suction_condition': fields.selection([('positive','Positive'),('negative','Negative'),('flooded','Flooded'),('sub_merged','Submerged')],'Suction Condition'),
 		'discharge_pressure_kg': fields.float('Discharge Pressure - kg/cm2'),
 		'suction_pressure_kg': fields.float('Suction Pressure - kg/cm2'),
 		
@@ -433,6 +433,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'flange_type': fields.selection([('standard','Standard'),('optional','Optional')],'Flange Type',required=True),
 		'pre_suppliy_ref': fields.char('Previous Supply Reference'),
 		'market_division': fields.selection([('cp','CP'),('ip','IP')],'Market Division'),
+		'lubrication_type': fields.selection([('grease','Grease'),('oil','Oil')],'Lubrication'),
 		'flag_standard': fields.boolean('Non Standard'),
 		
 		##### Product model values ##########
@@ -583,7 +584,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 	def onchange_motor_margin(self, cr, uid, ids, motor_kw, bkw_liq,context=None):
 		value = {'motor_margin': 0}
 		total = 0.00
-		total = (((bkw_liq / motor_kw) * 100) - 100)
+		total = (100 - ((bkw_liq / motor_kw) * 100))
 		value = {'motor_margin': total}
 		return {'value': value}
 			
@@ -657,7 +658,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		value = {'impeller_type': '','impeller_number': '','impeller_dia_max': '','impeller_dia_min': '','maximum_allowable_soild': '',
 				'max_allowable_test': '','number_of_stages': '','crm_type': '','bearing_number_nde':'','bearing_qty_nde':'',
 				'pumpseries_id':'','crm_type':'','casing_design':'','sealing_water_capacity':'','size_suctionx':'','gd_sq_value':'',
-				'sealing_water_pressure':''}
+				'sealing_water_pressure':'','lubrication_type':''}
 		total = 0.00
 		if pump_id:
 			pump_rec = self.pool.get('kg.pumpmodel.master').browse(cr, uid, pump_id, context=context)
@@ -671,7 +672,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			'number_of_stages': pump_rec.number_of_stages,'crm_type': pump_rec.crm_type,'bearing_number_nde':pump_rec.bearing_no,'bearing_qty_nde':pump_rec.bearing_qty,
 			'pumpseries_id':pump_rec.series_id.id,'crm_type':pump_rec.crm_type,'casing_design':pump_rec.feet_location,
 			'sealing_water_capacity':pump_rec.sealing_water_capacity,'size_suctionx':pump_rec.pump_size,'gd_sq_value':pump_rec.gd_sq_value,
-			'sealing_water_pressure':total}
+			'sealing_water_pressure':total,'lubrication_type':pump_rec.lubrication_type}
 			
 		return {'value': value}
 		

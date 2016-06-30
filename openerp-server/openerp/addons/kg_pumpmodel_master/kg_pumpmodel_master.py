@@ -80,7 +80,7 @@ class kg_pumpmodel_master(osv.osv):
 		'suction': fields.float('Suction', required=True),
 		'discharge': fields.float('Discharge', required=True),
 		'stage_type': fields.selection([('single','Single'),('multi','Multi'),('double','Double')],'Stage Type',required=True),
-		'rotation_type': fields.selection([('clock_wise','Clock Wise'),('anti_clock_wise','Anti Clock Wise')],'Rotation',required=True),
+		'rotation_type': fields.selection([('clock_wise','Clock Wise From Drive End'),('anti_clock_wise','Anti Clock Wise From Drive End')],'Rotation',required=True),
 		'packing_type': fields.selection([('ptfe','PTFE'),('gp','GP'),('mechanical_seal','Mechanical Seal'),('dynamic_seal','Dynamic seal')],'Packing'),
 		'wear_ring_type': fields.selection([('yes','Yes'),('no','NO')],'Wear Ring',required=True),
 		'lubrication_type': fields.selection([('grease','Grease'),('oil','Oil')],'Lubrication',required=True),
@@ -156,18 +156,20 @@ class kg_pumpmodel_master(osv.osv):
 			else:
 				res = True				
 		return res	
-		
+	
 	def send_to_dms(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		res_rec=self.pool.get('res.users').browse(cr,uid,uid)		
 		rec_user = str(res_rec.login)
 		rec_pwd = str(res_rec.password)
-		rec_code = str(rec.code)		
+		rec_code = str(rec.code)
+		#~ url = 'http://iasqa1.kgisl.com/?uname='+rec_user+'&s='+rec_work_order
 		encoded_user = base64.b64encode(rec_user)
 		encoded_pwd = base64.b64encode(rec_pwd)
 		
-		url = 'http://192.168.1.7/DMS/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&pummod='+rec_code	
+		url = 'http://10.100.9.60/DMS/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&wo_no='+rec_code
 		
+		#url = 'http://192.168.1.150:81/pbxclick2call.php?exten='+exe_no+'&phone='+str(m_no)
 		return {
 					  'name'	 : 'Go to website',
 					  'res_model': 'ir.actions.act_url',
@@ -175,6 +177,7 @@ class kg_pumpmodel_master(osv.osv):
 					  'target'   : 'current',
 					  'url'	  : url
 			   }
+		
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.cancel_remark:
