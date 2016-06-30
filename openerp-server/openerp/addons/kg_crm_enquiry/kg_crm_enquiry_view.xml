@@ -342,9 +342,9 @@
 									<field name="base_plate"/>
 									<field name="base_plate_item" attrs="{'required': [('base_plate','=','yes')]}"/>				   
 									<field name="coupling_guard"/>										
-									<field name="coupling_guard_item" attrs="{'required': [('base_plate','=','yes')]}"/>										
+									<field name="coupling_guard_item" attrs="{'required': [('coupling_guard','=','yes')]}"/>										
 									<field name="fou_bolts"/>										
-									<field name="fou_bolts_item" attrs="{'required': [('base_plate','=','yes')]}"/>										
+									<field name="fou_bolts_item" attrs="{'required': [('fou_bolts','=','yes')]}"/>										
 								</tree>
 							</field>								
 						</page>
@@ -359,7 +359,7 @@
 						</group>
 						
 					<notebook>
-						<page string="MOC part details">
+						<page string="Offer Material">
 							<field name="line_ids_moc_a" context="{'flag_standard':flag_standard}">
 								<tree string="Material of Construction Details Entry Tree" editable="top" >
 									<field name="offer_id" attrs="{'readonly': [('flag_standard','=',False)]}"/>

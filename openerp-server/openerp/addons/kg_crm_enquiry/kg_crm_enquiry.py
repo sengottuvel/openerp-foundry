@@ -472,7 +472,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'mototr_output_power_lower_speed': fields.float('Motor Output Power-Lower Speed'),
 		
 		# Accesssories 
-		'acces': fields.selection([('yes','Yes'),('no','No')],'Accessories'),
+		'acces': fields.selection([('yes','Yes'),('no','No')],'Accessories',required=True),
 		'acces_type': fields.selection([('coupling','Coupling'),('coupling_guard','Coupling Guard'),('base_plate','Base Plate')],'Type'),
 		
 	}
@@ -881,7 +881,7 @@ class ch_moc_construction(osv.osv):
 		
 		'header_id':fields.many2one('ch.kg.crm.pumpmodel', 'Header Id', ondelete='cascade'),
 		'moc_id':fields.many2one('kg.moc.master', 'MOC Name',domain = "[('active','=','t'),'&',('state','not in',('raject','cancel'))]",required=True),
-		'offer_id':fields.many2one('kg.offer.materials', 'Offer Name',domain = "[('active','=','t'),'&',('state','not in',('raject','cancel'))]",required=True),
+		'offer_id':fields.many2one('kg.offer.materials', 'Material Name',domain = "[('active','=','t'),'&',('state','not in',('raject','cancel'))]",required=True),
 		#~ 'pattern_id': fields.many2one('kg.pattern.master','Pattern No', required=True,domain="[('active','=','t')]"), 		
 		#~ 'pattern_name': fields.char('Pattern Name'), 	
 		'remarks':fields.text('Remarks'),   

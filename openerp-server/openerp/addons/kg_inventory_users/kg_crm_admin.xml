@@ -352,6 +352,15 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
 		</record>
 		
+		<record id="crm_admin_ch_kg_crm_accessories" model="ir.model.access">
+			<field name="model_id" ref="kg_crm_enquiry.model_ch_kg_crm_accessories"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch Kg CRM Accessories</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
 		
     </data>
 </openerp>

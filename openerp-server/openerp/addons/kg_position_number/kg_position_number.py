@@ -186,7 +186,7 @@ class kg_position_number(osv.osv):
 					where header.position_type = 'copy' and header.id = %s''',[rec.id])
 			source_position_ids = cr.fetchall()
 			source_position_len = len(source_position_ids)
-			
+			print"dddddddllll",source_position_len
 			cr.execute('''select 
 					position_line.clamping_area,
 					position_line.operation_id,
@@ -201,7 +201,7 @@ class kg_position_number(osv.osv):
 					where position_line.header_id  = %s''',[rec.position_no.id])
 			source_old_position_ids = cr.fetchall()
 			source_old_position_len = len(source_old_position_ids)	
-			
+			print"ddddssssssss",source_old_position_len
 			cr.execute('''select 
 
 					position_line.clamping_area,
@@ -233,7 +233,7 @@ class kg_position_number(osv.osv):
 					where position_line.header_id  = %s ''',[rec.id,rec.position_no.id])
 			repeat_ids = cr.fetchall()
 			new_position_len = len(repeat_ids)
-			
+			print"ddddddddddddddd",new_position_len
 			pos_dup = ''
 			if new_position_len  == source_position_len == source_old_position_len:
 				pos_dup = 'yes'
@@ -241,8 +241,91 @@ class kg_position_number(osv.osv):
 			if pos_dup == 'yes':
 				raise osv.except_osv(_('Warning!'),
 								_('Same Operation Details are already exist !!'))
+		####################
+		if rec.position_type == 'copy':
+			
+			obj = self.search(cr,uid,[('position_no','=',rec.position_no.id)])
+			if obj:
+				for item in obj:
+					if rec.id != item:
+						obj_rec = self.browse(cr,uid,item)
+						print"aaaaaaaaaaaaaa",obj_rec.id
+						
+						cr.execute('''select 
+								position_line.clamping_area,
+								position_line.operation_id,
+								position_line.stage_id,
+								position_line.is_last_operation,
+								position_line.total_cost,
+								position_line.remark,
+								position_line.time_consumption,
+								position_line.in_house_cost,
+								position_line.sc_cost
+								from ch_kg_position_number position_line 
+								left join kg_position_number header on header.id  = position_line.header_id
+								where header.position_type = 'copy' and header.id = %s''',[rec.id])
+						source_position_ids = cr.fetchall()
+						source_position_len = len(source_position_ids)
+						print"source_position_len",source_position_len
+						cr.execute('''select 
+								position_line.clamping_area,
+								position_line.operation_id,
+								position_line.stage_id,
+								position_line.is_last_operation,
+								position_line.total_cost,
+								position_line.remark,
+								position_line.time_consumption,
+								position_line.in_house_cost,
+								position_line.sc_cost
+								from ch_kg_position_number position_line 
+								where position_line.header_id  = %s''',[obj_rec.id])
+						source_old_position_ids = cr.fetchall()
+						source_old_position_len = len(source_old_position_ids)	
+						print"source_old_position_len",source_old_position_len
+						cr.execute('''select 
+
+								position_line.clamping_area,
+								position_line.operation_id,
+								position_line.stage_id,
+								position_line.is_last_operation,
+								position_line.total_cost,
+								position_line.remark,
+								position_line.time_consumption,
+								position_line.in_house_cost,
+								position_line.sc_cost
+								from ch_kg_position_number position_line 
+								left join kg_position_number header on header.id  = position_line.header_id
+								where header.position_type = 'copy' and header.id = %s
+
+								INTERSECT
+
+								select 
+								position_line.clamping_area,
+								position_line.operation_id,
+								position_line.stage_id,
+								position_line.is_last_operation,
+								position_line.total_cost,
+								position_line.remark,
+								position_line.time_consumption,
+								position_line.in_house_cost,
+								position_line.sc_cost
+								from ch_kg_position_number position_line 
+								where position_line.header_id  = %s ''',[rec.id,obj_rec.id])
+						repeat_ids = cr.fetchall()
+						new_position_len = len(repeat_ids)
+						print"new_position_len",new_position_len
+						pos_dup = ''
+						if new_position_len == source_position_len == source_old_position_len:
+							pos_dup = 'yes'
+						print"pos_duppos_dup",pos_dup
+						if pos_dup == 'yes':
+							raise osv.except_osv(_('Warning!'),
+											_('Same Operation Details are already exist !!'))
+								
+			
 								
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		
 		return True
 		
 	def entry_draft(self,cr,uid,ids,context=None):
@@ -344,6 +427,8 @@ class kg_dimension(osv.osv):
 		'description': fields.char('Description', required=True), 		
 		'min_val': fields.float('Minimum Value'), 
 		'max_val': fields.float('Maximum Value'), 
+		'min_tolerance': fields.integer('Min Tolerance(%)'), 
+		'max_tolerance': fields.integer('Maximum Tolerance(%)'), 
 		'remark': fields.text('Remarks'),
 		
 	}
