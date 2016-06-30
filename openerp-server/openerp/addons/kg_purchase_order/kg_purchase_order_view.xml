@@ -309,14 +309,18 @@
 				<field name="total_disc" invisible="1"/>
 				<field name="tax_structure_id" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}" on_change="onchange_tax_structure(tax_structure_id)" invisible="1"/>
                 <field name="taxes_id" widget="many2many_tags" domain="[('parent_id','=',False),('type_tax_use','!=','sale')]" />
-                <field name="pi_line_id" invisible="1"/>			
+                <field name="pi_line_id" invisible="1"/>
 				</field>
 				
 				<field name="price_unit" position="replace">
 					<field name="price_unit" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}"/>
 					
 				</field>
-				
+				<field name="price_unit" position="before">
+					<field name="uom_conversation_factor" readonly="1"/>
+					<field name="length" attrs="{'invisible':[('uom_conversation_factor','=','one_dimension')],'required':[('uom_conversation_factor','=','two_dimension')]}"/>
+					<field name="breadth" attrs="{'invisible':[('uom_conversation_factor','=','one_dimension')],'required':[('uom_conversation_factor','=','two_dimension')]}"/>					
+				</field>
 				<field name="price_unit" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}" position="after">
                 <field name="cancel_qty" readonly="1"
 							attrs="{'invisible': [('cancel_qty','=',0)]}"/>				
@@ -358,15 +362,14 @@
 					</page>
 				</xpath>
 				
-				<xpath expr = "//page[@string='Notes']" position="after">
-					<page string="Order Item Details">
-						<field name="line_id"/>
-							<tree string="WO Line">
-<!--
+				<xpath expr = "//page[@string='PO History']" position="before">
+					<page string="WO Details">
+						<field name="line_id">
+							<tree string="WO Line" editable="bottom">
 						    <field name="wo_id"/>
 						    <field name="qty"/>
--->
 							</tree>
+							</field>
 					</page>
 				</xpath>
 				

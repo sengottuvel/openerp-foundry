@@ -316,7 +316,7 @@
             <field name="name">purchase.order.tree</field>
             <field name="model">purchase.order</field>
             <field name="arch" type="xml">
-                <tree fonts="bold:message_unread==True" colors="grey:state=='cancel';blue:state in ('wait','confirmed');red:state in ('except_invoice','except_picking')" string="Purchase Order">
+                <tree fonts="bold:message_unread==True" colors="grey:state in ('cancel');blue:state in ('draft');red:state in ('confirmed');black:state in ('approved')" string="Purchase Order">
                     <field name="message_unread" invisible="1"/>
                     <field name="name" string="Reference"/>
                     <field name="date_order" />

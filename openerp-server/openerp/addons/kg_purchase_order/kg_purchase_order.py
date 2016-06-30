@@ -25,6 +25,10 @@ import urllib2
 import logging
 import base64
 
+UOM_CONVERSATION = [
+    ('one_dimension','One Dimension'),('two_dimension','Two Dimension')
+]
+
 class kg_purchase_order(osv.osv):
 	
 	def _amount_line_tax(self, cr, uid, line, context=None):
@@ -35,17 +39,32 @@ class kg_purchase_order(osv.osv):
 		kg_discount_per = line.kg_discount_per
 		tot_discount_per = amt_to_per + kg_discount_per
 		qty = 0
-		if line.price_type == 'per_kg':	
-			if line.product_id.po_uom_in_kgs > 0:
-				qty = line.product_qty * line.product_id.po_uom_in_kgs
+		if line.price_type == 'per_kg':
+			if line.product_id.uom_conversation_factor == 'two_dimension':
+				if line.product_id.po_uom_in_kgs > 0:
+					qty = line.product_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
+					print"aaaaaaaaAAA",qty
+			elif line.product_id.uom_conversation_factor == 'one_dimension':
+				if line.product_id.po_uom_in_kgs > 0:
+					qty = line.product_qty * line.product_id.po_uom_in_kgs
+				else:
+					qty = line.product_qty
 			else:
 				qty = line.product_qty
+		else:
+			qty = line.product_qty
+		#~ if line.price_type == 'per_kg':	
+			#~ if line.product_id.po_uom_in_kgs > 0:
+				#~ qty = line.product_qty * line.product_id.po_uom_in_kgs
+			#~ else:
+				#~ qty = line.product_qty
 				
 		for c in self.pool.get('account.tax').compute_all(cr, uid, line.taxes_id,
 			line.price_unit * (1-(tot_discount_per or 0.0)/100.0), qty, line.product_id,
 				line.order_id.partner_id)['taxes']:
 			 
 			val += c.get('amount', 0.0)
+		
 		return val	
 	
 	#~ def _amount_line_tax(self, cr, uid, line, context=None):
@@ -482,6 +501,34 @@ class kg_purchase_order(osv.osv):
 			raise osv.except_osv(
 					_('Purchase Order Value Error !'),
 					_('System not allow to confirm a Purchase Order with Zero Value'))	
+		
+		po_lines = obj.order_line
+		cr.execute("""select piline_id from kg_poindent_po_line where po_order_id = %s"""  %(str(ids[0])))
+		data = cr.dictfetchall()
+		val = [d['piline_id'] for d in data if 'piline_id' in d] # Get a values form list of dict if the dict have with empty values
+		for i in range(len(po_lines)):
+			po_qty=po_lines[i].product_qty
+			if po_lines[i].line_id:
+				total = sum(wo.qty for wo in po_lines[i].line_id)
+				if total <= po_qty:
+					pass
+				else:
+					raise osv.except_osv(
+						_('Warning!'),
+						_('Please Check WO Qty'))
+						
+				wo_sql = """ select count(wo_id) as wo_tot,wo_id as wo_name from ch_purchase_wo where header_id = %s group by wo_id"""%(po_lines[i].id)
+				cr.execute(wo_sql)		
+				wo_data = cr.dictfetchall()
+				
+				for wo in wo_data:
+					if wo['wo_tot'] > 1:
+						raise osv.except_osv(
+						_('Warning!'),
+						_('%s This WO No. repeated'%(wo['wo_name'])))
+					else:
+						pass
+		
 		for order_line in obj.order_line:
 			product_tax_amt = self._amount_line_tax(cr, uid, order_line, context=context)
 			cr.execute("""update purchase_order_line set product_tax_amt = %s where id = %s"""%(product_tax_amt,order_line.id))
@@ -508,11 +555,35 @@ class kg_purchase_order(osv.osv):
 					subtype_alternative = 'plain')
 			res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
 		"""
+		
 		return True
 			
 	def wkf_approve_order(self, cr, uid, ids, context=None):
 		logger.info('[KG OpenERP] Class: kg_purchase_order, Method: wkf_approve_order called...')
 		obj = self.browse(cr,uid,ids[0])
+		user_obj = self.pool.get('res.users').search(cr,uid,[('id','=',uid)])
+		if user_obj:
+			user_rec = self.pool.get('res.users').browse(cr,uid,user_obj[0])
+		for item in obj.order_line:
+			price_sql = """ 
+						select line.price_unit
+						from purchase_order_line line
+						left join purchase_order po on (po.id = line.order_id)
+						where line.product_id = %s and line.order_id != %s 
+						and po.state in ('confirmed','approved')
+						order by line.price_unit desc limit 1"""%(item.product_id.id,obj.id)
+			cr.execute(price_sql)		
+			price_data = cr.dictfetchall()
+			if price_data:
+				if price_data[0]['price_unit'] < item.price_unit:
+					if user_rec.special_approval == True:
+						pass
+					else:
+						raise osv.except_osv(
+							_('Warning'),
+							_('%s price is exceeding last purchase price. It should be approved by special approver'%(item.product_id.name)))
+							
+		
 		"""Raj
 		if obj.confirmed_by.id == uid:
 			raise osv.except_osv(
@@ -561,6 +632,17 @@ class kg_purchase_order(osv.osv):
 					raise osv.except_osv(
 						_('Warning!'),
 						_('Please Check WO Qty'))
+				wo_sql = """ select count(wo_id) as wo_tot,wo_id as wo_name from ch_purchase_wo where header_id = %s group by wo_id"""%(po_lines[i].id)
+				cr.execute(wo_sql)		
+				wo_data = cr.dictfetchall()
+				
+				for wo in wo_data:
+					if wo['wo_tot'] > 1:
+						raise osv.except_osv(
+						_('Warning!'),
+						_('%s This WO No. repeated'%(wo['wo_name'])))
+					else:
+						pass
 			if obj.po_type == 'frompi':
 				if po_lines[i].pi_line_id and po_lines[i].group_flag == False:
 					pi_line_id=po_lines[i].pi_line_id
@@ -973,13 +1055,31 @@ class kg_purchase_order_line(osv.osv):
 			context = {}
 		for line in self.browse(cr, uid, ids, context=context):
 			# Qty Calculation
-			if line.price_type == 'per_kg':								
-				if line.product_id.po_uom_in_kgs > 0:
-					qty = line.product_qty * line.product_id.po_uom_in_kgs
+			print"line.product_id.uom_conversation_factor",line.product_id.uom_conversation_factor
+			qty = 0.00
+			if line.price_type == 'per_kg':
+				if line.product_id.uom_conversation_factor == 'two_dimension':
+					if line.product_id.po_uom_in_kgs > 0:
+						qty = line.product_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
+						print"aaaaaaaaAAA",qty
+				elif line.product_id.uom_conversation_factor == 'one_dimension':
+					if line.product_id.po_uom_in_kgs > 0:
+						qty = line.product_qty * line.product_id.po_uom_in_kgs
+					else:
+						qty = line.product_qty
 				else:
 					qty = line.product_qty
 			else:
+				#~ if line.product_id.uom_conversation_factor == 'two_dimension':
+					#~ if line.product_id.po_uom_in_kgs > 0.00:
+						#~ qty = line.product_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
+						#~ print"bbbbbbbbbbbbb",qty
+				#~ elif line.product_id.uom_conversation_factor == 'one_dimension':		
+					#~ qty = line.product_qty
+				#~ else:
 				qty = line.product_qty
+			print"qtyqtyqty",qty
+			
 			# Price Calculation
 			price_amt = 0
 			if line.price_type == 'per_kg':
@@ -1059,6 +1159,9 @@ class kg_purchase_order_line(osv.osv):
 	'price_type': fields.selection([('po_uom','PO UOM'),('per_kg','Per Kg')],'Price Type'),
 	'line_id': fields.one2many('ch.purchase.wo','header_id','Ch Line Id'),
 	'moc_id': fields.many2one('kg.moc.master','MOC'),
+	'uom_conversation_factor': fields.related('product_id','uom_conversation_factor', type='selection',selection=UOM_CONVERSATION, string='UOM Conversation Factor',store=True,required=True),
+	'length': fields.float('Length'),
+	'breadth': fields.float('Breadth'),
 	
 	}
 	
@@ -1115,6 +1218,31 @@ class kg_purchase_order_line(osv.osv):
 			pass
 			
 		return True
+	
+	def _check_length(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+			
+		if rec.uom_conversation_factor == 'two_dimension':
+			print"aaaaaaa"
+			if rec.length <= 0:
+				print"bbbbbbbbbbb"
+				return False					
+		return True
+		
+	def _check_breadth(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+			
+		if rec.uom_conversation_factor == 'two_dimension':
+			if rec.breadth <= 0:
+				return False					
+		return True
+		
+	_constraints = [
+		
+		(_check_length,'You can not save this Length with Zero value !',['Length']),
+		(_check_breadth,'You can not save this Breadth with Zero value !',['Breadth']),
+		
+	]
 	
 	def onchange_qty(self, cr, uid, ids,product_qty,pending_qty,pi_line_id,pi_qty):
 		logger.info('[KG OpenERP] Class: kg_purchase_order_line, Method: onchange_qty called...')
@@ -1275,11 +1403,23 @@ class ch_purchase_wo(osv.osv):
 	_columns = {
 
 	'header_id': fields.many2one('purchase.order.line', 'PO Line'),
-	'wo_id': fields.char('WO', required=True),
-	'qty': fields.float('Indent Qty', required=True),
+	'wo_id': fields.char('WO No.'),
+	'qty': fields.float('Qty'),
 	
 	}
 	
+	def _check_qty(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+			
+		if rec.qty <= 0.00:
+			return False					
+		return True
+		
+	_constraints = [
 	
+		(_check_qty,'You cannot save with zero qty !',['Qty']),
+		
+		]
+		
 ch_purchase_wo()
 

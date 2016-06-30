@@ -161,7 +161,8 @@ class purchase_order(osv.osv):
 		('except_picking', 'Shipping Exception'),
 		('except_invoice', 'Invoice Exception'),
 		('done', 'Done'),
-		('cancel', 'Cancelled')
+		('cancel', 'Cancelled'),
+		('reject', 'Rejected')
 	]
 	_track = {
 		'state': {
@@ -176,9 +177,9 @@ class purchase_order(osv.osv):
 		),
 		'partner_ref': fields.char('Supplier Reference', states={'approved':[('readonly',True)],'done':[('readonly',True)]}, size=64,
 			help="Reference of the sales order or quotation sent by your supplier. It's mainly used to do the matching when you receive the products as this reference is usually written on the delivery order sent by your supplier."),
-		'date_order':fields.date('Order Date', required=True, states={'approved':[('readonly',True)]}, select=True, help="Date on which this document has been created."),
+		'date_order':fields.date('Order Date', required=True,readonly=False, states={'approved':[('readonly',True)],'cancel':[('readonly',True)]}, select=True, help="Date on which this document has been created."),
 		'date_approve':fields.date('Date Approved', readonly=1, select=True, help="Date on which purchase order has been approved"),
-		'partner_id':fields.many2one('res.partner', 'Supplier', required=True, states={'approved':[('readonly',True)],'done':[('readonly',True)]}, domain=[('supplier','=',True)],
+		'partner_id':fields.many2one('res.partner', 'Supplier', required=True, states={'approved':[('readonly',True)],'done':[('readonly',True)],'cancel':[('readonly',True)]}, domain=[('supplier','=',True)],
 			change_default=True, track_visibility='always'),
 		'dest_address_id':fields.many2one('res.partner', 'Customer Address (Direct Delivery)',
 			states={'approved':[('readonly',True)],'done':[('readonly',True)]},
@@ -858,7 +859,7 @@ class purchase_order_line(osv.osv):
 		'date_planned': fields.date('Scheduled Date', required=True, select=True),
 		'taxes_id': fields.many2many('account.tax', 'purchase_order_taxe', 'ord_id', 'tax_id', 'Taxes'),
 		'product_uom': fields.many2one('product.uom', 'Product Unit of Measure', required=True),
-		'product_id': fields.many2one('product.product', 'Product', required=True, domain=[('purchase_ok','=',True),'|',('state','=','approved')], change_default=True),
+		'product_id': fields.many2one('product.product', 'Product', required=True, domain=[('purchase_ok','=',True),'&',('state','not in',('reject','cancel'))], change_default=True),
 		'move_ids': fields.one2many('stock.move', 'purchase_line_id', 'Reservation', readonly=True, ondelete='set null'),
 		'move_dest_id': fields.many2one('stock.move', 'Reservation Destination', ondelete='set null'),
 		'price_unit': fields.float('Unit Price', required=True, digits_compute= dp.get_precision('Product Price')),
@@ -979,8 +980,8 @@ class purchase_order_line(osv.osv):
 			uom_id = product_uom_po_id
 
 		if product.uom_id.category_id.id != product_uom.browse(cr, uid, uom_id, context=context).category_id.id:
-			if self._check_product_uom_group(cr, uid, context=context):
-				res['warning'] = {'title': _('Warning!'), 'message': _('Selected Unit of Measure does not belong to the same category as the product Unit of Measure.')}
+			#~ if self._check_product_uom_group(cr, uid, context=context):
+				#~ res['warning'] = {'title': _('Warning!'), 'message': _('Selected Unit of Measure does not belong to the same category as the product Unit of Measure.')}
 			uom_id = product_uom_po_id
 
 		res['value'].update({'product_uom': uom_id})
@@ -1039,6 +1040,7 @@ class purchase_order_line(osv.osv):
 		else:
 			recent_val = 0
 		res['value'].update({'high_price': max_val or 0,'least_price': min_val or 0,'recent_price':recent_val or 0})		
+		res['value'].update({'uom_conversation_factor': product.uom_conversation_factor})		
 		
 		taxes = account_tax.browse(cr, uid, map(lambda x: x.id, product.supplier_taxes_id))
 		fpos = fiscal_position_id and account_fiscal_position.browse(cr, uid, fiscal_position_id, context=context) or False
