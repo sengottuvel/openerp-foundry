@@ -71,6 +71,14 @@ class kg_production(osv.osv):
 			diff_qty = entry.total_core_qty - entry.total_mould_qty		
 		result[entry.id]= diff_qty
 		return result
+		
+	def _get_pour_pending_qty(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		pending_qty = 0.00
+		for entry in self.browse(cr, uid, ids, context=context):
+			pending_qty = entry.qty - entry.pour_qty		
+		result[entry.id]= pending_qty
+		return result
 	
 	_columns = {
 	
@@ -183,6 +191,8 @@ class kg_production(osv.osv):
 		'pour_heat_id':fields.many2one('kg.melting','Heat Id',domain="[('state','=','confirmed'), ('active','=','t')]"),
 		'pour_remarks': fields.text('Remarks'),
 		'pour_date': fields.datetime('Pouring Date'),
+		'pour_pending_qty': fields.function(_get_pour_pending_qty, string='Pending Qty', store=True, type='float'),
+		'fettling_reject_qty': fields.integer('Rejected Qty'),
 		
 		### Core vs Mould Qty ###
 		'difference_qty': fields.function(_get_difference_qty, string='Difference', store=True, type='float'),

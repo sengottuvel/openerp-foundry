@@ -502,9 +502,21 @@ class kg_fettling(osv.osv):
 		entry = self.browse(cr, uid, ids[0])
 		reject_qty = entry.pour_qty - entry.inward_accept_qty
 		
-		if entry.inward_accept_qty <= 0:
+		if entry.inward_accept_qty < 0 or entry.inward_reject_qty < 0:
 			raise osv.except_osv(_('Warning!'),
 						_('System not allow to save negative or zero values !!'))
+						
+		if entry.inward_accept_qty == 0 and entry.inward_reject_qty == 0:
+			raise osv.except_osv(_('Warning!'),
+						_('System not allow to save negative or zero values !!'))
+						
+		if (entry.inward_accept_qty + entry.inward_reject_qty) > entry.pour_qty:
+			raise osv.except_osv(_('Warning!'),
+						_('Accept and Reject qty should not exceed Pour Qty !!'))
+						
+		if (entry.inward_accept_qty + entry.inward_reject_qty) < entry.pour_qty:
+			raise osv.except_osv(_('Warning!'),
+						_('Accept and Reject qty should be equal to POur Qty !!'))
 						
 		if reject_qty > 0:
 			if entry.inward_reject_qty == 0:
@@ -648,8 +660,10 @@ class kg_fettling(osv.osv):
 					self.ms_inward_update(cr, uid, [entry.id],entry.inward_accept_qty)
 					
 		if entry.inward_reject_qty > 0:
-			#### NC Creation for reject Qty ###
 			
+			production_obj.write(cr, uid, entry.production_id.id, {'fettling_reject_qty': entry.production_id.fettling_reject_qty + entry.inward_reject_qty})
+			#### NC Creation for reject Qty ###
+
 			### Production Number ###
 			produc_name = ''	
 			produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
@@ -729,6 +743,14 @@ class kg_fettling(osv.osv):
 		if entry.knockout_qty <= 0 or entry.knockout_accept_qty < 0:
 			raise osv.except_osv(_('Warning!'),
 						_('System not allow to save negative or zero values !!'))
+						
+		if (entry.knockout_accept_qty + entry.knockout_reject_qty) > entry.knockout_qty:
+			raise osv.except_osv(_('Warning!'),
+						_('Completed and Rejected qty should not exceed Production Qty !!'))
+						
+		if (entry.knockout_accept_qty + entry.knockout_reject_qty) < entry.knockout_qty:
+			raise osv.except_osv(_('Warning!'),
+						_('Completed and Rejected qty should be equal to Production Qty !!'))
 						
 		if reject_qty > 0:
 			if entry.knockout_reject_qty == 0:
@@ -974,6 +996,14 @@ class kg_fettling(osv.osv):
 			raise osv.except_osv(_('Warning!'),
 						_('System not allow to save negative or zero values !!'))
 						
+		if (entry.decoring_accept_qty + entry.decoring_reject_qty) > entry.decoring_qty:
+			raise osv.except_osv(_('Warning!'),
+						_('Completed and Rejected qty should not exceed Production Qty !!'))
+						
+		if (entry.decoring_accept_qty + entry.decoring_reject_qty) < entry.decoring_qty:
+			raise osv.except_osv(_('Warning!'),
+						_('Completed and Rejected qty should be equal to Production Qty !!'))
+						
 		if reject_qty > 0:
 			if entry.decoring_reject_qty == 0:
 				raise osv.except_osv(_('Warning!'),
@@ -1217,6 +1247,14 @@ class kg_fettling(osv.osv):
 		if entry.shot_blast_qty <= 0 or entry.shot_blast_accept_qty < 0:
 			raise osv.except_osv(_('Warning!'),
 						_('System not allow to save negative or zero values !!'))
+						
+		if (entry.shot_blast_accept_qty + entry.shot_blast_reject_qty) > entry.shot_blast_qty:
+			raise osv.except_osv(_('Warning!'),
+						_('Completed and Rejected qty should not exceed Production Qty !!'))
+						
+		if (entry.shot_blast_accept_qty + entry.shot_blast_reject_qty) < entry.shot_blast_qty:
+			raise osv.except_osv(_('Warning!'),
+						_('Completed and Rejected qty should be equal to Production Qty !!'))
 						
 						
 		if reject_qty > 0:
@@ -1462,6 +1500,14 @@ class kg_fettling(osv.osv):
 			raise osv.except_osv(_('Warning!'),
 						_('System not allow to save negative or zero values !!'))
 						
+		if (entry.hammering_accept_qty + entry.hammering_reject_qty) > entry.hammering_qty:
+			raise osv.except_osv(_('Warning!'),
+						_('Completed and Rejected qty should not exceed Production Qty !!'))
+						
+		if (entry.hammering_accept_qty + entry.hammering_reject_qty) < entry.hammering_qty:
+			raise osv.except_osv(_('Warning!'),
+						_('Completed and Rejected qty should be equal to Production Qty !!'))
+						
 		if reject_qty > 0:
 			if entry.hammering_reject_qty == 0:
 				raise osv.except_osv(_('Warning!'),
@@ -1703,6 +1749,14 @@ class kg_fettling(osv.osv):
 		if entry.wheel_cutting_qty <= 0 or entry.wheel_cutting_accept_qty < 0:
 			raise osv.except_osv(_('Warning!'),
 						_('System not allow to save negative or zero values !!'))
+						
+		if (entry.wheel_cutting_accept_qty + entry.wheel_cutting_reject_qty) > entry.wheel_cutting_qty:
+			raise osv.except_osv(_('Warning!'),
+						_('Completed and Rejected qty should not exceed Production Qty !!'))
+						
+		if (entry.wheel_cutting_accept_qty + entry.wheel_cutting_reject_qty) < entry.wheel_cutting_qty:
+			raise osv.except_osv(_('Warning!'),
+						_('Completed and Rejected qty should be equal to Production Qty !!'))
 						
 		if reject_qty > 0:
 			if entry.wheel_cutting_reject_qty == 0:
@@ -1946,6 +2000,14 @@ class kg_fettling(osv.osv):
 			raise osv.except_osv(_('Warning!'),
 						_('System not allow to save negative or zero values !!'))
 						
+		if (entry.gas_cutting_accept_qty + entry.gas_cutting_reject_qty) > entry.gas_cutting_qty:
+			raise osv.except_osv(_('Warning!'),
+						_('Completed and Rejected qty should not exceed Production Qty !!'))
+						
+		if (entry.gas_cutting_accept_qty + entry.gas_cutting_reject_qty) < entry.gas_cutting_qty:
+			raise osv.except_osv(_('Warning!'),
+						_('Completed and Rejected qty should be equal to Production Qty !!'))
+						
 		if reject_qty > 0:
 			if entry.gas_cutting_reject_qty == 0:
 				raise osv.except_osv(_('Warning!'),
@@ -2188,6 +2250,14 @@ class kg_fettling(osv.osv):
 		if entry.arc_cutting_qty <= 0 or entry.arc_cutting_accept_qty < 0:
 			raise osv.except_osv(_('Warning!'),
 						_('System not allow to save negative or zero values !!'))
+						
+		if (entry.arc_cutting_accept_qty + entry.arc_cutting_reject_qty) > entry.arc_cutting_qty:
+			raise osv.except_osv(_('Warning!'),
+						_('Completed and Rejected qty should not exceed Production Qty !!'))
+						
+		if (entry.arc_cutting_accept_qty + entry.arc_cutting_reject_qty) < entry.arc_cutting_qty:
+			raise osv.except_osv(_('Warning!'),
+						_('Completed and Rejected qty should be equal to Production Qty !!'))
 						
 						
 		if reject_qty > 0:
@@ -2594,6 +2664,16 @@ class kg_fettling(osv.osv):
 		if entry.rough_grinding_qty <= 0 or entry.rough_grinding_accept_qty < 0:
 			raise osv.except_osv(_('Warning!'),
 						_('System not allow to save negative or zero values !!'))
+						
+		total_qty = entry.rough_grinding_accept_qty + entry.rough_grinding_reject_qty + entry.rough_grinding_rework_qty
+		
+		if total_qty > entry.rough_grinding_qty:
+			raise osv.except_osv(_('Warning!'),
+					_('Kindly Check the Quantities !!'))
+					
+		if total_qty < entry.rough_grinding_qty:
+			raise osv.except_osv(_('Warning!'),
+						_('Kindly Check the Quantities !'))
 		
 		if entry.rough_grinding_rework_qty == 0:		
 		
@@ -2851,6 +2931,14 @@ class kg_fettling(osv.osv):
 			raise osv.except_osv(_('Warning!'),
 						_('System not allow to save negative or zero values !!'))
 						
+		if (entry.welding_accept_qty + entry.welding_reject_qty) > entry.welding_qty:
+			raise osv.except_osv(_('Warning!'),
+						_('Completed and Rejected qty should not exceed Production Qty !!'))
+						
+		if (entry.welding_accept_qty + entry.welding_reject_qty) < entry.welding_qty:
+			raise osv.except_osv(_('Warning!'),
+						_('Completed and Rejected qty should be equal to Production Qty !!'))
+						
 		if reject_qty > 0:
 			if entry.welding_reject_qty == 0:
 				raise osv.except_osv(_('Warning!'),
@@ -3012,6 +3100,14 @@ class kg_fettling(osv.osv):
 		if entry.finish_grinding_qty <= 0 or entry.finish_grinding_accept_qty < 0:
 			raise osv.except_osv(_('Warning!'),
 						_('System not allow to save negative or zero values !!'))
+						
+		if (entry.finish_grinding_accept_qty + entry.finish_grinding_reject_qty) > entry.finish_grinding_qty:
+			raise osv.except_osv(_('Warning!'),
+						_('Completed and Rejected qty should not exceed Production Qty !!'))
+						
+		if (entry.finish_grinding_accept_qty + entry.finish_grinding_reject_qty) < entry.finish_grinding_qty:
+			raise osv.except_osv(_('Warning!'),
+						_('Completed and Rejected qty should be equal to Production Qty !!'))
 						
 		if reject_qty > 0:
 			if entry.finish_grinding_reject_qty == 0:
@@ -3272,6 +3368,14 @@ class kg_fettling(osv.osv):
 		if entry.reshot_blasting_qty <= 0 or entry.reshot_blasting_accept_qty < 0:
 			raise osv.except_osv(_('Warning!'),
 						_('System not allow to save negative or zero values !!'))
+						
+		if (entry.reshot_blasting_accept_qty + entry.reshot_blasting_reject_qty) > entry.reshot_blasting_qty:
+			raise osv.except_osv(_('Warning!'),
+						_('Completed and Rejected qty should not exceed Production Qty !!'))
+						
+		if (entry.reshot_blasting_accept_qty + entry.reshot_blasting_reject_qty) < entry.reshot_blasting_qty:
+			raise osv.except_osv(_('Warning!'),
+						_('Completed and Rejected qty should be equal to Production Qty !!'))
 						
 		if reject_qty > 0:
 			if entry.reshot_blasting_reject_qty == 0:
