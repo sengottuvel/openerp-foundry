@@ -270,10 +270,13 @@
 				attrs="{'readonly': [('line_flag', '=', True)]}" position="after">
 				<field name="brand_id"/>
 				<field name="moc_id"/>
+				<field name="uom_conversation_factor" readonly="1" invisible="1"/>
+				<field name="length" attrs="{'invisible':[('uom_conversation_factor','!=','two_dimension')],'required':[('uom_conversation_factor','=','two_dimension')]}"/>
+				<field name="breadth" attrs="{'invisible':[('uom_conversation_factor','!=','two_dimension')],'required':[('uom_conversation_factor','=','two_dimension')]}"/>
 			</field>
 			
 			<field name="product_qty" position="replace">
-			<field name="product_qty" required="True" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}" on_change="onchange_qty(product_qty,pending_qty,pi_line_id,pi_qty)"/>
+			<field name="product_qty" required="True" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}" on_change="onchange_qty(product_qty,pending_qty,pi_line_id,pi_qty,uom_conversation_factor,length,breadth)"/>
 <!--
 			<field name="product_qty" required="True" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}"/>
 -->
@@ -316,11 +319,13 @@
 					<field name="price_unit" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}"/>
 					
 				</field>
-				<field name="price_unit" position="before">
-					<field name="uom_conversation_factor" readonly="1"/>
+<!--
+				<field name="product_qty" position="before">
+					<field name="uom_conversation_factor" readonly="1" invisible="1"/>
 					<field name="length" attrs="{'invisible':[('uom_conversation_factor','=','one_dimension')],'required':[('uom_conversation_factor','=','two_dimension')]}"/>
-					<field name="breadth" attrs="{'invisible':[('uom_conversation_factor','=','one_dimension')],'required':[('uom_conversation_factor','=','two_dimension')]}"/>					
+					<field name="breadth" attrs="{'invisible':[('uom_conversation_factor','=','one_dimension')],'required':[('uom_conversation_factor','=','two_dimension')]}"/>
 				</field>
+-->
 				<field name="price_unit" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}" position="after">
                 <field name="cancel_qty" readonly="1"
 							attrs="{'invisible': [('cancel_qty','=',0)]}"/>				

@@ -1244,7 +1244,7 @@ class kg_purchase_order_line(osv.osv):
 		
 	]
 	
-	def onchange_qty(self, cr, uid, ids,product_qty,pending_qty,pi_line_id,pi_qty):
+	def onchange_qty(self, cr, uid, ids,product_qty,pending_qty,pi_line_id,pi_qty,uom_conversation_factor,length,breadth):
 		logger.info('[KG OpenERP] Class: kg_purchase_order_line, Method: onchange_qty called...')
 		#if pi_line_id == False:
 			#raise osv.except_osv(_('PO From PI Only!'),_("You must select a PO lines From PI !") )
@@ -1257,7 +1257,12 @@ class kg_purchase_order_line(osv.osv):
 				value = {'pending_qty': product_qty}
 		else:
 			value = {'pending_qty': product_qty}
-		
+		if uom_conversation_factor == 'two_dimension':
+			if length <= 0:
+				raise osv.except_osv(_(' Warning !!'),_("You can not save this Length with Zero value !") )
+			if breadth <= 0:
+				raise osv.except_osv(_(' Warning !!'),_("You can not save this Breadth with Zero value !") )
+			
 		return {'value': value}
 		
 	def pol_cancel(self, cr, uid, ids, context=None):
