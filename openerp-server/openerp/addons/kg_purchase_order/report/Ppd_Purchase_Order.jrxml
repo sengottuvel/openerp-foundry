@@ -13,7 +13,12 @@ prod.name_template as product,
 trim(TO_CHAR((line.product_qty)::float, '999G999G99G999G99G99G990D99')) as product_qty,
 uom.name as uom,
 trim(TO_CHAR((line.price_unit)::float, '999G999G99G999G99G99G990D99')) as price,
-trim(TO_CHAR((line.price_unit*line.product_qty)::float, '999G999G99G999G99G99G990D99')) as amount,
+trim(TO_CHAR((line.price_unit*line.product_qty)::float, '999G999G99G999G99G99G990D99')) as amt,
+case when line.price_type = 'po_uom' then
+trim(TO_CHAR((line.price_unit*line.product_qty)::float, '999G999G99G999G99G99G990D99'))
+else
+trim(TO_CHAR((line.price_unit*line.product_qty*prod.po_uom_in_kgs)::float, '999G999G99G999G99G99G990D99'))
+end as amount,
 case when line.moc_id is null then ''
 else
 '['||moc.name||']' end as moc_name,
