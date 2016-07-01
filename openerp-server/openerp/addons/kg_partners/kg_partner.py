@@ -203,7 +203,10 @@ class kg_partner(osv.osv):
 	
 	def _check_zip(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])
-		if len(str(rec.zip)) in (6,7,8) and rec.zip.isdigit() == True:
+		if rec.zip:
+			if len(str(rec.zip)) in (6,7,8) and rec.zip.isdigit() == True:
+				return True
+		else:
 			return True
 		return False
 		
