@@ -232,7 +232,8 @@ class kg_production(osv.osv):
 		'issue_date':time.strftime('%Y-%m-%d %H:%M:%S'),
 		'core_date':time.strftime('%Y-%m-%d %H:%M:%S'),
 		'mould_date':time.strftime('%Y-%m-%d %H:%M:%S'),
-		'difference_qty': 0
+		'difference_qty': 0,
+		'pour_qty': 0
 		
 	}
 	
