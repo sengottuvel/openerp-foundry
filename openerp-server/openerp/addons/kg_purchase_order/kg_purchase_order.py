@@ -582,6 +582,17 @@ class kg_purchase_order(osv.osv):
 						raise osv.except_osv(
 							_('Warning'),
 							_('%s price is exceeding last purchase price. It should be approved by special approver'%(item.product_id.name)))
+			#########
+			prod_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',item.product_id.id)])
+			if prod_obj:
+				prod_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,prod_obj[0])
+				for ele in prod_rec.line_ids:
+					if item.brand_id.id == ele.brand_id.id and item.moc_id.id == ele.moc_id.id:
+						if ele.rate < item.price_unit:
+							raise osv.except_osv(
+							_('Warning'),
+							_('%s price is exceeding design price. It should be approved by special approver'%(item.product_id.name)))
+							
 							
 		
 		"""Raj

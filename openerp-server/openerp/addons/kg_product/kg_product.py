@@ -63,7 +63,7 @@ class kg_product(osv.osv):
 		'length': fields.float('Length'),
 		'thickness': fields.float('Thickness'),
 		'weight': fields.float('Weight'),
-		'po_uom_in_kgs': fields.float('PO UOM in kgs'),
+		'po_uom_in_kgs': fields.float('PO UOM in kgs',digits=(16,10)),
 		'uom_conversation_factor': fields.selection(UOM_CONVERSATION,'UOM Conversation Factor',required=True),
 		'coupling_type': fields.selection([('rss','RSS'),('sw','SW')],'Coupling Type'),
 		'service_factor': fields.float('Service Factor'),
