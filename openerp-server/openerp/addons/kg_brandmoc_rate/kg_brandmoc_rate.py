@@ -160,7 +160,6 @@ class kg_brandmoc_rate(osv.osv):
 kg_brandmoc_rate()
 
 
-
 class ch_brandmoc_rate_details(osv.osv):
 	
 	_name = "ch.brandmoc.rate.details"
@@ -175,18 +174,33 @@ class ch_brandmoc_rate_details(osv.osv):
 		'purchase_price':fields.float('Purchase Price(Rs)',readonly=True),
 		'remarks':fields.text('Remarks'),		
 	}
-	"""
+	
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.rate <= 0.00 or entry.purchase_price <= 0.00:
+		if entry.rate <= 0.00:
 			return False
-		return True
-		
+		return True	
+	
+	
+	def _check_brand_moc(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])		
+		cr.execute("""select id,brand_id,moc_id from ch_brandmoc_rate_details where header_id = %s"""%(entry.header_id.id))
+		line_data = cr.dictfetchall()
+		for line in line_data :			
+			for sub_line in line_data:				
+				if line['id'] == sub_line['id']:					
+					pass
+				else:
+					if ((line['brand_id'] == sub_line['brand_id']) and (line['moc_id'] == sub_line['moc_id'])):						
+						return False
+		return True	
+			
+			
 	_constraints = [		
 			  
-		(_check_values, 'System not allow to save negative and zero values..!!',['Rate','purchase_price']),	
+		(_check_brand_moc, 'System not allow to same Brand and MOC..!!',['Brand MOC Details']),	
+		(_check_values, 'System not allow to save negative and zero values..!!',['Design Rate']),
 		
 	   ]
-		
-	"""
+	   
 ch_brandmoc_rate_details()
