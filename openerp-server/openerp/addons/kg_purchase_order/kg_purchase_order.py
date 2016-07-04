@@ -1132,7 +1132,7 @@ class kg_purchase_order_line(osv.osv):
 	
 	_columns = {
 
-	'price_subtotal': fields.function(_amount_line, string='Subtotal', digits_compute= dp.get_precision('Account')),
+	'price_subtotal': fields.function(_amount_line, store=True,string='Subtotal', digits_compute= dp.get_precision('Account')),
 	'kg_discount': fields.float('Discount Amount'),
 	'kg_disc_amt_per': fields.float('Disc Amt(%)', digits_compute= dp.get_precision('Discount')),
 	'price_unit': fields.float('Unit Price', required=True, digits_compute= dp.get_precision('Product Price')),

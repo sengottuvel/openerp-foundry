@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.1000000000000072"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="367"/>
+	<property name="ireport.y" value="0"/>
 	<subDataset name="PO List">
 		<parameter name="po_id" class="java.lang.Integer"/>
 		<queryString>
@@ -13,12 +13,12 @@ prod.name_template as product,
 trim(TO_CHAR((line.product_qty)::float, '999G999G99G999G99G99G990D99')) as product_qty,
 uom.name as uom,
 trim(TO_CHAR((line.price_unit)::float, '999G999G99G999G99G99G990D99')) as price,
-trim(TO_CHAR((line.price_unit*line.product_qty)::float, '999G999G99G999G99G99G990D99')) as amt,
+trim(TO_CHAR((line.price_subtotal)::float, '999G999G99G999G99G99G990D99')) as amount,
 case when line.price_type = 'po_uom' then
 trim(TO_CHAR((line.price_unit*line.product_qty)::float, '999G999G99G999G99G99G990D99'))
 else
 trim(TO_CHAR((line.price_unit*line.product_qty*prod.po_uom_in_kgs)::float, '999G999G99G999G99G99G990D99'))
-end as amount,
+end as amt,
 case when line.moc_id is null then ''
 else
 '['||moc.name||']' end as moc_name,
@@ -46,6 +46,7 @@ group by 1,3,4,5,6,7,8,9,10,11]]>
 		<field name="uom" class="java.lang.String"/>
 		<field name="price" class="java.lang.String"/>
 		<field name="amount" class="java.lang.String"/>
+		<field name="amt" class="java.lang.String"/>
 		<field name="moc_name" class="java.lang.String"/>
 		<field name="brand_name" class="java.lang.String"/>
 		<field name="delivery_mode" class="java.lang.String"/>
@@ -152,8 +153,8 @@ where po.id = $P{po_id}]]>
 							<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 						</datasetRun>
 						<jr:listContents height="20" width="801">
-							<textField>
-								<reportElement x="0" y="0" width="39" height="20"/>
+							<textField isStretchWithOverflow="true">
+								<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="39" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="2">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -161,8 +162,8 @@ where po.id = $P{po_id}]]>
 								<textElement textAlignment="Center"/>
 								<textFieldExpression><![CDATA[$F{seq_no}]]></textFieldExpression>
 							</textField>
-							<textField>
-								<reportElement x="38" y="0" width="330" height="20"/>
+							<textField isStretchWithOverflow="true">
+								<reportElement stretchType="RelativeToTallestObject" x="38" y="0" width="330" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="2">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -170,8 +171,8 @@ where po.id = $P{po_id}]]>
 								<textElement/>
 								<textFieldExpression><![CDATA[" "+$F{product}+" "+$F{brand_name}+" "+$F{moc_name}]]></textFieldExpression>
 							</textField>
-							<textField>
-								<reportElement x="368" y="0" width="60" height="20"/>
+							<textField isStretchWithOverflow="true">
+								<reportElement stretchType="RelativeToTallestObject" x="368" y="0" width="60" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="2">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -179,8 +180,8 @@ where po.id = $P{po_id}]]>
 								<textElement textAlignment="Right"/>
 								<textFieldExpression><![CDATA[$F{product_qty}+" "]]></textFieldExpression>
 							</textField>
-							<textField>
-								<reportElement x="428" y="0" width="60" height="20"/>
+							<textField isStretchWithOverflow="true">
+								<reportElement stretchType="RelativeToTallestObject" x="428" y="0" width="60" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="2">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -188,8 +189,8 @@ where po.id = $P{po_id}]]>
 								<textElement textAlignment="Center"/>
 								<textFieldExpression><![CDATA[$F{uom}+" "]]></textFieldExpression>
 							</textField>
-							<textField>
-								<reportElement x="488" y="0" width="64" height="20"/>
+							<textField isStretchWithOverflow="true">
+								<reportElement stretchType="RelativeToTallestObject" x="488" y="0" width="64" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="2">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -197,8 +198,8 @@ where po.id = $P{po_id}]]>
 								<textElement textAlignment="Right"/>
 								<textFieldExpression><![CDATA[$F{price}+" "]]></textFieldExpression>
 							</textField>
-							<textField>
-								<reportElement x="552" y="0" width="72" height="20"/>
+							<textField isStretchWithOverflow="true">
+								<reportElement stretchType="RelativeToTallestObject" x="552" y="0" width="72" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="2">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -207,7 +208,7 @@ where po.id = $P{po_id}]]>
 								<textFieldExpression><![CDATA[$F{amount}+" "]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement x="624" y="0" width="113" height="20"/>
+								<reportElement stretchType="RelativeToTallestObject" x="624" y="0" width="113" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="2">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
