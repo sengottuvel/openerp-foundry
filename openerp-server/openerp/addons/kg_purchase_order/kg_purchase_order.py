@@ -701,8 +701,8 @@ class kg_purchase_order(osv.osv):
 				for item in bmr_rec.line_ids:
 					if item.brand_id.id == po_lines[i].brand_id.id and item.moc_id.id == po_lines[i].moc_id.id:
 						self.pool.get('ch.brandmoc.rate.details').write(cr,uid,item.id,{'purchase_price' : po_lines[i].price_unit})
-					elif item.brand_id.id == po_lines[i].brand_id.id or item.moc_id.id == po_lines[i].moc_id.id:
-						self.pool.get('ch.brandmoc.rate.details').write(cr,uid,item.id,{'purchase_price' : po_lines[i].price_unit})
+					#~ elif item.brand_id.id == po_lines[i].brand_id.id or item.moc_id.id == po_lines[i].moc_id.id:
+						#~ self.pool.get('ch.brandmoc.rate.details').write(cr,uid,item.id,{'purchase_price' : po_lines[i].price_unit})
 					else:
 						pass
 						
