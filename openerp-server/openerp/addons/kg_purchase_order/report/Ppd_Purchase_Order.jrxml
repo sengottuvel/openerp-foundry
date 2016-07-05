@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.1000000000000072"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.y" value="288"/>
 	<subDataset name="PO List">
 		<parameter name="po_id" class="java.lang.Integer"/>
 		<queryString>
@@ -25,6 +25,12 @@ else
 case when line.brand_id is null then ''
 else
 '['||brand.name||']' end as brand_name,
+case when line.length is null or line.length = 0.00 then ''
+else
+'['||trim(TO_CHAR((line.length)::float, '999G999G99G999G99G99G990D9999'))||']' end as length,
+case when line.breadth is null or line.breadth = 0.00 then ''
+else
+'['||trim(TO_CHAR((line.breadth)::float, '999G999G99G999G99G99G990D9999'))||']' end as breadth,
 del.name as delivery_mode,
 STRING_AGG(wo.wo_id, ', ' ORDER BY wo.wo_id) wo_no
 from
@@ -37,7 +43,7 @@ left join ch_purchase_wo wo on(wo.header_id=line.id)
 left join purchase_order po on(po.id=line.order_id)
 left join kg_delivery_master del on(del.id=po.delivery_mode)
 where line.order_id = $P{po_id}
-group by 1,3,4,5,6,7,8,9,10,11]]>
+group by 1,3,4,5,6,7,8,9,10,11,12,13]]>
 		</queryString>
 		<field name="line_id" class="java.lang.Integer"/>
 		<field name="seq_no" class="java.lang.Long"/>
@@ -49,6 +55,8 @@ group by 1,3,4,5,6,7,8,9,10,11]]>
 		<field name="amt" class="java.lang.String"/>
 		<field name="moc_name" class="java.lang.String"/>
 		<field name="brand_name" class="java.lang.String"/>
+		<field name="length" class="java.lang.String"/>
+		<field name="breadth" class="java.lang.String"/>
 		<field name="delivery_mode" class="java.lang.String"/>
 		<field name="wo_no" class="java.lang.String"/>
 	</subDataset>
@@ -169,7 +177,7 @@ where po.id = $P{po_id}]]>
 									<bottomPen lineWidth="0.5"/>
 								</box>
 								<textElement/>
-								<textFieldExpression><![CDATA[" "+$F{product}+" "+$F{brand_name}+" "+$F{moc_name}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[" "+$F{product}+" "+$F{length}+" "+$F{breadth}+" "+$F{brand_name}+" "+$F{moc_name}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true">
 								<reportElement stretchType="RelativeToTallestObject" x="368" y="0" width="60" height="20" isPrintWhenDetailOverflows="true"/>
