@@ -462,7 +462,7 @@ where po.id = $P{po_id}]]>
 				<reportElement x="1" y="3" width="64" height="71"/>
 				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
 			</image>
-		</band>
+		</band> 
 	</title>
 	<columnHeader>
 		<band height="16" splitType="Stretch">
