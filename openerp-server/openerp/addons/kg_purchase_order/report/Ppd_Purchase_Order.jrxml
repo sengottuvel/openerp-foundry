@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.1000000000000072"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="288"/>
+	<property name="ireport.y" value="1"/>
 	<subDataset name="PO List">
 		<parameter name="po_id" class="java.lang.Integer"/>
 		<queryString>
@@ -27,10 +27,26 @@ else
 '['||brand.name||']' end as brand_name,
 case when line.length is null or line.length = 0.00 then ''
 else
-'['||trim(TO_CHAR((line.length)::float, '999G999G99G999G99G99G990D9999'))||']' end as length,
+'['||trim(TO_CHAR((line.length)::float, '999G999G99G999G99G99G990D9999'))||']' end as lenth,
 case when line.breadth is null or line.breadth = 0.00 then ''
 else
-'['||trim(TO_CHAR((line.breadth)::float, '999G999G99G999G99G99G990D9999'))||']' end as breadth,
+'['||trim(TO_CHAR((line.breadth)::float, '999G999G99G999G99G99G990D9999'))||']' end as brdth,
+case when line.length is null or line.length = 0.00 then ''
+else(
+'['||case when (SUBSTRING(line.length::text FROM (select position('.' in line.length::text)+1))::numeric) >0 then (line.length::text) else
+(SUBSTRING(line.length::text,1,(select position('.' in line.length::text::text)-1)))||']'
+ end)  end as length,
+case when line.breadth is null or line.breadth = 0.00 then ''
+else(
+'['||case when (SUBSTRING(line.breadth::text FROM (select position('.' in line.breadth::text)+1))::numeric) >0 then (line.breadth::text) else
+(SUBSTRING(line.breadth::text,1,(select position('.' in line.breadth::text::text)-1)))||']'
+ end)  end as breadth,
+case when line.price_type = 'per_kg' then '['||case when (SUBSTRING(line.quantity::text FROM (select position('.' in line.quantity::text)+1))::numeric) >0 then (line.quantity::text) else
+(SUBSTRING(line.quantity::text,1,(select position('.' in line.quantity::text::text)-1)))||']'
+ end||']'
+else
+' ' end as weight,
+
 del.name as delivery_mode,
 STRING_AGG(wo.wo_id, ', ' ORDER BY wo.wo_id) wo_no
 from
@@ -43,7 +59,7 @@ left join ch_purchase_wo wo on(wo.header_id=line.id)
 left join purchase_order po on(po.id=line.order_id)
 left join kg_delivery_master del on(del.id=po.delivery_mode)
 where line.order_id = $P{po_id}
-group by 1,3,4,5,6,7,8,9,10,11,12,13]]>
+group by 1,3,4,5,6,7,8,9,10,11,12,13,14,15,16]]>
 		</queryString>
 		<field name="line_id" class="java.lang.Integer"/>
 		<field name="seq_no" class="java.lang.Long"/>
@@ -55,8 +71,11 @@ group by 1,3,4,5,6,7,8,9,10,11,12,13]]>
 		<field name="amt" class="java.lang.String"/>
 		<field name="moc_name" class="java.lang.String"/>
 		<field name="brand_name" class="java.lang.String"/>
+		<field name="lenth" class="java.lang.String"/>
+		<field name="brdth" class="java.lang.String"/>
 		<field name="length" class="java.lang.String"/>
 		<field name="breadth" class="java.lang.String"/>
+		<field name="weight" class="java.lang.String"/>
 		<field name="delivery_mode" class="java.lang.String"/>
 		<field name="wo_no" class="java.lang.String"/>
 	</subDataset>
@@ -177,7 +196,7 @@ where po.id = $P{po_id}]]>
 									<bottomPen lineWidth="0.5"/>
 								</box>
 								<textElement/>
-								<textFieldExpression><![CDATA[" "+$F{product}+" "+$F{length}+" "+$F{breadth}+" "+$F{brand_name}+" "+$F{moc_name}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[" "+$F{product}+" "+$F{length}+" "+$F{breadth}+" "+$F{brand_name}+" "+$F{moc_name}+" "+$F{weight}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true">
 								<reportElement stretchType="RelativeToTallestObject" x="368" y="0" width="60" height="20" isPrintWhenDetailOverflows="true"/>
@@ -248,7 +267,7 @@ where po.id = $P{po_id}]]>
 				<reportElement x="1" y="0" width="800" height="539">
 					<printWhenExpression><![CDATA[(new Boolean(($F{status}.equals("draft"))) || new Boolean(($F{status}.equals("confirmed"))))]]></printWhenExpression>
 				</reportElement>
-				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images/Draft.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/home/opensource/SVN_Projeccts/SAM/openerp-server/openerp/addons/kg_purchase_order/images/Draft.jpg"]]></imageExpression>
 			</image>
 			<frame>
 				<reportElement x="0" y="0" width="801" height="539"/>
@@ -411,7 +430,7 @@ where po.id = $P{po_id}]]>
 				<box>
 					<rightPen lineWidth="0.5"/>
 				</box>
-				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/TUV_NORD.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/home/opensource/SVN_Projeccts/SAM/openerp-server/openerp/addons/web/static/src/img/TUV_NORD.jpg"]]></imageExpression>
 			</image>
 			<textField>
 				<reportElement x="338" y="20" width="53" height="13"/>
@@ -441,7 +460,7 @@ where po.id = $P{po_id}]]>
 			</textField>
 			<image>
 				<reportElement x="1" y="3" width="64" height="71"/>
-				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/home/opensource/SVN_Projeccts/SAM/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
 			</image>
 		</band>
 	</title>
