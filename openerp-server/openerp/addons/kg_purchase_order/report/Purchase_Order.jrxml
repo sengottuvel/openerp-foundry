@@ -13,7 +13,11 @@ prod.name_template as product,
 trim(TO_CHAR((line.product_qty)::float, '999G999G99G999G99G99G990D99')) as product_qty,
 uom.name as uom,
 trim(TO_CHAR((line.price_unit)::float, '999G999G99G999G99G99G990D99')) as price,
-trim(TO_CHAR((line.price_subtotal)::float, '999G999G99G999G99G99G990D99')) as amount,
+case when line.product_tax_amt is not null then
+trim(TO_CHAR((line.price_subtotal-line.product_tax_amt)::float, '999G999G99G999G99G99G990D99')) 
+else
+trim(TO_CHAR((line.price_subtotal)::float, '999G999G99G999G99G99G990D99')) 
+end as amount,
 case when line.price_type = 'po_uom' then
 trim(TO_CHAR((line.price_unit*line.product_qty)::float, '999G999G99G999G99G99G990D99'))
 else
