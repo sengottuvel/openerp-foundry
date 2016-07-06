@@ -34,16 +34,19 @@ else
 case when line.length is null or line.length = 0.00 then ''
 else(
 '['||case when (SUBSTRING(line.length::text FROM (select position('.' in line.length::text)+1))::numeric) >0 then (line.length::text) else
-(SUBSTRING(line.length::text,1,(select position('.' in line.length::text::text)-1)))||']'
- end)  end as length,
+(SUBSTRING(line.length::text,1,(select position('.' in line.length::text::text)-1)))
+ end) ||']' end as length,
 case when line.breadth is null or line.breadth = 0.00 then ''
 else(
 '['||case when (SUBSTRING(line.breadth::text FROM (select position('.' in line.breadth::text)+1))::numeric) >0 then (line.breadth::text) else
-(SUBSTRING(line.breadth::text,1,(select position('.' in line.breadth::text::text)-1)))||']'
- end)  end as breadth,
-case when line.price_type = 'per_kg' then '['||case when (SUBSTRING(line.quantity::text FROM (select position('.' in line.quantity::text)+1))::numeric) >0 then (line.quantity::text) else
+(SUBSTRING(line.breadth::text,1,(select position('.' in line.breadth::text::text)-1)))
+ end) ||']' end as breadth,
+case when line.price_type = 'per_kg' and line.quantity is not null then '['||case when (SUBSTRING(line.quantity::text FROM (select position('.' in line.quantity::text)+1))::numeric) >0 then (line.quantity::text) else 
 (SUBSTRING(line.quantity::text,1,(select position('.' in line.quantity::text::text)-1)))||']'
- end||']'
+ end||']' 
+when 
+line.price_type = 'per_kg' and line.quantity is null then 
+' '
 else
 ' ' end as weight,
 
