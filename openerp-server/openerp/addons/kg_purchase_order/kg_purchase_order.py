@@ -427,6 +427,47 @@ class kg_purchase_order(osv.osv):
 		back_list = []
 		obj = self.browse(cr,uid,ids[0])
 		
+		user_obj = self.pool.get('res.users').search(cr,uid,[('id','=',uid)])
+		if user_obj:
+			user_rec = self.pool.get('res.users').browse(cr,uid,user_obj[0])
+		for item in obj.order_line:
+			price_sql = """ 
+						select line.price_unit
+						from purchase_order_line line
+						left join purchase_order po on (po.id = line.order_id)
+						where line.product_id = %s and line.order_id != %s 
+						and po.state in ('approved')
+						order by line.price_unit desc limit 1"""%(item.product_id.id,obj.id)
+			cr.execute(price_sql)		
+			price_data = cr.dictfetchall()
+			if price_data:
+				if price_data[0]['price_unit'] < item.price_unit:
+					self.write(cr,uid,ids,{'approval_flag':True})
+			
+			#########
+			prod_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',item.product_id.id)])
+			if prod_obj:
+				prod_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,prod_obj[0])
+				for ele in prod_rec.line_ids:
+					if item.brand_id.id == ele.brand_id.id and item.moc_id.id == ele.moc_id.id:
+						if ele.rate < item.price_unit:
+							self.write(cr,uid,ids,{'approval_flag':True})
+							
+			if item.price_type == 'per_kg':
+				if item.product_id.uom_conversation_factor == 'two_dimension':
+					if item.product_id.po_uom_in_kgs > 0:
+						qty = item.product_qty * item.product_id.po_uom_in_kgs * item.length * item.breadth
+				elif item.product_id.uom_conversation_factor == 'one_dimension':
+					if item.product_id.po_uom_in_kgs > 0:
+						qty = item.product_qty * item.product_id.po_uom_in_kgs
+					else:
+						qty = item.product_qty
+				else:
+					qty = item.product_qty
+			else:
+				qty = item.product_qty
+			
+			self.pool.get('purchase.order.line').write(cr,uid,item.id,{'quantity':qty})	
 		date_order = obj.date_order
 		date_order1 = datetime.strptime(date_order, '%Y-%m-%d')
 		date_order1 = datetime.date(date_order1)
@@ -530,7 +571,7 @@ class kg_purchase_order(osv.osv):
 						pass
 		
 		for order_line in obj.order_line:
-			product_tax_amt = self._amount_line_tax(cr, uid, order_line, context=context)
+			product_tax_amt = self._amount_line_tax(cr, uid, order_line, context=context)			
 			cr.execute("""update purchase_order_line set product_tax_amt = %s where id = %s"""%(product_tax_amt,order_line.id))
 		self.write(cr, uid, ids, {'state': 'confirmed',
 								  'confirm_flag':'True',
@@ -570,7 +611,7 @@ class kg_purchase_order(osv.osv):
 						from purchase_order_line line
 						left join purchase_order po on (po.id = line.order_id)
 						where line.product_id = %s and line.order_id != %s 
-						and po.state in ('confirmed','approved')
+						and po.state in ('approved')
 						order by line.price_unit desc limit 1"""%(item.product_id.id,obj.id)
 			cr.execute(price_sql)		
 			price_data = cr.dictfetchall()
@@ -592,8 +633,21 @@ class kg_purchase_order(osv.osv):
 							raise osv.except_osv(
 							_('Warning'),
 							_('%s price is exceeding design price. It should be approved by special approver'%(item.product_id.name)))
-							
-							
+			
+			if item.price_type == 'per_kg':
+				if item.product_id.uom_conversation_factor == 'two_dimension':
+					if item.product_id.po_uom_in_kgs > 0:
+						qty = item.product_qty * item.product_id.po_uom_in_kgs * item.length * item.breadth
+				elif item.product_id.uom_conversation_factor == 'one_dimension':
+					if item.product_id.po_uom_in_kgs > 0:
+						qty = item.product_qty * item.product_id.po_uom_in_kgs
+					else:
+						qty = item.product_qty
+				else:
+					qty = item.product_qty
+			else:
+				qty = item.product_qty
+			self.pool.get('purchase.order.line').write(cr,uid,item.id,{'quantity':qty})	
 		
 		"""Raj
 		if obj.confirmed_by.id == uid:
@@ -1171,8 +1225,9 @@ class kg_purchase_order_line(osv.osv):
 	'line_id': fields.one2many('ch.purchase.wo','header_id','Ch Line Id'),
 	'moc_id': fields.many2one('kg.moc.master','MOC'),
 	'uom_conversation_factor': fields.related('product_id','uom_conversation_factor', type='selection',selection=UOM_CONVERSATION, string='UOM Conversation Factor',store=True,required=True),
-	'length': fields.float('Length'),
-	'breadth': fields.float('Breadth'),
+	'length': fields.float('Length',digits=(16,4)),
+	'breadth': fields.float('Breadth',digits=(16,4)),
+	'quantity': fields.float('Weight(KGs)'),
 	
 	}
 	
@@ -1255,25 +1310,60 @@ class kg_purchase_order_line(osv.osv):
 		
 	]
 	
-	def onchange_qty(self, cr, uid, ids,product_qty,pending_qty,pi_line_id,pi_qty,uom_conversation_factor,length,breadth):
+	def onchange_qty(self, cr, uid, ids,product_qty,pending_qty,pi_line_id,pi_qty,uom_conversation_factor,length,breadth,price_type,product_id):
 		logger.info('[KG OpenERP] Class: kg_purchase_order_line, Method: onchange_qty called...')
 		#if pi_line_id == False:
 			#raise osv.except_osv(_('PO From PI Only!'),_("You must select a PO lines From PI !") )
 		# Need to do block flow
-		value = {'pending_qty': ''}
+		value = {'pending_qty': '','quantity': 0}
+		quantity = 0
+		if price_type == 'per_kg':
+			prod_rec = self.pool.get('product.product').browse(cr,uid,product_id)
+			if uom_conversation_factor == 'two_dimension':
+				if prod_rec.po_uom_in_kgs > 0:
+					quantity = product_qty * prod_rec.po_uom_in_kgs * length * breadth
+			elif uom_conversation_factor == 'one_dimension':
+				if prod_rec.po_uom_in_kgs > 0:
+					quantity = product_qty * prod_rec.po_uom_in_kgs
+				else:
+					quantity = product_qty
+			else:
+				quantity = product_qty
+		else:
+			quantity = product_qty
 		if pi_line_id:
 			if product_qty and product_qty > pi_qty:
 				raise osv.except_osv(_(' If PO From PI !!'),_("PO Qty can not be greater than Indent Qty !") )
 			else:
-				value = {'pending_qty': product_qty}
+				value = {'pending_qty': product_qty,'quantity': quantity}
 		else:
-			value = {'pending_qty': product_qty}
+			value = {'pending_qty': product_qty,'quantity': quantity}
 		if uom_conversation_factor == 'two_dimension':
 			if length <= 0:
 				raise osv.except_osv(_(' Warning !!'),_("You can not save this Length with Zero value !") )
 			if breadth <= 0:
 				raise osv.except_osv(_(' Warning !!'),_("You can not save this Breadth with Zero value !") )
 			
+		return {'value': value}
+		
+	def onchange_price_type(self, cr, uid, ids,product_qty,uom_conversation_factor,length,breadth,price_type,product_id):
+		value = {'quantity': 0}
+		quantity = 0
+		if price_type == 'per_kg':
+			prod_rec = self.pool.get('product.product').browse(cr,uid,product_id)
+			if uom_conversation_factor == 'two_dimension':
+				if prod_rec.po_uom_in_kgs > 0:
+					quantity = product_qty * prod_rec.po_uom_in_kgs * length * breadth
+			elif uom_conversation_factor == 'one_dimension':
+				if prod_rec.po_uom_in_kgs > 0:
+					quantity = product_qty * prod_rec.po_uom_in_kgs
+				else:
+					quantity = product_qty
+			else:
+				quantity = product_qty
+		else:
+			quantity = product_qty
+		value = {'quantity': quantity}
 		return {'value': value}
 		
 	def pol_cancel(self, cr, uid, ids, context=None):

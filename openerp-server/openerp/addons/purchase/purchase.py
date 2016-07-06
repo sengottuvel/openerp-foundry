@@ -229,6 +229,8 @@ class purchase_order(osv.osv):
 		'create_uid':  fields.many2one('res.users', 'Responsible'),
 		'company_id': fields.many2one('res.company','Company',required=True,select=1, states={'approved':[('readonly',True)]}),
 		'journal_id': fields.many2one('account.journal', 'Journal'),
+		'approval_flag': fields.boolean('Approval Flag'),
+		
 	}
 	_defaults = {
 		'date_order': fields.date.context_today,
@@ -240,6 +242,8 @@ class purchase_order(osv.osv):
 		'pricelist_id': lambda self, cr, uid, context: context.get('partner_id', False) and self.pool.get('res.partner').browse(cr, uid, context['partner_id']).property_product_pricelist_purchase.id,
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'purchase.order', context=c),
 		'journal_id': _get_journal,
+		'approval_flag': False,
+		
 	}
 	#_sql_constraints = [
 		#('name_uniq', 'unique(name, company_id)', 'Order Reference must be unique per Company!'),

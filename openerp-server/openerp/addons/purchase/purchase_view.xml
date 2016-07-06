@@ -194,6 +194,7 @@
                             <field domain="[('type','=','purchase')]" name="pricelist_id" groups="product.group_purchase_pricelist" on_change="onchange_pricelist(pricelist_id, context)"/>
                             <field name="currency_id" invisible='1'/>
                             <field name="journal_id" invisible='1'/>
+                            <field name="approval_flag" invisible='1'/>
                         </group>
                         <group>
                             
@@ -327,6 +328,7 @@
                     <field name="amount_untaxed" sum="Total Untaxed amount" string="Untaxed"/>
                     <field name="amount_total" sum="Total amount"/>
                     <field name="state"/>
+                    <field name="approval_flag" invisible="1"/>
                 </tree>
             </field>
         </record>
@@ -336,7 +338,29 @@
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">purchase.order</field>
             <field name="context">{}</field>
-            <field name="domain">[('state','=','draft')]</field>
+            <field name="domain">[('state','=','draft'),('approval_flag','=',False)]</field>
+            <field name="view_mode">tree,form,graph,calendar</field>
+            <field name="search_view_id" ref="view_purchase_order_filter"/>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Click to create a request for quotation.
+              </p><p>
+                The quotation contains the history of the discussion/negociation
+                you had with your supplier. Once confirmed, a request for
+                quotation is converted into a purchase order.
+              </p><p>
+                Most propositions of purchase orders are created automatically
+                by OpenERP based on inventory needs.
+              </p>
+            </field>
+        </record>
+        
+        <record id="purchase_rfq_spl_approval" model="ir.actions.act_window">
+            <field name="name">Special Approval</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">purchase.order</field>
+            <field name="context">{}</field>
+            <field name="domain">[('state','=','confirmed'),('approval_flag','=',True)]</field>
             <field name="view_mode">tree,form,graph,calendar</field>
             <field name="search_view_id" ref="view_purchase_order_filter"/>
             <field name="help" type="html">
@@ -362,7 +386,7 @@
             <field name="res_model">purchase.order</field>
             <field name="view_mode">tree,form,graph,calendar</field>
             <field name="context">{}</field>
-            <field name="domain">[('state','!=','draft')]</field>
+            <field name="domain">[('state','!=','draft'),('approval_flag','=',False)]</field>
             <field name="search_view_id" ref="view_purchase_order_filter"/>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">

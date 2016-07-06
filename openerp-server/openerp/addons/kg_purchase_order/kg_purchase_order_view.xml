@@ -271,12 +271,12 @@
 				<field name="brand_id"/>
 				<field name="moc_id"/>
 				<field name="uom_conversation_factor" readonly="1" invisible="1"/>
-				<field name="length" attrs="{'invisible':[('uom_conversation_factor','!=','two_dimension')],'required':[('uom_conversation_factor','=','two_dimension')]}"/>
-				<field name="breadth" attrs="{'invisible':[('uom_conversation_factor','!=','two_dimension')],'required':[('uom_conversation_factor','=','two_dimension')]}"/>
+				<field name="length" on_change="onchange_price_type(product_qty,uom_conversation_factor,length,breadth,price_type,product_id)" attrs="{'invisible':[('uom_conversation_factor','!=','two_dimension')],'required':[('uom_conversation_factor','=','two_dimension')]}"/>
+				<field name="breadth" on_change="onchange_price_type(product_qty,uom_conversation_factor,length,breadth,price_type,product_id)" attrs="{'invisible':[('uom_conversation_factor','!=','two_dimension')],'required':[('uom_conversation_factor','=','two_dimension')]}"/>
 			</field>
 			
 			<field name="product_qty" position="replace">
-			<field name="product_qty" required="True" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}" on_change="onchange_qty(product_qty,pending_qty,pi_line_id,pi_qty,uom_conversation_factor,length,breadth)"/>
+			<field name="product_qty" required="True" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}" on_change="onchange_qty(product_qty,pending_qty,pi_line_id,pi_qty,uom_conversation_factor,length,breadth,price_type,product_id)"/>
 <!--
 			<field name="product_qty" required="True" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}"/>
 -->
@@ -294,7 +294,7 @@
 			</field>
 			
 			<field name="date_planned" position="replace">
-			<field name = "date_planned" attrs="{'readonly': [('cancel_flag','=', True)]}" invisible="1"/>
+			<field name="date_planned" attrs="{'readonly': [('cancel_flag','=', True)]}" invisible="1"/>
 			<field name="line_state" invisible="1"/>
 			<field name="line_bill" invisible="1"/>
 			<field name="line_flag" invisible="1"/>		
@@ -331,7 +331,8 @@
 							attrs="{'invisible': [('cancel_qty','=',0)]}"/>				
 				<field name="received_qty" readonly="1"
 						attrs="{'invisible': [('received_qty','=',0)]}" />
-				<field name = "price_type"  required="1"/>
+				<field name = "quantity" readonly="1"/>
+				<field name = "price_type" on_change="onchange_price_type(product_qty,uom_conversation_factor,length,breadth,price_type,product_id)" required="1"/>
 				<field name = "cancel_flag" invisible="1"/>
 				<!--<field name="cancel_remark" attrs="{'readonly': [('cancel_flag','=', False)]}"/>-->
 		
