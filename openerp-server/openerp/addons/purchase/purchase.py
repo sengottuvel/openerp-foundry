@@ -280,6 +280,11 @@ class purchase_order(osv.osv):
 		return super(purchase_order, self).unlink(cr, uid, unlink_ids, context=context)
 
 	def button_dummy(self, cr, uid, ids, context=None):
+		obj = self.browse(cr,uid,ids[0])
+		self.write(cr,uid,obj.id,{'term_warranty':'sssss'})
+		for item in obj.order_line:
+			sol = self.pool.get('purchase.order.line').write(cr,uid,item.id,{'product_qty':item.product_qty})
+			
 		return True
 
 	def onchange_pricelist(self, cr, uid, ids, pricelist_id, context=None):

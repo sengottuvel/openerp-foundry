@@ -43,7 +43,6 @@ class kg_purchase_order(osv.osv):
 			if line.product_id.uom_conversation_factor == 'two_dimension':
 				if line.product_id.po_uom_in_kgs > 0:
 					qty = line.product_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
-					print"aaaaaaaaAAA",qty
 			elif line.product_id.uom_conversation_factor == 'one_dimension':
 				if line.product_id.po_uom_in_kgs > 0:
 					qty = line.product_qty * line.product_id.po_uom_in_kgs
@@ -53,6 +52,7 @@ class kg_purchase_order(osv.osv):
 				qty = line.product_qty
 		else:
 			qty = line.product_qty
+			
 		#~ if line.price_type == 'per_kg':	
 			#~ if line.product_id.po_uom_in_kgs > 0:
 				#~ qty = line.product_qty * line.product_id.po_uom_in_kgs
@@ -64,7 +64,6 @@ class kg_purchase_order(osv.osv):
 				line.order_id.partner_id)['taxes']:
 			 
 			val += c.get('amount', 0.0)
-		
 		return val	
 	
 	#~ def _amount_line_tax(self, cr, uid, line, context=None):
@@ -116,14 +115,13 @@ class kg_purchase_order(osv.osv):
 			for line in order.order_line:
 				tot_discount = line.kg_discount + line.kg_discount_per_value
 				val1 += line.price_subtotal
+				
 				#for c in self.pool.get('account.tax').compute_all(cr, uid, line.taxes_id, line.price_unit, line.product_qty, line.product_id, order.partner_id)['taxes']:
 				val += self._amount_line_tax(cr, uid, line, context=context)
 				val3 += tot_discount
-
 			res[order.id]['other_charge']= other_charges_amt or 0
 			res[order.id]['amount_tax']=(round(val,0))
 			res[order.id]['amount_untaxed']=(round(val1,0)) - (round(val,0)) + (round(val3,0))
-			
 			res[order.id]['discount']=(round(val3,0))
 			res[order.id]['amount_total']=res[order.id]['amount_untaxed'] - res[order.id]['discount'] + res[order.id]['amount_tax'] + res[order.id]['other_charge']
 			
@@ -300,17 +298,17 @@ class kg_purchase_order(osv.osv):
 		val['email_cc'] = email_cc
 		return val
 	
-	def create(self, cr, uid, vals,context=None):
-		"""inv_seq = vals['kg_seq_id']
-		next_seq_num = self.pool.get('ir.sequence').kg_get_id(cr, uid, inv_seq,'id',{'noupdate':False})
-		print "next_seq_num...........................", next_seq_num
-		vals.update({
-						'name':next_seq_num,
-						
-						})"""
-		
-		order =  super(kg_purchase_order, self).create(cr, uid, vals, context=context)
-		return order
+	#~ def create(self, cr, uid, vals,context=None):
+		#~ """inv_seq = vals['kg_seq_id']
+		#~ next_seq_num = self.pool.get('ir.sequence').kg_get_id(cr, uid, inv_seq,'id',{'noupdate':False})
+		#~ print "next_seq_num...........................", next_seq_num
+		#~ vals.update({
+						#~ 'name':next_seq_num,
+						#~ 
+						#~ })"""
+		#~ 
+		#~ order =  super(kg_purchase_order, self).create(cr, uid, vals, context=context)
+		#~ return order
 	
 	
 	def onchange_seq_id(self, cr, uid, ids, kg_seq_id,name):
@@ -1162,6 +1160,7 @@ class kg_purchase_order_line(osv.osv):
 			taxes = tax_obj.compute_all(cr, uid, line.taxes_id, price, qty, line.product_id, line.order_id.partner_id)
 			cur = line.order_id.pricelist_id.currency_id
 			res[line.id] = cur_obj.round(cr, uid, cur, taxes['total_included'])
+			print"rerereressssssssss",res
 		return res
 		
 	#~ def _amount_line(self, cr, uid, ids, prop, arg, context=None):
