@@ -20,6 +20,10 @@ from dateutil import relativedelta
 import calendar
 today = datetime.now()
 
+UOM_CONVERSATION = [
+    ('one_dimension','One Dimension'),('two_dimension','Two Dimension')
+]
+
 class kg_po_grn(osv.osv):
 
 	def _amount_line_tax(self, cr, uid, line, context=None):
@@ -104,8 +108,8 @@ class kg_po_grn(osv.osv):
 		'po_id':fields.many2one('purchase.order', 'PO NO',
 					domain="[('state','=','approved'), '&', ('order_line.pending_qty','>','0'), '&', ('grn_flag','=',False), '&', ('partner_id','=',supplier_id), '&', ('order_line.line_state','!=','cancel')]"), 
 		'po_ids':fields.many2many('purchase.order', 'multiple_po', 'grn_id', 'po_id', 'PO Nos',
-					domain="[('state','=','approved'), '&', ('order_line.pending_qty','>','0'), '&', ('grn_flag','=',False), '&', \
-							 ('partner_id','=',supplier_id), '&', ('order_line.line_state','!=','cancel')]",readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}), 
+					domain="[('state','=','approved'), '&', ('order_line.pending_qty','>','0'), '&', ('grn_flag','=',False), '&', ('partner_id','=',supplier_id), '&', ('order_line.line_state','!=','cancel')]",
+					readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}), 
 		'po_name': fields.char('PO NO',readonly=True),
 		'order_no': fields.char('Order NO',readonly=True),
 		'order_date': fields.char('Order Date',readonly=True),
@@ -202,7 +206,7 @@ class kg_po_grn(osv.osv):
 	_defaults = {
 		
 		'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
-		'grn_date': fields.date.context_today,
+		'grn_date': lambda * a: time.strftime('%Y-%m-%d'),
 		'created_by': lambda obj, cr, uid, context: uid,
 		'state':'item_load',
 		'type':'in',
@@ -294,29 +298,29 @@ class kg_po_grn(osv.osv):
 			back_list.append(backk_date)
 		holiday_obj = self.pool.get('kg.holiday.master.line')
 		holiday_ids = holiday_obj.search(cr, uid, [('leave_date','in',back_list)])
-		if grn_date > today_date:
-			raise osv.except_osv(
-					_('Warning'),
-					_('GRN Date should be less than or equal to current date!'))
-		if holiday_ids:
-			hol_bk_date = date.today() - timedelta(days=(3+len(holiday_ids)))
-			hol_back_date = hol_bk_date.strftime('%Y-%m-%d')
-			if grn_date < hol_back_date:
-				raise osv.except_osv(
-					_('Warning'),
-					_('GRN Entry is not allowed for this date!'))
-		elif (x for x in back_list if calendar.day_name[x.weekday()]  == 'Sunday'):	  
-			hol_bk_date = date.today() - timedelta(days=4)
-			hol_back_date = hol_bk_date.strftime('%Y-%m-%d')
-			if grn_date < hol_back_date:
-				raise osv.except_osv(
-					_('Warning'),
-					_('GRN Entry is not allowed for this date!'))
-		else:
-			if grn_date <= back_date:
-				raise osv.except_osv(
-					_('Warning'),
-					_('GRN Entry is not allowed for this date!'))
+		#~ if grn_date > today_date:
+			#~ raise osv.except_osv(
+					#~ _('Warning'),
+					#~ _('GRN Date should be less than or equal to current date!'))
+		#~ if holiday_ids:
+			#~ hol_bk_date = date.today() - timedelta(days=(3+len(holiday_ids)))
+			#~ hol_back_date = hol_bk_date.strftime('%Y-%m-%d')
+			#~ if grn_date < hol_back_date:
+				#~ raise osv.except_osv(
+					#~ _('Warning'),
+					#~ _('GRN Entry is not allowed for this date!'))
+		#~ elif (x for x in back_list if calendar.day_name[x.weekday()]  == 'Sunday'):	  
+			#~ hol_bk_date = date.today() - timedelta(days=4)
+			#~ hol_back_date = hol_bk_date.strftime('%Y-%m-%d')
+			#~ if grn_date < hol_back_date:
+				#~ raise osv.except_osv(
+					#~ _('Warning'),
+					#~ _('GRN Entry is not allowed for this date!'))
+		#~ else:
+			#~ if grn_date <= back_date:
+				#~ raise osv.except_osv(
+					#~ _('Warning'),
+					#~ _('GRN Entry is not allowed for this date!'))
 		return True
 	
 	# Onchange PO Date #
@@ -494,6 +498,9 @@ class kg_po_grn(osv.osv):
 							'order_no': order_line.order_id.name,
 							'order_date': order_line.order_id.date_order,
 							'price_type': order_line.price_type,
+							'uom_conversation_factor': order_line.uom_conversation_factor,
+							'length': order_line.length,
+							'breadth': order_line.breadth,
 						})
 					else:
 						print "NO Qty or Cancel"
@@ -683,25 +690,25 @@ class kg_po_grn(osv.osv):
 					_('Warning'),
 					_('GRN Date should be less than or equal to current date!'))
 						
-		if holiday_ids:
-			hol_bk_date = date.today() - timedelta(days=(3+len(holiday_ids)))
-			hol_back_date = hol_bk_date.strftime('%Y-%m-%d')
-			if grn_date < hol_back_date:
-				raise osv.except_osv(
-					_('Warning'),
-					_('GRN Entry is not allowed for this date!'))
-		elif (x for x in back_list if calendar.day_name[x.weekday()]  == 'Sunday'):   
-			hol_bk_date = date.today() - timedelta(days=4)
-			hol_back_date = hol_bk_date.strftime('%Y-%m-%d')
-			if grn_date < hol_back_date:
-				raise osv.except_osv(
-					_('Warning'),
-					_('GRN Entry is not allowed for this date!'))
-		else:
-			if grn_date < back_date:
-				raise osv.except_osv(
-					_('Warning'),
-					_('GRN Entry is not allowed for this date!'))
+		#~ if holiday_ids:
+			#~ hol_bk_date = date.today() - timedelta(days=(3+len(holiday_ids)))
+			#~ hol_back_date = hol_bk_date.strftime('%Y-%m-%d')
+			#~ if grn_date < hol_back_date:
+				#~ raise osv.except_osv(
+					#~ _('Warning'),
+					#~ _('GRN Entry is not allowed for this date!'))
+		#~ elif (x for x in back_list if calendar.day_name[x.weekday()]  == 'Sunday'):   
+			#~ hol_bk_date = date.today() - timedelta(days=4)
+			#~ hol_back_date = hol_bk_date.strftime('%Y-%m-%d')
+			#~ if grn_date < hol_back_date:
+				#~ raise osv.except_osv(
+					#~ _('Warning'),
+					#~ _('GRN Entry is not allowed for this date!'))
+		#~ else:
+			#~ if grn_date < back_date:
+				#~ raise osv.except_osv(
+					#~ _('Warning'),
+					#~ _('GRN Entry is not allowed for this date!'))
 		if grn_entry.name == '':
 			seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.po.grn')])
 			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
@@ -731,6 +738,9 @@ class kg_po_grn(osv.osv):
 							product_qty= 0
 							#s=po_line_id.pending_qty+po_line_id.pending_qty/100*line.product_id.tolerance_plus
 							product_qty=po_line_id.product_qty+po_line_id.product_qty/100*line.product_id.tolerance_plus
+							print"line.po_grn_qty",line.po_grn_qty
+							print"product_qty",product_qty
+							
 							if line.po_grn_qty <= product_qty:
 								po_rec = self.pool.get('po.grn.line').search(cr,uid,[('po_line_id','=',line.po_line_id.id),('po_grn_id','!=',line.id)])
 								po_grn_qty= 0
@@ -744,8 +754,8 @@ class kg_po_grn(osv.osv):
 									pass
 								else:
 									raise osv.except_osv(_('Warning!'), _('GRN Qty should not be greater than PO Qty for %s !!' %(line.product_id.name)))
-							else:
-								raise osv.except_osv(_('Warning!'), _('GRN Qty should not be greater than PO Qty for %s !!' %(line.product_id.name)))
+							#~ else:
+								#~ raise osv.except_osv(_('Warning!'), _('GRN Qty should not be greater than PO Qty for %s !!' %(line.product_id.name)))
 						else:
 							pass
 						
@@ -913,6 +923,7 @@ class kg_po_grn(osv.osv):
 						rec_qty = line.po_line_id.received_qty
 						pending_qty = line.po_line_id.pending_qty
 						if line.po_line_id:
+							print"dddddddddddddddddddddddd"
 							po_line_id = line.po_line_id
 							grn_qty = line.po_grn_qty
 							po_line_qty = line.po_qty
@@ -921,21 +932,15 @@ class kg_po_grn(osv.osv):
 							product_qty= 0
 							#s=po_line_id.pending_qty+po_line_id.pending_qty/100*line.product_id.tolerance_plus
 							product_qty=po_line_id.product_qty+po_line_id.product_qty/100*line.product_id.tolerance_plus
-							print"product_qty",product_qty
 							if line.po_grn_qty <= product_qty:
-								print"aaaaaaaaAA",line.po_line_id
 								po_rec = self.pool.get('po.grn.line').search(cr,uid,[('po_line_id','=',line.po_line_id.id),('po_grn_id','!=',line.id)])
-								print"po_recpo_recpo_rec",po_rec
 								po_grn_qty= 0
 								if po_rec:
 									for ele in po_rec:
 										po_recc = self.pool.get('po.grn.line').browse(cr,uid,ele)
-										print"po_reccpo_recc",po_recc.po_grn_qty
 										po_grn_qty += po_recc.po_grn_qty
-								print"po_grn_qty",po_grn_qty+line.po_grn_qty
 								d = 0
 								d = product_qty - po_grn_qty
-								print"dddddddD",d
 								if line.po_grn_qty <= d:
 									if po_line_pending_qty < 0:
 										po_line_pending_qty = 0
@@ -949,8 +954,8 @@ class kg_po_grn(osv.osv):
 								else:
 									raise osv.except_osv(_('Warning!'), _('GRN Qty should not be greater than PO Qty for %s !!' %(line.product_id.name)))
 									
-							else:
-								raise osv.except_osv(_('Warning!'), _('GRN Qty should not be greater than PO Qty for %s !!' %(line.product_id.name)))
+							#~ else:
+								#~ raise osv.except_osv(_('Warning!'), _('GRN Qty should not be greater than PO Qty for %s !!' %(line.product_id.name)))
 						else:
 							pass
 					#	raise osv.except_osv(_('Warning!'), _('GRN Qty should not be greater than PO Qty for %s !!' %(line.product_id.name)))
@@ -963,11 +968,28 @@ class kg_po_grn(osv.osv):
 					grn_qty = line.po_grn_qty
 					po_line_qty = line.po_qty
 					po_line_pending_qty = pending_qty - grn_qty
-					rec_qty += line.po_grn_qty
+					#~ rec_qty += line.po_grn_qty
 					
+					rec_qty= 0
 					product_qty= 0
-					#s=po_line_id.pending_qty+po_line_id.pending_qty/100*line.product_id.tolerance_plus
-					product_qty=po_line_id.product_qty+po_line_id.product_qty/100*line.product_id.tolerance_plus
+					#~ if po_line_id.product_id.toleranceapplicable == True:
+						#~ product_qty=po_line_id.product_qty+po_line_id.product_qty/100*line.product_id.tolerance_plus
+					#~ else:
+						#~ product_qty = po_line_id.product_qty
+					if po_line_id.price_type == 'per_kg':
+						if po_line_id.product_id.uom_conversation_factor == 'two_dimension':
+							if po_line_id.product_id.po_uom_in_kgs > 0:
+								product_qty = po_line_id.pending_qty * po_line_id.product_id.po_uom_in_kgs * po_line_id.length * po_line_id.breadth
+						elif po_line_id.product_id.uom_conversation_factor == 'one_dimension':
+							if po_line_id.product_id.po_uom_in_kgs > 0:
+								product_qty = po_line_id.product_qty * po_line_id.product_id.po_uom_in_kgs
+							else:
+								product_qty = po_line_id.product_qty
+						else:
+							product_qty = po_line_id.product_qty
+					else:
+						product_qty = po_line_id.product_qty
+					print"product_qtyproduct_qty",product_qty
 					if line.po_grn_qty <= product_qty:
 						po_rec = self.pool.get('po.grn.line').search(cr,uid,[('po_line_id','=',line.po_line_id.id)])
 						po_grn_qty= 0
@@ -975,13 +997,32 @@ class kg_po_grn(osv.osv):
 							for ele in po_rec:
 								po_recc = self.pool.get('po.grn.line').browse(cr,uid,ele)
 								po_grn_qty += po_recc.po_grn_qty
-						d = 0
-						d = product_qty - po_grn_qty
+						if line.price_type == 'per_kg':
+							if line.product_id.uom_conversation_factor == 'two_dimension':
+								rec_qty =(po_grn_qty / (float(line.length) * float(line.breadth) * float(line.product_id.po_uom_in_kgs)))
+							elif line.product_id.uom_conversation_factor == 'one_dimension':
+								if line.product_id.po_uom_in_kgs > 0:
+									rec_qty = po_grn_qty
+								else:
+									rec_qty = po_grn_qty
+						else:
+							rec_qty = po_grn_qty
+						print"rec_qtyrec_qtyrec_qty",rec_qty
+							
 						if line.po_grn_qty <= product_qty:
-							if po_line_pending_qty < 0:
-								po_line_pending_qty = 0
+							po_line_pending_qty = product_qty - line.po_grn_qty
+							if po_line_id.price_type == 'per_kg':
+								if po_line_id.product_id.uom_conversation_factor == 'two_dimension':
+									po_line_pending_qty = po_line_id.pending_qty - (line.po_grn_qty / (float(line.length) * float(line.breadth) * float(line.product_id.po_uom_coff)))
+								elif po_line_id.product_id.uom_conversation_factor == 'one_dimension':
+									if po_line_id.product_id.po_uom_in_kgs > 0:
+										po_line_pending_qty = product_qty - line_id.po_grn_qty 
+									else:
+										po_line_pending_qty = product_qty - line_id.po_grn_qty 
 							else:
-								po_line_pending_qty = po_line_pending_qty
+								po_line_pending_qty = product_qty - line_id.po_grn_qty 
+							
+							print"po_line_pending_qtypo_line_pending_qty",po_line_pending_qty
 							po_line_obj.write(cr, uid, [line.po_line_id.id],
 									{
 									'pending_qty' : po_line_pending_qty,
@@ -989,8 +1030,8 @@ class kg_po_grn(osv.osv):
 									})
 						else:
 							raise osv.except_osv(_('Warning!'), _('GRN Qty should not be greater than PO Qty for %s !!' %(line.product_id.name)))
-					else:
-						raise osv.except_osv(_('Warning!'), _('GRN Qty should not be greater than PO Qty for %s !!' %(line.product_id.name)))
+					#~ else:
+						#~ raise osv.except_osv(_('Warning!'), _('GRN Qty should not be greater than PO Qty for %s !!' %(line.product_id.name)))
 			
 			if grn_entry.grn_type == 'from_so':
 				so_id = grn_entry.so_id.id
@@ -1039,20 +1080,34 @@ class kg_po_grn(osv.osv):
 			# UOM Checking #
 			if grn_entry.grn_type == 'from_po':
 				if line.billing_type == 'cost':
+					#~ if line.uom_id.id != line.product_id.uom_id.id:
+						#~ product_uom = line.product_id.uom_id.id
+						#~ po_coeff = line.product_id.po_uom_coeff
+						#~ product_qty = line.po_grn_qty * po_coeff
+						#~ price_unit =  line.po_line_id.price_subtotal / product_qty
+					#~ elif line.uom_id.id == line.product_id.uom_id.id:
+						#~ product_uom = line.product_id.uom_id.id
+						#~ product_qty = line.po_grn_qty
+						#~ price_unit = line.po_line_id.price_subtotal / product_qty
 					if line.uom_id.id != line.product_id.uom_id.id:
 						product_uom = line.product_id.uom_id.id
 						po_coeff = line.product_id.po_uom_coeff
-						product_qty = line.po_grn_qty * po_coeff
+						product_qty = line.po_grn_qty 
 						price_unit =  line.po_line_id.price_subtotal / product_qty
 					elif line.uom_id.id == line.product_id.uom_id.id:
 						product_uom = line.product_id.uom_id.id
 						product_qty = line.po_grn_qty
 						price_unit = line.po_line_id.price_subtotal / product_qty
+						
 				if line.billing_type == 'free':
+					#~ if line.uom_id.id != line.product_id.uom_id.id:
+						#~ product_uom = line.product_id.uom_id.id
+						#~ po_coeff = line.product_id.po_uom_coeff
+						#~ product_qty = line.po_grn_qty * po_coeff
+						#~ price_unit =  line.price_subtotal / product_qty
 					if line.uom_id.id != line.product_id.uom_id.id:
 						product_uom = line.product_id.uom_id.id
 						po_coeff = line.product_id.po_uom_coeff
-						product_qty = line.po_grn_qty * po_coeff
 						price_unit =  line.price_subtotal / product_qty
 					elif line.uom_id.id == line.product_id.uom_id.id:
 						product_uom = line.product_id.uom_id.id
@@ -1703,13 +1758,36 @@ class po_grn_line(osv.osv):
 			context = {}
 		for line in self.browse(cr, uid, ids, context=context):
 			# Qty Calculation
-			if line.price_type == 'per_kg':								
-				if line.product_id.po_uom_in_kgs > 0:
-					qty = line.po_grn_qty * line.product_id.po_uom_in_kgs
+			#~ if line.price_type == 'per_kg':								
+				#~ if line.product_id.po_uom_in_kgs > 0:
+					#~ qty = line.po_grn_qty * line.product_id.po_uom_in_kgs
+				#~ else:
+					#~ qty = line.po_grn_qty
+			#~ else:
+				#~ qty = line.po_grn_qty
+			qty = 0.00
+			if line.price_type == 'per_kg':
+				if line.product_id.uom_conversation_factor == 'two_dimension':
+					if line.product_id.po_uom_in_kgs > 0:
+						qty = line.po_grn_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
+						print"aaaaaaaaAAA",qty
+				elif line.product_id.uom_conversation_factor == 'one_dimension':
+					if line.product_id.po_uom_in_kgs > 0:
+						qty = line.po_grn_qty * line.product_id.po_uom_in_kgs
+					else:
+						qty = line.po_grn_qty
 				else:
 					qty = line.po_grn_qty
 			else:
+				#~ if line.product_id.uom_conversation_factor == 'two_dimension':
+					#~ if line.product_id.po_uom_in_kgs > 0.00:
+						#~ qty = line.product_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
+						#~ print"bbbbbbbbbbbbb",qty
+				#~ elif line.product_id.uom_conversation_factor == 'one_dimension':		
+					#~ qty = line.product_qty
+				#~ else:
 				qty = line.po_grn_qty
+			print"qtyqtyqty",qty
 			# Price Calculation
 			price_amt = 0
 			if line.price_type == 'per_kg':
@@ -1717,6 +1795,7 @@ class po_grn_line(osv.osv):
 					price_amt = line.po_grn_qty / line.product_id.po_uom_in_kgs * line.price_unit
 			else:
 				price_amt = qty * line.price_unit
+			print"price_amtprice_amt",price_amt
 			
 			amt_to_per = (line.kg_discount / (qty * line.price_unit or 1.0 )) * 100
 			kg_discount_per = line.kg_discount_per
@@ -1774,7 +1853,10 @@ class po_grn_line(osv.osv):
 		'order_date': fields.char('Order Date',readonly=True),
 		'product_tax_amt':fields.float('Tax Amount'),  
 		'price_type': fields.selection([('po_uom','PO UOM'),('per_kg','Per Kg')],'Price Type'),
-		
+		'uom_conversation_factor': fields.related('product_id','uom_conversation_factor', type='selection',selection=UOM_CONVERSATION, string='UOM Conversation Factor',store=True),
+		'length': fields.float('Length'),
+		'breadth': fields.float('Breadth'),
+	
 	}
 	
 	def onchange_product_id(self, cr, uid, ids, product_id, uom_id,context=None):
