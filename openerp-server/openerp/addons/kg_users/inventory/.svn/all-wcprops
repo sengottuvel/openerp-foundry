@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/sam_turbo_dev/!svn/ver/730/openerp-server/openerp/addons/kg_users/inventory
+END
+kg_inventory_masters_admin.xml
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/sam_turbo_dev/!svn/ver/856/openerp-server/openerp/addons/kg_users/inventory/kg_inventory_masters_admin.xml
+END
+kg_inventory_transactions.xml
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svn/sam_turbo_dev/!svn/ver/825/openerp-server/openerp/addons/kg_users/inventory/kg_inventory_transactions.xml
+END
+kg_inventory_masters.xml
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/sam_turbo_dev/!svn/ver/786/openerp-server/openerp/addons/kg_users/inventory/kg_inventory_masters.xml
+END

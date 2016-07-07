@@ -1,0 +1,28 @@
+<?xml version="1.0" ?>
+<openerp>
+	<data noupdate="0">       	
+		
+		<record id="t_vendor_quote_user_access_rights" model="ir.model.access">
+			<field name="model_id" ref="kg_quotation.model_kg_quotation_requisition_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Vendor Quote Users</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Vendor Quote')]"/>
+		</record>
+		
+		<record id="t_vendor_pi_quote_user_access_rights" model="ir.model.access">
+			<field name="model_id" ref="kg_quotation.model_kg_quote_pi_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">PI Quote Users</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Vendor Quote')]"/>
+		</record>		
+		
+		
+	</data>
+</openerp>
+	
