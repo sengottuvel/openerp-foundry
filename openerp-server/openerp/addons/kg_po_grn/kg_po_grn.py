@@ -1020,7 +1020,7 @@ class kg_po_grn(osv.osv):
 									else:
 										po_line_pending_qty = product_qty - line_id.po_grn_qty 
 							else:
-								po_line_pending_qty = product_qty - line_id.po_grn_qty 
+								po_line_pending_qty = product_qty - line.po_grn_qty 
 							
 							print"po_line_pending_qtypo_line_pending_qty",po_line_pending_qty
 							po_line_obj.write(cr, uid, [line.po_line_id.id],
