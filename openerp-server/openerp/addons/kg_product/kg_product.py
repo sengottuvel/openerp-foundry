@@ -78,7 +78,9 @@ class kg_product(osv.osv):
 		'face_combination': fields.char('Face Combination'),
 		'api_plan': fields.char('API Plan'),
 		'gland_placement': fields.char('Gland Placement'),
-		
+		'gland_plate': fields.selection([('w_gland_plate','With Gland Plate'),('wo_gland_plate','Without Gland Plate')],'Gland Plate'),
+		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'sleeve_dia': fields.char('Sleeve dia(MM)')
 	}
 	
 	_defaults = {

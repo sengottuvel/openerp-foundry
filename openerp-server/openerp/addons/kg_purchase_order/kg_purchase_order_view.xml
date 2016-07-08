@@ -268,8 +268,8 @@
 			<field name="product_id" 
 				on_change="onchange_product_id(parent.pricelist_id,product_id,0,product_uom,parent.partner_id, parent.date_order,parent.fiscal_position,date_planned,name,price_unit,context)" 
 				attrs="{'readonly': [('line_flag', '=', True)]}" position="after">
-				<field name="brand_id"/>
-				<field name="moc_id"/>
+				<field name="brand_id" required="1"/>
+				<field name="moc_id" required="1"/>
 				<field name="uom_conversation_factor" readonly="1" invisible="1"/>
 				<field name="length" on_change="onchange_price_type(product_qty,uom_conversation_factor,length,breadth,price_type,product_id)" attrs="{'invisible':[('uom_conversation_factor','!=','two_dimension')],'required':[('uom_conversation_factor','=','two_dimension')]}"/>
 				<field name="breadth" on_change="onchange_price_type(product_qty,uom_conversation_factor,length,breadth,price_type,product_id)" attrs="{'invisible':[('uom_conversation_factor','!=','two_dimension')],'required':[('uom_conversation_factor','=','two_dimension')]}"/>

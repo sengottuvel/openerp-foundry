@@ -123,11 +123,13 @@
 							<field name="liquid_id" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
 							<field name="operating_condition" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
 							<field name="api_plan" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
+							<field name="gland_plate" attrs="{'readonly':[('state','in',('approved','reject'))],'required':[('product_type','=','mechanical_seal')]}"/>
 						</group>
 						<group>
 							<field name="mechanical_type" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
 							<field name="face_combination" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
-							<field name="gland_placement" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
+							<field name="sleeve_dia" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
+							<field name="moc_id" attrs="{'readonly':[('state','in',('approved','reject'))],'required':[('gland_plate','=','w_gland_plate')]}"/>
 						</group>
 					</group>
 				</page>
