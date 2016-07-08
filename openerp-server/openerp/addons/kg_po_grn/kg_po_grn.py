@@ -1016,9 +1016,9 @@ class kg_po_grn(osv.osv):
 									po_line_pending_qty = po_line_id.pending_qty - (line.po_grn_qty / (float(line.length) * float(line.breadth) * float(line.product_id.po_uom_coff)))
 								elif po_line_id.product_id.uom_conversation_factor == 'one_dimension':
 									if po_line_id.product_id.po_uom_in_kgs > 0:
-										po_line_pending_qty = product_qty - line_id.po_grn_qty 
+										po_line_pending_qty = product_qty - line.po_grn_qty 
 									else:
-										po_line_pending_qty = product_qty - line_id.po_grn_qty 
+										po_line_pending_qty = product_qty - line.po_grn_qty 
 							else:
 								po_line_pending_qty = product_qty - line.po_grn_qty 
 							
