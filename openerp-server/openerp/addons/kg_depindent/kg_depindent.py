@@ -195,6 +195,29 @@ class kg_depindent(osv.osv):
 		"""
 		Indent approve
 		"""
+		total = 0
+		indent_lines = indent_obj.dep_indent_line
+		for i in range(len(indent_lines)):
+			indent_qty=indent_lines[i].qty
+			if indent_lines[i].line_id:
+				total = sum(wo.qty for wo in indent_lines[i].line_id)
+				if total <= indent_qty:
+					pass
+				else:
+					raise osv.except_osv(
+						_('Warning!'),
+						_('Please Check WO Qty'))
+				wo_sql = """ select count(wo_id) as wo_tot,wo_id as wo_name from ch_depindent_wo where header_id = %s group by wo_id"""%(indent_lines[i].id)
+				cr.execute(wo_sql)		
+				wo_data = cr.dictfetchall()
+				for wo in wo_data:
+					if wo['wo_tot'] > 1:
+						raise osv.except_osv(
+						_('Warning!'),
+						_('%s This WO No. repeated'%(wo['wo_name'])))
+					else:
+						pass
+		
 		location = self.pool.get('kg.depmaster').browse(cr, uid, indent_obj.dep_name.id, context=context)
 		self.write(cr,uid,ids,{'src_location_id' : location.main_location.id,'dest_location_id':location.stock_location.id})
 		for t in self.browse(cr,uid,ids):
@@ -267,6 +290,30 @@ class kg_depindent(osv.osv):
 		
 	def approve_indent(self, cr, uid, ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
+		
+		total = 0
+		indent_lines = rec.dep_indent_line
+		for i in range(len(indent_lines)):
+			indent_qty=indent_lines[i].qty
+			if indent_lines[i].line_id:
+				total = sum(wo.qty for wo in indent_lines[i].line_id)
+				if total <= indent_qty:
+					pass
+				else:
+					raise osv.except_osv(
+						_('Warning!'),
+						_('Please Check WO Qty'))
+				wo_sql = """ select count(wo_id) as wo_tot,wo_id as wo_name from ch_depindent_wo where header_id = %s group by wo_id"""%(indent_lines[i].id)
+				cr.execute(wo_sql)		
+				wo_data = cr.dictfetchall()
+				for wo in wo_data:
+					if wo['wo_tot'] > 1:
+						raise osv.except_osv(
+						_('Warning!'),
+						_('%s This WO No. repeated'%(wo['wo_name'])))
+					else:
+						pass
+						
 		for t in self.browse(cr,uid,ids):
 			#if t.confirmed_by.id == uid:
 			#	raise osv.except_osv(
@@ -568,5 +615,18 @@ class ch_depindent_wo(osv.osv):
 	
 	}
 	
+	def _check_qty(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+			
+		if rec.qty <= 0.00:
+			return False					
+		return True
+		
+	_constraints = [
+	
+		(_check_qty,'You cannot save with zero qty !',['WO Qty']),
+		
+		]
+		
 	
 ch_depindent_wo()	
