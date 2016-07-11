@@ -563,6 +563,8 @@ class kg_pattern_batch_issue(osv.osv):
 			if rec.state != 'draft':
 				raise osv.except_osv(_('Warning!'),
 						_('You can not delete this entry !!'))
+			else:
+				unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
 	
 kg_pattern_batch_issue()
@@ -771,6 +773,8 @@ class kg_core_batch(osv.osv):
 			if rec.state != 'draft':
 				raise osv.except_osv(_('Warning!'),
 						_('You can not delete this entry !!'))
+			else:
+				unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
 	
 kg_core_batch()
@@ -996,6 +1000,8 @@ class kg_mould_batch(osv.osv):
 			if rec.state != 'draft':
 				raise osv.except_osv(_('Warning!'),
 						_('You can not delete this entry !!'))
+			else:
+				unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
 	
 kg_mould_batch()
