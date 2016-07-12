@@ -21,7 +21,7 @@ class kg_pouring_log(osv.osv):
 		### Header Details ####
 		'name': fields.char('Pouring No.', size=128,select=True),
 		'entry_date': fields.datetime('Pouring Date',required=True),
-		'melting_id': fields.many2one('kg.melting','Heat No.',domain="[('active','=','t')]"),
+		'melting_id': fields.many2one('kg.melting','Heat No'),
 		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),
 		'line_ids':fields.one2many('ch.pouring.details', 'header_id', "Pouring Details"),
 		'cancel_remark': fields.text('Cancel Remarks'),
