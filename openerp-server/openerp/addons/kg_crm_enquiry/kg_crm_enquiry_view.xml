@@ -329,25 +329,29 @@
 						</group>
 						<group string="Accessories">
 							<group>
-								<field name="acces"/>
+								<field name="acces" colspan="1"/>
 							</group>
-<!--
 							<group>
+<!--
 								<field name="acces_type" attrs="{'required':[('acces','=','yes')]}"/>
-							</group>
 -->
+							</group>
 						</group>
 						<notebook attrs="{'invisible': [('acces','!=','yes')]}">
 						<page string="Accessories">
 							<field name="line_ids_access_a">
 								<tree string="Accessories Entry Tree" editable="top" >
-									<field name="product_id" required="1"/>
-									<field name="base_plate"/>
+									<field name="access_id" required="1"/>
+									<field name="moc_id" required="1"/>
+									<field name="qty" required="1"/>
+									<field name="oth_spec"/>
+<!--
 									<field name="base_plate_item" attrs="{'required': [('base_plate','=','yes')]}"/>				   
 									<field name="coupling_guard"/>										
 									<field name="coupling_guard_item" attrs="{'required': [('coupling_guard','=','yes')]}"/>										
 									<field name="fou_bolts"/>										
 									<field name="fou_bolts_item" attrs="{'required': [('fou_bolts','=','yes')]}"/>										
+-->
 								</tree>
 							</field>								
 						</page>

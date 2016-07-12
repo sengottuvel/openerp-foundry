@@ -933,16 +933,32 @@ class ch_kg_crm_accessories(osv.osv):
 	
 		
 		'header_id':fields.many2one('ch.kg.crm.pumpmodel', 'Header Id', ondelete='cascade'),
-		'base_plate':fields.selection([('yes','YES'),('no','NO')],'Base Plate'),
-		'base_plate_item':fields.selection([('ms','MS'),('ss','SS')],'Item Details'),
-		'coupling_guard':fields.selection([('yes','YES'),('no','NO')],'Coupling Guard'),
-		'coupling_guard_item':fields.selection([('ms','MS'),('ss','SS')],'Item Details'),
-		'fou_bolts':fields.selection([('yes','YES'),('no','NO')],'Foundation Bolts'),
-		'fou_bolts_item':fields.selection([('ms','MS'),('ss','SS')],'Item Details'),
-		'product_id': fields.many2one('product.product','Coupling', domain="[('active','=','t'),('product_type','=','coupling')]"),
+		#~ 'base_plate':fields.selection([('yes','YES'),('no','NO')],'Base Plate'),
+		#~ 'base_plate_item':fields.selection([('ms','MS'),('ss','SS')],'Item Details'),
+		#~ 'coupling_guard':fields.selection([('yes','YES'),('no','NO')],'Coupling Guard'),
+		#~ 'coupling_guard_item':fields.selection([('ms','MS'),('ss','SS')],'Item Details'),
+		#~ 'fou_bolts':fields.selection([('yes','YES'),('no','NO')],'Foundation Bolts'),
+		#~ 'fou_bolts_item':fields.selection([('ms','MS'),('ss','SS')],'Item Details'),
+		#~ 'product_id': fields.many2one('product.product','Coupling', domain="[('active','=','t'),('product_type','=','coupling')]"),
+		'access_id': fields.many2one('kg.accessories.master','Accessories',domain="[('active','=','t'),('state','not in',('draft','reject','cancal'))]"),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t'),('state','not in',('reject','cancal'))]"),
+		'qty': fields.float('Qty'),
+		'oth_spec': fields.char('Other Specification'),
 		
 	}
 	
+	def _check_qty(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.qty <= 0.00:
+			return False
+		return True
+	
+	_constraints = [
+	
+		(_check_qty,'You cannot save with zero qty !',['Qty']),
+		
+		]
+		
 ch_moc_construction()
 
 
