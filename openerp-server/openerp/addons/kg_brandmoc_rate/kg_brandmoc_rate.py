@@ -190,6 +190,7 @@ class ch_brandmoc_rate_details(osv.osv):
 			for sub_line in line_data:				
 				if line['id'] == sub_line['id']:					
 					pass
+					
 				else:
 					if ((line['brand_id'] == sub_line['brand_id']) and (line['moc_id'] == sub_line['moc_id'])):						
 						return False
