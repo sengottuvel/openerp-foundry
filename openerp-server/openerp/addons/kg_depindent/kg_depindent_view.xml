@@ -238,8 +238,9 @@
 					<field name="line_date"/>
 					<field name="product_id"/>
 					<field name="uom" invisible="1"/>
-					<field name="qty" sum="qty"/>
-					<field name="pending_qty" sum="pending_qty"/>
+					<field name="qty" string="Department Indent Qty" sum="qty"/>
+					<field name="pending_qty" string="Purchase Indent Pending Qty" sum="pending_qty"/>
+					<field name="issue_pending_qty" string="Issue Pending Qty" sum="issue_pending_qty"/>
 					<field name="brand_id"/>
 					<field name="note"/>
 					<field name="issue_pending_qty" invisible="1"/>
@@ -270,13 +271,13 @@
         ===================== -->
 
 		<record id="action_kg_depindent_line_form" model="ir.actions.act_window">
-				<field name="name">Item Details</field>
+				<field name="name">Dept Indent Item Details</field>
 				<field name="type">ir.actions.act_window</field>
 				<field name="res_model">kg.depindent.line</field>
 				<field name="view_type">form</field>
 				<field name="view_mode">tree</field>
 				<field name="view_id" ref="view_kg_depindent_line_tree"/>
-				<field name="domain">[('pending_qty','!=',0)]</field>
+				<field name="domain">[('pending_qty','!=',0),('indent_id.state','=','approved')]</field>
 				<field name="context">{'search_default_group_product_id':1}</field>
 				<field name="search_view_id" ref="di_search_view"/>
 		</record>
