@@ -15,7 +15,8 @@
 			<button name="tender_for_approve" states="in_progress" string="Approve Indent" type="object" class="oe_highlight"/>
 		</button>
 		<button name="tender_cancel" states="draft,in_progress" string="Cancel Requisition" type="object" position="replace">
-			<button name="tender_cancel" states="in_progress,approved" string="Cancel Indent" type="object"/>
+			<button name="tender_cancel" states="approved" string="Cancel Indent" type="object"/>
+			<button name="tender_reject" states="in_progress" string="Reject Indent" type="object"/>
 		</button>
 		
 		<button name="%(purchase_requisition.action_purchase_requisition_partner)d" type="action"
@@ -132,7 +133,7 @@
 					<field name="pending_qty" readonly="1" invisible="1"/>
 					</tree>
 					</field>						
-				 <button name="update_pil" type='object' string="Save Record"/>
+				 <button name="update_pil" type='object' string="Save Record" states="draft,in_progress"/>
 			 </page>		
 		</xpath>
 		
@@ -152,16 +153,16 @@
 					<field name="created_by"/>
 					<field name="confirmed_by" attrs="{'invisible':[('state','in',['draft'])]}"/>
 					<field name="rej_user_id" attrs="{'invisible':[('state','in',['draft', 'in_progress','approved','cancel','done'])]}"/>
-					<field name="approved_by" attrs="{'invisible':[('state','in',['draft', 'in_progress'])]}"/>
-					<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'in_progress','approved','done'])]}"/>
+					<field name="approved_by" attrs="{'invisible':[('state','in',['draft', 'in_progress','reject'])]}"/>
+					<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'in_progress','approved','done','reject'])]}"/>
 					<field name="update_user_id"/>
 					</group>
 					<group>
 					<field name="creation_date"/>
 					<field name="confirmed_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
 					<field name="reject_date" attrs="{'invisible':[('state','in',['draft', 'in_progress','approved','cancel','done'])]}"/>
-					<field name="approved_date" attrs="{'invisible':[('state','in',['draft', 'in_progress'])]}"/>
-					<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'in_progress','approved','done'])]}"/>
+					<field name="approved_date" attrs="{'invisible':[('state','in',['draft', 'in_progress','reject'])]}"/>
+					<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'in_progress','approved','done','reject'])]}"/>
 					<field name="update_date"/>
 					</group>
 				</group>
@@ -226,13 +227,13 @@
             <field name="model">purchase.requisition.line</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
-				<tree string="PI Tree View" create="false">					
+				<tree string="PI Tree View" create="false" delete="false">					
 					<field name="requisition_id" string="Purchase Indent No"/>
 					<field name="line_date"/>
 					<field name="product_id"/>
 					<field name="product_uom_id" invisible="1"/>
-					<field name="product_qty" sum="product_qty"/>
-					<field name="pending_qty" sum="pending_qty"/>
+					<field name="product_qty" string="Purchase Indent Qty" sum="product_qty"/>
+					<field name="pending_qty" string="Purchase Order Pending Qty" sum="pending_qty"/>
 					<field name="brand_id"/>
 					<field name="note"/>
 					<field name="line_state" invisible="1"/>
@@ -253,7 +254,7 @@
                         <group>                            
                             <field name="requisition_id" string="Purchase Indent No" readonly="True"/>
                             <field name="product_id"  readonly="True"/> 
-                            <field name="product_qty"  readonly="True"/> 
+                            <field name="product_qty" readonly="True"/> 
                             <field name="line_state"  readonly="True"/>                                               
                         </group>
                         <group>                            
@@ -285,12 +286,12 @@
 		</record>
 		
 		<record id="kg_piline_confirmed_action" model="ir.actions.act_window">
-            <field name="name">Item Details</field>
+            <field name="name">Purchase Indent Item Details</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">purchase.requisition.line</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree</field>
-            <field name="domain">[('pending_qty','!=',0)]</field>
+            <field name="domain">[('pending_qty','!=',0),('requisition_id.state','=','approved')]</field>
             <field name="context">{'search_default_group_product_id':1}</field>
             <field name="search_view_id" ref="pil_search_view"/>
         </record>

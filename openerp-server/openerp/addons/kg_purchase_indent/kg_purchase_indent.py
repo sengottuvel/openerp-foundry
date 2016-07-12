@@ -23,7 +23,7 @@ class kg_purchase_indent(osv.osv):
 		'name': fields.char('Indent No', size=64, readonly=True, states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
 		'kg_store': fields.selection([('sub','Sub Store'), ('main','Main Store')], 'Store', readonly=True, states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
 		'dep_name' : fields.many2one('kg.depmaster', 'Dep.Name', readonly=True, states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
-		'state': fields.selection([('draft','Waiting for Confirmation'),('in_progress','Waiting for Approval'),('cancel','Cancelled'),('done','Purchase Done'),('approved','Approved')],
+		'state': fields.selection([('draft','Waiting for Confirmation'),('in_progress','Waiting for Approval'),('cancel','Cancelled'),('done','Purchase Done'),('approved','Approved'),('reject','Rejected')],
 						'Status', track_visibility='onchange', required=True, readonly=True, states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
 		'date_start':fields.date('Indent Date', readonly=True, states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
 		'line_ids' : fields.one2many('purchase.requisition.line','requisition_id','Products to Purchase', readonly=True, states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
@@ -34,7 +34,13 @@ class kg_purchase_indent(osv.osv):
 		'remark': fields.text('Remarks',readonly=False,states={'cancel':[('readonly',True)]}),
 		'dep_project':fields.many2one('kg.project.master','Dept/Project Name',readonly=True,states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
 		'division':fields.many2one('kg.division.master','Division',readonly=True,states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
-		'expected_date':fields.date('Expected Date',required=True),
+		'expected_date':fields.date('Expected Date',required=True,readonly=True,states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
+		'active': fields.boolean('Active'),
+		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode',required=True,readonly=True),
+		'indent_type': fields.selection([('fromdi','From Dept'),('direct','Direct')],'Indent Type',required=True,readonly=True,states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
+		
+		# Entry Info
+		
 		'created_by' : fields.many2one('res.users', 'Created By', readonly=True,select=True),
 		'creation_date':fields.datetime('Creation Date',readonly=True),
 		'confirmed_by' : fields.many2one('res.users', 'Confirmed By', readonly=True,select=True),
@@ -47,9 +53,6 @@ class kg_purchase_indent(osv.osv):
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'reject_date': fields.datetime('Reject Date', readonly=True),
 		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
-		'active': fields.boolean('Active'),
-		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode',required=True,readonly=True),
-		'indent_type': fields.selection([('fromdi','From Dept'),('direct','Direct')],'Indent Type',required=True,readonly=False),
 		
 		}
 	
@@ -153,14 +156,14 @@ class kg_purchase_indent(osv.osv):
 	def tender_in_progress(self, cr, uid, ids, context=None):
 		
 		obj = self.browse(cr,uid,ids[0])
-		if obj.name == '':
-			#indent_no = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.requisitionn')
-			seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','purchase.order.requisition')])
-			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
-			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,obj.date_start))
-			seq_name = cr.fetchone();
-			self.write(cr,uid,ids,{'name':seq_name[0]})
-			
+		#~ if obj.name == '':
+		#indent_no = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.requisitionn')
+		seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','purchase.order.requisition')])
+		seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+		cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,obj.date_start))
+		seq_name = cr.fetchone();
+		
+		self.write(cr,uid,ids,{'name':seq_name[0]})
 		self.write(cr,uid,ids,{'state':'in_progress','confirmed_by':uid,'confirmed_date':time.strftime("%Y-%m-%d")})
 		#cr.execute("""select all_transaction_mails('Purchase Indent Request Approval',%s)"""%(ids[0]))
 		"""Raj
@@ -348,29 +351,54 @@ class kg_purchase_indent(osv.osv):
 		purchase_order_obj = self.pool.get('purchase.order')
 		pi_line_obj = self.pool.get('purchase.requisition.line')
 		piindent = self.browse(cr, uid, ids[0], context=context)
-	
-		if piindent.state == 'approved':					
-			for line in piindent.line_ids:
-				pi_line_obj.write(cr,uid,line.id, {'line_state' : 'noprocess'})
-				if line.product_qty != line.pending_qty:
-					raise osv.except_osv(
-						_('Unable to cancel this Purchase Indent.'),
-						_('First cancel all PO related to this Purchase Indent.'))
-				else:
-					if line.depindent_line_id and line.group_flag == False:
-						orig_pending_qty = line.depindent_line_id.pending_qty
-						pi_qty = line.product_qty
-						orig_pending_qty += pi_qty
-						line.depindent_line_id.write({'pending_qty':orig_pending_qty })
-						line.depindent_line_id.write({'line_state':'noprocess' })
+		if not piindent.remark:
+			raise osv.except_osv(
+				_('Remarks Needed !!'),
+				_('Enter Remark in Remarks Tab....'))
+				
+		if piindent.indent_type == 'di':
+			if piindent.state == 'approved':					
+				for line in piindent.line_ids:
+					pi_line_obj.write(cr,uid,line.id, {'line_state' : 'noprocess'})
+					if line.product_qty != line.pending_qty:
+						raise osv.except_osv(
+							_('Unable to cancel this Purchase Indent.'),
+							_('First cancel all PO related to this Purchase Indent.'))
 					else:
-						pass
-						# Need to do cancel process if a PI line is product Grouping
-		else:			
+							if line.depindent_line_id and line.group_flag == False:
+								orig_pending_qty = line.depindent_line_id.pending_qty
+								pi_qty = line.product_qty
+								orig_pending_qty += pi_qty
+								line.depindent_line_id.write({'pending_qty':orig_pending_qty })
+								line.depindent_line_id.write({'line_state':'noprocess' })
+							else:
+								pass
+							# Need to do cancel process if a PI line is product Grouping
+			else:			
+				for line in piindent.line_ids:
+					line.depindent_line_id.write({'line_state' : 'noprocess'})			
+		else:
+			pass
+		return self.write(cr, uid, ids, {'state': 'cancel','cancel_date':time.strftime('%Y-%m-%d %H:%M:%S'),'cancel_user_id':uid})
+		
+		
+	def tender_reject(self, cr, uid, ids, context=None):
+		purchase_order_obj = self.pool.get('purchase.order')
+		pi_line_obj = self.pool.get('purchase.requisition.line')
+		piindent = self.browse(cr, uid, ids[0], context=context)
+		
+		if not piindent.remark:
+			raise osv.except_osv(
+				_('Remarks Needed !!'),
+				_('Enter Remark in Remarks Tab....'))
+			
+		if piindent.indent_type == 'di':
 			for line in piindent.line_ids:
 				line.depindent_line_id.write({'line_state' : 'noprocess'})			
-		
-		return self.write(cr, uid, ids, {'state': 'cancel','cancel_date':time.strftime('%Y-%m-%d %H:%M:%S'),'cancel_user_id':uid})
+		else:
+			pass
+			
+		return self.write(cr, uid, ids, {'state': 'reject','reject_date':time.strftime('%Y-%m-%d %H:%M:%S'),'rej_user_id':uid})
 		
 		
 	def pi_approval(self, cr, uid, ids, context=None):
