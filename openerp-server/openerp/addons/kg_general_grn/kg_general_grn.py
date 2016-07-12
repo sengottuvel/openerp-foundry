@@ -277,10 +277,10 @@ class kg_general_grn(osv.osv):
 		holiday_obj = self.pool.get('kg.holiday.master.line')
 		holiday_ids = holiday_obj.search(cr, uid, [('leave_date','in',back_list)])
 
-		if grn_date > today_date:
-			raise osv.except_osv(
-					_('Warning'),
-					_('GRN Date should be less than or equal to current date!'))
+		#~ if grn_date > today_date:
+			#~ raise osv.except_osv(
+					#~ _('Warning'),
+					#~ _('GRN Date should be less than or equal to current date!'))
 		if holiday_ids:
 			hol_bk_date = date.today() - timedelta(days=(3+len(holiday_ids)))
 			hol_back_date = hol_bk_date.strftime('%Y-%m-%d')
@@ -335,10 +335,10 @@ class kg_general_grn(osv.osv):
 			back_list.append(backk_date)
 		holiday_obj = self.pool.get('kg.holiday.master.line')
 		holiday_ids = holiday_obj.search(cr, uid, [('leave_date','in',back_list)])
-		if grn_date > today_date:
-			raise osv.except_osv(
-					_('Warning'),
-					_('GRN Date should be less than or equal to current date!'))
+		#~ if grn_date > today_date:
+			#~ raise osv.except_osv(
+					#~ _('Warning'),
+					#~ _('GRN Date should be less than or equal to current date!'))
 		if holiday_ids:
 			hol_bk_date = date.today() - timedelta(days=(3+len(holiday_ids)))
 			hol_back_date = hol_bk_date.strftime('%Y-%m-%d')
@@ -871,7 +871,7 @@ class kg_general_grn(osv.osv):
 		'user_id': lambda obj, cr, uid, context: uid,
 		'bill':'not_applicable',
 		'state':'draft',
-		'grn_date':fields.date.context_today,
+		'grn_date': lambda * a: time.strftime('%Y-%m-%d'),
 		'dc_date':fields.date.context_today,
 		'name':'',
 		'type':'in',
