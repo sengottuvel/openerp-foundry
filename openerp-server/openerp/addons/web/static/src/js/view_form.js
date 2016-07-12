@@ -2930,7 +2930,7 @@ instance.web.form.CompletionFieldMixin = {
             });
 
             // search more... if more results that max
-          /*  if (values.length > self.limit) {
+           if (values.length > self.limit) {
                 values = values.slice(0, self.limit);
                 values.push({
                     label: _t("Search More..."),
@@ -2943,6 +2943,8 @@ instance.web.form.CompletionFieldMixin = {
                 });
             }
             // quick create
+            
+        /* 
             var raw_result = _(data.result).map(function(x) {return x[1];});
             if (search_val.length > 0 && !_.include(raw_result, search_val)) {
                 values.push({
