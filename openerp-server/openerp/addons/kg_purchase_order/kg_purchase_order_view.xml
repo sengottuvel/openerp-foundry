@@ -465,7 +465,7 @@
 				<field name="order_id" string="PO No" filter_domain="[('order_id','ilike',self)]"/>
 			<separator/> 
 			<group expand="0" string="Group By...">
-				<filter string="PO No" icon="terp-personal" domain="[]" context="{'group_by':'order_id'}"/>
+				<filter string="PO No" name="group_order_id" icon="terp-personal" domain="[]" context="{'group_by':'order_id'}"/>
 				<filter string="PO Date" icon="terp-personal" domain="[]" context="{'group_by':'date_planned'}"/>
 				<filter string="Product" name="group_product_id" icon="terp-personal" domain="[]" context="{'group_by':'product_id'}"/>
 				<filter string="Brand" icon="terp-personal" domain="[]" context="{'group_by':'brand_id'}"/>
@@ -481,7 +481,7 @@
 		<field name="view_type">form</field>
 		<field name="view_mode">tree</field>
 		<field name="domain">[('pending_qty','!=',0),('order_id.state','=','approved')]</field>
-		<field name="context">{'search_default_group_product_id':1}</field>
+		<field name="context">{'search_default_group_order_id':1}</field>
 		<field name="search_view_id" ref="pol_search_view"/>
 	</record>
 
