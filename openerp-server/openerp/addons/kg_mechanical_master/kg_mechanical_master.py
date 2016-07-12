@@ -33,7 +33,8 @@ class kg_mechanical_master(osv.osv):
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
-		'cancel_remark': fields.text('Cancel'),
+		'cancel_remark': fields.text('Cancel'),		
+		'value_limit': fields.selection([('based_on_value','Based On Value'),('based_on_mpa','Based On MPA')],'Value Limit', required=True),
 		
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
 		
@@ -56,6 +57,7 @@ class kg_mechanical_master(osv.osv):
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.mechanical.master', context=c),
 		'active': True,
 		'state': 'draft',
+		'value_limit': 'based_on_value',
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':fields.datetime.now,	
 		'modify': 'no',

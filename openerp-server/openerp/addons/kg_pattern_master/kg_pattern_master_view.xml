@@ -15,7 +15,7 @@
 						<button name="entry_cancel" type="object" states="reject,approved" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 						<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
+						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>	
 					</header>
 					<sheet>
 						<group>
@@ -41,10 +41,8 @@
 								<field name="alias_name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>																
 								<field name="box_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>															
 								<field name="csd_code"/>		
-								<field name="copy_flag" invisible="1"/>													
-								<field name="pcs_weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
-								<field name="delivery_lead" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
-								<field name="tolerance" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+								<field name="copy_flag" invisible="1"/>														
+								<field name="delivery_lead" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>													
 								<field name="mould_rate" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" invisible="1"/>
 								<field name="location" />									
 								<field name="offer_info" />									
@@ -55,9 +53,7 @@
 								<field name="pattern_name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="make_by" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
-								<field name="making_cost"/>								
-								<field name="ci_weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>													
-								<field name="nonferous_weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>													
+								<field name="making_cost"/>																		
 								<field name="dynamic_length"/>									
 								<field name="length_type" attrs="{'required': [('dynamic_length','=',True)]}"/>									
 								<field name="active"/>									
@@ -65,6 +61,22 @@
 								<field name="state" style="width: 30%%" class="att_state_change"/>							
 							</group>
 						</group>
+						
+						<group string="Design Weight">
+							<group>
+								
+								<field name="pcs_weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])], 'required': [('tolerance_flag','=',True)]}"/>		
+								<field name="nonferous_weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])], 'required': [('tolerance_flag','=',True)]}"/>			
+																
+							</group>											
+							<group>
+								<field name="ci_weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])], 'required': [('tolerance_flag','=',True)]}"/>		
+								<field name="tolerance" attrs="{'readonly': [('state','in',['approved','reject','cancel'])] }" on_change="onchange_tolerance_details(tolerance)"/>									
+								<field name="tolerance_flag" invisible="1"/>									
+							</group>					
+						</group>
+						
+						
 						<group>
 							<group>	
 								<field name="moc_id" />
@@ -114,13 +126,16 @@
 									</tree>
 								</field>																								
 							</page>
-							<page string="Latest Weight details">	
+							<page string="Production Weight">	
 								<field name="line_ids_c" nolabel="1" >
 									<tree string="Latest Weight details Tree" editable="top" >									
 										<field name="weight_type" />											
 										<field name="pouring_weight"/>				   
+										<field name="pouring_tolerance"/>				   
 										<field name="casting_weight"/>				   
+										<field name="casting_tolerance"/>				   
 										<field name="finished_casting_weight"/>										
+										<field name="finished_casting_tolerance"/>										
 																							
 									</tree>
 								</field>																								
@@ -167,8 +182,8 @@
 					<field name="pattern_name"/>
 					<field name="ci_weight"/>					
 					<field name="pcs_weight"/>										
-					<field name="nonferous_weight"/>		
-					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>			
+					<field name="nonferous_weight"/>	
+					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>								
 					<field name="state"/>
 				</tree>
 			</field>
@@ -214,7 +229,46 @@
 		
 		<!-- Menu Action End-->
 		
-				
+		<!-- Audit Log Xml Data Start-->
+		
+        <record id="pattern_model" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Master</field>
+            <field name="object_id" eval="ref('kg_pattern_master.model_kg_pattern_master')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <!-- Audit Log Xml Data End-->
+        
+        <!-- Audit Log Xml Data Start-->
+		
+        <record id="pattern_moc_model" model="audittrail.rule">
+            <field name="name">Audit Log MOC Rate Details</field>
+            <field name="object_id" eval="ref('kg_pattern_master.model_ch_mocwise_rate')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <!-- Audit Log Xml Data End-->
+        
+        <!-- Audit Log Xml Data Start-->
+		
+        <record id="pattern_history_model" model="audittrail.rule">
+            <field name="name">Audit Log Pattern History</field>
+            <field name="object_id" eval="ref('kg_pattern_master.model_ch_pattern_history')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <!-- Audit Log Xml Data End-->
+        
+        <!-- Audit Log Xml Data Start-->
+		
+        <record id="pattern_attach_model" model="audittrail.rule">
+            <field name="name">Audit Log Pattern Attachment</field>
+            <field name="object_id" eval="ref('kg_pattern_master.model_ch_pattern_attachment')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <!-- Audit Log Xml Data End-->
+		
 		<!-- Menu Name Start here --> 
 		
 			<menuitem action="mma_pattern_master" name="Pattern" id="mam_pattern_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="0"/>

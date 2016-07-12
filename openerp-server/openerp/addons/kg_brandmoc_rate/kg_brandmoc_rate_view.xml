@@ -18,10 +18,29 @@
 					</header>
 					<sheet>
 						<group>
+							<group>
+								<field name="brand_type" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire'])]}"/>
+							</group>
+							<group>
+							</group>
+						</group>
+						<group>
+							<group>
+								<field name="source_brand" attrs="{'invisible':[('brand_type','=','new_brand')],'readonly': [('copy_flag','=',True)], 'required': [('brand_type','=','copy_brand')]}"/>
+							</group>
+							<group>
+								<button name="copy_brand" type="object" string="Copy" class="oe_highlight" attrs="{'invisible':['|',('brand_type','=','new_brand'),('copy_flag','=',True)]}"/>
+							</group>
+						</group>		
+						
+						
+						<group>
 							<group>						
-								<field name="product_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="product_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" on_change="onchange_product(product_id)"/>
 								<field name="latest_price" invisible="1"/>																				
+								<field name="name" invisible="1"/>																				
 								<field name="category_type" invisible="1"/>																				
+								<field name="copy_flag" invisible="1"/>																				
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 							</group>
 							<group>
@@ -44,10 +63,11 @@
 								<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire'])]}">
 									<tree string="Brand Moc Rate Details Entry Tree" editable="top" >									
 										<field name="brand_id" attrs="{'required':[('moc_id','=',False)]}"/>											
-										<field name="moc_id" attrs="{'required':[('brand_id','=',False)]}"/>	
+										<field name="moc_id" on_change="onchange_moc(moc_id)" attrs="{'required':[('brand_id','=',False)]}"/>	
 										<field name="rate" />
 										<field name="purchase_price" />
 										<field name="remarks" widget="char"/>														
+										<field name="name" invisible="1"/>														
 									</tree>
 								</field>																								
 							</page>

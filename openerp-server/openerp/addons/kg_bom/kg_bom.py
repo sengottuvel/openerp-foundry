@@ -153,8 +153,11 @@ class kg_bom(osv.osv):
 		bom_foundry_lines=rec.line_ids			 
 		machine_shop_lines=rec.line_ids_a			 
 		bot_lines=rec.line_ids_b			 
-		consu_lines=rec.line_ids_c		
-		
+		consu_lines=rec.line_ids_c			
+		if len(rec.line_ids) == 0  and len(rec.line_ids_a) == 0 and len(rec.line_ids_b) == 0:
+			raise osv.except_osv(
+					_('Warning !!!'),
+					_('Please Check Line empty values not allowed!!'))		
 		for bom_foundry_item in bom_foundry_lines:			
 			if bom_foundry_item.qty == 0:
 				raise osv.except_osv(
@@ -389,7 +392,17 @@ class kg_bom(osv.osv):
 		
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
-
+	
+	def convert_partlist_bom(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		print"rec.pump_model_id",rec.pump_model_id
+		if rec.pump_model_id:							   
+			self.write(cr, uid, ids, {'state': 'draft','category_type': 'pump_bom'})
+		else:
+			raise osv.except_osv(_('Pump Model is must !!'),
+				_('Enter the pump model field !!'))
+		return True
+	
 	def entry_approve(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])		
 		old_ids = self.search(cr,uid,[('state','=','approved'),('name','=',rec.name)])	  
@@ -450,9 +463,10 @@ class ch_bom_line(osv.osv):
 		
 		'header_id':fields.many2one('kg.bom', 'BOM Name', required=True, ondelete='cascade'),  
 		'pos_no': fields.integer('Position No'),
+		'position_id': fields.many2one('kg.position.number','Position No', required=True,domain="[('active','=','t')]"), 	
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern No', required=True,domain="[('active','=','t')]"), 	
 		'csd_no': fields.char('CSD No.', size=128),	
-		'pattern_name': fields.char('Pattern Name', required=True), 
+		'pattern_name': fields.char('Pattern Name', required=True),
 		'remarks':fields.text('Remarks'),
 		'qty': fields.integer('Qty',required=True,),
 		'state':fields.selection([('draft','Draft'),('approve','Approved')],'Status'),
@@ -545,6 +559,7 @@ class ch_machineshop_details(osv.osv):
 		'header_id':fields.many2one('kg.bom', 'BOM', ondelete='cascade',required=True),
 		'ms_id':fields.many2one('kg.machine.shop', 'Item Code',domain = [('type','=','ms')], ondelete='cascade',required=True),		
 		'pos_no': fields.integer('Position No'),
+		'position_id': fields.many2one('kg.position.number','Position No', required=True,domain="[('active','=','t')]"), 	
 		'csd_no': fields.char('CSD No.'),
 		'name':fields.char('Item Name', size=128),	  
 		'qty': fields.integer('Qty', required=True),
@@ -590,7 +605,8 @@ class ch_bot_details(osv.osv):
 	
 		'header_id':fields.many2one('kg.bom', 'BOM', ondelete='cascade',required=True),
 		'bot_id':fields.many2one('kg.machine.shop', 'Item Code',domain = [('type','=','bot')], ondelete='cascade',required=True),
-		'pos_no': fields.integer('Position No'),		
+		'pos_no': fields.integer('Position No'),
+		'position_id': fields.many2one('kg.position.number','Position No', required=True,domain="[('active','=','t')]"), 		
 		'name':fields.char('Item Name', size=128),	  
 		'qty': fields.integer('Qty', required=True),
 		'remarks':fields.text('Remarks'),   

@@ -50,7 +50,7 @@ class kg_pattern_master(osv.osv):
 		'line_ids':fields.one2many('ch.mocwise.rate', 'header_id', "MOC Wise Rate"),
 		'line_ids_a':fields.one2many('ch.pattern.attachment', 'header_id', "Attachments"),
 		'line_ids_b':fields.one2many('ch.pattern.history', 'header_id', "Pattern History"),	
-		'line_ids_c':fields.one2many('ch.latest.weight', 'header_id', "Latest Weight details", readonly=True),	
+		'line_ids_c':fields.one2many('ch.latest.weight', 'header_id', "Latest Weight details"),	
 		
 		'offer_info': fields.boolean('Offer Info'),
 		'dynamic_length': fields.boolean('Dynamic Length'),	
@@ -71,6 +71,7 @@ class kg_pattern_master(osv.osv):
 		'pattern_type': fields.selection([('new_pattern','New Pattern'),('copy_pattern','Copy Pattern')],'Type', required=True),	
 		'source_pattern': fields.many2one('kg.pattern.master', 'Source Pattern',domain="[('active','=','t')]"),
 		'copy_flag':fields.boolean('Copy Flag'),		
+		'tolerance_flag':fields.boolean('Tolerance Flag'),		
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -98,13 +99,34 @@ class kg_pattern_master(osv.osv):
 		'modify': 'no',
 		'pattern_state': 'active',
 		'copy_flag' : False,
+		'tolerance_flag' : False,
 		'pattern_type':'new_pattern',
 	}
 	
+	def _check_pcs_weight(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])		
+		if rec.tolerance > 0:
+			if rec.pcs_weight <= 0.00:
+				return False					
+		return True
+		
+	def _check_nonferous_weight(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])		
+		if rec.tolerance > 0:
+			if rec.nonferous_weight <= 0.00:
+				return False					
+		return True
+		
+	def _check_ci_weight(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])		
+		if rec.tolerance > 0:
+			if rec.ci_weight <= 0.00:
+				return False					
+		return True
 	
 	def _Validation(self, cr, uid, ids, context=None):
 		flds = self.browse(cr , uid , ids[0])
-		special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+=' )
+		special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )
 		if special_char:
 			return False
 		return True
@@ -131,6 +153,28 @@ class kg_pattern_master(osv.osv):
 			else:
 				res = True				
 		return res
+		
+	def send_to_dms(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res_rec=self.pool.get('res.users').browse(cr,uid,uid)		
+		rec_user = str(res_rec.login)
+		rec_pwd = str(res_rec.password)
+		rec_code = str(rec.code)
+		#~ url = 'http://iasqa1.kgisl.com/?uname='+rec_user+'&s='+rec_work_order
+		encoded_user = base64.b64encode(rec_user)
+		encoded_pwd = base64.b64encode(rec_pwd)
+		
+		url = 'http://10.100.9.60/DMS/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&wo_no='+rec_code
+		
+		#url = 'http://192.168.1.150:81/pbxclick2call.php?exten='+exe_no+'&phone='+str(m_no)
+		return {
+					  'name'	 : 'Go to website',
+					  'res_model': 'ir.actions.act_url',
+					  'type'	 : 'ir.actions.act_url',
+					  'target'   : 'current',
+					  'url'	  : url
+			   }
+		
 			
 	def list_moc(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -201,24 +245,12 @@ class kg_pattern_master(osv.osv):
 									'moc_const_type':[(6, 0, [x.id for x in rec.source_pattern.moc_const_type])], })		
 		return True
 		
-	def send_to_dms(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])
-		res_rec=self.pool.get('res.users').browse(cr,uid,uid)		
-		rec_user = str(res_rec.login)
-		rec_pwd = str(res_rec.password)
-		rec_name = str(rec.name)		
-		encoded_user = base64.b64encode(rec_user)
-		encoded_pwd = base64.b64encode(rec_pwd)
 		
-		url = 'http://192.168.1.7/DMS/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&pattern='+rec_name	
-		
-		return {
-					  'name'	 : 'Go to website',
-					  'res_model': 'ir.actions.act_url',
-					  'type'	 : 'ir.actions.act_url',
-					  'target'   : 'current',
-					  'url'	  : url
-			   }
+	def onchange_tolerance_details(self, cr, uid, ids, tolerance,context=None):		
+		value = {'tolerance_flag':False}
+		if tolerance:			
+			value = {'tolerance_flag': True}
+		return {'value': value}
 		
 		
 	def entry_cancel(self,cr,uid,ids,context=None):
@@ -233,6 +265,7 @@ class kg_pattern_master(osv.osv):
 
 	def entry_confirm(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
+		
 		if rec.pattern_type == 'copy_pattern':
 			
 			### Check Duplicates MOC Construction and Rate Details Items start ###
@@ -495,7 +528,9 @@ class kg_pattern_master(osv.osv):
 		(_Validation, 'Special Character Not Allowed !!!', ['name']),
 		(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
 		(_name_validate, 'Pattern No must be unique !!', ['no']),		
-		
+		(_check_pcs_weight,'You cannot save with zero value !',['SS Weight(kgs)']),
+		(_check_nonferous_weight,'You cannot save with zero value !',['Non-Ferrous Weight(kgs)']),
+		(_check_ci_weight,'You cannot save with zero value !',['CI Weight(kgs)']),
 	]
 	
 kg_pattern_master()
@@ -631,12 +666,36 @@ class ch_latest_weight(osv.osv):
 	_columns = {  
 			
 		'header_id':fields.many2one('kg.pattern.master', 'Latest Weight details', required=True, ondelete='cascade'),	
-		'weight_type': fields.selection([('ci','CI'),('ss','SS'),('non_ferrous','Non-Ferrous')],'Family Type'),	
-		'pouring_weight': fields.float('Pouring weight'),	
-		'casting_weight': fields.float('Casting weight'),	
+		'weight_type': fields.selection([('ci','CI'),('ss','SS'),('non_ferrous','Non-Ferrous')],'Family Type' ,required=True),	
+		'pouring_weight': fields.float('Pouring weight' ,required=True),	
+		'pouring_tolerance': fields.float('Pouring Tolerance(-/+%)' ,required=True),	
+		'casting_weight': fields.float('Rough Casting weight' ,required=True),	
+		'casting_tolerance': fields.float('Rough Casting Tolerance(-/+%)' ,required=True),	
 		'finished_casting_weight': fields.float('Finished Casting Weight'),	
+		'finished_casting_tolerance': fields.float('Finished Casting Tolerance(-/+%)'),	
 		
 	}
+	
+	_defaults = {
+	
+		'pouring_tolerance': 5,
+		'casting_tolerance': 2,
+		
+	}
+	
+	def _check_values(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		cr.execute(""" select weight_type from ch_latest_weight where weight_type  = '%s' and header_id = '%s' """ %(entry.weight_type,entry.header_id.id))
+		data = cr.dictfetchall()			
+		if len(data) > 1:		
+			return False
+		return True
+		
+	_constraints = [		
+			  
+		(_check_values, 'Please Check the same Family Type not allowed..!!',['Family Type']),	
+		
+	   ]
 	
 	
 ch_latest_weight()
