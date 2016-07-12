@@ -747,7 +747,7 @@ class kg_purchase_order(osv.osv):
 			prod_obj = self.pool.get('product.product')
 			prod_obj.write(cr,uid,po_lines[i].product_id.id,{'latest_price' : po_lines[i].price_unit})
 			
-			bmr_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',po_lines[i].product_id.id)])
+			bmr_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',po_lines[i].product_id.id),('state','in',('draft','confirmed','approved'))])
 			if bmr_obj:
 				bmr_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,bmr_obj[0])
 				for item in bmr_rec.line_ids:

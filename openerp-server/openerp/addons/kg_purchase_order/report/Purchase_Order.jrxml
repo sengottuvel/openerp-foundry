@@ -23,10 +23,10 @@ trim(TO_CHAR((line.price_unit*line.product_qty)::float, '999G999G99G999G99G99G99
 else
 trim(TO_CHAR((line.price_unit*line.product_qty*prod.po_uom_in_kgs)::float, '999G999G99G999G99G99G990D99'))
 end as amt,
-case when line.moc_id is null then ''
+case when line.moc_id is null or moc.name = 'N/A'  then ''
 else
 '['||moc.name||']' end as moc_name,
-case when line.brand_id is null then ''
+case when line.brand_id is null or brand.name = 'N/A' then ''
 else
 '['||brand.name||']' end as brand_name,
 case when line.length is null or line.length = 0.00 then ''
