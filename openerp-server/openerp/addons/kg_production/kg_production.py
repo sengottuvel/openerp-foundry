@@ -314,10 +314,10 @@ class kg_production(osv.osv):
 			core_entry_qty = entry_rec.core_qty
 			
 		### PAN No ###
-		upper_pan_no = ''
-		pan_no = entry_rec.core_pan_no
-		if pan_no:
-			upper_pan_no = (pan_no.upper())
+		#~ upper_pan_no = ''
+		#~ pan_no = entry_rec.core_pan_no
+		#~ if pan_no:
+			#~ upper_pan_no = (pan_no.upper())
 		
 		## Remaining Qty ###
 		remain_qty = entry_rec.qty - total_core_qty 
@@ -329,7 +329,7 @@ class kg_production(osv.osv):
 		'core_qty':core_entry_qty,
 		'core_rem_qty':remain_qty,
 		'core_user_id':uid,
-		'core_pan_no':upper_pan_no
+		#~ 'core_pan_no':upper_pan_no
 		})
 		return True
 		
@@ -371,10 +371,10 @@ class kg_production(osv.osv):
 			mould_entry_qty = entry_rec.mould_qty
 			
 		### PAN No ###
-		upper_pan_no = ''
-		pan_no = entry_rec.mould_pan_no
-		if pan_no:
-			upper_pan_no = (pan_no.upper())
+		#~ upper_pan_no = ''
+		#~ pan_no = entry_rec.mould_pan_no
+		#~ if pan_no:
+			#~ upper_pan_no = (pan_no.upper())
 			
 		## Remaining Qty ###
 		remain_qty = entry_rec.qty - total_mould_qty 
@@ -387,7 +387,7 @@ class kg_production(osv.osv):
 		'mould_rem_qty':remain_qty,
 		'state':state,
 		'mould_user_id':uid,
-		'mould_pan_no':upper_pan_no
+		#~ 'mould_pan_no':upper_pan_no
 		})
 		return True
 	
@@ -725,7 +725,7 @@ class kg_core_batch(osv.osv):
 					'core_hardness': entry.core_hardness,
 					'remarks':entry.remarks,
 					'core_by':entry.core_by,
-					'core_pan_no':entry.core_pan_no,
+					#~ 'core_pan_no':entry.core_pan_no,
 					
 				}
 				
@@ -749,7 +749,7 @@ class kg_core_batch(osv.osv):
 			production_obj.write(cr, uid,req_item.production_id.id,{'core_remarks':req_item.remarks,'core_date':req_item.core_date,
 			'core_shift_id':req_item.core_shift_id.id,'core_contractor':req_item.core_contractor.id,'core_operator':req_item.core_operator,
 			'core_helper':req_item.core_helper,'core_qty':req_item.core_qty,'core_hardness':req_item.core_hardness,
-			'core_by':req_item.core_by,'core_pan_no':req_item.core_pan_no
+			'core_by':req_item.core_by
 			})
 			production_obj.core_update(cr, uid, [req_item.production_id.id])
 			
@@ -953,7 +953,7 @@ class kg_mould_batch(osv.osv):
 					'mould_hardness': entry.mould_hardness,
 					'remarks':entry.remarks,
 					'mould_by':entry.mould_by,
-					'mould_pan_no':entry.mould_pan_no,
+					#~ 'mould_pan_no':entry.mould_pan_no,
 					
 				}
 				
@@ -977,7 +977,7 @@ class kg_mould_batch(osv.osv):
 			production_obj.write(cr, uid,req_item.production_id.id,{'mould_remarks':req_item.remarks,'mould_date':req_item.mould_date,
 			'mould_shift_id':req_item.mould_shift_id.id,'mould_contractor':req_item.mould_contractor.id,'mould_moulder':req_item.mould_moulder,
 			'mould_helper':req_item.mould_helper,'mould_qty':req_item.mould_qty,'mould_hardness':req_item.mould_hardness,'mould_box_id':req_item.mould_box_id.id,
-			'mould_by':req_item.mould_by,'mould_pan_no':req_item.mould_pan_no,'mould_operator':req_item.mould_operator})
+			'mould_by':req_item.mould_by,'mould_operator':req_item.mould_operator})
 			production_obj.mould_update(cr, uid, [req_item.production_id.id])
 			
 		### Mould Batch Sequence Number Generation  ###
