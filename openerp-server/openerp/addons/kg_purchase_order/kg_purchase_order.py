@@ -628,9 +628,12 @@ class kg_purchase_order(osv.osv):
 				for ele in prod_rec.line_ids:
 					if item.brand_id.id == ele.brand_id.id and item.moc_id.id == ele.moc_id.id:
 						if ele.rate < item.price_unit:
-							raise osv.except_osv(
-							_('Warning'),
-							_('%s price is exceeding design price. It should be approved by special approver'%(item.product_id.name)))
+							if user_rec.special_approval == True:
+								pass
+							else:
+								raise osv.except_osv(
+									_('Warning'),
+									_('%s price is exceeding design price. It should be approved by special approver'%(item.product_id.name)))
 			
 			if item.price_type == 'per_kg':
 				if item.product_id.uom_conversation_factor == 'two_dimension':
