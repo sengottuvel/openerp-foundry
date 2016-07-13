@@ -90,10 +90,10 @@ class kg_melting(osv.osv):
 		'total_weight_metal': fields.float('Total Weight',digits=(16,3)),	
 		
 		
-		'various': fields.function(_get_various_amt, string='Various(kg)',digits=(16,3), method=True, store=True, type='float'),		
+		'various': fields.function(_get_various_amt, string='Variance(%)',digits=(16,3), method=True, store=True, type='float'),		
 		'melt_cost': fields.function(_get_melting_cost, string='Melting Cost(Rs.)', method=True, store=True, type='float'),
 		
-		'load_item': fields.boolean('Load Item'),
+		
 		
 		##### Worker Details ####
 		'supervisor_name': fields.many2one('res.partner','Supervisor Name', domain="[('active','=','t')]"),
@@ -150,7 +150,7 @@ class kg_melting(osv.osv):
 	### Added by Sangeetha ###
 	def onchange_reading(self,cr, uid, ids, initial_reading,final_reading, context=None):
 		if initial_reading > 0 and final_reading > 0:
-			total_reading = final_reading - initial_reading
+			total_reading = (final_reading - initial_reading) * 1000
 			total_value = total_reading * 6.25
 		else:
 			total_reading = 0.00
@@ -165,39 +165,33 @@ class kg_melting(osv.osv):
 		return {'value': {'total_weight_metal': total_weight}}
 	
 	
-	def load_item(self, cr, uid, ids, context=None):		
-		
-		rec = self.browse(cr,uid,ids[0])	
-		moc = rec.moc_id	
+	def onchange_moc_details(self, cr, uid, ids, moc_id,context=None):			
+		chemistry_details_vals=[]
+		raw_material_vals=[]
 		moc_obj=self.pool.get('kg.moc.master')			
-		moc_obj_ids=moc_obj.search(cr,uid,[('id','=',rec.moc_id.id)])
-		
-		if rec.moc_id.id:						
-						
-			melting_id = rec.id			
+		if moc_id:					
+			moc_obj_ids=moc_obj.search(cr,uid,[('id','=',moc_id)])
+			moc_rec = moc_obj.browse(cr,uid,moc_obj_ids[0])
 			raw_material_line_obj = self.pool.get('ch.melting.charge.details')
-			raw_material_lines=moc.line_ids	
+			raw_material_lines=moc_rec.line_ids	
 			
 			chemistry_details_line_obj = self.pool.get('ch.melting.chemistry.details')
-			chemistry_details_lines=moc.line_ids_a	
-			cr.execute(""" delete from ch_melting_charge_details where header_id  = %s """ %(ids[0]))
+			chemistry_details_lines=moc_rec.line_ids_a	
+			
 			for raw_material_line in raw_material_lines:	
-				raw_material_line_id = raw_material_line_obj.create(cr,uid,
-					{
-						'header_id':rec.id,
+				raw_material_vals.append({
+						
 						'product_id': raw_material_line.product_id.id,
-						'moc_id':rec.moc_id.id			
+						'moc_id':moc_id		
 					})
-			cr.execute(""" delete from ch_melting_chemistry_details where header_id  = %s """ %(ids[0]))	
+			
 			for chemistry_details_line in chemistry_details_lines:					
-				chemistry_details_line_id = chemistry_details_line_obj.create(cr,uid,
-					{
-						'header_id':rec.id,
+				chemistry_details_vals.append({
+						
 						'chemistry_id': chemistry_details_line.chemical_id.id,
 												
-					})	
-		self.write(cr, uid, ids, {'load_item': True})
-		return True
+					})			
+		return {'value': {'line_ids': raw_material_vals,'line_ids_a': chemistry_details_vals}}
 	
 	def entry_confirm(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])		
@@ -218,6 +212,7 @@ class kg_melting(osv.osv):
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),
 		'various': various_formula,'melt_cost': melting_total_rate})
 		return True
+	
 		
 	def entry_cancel(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
@@ -272,7 +267,7 @@ class ch_melting_charge_details(osv.osv):
 	def onchange_purchase_rate(self,cr, uid, ids, product_id,moc_id,first_addition,second_addition, context=None):		
 		cr.execute(''' select line.purchase_price from kg_brandmoc_rate as header
 						left join ch_brandmoc_rate_details line on line.header_id = header.id
-						where header.product_id = %s and line.moc_id = %s
+						where header.product_id = %s and line.moc_id = %s and header.state != 'expire' order by line.id desc limit 1
 								  ''',[product_id,moc_id])
 		purchase_price= cr.fetchone()		
 		if purchase_price is not None:
@@ -281,7 +276,16 @@ class ch_melting_charge_details(osv.osv):
 			else:
 				purchase_price =0
 		else:
-			purchase_price =0
+			cr.execute(''' select line.purchase_price from kg_brandmoc_rate as header
+						left join ch_brandmoc_rate_details line on line.header_id = header.id
+						where header.product_id = %s and header.state != 'expire' order by line.id desc limit 1
+								  ''',[product_id])
+			purchase_price= cr.fetchone()		
+			
+			purchase_price = purchase_price[0]
+			
+		if purchase_price is None:
+			purchase_price = 0.00
 		total = first_addition + second_addition
 		
 		amount = total * purchase_price
@@ -341,19 +345,30 @@ class ch_mechanical_properties(osv.osv):
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
 		print "entry.mech_value,entry.mech_value,entry.moc_id.id,entry.mechanical_id.id]",entry.mech_value,entry.mech_value,entry.moc_id.id,entry.mechanical_id.id					
-		cr.execute(''' select header_id from ch_mechanical_chart 
-						where case 
-						when range_flag = 't' then
-						%s >= min
-						when range_flag = 'f' then
-						%s >= min and
-						%s <= max
-						end
+		cr.execute(''' select moc_line.name,moc_line.header_id from 
 
-						and
-						header_id = %s and mechanical_id = %s	
-	 
-							  ''',[entry.mech_value,entry.mech_value,entry.mech_value,entry.moc_id.id,entry.mechanical_id.id])
+									ch_mechanical_chart as moc_line
+									left join kg_mechanical_master mech on mech.id = moc_line.mechanical_id
+									where 
+									case when mech.value_limit = 'based_on_value' then
+									(case when moc_line.range_flag = 't' then 
+									%s >= moc_line.min
+									when moc_line.range_flag = 'f' then
+									%s >= moc_line.min and
+									%s <= moc_line.max
+									end)
+									else
+									(case when moc_line.range_flag = 't' then 
+									%s >= moc_line.min
+									when moc_line.range_flag = 'f' then
+									%s >= moc_line.min and
+									%s <= moc_line.max
+									end) end 
+									
+
+									and
+									moc_line.header_id = %s and moc_line.mechanical_id = %s
+							  ''',[entry.mech_value,entry.mech_value,entry.mech_value,entry.mpa_value,entry.mpa_value,entry.mpa_value,entry.moc_id.id,entry.mechanical_id.id])
 		values= cr.fetchone()
 		print "values",values		
 		if values:
@@ -403,3 +418,12 @@ class ch_mechanical_properties(osv.osv):
 	   ]
 	
 ch_mechanical_properties()
+
+
+
+
+
+
+
+
+

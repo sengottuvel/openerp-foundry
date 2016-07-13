@@ -18,10 +18,10 @@
 							<group>
 								
 								<field name="name" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-								<field name="moc_id" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+								<field name="moc_id" attrs="{'readonly': [('state','not in',['draft'])]}" on_change="onchange_moc_details(moc_id)"/>
 								<field name="lining_age" attrs="{'readonly': [('state','not in',['draft'])]}"/>					
 								<field name="remark" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-								<field name="load_item" invisible="1"/>
+								
 							</group>											
 							<group>
 								<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>
@@ -132,7 +132,7 @@
 									<div class="address_format">
 										<field name="pouring_finished"  widget="float_time" style="width: 15%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 										<field name="pouring_finished_time_type" style="width: 10%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>Liquid Metal Wt(kgs).
-										<field name="liquid_metal_wt" style="width: 15%%" attrs="{'readonly': [('state','not in',['draft'])]}"/> Ingot Wt(kgs).
+										<field name="liquid_metal_wt" style="width: 15%%" attrs="{'readonly': [('state','not in',['draft'])]}" on_change="onchange_weight(liquid_metal_wt,ingot_wt)"/> Ingot Wt(kgs).
 										<field name="ingot_wt" style="width: 15%%" attrs="{'readonly': [('state','not in',['draft'])]}" on_change="onchange_weight(liquid_metal_wt,ingot_wt)"/>									
 									</div>
 								</div>								
@@ -170,15 +170,14 @@
 							<group>
 								<field name="cancel_remark" attrs="{'invisible': [('state','not in',['cancel','confirmed'])],'readonly': [('state','not in',['confirmed'])]}"/>
 							</group>					
-						</group>
-						<button name="load_item" type="object" string="Load Item" class="oe_highlight" attrs="{'invisible':[('load_item','=',True)]}"/>
+						</group>						
 						<notebook>							
 							<page string="Raw Materials Details">	
 								<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel','reject'])]}" context="{'moc_id':moc_id}">
 									<tree string="Charge Details Entry Tree" editable="top" >									
 										<field name="product_id" />										   
 										<field name="moc_id" invisible="1"/>
-										<field name="first_addition" required="1"/>
+										<field name="first_addition" required="1" on_change="onchange_purchase_rate(product_id,moc_id,first_addition,second_addition)"/>
 										<field name="second_addition" required="1" on_change="onchange_purchase_rate(product_id,moc_id,first_addition,second_addition)"/>
 										<field name="total_weight" readonly="1" sum="Total Value" on_change="onchange_purchase_rate(product_id,moc_id,first_addition,second_addition)"/>
 										<field name="total_amount" readonly="1" sum="Total Value"/>
@@ -213,7 +212,7 @@
 																																						
 									</tree>
 								</field>																								
-							</page>				
+							</page>			
 							<page string="Entry Info">
 								<group>
 									<field name="company_id"/>
@@ -302,6 +301,21 @@
 		
 	<!-- Menu Action End-->
 	
+	<!-- Audit Log Xml Data Start-->
+		
+        <record id="audit_melting_log" model="audittrail.rule">
+            <field name="name">Audit Log Melting</field>
+            <field name="object_id" eval="ref('kg_melting.model_kg_melting')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+         <record id="audit_melting_charge_details_log" model="audittrail.rule">
+            <field name="name">Audit Log Melting Charge Details</field>
+            <field name="object_id" eval="ref('kg_melting.model_ch_melting_charge_details')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->
     
      <!-- Sequence Number Setting Starts Here -->
 	

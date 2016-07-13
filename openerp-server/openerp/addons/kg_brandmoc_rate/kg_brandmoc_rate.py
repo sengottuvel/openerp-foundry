@@ -52,7 +52,7 @@ class kg_brandmoc_rate(osv.osv):
 		
 		
 		'brand_type': fields.selection([('new_brand','New Brand'),('copy_brand','Copy Brand')],'Type', required=True),	
-		'source_brand': fields.many2one('kg.brandmoc.rate', 'Source Brand',domain="[('active','=','t')]"),
+		'source_brand': fields.many2one('kg.brandmoc.rate', 'Source Brand',domain="[('state','!=','expire')]"),
 		'copy_flag':fields.boolean('Copy Flag'),
 		
 		### Entry Info ###
