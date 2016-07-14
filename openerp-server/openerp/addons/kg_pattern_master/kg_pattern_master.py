@@ -273,7 +273,20 @@ class kg_pattern_master(osv.osv):
 
 	def entry_confirm(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		
+		if rec.line_ids_c:
+			for item in rec.line_ids_c:
+				if item.pouring_tolerance > 0.00:
+					if item.pouring_weight <= 0.00:
+						raise osv.except_osv(_('Production Weight tap !!'),
+						_('Enter the Pouring weight in save with zero value !!'))
+				if item.casting_tolerance > 0.00:
+					if item.casting_weight <= 0.00:
+						raise osv.except_osv(_('Production Weight tap !!'),
+						_('Enter the Rough Casting weight in save with zero value !!'))
+				if item.finished_casting_tolerance > 0.00:
+					if item.finished_casting_weight <= 0.00:
+						raise osv.except_osv(_('Production Weight tap !!'),
+						_('Enter the Finished Casting Weight in save with zero value !!'))
 		if rec.pattern_type == 'copy_pattern':
 			
 			### Check Duplicates MOC Construction and Rate Details Items start ###

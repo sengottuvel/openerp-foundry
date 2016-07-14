@@ -128,7 +128,7 @@
 							<page string="Production Weight">	
 								<field name="line_ids_c" nolabel="1" >
 									<tree string="Latest Weight details Tree" editable="top" create="false" delete="false">									
-										<field name="weight_type" />											
+										<field name="weight_type" readonly="1"/>											
 										<field name="pouring_weight"/>				   
 										<field name="pouring_tolerance"/>				   
 										<field name="casting_weight"/>				   
