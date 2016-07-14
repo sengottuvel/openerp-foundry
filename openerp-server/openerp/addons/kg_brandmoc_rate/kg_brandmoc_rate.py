@@ -285,10 +285,14 @@ class ch_brandmoc_rate_details(osv.osv):
 		line_data = cr.dictfetchall()
 		for line in line_data :			
 			for sub_line in line_data:				
-				if line['id'] == sub_line['id']:					
+				if line['id'] == sub_line['id']:		
+					print " line['id']", line['id']
+					print " line['id']", sub_line['id']
 					pass
 				else:
-					if ((line['brand_id'] == sub_line['brand_id']) and (line['moc_id'] == sub_line['moc_id'])):						
+					if ((line['brand_id'] == sub_line['brand_id']) and (line['moc_id'] == sub_line['moc_id'])):		
+						print "pisjoisdjkasdsd",(line['brand_id'] == sub_line['brand_id'])
+						print "dfkluerojwokew",(line['moc_id'] == sub_line['moc_id'])
 						return False
 		return True	
 			
