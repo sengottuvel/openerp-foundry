@@ -302,6 +302,12 @@ class ch_brandmoc_rate_details(osv.osv):
 						print "dfkluerojwokew",sub_line['moc_id']
 						return False
 		return True	
+	
+	def unlink(self,cr,uid,ids,context=None):
+		unlink_ids = []		
+		for rec in self.browse(cr,uid,ids):				
+			unlink_ids.append(rec.id)
+		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
 			
 			
 	_constraints = [		
