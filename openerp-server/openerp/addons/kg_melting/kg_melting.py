@@ -280,12 +280,14 @@ class ch_melting_charge_details(osv.osv):
 						left join ch_brandmoc_rate_details line on line.header_id = header.id
 						where header.product_id = %s and header.state != 'expire' order by line.id desc limit 1
 								  ''',[product_id])
-			purchase_price= cr.fetchone()		
+			purchase_price= cr.fetchone()
 			
-			purchase_price = purchase_price[0]
+			if purchase_price is None:
+				purchase_price = 0.00		
+			else:				
+				purchase_price = purchase_price[0]
 			
-		if purchase_price is None:
-			purchase_price = 0.00
+		
 		total = first_addition + second_addition
 		
 		amount = total * purchase_price

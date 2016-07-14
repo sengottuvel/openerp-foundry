@@ -149,7 +149,7 @@
 						</group>
 						<newline/>
 							<group>
-								<label for="various" string="Various(kg)"/>
+								<label for="various" string="Variance"/>
 								<div>
 									<div class="address_format">
 										<field name="various" readonly="1"/>																
