@@ -64,14 +64,13 @@
 						
 						<group string="Design Weight">
 							<group>
-								
-								<field name="pcs_weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])], 'required': [('tolerance_flag','=',True)]}"/>		
-								<field name="nonferous_weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])], 'required': [('tolerance_flag','=',True)]}"/>			
+								<field name="tolerance"/>									
+								<field name="nonferous_weight" required="1"/>			
 																
 							</group>											
 							<group>
-								<field name="ci_weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])], 'required': [('tolerance_flag','=',True)]}"/>		
-								<field name="tolerance" attrs="{'readonly': [('state','in',['approved','reject','cancel'])] }" on_change="onchange_tolerance_details(tolerance)"/>									
+								<field name="ci_weight" required="1"/>		
+								<field name="pcs_weight" required="1"/>										
 								<field name="tolerance_flag" invisible="1"/>									
 							</group>					
 						</group>
@@ -128,7 +127,7 @@
 							</page>
 							<page string="Production Weight">	
 								<field name="line_ids_c" nolabel="1" >
-									<tree string="Latest Weight details Tree" editable="top" >									
+									<tree string="Latest Weight details Tree" editable="top" create="false" delete="false">									
 										<field name="weight_type" />											
 										<field name="pouring_weight"/>				   
 										<field name="pouring_tolerance"/>				   

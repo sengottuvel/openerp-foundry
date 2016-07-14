@@ -90,7 +90,7 @@ class kg_melting(osv.osv):
 		'total_weight_metal': fields.float('Total Weight',digits=(16,3)),	
 		
 		
-		'various': fields.function(_get_various_amt, string='Variance(%)',digits=(16,3), method=True, store=True, type='float'),		
+		'various': fields.function(_get_various_amt, string='Variance%',digits=(16,3), method=True, store=True, type='float'),		
 		'melt_cost': fields.function(_get_melting_cost, string='Melting Cost(Rs.)', method=True, store=True, type='float'),
 		
 		
@@ -189,6 +189,8 @@ class kg_melting(osv.osv):
 				chemistry_details_vals.append({
 						
 						'chemistry_id': chemistry_details_line.chemical_id.id,
+						'required_chemistry': chemistry_details_line.min,
+						'required_chemistry_max': chemistry_details_line.max,
 												
 					})			
 		return {'value': {'line_ids': raw_material_vals,'line_ids_a': chemistry_details_vals}}
@@ -201,8 +203,11 @@ class kg_melting(osv.osv):
 		for line in line_ids:			
 			melt_cost += line.total_amount			
 			grand_total += line.total_weight	
-				
-		various_formula = ((entry.total_weight_metal/grand_total)/grand_total)	* 100
+		if entry.total_weight_metal > 0.00 and grand_total > 0.00:	
+			print"wwwwwww"
+			various_formula = ((entry.total_weight_metal/grand_total)/grand_total)	* 100
+		else:
+			various_formula = 0.00
 		melting_total_rate = melt_cost + entry.amount
 		
 		if various_formula > 3.000:	
@@ -313,7 +318,8 @@ class ch_melting_chemistry_details(osv.osv):
 			
 		'header_id':fields.many2one('kg.melting', 'Chemistry Entry', required=True, ondelete='cascade'),							
 		'chemistry_id': fields.many2one('kg.chemical.master','Name', required=True,domain="[('active','=','t')]"),	
-		'required_chemistry':fields.float('Required Chemistry',digits_compute=dp.get_precision('Required Chemistry')),
+		'required_chemistry':fields.float('Required Chemistry Min',digits_compute=dp.get_precision('Required Chemistry')),
+		'required_chemistry_max':fields.float('Required Chemistry Max',digits_compute=dp.get_precision('Required Chemistry')),
 		'bath_1':fields.float('Bath 1',digits=(16,3)),
 		'bath_2':fields.float('Bath 2',digits=(16,3)),
 		'final':fields.float('Final',digits=(16,3)),

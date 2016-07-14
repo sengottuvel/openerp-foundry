@@ -149,7 +149,7 @@
 						</group>
 						<newline/>
 							<group>
-								<label for="various" string="Variance"/>
+								<label for="various"/>
 								<div>
 									<div class="address_format">
 										<field name="various" readonly="1"/>																
@@ -191,6 +191,7 @@
 									<tree string="Chemistry Details Entry Tree" editable="top" >									
 										<field name="chemistry_id" />										   
 										<field name="required_chemistry" required="1"/>
+										<field name="required_chemistry_max" required="1"/>
 										<field name="bath_1" required="1"/>
 										<field name="bath_2" />
 										<field name="final" required="1"/>

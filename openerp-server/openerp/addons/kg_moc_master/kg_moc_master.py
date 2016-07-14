@@ -151,12 +151,14 @@ class kg_moc_master(osv.osv):
 		res_rec=self.pool.get('res.users').browse(cr,uid,uid)		
 		rec_user = str(res_rec.login)
 		rec_pwd = str(res_rec.password)
-		rec_code = str(rec.code)		
+		rec_code = str(rec.code)
+		#~ url = 'http://iasqa1.kgisl.com/?uname='+rec_user+'&s='+rec_work_order
 		encoded_user = base64.b64encode(rec_user)
 		encoded_pwd = base64.b64encode(rec_pwd)
 		
-		url = 'http://192.168.1.7/DMS/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&moc='+rec_code	
+		url = 'http://10.100.9.60/DMS/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&wo_no='+rec_code
 		
+		#url = 'http://192.168.1.150:81/pbxclick2call.php?exten='+exe_no+'&phone='+str(m_no)
 		return {
 					  'name'	 : 'Go to website',
 					  'res_model': 'ir.actions.act_url',
@@ -230,11 +232,30 @@ class ch_moc_raw_material(osv.osv):
 	_name = "ch.moc.raw.material"
 	_description = "SAM MOC Raw Materials Master"
 	
+	def _purchase_rate(self, cursor, user, ids, name, arg, context=None):	
+		res = {}
+		total_pro_cost = 0.00
+		for purchase in self.browse(cursor, user, ids, context=context):			
+			cursor.execute(""" select purchase_price from ch_brandmoc_rate_details as line
+
+				left join kg_brandmoc_rate header on header.id = line.header_id
+
+				where header.product_id = %s ORDER BY line.id ASC limit 1 """ %(purchase.product_id.id))
+			purchase_cost = cursor.fetchone()
+			if purchase_cost[0]:
+				
+				total_pro_cost = purchase_cost[0]
+			else:
+				0.00	
+			res[purchase.id] = total_pro_cost
+		return res
+	
 	_columns = {
 			
 		'header_id':fields.many2one('kg.moc.master', 'MOC Entry', required=True, ondelete='cascade'),	
 		'product_id': fields.many2one('product.product','Raw Material', required=True),	
-		'rate': fields.related('product_id','latest_price', type='float', string='Rate(Rs)', store=True),		
+		#~ 'rate': fields.related('product_id','latest_price', type='float', string='Rate(Rs)', store=True),
+		'rate': fields.function(_purchase_rate, string='Rate(Rs)', type='float', store=True),	
 		'uom':fields.char('UOM',size=128),
 		'qty':fields.float('Qty',required=True),
 		'remarks':fields.text('Remarks'),		
@@ -258,6 +279,7 @@ class ch_moc_raw_material(osv.osv):
 		return super(ch_moc_raw_material, self).create(cr, uid, vals, context=context)
 		
 	def write(self, cr, uid, ids, vals, context=None):
+		print "idsidsidsidsidsidsids",ids
 		pro_obj = self.pool.get('product.product')
 		if vals.get('product_id'):
 			uom_rec = pro_obj.browse(cr, uid, vals.get('product_id') )
@@ -282,6 +304,14 @@ class ch_chemical_chart(osv.osv):
 		'max':fields.float('Max',required=True,digits_compute=dp.get_precision('Max Value')),	
 		'range_flag': fields.boolean('Range Limit'),	
 	}
+	def _check_same_values(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		cr.execute(""" select chemical_id from ch_chemical_chart where chemical_id  = '%s' and header_id = '%s' """ %(entry.chemical_id.id,entry.header_id.id))
+		data = cr.dictfetchall()			
+		if len(data) > 1:		
+			return False
+		return True	
+	
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.min > entry.max:
@@ -291,6 +321,7 @@ class ch_chemical_chart(osv.osv):
 	_constraints = [		
 			  
 		(_check_values, 'Please Check the Min & Max values ,Min value should be less than Max value.!!',['Chemical Chart']),	
+		(_check_same_values, 'Please Check the same Chemical Name not allowed..!!',['Chemical Name']),	
 		
 	   ]
 	

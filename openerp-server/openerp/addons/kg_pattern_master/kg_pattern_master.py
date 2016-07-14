@@ -65,7 +65,7 @@ class kg_pattern_master(osv.osv):
 		'csd_code': fields.char('CSD Code No.', size=128),
 		'making_cost': fields.float('Pattern Making Cost'),
 		'moc_const_type': fields.many2many('kg.construction.type', 'm2m_moc_rate_details', 'moc_const_id', 'const_type_id','Type', domain="[('active','=','t')]"),
-		'moc_id': fields.many2one('kg.moc.master','Default MOC',domain="[('active','=','t')]" ),	
+		'moc_id': fields.many2one('kg.moc.master','Default MOC',domain="[('active','=','t')]" ,required=True ),	
 		
 		
 		'pattern_type': fields.selection([('new_pattern','New Pattern'),('copy_pattern','Copy Pattern')],'Type', required=True),	
@@ -105,23 +105,20 @@ class kg_pattern_master(osv.osv):
 	
 	def _check_pcs_weight(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])		
-		if rec.tolerance > 0:
-			if rec.pcs_weight <= 0.00:
-				return False					
+		if rec.pcs_weight <= 0.00:			
+			return False					
 		return True
 		
 	def _check_nonferous_weight(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])		
-		if rec.tolerance > 0:
-			if rec.nonferous_weight <= 0.00:
-				return False					
+		if rec.nonferous_weight <= 0.00:			
+			return False					
 		return True
 		
 	def _check_ci_weight(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])		
-		if rec.tolerance > 0:
-			if rec.ci_weight <= 0.00:
-				return False					
+		if rec.ci_weight <= 0.00:			
+			return False					
 		return True
 	
 	def _Validation(self, cr, uid, ids, context=None):
@@ -193,7 +190,22 @@ class kg_pattern_master(osv.osv):
 				   'moc_id':rec.moc_id.id,
 				   'code':moc_const_rec.code,
 				   'rate':rec.moc_id.rate,
-				   'pro_cost':rec.moc_id.pro_cost})				
+				   'pro_cost':rec.moc_id.pro_cost})		
+		cr.execute(""" delete from ch_latest_weight where header_id  = %s """ %(ids[0]))
+		weight = ''
+		for ele in range(3):			
+			if ele == 0:
+				weight = 'ci'
+			elif ele == 1:
+				weight = 'ss'				
+			elif ele == 2:
+				weight = 'non_ferrous'
+			line = self.pool.get('ch.latest.weight').create(cr,uid,{
+			       'header_id':rec.id,
+				   'weight_type':weight,
+				   'casting_weight':0.00,
+				   'pouring_weight':0.00,
+				})				
 		return True
 		
 		
@@ -246,11 +258,7 @@ class kg_pattern_master(osv.osv):
 		return True
 		
 		
-	def onchange_tolerance_details(self, cr, uid, ids, tolerance,context=None):		
-		value = {'tolerance_flag':False}
-		if tolerance:			
-			value = {'tolerance_flag': True}
-		return {'value': value}
+	
 		
 		
 	def entry_cancel(self,cr,uid,ids,context=None):
