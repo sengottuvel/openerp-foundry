@@ -61,6 +61,7 @@ class kg_payment_master(osv.osv):
 				('Others','others')],'Term Category',required=True,readonly=False,states={'approved':[('readonly',True)]}),
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
 		
+		
 	}
 	
 	_defaults = {
@@ -291,7 +292,8 @@ class kg_brand_master(osv.osv):
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel Remarks'),
-		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
+		#~ 'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
+		'product_ids': fields.many2many('product.product','prod_brnd','brd_id','prod_id','Product Name',readonly=False,states={'approved':[('readonly',True)]}),
 		
 	}
 	
@@ -302,7 +304,7 @@ class kg_brand_master(osv.osv):
 		'active': True,
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
-		'modify': 'no',
+		#~ 'modify': 'no',
 		
 	}
 	

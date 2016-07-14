@@ -25,7 +25,7 @@
     'images': ['images/purchase_requisitions.jpeg'],
     'website': 'http://www.openerp.com',
     'description': """  PO Masters  """,
-    'depends' : ['base'],
+    'depends' : ['base','product'],
     'data': ['kg_po_masters_view.xml'],
     'auto_install': False,
     'installable': True,
