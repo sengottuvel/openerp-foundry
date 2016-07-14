@@ -293,6 +293,10 @@ class ch_brandmoc_rate_details(osv.osv):
 					if ((line['brand_id'] == sub_line['brand_id']) and (line['moc_id'] == sub_line['moc_id'])):		
 						print "pisjoisdjkasdsd",(line['brand_id'] == sub_line['brand_id'])
 						print "dfkluerojwokew",(line['moc_id'] == sub_line['moc_id'])
+						print "dfkluerojwokew",line['moc_id']
+						print "dfkluerojwokew",sub_line['moc_id']
+						print "dfkluerojwokew",line['moc_id'] 
+						print "dfkluerojwokew",sub_line['moc_id']
 						return False
 		return True	
 			
