@@ -353,7 +353,7 @@ class ch_mechanical_properties(osv.osv):
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
 		print "entry.mech_value,entry.mech_value,entry.moc_id.id,entry.mechanical_id.id]",entry.mech_value,entry.mech_value,entry.moc_id.id,entry.mechanical_id.id					
-		cr.execute(''' select moc_line.name,moc_line.header_id from 
+		cr.execute(''' select moc_line.header_id from 
 
 									ch_mechanical_chart as moc_line
 									left join kg_mechanical_master mech on mech.id = moc_line.mechanical_id
