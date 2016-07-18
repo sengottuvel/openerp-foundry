@@ -194,6 +194,9 @@ class kg_production(osv.osv):
 		'pour_pending_qty': fields.function(_get_pour_pending_qty, string='Pending Qty', store=True, type='float'),
 		'fettling_reject_qty': fields.integer('Rejected Qty'),
 		
+		'pour_pending_remarks': fields.text('Remarks'),
+		'fettling_progress_remarks': fields.text('Remarks'),
+		
 		### Core vs Mould Qty ###
 		'difference_qty': fields.function(_get_difference_qty, string='Difference', store=True, type='float'),
 		

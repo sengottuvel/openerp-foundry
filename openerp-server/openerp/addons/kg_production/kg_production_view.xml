@@ -1363,6 +1363,7 @@
 				string="Core/Mould Completed Tree" create="false">
 					<field name="order_delivery_date" string="Date"/>
 					<field name="order_no"/>
+					<field name="order_priority" string="Category"/>
 					<field name="pattern_id" string="Part No."/>
 					<field name="pattern_name" string="Part Name."/>
 					<field name="moc_id"/>
@@ -1451,6 +1452,77 @@
 	
 	<!-- Pouring Pending List -->
 	
+	<!-- Pouring Pending List -->
+	
+	<!-- Form View Start -->
+	
+	<record id="t_form_v_pouring_pending" model="ir.ui.view">
+		<field name="name">Pouring Pending</field>
+		<field name="model">kg.production</field>
+		<field name="arch" type="xml">
+			<form string="Pouring Pending" version="7.0" create="false" >
+				<sheet>		
+					<group string="Work Order Details">
+						<group>
+							<field name="name" invisible="1"/>
+							<field name="division_id" invisible="1" readonly="1"/>
+							<field name="order_no" readonly="1"/>
+							<field name="order_priority" string="Category" readonly="1"/>
+							<field name="pour_remarks" string="Pour Remarks" readonly="1"/>
+							<field name="state" style="width: 30%%" class="att_state_change"/>	
+						</group>											
+						<group>
+							<field name="entry_date" invisible="1"/>
+							<field name="order_delivery_date"/>
+							<field name="location" readonly="1"/>
+							<field name="order_date" invisible="1" readonly="1"/>
+							<field name="order_category" invisible="1" readonly="1"/>
+							<field name="pour_pending_remarks" string="Remarks" readonly="0"/>
+							
+						</group>					
+					</group>
+					<group string="Specification">
+						<group>
+							<field name="pump_model_id" readonly="1"/>
+							<field name="pattern_name" readonly="1"/>
+							<field name="each_weight" readonly="1"/>
+							<field name="qty" readonly="1"/>
+						</group>											
+						<group>
+							<field name="pattern_id" readonly="1"/>
+							<field name="moc_id" readonly="1"/>
+							<field name="total_weight" readonly="1"/>
+							
+						</group>					
+					</group>
+					<notebook>
+						
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
+								<group>
+									<field name="user_id"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>
+				</sheet>
+			</form>
+		</field>
+	</record>
+		
+	<!-- Form View End -->
+	
 	<!-- Tree View Start -->
 		
 	<record id="t_tree_v_pouring_pending" model="ir.ui.view">
@@ -1459,7 +1531,7 @@
 		<field eval="8" name="priority"/>
 		<field name="arch" type="xml">
 			<tree toolbar="True" string="Pouring Pending Tree" create="false">
-				<field name="order_delivery_date" string="Date"/>
+				<field name="order_delivery_date" string="Delivery Date"/>
 				<field name="order_no"/>
 				<field name="order_priority" string="Category"/>
 				<field name="pattern_id" string="Part No."/>
@@ -1470,7 +1542,8 @@
 				<field name="pour_qty" invisible="1" string="Completed Qty" sum="Total Completed Qty"/>
 				<field name="each_weight" sum="Total Each Weight"/>
 				<field name="total_weight" sum="Total Weight"/>
-				<field name="pour_remarks"/>
+				<field name="pour_remarks" string="Pour Remarks"/>
+				<field name="pour_pending_remarks" string="Remarks"/>
 				<field name="state" invisible="1"/>
 				<field name="name" invisible="1"/>
 				<field name="order_category" invisible="1"/>
@@ -1538,7 +1611,7 @@
         <record model="ir.actions.act_window.view" id="tma_pouring_pending_form_view">
             <field name="sequence" eval="2"/>
             <field name="view_mode">form</field>
-            <field name="view_id" ref="t_form_v_pouring_completed"/>
+            <field name="view_id" ref="t_form_v_pouring_pending"/>
             <field name="act_window_id" ref="tma_pouring_pending"/>
         </record>
 		
@@ -1554,73 +1627,72 @@
 	<!-- Pouring Completed List -->
 	
 	<record id="t_form_v_pouring_completed" model="ir.ui.view">
-			<field name="name">Pouring Completed</field>
-			<field name="model">kg.production</field>
-			<field name="arch" type="xml">
-				<form string="Pouring Completed" version="7.0" create="false" edit="false">
-					<sheet>		
-						<group string="Work Order Details">
-							<group>
-								<field name="name" invisible="1"/>
-								<field name="division_id" invisible="1" readonly="1"/>
-								<field name="order_no" readonly="1"/>
-								<field name="order_priority" string="Category" readonly="1"/>
-								<field name="pour_remarks" readonly="1"/>
-							</group>											
-							<group>
-								<field name="entry_date" invisible="1"/>
-								<field name="order_delivery_date"/>
-								<field name="location" readonly="1"/>
-								<field name="order_date" invisible="1" readonly="1"/>
-								<field name="order_category" invisible="1" readonly="1"/>
-								<field name="state" style="width: 30%%" class="att_state_change"/>	
-							</group>					
-						</group>
-						<group string="Specification">
-							<group>
-							    <field name="pump_model_id" readonly="1"/>
-							    <field name="pattern_name" readonly="1"/>
-							    <field name="each_weight" readonly="1"/>
-							    <field name="qty" readonly="1"/>
-							</group>											
-							<group>
-								<field name="pattern_id" readonly="1"/>
-								<field name="moc_id" readonly="1"/>
-								<field name="total_weight" readonly="1"/>
-								
-							</group>					
-						</group>
-						<notebook>
+		<field name="name">Pouring Completed</field>
+		<field name="model">kg.production</field>
+		<field name="arch" type="xml">
+			<form string="Pouring Completed" version="7.0" create="false">
+				<sheet>		
+					<group string="Work Order Details">
+						<group>
+							<field name="name" invisible="1"/>
+							<field name="division_id" invisible="1" readonly="1"/>
+							<field name="order_no" readonly="1"/>
+							<field name="order_priority" string="Category" readonly="1"/>
+							<field name="pour_remarks" string="Pour Remarks" readonly="1"/>
+							<field name="state" style="width: 30%%" class="att_state_change"/>	
+						</group>											
+						<group>
+							<field name="entry_date" invisible="1"/>
+							<field name="order_delivery_date"/>
+							<field name="location" readonly="1"/>
+							<field name="order_date" invisible="1" readonly="1"/>
+							<field name="order_category" invisible="1" readonly="1"/>
+							<field name="fettling_progress_remarks" string="Remarks"/>
 							
-							<page string="Entry Info">
+						</group>					
+					</group>
+					<group string="Specification">
+						<group>
+							<field name="pump_model_id" readonly="1"/>
+							<field name="pattern_name" readonly="1"/>
+							<field name="each_weight" readonly="1"/>
+							<field name="qty" readonly="1"/>
+						</group>											
+						<group>
+							<field name="pattern_id" readonly="1"/>
+							<field name="moc_id" readonly="1"/>
+							<field name="total_weight" readonly="1"/>
+							
+						</group>					
+					</group>
+					<notebook>
+						
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
 								<group>
-									<field name="company_id"/>
+									<field name="user_id"/>
+									<field name="update_user_id"/>
 								</group>
 								<group>
-									<field name="active"/>
+									<field name="crt_date"/>
+									<field name="update_date"/>
 								</group>
-								<group>
-									<group>
-										<field name="user_id"/>
-										<field name="update_user_id"/>
-									</group>
-									<group>
-										<field name="crt_date"/>
-										<field name="update_date"/>
-									</group>
-								</group>
-							</page>
-						</notebook>
-					</sheet>
-				</form>
-			</field>
-		</record>
+							</group>
+						</page>
+					</notebook>
+				</sheet>
+			</form>
+		</field>
+	</record>
 		
 	<!-- Form View End -->
 		
-	
-	
-	
 	<!-- Tree View Start -->
 		
 		<record id="t_tree_v_pouring_completed" model="ir.ui.view">
@@ -1629,7 +1701,7 @@
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
 				<tree toolbar="True" string="Pouring Completed Tree" create="false">
-					<field name="order_delivery_date" string="Date"/>
+					<field name="order_delivery_date" string="Delivery Date"/>
 					<field name="order_no"/>
 					<field name="order_priority" string="Category"/>
 					<field name="pattern_id" string="Part No."/>
@@ -1641,7 +1713,8 @@
 					<field name="pour_pending_qty" invisible="1" sum="Total Pending Qty"/>
 					<field name="each_weight" sum="Total Each Weight"/>
 					<field name="total_weight" sum="Total Weight"/>
-					<field name="pour_remarks"/>
+					<field name="pour_remarks" string="Pour Remarks"/>
+					<field name="fettling_progress_remarks" string="Remarks"/>
 					<field name="state" invisible="1"/>
 					<field name="name" invisible="1"/>
 					<field name="order_category" invisible="1"/>
@@ -1691,8 +1764,6 @@
 		</record>
 		
 	<!-- Search View End -->
-	
-	
 	
 	
 	<!-- Menu Action Start -->

@@ -516,7 +516,7 @@ class kg_fettling(osv.osv):
 						
 		if (entry.inward_accept_qty + entry.inward_reject_qty) < entry.pour_qty:
 			raise osv.except_osv(_('Warning!'),
-						_('Accept and Reject qty should be equal to POur Qty !!'))
+						_('Accept and Reject qty should be equal to Pour Qty !!'))
 						
 		if reject_qty > 0:
 			if entry.inward_reject_qty == 0:

@@ -364,12 +364,51 @@
 	
 	<!-- Sequence Number Setting Ends Here -->
         
-    <!-- Audit Log Xml Data End-->
+	<!-- Un scheduled Work Order Items Tree View Start-->
+    
+		<record id="t_tree_v_unscheduled_wo_list" model="ir.ui.view">
+			<field name="name">Un Scheduled Work Order Items Tree</field>
+			<field name="model">ch.work.order.details</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Un Scheduled Work Order Items Tree" create="false" delete="false">					
+					<field name="order_no" string="WO.No."/>
+					<field name="order_date" string="WO.Date"/>
+					<field name="pump_model_id"/>
+					<field name="order_priority"/>
+					<field name="order_category"/>
+					<field name="delivery_date"/>
+				</tree>
+			</field>
+		</record>
+		
+	 <!-- Un scheduled Work Order Items Tree View End -->
+	
+	<!-- Menu Action Start for Work Order -->
+		
+		<record id="tma_unscheduled_wo_list" model="ir.actions.act_window">
+			<field name="name">Un-Schedule Work Order</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">ch.work.order.details</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_unscheduled_wo_list"/>
+<!--
+			<field name="search_view_id" ref="t_search_v_work_order"/>
+-->
+			<field name="domain">[('schedule_status','in',('allow','not_allow')),('header_id.order_priority','=','normal'),('state','=','confirmed'),('header_id.order_category','in',('pump','pump_spare','project'))]</field>
+		</record>
+		
+	<!-- Menu Action End for Work Order -->
+		
 	
 	<!-- Menu Item Start -->
 	
 		<!-- Work Order -->
 		<menuitem  action="tma_work_order" id="tam_work_order" parent="kg_stock_inward.tpm_planning_transactions" sequence="3"/>
+		<!-- Un Scheduled Work Order -->
+		<menuitem  action="tma_unscheduled_wo_list" id="tam_unscheduled_work_order" parent="kg_stock_inward.tpm_planning_transactions" sequence="3"/>
 	
 	<!-- Menu Item End -->
 	
