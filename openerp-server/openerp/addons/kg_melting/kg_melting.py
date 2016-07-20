@@ -168,6 +168,7 @@ class kg_melting(osv.osv):
 	def onchange_moc_details(self, cr, uid, ids, moc_id,context=None):			
 		chemistry_details_vals=[]
 		raw_material_vals=[]
+		mech_details_vals=[]
 		moc_obj=self.pool.get('kg.moc.master')			
 		if moc_id:					
 			moc_obj_ids=moc_obj.search(cr,uid,[('id','=',moc_id)])
@@ -177,6 +178,9 @@ class kg_melting(osv.osv):
 			
 			chemistry_details_line_obj = self.pool.get('ch.melting.chemistry.details')
 			chemistry_details_lines=moc_rec.line_ids_a	
+			
+			mech_details_line_obj = self.pool.get('ch.mechanical.properties')
+			mech_details_lines=moc_rec.line_ids_b	
 			
 			for raw_material_line in raw_material_lines:	
 				raw_material_vals.append({
@@ -193,7 +197,19 @@ class kg_melting(osv.osv):
 						'required_chemistry_max': chemistry_details_line.max,
 												
 					})			
-		return {'value': {'line_ids': raw_material_vals,'line_ids_a': chemistry_details_vals}}
+					
+			for mech_details_line in mech_details_lines:	
+				
+				mech_details_vals.append({
+						
+						'mechanical_id': mech_details_line.mechanical_id.id,
+						'uom': mech_details_line.uom,
+						'min': mech_details_line.min,
+						'max': mech_details_line.max,
+						'moc_id': moc_rec.id,
+												
+					})
+		return {'value': {'line_ids': raw_material_vals,'line_ids_a': chemistry_details_vals,'line_ids_b': mech_details_vals}}
 	
 	def entry_confirm(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])		
@@ -352,7 +368,7 @@ class ch_mechanical_properties(osv.osv):
 	
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		print "entry.mech_value,entry.mech_value,entry.moc_id.id,entry.mechanical_id.id]",entry.mech_value,entry.mech_value,entry.moc_id.id,entry.mechanical_id.id					
+						
 		cr.execute(''' select moc_line.header_id from 
 
 									ch_mechanical_chart as moc_line
@@ -377,8 +393,7 @@ class ch_mechanical_properties(osv.osv):
 									and
 									moc_line.header_id = %s and moc_line.mechanical_id = %s
 							  ''',[entry.mech_value,entry.mech_value,entry.mech_value,entry.mpa_value,entry.mpa_value,entry.mpa_value,entry.moc_id.id,entry.mechanical_id.id])
-		values= cr.fetchone()
-		print "values",values		
+		values= cr.fetchone()			
 		if values:
 			return True
 		else:
