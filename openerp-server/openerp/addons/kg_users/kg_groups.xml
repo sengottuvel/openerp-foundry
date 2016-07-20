@@ -42,6 +42,7 @@
             ref('kg_stock_inward.tpm_planning_transactions'),
             ref('kg_stock_inward.tam_stock_inward'),
             ref('kg_work_order.tam_work_order'),
+            ref('kg_work_order.tam_unscheduled_work_order'),
             ref('kg_schedule.tam_schedule'),
             ref('kg_qc_verification.tam_qc_verification'),
             ref('kg_production.tam_production'),
