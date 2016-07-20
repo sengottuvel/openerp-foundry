@@ -217,8 +217,9 @@
 						<page string="WO Details">
 							<field name="line_id" colspan="4" nolabel="1">
 								<tree string="WO Items" editable="bottom">
-								   <field name="wo_id"/>
+								   <field name="w_order_line_id"/>
 								   <field name="qty"/>
+								   <field name="wo_id" invisible="1"/>
 								</tree>
 							</field>
 						</page>

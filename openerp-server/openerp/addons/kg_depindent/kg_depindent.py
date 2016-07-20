@@ -609,9 +609,11 @@ class ch_depindent_wo(osv.osv):
 	
 	_columns = {
 
-	'header_id': fields.many2one('kg.depindent.line', 'Dept Indent Line', required=True, ondelete='cascade'),
-	'wo_id': fields.char('WO', required=True),
-	'qty': fields.float('Indent Qty', required=True),
+		'header_id': fields.many2one('kg.depindent.line', 'Dept Indent Line', required=True, ondelete='cascade'),
+		'wo_id': fields.char('WO', required=True),
+		'w_order_id': fields.many2one('kg.work.order','WO',required=True, domain="[('state','=','confirmed')]"),
+		'w_order_line_id': fields.many2one('ch.work.order.details','WO',required=True),
+		'qty': fields.float('Indent Qty', required=True),
 	
 	}
 	

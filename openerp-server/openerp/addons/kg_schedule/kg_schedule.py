@@ -333,8 +333,8 @@ class kg_schedule(osv.osv):
 								'order_id': schedule_item.order_id.id,
 								'order_line_id': schedule_item.order_line_id.id,
 								'qty' : allocation_qty[0],
-								'stock_qty':schedule_item.stock_qty,                   
-								'allocated_qty':allocation_qty[0],                 
+								'stock_qty':schedule_item.stock_qty,				   
+								'allocated_qty':allocation_qty[0],				 
 								'state' : 'draft',
 								'order_category':schedule_item.order_id.order_category,
 								'order_priority':schedule_item.order_id.order_priority,
@@ -398,8 +398,8 @@ class kg_schedule(osv.osv):
 							'schedule_line_id': schedule_item.id,
 							'order_id': schedule_item.order_id.id,
 							'order_line_id': schedule_item.order_line_id.id,
-							'qty' : schedule_qty,              
-							'schedule_qty' : schedule_qty,              
+							'qty' : schedule_qty,			  
+							'schedule_qty' : schedule_qty,			  
 							'state' : 'issue_pending',
 							'order_category':schedule_item.order_id.order_category,
 							'order_priority':priority,
@@ -455,8 +455,8 @@ class kg_schedule(osv.osv):
 							'schedule_line_id': schedule_item.id,
 							'order_id': schedule_item.order_id.id,
 							'order_line_id': schedule_item.order_line_id.id,
-							'qty' : schedule_qty,              
-							'schedule_qty' : schedule_qty,              
+							'qty' : schedule_qty,			  
+							'schedule_qty' : schedule_qty,			  
 							'state' : 'issue_done',
 							'order_category':schedule_item.order_id.order_category,
 							'order_priority':priority,
@@ -487,7 +487,10 @@ class kg_schedule(osv.osv):
 				
 					production_id = production_obj.create(cr, uid, production_vals)
 					
-			#### Department Indent Creation for MOC Raw materials ###
+			
+			#### Department Indent Creation for MOC Raw materials  ###
+			
+			### Foundry Items ###
 					
 			cr.execute("""
 				select product_id,sum(indent_qty) as indent_qty from 
@@ -501,7 +504,91 @@ class kg_schedule(osv.osv):
 					from ch_schedule_details  where header_id = %s and qty > 0
 					) 
 
-					union all
+					)
+
+					as sub_query
+					group by product_id"""%(entry.id))
+			foundry_indent_moc_details = cr.dictfetchall();
+			
+			if foundry_indent_moc_details:
+			
+				### Creation of Department Indent Header ###
+				
+				dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','FOUN')])
+				
+				seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
+				seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry.entry_date))
+				seq_name = cr.fetchone();
+
+				dep_indent_obj = self.pool.get('kg.depindent')
+				foundry_dep_indent_vals = {
+					'name':'',
+					'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+					'dep_name':dep_id[0],
+					'entry_mode':'auto',
+					'state': 'approved',
+					'indent_type': 'production',
+					'name': seq_name[0]
+					}
+					
+				indent_id = dep_indent_obj.create(cr, uid, foundry_dep_indent_vals)
+				for foundry_indent_item in foundry_indent_moc_details:
+					dep_indent_line_obj = self.pool.get('kg.depindent.line')
+					product_rec = self.pool.get('product.product').browse(cr, uid, foundry_indent_item['product_id'])
+					
+					foundry_dep_indent_line_vals = {
+						'indent_id':indent_id,
+						'product_id':foundry_indent_item['product_id'],
+						'uom':product_rec.uom_id.id,
+						'qty':foundry_indent_item['indent_qty'],
+						'pending_qty':foundry_indent_item['indent_qty'],
+					}
+					
+					indent_line_id = dep_indent_line_obj.create(cr, uid, foundry_dep_indent_line_vals)
+					
+					
+					cr.execute("""
+						select product_id,order_line_id,sum(indent_qty) as indent_qty from 
+
+						(
+
+						select (raw.qty * order_bom.qty) as indent_qty,raw.product_id,order_bom.header_id as order_line_id
+						from ch_moc_raw_material as raw
+						left join ch_order_bom_details order_bom on raw.header_id = order_bom.moc_id
+						where order_bom.flag_applicable = 't' and order_bom.header_id in (select order_line_id from 
+						ch_schedule_details where header_id = %s and qty > 0
+						)
+
+						)
+						as sub_query
+						where product_id = %s
+						group by product_id,order_line_id
+						"""%(entry.id,foundry_indent_item['product_id']))
+					foundry_indent_wo_details = cr.dictfetchall();
+					
+					for foundry_indent_wo_item in foundry_indent_wo_details:
+						
+						indent_wo_line_obj = self.pool.get('ch.depindent.wo')
+						order_line_rec = self.pool.get('ch.work.order.details').browse(cr, uid, foundry_indent_wo_item['order_line_id'])
+						
+						foundry_indent_wo_line_vals = {
+							'header_id':indent_line_id,
+							'wo_id':order_line_rec.order_no,
+							'w_order_id':order_line_rec.header_id.id,
+							'w_order_line_id':order_line_rec.id,
+							'qty':foundry_indent_wo_item['indent_qty'],
+						}
+						indent_wo_line_id = indent_wo_line_obj.create(cr, uid, foundry_indent_wo_line_vals)
+					
+					
+			#### Machine shop Items ###		
+					
+			cr.execute("""
+				select product_id,sum(indent_qty) as indent_qty from 
+
+					(
+
 
 					select (raw.qty * order_ms.qty) as indent_qty,raw.product_id
 					from ch_ms_raw_material as raw
@@ -511,7 +598,87 @@ class kg_schedule(osv.osv):
 					) 
 
 
-					union all
+					)
+
+					as sub_query
+					group by product_id"""%(entry.id))
+			ms_indent_moc_details = cr.dictfetchall();
+			
+			if ms_indent_moc_details:
+				### Creation of Department Indent Header ###
+				
+				dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','MS')])
+				
+				seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
+				seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry.entry_date))
+				seq_name = cr.fetchone();
+				
+				dep_indent_obj = self.pool.get('kg.depindent')
+				ms_dep_indent_vals = {
+					'name':'',
+					'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+					'dep_name':dep_id[0],
+					'entry_mode':'auto',
+					'state': 'approved',
+					'indent_type': 'production',
+					'name': seq_name[0]
+					}
+					
+				indent_id = dep_indent_obj.create(cr, uid, ms_dep_indent_vals)
+				for ms_indent_item in ms_indent_moc_details:
+					dep_indent_line_obj = self.pool.get('kg.depindent.line')
+					product_rec = self.pool.get('product.product').browse(cr, uid, ms_indent_item['product_id'])
+					ms_dep_indent_line_vals = {
+					'indent_id':indent_id,
+					'product_id':ms_indent_item['product_id'],
+					'uom':product_rec.uom_id.id,
+					'qty':ms_indent_item['indent_qty'],
+					'pending_qty':ms_indent_item['indent_qty'],
+					}
+					
+					indent_line_id = dep_indent_line_obj.create(cr, uid, ms_dep_indent_line_vals)
+					
+					
+					cr.execute("""
+						select product_id,order_line_id,sum(indent_qty) as indent_qty from 
+
+						(
+						select (raw.qty * order_ms.qty) as indent_qty,raw.product_id,order_ms.header_id as order_line_id
+						from ch_ms_raw_material as raw
+						left join ch_order_machineshop_details order_ms on raw.header_id = order_ms.ms_id
+						where order_ms.flag_applicable = 't' and order_ms.header_id in (select distinct order_line_id 
+						from ch_schedule_details where header_id = %s and qty > 0
+						)
+						)
+						as sub_query
+						where product_id = %s
+						group by product_id,order_line_id
+						"""%(entry.id,ms_indent_item['product_id']))
+					ms_indent_wo_details = cr.dictfetchall();
+					
+					for ms_indent_wo_item in ms_indent_wo_details:
+						
+						indent_wo_line_obj = self.pool.get('ch.depindent.wo')
+						order_line_rec = self.pool.get('ch.work.order.details').browse(cr, uid, ms_indent_wo_item['order_line_id'])
+						
+						ms_indent_wo_line_vals = {
+						'header_id':indent_line_id,
+						'wo_id':order_line_rec.order_no,
+						'w_order_id':order_line_rec.header_id.id,
+						'w_order_line_id':order_line_rec.id,
+						'qty':ms_indent_wo_item['indent_qty'],
+						}
+						
+						indent_wo_line_id = indent_wo_line_obj.create(cr, uid, ms_indent_wo_line_vals)
+					
+					
+			### BOT Items ###
+					
+			cr.execute("""
+				select product_id,sum(indent_qty) as indent_qty from 
+
+					(
 
 					select (raw.qty * order_bot.qty) as indent_qty,raw.product_id
 					from ch_ms_raw_material as raw
@@ -520,87 +687,81 @@ class kg_schedule(osv.osv):
 					from ch_schedule_details  where header_id = %s and qty > 0
 					)
 
-
-
 					)
 
 					as sub_query
-					group by product_id"""%(entry.id,entry.id,entry.id))
-			indent_moc_details = cr.dictfetchall();
+					group by product_id"""%(entry.id))
+			bot_indent_moc_details = cr.dictfetchall();
 			
-			### Creation of Department Indent Header ###
+			if bot_indent_moc_details:
 			
-			dep_indent_obj = self.pool.get('kg.depindent')
-			dep_indent_vals = {
-				'name':'',
-				'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
-				'dep_name':1,
-				'entry_mode':'auto'
-				}
+				### Creation of Department Indent Header ###
+				dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','ASS')])
 				
-			indent_id = dep_indent_obj.create(cr, uid, dep_indent_vals)
-			for indent_item in indent_moc_details:
-				dep_indent_line_obj = self.pool.get('kg.depindent.line')
-				product_rec = self.pool.get('product.product').browse(cr, uid, indent_item['product_id'])
-				dep_indent_line_vals = {
-				'indent_id':indent_id,
-				'product_id':indent_item['product_id'],
-				'uom':product_rec.uom_id.id,
-				'qty':indent_item['indent_qty'],
-				'pending_qty':indent_item['indent_qty'],
-				}
+				seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
+				seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry.entry_date))
+				seq_name = cr.fetchone();
 				
-				indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
-				
-				
-				cr.execute("""
-					select product_id,order_line_id,sum(indent_qty) as indent_qty from 
-
-					(
-
-					select (raw.qty * order_bom.qty) as indent_qty,raw.product_id,order_bom.header_id as order_line_id
-					from ch_moc_raw_material as raw
-					left join ch_order_bom_details order_bom on raw.header_id = order_bom.moc_id
-					where order_bom.flag_applicable = 't' and order_bom.header_id in (select order_line_id from 
-					ch_schedule_details where header_id = %s and qty > 0
-					)
-
-					union
-
-					select (raw.qty * order_ms.qty) as indent_qty,raw.product_id,order_ms.header_id as order_line_id
-					from ch_moc_raw_material as raw
-					left join ch_order_machineshop_details order_ms on raw.header_id = order_ms.moc_id
-					where order_ms.flag_applicable = 't' and order_ms.header_id in (select distinct order_line_id 
-					from ch_schedule_details  where header_id = %s and qty > 0
-					) 
-
-					union
-
-					select (raw.qty * order_bot.qty) as indent_qty,raw.product_id,order_bot.header_id as order_line_id
-					from ch_moc_raw_material as raw
-					left join ch_order_bot_details order_bot on raw.header_id = order_bot.moc_id
-					where order_bot.flag_applicable = 't' and order_bot.header_id in (select distinct order_line_id 
-					from ch_schedule_details  where header_id = %s and qty > 0
-					)  
-					)
-					as sub_query
-					where product_id = %s
-					group by product_id,order_line_id
-					"""%(entry.id,entry.id,entry.id,indent_item['product_id']))
-				indent_wo_details = cr.dictfetchall();
-				
-				for indent_wo_item in indent_wo_details:
-					
-					indent_wo_line_obj = self.pool.get('ch.depindent.wo')
-					order_line_rec = self.pool.get('ch.work.order.details').browse(cr, uid, indent_wo_item['order_line_id'])
-					
-					indent_wo_line_vals = {
-					'header_id':indent_line_id,
-					'wo_id':order_line_rec.order_no,
-					'qty':indent_wo_item['indent_qty'],
+				dep_indent_obj = self.pool.get('kg.depindent')
+				bot_dep_indent_vals = {
+					'name':'',
+					'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+					'dep_name':dep_id[0],
+					'entry_mode':'auto',
+					'state': 'approved',
+					'indent_type': 'production',
+					'name': seq_name[0]
 					}
 					
-					indent_wo_line_id = indent_wo_line_obj.create(cr, uid, indent_wo_line_vals)
+				indent_id = dep_indent_obj.create(cr, uid, bot_dep_indent_vals)
+				for bot_indent_item in bot_indent_moc_details:
+					dep_indent_line_obj = self.pool.get('kg.depindent.line')
+					product_rec = self.pool.get('product.product').browse(cr, uid, bot_indent_item['product_id'])
+					
+					bot_dep_indent_line_vals = {
+					'indent_id':indent_id,
+					'product_id':bot_indent_item['product_id'],
+					'uom':product_rec.uom_id.id,
+					'qty':bot_indent_item['indent_qty'],
+					'pending_qty':bot_indent_item['indent_qty'],
+					}
+					
+					indent_line_id = dep_indent_line_obj.create(cr, uid, bot_dep_indent_line_vals)
+					
+					
+					cr.execute("""
+						select product_id,order_line_id,sum(indent_qty) as indent_qty from 
+
+						(
+
+						select (raw.qty * order_bot.qty) as indent_qty,raw.product_id,order_bot.header_id as order_line_id
+						from ch_ms_raw_material as raw
+						left join ch_order_bot_details order_bot on raw.header_id = order_bot.bot_id
+						where order_bot.flag_applicable = 't' and order_bot.header_id in (select distinct order_line_id 
+						from ch_schedule_details  where header_id = %s and qty > 0
+						)  
+						)
+						as sub_query
+						where product_id = %s
+						group by product_id,order_line_id
+						"""%(entry.id,bot_indent_item['product_id']))
+					bot_indent_wo_details = cr.dictfetchall();
+					
+					for bot_indent_wo_item in bot_indent_wo_details:
+						
+						indent_wo_line_obj = self.pool.get('ch.depindent.wo')
+						order_line_rec = self.pool.get('ch.work.order.details').browse(cr, uid, bot_indent_wo_item['order_line_id'])
+						
+						bot_indent_wo_line_vals = {
+						'header_id':indent_line_id,
+						'wo_id':order_line_rec.order_no,
+						'w_order_id':order_line_rec.header_id.id,
+						'w_order_line_id':order_line_rec.id,
+						'qty':bot_indent_wo_item['indent_qty'],
+						}
+						
+						indent_wo_line_id = indent_wo_line_obj.create(cr, uid, bot_indent_wo_line_vals)
 				
 			
 		
