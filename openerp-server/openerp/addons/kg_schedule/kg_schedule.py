@@ -514,7 +514,7 @@ class kg_schedule(osv.osv):
 			
 				### Creation of Department Indent Header ###
 				
-				dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','FOUN')])
+				dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP15')])
 				
 				seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
 				seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
@@ -607,7 +607,7 @@ class kg_schedule(osv.osv):
 			if ms_indent_moc_details:
 				### Creation of Department Indent Header ###
 				
-				dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','MS')])
+				dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
 				
 				seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
 				seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
@@ -696,7 +696,7 @@ class kg_schedule(osv.osv):
 			if bot_indent_moc_details:
 			
 				### Creation of Department Indent Header ###
-				dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','ASS')])
+				dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP3')])
 				
 				seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
 				seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
