@@ -216,6 +216,39 @@ class kg_melting(osv.osv):
 		line_ids =entry.line_ids
 		grand_total =0.00
 		melt_cost =0.00
+		for entry in entry.line_ids_b:
+			cr.execute(''' select moc_line.header_id from 
+
+									ch_mechanical_chart as moc_line
+									left join kg_mechanical_master mech on mech.id = moc_line.mechanical_id
+									where 
+									case when mech.value_limit = 'based_on_value' then
+									(case when moc_line.range_flag = 't' then 
+									%s >= moc_line.min
+									when moc_line.range_flag = 'f' then
+									%s >= moc_line.min and
+									%s <= moc_line.max
+									end)
+									else
+									(case when moc_line.range_flag = 't' then 
+									%s >= moc_line.min
+									when moc_line.range_flag = 'f' then
+									%s >= moc_line.min and
+									%s <= moc_line.max
+									end) end 
+									
+
+									and
+									moc_line.header_id = %s and moc_line.mechanical_id = %s
+							  ''',[entry.mech_value,entry.mech_value,entry.mech_value,entry.mpa_value,entry.mpa_value,entry.mpa_value,entry.moc_id.id,entry.mechanical_id.id])
+			values= cr.fetchone()			
+			if values:
+				return True
+			else:
+				raise osv.except_osv(_('Mechanical Chart'),
+						_('Specified Mechanical Properties has not available in MOC Master and check the values !!'))
+		
+		
 		for line in line_ids:			
 			melt_cost += line.total_amount			
 			grand_total += line.total_weight	
@@ -437,7 +470,7 @@ class ch_mechanical_properties(osv.osv):
 		
 	_constraints = [		
 			  
-		(_check_values, 'Specified Mechanical Properties has not available in MOC Master and check the values !!',['Mechanical Chart']),		
+		#(_check_values, 'Specified Mechanical Properties has not available in MOC Master and check the values !!',['Mechanical Chart']),		
 	   ]
 	
 ch_mechanical_properties()
