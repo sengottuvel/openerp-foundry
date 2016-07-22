@@ -115,6 +115,7 @@
 					<filter icon="terp-check" name="issue_pending" string="Issue Pending" domain="[('state','=','issue_pending')]"/>
 					<filter icon="terp-check" name="issue_done" string="Issue Done" domain="[('state','=','issue_done')]"/>
 					<filter icon="terp-check" name="mould_com" string="Moulding Completed" domain="[('state','=','mould_com')]"/>
+					<filter icon="terp-check" name="pour_pending" string="Pouring Pending" domain="[('state','=','pour_pending')]"/>
 					<filter icon="terp-check" name="pour_com" string="Pouring Completed" domain="[('state','=','pour_com')]"/>
 					<filter icon="terp-check" name="casting_com" string="Casting Completed" domain="[('state','=','casting_com')]"/>				
 					<filter icon="terp-check" name="fettling_inprogress" string="Fettling In Progress" domain="[('state','=','fettling_inprogress')]"/>				

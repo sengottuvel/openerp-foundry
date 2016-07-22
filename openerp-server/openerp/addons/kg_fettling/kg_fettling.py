@@ -232,6 +232,8 @@ class kg_fettling(osv.osv):
 		'heat_chloride_content':fields.char('Chloride Content', size=128),
 		'heat_total_qty': fields.integer('Total Qty'),
 		'heat_qty':fields.integer('Qty'),
+		'heat_reject_qty': fields.integer('Rejected Qty'),
+		'heat_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		'heat_each_weight':fields.integer('Each Weight'),
 		'heat_total_weight':fields.integer('Total Weight'),
 		'heat_remarks': fields.text('Remarks'),
@@ -475,7 +477,12 @@ class kg_fettling(osv.osv):
 		'fettling_id':entry_rec.id,
 		'fettling_qty':inward_qty,
 		'inward_accept_qty':inward_qty,
-		'state':'waiting'
+		'state':'waiting',
+		'ms_sch_qty': inward_qty,
+		'ms_type': 'foundry_item',
+		'item_code': entry_rec.pattern_code,
+		'item_name': entry_rec.pattern_name,
+		'position_id': entry_rec.order_bomline_id.position_id.id,
 		
 		}
 		
@@ -2497,11 +2504,35 @@ class kg_fettling(osv.osv):
 		total_wt = 0
 		production_obj = self.pool.get('kg.production')
 		entry = self.browse(cr, uid, ids[0])
+						
+		reject_qty = entry.heat_total_qty - entry.heat_qty
 		
 		if entry.heat_qty <= 0 or entry.heat_each_weight < 0:
 			raise osv.except_osv(_('Warning!'),
 						_('System not allow to save negative or zero values !!'))
 						
+		if (entry.heat_qty + entry.heat_reject_qty) > entry.heat_total_qty:
+			raise osv.except_osv(_('Warning!'),
+						_('Completed and Rejected qty should not exceed Production Qty !!'))
+						
+		if (entry.heat_qty + entry.heat_reject_qty) < entry.heat_total_qty:
+			raise osv.except_osv(_('Warning!'),
+						_('Completed and Rejected qty should be equal to Production Qty !!'))
+						
+					
+		if reject_qty > 0:
+			if entry.heat_reject_qty == 0:
+				raise osv.except_osv(_('Warning!'),
+				_('Kindly Enter Rejection Qty !!'))
+			if entry.heat_reject_qty < reject_qty:
+				raise osv.except_osv(_('Warning!'),
+				_('Kindly Check Rejection Qty !!'))	
+				
+				
+		if entry.heat_reject_qty > 0 and not entry.heat_reject_remarks_id:
+			raise osv.except_osv(_('Warning!'),
+				_('Remarks is must for Rejection !!'))		
+										
 		heat_date = entry.heat_date
 		heat_date = str(heat_date)
 		heat_date = datetime.strptime(heat_date, '%Y-%m-%d')
@@ -2649,6 +2680,76 @@ class kg_fettling(osv.osv):
 			else:
 				### MS Inward Process Creation ###
 				self.ms_inward_update(cr, uid, [entry.id],entry.heat_qty)
+				
+		if entry.heat_reject_qty > 0:
+			
+			### Full Rejection Update ###
+			full_reject_qty = entry.heat_total_qty - entry.heat_reject_qty
+			if full_reject_qty == 0:
+				self.write(cr, uid, ids, {'state':'complete'})
+			#### NC Creation for reject Qty ###
+			
+			### Production Number ###
+			produc_name = ''	
+			produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
+			rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry.entry_date))
+			produc_name = cr.fetchone();
+			
+			### Issue Number ###
+			issue_name = ''	
+			issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
+			rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry.entry_date))
+			issue_name = cr.fetchone();
+			
+			### Core Log Number ###
+			core_name = ''	
+			core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
+			rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry.entry_date))
+			core_name = cr.fetchone();
+			
+			### Mould Log Number ###
+			mould_name = ''	
+			mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
+			rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry.entry_date))
+			mould_name = cr.fetchone();
+			
+			production_vals = {
+									
+				'name': produc_name[0],
+				'schedule_id': entry.schedule_id.id,
+				'schedule_date': entry.schedule_date,
+				'division_id': entry.division_id.id,
+				'location' : entry.location,
+				'schedule_line_id': entry.schedule_line_id.id,
+				'order_id': entry.order_id.id,
+				'order_line_id': entry.order_line_id.id,
+				'qty' : entry.heat_reject_qty,			  
+				'schedule_qty' : entry.heat_reject_qty,			  
+				'state' : 'issue_done',
+				'order_category':entry.order_category,
+				'order_priority': '2',
+				'pattern_id' : entry.pattern_id.id,
+				'pattern_name' : entry.pattern_id.pattern_name,	
+				'moc_id' : entry.moc_id.id,
+				'request_state': 'done',
+				'issue_no': issue_name[0],
+				'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+				'issue_qty': 1,
+				'issue_state': 'issued',
+				'core_no': core_name[0],
+				'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+				'core_qty': entry.heat_reject_qty,
+				'core_state': 'pending',
+				'mould_no': mould_name[0],
+				'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+				'mould_qty': entry.heat_reject_qty,
+				'mould_state': 'pending',		
+			}
+			production_id = production_obj.create(cr, uid, production_vals)	
 				
 			### Updating Total Weight ###
 			total_wt = entry.heat_qty * entry.heat_each_weight 
@@ -5475,7 +5576,22 @@ class kg_batch_heat_treatment(osv.osv):
 		'contractor_id':fields.many2one('res.partner','Contractor'),
 		'employee_name': fields.char('Employee',size=128),
 		'each_weight':fields.integer('Each Weight(kgs)'),
-
+		
+		
+		'heat_fc_temp':fields.char('F/c initial temperature', size=128),
+		'heat_fc_off_time': fields.float('F/c switch off at'),
+		'heat_furnace_on_time': fields.float('Furnace switched on time'),
+		'heat_treatment_type':fields.char('Treatment type', size=128),
+		'heat_cooling_type':fields.char('Cooling type', size=128),
+		'heat_set_temp':fields.char('Set temperature', size=128),
+		'heat_set_temp_time':fields.float('Set temperature reached on (hrs.)'),
+		'heat_socking_hr':fields.char('Socking hours(hrs.)', size=128),
+		'heat_socking_comp_time':fields.float('Socking completed at(hrs.)'),
+		'heat_quenc_time':fields.integer('Quenching time(Sec.)'),
+		'heat_quencing_before_temp':fields.char('Quenching temp Before', size=128),
+		'heat_quencing_after_temp':fields.char('Quenching temp After', size=128),
+		'heat_chloride_content':fields.char('Chloride Content', size=128),
+		
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		
@@ -5550,6 +5666,19 @@ class kg_batch_heat_treatment(osv.osv):
 					'remarks':  entry.remarks,
 					'heat_cycle_no': entry.heat_cycle_no,
 					'heat_specification': entry.heat_specification,
+					'heat_fc_temp':entry.heat_fc_temp,
+					'heat_fc_off_time': entry.heat_fc_off_time,
+					'heat_furnace_on_time': entry.heat_furnace_on_time,
+					'heat_treatment_type': entry.heat_treatment_type,
+					'heat_cooling_type': entry.heat_cooling_type,
+					'heat_set_temp': entry.heat_set_temp,
+					'heat_set_temp_time': entry.heat_set_temp_time,
+					'heat_socking_hr': entry.heat_socking_hr,
+					'heat_socking_comp_time': entry.heat_socking_comp_time,
+					'heat_quenc_time': entry.heat_quenc_time,
+					'heat_quencing_before_temp': entry.heat_quencing_before_temp,
+					'heat_quencing_after_temp': entry.heat_quencing_after_temp,
+					'heat_chloride_content': entry.heat_chloride_content,
 				}
 				
 				
@@ -5578,6 +5707,8 @@ class kg_batch_heat_treatment(osv.osv):
 			fettling_obj.write(cr, uid,item.heat_treatment_id.id,{
 			'heat_remarks':item.remarks,
 			'heat_qty': item.accept_qty,
+			'heat_reject_qty': item.reject_qty,
+			'heat_reject_remarks_id': item.reject_remarks_id.id,
 			'heat_date': item.date,
 			'heat_contractor': item.contractor_id.id,
 			'heat_employee': item.employee_name,
@@ -5585,6 +5716,19 @@ class kg_batch_heat_treatment(osv.osv):
 			'heat_each_weight': item.each_weight,
 			'heat_cycle_no': item.heat_cycle_no,
 			'heat_specification': item.heat_specification,
+			'heat_fc_temp':item.heat_fc_temp,
+			'heat_fc_off_time': item.heat_fc_off_time,
+			'heat_furnace_on_time': item.heat_furnace_on_time,
+			'heat_treatment_type': item.heat_treatment_type,
+			'heat_cooling_type': item.heat_cooling_type,
+			'heat_set_temp': item.heat_set_temp,
+			'heat_set_temp_time': item.heat_set_temp_time,
+			'heat_socking_hr': item.heat_socking_hr,
+			'heat_socking_comp_time': item.heat_socking_comp_time,
+			'heat_quenc_time': item.heat_quenc_time,
+			'heat_quencing_before_temp': item.heat_quencing_before_temp,
+			'heat_quencing_after_temp': item.heat_quencing_after_temp,
+			'heat_chloride_content': item.heat_chloride_content,
 			})
 			fettling_obj.heat_treatment_update(cr, uid, [item.heat_treatment_id.id])
 			
@@ -5630,6 +5774,8 @@ class ch_batch_heat_treatment_line(osv.osv):
 		'contractor_id':fields.many2one('res.partner','Contractor'),
 		'qty': fields.integer('Total Qty'),
 		'accept_qty': fields.integer('Accepted Qty'),
+		'reject_qty': fields.integer('Rejected Qty'),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		'each_weight':fields.integer('Each Weight(kgs)'),
 		'remarks': fields.text('Remarks'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
@@ -5637,6 +5783,20 @@ class ch_batch_heat_treatment_line(osv.osv):
 		'employee_name': fields.char('Employee',size=128),
 		'heat_cycle_no':fields.char('Heat Cycle No.', size=128),
 		'heat_specification':fields.char('Specification', size=128),
+		
+		'heat_fc_temp':fields.char('F/c initial temperature', size=128),
+		'heat_fc_off_time': fields.float('F/c switch off at'),
+		'heat_furnace_on_time': fields.float('Furnace switched on time'),
+		'heat_treatment_type':fields.char('Treatment type', size=128),
+		'heat_cooling_type':fields.char('Cooling type', size=128),
+		'heat_set_temp':fields.char('Set temperature', size=128),
+		'heat_set_temp_time':fields.float('Set temperature reached on (hrs.)'),
+		'heat_socking_hr':fields.char('Socking hours(hrs.)', size=128),
+		'heat_socking_comp_time':fields.float('Socking completed at(hrs.)'),
+		'heat_quenc_time':fields.integer('Quenching time(Sec.)'),
+		'heat_quencing_before_temp':fields.char('Quenching temp Before', size=128),
+		'heat_quencing_after_temp':fields.char('Quenching temp After', size=128),
+		'heat_chloride_content':fields.char('Chloride Content', size=128),
 			
 		
 		

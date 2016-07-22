@@ -69,8 +69,8 @@
 						<field name="line_ids" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
 							<tree string="BOM Details Entry Tree" editable="top" >					
 								
-								<field name="pos_no" invisible="0"/>	
-								<field name="position_id" invisible="1"/>	
+								<field name="pos_no" invisible="1"/>	
+								<field name="position_id"/>	
 								<field name="pattern_id" on_change="onchange_pattern_name(pattern_id)"/>
 								<field name="pattern_name" readonly="1"/>					   
 								<field name="csd_no"/>					   
@@ -84,8 +84,8 @@
 						<page string="Machine Shop">
 								<field name="line_ids_a" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
 									<tree string="Machine Shop Details Entry Tree" editable="top" >			
-										<field name="pos_no" invisible="0"/>	
-										<field name="position_id" invisible="1"/>	
+										<field name="pos_no" invisible="1"/>	
+										<field name="position_id"/>	
 										<field name="ms_id" on_change="onchange_machineshop_name(ms_id)"/>	
 										<field name="name" readonly="1"/>
 										<field name="csd_no" readonly="1"/>										
@@ -97,8 +97,8 @@
 							<page string="BOT">
 								<field name="line_ids_b" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
 									<tree string="BOT Details Entry Tree" editable="top" >	
-										<field name="pos_no" invisible="0"/>		
-										<field name="position_id" invisible="1"/>		
+										<field name="pos_no" invisible="1"/>		
+										<field name="position_id" invisible="0"/>		
 										<field name="bot_id" on_change="onchange_bot_name(bot_id)"/>
 										<field name="name" readonly="1" />																			
 										<field name="qty"/>

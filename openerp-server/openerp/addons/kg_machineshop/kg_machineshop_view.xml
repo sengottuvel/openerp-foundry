@@ -18,7 +18,7 @@
 						<group string="MS Details">
 							<group>
 								<field name="name"/>
-								<field name="inward_accept_qty" attrs="{'readonly': [('state','in',['accept'])]}"/>
+								<field name="inward_accept_qty" required="1" attrs="{'readonly': [('state','in',['accept'])]}"/>
 								<field name="inward_accept_user_id" string="QC by" attrs="{'readonly': [('state','in',['accept'])]}"/>
 								<field name="state" invisible="1"/>
 								<field name="stage_id" widget="selection" invisible="1"/>
@@ -26,7 +26,7 @@
 							</group>											
 							<group>
 								<field name="entry_date" attrs="{'readonly': [('state','in',['accept'])]}"/>
-								<field name="inward_reject_qty" readonly="1"/>
+								<field name="inward_reject_qty" attrs="{'readonly': [('state','in',['accept'])]}"/>
 								<field name="inward_reject_remarks_id" attrs="{'readonly': [('state','in',['accept'])]}"/>
 								<field name="inward_remarks" attrs="{'readonly': [('state','in',['accept'])]}"/>
 							</group>					
@@ -151,6 +151,7 @@
 			<field name="res_model">kg.machineshop</field>
 			<field name="view_type">form</field>
 			<field name="context">{}</field>
+			<field name="domain">[('state','=','waiting')]</field>
 			<field name="search_view_id" ref="t_search_v_ms_inward"/>
 		</record>
 		
@@ -198,13 +199,362 @@
 	
 	<!-- Sequence Number Setting Ends Here -->
 	
+	
+	<!-- MS Schedule List Starts Here -->
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_ms_sch_list" model="ir.ui.view">
+			<field name="name">MS Schedule List Form</field>
+			<field name="model">kg.machineshop</field>
+			<field name="arch" type="xml">
+				<form string="MS Schedule List" version="7.0" create="false">
+					<sheet>		
+						
+						<group string="MS Details">
+							<group>
+								<field name="name"/>
+								<field name="ms_sch_qty" readonly="1"/>
+								<field name="ms_type" invisible="1"/>
+							</group>											
+							<group>
+								<field name="entry_date" readonly="1"/>
+								<field name="ms_state" readonly="1"/>
+							</group>					
+						</group>
+						<group string="Work Order Details">
+							<group>
+								<field name="order_no" readonly="1"/>
+								<field name="order_priority" string="Category" readonly="1"/>
+								<field name="pattern_id" invisible="1"/>
+								<field name="item_code" readonly="1" />
+								<field name="moc_id" readonly="1"/>
+								<field name="total_weight" invisible="1"/>
+							</group>											
+							<group>
+								<field name="order_delivery_date"/>
+								<field name="pump_model_id" readonly="1"/>
+								<field name="pattern_name" invisible="1"/>
+								<field name="item_name" readonly="1"/>
+								<field name="each_weight" invisible="1"/>
+							</group>					
+						</group>
+						<notebook>
+							
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										<field name="update_user_id"/>
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_ms_sch_list" model="ir.ui.view">
+			<field name="name">MS Schedule List Tree</field>
+			<field name="model">kg.machineshop</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="MS Schedule List Tree" create="false">					
+					<field name="name" invisible="1"/>
+					<field name="order_no"/>
+					<field name="order_delivery_date"/>
+					<field name="order_category" invisible="1"/>
+					<field name="order_priority" string="Category"/>
+					<field name="pump_model_id"/>
+					<field name="pattern_id" invisible="1"/>
+					<field name="pattern_name" invisible="1"/>
+					<field name="item_code" />
+					<field name="item_name"/>
+					<field name="moc_id"/>
+					<field name="location" invisible="1"/>
+					<field name="ms_sch_qty" sum="Total Schedule Qty"/>
+					<field name="ms_state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Search View Start -->
+
+		<record id="t_search_v_ms_sch_list" model="ir.ui.view">
+            <field name="name">MS Schedule List Search</field>
+            <field name="model">kg.machineshop</field>
+            <field name="arch" type="xml">
+                <search string="MS Schedule List Search">
+					
+					<field name="item_code" string="Item Code"  filter_domain="[('item_code','ilike',self)]" />
+					<field name="item_name" string="Item Name"  filter_domain="[('item_name','ilike',self)]" />
+					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
+					<field name="order_no" string="Work Order No."  filter_domain="[('order_no','ilike',self)]" />
+					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />
+					
+					<filter icon="terp-check" name="in_plan" string="Planning In Progress" domain="[('ms_state','=','in_plan')]"/>
+					<filter icon="terp-check" name="op_progress" string="Operation In Progress" domain="[('ms_state','=','op_progress')]"/>
+					<filter icon="terp-check" name="op_completed" string="Operations Completed" domain="[('ms_state','=','op_completed')]"/>	
+					<filter icon="terp-check" name="op_rejected" string="Operation Rejected" domain="[('ms_state','=','op_rejected')]"/>	
+					<filter icon="terp-check" name="sent_to_store" string="Sent to MS Store" domain="[('ms_state','=','sent_to_store')]"/>	
+					
+							
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
+						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_delivery_date'}"/>
+						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_category'}"/>
+						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
+						<filter string="Item Code" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'item_code'}"/>
+						<filter string="Item Name" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'item_name'}"/>
+						<filter string="MOC" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_id'}"/>
+						<filter string="State" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'ms_state'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+		
+		<!-- Menu Action Start -->
+		
+		
+		<record id="tma_ms_sch_list" model="ir.actions.act_window">
+			<field name="name">MS Schedule List</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.machineshop</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="domain">[('state','=','accept')]</field>
+			<field name="search_view_id" ref="t_search_v_ms_sch_list"/>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_ms_sch_list_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_ms_sch_list"/>
+            <field name="act_window_id" ref="tma_ms_sch_list"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_ms_sch_list_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_ms_sch_list"/>
+            <field name="act_window_id" ref="tma_ms_sch_list"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	
+	<!-- Batch Entries Starts Here -->
+	
+	<!-- Batch - MS Inward Accept Starts Here -->
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_batch_ms_accept" model="ir.ui.view">
+			<field name="name">Batch MS Accept Form</field>
+			<field name="model">kg.ms.batch.accept</field>
+			<field name="arch" type="xml">
+				<form string="Batch Entry - MS Accept" version="7.0"  delete="false">
+					<header>
+						<button name="entry_accept" type="object" string="Update" states="draft" class="oe_highlight"/>
+					</header>
+					<sheet>		
+						<group>
+							<group>
+								<field name="name" readonly="1"/>
+								<field name="ms_inward_date" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="flag_msline" invisible="1"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+								
+							</group>											
+							<group>
+								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="inward_accept_user_id" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							</group>					
+						</group>
+						<notebook>
+							<page string="MS Inward Items" attrs="{'invisible':[('flag_msline','=',False)]}">
+								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
+									<tree string="MS Batch Accept Line Entry" editable="top" create="false" delete="false">	
+										<field name="ms_inward_no" readonly="1"/>
+										<field name="ms_inward_date" required="1"/>
+										<field name="schedule_qty" readonly="1"/>
+										<field name="accept_qty"/>
+										<field name="reject_qty"/>
+										<field name="reject_remarks_id" attrs="{'required': [('reject_qty','>',0)]}"/>
+										<field name="accept_user_id"/>
+										<field name="reject_user_id" invisible="1"/>
+										<field name="remarks" widget="char"/>
+									</tree>
+								</field>
+							</page>
+							<page string="Select MS Inward Items">	
+								<field name="ms_line_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
+								context="{'tree_view_ref' : 't_tree_v_common_batch_tree'}">
+									<tree string = "MS Items" create="false" edit="false">
+										<field name="name"/>
+										<field name="entry_date"/>
+										<field name="order_no"/>
+										<field name="order_priority"/>
+										<field name="pump_model_id"/>
+										<field name="pattern_id"/>										
+										<field name="pattern_name"/>										
+										<field name="moc_id"/>									
+										<field name="schedule_qty"/>									
+									</tree>
+								</field>
+								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
+							</page>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>										
+										<field name="update_user_id"/>
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>									
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_batch_ms_accept" model="ir.ui.view">
+			<field name="name">Batch MS Accept Tree</field>
+			<field name="model">kg.ms.batch.accept</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">	
+			<tree toolbar="True" string="Batch MS Accept">									
+					<field name="name"/>
+					<field name="entry_date"/>					
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_batch_ms_accept" model="ir.ui.view">
+            <field name="name">Batch MS Inward Search</field>
+            <field name="model">kg.ms.batch.accept</field>
+            <field name="arch" type="xml">
+                <search string="MS Batch Accept">
+					<field name="name" string="Batch No."  filter_domain="[('name','ilike',self)]" />
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+                       
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+	
+	
+	
+	<!-- Menu Action Start-->	
+		
+		<record id="tma_batch_ms_accept" model="ir.actions.act_window">
+			<field name="name">MS Accept</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.ms.batch.accept</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_batch_ms_accept"/>
+			<field name="search_view_id" ref="t_search_v_batch_ms_accept"/>
+			<field name="context">{"search_default_open":1}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start -->
+		
+        <record id="audit_batch_ms_accept" model="audittrail.rule">
+            <field name="name">Audit Log Batch MS Accept</field>
+            <field name="object_id" eval="ref('kg_machineshop.model_kg_ms_batch_accept')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+		
+        <record id="audit_batch_ms_accept_line" model="audittrail.rule">
+            <field name="name">Audit Log Batch MS Accept Line</field>
+            <field name="object_id" eval="ref('kg_machineshop.model_ch_ms_batch_accept_line')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->
+    
+    <!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_batch_ms_accept" model="ir.sequence.type">	
+		<field name="name">KG Batch MS Accept</field>
+		<field name="code">kg.ms.batch.accept</field>
+	</record>
+
+	<record forcecreate="1" id="seq_batch_ms_accept" model="ir.sequence">
+	  <field name="name">KG Batch MS Accept</field>
+	  <field name="code">kg.ms.batch.accept</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">MSBatch/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	<!-- Fettling Inward Batch End Here -->
+	
+	
+	
 	<!-- Menu Item Starts Here -->
 	
-	<menuitem name="Machine Shop" id="tpm_ms_process" parent="kg_stock_inward.tpm_transactions" sequence="4"/>
+	<menuitem name="MS Process" id="tpm_ms_process" parent="kg_menus.mpm_crm" sequence="2"/>
 			
 		<menuitem action="tma_ms_inward" id="tam_ms_inward" parent="tpm_ms_process" sequence="1" />
+		<menuitem action="tma_ms_sch_list" id="tam_ms_sch_list" parent="tpm_ms_process" sequence="2" />
+		
+	<menuitem name="Batch Entries" id="tpm_ms_batch" parent="kg_menus.mpm_crm" sequence="3"/>
 	
-	
+		<menuitem action="tma_batch_ms_accept" id="tam_batch_ms_accept" parent="tpm_ms_batch" sequence="1" />
 	
 	</data>
 </openerp>

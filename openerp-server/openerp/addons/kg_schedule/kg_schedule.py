@@ -276,8 +276,11 @@ class kg_schedule(osv.osv):
 		
 		if entry.line_ids:
 			
+			ms_no = 1
 			for schedule_item in entry.line_ids:
 				
+				### Updation WorK Order ###
+				order_line_obj.write(cr, uid, schedule_item.order_line_id.id, {'schedule_status':'completed'})
 				### Allocation Details Validation ###
 				if schedule_item.line_ids:
 					for alloc_item in schedule_item.line_ids:
@@ -484,9 +487,68 @@ class kg_schedule(osv.osv):
 						}
 						
 						
-				
 					production_id = production_obj.create(cr, uid, production_vals)
 					
+					if ms_no == 1:
+						### Machine shop Item Creation ####
+						cr.execute("""
+							select id as order_ms_line_id,qty as sch_qty,ms_id as ms_id,name as item_name,
+								bom_id as ms_bom_id,ms_line_id as ms_bom_line_id ,position_id,
+								moc_id
+								from ch_order_machineshop_details
+								where flag_applicable = 't' and header_id in 
+								(select order_line_id from ch_schedule_details where header_id = %s
+								) """%(entry.id))
+						order_ms_details = cr.dictfetchall();
+						
+						if order_ms_details:
+						
+							for ms_item in order_ms_details:
+								ms_obj = self.pool.get('kg.machineshop')
+								ms_master_obj = self.pool.get('kg.machine.shop')
+								ms_rec = ms_master_obj.browse(cr, uid, ms_item['ms_id'])
+								
+								### Sequence Number Generation ###
+								ms_name = ''	
+								ms_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.ms.inward')])
+								seq_rec = self.pool.get('ir.sequence').browse(cr,uid,ms_seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(ms_seq_id[0],seq_rec.code))
+								ms_name = cr.fetchone();
+								
+								ms_vals = {
+								
+								'order_ms_line_id': ms_item['order_ms_line_id'],
+								'name': ms_name[0],
+								'location': entry.location,
+								'schedule_id': entry.id,
+								'schedule_date': entry.entry_date,
+								'schedule_line_id': schedule_item.id,
+								'order_id': schedule_item.order_id.id,
+								'order_line_id': schedule_item.order_line_id.id,
+								'order_no': schedule_item.order_line_id.order_no,
+								'order_delivery_date': schedule_item.order_line_id.delivery_date,
+								'order_date': schedule_item.order_line_id.header_id.entry_date,
+								'order_category': schedule_item.order_id.order_category,
+								'order_priority': priority,
+								'pump_model_id':schedule_item.pump_model_id.id,
+								'moc_id':ms_item['moc_id'],
+								'schedule_qty':ms_item['sch_qty'],
+								'ms_sch_qty':ms_item['sch_qty'],
+								'ms_type': 'ms_item',
+								'ms_state': 'in_plan',
+								'state':'accept',
+								'ms_id': ms_item['ms_id'],
+								'ms_bom_id': ms_item['ms_bom_id'],
+								'ms_bom_line_id': ms_item['ms_bom_line_id'],
+								'position_id': ms_item['position_id'],
+								'item_code': ms_rec.code,
+								'item_name': ms_item['item_name' ],
+								
+								}
+								
+								
+								ms_no = ms_no + 1
+								ms_id = ms_obj.create(cr, uid, ms_vals)
 			
 			#### Department Indent Creation for MOC Raw materials  ###
 			

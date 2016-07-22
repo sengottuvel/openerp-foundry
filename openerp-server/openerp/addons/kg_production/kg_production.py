@@ -108,7 +108,7 @@ class kg_production(osv.osv):
 		'order_date': fields.related('order_id','entry_date', type='date', string='Order Date', store=True, readonly=True),
 		'order_category': fields.related('order_line_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'order_priority': fields.selection(ORDER_PRIORITY, string='Priority', store=True, readonly=True),
-		
+		'order_value': fields.related('order_id','order_value', type='float', string='WO Value', store=True, readonly=True),
 		
 		'pump_model_id': fields.related('order_line_id','pump_model_id', type='many2one', relation='kg.pumpmodel.master', string='Pump Model', store=True, readonly=True),
 		'pattern_id': fields.related('schedule_line_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern Number', store=True, readonly=True),
@@ -191,7 +191,7 @@ class kg_production(osv.osv):
 		'pour_heat_id':fields.many2one('kg.melting','Heat Id',domain="[('state','=','confirmed'), ('active','=','t')]"),
 		'pour_remarks': fields.text('Remarks'),
 		'pour_date': fields.datetime('Pouring Date'),
-		'pour_pending_qty': fields.function(_get_pour_pending_qty, string='Pending Qty', store=True, type='float'),
+		'pour_pending_qty': fields.function(_get_pour_pending_qty, string='Pending Qty', store=True, type='integer'),
 		'fettling_reject_qty': fields.integer('Rejected Qty'),
 		
 		'pour_pending_remarks': fields.text('Remarks'),

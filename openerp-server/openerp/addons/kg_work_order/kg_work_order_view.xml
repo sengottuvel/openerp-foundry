@@ -169,7 +169,7 @@
 						<group>
 							
 							<field name="order_category" attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
-							<field name="pump_model_type"  required="1" attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
+							<field name="pump_model_type" attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
 							<field name="qty"  required="1" attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
 							<field name="moc_construction_name"/>
 							<field name="setting_height"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
@@ -194,12 +194,10 @@
 						<page string="Foundry Items">
 							<field name="line_ids" colspan="4" nolabel="1" context="{'order_category':order_category,'flag_standard':flag_standard}"  attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
 								<tree string="BOM Details" editable="bottom">
-								   <field name="order_category" invisible="1"/>
+								    <field name="order_category" invisible="1"/>
 								   <field name="pattern_id"  attrs="{'readonly': [('entry_mode','=','auto')]}"/>
 								   <field name="pattern_name" readonly="1"/>
-<!--
-								   <field name="pos_no" attrs="{'readonly': [('order_category','=','pump')]}"/>
--->
+								   <field name="position_id" attrs="{'readonly': [('order_category','=','pump')]}"/>
 								   <field name="weight" readonly="1"/>
 <!--
 								   <field name="ci_weight" readonly="1"/>
@@ -224,9 +222,9 @@
 							<field name="line_ids_a" nolabel="1" context="{'order_category':order_category,'flag_standard':flag_standard}" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
 								<tree string="Order Machine Shop Details Entry Tree" editable="bottom">
 									<field name="order_category" invisible="1"/>
-									<field name="pos_no" attrs="{'readonly': [('entry_mode','=','auto')]}"/>		
 									<field name="ms_id" attrs="{'readonly': [('entry_mode','=','auto')]}"/>		
 									<field name="name" attrs="{'readonly': [('entry_mode','=','auto')]}"/>
+									<field name="position_id" attrs="{'readonly': [('entry_mode','=','auto')]}"/>		
 									<field name="qty"/>
 									<field name="flag_applicable"/>
 									<field name="moc_id" attrs="{'required': [('flag_applicable','!=',False)],'readonly': [('flag_standard','=',False)]}"/>
@@ -297,7 +295,7 @@
 		
 	<!-- Search View End -->
 	
-	<!-- Menu Action Start-->
+	<!-- Menu Action Start for Work Order -->
 		
 		<record id="tma_work_order" model="ir.actions.act_window">
 			<field name="name">Work Order</field>
@@ -311,7 +309,7 @@
 			<field name="context">{"search_default_draft":1}</field>
 		</record>
 		
-	<!-- Menu Action End-->
+	<!-- Menu Action End for Work Order -->
 	
 	<!-- Audit Log Xml Data Start -->
 		
