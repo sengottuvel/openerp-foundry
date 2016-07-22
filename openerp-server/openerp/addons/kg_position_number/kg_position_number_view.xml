@@ -207,8 +207,8 @@
 								<tree string="Diemnsion Details" editable="bottom">
 								   <field name="dimension_id"/>
 								   <field name="description"/>
-								   <field name="min_val" required="1"/>
-								   <field name="max_val" required="1"/>
+								   <field name="min_val"/>
+								   <field name="max_val"/>
 								   <field name="min_tolerance" />
 								   <field name="max_tolerance" />
 								   <field name="remark"/>

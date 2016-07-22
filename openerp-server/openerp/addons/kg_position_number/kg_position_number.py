@@ -451,17 +451,17 @@ class kg_dimension(osv.osv):
 			return False					
 		return True
 	
-	def _check_max_val(self, cr, uid, ids, context=None):		
-		rec = self.browse(cr, uid, ids[0])
-		if rec.max_val <= 0:
-			return False					
-		return True
+	#~ def _check_max_val(self, cr, uid, ids, context=None):		
+		#~ rec = self.browse(cr, uid, ids[0])
+		#~ if rec.max_val <= 0:
+			#~ return False					
+		#~ return True
 	
-	def _check_min_val(self, cr, uid, ids, context=None):		
-		rec = self.browse(cr, uid, ids[0])
-		if rec.min_val <= 0:
-			return False					
-		return True
+	#~ def _check_min_val(self, cr, uid, ids, context=None):		
+		#~ rec = self.browse(cr, uid, ids[0])
+		#~ if rec.min_val <= 0:
+			#~ return False					
+		#~ return True
 	
 	def _check_dimension(self, cr, uid, ids, context=None):
 		rec = self.browse(cr,uid,ids[0])		
@@ -480,8 +480,8 @@ class kg_dimension(osv.osv):
 	
 		(_check_total,'Maximum Value Should Be Greater Than Minimum Value !',['Minimum Value']),
 		(_check_dimension, 'System not allow to save duplicate Dimension value !',['Dimension']),	
-		(_check_max_val, 'Maximum Value Should Be Greater Than Zero Value !',['Maximum']),	
-		(_check_min_val, 'Minimum Value Should Be Greater Than Zero Value !',['Minimum']),	
+		#~ (_check_max_val, 'Maximum Value Should Be Greater Than Zero Value !',['Maximum']),	
+		#~ (_check_min_val, 'Minimum Value Should Be Greater Than Zero Value !',['Minimum']),	
 		
 		]
 		
