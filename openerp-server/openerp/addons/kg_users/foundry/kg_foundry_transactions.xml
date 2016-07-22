@@ -645,21 +645,6 @@
 		
 		<!-- Batch Finish Grinding Line End -->
 		
-		<!-- MS Inward Start --> 
-		
-		<record id="t_foundry_ms_inward" model="ir.model.access">
-			<field name="model_id" ref="kg_machineshop.model_kg_machineshop"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">Machine Shop</field>
-			<field eval="1" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
-		</record>
-		
-		
-		<!-- MS Inward End -->
-		
 		
 		<!-- Batch Rough Grinding Line Start --> 
 		

@@ -408,7 +408,7 @@ class ch_work_order_details(osv.osv):
 		'order_priority': fields.related('header_id','order_priority', type='selection', selection=ORDER_PRIORITY, string='Priority', store=True, readonly=True),
 		'order_ref_no': fields.related('header_id','name', type='char', string='Work Order No.', store=True, readonly=True),
 		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True,domain="[('active','=','t')]"),
-		'pump_model_type':fields.selection([('vertical','Vertical'),('horizontal','Horizontal'),('others','Others')], 'Type'),
+		'pump_model_type':fields.selection([('vertical','Vertical'),('horizontal','Horizontal'),('others','Others')], 'Type',required=True),
 		'order_no': fields.char('Order No.', size=128,select=True),
 		'order_category': fields.selection([('pump','Pump'),('spare','Spare')],'Purpose', required=True),
 		'qty': fields.integer('Qty', required=True),
@@ -425,7 +425,7 @@ class ch_work_order_details(osv.osv):
 		'flag_standard': fields.boolean('Non Standard'),
 		'unit_price': fields.float('Unit Price',required=True),
 		### Used for Schedule Purpose
-		'schedule_status':fields.selection([('allow','Allow to Schedule'),('not_allow','Not Allow to Schedule')],'Schedule Status', readonly=True),
+		'schedule_status':fields.selection([('allow','Allow to Schedule'),('not_allow','Not Allow to Schedule'),('completed','Schedule Completed')],'Schedule Status', readonly=True),
 		'moc_construction_id':fields.many2one('kg.moc.construction','MOC Construction Code',domain="[('active','=','t')]"),
 		'moc_construction_name':fields.related('moc_construction_id','name', type='char', string='MOC Construction Name.', store=True, readonly=True),
 		### Used for VO ###
@@ -518,7 +518,7 @@ class ch_work_order_details(osv.osv):
 				#### Loading Foundry Items
 				
 				order_bom_obj = self.pool.get('ch.order.bom.details')
-				cr.execute(''' select bom.id,bom.header_id,bom.pattern_id,bom.pattern_name,bom.qty, bom.pos_no,pattern.pcs_weight, pattern.ci_weight,pattern.nonferous_weight
+				cr.execute(''' select bom.id,bom.header_id,bom.pattern_id,bom.pattern_name,bom.qty, bom.pos_no,bom.position_id,pattern.pcs_weight, pattern.ci_weight,pattern.nonferous_weight
 						from ch_bom_line as bom
 						LEFT JOIN kg_pattern_master pattern on pattern.id = bom.pattern_id
 						where bom.header_id = (select id from kg_bom where pump_model_id = %s and active='t') ''',[pump_model_id])
@@ -569,7 +569,8 @@ class ch_work_order_details(osv.osv):
 							'pattern_id': bom_details['pattern_id'],
 							'pattern_name': bom_details['pattern_name'],						
 							'weight': wgt or 0.00,								  
-							'pos_no': bom_details['pos_no'],				  
+							'pos_no': bom_details['pos_no'],
+							'position_id': bom_details['position_id'],				  
 							'qty' : bom_qty,				   
 							'schedule_qty' : bom_qty,				  
 							'production_qty' : 0,				   
@@ -583,7 +584,7 @@ class ch_work_order_details(osv.osv):
 					#### Loading Machine Shop details
 					
 					bom_ms_obj = self.pool.get('ch.machineshop.details')
-					cr.execute(''' select id,pos_no,ms_id,name,qty,header_id as bom_id
+					cr.execute(''' select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
 							from ch_machineshop_details
 							where header_id = (select id from kg_bom where pump_model_id = %s and active='t') ''',[pump_model_id])
 					bom_ms_details = cr.dictfetchall()
@@ -600,8 +601,8 @@ class ch_work_order_details(osv.osv):
 							
 						machine_shop_vals.append({
 							
-							'pos_no':pos_no,					
-							'ms_line_id': bom_ms_details['id'],
+							'pos_no': bom_ms_details['pos_no'],
+							'position_id': bom_ms_details['position_id'],
 							'bom_id': bom_ms_details['bom_id'],
 							'ms_id': bom_ms_details['ms_id'],
 							'name': bom_ms_details['name'],
@@ -664,6 +665,7 @@ class ch_work_order_details(osv.osv):
 							bom.pattern_name,
 							bom.qty, 
 							bom.pos_no,
+							bom.position_id,
 							pattern.pcs_weight, 
 							pattern.ci_weight,
 							pattern.nonferous_weight
@@ -692,6 +694,7 @@ class ch_work_order_details(osv.osv):
 							bom.pattern_name,
 							bom.qty, 
 							bom.pos_no,
+							bom.position_id,
 							pattern.pcs_weight, 
 							pattern.ci_weight,
 							pattern.nonferous_weight
@@ -721,6 +724,7 @@ class ch_work_order_details(osv.osv):
 							bom.pattern_name,
 							bom.qty, 
 							bom.pos_no,
+							bom.position_id,
 							pattern.pcs_weight, 
 							pattern.ci_weight,
 							pattern.nonferous_weight
@@ -753,6 +757,7 @@ class ch_work_order_details(osv.osv):
 							bom.pattern_name,
 							bom.qty, 
 							bom.pos_no,
+							bom.position_id,
 							pattern.pcs_weight, 
 							pattern.ci_weight,
 							pattern.nonferous_weight
@@ -791,6 +796,7 @@ class ch_work_order_details(osv.osv):
 							bom.pattern_name,
 							bom.qty, 
 							bom.pos_no,
+							bom.position_id,
 							pattern.pcs_weight, 
 							pattern.ci_weight,
 							pattern.nonferous_weight
@@ -823,6 +829,7 @@ class ch_work_order_details(osv.osv):
 							bom.pattern_name,
 							bom.qty, 
 							bom.pos_no,
+							bom.position_id,
 							pattern.pcs_weight, 
 							pattern.ci_weight,
 							pattern.nonferous_weight
@@ -1070,7 +1077,8 @@ class ch_work_order_details(osv.osv):
 									'pattern_id': vertical_foundry['pattern_id'],
 									'pattern_name': vertical_foundry['pattern_name'],						
 									'weight': wgt or 0.00,								  
-									'pos_no': vertical_foundry['pos_no'],				  
+									'pos_no': vertical_foundry['pos_no'],
+									'position_id': vertical_foundry['position_id'],			  
 									'qty' : bom_qty,				   
 									'schedule_qty' : bom_qty,				  
 									'production_qty' : 0,				   
@@ -1088,7 +1096,7 @@ class ch_work_order_details(osv.osv):
 						bom_ms_obj = self.pool.get('ch.machineshop.details')
 						cr.execute(''' 
 									-- Power Series --
-									select id,pos_no,ms_id,name,qty,header_id as bom_id
+									select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
 									from ch_machineshop_details
 									where header_id = 
 									(
@@ -1104,7 +1112,7 @@ class ch_work_order_details(osv.osv):
 									union all
 									
 									-- Bed Assembly ----
-									select id,pos_no,ms_id,name,qty,header_id as bom_id
+									select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
 									from ch_machineshop_details
 									where header_id = 
 									(
@@ -1123,7 +1131,7 @@ class ch_work_order_details(osv.osv):
 
 
 									--- Motor Assembly ---
-									select id,pos_no,ms_id,name,qty,header_id as bom_id
+									select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
 									from ch_machineshop_details
 									where header_id =  
 									(
@@ -1143,7 +1151,7 @@ class ch_work_order_details(osv.osv):
 
 									-- Column Pipe ------
 
-									select id,pos_no,ms_id,name,qty,header_id as bom_id
+									select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
 									from ch_machineshop_details
 									where header_id = 
 									(
@@ -1169,7 +1177,7 @@ class ch_work_order_details(osv.osv):
 
 									-- Delivery Pipe ------
 
-									select id,pos_no,ms_id,name,qty,header_id as bom_id
+									select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
 									from ch_machineshop_details
 									where header_id =  
 									(
@@ -1189,7 +1197,7 @@ class ch_work_order_details(osv.osv):
 
 									-- Lubrication ------
 
-									select id,pos_no,ms_id,name,qty,header_id as bom_id
+									select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
 									from ch_machineshop_details
 									where header_id = 
 									(
@@ -1221,7 +1229,8 @@ class ch_work_order_details(osv.osv):
 								
 							machine_shop_vals.append({
 								
-								'pos_no':pos_no,					
+								'pos_no':pos_no,
+								'position_id':vertical_ms_details['position_id'],						
 								'ms_line_id': vertical_ms_details['id'],
 								'bom_id': vertical_ms_details['bom_id'],
 								'ms_id': vertical_ms_details['ms_id'],
@@ -1491,6 +1500,7 @@ class ch_order_bom_details(osv.osv):
 		#~ 'ci_weight': fields.related('pattern_id','ci_weight', type='float', string='CI Weight(kgs)', store=True),
 		#~ 'nonferous_weight': fields.related('pattern_id','nonferous_weight', type='float', string='Non-Ferrous Weight(kgs)', store=True),
 		'pos_no': fields.related('bom_line_id','pos_no', type='integer', string='Position No', store=True),
+		'position_id': fields.many2one('kg.position.number', string='Position No'),
 		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),
 		'qty': fields.integer('Qty'),
 		'unit_price': fields.float('Unit Price'),
@@ -1597,10 +1607,12 @@ class ch_order_machineshop_details(osv.osv):
 		'header_id':fields.many2one('ch.work.order.details', 'Work Order Detail', required=1, ondelete='cascade'),
 		'ms_line_id':fields.many2one('ch.machineshop.details', 'Machine Shop Id'),
 		'pos_no': fields.related('ms_line_id','pos_no', type='integer', string='Position No', store=True),
+		'position_id': fields.many2one('kg.position.number','Position No'),
 		'bom_id': fields.many2one('kg.bom','BOM'),
 		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', ondelete='cascade',required=True),
 		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),
-		'name':fields.char('Item Name', size=128),	  
+		#~ 'name':fields.char('Item Name', size=128),
+		'name': fields.related('ms_id','name', type='char',size=128,string='Item Name', store=True), 	  
 		'qty': fields.integer('Qty', required=True),
 		'flag_applicable': fields.boolean('Is Applicable'),
 		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),

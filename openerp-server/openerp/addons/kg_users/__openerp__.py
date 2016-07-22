@@ -21,6 +21,7 @@
 			'foundry/kg_foundry_masters_access.xml',
 			'foundry/kg_foundry_masters.xml',
 			'machineshop/kg_ms_masters.xml',
+			'machineshop/kg_ms_transactions.xml',
 			'purchase/kg_purchase_transactions.xml',
 			'purchase/kg_purchase_masters.xml',
 			'purchase/kg_vendor_quote_transactions.xml',
