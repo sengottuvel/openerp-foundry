@@ -37,7 +37,10 @@ class kg_position_number(osv.osv):
 		'position_type': fields.selection([('new','NEW'),('copy','COPY')],'Type',required=True),
 		'position_no': fields.many2one('kg.position.number','Source Position',domain="[('active','=',True),('state','=','approved')]"),
 		'line_ids': fields.one2many('ch.kg.position.number','header_id','Operation Configuration',readonly=False,states={'approved':[('readonly',True)]}),
-		'copy_flag':fields.boolean('Copy Flag'),		
+		'copy_flag':fields.boolean('Copy Flag'),
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern No'),
+		'pumpmodel_id': fields.many2one('kg.pumpmodel.master','Pump Model'),
+		'pattern_name': fields.char('Pattern Name'),
 		
 		#'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),
 		
@@ -88,6 +91,14 @@ class kg_position_number(osv.osv):
 				return False
 		return True		"""
 		
+	def onchange_pattern(self, cr, uid, ids,pattern_id):
+		value = {'pattern_name': ''}
+		if pattern_id:
+			pattern_rec = self.pool.get('kg.pattern.master').browse(cr,uid,pattern_id)
+			value = {'pattern_name':pattern_rec.pattern_name}
+		return {'value':value}
+		
+			
 	def _name_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
 		res = True
@@ -439,10 +450,38 @@ class kg_dimension(osv.osv):
 		if rec.max_val < rec.min_val:
 			return False					
 		return True
-		
+	
+	def _check_max_val(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+		if rec.max_val <= 0:
+			return False					
+		return True
+	
+	def _check_min_val(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+		if rec.min_val <= 0:
+			return False					
+		return True
+	
+	def _check_dimension(self, cr, uid, ids, context=None):
+		rec = self.browse(cr,uid,ids[0])		
+		cr.execute("""select id,dimension_id from kg_dimension where header_id = %s"""%(rec.header_id.id))
+		line_data = cr.dictfetchall()
+		for line in line_data :			
+			for sub_line in line_data:				
+				if line['id'] == sub_line['id']:					
+					pass
+				else:
+					if (line['dimension_id'] == sub_line['dimension_id']):
+						return False
+		return True
+			
 	_constraints = [
 	
 		(_check_total,'Maximum Value Should Be Greater Than Minimum Value !',['Minimum Value']),
+		(_check_dimension, 'System not allow to save duplicate Dimension value !',['Dimension']),	
+		(_check_max_val, 'Maximum Value Should Be Greater Than Zero Value !',['Maximum']),	
+		(_check_min_val, 'Minimum Value Should Be Greater Than Zero Value !',['Minimum']),	
 		
 		]
 		

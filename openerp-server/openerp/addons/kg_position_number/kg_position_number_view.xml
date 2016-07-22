@@ -36,15 +36,18 @@
 						
 						<group>
 							<group>						
-								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
-								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
+								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="pattern_id" on_change="onchange_pattern(pattern_id)" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="pattern_name" readonly="1"/>
+								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							</group>
 							<group>
 								<field name="active"/>
-								<field name="state" style="width: 30%%" class="att_state_change"/>								
-								<field name="copy_flag" invisible="1"/>								
+								<field name="pumpmodel_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="state" style="width: 30%%" class="att_state_change"/>
+								<field name="copy_flag" invisible="1"/>
 							</group>
-						</group>						
+						</group>
 						<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
 							<group>	
 								<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject','cancel'])]}"/>
@@ -204,8 +207,8 @@
 								<tree string="Diemnsion Details" editable="bottom">
 								   <field name="dimension_id"/>
 								   <field name="description"/>
-								   <field name="min_val" />
-								   <field name="max_val" />
+								   <field name="min_val" required="1"/>
+								   <field name="max_val" required="1"/>
 								   <field name="min_tolerance" />
 								   <field name="max_tolerance" />
 								   <field name="remark"/>
