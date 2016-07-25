@@ -37,99 +37,71 @@ class kg_purchase_invoice(osv.osv):
 	_description = "Purchase Invoice"
 	_columns = {
 	
-		'created_by' : fields.many2one('res.users', 'Created By', readonly=True),
-		'creation_date':fields.datetime('Creation Date',required=True,readonly=True),
-		
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),	
-		
 		'name':fields.char('Invoice No',readonly=True),
 		'invoice_date':fields.date('Invoice Date',readonly=True,required=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
-		
 		'type': fields.selection([('from_po', 'Product'), ('from_so', 'Service'),('from_gp','Gate Pass')], 'Product/Service',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'purpose': fields.selection([('consu', 'Consumables'), ('project', 'Project'), ('asset', 'Asset')], 'Purpose',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
-		
 		'grn_type': fields.selection([('from_po_grn', 'PO/SO GRN'), ('from_general_grn', 'General GRN'), ('others', 'Others')], 'GRN Type',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
-		
 		'state': fields.selection([('draft','Draft'),('confirmed','Waiting for approval'),('approved','Approved'),
 				('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True,track_visibility='onchange',select=True),
-				
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),		
-		
-		'approved_date': fields.datetime('Approved Date', readonly=True),
-		'app_user_id': fields.many2one('res.users', 'Apprved By', readonly=True),
-		
-		'confirmed_date': fields.datetime('Confirmed Date', readonly=True),
-		'conf_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
-		
-		'reject_date': fields.datetime('Rejected Date', readonly=True),
-		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
-		
-		'cancel_date': fields.datetime('Canceled Date', readonly=True),
-		'can_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
-		
 		'confirm_flag':fields.boolean('Confirm Flag'),
 		'approve_flag':fields.boolean('Expiry Flag'),
-		
 		'domain_field': fields.function(_get_domain, type='char', size=255, method=True, string="Domain"),
+		
+		# Entry Info
+		
+		'created_by' : fields.many2one('res.users', 'Created By', readonly=True),
+		'creation_date':fields.datetime('Creation Date',required=True,readonly=True),
+		'approved_date': fields.datetime('Approved Date', readonly=True),
+		'app_user_id': fields.many2one('res.users', 'Apprved By', readonly=True),
+		'confirmed_date': fields.datetime('Confirmed Date', readonly=True),
+		'conf_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
+		'reject_date': fields.datetime('Rejected Date', readonly=True),
+		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
+		'cancel_date': fields.datetime('Canceled Date', readonly=True),
+		'can_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
+		'update_date': fields.datetime('Last Updated Date', readonly=True),
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
 
 		## Vendor Information ##
 		
 		'supplier_id':fields.many2one('res.partner','Supplier',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'sup_address':fields.text('Supplier Address',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
-		
 		'sup_invoice_no':fields.char('Supplier Invoice No',size=200,readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'sup_invoice_date':fields.date('Supplier Invoice Date',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
-		
 		'payment_id':fields.many2one('kg.payment.master','Payment Terms',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'payment_due_date':fields.date('Payment Due Date',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
-		
 		'remarks': fields.text('Remarks',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
-		
 		'payment_type': fields.selection([('cash', 'Cash'), ('credit', 'Credit')], 'Payment Type',readonly=True),
 		
-		
-				 
 		### PO Details ###
 		
 		'po_id': fields.many2one('purchase.order','PO NO',select=True, readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]},domain="[('partner_id','=',supplier_id), '&', ('state','=','approved')]"),
-		
 		'po_date':fields.date('PO Date',readonly=True),
 		
 		### SO Details ###
 		'service_order_id':fields.many2one('kg.service.order','Service Order No', readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]},domain="[('partner_id','=',supplier_id), '&', ('state','=','approved')]"),
-		
 		'service_order_date':fields.date('Service Order Date', readonly=True),
-		
-		
 		'order_no': fields.char('Order NO',readonly=True),
-        
         'order_date': fields.char('Order Date',readonly=True),
-        
         'grn_no': fields.char('GRN NO',readonly=True),
-		
 		
 		#### GRN Search #######
 		
 		'po_grn_ids': fields.many2many('kg.po.grn', 'purchase_invoice_grn_ids', 'invoice_id','grn_id', 'GRN', delete=False,
 			 domain="[('state','=','done'),'&',('supplier_id','=',supplier_id),'&',('grn_type','=',type),'&',('billing_status','=','applicable')]"),
-				 
-			 
 		'general_grn_ids': fields.many2many('kg.general.grn', 'purchase_invoice_general_grn_ids', 'invoice_id','grn_id', 'GRN', delete=False,
 			 domain="[('supplier_id','=',supplier_id), '&', ('state','=','done'), '&', ('bill','=','applicable')]"),
-			 
 		'labour_ids': fields.many2many('kg.service.invoice', 'service_invoice_grn_ids', 'invoice_id','service_id', 'GRN', delete=False,domain="[('state','=','approved'),'&',('partner_id','=',supplier_id)]"),
-		
 		
 		### LINE IDS #####
 		
 		'pogrn_line_ids':fields.one2many('kg.pogrn.purchase.invoice.line','invoice_header_id','POGRN Line Id',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
-		
 		'gengrn_line_ids':fields.one2many('kg.gengrn.purchase.invoice.line','invoice_header_id','POGRN Line Id',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
-		
 		'service_line_ids':fields.one2many('kg.grn.service.invoice.line','invoice_header_id','POGRN Line Id',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
-		
 		'poadvance_line_ids':fields.one2many('kg.poadvance.purchase.invoice.line','invoice_header_id','POAdvance Line Id',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
-		
 		'soadvance_line_ids':fields.one2many('kg.soadvance.purchase.invoice.line','invoice_header_id','SOAdvance Line Id',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		
 		### Value Calculation ###
@@ -147,13 +119,10 @@ class kg_purchase_invoice(osv.osv):
 		### Flags ##
 		
 		'load_items_flag':fields.boolean('load_items_flag'),
-		
 		'active': fields.boolean('Active'),
-		
 		'specification': fields.text('Specification',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'dep_project':fields.many2one('kg.project.master','Dept/Project Name',readonly=True,states={'draft': [('readonly', False)],'confirmed':[('readonly',False)]}),	
 		'po_so_name': fields.char('PO/SO NO',readonly=True,states={'draft': [('readonly', False)],'confirmed':[('readonly',False)]}),
-		
 		'po_so_date': fields.char('PO/SO Date',readonly=True,states={'draft': [('readonly', False)],'confirmed':[('readonly',False)]}),
 		'helpdesk_flag':fields.boolean('HelpDesk Flag'),
 		
@@ -174,7 +143,6 @@ class kg_purchase_invoice(osv.osv):
 		'helpdesk_flag':False,
 
 	}
-	
 	
 	def sechedular_email_ids(self,cr,uid,ids,context = None):
 		email_from = []
@@ -228,6 +196,34 @@ class kg_purchase_invoice(osv.osv):
 		
 	   ]
 	
+	def write(self, cr, uid, ids, vals, context=None):		
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(kg_purchase_invoice, self).write(cr, uid, ids, vals, context)
+	
+	def entry_cancel(self, cr, uid, ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if not rec.remarks:
+			raise osv.except_osv(
+				_('Remarks Needed !!'),
+				_('Enter Remark in Remarks ....'))
+		self.write(cr, uid,ids,{'state' : 'cancel',
+								'cancel_user_id': uid,
+								'cancel_date': time.strftime("%Y-%m-%d %H:%M:%S"),
+								})
+		return True
+			
+	def entry_reject(self, cr, uid, ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if not rec.remarks:
+			raise osv.except_osv(
+				_('Remarks Needed !!'),
+				_('Enter Remark in Remarks ....'))
+		self.write(cr, uid,ids,{'state' : 'reject',
+								'rej_user_id': uid,
+								'reject_date': time.strftime("%Y-%m-%d %H:%M:%S"),
+								})
+		return True
+			
 	###  Onchange for Supplier Address ###
 	
 	def onchange_supplier_id(self, cr, uid, ids, supplier_id):
@@ -273,7 +269,7 @@ class kg_purchase_invoice(osv.osv):
 					del_sql = """delete from kg_poadvance_purchase_invoice_line where invoice_header_id=%s"""%(ids[0])
 					cr.execute(del_sql)
 				print "grn_record.po_idsgrn_record.po_ids",grn_record.po_ids
-				stop
+				
 				for element in grn_record.po_ids:
 					adv_search = self.pool.get('kg.po.advance').search(cr, uid, [('po_id','=',element.id)])
 					cr.execute(""" select * from kg_po_advance where po_id = %s and bal_adv > 0 and state='approved'""" %(element.id))
@@ -410,6 +406,8 @@ class kg_purchase_invoice(osv.osv):
 							'invoice_tax_ids': [(6, 0, [x.id for x in grn_line_record.grn_tax_ids])],
 							'net_amt': net_amount,
 							'grn_type':'from_po_grn',
+							'price_type': grn_line_record.price_type,
+							
 						}
 					print "po_grn_invoice_line_valspo_grn_invoice_line_valspo_grn_invoice_line_vals",po_grn_invoice_line_vals
 					pogrn_invoice_line_obj.create(cr, uid, po_grn_invoice_line_vals)
@@ -455,6 +453,7 @@ class kg_purchase_invoice(osv.osv):
 							'invoice_tax_ids': [(6, 0, [x.id for x in grn_line_record.grn_tax_ids])],
 							'net_amt': net_amount,
 							'grn_type':'from_general_grn',
+							'price_type': grn_line_record.price_type,
 							
 						})
 		if invoice_rec.grn_type == 'others':
@@ -601,38 +600,29 @@ class kg_purchase_invoice(osv.osv):
 				net_amount = tot_amt + val
 				
 				### Total Amount ###
-				
 				line_total = line.tot_rec_qty * line.price_unit
 				final_total_amount += line_total
 				final_net_amt += net_amount
-				## Total Discount###
 				
+				## Total Discount###
 				tot_disc = ((line_total * tot_discount_per)/100)
 				total_discount = tot_disc
-				
 				final_tot_discount += total_discount
 				
 				### Tax Amount ###
-				
 				final_tax += val
 				
 				### Other Charges ###
-				
 				if other_charges != None:
 					final_other_charges += other_charges 
 					
-					
 				### Net Amount, Actual Amount, Invoice Amount ####
-				
 				total_net_value += line.net_amt
 				total_net_value = total_net_value 
 				#total_net_value = total_net_value + final_tax
 				
 				final_net_value = (total_net_value + final_other_charges) - final_adj_amt
-				
-				
 				service_invoice_line_obj.write(cr, uid,line.id, {'total_amt': line_total,'net_amt':net_amount})
-				
 		self.write(cr, uid, ids[0], {
 					'total_amt': final_total_amount,
 					'discount_amt': final_tot_discount,
@@ -649,12 +639,9 @@ class kg_purchase_invoice(osv.osv):
 	def compute_values(self, cr, uid, ids,context=None):
 		
 		invoice_rec = self.browse(cr,uid,ids[0])
-		
 		val = 0.00
 		final_net_value = total_net_value = final_actual_amount = line_total = total_amount = final_total_amount = total_discount = final_tot_discount = total_tax = final_tax = final_other_charges = final_adj_amt=0.00
-		
 		if invoice_rec.grn_type == 'from_po_grn':
-			
 			for line in invoice_rec.pogrn_line_ids:
 				val = 0.00		
 				amt_to_per = (line.discount / (line.tot_rec_qty * line.price_unit or 1.0 )) * 100
@@ -663,102 +650,61 @@ class kg_purchase_invoice(osv.osv):
 				for c in self.pool.get('account.tax').compute_all(cr, uid, line.invoice_tax_ids,
 					line.price_unit * (1-(tot_discount_per or 0.0)/100.0), line.tot_rec_qty, line.product_id)['taxes']:
 					val += c.get('amount', 0.0)
-				
-				
 				### Total Amount ###
-				
 				line_total = line.tot_rec_qty * line.price_unit
 				final_total_amount += line_total
 				
 				## Total Discount###
-				
 				tot_disc = ((line_total * tot_discount_per)/100)
 				total_discount = tot_disc
-				
 				final_tot_discount += total_discount
 				
 				### Tax Amount ###
-				
 				final_tax += val
 				
 				### Other Charges ###
-				
 				final_other_charges = invoice_rec.other_charges_amt
-
-					
+	
 				### Net Amount, Actual Amount, Invoice Amount ####
-				
 				total_net_value += line.net_amt
-				
 				final_net_value = ((total_net_value + final_other_charges) - invoice_rec.advance_adjusted_amt) + invoice_rec.round_off_amt
-				
 				final_actual_amount = total_net_value + final_other_charges
 				
-				
-	
-				
 		if invoice_rec.grn_type == 'from_general_grn':
-			
-			
 			for line in invoice_rec.gengrn_line_ids:
-				
 				val = 0.00
-					
 				other_charges = line.general_grn_id.other_charge
-						
 				amt_to_per = (line.discount / (line.tot_rec_qty * line.price_unit or 1.0 )) * 100
 				kg_discount_per = line.kg_discount_per
 				tot_discount_per = amt_to_per + kg_discount_per
 				for c in self.pool.get('account.tax').compute_all(cr, uid, line.invoice_tax_ids,
 					line.price_unit * (1-(tot_discount_per or 0.0)/100.0), line.tot_rec_qty, line.product_id)['taxes']:
-					
-				 
 					val += c.get('amount', 0.0)
-					
-					
 				tot_amt = line.tot_rec_qty * (line.price_unit * (1-(tot_discount_per or 0.0)/100.0))
-				
 				net_amount = tot_amt + val	
 					
 				## Writing values into invoice lines ###
-				
-				
 				line_total = line.tot_rec_qty * line.price_unit
-				
 				line.write({'total_amt':line_total,'net_amt':net_amount})
 				
-				
 				### Total Amount ###
-				
-				
 				final_total_amount += line_total
 				
 				## Total Discount###
-			
 				tot_disc = ((line_total * tot_discount_per)/100)
 				total_discount = tot_disc
-				
 				final_tot_discount += total_discount
 				
-				
 				### Tax Amount ###
-				
 				final_tax += val
 				
 				### Other Charges ###
-				
-
 				final_other_charges = invoice_rec.other_charges_amt
-	
+				
 				### Net Amount, Actual Amount, Invoice Amount ####
-				
 				final_net_value = ((final_total_amount + final_tax + final_other_charges) - invoice_rec.discount_amt) + invoice_rec.round_off_amt
-				
 				final_actual_amount = ((final_total_amount + final_tax + final_other_charges) - invoice_rec.discount_amt)
-				
-		
 		if invoice_rec.grn_type == 'others':
-			
 			for line in invoice_rec.service_line_ids:
 				val = 0.00		
 				amt_to_per = (line.discount / (line.tot_rec_qty * line.price_unit or 1.0 )) * 100
@@ -767,40 +713,27 @@ class kg_purchase_invoice(osv.osv):
 				for c in self.pool.get('account.tax').compute_all(cr, uid, line.invoice_tax_ids,
 					line.price_unit * (1-(tot_discount_per or 0.0)/100.0), line.tot_rec_qty, line.product_id)['taxes']:
 					val += c.get('amount', 0.0)
-				
-				
 				### Total Amount ###
-				
 				line_total = line.tot_rec_qty * line.price_unit
 				final_total_amount += line_total
 				
 				## Total Discount###
-				
 				tot_disc = ((line_total * tot_discount_per)/100)
 				total_discount = tot_disc
-				
 				final_tot_discount += total_discount
 				
 				### Tax Amount ###
-				
 				final_tax += val
 				
 				### Other Charges ###
-				
 				final_other_charges = invoice_rec.other_charges_amt
 
-					
 				### Net Amount, Actual Amount, Invoice Amount ####
 				
 				total_net_value += line.net_amt
 				total_net_value = total_net_value 
-				
 				final_net_value = ((total_net_value + final_other_charges) - invoice_rec.advance_adjusted_amt) + invoice_rec.round_off_amt
-				
 				final_actual_amount = total_net_value + final_other_charges
-				
-				
-				
 		self.write(cr, uid, ids[0], {
 					'total_amt': final_total_amount,
 					'discount_amt': final_tot_discount,
@@ -811,83 +744,58 @@ class kg_purchase_invoice(osv.osv):
 					'advance_adjusted_amt': final_adj_amt or 0.00, 
 					'net_amt': final_net_value})
 			
-
 		return True
-		
-		
 		
 	def entry_confirm(self, cr, uid, ids,context=None):
 		invoice_rec = self.browse(cr,uid,ids[0])
-		
 		self.compute_values(cr,uid,ids,context = context)
 		
 		### Checking Advance date ###
 		
 		today_date = today.strftime('%Y-%m-%d')
-		
 		if invoice_rec.invoice_date > today_date:
 			raise osv.except_osv(
 					_('Warning!'),
 					_('Invoice Date should not be greater than current date'))
-					
 		if invoice_rec.sup_invoice_date > today_date:
 			raise osv.except_osv(
 					_('Warning!'),
 					_('Supplier Invoice Date should not be greater than current date'))
-			
 		
 		### Check Advance Amount greater than Zero ###
 		
 		if invoice_rec.grn_type == 'from_po_grn':
-			
-			
 			if not invoice_rec.pogrn_line_ids:
-				
 				raise osv.except_osv(
 						_('Warning!'),
 						_('You cannot confirm the entry without Invoice Line'))
-						
 			else:
-				
-		
 				for line in invoice_rec.pogrn_line_ids:
-				
-				
-			
 					if line.price_unit == 0.00:
 						raise osv.except_osv(
 							_('Price Unit Cannot be zero!'),
 							_('You cannot process Invoice with Price Unit Zero for Product %s.' %(line.product_id.name)))
-							
-							
 		if invoice_rec.grn_type == 'from_general__grn':
-			
-			
 			if not invoice_rec.gengrn_line_ids:
-				
 				raise osv.except_osv(
 						_('Warning!'),
 						_('You cannot confirm the entry without Invoice Line'))
-						
 			else:
-				
-		
 				for line in invoice_rec.gengrn_line_ids:
-				
-				
-			
 					if line.price_unit == 0.00:
 						raise osv.except_osv(
 							_('Price Unit Cannot be zero!'),
 							_('You cannot process Invoice with Price Unit Zero for Product %s.' %(line.product_id.name)))
-					
+		seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.purchase.invoice')])
+		seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+		cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,invoice_rec.invoice_date))
+		seq_name = cr.fetchone();
 		self.write(cr,uid,ids[0],{'state':'confirmed',
 								  'confirm_flag':'True',
 								  'conf_user_id':uid,
 								  'confirmed_date':dt_time,
-								  'name': self.pool.get('ir.sequence').get(cr, uid, 'kg.purchase.invoice') or '',
+								  'name': seq_name[0]
 								   })
-		
 		
 		return True
 		
@@ -895,90 +803,53 @@ class kg_purchase_invoice(osv.osv):
 		invoice_rec = self.browse(cr,uid,ids[0])
 		po_advance_obj = self.pool.get('kg.po.advance')
 		so_advance_obj = self.pool.get('kg.so.advance')
-		
-		
 		po_advance_line_obj = self.pool.get('kg.po.advance.line')
 		so_advance_line_obj = self.pool.get('kg.so.advance.line')
-		
 		#if invoice_rec.conf_user_id.id == uid:
 		#	raise osv.except_osv(
 		#			_('Warning'),
 		#			_('Approve cannot be done by Confirmed user'))
-		
 		if invoice_rec.type == 'from_po':
-			
-			
 			if invoice_rec.grn_type == 'from_po_grn':
-				
 				cr.execute(""" select grn_id from purchase_invoice_grn_ids where invoice_id = %s """ %(invoice_rec.id))
 				grn_data = cr.dictfetchall()
-				
 				for item in grn_data:
-					
-				
-					
 					grn_sql = """ update kg_po_grn set state='inv' where id = %s  """ %(item['grn_id'])
 					cr.execute(grn_sql)
-					
 			if invoice_rec.grn_type == 'from_general_grn':
-				
-				
 				cr.execute(""" select grn_id from purchase_invoice_general_grn_ids where invoice_id = %s """ %(invoice_rec.id))
 				grn_data = cr.dictfetchall()
-				
 				for item in grn_data:
-										
 					grn_sql = """ update kg_general_grn set state='inv' where id = %s  """ %(item['grn_id'])
 					cr.execute(grn_sql)
-				
-
 			if invoice_rec.poadvance_line_ids:
-				
 				for adv_line in invoice_rec.poadvance_line_ids:
 					if adv_line.current_adv_amt > 0:
-						
 						sql = """select id from kg_po_advance where id=%s and po_id=%s"""%(adv_line.po_advance_id.id,adv_line.po_id.id)
 						cr.execute(sql)
 						data = cr.dictfetchall()
-						
 						po_advance_line_rec = self.pool.get('kg.po.advance').browse(cr, uid, data[0]['id'])
-						
 						po_advance_bal_amt = po_advance_line_rec.bal_adv - adv_line.current_adv_amt
-					
 						if data:
-					
 							po_advance_line_rec.write({'bal_adv':po_advance_bal_amt})
-						
 		if invoice_rec.type == 'from_so':
-				
 			if invoice_rec.soadvance_line_ids:
-				
 				for adv_line in invoice_rec.soadvance_line_ids:
-
 					if adv_line.current_adv_amt > 0:
-						
-						
 						sql = """select id from kg_so_advance where id=%s and so_id=%s"""%(adv_line.so_advance_id.id,adv_line.so_id.id)
 						cr.execute(sql)
 						data = cr.dictfetchall()
-						
 						so_advance_line_rec = self.pool.get('kg.so.advance').browse(cr, uid, data[0]['id'])
-						
 						so_advance_bal_amt = so_advance_line_rec.bal_adv - adv_line.current_adv_amt
-					
 						if data:
-					
 							so_advance_line_rec.write({'bal_adv':so_advance_bal_amt})
-							
 		self.write(cr,uid,ids[0],{'state':'approved',
 								  'approve_flag':'True',
 								  'app_user_id':uid,
 								  'approved_date':dt_time,
 								   })	
 		return True
-		
 				
-		
 	def unlink(self,cr,uid,ids,context=None):
 		unlink_ids = []		
 		for rec in self.browse(cr,uid,ids):	
@@ -1081,7 +952,6 @@ class kg_purchase_invoice(osv.osv):
 		else:
 			db[0]['current_database'] = 'Others'
 			
-			
 		cr.execute(""" select pg.id from kg_po_grn pg where pg.state = 'done' and pg.approved_date::date='%s' and pg.billing_status = 'applicable' and
 						pg.payment_type = 'credit'
 					   union
@@ -1089,12 +959,8 @@ class kg_purchase_invoice(osv.osv):
 						gg.payment_type = 'credit'"""
 					    %(time.strftime('%Y-%m-%d'),time.strftime('%Y-%m-%d')))
 		grn_data = cr.dictfetchall()	
-		
-		
 		print "--------------------------------------->",grn_data
-		
 		if grn_data:	
-			
 			
 			cr.execute("""select all_daily_auto_scheduler_mails('Unaccount Goods Receipt Credit Register')""")
 			data = cr.fetchall();
@@ -1222,16 +1088,20 @@ class kg_pogrn_purchase_invoice_line(osv.osv):
 		'kg_discount_per': fields.float('DISCOUNT%(-)'),
 		'invoice_tax_ids': fields.many2many('account.tax', 'pogrn_purchase_invoice_tax', 'pogrn_invoice_line_id', 'taxes_id', 'Taxes(+)'),
 		'net_amt': fields.float('NET AMOUNT'),
-		
 		'invoice_header_id' : fields.many2one('kg.purchase.invoice', 'Header ID'),
 		'po_grn_line_id':fields.many2one('po.grn.line','PO GRN Entry Line'),
 		'po_line_id':fields.many2one('purchase.order.line','PO Line'),
 		'so_line_id':fields.many2one('kg.service.order.line','SO Line'),
 		'brand_id':fields.many2one('kg.brand.master','Brand'),
+		'price_type': fields.selection([('po_uom','PO UOM'),('per_kg','Per KG')],'Price Type'),
+		
 	}
 	
+	_defaults = {
 	
-
+		'price_type': 'po_uom',
+	
+	}
 	
 kg_pogrn_purchase_invoice_line()
 
@@ -1255,14 +1125,11 @@ class kg_grn_service_invoice_line(osv.osv):
 		'kg_discount_per': fields.float('DISCOUNT%(-)'),
 		'invoice_tax_ids': fields.many2many('account.tax', 'service_purchase_invoice_tax', 'service_invoice_line_id', 'taxes_id', 'Taxes(+)'),
 		'net_amt': fields.float('NET AMOUNT'),
-		
 		'invoice_header_id' : fields.many2one('kg.purchase.invoice', 'Header ID'),
 		
 		
 	}
 	
-	
-
 	
 kg_grn_service_invoice_line()
 
@@ -1285,13 +1152,10 @@ class kg_gengrn_purchase_invoice_line(osv.osv):
 		'kg_discount_per': fields.float('DISCOUNT%(-)'),
 		'invoice_tax_ids': fields.many2many('account.tax', 'gengrn_purchase_invoice_tax', 'gengrn_invoice_line_id', 'taxes_id', 'Taxes(+)'),
 		'net_amt': fields.float('NET AMOUNT'),
-		
 		'invoice_header_id' : fields.many2one('kg.purchase.invoice', 'Header ID'),
-		
 		
 	}
 	
-
 	
 kg_gengrn_purchase_invoice_line()
 
@@ -1313,7 +1177,6 @@ class kg_poadvance_purchase_invoice_line(osv.osv):
 		'current_adv_amt': fields.float('Current Adjustment Amount',required=True),
 		'invoice_header_id' : fields.many2one('kg.purchase.invoice', 'Header ID'),
 		
-		
 	}
 	
 	def onchange_po_id(self, cr, uid, ids, po_id):
@@ -1332,10 +1195,6 @@ class kg_poadvance_purchase_invoice_line(osv.osv):
 		else:
 			return True
 			
-	
-	
-
-	
 kg_poadvance_purchase_invoice_line()
 
 
@@ -1357,7 +1216,6 @@ class kg_soadvance_purchase_invoice_line(osv.osv):
 		'current_adv_amt': fields.float('Current Adjustment Amount', required=True),
 		'invoice_header_id' : fields.many2one('kg.purchase.invoice', 'Header ID'),
 		
-		
 	}
 	
 	def onchange_so_id(self, cr, uid, ids, so_id):
@@ -1377,7 +1235,4 @@ class kg_soadvance_purchase_invoice_line(osv.osv):
 		else:
 			return True
 			
-	
-
-	
 kg_soadvance_purchase_invoice_line()

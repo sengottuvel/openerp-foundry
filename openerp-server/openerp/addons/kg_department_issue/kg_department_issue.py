@@ -37,7 +37,8 @@ class kg_department_issue(osv.osv):
 				 domain="[('indent_id.state','=','approved'), '&', ('indent_id.main_store','=',False),'&', ('indent_id.dep_name','=',department_id),'&', ('issue_pending_qty','>','0'),'&', ('pi_cancel' ,'!=', 'True')]", 
 				 readonly=True, states={'draft': [('readonly', False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
 		'outward_type': fields.many2one('kg.outwardmaster', 'Outward Type',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
-		'department_id': fields.many2one('kg.depmaster','Department',required=True,readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
+		'department_id': fields.many2one('kg.depmaster','Department',required=True,readonly=True, 
+						 domain="[('item_request','=',True),('state','in',('draft','confirmed','approved'))]", states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
 		'state': fields.selection([('draft', 'Draft'),
 			('confirmed', 'Waiting for Confirmation'),
 			('approve', 'Waiting for Approval'),
@@ -491,6 +492,7 @@ class kg_department_issue(osv.osv):
 			'state': 'done',
 			'price_unit': line_ids.price_unit or 0.0,
 			'stock_rate':line_ids.price_unit or 0.0,
+			
 			})
 			
 			lot_sql = """ select lot_id from kg_department_issue_details where grn_id=%s""" %(line_ids.id)

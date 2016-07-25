@@ -177,12 +177,12 @@ class purchase_requisition_line(osv.osv):
 	_rec_name = 'product_id'
 
 	_columns = {
-		'product_id': fields.many2one('product.product', 'Product'),
+		'product_id': fields.many2one('product.product', 'Product',domain=[('state','not in',('reject','cancel'))]),
 		'product_uom_id': fields.many2one('product.uom', 'Product Unit of Measure'),
 		'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
 		'requisition_id' : fields.many2one('purchase.requisition','Purchase Requisition', ondelete='cascade'),
 		'company_id': fields.related('requisition_id','company_id',type='many2one',relation='res.company',string='Company', store=True, readonly=True),
-		'brand_id': fields.many2one('kg.brand.master', 'Brand Name'),
+		'brand_id': fields.many2one('kg.brand.master', 'Brand Name',domain="[('product_ids','in',(product_id)),('state','in',('draft','confirmed','approved'))]"),
 		'stock_qty': fields.float('Stock Qty'),
 		'line_ids': fields.one2many('ch.purchase.indent.wo','header_id','Ch Line Id'),
 		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode'),
@@ -190,7 +190,7 @@ class purchase_requisition_line(osv.osv):
 		'note': fields.text('Remarks'),
 		'pending_qty': fields.float('Pending Qty'),
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
-		
+		'moc_id_temp': fields.many2one('ch.brandmoc.rate.details','MOC',domain="[('brand_id','=',brand_id),('header_id.product_id','=',product_id),('header_id.state','in',('draft','confirmed','approved'))]"),
 	}
 
 	def onchange_product_id(self, cr, uid, ids, product_id, product_uom_id, context=None):
@@ -204,7 +204,15 @@ class purchase_requisition_line(osv.osv):
 			prod = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
 			value = {'product_uom_id': prod.uom_id.id,'product_qty':1.0}
 		return {'value': value}
-
+	
+	def onchange_moc(self, cr, uid, ids, moc_id_temp):
+		value = {'moc_id':''}
+		if moc_id_temp:
+			rate_rec = self.pool.get('ch.brandmoc.rate.details').browse(cr,uid,moc_id_temp)
+			value = {'moc_id': rate_rec.moc_id.id}
+		return {'value': value}
+		
+		
 	_defaults = {
 		'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'purchase.requisition.line', context=c),
 	}
@@ -221,11 +229,32 @@ class ch_purchase_indent_wo(osv.osv):
 
 	'header_id': fields.many2one('purchase.requisition.line', 'Purchase Indent Line', required=True, ondelete='cascade'),
 	'wo_id': fields.char('WO'),
+	'w_order_id': fields.many2one('kg.work.order','WO',required=True, domain="[('state','=','confirmed')]"),
+	'w_order_line_id': fields.many2one('ch.work.order.details','WO',required=True),
 	'qty': fields.float('Indent Qty', required=True),
 	
 	}
 	
+	def onchange_wo(self, cr, uid, ids,w_order_line_id):
+		value = {'wo_id': ''}
+		if w_order_line_id:
+			wo_rec = self.pool.get('ch.work.order.details').browse(cr,uid,w_order_line_id)
+			value = {'wo_id':wo_rec.order_no}
+		return {'value':value}
 	
+	def _check_qty(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+			
+		if rec.qty <= 0.00:
+			return False					
+		return True
+		
+	_constraints = [
+	
+		(_check_qty,'You cannot save with zero qty !',['Qty']),
+		
+		]
+			
 ch_purchase_indent_wo()	
 
 class purchase_order(osv.osv):

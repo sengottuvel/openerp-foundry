@@ -402,4 +402,4 @@ class kg_consultant_fee(osv.osv):
 		
 		return new_id
 		
-kg_billing_address()
+kg_consultant_fee()

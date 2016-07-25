@@ -114,6 +114,7 @@ class kg_depindent2_poindent(osv.osv):
 				'user_id' : user,
 				'stock_qty': stock_qty,
 				'moc_id': group[0].moc_id.id,
+				'moc_id_temp': group[0].moc_id_temp.id,
 				'requisition_id': obj.id,
 				
 				}
@@ -124,7 +125,7 @@ class kg_depindent2_poindent(osv.osv):
 					#~ self.write(cr,uid,ids[0],{'line_ids':[(0,0,vals)]})
 					line_id = self.pool.get('purchase.requisition.line').create(cr,uid,vals)
 					for wo in group[0].line_id:
-						self.pool.get('ch.purchase.indent.wo').create(cr,uid,{'header_id':line_id,'wo_id':wo.wo_id,'qty':wo.qty})
+						self.pool.get('ch.purchase.indent.wo').create(cr,uid,{'header_id':line_id,'wo_id':wo.wo_id,'w_order_id':wo.w_order_id.id,'qty':wo.qty})
 						
 			"""	
 			if ids:

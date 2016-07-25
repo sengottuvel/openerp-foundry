@@ -31,7 +31,6 @@ class kg_so_advance(osv.osv):
 	_description = "SO Advance"
 	_columns = {
 	
-		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),		
 		'confirm_flag':fields.boolean('Confirm Flag'),
 		'approve_flag':fields.boolean('Expiry Flag'),
 		'name':fields.char('Advance No',readonly=True),
@@ -40,7 +39,7 @@ class kg_so_advance(osv.osv):
 				('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True,track_visibility='onchange',select=True),
 		'line_ids':fields.one2many('kg.so.advance.line','advance_header_id','Line Id',readonly=True),
 		'active': fields.boolean('Active'),
-		'remark': fields.text('Remarks',readonly=True, states={'draft':[('readonly',False)]}),
+		'remark': fields.text('Remarks',readonly=True, states={'confirmed':[('readonly',False)],'approved':[('readonly',False)]}),
 		'supplier_id':fields.many2one('res.partner','Supplier',required=True,readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'so_id':fields.many2one('kg.service.order','SO No',
 		        domain="[('partner_id','=',supplier_id), '&', ('state','!=','draft')]",required=True,
@@ -54,6 +53,8 @@ class kg_so_advance(osv.osv):
 		'line_state':fields.selection([('draft','Draft'),('loaded','Loaded')],'Status'),
 		
 		# Entry Info
+		
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),		
 		'created_by' : fields.many2one('res.users', 'Created By', readonly=True),
 		'creation_date':fields.datetime('Creation Date',required=True,readonly=True),
 		'approved_date': fields.datetime('Approved Date', readonly=True),
@@ -194,7 +195,6 @@ class kg_so_advance(osv.osv):
 		else:
 			return True
 			
-		
 	def entry_confirm(self, cr, uid, ids,context=None):
 		advance_rec = self.browse(cr,uid,ids[0])
 		### Checking Advance date ###
@@ -298,7 +298,6 @@ class kg_so_advance(osv.osv):
 		"""
 		return True
 		
-		
 	def entry_reject(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.remark:
@@ -309,6 +308,7 @@ class kg_so_advance(osv.osv):
 		else:
 			raise osv.except_osv(_('Rejection remark is must !!'),
 				_('Enter rejection remark in remark field !!'))
+				
 		return True
 
 	def entry_cancel(self,cr,uid,ids,context=None):

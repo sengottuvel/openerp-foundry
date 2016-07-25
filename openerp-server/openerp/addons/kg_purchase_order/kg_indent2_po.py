@@ -74,18 +74,28 @@ class kg_indent2_po(osv.osv):
 				po_pi_id = group[0].id
 				po_uom = group[0].product_uom_id.id
 				remark = group[0].note
-				
+				print"brand_idbrand_idbrand_idbrand_id",brand_id
+				print"group[0].moc_id_temp.idgroup[0].moc_id_temp.idgroup[0].moc_id_temp.id",group[0].moc_id_temp.id
 				max_sql = """ select max(line.price_unit),min(line.price_unit) from purchase_order_line line 
 								left join purchase_order po on (po.id=line.order_id)
-								where po.state = 'approved' and line.product_id=%s """%(prod_browse.id)
+								join kg_brandmoc_rate rate on (rate.product_id=line.product_id)
+								join ch_brandmoc_rate_details det on (det.header_id=rate.id)
+								where po.state = 'approved' and rate.state in ('draft','confirmed','approved') 
+								and line.product_id=%s and line.brand_id = %s and line.moc_id = %s """%(prod_browse.id,brand_id,group[0].moc_id.id)
 				cr.execute(max_sql)		
 				max_data = cr.dictfetchall()
 				recent_sql = """ select line.price_unit from purchase_order_line line 
 								left join purchase_order po on (po.id=line.order_id)
-								where po.state = 'approved' and line.product_id = %s 
-								order by po.date_order desc limit 1 """%(prod_browse.id)
+								join kg_brandmoc_rate rate on (rate.product_id=line.product_id)
+								join ch_brandmoc_rate_details det on (det.header_id=rate.id)
+								where po.state = 'approved' and rate.state in ('draft','confirmed','approved')
+								and line.product_id = %s and line.brand_id = %s 
+								and line.moc_id = %s 
+								order by po.approved_date desc limit 1 """%(prod_browse.id,brand_id,group[0].moc_id.id)
 				cr.execute(recent_sql)		
 				recent_data = cr.dictfetchall()
+				print"max_datamax_datamax_data",max_data
+				print"recent_datarecent_data",recent_data
 				
 				if max_data:
 					max_val = max_data[0]['max']
@@ -101,7 +111,8 @@ class kg_indent2_po(osv.osv):
 					recent_val = 0
 										
 				vals = {
-			
+				
+				'order_id': obj.id,
 				'product_id':prod_browse.id,
 				'brand_id':brand_id,
 				'product_uom':po_uom,
@@ -118,18 +129,24 @@ class kg_indent2_po(osv.osv):
 				'high_price': max_val or 0,
 				'recent_price': recent_val or 0,
 				'moc_id': group[0].moc_id.id,
+				'moc_id_temp': group[0].moc_id_temp.id,
+				'uom_conversation_factor':prod_browse.uom_conversation_factor,
 				
 				}
 				poindent_line_obj.write(cr,uid,po_pi_id,{'line_state' : 'process','draft_flag':True})
 				if ids:
-					self.write(cr,uid,ids[0],{'order_line':[(0,0,vals)]})
-				
+					#~ self.write(cr,uid,ids[0],{'order_line':[(0,0,vals)]})
+					line_id = self.pool.get('purchase.order.line').create(cr,uid,vals)
+					for wo in group[0].line_ids:
+						self.pool.get('ch.purchase.wo').create(cr,uid,{'header_id':line_id,'wo_id':wo.wo_id,'w_order_id':wo.w_order_id.id,'qty':wo.qty})
+						
 			if ids:
 				if obj.order_line:
 					order_line = map(lambda x:x.id,obj.order_line)
 					for line_id in order_line:
 						self.write(cr,uid,ids,{'order_line':[]})
 		self.write(cr,uid,ids,res)
+		
 		return True
 		
 	def update_product_pending_qty(self,cr,uid,ids,line,context=None):

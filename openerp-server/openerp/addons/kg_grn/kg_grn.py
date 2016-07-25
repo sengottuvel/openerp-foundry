@@ -1751,7 +1751,7 @@ class kg_stock_production_lot(osv.osv):
     'product_uom':fields.many2one('product.uom', 'UOM'),
     'expiry_date':fields.date('Expiry Date'),
     'batch_no':fields.char('Batch No', size=128),
-    'price_unit': fields.float('Rate'),
+    'price_unit': fields.float('Unit Price'),
     'po_uom': fields.many2one('product.uom', 'PO UOM'), 
     'po_qty': fields.float('PO Qty'),
     'user_id':fields.many2one('res.users','LOT User'),

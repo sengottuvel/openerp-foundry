@@ -127,6 +127,7 @@ class kg_purchase_amendment(osv.osv):
 				
 			}, multi="sums",help="The total amount"),
 		'grn_flag': fields.boolean('GRN'),
+		'po_type': fields.selection([('direct', 'Direct'),('frompi', 'From PI'),('fromquote', 'From Quote')], 'PO Type',readonly=True),
 		
 		# Amendment Fields:
 		
@@ -156,6 +157,7 @@ class kg_purchase_amendment(osv.osv):
 		'dep_project_name':fields.char('Dept/Project Name',readonly=True),
 		'dep_project':fields.many2one('kg.project.master','Dept/Project Name',readonly=True),
 		'dep_project_amend':fields.many2one('kg.project.master','Amend Dept/Project Name', states={'confirm':[('readonly', True)]}),
+		'po_type_amend': fields.selection([('direct', 'Direct'),('frompi', 'From PI'),('fromquote', 'From Quote')], 'PO Type',readonly=False,states={'approved':[('readonly',True)]}),
 		
 		# Entry Info
 		'created_by':fields.many2one('res.users','Created By',readonly=True),
@@ -244,6 +246,8 @@ class kg_purchase_amendment(osv.osv):
 			'amendment_id': amend_id,
 			'po_line_id': order_line.id,
 			'line_bill':order_line.line_bill,
+			'product_id_amend': order_line.product_id.id,
+			'pi_line_id': order_line.pi_line_id.id,
 			
 		}
 	
@@ -330,7 +334,8 @@ class kg_purchase_amendment(osv.osv):
 						'amount_tax':po_order.amount_tax,
 						'amount_total':po_order.amount_total,
 						'discount':po_order.discount,
-			
+						'po_type': po_order.po_type,
+						
 						}
 			print "vals ..........",vals
 			self.pool.get('kg.purchase.amendment').write(cr,uid,ids,vals)
@@ -376,6 +381,7 @@ class kg_purchase_amendment(osv.osv):
 		pi_line_obj = self.pool.get('purchase.requisition.line')
 		stock_move_obj = self.pool.get('stock.move')
 		for amend_line in amend_obj.amendment_line:
+			
 			print "amend_line================>>", amend_line
 			po_line_id = amend_line.po_line_id.id
 			po_rec = amend_obj.po_id
@@ -384,35 +390,60 @@ class kg_purchase_amendment(osv.osv):
 			print "diff_qty :::::::::::::::", diff_qty
 			pending_diff_qty = amend_line.product_qty - amend_line.pending_qty
 			print "pending_diff_qty :::::::::::", pending_diff_qty
-			
-			if amend_line.product_qty < amend_line.product_qty_amend:
-				pi_line_record = pi_line_obj.browse(cr, uid,pol_record.pi_line_id.id)
-				if pi_line_record.pending_qty <= 0:
-					if not amend_line.kg_poindent_lines:
-						
-						raise osv.except_osv(
-						_('If you want to increase PO Qty'),
-						_('Select PI for this Product')) 
+			if grn_entry.po_type == 'frompi':
+				if amend_line.product_qty < amend_line.product_qty_amend:
+					pi_line_record = pi_line_obj.browse(cr, uid,pol_record.pi_line_id.id)
+					if pi_line_record.pending_qty <= 0:
+						if not amend_line.kg_poindent_lines:
+							raise osv.except_osv(
+							_('If you want to increase PO Qty'),
+							_('Select PI for this Product')) 
+						else:
+							for ele in amend_line.kg_poindent_lines:
+								if ele.product_id.id == amend_line.product_id.id:
+									
+									if (amend_line.product_qty_amend - amend_line.product_qty) <= ele.pending_qty:
+										pi_line_obj.write(cr,uid,pi_line_record.id,{'pending_qty': 0}) 
+										amend_line_obj.write(cr,uid,amend_line.id,{'pi_line_id':ele.id})
+										line_pending = ele.pending_qty - (amend_line.product_qty_amend - amend_line.product_qty)
+										print"line_pending",line_pending
+										pi_line_obj.write(cr,uid,ele.id,{'pending_qty': line_pending}) 
+									else:
+										raise osv.except_osv(
+											_('Amendment Qty is greater than indent qty'),
+											_('')) 	
 					else:
-						for ele in amend_line.kg_poindent_lines:
-							
-							if ele.product_id.id == amend_line.product_id.id:
-								if (amend_line.product_qty_amend - amend_line.product_qty) <= ele.pending_qty:
-									pi_line_obj.write(cr,uid,pi_line_record.id,{'pending_qty': ele.pending_qty}) 
-									amend_line_obj.write(cr,uid,amend_line.id,{'pi_line_id':ele.id})
-									line_pending = ele.pending_qty - (amend_line.product_qty_amend - amend_line.product_qty)
-									pi_line_obj.write(cr,uid,ele.id,{'pending_qty': line_pending}) 
-								else:
-									raise osv.except_osv(
-										_('Amendment Qty is greater than indent qty'),
-										_('')) 	
+						pass
+				else:
+					grn_id = self.pool.get('po.grn.line').search(cr, uid, [('po_line_id','=',amend_line.po_line_id.id)])
+					print "-------------------------------------------------------------grn_id---->",grn_id
+					print "-------------------------------------------------------------grn_id---->",amend_line.po_line_id.id
+					if grn_id:
+						grn_bro = self.pool.get('po.grn.line').browse(cr, uid, grn_id[0])
+						if grn_bro.po_grn_qty <= amend_line.product_qty_amend:
+							pass
+						else:
+							raise osv.except_osv(
+									_('You can not decrease PO Qty'),
+									_('Because GRN is already created'))
+					else:
+						pass
+				if amend_line.product_qty != amend_line.product_qty_amend:
+					if amend_line.pending_qty == 0 and not amend_line.kg_poindent_lines:
+						raise osv.except_osv(
+						_('All Qty has received for this PO !'),
+						_('You can not increase PO Qty for product %s')%(amend_line.product_id.name))
 				else:
 					pass
-			else:
+				if amend_line.product_id != amend_line.product_id_amend:
+					if not amend_line.kg_poindent_lines:
+						raise osv.except_osv(
+							_('If you want to change PO Product'),
+							_('Select PI for this Product')) 
+			elif grn_entry.po_type == 'direct' or grn_entry.po_type == 'fromquote':
 				grn_id = self.pool.get('po.grn.line').search(cr, uid, [('po_line_id','=',amend_line.po_line_id.id)])
 				print "-------------------------------------------------------------grn_id---->",grn_id
 				print "-------------------------------------------------------------grn_id---->",amend_line.po_line_id.id
-				
 				if grn_id:
 					grn_bro = self.pool.get('po.grn.line').browse(cr, uid, grn_id[0])
 					if grn_bro.po_grn_qty <= amend_line.product_qty_amend:
@@ -423,13 +454,19 @@ class kg_purchase_amendment(osv.osv):
 								_('Because GRN is already created'))
 				else:
 					pass
-			if amend_line.product_qty != amend_line.product_qty_amend:
-				if amend_line.pending_qty == 0 and not amend_line.kg_poindent_lines:
-					raise osv.except_osv(
-					_('All Qty has received for this PO !'),
-					_('You can not increase PO Qty for product %s')%(amend_line.product_id.name))
-			else:
-				pass		
+				if amend_line.product_qty != amend_line.product_qty_amend:
+					if amend_line.pending_qty == 0 and not amend_line.kg_poindent_lines:
+						raise osv.except_osv(
+						_('All Qty has received for this PO !'),
+						_('You can not increase PO Qty for product %s')%(amend_line.product_id.name))
+				else:
+					pass
+				if amend_line.product_id != amend_line.product_id_amend:
+					if not amend_line.kg_poindent_lines:
+						raise osv.except_osv(
+							_('If you want to change PO Product'),
+							_('Select PI for this Product')) 
+							
 		self.write(cr,uid,ids[0],{
 								  'state':'confirm',
 								  'confirmed_by':uid,
@@ -437,7 +474,6 @@ class kg_purchase_amendment(osv.osv):
 								  
 								   })
 						
-		
 		return True
 	
 	def cancel_amend(self, cr, uid, ids,context=None):
@@ -460,18 +496,22 @@ class kg_purchase_amendment(osv.osv):
 		
 		amend_obj = self.browse(cr,uid,ids[0])
 		po_obj = self.pool.get('purchase.order')
+		grn_obj = self.pool.get('kg.po.grn')
+		grn_line_obj = self.pool.get('po.grn.line')
+		invoice_obj = self.pool.get('kg.purchase.invoice')
+		invoice_line_obj = self.pool.get('kg.pogrn.purchase.invoice.line')
 		product_obj = self.pool.get('product.product')
 		po_line_obj = self.pool.get('purchase.order.line')
 		amend_line_obj = self.pool.get('kg.purchase.amendment.line')
 		pi_line_obj = self.pool.get('purchase.requisition.line')
 		stock_move_obj = self.pool.get('stock.move')
-		
+		stock_lot_obj = self.pool.get('stock.production.lot')
 		po_id = False 
 		#if amend_obj.confirmed_by.id == uid:
 		#	raise osv.except_osv(
 		#			_('Warning'),
 		#			_('Approve cannot be done by Confirmed user'))
-					
+		
 		if amend_obj.amendment_line ==[]:
 			raise osv.except_osv(
 			_('Empty Purchase Amendment!'),
@@ -484,43 +524,30 @@ class kg_purchase_amendment(osv.osv):
 			po_id = amend_obj.po_id.id
 			po_record = po_obj.browse(cr,uid,po_id)
 			po_obj.write(cr,uid,po_id,{'amend_flag': True})
-			
 			if amend_obj.partner_id.id != amend_obj.partner_id_amend.id:
 				po_obj.write(cr,uid,po_id,{'partner_id': amend_obj.partner_id_amend.id,'add_test':amend_obj.add_text_amend})
-				
 			if amend_obj.po_date != amend_obj.po_date_amend:
 				po_obj.write(cr,uid,po_id,{'date_order': amend_obj.po_date_amend})
-			
 			if amend_obj.quot_ref_no != amend_obj.quot_ref_no_amend:
 				po_obj.write(cr,uid,po_id,{'quot_ref_no': amend_obj.quot_ref_no_amend})
-				
 			if amend_obj.price != amend_obj.price_amend:
 				po_obj.write(cr,uid,po_id,{'price': amend_obj.price_amend})
-				
 			if amend_obj.dep_project.id != amend_obj.dep_project_amend.id:
 				po_obj.write(cr,uid,po_id,{'dep_project': amend_obj.dep_project_amend.id})	
-				
 			if amend_obj.payment_mode.id != amend_obj.payment_mode_amend.id:
 				po_obj.write(cr,uid,po_id,{'payment_mode': amend_obj.payment_mode_amend.id})
-				
 			if amend_obj.delivery_type.id != amend_obj.delivery_type_amend.id:
 				po_obj.write(cr,uid,po_id,{'delivery_type': amend_obj.delivery_type_amend.id})
-				
 			if amend_obj.delivery_mode.id != amend_obj.delivery_mode_amend.id:
 				po_obj.write(cr,uid,po_id,{'delivery_mode': amend_obj.delivery_mode_amend.id})
-				
 			if amend_obj.term_freight != amend_obj.term_freight_amend:
 				po_obj.write(cr,uid,po_id,{'term_freight': amend_obj.term_freight_amend})	
-				
 			if amend_obj.term_warranty != amend_obj.term_warranty_amend:
 				po_obj.write(cr,uid,po_id,{'term_warranty': amend_obj.term_warranty_amend})		
-				
 			if amend_obj.po_expenses_type1 != amend_obj.po_expenses_type1_amend:
 				po_obj.write(cr,uid,po_id,{'po_expenses_type1': amend_obj.po_expenses_type1_amend})
-				
 			if amend_obj.po_expenses_type2 != amend_obj.po_expenses_type2_amend:
 				po_obj.write(cr,uid,po_id,{'po_expenses_type2': amend_obj.po_expenses_type2_amend})
-				
 			if amend_obj.value1 != amend_obj.value1_amend or amend_obj.value2 != amend_obj.value2_amend:
 				tot_value = amend_obj.value1_amend + amend_obj.value2_amend
 				po_obj.write(cr,uid,po_id,{
@@ -534,7 +561,6 @@ class kg_purchase_amendment(osv.osv):
 					'note':amend_obj.remark,
 					'version':version,
 					})
-			
 		
 		for amend_line in amend_obj.amendment_line:
 			print "amend_line================>>", amend_line
@@ -545,140 +571,253 @@ class kg_purchase_amendment(osv.osv):
 			print "diff_qty :::::::::::::::", diff_qty
 			pending_diff_qty = amend_line.product_qty - amend_line.pending_qty
 			print "pending_diff_qty :::::::::::", pending_diff_qty
-			
-			if amend_line.product_qty < amend_line.product_qty_amend:
-				pi_line_record = pi_line_obj.browse(cr, uid,pol_record.pi_line_id.id)
-				if pi_line_record.pending_qty <= 0:
-					if not amend_line.kg_poindent_lines:
-						
-						raise osv.except_osv(
-						_('If you want to increase PO Qty'),
-						_('Select PI for this Product')) 
+			if pol_record.pi_line_id.id:
+				if amend_line.product_qty < amend_line.product_qty_amend:
+					pi_line_record = pi_line_obj.browse(cr, uid,pol_record.pi_line_id.id)
+					if pi_line_record.pending_qty <= 0:
+						if not amend_line.kg_poindent_lines:
+							raise osv.except_osv(
+							_('If you want to increase PO Qty'),
+							_('Select PI for this Product')) 
+					else:
+						pi_product_qty = pi_line_record.product_qty
+						pi_pending_qty = pi_line_record.pending_qty
+						re_qty = amend_line.product_qty_amend-amend_line.product_qty
+						if pi_pending_qty >= re_qty:
+							amend_pend = pi_pending_qty - re_qty
+							pi_line_obj.write(cr,uid,pol_record.pi_line_id.id,{'pending_qty' : amend_pend})
+						else: 
+							amend_pro_qty = re_qty - pi_pending_qty 
+							pi_product_qty += amend_pro_qty
+							pi_line_obj.write(cr,uid,pol_record.pi_line_id.id,{'pending_qty' : 0,'product_qty' : pi_product_qty})
 				else:
-					pi_product_qty = pi_line_record.product_qty
-					pi_pending_qty = pi_line_record.pending_qty
-					re_qty = amend_line.product_qty_amend-amend_line.product_qty
-					if pi_pending_qty >= re_qty:
-						amend_pend = pi_pending_qty - re_qty
-						pi_line_obj.write(cr,uid,pol_record.pi_line_id.id,{'pending_qty' : amend_pend})
-					else: 
-						amend_pro_qty = re_qty - pi_pending_qty 
-						pi_product_qty += amend_pro_qty
-						pi_line_obj.write(cr,uid,pol_record.pi_line_id.id,{'pending_qty' : 0,'product_qty' : pi_product_qty})
-			else:
-				grn_id = self.pool.get('po.grn.line').search(cr, uid, [('po_line_id','=',amend_line.po_line_id.id)])
-				print "-------------------------------------------------------------grn_id---->",grn_id
-				print "-------------------------------------------------------------grn_id---->",amend_line.po_line_id.id
-				
-				if grn_id:
-					grn_bro = self.pool.get('po.grn.line').browse(cr, uid, grn_id[0])
-					if grn_bro.po_grn_qty <= amend_line.product_qty_amend:
+					grn_id = self.pool.get('po.grn.line').search(cr, uid, [('po_line_id','=',amend_line.po_line_id.id)])
+					print "-------------------------------------------------------------grn_id---->",grn_id
+					print "-------------------------------------------------------------grn_id---->",amend_line.po_line_id.id
+					if grn_id:
+						grn_bro = self.pool.get('po.grn.line').browse(cr, uid, grn_id[0])
+						if grn_bro.po_grn_qty <= amend_line.product_qty_amend:
+							pi_line_record = pi_line_obj.browse(cr, uid,pol_record.pi_line_id.id)
+							pi_pending_qty = pi_line_record.pending_qty
+							re_qty = amend_line.product_qty - amend_line.product_qty_amend
+							pi_pending_qty += re_qty
+							pi_line_obj.write(cr,uid,pol_record.pi_line_id.id,{'pending_qty' : pi_pending_qty})
+						else:
+							raise osv.except_osv(
+									_('You can not decrease PO Qty'),
+									_('Because GRN is already created'))
+					else:
 						pi_line_record = pi_line_obj.browse(cr, uid,pol_record.pi_line_id.id)
 						pi_pending_qty = pi_line_record.pending_qty
 						re_qty = amend_line.product_qty - amend_line.product_qty_amend
 						pi_pending_qty += re_qty
 						pi_line_obj.write(cr,uid,pol_record.pi_line_id.id,{'pending_qty' : pi_pending_qty})
+						
+				if amend_line.line_state == 'cancel':
+					if pol_record.pi_line_id:					
+						pi_line_record = pi_line_obj.browse(cr, uid,pol_record.pi_line_id.id)
+						pi_product_qty = pi_line_record.product_qty
+						pi_pending_qty = pi_line_record.pending_qty
+						print "pi_line_record ======================>>", pi_line_record
+						print "pi_pending_qty ===================>>", pi_pending_qty
+						print "**************************************"
+						pi_product_qty += pol_record.product_qty
+						pi_pending_qty += pol_record.pending_qty
+						print "pi_pending_qty ===================>>", pi_pending_qty
+						pi_line_obj.write(cr,uid,pol_record.pi_line_id.id,{'pending_qty' : pi_pending_qty})
+						po_line_obj.write(cr,uid,po_line_id,{'line_state': amend_line.line_state,
+															 'cancel_qty' :amend_line.cancel_qty,
+															 'received_qty':amend_line.received_qty,
+															  })
 					else:
+						po_line_obj.write(cr,uid,po_line_id,{'line_state': amend_line.line_state,
+															 'cancel_qty' :amend_line.cancel_qty,
+															 'received_qty':amend_line.received_qty,
+															 })
+				if amend_line.product_qty != amend_line.product_qty_amend:
+					grn_sql = """ select sum(po_qty) - sum(po_grn_qty) as bal_po_grn_qty from po_grn_line where po_id = %s and product_id = %s """%(amend_obj.po_id.id,amend_line.product_id.id)
+					cr.execute(grn_sql)		
+					grn_data = cr.dictfetchall()
+					if grn_data:
+						if grn_data[0]['bal_po_grn_qty'] == 0:
+							raise osv.except_osv(
+								_('Please Check GRN!'),
+								_('GRN Already Created For This PO!!'))
+					if amend_line.pending_qty == 0 and not amend_line.kg_poindent_lines:
 						raise osv.except_osv(
-								_('You can not decrease PO Qty'),
-								_('Because GRN is already created'))
+						_('All Qty has received for this PO !'),
+						_('You can not increase PO Qty for product %s')%(amend_line.product_id.name))
+					disc_value = (amend_line.product_qty_amend * amend_line.price_unit_amend) * amend_line.kg_discount_per_amend / 100
+					print "kg_discount_per_value :::::::::::::::", disc_value
+					po_line_obj.write(cr,uid,po_line_id,{
+							'product_qty': amend_line.product_qty_amend,
+							'pending_qty': amend_line.pending_qty_amend,
+							'kg_discount_per_value' : disc_value,
+								})
+				
+				if amend_line.price_unit != amend_line.price_unit_amend:
+					pinv_obj = self.pool.get('kg.purchase.invoice').search(cr,uid,[('po_so_name','=',amend_obj.po_id.name),('state','=','approved')])
+					print"pinv_objpinv_obj",pinv_obj
+					if pinv_obj:
+						raise osv.except_osv(
+							_('Please Check Invoice!'),
+							_('Invoice Already Created For This PO!!'))
+					po_line_obj.write(cr,uid,po_line_id,{
+						'price_unit': amend_line.price_unit_amend})
+				if amend_line.brand_id.id != amend_line.brand_id_amend.id:
+					grn_sql = """ select sum(po_qty) - sum(po_grn_qty) as bal_po_grn_qty from po_grn_line where po_id = %s and product_id = %s """%(amend_obj.po_id.id,amend_line.product_id.id)
+					cr.execute(grn_sql)		
+					grn_data = cr.dictfetchall()
+					if grn_data:
+						if grn_data[0]['po_grn_qty'] == 0:
+							raise osv.except_osv(
+								_('Please Check GRN!'),
+								_('GRN Already Created For This PO!!'))
+					po_line_obj.write(cr,uid,po_line_id,{
+						'brand_id': amend_line.brand_id_amend.id})	
+				if amend_line.kg_discount != amend_line.kg_discount_amend:
+					print "kg_disc_amt_per_amend...................", amend_line.kg_disc_amt_per_amend
+					print "kg_discount_amend...........", amend_line.kg_discount_amend
+					po_line_obj.write(cr,uid,po_line_id,{'kg_discount': amend_line.kg_discount_amend})
+				if amend_line.kg_discount_per != amend_line.kg_discount_per_amend:
+					print "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",amend_line.kg_disc_amt_per_amend
+					po_line_obj.write(cr,uid,po_line_id,{'kg_discount_per': amend_line.kg_discount_per_amend}) 
+				if amend_line.kg_disc_amt_per != amend_line.kg_disc_amt_per_amend:
+					print "kg_disc&&&&&&&&&",amend_line.kg_disc_amt_per
+					print "kg_disc********",amend_line.kg_disc_amt_per_amend
+					po_line_obj.write(cr,uid,po_line_id,{'kg_disc_amt_per': amend_line.kg_disc_amt_per_amend})
+				if amend_line.kg_discount_per_value != amend_line.kg_discount_per_value_amend:
+					po_line_obj.write(cr,uid,po_line_id,{'kg_discount_per_value': amend_line.kg_discount_per_value_amend})
+				if amend_line.note != amend_line.note_amend:
+					po_line_obj.write(cr,uid,po_line_id,{'name': amend_line.note_amend})
+				if amend_line.product_id.id != amend_line.product_id_amend.id:
+					po_grn_obj = self.pool.get('po.grn.line').search(cr,uid,[('po_id','=',amend_obj.po_id.id)])
+					print"po_grn_objpo_grn_obj",po_grn_obj
+					if po_grn_obj:
+						raise osv.except_osv(
+							_('Please Check GRN!'),
+							_('GRN Already Created For This PO!!'))
+					po_line_obj.write(cr,uid,po_line_id,{'product_id': amend_line.product_id_amend.id})
+				print "amend_line.id::::::::::", amend_line.taxes_id
+				print "amend_line.id:::taxes_id_amend:::::::", amend_line.taxes_id_amend
+				cr.execute(""" select tax_id from amendment_order_tax where amend_line_id = %s """ %(amend_line.id))
+				data = cr.dictfetchall()
+				val = [d['tax_id'] for d in data if 'tax_id' in d]
+				print "val::::::::::::::::", val
+				cr.execute(""" delete from purchase_order_taxe where ord_id=%s """ %(po_line_id))
+				for i in range(len(val)):
+					print "IIIIIIIIIIIIIIIIIIIII", val[i]
+					cr.execute(""" INSERT INTO purchase_order_taxe (ord_id,tax_id) VALUES(%s,%s) """ %(po_line_id,val[i]))
 				else:
-					pi_line_record = pi_line_obj.browse(cr, uid,pol_record.pi_line_id.id)
-					pi_pending_qty = pi_line_record.pending_qty
-					re_qty = amend_line.product_qty - amend_line.product_qty_amend
-					pi_pending_qty += re_qty
-					pi_line_obj.write(cr,uid,pol_record.pi_line_id.id,{'pending_qty' : pi_pending_qty})
-					
-			if amend_line.line_state == 'cancel':
-				if pol_record.pi_line_id:					
-					pi_line_record = pi_line_obj.browse(cr, uid,pol_record.pi_line_id.id)
-					pi_product_qty = pi_line_record.product_qty
-					pi_pending_qty = pi_line_record.pending_qty
-					print "pi_line_record ======================>>", pi_line_record
-					print "pi_pending_qty ===================>>", pi_pending_qty
-					print "**************************************"
-					pi_product_qty += pol_record.product_qty
-					pi_pending_qty += pol_record.pending_qty
-					print "pi_pending_qty ===================>>", pi_pending_qty
-					pi_line_obj.write(cr,uid,pol_record.pi_line_id.id,{'pending_qty' : pi_pending_qty})
-					po_line_obj.write(cr,uid,po_line_id,{'line_state': amend_line.line_state,
-														 'cancel_qty' :amend_line.cancel_qty,
-														 'received_qty':amend_line.received_qty,
-														  })
-				else:
-					po_line_obj.write(cr,uid,po_line_id,{'line_state': amend_line.line_state,
-														 'cancel_qty' :amend_line.cancel_qty,
-														 'received_qty':amend_line.received_qty,
-														 })
-				
-			if amend_line.product_qty != amend_line.product_qty_amend:
-				
-				if amend_line.pending_qty == 0 and not amend_line.kg_poindent_lines:
-					raise osv.except_osv(
-					_('All Qty has received for this PO !'),
-					_('You can not increase PO Qty for product %s')%(amend_line.product_id.name))
-					
-				disc_value = (amend_line.product_qty_amend * amend_line.price_unit_amend) * amend_line.kg_discount_per_amend / 100
-				print "kg_discount_per_value :::::::::::::::", disc_value
-				po_line_obj.write(cr,uid,po_line_id,{
-						'product_qty': amend_line.product_qty_amend,
-						'pending_qty': amend_line.pending_qty_amend,
-						'kg_discount_per_value' : disc_value,
-							})
-					
-			if amend_line.price_unit != amend_line.price_unit_amend:
-				po_line_obj.write(cr,uid,po_line_id,{
-					'price_unit': amend_line.price_unit_amend})
-					
-			if amend_line.brand_id.id != amend_line.brand_id_amend.id:
-				po_line_obj.write(cr,uid,po_line_id,{
-					'brand_id': amend_line.brand_id_amend.id})	
-
-			if amend_line.kg_discount != amend_line.kg_discount_amend:
-				
-				print "kg_disc_amt_per_amend...................", amend_line.kg_disc_amt_per_amend
-				print "kg_discount_amend...........", amend_line.kg_discount_amend
-				po_line_obj.write(cr,uid,po_line_id,{'kg_discount': amend_line.kg_discount_amend})
-				
-			if amend_line.kg_discount_per != amend_line.kg_discount_per_amend:
-				print "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",amend_line.kg_disc_amt_per_amend
-				po_line_obj.write(cr,uid,po_line_id,{'kg_discount_per': amend_line.kg_discount_per_amend}) 
-				
-			if amend_line.kg_disc_amt_per != amend_line.kg_disc_amt_per_amend:
-				print "kg_disc&&&&&&&&&",amend_line.kg_disc_amt_per
-				print "kg_disc********",amend_line.kg_disc_amt_per_amend
-				po_line_obj.write(cr,uid,po_line_id,{'kg_disc_amt_per': amend_line.kg_disc_amt_per_amend})
-				
-			if amend_line.kg_discount_per_value != amend_line.kg_discount_per_value_amend:
-				po_line_obj.write(cr,uid,po_line_id,{'kg_discount_per_value': amend_line.kg_discount_per_value_amend})
-			
-			if amend_line.note != amend_line.note_amend:
-				po_line_obj.write(cr,uid,po_line_id,{'name': amend_line.note_amend})
-			
-			print "amend_line.id::::::::::", amend_line.taxes_id
-			print "amend_line.id:::taxes_id_amend:::::::", amend_line.taxes_id_amend
-			
-			cr.execute(""" select tax_id from amendment_order_tax where amend_line_id = %s """ %(amend_line.id))
-			data = cr.dictfetchall()
-			val = [d['tax_id'] for d in data if 'tax_id' in d]
-			print "val::::::::::::::::", val
-					
-			cr.execute(""" delete from purchase_order_taxe where ord_id=%s """ %(po_line_id))
-			
-			for i in range(len(val)):
-				print "IIIIIIIIIIIIIIIIIIIII", val[i]
-				cr.execute(""" INSERT INTO purchase_order_taxe (ord_id,tax_id) VALUES(%s,%s) """ %(po_line_id,val[i]))
+					print "NO PO Line Changs"
+				amend_line.write({'line_state': 'done'})
 			else:
-				print "NO PO Line Changs"
-			amend_line.write({'line_state': 'done'})
-			
+				
+				if amend_line.product_qty != amend_line.product_qty_amend:
+					grn_sql = """ select sum(po_qty) - sum(po_grn_qty) as bal_po_grn_qty from po_grn_line where po_id = %s and product_id = %s """%(amend_obj.po_id.id,amend_line.product_id.id)
+					cr.execute(grn_sql)		
+					grn_data = cr.dictfetchall()
+					if grn_data:
+						if grn_data[0]['bal_po_grn_qty'] == 0:
+							raise osv.except_osv(
+								_('Please Check GRN!'),
+								_('GRN Already Created For This PO!!'))
+					if amend_line.pending_qty == 0 and not amend_line.kg_poindent_lines:
+						raise osv.except_osv(
+						_('All Qty has received for this PO !'),
+						_('You can not increase PO Qty for product %s')%(amend_line.product_id.name))
+					disc_value = (amend_line.product_qty_amend * amend_line.price_unit_amend) * amend_line.kg_discount_per_amend / 100
+					print "kg_discount_per_value :::::::::::::::", disc_value
+					po_line_obj.write(cr,uid,po_line_id,{
+							'product_qty': amend_line.product_qty_amend,
+							'pending_qty': amend_line.pending_qty_amend,
+							'kg_discount_per_value' : disc_value,
+								})
+				
+				if amend_line.price_unit != amend_line.price_unit_amend:
+					pinv_obj = self.pool.get('kg.purchase.invoice').search(cr,uid,[('po_so_name','=',amend_obj.po_id.name),('state','=','approved')])
+					print"pinv_objpinv_obj",pinv_obj
+					if pinv_obj:
+						raise osv.except_osv(
+							_('Please Check Invoice!'),
+							_('Invoice Already Created For This PO!!'))
+					
+					po_line_obj.write(cr,uid,po_line_id,{
+						'price_unit': amend_line.price_unit_amend})
+				if amend_line.brand_id.id != amend_line.brand_id_amend.id:
+					grn_sql = """ select sum(po_qty) - sum(po_grn_qty) as bal_po_grn_qty from po_grn_line where po_id = %s and product_id = %s """%(amend_obj.po_id.id,amend_line.product_id.id)
+					cr.execute(grn_sql)		
+					grn_data = cr.dictfetchall()
+					if grn_data:
+						if grn_data[0]['po_grn_qty'] == 0:
+							raise osv.except_osv(
+								_('Please Check GRN!'),
+								_('GRN Already Created For This PO!!'))
+					po_line_obj.write(cr,uid,po_line_id,{
+						'brand_id': amend_line.brand_id_amend.id})
+				if amend_line.product_id.id != amend_line.product_id_amend.id:
+					po_grn_obj = self.pool.get('po.grn.line').search(cr,uid,[('po_id','=',amend_obj.po_id.id)])
+					print"po_grn_objpo_grn_obj",po_grn_obj
+					if po_grn_obj:
+						raise osv.except_osv(
+							_('Please Check GRN!'),
+							_('GRN Already Created For This PO!!'))
+					po_line_obj.write(cr,uid,po_line_id,{'product_id': amend_line.product_id_amend.id})
+		cr.execute(""" select count(id) from kg_purchase_amendment where state = 'approved' and po_id = %s """ %(amend_obj.po_id.id))
+		revision_data = cr.dictfetchall()
+		if revision_data:
+			po_obj.write(cr,uid,amend_obj.po_id.id,{'revision': revision_data[0]['count']+1})
 		print "Tax Calculation Methods are Going to Call"
-		
 		#po_line_obj._amount_line(cr,uid,[po_id],prop=None,arg=None,context=None)
 		po_obj._amount_line_tax(cr,uid,pol_record,context=None)
 		po_obj._amount_all(cr,uid,[po_id],field_name=None,arg=False,context=None)
 		self.write(cr,uid,ids,{'state' : 'approved' ,'approved_by':uid,
 								  'approved_date':today,})
+		
+		cr.execute(""" select grn_id from multiple_po where po_id = %s """ %(po_record.id))
+		grn_data = cr.dictfetchall()
+		if grn_data:
+			for item in grn_data:
+				
+				grn_search = grn_obj.search(cr,uid,[('id','=',item['grn_id']),('state','not in',('inv','cancel','reject'))])
+				
+				if grn_search:
+					grn_browse = grn_obj.browse(cr,uid,grn_search[0])
+					grn_obj.write(cr,uid,grn_search[0],{'supplier_id': amend_obj.partner_id.id})
+					for line_amend in amend_obj.amendment_line:
+						grn_line_search = self.pool.get('po.grn.line').search(cr, uid, [('po_line_id','=',line_amend.po_line_id.id),('po_grn_id','=',grn_search[0])])
+						if grn_line_search:
+							grn_line_browse = self.pool.get('po.grn.line').browse(cr, uid, grn_line_search[0])
+							grn_line_obj.write(cr,uid,grn_line_search[0],{'price_unit':line_amend.price_unit_amend,
+								'kg_discount_per':line_amend.kg_discount_per_amend,'kg_discount':line_amend.kg_discount_amend,
+								'grn_tax_ids':[(6, 0, [x.id for x in line_amend.taxes_id_amend])],'brand_id':line_amend.brand_id_amend.id or False})
+							
+							stock_move_search = stock_move_obj.search(cr,uid,[('po_grn_line_id','=',grn_line_search[0])])
+							if stock_move_search:
+								stock_move_browse = stock_move_obj.browse(cr,uid,stock_move_search[0])
+								stock_move_obj.write(cr,uid,stock_move_search[0],{'price_unit':line_amend.price_unit_amend,'brand_id':line_amend.brand_id_amend.id or False})
+							
+							stock_lot_search = self.pool.get('stock.move').search(cr,uid,[('po_grn_line_id','=',grn_line_browse.id)])
+							if stock_lot_search:
+								stock_move_browse = stock_move_obj.browse(cr,uid,stock_move_search[0])
+								for i in stock_lot_search:
+									
+									self.pool.get('stock.move').write(cr,uid,i,{'price_unit':line_amend.price_unit_amend,'brand_id':line_amend.brand_id_amend.id or False})
+							
+							
+							inv_line_search = invoice_line_obj.search(cr,uid,[('po_line_id','=',line_amend.po_line_id.id),('po_grn_line_id','=',grn_line_search[0])])
+							if inv_line_search:
+								inv_line_browse = invoice_line_obj.browse(cr,uid,inv_line_search[0])
+								print "-------------------------------------",inv_line_search[0]
+								invoice_line_obj.write(cr,uid,inv_line_search[0],{'price_unit':line_amend.price_unit_amend,
+									'kg_discount_per':line_amend.kg_discount_per_amend,'discount':line_amend.kg_discount_amend,
+									'invoice_tax_ids':[(6, 0, [x.id for x in line_amend.taxes_id_amend])],'brand_id':line_amend.brand_id_amend.id or False})
+								ids =[]
+								ids.append(inv_line_browse.invoice_header_id.id)
+								invoice_obj.update_actual_values(cr, uid, ids,context=None)
+				else:
+					pass
+		
 		return True
 		cr.close()
 		
@@ -728,7 +867,7 @@ class kg_purchase_amendment_line(osv.osv):
 	'order_id': fields.many2one('purchase.order', 'Order ID'),
 	'amendment_id':fields.many2one('kg.purchase.amendment','Amendment', select=True, required=True, ondelete='cascade'),
 	'pi_line_id':fields.many2one('purchase.requisition.line','PI Line', invisible=True),
-	'product_id':fields.many2one('product.product', 'Product', required=True,readonly=True),
+	'product_id':fields.many2one('product.product', 'Product', required=True),
 	'kg_discount': fields.float('Discount Amount', digits_compute= dp.get_precision('Discount')),
 	'price_unit': fields.float('Unit Price', digits_compute= dp.get_precision('Product Price')),
 	'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
@@ -745,7 +884,10 @@ class kg_purchase_amendment_line(osv.osv):
 	'taxes_id': fields.many2many('account.tax', 'purchase_order_tax', 'amend_line_id', 'tax_id','Taxes',readonly=True),
 	'line_state': fields.selection([('draft', 'Draft'),('cancel', 'Cancel'),('done', 'Done')], 'Status'),
 	'line_bill': fields.boolean('PO Bill'),
+	
 	# Amendment Fields:
+	
+	'product_id_amend': fields.many2one('product.product','Amend Product'),
 	'kg_discount_amend': fields.float('Amend Discount Amount', digits_compute= dp.get_precision('Discount')),
 	'price_unit_amend': fields.float('Amend Price', digits_compute= dp.get_precision('Product Price')),
 	'product_qty_amend': fields.float('Amend Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),

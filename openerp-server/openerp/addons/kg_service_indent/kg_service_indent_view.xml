@@ -17,7 +17,7 @@
 				<button name="draft_indent" states="cancel" string="Draft" type="object" class="oe_highlight"/>
                 <button name="confirm_indent" states="draft" string="Confirm" type="object" />
                 <button name="approve_indent" states="confirm" string="Approve" type="object"/>
-                <button name="cancel_indent" states="done" string="Cancel" type="object" class="oe_highlight"/>
+                <button name="cancel_indent" states="approved" string="Cancel" type="object" class="oe_highlight"/>
                 <field name="state" widget="statusbar" statusbar_visible="draft,confirm,done,cancel" statusbar_colors='{"draft":"blue"}'/>
 
 		</header>
@@ -107,7 +107,7 @@
             <field name="model">kg.service.indent</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
-				<tree colors="red:state == 'confirm';blue:state == 'draft';black:state == 'approved'" 
+				<tree colors="red:state == 'confirm';blue:state == 'draft';black:state == 'approved';gray:state == 'cancel'" 
 							string="Service Indent" toolbar="1" >
                     <field name="name"/>
 					<field name="date"/>

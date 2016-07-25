@@ -17,18 +17,24 @@ class kg_service_indent(osv.osv):
 	_columns = {
 	
 		'name': fields.char('Indent No', size=64, readonly=True),
-		'dep_name': fields.many2one('kg.depmaster','Department', translate=True,required=True, select=True,readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
+		'dep_name': fields.many2one('kg.depmaster','Department', translate=True,required=True, select=True,readonly=True, 
+					domain="[('item_request','=',True),('state','in',('draft','confirmed','approved'))]", states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'date': fields.date('Indent Date',required=True,readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'service_indent_line': fields.one2many('kg.service.indent.line', 'service_id',
 					'Indent Lines',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'active': fields.boolean('Active'),
-		'user_id' : fields.many2one('res.users', 'Created By', readonly=True),
 		'state': fields.selection([('draft', 'Draft'),('confirm','Waiting For Approval'),('approved','Approved'),('done','Done'),('cancel','Cancel')], 'Status', track_visibility='onchange', required=True),
 		'gate_pass': fields.boolean('Gate Pass', readonly=True, states={'draft':[('readonly', False)],'confirm':[('readonly',False)]}),
-		'creation_date':fields.datetime('Creation Date',required=True,readonly=True),
 		'origin': fields.char('Source Location', size=264,readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'remark': fields.text('Remarks'),
 		'division': fields.many2one('kg.division.master','Division'),
+		'dep_project':fields.many2one('kg.project.master','Dept/Project Name',readonly=True,states={'draft': [('readonly', False)],'confirm':[('readonly',False)]}),
+		
+		# Entry Info
+		
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
+		'creation_date':fields.datetime('Creation Date',required=True,readonly=True),
+		'user_id' : fields.many2one('res.users', 'Created By', readonly=True),
 		'confirmed_by' : fields.many2one('res.users', 'Confirmed By', readonly=True),
 		'confirmed_date' : fields.datetime('Confirmed Date',readonly=True),
 		'approved_by' : fields.many2one('res.users', 'Approved By', readonly=True),
@@ -37,12 +43,10 @@ class kg_service_indent(osv.osv):
 		'cancel_date' : fields.datetime('Cancelled Date',readonly=True),
 		'update_user_id' : fields.many2one('res.users', 'Last Updated By', readonly=True),
 		'update_date' : fields.datetime('Last Updated Date',readonly=True),
-		'dep_project':fields.many2one('kg.project.master','Dept/Project Name',readonly=True,states={'draft': [('readonly', False)],'confirm':[('readonly',False)]}),
-		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		
 	}
 	
-	_sql_constraints = [('code_uniq','unique(name)', 'Indent number must be unique!')]
+	#~ _sql_constraints = [('code_uniq','unique(name)', 'Indent number must be unique!')]
 
 	_defaults = {
 		
@@ -97,7 +101,7 @@ class kg_service_indent(osv.osv):
 			'name':seq_name[0],
 			'state': 'confirm',
 			'confirmed_by': uid,
-			'confirmed_date': time.strftime("%Y-%m-%d"),
+			'confirmed_date': time.strftime("%Y-%m-%d %H:%M:%S"),
 			})	
 		
 		#cr.execute("""select all_transaction_mails('Service Indent Request Approval',%s)"""%(ids[0]))
@@ -129,7 +133,7 @@ class kg_service_indent(osv.osv):
 		#			_('Warning'),
 		#			_('Approve cannot be done by Confirmed user'))
 		#else:
-		self.write(cr,uid,ids,{'state':'approved','approved_by':uid,'approved_date':time.strftime('%Y-%m-%d')})
+		self.write(cr,uid,ids,{'state':'approved','approved_by':uid,'approved_date':time.strftime('%Y-%m-%d %H:%M:%S')})
 		#cr.execute("""select all_transaction_mails('Service Indent Request Approval',%s)"""%(ids[0]))
 		"""Raj
 		data = cr.fetchall();
@@ -151,8 +155,14 @@ class kg_service_indent(osv.osv):
 		"""
 		return True
 	
-	def cancel_indent(self, cr, uid, ids, context=None):		
-		self.write(cr, uid,ids,{'state' : 'cancel','cancel_user_id': uid,'cancel_date':time.strftime('%Y-%m-%d')})
+	def cancel_indent(self, cr, uid, ids, context=None):
+		rec = self.browse(cr,uid,ids[0])		
+		
+		if not rec.remark:
+			raise osv.except_osv(
+				_('Remarks Needed !!'),
+				_('Enter Remark in Remarks Tab....'))
+		self.write(cr, uid,ids,{'state' : 'cancel','cancel_user_id': uid,'cancel_date':time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
 	def unlink(self, cr, uid, ids, context=None):

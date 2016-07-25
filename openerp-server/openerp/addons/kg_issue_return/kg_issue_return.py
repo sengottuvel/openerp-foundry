@@ -23,31 +23,40 @@ class kg_issue_return(osv.osv):
 	_columns = {
 	
 		'name': fields.char('Issue Return No', size=64, readonly=True),
-		'dep_name': fields.many2one('kg.depmaster','Department',required=True, select=True,readonly=True,states={'draft':[('readonly',False)]}),
+		#~ 'dep_name': fields.many2one('kg.depmaster','Department',required=True, select=True,readonly=True,states={'draft':[('readonly',False)]},
+							#~ domain="['&',('stock_location.location_type','=','sub'),('stock_location.custom','=',True)]",),
+		'dep_name': fields.many2one('kg.depmaster','Department',required=True, select=True,readonly=True,states={'draft':[('readonly',False)]},
+							domain="[('stock_location.location_type','=','sub'),('stock_location.custom','=',True),('item_request','=',True),('state','in',('draft','confirmed','approved'))]",),
 		'date': fields.date('Issue Return Date',required=True,readonly=True,states={'draft':[('readonly',False)]}),
 		'issue_return_line': fields.one2many('kg.issue.return.line', 'issue_return_id',
 					'Issue Return Lines',readonly=True,states={'draft':[('readonly',False)]}),
 		'active': fields.boolean('Active'),
-		'state': fields.selection([('draft', 'Draft'),('confirm','Waiting For Approval'),('approved','Approved'),('done','Done'),('cancel','Cancel')], 'Status', track_visibility='onchange', required=True),
+		'state': fields.selection([('draft', 'Draft'),('confirm','Waiting For Approval'),('approved','Approved'),('done','Done'),('cancel','Cancelled'),('reject','Rejected')], 'Status', track_visibility='onchange', required=True),
 		'gate_pass': fields.boolean('Gate Pass', readonly=False,states={'approved':[('readonly',True)]}),
 		'origin': fields.char('Source Location', size=264,readonly=True,states={'draft':[('readonly',False)]}),
-		'remark': fields.text('Remarks'),
+		'remark': fields.text('Remarks',readonly=True,states={'confirm':[('readonly',False)],'approved':[('readonly',False)]}),
 		'dep_issue_no':fields.many2one('kg.department.issue','Department Issue No',domain = "[('state','=','done'),('department_id','=',dep_name),('issue_return','=',False)]", readonly=True,states={'draft':[('readonly',False)]}),
 		'depissue_date':fields.date('Department Issue Date',readonly=True),
-		'return_type':fields.selection(RETURN_TYPE_SELECTION,'Return Type',readonly=True,states={'draft':[('readonly',False)]}),
-		'reject_location':fields.many2one('stock.location','Reject Location',domain = [('scrap_location','=',True)],readonly=True,states={'draft':[('readonly',False)]}),
+		'return_type':fields.selection(RETURN_TYPE_SELECTION,'Return Type',readonly=False,states={'approved':[('readonly',True)],'reject':[('readonly',True)]}),
+		#~ 'reject_location':fields.many2one('stock.location','Reject Location',domain = [('scrap_location','=',True)],readonly=True,states={'draft':[('readonly',False)]}),
+		'reject_location':fields.many2one('stock.location','Reject Location',domain = [('usage','=','scrap')],readonly=True,states={'draft':[('readonly',False)]}),
 		'rj_flag':fields.boolean('Reject Flag'),
 		'excess_flag':fields.boolean('Excess Flag'),
 		'list_flag':fields.boolean('List Flag'),
-		'company_id':fields.many2one('res.company','Company',readonly=True),
 		
 		# Entry Info
+		
+		'company_id':fields.many2one('res.company','Company',readonly=True),
 		'user_id' : fields.many2one('res.users', 'Created By', readonly=True),
 		'creation_date':fields.datetime('Creation Date',required=True,readonly=True),
 		'confirmed_by' : fields.many2one('res.users', 'Confirmed By', readonly=False,select=True),
+		'reject_date': fields.datetime('Reject Date', readonly=True),
+		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
 		'approved_by' : fields.many2one('res.users', 'Approved By', readonly=False,select=True),
 		'confirmed_date': fields.datetime('Confirmed Date',readonly=True),
 		'approved_date' : fields.datetime('Approved Date',readonly=True),
+		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
+		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'update_date' : fields.datetime('Last Updated Date',readonly=True),
 		'update_user_id' : fields.many2one('res.users','Last Updated By',readonly=True),
 		
@@ -79,17 +88,24 @@ class kg_issue_return(osv.osv):
 		return super(kg_issue_return, self).write(cr, uid, ids, vals, context)
 		
 	def onchange_qty(self,cr,uid,ids,return_type,context=None):
-		value = {'rj_flag': '','excess_flag':'','excess_flag' : False}
+		value = {'rj_flag': '','excess_flag':'','excess_flag' : False,'reject_location':''}
 		if return_type == 'noreturn':	
 			value = {'rj_flag' : True}
-
+			stock_obj = self.pool.get('stock.location').search(cr,uid,[('usage','=','scrap'),('custom','=',True)])
+			print"stock_objstock_objstock_obj",stock_obj
+			
+			if stock_obj:
+				stock_rec = self.pool.get('stock.location').browse(cr,uid,stock_obj[0])
+				value = {'reject_location' : stock_rec.id}
+				print"aaaaaaaaaaaaaaAA"
+			else:
+				value = {'reject_location' : ''}
+				print"bbbbbbbbbbbbbbbbbbbbbbbbb"
 		if return_type == 'replacement':
 			value = {'excess_flag' : True,'rj_flag':False}
 
 		return {'value': value}
 		
-	
-
 	def list_issue(self, cr, uid, ids,context=None):
 		
 		rec  = self.browse(cr,uid,ids[0])
@@ -319,13 +335,17 @@ class kg_issue_return(osv.osv):
 						_('Warning!!'),
 						_('There no line information to load!!'))
 			
-		self.write(cr,uid,ids,{'state':'approved','approved_by':uid,'aproved_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		self.write(cr,uid,ids,{'state':'approved','approved_by':uid,'approved_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 	
-	def cancel_indent(self, cr, uid, ids, context=None):		
-		self.write(cr, uid,ids,{'state' : 'cancel'})
+	def cancel_issue(self, cr, uid, ids, context=None):		
+		self.write(cr, uid,ids,{'state' : 'cancel','cancel_user_id':uid,'cancel_date': time.strftime("%Y-%m-%d %H:%M:%S"),})
 		return True
-
+	
+	def reject_issue(self, cr, uid, ids, context=None):		
+		self.write(cr, uid,ids,{'state' : 'reject','rej_user_id':uid,'reject_date': time.strftime("%Y-%m-%d %H:%M:%S"),})
+		return True
+	
 	def unlink(self, cr, uid, ids, context=None):
 		if context is None:
 			context = {}
@@ -386,7 +406,7 @@ class kg_issue_return_line(osv.osv):
 	
 	_columns = {
 	
-	'issue_return_id': fields.many2one('kg.issue.return', 'Indent No', required=True, ondelete='cascade'),
+	'issue_return_id': fields.many2one('kg.issue.return', 'Issue No', required=True, ondelete='cascade'),
 	#~ 'dep_issue_no_line': fields.many2many('kg.department.issue.line','is_ret_line','line_id','dep_is_line_id','Issue No',domain="[('product_id','=',product_id)]"),
 	'product_id': fields.many2one('product.product', 'Product', required=True,domain = [('state','=','approved'),'|',('type','=','service')]),
 	'uom': fields.many2one('product.uom', 'UOM', required=True),
@@ -399,7 +419,7 @@ class kg_issue_return_line(osv.osv):
 	'line_date': fields.date('Indent Date'),
 	'requested_by' : fields.many2one('res.users', 'Approved By', readonly=False,select=True),
 	'return_type':fields.selection([('replacement','Excess Return'),('noreturn','Damage/Replacement Return')],'Return Type'),
-	'dep_issue_no_line':fields.many2one('kg.department.issue.line','Department Issue Line',domain="[('product_id','=',product_id)]"),
+	'dep_issue_no_line':fields.many2one('kg.department.issue.line','Issue No',domain="[('product_id','=',product_id)]"),
 	'price_unit':fields.float('Unit Price'),
 	'reject_location':fields.many2one('stock.location','Reject Location',domain = [('scrap_location','=',True)]),
 	'rj_flag':fields.boolean('Reject Flag'),

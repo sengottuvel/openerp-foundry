@@ -31,7 +31,8 @@ class kg_depindent(osv.osv):
 	_columns = {
 		
 		'name': fields.char('No', size=64, readonly=True,select=True),
-		'dep_name': fields.many2one('kg.depmaster','Department', required=True,translate=True, select=True,readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
+		'dep_name': fields.many2one('kg.depmaster','Department', required=True,translate=True, select=True,readonly=True,
+					domain="[('item_request','=',True),('state','in',('draft','confirmed','approved'))]", states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'date': fields.datetime('Creation Date',readonly=True),
 		'ind_date': fields.date('Indent Date',readonly=True,states={'draft':[('readonly',False)]}),
 		'type': fields.selection([('direct','Direct'), ('from_bom','From BoM')], 'Indent Type',readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
@@ -582,10 +583,11 @@ class kg_depindent_line(osv.osv):
 	'dep_id': fields.many2one('kg.depmaster','Department Name'),
 	'pi_cancel': fields.boolean('Cancel'),
 	'required_date': fields.date('Required Date'),
-	'brand_id': fields.many2one('kg.brand.master', 'Brand Name'),
+	'brand_id': fields.many2one('kg.brand.master', 'Brand Name',domain="[('product_ids','in',(product_id)),('state','in',('draft','confirmed','approved'))]"),
 	'return_qty':fields.float('Return Qty'),
 	'line_id': fields.one2many('ch.depindent.wo','header_id','Ch Line Id'),
 	'moc_id': fields.many2one('kg.moc.master','MOC'),
+	'moc_id_temp': fields.many2one('ch.brandmoc.rate.details','MOC',domain="[('brand_id','=',brand_id),('header_id.product_id','=',product_id),('header_id.state','in',('draft','confirmed','approved'))]"),
 	
 	}
 	
@@ -597,7 +599,13 @@ class kg_depindent_line(osv.osv):
 	
 	}
 		
-	
+	def onchange_moc(self, cr, uid, ids, moc_id_temp):
+		value = {'moc_id':''}
+		if moc_id_temp:
+			rate_rec = self.pool.get('ch.brandmoc.rate.details').browse(cr,uid,moc_id_temp)
+			value = {'moc_id': rate_rec.moc_id.id}
+		return {'value': value}
+		
 kg_depindent_line()	
 
 
@@ -609,11 +617,11 @@ class ch_depindent_wo(osv.osv):
 	
 	_columns = {
 
-		'header_id': fields.many2one('kg.depindent.line', 'Dept Indent Line', required=True, ondelete='cascade'),
-		'wo_id': fields.char('WO', required=True),
-		'w_order_id': fields.many2one('kg.work.order','WO',required=True, domain="[('state','=','confirmed')]"),
-		'w_order_line_id': fields.many2one('ch.work.order.details','WO',required=True),
-		'qty': fields.float('Indent Qty', required=True),
+	'header_id': fields.many2one('kg.depindent.line', 'Dept Indent Line', required=True, ondelete='cascade'),
+	'wo_id': fields.char('WO', required=True),
+	'w_order_id': fields.many2one('kg.work.order','WO',required=True, domain="[('state','=','confirmed')]"),
+	'w_order_line_id': fields.many2one('ch.work.order.details','WO',required=True),
+	'qty': fields.float('Indent Qty', required=True),
 	
 	}
 	
@@ -630,5 +638,12 @@ class ch_depindent_wo(osv.osv):
 		
 		]
 		
+	def onchange_wo(self, cr, uid, ids,w_order_line_id):
+		value = {'wo_id': ''}
+		if w_order_line_id:
+			wo_rec = self.pool.get('ch.work.order.details').browse(cr,uid,w_order_line_id)
+			value = {'wo_id':wo_rec.order_no}
+		return {'value':value}
+				
 	
 ch_depindent_wo()	

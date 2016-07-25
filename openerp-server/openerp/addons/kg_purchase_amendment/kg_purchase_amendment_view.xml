@@ -12,8 +12,8 @@
             <field name="model">kg.purchase.amendment</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
-                <form string="Purchase Order Amendment" version="7.0">
-		<header>
+            <form string="Purchase Order Amendment" version="7.0">
+			<header>
                 <button name="approve_amend" states="confirm" string="Approve" type="object" class="oe_highlight" />
                 <button name="confirm_amend" states="draft" string="Confirm" type="object" class="oe_highlight"/>
                 <button name="cancel_amend" states="draft,confirm,amend" string="Cancel" type="object" class="oe_highlight"/>
@@ -23,7 +23,7 @@
 							attrs = "{'invisible':[('amend_flag','=',True)]}"/>
                 <field name="state" widget="statusbar" statusbar_visible="draft,confirm,approved,cancel" statusbar_colors='{"draft":"blue"}'/>
 
-		</header>
+			</header>
 				<group>
                     <group>
                     <field name="name" required="1"/>
@@ -42,6 +42,7 @@
                     <field name="delivery_mode"/>
                     <field name="term_warranty"/>
                     <field name="term_freight"/>
+                    <field name="po_type"/>
                     <field name="po_expenses_type1" invisible="1"/>
                     <field name="value1" invisible="1"/>
 					<field name="po_expenses_type2" invisible="1"/>
@@ -67,6 +68,7 @@
                     <field name="delivery_mode_amend"/>
                     <field name="term_warranty_amend"/>
                     <field name="term_freight_amend"/>
+                    <field name="po_type_amend"/>
                     <field name="po_expenses_type1_amend" invisible="1"/>
                     <field name="value1_amend" invisible="1"/>
 					<field name="po_expenses_type2_amend" invisible="1"/>
@@ -82,7 +84,7 @@
 								<field name="brand_id_amend"/>
 								<field name="product_uom"/>
 								<field name="product_qty_amend"/>
-								<field name="price_unit_amend" invisible="1"/>
+								<field name="price_unit_amend"/>
 								<field name="kg_discount_amend" invisible="1"/>
 								<field name="taxes_id_amend" widget="many2many_tags" invisible="1"/>
 								<field name="price_subtotal"/>
@@ -120,69 +122,66 @@
 				</page>
 				</notebook>		
 				
-			</form>
-		</field>
-	</record>
+				</form>
+			</field>
+		</record>
 	
-			<record id="view_kg_amend_line_form" model="ir.ui.view">
+		<record id="view_kg_amend_line_form" model="ir.ui.view">
             <field name="name">view.kg.amend.line.form</field>
             <field name="model">kg.purchase.amendment.line</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
-							
-				<form string="Purchase Amendment Line" version="7.0">
+			<form string="Purchase Amendment Line" version="7.0">
+				<group>
 					<group>
-						<group>
-							<field name="product_id"/>
-							<field name="product_qty" readonly="1"/>
-							<field name="brand_id" readonly="1"/>
-							<field name="pending_qty" readonly="1" invisible="1"/>
-							<field name="received_qty" readonly="1" invisible="1"/>
-							<field name="cancel_qty" readonly="1"
-									attrs="{'invisible': [('cancel_flag','=',False)]}" invisible="1"/>
-							<field name="price_unit" readonly="1" invisible="1"/>
-							<field name="kg_discount" readonly="1" invisible="1"/>
-							<field name="kg_disc_amt_per" invisible="1"/>
-							<field name="kg_discount_per" readonly="1" invisible="1"/>
-							<field name="kg_discount_per_value" invisible="1"/>
-							<field name="taxes_id" widget="many2many_tags" 
-								domain="[('parent_id','=',False),('type_tax_use','!=','sale')]" invisible="1"/>
-							<field name="note" readonly="1"/>
-							<field name="line_bill" invisible="1"/>
-
-						</group>
-						<group>
-							
-							<field name="product_uom"/>
-							<field name="pi_line_id"/>
-							<field name="product_qty_amend"
-								on_change="onchange_qty(product_qty,product_qty_amend,pending_qty,pending_qty_amend)" required="1"/>
-							<field name="brand_id_amend"/>	
-							<field name="pending_qty_amend" invisible="1"/>
-							<field name="price_unit_amend" attrs="{'readonly': [('line_bill','=',True)]}"
-								on_change="onchange_price_unit(price_unit_amend,kg_discount_per_amend,kg_discount_per_value_amend,product_qty_amend)" invisible="1"/>
-							<field name="kg_discount_amend" attrs="{'readonly': [('line_bill','=',True)]}" on_change="onchange_disc_amt(kg_discount_amend,product_qty_amend,price_unit_amend,kg_disc_amt_per_amend)" invisible="1"/>
-							<field name="kg_disc_amt_per_amend" invisible="1"/>
-							<field name="kg_discount_per_amend" attrs="{'readonly': [('line_bill','=',True)]}"
-								on_change="onchange_discount_value_calc(kg_discount_per_amend,product_qty_amend,price_unit_amend)" invisible="1"/>
-							<field name="kg_discount_per_value_amend" invisible="1"/>
-							<field name="taxes_id_amend" widget="many2many_tags" attrs="{'readonly': [('line_bill','=',True)]}"
-								domain="[('parent_id','=',False),('type_tax_use','!=','sale')]" invisible="1"/>
-							<field name="note_amend"/>
-							
-						</group>
-						<field name="cancel_flag" invisible="1"/>
-						<field name="qty_flag" invisible="1"/>
-						<field name="line_state" invisible="1"/>
-						<field name="kg_poindent_lines" nolabel="1"/>
-						<button name="pol_cancel" type="object" string="Cancel" icon="gtk-cancel"
-								attrs="{'invisible': [('line_state','!=','draft')]}"
-								class="oe_highlight" invisible="1"/>
-						<button name="pol_draft" type="object" string="Set to Draft" icon="gtk-draft"
-								attrs="{'invisible': ['|', ('line_state','=','done'), ('line_state','=', 'draft')]}" 
-								class="oe_highlight" invisible="1"/>
+						<field name="product_id" readonly="1"/>
+						<field name="product_qty" readonly="1"/>
+						<field name="brand_id" readonly="1"/>
+						<field name="pending_qty" readonly="1" invisible="1"/>
+						<field name="received_qty" readonly="1" invisible="1"/>
+						<field name="cancel_qty" readonly="1"
+								attrs="{'invisible': [('cancel_flag','=',False)]}" invisible="1"/>
+						<field name="price_unit" readonly="1" />
+						<field name="kg_discount" readonly="1" invisible="1"/>
+						<field name="kg_disc_amt_per" invisible="1"/>
+						<field name="kg_discount_per" readonly="1" invisible="1"/>
+						<field name="kg_discount_per_value" invisible="1"/>
+						<field name="taxes_id" widget="many2many_tags" 
+							domain="[('parent_id','=',False),('type_tax_use','!=','sale')]" invisible="1"/>
+						<field name="note" readonly="1"/>
+						<field name="line_bill" invisible="1"/>
 					</group>
-               </form>
+					<group>
+						<field name="product_id_amend"/>
+						<field name="product_uom"/>
+						<field name="pi_line_id"/>
+						<field name="product_qty_amend"
+							on_change="onchange_qty(product_qty,product_qty_amend,pending_qty,pending_qty_amend)" required="1"/>
+						<field name="brand_id_amend"/>	
+						<field name="pending_qty_amend" invisible="1"/>
+						<field name="price_unit_amend" attrs="{'readonly': [('line_bill','=',True)]}"
+							on_change="onchange_price_unit(price_unit_amend,kg_discount_per_amend,kg_discount_per_value_amend,product_qty_amend)" />
+						<field name="kg_discount_amend" attrs="{'readonly': [('line_bill','=',True)]}" on_change="onchange_disc_amt(kg_discount_amend,product_qty_amend,price_unit_amend,kg_disc_amt_per_amend)" invisible="1"/>
+						<field name="kg_disc_amt_per_amend" invisible="1"/>
+						<field name="kg_discount_per_amend" attrs="{'readonly': [('line_bill','=',True)]}"
+							on_change="onchange_discount_value_calc(kg_discount_per_amend,product_qty_amend,price_unit_amend)" invisible="1"/>
+						<field name="kg_discount_per_value_amend" invisible="1"/>
+						<field name="taxes_id_amend" widget="many2many_tags" attrs="{'readonly': [('line_bill','=',True)]}"
+							domain="[('parent_id','=',False),('type_tax_use','!=','sale')]" invisible="1"/>
+						<field name="note_amend"/>
+					</group>
+					<field name="cancel_flag" invisible="1"/>
+					<field name="qty_flag" invisible="1"/>
+					<field name="line_state" invisible="1"/>
+					<field name="kg_poindent_lines" nolabel="1"/>
+					<button name="pol_cancel" type="object" string="Cancel" icon="gtk-cancel"
+							attrs="{'invisible': [('line_state','!=','draft')]}"
+							class="oe_highlight" invisible="1"/>
+					<button name="pol_draft" type="object" string="Set to Draft" icon="gtk-draft"
+							attrs="{'invisible': ['|', ('line_state','=','done'), ('line_state','=', 'draft')]}" 
+							class="oe_highlight" invisible="1"/>
+				</group>
+           </form>
            </field>
         </record>
 
@@ -196,10 +195,9 @@
             <field name="model">kg.purchase.amendment</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
-                <tree colors="blue:state == 'draft';red:state == 'confirm'
-						;black:state == 'approved';gray:state == 'cancel'" 
+                <tree colors="blue:state == 'draft';red:state == 'confirm';black:state == 'approved';gray:state == 'cancel'" 
 								toolbar="True" string="Purchase Order Amendment">
-                     <field name="name"/>
+                    <field name="name"/>
 					<field name="date"/>
                     <field name="po_id"/>
                     <field name="po_date"/>
@@ -243,14 +241,14 @@
         ===================== -->
 
 
-	<record id="action_kg_poamendment_form" model="ir.actions.act_window">
+		<record id="action_kg_poamendment_form" model="ir.actions.act_window">
 			<field name="name">Purchase Order Amendment</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.purchase.amendment</field>
 			<field name="view_type">form</field>
 			<field name="view_id" ref="view_kg_poamendment_tree"/>
 			<field name="search_view_id" ref="t_search_v_purchase_amend"/>
-	</record>
+		</record>
 	
       	
     </data>

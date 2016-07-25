@@ -96,16 +96,17 @@ class kg_service_order(osv.osv):
 	
 	_columns = {
 		'name': fields.char('SO No', size=64,readonly=True),
-		'dep_name': fields.many2one('kg.depmaster','Department Name', translate=True, select=True,readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
+		'dep_name': fields.many2one('kg.depmaster','Department Name', translate=True, select=True,readonly=True, 
+					domain="[('item_request','=',True),('state','in',('draft','confirmed','approved'))]", states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'date': fields.date('SO Date', required=True,readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'partner_id':fields.many2one('res.partner', 'Supplier', required=True,readonly=True, 
-					states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
+					states={'draft':[('readonly',False)],'confirm':[('readonly',False)]},domain="[('supplier','=',True)]"),
 		'pricelist_id':fields.many2one('product.pricelist', 'Pricelist'),
 		'partner_address':fields.char('Supplier Address', size=128, readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'service_order_line': fields.one2many('kg.service.order.line', 'service_id', 'Order Lines', 
 					readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'active': fields.boolean('Active'),
-		'state': fields.selection([('draft', 'Draft'),('confirm','Waiting For Approval'),('approved','Approved'),('inv','Invoiced'),('cancel','Cancel')], 'Status', track_visibility='onchange'),
+		'state': fields.selection([('draft', 'Draft'),('confirm','Waiting For Approval'),('approved','Approved'),('inv','Invoiced'),('cancel','Cancel'),('reject','Rejected')], 'Status', track_visibility='onchange'),
 		'payment_mode': fields.many2one('kg.payment.master', 'Mode of Payment', 
 		          required=True, readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'delivery_type':fields.many2one('kg.deliverytype.master', 'Delivery Schedule', 
@@ -145,7 +146,7 @@ class kg_service_order(osv.osv):
 		'so_flag': fields.boolean('SO Flag'),
 		'amend_flag': fields.boolean('Amend Flag'),
 		
-		'remark': fields.text('Remarks', readonly=True, states={'draft': [('readonly', False)],'confirm':[('readonly',False)]}),
+		'remark': fields.text('Remarks', readonly=True, states={'approve': [('readonly', False)],'done':[('readonly',False)]}),
 		'so_bill': fields.boolean('SO Bill', readonly=True),
 		'currency_id': fields.many2one('res.currency', 'Currency', readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'specification':fields.text('Specification'),
@@ -161,7 +162,7 @@ class kg_service_order(osv.osv):
 		'amc_to': fields.date('AMC To Date',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'origin': fields.char('Project', size=256,readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'origin_project': fields.many2one('kg.project.master','Project', size=256,readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
-		'gp_id': fields.many2one('kg.gate.pass', 'Gate Pass No',domain="[('state','=','done'), '&',('partner_id','=',partner_id)]",
+		'gp_id': fields.many2one('kg.gate.pass', 'Gate Pass No',domain="[('state','=','done'), '&',('partner_id','=',partner_id),'&',('mode','=','frm_indent')]",
 					readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'warranty': fields.char('Warranty', size=256,readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'grn_flag':fields.boolean('GRN Flag'),
@@ -172,6 +173,7 @@ class kg_service_order(osv.osv):
 		'expense_line_id': fields.one2many('kg.service.order.expense.track','expense_id','Expense Track'),
 		
 		# Entry Info
+		
 		'user_id' : fields.many2one('res.users', 'Created By', readonly=True),
 		'creation_date':fields.datetime('Creation Date',readonly=True),
 		'approved_by': fields.many2one('res.users', 'Approved By', readonly=True),
@@ -180,8 +182,11 @@ class kg_service_order(osv.osv):
 		'confirmed_date': fields.datetime('Confirmed Date',readonly=True),
 		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
+		'reject_date': fields.datetime('Cancelled Date', readonly=True),
+		'rej_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'update_date' : fields.datetime('Last Updated Date',readonly=True),
 		'update_user_id' : fields.many2one('res.users','Last Updated By',readonly=True),
+		
 	}
 	#_sql_constraints = [('code_uniq','unique(name)', 'Service Order number must be unique!')]
 
@@ -439,7 +444,21 @@ class kg_service_order(osv.osv):
 		cr.close()
 		
 	def cancel_order(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr,uid,ids[0])
+		if not rec.remark:
+			raise osv.except_osv(
+				_('Remarks Needed !!'),
+				_('Enter Remark in Remarks Tab....'))
 		self.write(cr, uid,ids,{'state' : 'cancel','cancel_date':time.strftime('%Y-%m-%d %H:%M:%S'),'cancel_user_id':uid})
+		return True
+			
+	def reject_order(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr,uid,ids[0])
+		if not rec.remark:
+			raise osv.except_osv(
+				_('Remarks Needed !!'),
+				_('Enter Remark in Remarks Tab....'))
+		self.write(cr, uid,ids,{'state' : 'cancel','reject_date':time.strftime('%Y-%m-%d %H:%M:%S'),'rej_user_id':uid})
 		return True
 			
 	def unlink(self, cr, uid, ids, context=None):
@@ -561,11 +580,11 @@ class kg_service_order(osv.osv):
 			soindent_line_browse = soindent_line_obj.browse(cr,uid,soindent_line_ids)
 			soindent_line_browse = sorted(soindent_line_browse, key=lambda k: k.product_id.id)
 			groups = []
-			for key, group in groupby(soindent_line_browse, lambda x: x.product_id.id):
+			for key, group in groupby(soindent_line_browse, lambda x: x.product_id.id and x.ser_no):
 				groups.append(map(lambda r:r,group))
 			for key,group in enumerate(groups):
 				qty = sum(map(lambda x:float(x.qty),group)) #TODO: qty
-				
+				print"qtyqtyqty",qty
 				print "indent_qty,,,,,,,,,,,,,,",qty
 				soindent_line_ids = map(lambda x:x.id,group)
 				prod_browse = group[0].product_id
@@ -749,7 +768,7 @@ class kg_service_order_line(osv.osv):
 
 	'service_id': fields.many2one('kg.service.order', 'Service.order.NO', required=True, ondelete='cascade'),
 	'price_subtotal': fields.function(_amount_line, string='Linetotal', digits_compute= dp.get_precision('Account')),
-	'product_id': fields.many2one('product.product', 'Product', domain=[('state','=','approved')]),
+	'product_id': fields.many2one('product.product', 'Product', domain=[('state','not in',('cancel','reject'))]),
 	'product_uom': fields.many2one('product.uom', 'UOM'),
 	'product_qty': fields.float('Quantity'),
 	'soindent_qty':fields.float('Indent Qty'),

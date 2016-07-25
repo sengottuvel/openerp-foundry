@@ -269,7 +269,6 @@
 		</field>
 	</record>
 	
-	
 	<record model="ir.ui.view" id="kg_partner_tree">
 		<field name="name">res.partner.form</field>
 		<field name="model">res.partner</field>
@@ -313,7 +312,6 @@
 		<field name="search_view_id" ref="partner_group_view"/>-->
 	</record>
 	
-        
 	<record id="kg_action_dealer_form" model="ir.actions.act_window">
 		<field name="name">Dealer</field>
 		<field name="type">ir.actions.act_window</field>
@@ -338,7 +336,6 @@
 		<field name="search_view_id" ref="partner_group_view"/>-->
 	</record>
 	
-        
 	<record id="kg_action_group_form" model="ir.actions.act_window">
 		<field name="name">Groups</field>
 		<field name="type">ir.actions.act_window</field>

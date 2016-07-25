@@ -81,7 +81,6 @@
 
 		</record>
 		
-		
 	 <!-- Tree View -->
 		
 		<record id="kg_po_advance_tree_view" model="ir.ui.view">
@@ -89,7 +88,7 @@
 			<field name="model">kg.po.advance</field>
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'draft';red:state == 'confirmed'
-						;black:state == 'approved'" 
+						;black:state == 'approved';gray:state 'in' ('cancel','reject')" 
 								toolbar="True" string="PO Advance">	
 					
 					<field name="name"/>
@@ -103,29 +102,29 @@
 		
 	<!-- Search View -->
 		
-	<record id="po_advance_search_view" model="ir.ui.view">
-		<field name="name">PO Advance</field>
-		<field name="model">kg.po.advance</field>
-		<field name="arch" type="xml">
-			<search string="PO Advance">
-				<field name="name" string="Advance No" filter_domain="[('name','ilike',self)]"/>
-				<field name="supplier_id" string="Supplier" filter_domain="[('supplier_id','ilike',self)]"/>
-				<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
-				<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>
-				<filter icon="terp-check" name="approved" string="Approved" domain="[('state','=','approved')]"/>
-				<separator/>
-				<group expand="0" string="Group By...">
-					<filter string="Supplier" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'supplier_id'}"/>
-					<filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
-					<filter string="Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'advance_date'}"/>
-				</group>
-			</search>
-		</field>
-	</record>
-	
+		<record id="po_advance_search_view" model="ir.ui.view">
+			<field name="name">PO Advance</field>
+			<field name="model">kg.po.advance</field>
+			<field name="arch" type="xml">
+				<search string="PO Advance">
+					<field name="name" string="Advance No" filter_domain="[('name','ilike',self)]"/>
+					<field name="supplier_id" string="Supplier" filter_domain="[('supplier_id','ilike',self)]"/>
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>
+					<filter icon="terp-check" name="approved" string="Approved" domain="[('state','=','approved')]"/>
+					<separator/>
+					<group expand="0" string="Group By...">
+						<filter string="Supplier" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'supplier_id'}"/>
+						<filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+						<filter string="Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'advance_date'}"/>
+					</group>
+				</search>
+			</field>
+		</record>
+		
 	 <!-- Action -->
 		
-		 <record id="kg_po_advance_action_form" model="ir.actions.act_window">
+		<record id="kg_po_advance_action_form" model="ir.actions.act_window">
 			<field name="name">PO Advance</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.po.advance</field>

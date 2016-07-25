@@ -118,7 +118,11 @@
         <field name="name">purchase.requisition.tree</field>
         <field name="model">purchase.requisition</field>
         <field name="arch" type="xml">
+<!--
             <tree fonts="bold:message_unread==True" colors="grey:state == 'cancel';red:date_end and date_end&lt;current_date;black:date_end&gt;current_date;" string="Purchase Requisition">
+-->
+            <tree fonts="bold:message_unread==True" 
+            colors="grey:state in ('reject','cancel');blue:state == 'draft';red:state == 'in_progress';black:state == 'approved'" string="Purchase Requisition">
                 <field name="message_unread" invisible="1"/>
                 <field name="name"/>
                 <field name="date_start"/>
@@ -185,12 +189,13 @@
 					</group>
 					<group>
 						<field name="brand_id"/>
-						<field name="moc_id"/>
+						<field name="moc_id_temp" on_change="onchange_moc(moc_id_temp)"/>
 						<field name="stock_qty" readonly="1"/>
 						<field name="note"/>
 						<field name="entry_mode" invisible="1"/>
 						<field name="indent_type" invisible="1"/>
 						<field name="pending_qty" invisible="1"/>
+						<field name="moc_id" invisible="1"/>
 					</group>
 				</group>
 				<newline/>
@@ -198,8 +203,9 @@
 					<page string="WO Details">
 						<field name="line_ids" colspan="4" nolabel="1">
 							<tree string="WO Details" editable="bottom">
-							   <field name="wo_id"/>
+							   <field name="w_order_line_id" on_change="onchange_wo(w_order_line_id)"/>
 							   <field name="qty"/>
+							   <field name="wo_id" invisible="1"/>
 							</tree>
 						</field>
 					</page>

@@ -15,21 +15,17 @@
 					<button name="entry_draft" type="object" string="Set Draft" states="cancel" class="oe_highlight"/>
 					<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 					<button name="entry_cancel" type="object" string="Cancel" states="approved" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-					
 				</header>			
 					<group>
 						<group>
-							<field name="user_id"/>
 							<field name="name" invisible="1"/>
 							<field name="partner_id" />
 							<field name="sos_id" invisible="1"/>
-							<field name="state"/>
+							<field name="state" style="width: 30%%" class="att_state_change"/>
 						</group>											
 						<group>
-							<field name="date"/>							
 							<field name="trans_date"/>							
 							<field name="active"/>							
-														
 						</group>					
 					</group>
 					<button name="load_item" type="object" string="Load Item" states="draft" class="oe_highlight"/>				   
@@ -43,7 +39,6 @@
 								<field name="uom_id" readonly="1"/>								
 								<field name="quantity" readonly="1"/>								
 								<field name="unit_price" readonly="1"/>								
-															
 								<field name="total" readonly="1"/>								
 								<field name="close_state"/>								
 								<field name="remark" attrs="{'required': [('close_state','=','close')]}"/>								
@@ -65,7 +60,30 @@
 								</group>
 							</form>
 						</field>
-					</page>					
+					</page>		
+					<page string="Entry Info">
+						<group>
+							<field name="company_id"/>
+						</group>
+						<group>
+							<group>
+								<field name="user_id"/>
+								<field name="conf_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+								<field name="rej_user_id" attrs="{'invisible':[('state','not in',['reject'])]}"/>
+								<field name="app_user_id" attrs="{'invisible':[('state','in',['draft','confirm','reject'])]}"/>
+								<field name="can_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+								<field name="update_user_id"/>
+							</group>
+							<group>
+								<field name="date"/>
+								<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+								<field name="reject_date" attrs="{'invisible':[('state','not in',['reject'])]}"/>
+								<field name="approve_date" attrs="{'invisible':[('state','in',['draft','confirm','reject'])]}"/>
+								<field name="cancel_date" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+								<field name="update_date"/>
+							</group>
+						</group>
+					</page>				
 					</notebook>					
 					<field name="remark" placeholder="Remarks"/>
 				</form>
@@ -80,15 +98,13 @@
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'draft';red:state == 'confirm'
-						;black:state == 'approved';gray:state == 'reject'" 
+						;black:state == 'approved';gray:state in ('reject','cancel')" 
 								toolbar="True" string="SO Manual Closing">				
-					<field name="c_date"/>
-					<field name="name" invisible="1"/>
+					<field name="name"/>
 					<field name="trans_date"/>
 					<field name="partner_id"/>
 					<field name="total" sum="Total" invisible="1"/>
 					<field name="state"/>					
-					<field name="user_id"/>					
 				</tree>
 			</field>
 		</record>
@@ -100,7 +116,8 @@
             <field name="model">kg.so.manual.closing</field>
             <field name="arch" type="xml">
                 <search string="SO Manual Closing">
-					<field name="name" string="SO Manual Closing" filter_domain="['|',('name','ilike',self),('partner_id','ilike',self)]"/>
+					<field name="name" string="No" filter_domain="[('name','ilike',self)]"/>
+					<field name="partner_id" string="Supplier" filter_domain="[('partner_id','ilike',self)]"/>
 					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
 					<filter icon="terp-check" name="confirm" string="Confirmed" domain="[('state','=','confirm')]"/>
 					<filter icon="terp-check" name="approved" string="Approved" domain="[('state','=','approved')]"/>
@@ -108,19 +125,17 @@
 					<filter icon="terp-check" name="cancel" string="Cancel" domain="[('state','=','cancel')]"/>
 					<separator/>
                     <group expand="0" string="Group By...">
-                        <filter string="Buyer" icon="terp-personal" domain="[]" context="{'group_by':'partner_id'}"/>
-                        <filter string="Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'trans_date'}"/>
-                        <filter string="Created By" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'user_id'}"/>
+                        <filter string="Supplier" icon="terp-personal" domain="[]" context="{'group_by':'partner_id'}"/>
+                        <filter string="As On Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'trans_date'}"/>
                         <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
 					</group>
                 </search>
 			</field>
 		</record>		
 			
-        
 	<!-- Menu Action -->			
 		
-		 <record id="so_close_form_action" model="ir.actions.act_window">
+		<record id="so_close_form_action" model="ir.actions.act_window">
 			<field name="name">SO Manual Closing</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.so.manual.closing</field>
@@ -130,12 +145,6 @@
 			<field name="search_view_id" ref="kg_so_close_search_view"/>
 		</record>	
 		
-	<!-- Menu Items -->
-	
-				
-	<!--	<menuitem action="so_close_form_action" id="kg_so_close_action_menu" name="Service Order" parent="kg_po_manual_closing.kg_po_close_menus" sequence="2"/>-->
-
-
 
 	</data>
 </openerp>

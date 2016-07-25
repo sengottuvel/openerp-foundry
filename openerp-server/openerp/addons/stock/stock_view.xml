@@ -272,10 +272,12 @@
               </p>
             </field>
         </record>
-        <!--
-        <menuitem id="menu_traceability" name="Traceability" parent="menu_stock_root" 
-            sequence="3"/>
-        <menuitem action="action_tracking_form" id="menu_action_tracking_form"
+        
+<!--
+        <menuitem id="menu_traceability" name="Traceability" parent="menu_stock_root" sequence="3"/>
+-->
+        <menuitem id="menu_traceability" name="Stock View" parent="menu_stock_root" sequence="3"/>
+       <!-- <menuitem action="action_tracking_form" id="menu_action_tracking_form"
             groups="product.group_stock_packaging"
             sequence="6"
             parent="menu_traceability"/>-->
@@ -338,7 +340,8 @@
             <field name="name">stock.production.lot.form</field>
             <field name="model">stock.production.lot</field>
             <field name="arch" type="xml">
-                <form string="Serial Number" version="7.0">
+                <form string="Serial Number" version="7.0" create="false" delete="false">
+<!--
                     <div class="oe_button_box oe_right">
                         <button name="action_traceability" string="Upstream Traceability" type="object" context="{'type': 'move_history_ids2', 'field': 'prodlot_id'}"/>
                         <button name="action_traceability" string="Downstream Traceability" type="object" context="{'type': 'move_history_ids', 'field': 'prodlot_id'}"/>
@@ -349,22 +352,28 @@
                             <field name="name"/>
                         </h1>
                     </div>
+-->
                     <group>
                         <group>
-                            <field name="product_id"/>
-                            <field name="prefix"/>
-                            <field name="ref"/>
+                            <field name="product_id" readonly="1"/>
+                            <field name="name" readonly="1"/>
+                            <field name="prefix" invisible="1"/>
+                            <field name="ref" invisible="1"/>
                         </group>
                         <group>
-                            <field name="date"/>
+                            <field name="date" readonly="1"/>
+<!--
                             <field name="stock_available"/>
+-->
                         </group>
                     </group>
                     <notebook>
+<!--
                         <page string="Revisions">
                             <field name="revisions"/>
                         </page>
-                        <page string="Stock Moves">
+-->
+                        <page string="Stock Moves" invisible="1">
                             <field name="move_ids">
                                 <tree  string="Stock Moves">
                                     <field name="picking_id" string="Reference"/>
@@ -389,13 +398,15 @@
             <field name="name">stock.production.lot.tree</field>
             <field name="model">stock.production.lot</field>
             <field name="arch" type="xml">
-                <tree string="Serial Number">
-                    <field name="prefix"/>
-                    <field name="name"/>
-                    <field name="ref"/>
-                    <field name="product_id"/>
-                    <field name="stock_available"/>
-                    <field name="date"/>
+                <tree string="Serial Number" create="false" delete="false">
+					<field name="product_id"/>
+                    <field name="prefix" invisible="1"/>
+                    <field name="name" invisible="1"/>
+                    <field name="ref" invisible="1"/>
+                    <field name="stock_available" invisible="1"/>
+<!--
+                    <field name="date" invisible="1"/>
+-->
                 </tree>
             </field>
         </record>
@@ -406,24 +417,39 @@
             <field name="arch" type="xml">
                 <search string="Product Lots Filter">
                     <field name="name" string="Product Lots" filter_domain="['|','|',('name','ilike',self),('prefix','ilike',self),('ref','ilike',self)]"/>
+                    <field name="product_id" string="Product" filter_domain="[('product_id','ilike',self)]"/>
                     <field name="date"/>
+                    <filter icon="terp-check" name="available" string="Available" domain="[('stock_available', '&gt;', 0)]" help="Available Product Lots"/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Product" name="group_product_id" icon="terp-personal" domain="[]" context="{'group_by':'product_id'}"/>
+                    </group>
+                </search>
+<!--
+			 <search string="Product Lots Filter">
+                    <field name="name" string="Product Lots" filter_domain="['|','|',('name','ilike',self),('prefix','ilike',self),('ref','ilike',self)]"/>
                     <filter icon="terp-check" name="available" string="Available" domain="[('stock_available', '&gt;', 0)]" help="Available Product Lots"/>
                     <field name="product_id"/>
                     <group expand="0" string="Group By...">
                         <filter string="Product" icon="terp-accessories-archiver" domain="[]" context="{'group_by':'product_id'}"/>
                     </group>
                 </search>
+-->
             </field>
         </record>
 
         <record id="action_production_lot_form" model="ir.actions.act_window">
+<!--
             <field name="name">Serial Number</field>
+-->
+            <field name="name">Stock List</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">stock.production.lot</field>
             <field name="view_type">form</field>
-            <field name="view_id" ref="view_production_lot_tree"/>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('pending_qty','>',0)]</field>
+            <field name="context">{'search_default_group_product_id':1}</field>
             <field name="search_view_id" ref="search_product_lot_filter"/>
-            <field name="context">{}</field>
+            <field name="view_id" ref="view_production_lot_tree"/>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
                 Click to add a serial number.
@@ -438,10 +464,9 @@
               </p>
             </field>
         </record>
-        <!--
         <menuitem action="action_production_lot_form" id="menu_action_production_lot_form"
             parent="menu_traceability" groups="stock.group_production_lot"
-            sequence="1"/> -->
+            sequence="1"/> 
 
         #
         # Lot composition (history)

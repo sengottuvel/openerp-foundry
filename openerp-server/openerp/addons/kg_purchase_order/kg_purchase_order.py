@@ -298,17 +298,17 @@ class kg_purchase_order(osv.osv):
 		val['email_cc'] = email_cc
 		return val
 	
-	#~ def create(self, cr, uid, vals,context=None):
-		#~ """inv_seq = vals['kg_seq_id']
-		#~ next_seq_num = self.pool.get('ir.sequence').kg_get_id(cr, uid, inv_seq,'id',{'noupdate':False})
-		#~ print "next_seq_num...........................", next_seq_num
-		#~ vals.update({
-						#~ 'name':next_seq_num,
-						#~ 
-						#~ })"""
-		#~ 
-		#~ order =  super(kg_purchase_order, self).create(cr, uid, vals, context=context)
-		#~ return order
+	def create(self, cr, uid, vals,context=None):
+		"""inv_seq = vals['kg_seq_id']
+		next_seq_num = self.pool.get('ir.sequence').kg_get_id(cr, uid, inv_seq,'id',{'noupdate':False})
+		print "next_seq_num...........................", next_seq_num
+		vals.update({
+						'name':next_seq_num,
+						
+						})"""
+		
+		order =  super(kg_purchase_order, self).create(cr, uid, vals, context=context)
+		return order
 	
 	
 	def onchange_seq_id(self, cr, uid, ids, kg_seq_id,name):
@@ -425,32 +425,46 @@ class kg_purchase_order(osv.osv):
 		back_list = []
 		obj = self.browse(cr,uid,ids[0])
 		
+		approval = ''
+		
 		user_obj = self.pool.get('res.users').search(cr,uid,[('id','=',uid)])
 		if user_obj:
 			user_rec = self.pool.get('res.users').browse(cr,uid,user_obj[0])
 		for item in obj.order_line:
+			#~ price_sql = """ 
+						#~ select line.price_unit
+						#~ from purchase_order_line line
+						#~ left join purchase_order po on (po.id = line.order_id)
+						#~ where line.product_id = %s and line.order_id != %s 
+						#~ and po.state in ('approved')
+						#~ order by line.price_unit desc limit 1"""%(item.product_id.id,obj.id)
 			price_sql = """ 
-						select line.price_unit
-						from purchase_order_line line
-						left join purchase_order po on (po.id = line.order_id)
-						where line.product_id = %s and line.order_id != %s 
-						and po.state in ('approved')
-						order by line.price_unit desc limit 1"""%(item.product_id.id,obj.id)
+						select line.price_unit 
+						from purchase_order_line line 
+						left join purchase_order po on (po.id=line.order_id)
+						join kg_brandmoc_rate rate on (rate.product_id=line.product_id)
+						join ch_brandmoc_rate_details det on (det.header_id=rate.id)
+						where po.state = 'approved' and rate.state in ('draft','confirmed','approved')
+						and line.product_id = %s and line.order_id != %s and line.brand_id = %s 
+						and line.moc_id = %s 
+						order by po.approved_date desc limit 1
+						"""%(item.product_id.id,obj.id,item.brand_id.id,item.moc_id.id)
 			cr.execute(price_sql)		
 			price_data = cr.dictfetchall()
 			if price_data:
 				if price_data[0]['price_unit'] < item.price_unit:
 					self.write(cr,uid,ids,{'approval_flag':True})
-			
+					approval = 'yes'
 			#########
-			prod_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',item.product_id.id)])
+			prod_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',item.product_id.id),('state','in',('draft','confirmed','approved'))])
 			if prod_obj:
 				prod_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,prod_obj[0])
 				for ele in prod_rec.line_ids:
 					if item.brand_id.id == ele.brand_id.id and item.moc_id.id == ele.moc_id.id:
 						if ele.rate < item.price_unit:
 							self.write(cr,uid,ids,{'approval_flag':True})
-							
+							approval = 'yes'
+			
 			if item.price_type == 'per_kg':
 				if item.product_id.uom_conversation_factor == 'two_dimension':
 					if item.product_id.po_uom_in_kgs > 0:
@@ -465,7 +479,10 @@ class kg_purchase_order(osv.osv):
 			else:
 				qty = item.product_qty
 			
-			self.pool.get('purchase.order.line').write(cr,uid,item.id,{'quantity':qty})	
+			self.pool.get('purchase.order.line').write(cr,uid,item.id,{'quantity':qty})
+		print"obj.approval_flagobj.approval_flag",obj.approval_flag
+		print"approvalapprovalapprovalapproval",approval
+			
 		date_order = obj.date_order
 		date_order1 = datetime.strptime(date_order, '%Y-%m-%d')
 		date_order1 = datetime.date(date_order1)
@@ -575,6 +592,9 @@ class kg_purchase_order(osv.osv):
 								  'confirm_flag':'True',
 								  'confirmed_by':uid,
 								  'confirmed_date':today})
+		if approval == 'yes' and obj.approval_flag == True:
+			self.spl_po_apl_mail(cr,uid,ids,obj,context)
+			
 		#cr.execute("""select all_transaction_mails('Purchase Order Approval',%s)"""%(ids[0]))
 		"""Raj
 		data = cr.fetchall();
@@ -618,19 +638,22 @@ class kg_purchase_order(osv.osv):
 					if user_rec.special_approval == True:
 						pass
 					else:
+						#~ self.spl_po_apl_mail(cr,uid,ids,obj,context)
 						raise osv.except_osv(
 							_('Warning'),
 							_('%s price is exceeding last purchase price. It should be approved by special approver'%(item.product_id.name)))
 			#########
-			prod_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',item.product_id.id)])
+			prod_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',item.product_id.id),('state','in',('draft','confirmed','approved'))])
 			if prod_obj:
 				prod_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,prod_obj[0])
+				
 				for ele in prod_rec.line_ids:
 					if item.brand_id.id == ele.brand_id.id and item.moc_id.id == ele.moc_id.id:
 						if ele.rate < item.price_unit:
 							if user_rec.special_approval == True:
 								pass
 							else:
+								#~ self.spl_po_apl_mail(cr,uid,ids,obj,context)
 								raise osv.except_osv(
 									_('Warning'),
 									_('%s price is exceeding design price. It should be approved by special approver'%(item.product_id.name)))
@@ -784,6 +807,42 @@ class kg_purchase_order(osv.osv):
 		return True
 		cr.close()
 		"""
+	
+	def spl_po_apl_mail(self,cr,uid,ids,obj,context=None):
+		cr.execute("""select trans_po_spl_approval('po spl approval',"""+str(obj.id)+""")""")
+		data = cr.fetchall();
+		print "data<<<<<<<<<", data
+		if data[0][0] is None:
+			return False
+		if data[0][0] is not None:	
+			maildet = (str(data[0])).rsplit('~');
+			cont = data[0][0].partition('UNWANTED.')		
+			email_from = maildet[1]	
+			if maildet[2]:	
+				email_to = [maildet[2]]
+			else:
+				email_to = ['']			
+			if maildet[3]:
+				email_cc = [maildet[3]]	
+			else:
+				email_cc = ['']		
+			ir_mail_server = self.pool.get('ir.mail_server')
+			if maildet[4] != '':
+				msg = ir_mail_server.build_email(
+					email_from = email_from,
+					email_to = email_to,
+					subject = maildet[4],
+					body = cont[0],
+					email_cc = email_cc,
+					object_id = ids and ('%s-%s' % (ids, 'kg.mail.settings')),
+					subtype = 'html',
+					subtype_alternative = 'plain')
+				res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
+			else:
+				pass
+				
+		return True			
+						
 	def po_register_scheduler(self,cr,uid,ids=0,context = None):
 		cr.execute(""" SELECT current_database();""")
 		db = cr.dictfetchall()
@@ -866,13 +925,20 @@ class kg_purchase_order(osv.osv):
 	
 		purchase = self.browse(cr, uid, ids[0], context=context)
 		
+		if not purchase.notes:
+			raise osv.except_osv(
+						_('Remarks Needed !!'),
+						_('Enter Remark in Remarks Tab....'))
+						
 		if purchase.po_type == 'frompi':
-			if purchase.state == 'approved': 
-			
+			if purchase.state in ('draft','confirmed'):
+				for line in purchase.order_line:
+					sql = """ update purchase_requisition_line set draft_flag=False where line_state = 'process' and id = %s """%(line.pi_line_id.id)
+					cr.execute(sql)
+				self.write(cr,uid,ids,{'state':'cancel','cancel_user_id': uid,'cancel_date':time.strftime('%Y-%m-%d %H:%M:%S')})
+			elif purchase.state == 'approved': 
 				cr.execute(""" select grn_id from multiple_po where po_id = %s """ %(ids[0]))
 				multi_po = cr.dictfetchall()
-				
-				
 				if multi_po:
 					for pick in multi_po:
 						pick = po_grn_obj.browse(cr, uid, pick['grn_id'])
@@ -880,16 +946,15 @@ class kg_purchase_order(osv.osv):
 							raise osv.except_osv(
 								_('Unable to cancel this purchase order.'),
 								_('First cancel all GRN related to this purchase order.'))
-					
 				for line in purchase.order_line:
 					if line.pi_line_id and line.group_flag == False:
-								pi_obj=self.pool.get('purchase.requisition.line')
-								pi_line_obj=pi_obj.search(cr, uid, [('id','=',line.pi_line_id.id)])
-								orig_pending_qty = line.pi_line_id.pending_qty
-								po_qty = line.product_qty
-								orig_pending_qty += po_qty
-								sql = """ update purchase_requisition_line set pending_qty=%s where id = %s"""%(orig_pending_qty,line.pi_line_id.id)
-								cr.execute(sql)
+						pi_obj=self.pool.get('purchase.requisition.line')
+						pi_line_obj=pi_obj.search(cr, uid, [('id','=',line.pi_line_id.id)])
+						orig_pending_qty = line.pi_line_id.pending_qty
+						po_qty = line.product_qty
+						orig_pending_qty += po_qty
+						sql = """ update purchase_requisition_line set line_state = 'process',pending_qty=%s where id = %s"""%(orig_pending_qty,line.pi_line_id.id)
+						cr.execute(sql)
 					else:
 						if line.pi_line_id and line.group_flag == True:
 							cr.execute(""" select piline_id from kg_poindent_po_line where po_order_id = %s """ %(str(ids[0])))
@@ -906,27 +971,25 @@ class kg_purchase_order(osv.osv):
 								pi_qty = orig_pi_qty + pi_pen_qty
 								orig_pi_qty +=pi_pen_qty
 								po_qty = po_used_qty
-														 
 								if po_qty < pi_qty:
 									pi_qty = pi_pen_qty + po_qty
-									sql = """ update purchase_requisition_line set pending_qty=%s where id = %s"""%(pi_qty,bro_record.id)
+									sql = """ update purchase_requisition_line set line_state = 'process',pending_qty=%s where id = %s"""%(pi_qty,bro_record.id)
 									cr.execute(sql)
 									break		
-								
 								else:
 									remain_qty = po_used_qty - orig_pi_qty
-									sql = """ update purchase_requisition_line set pending_qty=%s where id = %s"""%(orig_pi_qty,bro_record.id)
+									sql = """ update purchase_requisition_line set line_state = 'process',pending_qty=%s where id = %s"""%(orig_pi_qty,bro_record.id)
 									cr.execute(sql)
 									if remain_qty < 0:
 										break
 									po_used_qty = remain_qty
 									orig_pi_qty = pi_pen_qty + remain_qty
-			
+				self.write(cr,uid,ids,{'state':'cancel','cancel_user_id': uid,'cancel_date':time.strftime('%Y-%m-%d %H:%M:%S')})					
 			else:
 				for line in purchase.order_line:
 					pi_line_obj.write(cr,uid,line.pi_line_id.id,{'line_state' : 'noprocess'})		
 		else:
-			pass
+			self.write(cr,uid,ids,{'state':'cancel','cancel_user_id': uid,'cancel_date':time.strftime('%Y-%m-%d %H:%M:%S')})
 			
 		"""		
 		for inv in purchase.invoice_ids:
@@ -934,13 +997,7 @@ class kg_purchase_order(osv.osv):
 			if inv:
 				wf_service.trg_validate(uid, 'account.invoice', inv.id, 'invoice_cancel', cr)
 				"""
-		
-		if not purchase.notes:
-			raise osv.except_osv(
-						_('Remarks Needed !!'),
-						_('Enter Remark in Remarks Tab....'))
-		else:
-			self.write(cr,uid,ids,{'state':'cancel','cancel_user_id': uid,'cancel_date':time.strftime('%Y-%m-%d %H:%M:%S')})
+			
 		for (id, name) in self.name_get(cr, uid, ids):
 			wf_service.trg_validate(uid, 'purchase.order', id, 'purchase_cancel', cr)
 		return True			
@@ -960,15 +1017,21 @@ class kg_purchase_order(osv.osv):
 			
 		return True
 		
+	def action_set_to_draft(self, cr, uid, ids, context=None):
+		purchase = self.browse(cr, uid, ids[0], context=context)
+		self.write(cr,uid,ids,{'state':'draft'})
+			
+		return True
+		
 	def kg_email_attachment(self,cr,uid,ids,context=None):
 		ir_model_data = self.pool.get('ir.model.data')
 		email_tmp_obj = self.pool.get('email.template')
 		att_obj = self.pool.get('ir.attachment')
 		#template = email_tmp_obj.get_email_template(cr, uid, template_id, ids, context)
 		template = email_tmp_obj.browse(cr, uid, 8)
-		report_xml_pool = self.pool.get('ir.actions.report.xml')		
+		report_xml_pool = self.pool.get('ir.actions.report.xml')
 		attachments = []
-		# Add report in attachments				
+		# Add report in attachments
 		if template.report_template:
 			report_name = email_tmp_obj.render_template(cr, uid, template.report_name, template.model, ids, context=context)
 			report_service = 'report.' + report_xml_pool.browse(cr, uid, template.report_template.id, context).report_name
@@ -1219,13 +1282,14 @@ class kg_purchase_order_line(osv.osv):
 	'line_flag':fields.boolean('Line Flag'),
 	'po_specification':fields.text('Specification'),
 	'product_tax_amt':fields.float('Tax Amount'),
-	'brand_id':fields.many2one('kg.brand.master','Brand'),
+	'brand_id':fields.many2one('kg.brand.master','Brand',domain="[('product_ids','in',(product_id)),('state','in',('draft','confirmed','approved'))]"),
 	'least_price': fields.float('Least Price'),
 	'high_price': fields.float('Highest Price'),
 	'recent_price': fields.float('Recent Price'),
 	'price_type': fields.selection([('po_uom','PO UOM'),('per_kg','Per Kg')],'Price Type'),
 	'line_id': fields.one2many('ch.purchase.wo','header_id','Ch Line Id'),
 	'moc_id': fields.many2one('kg.moc.master','MOC'),
+	'moc_id_temp': fields.many2one('ch.brandmoc.rate.details','MOC',domain="[('brand_id','=',brand_id),('header_id.product_id','=',product_id),('header_id.state','in',('draft','confirmed','approved'))]"),
 	'uom_conversation_factor': fields.related('product_id','uom_conversation_factor', type='selection',selection=UOM_CONVERSATION, string='UOM Conversation Factor',store=True,required=True),
 	'length': fields.float('Length',digits=(16,4)),
 	'breadth': fields.float('Breadth',digits=(16,4)),
@@ -1242,6 +1306,7 @@ class kg_purchase_order_line(osv.osv):
 	'price_type': 'po_uom',
 	
 	}
+	
 	
 	def create(self, cr, uid, vals,context=None):
 		if vals['product_id']:
@@ -1266,7 +1331,53 @@ class kg_purchase_order_line(osv.osv):
 			tax_ids  = map(lambda x:{'tax_id':x.tax_id.id},tax_struct_browse.tax_line)
 			return tax_ids
 		return []
-		
+	
+	def onchange_price(self, cr, uid, ids, product_id,brand_id,moc_id):
+		value = {'least_price':'','high_price':'','recent_price':''}
+		max_val = 0
+		min_val = 0
+		recent_val = 0
+		if product_id and brand_id and moc_id:
+			max_sql = """ 
+						select max(line.price_unit),min(line.price_unit) from purchase_order_line line 
+						left join purchase_order po on (po.id=line.order_id)
+						join kg_brandmoc_rate rate on (rate.product_id=line.product_id)
+						join ch_brandmoc_rate_details det on (det.header_id=rate.id)
+						where po.state = 'approved' and rate.state in ('draft','confirmed','approved')
+						and line.product_id=%s and line.brand_id = %s and line.moc_id = %s """%(product_id,brand_id,moc_id)
+			cr.execute(max_sql)		
+			max_data = cr.dictfetchall()
+			recent_sql = """ 
+						select line.price_unit from purchase_order_line line 
+						left join purchase_order po on (po.id=line.order_id)
+						join kg_brandmoc_rate rate on (rate.product_id=line.product_id)
+						join ch_brandmoc_rate_details det on (det.header_id=rate.id)
+						where po.state = 'approved' and rate.state in ('draft','confirmed','approved')
+						and line.product_id = %s and line.brand_id = %s 
+						and line.moc_id = %s order by po.approved_date desc limit 1 """%(product_id,brand_id,moc_id)
+			cr.execute(recent_sql)		
+			recent_data = cr.dictfetchall()
+			if max_data:
+				max_val = max_data[0]['max'] or 0
+				#max_val = max_val.values()[0]
+				min_val = max_data[0]['min'] or 0
+			else:
+				max_val = 0
+				min_val = 0
+			if recent_data:
+				recent_val = recent_data[0]['price_unit']
+			else:
+				recent_val = 0
+			value = {'least_price':min_val,'high_price':max_val,'recent_price':recent_val}
+		return {'value': value}
+			
+	def onchange_moc(self, cr, uid, ids, moc_id_temp):
+		value = {'moc_id':''}
+		if moc_id_temp:
+			rate_rec = self.pool.get('ch.brandmoc.rate.details').browse(cr,uid,moc_id_temp)
+			value = {'moc_id': rate_rec.moc_id.id}
+		return {'value': value}
+			
 	def onchange_tax_structure(self, cr, uid,ids, tax_structure_id):
 		if ids:
 			tax_struct_obj =  self.pool.get('kg.tax.structure')
@@ -1506,16 +1617,25 @@ kg_purchase_order_expense_track()
 class ch_purchase_wo(osv.osv):
 	
 	_name = "ch.purchase.wo"
-	_description = "Ch Depindent WO"
+	_description = "Ch Purchase WO"
 	
 	_columns = {
 
 	'header_id': fields.many2one('purchase.order.line', 'PO Line'),
 	'wo_id': fields.char('WO No.'),
+	'w_order_id': fields.many2one('kg.work.order','WO',required=True, domain="[('state','=','confirmed')]"),
+	'w_order_line_id': fields.many2one('ch.work.order.details','WO',required=True),
 	'qty': fields.float('Qty'),
 	
 	}
 	
+	def onchange_wo(self, cr, uid, ids,w_order_line_id):
+		value = {'wo_id': ''}
+		if w_order_line_id:
+			wo_rec = self.pool.get('ch.work.order.details').browse(cr,uid,w_order_line_id)
+			value = {'wo_id':wo_rec.order_no}
+		return {'value':value}
+		
 	def _check_qty(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])
 			

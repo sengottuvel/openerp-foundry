@@ -261,8 +261,11 @@
 						<field name="state" invisible="1"/>
                     </group> 
                   </group>
-                  
+                 <notebook>
+					 <page string="S/N Details">
+<!--
                   <group string="S/N Details">
+-->
 					   <field name="po_exp_id" nolabel="1">
 						  <tree editable="bottom">
 							<field name="product_qty" required="1"/>
@@ -270,7 +273,21 @@
 							<field name="batch_no" string = 'S/N' required="1"/>
 						  </tree>
 					  </field>
+					  </page>
+<!--
 				  </group>
+-->
+				  <page string="WO Details" colspan="4" nolabel="1">
+						<field name="line_wo_id">
+							<tree string="WO Line" editable="bottom">
+						    <field name="w_order_line_id" on_change="onchange_wo(w_order_line_id)" readonly="1"/>
+						    <field name="qty" readonly="1"/>
+						    <field name="wo_id" invisible="1" readonly="1"/>
+							</tree>
+						</field>
+				  </page>
+				</notebook> 
+				
                 </form> 
             </field>
         </record>

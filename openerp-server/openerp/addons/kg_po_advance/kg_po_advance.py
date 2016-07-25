@@ -28,29 +28,30 @@ class kg_po_advance(osv.osv):
 	_description = "PO Advance"
 	_columns = {
 	
-		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),		
 		'confirm_flag':fields.boolean('Confirm Flag'),
 		'approve_flag':fields.boolean('Expiry Flag'),
 		'name':fields.char('Advance No',readonly=True),
-		'advance_date':fields.date('Advance Date',readonly=False, states={'approved':[('readonly',True)]}),
+		'advance_date':fields.date('Advance Date',readonly=False, states={'approved':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'state': fields.selection([('draft','Draft'),('confirmed','Waiting for approval'),('approved','Approved'),('update','Update'),
 				('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True,track_visibility='onchange',select=True),
 		'line_ids':fields.one2many('kg.po.advance.line','advance_header_id','Line Id',readonly=True),
 		'active': fields.boolean('Active'),
 		'remark': fields.text('Remarks'),
-		'supplier_id':fields.many2one('res.partner','Supplier',required=True,readonly=False, states={'approved':[('readonly',True)]}),
+		'supplier_id':fields.many2one('res.partner','Supplier',required=True,readonly=False, states={'approved':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'po_id':fields.many2one('purchase.order','PO No',
 				domain="[('partner_id','=',supplier_id), '&', ('state','!=','draft')]",required=True,
-				readonly=False, states={'approved':[('readonly',True)]}),
+				readonly=False, states={'approved':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'po_date':fields.date('PO Date',readonly=True),
 		'net_amt': fields.float('Total Net Amount',readonly=True),
-		'advance_amt': fields.float('Advance Amount',required=True,readonly=False, states={'approved':[('readonly',True)]}),
+		'advance_amt': fields.float('Advance Amount',required=True,readonly=False, states={'approved':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'balance_advance_amt': fields.float('Balance Net Amount',readonly=True),
 		'amt_paid_so_far':fields.float('Advance Paid So far',readonly=True),
 		'bal_adv':fields.float('Balance Advance',readonly=True),
 		'line_state':fields.selection([('draft','Draft'),('loaded','Loaded')],'Status'),
 		
-		# Entry Info
+		# Entry Info.
+		
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),	
 		'created_by' : fields.many2one('res.users', 'Created By', readonly=True),
 		'creation_date':fields.datetime('Creation Date',required=True,readonly=True),
 		'approved_date': fields.datetime('Approved Date', readonly=True),

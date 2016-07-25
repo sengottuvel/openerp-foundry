@@ -473,7 +473,7 @@ class kg_po_grn(osv.osv):
 				for order_line in order_lines:
 					print"'price_type': order_line.price_type",order_line.price_type,
 					if order_line.pending_qty > 0 and order_line.line_state != 'cancel':
-						po_grn_line_obj.create(cr, uid, {
+						po_grn_line = po_grn_line_obj.create(cr, uid, {
 							'name': order_line.product_id.name or '/',
 							'product_id': order_line.product_id.id,
 							'brand_id':order_line.brand_id.id,
@@ -502,6 +502,13 @@ class kg_po_grn(osv.osv):
 							'length': order_line.length,
 							'breadth': order_line.breadth,
 						})
+						print"order_lineorder_lineorder_lineorder_line",order_line.id
+						if order_line.line_id:
+							for ele in order_line.line_id:
+								wo_obj = self.pool.get('ch.purchase.wo').search(cr,uid,[('id','=',ele.id)])
+								if wo_obj:
+									wo_rec = self.pool.get('ch.purchase.wo').browse(cr,uid,wo_obj[0])
+									wo_id = self.pool.get('ch.po.grn.wo').create(cr,uid,{'header_id':po_grn_line,'qty':wo_rec.qty,'w_order_id':wo_rec.w_order_id.id,'wo_id':wo_rec.wo_id})
 					else:
 						print "NO Qty or Cancel"
 		if grn_entry_obj.grn_type == 'from_so':  
@@ -674,7 +681,6 @@ class kg_po_grn(osv.osv):
 		
 		d1 = today_new
 		d2 = bk_date
-
 		delta = d1 - d2
 
 		for i in range(delta.days + 1):
@@ -685,10 +691,10 @@ class kg_po_grn(osv.osv):
 		holiday_obj = self.pool.get('kg.holiday.master.line')
 		holiday_ids = holiday_obj.search(cr, uid, [('leave_date','in',back_list)])
 		
-		if grn_date > today_date:
-			raise osv.except_osv(
-					_('Warning'),
-					_('GRN Date should be less than or equal to current date!'))
+		#~ if grn_date > today_date:
+			#~ raise osv.except_osv(
+					#~ _('Warning'),
+					#~ _('GRN Date should be less than or equal to current date!'))
 						
 		#~ if holiday_ids:
 			#~ hol_bk_date = date.today() - timedelta(days=(3+len(holiday_ids)))
@@ -715,6 +721,31 @@ class kg_po_grn(osv.osv):
 			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,grn_entry.grn_date))
 			seq_name = cr.fetchone();
 			self.write(cr,uid,ids,{'name':seq_name[0]})
+		
+		po_qty = 0	
+		total = 0	
+		for i in range(len(grn_entry.line_ids)):
+			po_qty=grn_entry.line_ids[i].po_grn_qty
+			if grn_entry.line_ids[i].line_wo_id:
+				total = sum(wo.qty for wo in grn_entry.line_ids[i].line_wo_id)
+				if total <= po_qty:
+					pass
+				#~ else:
+					#~ raise osv.except_osv(
+						#~ _('Warning!'),
+						#~ _('WO Qty should not be greater than GRN Qty'))
+				wo_sql = """ select count(wo_id) as wo_tot,wo_id as wo_name from ch_po_grn_wo where header_id = %s group by wo_id"""%(grn_entry.line_ids[i].id)
+				cr.execute(wo_sql)		
+				wo_data = cr.dictfetchall()
+				for wo in wo_data:
+					if wo['wo_tot'] > 1:
+						raise osv.except_osv(
+						_('Warning!'),
+						_('%s This WO No. repeated'%(wo['wo_name'])))
+					else:
+						pass
+		
+						
 		if grn_entry.dc_date and grn_entry.dc_date > grn_entry.grn_date:
 			raise osv.except_osv(_('DC Date Error!'),_('DC Date Should Be Less Than GRN Date.'))			
 		if not grn_entry.line_ids:
@@ -845,6 +876,30 @@ class kg_po_grn(osv.osv):
 		dest_location_id = dep_record.main_location.id 
 		line_tot = 0			
 		line_id_list = []
+		
+		po_qty = 0	
+		total = 0	
+		for i in range(len(grn_entry.line_ids)):
+			po_qty=grn_entry.line_ids[i].po_grn_qty
+			if grn_entry.line_ids[i].line_wo_id:
+				total = sum(wo.qty for wo in grn_entry.line_ids[i].line_wo_id)
+				if total <= po_qty:
+					pass
+				#~ else:
+					#~ raise osv.except_osv(
+						#~ _('Warning!'),
+						#~ _('WO Qty should not be greater than GRN Qty'))
+				wo_sql = """ select count(wo_id) as wo_tot,wo_id as wo_name from ch_po_grn_wo where header_id = %s group by wo_id"""%(grn_entry.line_ids[i].id)
+				cr.execute(wo_sql)		
+				wo_data = cr.dictfetchall()
+				for wo in wo_data:
+					if wo['wo_tot'] > 1:
+						raise osv.except_osv(
+						_('Warning!'),
+						_('%s This WO No. repeated'%(wo['wo_name'])))
+					else:
+						pass
+						
 		if grn_entry.grn_dc == 'dc_invoice' and grn_entry.grn_type != 'from_gp':
 			partner = self.pool.get('res.partner')
 			supplier = partner.browse(cr, uid, grn_entry.supplier_id.id)
@@ -1838,6 +1893,7 @@ class po_grn_line(osv.osv):
 		'pi_line_id':fields.many2one('purchase.requisition.line','PI Line'),
 		'si_line_id':fields.many2one('kg.service.indent.line','SI Line'),
 		'po_exp_id':fields.one2many('kg.po.exp.batch','po_grn_line_id','Expiry Line'),
+		'line_wo_id': fields.one2many('ch.po.grn.wo','header_id','Ch Line Id'),
 		'state': fields.selection([('draft', 'Draft'), ('confirmed', 'Confirmed'),('done', 'Done'), ('cancel', 'Cancelled')], 'Status',readonly=True),
 		'remark':fields.text('Remarks'),
 		'price_subtotal': fields.function(_amount_line, string='Line Total', digits_compute= dp.get_precision('Account')),
@@ -1960,3 +2016,42 @@ class kg_po_grn_expense_track(osv.osv):
 		}
 	
 kg_po_grn_expense_track()
+
+class ch_po_grn_wo(osv.osv):
+	
+	_name = "ch.po.grn.wo"
+	_description = "Ch PO GRN WO"
+	
+	_columns = {
+
+	'header_id': fields.many2one('po.grn.line', 'PO Line'),
+	'wo_id': fields.char('WO No.'),
+	'w_order_id': fields.many2one('kg.work.order','WO',required=True, domain="[('state','=','confirmed')]"),
+	'w_order_line_id': fields.many2one('ch.work.order.details','WO',required=True),
+	'qty': fields.float('Qty'),
+	
+	}
+	
+	def onchange_wo(self, cr, uid, ids,w_order_line_id):
+		value = {'wo_id': ''}
+		if w_order_line_id:
+			wo_rec = self.pool.get('ch.work.order.details').browse(cr,uid,w_order_line_id)
+			value = {'wo_id':wo_rec.order_no}
+		return {'value':value}
+		
+	def _check_qty(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+			
+		if rec.qty <= 0.00:
+			return False					
+		return True
+		
+	_constraints = [
+	
+		(_check_qty,'You cannot save with zero qty !',['Qty']),
+		
+		]
+		
+ch_po_grn_wo()
+
+

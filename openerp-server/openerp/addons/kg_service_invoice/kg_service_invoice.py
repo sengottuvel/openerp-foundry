@@ -79,7 +79,8 @@ class kg_service_invoice(osv.osv):
 	_columns = {
 	
 		'name': fields.char('Service Bill No', size=64,readonly=True, states={'draft': [('readonly', False)]}),
-		'dep_name': fields.many2one('kg.depmaster','Dep.Name', translate=True, select=True,readonly=True, states={'draft': [('readonly', False)]}),
+		'dep_name': fields.many2one('kg.depmaster','Dep.Name', translate=True, select=True,readonly=True,
+					domain="[('item_request','=',True),('state','in',('draft','confirmed','approved'))]", states={'draft': [('readonly', False)]}),
 		'date': fields.date('Date', required=True, readonly=True),
 		'partner_id':fields.many2one('res.partner', 'Misc Supplier', required=True,readonly=True, 
 					states={'draft':[('readonly',False)]}),

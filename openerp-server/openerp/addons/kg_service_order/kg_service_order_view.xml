@@ -3,7 +3,7 @@
     <data>
         <!--
           =====================
-          master Form view
+          Form view
           =====================
         -->
 
@@ -13,14 +13,14 @@
 		<field name="type">form</field>
 		<field name="arch" type="xml">
 		<form string="Service order" version="7.0">
-			
 			<header>
 				<button name="draft_order" states="cancel" string="Draft" type="object" class="oe_highlight"/>
                 <button name="confirm_order" states="draft" string="Confirm" type="object" />
                 <button name="approve_order" states="confirm" string="Approve" type="object" />
-                <button name="cancel_order" states="done" string="Cancel" type="object" class="oe_highlight"/>
-                <button name="so_register_scheduler" states="approved" string="SO Register" type="object"  invisible="0"/>
-		<button name="kg_email_attachment" states="approved" string="Send by Mail" type="object" class="oe_highlight"/>
+                <button name="cancel_order" states="approved" string="Cancel" type="object" class="oe_highlight"/>
+                <button name="reject_order" states="confirm" string="Reject" type="object" class="oe_highlight"/>
+                <button name="so_register_scheduler" states="approved" string="SO Register" type="object"  invisible="1"/>
+				<button name="kg_email_attachment" states="approved" string="Send by Mail" type="object" class="oe_highlight" invisible="1"/>
                 <button name="%(action_so_bill_creation)d" string="Create SO Bill" type="action" class="oe_highlight" 
 				attrs = "{'invisible':[('button_flag','=',False)]}"/>
               
@@ -57,10 +57,8 @@
 					<field name="warranty"/>
 					<field name="active"/>
 					<field name="currency_id" invisible="1"/>       
-					
                     </group>
 				</group>
-					
 				<notebook>
 				<page string="Service Order" attrs="{'invisible': [('so_flag', '=', False)]}">
 				<field colspan="4" mode="tree" name="service_order_line" nolabel="1" widget="one2many_list" >
@@ -102,7 +100,6 @@
 				</group>
 				</page>
 			   <page string="Select Service Indent" attrs="{'invisible':[('so_type','!=','service')]}">
-		   
 					<field name="kg_serindent_lines" >
 						<tree string="Service Indent Line" editable="bottom">
 						<field name="service_id" readonly="1"/>
@@ -125,7 +122,6 @@
 					<group>
 						<field name="company_id"/>
 					</group>
-					
 					<group>
 						<group>
 							<field name="user_id"/>
@@ -150,7 +146,7 @@
 			</group>
 			</form>
 		</field>
-	</record>
+		</record>
         
         <!-- Service Order Line Form  View -->
         
@@ -161,13 +157,11 @@
             <field name="arch" type="xml">
                 <form string="Service Order Line" version="7.0">
 				<group>
-					
 					<group>
 					<field name="product_id" required="1"  attrs = "{'readonly':[('service_flag','=',True)]}" on_change="onchange_product_id(product_id,product_uom)"/>
 					<field name="brand_id" attrs = "{'readonly':[('so_type_flag','=',True)]}"/>
 					<field name="product_qty" required="1" on_change="onchange_qty(product_qty,soindent_qty,pending_qty,service_flag)"/>
 					<field name="price_unit" attrs = "{'readonly':[('so_type_flag','=',True)]}" required="1"/>
-					
 					<field name="soindent_line_id" invisible="1"/>
 					<field name="note"/>
 					<field name="service_flag" invisible="1"/>
@@ -175,7 +169,6 @@
 					<field name="ser_no"/>
 					<field name="serial_no"/>
 					</group>
-					
 					<group>
 					<field name="product_uom" required="1" attrs = "{'readonly':[('so_type_flag','=',True)]}"/>
 					<field name="soindent_qty" readonly="1"/>
@@ -187,16 +180,14 @@
 					<field name="taxes_id" widget="many2many_tags" attrs = "{'readonly':[('so_type_flag','=',True)]}"
                         domain="[('parent_id','=',False),('type_tax_use','!=','sale')]"/>
 					</group>
-					
 				</group>
 				</form>
 			</field>
 		</record>
         
-
         <!--
         =====================
-        master Tree view
+        Tree view
         =====================
         -->
         <record id="view_kg_serviceorder_tree" model="ir.ui.view">
@@ -204,7 +195,7 @@
             <field name="model">kg.service.order</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
-                <tree colors="red:state=='confirm';blue:state=='draft';black:state=='approved'" 
+                <tree colors="red:state=='confirm';blue:state=='draft';black:state=='approved';gray:state=='cancel'" 
 							string="Service Order" toolbar="1" >
                     <field name="name"/>
 					<field name="date"/>
@@ -214,7 +205,6 @@
                     <field name="amount_tax"/>
                     <field name="amount_total"/>
 					<field name="state"/>
-
                 </tree> 
             </field>
         </record>
@@ -243,28 +233,23 @@
 			</field>
 		</record>
 		
-	<!-- Search View End -->
-	
-       <!--
+		<!--
         =====================
-        master Form Action
+        Form Action
         ===================== -->
 
-
-	<record id="action_kg_serviceorder_form" model="ir.actions.act_window">
-			<field name="name">Service order</field>
-			<field name="type">ir.actions.act_window</field>
-			<field name="res_model">kg.service.order</field>
-			<field name="view_type">form</field>
-			<field name="view_id" ref="view_kg_serviceorder_tree"/>
-			<field name="search_view_id" ref="t_search_v_service_order"/>
-	</record>
+		<record id="action_kg_serviceorder_form" model="ir.actions.act_window">
+				<field name="name">Service order</field>
+				<field name="type">ir.actions.act_window</field>
+				<field name="res_model">kg.service.order</field>
+				<field name="view_type">form</field>
+				<field name="view_id" ref="view_kg_serviceorder_tree"/>
+				<field name="search_view_id" ref="t_search_v_service_order"/>
+		</record>
 	
+		<!-- Service order line tree view -->
 	
-	
-	<!-- Service order line tree view -->
-	
-	<record id="view_kg_serviceorder_line_tree" model="ir.ui.view">
+		<record id="view_kg_serviceorder_line_tree" model="ir.ui.view">
             <field name="name">kg.deporder.line.tree</field>
             <field name="model">kg.service.order.line</field>
             <field name="type">tree</field>
@@ -275,7 +260,6 @@
                     <field name="product_id"/>
                     <field name="product_qty"/>
                     <field name="pending_qty"/>           
-                    
                 </tree>
             </field>
         </record>

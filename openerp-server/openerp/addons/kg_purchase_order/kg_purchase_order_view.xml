@@ -91,7 +91,8 @@
 		<button name="purchase_confirm" states="draft" string="Confirm Order" position="replace">
 			<button name="purchase_confirm" states="confirmed" string="Approve PO" confirm="Are you sure to proceed ?" />
 			<button name="action_reject" string="Reject PO" confirm="Are you sure to proceed ?" type="object" states="confirmed" />
-			<button name="action_cancel" string="Cancel PO" confirm="Are you sure to proceed ?" type="object" states="approved" />
+			<button name="action_cancel" string="Cancel PO" confirm="Are you sure to proceed ?" type="object" states="draft,confirmed,approved"/>
+			<button name="action_set_to_draft" string="Set To Draft" type="object" states="reject"/>
 		</button>
 		
 		<button name="purchase_confirm" states="confirmed" string="Approve PO" position="after">
@@ -268,8 +269,9 @@
 			<field name="product_id" 
 				on_change="onchange_product_id(parent.pricelist_id,product_id,0,product_uom,parent.partner_id, parent.date_order,parent.fiscal_position,date_planned,name,price_unit,context)" 
 				attrs="{'readonly': [('line_flag', '=', True)]}" position="after">
-				<field name="brand_id" required="1"/>
-				<field name="moc_id" required="1"/>
+				<field name="brand_id" required="1" on_change="onchange_price(product_id,brand_id,moc_id)"/>
+				<field name="moc_id" required="1" on_change="onchange_price(product_id,brand_id,moc_id)" invisible="1"/>
+				<field name="moc_id_temp" on_change="onchange_moc(moc_id_temp)" required="1"/>
 				<field name="uom_conversation_factor" readonly="1" invisible="1"/>
 				<field name="length" on_change="onchange_price_type(product_qty,uom_conversation_factor,length,breadth,price_type,product_id)" attrs="{'invisible':[('uom_conversation_factor','!=','two_dimension')],'required':[('uom_conversation_factor','=','two_dimension')]}"/>
 				<field name="breadth" on_change="onchange_price_type(product_qty,uom_conversation_factor,length,breadth,price_type,product_id)" attrs="{'invisible':[('uom_conversation_factor','!=','two_dimension')],'required':[('uom_conversation_factor','=','two_dimension')]}"/>
@@ -372,8 +374,9 @@
 					<page string="WO Details">
 						<field name="line_id">
 							<tree string="WO Line" editable="bottom">
-						    <field name="wo_id"/>
+						    <field name="w_order_line_id" on_change="onchange_wo(w_order_line_id)"/>
 						    <field name="qty"/>
+						    <field name="wo_id" invisible="1"/>
 							</tree>
 							</field>
 					</page>
@@ -465,7 +468,7 @@
 				<field name="order_id" string="PO No" filter_domain="[('order_id','ilike',self)]"/>
 			<separator/> 
 			<group expand="0" string="Group By...">
-				<filter string="PO No" name="group_order_id" icon="terp-personal" domain="[]" context="{'group_by':'order_id'}"/>
+				<filter string="PO No" name="group_order_id"  icon="terp-personal" domain="[]" context="{'group_by':'order_id'}"/>
 				<filter string="PO Date" icon="terp-personal" domain="[]" context="{'group_by':'date_planned'}"/>
 				<filter string="Product" name="group_product_id" icon="terp-personal" domain="[]" context="{'group_by':'product_id'}"/>
 				<filter string="Brand" icon="terp-personal" domain="[]" context="{'group_by':'brand_id'}"/>

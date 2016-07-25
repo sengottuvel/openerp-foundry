@@ -266,8 +266,20 @@ class purchase_order(osv.osv):
 	def unlink(self, cr, uid, ids, context=None):
 		purchase_orders = self.read(cr, uid, ids, ['state'], context=context)
 		unlink_ids = []
+		pi_line_obj = self.pool.get('purchase.requisition.line')
+		
+		for rec in self.browse(cr,uid,ids): 
+			if rec.state in ('draft'):
+				if rec.po_type == 'frompi':
+					for line in rec.order_line:
+						sql = """ update purchase_requisition_line set draft_flag=False where line_state = 'process' and id = %s """%(line.pi_line_id.id)
+						cr.execute(sql)
+				unlink_ids.append(rec.id)
+			else:
+				raise osv.except_osv(_('Invalid Action!'), _('In order to delete a purchase order, you must cancel it first.'))
+		
 		for s in purchase_orders:
-			if s['state'] in ['draft','cancel']:
+			if s['state'] in ['cancel']:
 				unlink_ids.append(s['id'])
 			else:
 				raise osv.except_osv(_('Invalid Action!'), _('In order to delete a purchase order, you must cancel it first.'))
@@ -1024,31 +1036,31 @@ class purchase_order_line(osv.osv):
 		else:
 			price = po_price
 		
-		max_sql = """ select max(line.price_unit),min(line.price_unit) from purchase_order_line line 
-						left join purchase_order po on (po.id=line.order_id)
-						where po.state = 'approved' and line.product_id=%s """%(product_id)
-		cr.execute(max_sql)		
-		max_data = cr.dictfetchall()
-		recent_sql = """ select line.price_unit from purchase_order_line line 
-						left join purchase_order po on (po.id=line.order_id)
-						where po.state = 'approved' and line.product_id = %s 
-						order by po.date_order desc limit 1 """%(product_id)
-		cr.execute(recent_sql)		
-		recent_data = cr.dictfetchall()
-		
-		if max_data:
-			max_val = max_data[0]['max']
-			#max_val = max_val.values()[0]
-			min_val = max_data[0]['min']
-		else:
-			max_val = 0
-			min_val = 0
-		
-		if recent_data:
-			recent_val = recent_data[0]['price_unit']
-		else:
-			recent_val = 0
-		res['value'].update({'high_price': max_val or 0,'least_price': min_val or 0,'recent_price':recent_val or 0})		
+		#~ max_sql = """ select max(line.price_unit),min(line.price_unit) from purchase_order_line line 
+						#~ left join purchase_order po on (po.id=line.order_id)
+						#~ where po.state = 'approved' and line.product_id=%s """%(product_id)
+		#~ cr.execute(max_sql)		
+		#~ max_data = cr.dictfetchall()
+		#~ recent_sql = """ select line.price_unit from purchase_order_line line 
+						#~ left join purchase_order po on (po.id=line.order_id)
+						#~ where po.state = 'approved' and line.product_id = %s 
+						#~ order by po.date_order desc limit 1 """%(product_id)
+		#~ cr.execute(recent_sql)		
+		#~ recent_data = cr.dictfetchall()
+		#~ 
+		#~ if max_data:
+			#~ max_val = max_data[0]['max']
+			#~ #max_val = max_val.values()[0]
+			#~ min_val = max_data[0]['min']
+		#~ else:
+			#~ max_val = 0
+			#~ min_val = 0
+		#~ 
+		#~ if recent_data:
+			#~ recent_val = recent_data[0]['price_unit']
+		#~ else:
+			#~ recent_val = 0
+		#~ res['value'].update({'high_price': max_val or 0,'least_price': min_val or 0,'recent_price':recent_val or 0})		
 		res['value'].update({'uom_conversation_factor': product.uom_conversation_factor})		
 		
 		taxes = account_tax.browse(cr, uid, map(lambda x: x.id, product.supplier_taxes_id))
