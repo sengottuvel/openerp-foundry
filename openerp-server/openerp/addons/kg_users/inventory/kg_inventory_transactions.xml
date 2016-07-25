@@ -642,6 +642,17 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Inventory Admin')]"/>
 		</record>
 		
+		<record id="t_inventory_ch_po_grn_wo" model="ir.model.access">
+			<field name="model_id" ref="kg_po_grn.model_ch_po_grn_wo"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch po grn wo</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Inventory Admin')]"/>
+		</record>
+		
+		
 <!--
 		<record id="t_inventory_scheduler_mail_settings_kg_mail" model="ir.model.access">
 			<field name="model_id" ref="kg_mail_settings.model_kg_mail_settings"/>
