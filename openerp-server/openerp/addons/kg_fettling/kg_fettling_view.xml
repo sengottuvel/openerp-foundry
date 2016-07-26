@@ -3950,18 +3950,31 @@
 						<group>
 							<group>
 								<field name="name" readonly="1"/>
-								<field name="flag_batchline" invisible="1"/>
-								<field name="heat_treatment_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="heat_cycle_no" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
 								<field name="heat_specification" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="heat_fc_off_time" widget="float_time" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="heat_treatment_type" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="heat_set_temp" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="heat_socking_hr" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="heat_quenc_time" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="heat_quencing_after_temp" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
 								<field name="each_weight" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')],'invisible':[('done_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')],'invisible':[('done_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
 								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
+								<field name="flag_batchline" invisible="1"/>
 							</group>											
 							<group>
 								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="heat_cycle_no" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="heat_treatment_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="heat_fc_temp" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="heat_furnace_on_time" widget="float_time" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="heat_cooling_type" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="heat_set_temp_time" widget="float_time" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="heat_socking_comp_time" widget="float_time" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="heat_quencing_before_temp" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="heat_chloride_content" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
 								<field name="done_by" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')],'invisible':[('done_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')],'invisible':[('done_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
 								<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
 							</group>					
 						</group>
@@ -3981,8 +3994,10 @@
 										<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')]}"/>
 										<field name="qty" string="Production Qty" required="1"/>
 										<field name="accept_qty" required="1"/>
+										<field name="reject_qty"/>
 										<field name="each_weight" required="1"/>
 										<field name="accept_user_id"/>
+										<field name="reject_remarks_id" attrs="{'required':[('reject_qty','>',0)]}"/>
 										<field name="remarks" widget="char"/>
 									</tree>
 								</field>
