@@ -70,9 +70,9 @@
 		<field name="kg_store" invisible="1"/>
 		<field name="pi_flag" invisible="1"/>
 		<field name="division"/>
-		<field name="dep_project"/>
-		<field name="entry_mode" on_change="onchange_entry_mode(entry_mode,pi_flag)"/>
 		<field name="indent_type" on_change="onchange_indent_type(indent_type,pi_flag)"/>
+		<field name="entry_mode" on_change="onchange_entry_mode(entry_mode,pi_flag)" invisible="1"/>
+		<field name="dep_project" invisible="1"/>
 		</field>
 		
 <!--

@@ -18,7 +18,9 @@
                 <button name="confirm_indent" states="draft" string="Confirm" type="object" />
                 <button name="approve_indent" states="confirm" string="Approve" type="object"/>
                 <button name="cancel_indent" states="approved" string="Cancel" type="object" class="oe_highlight"/>
+<!--
                 <field name="state" widget="statusbar" statusbar_visible="draft,confirm,done,cancel" statusbar_colors='{"draft":"blue"}'/>
+-->
 
 		</header>
 				<group>
@@ -26,15 +28,16 @@
 						<field name="name"/>
 						<field name="dep_name"/>
 						<field name="division"/>
-						<field name="origin"/>
+						<field name="source_id"/>
 						<field name="remark"/>
+						<field name="origin" invisible="1"/>
                     </group>
                     <group>
 						<field name="date"/>
-						<field name="dep_project"/>
 						<field name="gate_pass" invisible="1"/>
 						<field name="active"/>
 						<field name="state" style="width: 30%%" class="att_state_change" readonly="1"/>
+						<field name="dep_project" invisible="1"/>
                     </group>
 				</group>
 				<notebook>

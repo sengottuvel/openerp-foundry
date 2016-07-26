@@ -24,7 +24,9 @@
                 <button name="%(action_so_bill_creation)d" string="Create SO Bill" type="action" class="oe_highlight" 
 				attrs = "{'invisible':[('button_flag','=',False)]}"/>
               
+<!--
                 <field name="state" widget="statusbar" statusbar_visible="draft,confirm,done,cancel" statusbar_colors='{"draft":"blue"}'/>
+-->
 			</header>
                 <group>
                     <group> 
@@ -37,26 +39,26 @@
                     <field name="amc_from" attrs="{'invisible': [('so_type','!=','amc')],'required':[('so_type','=','amc')]}"/>
                     <field name="amc_to" attrs="{'invisible': [('so_type','!=','amc')],'required':[('so_type','=','amc')]}"/>
                     <field name="gp_id" attrs="{'invisible': [('so_type','!=','service')],'required':[('so_type','=','service')]}"/>
+					<field name="delivery_mode"/>
                     <field name="so_bill" invisible="1"/>
                     <field name="so_reonly_flag" invisible="1"/>
                     <field name="so_flag" id = "so_flag" invisible="1"/> 
                     <field name="amend_flag" invisible="1"/> 
                     <field name="button_flag" invisible="1"/> 
 					<field name="payment_type" attrs="{'invisible': [('so_type','=','service')],'required':[('so_type','!=','service')]}"/>
-					<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
                     </group> 
                     <group>					
 					<field name="date"/>
 					<field name="partner_address"/>
 					<field name="quot_ref_no"/>
 					<field name="dep_name"/>
-					<field name="delivery_mode"/>
-					<field name="price"/>					
-					<field name="origin" />
-					<field name="origin_project" invisible="1"/>
+					<field name="price"/>
 					<field name="warranty"/>
 					<field name="active"/>
-					<field name="currency_id" invisible="1"/>       
+					<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
+					<field name="currency_id" invisible="1"/>
+					<field name="origin" invisible="1"/>
+					<field name="origin_project" invisible="1"/>    
                     </group>
 				</group>
 				<notebook>

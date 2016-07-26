@@ -277,8 +277,11 @@ class kg_service_order(osv.osv):
 		supplier_address = partner.address_get(cr, uid, [partner_id], ['default'])
 		supplier = partner.browse(cr, uid, partner_id)
 		street = supplier.street or ''
+		street2 = supplier.street2 or ''
+		landmark = supplier.landmark or ''
 		city = supplier.city_id.name or ''
-		address = street+ city or ''
+		zip_code = supplier.zip or ''
+		address = street+','+street2+','+landmark+','+city+','+zip_code or ''
 
 		return {'value': {
 			'pricelist_id': supplier.property_product_pricelist_purchase.id,

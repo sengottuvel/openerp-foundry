@@ -25,6 +25,8 @@ class kg_service_indent(osv.osv):
 		'active': fields.boolean('Active'),
 		'state': fields.selection([('draft', 'Draft'),('confirm','Waiting For Approval'),('approved','Approved'),('done','Done'),('cancel','Cancel')], 'Status', track_visibility='onchange', required=True),
 		'gate_pass': fields.boolean('Gate Pass', readonly=True, states={'draft':[('readonly', False)],'confirm':[('readonly',False)]}),
+		'source_id': fields.many2one('stock.location','Source Location',readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]},
+						domain="[('custom','=',True)]"),
 		'origin': fields.char('Source Location', size=264,readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'remark': fields.text('Remarks'),
 		'division': fields.many2one('kg.division.master','Division'),

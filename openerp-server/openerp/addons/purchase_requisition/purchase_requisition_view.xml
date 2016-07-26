@@ -34,7 +34,9 @@
                <!-- <button name="tender_reset" states="done,cancel" string="Reset to Draft" type="object" />-->
                 <button name="tender_done" states="in_progress" string="Purchase Done" type="object" class="oe_highlight"/>
                 <button name="tender_cancel" states="draft,in_progress" string="Cancel Requisition" type="object" />
+<!--
                 <field name="state" widget="statusbar" statusbar_visible="draft,done" statusbar_colors='{"in_progress":"blue"}'/>
+-->
             </header>
             <sheet>
                 <div class="oe_edit_only">
