@@ -27,7 +27,7 @@
 								<field name="offer_date"/>
 								<field name="customer_id" required="1"/>
 								<field name="industry_id"/>
-								<field name="call_type"/>
+								<field name="call_type" readonly="1"/>
 								<field name="ref_mode"/>
 								<field name="market_division"/>
 								<field name="dealer_id" attrs="{'invisible': [('ref_mode','=','direct')],'required': [('ref_mode','=','dealer')]}"/>
@@ -65,7 +65,10 @@
 							</group>
 						</group>
 -->
+<!--
 						<group string="WO Details" attrs="{'invisible': [('purpose','not in',('spare'))]}">
+-->
+						<group string="WO Details" invisible="1">
 							<group>
 							<field name="pump_id" attrs="{'invisible': [('purpose','not in',('spare'))]}"/>
 							<field name="s_no" attrs="{'invisible': [('purpose','not in',('spare'))]}"/>
@@ -78,12 +81,17 @@
 							<field name="requirements" attrs="{'invisible': [('purpose','not in',('prj'))],'required': [('purpose','in',('prj'))]}"/>
 						</group>
 						
-						<group string="Pump Details">
-							<field name="ch_line_ids" colspan="4" nolabel="1" context="{'market_division':market_division}">
+						<group string="Pump/Spare Details">
+							<field name="ch_line_ids" colspan="4" nolabel="1" context="{'market_division':market_division,'purpose_categ':purpose}">
 								<tree string="Pump History">
 									<field name="equipment_no" required="1"/>
-									<field name="quantity_in_no" required="1"/>
-									<field name="description" required="1"/>							  
+									<field name="description" required="1"/>
+									<field name="purpose_categ"/>
+									<field name="pumpseries_id"/>
+									<field name="pump_id"/>
+									<field name="flange_type"/>
+									<field name="acces"/>
+									<field name="quantity_in_no" required="1" invisible="1"/>
 								</tree>
 								
 							</field>
@@ -199,6 +207,11 @@
 			<field name="arch" type="xml">
 				<form string="Pumpmodel Details" version="7.0">
 					<sheet>
+						<group>
+							<field name="purpose_categ" required="1" attrs="{'readonly':[('purpose_categ','in',('pump','spare'))]}"/>																
+						</group>	
+		<notebook>
+		<page string="Pump Details"  attrs="{'invisible':[('purpose_categ','!=','pump')]}">
 						<group string="Item Details">
 							<group>
 								<field name="equipment_no" />																
@@ -245,8 +258,9 @@
 					
 						<group string="Pump Specification">
 							<group>
-								<field name="pump_id" on_change="onchange_pumpmodel(pump_id,market_division,suction_pressure_kg,discharge_pressure_kg)"/>
-								<field name="pumpseries_id" on_change="onchange_pumpseries(pumpseries_id,flange_standard,flange_type)"/>
+								<field name="pump_id" on_change="onchange_pumpmodel(pump_id,market_division,suction_pressure_kg,discharge_pressure_kg)" attrs="{'required':[('purpose_categ','in',('pump'))]}"/>
+								<field name="qty" required="1"/>
+								<field name="pumpseries_id" on_change="onchange_pumpseries(pumpseries_id,flange_standard,flange_type)" attrs="{'required':[('purpose_categ','in',('pump'))]}"/>
 								<field name="pre_suppliy_ref"/>
 								<field name="shaft_sealing"/>
 								<field name="scope_of_supply" on_change="onchange_scope_of_supply(scope_of_supply,primemover_categ)"/>
@@ -254,7 +268,7 @@
 								<field name="impeller_type" />
 								<field name="impeller_dia_min" />																															
 								<field name="size_suctionx" />
-								<field name="flange_type" on_change="onchange_flange_type(flange_type,flange_standard)"/>
+								<field name="flange_type" attrs="{'required':[('purpose_categ','in',('pump'))]}" on_change="onchange_flange_type(flange_type,flange_standard)"/>
 								<field name="flange_standard" />
 								<field name="efficiency_in" on_change="onchange_bkw_liq(bkw_water,bkw_liq,capacity_in,head_in,specific_gravity,efficiency_in,motor_margin)"/>
 								<field name="npsh_r_m" />
@@ -278,7 +292,6 @@
 								<field name="end_of_the_curve" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
 								<field name="critical_speed"/>
 								<field name="engine_kw" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
-								
 								<field name="gear_box_loss_rated" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
 								<field name="fluid_coupling_loss_rated" on_change="onchange_mototr_output_power_rated(gear_box_loss_rated,fluid_coupling_loss_rated,bkw_liq,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
 								<field name="mototr_output_power_rated" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
@@ -327,56 +340,113 @@
 								<field name="market_division" invisible="1"/>
 							</group>
 						</group>
-						<group string="Accessories">
-							<group>
-								<field name="acces" colspan="1"/>
-							</group>
-							<group>
-<!--
-								<field name="acces_type" attrs="{'required':[('acces','=','yes')]}"/>
--->
-							</group>
-						</group>
-						<notebook attrs="{'invisible': [('acces','!=','yes')]}">
-						<page string="Accessories">
-							<field name="line_ids_access_a">
-								<tree string="Accessories Entry Tree" editable="top" >
-									<field name="access_id" required="1"/>
-									<field name="moc_id" required="1"/>
-									<field name="qty" required="1"/>
-									<field name="oth_spec"/>
-<!--
-									<field name="base_plate_item" attrs="{'required': [('base_plate','=','yes')]}"/>				   
-									<field name="coupling_guard"/>										
-									<field name="coupling_guard_item" attrs="{'required': [('coupling_guard','=','yes')]}"/>										
-									<field name="fou_bolts"/>										
-									<field name="fou_bolts_item" attrs="{'required': [('fou_bolts','=','yes')]}"/>										
--->
-								</tree>
-							</field>								
-						</page>
-					</notebook>
+						
 						<group>
 							<group>
-								<field name="moc_const_id" on_change="onchange_moc(moc_const_id,flag_standard)"/>
+								<field name="moc_const_id"  attrs="{'required':[('purpose_categ','in',('pump'))]}" on_change="onchange_moc(moc_const_id,flag_standard)"/>
 								<field name="flag_standard" on_change="onchange_moc(moc_const_id,flag_standard)"/>
 							</group>
 							<goup>
 							</goup>
 						</group>
-						
-					<notebook>
-						<page string="Offer Material">
-							<field name="line_ids_moc_a" context="{'flag_standard':flag_standard}">
-								<tree string="Material of Construction Details Entry Tree" editable="top" >
-									<field name="offer_id" attrs="{'readonly': [('flag_standard','=',False)]}"/>
-									<field name="moc_id" attrs="{'readonly': [('flag_standard','=',False)]}"/>				   
-									<field name="remarks" widget="char" attrs="{'readonly': [('flag_standard','=',False)]}"/>										
-									<field name="flag_standard" invisible="1"/>										
-								</tree>
-							</field>	
-						</page>							
-					</notebook>
+						<notebook>
+							<page string="Offer Material">
+								<field name="line_ids_moc_a" context="{'flag_standard':flag_standard}">
+									<tree string="Material of Construction Details Entry Tree" editable="top" >
+										<field name="offer_id" attrs="{'readonly': [('flag_standard','=',False)]}"/>
+										<field name="moc_id" attrs="{'readonly': [('flag_standard','=',False)]}"/>				   
+										<field name="remarks" widget="char" attrs="{'readonly': [('flag_standard','=',False)]}"/>										
+										<field name="flag_standard" invisible="1"/>										
+									</tree>
+								</field>	
+							</page>							
+						</notebook>
+		</page>
+		<page string="Spare Details" attrs="{'invisible':[('purpose_categ','!=','spare')]}">
+			<group>
+				<group>
+					<field name="wo_id" domain="[('partner_id','=',parent.customer_id),('order_category','=','spare'),('state','=','confirmed')]"/>
+					<field name="spare_pump_id" on_change="onchange_spare_pump_id(spare_pump_id)" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+					<field name="spare_pumpseries_id" on_change="onchange_spare_pumpseries_id(spare_pumpseries_id)" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+				</group>
+				<group>
+					<field name="s_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
+				</group>
+			</group>
+			<group>
+				<group>
+					<field name="load_bom" on_change="onchange_load_bom(load_bom,spare_pump_id)" attrs="{'readonly':[('load_bom','=',True)]}"/>
+				</group>
+				<group>
+				</group>
+			</group>
+			<notebook>
+				<page string = "Foundry Items">
+				<field name="line_ids">
+					<tree string="Foundry Item Tree" editable="top" delete="false">
+						<field name="is_applicable"/>
+						<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+						<field name="pattern_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+						<field name="pattern_name" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+						<field name="csd_no" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+						<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+						<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
+						<field name="load_bom" invisible="1"/>
+					</tree>
+				</field>								
+				</page>
+				<page string = "MS Items">
+				<field name="line_ids_a">
+					<tree string="MS Item Tree" editable="top" delete="false">
+						<field name="is_applicable"/>
+						<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+						<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+						<field name="ms_line_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+						<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
+						<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+						<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
+						<field name="load_bom" invisible="1"/>
+					</tree>
+				</field>								
+				</page>
+				<page string = "BOT Items">
+				<field name="line_ids_b">
+					<tree string="BOT Item Tree" editable="top" delete="false">
+						<field name="is_applicable"/>
+						<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+						<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+						<field name="bot_line_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+						<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+						<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
+						<field name="load_bom" invisible="1"/>
+					</tree>
+				</field>								
+				</page>
+			</notebook>
+		</page>
+		</notebook>
+			<group string="Accessories">
+				<group>
+					<field name="acces" attrs="{'required':[('purpose_categ','in',('pump'))]}" colspan="1"/>
+				</group>
+				<group>
+<!--
+					<field name="acces_type" attrs="{'required':[('acces','=','yes')]}"/>
+-->
+				</group>
+				</group>
+				<notebook attrs="{'invisible': [('acces','!=','yes')]}">
+				<page string="Accessories">
+					<field name="line_ids_access_a">
+						<tree string="Accessories Entry Tree" editable="top" >
+							<field name="access_id" required="1"/>
+							<field name="moc_id" required="1"/>
+							<field name="qty" required="1"/>
+							<field name="oth_spec"/>
+						</tree>
+					</field>								
+				</page>
+			</notebook>
 					</sheet>
 				</form>
 			</field>

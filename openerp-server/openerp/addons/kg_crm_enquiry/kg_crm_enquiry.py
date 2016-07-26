@@ -11,7 +11,7 @@ dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
 CALL_TYPE_SELECTION = [
     ('service','Service'),
-    ('product','Product')
+    ('new_enquiry','New Enquiry')
 ]
 PURPOSE_SELECTION = [
     ('pump','Pump'),('spare','Spare'),('prj','Project'),('pump_spare','Pump With Spare')
@@ -43,7 +43,7 @@ class kg_crm_enquiry(osv.osv):
 		'active': fields.boolean('Active'),
 		'state': fields.selection(STATE_SELECTION,'Status', readonly=True),
 		'line_ids': fields.one2many('ch.kg.crm.enquiry', 'header_id', "Child Enquiry"),
-		'ch_line_ids': fields.one2many('ch.kg.crm.pumpmodel', 'header_id', "Child Pump Enquiry"),
+		'ch_line_ids': fields.one2many('ch.kg.crm.pumpmodel', 'header_id', "Pump/Spare Details"),
 		'due_date': fields.date('Due Date',required=True),
 		'call_type': fields.selection(CALL_TYPE_SELECTION,'Call Type', required=True),
 		'ref_mode': fields.selection([('direct','Direct'),('dealer','Dealer')],'Reference Mode', required=True),
@@ -99,7 +99,7 @@ class kg_crm_enquiry(osv.osv):
 		'pump': 'gld_packing',
 		'transmision': 'cpl',
 		'ref_mode': 'direct',
-		'call_type': 'service',
+		'call_type': 'new_enquiry',
 		'active': True,
 	#	'division_id':_get_default_division,
 		'due_date' : lambda * a: time.strftime('%Y-%m-%d'),
@@ -244,7 +244,7 @@ class kg_crm_enquiry(osv.osv):
 			rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
 			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.enquiry_date))
 			off_no = cr.fetchone();
-		elif entry.call_type == 'product':
+		elif entry.call_type == 'new_enquiry':
 			if entry.market_division == 'cp':				
 				off_no = ''	
 				qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','crm.enquiry.cp')])
@@ -345,11 +345,12 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		### Pump Details ####
 		'header_id':fields.many2one('kg.crm.enquiry', 'Enquiry', ondelete='cascade'),
 		'enquiry_id':fields.many2one('kg.crm.enquiry', 'Enquiry'),
-		'pump_id':fields.many2one('kg.pumpmodel.master', 'Pump'),
+		#~ 'pump_id':fields.many2one('kg.pumpmodel.master', 'Pump'),
 		'qty':fields.integer('Quantity'),
 		'del_date':fields.date('Delivery Date'),
 		'oth_spec':fields.char('Other Specification'),
-		'purpose_categ': fields.selection([('pump','Pump'),('spare','Spare'),('prj','Project'),('pump_spare','Pump With Spare')],'Purpose Category'),
+		'purpose_categ': fields.selection([('pump','Pump'),('spare','Spare')],'Purpose Category'),
+		#~ 'purpose_categ': fields.selection([('pump','Pump'),('spare','Spare'),('prj','Project'),('pump_spare','Pump With Spare')],'Purpose Category'),
 		'line_ids': fields.one2many('ch.kg.crm.foundry.item', 'header_id', "Foundry Details"),
 		'line_ids_a': fields.one2many('ch.kg.crm.machineshop.item', 'header_id', "Machineshop Details"),
 		'line_ids_b': fields.one2many('ch.kg.crm.bot', 'header_id', "BOT Details"),
@@ -357,6 +358,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'line_ids_access_a': fields.one2many('ch.kg.crm.accessories', 'header_id', "Accessories"),
 		
 		########## Karthikeyan Item Details Added Start here ################
+		's_no': fields.char('Serial Number'),
 		'equipment_no': fields.char('Equipment No'),
 		'quantity_in_no': fields.integer('Quantity in No'),
 		'description': fields.char('Description'),
@@ -391,6 +393,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'pump_type': fields.char('Pump Model'),		
 		'casing_design': fields.selection([('base','Base'),('center_line','Center Line')],'Casing Feet Location'),
 		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Type', required=True,domain="[('active','=','t')]"),		
+		'spare_pump_id': fields.many2one('kg.pumpmodel.master','Pump Type', required=True,domain="[('active','=','t')]"),		
 		'size_suctionx': fields.char('Size-SuctionX Delivery(mm)'),
 		'flange_standard': fields.many2one('ch.pumpseries.flange','Flange Standard',domain="[('flange_type','=',flange_type),('header_id','=',pumpseries_id)]"),
 		'efficiency_in': fields.float('Efficiency in % Wat'),
@@ -430,7 +433,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'shaft_sealing': fields.selection([('gld_packing_tiga','Gland Packing-TIGA'),('gld_packing_ptfe','Gland Packing-PTFE'),('mc_seal','M/C Seal'),('dynamic_seal','Dynamic seal')],'Shaft Sealing'),
 		'scope_of_supply': fields.selection([('bare_pump','Bare Pump'),('pump_with_acces','Pump With Accessories'),('pump_with_acces_motor','Pump With Accessories And Motor')],'Scope of Supply'),
 		'drive': fields.selection([('motor','MOTOR'),('vfd','VFD'),('engine','ENGINE')],'Drive'),
-		'flange_type': fields.selection([('standard','Standard'),('optional','Optional')],'Flange Type',required=True),
+		'flange_type': fields.selection([('standard','Standard'),('optional','Optional')],'Flange Type'),
 		'pre_suppliy_ref': fields.char('Previous Supply Reference'),
 		'market_division': fields.selection([('cp','CP'),('ip','IP')],'Market Division'),
 		'lubrication_type': fields.selection([('grease','Grease'),('oil','Oil')],'Lubrication'),
@@ -448,6 +451,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		#'crm_type': fields.char('Type', readonly=True),
 		'crm_type': fields.selection([('pull_out','End Suction Back Pull Out'),('split_case','Split Case'),('multistage','Multistage'),('twin_casing','Twin Casing'),('single_casing','Single Casing'),('self_priming','Self Priming'),('vo_vs4','VO-VS4'),('vg_vs5','VG-VS5')],'Type'),
 		'pumpseries_id': fields.many2one('kg.pumpseries.master','Pumpseries',required=True),
+		'spare_pumpseries_id': fields.many2one('kg.pumpseries.master','Pumpseries',required=True),
 		'primemover_id': fields.many2one('kg.primemover.master','Primemover'),
 		'operation_range': fields.char('Operation Range'),
 		'primemover_categ': fields.selection([('engine','ENGINE'),('motor','MOTOR'),('vfd','VFD')],'Primemover Category'),
@@ -476,18 +480,23 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'acces': fields.selection([('yes','Yes'),('no','No')],'Accessories',required=True),
 		'acces_type': fields.selection([('coupling','Coupling'),('coupling_guard','Coupling Guard'),('base_plate','Base Plate')],'Type'),
 		
+		'wo_id': fields.many2one('kg.work.order','WO',),
+		
+		'load_bom': fields.boolean('Load BOM'),
+		
 	}
 	
 	_defaults = {
 		
 		'temperature': 'normal',
 		'flange_type': 'standard',
+		'load_bom':False,
 		
 	}
 	
-	
-	def default_get(self, cr, uid, fields, context=None):
-		return context
+	#~ 
+	#~ def default_get(self, cr, uid, fields, context=None):
+		#~ return context
 	"""
 	def create(self, cr, uid, vals, context=None):
 		header_rec = self.pool.get('kg.crm.enquiry').browse(cr, uid,vals['header_id'])
@@ -497,19 +506,70 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			res = False
 		return res
 	"""	
-	"""
+
 	def default_get(self, cr, uid, fields, context=None):
 		print"contextcontextcontext",context
-		if context['purpose_categ']:
-			if context['purpose_categ'] == 'pump_spare':
-				context['purpose_categ'] = ''
+		
+		if len(context)>4:
+			if not context['purpose_categ']:
+				raise osv.except_osv(_('Warning!'),
+						_('Kindly select Purpose !!'))
+			if context['purpose_categ']:
+				if context['purpose_categ'] == 'pump':
+					context['purpose_categ'] = 'pump'
+				if context['purpose_categ'] == 'spare':
+					context['purpose_categ'] = 'spare'
+				if context['purpose_categ'] == 'pump_spare':
+					context['purpose_categ'] = ''
+				else:
+					pass
 			else:
 				pass
-		else:
-			pass
 		return context
-		"""
+		
+	def _check_qty(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.purpose_categ == 'pump':
+			if rec.qty <= 0.00:
+				return False
+		return True
+		
+	def _check_is_applicable(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		applicable = ''
+		applicable_a = ''
+		applicable_b = ''
+		if rec.purpose_categ == 'spare':
+			print"ssssssssssssssssss",rec.line_ids
+			if rec.line_ids:
+				fou_data = [x for x in rec.line_ids if x.is_applicable == True]
+				if fou_data:
+					applicable='yes'
+				else:
+					applicable='no'
+			if rec.line_ids_a:
+				ms_data = [x for x in rec.line_ids_a if x.is_applicable == True]
+				if ms_data:
+					applicable_a='yes'
+				else:
+					applicable_a='no'
+			if rec.line_ids_b:
+				bot_data = [x for x in rec.line_ids_b if x.is_applicable == True]
+				if bot_data:
+					applicable_b='yes'
+				else:
+					applicable_b='no'
+		if applicable == 'no' and applicable_a == 'no' and applicable_b == 'no':
+			return False
+		return True
 	
+	_constraints = [
+	
+		(_check_qty,'You cannot save with zero qty !',['Qty']),
+		(_check_is_applicable,'You cannot save without Is applicable !',['Is Applicable']),
+		
+		]
+		
 	def onchange_capacity_in_liquid(self, cr, uid, ids, capacity_in_liquid, head_in_liquid, context=None):
 		value = {'capacity_in_liquid':'','head_in_liquid': ''}
 		if capacity_in_liquid or head_in_liquid:
@@ -531,6 +591,51 @@ class ch_kg_crm_pumpmodel(osv.osv):
 								})
 		return {'value': {'line_ids_moc_a': moc_const_vals}}
 	
+	def onchange_load_bom(self, cr, uid, ids, load_bom,spare_pump_id):
+		fou_vals=[]
+		ms_vals=[]
+		bot_vals=[]
+		if load_bom != False and spare_pump_id:
+			bom_obj = self.pool.get('kg.bom').search(cr, uid, [('pump_model_id','=',spare_pump_id),('state','in',('draft','confirmed','approved'))])
+			if bom_obj:
+				bom_rec = self.pool.get('kg.bom').browse(cr, uid, bom_obj[0])
+				for item in bom_rec.line_ids:
+					fou_vals.append({
+																	
+									'position_id': item.position_id.id,
+									'pattern_id': item.pattern_id.id,
+									'pattern_name': item.pattern_name,
+									'csd_no': item.csd_no,
+									'qty': item.qty,
+									'remarks': item.remarks,
+									'load_bom': True,
+									
+									})
+				for item in bom_rec.line_ids_a:
+					ms_vals.append({
+									
+									'ms_line_id': item.id,							
+									'position_id': item.position_id.id,							
+									'ms_id': item.ms_id.id,
+									'csd_no': item.csd_no,
+									'qty': item.qty,
+									'remarks': item.remarks,
+									'load_bom': True,
+									
+									})
+				for item in bom_rec.line_ids_b:
+					bot_vals.append({
+																	
+									'bot_line_id': item.id,
+									'position_id': item.position_id.id,
+									'ms_id': item.bot_id.id,
+									'qty': item.qty,
+									'remarks': item.remarks,
+									'load_bom': True,
+									
+									})
+		return {'value': {'line_ids': fou_vals,'line_ids_a': ms_vals,'line_ids_b': bot_vals}}
+		
 	def onchange_flange_type(self, cr, uid, ids, flange_standard, flange_type, context=None):
 		value = {'flange_standard': ''}
 		if flange_standard:
@@ -654,14 +759,15 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		return {'value': value}
 		
 	def onchange_pumpmodel(self, cr, uid, ids, pump_id, market_division,suction_pressure_kg,discharge_pressure_kg, context=None):
-		
+		print"pump_idpump_idpump_idpump_idpump_id",pump_id
 		value = {'impeller_type': '','impeller_number': '','impeller_dia_max': '','impeller_dia_min': '','maximum_allowable_soild': '',
 				'max_allowable_test': '','number_of_stages': '','crm_type': '','bearing_number_nde':'','bearing_qty_nde':'',
 				'pumpseries_id':'','crm_type':'','casing_design':'','sealing_water_capacity':'','size_suctionx':'','gd_sq_value':'',
-				'sealing_water_pressure':'','lubrication_type':''}
+				'sealing_water_pressure':'','lubrication_type':'','spare_pump_id':''}
 		total = 0.00
 		if pump_id:
 			pump_rec = self.pool.get('kg.pumpmodel.master').browse(cr, uid, pump_id, context=context)
+			print"pump_recpump_recpump_rec",pump_rec
 			if market_division == 'cp':
 				total = suction_pressure_kg + ((discharge_pressure_kg / 100.00) * 40) + pump_rec.sealing_water_pressure
 			if market_division == 'ip':
@@ -672,21 +778,33 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			'number_of_stages': pump_rec.number_of_stages,'crm_type': pump_rec.crm_type,'bearing_number_nde':pump_rec.bearing_no,'bearing_qty_nde':pump_rec.bearing_qty,
 			'pumpseries_id':pump_rec.series_id.id,'crm_type':pump_rec.crm_type,'casing_design':pump_rec.feet_location,
 			'sealing_water_capacity':pump_rec.sealing_water_capacity,'size_suctionx':pump_rec.pump_size,'gd_sq_value':pump_rec.gd_sq_value,
-			'sealing_water_pressure':total,'lubrication_type':pump_rec.lubrication_type}
-			
+			'sealing_water_pressure':total,'lubrication_type':pump_rec.lubrication_type,'spare_pump_id':pump_id}
+		print"valuevaluevalue",value
 		return {'value': value}
 		
 	def onchange_pumpseries(self, cr, uid, ids, pumpseries_id, flange_standard, flange_type, context=None):
 		
-		value = {'flange_standard': '','flange_type': ''}
+		value = {'flange_standard': '','flange_type': '','spare_pumpseries_id':''}
 		if pumpseries_id:
 			pumpseries_rec = self.pool.get('kg.pumpseries.master').browse(cr, uid, pumpseries_id, context=context)
 			for item in pumpseries_rec.line_ids:
 				if item.flange_type == 'standard':
-					value = {'flange_standard': item.id,'flange_type': item.flange_type}
+					value = {'flange_standard': item.id,'flange_type': item.flange_type,'spare_pumpseries_id':pumpseries_id}
 					return {'value': value}
 				
 		return True
+	
+	def onchange_spare_pump_id(self, cr, uid, ids, spare_pump_id, context=None):
+		value = {'pump_id': ''}
+		if spare_pump_id:
+			value = {'pump_id': spare_pump_id}
+		return {'value': value}
+
+	def onchange_spare_pumpseries_id(self, cr, uid, ids, spare_pumpseries_id, context=None):
+		value = {'primemover_categ': ''}
+		if spare_pumpseries_id:
+			value = {'pumpseries_id': spare_pumpseries_id}
+		return {'value': value}
 		
 	def onchange_scope_of_supply(self, cr, uid, ids, scope_of_supply, primemover_categ, context=None):
 		
@@ -798,14 +916,38 @@ class ch_kg_crm_foundry_item(osv.osv):
 		'pump_id':fields.many2one('kg.pumpmodel.master', 'Pump'),
 		'qty':fields.integer('Quantity'),
 		'oth_spec':fields.char('Other Specification'),
-		'pattern_code': fields.many2one('kg.pattern.master','Pattern No'),
+		'position_id': fields.many2one('kg.position.number','Position No'),
+		'csd_no': fields.char('CSD No.', size=128),
 		'pattern_name': fields.char('Pattern Name'),
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern No'),
+		'remarks': fields.char('Remarks'),
+		'is_applicable': fields.boolean('Is Applicable'),
+		'load_bom': fields.boolean('Load BOM'),
 		
 	}
+	
+	_defaults = {
 		
+		'is_applicable':False,
+		'load_bom':False,
+		
+	}
+	
 	def write(self, cr, uid, ids, vals, context=None):
 		return super(ch_kg_crm_foundry_item, self).write(cr, uid, ids, vals, context)
 	
+	def _check_qty(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.qty <= 0.00:
+			return False
+		return True
+	
+	_constraints = [
+	
+		(_check_qty,'You cannot save with zero qty !',['Qty']),
+		
+		]
+		
 	def onchange_pattern_name(self, cr, uid, ids, pattern_code,pattern_name):
 		value = {'pattern_name':''}
 		pattern_obj = self.pool.get('kg.pattern.master').search(cr,uid,([('id','=',pattern_code)]))
@@ -826,8 +968,10 @@ class ch_kg_crm_machineshop_item(osv.osv):
 		### machineshop Item Details ####
 		'header_id':fields.many2one('ch.kg.crm.pumpmodel', 'Pump Model Id', ondelete='cascade'),
 		'enquiry_id':fields.many2one('kg.crm.enquiry', 'Enquiry'),
-		'ms_line_id':fields.many2one('ch.machineshop.details', 'Machine Shop Id'),
+		'ms_line_id':fields.many2one('ch.machineshop.details', 'Item Name'),
 		'pos_no': fields.related('ms_line_id','pos_no', type='integer', string='Position No', store=True),
+		'position_id': fields.many2one('kg.position.number','Position No'),
+		'csd_no': fields.char('CSD No.'),
 		'bom_id': fields.many2one('kg.bom','BOM'),
 		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', domain=[('type','=','ms')], ondelete='cascade',required=True),
 		'name':fields.char('Item Name', size=128),	  
@@ -835,13 +979,33 @@ class ch_kg_crm_machineshop_item(osv.osv):
 		'flag_applicable': fields.boolean('Is Applicable'),
 		#'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'remarks':fields.text('Remarks'),   
+		'is_applicable': fields.boolean('Is Applicable'),
+		'load_bom': fields.boolean('Load BOM'),
+		
+	}
+	
+	
+	_defaults = {
+		
+		'is_applicable':False,
+		'load_bom':False,
 		
 	}
 		
 	def write(self, cr, uid, ids, vals, context=None):
 		return super(ch_kg_crm_machineshop_item, self).write(cr, uid, ids, vals, context)
 		
+	def _check_qty(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.qty <= 0.00:
+			return False
+		return True
 	
+	_constraints = [
+	
+		(_check_qty,'You cannot save with zero qty !',['Qty']),
+		
+		]
 ch_kg_crm_machineshop_item()
 
 class ch_kg_crm_bot(osv.osv):
@@ -854,22 +1018,42 @@ class ch_kg_crm_bot(osv.osv):
 		### machineshop Item Details ####
 		'header_id':fields.many2one('ch.kg.crm.pumpmodel', 'Pump Model Id', ondelete='cascade'),
 		'enquiry_id':fields.many2one('kg.crm.enquiry', 'Enquiry'),
-		'product_temp_id':fields.many2one('product.product', 'Item Name',domain = [('type','=','bot')], ondelete='cascade',required=True),
-		'bot_line_id':fields.many2one('ch.bot.details', 'BOT Line Id'),
+		'product_temp_id':fields.many2one('product.product', 'Product Name',domain = [('type','=','bot')], ondelete='cascade'),
+		'bot_line_id':fields.many2one('ch.bot.details', 'Item Name'),
+		'position_id': fields.many2one('kg.position.number','Position No'),
 		'bom_id': fields.many2one('kg.bom','BOM'),
-		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', domain=[('type','=','bot')], ondelete='cascade',required=True),
+		'ms_id':fields.many2one('kg.machine.shop', 'Item Name', domain=[('type','=','bot')], ondelete='cascade',required=True),
 		'code':fields.char('Item Code', size=128),	  
 		'qty': fields.integer('Qty', required=True),
 		'flag_applicable': fields.boolean('Is Applicable'),
 		#'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'remarks':fields.text('Remarks'),   
+		'is_applicable': fields.boolean('Is Applicable'),
+		'load_bom': fields.boolean('Load BOM'),
+		
+	}
+	
+	_defaults = {
+		
+		'is_applicable':False,
+		'load_bom':False,
 		
 	}
 		
 	def write(self, cr, uid, ids, vals, context=None):
 		return super(ch_kg_crm_bot, self).write(cr, uid, ids, vals, context)
 		
+	def _check_qty(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.qty <= 0.00:
+			return False
+		return True
 	
+	_constraints = [
+	
+		(_check_qty,'You cannot save with zero qty !',['Qty']),
+		
+		]
 ch_kg_crm_bot()
 
 class ch_moc_construction(osv.osv):
