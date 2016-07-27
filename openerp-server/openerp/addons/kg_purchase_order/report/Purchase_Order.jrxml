@@ -52,6 +52,13 @@ when
 line.price_type = 'per_kg' and line.quantity is null then 
 ' '
 else
+' ' end as wt,
+case when line.price_type = 'per_kg' and line.quantity is not null then '[Wt:'||trim(TO_CHAR((line.quantity)::float, '999G999G99G999G99G99G990D99'))||']'
+ ||']' 
+when 
+line.price_type = 'per_kg' and line.quantity is null then 
+' '
+else
 ' ' end as weight,
 del.name as delivery_mode,
 STRING_AGG(wo.wo_id, ', ' ORDER BY wo.wo_id) wo_no
@@ -66,7 +73,7 @@ left join ch_purchase_wo wo on(wo.header_id=line.id)
 left join purchase_order po on(po.id=line.order_id)
 left join kg_delivery_master del on(del.id=po.delivery_mode)
 where line.order_id = $P{po_id}
-group by 1,3,4,5,6,7,8,9,10,11,12,13,14,15,16]]>
+group by 1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]]>
 		</queryString>
 		<field name="line_id" class="java.lang.Integer"/>
 		<field name="seq_no" class="java.lang.Long"/>
