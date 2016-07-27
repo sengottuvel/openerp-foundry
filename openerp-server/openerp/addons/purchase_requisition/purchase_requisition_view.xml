@@ -190,8 +190,8 @@
 						<field name="product_uom_id" string="UOM"/>
 					</group>
 					<group>
-						<field name="brand_id"/>
-						<field name="moc_id_temp" on_change="onchange_moc(moc_id_temp)"/>
+						<field name="brand_id" required="1"/>
+						<field name="moc_id_temp" required="1" on_change="onchange_moc(moc_id_temp)"/>
 						<field name="stock_qty" readonly="1"/>
 						<field name="note"/>
 						<field name="entry_mode" invisible="1"/>

@@ -69,10 +69,18 @@ class kg_purchase_indent(osv.osv):
 			
 			}
 	
-	#_sql_constraints = [
+	#~ _sql_constraints = [
+	#~ 
+		#~ ('name_uniq', 'unique(name, company_id)', 'Indent Reference must be unique per Company!'),
+	#~ ]	
 	
-	#	('name_uniq', 'unique(name, company_id)', 'Indent Reference must be unique per Company!'),
-	#]	
+	def _past_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = time.strftime("%Y-%m-%d")
+		expected_date = str(rec.expected_date)
+		if expected_date < today:
+			return False
+		return True
 	
 	def onchange_entry_mode(self, cr, uid, ids, entry_mode, pi_flag, context=None):
 		print "callled onchange_entry_mode from KG"
@@ -423,7 +431,8 @@ class kg_purchase_indent(osv.osv):
 			
 	_constraints = [
 	
-		#(_check_line,'You can not save this Purchase Indent with out Line and Zero Qty !',['line_ids']),
+		#~ (_check_line,'You can not save this Purchase Indent with out Line and Zero Qty !',['line_ids']),
+		(_past_date_check, 'System not allow to save with past date. !!',['Expected Date']),
 	]   	   	
 		
 kg_purchase_indent()
