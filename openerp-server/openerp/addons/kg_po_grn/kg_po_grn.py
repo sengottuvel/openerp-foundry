@@ -2026,7 +2026,7 @@ class ch_po_grn_wo(osv.osv):
 
 	'header_id': fields.many2one('po.grn.line', 'PO Line'),
 	'wo_id': fields.char('WO No.'),
-	'w_order_id': fields.many2one('kg.work.order','WO',required=True, domain="[('state','=','confirmed')]"),
+	'w_order_id': fields.many2one('kg.work.order','WO',domain="[('state','=','confirmed')]"),
 	'w_order_line_id': fields.many2one('ch.work.order.details','WO',required=True),
 	'qty': fields.float('Qty'),
 	
