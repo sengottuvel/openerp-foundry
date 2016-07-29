@@ -223,24 +223,24 @@ class kg_po_grn(osv.osv):
 	
 	### Back Entry Date ###
 	
-	def po_seq_no(self, cr, uid, ids, context=None):
-		grn = self.browse(cr, uid, ids[0])
-		cr.execute("""
-				select grn.id,grn.grn_date 
-				from kg_po_grn grn
-				where state not in ('draft','item_load')
-				order by grn.confirmed_date
-				""")
-		po_data = cr.dictfetchall()
-		seq_no = 0
-		seq_name = ''
-		if po_data:
-			for item in po_data:	
-				seq_no += 1
-				seq_name = 'POGRN/16-17/' + str(seq_no)
-				self.write(cr, uid, item['id'], {'name' : seq_name})
-		print"seq_name",seq_name
-		return True  
+	#~ def po_seq_no(self, cr, uid, ids, context=None):
+		#~ grn = self.browse(cr, uid, ids[0])
+		#~ cr.execute("""
+				#~ select grn.id,grn.grn_date 
+				#~ from kg_po_grn grn
+				#~ where state not in ('draft','item_load')
+				#~ order by grn.confirmed_date
+				#~ """)
+		#~ po_data = cr.dictfetchall()
+		#~ seq_no = 0
+		#~ seq_name = ''
+		#~ if po_data:
+			#~ for item in po_data:	
+				#~ seq_no += 1
+				#~ seq_name = 'POGRN/16-17/' + str(seq_no)
+				#~ self.write(cr, uid, item['id'], {'name' : seq_name})
+		#~ print"seq_name",seq_name
+		#~ return True  
 		
 	def write(self, cr, uid, ids, vals, context=None):		
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
