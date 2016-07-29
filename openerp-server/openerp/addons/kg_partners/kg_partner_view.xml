@@ -14,9 +14,9 @@
 			<button name="confirm_partner" class="oe_highlight" type="object" string="Confirm" attrs = "{'invisible':[('partner_state','not in',('draft'))]}"/> 
 			<button name="reject_partner" class="oe_highlight" type="object" string="Reject" attrs = "{'invisible':[('partner_state','not in',('confirm'))]}"/> 
 			<button name="approve_partner" class="oe_highlight" type="object" string="Approve" attrs = "{'invisible':[('partner_state','not in',('confirm'))]}"/> 
-			<!--	<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes'),('partner_state','in',('approve','cancel'))]}" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
-			<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('partner_state','not in',('approve'))]}" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-			<button name="entry_draft" class="oe_highlight" type="object" string="Set To Draft" attrs = "{'invisible':[('partner_state','not in',('cancel'))]}"/> 
+			<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes'),('partner_state','in',('approve','cancel'))]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
+<!--		<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('partner_state','not in',('approve'))]}" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
+			<button name="entry_draft" class="oe_highlight" type="object" string="Set To Draft" attrs = "{'invisible':[('partner_state','not in',('approve'))]}"/> 
 		</header>
 		</xpath>
         
@@ -285,7 +285,6 @@
 			<field name="supply_type"/> 
 			<field name="partner_state"/>
 			<field name="dealer" invisible="1"/>
-			<field name="modify" invisible="1"/>
 			</field>					
 		</field>
 	</record>

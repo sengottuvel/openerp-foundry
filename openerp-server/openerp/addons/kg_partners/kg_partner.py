@@ -18,40 +18,30 @@ class kg_partner(osv.osv):
 	_inherit = "res.partner"
 	_description = "Partner Managment"
 	
-	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
+	def _get_modify(self, cr, uid, ids, field_name, arg,  context=None):
 		res={}
-		po_obj = self.pool.get('purchase.order')
-		po_amd_obj = self.pool.get('kg.purchase.amendment')
-		so_obj = self.pool.get('kg.service.order')
-		po_adv_obj = self.pool.get('kg.po.advance')
-		so_adv_obj = self.pool.get('kg.so.advance')
-		ser_inv_obj = self.pool.get('kg.service.invoice')
-		gen_grn_obj = self.pool.get('kg.general.grn')
-		po_grn_obj = self.pool.get('kg.po.grn')
-		com_grn_obj = self.pool.get('kg.common.grn')
-		gate_pass_obj = self.pool.get('kg.gate.pass')
-		pur_inv_obj = self.pool.get('kg.purchase.invoice')
-		con_inw_obj = self.pool.get('kg.contractor.inward')
-		po_man_obj = self.pool.get('kg.po.manual.closing')
-		so_man_obj = self.pool.get('kg.so.manual.closing')
-		for h in self.browse(cr, uid, ids, context=None):
-			res[h.id] = 'no'
-			po_ids = po_obj.search(cr,uid,[('partner_id','=',h.id)])
-			po_amd_ids = po_amd_obj.search(cr,uid,[('partner_id_amend','=',h.id)])
-			so_ids = so_obj.search(cr,uid,[('partner_id','=',h.id)])
-			po_adv_ids = po_adv_obj.search(cr,uid,[('supplier_id','=',h.id)])
-			so_adv_ids = so_adv_obj.search(cr,uid,[('supplier_id','=',h.id)])
-			ser_inv_ids = ser_inv_obj.search(cr,uid,[('partner_id','=',h.id)])
-			gen_grn_ids = gen_grn_obj.search(cr,uid,[('supplier_id','=',h.id)])
-			po_grn_ids = po_grn_obj.search(cr,uid,[('supplier_id','=',h.id)])
-			com_grn_ids = com_grn_obj.search(cr,uid,[('supplier_id','=',h.id)])
-			gate_pass_ids = gate_pass_obj.search(cr,uid,[('partner_id','=',h.id)])
-			pur_inv_ids = pur_inv_obj.search(cr,uid,[('supplier_id','=',h.id)])
-			con_inw_ids = con_inw_obj.search(cr,uid,[('supplier_id','=',h.id)])
-			po_man_ids = po_man_obj.search(cr,uid,[('partner_id','=',h.id)])
-			so_man_ids = so_man_obj.search(cr,uid,[('partner_id','=',h.id)])
-			if po_ids or po_amd_ids or so_ids or po_adv_ids or so_adv_ids or ser_inv_ids or gen_grn_ids or po_grn_ids or com_grn_ids or gate_pass_ids or pur_inv_ids or con_inw_ids or so_man_ids:
-				res[h.id] = 'yes'
+		if field_name == 'modify':
+			for h in self.browse(cr, uid, ids, context=None):	
+				res[h.id] = 'no'
+				cr.execute(""" select * from
+				(SELECT tc.table_schema, tc.constraint_name, tc.table_name, kcu.column_name, ccu.table_name
+				AS foreign_table_name, ccu.column_name AS foreign_column_name
+				FROM information_schema.table_constraints tc
+				JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
+				JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = tc.constraint_name
+				WHERE constraint_type = 'FOREIGN KEY'
+				AND ccu.table_name='%s')
+				as sam  """ %('res_partner'))
+				data = cr.dictfetchall()	
+				if data:
+					for var in data:
+						data = var
+						chk_sql = 'Select COALESCE(count(*),0) as cnt from '+str(data['table_name'])+' where '+data['column_name']+' = '+str(ids[0])
+						cr.execute(chk_sql)			
+						out_data = cr.dictfetchone()
+						if out_data:
+							if out_data['cnt'] > 0:
+								res[h.id] = 'yes'
 		return res
 		
 	_columns = {
@@ -136,7 +126,7 @@ class kg_partner(osv.osv):
 			value = {'zip':zip}
 		else:
 			raise osv.except_osv(_('Check zip number !!'),
-				_('Please enter 6-8 digit number !!'))
+				_('zip should contain 6-8 digit numerics. Else system not allow to save. !!'))
 		if zip.isdigit() == False:
 			raise osv.except_osv(_('Check zip number !!'),
 				_('Please enter numeric values !!'))
@@ -293,15 +283,15 @@ class kg_partner(osv.osv):
 			
 	_constraints = [
 	
-		(_check_zip,'Check Zip size !',['ZIP']),
-		(_check_tin,'Check TIN size !',['TIN']),
-		(_check_cst,'Check CST size !',['CST']),
-		(_check_vat,'Check VAT size !',['VAT']),
+		(_check_zip,'ZIP should contain 6-8 digit numerics. Else system not allow to save.',['ZIP']),
+		(_check_tin,'TIN No. should contain 11 digit numerics. Else system not allow to save.',['TIN']),
+		(_check_cst,'CST No. should contain 11 digit numerics. Else system not allow to save.',['CST']),
+		(_check_vat,'VAT No. should contain 15 letters. Else system not allow to save.',['VAT']),
 		(_check_website,'Check Website !',['Website']),
-		(_check_phone,'Check Phone size !',['Phone']),
-		(_check_ifsc,'Check IFSC size !',['IFSC']),
-		(_check_acc_no,'Check A/C No. size !',['A/C No.']),
-		(_check_mobile_no,'Check Mobile No. size !',['Mobile']),
+		(_check_phone,'Phone No. should contain 8-15 digit numerics. Else system not allow to save.',['Phone']),
+		(_check_ifsc,'IFSC should contain 11 letters. Else system not allow to save.',['IFSC']),
+		(_check_acc_no,'A/C No. should contain 6-18 digit numerics. Else system not allow to save.',['A/C No.']),
+		(_check_mobile_no,'Mobile No. should contain 10-12 digit numerics. Else system not allow to save.',['Mobile']),
 		
 		]
 			
