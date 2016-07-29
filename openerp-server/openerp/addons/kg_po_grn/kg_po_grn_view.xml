@@ -280,7 +280,7 @@
 				  <page string="WO Details" colspan="4" nolabel="1">
 						<field name="line_wo_id">
 							<tree string="WO Line" editable="bottom">
-						    <field name="w_order_line_id" on_change="onchange_wo(w_order_line_id)" readonly="1"/>
+						    <field name="w_order_line_id" required="1" on_change="onchange_wo(w_order_line_id)" readonly="1"/>
 						    <field name="qty" readonly="1"/>
 						    <field name="wo_id" invisible="1" readonly="1"/>
 							</tree>
