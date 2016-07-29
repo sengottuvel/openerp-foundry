@@ -14,9 +14,9 @@ trim(TO_CHAR((line.product_qty)::float, '999G999G99G999G99G99G990D99')) as produ
 uom.name as uom,
 trim(TO_CHAR((line.price_unit)::float, '999G999G99G999G99G99G990D99')) as price,
 case when line.product_tax_amt is not null then
-trim(TO_CHAR((line.price_subtotal-line.product_tax_amt)::float, '999G999G99G999G99G99G990D99')) 
+trim(TO_CHAR((line.price_subtotal-line.product_tax_amt)::float, '999G999G99G999G99G99G990D99'))
 else
-trim(TO_CHAR((line.price_subtotal)::float, '999G999G99G999G99G99G990D99')) 
+trim(TO_CHAR((line.price_subtotal)::float, '999G999G99G999G99G99G990D99'))
 end as amount,
 case when line.price_type = 'po_uom' then
 trim(TO_CHAR((line.price_unit*line.product_qty)::float, '999G999G99G999G99G99G990D99'))
@@ -45,17 +45,17 @@ else(
 ''||case when (SUBSTRING(line.breadth::text FROM (select position('.' in line.breadth::text)+1))::numeric) >0 then (line.breadth::text) else
 (SUBSTRING(line.breadth::text,1,(select position('.' in line.breadth::text::text)-1)))
  end) ||']' end as breadth,
-case when line.price_type = 'per_kg' and line.quantity is not null then '[Wt:'||case when (SUBSTRING(line.quantity::text FROM (select position('.' in line.quantity::text)+1))::numeric) >0 then (line.quantity::text) else 
+case when line.price_type = 'per_kg' and line.quantity is not null then '[Wt:'||case when (SUBSTRING(line.quantity::text FROM (select position('.' in line.quantity::text)+1))::numeric) >0 then (line.quantity::text) else
 (SUBSTRING(line.quantity::text,1,(select position('.' in line.quantity::text::text)-1)))||']'
- end||']' 
-when 
-line.price_type = 'per_kg' and line.quantity is null then 
+ end||']'
+when
+line.price_type = 'per_kg' and line.quantity is null then
 ' '
 else
 ' ' end as wt,
 case when line.price_type = 'per_kg' and line.quantity is not null then '[Wt:'||trim(TO_CHAR((line.quantity)::float, '999G999G99G999G99G99G990D99'))||']'
-when 
-line.price_type = 'per_kg' and line.quantity is null then 
+when
+line.price_type = 'per_kg' and line.quantity is null then
 ' '
 else
 ' ' end as weight,
@@ -212,7 +212,7 @@ where po.id = $P{po_id}]]>
 							</textField>
 							<textField isStretchWithOverflow="true">
 								<reportElement stretchType="RelativeToTallestObject" x="368" y="0" width="60" height="20" isPrintWhenDetailOverflows="true"/>
-								<box topPadding="2">
+								<box topPadding="2" rightPadding="2">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
 								</box>
@@ -230,7 +230,7 @@ where po.id = $P{po_id}]]>
 							</textField>
 							<textField isStretchWithOverflow="true">
 								<reportElement stretchType="RelativeToTallestObject" x="488" y="0" width="64" height="20" isPrintWhenDetailOverflows="true"/>
-								<box topPadding="2">
+								<box topPadding="2" rightPadding="2">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
 								</box>
@@ -239,7 +239,7 @@ where po.id = $P{po_id}]]>
 							</textField>
 							<textField isStretchWithOverflow="true">
 								<reportElement stretchType="RelativeToTallestObject" x="552" y="0" width="72" height="20" isPrintWhenDetailOverflows="true"/>
-								<box topPadding="2">
+								<box topPadding="2" rightPadding="2">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
 								</box>
