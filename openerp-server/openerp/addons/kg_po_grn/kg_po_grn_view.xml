@@ -6,7 +6,6 @@
           Form view
           =====================
         -->
-
         <record id="kg_po_grn_form" model="ir.ui.view">
             <field name="name">kg.po.grn.form</field>
             <field name="model">kg.po.grn</field>
@@ -14,26 +13,18 @@
             <field name="arch" type="xml">
             <form string="PO GRN" version="7.0">
 				<header>
-					<button name="po_grn_confirm" string="Confirm" type="object" states="draft" 
-						class="oe_highlight" confirm="Are you sure to proceed ?"/>
+					<button name="po_seq_no" string="Seq No" type="object" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+					<button name="po_grn_confirm" string="Confirm" type="object" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					<button name="grn_reject" string="Reject" type="object" states="confirmed" class="oe_highlight"/>
-					<button name="kg_po_grn_approve" string="Approve" type="object" states="confirmed" 
-						class="oe_highlight" confirm="Are you sure to proceed ?"/>
+					<button name="kg_po_grn_approve" string="Approve" type="object" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					<button name="grn_register_scheduler_mail" string="GRN Register" type="object" class="oe_highlight" invisible="1"/>
-					<!--	
-					<button name="grn_reject" string="Reject" type="object" states="confirmed" 
-						class="oe_highlight" confirm="Are you sure to proceed ?"/>		
+					<!--<button name="grn_reject" string="Reject" type="object" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>		
 					<button name="%(stock.action_stock_invoice_onshipping)d" string="Create Invoice"  
 					    attrs="{'invisible': [('invoice_flag','=',False)]}" type="action" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-					-->  
-					<!--<button name="print_grn" type="object" string="GRN Slip" states="done,inv" class="oe_highlight"/>-->
+					<button name="print_grn" type="object" string="GRN Slip" states="done,inv" class="oe_highlight"/>-->
+					<button name="grn_cancel" string="Cancel" type="object" states="draft" class="oe_highlight"/>
 					<field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done" statusbar_colors='{"draft":"red","confirmed":"red","done":"blue"}'/>
 				</header>
-			       <!--<button name="kg_grn_approve" string="Approve" type="object" states="confirmed" 
-						class="oe_highlight"/>
-					<button name="grn_cancel" string="Cancel" type="object" states="confirmed,done" 
-						class="oe_highlight"/>
-				-->
 				<group string="GRN Details">
 					<group>
 						<field name="name"/>
@@ -134,7 +125,7 @@
 					<page string="Rejection Remarks">
 						<field name="reject_remark" placeholder="Reason for rejection.........."/>
 					</page>
-					<page string="Remarks" attrs="{'invisible':[('state','not in',['done','cancel'])]}">
+					<page string="Remarks" attrs="{'invisible':[('state','not in',['draft','done','cancel'])]}">
 						<field name="remark"/>
 					</page>
 					<page string="Entry Info">
@@ -263,9 +254,6 @@
                   </group>
                  <notebook>
 					 <page string="S/N Details">
-<!--
-                  <group string="S/N Details">
--->
 					   <field name="po_exp_id" nolabel="1">
 						  <tree editable="bottom">
 							<field name="product_qty" required="1"/>
@@ -274,9 +262,6 @@
 						  </tree>
 					  </field>
 					  </page>
-<!--
-				  </group>
--->
 				  <page string="WO Details" colspan="4" nolabel="1">
 						<field name="line_wo_id">
 							<tree string="WO Line" editable="bottom">
@@ -287,7 +272,6 @@
 						</field>
 				  </page>
 				</notebook> 
-				
                 </form> 
             </field>
         </record>
@@ -356,7 +340,20 @@
 				<field name="view_id" ref="kg_po_grn_tree"/>
 				<field name="search_view_id" ref="t_search_v_po_grn"/>
 		</record>
-	
+		
+		<record forcecreate="1" id="seq_po_grn" model="ir.sequence.type">	
+			<field name="name">PO GRN</field>
+			<field name="code">kg.po.grn</field>
+		</record>
+
+		<record forcecreate="1" id="po_grn_id" model="ir.sequence">
+		  <field name="name">PO GRN</field>
+		  <field name="code">kg.po.grn</field>
+		  <field name="padding" eval="4"/>
+		  <field name="prefix">POGRN/%(year)s/</field>
+		  <field name="reset_sequence">fiscal_reset</field>
+		</record>
+		
                   
     </data>
 </openerp>

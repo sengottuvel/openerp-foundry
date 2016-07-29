@@ -222,59 +222,26 @@ class kg_po_grn(osv.osv):
 	}
 	
 	### Back Entry Date ###
+	
+	def po_seq_no(self, cr, uid, ids, context=None):
+		grn = self.browse(cr, uid, ids[0])
+		cr.execute("""
+				select grn.id,grn.grn_date 
+				from kg_po_grn grn
+				where state not in ('draft','item_load')
+				order by grn.confirmed_date
+				""")
+		po_data = cr.dictfetchall()
+		seq_no = 0
+		seq_name = ''
+		if po_data:
+			for item in po_data:	
+				seq_no += 1
+				seq_name = 'POGRN/16-17/' + str(seq_no)
+				self.write(cr, uid, ids[0], {'name' : seq_name})
+		print"seq_name",seq_name
+		return True  
 		
-	def email_ids(self,cr,uid,ids,context = None):
-		email_from = []
-		email_to = []
-		email_cc = []
-		val = {'email_from':'','email_to':'','email_cc':''}
-		ir_model = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		mail_form_ids = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		for ids in mail_form_ids:
-			mail_form_rec = self.pool.get('kg.mail.settings').browse(cr,uid,ids)
-			if mail_form_rec.doc_name.model == 'kg.po.grn':
-				email_from.append(mail_form_rec.name)
-				mail_line_id = self.pool.get('kg.mail.settings.line').search(cr,uid,[('line_entry','=',ids)])
-				for mail_id in mail_line_id:
-					mail_line_rec = self.pool.get('kg.mail.settings.line').browse(cr,uid,mail_id)
-					if mail_line_rec.to_address:
-						email_to.append(mail_line_rec.mail_id)
-					if mail_line_rec.cc_address:
-						email_cc.append(mail_line_rec.mail_id)
-			else:
-				pass		   
-		val['email_from'] = email_from
-		val['email_to'] = email_to
-		val['email_cc'] = email_cc
-		return val   
-	
-	def sechedular_email_ids(self,cr,uid,ids,context = None):
-		email_from = []
-		email_to = []
-		email_cc = []
-		val = {'email_from':'','email_to':'','email_cc':''}
-		ir_model = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		mail_form_ids = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		for ids in mail_form_ids:
-			mail_form_rec = self.pool.get('kg.mail.settings').browse(cr,uid,ids)
-			if mail_form_rec.sch_type == 'scheduler':
-				s = mail_form_rec.sch_name
-				s = s.lower()
-				if s == 'goods receipt register':
-					email_sub = mail_form_rec.subject
-					email_from.append(mail_form_rec.name)
-					mail_line_id = self.pool.get('kg.mail.settings.line').search(cr,uid,[('line_entry','=',ids)])
-					for mail_id in mail_line_id:
-						mail_line_rec = self.pool.get('kg.mail.settings.line').browse(cr,uid,mail_id)
-						if mail_line_rec.to_address:
-							email_to.append(mail_line_rec.mail_id)
-						if mail_line_rec.cc_address:
-							email_cc.append(mail_line_rec.mail_id)
-		val['email_from'] = email_from
-		val['email_to'] = email_to
-		val['email_cc'] = email_cc
-		return val
-	
 	def write(self, cr, uid, ids, vals, context=None):		
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_po_grn, self).write(cr, uid, ids, vals, context)
@@ -286,12 +253,9 @@ class kg_po_grn(osv.osv):
 		print "---------------------------->",today_new
 		bk_date = date.today() - timedelta(days=3)
 		back_date = bk_date.strftime('%Y-%m-%d')
-		
 		d1 = today_new
 		d2 = bk_date
-
 		delta = d1 - d2
-
 		for i in range(delta.days + 1):
 			bkk_date = d1 - timedelta(days=i)
 			backk_date = bkk_date.strftime('%Y-%m-%d')
@@ -378,12 +342,13 @@ class kg_po_grn(osv.osv):
 		if not grn.reject_remark:
 			raise osv.except_osv(_('Remarks is must !!'), _('Enter Remarks for GRN Rejection !!!'))
 		else:
-			self.write(cr, uid, ids[0], {'state' : 'reject','rej_user_id': uid,'reject_date': time.strftime("%Y-%m-%d %H:%M:%S")})
-		for line in grn.grn_line:
-			if grn.grn_type == 'from_po':
-				po_id.write(cr, uid, line.po_line_id.order_id.id, {'grn_flag' : False})
-			if grn.grn_type == 'from_so':
-				so_id.write(cr, uid, line.so_line_id.service_id.id, {'grn_flag' : False})   
+			self.write(cr, uid, ids[0], {'state' : 'draft','rej_user_id': uid,'reject_date': time.strftime("%Y-%m-%d %H:%M:%S")})
+			#~ self.write(cr, uid, ids[0], {'state' : 'reject','rej_user_id': uid,'reject_date': time.strftime("%Y-%m-%d %H:%M:%S")})
+		#~ for line in grn.grn_line:
+			#~ if grn.grn_type == 'from_po':
+				#~ po_id.write(cr, uid, line.po_line_id.order_id.id, {'grn_flag' : False})
+			#~ if grn.grn_type == 'from_so':
+				#~ so_id.write(cr, uid, line.so_line_id.service_id.id, {'grn_flag' : False})   
 			
 		return True  
 
@@ -397,7 +362,7 @@ class kg_po_grn(osv.osv):
 			raise osv.except_osv(_('Remarks is must !!'), _('Enter Remarks for GRN Cancellation !!!'))
 		else:
 			self.write(cr, uid, ids[0], {'state' : 'cancel','cancel_user_id': uid,'cancel_date': time.strftime("%Y-%m-%d %H:%M:%S")})
-		for line in grn.grn_line:
+		for line in grn.line_ids:
 			if grn.grn_type == 'from_po':
 				po_id.write(cr, uid, line.po_line_id.order_id.id, {'grn_flag' : False})
 			if grn.grn_type == 'from_so':
@@ -409,11 +374,18 @@ class kg_po_grn(osv.osv):
 
 	def unlink(self, cr, uid, ids, context=None):
 		unlink_ids = []		  
-		grn_rec = self.browse(cr, uid, ids[0])
-		if grn_rec.state != 'draft':
+		grn = self.browse(cr, uid, ids[0])
+		po_id = self.pool.get('purchase.order')
+		so_id = self.pool.get('kg.service.order')
+		if grn.state != 'draft':
 			raise osv.except_osv(_('Invalid action !'), _('System not allow to delete Confirmed and Done state GRN !!'))
 		else:
-			unlink_ids.append(grn_rec.id)
+			for line in grn.line_ids:
+				if grn.grn_type == 'from_po':
+					po_id.write(cr, uid, line.po_line_id.order_id.id, {'grn_flag' : False})
+				if grn.grn_type == 'from_so':
+					so_id.write(cr, uid, line.so_line_id.service_id.id, {'grn_flag' : False})   
+			unlink_ids.append(grn.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
 		
 	# GRN LINE Creation #
@@ -439,6 +411,7 @@ class kg_po_grn(osv.osv):
 			podate_list = []
 			poremark_list = []
 			for item in po_data:
+				po_obj.write(cr,uid,item['po_id'],{'grn_flag':True})
 				po_id = item['po_id']
 				po_record = po_obj.browse(cr, uid, po_id)
 				po_list.append(po_record.name)
@@ -511,6 +484,7 @@ class kg_po_grn(osv.osv):
 									wo_id = self.pool.get('ch.po.grn.wo').create(cr,uid,{'header_id':po_grn_line,'qty':wo_rec.qty,'w_order_id':wo_rec.w_order_id.id,'wo_id':wo_rec.wo_id})
 					else:
 						print "NO Qty or Cancel"
+			
 		if grn_entry_obj.grn_type == 'from_so':  
 				
 			### SO TO GRN ####
@@ -533,6 +507,7 @@ class kg_po_grn(osv.osv):
 			soremark_list = []
 			for item in so_data:
 				so_id = item['so_id']
+				so_obj.write(cr,uid,item['so_id'],{'grn_flag':True})
 				so_record = so_obj.browse(cr, uid, so_id)
 				so_list.append(so_record.name)
 				date_order = so_record.date
@@ -715,13 +690,12 @@ class kg_po_grn(osv.osv):
 				#~ raise osv.except_osv(
 					#~ _('Warning'),
 					#~ _('GRN Entry is not allowed for this date!'))
-		if grn_entry.name == '':
+		if not grn_entry.name:
 			seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.po.grn')])
 			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
 			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,grn_entry.grn_date))
 			seq_name = cr.fetchone();
 			self.write(cr,uid,ids,{'name':seq_name[0]})
-		
 		po_qty = 0	
 		total = 0	
 		for i in range(len(grn_entry.line_ids)):
