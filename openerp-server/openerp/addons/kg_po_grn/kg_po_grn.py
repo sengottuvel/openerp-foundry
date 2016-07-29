@@ -101,7 +101,7 @@ class kg_po_grn(osv.osv):
 
 	_columns = {
 		
-		'name': fields.char('GRN NO',readonly=True),
+		'name': fields.char('GRN NO',required=True,readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'grn_date':fields.date('GRN Date',required=True,readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'dc_no': fields.char('DC NO', required=True,readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'dc_date':fields.date('DC Date',required=True, readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
@@ -210,7 +210,7 @@ class kg_po_grn(osv.osv):
 		'created_by': lambda obj, cr, uid, context: uid,
 		'state':'item_load',
 		'type':'in',
-		'name':'',
+		#~ 'name':'',
 		'billing_status':'applicable',
 		'active':True,
 		'confirm_flag':False,
@@ -238,7 +238,7 @@ class kg_po_grn(osv.osv):
 			for item in po_data:	
 				seq_no += 1
 				seq_name = 'POGRN/16-17/' + str(seq_no)
-				self.write(cr, uid, ids[0], {'name' : seq_name})
+				self.write(cr, uid, item['id'], {'name' : seq_name})
 		print"seq_name",seq_name
 		return True  
 		
@@ -690,12 +690,13 @@ class kg_po_grn(osv.osv):
 				#~ raise osv.except_osv(
 					#~ _('Warning'),
 					#~ _('GRN Entry is not allowed for this date!'))
-		if not grn_entry.name:
-			seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.po.grn')])
-			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
-			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,grn_entry.grn_date))
-			seq_name = cr.fetchone();
-			self.write(cr,uid,ids,{'name':seq_name[0]})
+					
+		#~ if not grn_entry.name:
+			#~ seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.po.grn')])
+			#~ seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+			#~ cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,grn_entry.grn_date))
+			#~ seq_name = cr.fetchone();
+			#~ self.write(cr,uid,ids,{'name':seq_name[0]})
 		po_qty = 0	
 		total = 0	
 		for i in range(len(grn_entry.line_ids)):
@@ -743,8 +744,6 @@ class kg_po_grn(osv.osv):
 							product_qty= 0
 							#s=po_line_id.pending_qty+po_line_id.pending_qty/100*line.product_id.tolerance_plus
 							product_qty=po_line_id.product_qty+po_line_id.product_qty/100*line.product_id.tolerance_plus
-							print"line.po_grn_qty",line.po_grn_qty
-							print"product_qty",product_qty
 							
 							if line.po_grn_qty <= product_qty:
 								po_rec = self.pool.get('po.grn.line').search(cr,uid,[('po_line_id','=',line.po_line_id.id),('po_grn_id','!=',line.id)])
@@ -1799,7 +1798,6 @@ class po_grn_line(osv.osv):
 				if line.product_id.uom_conversation_factor == 'two_dimension':
 					if line.product_id.po_uom_in_kgs > 0:
 						qty = line.po_grn_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
-						print"aaaaaaaaAAA",qty
 				elif line.product_id.uom_conversation_factor == 'one_dimension':
 					if line.product_id.po_uom_in_kgs > 0:
 						qty = line.po_grn_qty * line.product_id.po_uom_in_kgs
@@ -1816,7 +1814,6 @@ class po_grn_line(osv.osv):
 					#~ qty = line.product_qty
 				#~ else:
 				qty = line.po_grn_qty
-			print"qtyqtyqty",qty
 			# Price Calculation
 			price_amt = 0
 			if line.price_type == 'per_kg':
@@ -1824,7 +1821,6 @@ class po_grn_line(osv.osv):
 					price_amt = line.po_grn_qty / line.product_id.po_uom_in_kgs * line.price_unit
 			else:
 				price_amt = qty * line.price_unit
-			print"price_amtprice_amt",price_amt
 			
 			amt_to_per = (line.kg_discount / (qty * line.price_unit or 1.0 )) * 100
 			kg_discount_per = line.kg_discount_per
@@ -1835,7 +1831,6 @@ class po_grn_line(osv.osv):
 			taxes = tax_obj.compute_all(cr, uid, line.grn_tax_ids, price, qty, line.product_id, line.po_grn_id.supplier_id)
 			cur = line.po_grn_id.supplier_id.property_product_pricelist_purchase.currency_id
 			res[line.id] = cur_obj.round(cr, uid, cur, taxes['total'])
-			print"resssssssssssss",res
 		return res
 			
 	_columns = {
