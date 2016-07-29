@@ -227,13 +227,13 @@ class kg_purchase_invoice(osv.osv):
 	###  Onchange for Supplier Address ###
 	
 	def onchange_supplier_id(self, cr, uid, ids, supplier_id):
-		partner = self.pool.get('res.partner')
-		supplier_address = partner.address_get(cr, uid, [supplier_id], ['default'])
-		supplier = partner.browse(cr, uid, supplier_id)
-		tot_add = (supplier.street or '')+ ' ' + (supplier.street2 or '') + '\n'+(supplier.city_id.name or '')+ ',' +(supplier.state_id.name or '') + '-' +(supplier.zip or '') + '\nPh:' + (supplier.phone or '')+ '\n' +(supplier.mobile or '')
-		return {'value': {
-			'sup_address' : tot_add or False
-			}}
+		value = {'sup_address':''}
+		#~ partner = self.pool.get('res.partner')
+		#~ supplier_address = partner.address_get(cr, uid, [supplier_id], ['default'])
+		if supplier_id:
+			supplier = self.pool.get('res.partner').browse(cr, uid, supplier_id)
+			value = {'sup_address': (supplier.street or '')+ ' ' + (supplier.street2 or '') + '\n'+(supplier.city_id.name or '')+ ',' +(supplier.state_id.name or '') + '-' +(supplier.zip or '') + '\nPh:' + (supplier.phone or '')+ '\n' +(supplier.mobile or '')}
+		return {'value': value}
 			
 	def onchange_po_id(self, cr, uid, ids, po_id, context=None):
 		value = {'po_date': '','service_order_id':''}

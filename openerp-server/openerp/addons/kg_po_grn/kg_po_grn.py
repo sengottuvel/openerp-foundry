@@ -508,7 +508,7 @@ class kg_po_grn(osv.osv):
 								wo_obj = self.pool.get('ch.purchase.wo').search(cr,uid,[('id','=',ele.id)])
 								if wo_obj:
 									wo_rec = self.pool.get('ch.purchase.wo').browse(cr,uid,wo_obj[0])
-									wo_id = self.pool.get('ch.po.grn.wo').create(cr,uid,{'header_id':po_grn_line,'qty':wo_rec.qty,'w_order_id':wo_rec.w_order_id.id or False,'wo_id':wo_rec.wo_id})
+									wo_id = self.pool.get('ch.po.grn.wo').create(cr,uid,{'header_id':po_grn_line,'qty':wo_rec.qty,'w_order_id':wo_rec.w_order_id.id,'wo_id':wo_rec.wo_id})
 					else:
 						print "NO Qty or Cancel"
 		if grn_entry_obj.grn_type == 'from_so':  
