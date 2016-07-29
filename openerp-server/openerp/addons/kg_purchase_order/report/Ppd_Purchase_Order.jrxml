@@ -53,7 +53,6 @@ line.price_type = 'per_kg' and line.quantity is null then
 else
 ' ' end as wt,
 case when line.price_type = 'per_kg' and line.quantity is not null then '[Wt:'||trim(TO_CHAR((line.quantity)::float, '999G999G99G999G99G99G990D99'))||']'
- ||']' 
 when 
 line.price_type = 'per_kg' and line.quantity is null then 
 ' '
