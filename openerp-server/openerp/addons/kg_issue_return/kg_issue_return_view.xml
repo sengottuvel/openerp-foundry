@@ -199,7 +199,21 @@
                 </search>
 			</field>
 		</record>
-	
+		
+		<record forcecreate="1" id="seq_issue_return" model="ir.sequence.type">	
+			<field name="name">Issue Return</field>
+			<field name="code">kg.issue.return</field>
+		</record>
+
+		<record forcecreate="1" id="issue_return_id" model="ir.sequence">
+		  <field name="name">Issue Return</field>
+		  <field name="code">kg.issue.return</field>
+		  <field name="padding" eval="3"/>
+		  <field name="prefix">IR/%(year)s/</field>
+		  <field name="reset_sequence">fiscal_reset</field>
+		</record>
+             
+             
         <!--
         =====================
         Menu Item

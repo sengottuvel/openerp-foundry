@@ -23,33 +23,35 @@ class kg_contractor_inward(osv.osv):
 	
 	_columns = {
 
-		'date': fields.datetime('Creation Date', readonly=True)	,
 		'user_id': fields.many2one('res.users','Created By', readonly=True),		
 		'name': fields.char('Inward No', size=128,select=True,readonly=True),
 		'inward_date': fields.date('Inward Date', readonly=True, states={'draft':[('readonly',False)]},select=True, required=True),	
-			
 		'dc_no': fields.char('DC No', size=128,readonly=True, states={'draft':[('readonly',False)]}, required=True),
 		'dc_date': fields.date('DC Date', readonly=True, states={'draft':[('readonly',False)]},select=True, required=True),						
-							
 		'supplier_id':fields.many2one('res.partner','Supplier',domain=[('supplier','=',True)],readonly=True,required=True, states={'draft':[('readonly',False)]}),
-		
-		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),		
 		'line_ids':fields.one2many('kg.contractor.inward.line', 'header_id', 'Line Entry',readonly=True, states={'draft':[('readonly',False)]}),
-		'remark': fields.text('Remarks'),		
+		'remark': fields.text('Remarks',readonly=True, states={'confirm':[('readonly',False)],'approved':[('readonly',False)]}),		
 		'state': fields.selection([('draft','Draft'),('confirm','Waiting for approval'),('approved','Approved'),
 				('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True,track_visibility='onchange',select=True),
+		'orderby_no': fields.integer('Order By',readonly=True),
+		'active': fields.boolean('Active'),
+		'total': fields.float('Total Amount', readonly=True),
+		
+		# Entry Info
+		
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
+		'user_id': fields.many2one('res.users','Created By', readonly=True),	
+		'date': fields.datetime('Creation Date', readonly=True)	,
 		'approve_date': fields.datetime('Approved Date', readonly=True),
-		'app_user_id': fields.many2one('res.users', 'Apprved By', readonly=True),
+		'app_user_id': fields.many2one('res.users', 'Approved By', readonly=True),
 		'confirm_date': fields.datetime('Confirm Date', readonly=True),
 		'conf_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
 		'reject_date': fields.datetime('Reject Date', readonly=True),
 		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
 		'cancel_date': fields.datetime('Cancel Date', readonly=True),
 		'can_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
-		'orderby_no': fields.integer('Order By',readonly=True),
-		'active': fields.boolean('Active',readonly=True),
-		'total': fields.float('Total Amount', readonly=True),
-		
+		'update_date': fields.datetime('Last Updated Date', readonly=True),
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
 		
 	}
 	
@@ -67,11 +69,19 @@ class kg_contractor_inward(osv.osv):
 	def create(self, cr, uid, vals, context=None):
 		v_name = None 
 		if vals.get('name','/')=='/':
-			vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'kg.contractor.inward') or '/'
-		
+			#~ vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'kg.contractor.inward') or '/'
+			seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.contractor.inward')])
+			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,rec.inward_date))
+			seq_name = cr.fetchone();	
+			vals['name'] = seq_name[0]
 		order =  super(kg_contractor_inward, self).create(cr, uid, vals, context=context) 
 		return order
-
+	
+	def write(self, cr, uid, ids, vals, context=None):		
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(kg_contractor_inward, self).write(cr, uid, ids, vals, context)
+		
 	def _future_date_check(self,cr,uid,ids,contaxt=None):
 		rec = self.browse(cr,uid,ids[0])
 		today = date.today()
@@ -114,15 +124,17 @@ class kg_contractor_inward(osv.osv):
 			
 		#	inward_obj.write(cr,uid,item.inward_type.id,{'modify': True})
 		#	brand_obj.write(cr,uid,item.brand_id.id,{'modify': True})
-			
-			
-			
+		
+		seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.contractor.inward')])
+		seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+		cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,rec.inward_date))
+		seq_name = cr.fetchone();	
 		self.write(cr, uid, ids, {
 					'state': 'confirm',
 					'conf_user_id': uid,
 					'confirm_date': dt_time,
-					'name' : self.pool.get('ir.sequence').get(cr, uid, 'kg.contractor.inward'),
 					'orderby_no':order_by,
+					'name' : seq_name[0]
 					})
 		
 		return True

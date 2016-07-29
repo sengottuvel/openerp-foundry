@@ -239,7 +239,19 @@
 			<field name="view_id" ref="kg_department_issue_tree"/>
 			<field name="search_view_id" ref="t_search_v_department_issue"/>
 		</record>
-	
+		
+		<record forcecreate="1" id="seq_store_issue" model="ir.sequence.type">	
+			<field name="name">Store Issue</field>
+			<field name="code">kg.department.issue</field>
+		</record>
+
+		<record forcecreate="1" id="store_issue_id" model="ir.sequence">
+		  <field name="name">Store Issue</field>
+		  <field name="code">kg.department.issue</field>
+		  <field name="padding" eval="3"/>
+		  <field name="prefix">SIS/%(year)s/</field>
+		  <field name="reset_sequence">fiscal_reset</field>
+		</record>
              
     </data>
 </openerp>

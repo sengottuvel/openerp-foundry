@@ -144,6 +144,19 @@
 			<field name="view_id" ref="kg_po_close_tree_view"/>
 			<field name="search_view_id" ref="kg_po_close_search_view"/>
 		</record>	
-	
+		
+		<record forcecreate="1" id="seq_po_man" model="ir.sequence.type">	
+			<field name="name">PO Manual Cl</field>
+			<field name="code">kg.po.manual.closing</field>
+		</record>
+
+		<record forcecreate="1" id="po_man_id" model="ir.sequence">
+		  <field name="name">PO Manual Cl</field>
+		  <field name="code">kg.po.manual.closing</field>
+		  <field name="padding" eval="3"/>
+		  <field name="prefix">POM/%(year)s/</field>
+		  <field name="reset_sequence">fiscal_reset</field>
+		</record>
+		
 	</data>
 </openerp>

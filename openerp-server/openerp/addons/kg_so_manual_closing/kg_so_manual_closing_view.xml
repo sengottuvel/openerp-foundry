@@ -145,6 +145,18 @@
 			<field name="search_view_id" ref="kg_so_close_search_view"/>
 		</record>	
 		
+		<record forcecreate="1" id="seq_so_man" model="ir.sequence.type">	
+			<field name="name">SO Manual Cl</field>
+			<field name="code">kg.so.manual.closing</field>
+		</record>
 
+		<record forcecreate="1" id="so_man_id" model="ir.sequence">
+		  <field name="name">SO Manual Cl</field>
+		  <field name="code">kg.so.manual.closing</field>
+		  <field name="padding" eval="3"/>
+		  <field name="prefix">SOM/%(year)s/</field>
+		  <field name="reset_sequence">fiscal_reset</field>
+		</record>
+		
 	</data>
 </openerp>

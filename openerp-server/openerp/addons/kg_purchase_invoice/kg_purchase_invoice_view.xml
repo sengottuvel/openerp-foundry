@@ -286,6 +286,19 @@
 			<field name="search_view_id" ref="purchase_invoice_search_view"/>
 		</record>
 		
+		<record forcecreate="1" id="seq_pur_inv" model="ir.sequence.type">	
+			<field name="name">Purchase Inv</field>
+			<field name="code">kg.purchase.invoice</field>
+		</record>
+
+		<record forcecreate="1" id="pur_inv_id" model="ir.sequence">
+		  <field name="name">Purchase Inv</field>
+		  <field name="code">kg.purchase.invoice</field>
+		  <field name="padding" eval="4"/>
+		  <field name="prefix">PINV/%(year)s/</field>
+		  <field name="reset_sequence">fiscal_reset</field>
+		</record>
+		
 	
 </data>
 	</openerp>
