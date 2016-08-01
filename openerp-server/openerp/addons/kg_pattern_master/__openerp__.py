@@ -9,7 +9,7 @@
     'version': '0.1',
     'author': 'karthikeyan',
     'category': 'BASE',        
-    'depends' : ['base','kg_moc_master','kg_pumpmodel_master'],
+    'depends' : ['base','kg_moc_master','kg_pumpmodel_master','kg_moc_construction'],
     'data': ['kg_pattern_master_view.xml'],
     'css': ['static/src/css/state.css'], 
     'auto_install': False,
