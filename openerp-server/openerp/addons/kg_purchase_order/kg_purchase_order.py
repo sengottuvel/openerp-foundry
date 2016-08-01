@@ -246,57 +246,6 @@ class kg_purchase_order(osv.osv):
 	
 	}
 	
-	def email_ids(self,cr,uid,ids,context = None):
-		email_from = []
-		email_to = []
-		email_cc = []
-		val = {'email_from':'','email_to':'','email_cc':''}
-		ir_model = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		mail_form_ids = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		for ids in mail_form_ids:
-			mail_form_rec = self.pool.get('kg.mail.settings').browse(cr,uid,ids)
-			if mail_form_rec.doc_name.model == 'purchase.order':
-				email_from.append(mail_form_rec.name)
-				mail_line_id = self.pool.get('kg.mail.settings.line').search(cr,uid,[('line_entry','=',ids)])
-				for mail_id in mail_line_id:
-					mail_line_rec = self.pool.get('kg.mail.settings.line').browse(cr,uid,mail_id)
-					if mail_line_rec.to_address:
-						email_to.append(mail_line_rec.mail_id)
-					if mail_line_rec.cc_address:
-						email_cc.append(mail_line_rec.mail_id)
-			else:
-				pass		
-		val['email_from'] = email_from
-		val['email_to'] = email_to
-		val['email_cc'] = email_cc
-		return val
-	
-	def sechedular_email_ids(self,cr,uid,ids,context = None):
-		email_from = []
-		email_to = []
-		email_cc = []
-		val = {'email_from':'','email_to':'','email_cc':''}
-		ir_model = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		mail_form_ids = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		for ids in mail_form_ids:
-			mail_form_rec = self.pool.get('kg.mail.settings').browse(cr,uid,ids)
-			if mail_form_rec.sch_type == 'scheduler':
-				s = mail_form_rec.sch_name
-				s = s.lower()
-				if s == 'po register':
-					email_sub = mail_form_rec.subject
-					email_from.append(mail_form_rec.name)
-					mail_line_id = self.pool.get('kg.mail.settings.line').search(cr,uid,[('line_entry','=',ids)])
-					for mail_id in mail_line_id:
-						mail_line_rec = self.pool.get('kg.mail.settings.line').browse(cr,uid,mail_id)
-						if mail_line_rec.to_address:
-							email_to.append(mail_line_rec.mail_id)
-						if mail_line_rec.cc_address:
-							email_cc.append(mail_line_rec.mail_id)
-		val['email_from'] = email_from
-		val['email_to'] = email_to
-		val['email_cc'] = email_cc
-		return val
 	
 	def create(self, cr, uid, vals,context=None):
 		"""inv_seq = vals['kg_seq_id']
@@ -309,7 +258,6 @@ class kg_purchase_order(osv.osv):
 		
 		order =  super(kg_purchase_order, self).create(cr, uid, vals, context=context)
 		return order
-	
 	
 	def onchange_seq_id(self, cr, uid, ids, kg_seq_id,name):
 		print "kgggggggggggggggggg --  onchange_seq_id called"		
@@ -335,10 +283,9 @@ class kg_purchase_order(osv.osv):
 		com_rec = self.pool.get('res.company').browse(cr,uid,com_obj[0])
 		part_obj = self.pool.get('res.partner').search(cr,uid,([('id','=',com_rec.partner_id.id)]))
 		part_rec = self.pool.get('res.company').browse(cr,uid,part_obj[0])
-		
 		address = part_rec.street+''+ part_rec.street2+''+part_rec.city+','+part_rec.state_id.name+','+part_rec.country_id.name+','+part_rec.zip
-
 		value = {'delivery_address': address}
+		
 		return {'value': value}	
 		
 	### Back Entry Date #####	
@@ -383,14 +330,11 @@ class kg_purchase_order(osv.osv):
 					_('PO Entry is not allowed!'))
 		return True
 		
-		
-		
 	def onchange_frieght_flag(self, cr, uid, ids, term_freight):
 		value = {'frieght_flag':False}
 		if term_freight == 'Extra':
 			value = {'frieght_flag': True}
 		return {'value': value}
-	
 	
 	def onchange_partner_id(self, cr, uid, ids, partner_id,add_text):
 		logger.info('[KG OpenERP] Class: kg_purchase_order, Method: onchange_partner_id called...')
@@ -431,13 +375,6 @@ class kg_purchase_order(osv.osv):
 		if user_obj:
 			user_rec = self.pool.get('res.users').browse(cr,uid,user_obj[0])
 		for item in obj.order_line:
-			#~ price_sql = """ 
-						#~ select line.price_unit
-						#~ from purchase_order_line line
-						#~ left join purchase_order po on (po.id = line.order_id)
-						#~ where line.product_id = %s and line.order_id != %s 
-						#~ and po.state in ('approved')
-						#~ order by line.price_unit desc limit 1"""%(item.product_id.id,obj.id)
 			price_sql = """ 
 						select line.price_unit 
 						from purchase_order_line line 
@@ -594,27 +531,7 @@ class kg_purchase_order(osv.osv):
 								  'confirmed_date':today})
 		if approval == 'yes' and obj.approval_flag == True:
 			self.spl_po_apl_mail(cr,uid,ids,obj,context)
-			
-		#cr.execute("""select all_transaction_mails('Purchase Order Approval',%s)"""%(ids[0]))
-		"""Raj
-		data = cr.fetchall();
-		vals = self.email_ids(cr,uid,ids,context = context)
-		if (not vals['email_to']) and (not vals['email_cc']):
-			pass
-		else:
-			ir_mail_server = self.pool.get('ir.mail_server')
-			msg = ir_mail_server.build_email(
-					email_from = vals['email_from'][0],
-					email_to = vals['email_to'],
-					subject = "	Purchase Order - Waiting For Approval",
-					body = data[0][0],
-					email_cc = vals['email_cc'],
-					object_id = ids[0] and ('%s-%s' % (ids[0], 'purchase.order')),
-					subtype = 'html',
-					subtype_alternative = 'plain')
-			res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
-		"""
-		
+					
 		return True
 			
 	def wkf_approve_order(self, cr, uid, ids, context=None):
@@ -646,9 +563,9 @@ class kg_purchase_order(osv.osv):
 			prod_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',item.product_id.id),('state','in',('draft','confirmed','approved'))])
 			if prod_obj:
 				prod_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,prod_obj[0])
-				
 				for ele in prod_rec.line_ids:
 					if item.brand_id.id == ele.brand_id.id and item.moc_id.id == ele.moc_id.id:
+						latest_rate = 0
 						if ele.rate < item.price_unit:
 							if user_rec.special_approval == True:
 								pass
@@ -657,7 +574,9 @@ class kg_purchase_order(osv.osv):
 								raise osv.except_osv(
 									_('Warning'),
 									_('%s price is exceeding design price. It should be approved by special approver'%(item.product_id.name)))
-			
+							latest_rate = item.price_unit + ((item.price_unit/100) * 5)
+							self.pool.get('ch.brandmoc.rate.details').write(cr,uid,ele.id,{'rate':latest_rate})
+							
 			if item.price_type == 'per_kg':
 				if item.product_id.uom_conversation_factor == 'two_dimension':
 					if item.product_id.po_uom_in_kgs > 0:
@@ -673,13 +592,12 @@ class kg_purchase_order(osv.osv):
 				qty = item.product_qty
 			self.pool.get('purchase.order.line').write(cr,uid,item.id,{'quantity':qty})	
 		
-		"""Raj
-		if obj.confirmed_by.id == uid:
-			raise osv.except_osv(
-					_('Warning'),
-					_('Approve cannot be done by Confirmed user'))
-		else:
-		"""
+		#~ if obj.confirmed_by.id == uid:
+			#~ raise osv.except_osv(
+					#~ _('Warning'),
+					#~ _('Approve cannot be done by Confirmed user'))
+		#~ else:
+		
 		if obj.payment_mode.term_category == 'advance':
 			cr.execute("""select * from kg_po_advance where state='approved' and po_id= %s"""  %(str(ids[0])))
 			data = cr.dictfetchall()
@@ -783,30 +701,7 @@ class kg_purchase_order(osv.osv):
 						#~ self.pool.get('ch.brandmoc.rate.details').write(cr,uid,item.id,{'purchase_price' : po_lines[i].price_unit})
 					else:
 						pass
-						
-			
-		#self.send_email(cr,uid,ids)
-		#cr.execute("""select all_transaction_mails('Purchase Order Approval',%s)"""%(ids[0]))
-		"""Raj
-		data = cr.fetchall();
-		vals = self.email_ids(cr,uid,ids,context = context)
-		if (not vals['email_to']) and (not vals['email_cc']):
-			pass
-		else:
-			ir_mail_server = self.pool.get('ir.mail_server')
-			msg = ir_mail_server.build_email(
-					email_from = vals['email_from'][0],
-					email_to = vals['email_to'],
-					subject = "	Purchase Order - Approved",
-					body = data[0][0],
-					email_cc = vals['email_cc'],
-					object_id = ids[0] and ('%s-%s' % (ids[0], 'purchase.order')),
-					subtype = 'html',
-					subtype_alternative = 'plain')
-			res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
-		return True
-		cr.close()
-		"""
+		
 	
 	def spl_po_apl_mail(self,cr,uid,ids,obj,context=None):
 		cr.execute("""select trans_po_spl_approval('po spl approval',"""+str(obj.id)+""")""")
@@ -841,70 +736,6 @@ class kg_purchase_order(osv.osv):
 			else:
 				pass
 				
-		return True			
-						
-	def po_register_scheduler(self,cr,uid,ids=0,context = None):
-		cr.execute(""" SELECT current_database();""")
-		db = cr.dictfetchall()
-		if db[0]['current_database'] == 'Empereal-KGDS':
-			db[0]['current_database'] = 'Empereal-KGDS'
-		elif db[0]['current_database'] == 'FSL':
-			db[0]['current_database'] = 'FSL'
-		elif db[0]['current_database'] == 'IIM':
-			db[0]['current_database'] = 'IIM'
-		elif db[0]['current_database'] == 'IIM_HOSTEL':
-			db[0]['current_database'] = 'IIM Hostel'
-		elif db[0]['current_database'] == 'KGISL-SD':
-			db[0]['current_database'] = 'KGISL-SD'
-		elif db[0]['current_database'] == 'CHIL':
-			db[0]['current_database'] = 'CHIL'
-		elif db[0]['current_database'] == 'KGCAS':
-			db[0]['current_database'] = 'KGCAS'
-		elif db[0]['current_database'] == 'KGISL':
-			db[0]['current_database'] = 'KGISL'
-		elif db[0]['current_database'] == 'KITE':
-			db[0]['current_database'] = 'KITE'
-		elif db[0]['current_database'] == 'TRUST':
-			db[0]['current_database'] = 'TRUST'
-		elif db[0]['current_database'] == 'CANTEEN':
-			db[0]['current_database'] = 'CANTEEN'
-		else:
-			db[0]['current_database'] = 'Others'
-		
-		line_rec = self.pool.get('purchase.order').search(cr, uid, [('state','in',('confirmed','approved')),('date_approve','=',time.strftime('%Y-%m-%d'))])
-		
-		print "---------------------------->",line_rec
-		
-		if line_rec:
-			
-			cr.execute("""select all_daily_auto_scheduler_mails('PO Register')""")
-			data = cr.fetchall();
-			cr.execute("""select trim(TO_CHAR(round(sum(amount_total),2)::float, '999G999G99G999G99G99G990D99')) as sum
-							from purchase_order where 	
-							to_char(purchase_order.date_order,'dd-mm-yyyy') = '%s' and
-							purchase_order.state in ('approved')"""%(time.strftime('%d-%m-%Y')))
-			total_sum = cr.dictfetchall();
-			
-			db = db[0]['current_database'].encode('utf-8')
-			total_sum = str(total_sum[0]['sum'])
-			vals = self.sechedular_email_ids(cr,uid,ids,context = context)
-			if (not vals['email_to']) and (not vals['email_cc']):
-				pass
-			else:
-				ir_mail_server = self.pool.get('ir.mail_server')
-				msg = ir_mail_server.build_email(
-						email_from = vals['email_from'][0],
-						email_to = vals['email_to'],
-						subject = "ERP Purchase Order Register Details for "+db +' on '+time.strftime('%d-%m-%Y')+' Total Amount (Rs.):' + total_sum,
-						body = data[0][0],
-						email_cc = vals['email_cc'],
-						object_id = ids and ('%s-%s' % (ids, 'kg.purchase.order')),
-						subtype = 'html',
-						subtype_alternative = 'plain')
-				res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
-		else:
-			pass			
-					
 		return True
 		
 	def poindent_line_move(self, cr, uid,ids, poindent_lines , context=None):
@@ -1023,97 +854,10 @@ class kg_purchase_order(osv.osv):
 			
 		return True
 		
-	def kg_email_attachment(self,cr,uid,ids,context=None):
-		ir_model_data = self.pool.get('ir.model.data')
-		email_tmp_obj = self.pool.get('email.template')
-		att_obj = self.pool.get('ir.attachment')
-		#template = email_tmp_obj.get_email_template(cr, uid, template_id, ids, context)
-		template = email_tmp_obj.browse(cr, uid, 8)
-		report_xml_pool = self.pool.get('ir.actions.report.xml')
-		attachments = []
-		# Add report in attachments
-		if template.report_template:
-			report_name = email_tmp_obj.render_template(cr, uid, template.report_name, template.model, ids, context=context)
-			report_service = 'report.' + report_xml_pool.browse(cr, uid, template.report_template.id, context).report_name
-			# Ensure report is rendered using template's language
-			ctx = context.copy()
-			if template.lang:
-				ctx['lang'] = email_tmp_obj.render_template(cr, uid, template.lang, template.model, ids, context)
-			service = netsvc.LocalService(report_service)
-			
-			(result, format) = service.create(cr, uid, ids, {'model': template.model}, ctx)
-			result = base64.b64encode(result)
-			attachment_id = att_obj.create(cr, uid,
-                    {
-                        'name': 'PO.pdf',
-                        'datas': result,
-                        'datas_fname': 'PO_Confirmation.pdf',
-                        'res_model': self._name,
-                        'res_id': ids[0],
-                        'type': 'binary'
-                    }, context=context)
-			self.send_mail(cr,uid,ids,attachment_id,template,context)
-			
-	def send_mail(self, cr, uid, ids,attachment_id,template,context=None):
-		
-		ir_attachment_obj = self.pool.get('ir.attachment')
-		rec = self.pool.get('purchase.order').browse(cr, uid, ids[0])
-		sub = ""
-		email_from = []
-		email_to = []
-		email_cc = []
-		ir_model = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		#to_mails = []
-		#hr_mail_id = '' 
-		mail_form_ids = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		for ids in mail_form_ids:
-			mail_form_rec = self.pool.get('kg.mail.settings').browse(cr,uid,ids)
-			if mail_form_rec.doc_name.model == 'purchase.order':
-				email_from.append(mail_form_rec.name)
-				mail_line_id = self.pool.get('kg.mail.settings.line').search(cr,uid,[('line_entry','=',ids)])
-				for mail_id in mail_line_id:
-					mail_line_rec = self.pool.get('kg.mail.settings.line').browse(cr,uid,mail_id)
-					if mail_line_rec.to_address:
-						email_to.append(mail_line_rec.mail_id)
-					if mail_line_rec.cc_address:
-						email_cc.append(mail_line_rec.mail_id)
-		if isinstance(self.browse(cr, uid, ids, context=context),list):
-			var = self.browse(cr, uid, ids, context=context)
-		else:
-			var = [self.browse(cr, uid, ids, context=context)]
-		
-		for wizard in var:
-			active_model_pool_name = 'purchase.order'
-			active_model_pool = self.pool.get(active_model_pool_name)		
-			
-			# wizard works in batch mode: [res_id] or active_ids
-			if isinstance(ids,int):
-				res_ids = [ids]
-			else:
-				res_ids = ids
-			for res_id in res_ids:			
-				attach = ir_attachment_obj.browse(cr,uid,attachment_id)
-				attachments = []
-				attachments.append((attach.datas_fname, base64.b64decode(attach.datas)))
-				ir_mail_server = self.pool.get('ir.mail_server')
-				msg = ir_mail_server.build_email(
-		                email_from = " ".join(str(x) for x in email_from),
-		                email_to = email_to,
-		                subject = template.subject + "  " +sub,
-		                body = template.body_html,
-		                email_cc = email_cc,
-		                attachments = attachments,
-		                object_id = res_id and ('%s-%s' % (res_id, 'purchase.order')),
-		                subtype = 'html',
-		                subtype_alternative = 'plain')
-				res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)			
-		return True
-	
 	def write(self, cr, uid, ids, vals, context=None):		
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_purchase_order, self).write(cr, uid, ids, vals, context)
 		
-			
 	def _check_line(self, cr, uid, ids, context=None):
 		logger.info('[KG ERP] Class: kg_purchase_order, Method: _check_line called...')
 		for po in self.browse(cr,uid,ids):
@@ -1161,16 +905,13 @@ class kg_purchase_order_line(osv.osv):
 	def onchange_discount_value_calc(self, cr, uid, ids, kg_discount_per, product_qty, price_unit):
 		logger.info('[KG OpenERP] Class: kg_purchase_order_line, Method: onchange_discount_value_calc called...')
 		discount_value = (product_qty * price_unit) * kg_discount_per / 100.00
-		print "discount_value ------------------------->>>>", discount_value
 		return {'value': {'kg_discount_per_value': discount_value }}
 		
 	def onchange_disc_amt(self,cr,uid,ids,kg_discount,product_qty,price_unit,kg_disc_amt_per):
 		logger.info('[KG OpenERP] Class: kg_purchase_order_line, Method: onchange_disc_amt called...')
 		if kg_discount:
-			print "kg_discount..........", 
 			kg_discount = kg_discount + 0.00
 			amt_to_per = (kg_discount / (product_qty * price_unit or 1.0 )) * 100.00
-			print "amt_to_peramt_to_peramt_to_per*******************", amt_to_per
 			return {'value': {'kg_disc_amt_per': amt_to_per}}	
 		else:
 			return {'value': {'kg_disc_amt_per': 0.0}}	
@@ -1184,13 +925,11 @@ class kg_purchase_order_line(osv.osv):
 			context = {}
 		for line in self.browse(cr, uid, ids, context=context):
 			# Qty Calculation
-			print"line.product_id.uom_conversation_factor",line.product_id.uom_conversation_factor
 			qty = 0.00
 			if line.price_type == 'per_kg':
 				if line.product_id.uom_conversation_factor == 'two_dimension':
 					if line.product_id.po_uom_in_kgs > 0:
 						qty = line.product_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
-						print"aaaaaaaaAAA",qty
 				elif line.product_id.uom_conversation_factor == 'one_dimension':
 					if line.product_id.po_uom_in_kgs > 0:
 						qty = line.product_qty * line.product_id.po_uom_in_kgs
@@ -1306,7 +1045,6 @@ class kg_purchase_order_line(osv.osv):
 	'price_type': 'po_uom',
 	
 	}
-	
 	
 	def create(self, cr, uid, vals,context=None):
 		if vals['product_id']:
@@ -1540,7 +1278,6 @@ class kg_purchase_order_line(osv.osv):
 			print "item....................", item
 			po_rec = self.pool.get('purchase.order').browse(cr,uid,item['order_id'])
 			print "po_rec......................", po_rec
-			
 			vals = {
 			
 				'line_id':item['id'],
@@ -1554,14 +1291,11 @@ class kg_purchase_order_line(osv.osv):
 				'po_no': po_rec.id,
 			
 			}
-			
 			print "price..........",vals
-			
 			po_entry = self.write(cr,uid,rec.id,{'po_order':[(0,0,vals)]})
 	
 		return data
 			
-		
 kg_purchase_order_line()
 
 class kg_po_line(osv.osv):
@@ -1570,19 +1304,17 @@ class kg_po_line(osv.osv):
 	
 	_columns = {
 	
-	
-	'line_id': fields.many2one('purchase.order.line', 'PO No'),
-	'kg_discount': fields.float('Discount Amount'),
-	'kg_discount_per': fields.float('Discount (%)', digits_compute= dp.get_precision('Discount')),
-	'price_unit': fields.float('Unit Price', size=120),
-	'date_order':fields.date('PO Date'),
-	'supp_name':fields.many2one('res.partner','Supplier',size=120),
-	'tax':fields.many2one('kg.tax.structure', 'Tax Structure'),
-	'other_ch':fields.float('Other Charges',size=128),
-	'po_no': fields.many2one('purchase.order','PO No'),
+			'line_id': fields.many2one('purchase.order.line', 'PO No'),
+			'kg_discount': fields.float('Discount Amount'),
+			'kg_discount_per': fields.float('Discount (%)', digits_compute= dp.get_precision('Discount')),
+			'price_unit': fields.float('Unit Price', size=120),
+			'date_order':fields.date('PO Date'),
+			'supp_name':fields.many2one('res.partner','Supplier',size=120),
+			'tax':fields.many2one('kg.tax.structure', 'Tax Structure'),
+			'other_ch':fields.float('Other Charges',size=128),
+			'po_no': fields.many2one('purchase.order','PO No'),
 	
 	}
-	
 	
 kg_po_line()
 
@@ -1592,23 +1324,22 @@ class kg_purchase_order_expense_track(osv.osv):
 	_name = "kg.purchase.order.expense.track"
 	_description = "kg expense track"
 	
-	
 	_columns = {
 		
-		'expense_id': fields.many2one('purchase.order', 'Expense Track'),
-		'name': fields.char('Number', size=128, select=True,readonly=False),
-		'date': fields.date('Creation Date'),
-		'company_id': fields.many2one('res.company', 'Company Name'),
-		'description': fields.char('Description'),
-		'expense_amt': fields.float('Amount'),
-		'expense': fields.many2one('kg.expense.master','Expense'),
+			'expense_id': fields.many2one('purchase.order', 'Expense Track'),
+			'name': fields.char('Number', size=128, select=True,readonly=False),
+			'date': fields.date('Creation Date'),
+			'company_id': fields.many2one('res.company', 'Company Name'),
+			'description': fields.char('Description'),
+			'expense_amt': fields.float('Amount'),
+			'expense': fields.many2one('kg.expense.master','Expense'),
 		
 	}
 	
 	_defaults = {
 		
-		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.purchase.order.expense.track', context=c),
-		'date' : fields.date.context_today,
+			'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.purchase.order.expense.track', context=c),
+			'date' : fields.date.context_today,
 	
 		}
 	
@@ -1621,11 +1352,11 @@ class ch_purchase_wo(osv.osv):
 	
 	_columns = {
 
-	'header_id': fields.many2one('purchase.order.line', 'PO Line'),
-	'wo_id': fields.char('WO No.'),
-	'w_order_id': fields.many2one('kg.work.order','WO',required=True, domain="[('state','=','confirmed')]"),
-	'w_order_line_id': fields.many2one('ch.work.order.details','WO',required=True),
-	'qty': fields.float('Qty'),
+			'header_id': fields.many2one('purchase.order.line', 'PO Line'),
+			'wo_id': fields.char('WO No.'),
+			'w_order_id': fields.many2one('kg.work.order','WO',required=True, domain="[('state','=','confirmed')]"),
+			'w_order_line_id': fields.many2one('ch.work.order.details','WO',required=True),
+			'qty': fields.float('Qty'),
 	
 	}
 	
