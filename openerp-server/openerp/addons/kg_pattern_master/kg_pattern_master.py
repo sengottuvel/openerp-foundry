@@ -16,19 +16,59 @@ class kg_pattern_master(osv.osv):
 	_name = "kg.pattern.master"
 	_description = "SAM Pattern Master"
 	
-	
+	def fields_view_get(self, cr, uid, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
+		print"kg_pattern_master",view_type
+		if context is None:
+			context={}
+
+		context.update({
+			'dept': 1
+		})
+		return super(kg_pattern_master,self).fields_view_get(cr, uid, view_id=view_id, view_type=view_type, context=context, toolbar=toolbar, submenu=submenu)
+	"""
 	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
 		res={}
-		bom_line_obj = self.pool.get('ch.bom.line')
-		bom_line_amend_obj = self.pool.get('ch.bom.line.amendment')		
+		stock_obj = self.pool.get('ch.bom.line')					
 		for item in self.browse(cr, uid, ids, context=None):
 			res[item.id] = 'no'
-			bom_line_ids = bom_line_obj.search(cr,uid,[('pattern_id','=',item.id)])
-			bom_line_amend_ids = bom_line_amend_obj.search(cr,uid,[('pattern_id','=',item.id)])
-					
-			if bom_line_ids or bom_line_amend_ids:
-				res[item.id] = 'yes'		
+			stock_ids = stock_obj.search(cr,uid,[('pattern_id','=',item.id)])			
+			if stock_ids:
+				res[item.id] = 'yes'
+		print"res",res		
 		return res
+		
+	"""	
+	def _get_modify(self, cr, uid, ids, field_name, arg,  context=None):
+		print "field_name ===",field_name
+		
+		res={}
+		print "Get Modify Execute "
+		if field_name == 'modify':
+			for h in self.browse(cr, uid, ids, context=None):			
+				res[h.id] = 'no'
+				cr.execute(""" select * from 
+				(SELECT tc.table_schema, tc.constraint_name, tc.table_name, kcu.column_name, ccu.table_name
+				AS foreign_table_name, ccu.column_name AS foreign_column_name
+				FROM information_schema.table_constraints tc
+				JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
+				JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = tc.constraint_name
+				WHERE constraint_type = 'FOREIGN KEY'
+				AND ccu.table_name='%s')
+				as sam  """ %('kg_pattern_master'))
+				data = cr.dictfetchall()	
+				if data:
+					for var in data:
+						data = var
+						chk_sql = 'Select COALESCE(count(*),0) as cnt from '+str(data['table_name'])+' where '+data['column_name']+' = '+str(ids[0])
+						cr.execute(chk_sql)			
+						out_data = cr.dictfetchone()
+						if out_data:
+							if out_data['cnt'] > 0:
+								res[h.id] = 'yes'
+		print"res",res
+		return res	
+		
+	
 	
 	_columns = {
 			
@@ -54,7 +94,7 @@ class kg_pattern_master(osv.osv):
 		
 		'offer_info': fields.boolean('Offer Info'),
 		'dynamic_length': fields.boolean('Dynamic Length'),	
-		'corless_pattern': fields.boolean('Corless Pattern'),
+		'corless_pattern': fields.boolean('Coreless Pattern'),
 		'length_type': fields.selection([('single_column_pipe','Single Column Pipe'),('single_shaft','Single Shaft'),('delivery_pipe','Delivery Pipe'),('drive_column_pipe','Drive Column Pipe'),('pump_column_pipe','Pump Column Pipe'),('pump_shaft','Pump Shaft'),('drive_shaft','Drive Shaft')],'Length Type'),		
 		
 		'tolerance': fields.float('Tolerance(-%)'),
@@ -71,7 +111,8 @@ class kg_pattern_master(osv.osv):
 		'pattern_type': fields.selection([('new_pattern','New Pattern'),('copy_pattern','Copy Pattern')],'Type', required=True),	
 		'source_pattern': fields.many2one('kg.pattern.master', 'Source Pattern',domain="[('active','=','t')]"),
 		'copy_flag':fields.boolean('Copy Flag'),		
-		'tolerance_flag':fields.boolean('Tolerance Flag'),		
+		'tolerance_flag':fields.boolean('Tolerance Flag'),	
+		'list_moc_flag': fields.boolean('List MOC Flag'),	
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -92,6 +133,7 @@ class kg_pattern_master(osv.osv):
 	
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.pattern.master', context=c),
 		'active': True,
+		'list_moc_flag': False,
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':fields.datetime.now,	
@@ -186,9 +228,9 @@ class kg_pattern_master(osv.osv):
 		for item in moc_const_obj:			
 			moc_const_rec = self.pool.get('kg.moc.construction').browse(cr,uid,item)				
 			line = self.pool.get('ch.mocwise.rate').create(cr,uid,{
-			       'header_id':rec.id,
+				   'header_id':rec.id,
 				   'moc_id':rec.moc_id.id,
-				   'code':moc_const_rec.code,
+				   'code':moc_const_rec.id,
 				   'rate':rec.moc_id.rate,
 				   'pro_cost':rec.moc_id.pro_cost})		
 		cr.execute(""" delete from ch_latest_weight where header_id  = %s """ %(ids[0]))
@@ -201,11 +243,12 @@ class kg_pattern_master(osv.osv):
 			elif ele == 2:
 				weight = 'non_ferrous'
 			line = self.pool.get('ch.latest.weight').create(cr,uid,{
-			       'header_id':rec.id,
+				   'header_id':rec.id,
 				   'weight_type':weight,
 				   'casting_weight':0.00,
 				   'pouring_weight':0.00,
-				})				
+				})	
+		self.write(cr, uid, ids, {'list_moc_flag': True})			
 		return True
 		
 		
@@ -273,6 +316,9 @@ class kg_pattern_master(osv.osv):
 
 	def entry_confirm(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
+		if rec.list_moc_flag == False:
+			raise osv.except_osv(_('List MOC Construction!!'),
+						_('Enter the List MOC Construction Button !!'))		
 		if rec.line_ids_c:
 			for item in rec.line_ids_c:
 				if item.pouring_tolerance > 0.00:
@@ -292,7 +338,7 @@ class kg_pattern_master(osv.osv):
 			### Check Duplicates MOC Construction and Rate Details Items start ###
 			
 			cr.execute('''select 
-					      
+						  
 					rate_line.moc_id,
 					rate_line.code,
 					rate_line.rate,
@@ -566,7 +612,7 @@ class ch_mocwise_rate(osv.osv):
 			
 		'header_id':fields.many2one('kg.pattern.master', 'Pattern Entry', required=True, ondelete='cascade'),	
 		'moc_id': fields.many2one('kg.moc.master','MOC', required=True,domain="[('active','=','t')]" ),		
-		'code':fields.char('MOC Construction Code'),
+		'code':fields.many2one('kg.moc.construction','MOC Construction Code'),
 		'rate':fields.float('Design Rate(Rs)',required=True),
 		'amount':fields.float('Design Amount(Rs)'),
 		'pro_cost':fields.float('Production Cost(Rs)'),

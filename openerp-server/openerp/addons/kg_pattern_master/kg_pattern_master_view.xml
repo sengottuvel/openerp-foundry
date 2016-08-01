@@ -11,8 +11,8 @@
 				<form string="Pattern Master" version="7.0">					
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="entry_cancel" type="object" states="reject,approved" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?" />
+						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes'),('state','in',('approved','cancel'))]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>						
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 						<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>	
@@ -41,6 +41,7 @@
 								<field name="alias_name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>																
 								<field name="box_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>															
 								<field name="csd_code"/>		
+								<field name="modify" invisible="1"/>		
 								<field name="copy_flag" invisible="1"/>														
 								<field name="delivery_lead" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>													
 								<field name="mould_rate" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" invisible="1"/>
@@ -97,7 +98,7 @@
 						<notebook>
 							<page string="MOC Construction &amp; Rate Details">	
 								<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">
-									<tree string="MOC Rate Details Entry Tree" editable="top" create="false" >	
+									<tree string="MOC Rate Details Entry Tree" editable="top" >	
 										<field name="code"/>								
 										<field name="moc_id" on_change="onchange_rate(moc_id)"/>														   
 										<field name="rate" readonly="1"/>

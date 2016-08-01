@@ -144,6 +144,17 @@ class kg_brandmoc_rate(osv.osv):
 		#~ if pro_ids:	
 			#~ raise osv.except_osv(_('Same product !!'),
 				#~ _('Enter the same product not allow!!'))	
+					
+		obj_ids = self.search(cr,uid,[('product_id','=',rec.product_id.id),('id','!=',rec.id)])
+		if obj_ids:
+			obj_rec = self.browse(cr,uid,obj_ids[0])
+			self.write(cr,uid,obj_rec.id,{'state':'expire'})	
+			
+		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		return True
+
+	def entry_approve(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
 		if rec.product_id:
 			for item in rec.line_ids:
 				if item.brand_id.id:
@@ -160,16 +171,6 @@ class kg_brandmoc_rate(osv.osv):
 						cr.execute(sql)
 				else:
 					pass
-					
-		obj_ids = self.search(cr,uid,[('product_id','=',rec.product_id.id),('id','!=',rec.id)])
-		if obj_ids:
-			obj_rec = self.browse(cr,uid,obj_ids[0])
-			self.write(cr,uid,obj_rec.id,{'state':'expire'})	
-			
-		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		return True
-
-	def entry_approve(self,cr,uid,ids,context=None):
 		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
