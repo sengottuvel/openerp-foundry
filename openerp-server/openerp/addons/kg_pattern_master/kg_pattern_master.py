@@ -25,7 +25,7 @@ class kg_pattern_master(osv.osv):
 			'dept': 1
 		})
 		return super(kg_pattern_master,self).fields_view_get(cr, uid, view_id=view_id, view_type=view_type, context=context, toolbar=toolbar, submenu=submenu)
-	"""
+
 	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
 		res={}
 		stock_obj = self.pool.get('ch.bom.line')					
@@ -36,37 +36,6 @@ class kg_pattern_master(osv.osv):
 				res[item.id] = 'yes'
 		print"res",res		
 		return res
-		
-	"""	
-	def _get_modify(self, cr, uid, ids, field_name, arg,  context=None):
-		print "field_name ===",field_name
-		
-		res={}
-		print "Get Modify Execute "
-		if field_name == 'modify':
-			for h in self.browse(cr, uid, ids, context=None):			
-				res[h.id] = 'no'
-				cr.execute(""" select * from 
-				(SELECT tc.table_schema, tc.constraint_name, tc.table_name, kcu.column_name, ccu.table_name
-				AS foreign_table_name, ccu.column_name AS foreign_column_name
-				FROM information_schema.table_constraints tc
-				JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
-				JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = tc.constraint_name
-				WHERE constraint_type = 'FOREIGN KEY'
-				AND ccu.table_name='%s')
-				as sam  """ %('kg_pattern_master'))
-				data = cr.dictfetchall()	
-				if data:
-					for var in data:
-						data = var
-						chk_sql = 'Select COALESCE(count(*),0) as cnt from '+str(data['table_name'])+' where '+data['column_name']+' = '+str(ids[0])
-						cr.execute(chk_sql)			
-						out_data = cr.dictfetchone()
-						if out_data:
-							if out_data['cnt'] > 0:
-								res[h.id] = 'yes'
-		print"res",res
-		return res	
 		
 	
 	
@@ -595,9 +564,9 @@ class kg_pattern_master(osv.osv):
 		(_Validation, 'Special Character Not Allowed !!!', ['name']),
 		(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
 		(_name_validate, 'Pattern No must be unique !!', ['no']),		
-		(_check_pcs_weight,'You cannot save with zero value !',['SS Weight(kgs)']),
-		(_check_nonferous_weight,'You cannot save with zero value !',['Non-Ferrous Weight(kgs)']),
-		(_check_ci_weight,'You cannot save with zero value !',['CI Weight(kgs)']),
+		#(_check_pcs_weight,'You cannot save with zero value !',['SS Weight(kgs)']),
+		#(_check_nonferous_weight,'You cannot save with zero value !',['Non-Ferrous Weight(kgs)']),
+		#(_check_ci_weight,'You cannot save with zero value !',['CI Weight(kgs)']),
 	]
 	
 kg_pattern_master()

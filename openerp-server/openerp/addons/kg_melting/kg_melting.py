@@ -24,8 +24,10 @@ class kg_melting(osv.osv):
 			for line in entry.line_ids:				
 				melt_cost += line.total_amount			
 				grand_total += line.total_weight	
-			if grand_total != 0:								
-				various_formula = ((entry.total_weight_metal/grand_total)/grand_total)	* 100
+			if grand_total != 0:
+				
+				various_formula = (grand_total - entry.total_weight_metal)/((grand_total + entry.total_weight_metal)/2)*100								
+				#various_formula = ((entry.total_weight_metal/grand_total)/grand_total)	* 100
 			else:
 				pass
 			
@@ -76,7 +78,7 @@ class kg_melting(osv.osv):
 		'initial_reading_type': fields.selection([('unit','Units'),('ton','Ton')],'Initial Reading Type', required=True),	
 		
 		'total_units': fields.float('Total Units',readonly=True),		
-		'amount': fields.float('Amount',readonly=True),		
+		'amount': fields.float('Amount',readonly=True , help="total_value = total_reading * rate_rec.value"),		
 		
 		'pouring_temp': fields.float('Pouring Temp',required=True),
 		'pouring_hrs': fields.float('Pouring Hours',required=True),
@@ -90,7 +92,7 @@ class kg_melting(osv.osv):
 		'total_weight_metal': fields.float('Total Weight',digits=(16,3)),	
 		
 		
-		'various': fields.function(_get_various_amt, string='Variance%',digits=(16,3), method=True, store=True, type='float'),		
+		'various': fields.function(_get_various_amt, string='Melting loss(%)',digits=(16,3), method=True, store=True, type='float' , help="Total = (Grand total weight - Total Weight)/((Grand total weight + Total Weight)/2)*100"),		
 		'melt_cost': fields.function(_get_melting_cost, string='Melting Cost(Rs.)', method=True, store=True, type='float'),
 		
 		
@@ -151,7 +153,10 @@ class kg_melting(osv.osv):
 	def onchange_reading(self,cr, uid, ids, initial_reading,final_reading, context=None):
 		if initial_reading > 0 and final_reading > 0:
 			total_reading = (final_reading - initial_reading) * 1000
-			total_value = total_reading * 6.25
+			rate_obj = self.pool.get('kg.consumable.rate')
+			rate_ids = rate_obj.search(cr, uid, [('category','=','power'),('state','=','approved')])
+			rate_rec = rate_obj.browse(cr, uid, rate_ids[0])			
+			total_value = total_reading * rate_rec.value
 		else:
 			total_reading = 0.00
 			total_value = 0.00
@@ -254,7 +259,8 @@ class kg_melting(osv.osv):
 			grand_total += line.total_weight	
 		if entry.total_weight_metal > 0.00 and grand_total > 0.00:	
 			print"wwwwwww"
-			various_formula = ((entry.total_weight_metal/grand_total)/grand_total)	* 100
+			#various_formula = ((entry.total_weight_metal/grand_total)/grand_total)	* 100
+			various_formula = (grand_total - entry.total_weight_metal)/((grand_total + entry.total_weight_metal)/2)*100		
 		else:
 			various_formula = 0.00
 		melting_total_rate = melt_cost + entry.amount

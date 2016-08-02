@@ -66,12 +66,12 @@
 						<group string="Design Weight">
 							<group>
 								<field name="tolerance"/>									
-								<field name="nonferous_weight" required="1"/>			
+								<field name="nonferous_weight"/>			
 																
 							</group>											
 							<group>
-								<field name="ci_weight" required="1"/>		
-								<field name="pcs_weight" required="1"/>										
+								<field name="ci_weight" />		
+								<field name="pcs_weight"/>										
 								<field name="tolerance_flag" invisible="1"/>									
 							</group>					
 						</group>

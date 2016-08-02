@@ -12,7 +12,7 @@
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="entry_cancel" type="object" string="Cancel" states="reject,approved" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes'),('state','in',('approved','cancel'))]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 						<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>	
@@ -27,7 +27,8 @@
 								<field name="impeller_type"/>								
 								<field name="impeller_number"/>								
 								<field name="impeller_dia_max"/>								
-								<field name="crm_type"/>								
+								<field name="crm_type"/>
+								<field name="modify" invisible="1"/>												
 								<field name="pump_mode"/>
 								
 								<field name="pump_size"/>
@@ -59,7 +60,6 @@
 								<field name="packing_type" invisible="1"/>		
 								<field name="lubrication_type" />		
 								<field name="suction_orientation" />		
-								<field name="gd_sq_value" />
 								<field name="companion_flange" invisible="1"/>		
 								<field name="max_solid_size" invisible="1"/>		
 								
@@ -186,7 +186,6 @@
 		
 		<!-- Audit Log Xml Data Start-->
 		
-<!--
         <record id="pump_model" model="audittrail.rule">
             <field name="name">Audit Log Pumpmodel Master</field>
             <field name="object_id" eval="ref('kg_pumpmodel_master.model_kg_pumpmodel_master')"/>       
@@ -204,7 +203,6 @@
             <field name="object_id" eval="ref('kg_pumpmodel_master.model_ch_delivery_pipe')"/>       
             <field name="state">subscribed</field>              
         </record>
--->
         
         <!-- Audit Log Xml Data End-->
 		
