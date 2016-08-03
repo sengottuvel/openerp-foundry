@@ -402,6 +402,16 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
 		</record>
 		
+		<record id="crm_admin_ch_kg_crm_foundry_item" model="ir.model.access">
+			<field name="model_id" ref="kg_crm_enquiry.model_ch_kg_crm_foundry_item"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">ch kg crm foundry item</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
     </data>
 </openerp>
 	
