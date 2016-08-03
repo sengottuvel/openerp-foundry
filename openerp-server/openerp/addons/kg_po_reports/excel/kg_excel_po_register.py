@@ -20,7 +20,8 @@ logger = logging.getLogger('server')
 class kg_excel_po_register(osv.osv):
 
 	_name = 'kg.excel.po.register'
-
+	_order = 'creation_date desc'
+	
 	_columns = {
 		
 		'creation_date': fields.date('Creation Date', readonly=True),
@@ -144,7 +145,7 @@ class kg_excel_po_register(osv.osv):
 					  left JOIN kg_po_advance po_ad ON (po_ad.po_id = po.id)
 					  left JOIN kg_moc_master moc ON (moc.id=pol.moc_id)
 					  where po.state = """+po_state+""" and po.date_order >="""+date_from+""" and po.date_order <="""+date_to+' '+""" """+ supplier +""" """+ product+ """
-					  """
+					  order by po.date_order """
 		elif rec.status == 'pending':
 			sql = """		
 				SELECT
@@ -188,11 +189,11 @@ class kg_excel_po_register(osv.osv):
 				  left JOIN kg_po_advance po_ad ON (po_ad.po_id = po.id)
 				  left JOIN kg_moc_master moc ON (moc.id=pol.moc_id)
 				  where po.state='approved' and pol.pending_qty > 0 and po.date_order >="""+date_from+""" and po.date_order <="""+date_to+' '+""" """+ supplier +""" """+ product+ """
-					  """
+				  order by po.date_order  """
 		cr.execute(sql)		
 		data = cr.dictfetchall()
 		
-		data.sort(key=lambda data: data['po_date'])
+		data.sort(key=lambda data: data['date'])
 		
 		record={}
 		sno=1
@@ -202,7 +203,7 @@ class kg_excel_po_register(osv.osv):
 		
 		"""adding a worksheet along with name"""
 		
-		sheet1 = wbk.add_sheet('Customer Details')
+		sheet1 = wbk.add_sheet('PO Register')
 		s2=1
 		sheet1.col(0).width = 2000
 		sheet1.col(1).width = 6000
