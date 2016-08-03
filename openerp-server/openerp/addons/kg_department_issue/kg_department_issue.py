@@ -349,7 +349,7 @@ class kg_department_issue(osv.osv):
 		product_obj = self.pool.get('product.product')
 		dep_issue_line_obj = self.pool.get('kg.department.issue.line')
 		
-		if obj_rec.name == '':
+		if not obj_rec.name:
 			seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.department.issue')])
 			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
 			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,obj_rec.issue_date))
