@@ -35,7 +35,7 @@ class kg_schedule(osv.osv):
 	_columns = {
 	
 		### Header Details ####
-		'name': fields.char('Schedule No', size=128,select=True,readonly=True),
+		'name': fields.char('Schedule No', size=128,select=True,required=True),
 		'entry_date': fields.date('Schedule Date',required=True),
 		'division_id': fields.many2one('kg.division.master','Division',readonly=True,required=True,domain="[('state','=','approved'), ('active','=','t')]"),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location',required=True),
@@ -832,15 +832,16 @@ class kg_schedule(osv.osv):
 			
 		
 		### Sequence Number Generation  ###
-		sch_name = ''
-		if not entry.name:		
-			sch_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.schedule')])
-			rec = self.pool.get('ir.sequence').browse(cr,uid,sch_id[0])
-			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(sch_id[0],rec.code,entry.entry_date))
-			sch_name = cr.fetchone();
+		#~ sch_name = ''
+		#~ if not entry.name:		
+			#~ sch_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.schedule')])
+			#~ rec = self.pool.get('ir.sequence').browse(cr,uid,sch_id[0])
+			#~ cr.execute("""select generatesequenceno(%s,'%s','%s') """%(sch_id[0],rec.code,entry.entry_date))
+			#~ sch_name = cr.fetchone();
 		
 		self.write(cr, uid, ids, {'state': 'confirmed','flag_cancel':1,'confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-			'name' :sch_name[0]})
+			#~ 'name' :sch_name[0]
+			})
 		cr.execute(''' update ch_schedule_details set state = 'confirmed' where header_id = %s ''',[ids[0]])
 		
 		

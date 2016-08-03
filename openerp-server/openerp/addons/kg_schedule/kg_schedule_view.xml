@@ -17,7 +17,7 @@
 					<sheet>
 						<group>
 							<group>
-								<field name="name"/>
+								<field name="name" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="division_id"/>
 								<field name="order_priority" readonly="1" invisible="1"/>
 								<field name="remarks" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
