@@ -87,6 +87,10 @@ class kg_schedule(osv.osv):
 
 	}
 	
+	_sql_constraints = [
+        ('name_uniq', 'unique(name)', 'Schedule No. must be unique !!'),
+    ]
+	
 	def _future_entry_date_check(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		today = date.today()
