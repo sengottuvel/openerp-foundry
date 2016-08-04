@@ -899,7 +899,7 @@ where po.id = $P{po_id}]]>
 				<textElement>
 					<font size="12" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["All Correspondence to-Avianashi Road, Neelambur, Coimbatore - 641 062"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["All Correspondence to-Avinashi Road, Neelambur, Coimbatore - 641 062"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement x="3" y="76" width="196" height="20"/>
