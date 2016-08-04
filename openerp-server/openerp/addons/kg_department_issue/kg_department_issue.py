@@ -83,7 +83,7 @@ class kg_department_issue(osv.osv):
 	_defaults = {
 		
 		'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
-		'confirmed_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
+		#~ 'confirmed_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'approved_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'issue_date': fields.date.context_today,
 		'created_by': lambda obj, cr, uid, context: uid,

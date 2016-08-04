@@ -23,7 +23,7 @@ trim(TO_CHAR((line.price_unit*line.product_qty)::float, '999G999G99G999G99G99G99
 else
 trim(TO_CHAR((line.price_unit*line.product_qty*prod.po_uom_in_kgs)::float, '999G999G99G999G99G99G990D99'))
 end as amt,
-case when line.moc_id is null or moc.name = 'N/A'  then ''
+case when line.moc_id_temp is null or moc.name = 'N/A'  then ''
 else
 '['||moc.name||']' end as moc_name,
 case when line.brand_id is null or brand.name = 'N/A' then ''
@@ -66,7 +66,7 @@ from
 purchase_order_line line
 left join product_product prod on(prod.id=line.product_id)
 left join product_uom uom on(uom.id=line.product_uom)
-left join kg_moc_master moc on(moc.id=line.moc_id)
+left join ch_brandmoc_rate_details moc on(moc.id=line.moc_id_temp)
 left join kg_brand_master brand on(brand.id=line.brand_id)
 left join ch_purchase_wo wo on(wo.header_id=line.id)
 left join purchase_order po on(po.id=line.order_id)
