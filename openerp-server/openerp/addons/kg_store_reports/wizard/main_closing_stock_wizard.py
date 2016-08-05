@@ -17,7 +17,9 @@ class main_closing_stock_wizard(osv.osv_memory):
 		'location_dest_id': fields.many2one('stock.location', 'Stores', required=True, domain="[('location_type','=', 'main')]"),
 		'major_name':fields.many2one('product.category', 'Product Category'),
 		'product':fields.many2many('product.product','main_close_stock_product','stock_product_id','close_stock_id','Product'),
-		'product_type': fields.selection([('consu', 'Consumable Items'),('cap','Capital Goods'),('service','Service Items')], 'Product Type'),
+		'product_type': fields.selection([('raw','Foundry Raw Materials'),('ms','MS Item'),('bot','BOT'),('consu', 'Consumables'),
+											('capital','Capitals and Asset'),('service','Service Items'),('coupling','Coupling'),
+											('mechanical_seal','Mechanical Seal')], 'Product Type'),
 		'company_id': fields.many2one('res.company', 'Company Name'),
 		
 	}

@@ -64,7 +64,7 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 			product=''
 			
 		if form['product_type']:
-				pro_type.append("pt.type= '%s' "%form['product_type'])
+				pro_type.append("prod.type= '%s' "%form['product_type'])
 				
 		if pro_type:
 			pro_type = ' and '+' or '.join(pro_type)
@@ -85,12 +85,11 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 			   SELECT 
 					sm.product_id as in_pro_id,
 					sum(product_qty) as in_qty
-					
 			   FROM stock_move sm
 			   
+			   left JOIN product_product prod ON (prod.id=sm.product_id)
 			   left JOIN product_template pt ON (pt.id=sm.product_id)
 			   left JOIN product_category pc ON (pc.id=pt.categ_id)
-
 			   
 			   where sm.product_qty != 0 and sm.state=%s and sm.move_type =%s and sm.date::date <=%s '''+ where_sql + major + product + pro_type +'''
 			   group by sm.product_id''',('done',lo_type,form['date']))
@@ -143,8 +142,6 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 					spl_obj=self.pool.get('stock.production.lot')
 					spl_id=spl_obj.search(self.cr,self.uid,[('product_id','=',product_id),('lot_type','=','in')])
 					print "innnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",spl_id
-							
-					
 					value=0
 					qty=0
 					for j in spl_id:
@@ -159,14 +156,9 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 						else:
 							price = 0	
 						
-						
 						value += price
 					item['closing_value'] =value
-										
-		
-
 		print "----------------------------->>>>",data
-		
 		data_renew = []
 		val = 0.0
 		val1 = 0.0
@@ -182,15 +174,10 @@ class mains_closing_stock_report(report_sxw.rml_parse):
 				print "-----===========data_renew==========>",data_renew
 			else:
 				pass
-				
-		
-				
 		data = data_renew
 		print "=================data============>",data
 		return data
-			
-			   
-
+	
 	def _get_filter(self, data):
 		if data.get('form', False) and data['form'].get('filter', False):
 			if data['form']['filter'] == 'filter_date':

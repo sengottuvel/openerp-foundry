@@ -108,7 +108,8 @@ class kg_po_register(report_sxw.rml_parse):
 				  city.name as city,
 				  state.name as state,
 				  brand.name as brand_name,
-				  po.quot_ref_no as quot_ref_no
+				  po.quot_ref_no as quot_ref_no,
+				  moc.name as moc
 						  
 							  
 				  FROM  purchase_order po
@@ -122,6 +123,7 @@ class kg_po_register(report_sxw.rml_parse):
 				  JOIN product_uom uom ON (uom.id=pol.product_uom)
 				  left JOIN kg_brand_master brand ON (pol.brand_id = brand.id)
 				  left JOIN kg_project_master project ON (po.dep_project = project.id)
+				  left JOIN kg_moc_master moc ON (moc.id=pol.moc_id)
 
 				  where po.state=%s and po.date_order >=%s and po.date_order <=%s '''+ product + partner + project +'''
 				  order by po.date_order''',(po_state,form['date_from'],form['date_to']))
@@ -152,13 +154,13 @@ class kg_po_register(report_sxw.rml_parse):
 				  city.name as city,
 				  state.name as state,
 				  brand.name as brand_name,
-				  po.quot_ref_no as quot_ref_no
-						  
+				  po.quot_ref_no as quot_ref_no,
+				  moc.name as moc
 							  
 				  FROM  purchase_order po
 							  
 				  JOIN res_partner res ON (res.id=po.partner_id)
-				  left join res_city city on(city.id=res.city)
+				  left join res_city city on(city.id=res.city_id)
 				  left join res_country_state state on(state.id=res.state_id)
 				  JOIN purchase_order_line pol ON (pol.order_id=po.id)
 				  JOIN product_product prd ON (prd.id=pol.product_id)
@@ -167,6 +169,7 @@ class kg_po_register(report_sxw.rml_parse):
 				  left JOIN kg_brand_master brand ON (pol.brand_id = brand.id)
 				  left JOIN kg_po_advance_line po_ad ON (po_ad.po_id = po.id)
 				  left JOIN kg_project_master project ON (po.dep_project = project.id)
+				  left JOIN kg_moc_master moc ON (moc.id=pol.moc_id)
 				  where po.state='approved' and pol.pending_qty > 0 and po.date_order >=%s and po.date_order <=%s '''+ product + partner + project +'''
 				  order by po.date_order''',(form['date_from'],form['date_to']))
 			   
