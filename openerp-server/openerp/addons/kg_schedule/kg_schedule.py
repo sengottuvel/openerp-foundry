@@ -53,6 +53,7 @@ class kg_schedule(osv.osv):
 		'delivery_date': fields.date('Delivery Date',required=True),
 		'order_priority': fields.selection(ORDER_PRIORITY,'Priority'),
 		'order_category': fields.selection(ORDER_CATEGORY,'Category'),
+		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
 		
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
@@ -88,8 +89,8 @@ class kg_schedule(osv.osv):
 	}
 	
 	_sql_constraints = [
-        ('name_uniq', 'unique(name)', 'Schedule No. must be unique !!'),
-    ]
+		('name_uniq', 'unique(name)', 'Schedule No. must be unique !!'),
+	]
 	
 	def _future_entry_date_check(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -835,16 +836,17 @@ class kg_schedule(osv.osv):
 			raise osv.except_osv(_('Warning !'), _('System not allow to confirm an entry without Schedule details!!'))
 			
 		
-		### Sequence Number Generation  ###
-		#~ sch_name = ''
-		#~ if not entry.name:		
-			#~ sch_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.schedule')])
-			#~ rec = self.pool.get('ir.sequence').browse(cr,uid,sch_id[0])
-			#~ cr.execute("""select generatesequenceno(%s,'%s','%s') """%(sch_id[0],rec.code,entry.entry_date))
-			#~ sch_name = cr.fetchone();
+		if entry.entry_mode == 'auto':
+			#~ ### Sequence Number Generation  ###
+			sch_name = ''
+			if not entry.name:		
+				sch_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.schedule')])
+				rec = self.pool.get('ir.sequence').browse(cr,uid,sch_id[0])
+				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(sch_id[0],rec.code,entry.entry_date))
+				sch_name = cr.fetchone();
+			self.write(cr, uid, ids, {'name' :sch_name[0]})
 		
-		self.write(cr, uid, ids, {'state': 'confirmed','flag_cancel':1,'confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-			#~ 'name' :sch_name[0]
+		self.write(cr, uid, ids, {'state': 'confirmed','flag_cancel':1,'confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')
 			})
 		cr.execute(''' update ch_schedule_details set state = 'confirmed' where header_id = %s ''',[ids[0]])
 		

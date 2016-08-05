@@ -269,7 +269,8 @@ class kg_work_order(osv.osv):
 				'order_priority': 'normal',
 				'delivery_date': entry.delivery_date,
 				'order_line_ids': [(6, 0, order_line_ids)],
-				'state' : 'draft'					   
+				'state' : 'draft',
+				'entry_mode' : 'auto',				   
 			}
 			
 			schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
@@ -293,7 +294,8 @@ class kg_work_order(osv.osv):
 				'order_priority': 'emergency',
 				'delivery_date': entry.delivery_date,
 				'order_line_ids': [(6, 0, order_line_ids)],
-				'state' : 'draft'					   
+				'state' : 'draft',
+				'entry_mode' : 'auto',			   
 			}
 			
 			schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
@@ -317,7 +319,8 @@ class kg_work_order(osv.osv):
 				'order_priority': 'emergency',
 				'delivery_date': entry.delivery_date,
 				'order_line_ids': [(6, 0, order_line_ids)],
-				'state' : 'draft'					   
+				'state' : 'draft',
+				'entry_mode' : 'auto',					   
 			}
 			
 			schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
