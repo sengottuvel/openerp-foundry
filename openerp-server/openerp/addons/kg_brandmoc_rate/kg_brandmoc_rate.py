@@ -17,20 +17,37 @@ class kg_brandmoc_rate(osv.osv):
 	
 	
 	
-	"""
-	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
-		res={}
-		ms_line_obj = self.pool.get('ch.machineshop.details')
-		ms_line_amend_obj = self.pool.get('ch.machineshop.details.amendment')
-		moc_const_ms_obj = self.pool.get('ch.moc.machineshop.details')		
-		for item in self.browse(cr, uid, ids, context=None):
-			res[item.id] = 'no'
-			ms_line_ids = ms_line_obj.search(cr,uid,[('ms_id','=',item.id)])
-			ms_line_amend_ids = ms_line_amend_obj.search(cr,uid,[('ms_id','=',item.id)])
-			moc_const_ms_ids = moc_const_ms_obj.search(cr,uid,[('ms_id','=',item.id)])					
-			if ms_line_ids or ms_line_amend_ids or moc_const_ms_ids:
-				res[item.id] = 'yes'		
-		return res"""
+	def _get_modify(self, cr, uid, ids, field_name, arg,  context=None):
+		res={}		
+		if field_name == 'modify':
+			for h in self.browse(cr, uid, ids, context=None):
+				res[h.id] = 'no'
+				if h.state == 'approved':
+					cr.execute(""" select * from 
+					(SELECT tc.table_schema, tc.constraint_name, tc.table_name, kcu.column_name, ccu.table_name
+					AS foreign_table_name, ccu.column_name AS foreign_column_name
+					FROM information_schema.table_constraints tc
+					JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
+					JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = tc.constraint_name
+					WHERE constraint_type = 'FOREIGN KEY'
+					AND ccu.table_name='%s')
+					as sam  """ %('kg_brandmoc_rate'))
+					data = cr.dictfetchall()	
+					if data:
+						for var in data:
+							data = var
+							chk_sql = 'Select COALESCE(count(*),0) as cnt from '+str(data['table_name'])+' where '+data['column_name']+' = '+str(ids[0])							
+							cr.execute(chk_sql)			
+							out_data = cr.dictfetchone()
+							if out_data:								
+								if out_data['cnt'] > 0:
+									res[h.id] = 'no'
+									return res
+								else:
+									res[h.id] = 'yes'
+				else:
+					res[h.id] = 'no'	
+		return res	
 	
 	_columns = {
 			
@@ -46,7 +63,7 @@ class kg_brandmoc_rate(osv.osv):
 		'line_ids':fields.one2many('ch.brandmoc.rate.details', 'header_id', "Raw Materials"),
 		
 		
-		#'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),	
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),	
 		'latest_price': fields.related('product_id','latest_price', type='float', string='Latest Price(Rs)', store=True),
 		'category_type': fields.selection([('purchase_item','Purchase Item'),('design_item','Design Item')],'Category'),
 		
@@ -77,7 +94,7 @@ class kg_brandmoc_rate(osv.osv):
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':fields.datetime.now,	
 		'eff_date':fields.datetime.now,	
-		#'modify': 'no',
+		'modify': 'no',
 		'copy_flag' : False,
 		'brand_type':'new_brand',
 		
@@ -145,16 +162,32 @@ class kg_brandmoc_rate(osv.osv):
 			#~ raise osv.except_osv(_('Same product !!'),
 				#~ _('Enter the same product not allow!!'))	
 					
-		obj_ids = self.search(cr,uid,[('product_id','=',rec.product_id.id),('id','!=',rec.id)])
-		if obj_ids:
-			obj_rec = self.browse(cr,uid,obj_ids[0])
-			self.write(cr,uid,obj_rec.id,{'state':'expire'})	
+		
 			
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
+		
+		obj_ids = self.search(cr,uid,[('product_id','=',rec.product_id.id),('id','!=',rec.id),('state','=','approved')])
+		if obj_ids:
+			obj_rec = self.browse(cr,uid,obj_ids[0])
+			for item in obj_rec.line_ids:
+				#~ obj_rec = self.browse(cr,uid,obj_ids[0])
+				brand_rec = self.pool.get('kg.brand.master').browse(cr,uid,item.brand_id.id)				
+				sql_check = """ select brd_id,prod_id from prod_brnd where brd_id=%s and prod_id=%s""" %(brand_rec.id,obj_rec.product_id.id)
+				cr.execute(sql_check)
+				data = cr.dictfetchall()
+				
+				if data:
+					sql = """ delete from prod_brnd where brd_id =%s and prod_id=%s """ %(brand_rec.id,obj_rec.product_id.id)
+					cr.execute(sql)
+				else:				
+					#~ self.pool.get('kg.brand.master').write(cr,uid,brand_rec.id,{'product_ids':[(6, 0, [rec.product_id.id])]})				
+					pass
+			
+			self.write(cr,uid,obj_rec.id,{'state':'expire'})
 		if rec.product_id:
 			for item in rec.line_ids:
 				if item.brand_id.id:
@@ -195,6 +228,7 @@ class kg_brandmoc_rate(osv.osv):
 			raise osv.except_osv(_('Rejection remark is must !!'),
 				_('Enter the remarks in rejection remark field !!'))
 		return True
+	
 	
 		
 	def unlink(self,cr,uid,ids,context=None):
