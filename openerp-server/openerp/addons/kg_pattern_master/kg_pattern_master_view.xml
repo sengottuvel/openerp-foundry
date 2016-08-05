@@ -100,6 +100,7 @@
 								<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">
 									<tree string="MOC Rate Details Entry Tree" editable="top" >	
 										<field name="code"/>								
+										<field name="code_moved0"/>								
 										<field name="moc_id" on_change="onchange_rate(moc_id)"/>														   
 										<field name="rate" readonly="1"/>
 										<field name="pro_cost" readonly="1"/>
