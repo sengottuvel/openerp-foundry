@@ -82,7 +82,7 @@
 						</group>
 						
 						<group string="Pump/Spare Details">
-							<field name="ch_line_ids" colspan="4" nolabel="1" context="{'market_division':market_division,'purpose_categ':purpose}">
+							<field name="ch_line_ids" colspan="4" nolabel="1" context="{'market_division':market_division,'purpose_categ':purpose,'temperature': 'normal','flange_type': 'standard','load_bom':False,}">
 								<tree string="Pump History">
 									<field name="equipment_no" required="1"/>
 									<field name="description" required="1"/>
@@ -367,7 +367,7 @@
 				<group>
 					<field name="wo_id" domain="[('partner_id','=',parent.customer_id),('order_category','=','spare'),('state','=','confirmed')]"/>
 					<field name="spare_pump_id" on_change="onchange_spare_pump_id(spare_pump_id)" attrs="{'readonly':[('load_bom','=',True)],'required':[('purpose_categ','in',('spare'))]}"/>
-					<field name="spare_pumpseries_id" on_change="onchange_spare_pumpseries_id(spare_pumpseries_id)" required="1" attrs="{'readonly':[('load_bom','=',True)],'required':[('purpose_categ','in',('spare'))]}"/>
+					<field name="spare_pumpseries_id" on_change="onchange_spare_pumpseries_id(spare_pumpseries_id)" attrs="{'readonly':[('load_bom','=',True)],'required':[('purpose_categ','in',('spare'))]}"/>
 				</group>
 				<group>
 					<field name="s_no" attrs="{'readonly':[('load_bom','=',True)]}"/>

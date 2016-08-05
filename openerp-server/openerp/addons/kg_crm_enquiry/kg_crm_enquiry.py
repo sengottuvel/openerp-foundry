@@ -510,7 +510,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 	def default_get(self, cr, uid, fields, context=None):
 		print"contextcontextcontext",context
 		
-		if len(context)>4:
+		if len(context)>7:
 			if not context['purpose_categ']:
 				raise osv.except_osv(_('Warning!'),
 						_('Kindly select Purpose !!'))
@@ -636,9 +636,9 @@ class ch_kg_crm_pumpmodel(osv.osv):
 									})
 		return {'value': {'line_ids': fou_vals,'line_ids_a': ms_vals,'line_ids_b': bot_vals}}
 		
-	def onchange_flange_type(self, cr, uid, ids, flange_standard, flange_type, context=None):
+	def onchange_flange_type(self, cr, uid, ids, flange_type, flange_standard, context=None):
 		value = {'flange_standard': ''}
-		if flange_standard:
+		if flange_type:
 			value = {'flange_standard': ''}
 			
 		return {'value': value}
