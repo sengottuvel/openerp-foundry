@@ -838,9 +838,9 @@
 			<field name="model_id" ref="kg_moc_construction.model_ch_offer_materials"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">MOC Construction Offer line</field>
-			<field eval="1" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
 		</record>
 		
@@ -849,8 +849,45 @@
 			<field eval="1" name="perm_read"/>
 			<field name="name">Offer Materials</field>
 			<field eval="1" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- Pump Test Type Master Access end-->
+		
+		<record id="m_foundry_pump_type_master" model="ir.model.access">
+			<field name="model_id" ref="kg_pumptest_type.model_kg_pumptest_type"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Pump Test Type Master</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- Pump Test Group Master Access end-->
+		
+		<record id="m_foundry_pump_group_master" model="ir.model.access">
+			<field name="model_id" ref="kg_pumptest_group.model_kg_pumptest_group"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Pump Test Group Master</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
+		</record>
+		
+		<!-- Pump Test Group line Master Access end-->
+		
+		
+		<record id="m_foundry_pump_group_line_master" model="ir.model.access">
+			<field name="model_id" ref="kg_pumptest_group.model_ch_pump_type"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Pump Test Group Line Master</field>
+			<field eval="0" name="perm_unlink"/>
+			<field eval="0" name="perm_write"/>
+			<field eval="0" name="perm_create"/>
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Master_Access')]"/>
 		</record>
 		
