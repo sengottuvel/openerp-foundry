@@ -85,6 +85,7 @@ class kg_schedule(osv.osv):
 		'division_id':_get_default_division,
 		'order_priority': 'normal',
 		'delivery_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'entry_mode': 'manual'
 
 	}
 	
