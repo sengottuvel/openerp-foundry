@@ -542,11 +542,12 @@ class ch_work_order_details(osv.osv):
 						
 						if moc_construction_id != False:
 							
+							print "bom_details['pattern_id']",bom_details['pattern_id']
+							print "moc_construction_id",moc_construction_id
 							cr.execute(''' select pat_moc.moc_id
 								from ch_mocwise_rate pat_moc
 								LEFT JOIN kg_moc_construction const on const.code = pat_moc.code
-								where pat_moc.header_id = %s and const.id = %s
-								  ''',[bom_details['pattern_id'],moc_construction_id])
+								where pat_moc.header_id = %s and const.id = %s ''',[bom_details['pattern_id'],moc_construction_id])
 							const_moc_id = cr.fetchone()
 							if const_moc_id != None:
 								moc_id = const_moc_id[0]
