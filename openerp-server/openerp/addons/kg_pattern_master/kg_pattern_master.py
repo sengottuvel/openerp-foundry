@@ -602,8 +602,7 @@ class ch_mocwise_rate(osv.osv):
 			
 		'header_id':fields.many2one('kg.pattern.master', 'Pattern Entry', required=True, ondelete='cascade'),	
 		'moc_id': fields.many2one('kg.moc.master','MOC', required=True,domain="[('active','=','t')]" ),		
-		'code':fields.many2one('kg.moc.construction','MOC Construction Code'),
-		'code_moved0':fields.char('Old MOC Construction Code',readonly=True),
+		'code':fields.many2one('kg.moc.construction','MOC Construction Code'),		
 		'rate':fields.float('Design Rate(Rs)',required=True),
 		'amount':fields.float('Design Amount(Rs)'),
 		'pro_cost':fields.float('Production Cost(Rs)'),
