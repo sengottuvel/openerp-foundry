@@ -12,9 +12,10 @@
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="entry_cancel" type="object" states="reject,approved" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes')]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
+<!--					<button name="entry_cancel" type="object" states="reject,approved" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>	
-						<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>	
+						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>	
 					</header>
 					<sheet>
 						<group>
@@ -33,19 +34,23 @@
 							</group>
 						</group>
 						
-						
 						<group>
 							<group>						
 								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="pattern_id" on_change="onchange_pattern(pattern_id)" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="pattern_name" readonly="1"/>
+								<field name="ms_id" on_change="onchange_ms_id(ms_id)"/>
+								<field name="bot_id" on_change="onchange_bot_id(bot_id)"/>
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							</group>
 							<group>
-								<field name="active"/>
 								<field name="pumpmodel_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="pattern_name" readonly="1"/>
+								<field name="ms_code" readonly="1"/>
+								<field name="bot_code" readonly="1"/>
+								<field name="active"/>
 								<field name="state" style="width: 30%%" class="att_state_change"/>
 								<field name="copy_flag" invisible="1"/>
+								<field name="modify" invisible="1"/>
 							</group>
 						</group>
 						<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">

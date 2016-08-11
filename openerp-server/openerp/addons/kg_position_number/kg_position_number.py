@@ -13,17 +13,38 @@ class kg_position_number(osv.osv):
 	_name = "kg.position.number"
 	_description = "Position Number Master"
 	
-	"""
-	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
+	def _get_modify(self, cr, uid, ids, field_name, arg,  context=None):
 		res={}
-		enq_obj = self.pool.get('purchase.order')			
-		for item in self.browse(cr, uid, ids, context=None):
-			res[item.id] = 'no'
-			enq_ids = enq_obj.search(cr,uid,[('mode_of_dispatch','=',item.id)])			
-			if enq_ids:
-				res[item.id] = 'yes'		
+		if field_name == 'modify':
+			for h in self.browse(cr, uid, ids, context=None):
+				res[h.id] = 'no'
+				if h.state == 'approved':
+					cr.execute(""" select * from 
+					(SELECT tc.table_schema, tc.constraint_name, tc.table_name, kcu.column_name, ccu.table_name
+					AS foreign_table_name, ccu.column_name AS foreign_column_name
+					FROM information_schema.table_constraints tc
+					JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
+					JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = tc.constraint_name
+					WHERE constraint_type = 'FOREIGN KEY'
+					AND ccu.table_name='%s')
+					as sam  """ %('kg_position_number'))
+					data = cr.dictfetchall()	
+					if data:
+						for var in data:
+							data = var
+							chk_sql = 'Select COALESCE(count(*),0) as cnt from '+str(data['table_name'])+' where '+data['column_name']+' = '+str(ids[0])
+							cr.execute(chk_sql)			
+							out_data = cr.dictfetchone()
+							if out_data:
+								if out_data['cnt'] > 0:
+									res[h.id] = 'yes'
+									return res
+								else:
+									res[h.id] = 'no'
+				else:
+					res[h.id] = 'yes'								
 		return res
-	"""
+	
 	_columns = {
 			
 		'name': fields.char('Position No', required=True, select=True),
@@ -41,8 +62,11 @@ class kg_position_number(osv.osv):
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern No'),
 		'pumpmodel_id': fields.many2one('kg.pumpmodel.master','Pump Model'),
 		'pattern_name': fields.char('Pattern Name'),
-		
-		#'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),
+		'ms_id': fields.many2one('kg.machine.shop','MS Code',domain="[('type','=','ms')]"),
+		'ms_code': fields.char('MS Name'),
+		'bot_id': fields.many2one('kg.machine.shop','BOT Code',domain="[('type','=','bot')]"),
+		'bot_code': fields.char('BOT Name'),
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -67,7 +91,8 @@ class kg_position_number(osv.osv):
 		'crt_date': fields.datetime.now,	
 		'position_type': 'new',
 		'copy_flag' : False,
-		#'modify': 'no',
+		'modify': 'yes',
+		
 	}
 	
 	_sql_constraints = [
@@ -96,6 +121,20 @@ class kg_position_number(osv.osv):
 		if pattern_id:
 			pattern_rec = self.pool.get('kg.pattern.master').browse(cr,uid,pattern_id)
 			value = {'pattern_name':pattern_rec.pattern_name}
+		return {'value':value}
+		
+	def onchange_ms_id(self, cr, uid, ids,ms_id):
+		value = {'ms_id': ''}
+		if ms_id:
+			ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,ms_id)
+			value = {'ms_code':ms_rec.name}
+		return {'value':value}
+		
+	def onchange_bot_id(self, cr, uid, ids,bot_id):
+		value = {'bot_code': ''}
+		if bot_id:
+			bot_rec = self.pool.get('kg.machine.shop').browse(cr,uid,bot_id)
+			value = {'bot_code':bot_rec.name}
 		return {'value':value}
 		
 			
@@ -249,9 +288,9 @@ class kg_position_number(osv.osv):
 			if new_position_len  == source_position_len == source_old_position_len:
 				pos_dup = 'yes'
 			
-			if pos_dup == 'yes':
-				raise osv.except_osv(_('Warning!'),
-								_('Same Operation Details are already exist !!'))
+			#~ if pos_dup == 'yes':
+				#~ raise osv.except_osv(_('Warning!'),
+								#~ _('Same Operation Details are already exist !!'))
 		####################
 		if rec.position_type == 'copy':
 			
