@@ -141,6 +141,7 @@
                     <field name="name" string="Indent No"/>
 					<field name="ind_date"/>
                     <field name="dep_name"/>
+                    <field name="order_line_id"/>
 					<field name="state"/>
 					<field name="division" invisible="1"/>								
 					<field name="indent_type" invisible="1"/>
@@ -244,6 +245,7 @@
 			   <tree string="Department Indent" create="false">
 					<field name="indent_id"/>
 					<field name="line_date"/>
+					<field name="order_line_id"/>
 					<field name="product_id"/>
 					<field name="uom" invisible="1"/>
 					<field name="qty" string="Department Indent Qty" sum="qty"/>
