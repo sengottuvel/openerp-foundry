@@ -64,7 +64,8 @@ class kg_depindent(osv.osv):
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode',required=True,readonly=True),
 		'indent_type': fields.selection([('production','For Production'),('own_use','For Own Use')],'Indent Type',required=True,readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
-		
+		'order_id': fields.many2one('kg.work.order','Work Order'),
+		'order_line_id': fields.many2one('ch.work.order.details','WO No.',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		
 	}
 	
@@ -588,7 +589,8 @@ class kg_depindent_line(osv.osv):
 	'line_id': fields.one2many('ch.depindent.wo','header_id','Ch Line Id'),
 	'moc_id': fields.many2one('kg.moc.master','MOC'),
 	'moc_id_temp': fields.many2one('ch.brandmoc.rate.details','MOC',domain="[('brand_id','=',brand_id),('header_id.product_id','=',product_id),('header_id.state','in',('draft','confirmed','approved'))]"),
-	
+	'pattern_id': fields.many2one('kg.pattern.master', 'Pattern No.'),
+	'order_line_id': fields.related('indent_id','order_line_id', type='many2one', relation='ch.work.order.details', string='WO No.', store=True, readonly=True),
 	}
 	
 	_defaults = {
