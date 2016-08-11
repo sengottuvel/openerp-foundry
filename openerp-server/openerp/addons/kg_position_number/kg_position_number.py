@@ -368,9 +368,9 @@ class kg_position_number(osv.osv):
 						if new_position_len == source_position_len == source_old_position_len:
 							pos_dup = 'yes'
 						print"pos_duppos_dup",pos_dup
-						if pos_dup == 'yes':
-							raise osv.except_osv(_('Warning!'),
-											_('Same Operation Details are already exist !!'))
+						#~ if pos_dup == 'yes':
+							#~ raise osv.except_osv(_('Warning!'),
+											#~ _('Same Operation Details are already exist !!'))
 								
 			
 								
