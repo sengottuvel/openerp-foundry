@@ -13,22 +13,38 @@ class kg_moc_master(osv.osv):
 	
 	_name = "kg.moc.master"
 	_description = "SAM MOC Master"
-	"""
-	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
-		res={}
 	
-		moc_const_ms_obj = self.pool.get('ch.moc.machineshop.details')
-		moc_const_bot_obj = self.pool.get('ch.moc.bot.details')			
-		for item in self.browse(cr, uid, ids, context=None):
-			res[item.id] = 'no'
-			
-			moc_const_ms_ids = moc_const_ms_obj.search(cr,uid,[('moc_id','=',item.id)])
-			moc_const_bot_ids = moc_const_bot_obj.search(cr,uid,[('moc_id','=',item.id)])		
-						
-			if moc_const_ms_ids or moc_const_bot_ids:
-				res[item.id] = 'yes'		
-		return res
-	"""
+	def _get_modify(self, cr, uid, ids, field_name, arg,  context=None):
+		res={}		
+		if field_name == 'modify':
+			for h in self.browse(cr, uid, ids, context=None):
+				res[h.id] = 'no'
+				if h.state == 'approved':
+					cr.execute(""" select * from 
+					(SELECT tc.table_schema, tc.constraint_name, tc.table_name, kcu.column_name, ccu.table_name
+					AS foreign_table_name, ccu.column_name AS foreign_column_name
+					FROM information_schema.table_constraints tc
+					JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
+					JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = tc.constraint_name
+					WHERE constraint_type = 'FOREIGN KEY'
+					AND ccu.table_name='%s')
+					as sam  """ %('kg_moc_master'))
+					data = cr.dictfetchall()	
+					if data:
+						for var in data:
+							data = var
+							chk_sql = 'Select COALESCE(count(*),0) as cnt from '+str(data['table_name'])+' where '+data['column_name']+' = '+str(ids[0])							
+							cr.execute(chk_sql)			
+							out_data = cr.dictfetchone()
+							if out_data:								
+								if out_data['cnt'] > 0:
+									res[h.id] = 'no'
+									return res
+								else:
+									res[h.id] = 'yes'
+				else:
+					res[h.id] = 'no'	
+		return res	
 	
 	def _production_cost(self, cursor, user, ids, name, arg, context=None):	
 		res = {}
@@ -68,7 +84,7 @@ class kg_moc_master(osv.osv):
 		'alias_name': fields.char('Alias Name', size=128),
 		'moc_type': fields.selection([('foundry_moc','Foundry MOC'),('purchase_moc','Purchase MOC'),('both','Both')],'Type'),
 		'product_id': fields.many2one('product.product','Equivalent Rejection Material'),	
-		#'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),	
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),	
 		
 		
 		### Entry Info ###
@@ -92,7 +108,7 @@ class kg_moc_master(osv.osv):
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':fields.datetime.now,	
-		#'modify': 'no',
+		'modify': 'no',
 		
 	}
 	
@@ -242,11 +258,12 @@ class ch_moc_raw_material(osv.osv):
 
 				where header.product_id = %s ORDER BY line.id ASC limit 1 """ %(purchase.product_id.id))
 			purchase_cost = cursor.fetchone()
-			if purchase_cost[0]:
-				
-				total_pro_cost = purchase_cost[0]
+			print"purchase_cost",purchase_cost
+			if purchase_cost is not None:
+				if purchase_cost[0]:				
+					total_pro_cost = purchase_cost[0]
 			else:
-				0.00	
+				total_pro_cost = 0.00	
 			res[purchase.id] = total_pro_cost
 		return res
 	

@@ -12,16 +12,16 @@
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="entry_cancel" type="object" states="reject,approved" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>	
-						<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>	
+						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>	
 						
 					</header>
 					<sheet>
 						<group>
 							<group>						
 								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
-								<field name="purpose" readonly="1" invisible="1"/>
+								<field name="purpose" invisible="1"/>
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 							</group>
 							<group>
@@ -138,7 +138,15 @@
 			<field name="search_view_id" ref="m_search_v_chemical"/>
 		</record>	
 		
-
+		 <!-- Audit Log Xml Data Start -->
+		
+        <record id="chemical_model" model="audittrail.rule">
+            <field name="name">Audit Log Chemical Composition Master</field>
+            <field name="object_id" eval="ref('kg_chemical_master.model_kg_chemical_master')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <!-- Audit Log Xml Data End-->
 		
 		<!-- Menu Name Start here --> 
 		

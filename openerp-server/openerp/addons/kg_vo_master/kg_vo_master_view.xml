@@ -12,15 +12,16 @@
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="entry_cancel" type="object" string="Cancel" states="reject,approved" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
-						<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
 					<sheet>
 						<group>
 							<group>						
 								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 								<field name="active"/>
+								<field name="modify" invisible = "1"/>
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 							</group>
 							<group>
@@ -208,7 +209,57 @@
 		
 		<!-- Menu Action End-->
 		
+		<!-- Audit Log Xml Data Start -->
 		
+        <record id="=vo_model" model="audittrail.rule">
+            <field name="name">Audit Log VO Master</field>
+            <field name="object_id" eval="ref('kg_vo_master.model_kg_vo_master')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <record id="=vo_ch_power_series_model" model="audittrail.rule">
+            <field name="name">Audit Log VO Power Series</field>
+            <field name="object_id" eval="ref('kg_vo_master.model_ch_power_series')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+         <record id="=vo_ch_bed_assembly_model" model="audittrail.rule">
+            <field name="name">Audit Log VO Bed Assembly</field>
+            <field name="object_id" eval="ref('kg_vo_master.model_ch_bed_assembly')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <record id="=vo_ch_motor_assembly_model" model="audittrail.rule">
+            <field name="name">Audit Log VO Motor Assembly</field>
+            <field name="object_id" eval="ref('kg_vo_master.model_ch_motor_assembly')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <record id="=vo_ch_columnpipe_assembly_model" model="audittrail.rule">
+            <field name="name">Audit Log VO ColumnPipe Assembly</field>
+            <field name="object_id" eval="ref('kg_vo_master.model_ch_columnpipe_assembly')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <record id="=vo_ch_deliverypipe_assembly_model" model="audittrail.rule">
+            <field name="name">Audit Log VO DeliveryPipe Assembly</field>
+            <field name="object_id" eval="ref('kg_vo_master.model_ch_deliverypipe_assembly')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <record id="=vo_ch_casing_assembly_model" model="audittrail.rule">
+            <field name="name">Audit Log VO Casing Assembly</field>
+            <field name="object_id" eval="ref('kg_vo_master.model_ch_casing_assembly')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <record id="=vo_ch_lubricant_model" model="audittrail.rule">
+            <field name="name">Audit Log VO Lubricant</field>
+            <field name="object_id" eval="ref('kg_vo_master.model_ch_lubricant')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <!-- Audit Log Xml Data End-->
 		
 		<!-- Menu Name Start here --> 
 		

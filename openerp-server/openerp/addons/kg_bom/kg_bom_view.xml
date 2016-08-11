@@ -14,9 +14,9 @@
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="entry_cancel" type="object" states="reject,approved" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
-						<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>						
+						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>						
 						<button name="convert_partlist_bom" type="object" string="Convert Pump BOM" class="oe_highlight" attrs="{'invisible':['|',('category_type','=','pump_bom'),('state','!=','approved')]}"/>
 					</header>
 					<sheet>
@@ -51,6 +51,7 @@
 								<field name="pump_model_id" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire']),('category_type','=','pump_bom')],'required': [('category_type','in',['pump_bom'])]}"/>
 								<field name="qty" readonly="1"/>
 								<field name="copy_flag" invisible="1"/>									
+								<field name="modify" invisible="1"/>									
 								<field name="active"/>									
 								<field name="type" invisible="1"/>									
 								<field name="state" style="width: 30%%" class="att_state_change"/>								
@@ -69,8 +70,8 @@
 						<field name="line_ids" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
 							<tree string="BOM Details Entry Tree" editable="top" >					
 								
-								<field name="pos_no" string="Position No(OLD)" invisible="0"/>	
-								<field name="position_id"/>	
+								<field name="pos_no" invisible="1"/>	
+								<field name="position_id" />	
 								<field name="pattern_id" on_change="onchange_pattern_name(pattern_id)"/>
 								<field name="pattern_name" readonly="1"/>					   
 								<field name="csd_no"/>					   
@@ -84,8 +85,8 @@
 						<page string="Machine Shop">
 								<field name="line_ids_a" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
 									<tree string="Machine Shop Details Entry Tree" editable="top" >			
-										<field name="pos_no" string="Position No(OLD)" invisible="0"/>	
-										<field name="position_id"/>	
+										<field name="pos_no" invisible="1"/>	
+										<field name="position_id" />	
 										<field name="ms_id" on_change="onchange_machineshop_name(ms_id)"/>	
 										<field name="name" readonly="1"/>
 										<field name="csd_no" readonly="1"/>										
@@ -97,8 +98,8 @@
 							<page string="BOT">
 								<field name="line_ids_b" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
 									<tree string="BOT Details Entry Tree" editable="top" >	
-										<field name="pos_no" string="Position No(OLD)" invisible="0"/>		
-										<field name="position_id" invisible="0"/>		
+										<field name="pos_no" invisible="1"/>		
+										<field name="position_id" />		
 										<field name="bot_id" on_change="onchange_bot_name(bot_id)"/>
 										<field name="name" readonly="1" />																			
 										<field name="qty"/>

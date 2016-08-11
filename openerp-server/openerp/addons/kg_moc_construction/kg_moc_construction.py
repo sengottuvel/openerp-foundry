@@ -13,17 +13,38 @@ class kg_moc_construction(osv.osv):
 	_name = "kg.moc.construction"
 	_description = "MOC Construction Master"
 	_rec_name = "code"
-	"""
-	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
-		res={}
-		ch_weekly_obj = self.pool.get('ch.weekly.schedule.details')			
-		for item in self.browse(cr, uid, ids, context=None):
-			res[item.id] = 'no'
-			ch_weekly_ids = ch_weekly_obj.search(cr,uid,[('moc_construction_id','=',item.id)])			
-			if ch_weekly_ids:
-				res[item.id] = 'yes'		
-		return res
-	"""
+	
+	def _get_modify(self, cr, uid, ids, field_name, arg,  context=None):
+		res={}		
+		if field_name == 'modify':
+			for h in self.browse(cr, uid, ids, context=None):
+				res[h.id] = 'no'
+				if h.state == 'approved':
+					cr.execute(""" select * from 
+					(SELECT tc.table_schema, tc.constraint_name, tc.table_name, kcu.column_name, ccu.table_name
+					AS foreign_table_name, ccu.column_name AS foreign_column_name
+					FROM information_schema.table_constraints tc
+					JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
+					JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = tc.constraint_name
+					WHERE constraint_type = 'FOREIGN KEY'
+					AND ccu.table_name='%s')
+					as sam  """ %('kg_moc_construction'))
+					data = cr.dictfetchall()	
+					if data:
+						for var in data:
+							data = var
+							chk_sql = 'Select COALESCE(count(*),0) as cnt from '+str(data['table_name'])+' where '+data['column_name']+' = '+str(ids[0])							
+							cr.execute(chk_sql)			
+							out_data = cr.dictfetchone()
+							if out_data:								
+								if out_data['cnt'] > 0:
+									res[h.id] = 'no'
+									return res
+								else:
+									res[h.id] = 'yes'
+				else:
+					res[h.id] = 'no'	
+		return res	
 	_columns = {
 			
 		'name': fields.char('Name', size=128, required=True, select=True),
@@ -35,7 +56,7 @@ class kg_moc_construction(osv.osv):
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),			
 		
-		#'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
 		'constuction_type_id': fields.many2one('kg.construction.type','Construction Type', required=True,domain="[('active','=','t')]"),
 		'line_ids':fields.one2many('ch.offer.materials', 'header_id', "Offer Materials"),	
 		
@@ -60,7 +81,7 @@ class kg_moc_construction(osv.osv):
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':fields.datetime.now,	
-		#'modify': 'no',
+		'modify': 'no',
 		
 	}
 	
@@ -185,7 +206,6 @@ class ch_offer_materials(osv.osv):
 		'moc_id': fields.many2one('kg.moc.master', 'MOC Name', required=True,domain = [('active','=','t')]),
 		'remarks':fields.text('Remarks'),		
 	}
-	
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
 		cr.execute(""" select offer_id from ch_offer_materials where offer_id  = '%s' and header_id = '%s' """ %(entry.offer_id.id,entry.header_id.id))

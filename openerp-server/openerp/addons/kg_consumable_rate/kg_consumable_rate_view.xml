@@ -12,9 +12,9 @@
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="entry_cancel" type="object" string="Cancel" states="reject,approved" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
-						
+						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
 					<sheet >
 						<group>
@@ -26,6 +26,7 @@
 							<group>
 								<field name="category" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="active"/>
+								<field name="modify" invisible = "1"/>
 								<field name="state" style="width: 30%%" class="att_state_change"/>								
 							</group>
 						</group>						

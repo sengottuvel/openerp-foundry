@@ -12,9 +12,9 @@
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="entry_cancel" type="object" states="reject,approved" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
-						<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
 					<sheet>
 						<group>
@@ -37,19 +37,20 @@
 							<group>						
 								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
 								<field name="uom_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>											
-								<field name="type" invisible="1"/>											
-								<field name="od"/>											
-								<field name="length"/>	
+								<field name="type" invisible="1"/>
+								<field name="dynamic_length" attrs="{'invisible':[('type','=','bot')]}"/>												
+								<field name="od" invisible="1"/>											
+								<field name="length" invisible="1"/>	
 								<field name="copy_flag" invisible="1"/>											
-								<field name="weight"/>											
+								<field name="modify" invisible="1"/>											
+								<field name="weight" invisible="1"/>											
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 							</group>
 							<group>
 								<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 								<field name="csd_code"/>
-								<field name="breadth"/>
-								<field name="thickness"/>
-								<field name="dynamic_length" attrs="{'invisible':[('type','=','bot')]}"/>									
+								<field name="breadth" invisible="1"/>
+								<field name="thickness" invisible="1"/>																
 								<field name="length_type" attrs="{'invisible':[('type','=','bot')],'required': [('dynamic_length','=',True)]}"/>		
 								<field name="active"/>									
 								<field name="state" style="width: 30%%" class="att_state_change"/>								
@@ -83,11 +84,17 @@
 								</field>																								
 							</page>
 							<page string="Raw Materials">	
-								<field name="line_ids" nolabel="1" >
+								<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" >
 									<tree string="Raw Materials Entry Tree" editable="top" >									
 										<field name="product_id" on_change="onchange_uom(product_id)" />											
 										<field name="uom" readonly="1"/>	
-										<field name="qty" />
+										<field name="uom_conversation_factor" readonly="1"/>	
+										<field name="od" />	
+										<field name="length" attrs="{'required': [('uom_conversation_factor','in',['one_dimension','two_dimension'])]}"/>	
+										<field name="breadth" attrs="{'required': [('uom_conversation_factor','in',['two_dimension'])]}"/>	
+										<field name="thickness" />	
+										<field name="weight" />	
+										<field name="qty" required="1" />
 										<field name="remarks" widget="char"/>														
 									</tree>
 								</field>																								
@@ -190,7 +197,29 @@
 				
 		<!-- Menu Action End-->
 		
-			
+		
+		<!-- Audit Log Xml Data Start-->
+		
+        <record id="audit_machine_shop_model" model="audittrail.rule">
+            <field name="name">Audit Log Machine Shop Master</field>
+            <field name="object_id" eval="ref('kg_machine_shop.model_kg_machine_shop')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <record id="audit_raw_material_model" model="audittrail.rule">
+            <field name="name">Audit Log Raw Material Details</field>
+            <field name="object_id" eval="ref('kg_machine_shop.model_ch_ms_raw_material')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <record id="audit_machine_mocwise_model" model="audittrail.rule">
+            <field name="name">Audit Log Machine MOC wise Details</field>
+            <field name="object_id" eval="ref('kg_machine_shop.model_ch_machine_mocwise')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+        <!-- Audit Log Xml Data End-->
+		
 		
 		
 		<!-- Menu Name Start here --> 

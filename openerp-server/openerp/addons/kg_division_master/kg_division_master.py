@@ -13,19 +13,41 @@ class kg_division_master(osv.osv):
 	_name = "kg.division.master"
 	_description = "SAM Division Master"
 	
-	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
-		res={}
-		stock_obj = self.pool.get('kg.stock.inward')
-		weekly_sch_obj = self.pool.get('kg.weekly.schedule')				
-		for item in self.browse(cr, uid, ids, context=None):
-			res[item.id] = 'no'
-			stock_ids = stock_obj.search(cr,uid,[('division_id','=',item.id)])
-			weekly_sch_ids = weekly_sch_obj.search(cr,uid,[('division_id','=',item.id)])			
-			if stock_ids or weekly_sch_ids:
-				res[item.id] = 'yes'		
-		return res
+	def _get_modify(self, cr, uid, ids, field_name, arg,  context=None):
+		res={}		
+		if field_name == 'modify':
+			for h in self.browse(cr, uid, ids, context=None):
+				res[h.id] = 'no'
+				if h.state == 'approved':
+					cr.execute(""" select * from 
+					(SELECT tc.table_schema, tc.constraint_name, tc.table_name, kcu.column_name, ccu.table_name
+					AS foreign_table_name, ccu.column_name AS foreign_column_name
+					FROM information_schema.table_constraints tc
+					JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
+					JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = tc.constraint_name
+					WHERE constraint_type = 'FOREIGN KEY'
+					AND ccu.table_name='%s')
+					as sam  """ %('kg_division_master'))
+					data = cr.dictfetchall()	
+					if data:
+						for var in data:
+							data = var
+							chk_sql = 'Select COALESCE(count(*),0) as cnt from '+str(data['table_name'])+' where '+data['column_name']+' = '+str(ids[0])							
+							cr.execute(chk_sql)			
+							out_data = cr.dictfetchone()
+							if out_data:								
+								if out_data['cnt'] > 0:
+									res[h.id] = 'no'
+									return res
+								else:
+									res[h.id] = 'yes'
+				else:
+					res[h.id] = 'no'	
+		return res	
 	
 	_columns = {
+	
+	
 			
 		'name': fields.char('Name', size=128, required=True, select=True),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),

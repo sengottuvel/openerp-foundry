@@ -13,7 +13,37 @@ class kg_stage_master(osv.osv):
 	_name = "kg.stage.master"
 	_description = "SAM Stage Master"
 	
-	
+	def _get_modify(self, cr, uid, ids, field_name, arg,  context=None):
+		res={}		
+		if field_name == 'modify':
+			for h in self.browse(cr, uid, ids, context=None):
+				res[h.id] = 'no'
+				if h.state == 'approved':
+					cr.execute(""" select * from 
+					(SELECT tc.table_schema, tc.constraint_name, tc.table_name, kcu.column_name, ccu.table_name
+					AS foreign_table_name, ccu.column_name AS foreign_column_name
+					FROM information_schema.table_constraints tc
+					JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
+					JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = tc.constraint_name
+					WHERE constraint_type = 'FOREIGN KEY'
+					AND ccu.table_name='%s')
+					as sam  """ %('kg_stage_master'))
+					data = cr.dictfetchall()	
+					if data:
+						for var in data:
+							data = var
+							chk_sql = 'Select COALESCE(count(*),0) as cnt from '+str(data['table_name'])+' where '+data['column_name']+' = '+str(ids[0])							
+							cr.execute(chk_sql)			
+							out_data = cr.dictfetchone()
+							if out_data:								
+								if out_data['cnt'] > 0:
+									res[h.id] = 'no'
+									return res
+								else:
+									res[h.id] = 'yes'
+				else:
+					res[h.id] = 'no'	
+		return res	
 	
 	_columns = {
 			
@@ -27,7 +57,7 @@ class kg_stage_master(osv.osv):
 		'remark': fields.text('Approve/Reject'),
 		'stage_seq_id': fields.integer('Stage Sequence' , size=128),
 		'cancel_remark': fields.text('Cancel'),
-		
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),	
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -50,7 +80,7 @@ class kg_stage_master(osv.osv):
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':fields.datetime.now,	
-		
+		'modify': 'no',
 		
 	}
 	

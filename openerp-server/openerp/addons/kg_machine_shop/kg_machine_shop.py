@@ -14,20 +14,39 @@ class kg_machine_shop(osv.osv):
 	_description = "SAM MOC Master"
 	_rec_name = 'code'
 	
-	"""
-	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
-		res={}
-		ms_line_obj = self.pool.get('ch.machineshop.details')
-		ms_line_amend_obj = self.pool.get('ch.machineshop.details.amendment')
-		moc_const_ms_obj = self.pool.get('ch.moc.machineshop.details')		
-		for item in self.browse(cr, uid, ids, context=None):
-			res[item.id] = 'no'
-			ms_line_ids = ms_line_obj.search(cr,uid,[('ms_id','=',item.id)])
-			ms_line_amend_ids = ms_line_amend_obj.search(cr,uid,[('ms_id','=',item.id)])
-			moc_const_ms_ids = moc_const_ms_obj.search(cr,uid,[('ms_id','=',item.id)])					
-			if ms_line_ids or ms_line_amend_ids or moc_const_ms_ids:
-				res[item.id] = 'yes'		
-		return res """
+	
+	def _get_modify(self, cr, uid, ids, field_name, arg,  context=None):
+		res={}		
+		if field_name == 'modify':
+			for h in self.browse(cr, uid, ids, context=None):
+				res[h.id] = 'no'
+				if h.state == 'approved':
+					cr.execute(""" select * from 
+					(SELECT tc.table_schema, tc.constraint_name, tc.table_name, kcu.column_name, ccu.table_name
+					AS foreign_table_name, ccu.column_name AS foreign_column_name
+					FROM information_schema.table_constraints tc
+					JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
+					JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = tc.constraint_name
+					WHERE constraint_type = 'FOREIGN KEY'
+					AND ccu.table_name='%s')
+					as sam  """ %('kg_machine_shop'))
+					data = cr.dictfetchall()	
+					if data:
+						for var in data:
+							data = var
+							chk_sql = 'Select COALESCE(count(*),0) as cnt from '+str(data['table_name'])+' where '+data['column_name']+' = '+str(ids[0])							
+							cr.execute(chk_sql)			
+							out_data = cr.dictfetchone()
+							if out_data:								
+								if out_data['cnt'] > 0:
+									res[h.id] = 'no'
+									return res
+								else:
+									res[h.id] = 'yes'
+				else:
+					res[h.id] = 'no'	
+		return res	
+	
 	
 	_columns = {
 			
@@ -44,7 +63,7 @@ class kg_machine_shop(osv.osv):
 		'line_ids_a':fields.one2many('ch.machine.mocwise', 'header_id', "Machine Shop MOC Wise"),
 		
 		'csd_code': fields.char('CSD Code No.', size=128),
-		#'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
 		'type': fields.selection([('ms','MS Item'),('bot','BOT')],'Type'),
 		'od': fields.float('OD'),
 		'length': fields.float('Length'),
@@ -84,7 +103,7 @@ class kg_machine_shop(osv.osv):
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':fields.datetime.now,	
-		#'modify': 'no',
+		'modify': 'no',
 		'copy_flag' : False,
 		'ms_type':'new_item', 
 		
@@ -354,18 +373,24 @@ class ch_ms_raw_material(osv.osv):
 	_columns = {
 			
 		'header_id':fields.many2one('kg.machine.shop', 'MS Entry', required=True, ondelete='cascade'),	
-		'product_id': fields.many2one('product.product','Raw Material', required=True),			
-		'uom':fields.char('UOM',size=128),		
+		'product_id': fields.many2one('product.product','Raw Material', required=True, domain="[('product_type','=','raw')]"),			
+		'uom':fields.char('UOM',size=128),
+		'od': fields.float('OD'),
+		'length': fields.float('Length'),
+		'breadth': fields.float('Breadth'),
+		'thickness': fields.float('Thickness'),
+		'weight': fields.float('Weight'),
+		'uom_conversation_factor': fields.selection([('one_dimension','One Dimension'),('two_dimension','Two Dimension')],'UOM Conversation Factor'),		
 		'qty':fields.float('Qty'),
 		'remarks':fields.text('Remarks'),		
 	}
 	
 	def onchange_uom(self, cr, uid, ids, product_id, context=None):
 		
-		value = {'uom': ''}
+		value = {'uom': '','uom_conversation_factor':''}
 		if product_id:
 			uom_rec = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
-			value = {'uom': uom_rec.uom_id.name}
+			value = {'uom': uom_rec.uom_id.name,'uom_conversation_factor':uom_rec.uom_conversation_factor}
 			
 		return {'value': value}
 		
@@ -384,6 +409,41 @@ class ch_ms_raw_material(osv.osv):
 			uom_name = uom_rec.uom_id.name
 			vals.update({'uom': uom_name})
 		return super(ch_ms_raw_material, self).write(cr, uid, ids, vals, context)  
+	
+	
+	def _check_values(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		cr.execute(""" select product_id from ch_ms_raw_material where product_id  = '%s' and header_id = '%s' """ %(entry.product_id.id,entry.header_id.id))
+		data = cr.dictfetchall()			
+		if len(data) > 1:		
+			return False
+		return True
+		
+	
+		
+	def _check_one_values(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		if entry.uom_conversation_factor =='one_dimension':
+			if entry.length == 0 or entry.qty == 0:				
+				return False
+			return True
+		return True
+		
+	def _check_two_values(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		if entry.uom_conversation_factor =='two_dimension':
+			if entry.length == 0 or entry.qty == 0 or entry.breadth == 0:				
+				return False
+			return True
+		return True
+		
+	_constraints = [		
+			  
+		(_check_one_values, 'Check the zero values not allowed..!!',['Length,Qty']),	
+		(_check_two_values, 'Check the zero values not allowed..!!',['Breadth,Length,Qty']),
+		(_check_values, 'Please Check the same Raw Material not allowed..!!',['Raw Material']),	
+		
+	   ]
 	
 ch_ms_raw_material()
 
