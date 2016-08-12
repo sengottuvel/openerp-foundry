@@ -528,6 +528,10 @@ class ch_work_order_details(osv.osv):
 				bom_details = cr.dictfetchall()
 				if order_category == 'pump' :
 					for bom_details in bom_details:
+						if bom_details['position_id'] == None:
+							raise osv.except_osv(_('Warning!'),
+							_('Kindly Configure Position No. in Foundry Items for respective Pump Bom and proceed further !!'))
+						
 						if order_category == 'pump' :
 							applicable = True
 						if order_category in ('spare','pump_spare'):
@@ -591,6 +595,9 @@ class ch_work_order_details(osv.osv):
 							where header_id = (select id from kg_bom where pump_model_id = %s and active='t') ''',[pump_model_id])
 					bom_ms_details = cr.dictfetchall()
 					for bom_ms_details in bom_ms_details:
+						if bom_ms_details['position_id'] == None:
+							raise osv.except_osv(_('Warning!'),
+							_('Kindly Configure Position No. in MS Items for respective Pump Bom and proceed further !!'))
 						if qty == 0:
 							bom_ms_qty = bom_ms_details['qty']
 						if qty > 0:
@@ -869,7 +876,7 @@ class ch_work_order_details(osv.osv):
 									
 									cr.execute(''' select pat_moc.moc_id
 										from ch_mocwise_rate pat_moc
-										LEFT JOIN kg_moc_construction const on const.code = pat_moc.code
+										LEFT JOIN kg_moc_construction const on const.id = pat_moc.code
 										where pat_moc.header_id = %s and const.id = %s
 										  ''',[vertical_foundry['pattern_id'],moc_construction_id])
 									const_moc_id = cr.fetchone()
@@ -1072,6 +1079,9 @@ class ch_work_order_details(osv.osv):
 								if qty > 0:
 									bom_qty = qty * foundry_bom_qty
 								print "bom_qty",bom_qty
+								if vertical_foundry['position_id'] == None:
+									raise osv.except_osv(_('Warning!'),
+									_('Kindly Configure Position No. in Foundry Items for respective Pump Bom and proceed further !!'))
 								bom_vals.append({
 																	
 									'bom_id': vertical_foundry['header_id'],
@@ -1228,6 +1238,10 @@ class ch_work_order_details(osv.osv):
 								pos_no = 0
 							else:
 								pos_no = vertical_ms_details['pos_no']
+								
+							if vertical_ms_details['position_id'] == None:
+								raise osv.except_osv(_('Warning!'),
+								_('Kindly Configure Position No. in MS Items for respective Pump Bom and proceed further !!'))
 								
 							machine_shop_vals.append({
 								
