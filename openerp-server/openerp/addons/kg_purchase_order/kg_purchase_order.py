@@ -528,7 +528,7 @@ class kg_purchase_order(osv.osv):
 		self.write(cr, uid, ids, {'state': 'confirmed',
 								  'confirm_flag':'True',
 								  'confirmed_by':uid,
-								  'confirmed_date':today})
+								  'confirmed_date':time.strftime('%Y-%m-%d %H:%M:%S')})
 		if approval == 'yes' and obj.approval_flag == True:
 			self.spl_po_apl_mail(cr,uid,ids,obj,context)
 					
@@ -621,7 +621,7 @@ class kg_purchase_order(osv.osv):
 		self.write(cr, uid, ids, {'state': 'approved', 'date_approve': fields.date.context_today(self,cr,uid,context=context),'order_line.line_state' : 'confirm'})
 		self.write(cr, uid, ids, {'approve_flag':'True',
 								  'approved_by':uid,
-								  'approved_date':today})
+								  'approved_date':time.strftime('%Y-%m-%d %H:%M:%S')})
 								  
 		po_order_obj=self.pool.get('purchase.order')
 		po_id=obj.id
