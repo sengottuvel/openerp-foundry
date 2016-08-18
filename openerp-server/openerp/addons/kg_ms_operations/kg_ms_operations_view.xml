@@ -177,7 +177,7 @@
 	<!-- Menu Action Start-->
 		
 		<record id="tma_ms_operation1" model="ir.actions.act_window">
-			<field name="name">Operation 1</field>
+			<field name="name">Operation 10</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.ms.operations</field>
 			<field name="view_type">form</field>
@@ -375,7 +375,7 @@
 	<!-- Menu Action Start-->
 		
 		<record id="tma_ms_operation2" model="ir.actions.act_window">
-			<field name="name">Operation 2</field>
+			<field name="name">Operation 20</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.ms.operations</field>
 			<field name="view_type">form</field>
@@ -573,7 +573,7 @@
 	<!-- Menu Action Start-->
 		
 		<record id="tma_ms_operation3" model="ir.actions.act_window">
-			<field name="name">Operation 3</field>
+			<field name="name">Operation 30</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.ms.operations</field>
 			<field name="view_type">form</field>
@@ -773,7 +773,7 @@
 	<!-- Menu Action Start-->
 		
 		<record id="tma_ms_operation4" model="ir.actions.act_window">
-			<field name="name">Operation 4</field>
+			<field name="name">Operation 40</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.ms.operations</field>
 			<field name="view_type">form</field>
@@ -973,7 +973,7 @@
 	<!-- Menu Action Start-->
 		
 		<record id="tma_ms_operation5" model="ir.actions.act_window">
-			<field name="name">Operation 5</field>
+			<field name="name">Operation 50</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.ms.operations</field>
 			<field name="view_type">form</field>
@@ -1173,7 +1173,7 @@
 	<!-- Menu Action Start-->
 		
 		<record id="tma_ms_operation6" model="ir.actions.act_window">
-			<field name="name">Operation 6</field>
+			<field name="name">Operation 60</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.ms.operations</field>
 			<field name="view_type">form</field>
@@ -1373,7 +1373,7 @@
 	<!-- Menu Action Start-->
 		
 		<record id="tma_ms_operation7" model="ir.actions.act_window">
-			<field name="name">Operation 7</field>
+			<field name="name">Operation 70</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.ms.operations</field>
 			<field name="view_type">form</field>
@@ -1573,7 +1573,7 @@
 	<!-- Menu Action Start-->
 		
 		<record id="tma_ms_operation8" model="ir.actions.act_window">
-			<field name="name">Operation 8</field>
+			<field name="name">Operation 80</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.ms.operations</field>
 			<field name="view_type">form</field>
@@ -1773,7 +1773,7 @@
 	<!-- Menu Action Start-->
 		
 		<record id="tma_ms_operation9" model="ir.actions.act_window">
-			<field name="name">Operation 9</field>
+			<field name="name">Operation 90</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.ms.operations</field>
 			<field name="view_type">form</field>
@@ -1973,7 +1973,7 @@
 	<!-- Menu Action Start-->
 		
 		<record id="tma_ms_operation10" model="ir.actions.act_window">
-			<field name="name">Operation 10</field>
+			<field name="name">Operation 100</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.ms.operations</field>
 			<field name="view_type">form</field>
@@ -2173,7 +2173,7 @@
 	<!-- Menu Action Start-->
 		
 		<record id="tma_ms_operation11" model="ir.actions.act_window">
-			<field name="name">Operation 11</field>
+			<field name="name">Operation 110</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.ms.operations</field>
 			<field name="view_type">form</field>
@@ -2373,7 +2373,7 @@
 	<!-- Menu Action Start-->
 		
 		<record id="tma_ms_operation12" model="ir.actions.act_window">
-			<field name="name">Operation 12</field>
+			<field name="name">Operation 120</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.ms.operations</field>
 			<field name="view_type">form</field>
