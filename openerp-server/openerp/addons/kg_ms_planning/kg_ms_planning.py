@@ -195,73 +195,73 @@ class kg_ms_daily_planning(osv.osv):
 				if line_item.position_id.id != False:
 					for pos_line_item in line_item.position_id.line_ids:
 						
-						if pos_line_item.operation_id.name == 'Operation 1':
+						if pos_line_item.operation_id.name == 'Operation 10':
 							op1_status = 'pending'
 							op1_id = pos_line_item.operation_id.id
 							op1_stage_id = pos_line_item.stage_id.id
 							op1_clamping_area = pos_line_item.clamping_area
 							
-						if pos_line_item.operation_id.name == 'Operation 2':
+						if pos_line_item.operation_id.name == 'Operation 20':
 							op2_status = 'pending'
 							op2_id = pos_line_item.operation_id.id
 							op2_stage_id = pos_line_item.stage_id.id
 							op2_clamping_area = pos_line_item.clamping_area
 							
-						if pos_line_item.operation_id.name == 'Operation 3':
+						if pos_line_item.operation_id.name == 'Operation 30':
 							op3_status = 'pending'
 							op3_id = pos_line_item.operation_id.id
 							op3_stage_id = pos_line_item.stage_id.id
 							op3_clamping_area = pos_line_item.clamping_area
 							
-						if pos_line_item.operation_id.name == 'Operation 4':
+						if pos_line_item.operation_id.name == 'Operation 40':
 							op4_status = 'pending'
 							op4_id = pos_line_item.operation_id.id
 							op4_stage_id = pos_line_item.stage_id.id
 							op4_clamping_area = pos_line_item.clamping_area
 							
-						if pos_line_item.operation_id.name == 'Operation 5':
+						if pos_line_item.operation_id.name == 'Operation 50':
 							op5_status = 'pending'
 							op5_id = pos_line_item.operation_id.id
 							op5_stage_id = pos_line_item.stage_id.id
 							op5_clamping_area = pos_line_item.clamping_area
 							
-						if pos_line_item.operation_id.name == 'Operation 6':
+						if pos_line_item.operation_id.name == 'Operation 60':
 							op6_status = 'pending'
 							op6_id = pos_line_item.operation_id.id
 							op6_stage_id = pos_line_item.stage_id.id
 							op6_clamping_area = pos_line_item.clamping_area
 							
-						if pos_line_item.operation_id.name == 'Operation 7':
+						if pos_line_item.operation_id.name == 'Operation 70':
 							op7_status = 'pending'
 							op7_id = pos_line_item.operation_id.id
 							op7_stage_id = pos_line_item.stage_id.id
 							op7_clamping_area = pos_line_item.clamping_area
 							
-						if pos_line_item.operation_id.name == 'Operation 8':
+						if pos_line_item.operation_id.name == 'Operation 80':
 							op8_status = 'pending'
 							op8_id = pos_line_item.operation_id.id
 							op8_stage_id = pos_line_item.stage_id.id
 							op8_clamping_area = pos_line_item.clamping_area
 							
-						if pos_line_item.operation_id.name == 'Operation 9':
+						if pos_line_item.operation_id.name == 'Operation 90':
 							op9_status = 'pending'
 							op9_id = pos_line_item.operation_id.id
 							op9_stage_id = pos_line_item.stage_id.id
 							op9_clamping_area = pos_line_item.clamping_area
 							
-						if pos_line_item.operation_id.name == 'Operation 10':
+						if pos_line_item.operation_id.name == 'Operation 100':
 							op10_status = 'pending'
 							op10_id = pos_line_item.operation_id.id
 							op10_stage_id = pos_line_item.stage_id.id
 							op10_clamping_area = pos_line_item.clamping_area
 							
-						if pos_line_item.operation_id.name == 'Operation 11':
+						if pos_line_item.operation_id.name == 'Operation 110':
 							op11_status = 'pending'
 							op11_id = pos_line_item.operation_id.id
 							op11_stage_id = pos_line_item.stage_id.id
 							op11_clamping_area = pos_line_item.clamping_area
 							
-						if pos_line_item.operation_id.name == 'Operation 12':
+						if pos_line_item.operation_id.name == 'Operation 120':
 							op12_status = 'pending'
 							op12_id = pos_line_item.operation_id.id
 							op12_stage_id = pos_line_item.stage_id.id
@@ -338,7 +338,7 @@ class kg_ms_daily_planning(osv.osv):
 							for pos_line_item in line_item.position_id.line_ids:
 								
 								
-								if pos_line_item.operation_id.name == 'Operation 1':
+								if pos_line_item.operation_id.name == 'Operation 10':
 									
 									for op1_dimen_item in pos_line_item.line_ids:
 										op1_dimen_vals = {
@@ -361,7 +361,7 @@ class kg_ms_daily_planning(osv.osv):
 										op1_ms_dimension_id = ms_dimension_obj.create(cr, uid,op1_dimen_vals)
 										
 								
-								if pos_line_item.operation_id.name == 'Operation 2':
+								if pos_line_item.operation_id.name == 'Operation 20':
 									
 									for op2_dimen_item in pos_line_item.line_ids:
 										
@@ -385,7 +385,7 @@ class kg_ms_daily_planning(osv.osv):
 										op2_ms_dimension_id = ms_dimension_obj.create(cr, uid,op2_dimen_vals)
 										
 										
-								if pos_line_item.operation_id.name == 'Operation 3':
+								if pos_line_item.operation_id.name == 'Operation 30':
 									
 									for op3_dimen_item in pos_line_item.line_ids:
 										
@@ -409,7 +409,7 @@ class kg_ms_daily_planning(osv.osv):
 										op3_ms_dimension_id = ms_dimension_obj.create(cr, uid,op3_dimen_vals)
 										
 										
-								if pos_line_item.operation_id.name == 'Operation 4':
+								if pos_line_item.operation_id.name == 'Operation 40':
 									
 									for op4_dimen_item in pos_line_item.line_ids:
 										
@@ -433,7 +433,7 @@ class kg_ms_daily_planning(osv.osv):
 										op4_ms_dimension_id = ms_dimension_obj.create(cr, uid,op4_dimen_vals)
 										
 										
-								if pos_line_item.operation_id.name == 'Operation 5':
+								if pos_line_item.operation_id.name == 'Operation 50':
 									
 									for op5_dimen_item in pos_line_item.line_ids:
 										
@@ -457,7 +457,7 @@ class kg_ms_daily_planning(osv.osv):
 										op5_ms_dimension_id = ms_dimension_obj.create(cr, uid,op5_dimen_vals)
 										
 										
-								if pos_line_item.operation_id.name == 'Operation 6':
+								if pos_line_item.operation_id.name == 'Operation 60':
 									
 									for op6_dimen_item in pos_line_item.line_ids:
 										
@@ -481,7 +481,7 @@ class kg_ms_daily_planning(osv.osv):
 										op6_ms_dimension_id = ms_dimension_obj.create(cr, uid,op6_dimen_vals)
 										
 										
-								if pos_line_item.operation_id.name == 'Operation 7':
+								if pos_line_item.operation_id.name == 'Operation 70':
 									
 									for op7_dimen_item in pos_line_item.line_ids:
 										
@@ -505,7 +505,7 @@ class kg_ms_daily_planning(osv.osv):
 										op7_ms_dimension_id = ms_dimension_obj.create(cr, uid,op7_dimen_vals)
 										
 										
-								if pos_line_item.operation_id.name == 'Operation 8':
+								if pos_line_item.operation_id.name == 'Operation 80':
 									
 									for op8_dimen_item in pos_line_item.line_ids:
 										
@@ -529,7 +529,7 @@ class kg_ms_daily_planning(osv.osv):
 										op8_ms_dimension_id = ms_dimension_obj.create(cr, uid,op8_dimen_vals)
 										
 										
-								if pos_line_item.operation_id.name == 'Operation 9':
+								if pos_line_item.operation_id.name == 'Operation 90':
 									
 									for op9_dimen_item in pos_line_item.line_ids:
 										
@@ -553,7 +553,7 @@ class kg_ms_daily_planning(osv.osv):
 										op9_ms_dimension_id = ms_dimension_obj.create(cr, uid,op9_dimen_vals)
 										
 										
-								if pos_line_item.operation_id.name == 'Operation 10':
+								if pos_line_item.operation_id.name == 'Operation 100':
 									
 									for op10_dimen_item in pos_line_item.line_ids:
 										
@@ -577,7 +577,7 @@ class kg_ms_daily_planning(osv.osv):
 										op10_ms_dimension_id = ms_dimension_obj.create(cr, uid,op10_dimen_vals)
 										
 										
-								if pos_line_item.operation_id.name == 'Operation 11':
+								if pos_line_item.operation_id.name == 'Operation 110':
 									
 									for op11_dimen_item in pos_line_item.line_ids:
 										
@@ -601,7 +601,7 @@ class kg_ms_daily_planning(osv.osv):
 										op11_ms_dimension_id = ms_dimension_obj.create(cr, uid,op11_dimen_vals)
 										
 										
-								if pos_line_item.operation_id.name == 'Operation 12':
+								if pos_line_item.operation_id.name == 'Operation 120':
 									
 									for op12_dimen_item in pos_line_item.line_ids:
 										
