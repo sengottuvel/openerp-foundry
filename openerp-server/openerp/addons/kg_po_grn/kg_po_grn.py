@@ -31,10 +31,25 @@ class kg_po_grn(osv.osv):
 		amt_to_per = (line.kg_discount / (line.po_grn_qty * line.price_unit or 1.0 )) * 100
 		kg_discount_per = line.kg_discount_per
 		tot_discount_per = amt_to_per + kg_discount_per
+		
+		if line.price_type == 'per_kg':
+			if line.product_id.uom_conversation_factor == 'two_dimension':
+				if line.product_id.po_uom_in_kgs > 0:
+					qty = line.po_grn_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
+			elif line.product_id.uom_conversation_factor == 'one_dimension':
+				if line.product_id.po_uom_in_kgs > 0:
+					qty = line.po_grn_qty * line.product_id.po_uom_in_kgs
+				else:
+					qty = line.po_grn_qty
+			else:
+				qty = line.po_grn_qty
+		else:
+			qty = line.po_grn_qty
 		for c in self.pool.get('account.tax').compute_all(cr, uid, line.grn_tax_ids,
-			line.price_unit * (1-(tot_discount_per or 0.0)/100.0), line.po_grn_qty, line.product_id,
+			line.price_unit * (1-(tot_discount_per or 0.0)/100.0), qty, line.product_id,
 			 line.po_grn_id.supplier_id)['taxes']:			 
 			val += c.get('amount', 0.0)
+		
 		return val
 	
 	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
@@ -125,7 +140,10 @@ class kg_po_grn(osv.osv):
 		'state': fields.selection([('item_load','Draft'),('draft', 'Waiting for Confirmation'), ('confirmed', 'Waiting for Approval'), ('done', 'Done'), ('inv', 'Invoiced'), ('cancel', 'Cancelled'),('reject','Rejected')], 'Status',readonly=True),
 		'type': fields.selection([('in', 'IN'), ('out', 'OUT'), ('internal', 'Internal')], 'Type'),
 		'active':fields.boolean('Active'),
+		'can_remark':fields.text('Cancel Remarks'),
+		'reject_remark':fields.text('Reject Remarks', readonly=True, states={'confirmed':[('readonly',False)]}),
 		'remark':fields.text('Remarks'),
+		'notes':fields.text('Notes'),
 		'po_so_remark':fields.text('PO/SO Remarks'),
 		'confirm_flag':fields.boolean('Confirm Flag'),
 		'approve_flag':fields.boolean('Expiry Flag'),
@@ -180,7 +198,6 @@ class kg_po_grn(osv.osv):
 		'sos_date': fields.char('SO Date',readonly=True),
 		'payment_type': fields.selection([('cash', 'Cash'), ('credit', 'Credit')], 'Payment Type',required=True, readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'dep_project':fields.many2one('kg.project.master','Dept/Project Name',readonly=False,states={'readonly': [('readonly', True)]}),	
-		'reject_remark':fields.text('Cancel Remarks', readonly=True, states={'confirmed':[('readonly',False)]}),
 		'sup_invoice_no':fields.char('Supplier Invoice No',size=200, readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'sup_invoice_date':fields.date('Supplier Invoice Date', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'expense_line_id': fields.one2many('kg.po.grn.expense.track','expense_id','Expense Track',readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
@@ -242,6 +259,20 @@ class kg_po_grn(osv.osv):
 		#~ print"seq_name",seq_name
 		#~ return True  
 		
+	def _grndate_validation(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		today = date.today()
+		grn_date = datetime.strptime(rec.grn_date,'%Y-%m-%d').date()
+		if grn_date > today:
+			return False
+		return True
+		
+	_constraints = [
+	
+		(_grndate_validation, 'GRN date should not be greater than current date !!',['grn_date']),
+		
+		]
+				
 	def write(self, cr, uid, ids, vals, context=None):		
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_po_grn, self).write(cr, uid, ids, vals, context)
@@ -335,7 +366,7 @@ class kg_po_grn(osv.osv):
 	
 	# Reject Method #
 	
-	def grn_reject(self, cr, uid, ids, context=None):
+	def entry_reject(self, cr, uid, ids, context=None):
 		grn = self.browse(cr, uid, ids[0])
 		po_id = self.pool.get('purchase.order')
 		so_id = self.pool.get('kg.service.order')
@@ -354,11 +385,11 @@ class kg_po_grn(osv.osv):
 
 	# Cancel Method #
 	
-	def grn_cancel(self, cr, uid, ids, context=None):
+	def entry_cancel(self, cr, uid, ids, context=None):
 		grn = self.browse(cr, uid, ids[0])
 		po_id = self.pool.get('purchase.order')
 		so_id = self.pool.get('kg.service.order')
-		if not grn.remark:
+		if not grn.can_remark:
 			raise osv.except_osv(_('Remarks is must !!'), _('Enter Remarks for GRN Cancellation !!!'))
 		else:
 			self.write(cr, uid, ids[0], {'state' : 'cancel','cancel_user_id': uid,'cancel_date': time.strftime("%Y-%m-%d %H:%M:%S")})
@@ -404,7 +435,12 @@ class kg_po_grn(osv.osv):
 			pol_obj = self.pool.get('purchase.order.line')
 			#po_order = grn_entry_obj.po_id
 			line_ids = map(lambda x:x.id,grn_entry_obj.line_ids)
-			po_grn_line_obj.unlink(cr,uid,line_ids)
+			for ele in line_ids:
+				line_rec = self.pool.get('po.grn.line').browse(cr,uid,ele)
+				self.pool.get('purchase.order').write(cr,uid,line_rec.po_id.id,{'grn_flag':False})
+			if line_ids:
+				po_grn_line_obj.unlink(cr,uid,line_ids)
+			
 			value1 = 0
 			value2 = 0
 			po_list = []
@@ -474,6 +510,8 @@ class kg_po_grn(osv.osv):
 							'uom_conversation_factor': order_line.uom_conversation_factor,
 							'length': order_line.length,
 							'breadth': order_line.breadth,
+							'inward_type': grn_entry_obj.inward_type.id,
+							
 						})
 						print"order_lineorder_lineorder_lineorder_line",order_line.id
 						if order_line.line_id:
@@ -637,7 +675,7 @@ class kg_po_grn(osv.osv):
 	
 	# PO GRN Confirm #
 		
-	def po_grn_confirm(self, cr, uid, ids,context=None):
+	def entry_confirm(self, cr, uid, ids,context=None):
 		back_list = []
 		grn_entry = self.browse(cr, uid, ids[0])
 		po_obj=self.pool.get('purchase.order')
@@ -719,7 +757,6 @@ class kg_po_grn(osv.osv):
 						_('%s This WO No. repeated'%(wo['wo_name'])))
 					else:
 						pass
-		
 						
 		if grn_entry.dc_date and grn_entry.dc_date > grn_entry.grn_date:
 			raise osv.except_osv(_('DC Date Error!'),_('DC Date Should Be Less Than GRN Date.'))			
@@ -799,31 +836,12 @@ class kg_po_grn(osv.osv):
 								  'confirmed_by':uid,
 								  'confirmed_date':today,
 								   })
-		#cr.execute("""select all_transaction_mails('PO/SO GRN Approval',%s)"""%(ids[0]))
-		"""Raj
-		data = cr.fetchall();
-		vals = self.email_ids(cr,uid,ids,context = context)
-		if (not vals['email_to']) or (not vals['email_cc']):
-			pass
-		else:
-			ir_mail_server = self.pool.get('ir.mail_server')
-			msg = ir_mail_server.build_email(
-					email_from = vals['email_from'][0],
-					email_to = vals['email_to'],
-					subject = " PO/SO GRN - Waiting For Approval",
-					body = data[0][0],
-					email_cc = vals['email_cc'],
-					object_id = ids[0] and ('%s-%s' % (ids[0], 'kg.po.grn')),
-					subtype = 'html',
-					subtype_alternative = 'plain')
-			res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)			   
-		"""
 		
 		return True
 		
 		# PO GRN APPROVE #
 		
-	def kg_po_grn_approve(self, cr, uid, ids,context=None):
+	def entry_approve(self, cr, uid, ids,context=None):
 		user_id = self.pool.get('res.users').browse(cr, uid, uid)
 		grn_entry = self.browse(cr, uid, ids[0])
 		gate_obj = self.pool.get('kg.gate.pass')
@@ -1041,7 +1059,7 @@ class kg_po_grn(osv.osv):
 							po_line_pending_qty = product_qty - line.po_grn_qty
 							if po_line_id.price_type == 'per_kg':
 								if po_line_id.product_id.uom_conversation_factor == 'two_dimension':
-									po_line_pending_qty = po_line_id.pending_qty - (line.po_grn_qty / (float(line.length) * float(line.breadth) * float(line.product_id.po_uom_coff)))
+									po_line_pending_qty = po_line_id.pending_qty - (line.po_grn_qty / (float(line.length) * float(line.breadth) * float(line.product_id.po_uom_coeff)))
 								elif po_line_id.product_id.uom_conversation_factor == 'one_dimension':
 									if po_line_id.product_id.po_uom_in_kgs > 0:
 										po_line_pending_qty = product_qty - line.po_grn_qty 
@@ -1531,29 +1549,6 @@ class kg_po_grn(osv.osv):
 				else:
 					gate_obj.write(cr,uid,so_grn_rec.gp_id.id,{'in_state':'done'})
 		
-		#cr.execute("""select all_transaction_mails('PO/SO GRN Approval',%s)"""%(ids[0]))
-		"""Raj
-		data = cr.fetchall();
-		vals = self.email_ids(cr,uid,ids,context = context)
-		if (not vals['email_to']) and (not vals['email_cc']):
-			pass
-		else:
-			ir_mail_server = self.pool.get('ir.mail_server')
-			msg = ir_mail_server.build_email(
-					email_from = vals['email_from'][0],
-					email_to = vals['email_to'],
-					subject = " PO/SO GRN - Approved",
-					body = data[0][0],
-					email_cc = vals['email_cc'],
-					object_id = ids[0] and ('%s-%s' % (ids[0], 'kg.po.grn')),
-					subtype = 'html',
-					subtype_alternative = 'plain')
-			res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)				  
-		if grn_entry.billing_status == 'applicable':
-			self.write(cr,uid,ids[0],{'invoice_flag':'True'})
-		if grn_entry.grn_type == 'from_so' and grn_entry.so_id.gp_id:"""
-			
-		
 		return True
 		
 	## GRN to PO Bill creation Part ##
@@ -1752,9 +1747,7 @@ class kg_po_grn(osv.osv):
 		}
 		return {'type': 'ir.actions.report.xml', 'report_name': 'grn.print', 'datas': datas, 'nodestroy': True,'name': 'GRN'}	  
 	
-	def grn_register_scheduler_mail(self,cr,uid,ids,context=None):
-		return True
-
+	
 kg_po_grn()
 
 class po_grn_line(osv.osv):
@@ -1881,9 +1874,22 @@ class po_grn_line(osv.osv):
 		'uom_conversation_factor': fields.related('product_id','uom_conversation_factor', type='selection',selection=UOM_CONVERSATION, string='UOM Conversation Factor',store=True),
 		'length': fields.float('Length'),
 		'breadth': fields.float('Breadth'),
-	
+		'weight': fields.float('Weight'),
+		
 	}
 	
+	def _check_weight(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+		if rec.weight < 0.00:
+			return False					
+		return True
+		
+	_constraints = [
+	
+		(_check_weight,'You cannot save with negative weight !',['Weight']),
+		
+		]
+		
 	def onchange_product_id(self, cr, uid, ids, product_id, uom_id,context=None):
 			
 		value = {'uom_id': ''}

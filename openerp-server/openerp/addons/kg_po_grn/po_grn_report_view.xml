@@ -10,7 +10,7 @@
         name="onscreen_po_grn_report"
         rml="kg_po_grn/report/GRN_Slip.jrxml"
         id="po_grn_jasper_report" 
-        menu="True"
+        menu="False"
         header="False"
         />
 
