@@ -80,7 +80,7 @@ class kg_moc_master(osv.osv):
 		'line_ids_b':fields.one2many('ch.mechanical.chart', 'header_id', "Mechanical Chart"),
 		'line_ids_c':fields.one2many('ch.fettling.process', 'header_id', "Fettling Process"),
 		
-		'weight_type': fields.selection([('ci','CI'),('ss','SS'),('non_ferrous','Non-Ferrous')],'Family Type'),
+		'weight_type': fields.selection([('ci','CI'),('ss','SS'),('non_ferrous','Non-Ferrous')],'Family Type',required=True),
 		'alias_name': fields.char('Alias Name', size=128),
 		'moc_type': fields.selection([('foundry_moc','Foundry MOC'),('purchase_moc','Purchase MOC'),('both','Both')],'Type'),
 		'product_id': fields.many2one('product.product','Equivalent Rejection Material'),	
