@@ -424,7 +424,7 @@ class ch_ms_raw_material(osv.osv):
 	def _check_one_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.uom_conversation_factor =='one_dimension':
-			if entry.length == 0 or entry.qty == 0:				
+			if entry.qty == 0:				
 				return False
 			return True
 		return True
@@ -439,7 +439,7 @@ class ch_ms_raw_material(osv.osv):
 		
 	_constraints = [		
 			  
-		(_check_one_values, 'Check the zero values not allowed..!!',['Length,Qty']),	
+		(_check_one_values, 'Check the zero values not allowed..!!',['Qty']),	
 		(_check_two_values, 'Check the zero values not allowed..!!',['Breadth,Length,Qty']),
 		(_check_values, 'Please Check the same Raw Material not allowed..!!',['Raw Material']),	
 		

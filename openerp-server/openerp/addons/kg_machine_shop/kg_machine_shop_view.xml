@@ -88,12 +88,12 @@
 									<tree string="Raw Materials Entry Tree" editable="top" >									
 										<field name="product_id" on_change="onchange_uom(product_id)" />											
 										<field name="uom" readonly="1"/>	
-										<field name="uom_conversation_factor" readonly="1"/>	
-										<field name="od" />	
-										<field name="length" attrs="{'required': [('uom_conversation_factor','in',['one_dimension','two_dimension'])]}"/>	
+										<field name="uom_conversation_factor" readonly="1" invisible="1"/>	
+										<field name="od" invisible="1"/>	
+										<field name="length" attrs="{'required': [('uom_conversation_factor','in',['two_dimension'])]}"/>	
 										<field name="breadth" attrs="{'required': [('uom_conversation_factor','in',['two_dimension'])]}"/>	
-										<field name="thickness" />	
-										<field name="weight" />	
+										<field name="thickness" invisible="1"/>	
+										<field name="weight" invisible="1"/>	
 										<field name="qty" required="1" />
 										<field name="remarks" widget="char"/>														
 									</tree>
