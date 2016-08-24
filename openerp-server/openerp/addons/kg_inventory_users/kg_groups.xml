@@ -20,8 +20,7 @@
 			ref('kg_menus.mam_uom_master'),
 			ref('kg_menus.mam_brandmocrate_purchase_master'),
 			ref('kg_menus.qam_quotation'),
-			ref('kg_menus.rpm_excel_report_menu'),
-			ref('kg_machinery_master.mam_machinery_master'),
+	
 			
             ])]" name="menu_access"/>
             <field name="users" eval="[(4, ref('base.user_root'))]"/>
@@ -87,11 +86,9 @@
 			ref('kg_menus.cam_crm_city_master'),
 			ref('kg_menus.cam_crm_chemical_master'),
 			ref('kg_menus.cam_crm_industry_master'),
-			ref('kg_menus.mam_fluid_master_menu'),
-			ref('kg_menus.mam_primemover_master_menu'),
-			ref('kg_menus.mam_pumpseries_master_menu'),
 			ref('kg_menus.cpm_crm_enquiry_menu'),
 			ref('kg_menus.tma_crm_enquiry'),
+			ref('kg_menus.tma_crm_offer'),
 			
             ])]" name="menu_access"/>
             <field name="users" eval="[(4, ref('base.user_root'))]"/>

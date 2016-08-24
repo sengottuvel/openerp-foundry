@@ -412,6 +412,76 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
 		</record>
 		
+		<record id="crm_admin_crm_offer" model="ir.model.access">
+			<field name="model_id" ref="kg_crm_offer.model_kg_crm_offer"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">CRM Offer</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_ch_pump_offer" model="ir.model.access">
+			<field name="model_id" ref="kg_crm_offer.model_ch_pump_offer"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">CRM Ch Pump Offer</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_ch_spare_offer" model="ir.model.access">
+			<field name="model_id" ref="kg_crm_offer.model_ch_spare_offer"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">CRM Ch Spare Offer</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_ch_spare_offer_fou" model="ir.model.access">
+			<field name="model_id" ref="kg_crm_offer.model_ch_spare_offer_fou"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">ch spare offer fou</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_ch_spare_offer_ms" model="ir.model.access">
+			<field name="model_id" ref="kg_crm_offer.model_ch_spare_offer_ms"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">ch spare offer ms</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_ch_spare_offer_bot" model="ir.model.access">
+			<field name="model_id" ref="kg_crm_offer.model_ch_spare_offer_bot"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">ch spare offer bot</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_ch_accessories_offer" model="ir.model.access">
+			<field name="model_id" ref="kg_crm_offer.model_ch_accessories_offer"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">CRM Ch Accessories Offer</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
     </data>
 </openerp>
 	
