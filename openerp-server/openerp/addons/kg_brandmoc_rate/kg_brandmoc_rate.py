@@ -52,6 +52,7 @@ class kg_brandmoc_rate(osv.osv):
 	_columns = {
 			
 		'product_id': fields.many2one('product.product','Product Name', required=True),
+		'uom_id': fields.many2one('product.uom','UOM'),
 		'name': fields.char('Name'),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'eff_date': fields.date('Effective date',required=True),		
@@ -130,10 +131,10 @@ class kg_brandmoc_rate(osv.osv):
 		return True
 		
 	def onchange_product(self, cr, uid, ids, product_id, context=None):		
-		value = {'name': ''}
+		value = {'name': '','uom_id':''}
 		if product_id:
 			pro_rec = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
-			value = {'name': pro_rec.name_template}			
+			value = {'name': pro_rec.name_template,'uom_id':pro_rec.uom_po_id.id}			
 		return {'value': value}
 		
 	def copy_brand(self, cr, uid, ids, context=None):	

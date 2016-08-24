@@ -32,10 +32,10 @@ class kg_crm_enquiry(osv.osv):
 	_columns = {
 	
 		### Header Details ####
-		'name': fields.char('Offer No', size=128,select=True),
+		'name': fields.char('Enquiry No', size=128,select=True),
 		'schedule_no': fields.char('Schedule No', size=128,select=True),
-		'enquiry_date': fields.date('Enquiry Date',required=True),
-		'offer_date': fields.date('Offer Date'),
+		'enquiry_date': fields.date('Customer Enquiry Date',required=True),
+		'offer_date': fields.date('Enquiry Date',required=True),
 		'note': fields.char('Notes'),
 		'service_det': fields.char('Service Details'),
 		'remarks': fields.text('Remarks'),
@@ -69,7 +69,7 @@ class kg_crm_enquiry(osv.osv):
 		
 		
 		########## Karthikeyan Added Start here ################
-		'enquiry_no': fields.char('Enquiry No.', size=128,select=True,required=True),
+		'enquiry_no': fields.char('Customer Enquiry No.', size=128,select=True,required=True),
 		'scope_of_supply': fields.selection([('bare_pump','Bare Pump'),('pump_with_acces','Pump With Accessories'),('pump_with_acces_motor','Pump With Accessories And Motor')],'Scope of Supply'),
 		'pump': fields.selection([('gld_packing','Gland Packing'),('mc_seal','M/C Seal'),('dynamic_seal','Dynamic seal')],'Shaft Sealing', required=True),
 		'drive': fields.selection([('motor','Motor'),('vfd','VFD'),('engine','Engine')],'Drive'),
@@ -93,6 +93,7 @@ class kg_crm_enquiry(osv.osv):
 	
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_crm_enquiry', context=c),
 		'enquiry_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'offer_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':time.strftime('%Y-%m-%d %H:%M:%S'),
 		'state': 'draft',
@@ -179,7 +180,7 @@ class kg_crm_enquiry(osv.osv):
 	_constraints = [		
 		
 		(_future_enquiry_date_check, 'System not allow to save with past date. !!',['Enquiry Date']),
-		(_future_due_date_check, 'System not allow to save with past date. !!',['Due Date']),
+		(_future_due_date_check, 'Should be grater than current date !!',['Due Date']),
 		#(_check_duplicates, 'System not allow to do duplicate entry !!',['']),
 		#(_check_lineitems, 'System not allow to save with empty Work Order Details !!',['']),
 		#(_Validation, 'Special Character Not Allowed in Work Order No.', ['']),
@@ -206,7 +207,6 @@ class kg_crm_enquiry(osv.osv):
 		obj = self.search(cr,uid,[('id','!=',rec.id),('customer_id','=',rec.customer_id.id)])
 		if obj:
 			cr.execute(''' delete from ch_kg_crm_enquiry where header_id = %s '''%(rec.id))
-			
 			for item in obj:
 				obj_rec = self.browse(cr,uid,item)
 				child_id = self.pool.get('ch.kg.crm.enquiry').create(cr,uid,{'header_id':rec.id,'enquiry_id':item})
@@ -261,7 +261,54 @@ class kg_crm_enquiry(osv.osv):
 				pass
 		else:
 			pass
-	
+		offer_id = self.pool.get('kg.crm.offer').create(cr,uid,{
+																'enquiry_id': entry.id,
+																'enquiry_no': off_no[0],
+																'enquiry_date': entry.offer_date,
+																'customer_id': entry.customer_id.id,
+																'ref_mode': entry.ref_mode,
+																'market_division': entry.market_division,
+																'purpose': entry.purpose,
+																'segment': entry.segment,
+																})
+		print"offer_idoffer_idoffer_idoffer_id",offer_id
+		print"entry.line_idsentry.line_idsentry.line_ids",entry.ch_line_ids
+		if entry.ch_line_ids:
+			print"entryssssssssssssssssssss",entry
+			for item in entry.ch_line_ids:
+				print"iiiiiiiiiiiiiiiiiiiiii",item
+				if item.purpose_categ == 'pump':
+					primecost_vals = self._prepare_primecost(cr,uid,item)
+					print"primecost_valsprimecost_vals",primecost_vals
+					pump_id = self.pool.get('ch.pump.offer').create(cr,uid,{
+																	'header_id': offer_id,
+																	'pumpseries_id': item.pumpseries_id.id,
+																	'pump_id': item.pump_id.id,
+																	'qty': item.qty,
+																	'moc_const_id': item.moc_const_id.id,
+																	'prime_cost': primecost_vals,
+																	})
+					print"pump_idpump_idpump_id",pump_id
+				if item.purpose_categ == 'spare':
+					primecost_vals = self._prepare_primecost(cr,uid,item)
+					print"primecost_vals",primecost_vals
+					
+					spare_id = self.pool.get('ch.spare.offer').create(cr,uid,{
+																	'header_id': offer_id,
+																	'pumpseries_id': item.spare_pumpseries_id.id,
+																	'pump_id': item.spare_pump_id.id,
+																	'prime_cost': primecost_vals,
+																	})
+				if item.acces == 'yes':
+					print"bbbbbbbbbbbbbbbbBB"
+					for ele in item.line_ids_access_a:
+						access_id = self.pool.get('ch.accessories.offer').create(cr,uid,{
+																	'header_id': offer_id,
+																	'access_id': ele.access_id.id,
+																	'moc_id': ele.moc_id.id,
+																	'qty': ele.qty,
+																	})
+			
 		self.write(cr, uid, ids, {
 									#'name':self.pool.get('ir.sequence').get(cr, uid, 'kg.crm.enquiry'),
 									'name':off_no[0],
@@ -270,7 +317,214 @@ class kg_crm_enquiry(osv.osv):
 									'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')
 								})
 		return True
+	
+	def _prepare_primecost(self,cr,uid,item,context=None):
+		
+		#~ for item in entry.ch_line_ids:
+		
+		design_rate = 0.00
+		moc_rate = 0.00
+		brandmoc_rate = 0.00
+		h_brandmoc_rate = 0.00
+		pat_amt = 0.00
+		prime_cost = 0.00
+		prime_cost_1 = 0.00
+		qty = 0.00
+		price = 0.00
+		ms_price = 0.00
+		tot_price = 0.00
+		
+		price_1 = 0.00
+		price_2 = 0.00
+		if item.purpose_categ == 'pump':
+			bom_obj = self.pool.get('kg.bom').search(cr,uid,[('pump_model_id','=',item.pump_id.id)])
+			if bom_obj:
+				bom_rec = self.pool.get('kg.bom').browse(cr,uid,bom_obj[0])
+				bom_line_id = bom_rec.line_ids
+				bom_ms_line_id = bom_rec.line_ids_a
+				bom_bot_line_id = bom_rec.line_ids_b
+		elif item.purpose_categ == 'spare':
+				bom_line_id = item.line_ids
+				bom_ms_line_id = item.line_ids_a
+				bom_bot_line_id = item.line_ids_b
+				print"bom_line_idbom_line_id",bom_line_id
+				print"bom_ms_line_idbom_ms_line_id",bom_ms_line_id
+				print"bom_bot_line_idbom_bot_line_id",bom_bot_line_id
+				
+		# FOU Item
+		if bom_line_id:
+			for bom_line in bom_line_id:
+				pattern_id = bom_line.pattern_id.id
+				pattern_obj = self.pool.get('kg.pattern.master').search(cr,uid,[('id','=',pattern_id)])
+				print"pattern_objpattern_obj",pattern_obj
+				if pattern_obj:
+					pattern_rec = self.pool.get('kg.pattern.master').browse(cr,uid,pattern_obj[0])
+					pattern_line_id = pattern_rec.line_ids
+					print"pattern_line_idpattern_line_id",pattern_line_id
+					if pattern_line_id:
+						if item.purpose_categ == 'pump':
+							item_moc_const_id = item.moc_const_id.id
+						elif item.purpose_categ == 'spare':
+							item_moc_const_id = item.spare_moc_const_id.id
+						print"item_moc_const_id",item_moc_const_id	
+						print"pattern_rec.id",pattern_rec.id	
+						pat_line_obj = self.pool.get('ch.mocwise.rate').search(cr,uid,[('code','=',item_moc_const_id),('header_id','=',pattern_rec.id)])
+						print"pat_line_objpat_line_obj",pat_line_obj
+						
+						pat_line_rec = self.pool.get('ch.mocwise.rate').browse(cr,uid,pat_line_obj[0])
+						moc_id = pat_line_rec.moc_id.id
+						print"moc_idmoc_idmoc_id",moc_id
+						if moc_id:
+							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
+							if moc_rec.weight_type == 'ci':
+								qty = bom_line.qty * pattern_rec.ci_weight
+							elif moc_rec.weight_type == 'ss':
+								qty = bom_line.qty * pattern_rec.pcs_weight
+							elif moc_rec.weight_type == 'non_ferrous':
+								qty = bom_line.qty * pattern_rec.nonferous_weight
+							else:
+								qty = 0
+							print"qtyqtyqtyqtyqtyqty",qty
+							moc_line_id = moc_rec.line_ids
+							if moc_line_id:
+								for moc_line in moc_rec.line_ids:
+									brandmoc_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',moc_line.product_id.id)])
+									brandmoc_rate = 0.00
+									if brandmoc_obj:
+										brandmoc_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,brandmoc_obj[0])
+										print"brandmoc_recbrandmoc_rec",brandmoc_rec.id
+										brandmoc_line_id = brandmoc_rec.line_ids
+										print"brandmoc_line_idbrandmoc_line_id",brandmoc_line_id
+										if brandmoc_line_id:
+											for brandmoc_line in brandmoc_line_id:
+												if brandmoc_line.moc_id.id == moc_id:
+													design_rate = brandmoc_line.rate
+													moc_rate = moc_line.qty * design_rate
+													print"design_ratedesign_rate",design_rate
+													print"moc_ratemoc_rate",moc_rate
+										brandmoc_rate += moc_rate
+										print"brandmoc_ratebrandmoc_rate",brandmoc_rate
+						h_brandmoc_rate = brandmoc_rate / 100.00
+						print"h_brandmoc_rateh_brandmoc_rate",h_brandmoc_rate
+						pat_amt = h_brandmoc_rate * qty
+						print"pattern_recpattern_recpattern_recpattern_rec",pattern_rec.name
+						print"pat_amtpat_amtpat_amt",pat_amt
+				prime_cost_1 = pat_amt 
+				print"vvvvvvvvvvvvvvvvvvvvvvvvvvv",prime_cost_1
+				prime_cost += prime_cost_1
+				print"prime_costprime_costprime_cost",prime_cost
+		# MS Item 
+		if bom_ms_line_id:
+			print"bom_ms_line_idbom_ms_line_id",bom_ms_line_id
 			
+			ms_price = 0.00
+			for bom_ms_line in bom_ms_line_id:
+				tot_price = 0.00
+				ms_id = bom_ms_line.ms_id.id
+				ms_obj = self.pool.get('kg.machine.shop').search(cr,uid,[('id','=',ms_id)])
+				print"ms_objms_obj",ms_obj
+				
+				if ms_obj:
+					ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,ms_obj[0])
+					if item.purpose_categ == 'pump':
+						item_moc_const_id = item.moc_const_id.code
+					elif item.purpose_categ == 'spare':
+						item_moc_const_id = item.spare_moc_const_id.code
+					ms_line_obj = self.pool.get('ch.machine.mocwise').search(cr,uid,[('code','=',item_moc_const_id),('header_id','=',ms_rec.id)])
+					if ms_line_obj:
+						ms_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,ms_line_obj[0])
+						moc_id = ms_line_rec.moc_id.id
+						if ms_rec.line_ids:
+							for raw_line in ms_rec.line_ids:
+								brandmoc_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',raw_line.product_id.id)])
+								if brandmoc_obj:
+									brandmoc_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,brandmoc_obj[0])
+									#~ brandmoc_line_obj = self.pool.get('ch.brandmoc.rate.details').search(cr,uid,[('moc_id','=',moc_id),('header_id','=',brandmoc_rec.id)])
+									brandmoc_line_sql = """ select rate from ch_brandmoc_rate_details where moc_id =  %s and header_id = %s order by rate desc limit 1"""%(moc_id,brandmoc_rec.id)
+									cr.execute(brandmoc_line_sql)		
+									brandmoc_line_data = cr.dictfetchall()
+									if brandmoc_line_data:
+										design_rate = brandmoc_line_data[0]['rate']
+										if raw_line.product_id.uom_conversation_factor == 'one_dimension':
+											qty = raw_line.qty
+										elif raw_line.product_id.uom_conversation_factor == 'two_dimension':
+											qty = raw_line.qty * raw_line.length * raw_line.breadth
+										if raw_line.product_id.uom_id.id == brandmoc_rec.uom_id.id:
+											price = qty * design_rate
+										elif raw_line.product_id.uom_id.id != brandmoc_rec.uom_id.id:
+											if brandmoc_rec.uom_id.code == 'Kg':
+												kg_val = brandmoc_rec.product_id.po_uom_in_kgs / brandmoc_rec.product_id.po_uom_coeff
+												tot_kg = qty * kg_val
+												price = tot_kg * design_rate
+											else:
+												kg_val = design_rate / brandmoc_rec.product_id.po_uom_coeff
+												price = kg_val * qty
+									tot_price += price
+				ms_price += tot_price * bom_ms_line.qty
+				print"ms_pricems_price",ms_price
+		# BOT Item 
+		if bom_bot_line_id:
+			bot_price = 0.00
+			for bom_bot_line in bom_bot_line_id:
+				tot_price = 0.00
+				if item.purpose_categ == 'pump':
+					bot_id = bom_bot_line.bot_id.id
+				elif item.purpose_categ == 'spare':
+					bot_id = bom_bot_line.ms_id.id
+				ms_obj = self.pool.get('kg.machine.shop').search(cr,uid,[('id','=',bot_id)])
+				if ms_obj:
+					ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,ms_obj[0])
+					if item.purpose_categ == 'pump':
+						item_moc_const_id = item.moc_const_id.code
+					elif item.purpose_categ == 'spare':
+						item_moc_const_id = item.spare_moc_const_id.code
+					ms_line_obj = self.pool.get('ch.machine.mocwise').search(cr,uid,[('code','=',item_moc_const_id),('header_id','=',ms_rec.id)])
+					if ms_line_obj:
+						ms_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,ms_line_obj[0])
+						moc_id = ms_line_rec.moc_id.id
+						if ms_rec.line_ids:
+							for raw_line in ms_rec.line_ids:
+								brandmoc_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',raw_line.product_id.id)])
+								if brandmoc_obj:
+									brandmoc_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,brandmoc_obj[0])
+									#~ brandmoc_line_obj = self.pool.get('ch.brandmoc.rate.details').search(cr,uid,[('moc_id','=',moc_id),('header_id','=',brandmoc_rec.id)])
+									brandmoc_line_sql = """ select rate from ch_brandmoc_rate_details where moc_id =  %s and header_id = %s order by rate desc limit 1"""%(moc_id,brandmoc_rec.id)
+									cr.execute(brandmoc_line_sql)		
+									brandmoc_line_data = cr.dictfetchall()
+									if brandmoc_line_data:
+										design_rate = brandmoc_line_data[0]['rate']
+										if raw_line.product_id.uom_conversation_factor == 'one_dimension':
+											qty = raw_line.qty
+										elif raw_line.product_id.uom_conversation_factor == 'two_dimension':
+											qty = raw_line.qty * raw_line.length * raw_line.breadth
+										if raw_line.product_id.uom_id.id == brandmoc_rec.uom_id.id:
+											price = qty * design_rate
+										elif raw_line.product_id.uom_id.id != brandmoc_rec.uom_id.id:
+											if brandmoc_rec.uom_id.code == 'Kg':
+												kg_val = brandmoc_rec.product_id.po_uom_in_kgs / brandmoc_rec.product_id.po_uom_coeff
+												tot_kg = qty * kg_val
+												price = tot_kg * design_rate
+											else:
+												kg_val = design_rate / brandmoc_rec.product_id.po_uom_coeff
+												price = kg_val * qty
+									tot_price += price
+				bot_price += tot_price * bom_bot_line.qty
+				print"bot_pricebot_price",bot_price
+		print"aaaaaaaaaaaa",prime_cost
+		print"aaaaaaaaaaaa",ms_price
+		print"aaaaaaaaaaaa",bot_price
+		print"aaaaaaaaaaaa",item.qty
+		d= prime_cost + ms_price + bot_price
+		print"ddddddddddddddddddddddDD",d
+		if item.purpose_categ == 'pump':
+			item_qty = item.qty
+		elif item.purpose_categ == 'spare':
+			item_qty= 1
+		primecost_tot = (prime_cost + ms_price + bot_price) * item_qty
+		primecost_vals = primecost_tot
+		
+		return primecost_vals
+				
 	def entry_call_back(self,cr,uid,ids,context=None):
 		
 		self.write(cr, uid, ids, {'state': 'call','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
@@ -455,7 +709,8 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'primemover_id': fields.many2one('kg.primemover.master','Primemover'),
 		'operation_range': fields.char('Operation Range'),
 		'primemover_categ': fields.selection([('engine','ENGINE'),('motor','MOTOR'),('vfd','VFD')],'Primemover Category'),
-		'moc_const_id':fields.many2one('kg.moc.construction', 'MOC Construction',domain = [('active','=','t')],required=True),
+		'moc_const_id':fields.many2one('kg.moc.construction', 'MOC Construction',domain = [('active','=','t')]),
+		'spare_moc_const_id':fields.many2one('kg.moc.construction', 'MOC Construction',domain = [('active','=','t')]),
 		
 		# FC GB
 		'gear_box_loss_rated': fields.float('Gear Box Loss-Rated'),
@@ -477,7 +732,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'mototr_output_power_lower_speed': fields.float('Motor Output Power-Lower Speed'),
 		
 		# Accesssories 
-		'acces': fields.selection([('yes','Yes'),('no','No')],'Accessories',required=True),
+		'acces': fields.selection([('yes','Yes'),('no','No')],'Accessories'),
 		'acces_type': fields.selection([('coupling','Coupling'),('coupling_guard','Coupling Guard'),('base_plate','Base Plate')],'Type'),
 		
 		'wo_id': fields.many2one('kg.work.order','WO',),

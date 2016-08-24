@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+
+	<!-- Form View Start -->
+
+		<record id="t_form_v_crm_offer" model="ir.ui.view">
+			<field name="name">Offer Entry Form</field>
+			<field name="model">kg.crm.offer</field>
+			<field name="arch" type="xml">
+				<form string="CRM Offer" version="7.0" create="false" delete="false">
+					<header>
+						<button name="entry_confirm" type="object" string="Process Offer" states="draft" class="oe_highlight"/>
+						<button name="entry_call_back" type="object" string="Call Back" states="draft" class="oe_highlight"/>
+					</header>
+					<sheet>		
+						<group>
+							<group>
+								<field name="name" readonly="1"/>
+								<field name="offer_date" readonly="1"/>
+								<field name="customer_id" required="1" readonly="1"/>
+								<field name="ref_mode" readonly="1"/>
+								<field name="market_division" readonly="1"/>
+								<field name="note"/>
+								<field name="purpose" readonly="1"/>
+							</group>											
+							<group>
+								<field name="enquiry_id" readonly="1" invisible="1"/>
+								<field name="enquiry_no" readonly="1"/>
+								<field name="enquiry_date" readonly="1"/>
+								<field name="segment" readonly="1"/>	
+								<field name="state" style="width: 30%%" class="att_state_change" readonly="1"/>
+							</group>	
+						</group>
+						<group string="Pump Offer">
+							<field name="line_pump_ids" colspan="4" nolabel="1">
+								<tree string="Pump History">
+									<field name="pumpseries_id" required="1"/>
+									<field name="pump_id" required="1"/>
+									<field name="moc_const_id"/>
+									<field name="qty"/>
+									<field name="prime_cost"/>
+									<field name="sam_ratio"/>
+									<field name="dealer_discount"/>
+									<field name="customer_discount"/>
+									<field name="special_discount"/>
+									<field name="tax"/>
+									<field name="p_f"/>
+									<field name="freight"/>
+									<field name="insurance"/>
+									<field name="pump_price"/>
+									<field name="total_price"/>
+								</tree>
+							</field>
+							<group class="oe_subtotal_footer oe_right">
+								<field name="pump_tot_price"/>
+								<field name="pump_sam_ratio"/>
+								<field name="pump_dealer_discount"/>
+								<field name="pump_customer_discount"/>
+								<field name="pump_tax"/>
+								<field name="pump_p_f"/>
+								<field name="pump_freight"/>
+								<field name="pump_insurance"/>
+								<div class="oe_subtotal_footer_separator oe_inline">
+								<label for="pump_net_amount"/>
+								</div>
+								<field name="pump_net_amount" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+							</group>
+						</group>
+						<group string="Spare Offer">
+							<field name="line_spare_ids" colspan="4" nolabel="1">
+								<tree string="Spare History">
+									<field name="pumpseries_id" required="1"/>
+									<field name="pump_id" required="1"/>
+									<field name="spare_count"/>
+									<field name="price_cost"/>
+									<field name="total_price"/>
+								</tree>
+							</field>
+							<group class="oe_subtotal_footer oe_right">
+								<field name="spare_tot_price"/>
+								<field name="spare_sam_ratio"/>
+								<field name="spare_dealer_discount"/>
+								<field name="spare_customer_discount"/>
+								<field name="spare_tax"/>
+								<field name="spare_p_f"/>
+								<field name="spare_freight"/>
+								<field name="spare_insurance"/>
+								<div class="oe_subtotal_footer_separator oe_inline">
+								<label for="spare_net_amount"/>
+								</div>
+								<field name="spare_net_amount" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+							</group>
+						</group>
+						<group string="Accessories Offer">
+							<field name="line_accessories_ids" colspan="4" nolabel="1">
+								<tree string="Accessories History">
+									<field name="access_id" required="1"/>
+									<field name="moc_id" required="1"/>
+									<field name="qty"/>
+									<field name="pump_price"/>
+									<field name="total_price"/>
+								</tree>
+							</field>
+							<group class="oe_subtotal_footer oe_right">
+								<field name="access_tot_price"/>
+								<field name="access_sam_ratio"/>
+								<field name="access_dealer_discount"/>
+								<field name="access_customer_discount"/>
+								<field name="access_tax"/>
+								<field name="access_p_f"/>
+								<field name="access_freight"/>
+								<field name="access_insurance"/>
+								<div class="oe_subtotal_footer_separator oe_inline">
+								<label for="access_net_amount"/>
+								</div>
+								<field name="access_net_amount" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+							</group>
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+		<record id="t_form_v_pump_offer" model="ir.ui.view">
+			<field name="name">Pump Offer Entry Form</field>
+			<field name="model">ch.pump.offer</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<form string="Pump Offer Details" version="7.0">
+				<sheet>
+					<group string="Pump Offer Details">
+						<group>
+						<field name="pumpseries_id" required="1"/>
+						<field name="pump_id" required="1"/>
+						<field name="moc_const_id"/>
+						<field name="qty"/>
+						<field name="prime_cost"/>
+						<field name="sam_ratio"/>
+						<field name="dealer_discount"/>
+						<field name="customer_discount"/>
+						<field name="special_discount"/>
+						</group>
+						<group>
+						<field name="tax"/>
+						<field name="p_f"/>
+						<field name="freight"/>
+						<field name="insurance"/>
+						<field name="pump_price"/>
+						<field name="total_price"/>
+						</group>					
+						<group>
+						</group>
+						<group class="oe_subtotal_footer oe_right">
+							<field name="tot_price"/>
+							<field name="sam_ratio_tot"/>
+							<field name="dealer_discount_tot"/>
+							<field name="customer_discount_tot"/>
+							<field name="tax_tot"/>
+							<field name="p_f_tot"/>
+							<field name="freight_tot"/>
+							<field name="insurance_tot"/>
+							<div class="oe_subtotal_footer_separator oe_inline">
+							<label for="net_amount"/>
+							</div>
+							<field name="net_amount" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+						</group>
+					</group>
+				</sheet>
+				</form>
+			</field>
+		</record>
+		
+		<record id="t_form_v_spare_offer" model="ir.ui.view">
+			<field name="name">Spare Offer Entry Form</field>
+			<field name="model">ch.spare.offer</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<form string="Spare Offer Details" version="7.0">
+				<sheet>
+					<group string="Spare Offer Details">
+						<group>
+						<field name="pumpseries_id" required="1"/>
+						<field name="pump_id" required="1"/>
+						</group>
+						<group>
+						<field name="spare_count"/>
+						<field name="price_cost"/>
+						<field name="total_price"/>
+						</group>					
+						
+					</group>
+					
+					<notebook>
+						<page string="Foundry Items">
+							<field name="line_fou_ids" colspan="4" nolabel="1">
+								<tree string="Foundry History">
+									<field name="pattern_id" required="1"/>
+									<field name="pattern_name" required="1"/>
+									<field name="moc_id"/>
+									<field name="qty"/>
+									<field name="prime_cost"/>
+									<field name="ratio"/>
+									<field name="dealer_discount"/>
+									<field name="customer_discount"/>
+									<field name="special_discount"/>
+									<field name="tax"/>
+									<field name="p_f"/>
+									<field name="freight"/>
+									<field name="insurance"/>
+									<field name="quote_price"/>
+									<field name="total_price"/>
+								</tree>
+								<form string="Foundry History">
+									<group>
+									<group>
+									<field name="pattern_id" required="1" on_change="onchange_pattern_name(pattern_id)"/>
+									<field name="pattern_name" required="1" readonly="1"/>
+									<field name="moc_id"/>
+									<field name="qty"/>
+									<field name="prime_cost"/>
+									<field name="ratio"/>
+									<field name="dealer_discount"/>
+									<field name="customer_discount"/>
+									</group>
+									<group>
+									<field name="special_discount"/>
+									<field name="tax"/>
+									<field name="p_f"/>
+									<field name="freight"/>
+									<field name="insurance"/>
+									<field name="quote_price"/>
+									<field name="total_price"/>
+									</group>
+									</group>
+								</form>
+							</field>
+						</page>
+						<page string="MS Items">
+							<field name="line_ms_ids" colspan="4" nolabel="1">
+								<tree string="MS History">
+									<field name="ms_line_id" required="1"/>
+									<field name="ms_id" required="1"/>
+									<field name="moc_id"/>
+									<field name="qty"/>
+									<field name="prime_cost"/>
+									<field name="ratio"/>
+									<field name="dealer_discount"/>
+									<field name="customer_discount"/>
+									<field name="special_discount"/>
+									<field name="tax"/>
+									<field name="p_f"/>
+									<field name="freight"/>
+									<field name="insurance"/>
+									<field name="quote_price"/>
+									<field name="total_price"/>
+								</tree>
+								<form string="Foundry History">
+									<group>
+									<group>
+									<field name="ms_line_id" required="1"/>
+									<field name="ms_id" required="1"/>
+									<field name="moc_id"/>
+									<field name="qty"/>
+									<field name="prime_cost"/>
+									<field name="ratio"/>
+									<field name="dealer_discount"/>
+									<field name="customer_discount"/>
+									</group>
+									<group>
+									<field name="special_discount"/>
+									<field name="tax"/>
+									<field name="p_f"/>
+									<field name="freight"/>
+									<field name="insurance"/>
+									<field name="quote_price"/>
+									<field name="total_price"/>
+									</group>
+									</group>
+								</form>
+							</field>
+						</page>
+						<page string="BOT Items">
+							<field name="line_bot_ids" colspan="4" nolabel="1">
+								<tree string="BOT History">
+									<field name="bot_line_id" required="1"/>
+									<field name="ms_id" required="1"/>
+									<field name="moc_id"/>
+									<field name="qty"/>
+									<field name="prime_cost"/>
+									<field name="ratio"/>
+									<field name="dealer_discount"/>
+									<field name="customer_discount"/>
+									<field name="special_discount"/>
+									<field name="tax"/>
+									<field name="p_f"/>
+									<field name="freight"/>
+									<field name="insurance"/>
+									<field name="quote_price"/>
+									<field name="total_price"/>
+								</tree>
+								<form string="BOT History">
+									<group>
+									<group>
+									<field name="bot_line_id" required="1"/>
+									<field name="ms_id" required="1"/>
+									<field name="moc_id"/>
+									<field name="qty"/>
+									<field name="prime_cost"/>
+									<field name="ratio"/>
+									<field name="dealer_discount"/>
+									<field name="customer_discount"/>
+									</group>
+									<group>
+									<field name="special_discount"/>
+									<field name="tax"/>
+									<field name="p_f"/>
+									<field name="freight"/>
+									<field name="insurance"/>
+									<field name="quote_price"/>
+									<field name="total_price"/>
+									</group>
+									</group>
+								</form>
+							</field>
+						</page>
+					</notebook>
+				</sheet>
+				</form>
+			</field>
+		</record>
+		
+		<record id="t_form_v_accessories_offer" model="ir.ui.view">
+			<field name="name">Accessories Offer Entry Form</field>
+			<field name="model">ch.accessories.offer</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<form string="Accessories Offer Details" version="7.0">
+				<sheet>
+					<group string="Accessories Offer Details">
+						<group>
+						<field name="access_id" required="1"/>
+						<field name="moc_id" required="1"/>
+						<field name="qty"/>
+						<field name="sam_ratio"/>
+						<field name="dealer_discount"/>
+						<field name="customer_discount"/>
+						<field name="special_discount"/>
+						</group>
+						<group>
+						<field name="tax"/>
+						<field name="p_f"/>
+						<field name="freight"/>
+						<field name="insurance"/>
+						<field name="pump_price"/>
+						<field name="total_price"/>
+						</group>
+					</group>
+				</sheet>
+				</form>
+			</field>
+		</record>
+		
+		<record id="t_tree_v_crm_offer" model="ir.ui.view">
+			<field name="name">CRM Offer Entry Tree</field>
+			<field name="model">kg.crm.offer</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';black:state == 'moved_to_offer';gray:state == 'call'" 
+								toolbar="True" string="Enquiry Entry Tree"  create="false" delete="false">					
+					<field name="name"/>
+					<field name="enquiry_date"/>
+					<field name="customer_id"/>	
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+		<!-- Search View Start -->
+
+		<record id="t_search_v_crm_offer" model="ir.ui.view">
+            <field name="name">Offer Entry Search</field>
+            <field name="model">kg.crm.offer</field>
+            <field name="arch" type="xml">
+                <search string="Offer Entry Search">
+					<field name="name" string="Offer No"  filter_domain="[('name','ilike',self)]" />
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="Customer" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'customer_id'}"/>
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->
+	
+	<!-- Menu Action Start-->
+		
+		<record id="tma_crm_offer" model="ir.actions.act_window">
+			<field name="name">Offer</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.crm.offer</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_crm_offer"/>
+			<field name="search_view_id" ref="t_search_v_crm_offer"/>
+			<field name="context">{}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+		<record forcecreate="1" id="seq_crm_offer" model="ir.sequence.type">	
+			<field name="name">CRM Offer</field>
+			<field name="code">kg.crm.offer</field>
+		</record>
+
+		<record forcecreate="1" id="crm_offer" model="ir.sequence">
+		  <field name="name">CRM Offer</field>
+		  <field name="code">kg.crm.offer</field>
+		  <field name="padding" eval="3"/>
+		  <field name="prefix">CRMO/%(year)s/</field>
+		  <field name="reset_sequence">fiscal_reset</field>
+		</record>
+		
+	</data>
+</openerp>
