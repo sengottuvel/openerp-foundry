@@ -628,7 +628,7 @@ class ch_bot_details(osv.osv):
 		'header_id':fields.many2one('kg.bom', 'BOM', ondelete='cascade',required=True),
 		'bot_id':fields.many2one('kg.machine.shop', 'Item Code',domain = [('type','=','bot')], ondelete='cascade',required=True),
 		'pos_no': fields.integer('Position No'),
-		'position_id': fields.many2one('kg.position.number','Position No', required=True,domain="[('active','=','t')]"), 		
+		'position_id': fields.many2one('kg.position.number','Position No',domain="[('active','=','t')]"), 		
 		'name':fields.char('Item Name', size=128),	  
 		'qty': fields.integer('Qty', required=True),
 		'remarks':fields.text('Remarks'),   
