@@ -526,9 +526,18 @@ class kg_pattern_master(osv.osv):
 		rec = self.browse(cr,uid,ids[0])				
 		moc_rate_lines=rec.line_ids	
 		moc_obj=self.pool.get('kg.moc.master')	
+		
+		for item in rec.line_ids:
+			print"dddd",	
+			vals = {
+				'read_flag': True,				
+					}
+			self.pool.get('ch.mocwise.rate').write(cr,uid,item.id,vals)
+			
 		for moc_rate_item in moc_rate_lines:			
 			moc_rate_ids=moc_obj.search(cr,uid,[('name','=',moc_rate_item.moc_id.name),('active','=',True)])					
-			moc_rec = moc_obj.browse(cr,uid,moc_rate_ids[0])						
+			moc_rec = moc_obj.browse(cr,uid,moc_rate_ids[0])
+									
 			if moc_rec.weight_type == 'ci':			
 				amount=rec.ci_weight * moc_rate_item.rate
 				vals = {
@@ -548,7 +557,8 @@ class kg_pattern_master(osv.osv):
 					}
 				self.pool.get('ch.mocwise.rate').write(cr,uid,moc_rate_item.id,vals)	
 			else:
-				pass	
+				pass
+					
 		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 	
@@ -607,10 +617,14 @@ class ch_mocwise_rate(osv.osv):
 		'amount':fields.float('Design Amount(Rs)'),
 		'pro_cost':fields.float('Production Cost(Rs)'),
 		'remarks':fields.text('Remarks'),
+		'read_flag': fields.boolean('Read Flag'),
 		
 	}
 	
-	
+	_defaults = {
+		
+		'read_flag' : False,		
+	}
 	   
 	def onchange_rate(self, cr, uid, ids, moc_id, context=None):
 		

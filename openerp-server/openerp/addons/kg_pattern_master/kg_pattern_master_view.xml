@@ -97,13 +97,14 @@
 						</group>
 						<notebook>
 							<page string="MOC Construction &amp; Rate Details">	
-								<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">
+								<field name="line_ids" nolabel="1" >
 									<tree string="MOC Rate Details Entry Tree" editable="top" create="false">	
 										<field name="code" readonly="1"/>																	
-										<field name="moc_id" on_change="onchange_rate(moc_id)" readonly="1"/>														   
+										<field name="moc_id" on_change="onchange_rate(moc_id)" attrs="{'readonly': [('read_flag','=',True)]}"/>														   
 										<field name="rate" readonly="1"/>
 										<field name="pro_cost" readonly="1"/>
 										<field name="amount" readonly="1"/>
+										<field name="read_flag" readonly="1"/>
 										<field name="remarks" widget="char"/>														
 									</tree>
 								</field>																								
