@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+
+	<!-- Form View Start -->
+
+		<record id="t_form_v_service_enquiry" model="ir.ui.view">
+			<field name="name">Enquiry Entry Form</field>
+			<field name="model">kg.service.enquiry</field>
+			<field name="arch" type="xml">
+				<form string="Service Enquiry" version="7.0">
+					<header>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
+						<button name="entry_update" type="object" string="Update" states="open,in_progress" class="oe_highlight"/>
+						<button name="entry_close" type="object" string="Closed" states="in_progress" class="oe_highlight"/>
+					</header>
+					<sheet>		
+						<group>
+							<group>
+								<field name="name" readonly="1"/>
+								<field name="customer_id" required="1"/>
+								<field name="purpose"/>
+							</group>											
+							<group>
+								<field name="complaint_date"/>
+								<field name="state" style="width: 30%%" class="att_state_change"/>
+							</group>	
+						</group>
+						<notebook>
+							<page string="Complaint Details">
+								<field name="line_ids" colspan="4" nolabel="1">
+									<tree string="Complaint Details">
+										<field name="s_no" required="1"/>
+										<field name="wo_line_id" required="1"/>
+										<field name="market_division"/>
+										<field name="ref_mode"/>
+										<field name="dealer_id"/>
+										<field name="purpose"/>
+										<field name="pump_id"/>
+										<field name="pumpseries_id"/>
+										<field name="moc_const_id"/>
+										<field name="nature_of_complaint"/>
+									</tree>
+								</field>
+							</page>
+							<page string="Complaint Feedback">
+								<field name="line_ids_feedback" colspan="4" nolabel="1">
+									<tree string="Complaint Feedback" editable="top" delete="false">
+										<field name="crt_date" required="1" readonly="1"/>
+										<field name="reminder_date" required="1"/>
+										<field name="feedback" required="1"/>
+									</tree>
+								</field>
+							</page>
+							<page string="Entry Info">
+								<group>
+									<group>
+										<field name="company_id"/>
+									</group>
+									<group>
+										<field name="active"/>
+									</group>
+									<group>
+										<field name="user_id"/>
+										<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+										<field name="approve_user_id" attrs="{'invisible':[('state','in',['draft', 'open'])]}"/>
+										<field name="close_user_id" attrs="{'invisible':[('state','in',['draft', 'open','in_progress'])]}"/>
+										<field name="update_user_id"/>
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+										<field name="approve_date" attrs="{'invisible':[('state','in',['draft', 'open'])]}"/>
+										<field name="close_date" attrs="{'invisible':[('state','in',['draft', 'open','in_progress'])]}"/>
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_service_enquiry" model="ir.ui.view">
+			<field name="name">Service Enquiry Entry Tree</field>
+			<field name="model">kg.service.enquiry</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';black:state == 'open';red:state == 'in_progress'" 
+								toolbar="True" string="Enquiry Entry Tree" >
+					<field name="name"/>
+					<field name="complaint_date"/>
+					<field name="customer_id"/>	
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Search View Start -->
+
+		<record id="t_search_v_service_enquiry" model="ir.ui.view">
+            <field name="name">Enquiry Entry Search</field>
+            <field name="model">kg.service.enquiry</field>
+            <field name="arch" type="xml">
+                <search string="Enquiry Entry Search">
+					<field name="name" string="Complaint No"  filter_domain="[('name','ilike',self)]" />
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="open" string="Open" domain="[('state','=','open')]"/>
+					<filter icon="terp-check" name="in_progress" string="In Progress" domain="[('state','=','in_progress')]"/>
+					<filter icon="terp-check" name="close" string="Closed" domain="[('state','=','close')]"/>
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="Customer" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'customer_id'}"/>
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->
+	
+	<record id="t_form_v_ch_service_enquiry" model="ir.ui.view">
+		<field name="name">Complaint Details Entry Form</field>
+		<field name="model">ch.service.enquiry</field>
+		<field eval="8" name="priority"/>
+		<field name="arch" type="xml">
+			<form string="Complaint Details" version="7.0" >
+				<sheet>
+					<group>
+						<group>
+							<field name="s_no" required="1"/>
+							<field name="market_division" required="1"/>
+							<field name="dealer_id" required="1"/>
+							<field name="pump_id" required="1"/>
+							<field name="moc_const_id" required="1"/>
+						</group>
+						<group>
+							<field name="wo_line_id" required="1" on_change="onchange_wo_id(wo_line_id)"/>
+							<field name="ref_mode" required="1"/>
+							<field name="purpose" required="1"/>
+							<field name="pumpseries_id" required="1"/>
+							<field name="nature_of_complaint"/>
+						</group>
+					</group>
+					
+					<notebook>
+						<page string="Foundry Items">
+							<field name="line_ids_fou">
+								<tree string="FOU Details Tree" editable="top" create="false" delete="false">
+									<field name="is_applicalbe"/>
+									<field name="position_id"  readonly="1"/>
+									<field name="pattern_id" required="1" readonly="1"/>
+									<field name="pattern_name" required="1" readonly="1"/>
+									<field name="qty" required="1" readonly="1"/>
+									<field name="remark"/>
+								</tree>
+							</field>
+						</page>
+						<page string="Machine Shop">
+							<field name="line_ids_ms">
+								<tree string="MS Details Tree" editable="top" create="false" delete="false">
+									<field name="is_applicalbe"/>
+									<field name="ms_name_id" required="1" readonly="1"/>
+									<field name="ms_id" required="1" readonly="1"/>
+									<field name="qty" required="1" readonly="1"/>
+									<field name="remark"/>
+								</tree>
+							</field>
+						</page>
+						<page string="BOT">
+							<field name="line_ids_bot">
+								<tree string="BOT Details Tree" editable="top" create="false" delete="false">
+									<field name="is_applicalbe"/>
+									<field name="bot_id" required="1" readonly="1"/>
+									<field name="bot_name" required="1" readonly="1"/>
+									<field name="qty" required="1" readonly="1"/>
+									<field name="remark"/>
+								</tree>
+							</field>
+						</page>
+					</notebook>
+					
+				</sheet>
+			</form>
+		</field>
+	</record>	
+	<!-- Menu Action Start-->
+		
+		<record id="tma_service_enquiry" model="ir.actions.act_window">
+			<field name="name">Service Enquiry</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.service.enquiry</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_service_enquiry"/>
+			<field name="search_view_id" ref="t_search_v_service_enquiry"/>
+			<field name="context">{}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Sequence Number Setting Starts Here -->
+	
+		<record forcecreate="1" id="seq_service_enq" model="ir.sequence.type">	
+			<field name="name">Service Enquiry</field>
+			<field name="code">kg.service.enquiry</field>
+		</record>
+
+		<record forcecreate="1" id="service_enquiry" model="ir.sequence">
+		  <field name="name">Service Complaint</field>
+		  <field name="code">kg.service.enquiry</field>
+		  <field name="padding" eval="3"/>
+		  <field name="prefix">SC/%(year)s/</field>
+		  <field name="reset_sequence">fiscal_reset</field>
+		</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	</data>
+</openerp>

@@ -482,6 +482,86 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
 		</record>
 		
+		<record id="crm_admin_service_enquiry" model="ir.model.access">
+			<field name="model_id" ref="kg_service_enquiry.model_kg_service_enquiry"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Service Enquiry</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_ch_service_enquiry" model="ir.model.access">
+			<field name="model_id" ref="kg_service_enquiry.model_ch_service_enquiry"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch Service Enquiry</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_ch_service_enquiry_fou" model="ir.model.access">
+			<field name="model_id" ref="kg_service_enquiry.model_ch_service_enquiry_fou"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch Service Enquiry FOU</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_ch_service_enquiry_ms" model="ir.model.access">
+			<field name="model_id" ref="kg_service_enquiry.model_ch_service_enquiry_ms"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch Service Enquiry MS</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_ch_service_enquiry_bot" model="ir.model.access">
+			<field name="model_id" ref="kg_service_enquiry.model_ch_service_enquiry_bot"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch Service Enquiry BOT</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_ch_service_enquiry_feedback" model="ir.model.access">
+			<field name="model_id" ref="kg_service_enquiry.model_ch_service_enquiry_feedback"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch Service Enquiry Feedback</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_kg_bom" model="ir.model.access">
+			<field name="model_id" ref="kg_bom.model_kg_bom"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">BOM</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_kg_bom_line" model="ir.model.access">
+			<field name="model_id" ref="kg_bom.model_ch_bom_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">BOM Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
     </data>
 </openerp>
 	

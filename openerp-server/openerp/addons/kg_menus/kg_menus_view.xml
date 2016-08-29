@@ -85,6 +85,9 @@
 				<!-- Offer --> 
 				<menuitem action="kg_crm_offer.tma_crm_offer" name="Offer" id="tma_crm_offer" parent="cpm_crm_enquiry_menu" sequence="2"/>
 				
+				<!-- Service Complaint --> 
+				<menuitem action="kg_service_enquiry.tma_service_enquiry" name="Service Complaint" id="tma_service_enquiry" parent="cpm_crm_enquiry_menu" sequence="3"/>
+				
 		<!-- MS Process Menu -->
 		
 		<menuitem name="MS Process" id="mpm_crm" sequence="20"/>

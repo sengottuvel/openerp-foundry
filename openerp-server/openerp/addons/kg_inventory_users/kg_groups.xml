@@ -89,6 +89,7 @@
 			ref('kg_menus.cpm_crm_enquiry_menu'),
 			ref('kg_menus.tma_crm_enquiry'),
 			ref('kg_menus.tma_crm_offer'),
+			ref('kg_menus.tma_service_enquiry'),
 			
             ])]" name="menu_access"/>
             <field name="users" eval="[(4, ref('base.user_root'))]"/>
