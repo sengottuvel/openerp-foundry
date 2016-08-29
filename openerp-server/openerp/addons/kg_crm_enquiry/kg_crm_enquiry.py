@@ -180,7 +180,7 @@ class kg_crm_enquiry(osv.osv):
 	_constraints = [		
 		
 		(_future_enquiry_date_check, 'System not allow to save with past date. !!',['Enquiry Date']),
-		(_future_due_date_check, 'Should be grater than current date !!',['Due Date']),
+		(_future_due_date_check, 'Should be greater than current date !!',['Due Date']),
 		#(_check_duplicates, 'System not allow to do duplicate entry !!',['']),
 		#(_check_lineitems, 'System not allow to save with empty Work Order Details !!',['']),
 		#(_Validation, 'Special Character Not Allowed in Work Order No.', ['']),
@@ -333,6 +333,7 @@ class kg_crm_enquiry(osv.osv):
 		price = 0.00
 		ms_price = 0.00
 		tot_price = 0.00
+		bot_price = 0.00
 		
 		price_1 = 0.00
 		price_2 = 0.00
@@ -370,45 +371,46 @@ class kg_crm_enquiry(osv.osv):
 						print"pattern_rec.id",pattern_rec.id	
 						pat_line_obj = self.pool.get('ch.mocwise.rate').search(cr,uid,[('code','=',item_moc_const_id),('header_id','=',pattern_rec.id)])
 						print"pat_line_objpat_line_obj",pat_line_obj
-						
-						pat_line_rec = self.pool.get('ch.mocwise.rate').browse(cr,uid,pat_line_obj[0])
-						moc_id = pat_line_rec.moc_id.id
-						print"moc_idmoc_idmoc_id",moc_id
-						if moc_id:
-							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
-							if moc_rec.weight_type == 'ci':
-								qty = bom_line.qty * pattern_rec.ci_weight
-							elif moc_rec.weight_type == 'ss':
-								qty = bom_line.qty * pattern_rec.pcs_weight
-							elif moc_rec.weight_type == 'non_ferrous':
-								qty = bom_line.qty * pattern_rec.nonferous_weight
-							else:
-								qty = 0
-							print"qtyqtyqtyqtyqtyqty",qty
-							moc_line_id = moc_rec.line_ids
-							if moc_line_id:
-								for moc_line in moc_rec.line_ids:
-									brandmoc_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',moc_line.product_id.id)])
-									brandmoc_rate = 0.00
-									if brandmoc_obj:
-										brandmoc_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,brandmoc_obj[0])
-										print"brandmoc_recbrandmoc_rec",brandmoc_rec.id
-										brandmoc_line_id = brandmoc_rec.line_ids
-										print"brandmoc_line_idbrandmoc_line_id",brandmoc_line_id
-										if brandmoc_line_id:
-											for brandmoc_line in brandmoc_line_id:
-												if brandmoc_line.moc_id.id == moc_id:
-													design_rate = brandmoc_line.rate
-													moc_rate = moc_line.qty * design_rate
-													print"design_ratedesign_rate",design_rate
-													print"moc_ratemoc_rate",moc_rate
-										brandmoc_rate += moc_rate
-										print"brandmoc_ratebrandmoc_rate",brandmoc_rate
-						h_brandmoc_rate = brandmoc_rate / 100.00
-						print"h_brandmoc_rateh_brandmoc_rate",h_brandmoc_rate
-						pat_amt = h_brandmoc_rate * qty
-						print"pattern_recpattern_recpattern_recpattern_rec",pattern_rec.name
-						print"pat_amtpat_amtpat_amt",pat_amt
+						if pat_line_obj:
+							pat_line_rec = self.pool.get('ch.mocwise.rate').browse(cr,uid,pat_line_obj[0])
+							moc_id = pat_line_rec.moc_id.id
+							print"moc_idmoc_idmoc_id",moc_id
+							if moc_id:
+								moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
+								if moc_rec.weight_type == 'ci':
+									qty = bom_line.qty * pattern_rec.ci_weight
+								elif moc_rec.weight_type == 'ss':
+									qty = bom_line.qty * pattern_rec.pcs_weight
+								elif moc_rec.weight_type == 'non_ferrous':
+									qty = bom_line.qty * pattern_rec.nonferous_weight
+								else:
+									qty = 0
+								print"qtyqtyqtyqtyqtyqty",qty
+								moc_line_id = moc_rec.line_ids
+								if moc_line_id:
+									for moc_line in moc_rec.line_ids:
+										brandmoc_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',moc_line.product_id.id)])
+										brandmoc_rate = 0.00
+										if brandmoc_obj:
+											brandmoc_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,brandmoc_obj[0])
+											print"brandmoc_recbrandmoc_rec",brandmoc_rec.id
+											brandmoc_line_id = brandmoc_rec.line_ids
+											print"brandmoc_line_idbrandmoc_line_id",brandmoc_line_id
+											if brandmoc_line_id:
+												for brandmoc_line in brandmoc_line_id:
+													if brandmoc_line.moc_id.id == moc_id:
+														#~ design_rate = brandmoc_line.rate
+														design_rate = moc_rec.rate
+														moc_rate = moc_line.qty * design_rate
+														print"design_ratedesign_rate",design_rate
+														print"moc_ratemoc_rate",moc_rate
+											brandmoc_rate += moc_rate
+											print"brandmoc_ratebrandmoc_rate",brandmoc_rate
+							h_brandmoc_rate = brandmoc_rate / 100.00
+							print"h_brandmoc_rateh_brandmoc_rate",h_brandmoc_rate
+							pat_amt = h_brandmoc_rate * qty
+							print"pattern_recpattern_recpattern_recpattern_rec",pattern_rec.name
+							print"pat_amtpat_amtpat_amt",pat_amt
 				prime_cost_1 = pat_amt 
 				print"vvvvvvvvvvvvvvvvvvvvvvvvvvv",prime_cost_1
 				prime_cost += prime_cost_1
