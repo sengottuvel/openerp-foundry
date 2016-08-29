@@ -536,6 +536,7 @@
             <field name="model">product.uom</field>
             <field name="arch" type="xml">
                 <tree string="Units of Measure">
+                    <field name="code"/>
                     <field name="name"/>
                     <field name="category_id"/>
                     <field name="dummy_state"/>
@@ -577,7 +578,8 @@
                             </div>
                         </group>
                         <group>
-							<field name="active"/>	
+							
+							<field name="code" attrs="{'readonly':[('dummy_state','=','approved')]}"/>	
 							<field name="dummy_state"/>
                         </group>
                    </group>                       
@@ -592,10 +594,13 @@
 				
                         <notebook>
 							<page string="Entry Info">
+								<group>
 									<group>
 										<field name="company_id"/>
 									</group>
 									<group>
+										<field name="active"/>	
+									</group>
 									<group>
 										<field name="user_id"/>
 										<field name="confirm_user_id" attrs="{'invisible':[('dummy_state','in',['draft'])]}"/>

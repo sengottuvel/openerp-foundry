@@ -167,6 +167,7 @@ class product_uom(osv.osv):
 	_columns = {
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'name': fields.char('Unit of Measure', size=64, required=True, translate=True),
+		'code': fields.char('Code'),
 		'category_id': fields.many2one('product.uom.categ', 'Category', ondelete='cascade',
 			help="Conversion between Units of Measure can only occur if they belong to the same category. The conversion will be made based on the ratios."),
 		'factor': fields.float('Ratio',digits=(12, 12),
