@@ -12,20 +12,21 @@
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="entry_cancel" type="object" states="reject,approved" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes'),('state','in',('approved','cancel'))]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
+<!--					<button name="entry_cancel" type="object" states="reject,approved" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>	
-						<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>	
+						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>	
 					</header>
 					<sheet>
 						<group>
 							<group>						
 								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
-								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
+								<field name="notes" widget="char" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 							</group>
 							<group>
 								<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="active"/>
-								<field name="state" style="width: 30%%" class="att_state_change"/>								
+								<field name="state" style="width: 30%%" class="att_state_change"/>
+								<field name="modify" invisible="1"/>
 							</group>
 						</group>						
 						<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
@@ -38,10 +39,13 @@
 						</group>
 						<notebook>
 							<page string="Entry Info">
+								<group>
 									<group>
 										<field name="company_id"/>
 									</group>
 									<group>
+										<field name="active"/>
+									</group>
 									<group>
 										<field name="user_id"/>
 										<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
@@ -74,7 +78,7 @@
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'draft';red:state == 'confirmed'
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" 
-								toolbar="True" string="Industry Master Tree">				
+								toolbar="True" string="Dispatch Master Tree">				
 					<field name="code"/>
 					<field name="name"/>
 					<field name="state"/>
@@ -126,7 +130,7 @@
 		
         <record id="dispatch_model" model="audittrail.rule">
             <field name="name">Audit Log Dispatch Composition Master</field>
-            <field name="object_id" eval="ref('kg_industry_master.model_kg_dispatch_master')"/>       
+            <field name="object_id" eval="ref('kg_dispatch_master.model_kg_dispatch_master')"/>       
             <field name="state">subscribed</field>              
         </record> -->
         

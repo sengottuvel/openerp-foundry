@@ -11,20 +11,19 @@
 					<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?" />
 					<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?" />
 					<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
-					<!--<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes'),('state','in',('approved','cancel'))]}" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
-					<button name="entry_cancel" type="object" states="approved,reject" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-					<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+					<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes'),('state','in',('approved','cancel'))]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
+<!--				<button name="entry_cancel" type="object" states="approved,reject" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
+					<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 				</header>
 				<group>
 					<group>
 						<field name="name"/>
-						<field name="bill"/>
-						<field name="valid"/>
+						<field name="bill" invisible="1"/>
+						<field name="valid" invisible="1"/>
 						<field name="modify" invisible="1"/>
 					</group>
 					<group>
-						<field name="return"/>
-						<field name="active"/>
+						<field name="return" invisible="1"/>
 						<field name="state" style="width: 30%%" class="att_state_change"/>
 					</group>
 				</group>
@@ -39,25 +38,28 @@
 			<notebook>
 			<page string="Entry Info">
 				<group>
-					<field name="company_id"/>
-				</group>
-				<group>
-				<group>
-					<field name="user_id"/>
-					<field name="conf_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
-					<field name="app_user_id" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])]}"/>
-					<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
-					<field name="rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','approved','cancel'])]}"/>
-					<field name="update_user_id"/>
-				</group>
-				<group>
-					<field name="creation_date"/>
-					<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
-					<field name="approve_date" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])]}"/>
-					<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
-					<field name="reject_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','approved','cancel'])]}"/>
-					<field name="update_date"/>
-				</group>
+					<group>
+						<field name="company_id"/>
+					</group>
+					<group>
+						<field name="active"/>
+					</group>
+					<group>
+						<field name="user_id"/>
+						<field name="conf_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+						<field name="app_user_id" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])]}"/>
+						<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
+						<field name="rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','approved','cancel'])]}"/>
+						<field name="update_user_id"/>
+					</group>
+					<group>
+						<field name="creation_date"/>
+						<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+						<field name="approve_date" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])]}"/>
+						<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
+						<field name="reject_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','approved','cancel'])]}"/>
+						<field name="update_date"/>
+					</group>
 				</group>
 			</page>
 			</notebook>
@@ -74,7 +76,6 @@
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" toolbar="True" string="Outward Categories">
 					<field name="name"/>
 					<field name="state"/>
-					<field name="modify" invisible="1"/>
 				</tree>
 			</field>
 		</record>
@@ -99,7 +100,7 @@
 		</record>
 		
 		<record id="outwardmaster_action_form" model="ir.actions.act_window">
-			<field name="name">Outward Master</field>
+			<field name="name">Outward</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.outwardmaster</field>
 			<field name="view_type">form</field>
@@ -107,9 +108,15 @@
 			<field name="search_view_id" ref="m_search_v_outward"/>
 		</record>
 		
+		<!-- Audit Log Xml Data Start-->
 		
-		
-	<!--<menuitem action="outwardmaster_action_form" id="menu_kg_brandmaster_action_form" parent="kg_depmaster.kg_depmaster_parent_menu" sequence="6"/>
-     -->
+        <record id="outwardmaster_model" model="audittrail.rule">
+            <field name="name">Audit Log Outwardmaster</field>
+            <field name="object_id" eval="ref('kg_outwardmaster.model_kg_outwardmaster')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+		<!-- Audit Log Xml Data End-->
+
 </data>
 	</openerp>

@@ -2,9 +2,7 @@
 <openerp>
 	<data>
 	
-	
 	<!-- Payment Masters -->
-	
 	
 	<record id="kg_payment_master_form_view" model="ir.ui.view">
 			<field name="name">kg.payment.master.form</field>
@@ -15,20 +13,19 @@
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?" />
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
-						<!--<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes'),('state','in',('approved','cancel'))]}" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
-						<button name="entry_cancel" type="object" states="approved,reject" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes'),('state','in',('approved','cancel'))]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
+<!--					<button name="entry_cancel" type="object" states="approved,reject" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
+						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 			    </header>				
 					<group>
 						<group>
 							<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="term_category" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>		
+							<field name="notes" widget="char" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>		
 							<field name="modify" invisible="1"/>
 						</group>
 						<group>
 							<field name="code"/>
-							<field name="active"/>
 							<field name="state" style="width: 30%%" class="att_state_change"/>
 						</group>						
 					</group>	
@@ -43,25 +40,28 @@
 					<notebook>
 						<page string="Entry Info">
 							<group>
-								<field name="company_id"/>
-							</group>
-							<group>
-							<group>
-								<field name="user_id"/>
-								<field name="conf_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
-								<field name="app_user_id" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])]}"/>
-								<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
-								<field name="rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','approved','cancel'])]}"/>
-								<field name="update_user_id"/>
-							</group>
-							<group>
-								<field name="creation_date"/>
-								<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
-								<field name="approve_date" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])]}"/>
-								<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
-								<field name="reject_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','approved','cancel'])]}"/>
-								<field name="update_date"/>
-							</group>
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<field name="user_id"/>
+									<field name="conf_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="app_user_id" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])]}"/>
+									<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
+									<field name="rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','approved','cancel'])]}"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="creation_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="approve_date" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])]}"/>
+									<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
+									<field name="reject_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','approved','cancel'])]}"/>
+									<field name="update_date"/>
+								</group>
 							</group>
 						</page>
 					</notebook>					   
@@ -78,7 +78,6 @@
 					<field name="name"/>
 					<field name="term_category"/>
 					<field name="state"/>
-					<field name="modify" invisible="1"/>
 				</tree>
 			</field>
 		</record>
@@ -103,7 +102,7 @@
 		</record>
 		
 		<record id="payment_master_action_form" model="ir.actions.act_window">
-			<field name="name">Payment Master</field>
+			<field name="name">Payment Terms</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.payment.master</field>
 			<field name="view_type">form</field>
@@ -134,17 +133,17 @@
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?" />
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?" />
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
-						<!--<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes'),('state','in',('approved','cancel'))]}" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
-						<button name="entry_cancel" type="object" states="approved,reject" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes'),('state','in',('approved','cancel'))]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
+<!--					<button name="entry_cancel" type="object" states="approved,reject" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
+						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					 </header>				
 					<group>
 						<group>
 							<field name="name"/>
+							<field name="notes" widget="char"/>
 							<field name="modify" invisible="1"/>
 						</group>
 						<group>
-							<field name="active"/>
 							<field name="state" style="width: 30%%" class="att_state_change"/>
 						</group>						
 					</group>	
@@ -159,25 +158,28 @@
 					<notebook>
 						<page string="Entry Info">
 							<group>
-								<field name="company_id"/>
-							</group>
-							<group>
-							<group>
-								<field name="user_id"/>
-								<field name="conf_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
-								<field name="app_user_id" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])]}"/>
-								<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/><field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
-								<field name="rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','approved','cancel'])]}"/>
-								<field name="update_user_id"/>
-							</group>
-							<group>
-								<field name="creation_date"/>
-								<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
-								<field name="approve_date" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])]}"/>
-								<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
-								<field name="reject_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','approved','cancel'])]}"/>
-								<field name="update_date"/>
-							</group>
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<field name="user_id"/>
+									<field name="conf_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="app_user_id" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])]}"/>
+									<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/><field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
+									<field name="rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','approved','cancel'])]}"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="creation_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="approve_date" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])]}"/>
+									<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
+									<field name="reject_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','approved','cancel'])]}"/>
+									<field name="update_date"/>
+								</group>
 							</group>
 						</page>
 					</notebook>			   
@@ -193,7 +195,6 @@
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" toolbar="True" string="Delivery Master">
 					<field name="name"/>
 					<field name="state"/>
-					<field name="modify" invisible="1"/>
 				</tree>
 			</field>
 		</record>
@@ -218,7 +219,7 @@
 		</record>
 		
 		<record id="delivery_master_action_form" model="ir.actions.act_window">
-			<field name="name">Delivery Master</field>
+			<field name="name">Delivery Terms</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.delivery.master</field>
 			<field name="view_type">form</field>
@@ -248,20 +249,18 @@
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?" />
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?" />
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
-						<!--<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes'),('state','in',('approved','cancel'))]}" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
-						<button name="entry_cancel" type="object" states="approved,reject" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes'),('state','in',('approved','cancel'))]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
+<!--					<button name="entry_cancel" type="object" states="approved,reject" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
+						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>				
 					<group>
 						<group>
 							<field name="name"/>
+							<field name="notes" widget="char"/>
 							<field name="product_ids" widget="many2many_tags" invisible="1"/>
-<!--
 							<field name="modify" invisible="1"/>
--->
 						</group>
 						<group>
-							<field name="active"/>
 							<field name="state" style="width: 30%%" class="att_state_change"/>
 						</group>						
 					</group>	
@@ -276,25 +275,28 @@
 					<notebook>
 						<page string="Entry Info">
 							<group>
-								<field name="company_id"/>
-							</group>
-							<group>
-							<group>
-								<field name="user_id"/>
-								<field name="conf_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
-								<field name="app_user_id" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])]}"/>
-								<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/><field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
-								<field name="rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','approved','cancel'])]}"/>
-								<field name="update_user_id"/>
-							</group>
-							<group>
-								<field name="creation_date"/>
-								<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
-								<field name="approve_date" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])]}"/>
-								<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
-								<field name="reject_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','approved','cancel'])]}"/>
-								<field name="update_date"/>
-							</group>
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<field name="user_id"/>
+									<field name="conf_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="app_user_id" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])]}"/>
+									<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/><field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
+									<field name="rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','approved','cancel'])]}"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="creation_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="approve_date" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])]}"/>
+									<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
+									<field name="reject_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','approved','cancel'])]}"/>
+									<field name="update_date"/>
+								</group>
 							</group>
 						</page>
 					</notebook>				   
@@ -306,13 +308,10 @@
 			<field name="name">kg.brand.master.tree</field>
 			<field name="model">kg.brand.master</field>
 			<field name="arch" type="xml">
-				<tree toolbar="True" string="Brand Master">
+				<tree colors="blue:state == 'draft';red:state == 'confirmed'
+						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" toolbar="True" string="Brand Master">
 					<field name="name"/>
-					<field name="creation_date"/>
 					<field name="state"/>
-<!--
-					<field name="modify" invisible="1"/>
--->
 				</tree>
 			</field>
 		</record>
@@ -337,7 +336,7 @@
 		</record>
 		
 		<record id="brand_master_action_form" model="ir.actions.act_window">
-			<field name="name">Brand Master</field>
+			<field name="name">Brand</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.brand.master</field>
 			<field name="view_type">form</field>

@@ -23,31 +23,47 @@ class kg_depmaster(osv.osv):
 	_description = "Department Master"
 	_rec_name = 'dep_name' 
 	
-	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
-		res={}
-		ser_obj = self.pool.get('kg.service.order')
-		dep_is_obj = self.pool.get('kg.department.issue')
-		res_users_obj = self.pool.get('res.users')
-		ser_ind_obj = self.pool.get('kg.service.indent')
-		ser_inv_obj = self.pool.get('kg.service.invoice')
-		stock_obj = self.pool.get('stock.picking')
-		dep_ind_obj = self.pool.get('kg.depindent')
-		gate_pass_obj = self.pool.get('kg.gate.pass')
-		for h in self.browse(cr, uid, ids, context=None):
-			res[h.id] = 'no'
-			ser_ids = ser_obj.search(cr,uid,[('dep_name','=',h.id)])
-			dep_is_ids = dep_is_obj.search(cr,uid,[('department_id','=',h.id)])
-			res_users_ids = res_users_obj.search(cr,uid,[('dep_name','=',h.id)])
-			ser_ind_ids = ser_ind_obj.search(cr,uid,[('dep_name','=',h.id)])
-			ser_inv_ids = ser_inv_obj.search(cr,uid,[('dep_name','=',h.id)])
-			stock_ids = stock_obj.search(cr,uid,[('dep_name','=',h.id)])
-			dep_ind_ids = dep_ind_obj.search(cr,uid,[('dep_name','=',h.id)])
-			gate_pass_ids = gate_pass_obj.search(cr,uid,[('dep_id','=',h.id)])
-			if ser_ids or dep_is_ids or res_users_ids or ser_ind_ids or ser_inv_ids or stock_ids or dep_ind_ids or gate_pass_ids:
-				res[h.id] = 'yes'
-		return res
+	#~ def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
+		#~ res={}
+		#~ ser_obj = self.pool.get('kg.service.order')
+		#~ dep_is_obj = self.pool.get('kg.department.issue')
+		#~ for h in self.browse(cr, uid, ids, context=None):
+			#~ res[h.id] = 'no'
+			#~ ser_ids = ser_obj.search(cr,uid,[('dep_name','=',h.id)])
+			#~ dep_is_ids = dep_is_obj.search(cr,uid,[('department_id','=',h.id)])
+			#~ if ser_ids or dep_is_ids:
+				#~ res[h.id] = 'yes'
+		#~ print"eeeeeeeeeeeeeeee",res
+		#~ return res
 		
+	def _get_modify(self, cr, uid, ids, field_name, arg,  context=None):
+		res={}
+		if field_name == 'modify':
+			for h in self.browse(cr, uid, ids, context=None):	
+				res[h.id] = 'no'
+				cr.execute(""" select * from
+				(SELECT tc.table_schema, tc.constraint_name, tc.table_name, kcu.column_name, ccu.table_name
+				AS foreign_table_name, ccu.column_name AS foreign_column_name
+				FROM information_schema.table_constraints tc
+				JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
+				JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = tc.constraint_name
+				WHERE constraint_type = 'FOREIGN KEY'
+				AND ccu.table_name='%s')
+				as sam  """ %('kg_depmaster'))
+				data = cr.dictfetchall()	
+				if data:
+					for var in data:
+						data = var
+						chk_sql = 'Select COALESCE(count(*),0) as cnt from '+str(data['table_name'])+' where '+data['column_name']+' = '+str(ids[0])
+						cr.execute(chk_sql)			
+						out_data = cr.dictfetchone()
+						if out_data:
+							if out_data['cnt'] > 0:
+								res[h.id] = 'yes'
+		return res
+			
 	_columns = {
+		
 		'name': fields.char('Dep.Code', size=64, required=True,readonly=False,states={'approved':[('readonly',True)]}),
 		'dep_name': fields.char('Dep.Name', size=64, required=True, translate=True,readonly=False,states={'approved':[('readonly',True)]}),
 		'consumerga': fields.many2one('account.account', 'Consumer GL/AC', size=64, translate=True, select=2),
@@ -58,13 +74,24 @@ class kg_depmaster(osv.osv):
 					select=True, domain=[('usage','<>','view')],readonly=False,states={'approved':[('readonly',True)]}),
 		'used_location': fields.many2one('stock.location', 'Used Stock Location', size=64, translate=True, 
 					select=True, domain=[('usage','<>','view')],readonly=False,states={'approved':[('readonly',True)]}),
-		'creation_date':fields.datetime('Creation Date',readonly=True),
 		'product_id': fields.many2many('product.product', 'product_deparment', 'depmaster_id', 'product_depid', 'Product'),
 		'issue_period': fields.selection([('weekly','Weekly'), ('15th','15th Once'), ('monthly', 'Monthly')], 'Stock Issue Period'),
 		'issue_date': fields.float('Stock Issue Days'),
-		'active': fields.boolean("Active"),
 		'sub_indent': fields.boolean("Sub.Store.Ind"),
+		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
+		'notes': fields.text('Notes'),
+		'remark': fields.text('Approve/Reject'),
+		'cancel_remark': fields.text('Cancel Remarks'),
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
+		'is_parent': fields.boolean('Is Parent',readonly=False,states={'approved':[('readonly',True)]}),
+		'parent_dept': fields.many2one('kg.depmaster','Parent Department',domain="[('is_parent','=',True)]",readonly=False,states={'approved':[('readonly',True)]}),
+		'item_request': fields.boolean('Item Request Applicable',readonly=False,states={'approved':[('readonly',True)]}),
+		
+		# Entry Info
+		
+		'active': fields.boolean("Active"),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
+		'creation_date':fields.datetime('Creation Date',readonly=True),
 		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
 		'approve_date': fields.datetime('Approved Date', readonly=True),
 		'app_user_id': fields.many2one('res.users', 'Apprved By', readonly=True),
@@ -76,14 +103,6 @@ class kg_depmaster(osv.osv):
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
 		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
-		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
-		'notes': fields.text('Notes'),
-		'remark': fields.text('Approve/Reject'),
-		'cancel_remark': fields.text('Cancel Remarks'),
-		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
-		'is_parent': fields.boolean('Is Parent',readonly=False,states={'approved':[('readonly',True)]}),
-		'parent_dept': fields.many2one('kg.depmaster','Parent Department',domain="[('is_parent','=',True)]",readonly=False,states={'approved':[('readonly',True)]}),
-		'item_request': fields.boolean('Item Request Applicable',readonly=False,states={'approved':[('readonly',True)]}),
 		
 	}
 
@@ -201,15 +220,15 @@ kg_depmaster()
 
 
 class custom_sequence_generate_det(osv.osv):
-    _name = 'custom.sequence.generate.det'
-    _order = 'name'
-    _columns = {
-        'name': fields.char('Name',size=64),
-        'ir_sequence_id': fields.many2one('ir.sequence', 'Sequence'),
-        'seq_month' : fields.integer('Sequence Month'),
-        'seq_year' : fields.integer('Sequence Year'),
-        'seq_next_number' : fields.integer('Sequence Next Number'),
-        'fiscal_year_code' : fields.char('Fiscal Year Code',size=64),
-        'fiscal_year_id' : fields.integer('Fiscal Year ID'),
-    }
+	_name = 'custom.sequence.generate.det'
+	_order = 'name'
+	_columns = {
+		'name': fields.char('Name',size=64),
+		'ir_sequence_id': fields.many2one('ir.sequence', 'Sequence'),
+		'seq_month' : fields.integer('Sequence Month'),
+		'seq_year' : fields.integer('Sequence Year'),
+		'seq_next_number' : fields.integer('Sequence Next Number'),
+		'fiscal_year_code' : fields.char('Fiscal Year Code',size=64),
+		'fiscal_year_id' : fields.integer('Fiscal Year ID'),
+	}
 custom_sequence_generate_det()

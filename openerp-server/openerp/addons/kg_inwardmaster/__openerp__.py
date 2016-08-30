@@ -32,12 +32,13 @@ When a purchase order is created, you now have the opportunity to save the
 related requisition. This new object will regroup and will allow you to easily
 keep track and order all your purchase orders.
 """,
-    'depends' : ['base'],
+    'depends' : ['base','web'],
     'data': ['kg_inwardmaster_view.xml','wizard/kg_inwardmaster_wiz_view.xml'],
      'test': [
         'test/kg_inwardmaster_wiz.yml',
         
     ],
+    'css': ['static/src/css/base.css'],
     'auto_install': False,
     'installable': True,
 }

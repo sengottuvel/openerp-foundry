@@ -13,31 +13,47 @@ class kg_item_quality_master(osv.osv):
 	_name = "kg.item.quality.master"
 	_description = "Item Quality Master"
 	
-	"""
-	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
+	def _get_modify(self, cr, uid, ids, field_name, arg,  context=None):
 		res={}
-		enq_obj = self.pool.get('purchase.order')			
-		for item in self.browse(cr, uid, ids, context=None):
-			res[item.id] = 'no'
-			enq_ids = enq_obj.search(cr,uid,[('item_quality','=',item.id)])			
-			if enq_ids:
-				res[item.id] = 'yes'		
+		if field_name == 'modify':
+			for h in self.browse(cr, uid, ids, context=None):	
+				res[h.id] = 'no'
+				cr.execute(""" select * from
+				(SELECT tc.table_schema, tc.constraint_name, tc.table_name, kcu.column_name, ccu.table_name
+				AS foreign_table_name, ccu.column_name AS foreign_column_name
+				FROM information_schema.table_constraints tc
+				JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
+				JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = tc.constraint_name
+				WHERE constraint_type = 'FOREIGN KEY'
+				AND ccu.table_name='%s')
+				as sam  """ %('kg_item_quality_master'))
+				data = cr.dictfetchall()	
+				if data:
+					for var in data:
+						data = var
+						chk_sql = 'Select COALESCE(count(*),0) as cnt from '+str(data['table_name'])+' where '+data['column_name']+' = '+str(ids[0])
+						cr.execute(chk_sql)			
+						out_data = cr.dictfetchone()
+						if out_data:
+							if out_data['cnt'] > 0:
+								res[h.id] = 'yes'
 		return res
-	"""
+	
 	_columns = {
 			
 		'name': fields.char('Name', size=128, required=True, select=True),
-		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'code': fields.char('Code', size=128),
-		'active': fields.boolean('Active'),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'type': fields.selection([('pf','P&F'),('quality','Quality'),('taxation','Taxation'),('discount','Discount'),('pricing','Pricing'),('freight','Freight'),('others','Others')],'Type', required=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
-		#'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
 		
 		### Entry Info ###
+		
+		'active': fields.boolean('Active'),
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'crt_date': fields.datetime('Creation Date',readonly=True),
 		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
 		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
@@ -58,7 +74,8 @@ class kg_item_quality_master(osv.osv):
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':fields.datetime.now,	
-		#'modify': 'no',
+		'modify': 'no',
+		
 	}
 	
 	_sql_constraints = [

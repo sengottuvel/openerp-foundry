@@ -16,43 +16,55 @@ import openerp.addons.decimal_precision as dp
 import logging
 _logger = logging.getLogger(__name__)
 
-
 class kg_inwardmaster(osv.osv):
 
 	_name = "kg.inwardmaster"
 	_description = "Inward Master"
 	
-	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
+	def _get_modify(self, cr, uid, ids, field_name, arg,  context=None):
 		res={}
-		acc_vou_obj = self.pool.get('kg.contractor.inward.line')
-		stock_obj = self.pool.get('stock.picking')
-		po_grn_obj = self.pool.get('kg.po.grn')
-		po_grn_line_obj = self.pool.get('po.grn.line')
-		gen_grn_obj = self.pool.get('kg.general.grn')
-		gen_grn_line_obj = self.pool.get('kg.general.grn.line')
-		for h in self.browse(cr, uid, ids, context=None):
-			res[h.id] = 'no'
-			acc_vou_ids = acc_vou_obj.search(cr,uid,[('inward_type','=',h.id)])
-			stock_ids = stock_obj.search(cr,uid,[('inward_type','=',h.id)])
-			po_grn_ids = po_grn_obj.search(cr,uid,[('inward_type','=',h.id)])
-			po_grn_line_ids = po_grn_line_obj.search(cr,uid,[('inward_type','=',h.id)])
-			gen_grn_ids = gen_grn_obj.search(cr,uid,[('inward_type','=',h.id)])
-			gen_grn_line_ids = gen_grn_line_obj.search(cr,uid,[('inward_type','=',h.id)])
-			if acc_vou_ids or stock_ids or po_grn_ids or po_grn_line_ids or gen_grn_ids or gen_grn_line_ids:
-				res[h.id] = 'yes'
-		print "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",res
+		if field_name == 'modify':
+			for h in self.browse(cr, uid, ids, context=None):	
+				res[h.id] = 'no'
+				cr.execute(""" select * from
+				(SELECT tc.table_schema, tc.constraint_name, tc.table_name, kcu.column_name, ccu.table_name
+				AS foreign_table_name, ccu.column_name AS foreign_column_name
+				FROM information_schema.table_constraints tc
+				JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
+				JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = tc.constraint_name
+				WHERE constraint_type = 'FOREIGN KEY'
+				AND ccu.table_name='%s')
+				as sam  """ %('kg_inwardmaster'))
+				data = cr.dictfetchall()	
+				if data:
+					for var in data:
+						data = var
+						chk_sql = 'Select COALESCE(count(*),0) as cnt from '+str(data['table_name'])+' where '+data['column_name']+' = '+str(ids[0])
+						cr.execute(chk_sql)			
+						out_data = cr.dictfetchone()
+						if out_data:
+							if out_data['cnt'] > 0:
+								res[h.id] = 'yes'
 		return res
 		
 	_columns = {
 		
-		'name': fields.char('Name', size=128, required=True, select=True,readonly=False,states={'approved':[('readonly',True)]}),
+		'name': fields.char('Inward Type', size=128, required=True, select=True,readonly=False,states={'approved':[('readonly',True)]}),
 		'code': fields.char('Code',readonly=False,states={'approved':[('readonly',True)]}),
-		'creation_date':fields.datetime('Creation Date',readonly=True),
 		'bill': fields.boolean('Bill Indication',readonly=False,states={'approved':[('readonly',True)]}),
 		'return': fields.boolean('Return Indication',readonly=False,states={'approved':[('readonly',True)]}),
 		'valid': fields.boolean('Valid Indication',readonly=False,states={'approved':[('readonly',True)]}),
+		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
+		'notes': fields.text('Notes'),
+		'remark': fields.text('Approve/Reject'),
+		'cancel_remark': fields.text('Cancel Remarks'),
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
+		
+		# Entry Info
+		
 		'active': fields.boolean('Active'),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
+		'creation_date':fields.datetime('Creation Date',readonly=True),
 		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
 		'approve_date': fields.datetime('Approved Date', readonly=True),
 		'app_user_id': fields.many2one('res.users', 'Apprved By', readonly=True),
@@ -64,11 +76,6 @@ class kg_inwardmaster(osv.osv):
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
 		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
-		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
-		'notes': fields.text('Notes'),
-		'remark': fields.text('Approve/Reject'),
-		'cancel_remark': fields.text('Cancel Remarks'),
-		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
 		
 	}
 	
