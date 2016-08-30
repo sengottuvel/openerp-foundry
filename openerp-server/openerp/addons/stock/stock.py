@@ -149,19 +149,30 @@ class stock_location(osv.osv):
 						result[loc_id][f] += amount
 		return result
 	
-	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
+	def _get_modify(self, cr, uid, ids, field_name, arg,  context=None):
 		res={}
-		is_re_obj = self.pool.get('kg.issue.return')
-		led_obj = self.pool.get('kg.item.ledger')
-		
-		for h in self.browse(cr, uid, ids, context=None):
-			res[h.id] = 'no'
-			is_re_ids = is_re_obj.search(cr,uid,[('reject_location','=',h.id)])
-			led_ids = led_obj.search(cr,uid,[('dep_name','=',h.id)])
-			
-			if is_re_ids or led_ids:
-				res[h.id] = 'yes'
-		print "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",res
+		if field_name == 'modify':
+			for h in self.browse(cr, uid, ids, context=None):	
+				res[h.id] = 'no'
+				cr.execute(""" select * from
+				(SELECT tc.table_schema, tc.constraint_name, tc.table_name, kcu.column_name, ccu.table_name
+				AS foreign_table_name, ccu.column_name AS foreign_column_name
+				FROM information_schema.table_constraints tc
+				JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
+				JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = tc.constraint_name
+				WHERE constraint_type = 'FOREIGN KEY'
+				AND ccu.table_name='%s')
+				as sam  """ %('stock_location'))
+				data = cr.dictfetchall()	
+				if data:
+					for var in data:
+						data = var
+						chk_sql = 'Select COALESCE(count(*),0) as cnt from '+str(data['table_name'])+' where '+data['column_name']+' = '+str(ids[0])
+						cr.execute(chk_sql)			
+						out_data = cr.dictfetchone()
+						if out_data:
+							if out_data['cnt'] > 0:
+								res[h.id] = 'yes'
 		return res
 		
 	_columns = {
@@ -277,6 +288,27 @@ class stock_location(osv.osv):
 		'entry_mode': 'manual',
 		
 	}
+	
+	def _name_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.name:
+			location_name = rec.name
+			location_type = rec.location_type
+			name=location_name.upper()			
+			cr.execute(""" select upper(name) from stock_location where upper(name) = '%s' and location_type = '%s' """ %(name,location_type))
+			data = cr.dictfetchall()
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res
+		
+	_constraints = [
+		
+		(_name_validate, 'Location Name must be unique !!', ['Location Name']),
+		
+	]
 	
 	def entry_confirm(self,cr,uid,ids,context=None):
 		self.write(cr, uid, ids, {'state': 'confirmed','conf_user_id': uid, 'confirm_date': dt_time})
