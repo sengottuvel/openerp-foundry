@@ -642,6 +642,66 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
 		</record>
 		
+		<record id="crm_admin_kg_machine_shop" model="ir.model.access">
+			<field name="model_id" ref="kg_machine_shop.model_kg_machine_shop"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">kg machine shop</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_ch_machine_mocwise" model="ir.model.access">
+			<field name="model_id" ref="kg_machine_shop.model_ch_machine_mocwise"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">ch machine mocwise</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_ch_ms_raw_material" model="ir.model.access">
+			<field name="model_id" ref="kg_machine_shop.model_ch_ms_raw_material"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">ch ms raw material</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_ch_brandmoc_rate" model="ir.model.access">
+			<field name="model_id" ref="kg_brandmoc_rate.model_kg_brandmoc_rate"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">brandmoc rate</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_ch_brandmoc_rate_details" model="ir.model.access">
+			<field name="model_id" ref="kg_brandmoc_rate.model_ch_brandmoc_rate_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">ch brandmoc rate details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_ch_moc_raw_material" model="ir.model.access">
+			<field name="model_id" ref="kg_moc_master.model_ch_moc_raw_material"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">ch moc raw material</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
     </data>
 </openerp>
 	
