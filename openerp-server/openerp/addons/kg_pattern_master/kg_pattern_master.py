@@ -155,7 +155,7 @@ class kg_pattern_master(osv.osv):
 	
 	def _Validation(self, cr, uid, ids, context=None):
 		flds = self.browse(cr , uid , ids[0])
-		special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )
+		special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+=' )
 		if special_char:
 			return False
 		return True
@@ -163,7 +163,7 @@ class kg_pattern_master(osv.osv):
 	def _CodeValidation(self, cr, uid, ids, context=None):
 		flds = self.browse(cr , uid , ids[0])		
 		if flds.code:	
-			code_special_char = ''.join( c for c in flds.code if  c in '!@#$%^~*{}?+/=' )		
+			code_special_char = ''.join( c for c in flds.code if  c in '!@#$%^~*{}?+=' )		
 			if code_special_char:
 				return False
 		return True		
