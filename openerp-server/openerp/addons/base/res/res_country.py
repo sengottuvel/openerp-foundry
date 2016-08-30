@@ -23,6 +23,7 @@ from openerp.osv import fields, osv
 import time
 from datetime import date
 from datetime import datetime
+from openerp.tools.translate import _
 
 a = datetime.now()
 dt_time = a.strftime('%m/%d/%Y %H:%M:%S')
@@ -49,17 +50,30 @@ class Country(osv.osv):
 	_name = 'res.country'
 	_description = 'Country'
 	
-	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
+	def _get_modify(self, cr, uid, ids, field_name, arg,  context=None):
 		res={}
-		trans_obj = self.pool.get('kg.transport')
-		partner_obj = self.pool.get('res.partner')
-		for h in self.browse(cr, uid, ids, context=None):
-			res[h.id] = 'no'
-			trans_ids = trans_obj.search(cr,uid,[('city_id','=',h.id)])
-			partner_ids = partner_obj.search(cr,uid,[('city_id','=',h.id)])
-			if trans_ids or partner_ids:
-				res[h.id] = 'yes'
-		print "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",res
+		if field_name == 'modify':
+			for h in self.browse(cr, uid, ids, context=None):	
+				res[h.id] = 'no'
+				cr.execute(""" select * from
+				(SELECT tc.table_schema, tc.constraint_name, tc.table_name, kcu.column_name, ccu.table_name
+				AS foreign_table_name, ccu.column_name AS foreign_column_name
+				FROM information_schema.table_constraints tc
+				JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
+				JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = tc.constraint_name
+				WHERE constraint_type = 'FOREIGN KEY'
+				AND ccu.table_name='%s')
+				as sam  """ %('res_country'))
+				data = cr.dictfetchall()	
+				if data:
+					for var in data:
+						data = var
+						chk_sql = 'Select COALESCE(count(*),0) as cnt from '+str(data['table_name'])+' where '+data['column_name']+' = '+str(ids[0])
+						cr.execute(chk_sql)			
+						out_data = cr.dictfetchone()
+						if out_data:
+							if out_data['cnt'] > 0:
+								res[h.id] = 'yes'
 		return res
 		
 	_columns = {
@@ -127,27 +141,60 @@ addresses belonging to this country.\n\nYou can use the python-style string pate
 	def write(self, cursor, user, ids, vals, context=None):
 		if 'code' in vals:
 			vals['code'] = vals['code'].upper()
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':user})
 		return super(Country, self).write(cursor, user, ids, vals,
 				context=context)
-
-
+	
+	def entry_reject(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.remark:
+			self.write(cr, uid, ids, {'state': 'reject','rej_user_id': uid, 'reject_date': dt_time})
+		else:
+			raise osv.except_osv(_('Rejection remark is must !!'),
+				_('Enter rejection remark in remark field !!'))
+		return True
+		
+	def entry_confirm(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'confirmed','conf_user_id': uid, 'confirm_date': dt_time})
+		return True
+		
+	def entry_approve(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': dt_time})
+		return True
+		
+	def entry_draft(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'draft'})
+		return True
+		
 class CountryState(osv.osv):
 	_description="Country state"
 	_name = 'res.country.state'
 	
-	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
+	def _get_modify(self, cr, uid, ids, field_name, arg,  context=None):
 		res={}
-		trans_obj = self.pool.get('kg.transport')
-		partner_obj = self.pool.get('res.partner')
-		for h in self.browse(cr, uid, ids, context=None):
-			res[h.id] = 'no'
-			trans_ids = trans_obj.search(cr,uid,[('city_id','=',h.id)])
-			partner_ids = partner_obj.search(cr,uid,[('city_id','=',h.id)])
-			if trans_ids or partner_ids:
-				res[h.id] = 'yes'
-		print "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",res
+		if field_name == 'modify':
+			for h in self.browse(cr, uid, ids, context=None):	
+				res[h.id] = 'no'
+				cr.execute(""" select * from
+				(SELECT tc.table_schema, tc.constraint_name, tc.table_name, kcu.column_name, ccu.table_name
+				AS foreign_table_name, ccu.column_name AS foreign_column_name
+				FROM information_schema.table_constraints tc
+				JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
+				JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = tc.constraint_name
+				WHERE constraint_type = 'FOREIGN KEY'
+				AND ccu.table_name='%s')
+				as sam  """ %('res_country_state'))
+				data = cr.dictfetchall()	
+				if data:
+					for var in data:
+						data = var
+						chk_sql = 'Select COALESCE(count(*),0) as cnt from '+str(data['table_name'])+' where '+data['column_name']+' = '+str(ids[0])
+						cr.execute(chk_sql)			
+						out_data = cr.dictfetchone()
+						if out_data:
+							if out_data['cnt'] > 0:
+								res[h.id] = 'yes'
 		return res
-		
 		
 	_columns = {
 		
@@ -191,6 +238,26 @@ class CountryState(osv.osv):
 		
 	}
 	
+	def _name_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.name:
+			state_name = rec.name
+			name=state_name.upper()			
+			cr.execute(""" select upper(name) from res_country_state where upper(name) = '%s' """ %(name))
+			data = cr.dictfetchall()
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res
+	
+	_constraints = [
+		
+		(_name_validate, 'State Name must be unique !!', ['State Name']),
+		
+	]
+		
 	name_search = location_name_search
 	
 	def entry_confirm(self,cr,uid,ids,context=None):
@@ -235,17 +302,30 @@ class res_city(osv.osv):
 	_name = 'res.city'
 	_description = 'city'
 	
-	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
+	def _get_modify(self, cr, uid, ids, field_name, arg,  context=None):
 		res={}
-		trans_obj = self.pool.get('kg.transport')
-		partner_obj = self.pool.get('res.partner')
-		for h in self.browse(cr, uid, ids, context=None):
-			res[h.id] = 'no'
-			trans_ids = trans_obj.search(cr,uid,[('city_id','=',h.id)])
-			partner_ids = partner_obj.search(cr,uid,[('city_id','=',h.id)])
-			if trans_ids or partner_ids:
-				res[h.id] = 'yes'
-		print "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",res
+		if field_name == 'modify':
+			for h in self.browse(cr, uid, ids, context=None):	
+				res[h.id] = 'no'
+				cr.execute(""" select * from
+				(SELECT tc.table_schema, tc.constraint_name, tc.table_name, kcu.column_name, ccu.table_name
+				AS foreign_table_name, ccu.column_name AS foreign_column_name
+				FROM information_schema.table_constraints tc
+				JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
+				JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = tc.constraint_name
+				WHERE constraint_type = 'FOREIGN KEY'
+				AND ccu.table_name='%s')
+				as sam  """ %('res_city'))
+				data = cr.dictfetchall()	
+				if data:
+					for var in data:
+						data = var
+						chk_sql = 'Select COALESCE(count(*),0) as cnt from '+str(data['table_name'])+' where '+data['column_name']+' = '+str(ids[0])
+						cr.execute(chk_sql)			
+						out_data = cr.dictfetchone()
+						if out_data:
+							if out_data['cnt'] > 0:
+								res[h.id] = 'yes'
 		return res
 		
 	_columns = {
@@ -326,6 +406,7 @@ class res_city(osv.osv):
 		else:
 			raise osv.except_osv(_('Rejection remark is must !!'),
 				_('Enter rejection remark in remark field !!'))
+				
 		return True
 	
 	def entry_cancel(self,cr,uid,ids,context=None):
