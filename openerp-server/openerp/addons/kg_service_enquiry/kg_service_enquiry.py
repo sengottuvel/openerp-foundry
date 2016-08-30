@@ -111,8 +111,8 @@ class kg_service_enquiry(osv.osv):
 				pass
 			else:
 				raise osv.except_osv(_('Warning!'),
-					_('Please select anyone applicable !!'))
-		
+					_('%s Please select anyone applicable'%(item.wo_line_id.name)))
+					
 		self.write(cr, uid, ids, {
 									'name':ser_no[0],
 									'state': 'open',
@@ -202,12 +202,16 @@ class ch_service_enquiry(osv.osv):
 		
 		purpose = ''
 		pump_id = ''
+		pumpseries_id = ''
 		moc_const = ''
 		
 		if wo_line_id != False:
 			wo_line_rec = self.pool.get('ch.work.order.details').browse(cr, uid, wo_line_id)
 			purpose = wo_line_rec.order_category
 			pump_id = wo_line_rec.pump_model_id.id
+			if pump_id:
+				pump_rec = self.pool.get('kg.pumpmodel.master').browse(cr,uid,pump_id)
+				pumpseries_id = pump_rec.series_id.id
 			moc_const = wo_line_rec.moc_construction_id.id
 			
 			for item in wo_line_rec.line_ids:
@@ -232,7 +236,7 @@ class ch_service_enquiry(osv.osv):
 									'bot_name': item.item_name,
 									'qty': item.qty,
 									})
-		return {'value': {'line_ids_fou': fou_vals,'line_ids_ms': ms_vals,'line_ids_bot': bot_vals,'purpose':purpose,'pump_id':pump_id,'moc_const_id':moc_const}}
+		return {'value': {'line_ids_fou': fou_vals,'line_ids_ms': ms_vals,'line_ids_bot': bot_vals,'purpose':purpose,'pump_id':pump_id,'moc_const_id':moc_const,'pumpseries_id':pumpseries_id}}
 		
 ch_service_enquiry()
 

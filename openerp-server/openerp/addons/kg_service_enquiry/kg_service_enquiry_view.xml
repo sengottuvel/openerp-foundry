@@ -194,7 +194,7 @@
 	<!-- Menu Action Start-->
 		
 		<record id="tma_service_enquiry" model="ir.actions.act_window">
-			<field name="name">Service Enquiry</field>
+			<field name="name">Service Complaint</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.service.enquiry</field>
 			<field name="view_type">form</field>
