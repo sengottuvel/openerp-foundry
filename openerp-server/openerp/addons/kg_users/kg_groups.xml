@@ -341,8 +341,6 @@
 			ref('kg_menus.menu_depmaster_action_form'),
 			ref('kg_menus.mam_inward_master'),
 			ref('kg_menus.mam_outward_master'),
-			ref('kg_menus.mam_holiday_master'),
-			ref('kg_menus.mam_project_master'),
 			ref('kg_menus.mam_inventory_master'),
 			
 			
