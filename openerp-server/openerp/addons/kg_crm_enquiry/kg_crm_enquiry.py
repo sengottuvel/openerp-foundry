@@ -387,34 +387,38 @@ class kg_crm_enquiry(osv.osv):
 									qty = 0
 								print"qtyqtyqtyqtyqtyqty",qty
 								moc_line_id = moc_rec.line_ids
-								if moc_line_id:
-									for moc_line in moc_rec.line_ids:
-										brandmoc_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',moc_line.product_id.id)])
-										brandmoc_rate = 0.00
-										if brandmoc_obj:
-											brandmoc_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,brandmoc_obj[0])
-											print"brandmoc_recbrandmoc_rec",brandmoc_rec.id
-											brandmoc_line_id = brandmoc_rec.line_ids
-											print"brandmoc_line_idbrandmoc_line_id",brandmoc_line_id
-											if brandmoc_line_id:
-												for brandmoc_line in brandmoc_line_id:
-													if brandmoc_line.moc_id.id == moc_id:
+								design_rate = moc_rec.rate
+								print"design_ratedesign_ratedesign_ratedesign_ratedesign_ratedesign_rate",design_rate
+								#~ if moc_line_id:
+									#~ for moc_line in moc_rec.line_ids:
+										#~ brandmoc_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',moc_line.product_id.id)])
+										#~ brandmoc_rate = 0.00
+										#~ if brandmoc_obj:
+											#~ brandmoc_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,brandmoc_obj[0])
+											#~ print"brandmoc_recbrandmoc_rec",brandmoc_rec.id
+											#~ brandmoc_line_id = brandmoc_rec.line_ids
+											#~ print"brandmoc_line_idbrandmoc_line_id",brandmoc_line_id
+											#~ if brandmoc_line_id:
+												#~ for brandmoc_line in brandmoc_line_id:
+													#~ if brandmoc_line.moc_id.id == moc_id:
 														#~ design_rate = brandmoc_line.rate
-														design_rate = moc_rec.rate
-														moc_rate = moc_line.qty * design_rate
-														print"design_ratedesign_rate",design_rate
-														print"moc_ratemoc_rate",moc_rate
-											brandmoc_rate += moc_rate
-											print"brandmoc_ratebrandmoc_rate",brandmoc_rate
-							h_brandmoc_rate = brandmoc_rate / 100.00
-							print"h_brandmoc_rateh_brandmoc_rate",h_brandmoc_rate
-							pat_amt = h_brandmoc_rate * qty
-							print"pattern_recpattern_recpattern_recpattern_rec",pattern_rec.name
-							print"pat_amtpat_amtpat_amt",pat_amt
+														#~ 
+														#~ moc_rate = moc_line.qty * design_rate
+														#~ print"design_ratedesign_rate",design_rate
+														#~ print"moc_ratemoc_rate",moc_rate
+											#~ brandmoc_rate += moc_rate
+											#~ print"brandmoc_ratebrandmoc_rate",brandmoc_rate
+							#~ h_brandmoc_rate = brandmoc_rate / 100.00
+							#~ print"h_brandmoc_rateh_brandmoc_rate",h_brandmoc_rate
+							#~ pat_amt = h_brandmoc_rate * qty
+								print"pattern_recpattern_recpattern_recpattern_rec",pattern_rec.name
+								pat_amt = design_rate * qty
+								print"pat_amtpat_amtpat_amt",pat_amt
 				prime_cost_1 = pat_amt 
 				print"vvvvvvvvvvvvvvvvvvvvvvvvvvv",prime_cost_1
 				prime_cost += prime_cost_1
 				print"prime_costprime_costprime_cost",prime_cost
+				
 		# MS Item 
 		if bom_ms_line_id:
 			print"bom_ms_line_idbom_ms_line_id",bom_ms_line_id
@@ -512,9 +516,9 @@ class kg_crm_enquiry(osv.osv):
 									tot_price += price
 				bot_price += tot_price * bom_bot_line.qty
 				print"bot_pricebot_price",bot_price
-		print"aaaaaaaaaaaa",prime_cost
-		print"aaaaaaaaaaaa",ms_price
-		print"aaaaaaaaaaaa",bot_price
+		print"prime_cost",prime_cost
+		print"ms_price",ms_price
+		print"bot_price",bot_price
 		print"aaaaaaaaaaaa",item.qty
 		d= prime_cost + ms_price + bot_price
 		print"ddddddddddddddddddddddDD",d
@@ -524,6 +528,7 @@ class kg_crm_enquiry(osv.osv):
 			item_qty= 1
 		primecost_tot = (prime_cost + ms_price + bot_price) * item_qty
 		primecost_vals = primecost_tot
+		print"primecost_valsprimecost_vals",primecost_vals
 		
 		return primecost_vals
 				
