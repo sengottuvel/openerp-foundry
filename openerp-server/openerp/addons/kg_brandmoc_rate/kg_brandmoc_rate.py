@@ -52,7 +52,7 @@ class kg_brandmoc_rate(osv.osv):
 	_columns = {
 			
 		'product_id': fields.many2one('product.product','Product Name', required=True),
-		'uom_id': fields.many2one('product.uom','UOM'),
+		'uom_id': fields.many2one('product.uom','UOM',required=True),
 		'name': fields.char('Name'),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'eff_date': fields.date('Effective date',required=True),		
@@ -106,7 +106,17 @@ class kg_brandmoc_rate(osv.osv):
 		#~ ('product_id', 'unique(product_id)', 'Product Name must be unique per Company !!'),
 		#~ 
 	#~ ]
-			
+	
+	def onchange_product_uom(self, cr, uid, ids, product_id, uom_id,  context=None):			
+		
+		prod = self.pool.get('product.product').browse(cr, uid, product_id, context=context)		
+		if uom_id != prod.uom_id.id:
+			if uom_id != prod.uom_po_id.id:				 			
+				raise osv.except_osv(
+					_('UOM Mismatching Error !'),
+					_('You choosed wrong UOM and you can choose either %s or %s for %s !!!') % (prod.uom_id.name,prod.uom_po_id.name,prod.name))	
+
+		return True	
 		
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -131,10 +141,10 @@ class kg_brandmoc_rate(osv.osv):
 		return True
 		
 	def onchange_product(self, cr, uid, ids, product_id, context=None):		
-		value = {'name': '','uom_id':''}
+		value = {'name': '',}
 		if product_id:
 			pro_rec = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
-			value = {'name': pro_rec.name_template,'uom_id':pro_rec.uom_po_id.id}			
+			value = {'name': pro_rec.name_template,}			
 		return {'value': value}
 		
 	def copy_brand(self, cr, uid, ids, context=None):	
@@ -157,7 +167,13 @@ class kg_brandmoc_rate(osv.osv):
 		return True
 
 	def entry_confirm(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])	
+		rec = self.browse(cr,uid,ids[0])
+		prod = self.pool.get('product.product').browse(cr, uid, rec.product_id.id, context=context)		
+		if rec.uom_id.id != prod.uom_id.id:
+			if rec.uom_id.id != prod.uom_po_id.id:				 			
+				raise osv.except_osv(
+					_('UOM Mismatching Error !'),
+					_('You choosed wrong UOM and you can choose either %s or %s for %s !!!') % (prod.uom_id.name,prod.uom_po_id.name,prod.name))		
 		#~ pro_ids = self.search(cr,uid,[('product_id','=',rec.product_id.id),('state','!=','expire')])		
 		#~ if pro_ids:	
 			#~ raise osv.except_osv(_('Same product !!'),

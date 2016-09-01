@@ -47,6 +47,7 @@
 								<field name="mould_rate" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" invisible="1"/>
 								<field name="location" />									
 								<field name="offer_info" />									
+								<field name="need_dynamic_balancing" />									
 								<field name="corless_pattern" />									
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>					
 							</group>
@@ -57,6 +58,7 @@
 								<field name="making_cost"/>																		
 								<field name="dynamic_length"/>									
 								<field name="length_type" attrs="{'required': [('dynamic_length','=',True)]}"/>									
+								<field name="need_hydro_test"/>									
 								<field name="active"/>									
 								<field name="pattern_state" style="width: 50%%" class="att_state_change"/>							
 								<field name="state" style="width: 30%%" class="att_state_change"/>							

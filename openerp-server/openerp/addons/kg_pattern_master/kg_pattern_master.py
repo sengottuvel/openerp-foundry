@@ -103,6 +103,8 @@ class kg_pattern_master(osv.osv):
 		'copy_flag':fields.boolean('Copy Flag'),		
 		'tolerance_flag':fields.boolean('Tolerance Flag'),	
 		'list_moc_flag': fields.boolean('List MOC Flag'),	
+		'need_dynamic_balancing': fields.boolean('Need Dynamic Balancing '),	
+		'need_hydro_test': fields.boolean('Need Hydro Test'),	
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -155,7 +157,7 @@ class kg_pattern_master(osv.osv):
 	
 	def _Validation(self, cr, uid, ids, context=None):
 		flds = self.browse(cr , uid , ids[0])
-		special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+=' )
+		special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )
 		if special_char:
 			return False
 		return True
@@ -163,7 +165,7 @@ class kg_pattern_master(osv.osv):
 	def _CodeValidation(self, cr, uid, ids, context=None):
 		flds = self.browse(cr , uid , ids[0])		
 		if flds.code:	
-			code_special_char = ''.join( c for c in flds.code if  c in '!@#$%^~*{}?+=' )		
+			code_special_char = ''.join( c for c in flds.code if  c in '!@#$%^~*{}?+/=' )		
 			if code_special_char:
 				return False
 		return True		

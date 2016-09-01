@@ -373,14 +373,15 @@ class ch_ms_raw_material(osv.osv):
 	_columns = {
 			
 		'header_id':fields.many2one('kg.machine.shop', 'MS Entry', required=True, ondelete='cascade'),	
-		'product_id': fields.many2one('product.product','Raw Material', required=True, domain="[('product_type','=','raw')]"),			
-		'uom':fields.char('UOM',size=128),
+		'product_id': fields.many2one('product.product','Raw Material', required=True, domain="[('product_type','in',['ms','bot','consu'])]"),			
+		'uom':fields.many2one('product.uom','PO UOM',size=128),
 		'od': fields.float('OD'),
 		'length': fields.float('Length'),
 		'breadth': fields.float('Breadth'),
 		'thickness': fields.float('Thickness'),
 		'weight': fields.float('Weight'),
 		'uom_conversation_factor': fields.selection([('one_dimension','One Dimension'),('two_dimension','Two Dimension')],'UOM Conversation Factor'),		
+		'temp_qty':fields.float('Qty'),
 		'qty':fields.float('Qty'),
 		'remarks':fields.text('Remarks'),		
 	}
@@ -390,8 +391,20 @@ class ch_ms_raw_material(osv.osv):
 		value = {'uom': '','uom_conversation_factor':''}
 		if product_id:
 			uom_rec = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
-			value = {'uom': uom_rec.uom_id.name,'uom_conversation_factor':uom_rec.uom_conversation_factor}
+			value = {'uom': uom_rec.uom_po_id.id,'uom_conversation_factor':uom_rec.uom_conversation_factor}
 			
+		return {'value': value}
+		
+	def onchange_weight(self, cr, uid, ids, uom_conversation_factor,length,breadth,temp_qty,product_id, context=None):		
+		value = {'qty': '','weight': '',}
+		prod_rec = self.pool.get('product.product').browse(cr,uid,product_id)
+		if uom_conversation_factor == 'one_dimension':			
+			qty_value = breadth * temp_qty			
+			weight = qty_value * prod_rec.po_uom_in_kgs
+		if uom_conversation_factor == 'two_dimension':
+			qty_value = length * breadth * temp_qty				
+			weight = qty_value * prod_rec.po_uom_in_kgs		
+		value = {'qty': qty_value,'weight':weight}			
 		return {'value': value}
 		
 	def create(self, cr, uid, vals, context=None):
@@ -424,7 +437,7 @@ class ch_ms_raw_material(osv.osv):
 	def _check_one_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.uom_conversation_factor =='one_dimension':
-			if entry.qty == 0:				
+			if entry.qty == 0 or entry.breadth == 0:				
 				return False
 			return True
 		return True
