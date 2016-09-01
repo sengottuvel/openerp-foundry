@@ -102,8 +102,8 @@ class kg_crm_enquiry(osv.osv):
 		'ref_mode': 'direct',
 		'call_type': 'new_enquiry',
 		'active': True,
-	#	'division_id':_get_default_division,
-		'due_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		#~ 'division_id':_get_default_division,
+		#~ 'due_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		
 	}
 	
@@ -345,16 +345,41 @@ class kg_crm_enquiry(osv.osv):
 				bom_ms_line_id = bom_rec.line_ids_a
 				bom_bot_line_id = bom_rec.line_ids_b
 		elif item.purpose_categ == 'spare':
-				bom_line_id = item.line_ids
-				bom_ms_line_id = item.line_ids_a
-				bom_bot_line_id = item.line_ids_b
-				print"bom_line_idbom_line_id",bom_line_id
-				print"bom_ms_line_idbom_ms_line_id",bom_ms_line_id
-				print"bom_bot_line_idbom_bot_line_id",bom_bot_line_id
+			bom_line_ids = item.line_ids
+			bom_ms_line_ids = item.line_ids_a
+			bom_bot_line_ids = item.line_ids_b
+			print"bom_line_idbom_line_id",bom_line_ids
+			print"bom_ms_line_idbom_ms_line_id",bom_ms_line_ids
+			print"bom_bot_line_idbom_bot_line_id",bom_bot_line_ids
+			bom_line_id = []
+			bom_ms_line_id = []
+			bom_bot_line_id = []
+			for bm_line in bom_line_ids:
+				if bm_line.is_applicable == True:
+					bom_line_rec = self.pool.get('ch.kg.crm.foundry.item').browse(cr,uid,bm_line.id)
+					bom_line_id.append(bom_line_rec)
+			for ms_line in bom_ms_line_ids:
+				if ms_line.is_applicable == True:
+					ms_line_rec = self.pool.get('ch.kg.crm.machineshop.item').browse(cr,uid,ms_line.id)
+					bom_ms_line_id.append(ms_line_rec)
+			for bt_line in bom_bot_line_ids:
+				if bt_line.is_applicable == True:
+					bot_line_rec = self.pool.get('ch.kg.crm.bot').browse(cr,uid,bt_line.id)
+					bom_bot_line_id.append(bom_line_rec)
+			print"ssssssssssssssssssssssssssssssss",bom_line_id
+			print"ssssssssssssssssssssssssssssssssbom_ms_line_id",bom_ms_line_id
+			print"ssssssssssssssssssssssssssssssssbbom_bot_line_id",bom_bot_line_id
+				
 				
 		# FOU Item
 		if bom_line_id:
 			for bom_line in bom_line_id:
+				
+				
+				
+				
+				
+				
 				pattern_id = bom_line.pattern_id.id
 				pattern_obj = self.pool.get('kg.pattern.master').search(cr,uid,[('id','=',pattern_id)])
 				print"pattern_objpattern_obj",pattern_obj

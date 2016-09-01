@@ -389,7 +389,7 @@
 						<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
 						<field name="pattern_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
 						<field name="pattern_name" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
-						<field name="csd_no" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+						<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
 						<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 						<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
 						<field name="load_bom" invisible="1"/>
