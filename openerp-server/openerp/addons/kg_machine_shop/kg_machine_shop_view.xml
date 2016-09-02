@@ -36,7 +36,7 @@
 						<group>
 							<group>						
 								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
-								<field name="uom_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>											
+								<field name="uom_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" invisible="1"/>											
 								<field name="type" invisible="1"/>
 								<field name="dynamic_length" attrs="{'invisible':[('type','=','bot')]}"/>												
 								<field name="od" invisible="1"/>											
@@ -87,7 +87,7 @@
 								<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" >
 									<tree string="Raw Materials Entry Tree" editable="top" >									
 										<field name="product_id" on_change="onchange_uom(product_id)" />											
-										<field name="uom" readonly="1"/>	
+										<field name="uom" required="1" on_change="onchange_product_uom(product_id,uom)"/>	
 										<field name="uom_conversation_factor" readonly="1"/>	
 										<field name="od" invisible="1"/>	
 										<field name="length" attrs="{'required': [('uom_conversation_factor','in',['one_dimension','two_dimension'])]}" on_change="onchange_weight(uom_conversation_factor,length,breadth,temp_qty,product_id)"/>	

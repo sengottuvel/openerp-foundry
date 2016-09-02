@@ -106,7 +106,7 @@
 										<field name="rate" readonly="1"/>
 										<field name="pro_cost" readonly="1"/>
 										<field name="amount" readonly="1"/>
-										<field name="read_flag" readonly="1"/>
+										<field name="read_flag" invisible="1"/>
 										<field name="remarks" widget="char"/>														
 									</tree>
 								</field>																								

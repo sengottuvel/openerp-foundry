@@ -53,7 +53,7 @@ class kg_machine_shop(osv.osv):
 		'name': fields.char('Name', size=128, required=True, select=True),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'code': fields.char('Code', size=128, required=True),		
-		'uom_id': fields.many2one('product.uom', 'Unit of Measure', required=True, domain="[('dummy_state','=','approved'), ('active','=','t')]"),
+		'uom_id': fields.many2one('product.uom', 'Unit of Measure', domain="[('dummy_state','=','approved'), ('active','=','t')]"),
 		'active': fields.boolean('Active'),	
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'notes': fields.text('Notes'),
@@ -192,7 +192,38 @@ class kg_machine_shop(osv.osv):
 		return True
 
 	def entry_confirm(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])
+		rec = self.browse(cr,uid,ids[0])	
+		
+		for item in rec.line_ids:
+			prod = self.pool.get('product.product').browse(cr, uid, item.product_id.id, context=context)					
+			if item.uom.id != prod.uom_id.id:
+				if item.uom.id  != prod.uom_po_id.id:				 			
+					raise osv.except_osv(
+						_('UOM Mismatching Error !'),
+						_('You choosed wrong UOM and you can choose either %s or %s for %s !!!') % (prod.uom_id.name,prod.uom_po_id.name,prod.name))
+								
+			if item.uom_conversation_factor == 'one_dimension':	
+				if prod.uom_id.id == prod.uom_po_id.id:
+					qty_value = item.temp_qty
+					weight = 0.00
+				if item.length == 0.00:
+					qty_value = item.temp_qty
+					weight = 0.00
+				else:				
+					qty_value = item.length * item.temp_qty			
+					weight = qty_value * prod.po_uom_in_kgs
+			if item.uom_conversation_factor == 'two_dimension':
+				if item.length == 0.00 or item.breadth == 0.00:
+					qty_value = item.temp_qty
+					weight = 0.00
+				else:
+					qty_value = item.temp_qty
+					weight = 0.00
+				qty_value = item.length * item.breadth * item.temp_qty				
+				weight = qty_value * prod.po_uom_in_kgs	
+				
+			self.pool.get('ch.ms.raw.material').write(cr,uid,item.id,{'qty':qty_value,'weight':weight})			
+		
 		if rec.ms_type == 'copy_item':
 			
 			### Check Duplicates Raw Materials Items start ###
@@ -374,7 +405,7 @@ class ch_ms_raw_material(osv.osv):
 			
 		'header_id':fields.many2one('kg.machine.shop', 'MS Entry', required=True, ondelete='cascade'),	
 		'product_id': fields.many2one('product.product','Raw Material', required=True, domain="[('product_type','in',['ms','bot','consu'])]"),			
-		'uom':fields.many2one('product.uom','PO UOM',size=128),
+		'uom':fields.many2one('product.uom','PO UOM',size=128 ,required=True),
 		'od': fields.float('OD'),
 		'length': fields.float('Length'),
 		'breadth': fields.float('Breadth'),
@@ -386,18 +417,30 @@ class ch_ms_raw_material(osv.osv):
 		'remarks':fields.text('Remarks'),		
 	}
 	
+	def onchange_product_uom(self, cr, uid, ids, product_id, uom_id,  context=None):		
+		prod = self.pool.get('product.product').browse(cr, uid, product_id, context=context)		
+		if uom_id != prod.uom_id.id:
+			if uom_id != prod.uom_po_id.id:				 			
+				raise osv.except_osv(
+					_('UOM Mismatching Error !'),
+					_('You choosed wrong UOM and you can choose either %s or %s for %s !!!') % (prod.uom_id.name,prod.uom_po_id.name,prod.name))	
+
+		return True	
+	
 	def onchange_uom(self, cr, uid, ids, product_id, context=None):
 		
 		value = {'uom': '','uom_conversation_factor':''}
 		if product_id:
 			uom_rec = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
-			value = {'uom': uom_rec.uom_po_id.id,'uom_conversation_factor':uom_rec.uom_conversation_factor}
+			value = {'uom_conversation_factor':uom_rec.uom_conversation_factor}
 			
 		return {'value': value}
 		
 	def onchange_weight(self, cr, uid, ids, uom_conversation_factor,length,breadth,temp_qty,product_id, context=None):		
 		value = {'qty': '','weight': '',}
 		prod_rec = self.pool.get('product.product').browse(cr,uid,product_id)
+		qty_value = 0.00
+		weight=0.00
 		if uom_conversation_factor == 'one_dimension':	
 			if prod_rec.uom_id.id == prod_rec.uom_po_id.id:
 				qty_value = temp_qty
