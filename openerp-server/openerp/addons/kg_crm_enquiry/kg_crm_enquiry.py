@@ -370,16 +370,9 @@ class kg_crm_enquiry(osv.osv):
 			print"ssssssssssssssssssssssssssssssssbom_ms_line_id",bom_ms_line_id
 			print"ssssssssssssssssssssssssssssssssbbom_bot_line_id",bom_bot_line_id
 				
-				
 		# FOU Item
 		if bom_line_id:
 			for bom_line in bom_line_id:
-				
-				
-				
-				
-				
-				
 				pattern_id = bom_line.pattern_id.id
 				pattern_obj = self.pool.get('kg.pattern.master').search(cr,uid,[('id','=',pattern_id)])
 				print"pattern_objpattern_obj",pattern_obj
@@ -454,7 +447,6 @@ class kg_crm_enquiry(osv.osv):
 				ms_id = bom_ms_line.ms_id.id
 				ms_obj = self.pool.get('kg.machine.shop').search(cr,uid,[('id','=',ms_id)])
 				print"ms_objms_obj",ms_obj
-				
 				if ms_obj:
 					ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,ms_obj[0])
 					if item.purpose_categ == 'pump':
@@ -476,20 +468,31 @@ class kg_crm_enquiry(osv.osv):
 									brandmoc_line_data = cr.dictfetchall()
 									if brandmoc_line_data:
 										design_rate = brandmoc_line_data[0]['rate']
+										
+										#~ if raw_line.product_id.uom_conversation_factor == 'one_dimension':
+											#~ qty = raw_line.qty
+										#~ elif raw_line.product_id.uom_conversation_factor == 'two_dimension':
+											#~ qty = raw_line.qty * raw_line.length * raw_line.breadth
+										#~ if raw_line.product_id.uom_id.id == brandmoc_rec.uom_id.id:
+											#~ price = qty * design_rate
+										#~ elif raw_line.product_id.uom_id.id != brandmoc_rec.uom_id.id:
+											#~ if brandmoc_rec.uom_id.code == 'Kg':
+												#~ kg_val = brandmoc_rec.product_id.po_uom_in_kgs / brandmoc_rec.product_id.po_uom_coeff
+												#~ tot_kg = qty * kg_val
+												#~ price = tot_kg * design_rate
+											#~ else:
+												#~ kg_val = design_rate / brandmoc_rec.product_id.po_uom_coeff
+												#~ price = kg_val * qty
+												
 										if raw_line.product_id.uom_conversation_factor == 'one_dimension':
-											qty = raw_line.qty
+											if raw_line.uom.id == brandmoc_rec.uom_id.id:
+												qty = raw_line.qty
+											elif raw_line.uom.id != brandmoc_rec.uom_id.id:
+												qty = raw_line.weight
 										elif raw_line.product_id.uom_conversation_factor == 'two_dimension':
-											qty = raw_line.qty * raw_line.length * raw_line.breadth
-										if raw_line.product_id.uom_id.id == brandmoc_rec.uom_id.id:
-											price = qty * design_rate
-										elif raw_line.product_id.uom_id.id != brandmoc_rec.uom_id.id:
-											if brandmoc_rec.uom_id.code == 'Kg':
-												kg_val = brandmoc_rec.product_id.po_uom_in_kgs / brandmoc_rec.product_id.po_uom_coeff
-												tot_kg = qty * kg_val
-												price = tot_kg * design_rate
-											else:
-												kg_val = design_rate / brandmoc_rec.product_id.po_uom_coeff
-												price = kg_val * qty
+											qty = raw_line.weight
+										
+										price = design_rate * qty
 									tot_price += price
 				ms_price += tot_price * bom_ms_line.qty
 				print"ms_pricems_price",ms_price
@@ -524,27 +527,36 @@ class kg_crm_enquiry(osv.osv):
 									brandmoc_line_data = cr.dictfetchall()
 									if brandmoc_line_data:
 										design_rate = brandmoc_line_data[0]['rate']
+										#~ if raw_line.product_id.uom_conversation_factor == 'one_dimension':
+											#~ qty = raw_line.qty
+										#~ elif raw_line.product_id.uom_conversation_factor == 'two_dimension':
+											#~ qty = raw_line.qty * raw_line.length * raw_line.breadth
+										#~ if raw_line.product_id.uom_id.id == brandmoc_rec.uom_id.id:
+											#~ price = qty * design_rate
+										#~ elif raw_line.product_id.uom_id.id != brandmoc_rec.uom_id.id:
+											#~ if brandmoc_rec.uom_id.code == 'Kg':
+												#~ kg_val = brandmoc_rec.product_id.po_uom_in_kgs / brandmoc_rec.product_id.po_uom_coeff
+												#~ tot_kg = qty * kg_val
+												#~ price = tot_kg * design_rate
+											#~ else:
+												#~ kg_val = design_rate / brandmoc_rec.product_id.po_uom_coeff
+												#~ price = kg_val * qty
 										if raw_line.product_id.uom_conversation_factor == 'one_dimension':
-											qty = raw_line.qty
+											if raw_line.uom.id == brandmoc_rec.uom_id.id:
+												qty = raw_line.qty
+											elif raw_line.uom.id != brandmoc_rec.uom_id.id:
+												qty = raw_line.weight
 										elif raw_line.product_id.uom_conversation_factor == 'two_dimension':
-											qty = raw_line.qty * raw_line.length * raw_line.breadth
-										if raw_line.product_id.uom_id.id == brandmoc_rec.uom_id.id:
-											price = qty * design_rate
-										elif raw_line.product_id.uom_id.id != brandmoc_rec.uom_id.id:
-											if brandmoc_rec.uom_id.code == 'Kg':
-												kg_val = brandmoc_rec.product_id.po_uom_in_kgs / brandmoc_rec.product_id.po_uom_coeff
-												tot_kg = qty * kg_val
-												price = tot_kg * design_rate
-											else:
-												kg_val = design_rate / brandmoc_rec.product_id.po_uom_coeff
-												price = kg_val * qty
+											qty = raw_line.weight
+												
+										price = design_rate * qty
 									tot_price += price
 				bot_price += tot_price * bom_bot_line.qty
 				print"bot_pricebot_price",bot_price
 		print"prime_cost",prime_cost
 		print"ms_price",ms_price
 		print"bot_price",bot_price
-		print"aaaaaaaaaaaa",item.qty
+		print"item.qtyitem.qty",item.qty
 		d= prime_cost + ms_price + bot_price
 		print"ddddddddddddddddddddddDD",d
 		if item.purpose_categ == 'pump':
