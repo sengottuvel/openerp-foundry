@@ -597,6 +597,12 @@ class ch_machineshop_details(osv.osv):
 			value = {'name': pro_rec.name,'csd_no':pro_rec.csd_code}
 			
 		return {'value': value}
+	
+	def _check_line_qty(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])		
+		if entry.qty <= 0:			
+			return False
+		return True
 		
 	def create(self, cr, uid, vals, context=None):	  
 		ms_obj = self.pool.get('kg.machine.shop')
@@ -614,7 +620,12 @@ class ch_machineshop_details(osv.osv):
 			ms_name = ms_rec.name
 			csd_no = ms_rec.csd_code		   		   
 			vals.update({'name':ms_name,'csd_no':csd_no })
-		return super(ch_machineshop_details, self).write(cr, uid, ids, vals, context)   
+		return super(ch_machineshop_details, self).write(cr, uid, ids, vals, context)
+	_constraints = [
+		
+		(_check_line_qty, 'Machine Shop items Qty Zero and negative not accept', ['Qty']),	   
+		
+	]   
 
 ch_machineshop_details()
 
@@ -656,8 +667,20 @@ class ch_bot_details(osv.osv):
 			product_rec = product_obj.browse(cr, uid, vals.get('bot_id') )
 			product_code = product_rec.name
 			vals.update({'name':product_code })
-		return super(ch_bot_details, self).write(cr, uid, ids, vals, context)   
-
+		return super(ch_bot_details, self).write(cr, uid, ids, vals, context) 
+		
+	def _check_line_qty(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])		
+		if entry.qty <= 0:			
+			return False
+		return True 
+	_constraints = [
+		
+		(_check_line_qty, 'BOT Items Qty Zero and negative not accept', ['Qty']),	   
+		
+	]
+	
+	
 ch_bot_details()
 
 class ch_consu_details(osv.osv):

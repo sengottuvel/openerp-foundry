@@ -398,30 +398,19 @@ class ch_ms_raw_material(osv.osv):
 	def onchange_weight(self, cr, uid, ids, uom_conversation_factor,length,breadth,temp_qty,product_id, context=None):		
 		value = {'qty': '','weight': '',}
 		prod_rec = self.pool.get('product.product').browse(cr,uid,product_id)
-		if uom_conversation_factor == 'one_dimension':			
-			qty_value = breadth * temp_qty			
-			weight = qty_value * prod_rec.po_uom_in_kgs
+		if uom_conversation_factor == 'one_dimension':	
+			if prod_rec.uom_id.id == prod_rec.uom_po_id.id:
+				qty_value = temp_qty
+				weight = 0.00
+			else:				
+				qty_value = length * temp_qty			
+				weight = qty_value * prod_rec.po_uom_in_kgs
 		if uom_conversation_factor == 'two_dimension':
 			qty_value = length * breadth * temp_qty				
 			weight = qty_value * prod_rec.po_uom_in_kgs		
 		value = {'qty': qty_value,'weight':weight}			
 		return {'value': value}
 		
-	def create(self, cr, uid, vals, context=None):
-		pro_obj = self.pool.get('product.product')
-		if vals.get('product_id'):		  
-			uom_rec = pro_obj.browse(cr, uid, vals.get('product_id') )
-			uom_name = uom_rec.uom_id.name
-			vals.update({'uom': uom_name})
-		return super(ch_ms_raw_material, self).create(cr, uid, vals, context=context)
-		
-	def write(self, cr, uid, ids, vals, context=None):
-		pro_obj = self.pool.get('product.product')
-		if vals.get('product_id'):
-			uom_rec = pro_obj.browse(cr, uid, vals.get('product_id') )
-			uom_name = uom_rec.uom_id.name
-			vals.update({'uom': uom_name})
-		return super(ch_ms_raw_material, self).write(cr, uid, ids, vals, context)  
 	
 	
 	def _check_values(self, cr, uid, ids, context=None):
@@ -430,16 +419,20 @@ class ch_ms_raw_material(osv.osv):
 		data = cr.dictfetchall()			
 		if len(data) > 1:		
 			return False
-		return True
-		
-	
+		return True	
 		
 	def _check_one_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
+		prod_rec = self.pool.get('product.product').browse(cr,uid,entry.product_id.id)
 		if entry.uom_conversation_factor =='one_dimension':
-			if entry.qty == 0 or entry.breadth == 0:				
-				return False
-			return True
+			if prod_rec.uom_id.id == prod_rec.uom_po_id.id:
+				if entry.qty == 0:				
+					return False
+				return True	
+			else:
+				if entry.qty == 0 or entry.length == 0:				
+					return False				
+				return True				
 		return True
 		
 	def _check_two_values(self, cr, uid, ids, context=None):
@@ -452,8 +445,8 @@ class ch_ms_raw_material(osv.osv):
 		
 	_constraints = [		
 			  
-		(_check_one_values, 'Check the zero values not allowed..!!',['Qty']),	
-		(_check_two_values, 'Check the zero values not allowed..!!',['Breadth,Length,Qty']),
+		(_check_one_values, 'Check the zero values not allowed..!!',['Qty or Length']),	
+		(_check_two_values, 'Check the zero values not allowed..!!',['Breadth or Length or Qty']),
 		(_check_values, 'Please Check the same Raw Material not allowed..!!',['Raw Material']),	
 		
 	   ]
