@@ -468,7 +468,7 @@ class kg_purchase_order(osv.osv):
 				#~ raise osv.except_osv(
 					#~ _('Warning'),
 					#~ _('PO Entry is not allowed!'))
-		if obj.name == False:
+		if not obj.name:
 			if obj.division == 'ipd':
 				seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','purchase.order')])
 				seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
