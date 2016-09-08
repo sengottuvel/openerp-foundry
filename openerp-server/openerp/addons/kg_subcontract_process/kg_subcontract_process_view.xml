@@ -87,6 +87,7 @@
 					<field name="item_code" />
 					<field name="item_name"/>
 					<field name="moc_id"/>
+					<field name="position_id"/>
 					<field name="location" invisible="1"/>
 					<field name="actual_qty" sum="Total SC Qty"/>
 					<field name="pending_qty" sum="Total SC Qty"/>
