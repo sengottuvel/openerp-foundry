@@ -17,7 +17,7 @@
 						<group string="SC Details">
 							<group>
 								<field name="name"/>
-								<field name="sc_qty" readonly="1"/>
+								<field name="actual_qty" readonly="1"/>
 							</group>											
 							<group>
 								<field name="entry_date" readonly="1"/>
@@ -88,7 +88,9 @@
 					<field name="item_name"/>
 					<field name="moc_id"/>
 					<field name="location" invisible="1"/>
-					<field name="sc_qty" sum="Total SC Qty"/>
+					<field name="actual_qty" sum="Total SC Qty"/>
+					<field name="pending_qty" sum="Total SC Qty"/>
+					<field name="total_qty" sum="Total WO Qty"/>
 				</tree>
 			</field>
 		</record>
@@ -136,6 +138,7 @@
 			<field name="view_type">form</field>
 			<field name="context">{}</field>
 			<field name="search_view_id" ref="t_search_v_sc_list"/>
+			<field name="domain">[('wo_process_state','=','allow')]</field>
 		</record>
 		
 		 <record model="ir.actions.act_window.view" id="tma_sc_list_tree_view">
@@ -194,6 +197,7 @@
 				<form string="Subcontract WO" version="7.0">
 					<header>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="confirm_dc" type="object" string="Confirm &amp; DC" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
 					<sheet>		
 						<group>
@@ -201,8 +205,7 @@
 								<field name="name"/>
 								<field name="contractor_id" on_change="onchange_contractor(contractor_id)" required="1"  attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="phone" readonly="1"/>
-								<field name="wo_value" readonly="1"/>
-								<field name="state" readonly="1"/>
+								<field name="wo_value" readonly="1"/>								
 							</group>											
 							<group>
 								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
@@ -210,6 +213,7 @@
 								<field name="billing_type" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="delivery_date" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="flag_order" invisible="1"/>
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
 							</group>					
 						</group>
 						<notebook>
@@ -222,14 +226,15 @@
 										<field name="position_id" readonly="1"/>
 										<field name="moc_id" readonly="1"/>
 										<field name="qty" required="1" on_change="onchange_sc_rate(operation_id,position_id,qty,rate)"/>
-										<field name="operation_id" on_change="onchange_sc_rate(operation_id,position_id,qty,rate)" required="1"/>
-										<field name="rate" required="1" on_change="onchange_sc_rate(operation_id,position_id,qty,rate)"/>
+										<field name="operation_id" on_change="onchange_sc_rate(operation_id,position_id,qty,rate)" required="1" widget="many2many_tags"/>
+										<field name="rate" readonly="1" on_change="onchange_sc_rate(operation_id,position_id,qty,rate)"/>
 										<field name="amount" required="1" readonly="1"/>
 										<field name="remarks" widget="char"/>
+										<field name="dc_flag" invisible="1"/>
 									</tree>
 								</field>
 							</page>
-							<page string="Select SC Items">
+							<page string="Select Items">
 								<field name="sc_line_ids" attrs="{'readonly': [('state','in',['confirmed'])]}">
 									<tree string="SC Items" create="false">
 										<field name="order_no"/>
@@ -239,7 +244,7 @@
 										<field name="item_code" />
 										<field name="item_name"/>
 										<field name="moc_id"/>
-										<field name="sc_qty"/>
+										<field name="actual_qty"/>
 									</tree>
 								</field>
 								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
@@ -279,7 +284,9 @@
 			<field name="model">kg.subcontract.wo</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<tree toolbar="True" string="Subcontract WO Tree">					
+				<tree colors="blue:state == 'draft';black:state == 'confirmed'
+						;black:state == 'confirmed_dc';gray:state == 'cancel'" 
+						toolbar="True" string="Subcontract WO Tree">					
 					<field name="name"/>
 					<field name="entry_date"/>
 					<field name="contractor_id"/>
@@ -287,6 +294,32 @@
 					<field name="wo_value"/>
 					<field name="delivery_date"/>
 					<field name="state"/>
+					
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	
+	<!-- WO Line Tree View Start -->
+		
+		<record id="t_tree_v_sc_wo_line" model="ir.ui.view">
+			<field name="name">Subcontract WO Line Tree</field>
+			<field name="model">ch.subcontract.wo.line</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Subcontract WO Line Tree">				
+					<field name="order_no"/>
+					<field name="order_delivery_date"/>					
+					<field name="order_priority" string="Category"/>
+					<field name="pump_model_id"/>					
+					<field name="item_code" />
+					<field name="item_name"/>
+					<field name="moc_id"/>					
+					<field name="qty" sum="Total SC Qty"/>
+					<field name="pending_qty" sum="Total SC Qty"/>
+					
 					
 				</tree>
 			</field>
@@ -377,18 +410,884 @@
 	  <field name="reset_sequence">fiscal_reset</field>
 	</record>
 	
-	<!-- Sequence Number Setting Ends Here -->
-	
-	<!-- Fettling Inward Batch End Here -->
+	<!-- Sequence Number Setting Ends Here -->	
 	
 	
+	<!-- DC Karthikeyan Started -->	
 	
+	<!-- Subcontractor DC Starts Here -->
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_sc_dc" model="ir.ui.view">
+			<field name="name">Subcontract DC Form</field>
+			<field name="model">kg.subcontract.dc</field>
+			<field name="arch" type="xml">
+				<form string="Subcontract DC" version="7.0">
+					<header>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+					</header>
+					<sheet>		
+						<group>
+							<group>
+								<field name="name"/>
+								<field name="transfer_type" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="to_division_id" attrs="{'invisible': [('transfer_type','=','sub_contractor')],'required': [('transfer_type','=','internal')],'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="contractor_id" on_change="onchange_contractor(contractor_id)"  attrs="{'readonly': [('state','in',['confirmed','cancel'])], 'invisible': [('transfer_type','=','internal')],'required': [('transfer_type','=','sub_contractor')]}"/>	
+								<field name="phone" readonly="1" attrs="{'invisible': [('transfer_type','=','internal')]}"/>												
+								
+							</group>											
+							<group>
+								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>								
+								<field name="division_id" readonly="1"/>
+								<field name="contact_person" readonly="1" attrs="{'invisible': [('transfer_type','=','internal')]}"/>
+								<field name="vehicle_detail" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}" required="1"/>			
+								<field name="flag_dc" invisible="1"/>			
+								<field name="entry_mode" invisible="1"/>	
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>		
+							</group>					
+						</group>
+						<notebook>
+							<page string="DC Details" attrs="{'invisible': [('flag_dc','!=',True)]}">
+								<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
+									<tree string = "Work Order Items" editable="bottom">
+										<field name="order_no" readonly="1"/>
+										<field name="item_code" readonly="1"/>
+										<field name="item_name" readonly="1"/>
+										<field name="position_id" readonly="1"/>
+										<field name="moc_id" readonly="1"/>
+										<field name="qty" required="1" attrs="{'readonly': [('entry_mode','=','from_wo')]}"/>	
+										<field name="operation_id" required="1" widget="many2many_tags"/>									
+										<field name="each_weight" required="1" on_change="onchange_total_weight(each_weight,qty)"/>
+										<field name="totel_weight" readonly="1"/>
+										<field name="entry_mode" invisible="1"/>
+										<field name="entry_type" invisible="1"/>
+										<field name="state" invisible="1"/>
+										
+										<field name="remarks" widget="char"/>
+									</tree>
+								</field>
+							</page>
+							<page string="Select Items" attrs="{'invisible': [('entry_mode','=','from_wo')]}">
+								<field name="dc_internal_line_ids" attrs="{'readonly': [('state','in',['confirmed'])],'invisible': [('transfer_type','=','sub_contractor')]}">
+									<tree string="SC Items" create="false">
+										<field name="order_no"/>
+										<field name="order_delivery_date"/>
+										<field name="order_priority" string="Category"/>
+										<field name="pump_model_id"/>
+										<field name="item_code" />
+										<field name="item_name"/>
+										<field name="moc_id"/>
+										<field name="actual_qty"/>
+									</tree>
+								</field>
+								<field name="dc_sub_line_ids" attrs="{'readonly': [('state','in',['confirmed'])],'invisible': [('transfer_type','=','internal')]}">
+									<tree string="SC Items" create="false">
+										<field name="order_no"/>
+										<field name="order_delivery_date"/>
+										<field name="order_priority" string="Category"/>
+										<field name="pump_model_id"/>
+										<field name="item_code" />
+										<field name="item_name"/>
+										<field name="moc_id"/>
+										<field name="qty"/>
+									</tree>
+								</field>
+								
+								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
+							</page>
+							
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										<field name="update_user_id"/>
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_sc_dc" model="ir.ui.view">
+			<field name="name">Subcontract DC Tree</field>
+			<field name="model">kg.subcontract.dc</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';black:state == 'confirmed';
+						gray:state == 'cancel'" 
+						toolbar="True" string="Subcontract DC Tree">								
+					<field name="name"/>
+					<field name="entry_date"/>					
+					<field name="transfer_type"/>					
+					<field name="state"/>
+					
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	
+	<!-- DC Line Tree View Start -->
+		
+		<record id="t_tree_v_sc_dc_line" model="ir.ui.view">
+			<field name="name">Subcontract DC Line Tree</field>
+			<field name="model">ch.subcontract.dc.line</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Subcontract DC Line Tree">				
+					<field name="order_no"/>
+					<field name="order_delivery_date"/>					
+					<field name="order_priority" string="Category"/>
+					<field name="pump_model_id"/>					
+					<field name="item_code" />
+					<field name="item_name"/>
+					<field name="moc_id"/>					
+					<field name="entry_type" invisible="1"/>					
+					<field name="actual_qty" sum="Total SC Qty"/>
+					<field name="pending_qty" sum="Total pending Qty"/>
+					
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Search View Start -->
+
+		<record id="t_search_v_sc_dc" model="ir.ui.view">
+            <field name="name">Subcontract DC Search</field>
+            <field name="model">kg.subcontract.dc</field>
+            <field name="arch" type="xml">
+                <search string="Subcontract DC Search">
+					
+					<field name="name" string="DC No."  filter_domain="[('name','ilike',self)]" />
+					
+					
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>					
+					<filter icon="terp-check" name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>				
+				
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="DC No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'name'}"/>
+						
+						<filter string="Contractor" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'contractor_id'}"/>
+						<filter string="State" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+						
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+		
+		<!-- Menu Action Start -->
+		
+		
+		<record id="tma_sc_dc" model="ir.actions.act_window">
+			<field name="name">Subcontract DC</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.subcontract.dc</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="search_view_id" ref="t_search_v_sc_dc"/>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_sc_dc_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_sc_dc"/>
+            <field name="act_window_id" ref="tma_sc_dc"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_sc_dc_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_sc_dc"/>
+            <field name="act_window_id" ref="tma_sc_dc"/>
+        </record>
+		
+	<!-- Menu Action End-->
+
+	
+	<!-- Audit Log Xml Data Start -->
+		
+        <record id="audit_sc_dc" model="audittrail.rule">
+            <field name="name">Audit Subcontract dc</field>
+            <field name="object_id" eval="ref('kg_subcontract_process.model_kg_subcontract_dc')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->
+    
+    <!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_subcontract_dc" model="ir.sequence.type">	
+		<field name="name">KG Subcontract DC</field>
+		<field name="code">kg.subcontract.dc</field>
+	</record>
+
+	<record forcecreate="1" id="seq_subcontract_wo" model="ir.sequence">
+	  <field name="name">KG Subcontract DC</field>
+	  <field name="code">kg.subcontract.dc</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">DC/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->	
+	
+	
+	<!-- DC Code End Here -->
+	
+	
+	
+	
+	
+	
+	<!-- Inward code Karthikeyan Started -->	
+	
+	<!-- Subcontractor Inward Starts Here -->
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_sc_inward" model="ir.ui.view">
+			<field name="name">Subcontract Inward Form</field>
+			<field name="model">kg.subcontract.inward</field>
+			<field name="arch" type="xml">
+				<form string="Subcontract Inward" version="7.0">
+					<header>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+					</header>
+					<sheet>		
+						<group>
+							<group>
+								<field name="name"/>
+								<field name="transfer_type" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="to_division_id" attrs="{'invisible': [('transfer_type','=','sub_contractor')],'required': [('transfer_type','=','internal')],'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="contractor_id" on_change="onchange_contractor(contractor_id)"  attrs="{'readonly': [('state','in',['confirmed','cancel'])], 'invisible': [('transfer_type','=','internal')],'required': [('transfer_type','=','sub_contractor')]}"/>	
+								<field name="phone" readonly="1" attrs="{'invisible': [('transfer_type','=','internal')]}"/>																			
+								
+							</group>											
+							<group>
+								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="division_id" readonly="1"/>
+								<field name="contact_person" readonly="1" attrs="{'invisible': [('transfer_type','=','internal')]}"/>									
+								<field name="flag_inward" invisible="1"/>			
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+							</group>					
+						</group>
+						<notebook>
+							<page string="Inward Details" attrs="{'invisible': [('flag_inward','!=',True)]}">
+								<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
+									<tree string = "Inward Items" editable="bottom">
+										<field name="order_no" readonly="1"/>
+										<field name="item_code" readonly="1"/>
+										<field name="item_name" readonly="1"/>
+										<field name="position_id" readonly="1"/>
+										<field name="moc_id" readonly="1"/>
+										<field name="qty" required="1"/>
+										<field name="operation_id" required="1" widget="many2many_tags" readonly="1"/>											
+										<field name="com_operation_id" required="1" widget="many2many_tags"/>											
+										<field name="each_weight" readonly="1" />
+										<field name="com_weight" required="1" on_change="onchange_com_weight(com_weight,qty)"/>
+										<field name="totel_weight" readonly="1"/>										
+										<field name="remarks" widget="char"/>
+									</tree>
+								</field>
+							</page>
+							<page string="Select Items">
+								<field name="dc_line_ids" attrs="{'readonly': [('state','in',['confirmed'])],'invisible': [('transfer_type','=','sub_contractor')]}">
+									<tree string="SC Items" create="false">
+										<field name="order_no"/>
+										<field name="order_delivery_date"/>
+										<field name="order_priority" string="Category"/>
+										<field name="pump_model_id"/>
+										<field name="item_code" />
+										<field name="item_name"/>
+										<field name="moc_id"/>
+										
+									</tree>
+								</field>
+								<field name="inward_sub_line_ids" attrs="{'readonly': [('state','in',['confirmed'])],'invisible': [('transfer_type','=','internal')]}">
+									<tree string="SC Items" create="false">
+										<field name="order_no"/>
+										<field name="order_delivery_date"/>
+										<field name="order_priority" string="Category"/>
+										<field name="pump_model_id"/>
+										<field name="item_code" />
+										<field name="item_name"/>
+										<field name="moc_id"/>
+										
+									</tree>
+								</field>							
+								
+								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
+							</page>
+							
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										<field name="update_user_id"/>
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_sc_inward" model="ir.ui.view">
+			<field name="name">Subcontract Inward Tree</field>
+			<field name="model">kg.subcontract.inward</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';black:state == 'confirmed';
+						gray:state == 'cancel'" 
+						toolbar="True" string="Subcontract Inward Tree">							
+					<field name="name"/>
+					<field name="entry_date"/>					
+					<field name="state"/>				
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Search View Start -->
+
+		<record id="t_search_v_sc_inward" model="ir.ui.view">
+            <field name="name">Subcontract Inward Search</field>
+            <field name="model">kg.subcontract.inward</field>
+            <field name="arch" type="xml">
+                <search string="Subcontract Inward Search">
+					
+					<field name="name" string="Inward No."  filter_domain="[('name','ilike',self)]" />
+					
+					
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>					
+					<filter icon="terp-check" name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>				
+				
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="Inward No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'name'}"/>		
+						
+						<filter string="State" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+						
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->	
+	
+		<!-- Inward Line Tree View Start -->
+		
+		<record id="t_tree_v_sc_inward_line" model="ir.ui.view">
+			<field name="name">Subcontract Inward Line Tree</field>
+			<field name="model">ch.subcontract.inward.line</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Subcontract Inward Line Tree">				
+					<field name="order_no"/>
+					<field name="order_delivery_date"/>					
+					<field name="order_priority" string="Category"/>
+					<field name="pump_model_id"/>					
+					<field name="item_code" />
+					<field name="item_name"/>
+					<field name="moc_id"/>									
+					<field name="actual_qty" sum="Total SC Qty"/>
+					<field name="pending_qty" sum="Pending Qty"/>
+					
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->	
+			
+		
+		<!-- Menu Action Start -->
+		
+		
+		<record id="tma_sc_inward" model="ir.actions.act_window">
+			<field name="name">Subcontract Inward</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.subcontract.inward</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="search_view_id" ref="t_search_v_sc_inward"/>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_sc_inward_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_sc_inward"/>
+            <field name="act_window_id" ref="tma_sc_inward"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_sc_inward_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_sc_inward"/>
+            <field name="act_window_id" ref="tma_sc_inward"/>
+        </record>
+		
+	<!-- Menu Action End-->
+
+	
+	<!-- Audit Log Xml Data Start -->
+		
+        <record id="audit_sc_inward" model="audittrail.rule">
+            <field name="name">Audit Subcontract inward</field>
+            <field name="object_id" eval="ref('kg_subcontract_process.model_kg_subcontract_inward')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->
+    
+    <!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_subcontract_inward" model="ir.sequence.type">	
+		<field name="name">KG Subcontract Inward</field>
+		<field name="code">kg.subcontract.inward</field>
+	</record>
+
+	<record forcecreate="1" id="seq_subcontract_inward" model="ir.sequence">
+	  <field name="name">KG Subcontract Inward</field>
+	  <field name="code">kg.subcontract.inward</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">IN/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->	
+	
+	
+	<!-- Inward Code End Here -->
+	
+	
+	
+	
+	<!-- Advance code Karthikeyan Started -->	
+	
+	<!-- Subcontractor Advance Starts Here -->
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_sc_advance" model="ir.ui.view">
+			<field name="name">Subcontract Advance Form</field>
+			<field name="model">kg.subcontract.advance</field>
+			<field name="arch" type="xml">
+				<form string="Subcontract Advance" version="7.0">
+					<header>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+					</header>
+					<sheet>		
+						<group>
+							<group>
+								<field name="name"/>																			
+								<field name="contractor_id"/>																			
+								<field name="advance_amt" required="1"/>																											
+								
+							</group>											
+							<group>
+								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>									
+								<field name="total_amt"  readonly="1"/>			
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+							</group>					
+						</group>
+						<notebook>		
+							<page string="WO Items">
+								<field name="wo_ids"/>
+							</page>
+							
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										<field name="update_user_id"/>
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_sc_advance" model="ir.ui.view">
+			<field name="name">Subcontract Advance Tree</field>
+			<field name="model">kg.subcontract.advance</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';black:state == 'confirmed';
+						gray:state == 'cancel'" 
+						toolbar="True" string="Subcontract Advance Tree">						
+					<field name="name"/>
+					<field name="entry_date"/>					
+					<field name="total_amt"/>					
+					<field name="advance_amt"/>					
+					<field name="state"/>				
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Search View Start -->
+
+		<record id="t_search_v_sc_advance" model="ir.ui.view">
+            <field name="name">Subcontract Advance Search</field>
+            <field name="model">kg.subcontract.advance</field>
+            <field name="arch" type="xml">
+                <search string="Subcontract Advance Search">
+					
+					<field name="name" string="Advance No."  filter_domain="[('name','ilike',self)]" />
+					
+					
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>					
+					<filter icon="terp-check" name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>				
+				
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="Advance No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'name'}"/>		
+						
+						<filter string="State" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+						
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->
+	
+		
+			
+		
+		<!-- Menu Action Start -->
+		
+		
+		<record id="tma_sc_advance" model="ir.actions.act_window">
+			<field name="name">Subcontract Advance</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.subcontract.advance</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="search_view_id" ref="t_search_v_sc_advance"/>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_sc_advance_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_sc_advance"/>
+            <field name="act_window_id" ref="tma_sc_advance"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_sc_advance_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_sc_advance"/>
+            <field name="act_window_id" ref="tma_sc_advance"/>
+        </record>
+		
+	<!-- Menu Action End-->
+
+	
+	<!-- Audit Log Xml Data Start -->
+		
+        <record id="audit_sc_advance" model="audittrail.rule">
+            <field name="name">Audit Subcontract Advance</field>
+            <field name="object_id" eval="ref('kg_subcontract_process.model_kg_subcontract_advance')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->
+    
+    <!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_subcontract_advance" model="ir.sequence.type">	
+		<field name="name">KG Subcontract Advance</field>
+		<field name="code">kg.subcontract.advance</field>
+	</record>
+
+	<record forcecreate="1" id="seq_subcontract_advance" model="ir.sequence">
+	  <field name="name">KG Subcontract Advance</field>
+	  <field name="code">kg.subcontract.advance</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">IN/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->	
+	
+	
+	<!-- DC Code End Here -->
+	
+	
+	
+	
+		
+		
+		
+		
+		
+		
+	<!-- Subcontractor Invoice Starts Here -->
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_sc_invoice" model="ir.ui.view">
+			<field name="name">Subcontract Invoice Form</field>
+			<field name="model">kg.subcontract.invoice</field>
+			<field name="arch" type="xml">
+				<form string="Subcontract Invoice" version="7.0">
+					<header>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+					</header>
+					<sheet>		
+						<group>
+							<group>
+								<field name="name"/>							
+								<field name="contractor_id" on_change="onchange_contractor(contractor_id)"  attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>	
+								<field name="phone" readonly="1" />																			
+								
+							</group>											
+							<group>
+								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>							
+								<field name="inward_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>									
+								<field name="contact_person" readonly="1" />									
+								<field name="flag_invoice" invisible="1"/>	
+								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>		
+									
+							</group>					
+						</group>
+						<notebook>
+							<page string="Invoice Details" attrs="{'invisible': [('flag_invoice','!=',True)]}">
+								<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
+									<tree string = "Invoice Items" editable="bottom">
+										<field name="order_no" readonly="1"/>
+										<field name="item_code" readonly="1"/>
+										<field name="item_name" readonly="1"/>
+										<field name="position_id" readonly="1"/>
+										<field name="moc_id" readonly="1"/>
+										<field name="operation_id" required="1" widget="many2many_tags" readonly="1"/>
+										<field name="qty" required="1" on_change="onchange_total_value(qty,value)"/>																				
+										<field name="value" required="1" on_change="onchange_total_value(qty,value)"/>
+										<field name="total_value" readonly="1" />
+										<field name="com_weight" readonly="1"/>										
+										<field name="remarks" widget="char"/>
+									</tree>
+								</field>
+							</page>
+							<page string="Select Items">
+								<field name="inward_subcontract_line_ids" attrs="{'readonly': [('state','in',['confirmed'])]}">
+									<tree string="Inward Items" create="false">
+										<field name="order_no"/>
+										<field name="order_delivery_date"/>
+										<field name="order_priority" string="Category"/>
+										<field name="pump_model_id"/>
+										<field name="item_code" />
+										<field name="item_name"/>
+										<field name="moc_id"/>										
+									</tree>
+								</field>
+														
+								
+								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
+							</page>
+							
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										<field name="update_user_id"/>
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_sc_invoice" model="ir.ui.view">
+			<field name="name">Subcontract Invoice Tree</field>
+			<field name="model">kg.subcontract.invoice</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+					<tree colors="blue:state == 'draft';black:state == 'confirmed';
+						gray:state == 'cancel'" 
+						toolbar="True" string="Subcontract Invoice Tree">							
+					<field name="name"/>
+					<field name="entry_date"/>					
+					<field name="state"/>				
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Search View Start -->
+
+		<record id="t_search_v_sc_invoice" model="ir.ui.view">
+            <field name="name">Subcontract Invoice Search</field>
+            <field name="model">kg.subcontract.invoice</field>
+            <field name="arch" type="xml">
+                <search string="Subcontract Invoice Search">
+					
+					<field name="name" string="Invoice No."  filter_domain="[('name','ilike',self)]" />
+					
+					
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>					
+					<filter icon="terp-check" name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>				
+				
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="Invoice No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'name'}"/>		
+						
+						<filter string="State" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+						
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+		
+		<!-- Menu Action Start -->
+		
+		
+		<record id="tma_sc_invoice" model="ir.actions.act_window">
+			<field name="name">Subcontract Invoice</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.subcontract.invoice</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="search_view_id" ref="t_search_v_sc_invoice"/>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_sc_invoice_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_sc_invoice"/>
+            <field name="act_window_id" ref="tma_sc_invoice"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_sc_invoice_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_sc_invoice"/>
+            <field name="act_window_id" ref="tma_sc_invoice"/>
+        </record>
+		
+	<!-- Menu Action End-->
+
+	
+	
+    
+    <!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_subcontract_invoice" model="ir.sequence.type">	
+		<field name="name">KG Subcontract Invoice</field>
+		<field name="code">kg.subcontract.invoice</field>
+	</record>
+
+	<record forcecreate="1" id="seq_subcontract_invoice" model="ir.sequence">
+	  <field name="name">KG Subcontract Invoice</field>
+	  <field name="code">kg.subcontract.invoice</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">INVOICE/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->	
+	
+	
+	<!-- Inward Code End Here -->
+		
+		
+		
 	<!-- Menu Item Starts Here -->
 	
 	<menuitem name="Subcontract Process" id="tpm_sc_process" parent="kg_menus.mpm_crm" sequence="4"/>
 			
 		<menuitem action="tma_sc_list" id="tam_sc_list" parent="tpm_sc_process" sequence="1" />
 		<menuitem action="tma_sc_wo" id="tam_sc_wo" parent="tpm_sc_process" sequence="2" />
+		<menuitem action="tma_sc_dc" id="tam_sc_dc" parent="tpm_sc_process" sequence="3" />
+		<menuitem action="tma_sc_inward" id="tam_sc_inward" parent="tpm_sc_process" sequence="4" />
+		<menuitem action="tma_sc_advance" id="tam_sc_advance" parent="tpm_sc_process" sequence="5" />	
+		<menuitem action="tma_sc_invoice" id="tam_sc_invoice" parent="tpm_sc_process" sequence="6" />	
+		
+		
+		
+		
 		
 	
 	</data>

@@ -58,7 +58,7 @@
 						</group>
 						<group>
 							<group>	
-								<field name="moc_id" />
+								<field name="moc_id" required="1"/>
 							</group>
 							<group>												
 								<field name="moc_const_type" widget="many2many_tags"/>												

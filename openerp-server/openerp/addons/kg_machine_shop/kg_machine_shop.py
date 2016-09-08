@@ -81,6 +81,7 @@ class kg_machine_shop(osv.osv):
 		'ms_type': fields.selection([('new_item','New Item'),('copy_item','Copy Item')],'Type', required=True),	
 		'source_item': fields.many2one('kg.machine.shop', 'Source Item',domain="[('type','=',type),('active','=','t')]"),
 		'copy_flag':fields.boolean('Copy Flag'),
+		'list_moc_flag':fields.boolean('List MOC Flag'),
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -154,7 +155,8 @@ class kg_machine_shop(osv.osv):
 				   'header_id':rec.id,
 				   'moc_id':rec.moc_id.id,
 				   'code':moc_const_rec.code,
-						})				
+						})	
+		self.write(cr, uid, ids, {'list_moc_flag': True})			
 		return True	
 		
 		
@@ -193,7 +195,9 @@ class kg_machine_shop(osv.osv):
 
 	def entry_confirm(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])	
-		
+		if rec.list_moc_flag == False:
+			raise osv.except_osv(_('List MOC Construction !!'),
+				_('Click the List MOC Construction Button !!'))
 		for item in rec.line_ids:
 			prod = self.pool.get('product.product').browse(cr, uid, item.product_id.id, context=context)					
 			if item.uom.id != prod.uom_id.id:
