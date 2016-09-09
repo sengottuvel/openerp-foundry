@@ -28,31 +28,35 @@ class kg_crm_offer(osv.osv):
 	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
 		res = {}
 		cur_obj=self.pool.get('res.currency')
-		other_charges_amt = 0
+		pump_net_amount = spare_net_amount = access_net_amount = offer_net_amount = 0.00
 		for order in self.browse(cr, uid, ids, context=context):
 			res[order.id] = {
-				'pump_tot_price': 0.0,
-				'pump_sam_ratio': 0.0,
-				'pump_dealer_discount': 0.0,
-				'pump_customer_discount' : 0.0,
-				'pump_tax': 0.0,
+				'pump_net_amount': 0.0,
+				'spare_net_amount': 0.0,
+				'access_net_amount': 0.0,
+				'offer_net_amount': 0.0,
+			
 			}
-			val = val1 = val3 = 0.0
+			
 			cur = order.customer_id.property_product_pricelist_purchase.currency_id
 			
-			other_charges_amt = 0
+			for line in order.line_pump_ids:
+				pump_net_amount += line.net_amount
+				print"pump_net_amount",pump_net_amount	
 				
-			per_to_amt = 0
-			tot_discount = 0
-			val1 += 0
-			val += 0
-			val3 += 0
-			res[order.id]['pump_tot_price']=(round(other_charges_amt,0))
-			res[order.id]['pump_sam_ratio']=(round(val,0))
-			res[order.id]['pump_dealer_discount']=(round(val1,0))
-			#res[order.id]['amount_total']=res[order.id]['amount_untaxed'] + res[order.id]['amount_tax'] 
-			res[order.id]['pump_customer_discount']=(round(val + val1 + 0))
-			res[order.id]['pump_tax']=(round(val3,0))   
+			for line in order.line_spare_ids:
+				spare_net_amount += line.net_amount
+				print"spare_net_amount",spare_net_amount	
+				
+			for line in order.line_accessories_ids:
+				access_net_amount += line.net_amount
+				print"access_net_amount",access_net_amount	
+				
+			res[order.id]['pump_net_amount'] = pump_net_amount
+			res[order.id]['spare_net_amount'] = spare_net_amount
+			res[order.id]['access_net_amount'] = access_net_amount
+			res[order.id]['offer_net_amount'] = pump_net_amount + spare_net_amount + access_net_amount
+			
 		return res
 		
 	_name = "kg.crm.offer"
@@ -137,6 +141,8 @@ class kg_crm_offer(osv.osv):
 		'access_insurance': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),	
 		'access_net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),	
 		
+		'offer_net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Offer Amount',multi="sums",store=True),
+		
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -181,7 +187,27 @@ class kg_crm_offer(osv.osv):
 	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_crm_offer, self).write(cr, uid, ids, vals, context)
+	
+	def entry_confirm(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
 		
+		#~ for line in entry.line_pump_ids:
+			
+		
+		off_no = ''	
+		seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.crm.offer')])
+		rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+		cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],rec.code,entry.offer_date))
+		off_no = cr.fetchone();
+		self.write(cr, uid, ids, {
+									'name':off_no[0],
+									'state': 'moved_to_offer',
+									'confirm_user_id': uid, 
+									'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')
+								})
+		return True
+		
+			
 kg_crm_offer()
 
 
@@ -191,30 +217,66 @@ class ch_pump_offer(osv.osv):
 	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
 		res = {}
 		cur_obj=self.pool.get('res.currency')
-		other_charges_amt = 0
-		for order in self.browse(cr, uid, ids, context=context):
-			res[order.id] = {
-				'tot_price': 0.0,
+		sam_ratio_tot = dealer_discount_tot = customer_discount_tot = spl_discount_tot = tax_tot = p_f_tot = freight_tot = insurance_tot = pump_price_tot = tot_price = net_amount = 0
+		i_tot = k_tot = m_tot = p_tot = r_tot = 0
+		for line in self.browse(cr, uid, ids, context=context):
+			print"linelineline",line
+			res[line.id] = {
+				
 				'sam_ratio_tot': 0.0,
 				'dealer_discount_tot': 0.0,
 				'customer_discount_tot' : 0.0,
+				'spl_discount_tot' : 0.0,
 				'tax_tot': 0.0,
-			}
-			val = val1 = val3 = 0.0
-			
-			other_charges_amt = 0
+				'p_f_tot': 0.0,
+				'freight_tot': 0.0,
+				'insurance_tot': 0.0,
+				'pump_price': 0.0,
+				'tot_price': 0.0,
 				
-			per_to_amt = 0
-			tot_discount = 0
-			val1 += 0
-			val += 0
-			val3 += 0
-			res[order.id]['tot_price']=(round(other_charges_amt,0))
-			res[order.id]['sam_ratio_tot']=(round(val,0))
-			res[order.id]['dealer_discount_tot']=(round(val1,0))
-			#res[order.id]['amount_total']=res[order.id]['amount_untaxed'] + res[order.id]['amount_tax'] 
-			res[order.id]['customer_discount_tot']=(round(val + val1 + 0))
-			res[order.id]['tax_tot']=(round(val3,0))   
+			}
+			print"line.prime_cost",line.prime_cost
+			print"line.sam_ratio",line.sam_ratio
+			sam_ratio_tot = line.prime_cost * line.sam_ratio
+			print"sam_ratio_totsam_ratio_tot",sam_ratio_tot
+			dealer_discount_tot = sam_ratio_tot / (( 100 - line.dealer_discount ) / 100.00 ) - sam_ratio_tot
+			print"dealer_discount_totdealer_discount_tot",dealer_discount_tot
+			i_tot = sam_ratio_tot + dealer_discount_tot
+			customer_discount_tot = i_tot / (( 100 - line.customer_discount ) / 100.00 ) - i_tot
+			print"customer_discount_totcustomer_discount_tot",customer_discount_tot
+			k_tot = i_tot + customer_discount_tot
+			spl_discount_tot = k_tot / (( 100 - line.special_discount ) / 100.00 ) - k_tot
+			print"spl_discount_totspl_discount_tot",spl_discount_tot
+			m_tot = k_tot + spl_discount_tot
+			tax_tot = (m_tot / 100) * line.tax
+			print"tax_tottax_tot",tax_tot
+			p_f_tot = ( m_tot + tax_tot ) / 100.00 * line.p_f
+			print"p_f_totp_f_tot",p_f_tot
+			p_tot = m_tot + tax_tot + p_f_tot
+			freight_tot = p_tot / (( 100 - line.freight ) / 100.00 ) - p_tot
+			print"freight_totfreight_tot",freight_tot
+			r_tot = p_tot + freight_tot
+			insurance_tot = r_tot / (( 100 - line.insurance ) / 100.00 ) - r_tot
+			print"insurance_totinsurance_tot",insurance_tot
+			pump_price_tot = r_tot + insurance_tot
+			print"pump_price_totpump_price_tot",pump_price_tot
+			tot_price = pump_price_tot
+			print"tot_pricetot_price",tot_price
+			net_amount = tot_price * line.qty
+			print"net_amountnet_amount",net_amount
+			
+			res[line.id]['sam_ratio_tot'] = sam_ratio_tot
+			res[line.id]['dealer_discount_tot'] = dealer_discount_tot
+			res[line.id]['customer_discount_tot'] = customer_discount_tot
+			res[line.id]['spl_discount_tot'] = spl_discount_tot
+			res[line.id]['tax_tot'] = tax_tot
+			res[line.id]['p_f_tot'] = p_f_tot
+			res[line.id]['freight_tot'] = freight_tot
+			res[line.id]['insurance_tot'] = insurance_tot
+			res[line.id]['pump_price_tot'] = pump_price_tot
+			res[line.id]['tot_price'] = tot_price
+			res[line.id]['net_amount'] = net_amount
+			
 		return res
 		
 	_name = "ch.pump.offer"
@@ -230,27 +292,35 @@ class ch_pump_offer(osv.osv):
 		'pumpseries_id': fields.many2one('kg.pumpseries.master','Pump Series'),
 		'moc_const_id': fields.many2one('kg.moc.construction','MOC'),
 		'prime_cost': fields.float('Prime Cost'),
-		'sam_ratio': fields.float('Sam Ratio'),
-		'dealer_discount': fields.float('Dealer Discount'),
-		'customer_discount': fields.float('Customer Discount'),
-		'special_discount': fields.float('Special Discount'),
-		'tax': fields.float('Tax'),
-		'p_f': fields.float('P&F'),
-		'freight': fields.float('Freight'),
-		'insurance': fields.float('Insurance'),
-		'pump_price': fields.float('Pump Price'),
-		'total_price': fields.float('Total Price'),
+		'per_pump_prime_cost': fields.float('Per Pump Prime Cost'),
+		'sam_ratio': fields.float('Sam Ratio(%)'),
+		'dealer_discount': fields.float('Dealer Discount(%)'),
+		'customer_discount': fields.float('Customer Discount(%)'),
+		'special_discount': fields.float('Special Discount(%)'),
+		'tax': fields.float('Tax(%)'),
+		'p_f': fields.float('P&F(%)'),
+		'freight': fields.float('Freight(%)'),
+		'insurance': fields.float('Insurance(%)'),
+		'total_price': fields.float('Total Price(%)'),
 		
 		'tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),	
 		'sam_ratio_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Sam Ratio',multi="sums",store=True),	
 		'dealer_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Dealer Discount Value',multi="sums",store=True),	
 		'customer_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Customer Discount Value',multi="sums",store=True),	
+		'spl_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Special Discount Value',multi="sums",store=True),	
 		'tax_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Tax',multi="sums",store=True),	
 		'p_f_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F',multi="sums",store=True),	
 		'freight_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Freight',multi="sums",store=True),	
 		'insurance_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),	
+		'pump_price_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Pump Price',multi="sums",store=True),	
 		'net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),	
-			 
+		
+		'enquiry_line_id': fields.many2one('ch.kg.crm.pumpmodel','Enquiry Line'),
+		'off_fou_id': fields.related('enquiry_line_id','line_ids', type='one2many', relation='ch.kg.crm.foundry.item', string='Foundry Items'),
+		'off_ms_id': fields.related('enquiry_line_id','line_ids_a', type='one2many', relation='ch.kg.crm.machineshop.item', string='MS Items'),
+		'off_bot_id': fields.related('enquiry_line_id','line_ids_b', type='one2many', relation='ch.kg.crm.bot', string='BOT Items'),
+		
+		
 	}
 	
 	#~ _defaults = {
@@ -265,132 +335,185 @@ ch_pump_offer()
 
 
 class ch_spare_offer(osv.osv):
-	
+
+	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
+		res = {}
+		cur_obj=self.pool.get('res.currency')
+		sam_ratio_tot = dealer_discount_tot = customer_discount_tot = spl_discount_tot = tax_tot = p_f_tot = freight_tot = insurance_tot = pump_price_tot = tot_price = net_amount = 0
+		i_tot = k_tot = m_tot = p_tot = r_tot = 0
+		for line in self.browse(cr, uid, ids, context=context):
+			print"linelineline",line
+			res[line.id] = {
+				
+				'sam_ratio_tot': 0.0,
+				'dealer_discount_tot': 0.0,
+				'customer_discount_tot' : 0.0,
+				'spl_discount_tot' : 0.0,
+				'tax_tot': 0.0,
+				'p_f_tot': 0.0,
+				'freight_tot': 0.0,
+				'insurance_tot': 0.0,
+				'pump_price': 0.0,
+				'tot_price': 0.0,
+				
+			}
+			print"line.prime_cost",line.prime_cost
+			print"line.sam_ratio",line.sam_ratio
+			sam_ratio_tot = line.prime_cost * line.sam_ratio
+			print"sam_ratio_totsam_ratio_tot",sam_ratio_tot
+			dealer_discount_tot = sam_ratio_tot / (( 100 - line.dealer_discount ) / 100.00 ) - sam_ratio_tot
+			print"dealer_discount_totdealer_discount_tot",dealer_discount_tot
+			i_tot = sam_ratio_tot + dealer_discount_tot
+			customer_discount_tot = i_tot / (( 100 - line.customer_discount ) / 100.00 ) - i_tot
+			print"customer_discount_totcustomer_discount_tot",customer_discount_tot
+			k_tot = i_tot + customer_discount_tot
+			spl_discount_tot = k_tot / (( 100 - line.special_discount ) / 100.00 ) - k_tot
+			print"spl_discount_totspl_discount_tot",spl_discount_tot
+			m_tot = k_tot + spl_discount_tot
+			tax_tot = (m_tot / 100) * line.tax
+			print"tax_tottax_tot",tax_tot
+			p_f_tot = ( m_tot + tax_tot ) / 100.00 * line.p_f
+			print"p_f_totp_f_tot",p_f_tot
+			p_tot = m_tot + tax_tot + p_f_tot
+			freight_tot = p_tot / (( 100 - line.freight ) / 100.00 ) - p_tot
+			print"freight_totfreight_tot",freight_tot
+			r_tot = p_tot + freight_tot
+			insurance_tot = r_tot / (( 100 - line.insurance ) / 100.00 ) - r_tot
+			print"insurance_totinsurance_tot",insurance_tot
+			pump_price_tot = r_tot + insurance_tot
+			print"pump_price_totpump_price_tot",pump_price_tot
+			tot_price = pump_price_tot 
+			print"tot_pricetot_price",tot_price
+			net_amount = tot_price * 1
+			print"net_amountnet_amount",net_amount
+			
+			res[line.id]['sam_ratio_tot'] = sam_ratio_tot
+			res[line.id]['dealer_discount_tot'] = dealer_discount_tot
+			res[line.id]['customer_discount_tot'] = customer_discount_tot
+			res[line.id]['spl_discount_tot'] = spl_discount_tot
+			res[line.id]['tax_tot'] = tax_tot
+			res[line.id]['p_f_tot'] = p_f_tot
+			res[line.id]['freight_tot'] = freight_tot
+			res[line.id]['insurance_tot'] = insurance_tot
+			res[line.id]['pump_price_tot'] = pump_price_tot
+			res[line.id]['tot_price'] = tot_price
+			res[line.id]['net_amount'] = net_amount
+			
+		return res
+		
 	_name = "ch.spare.offer"
 	_description = "Ch Spare Offer"
 	
 	_columns = {
 	
-		### Spare Details ####
+		### Pump Details ####
 		'header_id':fields.many2one('kg.crm.offer', 'Offer', ondelete='cascade'),
 		'offer_id':fields.many2one('kg.crm.offer', 'Offer'),
-		'spare_count':fields.integer('Spare Count'),
+		'qty':fields.integer('Quantity'),
 		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Type'),
 		'pumpseries_id': fields.many2one('kg.pumpseries.master','Pump Series'),
-		'price_cost': fields.float('Price Cost'),
+		'moc_const_id': fields.many2one('kg.moc.construction','MOC'),
+		'prime_cost': fields.float('Prime Cost'),
+		'sam_ratio': fields.float('Sam Ratio(%)'),
+		'dealer_discount': fields.float('Dealer Discount(%)'),
+		'customer_discount': fields.float('Customer Discount(%)'),
+		'special_discount': fields.float('Special Discount(%)'),
+		'tax': fields.float('Tax(%)'),
+		'p_f': fields.float('P&F(%)'),
+		'freight': fields.float('Freight(%)'),
+		'insurance': fields.float('Insurance(%)'),
 		'total_price': fields.float('Total Price'),
 		
-		'line_fou_ids': fields.one2many('ch.spare.offer.fou', 'header_id', "FOU"),
-		'line_ms_ids': fields.one2many('ch.spare.offer.ms', 'header_id', "FOU"),
-		'line_bot_ids': fields.one2many('ch.spare.offer.bot', 'header_id', "BOT"),
+		'tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),	
+		'sam_ratio_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Sam Ratio',multi="sums",store=True),	
+		'dealer_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Dealer Discount Value',multi="sums",store=True),	
+		'customer_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Customer Discount Value',multi="sums",store=True),	
+		'spl_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Special Discount Value',multi="sums",store=True),	
+		'tax_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Tax',multi="sums",store=True),	
+		'p_f_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F',multi="sums",store=True),	
+		'freight_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Freight',multi="sums",store=True),	
+		'insurance_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),	
+		'pump_price_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Pump Price',multi="sums",store=True),	
+		'net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),	
+		
+		'enquiry_line_id': fields.many2one('ch.kg.crm.pumpmodel','Enquiry Line'),
+		'off_fou_id': fields.related('enquiry_line_id','line_ids', type='one2many', relation='ch.kg.crm.foundry.item', string='Foundry Items'),
+		'off_ms_id': fields.related('enquiry_line_id','line_ids_a', type='one2many', relation='ch.kg.crm.machineshop.item', string='MS Items'),
+		'off_bot_id': fields.related('enquiry_line_id','line_ids_b', type='one2many', relation='ch.kg.crm.bot', string='BOT Items'),
+		
 		
 	}
 	
+
 ch_spare_offer()
-
-
-class ch_spare_offer_fou(osv.osv):
-	
-	_name = "ch.spare.offer.fou"
-	_description = "Ch Spare Offer FOU"
-	
-	_columns = {
-	
-		### FOU Details ####
-		'header_id':fields.many2one('ch.spare.offer', 'Offer', ondelete='cascade'),
-		'pattern_id': fields.many2one('kg.pattern.master','Pattern No', domain="[('active','=','t')]"),
-		'moc_id': fields.many2one('kg.moc.master','MOC'),
-		'pattern_name': fields.char('Pattern Name'),
-		'qty': fields.integer('Quantity'),
-		'prime_cost': fields.float('Prime Cost'),
-		'ratio': fields.float('Ratio'),
-		'dealer_discount': fields.float('Dealer Discount'),
-		'customer_discount': fields.float('Customer Discount'),
-		'special_discount': fields.float('Special Discount'),
-		'tax': fields.float('Tax'),
-		'p_f': fields.float('P&F'),
-		'freight': fields.float('Freight'),
-		'insurance': fields.float('Insurance'),
-		'quote_price': fields.float('Quote Price'),
-		'total_price': fields.float('Total Price'),
-		
-	}
-	
-	def onchange_pattern_name(self, cr, uid, ids, pattern_id):
-		value = {'pattern_name':''}
-		pattern_obj = self.pool.get('kg.pattern.master').search(cr,uid,([('id','=',pattern_id)]))
-		if pattern_obj:
-			pattern_rec = self.pool.get('kg.pattern.master').browse(cr,uid,pattern_obj[0])
-			value = {'pattern_name':pattern_rec.pattern_name}
-		return {'value': value}
-		
-ch_spare_offer_fou()
-
-class ch_spare_offer_ms(osv.osv):
-	
-	_name = "ch.spare.offer.ms"
-	_description = "Ch Spare Offer MS"
-	
-	_columns = {
-	
-		### MS Details ####
-		'header_id':fields.many2one('ch.spare.offer', 'Offer', ondelete='cascade'),
-		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', domain=[('type','=','ms')], ondelete='cascade'),
-		'moc_id': fields.many2one('kg.moc.master','MOC'),
-		'ms_line_id':fields.many2one('ch.machineshop.details', 'Item Name'),
-		'qty': fields.integer('Quantity'),
-		'prime_cost': fields.float('Prime Cost'),
-		'ratio': fields.float('Ratio'),
-		'dealer_discount': fields.float('Dealer Discount'),
-		'customer_discount': fields.float('Customer Discount'),
-		'special_discount': fields.float('Special Discount'),
-		'tax': fields.float('Tax'),
-		'p_f': fields.float('P&F'),
-		'freight': fields.float('Freight'),
-		'insurance': fields.float('Insurance'),
-		'quote_price': fields.float('Quote Price'),
-		'total_price': fields.float('Total Price'),
-		
-	}
-	
-		
-ch_spare_offer_ms()
-
-
-class ch_spare_offer_bot(osv.osv):
-	
-	_name = "ch.spare.offer.bot"
-	_description = "Ch Spare Offer BOT"
-	
-	_columns = {
-	
-		### MS Details ####
-		'header_id':fields.many2one('ch.spare.offer', 'Offer', ondelete='cascade'),
-		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', domain=[('type','=','bot')], ondelete='cascade',required=True),
-		'moc_id': fields.many2one('kg.moc.master','MOC'),
-		'bot_line_id':fields.many2one('ch.bot.details', 'Item Name'),
-		'qty': fields.integer('Quantity'),
-		'prime_cost': fields.float('Prime Cost'),
-		'ratio': fields.float('Ratio'),
-		'dealer_discount': fields.float('Dealer Discount'),
-		'customer_discount': fields.float('Customer Discount'),
-		'special_discount': fields.float('Special Discount'),
-		'tax': fields.float('Tax'),
-		'p_f': fields.float('P&F'),
-		'freight': fields.float('Freight'),
-		'insurance': fields.float('Insurance'),
-		'quote_price': fields.float('Quote Price'),
-		'total_price': fields.float('Total Price'),
-		
-	}
-	
-		
-ch_spare_offer_bot()
-
-
 
 class ch_accessories_offer(osv.osv):
 	
+	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
+		res = {}
+		cur_obj=self.pool.get('res.currency')
+		sam_ratio_tot = dealer_discount_tot = customer_discount_tot = spl_discount_tot = tax_tot = p_f_tot = freight_tot = insurance_tot = pump_price_tot = tot_price = net_amount = 0
+		i_tot = k_tot = m_tot = p_tot = r_tot = 0
+		for line in self.browse(cr, uid, ids, context=context):
+			print"linelineline",line
+			res[line.id] = {
+				
+				'sam_ratio_tot': 0.0,
+				'dealer_discount_tot': 0.0,
+				'customer_discount_tot' : 0.0,
+				'spl_discount_tot' : 0.0,
+				'tax_tot': 0.0,
+				'p_f_tot': 0.0,
+				'freight_tot': 0.0,
+				'insurance_tot': 0.0,
+				'pump_price': 0.0,
+				'tot_price': 0.0,
+				
+			}
+			print"line.prime_cost",line.prime_cost
+			print"line.sam_ratio",line.sam_ratio
+			sam_ratio_tot = line.prime_cost * line.sam_ratio
+			print"sam_ratio_totsam_ratio_tot",sam_ratio_tot
+			dealer_discount_tot = sam_ratio_tot / (( 100 - line.dealer_discount ) / 100.00 ) - sam_ratio_tot
+			print"dealer_discount_totdealer_discount_tot",dealer_discount_tot
+			i_tot = sam_ratio_tot + dealer_discount_tot
+			customer_discount_tot = i_tot / (( 100 - line.customer_discount ) / 100.00 ) - i_tot
+			print"customer_discount_totcustomer_discount_tot",customer_discount_tot
+			k_tot = i_tot + customer_discount_tot
+			spl_discount_tot = k_tot / (( 100 - line.special_discount ) / 100.00 ) - k_tot
+			print"spl_discount_totspl_discount_tot",spl_discount_tot
+			m_tot = k_tot + spl_discount_tot
+			tax_tot = (m_tot / 100) * line.tax
+			print"tax_tottax_tot",tax_tot
+			p_f_tot = ( m_tot + tax_tot ) / 100.00 * line.p_f
+			print"p_f_totp_f_tot",p_f_tot
+			p_tot = m_tot + tax_tot + p_f_tot
+			freight_tot = p_tot / (( 100 - line.freight ) / 100.00 ) - p_tot
+			print"freight_totfreight_tot",freight_tot
+			r_tot = p_tot + freight_tot
+			insurance_tot = r_tot / (( 100 - line.insurance ) / 100.00 ) - r_tot
+			print"insurance_totinsurance_tot",insurance_tot
+			pump_price_tot = r_tot + insurance_tot
+			print"pump_price_totpump_price_tot",pump_price_tot
+			tot_price = pump_price_tot 
+			print"tot_pricetot_price",tot_price
+			net_amount = tot_price * line.qty
+			print"net_amountnet_amount",net_amount
+			
+			res[line.id]['sam_ratio_tot'] = sam_ratio_tot
+			res[line.id]['dealer_discount_tot'] = dealer_discount_tot
+			res[line.id]['customer_discount_tot'] = customer_discount_tot
+			res[line.id]['spl_discount_tot'] = spl_discount_tot
+			res[line.id]['tax_tot'] = tax_tot
+			res[line.id]['p_f_tot'] = p_f_tot
+			res[line.id]['freight_tot'] = freight_tot
+			res[line.id]['insurance_tot'] = insurance_tot
+			res[line.id]['pump_price_tot'] = pump_price_tot
+			res[line.id]['tot_price'] = tot_price
+			res[line.id]['net_amount'] = net_amount
+			
+		return res
+		
 	_name = "ch.accessories.offer"
 	_description = "Ch Accessories Offer"
 	
@@ -400,18 +523,39 @@ class ch_accessories_offer(osv.osv):
 		'header_id':fields.many2one('kg.crm.offer', 'Offer', ondelete='cascade'),
 		'offer_id':fields.many2one('kg.crm.offer', 'Offer'),
 		'access_id':fields.many2one('kg.accessories.master', 'Item Name'),
+		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Type'),
 		'moc_id':fields.many2one('kg.moc.master', 'MOC'),
 		'qty':fields.integer('Quantity'),
-		'sam_ratio': fields.float('Sam Ratio'),
-		'dealer_discount': fields.float('Dealer Discount'),
-		'customer_discount': fields.float('Customer Discount'),
-		'special_discount': fields.float('Special Discount'),
-		'tax': fields.float('Tax'),
-		'p_f': fields.float('P&F'),
-		'freight': fields.float('Freight'),
-		'insurance': fields.float('Insurance'),
+		'prime_cost': fields.float('Prime Cost'),
+		'per_access_prime_cost': fields.float('Per Access Prime Cost'),
+		'sam_ratio': fields.float('Sam Ratio(%)'),
+		'dealer_discount': fields.float('Dealer Discount(%)'),
+		'customer_discount': fields.float('Customer Discount(%)'),
+		'special_discount': fields.float('Special Discount(%)'),
+		'tax': fields.float('Tax(%)'),
+		'p_f': fields.float('P&F(%)'),
+		'freight': fields.float('Freight(%)'),
+		'insurance': fields.float('Insurance(%)'),
 		'pump_price': fields.float('Pump Price'),
 		'total_price': fields.float('Total Price'),
+		
+		'tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),	
+		'sam_ratio_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Sam Ratio',multi="sums",store=True),	
+		'dealer_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Dealer Discount Value',multi="sums",store=True),	
+		'customer_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Customer Discount Value',multi="sums",store=True),	
+		'spl_discount_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Special Discount Value',multi="sums",store=True),	
+		'tax_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Tax',multi="sums",store=True),	
+		'p_f_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='P&F',multi="sums",store=True),	
+		'freight_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Freight',multi="sums",store=True),	
+		'insurance_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),	
+		'pump_price_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Pump Price',multi="sums",store=True),	
+		'net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),	
+		
+		'enquiry_line_access_id': fields.many2one('ch.kg.crm.accessories','Enquiry Line'),
+		'off_fou_id': fields.related('enquiry_line_access_id','line_ids', type='one2many', relation='ch.crm.access.fou', string='Foundry Items'),
+		'off_ms_id': fields.related('enquiry_line_access_id','line_ids_a', type='one2many', relation='ch.crm.access.ms', string='MS Items'),
+		'off_bot_id': fields.related('enquiry_line_access_id','line_ids_b', type='one2many', relation='ch.crm.access.bot', string='BOT Items'),
+		
 		
 	}
 	

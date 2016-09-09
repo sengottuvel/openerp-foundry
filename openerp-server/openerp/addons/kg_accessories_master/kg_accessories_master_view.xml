@@ -12,9 +12,10 @@
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="entry_cancel" type="object" states="reject,approved" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+<!--					<button name="entry_cancel" type="object" states="reject,approved" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
+						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes')]}" class="oe_highlight" confirm="Are you sure to proceed ?" inivsible="1"/>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>	
-						<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>	
+						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>	
 					</header>
 					<sheet>
 						<group>
@@ -36,14 +37,15 @@
 						<group>
 							<group>						
 								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
-								<field name="accessories_type" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
+								<field name="accessories_type" required="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 							</group>
 							<group>
-								<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="code" required="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="active"/>
-								<field name="state" style="width: 30%%" class="att_state_change"/>								
-								<field name="copy_flag" invisible="1"/>								
+								<field name="state" style="width: 30%%" class="att_state_change"/>
+								<field name="copy_flag" invisible="1"/>
+								<field name="modify" invisible="1"/>
 							</group>
 						</group>						
 						<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
@@ -55,16 +57,43 @@
 							</group>
 						</group>
 						<notebook>
+							<page string="Foundry Items">
+								<field name="line_ids_b" nolabel="1">
+									<tree string="Foundry Items" editable="top" >					
+										<field name="pos_no" invisible="1"/>	
+										<field name="position_id" />	
+										<field name="pattern_id" on_change="onchange_pattern_name(pattern_id)"/>
+										<field name="pattern_name" readonly="1"/>					   
+										<field name="csd_no"/>					   
+										<field name="qty"/>
+										<field name="remarks" widget="char"/>
+										<field name="state" invisible="1"/>
 							
-							<page string="Raw Material Details">
+									</tree>
+								</field>
+							</page>
+							<page string="MS Items">
+								<field name="line_ids_a" nolabel="1" >
+									<tree string="MS Items" editable="top" >			
+										<field name="pos_no" invisible="1"/>	
+										<field name="position_id" />	
+										<field name="ms_id" on_change="onchange_machineshop_name(ms_id)"/>	
+										<field name="name" readonly="1"/>
+										<field name="csd_no" readonly="1"/>										
+										<field name="qty"/>
+										<field name="remarks" widget="char"/>
+									</tree>
+								</field>
+							</page>
+							<page string="BOT">
 								<field colspan="4" mode="tree" name="line_ids" nolabel="1" widget="one2many_list">
-							   <tree string="Raw Materials" editable="bottom"> 
+								<tree string="BOT" editable="top"> 
 									<field name="product_id" on_change="onchange_uom(product_id)"/>
 									<field name="brand_id"/>
-									<field name="moc_id"/>
+<!--								<field name="moc_id"/>-->
 									<field name="uom_id" required ="1" readonly="1"/>
-									<field name="length" attrs="{'required':[('uom_conversation_factor','=','two_dimension')]}"/>
-									<field name="breadth" attrs="{'required':[('uom_conversation_factor','=','two_dimension')]}"/>
+<!--								<field name="length" attrs="{'required':[('uom_conversation_factor','=','two_dimension')]}"/>
+									<field name="breadth" attrs="{'required':[('uom_conversation_factor','=','two_dimension')]}"/>-->
 									<field name="qty"/>
 									<field name="remark"/>
 									<field name="uom_conversation_factor" invisible="1"/>
@@ -72,15 +101,12 @@
 								<form string="Raw Materials" >
 									<group>
 										<group>
-										<field name="product_id" on_change="onchange_uom(product_id)"/>
-										<field name="brand_id"/>
-										<field name="moc_id"/>
-										<field name="uom_id" required ="1" readonly="1"/>
-										<field name="uom_conversation_factor" invisible="1"/>
+											<field name="product_id" on_change="onchange_uom(product_id)"/>
+											<field name="brand_id"/>
+											<field name="uom_id" required ="1" readonly="1"/>
+											<field name="uom_conversation_factor" invisible="1"/>
 										</group>
 										<group>
-											<field name="length" attrs="{'required':[('uom_conversation_factor','=','two_dimension')]}"/>
-											<field name="breadth" attrs="{'required':[('uom_conversation_factor','=','two_dimension')]}"/>
 											<field name="qty"/>
 											<field name="remark"/>
 										</group>
@@ -174,60 +200,6 @@
 		</record>	
 		
 		<!-- Menu Action End-->
-		
-<!--
-		<record id="t_form_v_ch_position_number" model="ir.ui.view">
-			<field name="name">Ch Position Number Form</field>
-			<field name="model">ch.kg.position.number</field>
-			<field eval="8" name="priority"/>
-			<field name="arch" type="xml">
-				<form string="Operation Details Entry Form">
-					<group>
-						<group>
-							<field name="operation_id"/>
-							<field name="stage_id"/>
-							<field name="is_last_operation"/>
-							<field name="total_cost" readonly="1"/>
-							<field name="remark"/>
-						</group>
-						<group>
-							<field name="clamping_area"/>
-							<field name="time_consumption"  on_change="onchange_total_cost(total_cost, time_consumption, in_house_cost)"/>
-							<field name="in_house_cost" on_change="onchange_total_cost(total_cost, time_consumption, in_house_cost)"/>
-							<field name="sc_cost"/>
-						</group>
-					</group>
-					<newline/>
-					<notebook>
-						<page string="Dimension Details">
-							<field name="line_ids" colspan="4" nolabel="1">
-								<tree string="Diemnsion Details" editable="bottom">
-								   <field name="dimension_id"/>
-								   <field name="description"/>
-								   <field name="min_val" />
-								   <field name="max_val" />
-								   <field name="min_tolerance" />
-								   <field name="max_tolerance" />
-								   <field name="remark"/>
-								</tree>
-							</field>
-						</page>
-					</notebook>
-				</form>
-			</field>
-		</record>
--->
-		
-		 <!-- Audit Log Xml Data Start
-		
-        <record id="position_number_model" model="audittrail.rule">
-            <field name="name">Audit Log Position Number Master</field>
-            <field name="object_id" eval="ref('kg_position_number.model_kg_position_number')"/>       
-            <field name="state">subscribed</field>              
-        </record> -->
-        
-        <!-- Audit Log Xml Data End-->
-		
 
 	</data>
 </openerp>

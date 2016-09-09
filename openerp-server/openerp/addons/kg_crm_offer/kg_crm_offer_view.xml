@@ -13,7 +13,6 @@
 						<button name="entry_confirm" type="object" string="Process Offer" states="draft" class="oe_highlight"/>
 						<button name="entry_call_back" type="object" string="Call Back" states="draft" class="oe_highlight"/>
 					</header>
-					<sheet>		
 						<group>
 							<group>
 								<field name="name" readonly="1"/>
@@ -32,13 +31,17 @@
 								<field name="state" style="width: 30%%" class="att_state_change" readonly="1"/>
 							</group>	
 						</group>
+						<group class="oe_subtotal_footer oe_right">
+							<field name="offer_net_amount"/>
+						</group>
 						<group string="Pump Offer">
 							<field name="line_pump_ids" colspan="4" nolabel="1">
-								<tree string="Pump History">
+								<tree string="Pump History" create="false" delete="false">
 									<field name="pumpseries_id" required="1"/>
 									<field name="pump_id" required="1"/>
 									<field name="moc_const_id"/>
 									<field name="qty" sum="qty"/>
+									<field name="per_pump_prime_cost" sum="per_pump_prime_cost"/>
 									<field name="prime_cost" sum="prime_cost"/>
 									<field name="sam_ratio" sum="sam_ratio"/>
 									<field name="dealer_discount" sum="dealer_discount"/>
@@ -48,12 +51,17 @@
 									<field name="p_f" sum="p_f"/>
 									<field name="freight" sum="freight"/>
 									<field name="insurance" sum="insurance"/>
-									<field name="pump_price" sum="pump_price"/>
-									<field name="total_price" sum="total_price"/>
+									<field name="tot_price" sum="total_price"/>
+									<field name="net_amount" sum="net_amount"/>
 								</tree>
 							</field>
+
 <!--
 							<group class="oe_subtotal_footer oe_right">
+								<field name="pump_net_amount"/>
+							</group>
+-->
+<!--						<group class="oe_subtotal_footer oe_right">
 								<field name="pump_tot_price"/>
 								<field name="pump_sam_ratio"/>
 								<field name="pump_dealer_discount"/>
@@ -71,14 +79,30 @@
 						</group>
 						<group string="Spare Offer">
 							<field name="line_spare_ids" colspan="4" nolabel="1">
-								<tree string="Spare History">
+								<tree string="Spare History" create="false" delete="false">
 									<field name="pumpseries_id" required="1"/>
 									<field name="pump_id" required="1"/>
-									<field name="spare_count"/>
-									<field name="price_cost"/>
-									<field name="total_price"/>
+									<field name="moc_const_id"/>
+									<field name="qty" sum="qty"/>
+									<field name="prime_cost" sum="prime_cost"/>
+									<field name="sam_ratio" sum="sam_ratio"/>
+									<field name="dealer_discount" sum="dealer_discount"/>
+									<field name="customer_discount" sum="customer_discount"/>
+									<field name="special_discount" sum="special_discount"/>
+									<field name="tax" sum="tax"/>
+									<field name="p_f" sum="p_f"/>
+									<field name="freight" sum="freight"/>
+									<field name="insurance" sum="insurance"/>
+									<field name="tot_price" sum="total_price"/>
+									<field name="net_amount" sum="net_amount"/>
 								</tree>
 							</field>
+<!--
+							<group class="oe_subtotal_footer oe_right">
+								<field name="spare_net_amount"/>
+							</group>
+-->
+<!--
 							<group class="oe_subtotal_footer oe_right">
 								<field name="spare_tot_price"/>
 								<field name="spare_sam_ratio"/>
@@ -93,17 +117,40 @@
 								</div>
 								<field name="spare_net_amount" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
 							</group>
+-->
 						</group>
 						<group string="Accessories Offer">
 							<field name="line_accessories_ids" colspan="4" nolabel="1">
-								<tree string="Accessories History">
-									<field name="access_id" required="1"/>
-									<field name="moc_id" required="1"/>
-									<field name="qty"/>
-									<field name="pump_price"/>
-									<field name="total_price"/>
+								<tree string="Accessories History" create="false" delete="false">
+									<field name="access_id" required="1" readonly="1"/>
+									<field name="pump_id" required="1" readonly="1"/>
+									<field name="moc_id" required="1" readonly="1"/>
+									<field name="qty" sum="qty"/>
+									<field name="per_access_prime_cost" sum="per_access_prime_cost" readonly="1"/>
+									<field name="prime_cost" sum="prime_cost" readonly="1"/>
+									<field name="sam_ratio" sum="sam_ratio"/>
+									<field name="dealer_discount" sum="dealer_discount"/>
+									<field name="customer_discount" sum="customer_discount"/>
+									<field name="special_discount" sum="special_discount"/>
+									<field name="tax" sum="tax"/>
+									<field name="p_f" sum="p_f"/>
+									<field name="freight" sum="freight"/>
+									<field name="insurance" sum="insurance"/>
+									<field name="tot_price" sum="total_price"/>
+									<field name="net_amount" sum="net_amount"/>
 								</tree>
 							</field>
+<!--
+							<group class="oe_subtotal_footer oe_right">
+								<field name="access_net_amount"/>
+							</group>
+							</group>
+							<group>
+							<group class="oe_subtotal_footer oe_right">
+								<field name="offer_net_amount"/>
+							</group>
+-->
+<!--
 							<group class="oe_subtotal_footer oe_right">
 								<field name="access_tot_price"/>
 								<field name="access_sam_ratio"/>
@@ -118,8 +165,8 @@
 								</div>
 								<field name="access_net_amount" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
 							</group>
+-->
 						</group>
-					</sheet>
 				</form>
 			</field>
 		</record>
@@ -129,46 +176,106 @@
 			<field name="model">ch.pump.offer</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<form string="Pump Offer Details" version="7.0">
-				<sheet>
+				<form string="Pump Offer Details" version="7.0" create="false" delete="false">
+				
 					<group string="Pump Offer Details">
 						<group>
-						<field name="pumpseries_id" required="1"/>
-						<field name="pump_id" required="1"/>
-						<field name="moc_const_id"/>
-						<field name="qty"/>
-						<field name="prime_cost"/>
-						<field name="sam_ratio"/>
-						<field name="dealer_discount"/>
-						<field name="customer_discount"/>
-						<field name="special_discount"/>
+							<field name="pumpseries_id" required="1" readonly="1"/>
+							<field name="pump_id" required="1"  readonly="1"/>
+							<field name="moc_const_id" readonly="1"/>
+							<field name="qty" readonly="1"/>
+							<field name="prime_cost" readonly="1"/>
+							<field name="sam_ratio"/>
+							<field name="dealer_discount"/>
 						</group>
 						<group>
-						<field name="tax"/>
-						<field name="p_f"/>
-						<field name="freight"/>
-						<field name="insurance"/>
-						<field name="pump_price"/>
-						<field name="total_price"/>
+							<field name="customer_discount"/>
+							<field name="special_discount"/>
+							<field name="tax"/>
+							<field name="p_f"/>
+							<field name="freight"/>
+							<field name="insurance"/>
 						</group>					
+					</group>
+					<notebook>
+						<page string="Foundry Items">
+							<group colspan="6" col="6">		
+								<field name="off_fou_id" colspan="4" nolabel="1" mode="tree">
+									<tree string="Foundry Items"  delete="false" create="false" editable="bottom">
+										<field name="is_applicable" readonly="1"/>
+										<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="pattern_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="pattern_name" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="moc_id" required="1" readonly="1"/>
+										<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="prime_cost" readonly="1"/>
+										<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="load_bom" invisible="1"/>
+									</tree>	
+								</field>
+							</group>
+						</page>
+						<page string="MS Items">
+							<group colspan="6" col="6">		
+								<field name="off_ms_id" colspan="4" nolabel="1" mode="tree">
+									<tree string="MS Items"  delete="false" create="false" editable="bottom">
+										<field name="is_applicable" readonly="1"/>
+										<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="name" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="moc_id" readonly="1" required="1"/>
+										<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="prime_cost" readonly="1"/>
+										<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="load_bom" invisible="1"/>
+									</tree>	
+								</field>
+							</group>
+						</page>
+						<page string="BOT Items">
+							<group colspan="6" col="6">		
+								<field name="off_bot_id" colspan="4" nolabel="1" mode="tree">
+									<tree string="BOT Items"  delete="false" create="false" editable="bottom">
+										<field name="is_applicable" readonly="1"/>
+										<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="item_name" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="moc_id" readonly="1" required="1"/>
+										<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="prime_cost" readonly="1"/>
+										<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="load_bom" invisible="1"/>
+									</tree>	
+								</field>
+							</group>
+						</page>
+					</notebook>
+					<group>
 						<group>
 						</group>
 						<group class="oe_subtotal_footer oe_right">
-							<field name="tot_price"/>
+							
 							<field name="sam_ratio_tot"/>
 							<field name="dealer_discount_tot"/>
 							<field name="customer_discount_tot"/>
+							<field name="spl_discount_tot"/>
 							<field name="tax_tot"/>
 							<field name="p_f_tot"/>
 							<field name="freight_tot"/>
 							<field name="insurance_tot"/>
+							<field name="pump_price_tot"/>
+<!--
+							<field name="tot_price"/>
+-->
 							<div class="oe_subtotal_footer_separator oe_inline">
 							<label for="net_amount"/>
 							</div>
 							<field name="net_amount" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
 						</group>
 					</group>
-				</sheet>
+					
 				</form>
 			</field>
 		</record>
@@ -178,155 +285,104 @@
 			<field name="model">ch.spare.offer</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<form string="Spare Offer Details" version="7.0">
+				<form string="Spare Offer Details" version="7.0" create="false" delete="false">
 				<sheet>
 					<group string="Spare Offer Details">
 						<group>
-						<field name="pumpseries_id" required="1"/>
-						<field name="pump_id" required="1"/>
+							<field name="pumpseries_id" required="1" readonly="1"/>
+							<field name="pump_id" required="1" readonly="1"/>
+							<field name="moc_const_id" readonly="1"/>
+							<field name="qty" readonly="1"/>
+							<field name="prime_cost" readonly="1"/>
+							<field name="sam_ratio"/>
+							<field name="dealer_discount"/>
 						</group>
 						<group>
-						<field name="spare_count"/>
-						<field name="price_cost"/>
-						<field name="total_price"/>
+							<field name="customer_discount"/>
+							<field name="special_discount"/>
+							<field name="tax"/>
+							<field name="p_f"/>
+							<field name="freight"/>
+							<field name="insurance"/>
 						</group>					
-						
 					</group>
-					
 					<notebook>
 						<page string="Foundry Items">
-							<field name="line_fou_ids" colspan="4" nolabel="1">
-								<tree string="Foundry History">
-									<field name="pattern_id" required="1"/>
-									<field name="pattern_name" required="1"/>
-									<field name="moc_id"/>
-									<field name="qty"/>
-									<field name="prime_cost"/>
-									<field name="ratio"/>
-									<field name="dealer_discount"/>
-									<field name="customer_discount"/>
-									<field name="special_discount"/>
-									<field name="tax"/>
-									<field name="p_f"/>
-									<field name="freight"/>
-									<field name="insurance"/>
-									<field name="quote_price"/>
-									<field name="total_price"/>
-								</tree>
-								<form string="Foundry History">
-									<group>
-									<group>
-									<field name="pattern_id" required="1" on_change="onchange_pattern_name(pattern_id)"/>
-									<field name="pattern_name" required="1" readonly="1"/>
-									<field name="moc_id"/>
-									<field name="qty"/>
-									<field name="prime_cost"/>
-									<field name="ratio"/>
-									<field name="dealer_discount"/>
-									<field name="customer_discount"/>
-									</group>
-									<group>
-									<field name="special_discount"/>
-									<field name="tax"/>
-									<field name="p_f"/>
-									<field name="freight"/>
-									<field name="insurance"/>
-									<field name="quote_price"/>
-									<field name="total_price"/>
-									</group>
-									</group>
-								</form>
-							</field>
+							<group colspan="6" col="6">		
+								<field name="off_fou_id" colspan="4" nolabel="1" mode="tree">
+									<tree string="Foundry Items"  delete="false" create="false" editable="bottom">
+										<field name="is_applicable" readonly="1"/>
+										<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="pattern_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="pattern_name" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="moc_id" required="1" readonly="1"/>
+										<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="prime_cost" readonly="1"/>
+										<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="load_bom" invisible="1"/>
+									</tree>	
+								</field>
+							</group>
 						</page>
 						<page string="MS Items">
-							<field name="line_ms_ids" colspan="4" nolabel="1">
-								<tree string="MS History">
-									<field name="ms_line_id" required="1"/>
-									<field name="ms_id" required="1"/>
-									<field name="moc_id"/>
-									<field name="qty"/>
-									<field name="prime_cost"/>
-									<field name="ratio"/>
-									<field name="dealer_discount"/>
-									<field name="customer_discount"/>
-									<field name="special_discount"/>
-									<field name="tax"/>
-									<field name="p_f"/>
-									<field name="freight"/>
-									<field name="insurance"/>
-									<field name="quote_price"/>
-									<field name="total_price"/>
-								</tree>
-								<form string="Foundry History">
-									<group>
-									<group>
-									<field name="ms_line_id" required="1"/>
-									<field name="ms_id" required="1"/>
-									<field name="moc_id"/>
-									<field name="qty"/>
-									<field name="prime_cost"/>
-									<field name="ratio"/>
-									<field name="dealer_discount"/>
-									<field name="customer_discount"/>
-									</group>
-									<group>
-									<field name="special_discount"/>
-									<field name="tax"/>
-									<field name="p_f"/>
-									<field name="freight"/>
-									<field name="insurance"/>
-									<field name="quote_price"/>
-									<field name="total_price"/>
-									</group>
-									</group>
-								</form>
-							</field>
+							<group colspan="6" col="6">		
+								<field name="off_ms_id" colspan="4" nolabel="1" mode="tree">
+									<tree string="MS Items"  delete="false" create="false" editable="bottom">
+										<field name="is_applicable" readonly="1"/>
+										<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="name" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="moc_id" readonly="1" required="1"/>
+										<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="prime_cost" readonly="1"/>
+										<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="load_bom" invisible="1"/>
+									</tree>	
+								</field>
+							</group>
 						</page>
 						<page string="BOT Items">
-							<field name="line_bot_ids" colspan="4" nolabel="1">
-								<tree string="BOT History">
-									<field name="bot_line_id" required="1"/>
-									<field name="ms_id" required="1"/>
-									<field name="moc_id"/>
-									<field name="qty"/>
-									<field name="prime_cost"/>
-									<field name="ratio"/>
-									<field name="dealer_discount"/>
-									<field name="customer_discount"/>
-									<field name="special_discount"/>
-									<field name="tax"/>
-									<field name="p_f"/>
-									<field name="freight"/>
-									<field name="insurance"/>
-									<field name="quote_price"/>
-									<field name="total_price"/>
-								</tree>
-								<form string="BOT History">
-									<group>
-									<group>
-									<field name="bot_line_id" required="1"/>
-									<field name="ms_id" required="1"/>
-									<field name="moc_id"/>
-									<field name="qty"/>
-									<field name="prime_cost"/>
-									<field name="ratio"/>
-									<field name="dealer_discount"/>
-									<field name="customer_discount"/>
-									</group>
-									<group>
-									<field name="special_discount"/>
-									<field name="tax"/>
-									<field name="p_f"/>
-									<field name="freight"/>
-									<field name="insurance"/>
-									<field name="quote_price"/>
-									<field name="total_price"/>
-									</group>
-									</group>
-								</form>
-							</field>
+							<group colspan="6" col="6">		
+								<field name="off_bot_id" colspan="4" nolabel="1" mode="tree">
+									<tree string="BOT Items"  delete="false" create="false" editable="bottom">
+										<field name="is_applicable" readonly="1"/>
+										<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="item_name" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="moc_id" readonly="1" required="1"/>
+										<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="prime_cost" readonly="1"/>
+										<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
+										<field name="load_bom" invisible="1"/>
+									</tree>	
+								</field>
+							</group>
 						</page>
-					</notebook>
+					</notebook>		
+						<group>
+							<group>
+							</group>
+							<group class="oe_subtotal_footer oe_right">
+								<field name="sam_ratio_tot"/>
+								<field name="dealer_discount_tot"/>
+								<field name="customer_discount_tot"/>
+								<field name="spl_discount_tot"/>
+								<field name="tax_tot"/>
+								<field name="p_f_tot"/>
+								<field name="freight_tot"/>
+								<field name="insurance_tot"/>
+								<field name="pump_price_tot"/>
+<!--
+								<field name="tot_price"/>
+-->
+								<div class="oe_subtotal_footer_separator oe_inline">
+								<label for="net_amount"/>
+								</div>
+								<field name="net_amount" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+							</group>
+						</group>
 				</sheet>
 				</form>
 			</field>
@@ -337,27 +393,114 @@
 			<field name="model">ch.accessories.offer</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<form string="Accessories Offer Details" version="7.0">
+				<form string="Accessories Offer Details" version="7.0" create="false" delete="false">
 				<sheet>
 					<group string="Accessories Offer Details">
 						<group>
-						<field name="access_id" required="1"/>
-						<field name="moc_id" required="1"/>
-						<field name="qty"/>
+						<field name="access_id" required="1" readonly="1"/>
+						<field name="moc_id" required="1" readonly="1"/>
+						<field name="pump_id" readonly="1"/>
+						<field name="qty" readonly="1"/>
+						<field name="prime_cost" readonly="1"/>
 						<field name="sam_ratio"/>
 						<field name="dealer_discount"/>
 						<field name="customer_discount"/>
-						<field name="special_discount"/>
 						</group>
 						<group>
+						<field name="special_discount"/>
 						<field name="tax"/>
 						<field name="p_f"/>
 						<field name="freight"/>
 						<field name="insurance"/>
-						<field name="pump_price"/>
-						<field name="total_price"/>
+<!--
+						<field name="pump_price" readonly="1"/>
+-->
+<!--
+						<field name="total_price" readonly="1"/>
+-->
 						</group>
 					</group>
+					<notebook>
+						<page string="Foundry Items">
+							<group colspan="6" col="6">		
+								<field name="off_fou_id" colspan="4" nolabel="1" mode="tree">
+									<tree string="Foundry Items"  delete="false" create="false" editable="bottom">
+										<field name="is_applicable" readonly="1"/>
+										<field name="position_id" readonly="1"/>
+										<field name="pattern_id" readonly="1"/>
+										<field name="pattern_name" readonly="1"/>
+										<field name="moc_id" readonly="1"/>
+										<field name="csd_no" readonly="1"/>
+										<field name="qty" readonly="1"/>
+										<field name="prime_cost" readonly="1"/>
+										<field name="remarks" readonly="1"/>
+										<field name="load_bom" invisible="1"/>
+									</tree>	
+								</field>
+							</group>
+						</page>
+
+						<page string="MS Items">
+							<group colspan="6" col="6">		
+								<field name="off_ms_id" colspan="4" nolabel="1" mode="tree">
+									<tree string="MS Items"  delete="false" create="false" editable="bottom">
+										<field name="is_applicable" readonly="1"/>
+										<field name="position_id" readonly="1"/>
+										<field name="ms_id" required="1" readonly="1"/>
+										<field name="name" readonly="1"/>
+										<field name="moc_id" readonly="1" required="1"/>
+										<field name="csd_no" readonly="1"/>
+										<field name="qty" required="1" readonly="1"/>
+										<field name="prime_cost" readonly="1"/>
+										<field name="remarks" readonly="1"/>
+										<field name="load_bom" invisible="1"/>
+									</tree>	
+								</field>
+							</group>
+						</page>
+						<page string="BOT Items">
+							<group colspan="6" col="6">		
+								<field name="off_bot_id" colspan="4" nolabel="1" mode="tree">
+									<tree string="BOT Items"  delete="false" create="false" editable="bottom">
+										<field name="is_applicable" readonly="1"/>
+										<field name="product_id" readonly="1"/>
+										<field name="brand_id" readonly="1"/>
+										<field name="uom_id" readonly="1"/>
+										<field name="uom_conversation_factor" readonly="1"/>
+										<field name="qty" required="1" readonly="1"/>
+										<field name="prime_cost" readonly="1"/>
+										<field name="remarks" readonly="1"/>
+										<field name="load_bom" invisible="1"/>
+									</tree>	
+								</field>
+							</group>
+						</page>
+					</notebook>		
+						<group>
+							<group>
+							</group>
+							<group class="oe_subtotal_footer oe_right">
+								<field name="sam_ratio_tot"/>
+								<field name="dealer_discount_tot"/>
+								<field name="customer_discount_tot"/>
+								<field name="spl_discount_tot"/>
+								<field name="tax_tot"/>
+								<field name="p_f_tot"/>
+								<field name="freight_tot"/>
+								<field name="insurance_tot"/>
+								<field name="pump_price_tot"/>
+<!--
+								<field name="tot_price"/>
+-->
+								<div class="oe_subtotal_footer_separator oe_inline">
+								<label for="net_amount"/>
+								</div>
+								<field name="net_amount" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+							</group>
+						</group>
+						
+						
+						
 				</sheet>
 				</form>
 			</field>
@@ -372,6 +515,7 @@
 								toolbar="True" string="Enquiry Entry Tree"  create="false" delete="false">					
 					<field name="name"/>
 					<field name="enquiry_date"/>
+					<field name="enquiry_no"/>
 					<field name="customer_id"/>	
 					<field name="state"/>
 				</tree>

@@ -13,35 +13,61 @@ class kg_accessories_master(osv.osv):
 	_name = "kg.accessories.master"
 	_description = "Accessories Master"
 	
-	"""
-	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
+	def _get_modify(self, cr, uid, ids, field_name, arg,  context=None):
 		res={}
-		enq_obj = self.pool.get('purchase.order')			
-		for item in self.browse(cr, uid, ids, context=None):
-			res[item.id] = 'no'
-			enq_ids = enq_obj.search(cr,uid,[('mode_of_dispatch','=',item.id)])			
-			if enq_ids:
-				res[item.id] = 'yes'		
+		if field_name == 'modify':
+			for h in self.browse(cr, uid, ids, context=None):
+				res[h.id] = 'no'
+				if h.state == 'approved':
+					cr.execute(""" select * from 
+					(SELECT tc.table_schema, tc.constraint_name, tc.table_name, kcu.column_name, ccu.table_name
+					AS foreign_table_name, ccu.column_name AS foreign_column_name
+					FROM information_schema.table_constraints tc
+					JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
+					JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = tc.constraint_name
+					WHERE constraint_type = 'FOREIGN KEY'
+					AND ccu.table_name='%s')
+					as sam  """ %('kg_accessories_master'))
+					data = cr.dictfetchall()	
+					if data:
+						for var in data:
+							data = var
+							chk_sql = 'Select COALESCE(count(*),0) as cnt from '+str(data['table_name'])+' where '+data['column_name']+' = '+str(ids[0])
+							cr.execute(chk_sql)			
+							out_data = cr.dictfetchone()
+							if out_data:
+								if out_data['cnt'] > 0:
+									res[h.id] = 'yes'
+									return res
+								else:
+									res[h.id] = 'no'
+				else:
+					res[h.id] = 'yes'								
 		return res
-	"""
 	
 	_columns = {
 			
 		'name': fields.char('Name', required=True, select=True),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
-		'code': fields.char('Code', size=128,required=True),
+		'code': fields.char('Code', size=128),
 		'active': fields.boolean('Active'),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
 		'access_type': fields.selection([('new','NEW'),('copy','COPY')],'Type',required=True),
-		'accessories_type': fields.selection([('bot','BOT'),('fabrication','Fabrication'),('foundry','Foundry')],'Accessories Type',required=True),
+		'accessories_type': fields.selection([('bot','BOT'),('fabrication','Fabrication'),('foundry','Foundry')],'Accessories Type'),
 		'access_id': fields.many2one('kg.accessories.master','Source Accessories',domain="[('active','=',True),('state','=','approved')]"),
-		'line_ids': fields.one2many('ch.kg.accessories.master','header_id','Line Details',readonly=False,states={'approved':[('readonly',True)]}),
-		'copy_flag':fields.boolean('Copy Flag'),		
 		
-		#'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),
+		'line_ids': fields.one2many('ch.kg.accessories.master','header_id','BOT Line Details',readonly=False,states={'approved':[('readonly',True)]}),
+		'line_ids_a':fields.one2many('ch.accessories.ms', 'header_id', "Machine Shop Line",readonly=False,states={'approved':[('readonly',True)]}),
+		'line_ids_b':fields.one2many('ch.accessories.fou', 'header_id', "FOU Line",readonly=False,states={'approved':[('readonly',True)]}),
+		
+		'copy_flag':fields.boolean('Copy Flag'),		
+		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
+		'product_id': fields.many2one('product.product','Item Name'), 		
+		
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -54,7 +80,7 @@ class kg_accessories_master(osv.osv):
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),		
-				
+			
 	}
 	
 	_defaults = {
@@ -66,7 +92,8 @@ class kg_accessories_master(osv.osv):
 		'crt_date': fields.datetime.now,
 		'access_type': 'new',
 		'copy_flag' : False,
-		#'modify': 'no',
+		'modify': 'yes',
+		'entry_mode': 'manual',
 		
 	}
 	
@@ -123,6 +150,9 @@ class kg_accessories_master(osv.osv):
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.cancel_remark:
+			for item in rec.line_ids:
+				if item.entry_mode == 'auto' and item.product_id.is_accessories == True:
+					self.pool.get('product.product').write(cr,uid,item.product_id.id,{'state':'cancel','remark':'Cancelled from Accessories Master'})
 			self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		else:
 			raise osv.except_osv(_('Cancel remark is must !!'),
@@ -380,6 +410,102 @@ class kg_accessories_master(osv.osv):
 kg_accessories_master()
 
 
+class ch_accessories_fou(osv.osv):
+	
+	_name = 'ch.accessories.fou'
+	
+	_columns = {
+		
+		'header_id':fields.many2one('kg.accessories.master', 'Access',ondelete='cascade'),
+		'pos_no': fields.integer('Position No'),
+		'position_id': fields.many2one('kg.position.number','Position No', required=True,domain="[('active','=','t')]"), 	
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern No', required=True,domain="[('active','=','t')]"), 	
+		'csd_no': fields.char('CSD No.', size=128),	
+		'pattern_name': fields.char('Pattern Name', required=True),
+		'remarks':fields.text('Remarks'),
+		'qty': fields.integer('Qty',required=True,),
+		'state':fields.selection([('draft','Draft'),('approve','Approved')],'Status'),
+		
+	}
+	
+	_defaults = {
+	
+	'state':'draft',
+	'qty': 1,
+	  
+	}
+	
+	def _check_line_duplicates(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		cr.execute('''select id from ch_accessories_fou where pattern_id = %s and id != %s and header_id = %s ''',[entry.pattern_id.id,entry.id,entry.header_id.id])
+		duplicate_id = cr.fetchone()
+		if duplicate_id:
+			if duplicate_id[0] != None:
+				return False
+		return True 
+		
+	def _check_line_qty(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])		
+		if entry.qty <= 0:			
+			return False
+		return True
+	
+	def onchange_pattern_name(self, cr, uid, ids, pattern_id, context=None):
+		value = {'pattern_name': '','csd_no':''}
+		if pattern_id:
+			pro_rec = self.pool.get('kg.pattern.master').browse(cr, uid, pattern_id, context=context)
+			value = {'pattern_name': pro_rec.pattern_name,'csd_no':pro_rec.csd_code}
+		return {'value': value}
+		
+	_constraints = [
+		
+		(_check_line_qty, 'Foundry Items Qty Zero and negative not accept', ['Qty']),	   
+		
+	]
+
+	
+ch_accessories_fou()
+
+
+class ch_accessories_ms(osv.osv):
+
+	_name = "ch.accessories.ms"
+	_description = "Accessories Machineshop Details"
+	
+	_columns = {
+	
+		'header_id':fields.many2one('kg.accessories.master', 'Access', ondelete='cascade',required=True),
+		'ms_id':fields.many2one('kg.machine.shop', 'Item Code',domain = [('type','=','ms')], ondelete='cascade',required=True),		
+		'pos_no': fields.integer('Position No'),
+		'position_id': fields.many2one('kg.position.number','Position No', required=True,domain="[('active','=','t')]"), 	
+		'csd_no': fields.char('CSD No.'),
+		'name':fields.char('Item Name', size=128),	  
+		'qty': fields.integer('Qty', required=True),
+		'remarks':fields.text('Remarks'),   
+	
+	}
+	
+	def onchange_machineshop_name(self, cr, uid, ids, ms_id, context=None):
+		value = {'name': '','csd_no':''}
+		if ms_id:
+			pro_rec = self.pool.get('kg.machine.shop').browse(cr, uid, ms_id, context=context)
+			value = {'name': pro_rec.name,'csd_no':pro_rec.csd_code}
+		return {'value': value}
+	
+	def _check_line_qty(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])		
+		if entry.qty <= 0:			
+			return False
+		return True
+	
+	_constraints = [
+		
+		(_check_line_qty, 'Machine Shop items Qty Zero and negative not accept', ['Qty']),	   
+		
+	]   
+
+ch_accessories_ms()
+
 
 class ch_kg_accessories_master(osv.osv):
 	
@@ -388,7 +514,7 @@ class ch_kg_accessories_master(osv.osv):
 	_columns = {
 		
 		'header_id':fields.many2one('kg.accessories.master', 'Accessories No', required=True, ondelete='cascade'),  
-		'product_id': fields.many2one('product.product','Item Name', required=True,domain="[('state','not in',('reject','cancel'))]"), 		
+		'product_id': fields.many2one('product.product','Item Name', required=True,domain="[('state','not in',('reject','cancel'))]"),
 		'brand_id': fields.many2one('kg.brand.master','Brand', domain="[('state','not in',('reject','cancel'))]"), 		
 		'moc_id': fields.many2one('kg.moc.master','MOC', domain="[('state','not in',('reject','cancel'))]"), 		
 		'uom_id': fields.many2one('product.uom','UOM'),
@@ -397,9 +523,16 @@ class ch_kg_accessories_master(osv.osv):
 		'breadth': fields.float('Breadth'),
 		'qty': fields.float('Qty',required=True),
 		'remark': fields.text('Remarks'),
+		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
+		
 		
 	}
 	
+	_defaults = {
+				'entry_mode': 'manual',
+				
+				}
+				
 	def onchange_uom(self, cr, uid, ids, product_id, context=None):
 		value = {'uom_id': '','uom_conversation_factor':''}
 		if product_id:
@@ -408,19 +541,21 @@ class ch_kg_accessories_master(osv.osv):
 			value = {'uom_id': prod_rec.uom_po_id.id,'uom_conversation_factor':prod_rec.uom_conversation_factor}
 		return {'value': value}
 	
-	def _check_length(self, cr, uid, ids, context=None):
-		rec = self.browse(cr, uid, ids[0])
-		if rec.uom_conversation_factor == 'two_dimension':
-			if rec.length <= 0.00:
-				return False
-		return True
+	#~ def _check_length(self, cr, uid, ids, context=None):
+		#~ rec = self.browse(cr, uid, ids[0])
+		#~ if rec.header_id.state in ('confirmed'):
+			#~ if rec.uom_conversation_factor == 'two_dimension':
+				#~ if rec.length <= 0.00:
+					#~ return False
+		#~ return True
 		
-	def _check_breadth(self, cr, uid, ids, context=None):
-		rec = self.browse(cr, uid, ids[0])
-		if rec.uom_conversation_factor == 'two_dimension':
-			if rec.breadth <= 0.00:
-				return False
-		return True
+	#~ def _check_breadth(self, cr, uid, ids, context=None):
+		#~ rec = self.browse(cr, uid, ids[0])
+		#~ if rec.header_id.state in ('confirmed'):
+			#~ if rec.uom_conversation_factor == 'two_dimension':
+				#~ if rec.breadth <= 0.00:
+					#~ return False
+		#~ return True
 		
 	def _check_qty(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
@@ -444,8 +579,8 @@ class ch_kg_accessories_master(osv.osv):
 	_constraints = [
 	
 		(_check_qty,'You cannot save with zero qty !',['Qty']),
-		(_check_length,'You cannot save with zero length !',['Length']),
-		(_check_breadth,'You cannot save with zero breadth !',['Breadth']),
+		#~ (_check_length,'You cannot save with zero length !',['Length']),
+		#~ (_check_breadth,'You cannot save with zero breadth !',['Breadth']),
 		(_check_item,'System not allow to same Item !',['Raw Material Details']),	
 		
 		]
