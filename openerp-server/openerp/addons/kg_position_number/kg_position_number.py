@@ -502,23 +502,23 @@ class kg_dimension(osv.osv):
 			#~ return False					
 		#~ return True
 	
-	def _check_dimension(self, cr, uid, ids, context=None):
-		rec = self.browse(cr,uid,ids[0])		
-		cr.execute("""select id,dimension_id from kg_dimension where header_id = %s"""%(rec.header_id.id))
-		line_data = cr.dictfetchall()
-		for line in line_data :			
-			for sub_line in line_data:				
-				if line['id'] == sub_line['id']:					
-					pass
-				else:
-					if (line['dimension_id'] == sub_line['dimension_id']):
-						return False
-		return True
+	#~ def _check_dimension(self, cr, uid, ids, context=None):
+		#~ rec = self.browse(cr,uid,ids[0])		
+		#~ cr.execute("""select id,dimension_id from kg_dimension where header_id = %s"""%(rec.header_id.id))
+		#~ line_data = cr.dictfetchall()
+		#~ for line in line_data :			
+			#~ for sub_line in line_data:				
+				#~ if line['id'] == sub_line['id']:					
+					#~ pass
+				#~ else:
+					#~ if (line['dimension_id'] == sub_line['dimension_id']):
+						#~ return False
+		#~ return True
 			
 	_constraints = [
 	
 		(_check_total,'Maximum Value Should Be Greater Than Minimum Value !',['Minimum Value']),
-		(_check_dimension, 'System not allow to save duplicate Dimension value !',['Dimension']),	
+		#~ (_check_dimension, 'System not allow to save duplicate Dimension value !',['Dimension']),	
 		#~ (_check_max_val, 'Maximum Value Should Be Greater Than Zero Value !',['Maximum']),	
 		#~ (_check_min_val, 'Minimum Value Should Be Greater Than Zero Value !',['Minimum']),	
 		
