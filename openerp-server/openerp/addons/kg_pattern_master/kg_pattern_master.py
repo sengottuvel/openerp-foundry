@@ -155,20 +155,20 @@ class kg_pattern_master(osv.osv):
 			return False					
 		return True
 	
-	def _Validation(self, cr, uid, ids, context=None):
-		flds = self.browse(cr , uid , ids[0])
-		special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )
-		if special_char:
-			return False
-		return True
-	
-	def _CodeValidation(self, cr, uid, ids, context=None):
-		flds = self.browse(cr , uid , ids[0])		
-		if flds.code:	
-			code_special_char = ''.join( c for c in flds.code if  c in '!@#$%^~*{}?+/=' )		
-			if code_special_char:
-				return False
-		return True		
+	#~ def _Validation(self, cr, uid, ids, context=None):
+		#~ flds = self.browse(cr , uid , ids[0])
+		#~ special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )
+		#~ if special_char:
+			#~ return False
+		#~ return True
+	#~ 
+	#~ def _CodeValidation(self, cr, uid, ids, context=None):
+		#~ flds = self.browse(cr , uid , ids[0])		
+		#~ if flds.code:	
+			#~ code_special_char = ''.join( c for c in flds.code if  c in '!@#$%^~*{}?+/=' )		
+			#~ if code_special_char:
+				#~ return False
+		#~ return True		
 		
 	def _name_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -594,8 +594,8 @@ class kg_pattern_master(osv.osv):
 		
 	
 	_constraints = [
-		(_Validation, 'Special Character Not Allowed !!!', ['name']),
-		(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
+		#~ (_Validation, 'Special Character Not Allowed !!!', ['name']),
+		#~ (_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
 		(_name_validate, 'Pattern No must be unique !!', ['no']),		
 		#(_check_pcs_weight,'You cannot save with zero value !',['SS Weight(kgs)']),
 		#(_check_nonferous_weight,'You cannot save with zero value !',['Non-Ferrous Weight(kgs)']),
