@@ -1043,7 +1043,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 								if ms_rec.line_ids_a:
 									#~ for ele in ms_rec.line_ids_a:
 									cons_rec = self.pool.get('kg.moc.construction').browse(cr,uid,spare_moc_const_id)
-									ms_line_obj = self.pool.get('ch.machine.mocwise').search(cr,uid,[('code','=',cons_rec.name),('header_id','=',ms_rec.id)])
+									ms_line_obj = self.pool.get('ch.machine.mocwise').search(cr,uid,[('code','=',cons_rec.code),('header_id','=',ms_rec.id)])
 									if ms_line_obj:
 										ms_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,ms_line_obj[0])
 										moc_id = ms_line_rec.moc_id.id
@@ -1075,7 +1075,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 								if bot_rec.line_ids_a:
 									#~ for ele in bot_rec.line_ids_a:
 									cons_rec = self.pool.get('kg.moc.construction').browse(cr,uid,spare_moc_const_id)
-									bot_line_obj = self.pool.get('ch.machine.mocwise').search(cr,uid,[('code','=',cons_rec.name),('header_id','=',bot_rec.id)])
+									bot_line_obj = self.pool.get('ch.machine.mocwise').search(cr,uid,[('code','=',cons_rec.code),('header_id','=',bot_rec.id)])
 									if bot_line_obj:
 										bot_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,bot_line_obj[0])
 										moc_id = bot_line_rec.moc_id.id
@@ -1129,7 +1129,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							if ms_rec.line_ids_a:
 								#~ for ele in ms_rec.line_ids_a:
 								cons_rec = self.pool.get('kg.moc.construction').browse(cr,uid,moc_const_id)
-								ms_line_obj = self.pool.get('ch.machine.mocwise').search(cr,uid,[('code','=',cons_rec.name),('header_id','=',ms_rec.id)])
+								ms_line_obj = self.pool.get('ch.machine.mocwise').search(cr,uid,[('code','=',cons_rec.code),('header_id','=',ms_rec.id)])
 								if ms_line_obj:
 									ms_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,ms_line_obj[0])
 									moc_id = ms_line_rec.moc_id.id
@@ -1156,7 +1156,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							if bot_rec.line_ids_a:
 								#~ for ele in bot_rec.line_ids_a:
 								cons_rec = self.pool.get('kg.moc.construction').browse(cr,uid,moc_const_id)
-								bot_line_obj = self.pool.get('ch.machine.mocwise').search(cr,uid,[('code','=',cons_rec.name),('header_id','=',bot_rec.id)])
+								bot_line_obj = self.pool.get('ch.machine.mocwise').search(cr,uid,[('code','=',cons_rec.code),('header_id','=',bot_rec.id)])
 								if bot_line_obj:
 									bot_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,bot_line_obj[0])
 									moc_id = bot_line_rec.moc_id.id
