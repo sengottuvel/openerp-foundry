@@ -242,7 +242,7 @@
 								<field name="capacity_in" />
 								<field name="suction_pressure" />
 								<field name="slurry_correction_in" />
-								<field name="suction_pressure_kg" on_change="onchange_differential_pressure_kg(suction_pressure_kg,discharge_pressure_kg,sealing_water_pressure)"/>
+								<field name="suction_pressure_kg" on_change="onchange_differential_pressure_kg(head_in,suction_pressure_kg,discharge_pressure_kg,sealing_water_pressure)"/>
 								<field name="viscosity_crt_factor" />
 							</group>
 							<group>
@@ -311,7 +311,7 @@
 								<field name="minimum_contionuous" />
 								<field name="specific_speed" />
 								<field name="suction_specific_speed" />
-								<field name="sealing_water_pressure" on_change="onchange_differential_pressure_kg(suction_pressure_kg,discharge_pressure_kg,sealing_water_pressure)"/>
+								<field name="sealing_water_pressure" on_change="onchange_differential_pressure_kg(head_in,suction_pressure_kg,discharge_pressure_kg,sealing_water_pressure)"/>
 								<field name="sealing_water_capacity" />
 								<field name="gd_sq_value" />
 								<field name="bearing_make" />

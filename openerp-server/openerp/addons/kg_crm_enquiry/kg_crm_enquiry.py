@@ -1123,10 +1123,10 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			
 		return {'value': value}
 			
-	def onchange_differential_pressure_kg(self,cr,uid,ids,suction_pressure_kg,discharge_pressure_kg,sealing_water_pressure,context=None):
+	def onchange_differential_pressure_kg(self,cr,uid,ids,head_in,suction_pressure_kg,discharge_pressure_kg,sealing_water_pressure,context=None):
 		value = {'differential_pressure_kg': 0}
 		total = 0.00
-		total = suction_pressure_kg + discharge_pressure_kg + sealing_water_pressure
+		total = head_in / 10.00
 		value = {'differential_pressure_kg': total}
 		return {'value': value}
 		
@@ -1230,11 +1230,11 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		return {'value': value}
 		
 	def onchange_head_in(self, cr, uid, ids, head_in, discharge_pressure_kg, sealing_water_pressure, context=None):
-		value = {'head_in': '','discharge_pressure_kg': '','sealing_water_pressure':''}
+		value = {'head_in': '','sealing_water_pressure':''}
 		total = 0.00
-		if head_in or discharge_pressure_kg:
+		if head_in:
 			total = (head_in / 10.00) + 1
-			value = {'head_in': head_in,'discharge_pressure_kg': head_in / 10.00,'sealing_water_pressure': total}
+			value = {'head_in': head_in,'sealing_water_pressure': total}
 			
 		return {'value': value}
 		
