@@ -206,7 +206,7 @@
 				<form string="Pumpmodel Details" version="7.0">
 					<sheet>
 						<group>
-							<field name="purpose_categ" required="1" attrs="{'readonly':[('purpose_categ','in',('pump','spare'))]}"/>																
+							<field name="purpose_categ" on_change="onchange_purpose_categ(purpose_categ)" required="1" attrs="{'readonly':[('purpose_categ','in',('pump','spare','access'))]}"/>
 						</group>	
 		<notebook>
 		<page string="Pump Details"  attrs="{'invisible':[('purpose_categ','!=','pump')]}">
@@ -392,7 +392,7 @@
 			
 		</page>
 		</notebook>
-		<notebook>
+		<notebook attrs="{'invisible':[('purpose_categ','not in',('spare','pump'))]}">
 			<page string = "Foundry Items">
 				<field name="line_ids">
 					<tree string="Foundry Item Tree" editable="top" create="false" delete="false">
@@ -444,7 +444,7 @@
 		
 			<group string="Accessories">
 				<group>
-					<field name="acces" attrs="{'required':[('purpose_categ','in',('pump','spare'))]}" colspan="1"/>
+					<field name="acces" attrs="{'required':[('purpose_categ','in',('pump','spare','access'))],'readonly':[('purpose_categ','=','access')]}" colspan="1"/>
 				</group>
 				<group>
 <!--
