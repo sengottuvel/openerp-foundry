@@ -1015,7 +1015,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 									#~ for ele in pat_rec.line_ids:
 									pat_line_obj = self.pool.get('ch.mocwise.rate').search(cr,uid,[('code','=',spare_moc_const_id),('header_id','=',pat_rec.id)])
 									if pat_line_obj:
-										pat_line_rec = self.pool.get('ch.mocwise.rate').search(cr,uid,pat_line_obj[0])
+										pat_line_rec = self.pool.get('ch.mocwise.rate').browse(cr,uid,pat_line_obj[0])
 										moc_id = pat_line_rec.moc_id.id
 						fou_vals.append({
 										'position_id': item.position_id.id,
@@ -1103,7 +1103,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 								#~ for ele in pat_rec.line_ids:
 								pat_line_obj = self.pool.get('ch.mocwise.rate').search(cr,uid,[('code','=',moc_const_id),('header_id','=',pat_rec.id)])
 								if pat_line_obj:
-									pat_line_rec = self.pool.get('ch.mocwise.rate').search(cr,uid,pat_line_obj[0])
+									pat_line_rec = self.pool.get('ch.mocwise.rate').browse(cr,uid,pat_line_obj[0])
 									moc_id = pat_line_rec.moc_id.id
 						print"moc_idmoc_id",moc_id	
 								
