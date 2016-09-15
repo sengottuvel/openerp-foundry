@@ -529,7 +529,7 @@ class kg_crm_enquiry(osv.osv):
 			print"ms_pricems_price",ms_price
 		
 		# BOT Item 
-		
+		 
 		bot_price = 0.00
 		for bot_line in bom_bot_line_id:
 			tot_price = 0.00
