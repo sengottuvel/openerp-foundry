@@ -199,7 +199,9 @@ class kg_machine_shop(osv.osv):
 			raise osv.except_osv(_('List MOC Construction !!'),
 				_('Click the List MOC Construction Button !!'))
 		for item in rec.line_ids:
-			prod = self.pool.get('product.product').browse(cr, uid, item.product_id.id, context=context)					
+			prod = self.pool.get('product.product').browse(cr, uid, item.product_id.id, context=context)	
+			print"item.uom.id",item.uom.id				
+			print"prod.uom_po_id.id",prod.uom_po_id.id				
 			if item.uom.id != prod.uom_id.id:
 				if item.uom.id  != prod.uom_po_id.id:				 			
 					raise osv.except_osv(
@@ -501,8 +503,11 @@ class ch_ms_raw_material(osv.osv):
 	def _check_uom_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
 		prod = self.pool.get('product.product').browse(cr, uid, entry.product_id.id)		
-		if entry.uom.id != prod.uom_id.id or entry.uom.id != prod.uom_po_id.id:
-			return False			
+		print"item.uom.id",entry.uom.id				
+		print"prod.uom_po_id.id",prod.uom_po_id.id				
+		if entry.uom.id != prod.uom_id.id:
+			if entry.uom.id  != prod.uom_po_id.id:
+				return False			
 		return True	
 		
 	_constraints = [		
