@@ -95,7 +95,7 @@
 										<field name="thickness" invisible="1"/>	
 										<field name="weight" invisible="1"/>	
 										<field name="temp_qty" required="1" on_change="onchange_weight(uom_conversation_factor,length,breadth,temp_qty,product_id)"/>
-										<field name="qty" invisible="1" />
+										<field name="qty"/>
 										<field name="weight" readonly="1"/>
 										<field name="remarks" widget="char"/>														
 									</tree>

@@ -409,7 +409,7 @@ class ch_ms_raw_material(osv.osv):
 			
 		'header_id':fields.many2one('kg.machine.shop', 'MS Entry', required=True, ondelete='cascade'),	
 		'product_id': fields.many2one('product.product','Raw Material', required=True, domain="[('product_type','in',['ms','bot','consu'])]"),			
-		'uom':fields.many2one('product.uom','PO UOM',size=128 ,required=True),
+		'uom':fields.many2one('product.uom','UOM',size=128 ,required=True),
 		'od': fields.float('OD'),
 		'length': fields.float('Length'),
 		'breadth': fields.float('Breadth'),
@@ -417,8 +417,16 @@ class ch_ms_raw_material(osv.osv):
 		'weight': fields.float('Weight' ,digits=(16,5)),
 		'uom_conversation_factor': fields.selection([('one_dimension','One Dimension'),('two_dimension','Two Dimension')],'UOM Conversation Factor'),		
 		'temp_qty':fields.float('Qty'),
-		'qty':fields.float('Qty'),
+		'qty':fields.float('Testing Qty',readonly=True),
 		'remarks':fields.text('Remarks'),		
+	}
+	
+	_defaults = {
+	
+		
+		'length': 1.00,
+	
+		
 	}
 	
 	def onchange_product_uom(self, cr, uid, ids, product_id, uom_id,  context=None):		
@@ -490,11 +498,19 @@ class ch_ms_raw_material(osv.osv):
 			return True
 		return True
 		
+	def _check_uom_values(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		prod = self.pool.get('product.product').browse(cr, uid, entry.product_id.id)		
+		if entry.uom.id != prod.uom_id.id or entry.uom.id != prod.uom_po_id.id:
+			return False			
+		return True	
+		
 	_constraints = [		
 			  
 		(_check_one_values, 'Check the zero values not allowed..!!',['Qty or Length']),	
 		(_check_two_values, 'Check the zero values not allowed..!!',['Breadth or Length or Qty']),
 		(_check_values, 'Please Check the same Raw Material not allowed..!!',['Raw Material']),	
+		(_check_uom_values, 'UOM Mismatching Error, You choosed wrong UOM !!!',['UOM']),	
 		
 	   ]
 	
