@@ -414,7 +414,7 @@ class ch_ms_raw_material(osv.osv):
 		'length': fields.float('Length'),
 		'breadth': fields.float('Breadth'),
 		'thickness': fields.float('Thickness'),
-		'weight': fields.float('Weight'),
+		'weight': fields.float('Weight' ,digits=(16,5)),
 		'uom_conversation_factor': fields.selection([('one_dimension','One Dimension'),('two_dimension','Two Dimension')],'UOM Conversation Factor'),		
 		'temp_qty':fields.float('Qty'),
 		'qty':fields.float('Qty'),
