@@ -12,6 +12,7 @@
 					<header>
 						<button name="entry_confirm" type="object" string="Process Offer" states="draft" class="oe_highlight"/>
 						<button name="entry_call_back" type="object" string="Call Back" states="draft" class="oe_highlight"/>
+						<button name="offer_copy" type="object" string="Offer Copy" class="oe_highlight"/>
 					</header>
 						<group>
 							<group>
@@ -29,6 +30,7 @@
 								<field name="enquiry_date" readonly="1"/>
 								<field name="segment" readonly="1"/>	
 								<field name="state" style="width: 30%%" class="att_state_change" readonly="1"/>
+								<field name="rep_data" readonly="1" width="100" filename="offer_copy"/>
 							</group>	
 						</group>
 						<group class="oe_subtotal_footer oe_right">
@@ -55,7 +57,6 @@
 									<field name="net_amount" sum="net_amount"/>
 								</tree>
 							</field>
-
 <!--
 							<group class="oe_subtotal_footer oe_right">
 								<field name="pump_net_amount"/>
@@ -82,7 +83,9 @@
 								<tree string="Spare History" create="false" delete="false">
 									<field name="pumpseries_id" required="1"/>
 									<field name="pump_id" required="1"/>
-									<field name="moc_const_id"/>
+									<field name="item_code" required="1"/>
+									<field name="item_name" required="1"/>
+									<field name="moc_id"/>
 									<field name="qty" sum="qty"/>
 									<field name="prime_cost" sum="prime_cost"/>
 									<field name="sam_ratio" sum="sam_ratio"/>
@@ -291,13 +294,18 @@
 						<group>
 							<field name="pumpseries_id" required="1" readonly="1"/>
 							<field name="pump_id" required="1" readonly="1"/>
-							<field name="moc_const_id" readonly="1"/>
+							<field name="item_code" required="1" readonly="1"/>
+							<field name="item_name" required="1" readonly="1"/>
+							<field name="moc_id" required="1" readonly="1"/>
 							<field name="qty" readonly="1"/>
 							<field name="prime_cost" readonly="1"/>
 							<field name="sam_ratio"/>
-							<field name="dealer_discount"/>
+							<field name="pattern_id" readonly="1" invisible="1"/>
+							<field name="ms_id" readonly="1" invisible="1"/>
+							<field name="bot_id" readonly="1" invisible="1"/>
 						</group>
 						<group>
+							<field name="dealer_discount"/>
 							<field name="customer_discount"/>
 							<field name="special_discount"/>
 							<field name="tax"/>
@@ -306,6 +314,7 @@
 							<field name="insurance"/>
 						</group>					
 					</group>
+<!--
 					<notebook>
 						<page string="Foundry Items">
 							<group colspan="6" col="6">		
@@ -361,6 +370,7 @@
 							</group>
 						</page>
 					</notebook>		
+-->
 						<group>
 							<group>
 							</group>

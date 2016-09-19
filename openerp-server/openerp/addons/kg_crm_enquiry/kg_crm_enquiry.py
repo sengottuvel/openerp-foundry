@@ -14,7 +14,7 @@ CALL_TYPE_SELECTION = [
     ('new_enquiry','New Enquiry')
 ]
 PURPOSE_SELECTION = [
-    ('pump','Pump'),('spare','Spare'),('prj','Project'),('pump_spare','Pump With Spare')
+    ('pump','Pump'),('spare','Spare'),('prj','Project'),('pump_spare','Pump With Spare'),('access','Only Accessories')
 ]
 STATE_SELECTION = [
     ('draft','Draft'),('moved_to_offer','Moved To Offer'),('call','Call Back'),('quote','Quote Process'),('wo_released','WO Released'),('reject','Rejected')
@@ -354,10 +354,11 @@ class kg_crm_enquiry(osv.osv):
 																				})
 					
 				if item.acces == 'yes':
+					ite = item
 					pump_id = ''
 					if item.purpose_categ == 'pump':
 						pump_id = item.pump_id.id
-					elif item.purpose_categ == 'spare':
+					elif item.purpose_categ == 'spare' or item.purpose_categ == 'access':
 						pump_id = item.spare_pump_id.id
 					if item.line_ids_access_a:
 						for item_1 in item.line_ids_access_a:
@@ -376,6 +377,7 @@ class kg_crm_enquiry(osv.osv):
 																		'prime_cost': primecost_vals,
 																		'per_access_prime_cost': per_access_prime_cost,
 																		'enquiry_line_access_id': item_1.id,
+																		'enquiry_line_id': ite.id,
 																		})
 			
 		self.write(cr, uid, ids, {
@@ -872,6 +874,8 @@ class ch_kg_crm_pumpmodel(osv.osv):
 					context['purpose_categ'] = 'pump'
 				if context['purpose_categ'] == 'spare':
 					context['purpose_categ'] = 'spare'
+				if context['purpose_categ'] == 'access':
+					context['purpose_categ'] = 'access'
 				if context['purpose_categ'] == 'pump_spare':
 					context['purpose_categ'] = ''
 				else:
@@ -1332,7 +1336,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 				
 		return True
 	
-	def onchange_spare_pump_id(self, cr, uid, ids, spare_pump_id, context=None):
+	def onchange_spare_pump_id(self, cr, uid, ids, spare_pump_id,purpose_categ, context=None):
 		value = {'pump_id': '','spare_pumpseries_id':''}
 		series_id = ''
 		if spare_pump_id:
@@ -1343,7 +1347,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			value = {'pump_id': spare_pump_id,'spare_pumpseries_id': series_id}
 		return {'value': value}
 
-	def onchange_spare_pumpseries_id(self, cr, uid, ids, spare_pumpseries_id, context=None):
+	def onchange_spare_pumpseries_id(self, cr, uid, ids, spare_pumpseries_id,purpose_categ, context=None):
 		value = {'primemover_categ': ''}
 		if spare_pumpseries_id:
 			value = {'pumpseries_id': spare_pumpseries_id}
