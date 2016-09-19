@@ -282,6 +282,8 @@ class kg_crm_offer(osv.osv):
 		len_col = 0
 		if line_data:
 			if len(line_data):
+				if len(line_data) <= 1:
+					len_col = len(line_data) + 1
 				if len(line_data) <= 2:
 					len_col = len(line_data) 
 				elif len(line_data) <= 3 or len(line_data) > 3:
@@ -306,10 +308,10 @@ class kg_crm_offer(osv.osv):
 		img = Image.merge("RGB", (r, g, b))
 		img.save('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp')
 		img = Image.open('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.png')
-		#~ r, g, b, a = img.split()
-		#~ img = Image.merge("RGB", (r, g, b))
 		img.save('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp')
 		
+		#~ r, g, b, a = img.split()
+		#~ img = Image.merge("RGB", (r, g, b))
 		s1=8
 		
 		"""adding a worksheet along with name"""
@@ -324,9 +326,9 @@ class kg_crm_offer(osv.osv):
 				sheet1.col(2).width = 7000
 			elif len_col >= 3:
 				sheet1.col(0).width = 8000
-				sheet1.col(1).width = 5000
-				sheet1.col(2).width = 5000
-				sheet1.col(3).width = 5000
+				sheet1.col(1).width = 7000
+				sheet1.col(2).width = 7000
+				sheet1.col(3).width = 7000
 		else:
 			sheet1.col(0).width = 8000
 			sheet1.col(1).width = 5000
@@ -682,11 +684,11 @@ class kg_crm_offer(osv.osv):
 							row_no = row_no+1
 					em_col = em_col + 1
 				else:
-					sheet1.write(row_no,em_col,"-",style6)
+					sheet1.write(row_no+1,em_col,"-",style6)
 					em_col = em_col + 1
 		row_no = row_no
 		
-		sheet1.write_merge(row_no+1, row_no+1, 0, len_col, 'Spares:', style5)
+		sheet1.write_merge(row_no+2, row_no+2, 0, len_col, 'Spares:', style5)
 		sheet1.row(row_no+1).height = 400
 		row_no = row_no + 1
 		
@@ -709,11 +711,11 @@ class kg_crm_offer(osv.osv):
 					for item_1 in spare_data:
 						if item_1['spare_name'] or item_1['net_amount']:
 							m_col_no = 1
-							sheet1.write(row_no+1,0,item_1['spare_name'],style6)
-							sheet1.write(row_no+1,em_col,item_1['net_amount'] or "-",style6)
+							sheet1.write(row_no+2,0,item_1['spare_name'],style6)
+							sheet1.write(row_no+2,em_col,item_1['net_amount'] or "-",style6)
 							row_no = row_no+1
 				else:
-					sheet1.write(row_no+1,em_col,"-",style6)
+					sheet1.write(row_no+2,em_col,"-",style6)
 					em_col = em_col + 1
 		row_no = row_no
 		print"row_norow_norow_norow_norow_norow_no",row_no
