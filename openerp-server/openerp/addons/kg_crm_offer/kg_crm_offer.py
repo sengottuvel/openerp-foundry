@@ -284,8 +284,6 @@ class kg_crm_offer(osv.osv):
 			if len(line_data):
 				if len(line_data) <= 1:
 					len_col = len(line_data) + 1
-				if len(line_data) <= 2:
-					len_col = len(line_data) 
 				elif len(line_data) <= 3 or len(line_data) > 3:
 					len_col = len(line_data)
 		print"len_collen_collen_col",len_col
