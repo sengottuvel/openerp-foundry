@@ -215,16 +215,21 @@ class kg_pattern_master(osv.osv):
 				moc_type_ids.append(moc_type.id)			
 			moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('constuction_type_id','in',moc_type_ids)]))
 		else:
-			moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('active','=',True)]))				
-		cr.execute(""" delete from ch_mocwise_rate where header_id  = %s """ %(ids[0]))
+			moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('active','=',True)]))			
 		for item in moc_const_obj:			
-			moc_const_rec = self.pool.get('kg.moc.construction').browse(cr,uid,item)				
-			line = self.pool.get('ch.mocwise.rate').create(cr,uid,{
-				   'header_id':rec.id,
-				   'moc_id':rec.moc_id.id,
-				   'code':moc_const_rec.id,
-				   'rate':rec.moc_id.rate,
-				   'pro_cost':rec.moc_id.pro_cost})		
+			moc_const_rec = self.pool.get('kg.moc.construction').browse(cr,uid,item)
+			sql_check = """ select code from ch_mocwise_rate where code=%s and header_id  = %s """ %(moc_const_rec.id,ids[0])
+			cr.execute(sql_check)
+			data = cr.dictfetchall()			
+			if data == []:			
+				line = self.pool.get('ch.mocwise.rate').create(cr,uid,{
+					   'header_id':rec.id,
+					   'moc_id':rec.moc_id.id,
+					   'code':moc_const_rec.id,
+					   'rate':rec.moc_id.rate,
+					   'pro_cost':rec.moc_id.pro_cost})	
+			else:
+				pass	
 		cr.execute(""" delete from ch_latest_weight where header_id  = %s """ %(ids[0]))
 		weight = ''
 		for ele in range(3):			
@@ -594,8 +599,8 @@ class kg_pattern_master(osv.osv):
 		
 	
 	_constraints = [
-		#~ (_Validation, 'Special Character Not Allowed !!!', ['name']),
-		#~ (_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
+		#(_Validation, 'Special Character Not Allowed !!!', ['name']),
+		#(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
 		(_name_validate, 'Pattern No must be unique !!', ['no']),		
 		#(_check_pcs_weight,'You cannot save with zero value !',['SS Weight(kgs)']),
 		#(_check_nonferous_weight,'You cannot save with zero value !',['Non-Ferrous Weight(kgs)']),
