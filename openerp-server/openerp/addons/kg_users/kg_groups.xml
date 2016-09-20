@@ -124,6 +124,13 @@
             ref('kg_menus.ram_stock_statement'),
             
             
+            ref('kg_sale_invoice.menu_kg_sale_root'),
+            ref('kg_sale_invoice.menu_sale_parent'),
+            ref('kg_sale_invoice.kg_draft_bill_menu'),
+            ref('kg_sale_invoice.kg_draft_bill_menus'),
+            ref('kg_customer_advance.kg_advance_menu'),
+            ref('kg_sale_invoice.menu_kg_customer_advance'),
+            
             
             ])]" name="menu_access"/>
 		<field name="users" eval="[(4, ref('base.user_root'))]"/>

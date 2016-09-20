@@ -1166,6 +1166,98 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
 		</record>
 		
+		
+		<!-- Proforma Invoice Start here -->
+		
+		<record id="m_foundry_sale_invoice_1" model="ir.model.access">
+			<field name="model_id" ref="kg_sale_invoice.model_kg_sale_invoice"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Sale Invoice</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<record id="m_foundry_sale_invoice_2" model="ir.model.access">
+			<field name="model_id" ref="kg_sale_invoice.model_ch_pumpspare_invoice"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Sale Invoice pump</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		
+		<record id="m_foundry_sale_invoice_3" model="ir.model.access">
+			<field name="model_id" ref="kg_sale_invoice.model_ch_spare_invoice"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Sale Invoice spare</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		
+		<record id="m_foundry_sale_invoice_4" model="ir.model.access">
+			<field name="model_id" ref="kg_sale_invoice.model_ch_accessories_invoice"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Sale Invoice acc</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		
+		<record id="m_foundry_sale_invoice_5" model="ir.model.access">
+			<field name="model_id" ref="kg_sale_invoice.model_ch_invoice_additional_charge"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Sale Invoice Additional</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		
+		<record id="m_foundry_sale_invoice_6" model="ir.model.access">
+			<field name="model_id" ref="kg_sale_invoice.model_ch_customer_advance_invoice_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Sale Invoice Advance Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<record id="m_foundry_customer_advance_1" model="ir.model.access">
+			<field name="model_id" ref="kg_customer_advance.model_kg_customer_advance"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Customer Advance</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<record id="m_foundry_customer_advance_2" model="ir.model.access">
+			<field name="model_id" ref="kg_customer_advance.model_ch_customer_advance_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Customer Advance Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- End -->
+		
+		
+		
+		
     </data>
 </openerp>
 	
