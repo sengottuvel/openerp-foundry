@@ -4,26 +4,54 @@ from openerp.tools.translate import _
 import time
 import datetime
 import openerp.addons.decimal_precision as dp
+import re
 
 class kg_transport(osv.osv):
 
 	_name = "kg.transport"
 	_description = "KG Transport"
 	
+	def _get_modify(self, cr, uid, ids, field_name, arg,  context=None):
+		res={}
+		if field_name == 'modify':
+			for h in self.browse(cr, uid, ids, context=None):	
+				res[h.id] = 'no'
+				cr.execute(""" select * from
+				(SELECT tc.table_schema, tc.constraint_name, tc.table_name, kcu.column_name, ccu.table_name
+				AS foreign_table_name, ccu.column_name AS foreign_column_name
+				FROM information_schema.table_constraints tc
+				JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
+				JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = tc.constraint_name
+				WHERE constraint_type = 'FOREIGN KEY'
+				AND ccu.table_name='%s')
+				as sam  """ %('kg_transport'))
+				data = cr.dictfetchall()	
+				if data:
+					for var in data:
+						data = var
+						chk_sql = 'Select COALESCE(count(*),0) as cnt from '+str(data['table_name'])+' where '+data['column_name']+' = '+str(ids[0])
+						cr.execute(chk_sql)			
+						out_data = cr.dictfetchone()
+						if out_data:
+							if out_data['cnt'] > 0:
+								res[h.id] = 'yes'
+		return res
+		
 	_columns = {
 		
 		'created_by': fields.many2one('res.users', 'Created By', readonly=True),
 		'creation_date': fields.datetime('Creation Date', readonly=True),
-		'code': fields.char('Code',required=True,readonly=False, states={'draft':[('readonly',False)]}),
+		'code': fields.char('Code',readonly=True),
 		'name': fields.char('Transport Name', size=128, required=True, select=True,readonly=True, states={'draft':[('readonly',False)]}),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'contact_person': fields.char('Contact Person', size=128, required=True, readonly=True, states={'draft':[('readonly',False)]}, select=True),
 		'address': fields.char('Address', size=128),
 		'address1': fields.char('Address1', size=128),
 		'city_id': fields.many2one('res.city','City', size=128),
-		'zip': fields.integer('Zip', size=128),
+		'zip': fields.integer('Zip', size=8),
 		'mobile': fields.char('Mobile', size=128),
 		'phone': fields.char('Phone', size=128),
+		'website': fields.char('Website', size=128),
 		'email': fields.char('Email', size=128),
 		'state_id': fields.many2one('res.country.state', 'State'),
 		'country_id': fields.many2one('res.country', 'Country'),
@@ -46,6 +74,7 @@ class kg_transport(osv.osv):
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel Remarks'),
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
 		
 	}
 	
@@ -53,10 +82,10 @@ class kg_transport(osv.osv):
 		
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.transport', context=c),
 		'active': True,
-		'code': '/',
 		'state': 'draft',
 		'created_by': lambda obj, cr, uid, context: uid,
-		'creation_date' :  fields.datetime.now,
+		'creation_date' : fields.datetime.now,
+		'modify': 'no',
 		
 	}
 	
@@ -65,18 +94,85 @@ class kg_transport(osv.osv):
 		('name', 'unique(name)', 'Transport name must be unique per Company !!'),
 	]
 	
-	#_sql_constraints = [
+	#~ def _code_validate(self, cr, uid,ids, context=None):
+		#~ rec = self.browse(cr,uid,ids[0])
+		#~ res = True
+		#~ if rec.code:
+			#~ trans_code = rec.code
+			#~ code = trans_code.upper()			
+			#~ cr.execute(""" select upper(code) from kg_transport where upper(code) = '%s' """ %(code))
+			#~ data = cr.dictfetchall()			
+			#~ if len(data) > 1:
+				#~ res = False
+			#~ else:
+				#~ res = True				
+		#~ return res
 	
-	#	('code', 'unique(code)', 'Transport Code must be unique per Company !!'),
-	#]
+	def _check_zip(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+		if rec.zip:
+			if len(str(rec.zip)) in (6,7,8):
+				return True
+			else:
+				return False
+		else:
+			return True
+		return False
+	
+	def  _validate_email(self, cr, uid, ids, context=None):
+		rec = self.browse(cr,uid,ids[0]) 
+		if rec.email==False:
+			return True
+		else:
+			if re.match("^.+\\@(\\[?)[a-zA-Z0-9\\-\\.]+\\.([a-zA-Z]{2,3}|[0-9]{1,3})(\\]?)$", rec.email) != None:
+				return True
+			else:
+				raise osv.except_osv('Invalid Email', 'Please enter a valid email address')  
+				
+	def _check_website(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.website != False:
+			if re.match('www.(?:www)?(?:[\w-]{2,255}(?:\.\w{2,6}){1,2})(?:/[\w&%?#-]{1,300})?',rec.website):
+				return True
+			else:
+				return False
+		return True
+	
+	def _check_mobile_no(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+		if rec.mobile:
+			if len(str(rec.mobile)) in (8,9,10,11,12,13,14,15) and rec.mobile.isdigit() == True:
+				return True
+		else:
+			return True
+		return False
+			
+	def _check_phone_no(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+		if rec.phone:
+			if len(str(rec.phone)) in (10,11) and rec.phone.isdigit() == True:
+				return True
+		else:
+			return True
+		return False
+			
+	_constraints = [
+	
+		#~ (_code_validate, 'Code must be unique !!', ['Code']),		
+		(_check_zip,'ZIP should contain 6-8 digit numerics. Else system not allow to save.',['ZIP']),
+		(_validate_email,'Enter a correct Email !',['Email']),
+		(_check_website,'Enter a correct Website !',['Website']),
+		(_check_mobile_no,'Mobile No. should contain 8-15 digit numerics. Else system not allow to save.',['Mobile']),
+		(_check_phone_no,'Phone No. should contain 10-12 digit numerics. Else system not allow to save.',['Phone']),
+		
+	]
 	
 	def onchange_zip(self,cr,uid,ids,zip,context=None):
-		if len(str(zip)) == 6:
+		if len(str(zip)) in (6,7,8):
 			value = {'zip':zip}
 		else:
 			raise osv.except_osv(_('Check zip number !!'),
-				_('Please enter six digit number !!'))
-		
+				_('ZIP should contain 6-8 digit numerics. Else system not allow to save.!!'))
 		return {'value': value}
 	
 	def onchange_city(self, cr, uid, ids, city_id, context=None):
@@ -91,16 +187,24 @@ class kg_transport(osv.osv):
 			return {'value':{'country_id':country_id}}
 		return {}
 				
-	def create(self, cr, uid, vals,context=None):		
-		if vals.get('code','/')=='/':
-			vals['code'] = self.pool.get('ir.sequence').get(cr, uid, 'kg.transport') or '/'
-		order =  super(kg_transport, self).create(cr, uid, vals, context=context)
-		return order
+	#~ def create(self, cr, uid, vals,context=None):		
+		#~ if vals.get('code','/')=='/':
+			#~ vals['code'] = self.pool.get('ir.sequence').get(cr, uid, 'kg.transport') or '/'
+		#~ order =  super(kg_transport, self).create(cr, uid, vals, context=context)
+		#~ return order
 		
 	def confirm_transport(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		cur_date = datetime.datetime.now()
-		self.write(cr,uid,ids,{'state': 'confirmed','confirm_by': uid, 'confirm_date': cur_date})
+		if not rec.code:
+			seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.transport')])
+			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s',now()::date) """%(seq_id[0],seq_rec.code))
+			seq_name = cr.fetchone();
+			seq_code = seq_name[0]
+		else:
+			seq_code = rec.code
+		self.write(cr,uid,ids,{'state': 'confirmed','confirm_by': uid, 'confirm_date': cur_date,'code': seq_code})
 		return True
 		
 	def approve_transport(self,cr,uid,ids,context=None):
@@ -136,20 +240,11 @@ class kg_transport(osv.osv):
 	def unlink(self,cr,uid,ids,context=None):
 		raise osv.except_osv(_('Warning!'),
 				_('You can not delete Entry !!'))		
-	
-	def write(self, cr, uid, ids, vals, context=None):
 		
-		#if vals:
-		#	if len(str(vals['zip'])) == 6:
-		#		pass
-		#	else:
-		#		raise osv.except_osv(_('Check zip number !!'),
-		#			_('Please enter six digit number !!'))
-		#else:
-		#	pass	
+	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_transport, self).write(cr, uid, ids, vals, context)
-			
+				
 	"""			   
 	def delete_transport(self,cr,uid,ids,context = None):
 		unlink_ids = []		

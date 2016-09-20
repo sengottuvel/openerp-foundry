@@ -76,16 +76,20 @@
             <field name="model">res.partner</field>
             <field eval="8" name="priority"/>
             <field name="arch" type="xml">
-                <tree string="Contacts">
+<!--                <tree string="Contacts">-->
+					<tree colors="blue:partner_state == 'draft';red:partner_state == 'confirm'
+						;black:partner_state == 'approved';gray:partner_state == 'reject';gray:partner_state == 'cancel'" string="Contacts">
                     <field name="name"/>
                     <field name="function" invisible="1"/>
                     <field name="phone"/>
                     <field name="email"/>
+                    <field name="partner_state"/>
                     <field name="user_id" invisible="1"/>
                     <field name="is_company" invisible="1"/>
                     <field name="country" invisible="1"/>
                     <field name="country_id" invisible="1"/>
                     <field name="parent_id" invisible="1"/>
+                    
                 </tree>
             </field>
         </record>
@@ -205,6 +209,7 @@
 						</group>
 						<group string=" ">
 							<field name="color"/>
+							<field name="partner_state" style="width: 30%%" class="att_state_change" readonly="1"/>
 						</group>
                     </group>
                     <label for = "comment"></label>
@@ -335,7 +340,7 @@
                                     <field name="date"/>
                                 </group>
                                 <group>
-                                    <field name="active"/>
+<!--                                 <field name="active"/>-->
                                 </group>
                             </group>
                         </page>
@@ -356,9 +361,13 @@
                 <search string="Search Partner">
                    <field name="name"
                        filter_domain="['|','|',('name','ilike',self),('parent_id','ilike',self),('ref','=',self)]"/>
-                   <filter help="My Partners" icon="terp-personal+" domain="[('user_id','=',uid)]"/>
+<!--               <filter help="My Partners" icon="terp-personal+" domain="[('user_id','=',uid)]"/>-->
                    <separator/>
-                   <filter string="Persons" name="type_person" domain="[('is_company','=',0)]"/>
+                   <filter icon="terp-check" name="draft" string="Draft" domain="[('partner_state','=','draft')]"/>
+				   <filter icon="terp-check" name="confirm" string="Confirmed" domain="[('partner_state','=','confirm')]"/>
+				   <filter icon="terp-check" name="approve" string="Approved" domain="[('partner_state','=','approve')]"/>
+				   <filter icon="terp-check" name="reject" string="Rejected" domain="[('partner_state','=','reject')]"/>
+<!--               <filter string="Persons" name="type_person" domain="[('is_company','=',0)]"/>
                    <filter string="Companies" name="type_company" domain="[('is_company','=',1)]"/>
                    <separator/>
                    <filter string="Customers" name="customer" domain="[('customer','=',1)]" help="Customer Partners"/>
@@ -366,11 +375,12 @@
                    <separator/>
                    <field name="category_id" string="Tag" filter_domain="[('category_id','ilike', self)]"/>
                    <field name="user_id"/>
-                   <field name="parent_id" domain="[('is_company','=',1)]" filter_domain="[('parent_id','child_of',[self])]"/>
+                   <field name="parent_id" domain="[('is_company','=',1)]" filter_domain="[('parent_id','child_of',[self])]"/>-->
                    <group expand="0" string="Group By...">
-                       <filter string="Salesperson" icon="terp-personal" domain="[]" context="{'group_by' : 'user_id'}" />
+                       <filter string="Status" icon="terp-personal" domain="[]" context="{'group_by' : 'partner_state'}" />
+<!--                   <filter string="Salesperson" icon="terp-personal" domain="[]" context="{'group_by' : 'user_id'}" />
                        <filter string="Company" context="{'group_by': 'parent_id'}"/>
-                       <filter string="Country" context="{'group_by': 'country_id'}"/>
+                       <filter string="Country" context="{'group_by': 'country_id'}"/>-->
                    </group>
                </search>
             </field>

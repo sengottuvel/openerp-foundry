@@ -287,6 +287,7 @@ class res_partner(osv.osv, format_address):
 		'commercial_partner_id': fields.function(_commercial_partner_id, type='many2one', relation='res.partner', string='Commercial Entity'),
 		'contact': fields.boolean('Contact'),
 		'code': fields.char('Code'),
+		'partner_state': fields.selection([('draft','Draft'),('confirm','WFA'),('approve','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status'),
 		
 	}
 

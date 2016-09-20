@@ -64,7 +64,7 @@ class kg_partner(osv.osv):
 	'transport_id': fields.many2one('kg.transport','Transport'),
 	'contact_person': fields.char('Contact Person', size=128),
 	'landmark': fields.char('Landmark', size=128),
-	'partner_state': fields.selection([('draft','Draft'),('confirm','WFA'),('approve','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status'),
+	#~ 'partner_state': fields.selection([('draft','Draft'),('confirm','WFA'),('approve','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status'),
 	'group_flag': fields.boolean('Is Group Company'),
 	'delivery_id': fields.many2one('kg.delivery.master','Delivery Type'),
 	#'child_ids': fields.one2many('res.partner', 'parent_id', 'Contacts', domain=[('active','=',True)]),
@@ -280,7 +280,28 @@ class kg_partner(osv.osv):
 		else:
 			return True
 		return False
-			
+	
+	def _name_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.name:
+			partner_name = rec.name
+			name=partner_name.upper()
+			if rec.customer == True:
+				cr.execute(""" select upper(name) from res_partner where upper(name) = '%s' and customer = True """ %(name))
+				data = cr.dictfetchall()
+			elif rec.supplier == True:
+				cr.execute(""" select upper(name) from res_partner where upper(name) = '%s' and supplier = True """ %(name))
+				data = cr.dictfetchall()
+			elif rec.dealer == True:
+				cr.execute(""" select upper(name) from res_partner where upper(name) = '%s' and dealer = True """ %(name))
+				data = cr.dictfetchall()
+			if len(data) > 1:
+				res = False
+			else:
+				res = True
+		return res
+				
 	_constraints = [
 	
 		(_check_zip,'ZIP should contain 6-8 digit numerics. Else system not allow to save.',['ZIP']),
@@ -292,6 +313,7 @@ class kg_partner(osv.osv):
 		(_check_ifsc,'IFSC should contain 11 letters. Else system not allow to save.',['IFSC']),
 		(_check_acc_no,'A/C No. should contain 6-18 digit numerics. Else system not allow to save.',['A/C No.']),
 		(_check_mobile_no,'Mobile No. should contain 10-12 digit numerics. Else system not allow to save.',['Mobile']),
+		(_name_validate, 'Name must be unique !!', ['Name']),		
 		
 		]
 			
@@ -305,7 +327,7 @@ class kg_delivery_address(osv.osv):
 	_description = "Delivery Address"
 	
 	_columns = {
-	
+
 	'name': fields.char('Name'),
 	'src_id': fields.many2one('res.partner', 'Partner Master'),
 	'street': fields.char('Street', size=128,select=True),
