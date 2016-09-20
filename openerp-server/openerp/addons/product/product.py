@@ -100,25 +100,36 @@ class product_uom(osv.osv):
 	_name = 'product.uom'
 	_description = 'Product Unit of Measure'
 	
-	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
+	def _get_modify(self, cr, uid, ids, field_name, arg,  context=None):
 		res={}
-		dep_ind_obj = self.pool.get('kg.depindent.line')
-		ser_ind_obj = self.pool.get('kg.service.indent.line')
-		so_obj = self.pool.get('kg.service.order.line')
-		ser_inv_line_obj = self.pool.get('kg.service.invoice.line')
-		po_grn_obj = self.pool.get('po.grn.line')
-		con_inw_line_obj = self.pool.get('kg.contractor.inward.line')
-		for h in self.browse(cr, uid, ids, context=None):
-			res[h.id] = 'no'
-			dep_ind_ids = dep_ind_obj.search(cr,uid,[('uom','=',h.id)])
-			ser_ind_ids = ser_ind_obj.search(cr,uid,[('uom','=',h.id)])
-			so_ids = so_obj.search(cr,uid,[('product_uom','=',h.id)])
-			ser_inv_line_ids = ser_inv_line_obj.search(cr,uid,[('product_uom','=',h.id)])
-			po_grn_ids = po_grn_obj.search(cr,uid,[('uom_id','=',h.id)])
-			con_inw_line_ids = con_inw_line_obj.search(cr,uid,[('uom_id','=',h.id)])
-			if dep_ind_ids or ser_ind_ids or so_ids or ser_inv_line_ids or po_grn_ids or con_inw_line_ids:
-				res[h.id] = 'yes'
-		print "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",res
+		if field_name == 'modify':
+			for h in self.browse(cr, uid, ids, context=None):
+				res[h.id] = 'no'
+				if h.dummy_state == 'approved':
+					cr.execute(""" select * from 
+					(SELECT tc.table_schema, tc.constraint_name, tc.table_name, kcu.column_name, ccu.table_name
+					AS foreign_table_name, ccu.column_name AS foreign_column_name
+					FROM information_schema.table_constraints tc
+					JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
+					JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = tc.constraint_name
+					WHERE constraint_type = 'FOREIGN KEY'
+					AND ccu.table_name='%s')
+					as sam  """ %('product_uom'))
+					data = cr.dictfetchall()	
+					if data:
+						for var in data:
+							data = var
+							chk_sql = 'Select COALESCE(count(*),0) as cnt from '+str(data['table_name'])+' where '+data['column_name']+' = '+str(ids[0])
+							cr.execute(chk_sql)			
+							out_data = cr.dictfetchone()
+							if out_data:
+								if out_data['cnt'] > 0:
+									res[h.id] = 'yes'
+									return res
+								else:
+									res[h.id] = 'no'
+				else:
+					res[h.id] = 'yes'								
 		return res
 	
 	def _compute_factor_inv(self, factor):
@@ -218,7 +229,7 @@ class product_uom(osv.osv):
 		'dummy_state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'product.uom', context=c),
-		'modify': 'no',
+		'modify': 'yes',
 		
 	}
 
@@ -253,7 +264,11 @@ class product_uom(osv.osv):
 			raise osv.except_osv(_('Cancel remark is must !!'),
 				_('Enter the remarks in Cancel remarks field !!'))
 		return True
-		
+	
+	def entry_draft(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'dummy_state': 'draft'})
+		return True
+			
 	def unlink(self,cr,uid,ids,context=None):
 		unlink_ids = []		
 		for rec in self.browse(cr,uid,ids):	
@@ -357,7 +372,39 @@ class product_category(osv.osv):
 	def _name_get_fnc(self, cr, uid, ids, prop, unknow_none, context=None):
 		res = self.name_get(cr, uid, ids, context=context)
 		return dict(res)
-
+	
+	def _get_modify(self, cr, uid, ids, field_name, arg,  context=None):
+		res={}
+		if field_name == 'modify':
+			for h in self.browse(cr, uid, ids, context=None):
+				res[h.id] = 'no'
+				if h.state == 'approved':
+					cr.execute(""" select * from 
+					(SELECT tc.table_schema, tc.constraint_name, tc.table_name, kcu.column_name, ccu.table_name
+					AS foreign_table_name, ccu.column_name AS foreign_column_name
+					FROM information_schema.table_constraints tc
+					JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
+					JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = tc.constraint_name
+					WHERE constraint_type = 'FOREIGN KEY'
+					AND ccu.table_name='%s')
+					as sam  """ %('product_category'))
+					data = cr.dictfetchall()	
+					if data:
+						for var in data:
+							data = var
+							chk_sql = 'Select COALESCE(count(*),0) as cnt from '+str(data['table_name'])+' where '+data['column_name']+' = '+str(ids[0])
+							cr.execute(chk_sql)			
+							out_data = cr.dictfetchone()
+							if out_data:
+								if out_data['cnt'] > 0:
+									res[h.id] = 'yes'
+									return res
+								else:
+									res[h.id] = 'no'
+				else:
+					res[h.id] = 'yes'								
+		return res
+		
 	_name = "product.category"
 	_description = "Product Category"
 	_columns = {
@@ -385,10 +432,12 @@ class product_category(osv.osv):
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
 		'state': fields.selection([('draft','Draft'),('confirm','Waiting for approval'),('approved','Approved'),
 				('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
-		'remark': fields.text('Remarks',readonly=False,states={'approved':[('readonly',True)]}),
+		'remark': fields.text('Reject Remarks',readonly=False,states={'approved':[('readonly',True)]}),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'flag_isparent': fields.boolean('Is Parent'),
 		'cancel_remark': fields.text('Cancel Remarks'),
+		'code': fields.char('Code'),
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
 		
 	}
 	
@@ -399,12 +448,15 @@ class product_category(osv.osv):
 
 
 	_defaults = {
+		
 		'type' : lambda *a : 'normal',
 		'active':True,
 		'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'product.category', context=c),
+		'modify': 'yes',
+		
 	}
 
 	_parent_name = "parent_id"
@@ -463,6 +515,10 @@ class product_category(osv.osv):
 				_('Enter the remarks in Cancel remarks field !!'))
 		return True
 		
+	def entry_draft(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'draft'})
+		return True
+			
 	def write(self, cr, uid, ids, vals, context=None):	  
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(product_category, self).write(cr, uid, ids, vals, context)
@@ -741,7 +797,39 @@ class product_product(osv.osv):
 		'price_margin': lambda *a: 1.0,
 		'color': 0,
 	}
-
+	
+	def _get_modify(self, cr, uid, ids, field_name, arg,  context=None):
+		res={}
+		if field_name == 'modify':
+			for h in self.browse(cr, uid, ids, context=None):
+				res[h.id] = 'no'
+				if h.state == 'approved':
+					cr.execute(""" select * from 
+					(SELECT tc.table_schema, tc.constraint_name, tc.table_name, kcu.column_name, ccu.table_name
+					AS foreign_table_name, ccu.column_name AS foreign_column_name
+					FROM information_schema.table_constraints tc
+					JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
+					JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = tc.constraint_name
+					WHERE constraint_type = 'FOREIGN KEY'
+					AND ccu.table_name='%s')
+					as sam  """ %('product_product'))
+					data = cr.dictfetchall()	
+					if data:
+						for var in data:
+							data = var
+							chk_sql = 'Select COALESCE(count(*),0) as cnt from '+str(data['table_name'])+' where '+data['column_name']+' = '+str(ids[0])
+							cr.execute(chk_sql)			
+							out_data = cr.dictfetchone()
+							if out_data:
+								if out_data['cnt'] > 0:
+									res[h.id] = 'yes'
+									return res
+								else:
+									res[h.id] = 'no'
+				else:
+					res[h.id] = 'yes'								
+		return res
+		
 	_name = "product.product"
 	_description = "Product"
 	_table = "product_product"
@@ -817,7 +905,15 @@ class product_product(osv.osv):
 		'tolerance_plus': fields.float('Tolerance(+ %)'),
 		'tolerance_minus': fields.float('Tolerance(- %)'),
 		'tolerance_applicable': fields.boolean('Tolerance Applicable?'),
-	#	'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
+		'is_accessories': fields.boolean('Is Accessories?'),
+		
+		#Entry Info
+		'crt_date': fields.datetime('Creation Date',readonly=True),
+		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
+		'update_date': fields.datetime('Last Updated Date', readonly=True),
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
+		'company_id': fields.many2one('res.company','Company Name',readonly=True),
 		
 	}
 	
@@ -828,17 +924,16 @@ class product_product(osv.osv):
 	
 	_defaults = {
 		
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'product.product', context=c),
 		'active':True,
 		'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'product_status':'not_approve',
 		'state': 'draft',
-		#'modify': 'no',
+		'modify': 'yes',
+		'is_accessories': False,
 		
 	   }
 	
-	
-	   
-	   
 	def approve_product(self, cr, uid, ids, context=None):
 		return self.write(cr, uid, ids, {'product_status':'approve'})
 	"""
@@ -882,7 +977,10 @@ class product_product(osv.osv):
 		result = super(product_product,self).create(cr, uid, vals, context=context) 
 		return result
 
-
+	def write(self, cr, uid, ids, vals, context=None):	  
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(product_product, self).write(cr, uid, ids, vals, context)
+		
 	"""
 	def write(self, cr, uid, ids, vals, context=None):	
 		print"valsvalsvals",vals

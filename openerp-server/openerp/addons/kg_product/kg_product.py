@@ -43,16 +43,12 @@ class kg_product(osv.osv):
 		'product_type': fields.selection([('raw','Foundry Raw Materials'),('ms','MS Item'),('bot','BOT'),('consu', 'Consumables'),
 											('capital','Capitals and Asset'),('service','Service Items'),('coupling','Coupling'),
 											('mechanical_seal','Mechanical Seal')], 'Product Type',required=True),
-		'crt_date': fields.datetime('Creation Date',readonly=True),
-		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
 		'approve_date': fields.datetime('Approved Date', readonly=True),
-		'app_user_id': fields.many2one('res.users', 'Apprved By', readonly=True),
+		'app_user_id': fields.many2one('res.users', 'Approved By', readonly=True),
 		'confirm_date': fields.datetime('Confirm Date', readonly=True),
 		'conf_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
 		'reject_date': fields.datetime('Reject Date', readonly=True),
 		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
-		'update_date': fields.datetime('Last Updated Date', readonly=True),
-		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
 		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'remark': fields.text('Remarks',readonly=False,states={'approved':[('readonly',True)]}),
@@ -80,42 +76,19 @@ class kg_product(osv.osv):
 		'gland_placement': fields.char('Gland Placement'),
 		'gland_plate': fields.selection([('w_gland_plate','With Gland Plate'),('wo_gland_plate','Without Gland Plate')],'Gland Plate'),
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
-		'sleeve_dia': fields.char('Sleeve dia(MM)')
+		'sleeve_dia': fields.char('Sleeve dia(MM)'),
+		#~ 'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
+		
 	}
 	
 	_defaults = {
 	
+		#~ 'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'product.product', context=c),
 		'po_uom_coeff' : 1.00,
 		'crt_date':fields.datetime.now,	
 		'user_id': lambda obj, cr, uid, context: uid,
 		
 	}
-	
-	def email_ids(self,cr,uid,ids,context = None):
-		email_from = []
-		email_to = []
-		email_cc = []
-		val = {'email_from':'','email_to':'','email_cc':''}
-		ir_model = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		mail_form_ids = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		for ids in mail_form_ids:
-			mail_form_rec = self.pool.get('kg.mail.settings').browse(cr,uid,ids)
-			if mail_form_rec.doc_name.model == 'product.product':
-				email_from.append(mail_form_rec.name)
-				mail_line_id = self.pool.get('kg.mail.settings.line').search(cr,uid,[('line_entry','=',ids)])
-				for mail_id in mail_line_id:
-					mail_line_rec = self.pool.get('kg.mail.settings.line').browse(cr,uid,mail_id)
-					if mail_line_rec.to_address:
-						email_to.append(mail_line_rec.mail_id)
-					if mail_line_rec.cc_address:
-						email_cc.append(mail_line_rec.mail_id)
-						
-			else:
-				pass		
-		val['email_from'] = email_from
-		val['email_to'] = email_to
-		val['email_cc'] = email_cc
-		return val
 	
 	def entry_confirm(self,cr,uid,ids,context=None):
 		self.write(cr, uid, ids, {'state': 'confirm','conf_user_id': uid, 'confirm_date': dt_time})
@@ -123,7 +96,52 @@ class kg_product(osv.osv):
 		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):
-		obj = self.browse(cr, uid, ids[0])		
+		rec = self.browse(cr, uid, ids[0])
+		access_obj = self.pool.get('kg.accessories.master')
+		ch_access_obj = self.pool.get('ch.kg.accessories.master')
+		
+		if rec.is_accessories == True:
+			
+			ac_id = access_obj.search(cr,uid,[('product_id','=',rec.id)])
+			
+			if ac_id:
+				old_obj = access_obj.search(cr,uid,[('product_id','=',rec.id),('state','!=','reject')])
+				if old_obj:
+					old_rec = access_obj.browse(cr,uid,old_obj[0])
+					access_obj.write(cr,uid,old_rec.id,{'name':rec.name})
+				
+				old_rej_obj = access_obj.search(cr,uid,[('product_id','=',rec.id),('state','=','reject')])
+				if old_rej_obj:
+					old_rej_rec = access_obj.browse(cr,uid,old_rej_obj[0])
+					access_id = access_obj.create(cr,uid,{'access_type':'new',
+														  'name': rec.name,
+														  'entry_mode': 'auto',
+														  'product_id': rec.id,
+														 })
+					print"access_idaccess_idaccess_id",access_id
+					if access_id:
+						ch_access_obj.create(cr,uid,{'header_id': access_id,
+													 'product_id': rec.id,
+													 'qty': 1,
+													 'uom_id': rec.uom_po_id.id,
+													 'uom_conversation_factor':rec.uom_conversation_factor,
+													 'entry_mode': 'auto',
+													})			
+			else:
+				access_id = access_obj.create(cr,uid,{'access_type':'new',
+													  'name': rec.name,
+													  'entry_mode': 'auto',
+													  'product_id': rec.id,
+													 })
+				print"access_idaccess_idaccess_id",access_id
+				if access_id:
+					ch_access_obj.create(cr,uid,{'header_id': access_id,
+												 'product_id': rec.id,
+												 'qty': 1,
+												 'uom_id': rec.uom_po_id.id,
+												 'uom_conversation_factor':rec.uom_conversation_factor,
+												 'entry_mode': 'auto',
+												})			  
 		self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': dt_time})
 	   
 		return True
@@ -155,9 +173,10 @@ class kg_product(osv.osv):
 		res = True
 					   
 		return res 
-	def write(self, cr, uid, ids, vals, context=None):
-		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
-		return super(kg_product, self).write(cr, uid, ids, vals, context)	 
+		
+	#~ def write(self, cr, uid, ids, vals, context=None):
+		#~ vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		#~ return super(kg_product, self).write(cr, uid, ids, vals, context)	 
 	
 	_constraints = [
 		

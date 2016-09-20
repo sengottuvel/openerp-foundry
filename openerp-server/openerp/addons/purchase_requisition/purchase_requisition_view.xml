@@ -246,6 +246,7 @@
         parent="purchase.menu_procurement_management"
         action="action_purchase_requisition" name="Purchase Requisition"/> -->
 
+<!--
     <record model="ir.ui.view" id="product_normal_form_view_inherit">
         <field name="name">product.form.inherit</field>
         <field name="model">product.product</field>
@@ -256,6 +257,7 @@
             </field>
         </field>
     </record>
+-->
 
     <record model="ir.ui.view" id="procurement_normal_form_view_inherit">
         <field name="name">procurement.form.inherit</field>

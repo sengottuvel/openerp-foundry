@@ -19,8 +19,8 @@ class kg_sale_invoice(osv.osv):
 	'invoice_no': fields.char('Invoice No',size=128,readonly=True),
 	'invoice_date': fields.date('Invoice Date',readonly=True),
 	'contact_person': fields.char('Contact Person', size=128,readonly=True),
-	'del_address': fields.many2one('kg.delivery.address', 'Delivery Address'),
-	'billing_address': fields.many2one('kg.billing.address', 'Billing Address'),
+	'del_address': fields.many2one('kg.delivery.address', 'Delivery Address' ,domain="[('src_id','=',customer_id)]"),
+	'billing_address': fields.many2one('kg.billing.address', 'Billing Address' ,domain="[('bill_id','=',customer_id)]"),
 	'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('approved','Approved'),('invoice','Invoiced'),('cancel','Cancelled')],'Status', readonly=True),
 	'customer_id': fields.many2one('res.partner','Customer Name',domain=[('customer','=',True)]),
 		

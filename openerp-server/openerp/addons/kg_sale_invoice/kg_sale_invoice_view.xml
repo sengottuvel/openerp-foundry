@@ -32,8 +32,8 @@
 							</group>											
 							<group>								
 								<field name="proforma_invoice_date" required="1" attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}"/>						
-								<field name="invoice_date" attrs="{'invisible': [('state','in',['draft','confirmed','approved'])]}"/>						
-								<field name="billing_address"  attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}"/>
+								<field name="invoice_date" attrs="{'invisible': [('state','in',['draft','confirmed','approved'])]}" required="1"/>						
+								<field name="billing_address"  attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}" required="1"/>
 								<field name="del_address"  attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}"/>	
 								<field name="state" />	
 							</group>	

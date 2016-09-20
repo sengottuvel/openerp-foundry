@@ -17,10 +17,9 @@
 		-->
 		
 		<field name="categ_id" position="after">
-			<group>
-				<field name="capital" invisible="1"/>
-				<field name="abc" invisible="1"/>
-			</group>
+			<field name="is_accessories"/>
+			<field name="capital" invisible="1"/>
+			<field name="abc" invisible="1"/>
 		</field>
 		<!--<field name="product_code" position="after">
 			<label for = "moc_id"></label>
@@ -41,13 +40,11 @@
 		<field name="product_type"/>
 		<field name="uom_conversation_factor"/>
 		</field>
-		<field name="tolerance_plus" position="after">
-		<field name="od"/>
-		<field name="breadth"/>
-		
-		</field>
+
 		<field name="stock_in_hand" position="after">
 		<field name="length"/>
+		<field name="breadth"/>
+		<field name="od"/>
 		<field name="thickness"/>
 		<field name="weight"/>
 		</field>
@@ -64,40 +61,23 @@
         <field name="sale_ok" invisible="1"/>
         </field>
         
-        <field name="sale_ok" invisible="1" position="after">
-			<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
-				<group>	
-					<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject'])]}"/>
-				</group>
-				<group>												
-					<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','reject','confirm'])], 'readonly': [('state','in',['cancel'])]}"/>												
-				</group>
-			</group>
+        <field name="user_id" position="after">
+			<field name="conf_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+			<field name="app_user_id" attrs="{'invisible':[('state','in',['draft', 'confirm','reject'])]}"/>
+			<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirm','reject','approved'])]}"/>
+			<field name="rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirm','approved'])]}"/>		
 		</field>
-		
-		 <xpath expr = "//page[@string='Suppliers']" position="after">
-				<page string="Entry Info">
-					<group>
-						<group>
-							<field name="user_id"/>
-							<field name="conf_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
-							<field name="app_user_id" attrs="{'invisible':[('state','in',['draft', 'confirm','reject'])]}"/>
-							<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirm','reject','approved'])]}"/>
-							<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirm','reject','approved'])]}"/>
-							<field name="rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirm','approved'])]}"/>		
-							<field name="update_user_id"/>					
-						</group>
-						<group>
-							<field name="crt_date"/>
-							<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
-							<field name="approve_date" attrs="{'invisible':[('state','in',['draft', 'confirm','reject'])]}"/>
-							<field name="reject_date" attrs="{'invisible':[('state','in',['draft', 'confirm','approved'])]}"/>	
-							<field name="update_date"/>						
-						</group>
-					</group>
-				</page>
-		</xpath>
-		
+        <field name="crt_date" position="after">
+			<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+			<field name="approve_date" attrs="{'invisible':[('state','in',['draft', 'confirm','reject'])]}"/>
+			<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirm','reject','approved'])]}"/>
+			<field name="reject_date" attrs="{'invisible':[('state','in',['draft', 'confirm','approved'])]}"/>				
+		</field>
+						
+        <field name="is_accessories" invisible="1" position="after">
+			<field name="remark" attrs="{'invisible':[('state','not in',('confirm','reject'))], 'readonly': [('state','in',['approved','reject'])]}"/>
+			<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','reject','confirm'])], 'readonly': [('state','in',['cancel'])]}"/>
+		</field>
 		<xpath expr = "//page[@string='Entry Info']" position="before">
 				<page string="Coupling Details" attrs="{'invisible':[('product_type','not in',('coupling'))]}">
 					<group>
