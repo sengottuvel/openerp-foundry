@@ -116,6 +116,9 @@ class kg_general_grn(osv.osv):
 		'expiry_flag':fields.boolean('Expiry Flag'),
 		'dep_name': fields.many2one('kg.depmaster','Department',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'remark':fields.text('Remarks'),
+		'notes':fields.text('Notes'),
+		'can_remark':fields.text('Cancel Remarks'),
+		'reject_remark':fields.text('Reject Remarks'),
 		'inward_type': fields.many2one('kg.inwardmaster', 'Inward Type',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 
 		'other_charge': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Other Charges(+)',
@@ -154,11 +157,10 @@ class kg_general_grn(osv.osv):
 		'order_date':fields.char('Order Date'),
 		'payment_type': fields.selection([('cash', 'Cash'), ('credit', 'Credit')], 'Payment Type',readonly=True,states={'confirmed':[('readonly',False)],'draft': [('readonly', False)]}),
 		'dep_project':fields.many2one('kg.project.master','Dept/Project Name',readonly=True,states={'draft': [('readonly', False)]}),
-		'reject_remark':fields.text('Cancel Remarks', readonly=True, states={'confirmed':[('readonly',False)]}),
+		
 		#~ 'grn_dc': fields.selection([('dc_invoice','DC & Invoice'),('only_grn','Only grn')], 'GRN Type',
 										#~ required=True, readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
-		'grn_dc': fields.selection([('only_grn','Only grn')], 'GRN Type',
-										required=True, readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
+		'grn_dc': fields.selection([('only_grn','Only grn')], 'GRN Type',required=True),
 		'sup_invoice_no':fields.char('Supplier Invoice No',size=200, readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'sup_invoice_date':fields.date('Supplier Invoice Date', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'expense_line_id': fields.one2many('kg.gen.grn.expense.track','expense_id','Expense Track',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
@@ -192,62 +194,6 @@ class kg_general_grn(osv.osv):
 
 	### Back Entry Date ###
 
-	def email_ids(self,cr,uid,ids,context = None):
-		email_from = []
-		email_to = []
-		email_cc = []
-		val = {'email_from':'','email_to':'','email_cc':''}
-		ir_model = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		mail_form_ids = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		for ids in mail_form_ids:
-			mail_form_rec = self.pool.get('kg.mail.settings').browse(cr,uid,ids)
-			if mail_form_rec.doc_name.model == 'kg.general.grn':
-				email_from.append(mail_form_rec.name)
-				mail_line_id = self.pool.get('kg.mail.settings.line').search(cr,uid,[('line_entry','=',ids)])
-				for mail_id in mail_line_id:
-					mail_line_rec = self.pool.get('kg.mail.settings.line').browse(cr,uid,mail_id)
-					if mail_line_rec.to_address:
-						email_to.append(mail_line_rec.mail_id)
-					if mail_line_rec.cc_address:
-						email_cc.append(mail_line_rec.mail_id)
-						
-			else:
-				pass			
-		val['email_from'] = email_from
-		val['email_to'] = email_to
-		val['email_cc'] = email_cc
-		return val
-	
-	def sechedular_email_ids(self,cr,uid,ids,reg_string,context = None):
-		email_from = []
-		email_to = []
-		email_cc = []
-		val = {'email_from':'','email_to':'','email_cc':''}
-		ir_model = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		mail_form_ids = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		for ids in mail_form_ids:
-			mail_form_rec = self.pool.get('kg.mail.settings').browse(cr,uid,ids)
-			if mail_form_rec.sch_type == 'scheduler':
-				s = mail_form_rec.sch_name
-				s = s.lower()
-				if s == reg_string:
-					email_sub = mail_form_rec.subject
-					email_from.append(mail_form_rec.name)
-					mail_line_id = self.pool.get('kg.mail.settings.line').search(cr,uid,[('line_entry','=',ids)])
-					for mail_id in mail_line_id:
-						mail_line_rec = self.pool.get('kg.mail.settings.line').browse(cr,uid,mail_id)
-						if mail_line_rec.to_address:
-							email_to.append(mail_line_rec.mail_id)
-						if mail_line_rec.cc_address:
-							email_cc.append(mail_line_rec.mail_id)
-				else:
-					pass
-			
-		val['email_from'] = email_from
-		val['email_to'] = email_to
-		val['email_cc'] = email_cc
-		return val
-	
 	def write(self, cr, uid, ids, vals, context=None):		
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_general_grn, self).write(cr, uid, ids, vals, context)
@@ -310,7 +256,7 @@ class kg_general_grn(osv.osv):
 			value = {'dep_name': user.dep_name.id}
 		return {'value': value}		
 		
-	def kg_grn_confirm(self, cr, uid, ids,context=None):
+	def entry_confirm(self, cr, uid, ids,context=None):
 		grn_entry = self.browse(cr, uid, ids[0])
 		if not grn_entry.name:
 			seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.po.grn')])
@@ -389,28 +335,10 @@ class kg_general_grn(osv.osv):
 								  'confirmed_by':uid,
 								  'confirmed_date':time.strftime('%Y-%m-%d %H:%M:%S')
 								  })
-		#cr.execute("""select all_transaction_mails('General GRN Approval',%s)"""%(ids[0]))
-		"""Raj
-		data = cr.fetchall();
-		vals = self.email_ids(cr,uid,ids,context = context)
-		if (not vals['email_to']) and (not vals['email_cc']):
-			pass
-		else:
-			ir_mail_server = self.pool.get('ir.mail_server')
-			msg = ir_mail_server.build_email(
-					email_from = vals['email_from'][0],
-					email_to = vals['email_to'],
-					subject = " General GRN - Waiting For Approval",
-					body = data[0][0],
-					email_cc = vals['email_cc'],
-					object_id = ids[0] and ('%s-%s' % (ids[0], 'kg.general.grn')),
-					subtype = 'html',
-					subtype_alternative = 'plain')
-			res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
-		"""
+		
 		return True
 
-	def kg_grn_approve(self, cr, uid, ids,context=None):
+	def entry_approve(self, cr, uid, ids,context=None):
 		user_id = self.pool.get('res.users').browse(cr, uid, uid)
 		grn_entry = self.browse(cr, uid, ids[0])
 		#if grn_entry.confirmed_by.id == uid:
@@ -590,254 +518,12 @@ class kg_general_grn(osv.osv):
 			total_price = line.price_unit * line.grn_qty
 			product_tax_amt = self._amount_line_tax(cr, uid, line, context=context)
 			cr.execute("""update kg_general_grn_line set product_tax_amt = %s where id = %s"""%(product_tax_amt,line.id))
-		#cr.execute("""select all_transaction_mails('General GRN Approval',%s)"""%(ids[0]))
-		"""Raj
-		data = cr.fetchall();
-		vals = self.email_ids(cr,uid,ids,context = context)
-		if (not vals['email_to']) and (not vals['email_cc']):
-			pass
-		else:
-			ir_mail_server = self.pool.get('ir.mail_server')
-			msg = ir_mail_server.build_email(
-					email_from = vals['email_from'][0],
-					email_to = vals['email_to'],
-					subject = " General GRN - Approved",
-					body = data[0][0],
-					email_cc = vals['email_cc'],
-					object_id = ids[0] and ('%s-%s' % (ids[0], 'kg.general.grn')),
-					subtype = 'html',
-					subtype_alternative = 'plain')
-			res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
-		"""
-		return True
-			
-			
-	def dead_stock_register_scheduler(self,cr,uid,ids=0,context = None):
-		cr.execute(""" SELECT current_database();""")
-		db = cr.dictfetchall()
-		if db[0]['current_database'] == 'Empereal-KGDS':
-			db[0]['current_database'] = 'Empereal-KGDS'
-		elif db[0]['current_database'] == 'FSL':
-			db[0]['current_database'] = 'FSL'
-		elif db[0]['current_database'] == 'IIM':
-			db[0]['current_database'] = 'IIM'
-		elif db[0]['current_database'] == 'IIM_HOSTEL':
-			db[0]['current_database'] = 'IIM Hostel'
-		elif db[0]['current_database'] == 'KGISL-SD':
-			db[0]['current_database'] = 'KGISL-SD'
-		elif db[0]['current_database'] == 'CHIL':
-			db[0]['current_database'] = 'CHIL'
-		elif db[0]['current_database'] == 'KGCAS':
-			db[0]['current_database'] = 'KGCAS'
-		elif db[0]['current_database'] == 'KGISL':
-			db[0]['current_database'] = 'KGISL'
-		elif db[0]['current_database'] == 'KITE':
-			db[0]['current_database'] = 'KITE'
-		elif db[0]['current_database'] == 'TRUST':
-			db[0]['current_database'] = 'TRUST'
-		else:
-			db[0]['current_database'] = 'Others'
-		cr.execute("""select all_daily_scheduler_mails('Unused Stock Register')""")
-		data = cr.fetchall();
-		cr.execute("""SELECT to_date(to_char(now()::date - interval '1 month', 'YYYY/MM/DD'), 'YYYY/MM/DD') as last_dt""")
-		last_dt = cr.fetchall();
-		cr.execute("""select sum(tot_name) from (select product_product.name_template,product_uom.name,stock_production_lot.pending_qty,
-				stock_production_lot.grn_no,stock_production_lot.price_unit,(stock_production_lot.price_unit * stock_production_lot.pending_qty) as tot_name
-				
-				from stock_production_lot
-				
-				left join product_product on product_product.id = stock_production_lot.product_id
-				left join product_uom on product_uom.id = stock_production_lot.product_uom
-				where 
-				to_char(stock_production_lot.write_date,'yyyy-mm-dd') <= '%s' and stock_production_lot.pending_qty = stock_production_lot.product_qty and stock_production_lot.pending_qty > 0
-				order by stock_production_lot.date,stock_production_lot.grn_no) as p	"""%(last_dt[0]))
-		total_sum = cr.dictfetchall();
-		db = db[0]['current_database'].encode('utf-8')
-		total_sum = str(total_sum[0]['sum'])
-		vals = self.sechedular_email_ids(cr,uid,ids,reg_string = 'dead stock',context = context)
-		if (not vals['email_to']) and (not vals['email_cc']):
-			pass
-		else:
-			ir_mail_server = self.pool.get('ir.mail_server')
-			msg = ir_mail_server.build_email(
-					email_from = vals['email_from'][0],
-					email_to = vals['email_to'],
-					subject = "ERP Non-Movable stock (for last 30 days) Details for "+db+' as on ' + time.strftime('%d-%m-%Y') + '. Total Values is ' +  total_sum,
-					body = data[0][0],
-					email_cc = vals['email_cc'],
-					object_id = ids and ('%s-%s' % (ids, 'kg.general.grn')),
-					subtype = 'html',
-					subtype_alternative = 'plain')
-			res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
-		return True
-	
-	def unaccounted_cash_GRN_register_scheduler(self,cr,uid,ids=0,context = None):
-		cr.execute(""" SELECT current_database();""")
-		db = cr.dictfetchall()
-		if db[0]['current_database'] == 'Empereal-KGDS':
-			db[0]['current_database'] = 'Empereal-KGDS'
-		elif db[0]['current_database'] == 'FSL':
-			db[0]['current_database'] = 'FSL'
-		elif db[0]['current_database'] == 'IIM':
-			db[0]['current_database'] = 'IIM'
-		elif db[0]['current_database'] == 'IIM_HOSTEL':
-			db[0]['current_database'] = 'IIM Hostel'
-		elif db[0]['current_database'] == 'KGISL-SD':
-			db[0]['current_database'] = 'KGISL-SD'
-		elif db[0]['current_database'] == 'CHIL':
-			db[0]['current_database'] = 'CHIL'
-		elif db[0]['current_database'] == 'KGCAS':
-			db[0]['current_database'] = 'KGCAS'
-		elif db[0]['current_database'] == 'KGISL':
-			db[0]['current_database'] = 'KGISL'
-		elif db[0]['current_database'] == 'KITE':
-			db[0]['current_database'] = 'KITE'
-		elif db[0]['current_database'] == 'TRUST':
-			db[0]['current_database'] = 'TRUST'
-		elif db[0]['current_database'] == 'CANTEEN':
-			db[0]['current_database'] = 'CANTEEN'
-		else:
-			db[0]['current_database'] = 'Others'
-			
-		cr.execute(""" select pg.id from kg_po_grn pg where pg.state in ('done','inv') and pg.approved_date::date='%s' and pg.billing_status = 'applicable' and
-						pg.payment_type = 'cash'
-					   union
-					   select gg.id from kg_general_grn gg where gg.state in ('done','inv') and gg.approved_date::date='%s' and gg.bill = 'applicable' and
-						gg.payment_type = 'cash'"""
-					    %(time.strftime('%Y-%m-%d'),time.strftime('%Y-%m-%d')))
-		grn_data = cr.dictfetchall()	
-			
-		if grn_data:
-				
-			cr.execute("""select all_daily_auto_scheduler_mails('Unaccount Goods Receipt Cash Register')""")
-			data = cr.fetchall();
-			cr.execute("""select sum(name) from ((select
-							round(cast(po_grn_line.po_grn_qty * po_grn_line.price_unit as numeric),2) as name
-							from kg_po_grn
-							left join po_grn_line on po_grn_line.po_grn_id = kg_po_grn.id
-							where kg_po_grn.billing_status = 'applicable' and
-							kg_po_grn.payment_type = 'cash' and
-							to_char(kg_po_grn.grn_date,'dd-mm-yyyy') = '%s' and
-							kg_po_grn.state in ('done') )
-						union
-							(select 
-							round(cast(kg_general_grn_line.grn_qty * kg_general_grn_line.price_unit as numeric),2) as name
-							from kg_general_grn
-							left join kg_general_grn_line on kg_general_grn_line.grn_id = kg_general_grn.id
-							where kg_general_grn.bill = 'applicable' and
-							kg_general_grn.payment_type = 'cash' and
-							to_char(kg_general_grn.grn_date,'dd-mm-yyyy') = '%s' and
-							kg_general_grn.state in ('done')))  as p1   """%(time.strftime('%d-%m-%Y'),time.strftime('%d-%m-%Y')))
-			total_sum = cr.dictfetchall();
-			db = db[0]['current_database'].encode('utf-8')
-			total_sum = str(total_sum[0]['sum'])
-			vals = self.sechedular_email_ids(cr,uid,ids,reg_string = 'unaccounted cash register',context = context)
-			if (not vals['email_to']) and (not vals['email_cc']):
-				pass
-			else:
-				ir_mail_server = self.pool.get('ir.mail_server')
-				msg = ir_mail_server.build_email(
-						email_from = vals['email_from'][0],
-						email_to = vals['email_to'],
-						subject = "ERP Unaccounted GRN - Cash for "+db +' as on '+time.strftime('%d-%m-%Y')+' Total Amount (Rs.):' + total_sum,
-						body = data[0][0],
-						email_cc = vals['email_cc'],
-						object_id = ids and ('%s-%s' % (ids, 'kg.general.grn')),
-						subtype = 'html',
-						subtype_alternative = 'plain')
-				res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
-				
-		else:
-			pass		
-		return True
 		
-	def grn_register_scheduler_mail(self,cr,uid,ids=0,context = None):
-		cr.execute("""SELECT current_database();""")
-		db = cr.dictfetchall()
-		if db[0]['current_database'] == 'Empereal-KGDS':
-			db[0]['current_database'] = 'Empereal-KGDS'
-		elif db[0]['current_database'] == 'FSL':
-			db[0]['current_database'] = 'FSL'
-		elif db[0]['current_database'] == 'IIM':
-			db[0]['current_database'] = 'IIM'
-		elif db[0]['current_database'] == 'IIM_HOSTEL':
-			db[0]['current_database'] = 'IIM Hostel'
-		elif db[0]['current_database'] == 'KGISL-SD':
-			db[0]['current_database'] = 'KGISL-SD'
-		elif db[0]['current_database'] == 'CHIL':
-			db[0]['current_database'] = 'CHIL'
-		elif db[0]['current_database'] == 'KGCAS':
-			db[0]['current_database'] = 'KGCAS'
-		elif db[0]['current_database'] == 'KGISL':
-			db[0]['current_database'] = 'KGISL'
-		elif db[0]['current_database'] == 'KITE':
-			db[0]['current_database'] = 'KITE'
-		elif db[0]['current_database'] == 'TRUST':
-			db[0]['current_database'] = 'TRUST'
-		elif db[0]['current_database'] == 'CANTEEN':
-			db[0]['current_database'] = 'CANTEEN'
-		else:
-			db[0]['current_database'] = 'Others'
-			
-		cr.execute(""" select pg.id from kg_po_grn pg where pg.state in ('done','inv') and pg.approved_date::date='%s'
-					   union
-					   select gg.id from kg_general_grn gg where gg.state in ('done','inv') and gg.approved_date::date='%s' """
-					    %(time.strftime('%Y-%m-%d'),time.strftime('%Y-%m-%d')))
-		grn_data = cr.dictfetchall()
-		
-		if grn_data:	
-			
-			cr.execute("""select all_daily_auto_scheduler_mails('Goods Receipt Register')""")
-			data = cr.fetchall();
-			cr.execute("""select sum(total) from ((select 
-							round(cast(po_grn_line.po_grn_qty*po_grn_line.price_unit as numeric) ,2) as total
-							from kg_po_grn
-							left join po_grn_line on po_grn_line.po_grn_id = kg_po_grn.id
-							left join product_product on product_product.id = po_grn_line.product_id
-							left join product_uom on product_uom.id = po_grn_line.uom_id
-							left join kg_brand_master on kg_brand_master.id = po_grn_line.brand_id
-							left join purchase_order on purchase_order.id = kg_po_grn.po_id
-							left join kg_service_order on kg_service_order.id = kg_po_grn.so_id
-							where to_char(kg_po_grn.grn_date,'dd-mm-yyyy') = '%s' and
-							kg_po_grn.state in ('done','inv') order by kg_po_grn.grn_date,kg_po_grn.name)
-						union
-							(select
-							round(cast(kg_general_grn_line.grn_qty*kg_general_grn_line.price_unit as numeric),2) as total
-							from kg_general_grn
-							left join kg_general_grn_line on kg_general_grn_line.grn_id = kg_general_grn.id
-							left join product_product on product_product.id = kg_general_grn_line.product_id
-							left join product_uom on product_uom.id = kg_general_grn_line.uom_id
-							left join kg_brand_master on kg_brand_master.id = kg_general_grn_line.brand_id
-							left join purchase_order on purchase_order.id = kg_general_grn.po_id
-							where to_char(kg_general_grn.grn_date,'dd-mm-yyyy') = '%s' and
-							kg_general_grn.state in ('done','inv') order by kg_general_grn.grn_date,kg_general_grn.name)) as pp1
-						"""%(time.strftime('%d-%m-%Y'),time.strftime('%d-%m-%Y')))
-			total_sum = cr.dictfetchall();
-			db = db[0]['current_database'].encode('utf-8')
-			total_sum = str(total_sum[0]['sum'])
-			vals = self.sechedular_email_ids(cr,uid,ids,reg_string = 'goods receipt register',context = context)
-			if (not vals['email_to']) and (not vals['email_cc']):
-				pass
-			else:
-				ir_mail_server = self.pool.get('ir.mail_server')
-				msg = ir_mail_server.build_email(
-						email_from = vals['email_from'][0],
-						email_to = vals['email_to'],
-						subject = "ERP Goods Reciept Notes for "+db +' as on '+time.strftime('%d-%m-%Y')+' Total Amount (Rs.):' + total_sum,
-						body = data[0][0],
-						email_cc = vals['email_cc'],
-						object_id = ids and ('%s-%s' % (ids, 'kg.general.grn')),
-						subtype = 'html',
-						subtype_alternative = 'plain')
-				res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
-		else:
-			pass		
-				
 		return True
-	
-	def grn_cancel(self, cr, uid, ids, context=None):
+			
+	def entry_cancel(self, cr, uid, ids, context=None):
 		grn = self.browse(cr, uid, ids[0])
-		if not grn.remark:
+		if not grn.can_remark:
 			raise osv.except_osv(_('Remarks is must !!'), _('Enter Remarks for GRN Cancel !!!'))
 		else:
 			self.write(cr, uid, ids[0], {'state' : 'cancel','cancel_user_id': uid,'cancel_date': time.strftime("%Y-%m-%d %H:%M:%S")})
@@ -845,7 +531,7 @@ class kg_general_grn(osv.osv):
 			line.write({'state':'cancel'})
 		return True
 
-	def grn_reject(self, cr, uid, ids, context=None):
+	def entry_reject(self, cr, uid, ids, context=None):
 		grn = self.browse(cr, uid, ids[0])
 		if not grn.reject_remark:
 			raise osv.except_osv(_('Remarks is must !!'), _('Enter Remarks for GRN Rejection !!!'))
@@ -1068,7 +754,6 @@ class kg_general_grn(osv.osv):
 
 	def _grndate_validation(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
-		print "rec...................", rec
 		today = date.today()
 		print "today................", type(today), today
 		grn_date = datetime.strptime(rec.grn_date,'%Y-%m-%d').date()
@@ -1079,11 +764,8 @@ class kg_general_grn(osv.osv):
 
 	def _dcdate_validation(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
-		print "rec...................", rec
 		today = date.today()
-		print "today................", type(today), today
 		dc_date = datetime.strptime(rec.dc_date,'%Y-%m-%d').date()
-		print "rec.grn_date...........", type(dc_date), dc_date
 		if dc_date > today:
 			return False
 		return True
@@ -1108,8 +790,6 @@ class kg_general_grn(osv.osv):
 		new_list = []
 		for item in data:
 			now = time.strftime("%Y-%m-%d")
-			print "now",now
-
 			# Product Name
 			grn_line_rec = self.pool.get('kg.general.grn.line').browse(cr, uid, item['grn_line_id'])
 
@@ -1196,7 +876,7 @@ class kg_general_grn_line(osv.osv):
 	_columns = {
 
 		'grn_id':fields.many2one('kg.general.grn','GRN Entry'),
-		'product_id':fields.many2one('product.product','Item Name',required=True,readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}, domain=[('state','=','approved')]),
+		'product_id':fields.many2one('product.product','Item Name',required=True,readonly=False, states={'done':[('readonly',True)],'calcel':[('readonly',True)]}, domain=[('state','=','approved')]),
 		'uom_id':fields.many2one('product.uom','UOM',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'grn_qty':fields.float('GRN Quantity',required=True,readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'price_unit':fields.float('Unit Price',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
@@ -1207,11 +887,11 @@ class kg_general_grn_line(osv.osv):
 		'kg_discount_per': fields.float('Discount (%)', digits_compute= dp.get_precision('Discount')),
 		'kg_discount': fields.float('Discount Amount'),
 		'grn_tax_ids': fields.many2many('account.tax', 'po_gen_grn_tax', 'order_id', 'taxes_id', 'Taxes'),
-
 		'brand_id':fields.many2one('kg.brand.master','Brand'),
 		'inward_type': fields.many2one('kg.inwardmaster', 'Inward Type'),
 		'product_tax_amt':fields.float('Tax Amount'),
 		'price_type': fields.selection([('po_uom','PO UOM'),('per_kg','Per Kg')],'Price Type'),
+		'weight': fields.float('Weight',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		
 	}
 
@@ -1221,9 +901,25 @@ class kg_general_grn_line(osv.osv):
 		'price_type': 'po_uom',
 
 	}
-
+	
+	def _check_weight(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+		if rec.weight < 0.00:
+			return False					
+		return True
+		
+	_constraints = [
+	
+		(_check_weight,'You cannot save with negative weight !',['Weight']),
+		
+		]
+		
+	def default_get(self, cr, uid, fields, context=None):
+		print"contextcontextcontext",context
+		
+		return context
+		
 	def onchange_uom_id(self, cr, uid, ids, product_id, context=None):
-
 		value = {'uom_id': ''}
 		if product_id:
 			pro_rec = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
