@@ -201,7 +201,7 @@ class ch_pumpspare_invoice(osv.osv):
 	
 	_columns = {
 	
-		'header_id':fields.many2one('account.invoice', 'Invoice Detail', required=1, ondelete='cascade'),	
+		'header_id':fields.many2one('kg.sale.invoice', 'Invoice Detail', required=1, ondelete='cascade'),	
 		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True,domain="[('active','=','t')]"),		
 		'order_category': fields.selection([('pump','Pump'),('spare','Spare')],'Purpose', required=True),
 		'qty': fields.integer('Qty', required=True),
