@@ -14,36 +14,39 @@
             <field name="arch" type="xml">
                 <form string="Issue Return" version="7.0">
 			<header>
-                <button name="confirm_issue_return" states="draft" string="Confirm" type="object" />
-                <button name="approve_indent" states="confirm" string="Approve" type="object" />
-                <button name="cancel_issue" states="done" string="Cancel" type="object" class="oe_highlight"/>
-                <button name="reject_issue" states="confirm" string="Reject" type="object" class="oe_highlight"/>
-                <field name="state" widget="statusbar" statusbar_visible="draft,confirm,done,cancel" statusbar_colors='{"draft":"blue"}'/>
+                <button name="entry_confirm" states="draft" string="Confirm" type="object" />
+                <button name="entry_reject" states="confirm" string="Reject" type="object" class="oe_highlight"/>
+                <button name="entry_approve" states="confirm" string="Approve" type="object" />
+                <button name="entry_cancel" states="approved" string="Cancel" type="object" class="oe_highlight"/>                
 			</header>
 				<group>
 					<group>
 						<field name="name" string="Return No"/>
-						<field name="dep_name" attrs="{'readonly': [('list_flag','=',True)]}"/>
+						<field name="dep_name" />
 						<field name="origin" invisible="1"/>
-<!--
-						<field name="dep_issue_no" string="Issue No" required="1" on_change = "onchange_didate(dep_issue_no)" attrs="{'readonly': [('list_flag','=',True)]}" />
--->
+<!--					<field name="dep_issue_no" string="Issue No" required="1" on_change = "onchange_didate(dep_issue_no)" attrs="{'readonly': [('list_flag','=',True)]}" />-->
 						<field name="return_type" required="1" on_change="onchange_qty(return_type)"/>
-						<field name="active"/>
 						<field name="list_flag" invisible="1"/>
 						<field name="rj_flag" invisible="1"/>
 						<field name="excess_flag" invisible="1"/>
-<!--
-						<button name="list_issue" string="List Details" type="object" class="oe_highlight" attrs="{'invisible': [('list_flag','=',True)]}"/>
--->
+<!--					<button name="list_issue" string="List Details" type="object" class="oe_highlight" attrs="{'invisible': [('list_flag','=',True)]}"/>-->
                     </group>
                     <group>
 						<field name="date" string="Return Date"/>
 						<field name="depissue_date" string="Issue Date" attrs="{'readonly': [('list_flag','=',True)]}" invisible="1"/>
 						<field name="reject_location" attrs="{'required': [('rj_flag','=',True)],'invisible':[('excess_flag','=',True),'|',('rj_flag','=',False)]}" />
+						<field name="active"/>
 						<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
 						<field name="gate_pass" invisible="1"/>
                     </group>
+				</group>
+				<group string='Remarks' attrs="{'invisible':[('state','in',('draft'))]}">
+					<group>	
+						<field name="can_remark" attrs="{'invisible':[('state','not in',('approved','cancel'))], 'readonly': [('state','in',['cancel','reject'])]}"/>
+						<field name="reject_remark" attrs="{'invisible':[('state','not in',['confirm','reject'])], 'readonly': [('state','in',['cancel','reject'])]}"/>	
+					</group>
+					<group>												
+					</group>
 				</group>
 				<notebook>
 					<page string = "Item Details">
@@ -102,7 +105,9 @@
 					</group>
 				</page>
 				</notebook>
-				<field name="remark" placeholder="Remarks"/>
+				<group>
+					<field name="notes" placeholder="Notes..."/>
+				</group>
                </form>
            </field>
         </record>
@@ -134,8 +139,7 @@
             <field name="model">kg.issue.return</field>
             <field name="arch" type="xml">
                 <search string="Issue Return">
-					<field name="name" string="Issue Return" filter_domain="[('name','ilike',self)]"/> 
-					<field name="dep_issue_no" string="Department Issue" filter_domain="[('dep_issue_no','ilike',self)]"/> 
+					<field name="name" string="Return No" filter_domain="[('name','ilike',self)]"/> 
 					<field name="dep_name" string="Department Name" filter_domain="[('dep_name','ilike',self)]"/> 
 					<separator/>
 					<filter icon="terp-check" name="call" string="Draft" domain="[('state','=','draft')]"/>

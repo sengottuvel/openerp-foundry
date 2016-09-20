@@ -25,19 +25,22 @@ class kg_issue_return(osv.osv):
 		'name': fields.char('Issue Return No', size=64, readonly=True),
 		#~ 'dep_name': fields.many2one('kg.depmaster','Department',required=True, select=True,readonly=True,states={'draft':[('readonly',False)]},
 							#~ domain="['&',('stock_location.location_type','=','sub'),('stock_location.custom','=',True)]",),
-		'dep_name': fields.many2one('kg.depmaster','Department',required=True, select=True,readonly=True,states={'draft':[('readonly',False)]},
-							domain="[('stock_location.location_type','=','sub'),('stock_location.custom','=',True),('item_request','=',True),('state','in',('draft','confirmed','approved'))]",),
-		'date': fields.date('Issue Return Date',required=True,readonly=True,states={'draft':[('readonly',False)]}),
+		'dep_name': fields.many2one('kg.depmaster','Department',required=True, select=True,readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]},
+							domain="[('stock_location.location_type','=','sub'),('stock_location.custom','=',True),('item_request','=',True),('state','in',('draft','confirmed','approved'))]"),
+		'date': fields.date('Issue Return Date',required=True,readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'issue_return_line': fields.one2many('kg.issue.return.line', 'issue_return_id',
-					'Issue Return Lines',readonly=True,states={'draft':[('readonly',False)]}),
+					'Issue Return Lines',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'active': fields.boolean('Active'),
 		'state': fields.selection([('draft', 'Draft'),('confirm','Waiting For Approval'),('approved','Approved'),('done','Done'),('cancel','Cancelled'),('reject','Rejected')], 'Status', track_visibility='onchange', required=True),
 		'gate_pass': fields.boolean('Gate Pass', readonly=False,states={'approved':[('readonly',True)]}),
 		'origin': fields.char('Source Location', size=264,readonly=True,states={'draft':[('readonly',False)]}),
+		'notes': fields.text('Notes'),
 		'remark': fields.text('Remarks',readonly=True,states={'confirm':[('readonly',False)],'approved':[('readonly',False)]}),
+		'can_remark': fields.text('Cancel Remarks'),
+		'reject_remark': fields.text('Reject Remarks'),
 		'dep_issue_no':fields.many2one('kg.department.issue','Department Issue No',domain = "[('state','=','done'),('department_id','=',dep_name),('issue_return','=',False)]", readonly=True,states={'draft':[('readonly',False)]}),
 		'depissue_date':fields.date('Department Issue Date',readonly=True),
-		'return_type':fields.selection(RETURN_TYPE_SELECTION,'Return Type',readonly=False,states={'approved':[('readonly',True)],'reject':[('readonly',True)]}),
+		'return_type':fields.selection(RETURN_TYPE_SELECTION,'Return Type',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		#~ 'reject_location':fields.many2one('stock.location','Reject Location',domain = [('scrap_location','=',True)],readonly=True,states={'draft':[('readonly',False)]}),
 		'reject_location':fields.many2one('stock.location','Reject Location',domain = [('usage','=','scrap')],readonly=True,states={'draft':[('readonly',False)]}),
 		'rj_flag':fields.boolean('Reject Flag'),
@@ -49,10 +52,10 @@ class kg_issue_return(osv.osv):
 		'company_id':fields.many2one('res.company','Company',readonly=True),
 		'user_id' : fields.many2one('res.users', 'Created By', readonly=True),
 		'creation_date':fields.datetime('Creation Date',required=True,readonly=True),
-		'confirmed_by' : fields.many2one('res.users', 'Confirmed By', readonly=False,select=True),
+		'confirmed_by' : fields.many2one('res.users', 'Confirmed By', readonly=True,select=True),
 		'reject_date': fields.datetime('Reject Date', readonly=True),
 		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
-		'approved_by' : fields.many2one('res.users', 'Approved By', readonly=False,select=True),
+		'approved_by' : fields.many2one('res.users', 'Approved By', readonly=True,select=True),
 		'confirmed_date': fields.datetime('Confirmed Date',readonly=True),
 		'approved_date' : fields.datetime('Approved Date',readonly=True),
 		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
@@ -92,15 +95,11 @@ class kg_issue_return(osv.osv):
 		if return_type == 'noreturn':	
 			value = {'rj_flag' : True}
 			stock_obj = self.pool.get('stock.location').search(cr,uid,[('usage','=','scrap'),('custom','=',True)])
-			print"stock_objstock_objstock_obj",stock_obj
-			
 			if stock_obj:
 				stock_rec = self.pool.get('stock.location').browse(cr,uid,stock_obj[0])
 				value = {'reject_location' : stock_rec.id}
-				print"aaaaaaaaaaaaaaAA"
 			else:
 				value = {'reject_location' : ''}
-				print"bbbbbbbbbbbbbbbbbbbbbbbbb"
 		if return_type == 'replacement':
 			value = {'excess_flag' : True,'rj_flag':False}
 
@@ -151,7 +150,7 @@ class kg_issue_return(osv.osv):
 		rec.write({'list_flag':True})
 		return True
 	
-	def confirm_issue_return(self, cr, uid, ids,context=None):
+	def entry_confirm(self, cr, uid, ids,context=None):
 		rec  = self.browse(cr,uid,ids[0])
 		if not rec.issue_return_line:
 			raise osv.except_osv(
@@ -196,7 +195,7 @@ class kg_issue_return(osv.osv):
 		return True
 		
 			
-	def approve_indent(self, cr, uid, ids,context=None):
+	def entry_approve(self, cr, uid, ids,context=None):
 		obj = self.browse(cr,uid,ids[0])
 		#print "obj.dep_name.reject_location.id",obj.dep_name.reject_location.id
 		#obj.dep_issue_no.write({'issue_return':True})
@@ -215,7 +214,6 @@ class kg_issue_return(osv.osv):
 					issue_return_qty = issue_return_qty + line.dep_issue_no_line.return_qty
 				line.dep_issue_no_line.write({'return_qty':issue_return_qty+line.issue_pending_qty})
 				line.dep_issue_no_line.write({'issue_return_line':True})
-
 
 				# Updating the department indent pending qty with damaged qty to proceed further
 				if line.dep_issue_no_line.indent_line_id.issue_pending_qty == None:
@@ -338,12 +336,20 @@ class kg_issue_return(osv.osv):
 		self.write(cr,uid,ids,{'state':'approved','approved_by':uid,'approved_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 	
-	def cancel_issue(self, cr, uid, ids, context=None):		
-		self.write(cr, uid,ids,{'state' : 'cancel','cancel_user_id':uid,'cancel_date': time.strftime("%Y-%m-%d %H:%M:%S"),})
+	def entry_cancel(self, cr, uid, ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if not rec.can_remark:
+			raise osv.except_osv(_('Remarks is must !!'), _('Enter Remarks for Cancellation !!!'))
+		else:
+			self.write(cr, uid,ids,{'state' : 'cancel','cancel_user_id':uid,'cancel_date': time.strftime("%Y-%m-%d %H:%M:%S"),})
 		return True
 	
-	def reject_issue(self, cr, uid, ids, context=None):		
-		self.write(cr, uid,ids,{'state' : 'reject','rej_user_id':uid,'reject_date': time.strftime("%Y-%m-%d %H:%M:%S"),})
+	def entry_reject(self, cr, uid, ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if not rec.reject_remark:
+			raise osv.except_osv(_('Remarks is must !!'), _('Enter Remarks for Rejection !!!'))
+		else:
+			self.write(cr, uid,ids,{'state' : 'reject','rej_user_id':uid,'reject_date': time.strftime("%Y-%m-%d %H:%M:%S"),})
 		return True
 	
 	def unlink(self, cr, uid, ids, context=None):
@@ -372,11 +378,20 @@ class kg_issue_return(osv.osv):
 						
 			return True
 	
-	#_constraints = [
+	def _returndate_validation(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		today = date.today()
+		return_date = datetime.strptime(rec.date,'%Y-%m-%d').date()
+		if return_date > today:
+			return False
+		return True
+		
+	_constraints = [
 	
-		#(_check_lineitem, 'You can not save this Service Indent with out Line and Zero Qty  !!',['qty']),
-
-		#]	
+		#~ (_check_lineitem, 'You can not save this Service Indent with out Line and Zero Qty  !!',['qty']),
+			(_returndate_validation, 'Return date should not be greater than current date !!',['date']),
+			
+		]	
 
 kg_issue_return()
 

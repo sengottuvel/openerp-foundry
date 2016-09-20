@@ -42,7 +42,7 @@ class kg_department_issue(osv.osv):
 		'state': fields.selection([('draft', 'Draft'),
 			('confirmed', 'Waiting for Confirmation'),
 			('approve', 'Waiting for Approval'),
-			('done', 'Issued'),('cancel', 'Cancelled'),('reject', 'Rejected')], 'Status',readonly=True),
+			('done', 'Received'),('cancel', 'Cancelled'),('reject', 'Rejected')], 'Status',readonly=True),
 		
 		'type': fields.selection([('in', 'IN'), ('out', 'OUT'), ('internal', 'Internal')], 'Type'),
 		'active':fields.boolean('Active'),
@@ -51,9 +51,12 @@ class kg_department_issue(osv.osv):
 		'products_flag':fields.boolean('Products Flag'),
 		'user_id' : fields.many2one('res.users', 'User', readonly=False),
 		'remarks': fields.text('Remarks',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
+		'can_remark': fields.text('Cancel Remarks'),
+		'reject_remark': fields.text('Reject Remarks'),
+		'notes': fields.text('Notes'),
 		'project':fields.char('Project',size=100,readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
 		'building':fields.char('Building',size=100,readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
-		'issue_type': fields.selection([('material', 'Material'), ('service', 'Service')], 'Issue Type'),
+		'issue_type': fields.selection([('material', 'Material'), ('service', 'Service')], 'Issue Type',readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
 		'kg_service_indent_line':fields.many2many('kg.service.indent.line', 'kg_service_indent_picking', 'kg_serviceline_id', 'service_issue', 'Service Indent', 
 				 domain="[('service_id.state','=','approved'),'&', ('service_id.dep_name','=',department_id),'&', ('issue_pending_qty','>','0')]", 
 				  readonly=True, states={'draft': [('readonly', False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
@@ -61,12 +64,13 @@ class kg_department_issue(osv.osv):
 		'issue_return':fields.boolean('Issue Return'),
 		'dep_issue_type':fields.selection([('from_indent','From Indent'),('direct','Direct')],'Issue Type',required=True,
 					readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
-					
+		'wo_line_id': fields.many2one('ch.work.order.details','WO No.',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
+		
 		# Entry Info
 		
 		'company_id':fields.many2one('res.company','Company',readonly=True),
 		'created_by':fields.many2one('res.users','Created By',readonly=True),
-		'creation_date':fields.datetime('Creation Date',readonly=True),
+		'creation_date':fields.datetime('Creation Date',required=True,readonly=True),
 		'confirmed_by':fields.many2one('res.users','Confirmed By',readonly=True),
 		'confirmed_date':fields.datetime('Confirmed Date',readonly=True),
 		'approved_by':fields.many2one('res.users','Approved By',readonly=True),
@@ -100,61 +104,20 @@ class kg_department_issue(osv.osv):
 
 	}
 	
-	def email_ids(self,cr,uid,ids,context = None):
-		email_from = []
-		email_to = []
-		email_cc = []
-		val = {'email_from':'','email_to':'','email_cc':''}
-		ir_model = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		mail_form_ids = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		for ids in mail_form_ids:
-			mail_form_rec = self.pool.get('kg.mail.settings').browse(cr,uid,ids)
-			if mail_form_rec.doc_name.model == 'kg.department.issue':
-				email_from.append(mail_form_rec.name)
-				mail_line_id = self.pool.get('kg.mail.settings.line').search(cr,uid,[('line_entry','=',ids)])
-				for mail_id in mail_line_id:
-					mail_line_rec = self.pool.get('kg.mail.settings.line').browse(cr,uid,mail_id)
-					if mail_line_rec.to_address:
-						email_to.append(mail_line_rec.mail_id)
-					if mail_line_rec.cc_address:
-						email_cc.append(mail_line_rec.mail_id)
-			else:
-				pass			
-						
-		val['email_from'] = email_from
-		val['email_to'] = email_to
-		val['email_cc'] = email_cc
-		return val
+	def _issdate_validation(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		today = date.today()
+		issue_date = datetime.strptime(rec.issue_date,'%Y-%m-%d').date()
+		if issue_date > today:
+			return False
+		return True
+		
+	_constraints = [
 	
-	def sechedular_email_ids(self,cr,uid,ids,context = None):
-		email_from = []
-		email_to = []
-		email_cc = []
-		val = {'email_from':'','email_to':'','email_cc':''}
-		ir_model = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		mail_form_ids = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		for ids in mail_form_ids:
-			mail_form_rec = self.pool.get('kg.mail.settings').browse(cr,uid,ids)
-			if mail_form_rec.sch_type == 'scheduler':
-				s = mail_form_rec.sch_name
-				s = s.lower()
-				if s == 'issue register':
-					email_sub = mail_form_rec.subject
-					email_from.append(mail_form_rec.name)
-					mail_line_id = self.pool.get('kg.mail.settings.line').search(cr,uid,[('line_entry','=',ids)])
-					for mail_id in mail_line_id:
-						mail_line_rec = self.pool.get('kg.mail.settings.line').browse(cr,uid,mail_id)
-						if mail_line_rec.to_address:
-							email_to.append(mail_line_rec.mail_id)
-						if mail_line_rec.cc_address:
-							email_cc.append(mail_line_rec.mail_id)
-				else:
-					pass
-		val['email_from'] = email_from
-		val['email_to'] = email_to
-		val['email_cc'] = email_cc
-		return val
-	
+		(_issdate_validation, 'Issue Date should not be greater than current date !!',['issue_date']),
+		
+		]
+		
 	def onchange_direct_issue(self,cr,uid,ids,dep_iss_type,products_flag,context = None):
 		value = {'products_flag':'','state':''}
 		state = 'draft'
@@ -171,22 +134,22 @@ class kg_department_issue(osv.osv):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_department_issue, self).write(cr, uid, ids, vals, context)
 	
-	def cancel_issue(self, cr, uid, ids, context=None):		
+	def entry_reject(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr,uid,ids[0])
-		if not rec.remark:
+		if not rec.reject_remark:
 			raise osv.except_osv(
 				_('Remarks Needed !!'),
-				_('Enter Remark in Remarks Tab....'))
-		self.write(cr, uid,ids,{'state' : 'cancel','cancel_date':time.strftime('%Y-%m-%d %H:%M:%S'),'cancel_user_id':uid})
+				_('Enter Remarks for Issue Rejection..'))
+		self.write(cr, uid,ids,{'state' : 'reject','reject_date':time.strftime('%Y-%m-%d %H:%M:%S'),'rej_user_id':uid})
 		return True
 			
-	def cancel_reject(self, cr, uid, ids, context=None):		
+	def entry_cancel(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr,uid,ids[0])
-		if not rec.remark:
+		if not rec.can_remark:
 			raise osv.except_osv(
 				_('Remarks Needed !!'),
-				_('Enter Remark in Remarks Tab....'))
-		self.write(cr, uid,ids,{'state' : 'cancel','reject_date':time.strftime('%Y-%m-%d %H:%M:%S'),'rej_user_id':uid})
+				_('Enter Remarks for Issue Cancellation..'))
+		self.write(cr, uid,ids,{'state' : 'cancel','cancel_date':time.strftime('%Y-%m-%d %H:%M:%S'),'cancel_user_id':uid})
 		return True
 				
 	def onchange_user_id(self, cr, uid, ids, user_id, context=None):
@@ -223,7 +186,6 @@ class kg_department_issue(osv.osv):
 			move_obj.unlink(cr,uid,issue_lines)
 		
 		dep_rec = dep_obj.browse(cr, uid, obj.user_id.dep_name.id)
-		
 		issue_dep_id = obj.department_id.id
 		
 		obj.write({'state': 'confirmed'})
@@ -254,6 +216,7 @@ class kg_department_issue(osv.osv):
 					'brand_id':brand_id,
 					'uom_id':uom,
 					'issue_qty':qty,
+					'issue_qty_2':qty,
 					'indent_qty':qty,
 					'name':prod_browse.name,
 					'location_id':main_location,
@@ -342,7 +305,7 @@ class kg_department_issue(osv.osv):
 		return True
 		
 		
-	def confirm_issue(self, cr, uid, ids, context=None):
+	def entry_confirm(self, cr, uid, ids, context=None):
 		
 		obj_rec = self.browse(cr, uid, ids[0])	
 		lot_obj = self.pool.get('stock.production.lot')
@@ -358,25 +321,7 @@ class kg_department_issue(osv.osv):
 			obj_rec.write({'name': issue_name})
 			
 		obj_rec.write({'state': 'approve','confirmed_by':uid,'confirmed_date':time.strftime('%Y-%m-%d %H:%M:%S')})
-		#cr.execute("""select all_transaction_mails('Issue Request Approval',%s)"""%(ids[0]))
-		"""Raj
-		data = cr.fetchall();
-		vals = self.email_ids(cr,uid,ids,context = context)
-		if (not vals['email_to']) or (not vals['email_cc']):
-			pass
-		else:
-			ir_mail_server = self.pool.get('ir.mail_server')
-			msg = ir_mail_server.build_email(
-					email_from = vals['email_from'][0],
-					email_to = vals['email_to'],
-					subject = " Department Issue- Waiting For Approval",
-					body = data[0][0],
-					email_cc = vals['email_cc'],
-					object_id = ids[0] and ('%s-%s' % (ids[0], 'kg.department.issue')),
-					subtype = 'html',
-					subtype_alternative = 'plain')
-			res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
-		"""
+		
 		if not obj_rec.issue_line_ids:
 			raise osv.except_osv(_('Item Line Empty!'),_('You cannot process Issue without Item Line.'))
 		else:
@@ -426,26 +371,6 @@ class kg_department_issue(osv.osv):
 		lot_obj = self.pool.get('stock.production.lot')
 		item_issue_obj = self.pool.get('kg.item.wise.dept.issue')
 		issue_record.write({'state': 'done','approved_by':uid,'approved_date':time.strftime('%Y-%m-%d %H:%M:%S')})
-		#cr.execute("""select all_transaction_mails('Issue Request Approval',%s)"""%(ids[0]))
-		"""Raj
-		data = cr.fetchall();
-		vals = self.email_ids(cr,uid,ids,context = context)
-		if (not vals['email_to']) or (not vals['email_cc']):
-			pass
-		else:
-			ir_mail_server = self.pool.get('ir.mail_server')
-			msg = ir_mail_server.build_email(
-					email_from = vals['email_from'][0],
-					email_to = vals['email_to'],
-					subject = " Department Issue- Approved",
-					body = data[0][0],
-					email_cc = vals['email_cc'],
-					object_id = ids[0] and ('%s-%s' % (ids[0], 'kg.department.issue')),
-					subtype = 'html',
-					subtype_alternative = 'plain')
-			res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
-		"""	
-		
 		
 		#### Updating Department Issue to Stock Move ####			
 		for line_ids in issue_record.issue_line_ids:
@@ -474,281 +399,221 @@ class kg_department_issue(osv.osv):
 					stock_main_store = self.pool.get('stock.location').search(cr,uid,[('custom','=',True),('location_type','=','main')])
 					main_location = stock_main_store[0]
 					dep_stock_location = issue_record.department_id.stock_location.id
+					
+			if line_ids.issue_qty > line_ids.issue_qty_2:
+				raise osv.except_osv(_('Warning!'),
+					_('%s Qty is exceeding store issue qty'%(line_ids.product_id.name)))
+					
+			if line_ids.wo_state == 'accept':
+			
+				stock_move_obj.create(cr,uid,
+				{
+				'dept_issue_id':issue_record.id,
+				'dept_issue_line_id':line_ids.id,
+				'product_id': line_ids.product_id.id,
+				'brand_id':line_ids.brand_id.id,
+				'name':line_ids.product_id.name,
+				'product_qty': line_ids.issue_qty,
+				'po_to_stock_qty':line_ids.issue_qty,
+				'stock_uom':line_ids.uom_id.id,
+				'product_uom': line_ids.uom_id.id,
+				'location_id': main_location,
+				'location_dest_id': dep_stock_location,
+				'move_type': 'out',
+				'state': 'done',
+				'price_unit': line_ids.price_unit or 0.0,
+				'stock_rate':line_ids.price_unit or 0.0,
 				
-			stock_move_obj.create(cr,uid,
-			{
-			'dept_issue_id':issue_record.id,
-			'dept_issue_line_id':line_ids.id,
-			'product_id': line_ids.product_id.id,
-			'brand_id':line_ids.brand_id.id,
-			'name':line_ids.product_id.name,
-			'product_qty': line_ids.issue_qty,
-			'po_to_stock_qty':line_ids.issue_qty,
-			'stock_uom':line_ids.uom_id.id,
-			'product_uom': line_ids.uom_id.id,
-			'location_id': main_location,
-			'location_dest_id': dep_stock_location,
-			'move_type': 'out',
-			'state': 'done',
-			'price_unit': line_ids.price_unit or 0.0,
-			'stock_rate':line_ids.price_unit or 0.0,
-			
-			})
-			
-			lot_sql = """ select lot_id from kg_department_issue_details where grn_id=%s""" %(line_ids.id)
-			cr.execute(lot_sql)
-			lot_data = cr.dictfetchall()
-			if not lot_data:
-				raise osv.except_osv(
-				_('No GRN Entry !!'),
-				_('There is no GRN reference for this Issue. You must associate GRN entries '))
-			else:
-				val = [d['lot_id'] for d in lot_data if 'lot_id' in d]
-				tot = 0.0
-				for i in val:
-					lot_rec = lot_obj.browse(cr, uid, i)
-					tot += lot_rec.pending_qty
-				if tot < line_ids.issue_qty:
+				})
+				
+				lot_sql = """ select lot_id from kg_department_issue_details where grn_id=%s""" %(line_ids.id)
+				cr.execute(lot_sql)
+				lot_data = cr.dictfetchall()
+				if not lot_data:
 					raise osv.except_osv(
-					_('Stock not available !!'),
-					_('Associated GRN have less Qty compare to issue Qty.'))
+					_('No GRN Entry !!'),
+					_('There is no GRN reference for this Issue. You must associate GRN entries '))
 				else:
-					pass
-				### Updation Issue Pending Qty in Department Issue ###
-				if issue_record.issue_type == 'material':
-					dep_line_obj = self.pool.get('kg.depindent.line')   
-					self.write(cr, uid, ids, {'state': 'done'})
-					cr.execute(""" select stock_picking_id from kg_department_indent_picking where kg_depline_id = %s """ %(issue_record.id))
-					data = cr.dictfetchall()
-					val = [d['stock_picking_id'] for d in data if 'stock_picking_id' in d] 
-					product_id = line_ids.product_id.id
-					product_obj = self.pool.get('product.product')
-					product_record = product_obj.browse(cr, uid, product_id)
-					list_line = dep_line_obj.search(cr,uid,[('id', 'in', val), ('product_id', '=', product_id)],context=context)
-					issue_qty = line_ids.issue_qty
-					for i in list_line:
-						bro_record = dep_line_obj.browse(cr, uid,i)
-						orig_depindent_qty = bro_record.qty
-						issue_pending_qty = bro_record.issue_pending_qty
-						issue_used_qty = issue_qty
-						indent_uom = bro_record.uom.id
-						move_uom = line_ids.uom_id.id
-						if indent_uom != move_uom:
-							if issue_used_qty <= issue_pending_qty:
-								pending_depindent_qty = issue_pending_qty - (issue_used_qty * product_record.po_uom_coeff)
-								sql = """ update kg_depindent_line set issue_pending_qty=%s where id = %s"""%(pending_depindent_qty,bro_record.id)
-								cr.execute(sql)
-								#dep_line_obj.write(cr,uid, bro_record.id, {'line_state' : 'noprocess'})
-								break
-							else:
-								remain_qty = issue_used_qty - issue_pending_qty
-								issue_qty = remain_qty
-								pending_depindent_qty =  0.0
-								sql = """ update kg_depindent_line set issue_pending_qty=%s where id = %s"""%(pending_depindent_qty,bro_record.id)
-								cr.execute(sql)
-								#dep_line_obj.write(cr,uid, bro_record.id, {'line_state' : 'noprocess'})
-								if remain_qty < 0:
-									break		   
-						else:
-							if issue_used_qty <= issue_pending_qty:
-								pending_depindent_qty =  issue_pending_qty - issue_used_qty
-								sql = """ update kg_depindent_line set issue_pending_qty=%s where id = %s"""%(pending_depindent_qty,bro_record.id)
-								cr.execute(sql)
-								#dep_line_obj.write(cr,uid, bro_record.id, {'line_state' : 'noprocess'})
-								break
-							else:
-								remain_qty = issue_used_qty - issue_pending_qty
-								issue_qty = remain_qty
-								pending_depindent_qty =  0.0
-								sql = """ update kg_depindent_line set issue_pending_qty=%s where id = %s"""%(pending_depindent_qty,bro_record.id)
-								cr.execute(sql)
-								#dep_line_obj.write(cr,uid, bro_record.id, {'line_state' : 'noprocess'})
-								if remain_qty < 0:
-									break	  
-				if issue_record.issue_type == 'service':
-					serviceind_line_obj = self.pool.get('kg.service.indent.line')   
-					self.write(cr, uid, ids, {'state': 'done'})
-					cr.execute(""" select service_issue from kg_service_indent_picking where kg_serviceline_id = %s """ %(issue_record.id))
-					data = cr.dictfetchall()
-					val = [d['service_issue'] for d in data if 'service_issue' in d] 
-					product_id = line_ids.product_id.id
-					product_obj = self.pool.get('product.product')
-					product_record = product_obj.browse(cr, uid, product_id)
-					list_line = serviceind_line_obj.search(cr,uid,[('id', 'in', val), ('product_id', '=', product_id)],context=context)
-					issue_qty = line_ids.issue_qty
-					for i in list_line:
-						bro_record = serviceind_line_obj.browse(cr, uid,i)
-						orig_depindent_qty = bro_record.qty
-						issue_pending_qty = bro_record.issue_pending_qty
-						issue_used_qty = issue_qty
-						indent_uom = bro_record.uom.id
-						move_uom = line_ids.uom_id.id
-						if indent_uom != move_uom:
-							if issue_used_qty <= issue_pending_qty:
-								pending_depindent_qty = issue_pending_qty - (issue_used_qty * product_record.po_uom_coeff)
-								sql = """ update kg_service_indent_line set issue_pending_qty=%s where id = %s"""%(pending_depindent_qty,bro_record.id)
-								cr.execute(sql)
-								#dep_line_obj.write(cr,uid, bro_record.id, {'line_state' : 'noprocess'})
-								break
-							else:
-								remain_qty = issue_used_qty - issue_pending_qty
-								issue_qty = remain_qty
-								pending_depindent_qty =  0.0
-								sql = """ update kg_service_indent_line set issue_pending_qty=%s where id = %s"""%(pending_depindent_qty,bro_record.id)
-								cr.execute(sql)
-								#dep_line_obj.write(cr,uid, bro_record.id, {'line_state' : 'noprocess'})
-								if remain_qty < 0:
-									break		   
-						else:
-							if issue_used_qty <= issue_pending_qty:
-								pending_depindent_qty =  issue_pending_qty - issue_used_qty
-								sql = """ update kg_service_indent_line set issue_pending_qty=%s where id = %s"""%(pending_depindent_qty,bro_record.id)
-								cr.execute(sql)
-								#dep_line_obj.write(cr,uid, bro_record.id, {'line_state' : 'noprocess'})
-								break
-							else:
-								remain_qty = issue_used_qty - issue_pending_qty
-								issue_qty = remain_qty
-								pending_depindent_qty =  0.0
-								sql = """ update kg_service_indent_line set issue_pending_qty=%s where id = %s"""%(pending_depindent_qty,bro_record.id)
-								cr.execute(sql)
-								#dep_line_obj.write(cr,uid, bro_record.id, {'line_state' : 'noprocess'})
-								if remain_qty < 0:
-									break
-				# The below part will update production lot pending qty while issue stock to sub store #
-				sql = """ select lot_id from kg_department_issue_details where grn_id=%s""" %(line_ids.id)
-				cr.execute(sql)
-				data = cr.dictfetchall()
-				if data:
-					val = [d['lot_id'] for d in data if 'lot_id' in d]
-					issue_qty = line_ids.issue_qty
+					val = [d['lot_id'] for d in lot_data if 'lot_id' in d]
+					tot = 0.0
 					for i in val:
-						lot_rec = lot_obj.browse(cr,uid,i)
-						move_qty = issue_qty
-						if move_qty > 0 and move_qty <= lot_rec.pending_qty:
-							#move_qty = move_qty - lot_rec.issue_qty
-							lot_pending_qty = lot_rec.pending_qty - move_qty
-							lot_rec.write({'pending_qty': lot_pending_qty,'issue_qty': 0.0})
-							#### wrting data into kg_issue_details ###
-							lot_issue_qty = lot_rec.pending_qty - lot_pending_qty
-							if lot_issue_qty == 0:
-								issue_qty = lot_rec.pending_qty
-							elif lot_issue_qty > 0:
-								issue_qty = lot_issue_qty
-							item_issue_obj.create(cr,uid,
-									{
-									'issue_line_id':line_ids.id,
-									'product_id':line_ids.product_id.id,
-									'uom_id':line_ids.uom_id.id,
-									'grn_qty':lot_rec.pending_qty,
-									'issue_qty':issue_qty,
-									'price_unit':lot_rec.price_unit,
-									'expiry_date':lot_rec.expiry_date,
-									'batch_no':lot_rec.batch_no,
-									'lot_id':lot_rec.id,
-									})
-							##### Ends Here ###
-							break
-						else:
-							if move_qty > 0:								
-								lot_pending_qty = lot_rec.pending_qty
-								remain_qty =  move_qty - lot_pending_qty
-								lot_rec.write({'pending_qty': 0.0})
+						lot_rec = lot_obj.browse(cr, uid, i)
+						tot += lot_rec.pending_qty
+					if tot < line_ids.issue_qty:
+						raise osv.except_osv(
+						_('Stock not available !!'),
+						_('Associated GRN have less Qty compare to issue Qty.'))
+					else:
+						pass
+					### Updation Issue Pending Qty in Department Issue ###
+					if issue_record.issue_type == 'material':
+						dep_line_obj = self.pool.get('kg.depindent.line')   
+						self.write(cr, uid, ids, {'state': 'done'})
+						cr.execute(""" select stock_picking_id from kg_department_indent_picking where kg_depline_id = %s """ %(issue_record.id))
+						data = cr.dictfetchall()
+						val = [d['stock_picking_id'] for d in data if 'stock_picking_id' in d] 
+						product_id = line_ids.product_id.id
+						product_obj = self.pool.get('product.product')
+						product_record = product_obj.browse(cr, uid, product_id)
+						list_line = dep_line_obj.search(cr,uid,[('id', 'in', val), ('product_id', '=', product_id)],context=context)
+						issue_qty = line_ids.issue_qty
+						for i in list_line:
+							bro_record = dep_line_obj.browse(cr, uid,i)
+							orig_depindent_qty = bro_record.qty
+							issue_pending_qty = bro_record.issue_pending_qty
+							issue_used_qty = issue_qty
+							indent_uom = bro_record.uom.id
+							move_uom = line_ids.uom_id.id
+							if indent_uom != move_uom:
+								if issue_used_qty <= issue_pending_qty:
+									pending_depindent_qty = issue_pending_qty - (issue_used_qty * product_record.po_uom_coeff)
+									sql = """ update kg_depindent_line set issue_pending_qty=%s where id = %s"""%(pending_depindent_qty,bro_record.id)
+									cr.execute(sql)
+									#dep_line_obj.write(cr,uid, bro_record.id, {'line_state' : 'noprocess'})
+									break
+								else:
+									remain_qty = issue_used_qty - issue_pending_qty
+									issue_qty = remain_qty
+									pending_depindent_qty =  0.0
+									sql = """ update kg_depindent_line set issue_pending_qty=%s where id = %s"""%(pending_depindent_qty,bro_record.id)
+									cr.execute(sql)
+									#dep_line_obj.write(cr,uid, bro_record.id, {'line_state' : 'noprocess'})
+									if remain_qty < 0:
+										break		   
+							else:
+								if issue_used_qty <= issue_pending_qty:
+									pending_depindent_qty =  issue_pending_qty - issue_used_qty
+									sql = """ update kg_depindent_line set issue_pending_qty=%s where id = %s"""%(pending_depindent_qty,bro_record.id)
+									cr.execute(sql)
+									#dep_line_obj.write(cr,uid, bro_record.id, {'line_state' : 'noprocess'})
+									break
+								else:
+									remain_qty = issue_used_qty - issue_pending_qty
+									issue_qty = remain_qty
+									pending_depindent_qty =  0.0
+									sql = """ update kg_depindent_line set issue_pending_qty=%s where id = %s"""%(pending_depindent_qty,bro_record.id)
+									cr.execute(sql)
+									#dep_line_obj.write(cr,uid, bro_record.id, {'line_state' : 'noprocess'})
+									if remain_qty < 0:
+										break	  
+					if issue_record.issue_type == 'service':
+						serviceind_line_obj = self.pool.get('kg.service.indent.line')   
+						self.write(cr, uid, ids, {'state': 'done'})
+						cr.execute(""" select service_issue from kg_service_indent_picking where kg_serviceline_id = %s """ %(issue_record.id))
+						data = cr.dictfetchall()
+						val = [d['service_issue'] for d in data if 'service_issue' in d] 
+						product_id = line_ids.product_id.id
+						product_obj = self.pool.get('product.product')
+						product_record = product_obj.browse(cr, uid, product_id)
+						list_line = serviceind_line_obj.search(cr,uid,[('id', 'in', val), ('product_id', '=', product_id)],context=context)
+						issue_qty = line_ids.issue_qty
+						for i in list_line:
+							bro_record = serviceind_line_obj.browse(cr, uid,i)
+							orig_depindent_qty = bro_record.qty
+							issue_pending_qty = bro_record.issue_pending_qty
+							issue_used_qty = issue_qty
+							indent_uom = bro_record.uom.id
+							move_uom = line_ids.uom_id.id
+							if indent_uom != move_uom:
+								if issue_used_qty <= issue_pending_qty:
+									pending_depindent_qty = issue_pending_qty - (issue_used_qty * product_record.po_uom_coeff)
+									sql = """ update kg_service_indent_line set issue_pending_qty=%s where id = %s"""%(pending_depindent_qty,bro_record.id)
+									cr.execute(sql)
+									#dep_line_obj.write(cr,uid, bro_record.id, {'line_state' : 'noprocess'})
+									break
+								else:
+									remain_qty = issue_used_qty - issue_pending_qty
+									issue_qty = remain_qty
+									pending_depindent_qty =  0.0
+									sql = """ update kg_service_indent_line set issue_pending_qty=%s where id = %s"""%(pending_depindent_qty,bro_record.id)
+									cr.execute(sql)
+									#dep_line_obj.write(cr,uid, bro_record.id, {'line_state' : 'noprocess'})
+									if remain_qty < 0:
+										break		   
+							else:
+								if issue_used_qty <= issue_pending_qty:
+									pending_depindent_qty =  issue_pending_qty - issue_used_qty
+									sql = """ update kg_service_indent_line set issue_pending_qty=%s where id = %s"""%(pending_depindent_qty,bro_record.id)
+									cr.execute(sql)
+									#dep_line_obj.write(cr,uid, bro_record.id, {'line_state' : 'noprocess'})
+									break
+								else:
+									remain_qty = issue_used_qty - issue_pending_qty
+									issue_qty = remain_qty
+									pending_depindent_qty =  0.0
+									sql = """ update kg_service_indent_line set issue_pending_qty=%s where id = %s"""%(pending_depindent_qty,bro_record.id)
+									cr.execute(sql)
+									#dep_line_obj.write(cr,uid, bro_record.id, {'line_state' : 'noprocess'})
+									if remain_qty < 0:
+										break
+					# The below part will update production lot pending qty while issue stock to sub store #
+					sql = """ select lot_id from kg_department_issue_details where grn_id=%s""" %(line_ids.id)
+					cr.execute(sql)
+					data = cr.dictfetchall()
+					if data:
+						val = [d['lot_id'] for d in data if 'lot_id' in d]
+						issue_qty = line_ids.issue_qty
+						for i in val:
+							lot_rec = lot_obj.browse(cr,uid,i)
+							move_qty = issue_qty
+							if move_qty > 0 and move_qty <= lot_rec.pending_qty:
+								#move_qty = move_qty - lot_rec.issue_qty
+								lot_pending_qty = lot_rec.pending_qty - move_qty
+								lot_rec.write({'pending_qty': lot_pending_qty,'issue_qty': 0.0})
 								#### wrting data into kg_issue_details ###
 								lot_issue_qty = lot_rec.pending_qty - lot_pending_qty
 								if lot_issue_qty == 0:
 									issue_qty = lot_rec.pending_qty
 								elif lot_issue_qty > 0:
 									issue_qty = lot_issue_qty
-								issue_name = 'OUT'
 								item_issue_obj.create(cr,uid,
-									{
-
-									'issue_line_id':line_ids.id,
-									'product_id':line_ids.product_id.id,
-									'uom_id':line_ids.uom_id.id,
-									'grn_qty':lot_rec.pending_qty,
-									'issue_qty':issue_qty,
-									'price_unit':lot_rec.price_unit,
-									'expiry_date':lot_rec.expiry_date,
-									'batch_no':lot_rec.batch_no,
-									'lot_id':lot_rec.id,
-									})
+										{
+										'issue_line_id':line_ids.id,
+										'product_id':line_ids.product_id.id,
+										'uom_id':line_ids.uom_id.id,
+										'grn_qty':lot_rec.pending_qty,
+										'issue_qty':issue_qty,
+										'price_unit':lot_rec.price_unit,
+										'expiry_date':lot_rec.expiry_date,
+										'batch_no':lot_rec.batch_no,
+										'lot_id':lot_rec.id,
+										})
 								##### Ends Here ###
+								break
 							else:
-								pass
-						issue_qty = remain_qty
-				else:
-					pass
+								if move_qty > 0:								
+									lot_pending_qty = lot_rec.pending_qty
+									remain_qty =  move_qty - lot_pending_qty
+									lot_rec.write({'pending_qty': 0.0})
+									#### wrting data into kg_issue_details ###
+									lot_issue_qty = lot_rec.pending_qty - lot_pending_qty
+									if lot_issue_qty == 0:
+										issue_qty = lot_rec.pending_qty
+									elif lot_issue_qty > 0:
+										issue_qty = lot_issue_qty
+									issue_name = 'OUT'
+									item_issue_obj.create(cr,uid,
+										{
+
+										'issue_line_id':line_ids.id,
+										'product_id':line_ids.product_id.id,
+										'uom_id':line_ids.uom_id.id,
+										'grn_qty':lot_rec.pending_qty,
+										'issue_qty':issue_qty,
+										'price_unit':lot_rec.price_unit,
+										'expiry_date':lot_rec.expiry_date,
+										'batch_no':lot_rec.batch_no,
+										'lot_id':lot_rec.id,
+										})
+									##### Ends Here ###
+								else:
+									pass
+							issue_qty = remain_qty
+					else:
+						pass
 					
 		return True
 	
-	def department_issue_scheduler(self,cr,uid,ids=0,context = None):
-		cr.execute(""" SELECT current_database();""")
-		db = cr.dictfetchall()
-		if db[0]['current_database'] == 'Empereal-KGDS':
-			db[0]['current_database'] = 'Empereal-KGDS'
-		elif db[0]['current_database'] == 'FSL':
-			db[0]['current_database'] = 'FSL'
-		elif db[0]['current_database'] == 'IIM':
-			db[0]['current_database'] = 'IIM'
-		elif db[0]['current_database'] == 'IIM_HOSTEL':
-			db[0]['current_database'] = 'IIM Hostel'
-		elif db[0]['current_database'] == 'KGISL-SD':
-			db[0]['current_database'] = 'KGISL-SD'
-		elif db[0]['current_database'] == 'CHIL':
-			db[0]['current_database'] = 'CHIL'
-		elif db[0]['current_database'] == 'KGCAS':
-			db[0]['current_database'] = 'KGCAS'
-		elif db[0]['current_database'] == 'KGISL':
-			db[0]['current_database'] = 'KGISL'
-		elif db[0]['current_database'] == 'KITE':
-			db[0]['current_database'] = 'KITE'
-		elif db[0]['current_database'] == 'TRUST':
-			db[0]['current_database'] = 'TRUST'
-		elif db[0]['current_database'] == 'CANTEEN':
-			db[0]['current_database'] = 'CANTEEN'
-		else:
-			db[0]['current_database'] = 'Others'
-			
-		cr.execute(""" select name from kg_department_issue where to_char(approved_date::date,'dd-mm-yyyy') = '%s' and
-		 state in ('done') """
-					    %(time.strftime('%d-%m-%Y')))
-		grn_data = cr.dictfetchall()	
-			
-		if grn_data:	
-			cr.execute("""select all_daily_auto_scheduler_mails('Issue Register')""")
-			data = cr.fetchall();
-			cr.execute("""select 
-							trim(TO_CHAR(sum(kg_department_issue_line.issue_qty * kg_department_issue_line.price_unit)::float, '999G999G99G999G99G99G990D99')) as sum
-							from kg_department_issue
-							left join kg_department_issue_line on kg_department_issue_line.issue_id = kg_department_issue.id
-							where 
-							to_char(kg_department_issue.issue_date,'dd-mm-yyyy') = '%s' and
-							kg_department_issue.state in ('done')"""%(time.strftime('%d-%m-%Y')))
-			total_sum = cr.dictfetchall();
-			db = db[0]['current_database'].encode('utf-8')
-			total_sum = str(total_sum[0]['sum'])
-			vals = self.sechedular_email_ids(cr,uid,ids,context = context)
-			if (not vals['email_to']) and (not vals['email_cc']):
-				pass
-			else:
-				ir_mail_server = self.pool.get('ir.mail_server')
-				msg = ir_mail_server.build_email(
-						email_from = vals['email_from'][0],
-						email_to = vals['email_to'],
-						subject = "ERP Issue Register Details for "+db +' as on '+time.strftime('%d-%m-%Y')+'. Total Amount (Rs.):' + total_sum,
-						body = data[0][0],
-						email_cc = vals['email_cc'],
-						object_id = ids and ('%s-%s' % (ids, 'kg.department.issue')),
-						subtype = 'html',
-						subtype_alternative = 'plain')
-				res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
-				
-		else:
-			pass		
-				
-		return True
 	
 kg_department_issue()
 
@@ -766,6 +631,7 @@ class kg_department_issue_line(osv.osv):
 		'product_id':fields.many2one('product.product','Product Name',required=True),
 		'uom_id':fields.many2one('product.uom','UOM',readonly=True),
 		'issue_qty':fields.float('Issue Quantity',required=True),
+		'issue_qty_2':fields.float('Issue Quantity 2',required=True),
 		'indent_qty':fields.float('Indent Quantity'),
 		'price_unit':fields.float('Unit Price'),
 		'kg_discount_per': fields.float('Discount (%)', digits_compute= dp.get_precision('Discount')),
@@ -789,12 +655,15 @@ class kg_department_issue_line(osv.osv):
 		'excess_return_qty':fields.float('Excess Return Qty'),
 		'damage_flag':fields.boolean('Damage Return Flag'),
 		'return_qty':fields.float('Returned Qty'),
+		'wo_state': fields.selection([('accept','Accept'),('reject','Reject')],'Status'),
+		'ms_name': fields.char('MS Item Name'),
 		
 	}
 	
 	_defaults = {
 	
 		'state':'draft',
+		'wo_state':'accept',
 		
 	}
 	
@@ -807,6 +676,12 @@ class kg_department_issue_line(osv.osv):
 		if product_id:
 			prod = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
 			value = {'uom_id': prod.uom_id.id}
+		return {'value': value}
+		
+	def onchange_issue_qty_2(self, cr, uid, ids, issue_qty,context=None):
+		value = {'issue_qty_2': ''}
+		if issue_qty:
+			value = {'issue_qty_2': issue_qty}
 		return {'value': value}
 		
 	def update_lines(self, cr, uid, ids, context=None):
