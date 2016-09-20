@@ -129,7 +129,7 @@
             ref('kg_sale_invoice.kg_draft_bill_menu'),
             ref('kg_sale_invoice.kg_draft_bill_menus'),
             ref('kg_customer_advance.kg_advance_menu'),
-            ref('kg_sale_invoice.menu_kg_customer_advance'),
+            ref('kg_customer_advance.menu_kg_customer_advance'),
             
             
             ])]" name="menu_access"/>
