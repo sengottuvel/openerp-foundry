@@ -104,6 +104,11 @@
 				<!--Posotion Number Master Menu -->
 				<menuitem name="Position Number" parent="mpm_ms_master_menu" action="kg_position_number.mma_position_number_master" id="mam_position_number_menu" sequence="3"/>
 				
+				<!-- BOT Store Inward Transaction Menu -->
+				<menuitem action="kg_department_issue.action_bot_issue" id="gam_bot_issue" name="BOT Store Inward" parent="kg_assembly.tpm_assembly_process" sequence="4"/>
+				
+				<!-- MS Store Inward Transaction Menu -->
+				<menuitem action="kg_department_issue.action_ms_issue" id="gam_ms_issue" name="MS Store Inward" parent="kg_machineshop.tpm_ms_process" sequence="17"/>
 						
 		<!-- Indent Menu -->
 		
