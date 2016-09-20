@@ -709,7 +709,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		
 		########## Item Details Added Start here ################
 		's_no': fields.char('Serial Number'),
-		'equipment_no': fields.char('Equipment No'),
+		'equipment_no': fields.char('Equipment/Tag No'),
 		'quantity_in_no': fields.integer('Quantity in No'),
 		'description': fields.char('Description'),
 		

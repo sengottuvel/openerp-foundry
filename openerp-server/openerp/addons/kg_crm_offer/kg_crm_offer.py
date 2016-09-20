@@ -283,7 +283,7 @@ class kg_crm_offer(osv.osv):
 		if line_data:
 			if len(line_data):
 				if len(line_data) <= 1:
-					len_col = len(line_data) + 1
+					len_col = len(line_data) 
 				elif len(line_data) <= 3 or len(line_data) > 3:
 					len_col = len(line_data)
 		print"len_collen_collen_col",len_col
@@ -292,7 +292,7 @@ class kg_crm_offer(osv.osv):
 		record={}
 		sno=0
 		wbk = xlwt.Workbook()
-		style1 = xlwt.easyxf('font: bold on,height 240,color_index 0X36;' 'align: horiz center;''borders: left thin, right thin, top thin, bottom thin') 
+		style1 = xlwt.easyxf('font: bold on,height 240,color_index red;' 'align: horiz center;''borders: left thin, right thin, top thin, bottom thin') 
 		style2 = xlwt.easyxf('font: bold on,height 240,color_index black;' 'align: horiz center;''borders: left thin, right thin, top thin, bottom thin') 
 		style3 = xlwt.easyxf('font: height 200,color_index black;' 'align: horiz center;''borders: left thin, right thin, top thin, bottom thin') 
 		style4 = xlwt.easyxf('font: height 200,color_index black;' 'align: horiz left;''borders: left thin, right thin, top thin, bottom thin') 
@@ -318,7 +318,10 @@ class kg_crm_offer(osv.osv):
 		
 		s2=9
 		if line_data:
-			if len_col <= 2:
+			if len_col <= 1:
+				sheet1.col(0).width = 8000
+				sheet1.col(1).width = 12000
+			elif len_col <= 2:
 				sheet1.col(0).width = 8000
 				sheet1.col(1).width = 7000
 				sheet1.col(2).width = 7000
@@ -346,16 +349,16 @@ class kg_crm_offer(osv.osv):
 		sheet1.write_merge(3, 3, 0, len_col,"TECHNICAL CUM PRICED OFFER",style2)
 		sheet1.row(3).height = 300
 		to = "To : " + str(rec.customer_id.name)
-		sheet1.write_merge(4, 4, 0, 1, to, style4)
+		sheet1.write_merge(4, 4, 0, 0, to, style4)
 		enq_ref = "Enquiry Ref : " + str(rec.enquiry_no)
-		sheet1.write_merge(4, 4, 2, len_col, enq_ref, style4)
+		sheet1.write_merge(4, 4, 1, len_col, enq_ref, style4)
 		sheet1.row(4).height = 450
 		off_ref_no = "Offer Ref : " + str(rec.name)
-		sheet1.write_merge(5, 5, 0, 1, off_ref_no or "-", style4)
+		sheet1.write_merge(5, 5, 0, 0, off_ref_no or "-", style4)
 		offer_date = rec.offer_date
 		offer_date = datetime.strptime(offer_date, '%Y-%m-%d').strftime('%d/%m/%Y')
 		date = "Date : " + offer_date
-		sheet1.write_merge(5, 5, 2, len_col, date, style4)
+		sheet1.write_merge(5, 5, 1, len_col, date, style4)
 		sheet1.row(5).height = 400
 		sheet1.write_merge(6, 6, 0, len_col, 'Item Details:', style5)
 		sheet1.row(6).height = 400
@@ -371,12 +374,20 @@ class kg_crm_offer(osv.osv):
 		
 		col_1 = ''
 		col_no = 1
-		
+		logo_size = 0
 		for item in line_data:
 			""" writing field headings """
 			col_1 = item['name']
-			sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
-			sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp',0,len_col,120)
+			#~ sheet1.insert_bitmap('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
+			#~ sheet1.insert_bitmap('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp',0,len_col,120)
+			if len_col == 1:
+				logo_size = 250
+			elif len_col <= 3:
+				logo_size = 120
+			elif len_col >= 4:
+				logo_size = 100
+			sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundryopenerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
+			sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp',0,len_col,logo_size)
 			print"col_1",col_1
 			sheet1.write(s1,col_no,str(col_1),style1)
 			col_no = col_no + 1
@@ -456,48 +467,85 @@ class kg_crm_offer(osv.osv):
 				cr.execute(item_sql)		
 				item_data = cr.dictfetchall()
 				print"item_dataitem_data",item_data
-				for ele in item_data:
-					sheet1.write(s2,coln_no,s_no,style6)
-					sheet1.write(s2+1,coln_no,ele['equipment_no'] or "-",style6)
-					sheet1.write(s2+2,coln_no,ele['description'] or "-",style6)
-					sheet1.write(s2+3,coln_no,ele['qty'] or "-",style6)
-					sheet1.write(s2+5,coln_no,ele['liquid_name'] or "-",style6)
-					sheet1.write(s2+6,coln_no,ele['temperature_in_c'] or "-",style6)
-					sheet1.write(s2+7,coln_no,ele['specific_gravity'] or "-",style6)
-					sheet1.write(s2+8,coln_no,ele['specific_gravity'] or "-",style6)
-					sheet1.write(s2+9,coln_no,ele['capacity_in_liquid'] or "-",style6)
-					sheet1.write(s2+10,coln_no,ele['head_in_liquid'] or "-",style6)
-					sheet1.write(s2+11,coln_no,ele['shut_off_head'] or "-",style6)
-					sheet1.write(s2+12,coln_no,ele['shut_off_head'] or "-",style6)
-					sheet1.write(s2+13,coln_no,ele['minimum_contionuous'] or "-",style6)
-					sheet1.write(s2+14,coln_no,ele['hydrostatic_test_pressure'] or "-",style6)
-					sheet1.write(s2+15,coln_no,ele['hydrostatic_test_pressure'] or "-",style6)
-					sheet1.write(s2+17,coln_no,"Horizontal Centrifual Front pull out Design Pump" or "-",style7)
+				if item_data:
+					for ele in item_data:
+						sheet1.write(s2,coln_no,s_no,style6)
+						sheet1.write(s2+1,coln_no,ele['equipment_no'] or "-",style6)
+						sheet1.write(s2+2,coln_no,ele['description'] or "-",style6)
+						sheet1.write(s2+3,coln_no,ele['qty'] or "-",style6)
+						sheet1.write(s2+5,coln_no,ele['liquid_name'] or "-",style6)
+						sheet1.write(s2+6,coln_no,ele['temperature_in_c'] or "-",style6)
+						sheet1.write(s2+7,coln_no,ele['specific_gravity'] or "-",style6)
+						sheet1.write(s2+8,coln_no,ele['specific_gravity'] or "-",style6)
+						sheet1.write(s2+9,coln_no,ele['capacity_in_liquid'] or "-",style6)
+						sheet1.write(s2+10,coln_no,ele['head_in_liquid'] or "-",style6)
+						sheet1.write(s2+11,coln_no,ele['shut_off_head'] or "-",style6)
+						sheet1.write(s2+12,coln_no,ele['shut_off_head'] or "-",style6)
+						sheet1.write(s2+13,coln_no,ele['minimum_contionuous'] or "-",style6)
+						sheet1.write(s2+14,coln_no,ele['hydrostatic_test_pressure'] or "-",style6)
+						sheet1.write(s2+15,coln_no,ele['hydrostatic_test_pressure'] or "-",style6)
+						sheet1.write(s2+17,coln_no,"Horizontal Centrifual Front pull out Design Pump" or "-",style7)
+						sheet1.row(s2+17).height = 490
+						sheet1.write(s2+18,coln_no,item['name'] or "-",style1)
+						sheet1.write(s2+19,coln_no,item['name'] or "-",style6)	
+						sheet1.write(s2+20,coln_no,ele['flange_standard'] or "-",style6)
+						sheet1.write(s2+21,coln_no,ele['efficiency_in'] or "-",style6)
+						sheet1.write(s2+22,coln_no,ele['efficiency_in'] or "-",style6)
+						sheet1.write(s2+23,coln_no,ele['efficiency_in'] or "-",style6)
+						sheet1.write(s2+24,coln_no,ele['motor_kw'] or "-",style6)
+						sheet1.write(s2+25,coln_no,ele['speed_in_pump'] or "-",style6)
+						sheet1.write(s2+26,coln_no,ele['type_of_drive'] or "-",style6)
+						sheet1.write(s2+27,coln_no,ele['npsh_r_m'] or "-",style6)
+						sheet1.write(s2+28,coln_no,ele['impeller_type'] or "-",style6)
+						sheet1.write(s2+29,coln_no,ele['maximum_allowable_soild'] or "-",style6)
+						sheet1.write(s2+30,coln_no,ele['bearing_number_nde'] or "-",style6)
+						sheet1.write(s2+31,coln_no,ele['bearing_number_nde'] or "-",style6)
+						sheet1.write(s2+32,coln_no,ele['bearing_number_nde'] or "-",style6)
+						sheet1.write(s2+33,coln_no,ele['bearing_number_nde'] or "-",style6)
+						sheet1.write(s2+34,coln_no,ele['bearing_number_nde'] or "-",style6)
+						sheet1.write(s2+35,coln_no,ele['bearing_number_nde'] or "-",style6)
+						sheet1.write(s2+36,coln_no,ele['bearing_number_nde'] or "-",style6)
+						
+						s_no = s_no + 1
+					coln_no = coln_no + 1
+				else:
+					sheet1.write(s2+1,coln_no,"-",style6)
+					sheet1.write(s2+2,coln_no,"-",style6)
+					sheet1.write(s2+3,coln_no,"-",style6)
+					sheet1.write(s2+5,coln_no,"-",style6)
+					sheet1.write(s2+6,coln_no,"-",style6)
+					sheet1.write(s2+7,coln_no,"-",style6)
+					sheet1.write(s2+8,coln_no,"-",style6)
+					sheet1.write(s2+9,coln_no,"-",style6)
+					sheet1.write(s2+10,coln_no,"-",style6)
+					sheet1.write(s2+11,coln_no,"-",style6)
+					sheet1.write(s2+12,coln_no,"-",style6)
+					sheet1.write(s2+13,coln_no,"-",style6)
+					sheet1.write(s2+14,coln_no,"-",style6)
+					sheet1.write(s2+15,coln_no,"-",style6)
+					sheet1.write(s2+17,coln_no,"-",style6)
 					sheet1.row(s2+17).height = 490
-					sheet1.write(s2+18,coln_no,item['name'] or "-",style1)
-					sheet1.write(s2+19,coln_no,item['name'] or "-",style6)	
-					sheet1.write(s2+20,coln_no,ele['flange_standard'] or "-",style6)
-					sheet1.write(s2+21,coln_no,ele['efficiency_in'] or "-",style6)
-					sheet1.write(s2+22,coln_no,ele['efficiency_in'] or "-",style6)
-					sheet1.write(s2+23,coln_no,ele['efficiency_in'] or "-",style6)
-					sheet1.write(s2+24,coln_no,ele['motor_kw'] or "-",style6)
-					sheet1.write(s2+25,coln_no,ele['speed_in_pump'] or "-",style6)
-					sheet1.write(s2+26,coln_no,ele['type_of_drive'] or "-",style6)
-					sheet1.write(s2+27,coln_no,ele['npsh_r_m'] or "-",style6)
-					sheet1.write(s2+28,coln_no,ele['impeller_type'] or "-",style6)
-					sheet1.write(s2+29,coln_no,ele['maximum_allowable_soild'] or "-",style6)
-					sheet1.write(s2+30,coln_no,ele['bearing_number_nde'] or "-",style6)
-					sheet1.write(s2+31,coln_no,ele['bearing_number_nde'] or "-",style6)
-					sheet1.write(s2+32,coln_no,ele['bearing_number_nde'] or "-",style6)
-					sheet1.write(s2+33,coln_no,ele['bearing_number_nde'] or "-",style6)
-					sheet1.write(s2+34,coln_no,ele['bearing_number_nde'] or "-",style6)
-					sheet1.write(s2+35,coln_no,ele['bearing_number_nde'] or "-",style6)
-					sheet1.write(s2+36,coln_no,ele['bearing_number_nde'] or "-",style6)
+					sheet1.write(s2+18,coln_no,"-",style1)
+					sheet1.write(s2+19,coln_no,"-",style6)	
+					sheet1.write(s2+20,coln_no,"-",style6)
+					sheet1.write(s2+21,coln_no,"-",style6)
+					sheet1.write(s2+22,coln_no,"-",style6)
+					sheet1.write(s2+23,coln_no,"-",style6)
+					sheet1.write(s2+24,coln_no,"-",style6)
+					sheet1.write(s2+25,coln_no,"-",style6)
+					sheet1.write(s2+26,coln_no,"-",style6)
+					sheet1.write(s2+27,coln_no,"-",style6)
+					sheet1.write(s2+28,coln_no,"-",style6)
+					sheet1.write(s2+29,coln_no,"-",style6)
+					sheet1.write(s2+30,coln_no,"-",style6)
+					sheet1.write(s2+31,coln_no,"-",style6)
+					sheet1.write(s2+32,coln_no,"-",style6)
+					sheet1.write(s2+33,coln_no,"-",style6)
+					sheet1.write(s2+34,coln_no,"-",style6)
+					sheet1.write(s2+35,coln_no,"-",style6)
+					sheet1.write(s2+36,coln_no,"-",style6)
+					coln_no = coln_no + 1
 					
-					s_no = s_no + 1
-				coln_no = coln_no + 1
-		
-		
 		if line_data:
 			em_col = 1
 			for item in line_data:
@@ -572,7 +620,10 @@ class kg_crm_offer(osv.osv):
 						em_col = em_col + 1
 						print"sssssssssssss",s
 				else:
+					sheet1.write(row_no,em_col,"-",style6)
+					sheet1.write(row_no+1,em_col,"-",style6)
 					em_col = em_col + 1
+					
 			print"row_norow_nodddddD",row_no
 			row_no = row_no + s
 		
@@ -602,20 +653,19 @@ class kg_crm_offer(osv.osv):
 				if mm_data:
 					for item_1 in mm_data:
 						if item_1['shaft_sealing'] or item_1['qty']:
-							m_col_no = 1
 							sheet1.write(row_no,em_col,item_1['shaft_sealing'] or "-",style6)
 							sheet1.write(row_no+1,em_col,item_1['qty'] or "-",style6)
 							sheet1.write(row_no+2,em_col,item_1['qty'] or "-",style6)
-							m_col_no = m_col_no+1
 						else:
-							m_col_no = 1
 							sheet1.write(row_no,em_col,"-",style6)
 							sheet1.write(row_no+1,em_col,"-",style6)
 							sheet1.write(row_no+2,em_col,"-",style6)
-							m_col_no = m_col_no+1
 						s = s + 2
 						em_col = em_col + 1
 				else:
+					sheet1.write(row_no,em_col,"-",style6)
+					sheet1.write(row_no+1,em_col,"-",style6)
+					sheet1.write(row_no+2,em_col,"-",style6)
 					em_col = em_col + 1
 		row_no = row_no + s
 		
@@ -641,18 +691,12 @@ class kg_crm_offer(osv.osv):
 				if ss_data:
 					for item_1 in ss_data:
 						if item_1['net_amount']:
-							m_col_no = 1
 							sheet1.write(row_no,em_col,item_1['net_amount'] or "-",style6)
-							m_col_no = m_col_no+1
 						else:
-							m_col_no = 1
 							sheet1.write(row_no,em_col,"-",style6)
-							m_col_no = m_col_no+1
 						em_col = em_col + 1
 				else:
-					m_col_no = 1
 					sheet1.write(row_no,em_col,"-",style6)
-					m_col_no = m_col_no+1
 					em_col = em_col + 1
 		row_no = row_no
 		print"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",row_no
