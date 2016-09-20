@@ -28,9 +28,6 @@ class kg_po_grn(osv.osv):
 
 	def _amount_line_tax(self, cr, uid, line, context=None):
 		val = 0.0
-		amt_to_per = (line.kg_discount / (line.po_grn_qty * line.price_unit or 1.0 )) * 100
-		kg_discount_per = line.kg_discount_per
-		tot_discount_per = amt_to_per + kg_discount_per
 		
 		if line.price_type == 'per_kg':
 			if line.product_id.uom_conversation_factor == 'two_dimension':
@@ -45,6 +42,11 @@ class kg_po_grn(osv.osv):
 				qty = line.po_grn_qty
 		else:
 			qty = line.po_grn_qty
+		
+		amt_to_per = (line.kg_discount / (qty * line.price_unit or 1.0 )) * 100
+		kg_discount_per = line.kg_discount_per
+		tot_discount_per = amt_to_per + kg_discount_per
+		
 		for c in self.pool.get('account.tax').compute_all(cr, uid, line.grn_tax_ids,
 			line.price_unit * (1-(tot_discount_per or 0.0)/100.0), qty, line.product_id,
 			 line.po_grn_id.supplier_id)['taxes']:			 
@@ -76,16 +78,23 @@ class kg_po_grn(osv.osv):
 				
 			for line in order.line_ids:
 				per_to_amt = (line.po_grn_qty * line.price_unit) * line.kg_discount_per / 100.00
-				tot_discount = line.kg_discount + per_to_amt
+				print"per_to_amtper_to_amt",per_to_amt
+				tot_discount = ((line.kg_discount / line.po_qty) * line.po_grn_qty )+ per_to_amt
+				print"tot_discount",tot_discount
 				val1 += line.price_subtotal
 				val += self._amount_line_tax(cr, uid, line, context=context)
 				val3 += tot_discount	
 			res[order.id]['other_charge']=(round(other_charges_amt,0))
 			res[order.id]['amount_tax']=(round(val,0))
-			res[order.id]['amount_untaxed']=(round(val1,0))
-			#res[order.id]['amount_total']=res[order.id]['amount_untaxed'] + res[order.id]['amount_tax'] 
-			res[order.id]['amount_total']=(round(val + val1 + res[order.id]['other_charge'],0))
+			#~ res[order.id]['amount_untaxed']=(round(val1,0))
+			res[order.id]['amount_untaxed']=(round(val1,0)) - (round(val,0)) + (round(val3,0))
+			print"res[order.id]['amount_untaxed']",res[order.id]['amount_untaxed']
 			res[order.id]['discount']=(round(val3,0))   
+			res[order.id]['amount_total'] = res[order.id]['amount_untaxed'] - res[order.id]['discount'] + res[order.id]['amount_tax'] + res[order.id]['other_charge']
+			print"res[order.id]['amount_total']",res[order.id]['amount_total']
+			#res[order.id]['amount_total']=res[order.id]['amount_untaxed'] + res[order.id]['amount_tax'] 
+			#~ res[order.id]['amount_total']=(round(val + val1 + res[order.id]['other_charge'],0))
+			
 		return res
 		
 	def _get_journal(self, cr, uid, context=None):	
@@ -201,6 +210,7 @@ class kg_po_grn(osv.osv):
 		'sup_invoice_no':fields.char('Supplier Invoice No',size=200, readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'sup_invoice_date':fields.date('Supplier Invoice Date', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'expense_line_id': fields.one2many('kg.po.grn.expense.track','expense_id','Expense Track',readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
+		'inv_flag': fields.boolean('Invoice Flag'),
 		
 		# Entry Info
 		
@@ -225,16 +235,16 @@ class kg_po_grn(osv.osv):
 		'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'grn_date': lambda * a: time.strftime('%Y-%m-%d'),
 		'created_by': lambda obj, cr, uid, context: uid,
-		'state':'item_load',
-		'type':'in',
-		#~ 'name':'',
-		'billing_status':'applicable',
-		'active':True,
-		'confirm_flag':False,
-		'approve_flag':False,
+		'state': 'item_load',
+		'type': 'in',
+		'billing_status': 'applicable',
+		'active': True,
+		'confirm_flag': False,
+		'approve_flag': False,
+		'inv_flag': False,
 		'company_id' : lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.po.grn', context=c),
-		#'payment_type':'credit',
-		'grn_dc':'only_grn',
+		#'payment_type': 'credit',
+		'grn_dc': 'only_grn',
 		
 	}
 	
@@ -1823,7 +1833,7 @@ class po_grn_line(osv.osv):
 			#~ taxes = tax_obj.compute_all(cr, uid, line.taxes_id, price, line.product_qty, line.product_id, line.order_id.partner_id)
 			taxes = tax_obj.compute_all(cr, uid, line.grn_tax_ids, price, qty, line.product_id, line.po_grn_id.supplier_id)
 			cur = line.po_grn_id.supplier_id.property_product_pricelist_purchase.currency_id
-			res[line.id] = cur_obj.round(cr, uid, cur, taxes['total'])
+			res[line.id] = cur_obj.round(cr, uid, cur, taxes['total_included'])
 		return res
 			
 	_columns = {
