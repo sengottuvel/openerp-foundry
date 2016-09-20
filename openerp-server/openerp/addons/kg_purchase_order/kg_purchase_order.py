@@ -34,10 +34,6 @@ class kg_purchase_order(osv.osv):
 	def _amount_line_tax(self, cr, uid, line, context=None):
 		logger.info('[KG OpenERP] Class: kg_purchase_order, Method: _amount_line_tax called...')
 		val = 0.0
-		new_amt_to_per = line.kg_discount / line.product_qty
-		amt_to_per = (line.kg_discount / (line.product_qty * line.price_unit or 1.0 )) * 100
-		kg_discount_per = line.kg_discount_per
-		tot_discount_per = amt_to_per + kg_discount_per
 		qty = 0
 		if line.price_type == 'per_kg':
 			if line.product_id.uom_conversation_factor == 'two_dimension':
@@ -53,12 +49,15 @@ class kg_purchase_order(osv.osv):
 		else:
 			qty = line.product_qty
 			
+		new_amt_to_per = line.kg_discount / qty
+		amt_to_per = (line.kg_discount / (qty * line.price_unit or 1.0 )) * 100
+		kg_discount_per = line.kg_discount_per
+		tot_discount_per = amt_to_per + kg_discount_per
 		#~ if line.price_type == 'per_kg':	
 			#~ if line.product_id.po_uom_in_kgs > 0:
 				#~ qty = line.product_qty * line.product_id.po_uom_in_kgs
 			#~ else:
 				#~ qty = line.product_qty
-				
 		for c in self.pool.get('account.tax').compute_all(cr, uid, line.taxes_id,
 			line.price_unit * (1-(tot_discount_per or 0.0)/100.0), qty, line.product_id,
 				line.order_id.partner_id)['taxes']:
@@ -66,33 +65,12 @@ class kg_purchase_order(osv.osv):
 			val += c.get('amount', 0.0)
 		return val	
 	
-	#~ def _amount_line_tax(self, cr, uid, line, context=None):
-		#~ # Qty Calculation
-		#~ if line.price_type == 'per_kg':								
-			#~ if line.product_id.po_uom_in_kgs > 0:
-				#~ qty = line.product_qty * line.product_id.po_uom_in_kgs
-			#~ else:
-				#~ qty = line.product_qty
-		#~ else:
-			#~ qty = line.product_qty
-		#~ # Price Calculation
-		#~ price_amt = 0
-		#~ if line.price_type == 'per_kg':
-			#~ if line.product_id.po_uom_in_kgs > 0:
-				#~ price_amt = line.product_qty / line.product_id.po_uom_in_kgs * line.price_unit
-		#~ else:
-			#~ price_amt = qty * line.price_unit
-		#~ val = 0.0		
-		#~ for c in self.pool.get('account.tax').compute_all(cr, uid, line.taxes_id, price_amt * (1-(line.kg_discount_per or 0.0)/100.0), qty, line.product_id, line.order_id.partner_id)['taxes']:
-			#~ val += c.get('amount', 0.0)
-				#~ 
-		#~ return val	
-	
 	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
 		logger.info('[KG OpenERP] Class: kg_purchase_order, Method: _amount_all called...')
 		res = {}
 		cur_obj=self.pool.get('res.currency')
 		other_charges_amt = 0
+		discount_per_value = 0
 		for order in self.browse(cr, uid, ids, context=context):
 			res[order.id] = {
 				'amount_untaxed': 0.0,
@@ -113,7 +91,10 @@ class kg_purchase_order(osv.osv):
 				
 			pol = self.pool.get('purchase.order.line')
 			for line in order.order_line:
-				tot_discount = line.kg_discount + line.kg_discount_per_value
+				print"line.price_subtotal",line.price_subtotal
+				discount_per_value = ((line.product_qty * line.price_unit) / 100.00) * line.kg_discount_per
+				print"discount_per_value",discount_per_value
+				tot_discount = line.kg_discount + discount_per_value
 				val1 += line.price_subtotal
 				
 				#for c in self.pool.get('account.tax').compute_all(cr, uid, line.taxes_id, line.price_unit, line.product_qty, line.product_id, order.partner_id)['taxes']:
@@ -209,7 +190,7 @@ class kg_purchase_order(osv.osv):
 		'mode_of_dispatch': fields.many2one('kg.dispatch.master','Mode of Dispatch',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'item_quality_term': fields.many2one('kg.item.quality.master','Item Quality Term',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		'item_quality_term_id': fields.many2many('kg.item.quality.master','general_term','po_id','term_id','Item Quality Term',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)],'cancel':[('readonly',True)]}),
-		
+		'sent_mail_flag': fields.boolean('Sent Mail Flag'),
 		
 		# Entry Info
 		
@@ -243,7 +224,8 @@ class kg_purchase_order(osv.osv):
 		'pricelist_id': 2,
 		'type_flag': False,
 		'insurance': 'na',
-	
+		'sent_mail_flag': False,
+		
 	}
 	
 	
@@ -529,9 +511,10 @@ class kg_purchase_order(osv.osv):
 								  'confirm_flag':'True',
 								  'confirmed_by':uid,
 								  'confirmed_date':time.strftime('%Y-%m-%d %H:%M:%S')})
-		if approval == 'yes' and obj.approval_flag == True:
+		if approval == 'yes' and obj.approval_flag == True and obj.sent_mail_flag == False:
 			self.spl_po_apl_mail(cr,uid,ids,obj,context)
-					
+			self.write(cr,uid,ids,{'sent_mail_flag':True})
+			
 		return True
 			
 	def wkf_approve_order(self, cr, uid, ids, context=None):
@@ -756,7 +739,7 @@ class kg_purchase_order(osv.osv):
 	
 		purchase = self.browse(cr, uid, ids[0], context=context)
 		
-		if not purchase.notes:
+		if not purchase.can_remark:
 			raise osv.except_osv(
 						_('Remarks Needed !!'),
 						_('Enter Remark in Remarks Tab....'))
@@ -833,13 +816,12 @@ class kg_purchase_order(osv.osv):
 			wf_service.trg_validate(uid, 'purchase.order', id, 'purchase_cancel', cr)
 		return True			
 	
-	def action_reject(self, cr, uid, ids, context=None):
+	def entry_reject(self, cr, uid, ids, context=None):
 		pi_line_obj = self.pool.get('purchase.requisition.line')
 		purchase = self.browse(cr, uid, ids[0], context=context)
-		
 		for line in purchase.order_line:
 			pi_line_obj.write(cr,uid,line.pi_line_id.id,{'line_state' : 'noprocess'})	
-		if not purchase.notes:
+		if not purchase.reject_remark:
 			raise osv.except_osv(
 				_('Remarks Needed !!'),
 				_('Enter Remark in Remarks Tab....'))
@@ -905,16 +887,19 @@ class kg_purchase_order_line(osv.osv):
 	def onchange_discount_value_calc(self, cr, uid, ids, kg_discount_per, product_qty, price_unit):
 		logger.info('[KG OpenERP] Class: kg_purchase_order_line, Method: onchange_discount_value_calc called...')
 		discount_value = (product_qty * price_unit) * kg_discount_per / 100.00
-		return {'value': {'kg_discount_per_value': discount_value }}
-		
+		if discount_value:
+			return {'value': {'kg_discount_per_value': discount_value,'discount_flag':True }}
+		else:
+			return {'value': {'kg_discount_per_value': discount_value,'discount_flag':False }}
+			
 	def onchange_disc_amt(self,cr,uid,ids,kg_discount,product_qty,price_unit,kg_disc_amt_per):
 		logger.info('[KG OpenERP] Class: kg_purchase_order_line, Method: onchange_disc_amt called...')
 		if kg_discount:
 			kg_discount = kg_discount + 0.00
 			amt_to_per = (kg_discount / (product_qty * price_unit or 1.0 )) * 100.00
-			return {'value': {'kg_disc_amt_per': amt_to_per}}	
+			return {'value': {'kg_disc_amt_per': amt_to_per,'discount_per_flag':True}}
 		else:
-			return {'value': {'kg_disc_amt_per': 0.0}}	
+			return {'value': {'kg_disc_amt_per': 0.0,'discount_per_flag':False}}	
 			
 	def _amount_line(self, cr, uid, ids, prop, arg, context=None):
 		logger.info('[KG OpenERP] Class: kg_purchase_order_line, Method: _amount_line called...')
@@ -992,6 +977,7 @@ class kg_purchase_order_line(osv.osv):
 
 	'price_subtotal': fields.function(_amount_line, store=True,string='Subtotal', digits_compute= dp.get_precision('Account')),
 	'kg_discount': fields.float('Discount Amount'),
+	'discount_flag': fields.boolean('Discount Flag'),
 	'kg_disc_amt_per': fields.float('Disc Amt(%)', digits_compute= dp.get_precision('Discount')),
 	'price_unit': fields.float('Unit Price', required=True, digits_compute= dp.get_precision('Product Price')),
 	'product_qty': fields.float('Quantity'),
@@ -1008,6 +994,7 @@ class kg_purchase_order_line(osv.osv):
 	'pi_line_id':fields.many2one('purchase.requisition.line','PI Line'),
 	'po_order':fields.one2many('kg.po.line','line_id','PO order Line'),
 	'kg_discount_per': fields.float('Discount (%)', digits_compute= dp.get_precision('Discount')),
+	'discount_per_flag': fields.boolean('Discount Amount Flag'),
 	'kg_discount_per_value': fields.float('Discount(%)Value', digits_compute= dp.get_precision('Discount')),
 	'line_state': fields.selection([('draft', 'Active'),('confirm','Confirmed'),('cancel', 'Cancel')], 'State'),
 	'group_flag': fields.boolean('Group By'),
@@ -1043,6 +1030,8 @@ class kg_purchase_order_line(osv.osv):
 	'name':'PO',
 	'cancel_flag': False,
 	'price_type': 'po_uom',
+	'discount_flag': False,
+	'discount_per_flag': False,
 	
 	}
 	
@@ -1138,20 +1127,18 @@ class kg_purchase_order_line(osv.osv):
 	
 	def _check_length(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])
-			
-		if rec.uom_conversation_factor == 'two_dimension':
-			print"aaaaaaa"
-			if rec.length <= 0:
-				print"bbbbbbbbbbb"
-				return False					
+		if rec.order_id.po_type != 'frompi':
+			if rec.uom_conversation_factor == 'two_dimension':
+				if rec.length <= 0:
+					return False					
 		return True
 		
 	def _check_breadth(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])
-			
-		if rec.uom_conversation_factor == 'two_dimension':
-			if rec.breadth <= 0:
-				return False					
+		if rec.order_id.po_type != 'frompi':
+			if rec.uom_conversation_factor == 'two_dimension':
+				if rec.breadth <= 0:
+					return False					
 		return True
 		
 	_constraints = [

@@ -75,6 +75,9 @@
 				
 				<!--Accessories Master Menu -->
 				<menuitem name="Accessories" parent="cpm_crm_master_menu" action="kg_accessories_master.mma_accessories_master" id="mam_accessories_master_menu" sequence="13"/>
+				
+				<!--Defect Master Menu -->
+				<menuitem name="Defect" parent="cpm_crm_master_menu" action="kg_defect_master.mma_defect_master" id="mam_defect_master_menu" sequence="14"/>
 		
 			<!-- CRM Enquiry Menu -->
 			<menuitem id="cpm_crm_enquiry_menu" name="Enquiry" parent="cpm_crm" sequence="2"/>
