@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+
+	<!-- Form View Start -->
+
+		<record id="t_form_v_sale_invoice_process" model="ir.ui.view">
+			<field name="name">Invoice Entry Form</field>
+			<field name="model">kg.sale.invoice</field>
+			<field name="arch" type="xml">
+				<form string="Sale Invoice" version="7.0" create="false" delete="false">
+					<header>
+						<button name="invoice_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
+						<button name="invoice_approve" type="object" string="Approve" states="confirmed" class="oe_highlight"/>
+						<button name="invoice_process" type="object" string="Create Invoice" states="approved" class="oe_highlight"/>
+						
+					</header>
+						<group>
+							<group>
+								<field name="name"/>
+								<field name="invoice_no"  attrs="{'invisible': [('state','in',['draft','confirmed','approved'])]}"/>
+								<field string="Customer" name="customer_id"
+								on_change="onchange_customer_details(customer_id)"
+                                context="{'search_default_customer':1, 'show_address': 1}"
+                                options='{"always_reload": True}'
+                                domain="[('customer', '=', True)]" required="1"
+                                attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}" />							
+								<field name="contact_person"/>
+								<field name="work_order_ids" widget="many2many_tags" required="1"  attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}"/>									
+										
+								<button name="load_wo_details" type="object" string="Load Order Details" class="oe_highlight"  attrs="{'invisible': [('state','in',['confirmed','approved','invoice','cancel'])]}"/>	
+							</group>											
+							<group>								
+								<field name="proforma_invoice_date" required="1" attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}"/>						
+								<field name="invoice_date" attrs="{'invisible': [('state','in',['draft','confirmed','approved'])]}"/>						
+								<field name="billing_address"  attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}"/>
+								<field name="del_address"  attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}"/>	
+								<field name="state" />	
+							</group>	
+						</group>
+							
+						<group string="Pump Details">
+							<field name="line_ids" colspan="4" nolabel="1">
+								<tree string="Pump History" create="false" delete="false">
+									<field name="pump_model_id" required="1"/>
+									<field name="order_category" required="1"/>	
+									<field name="qty" sum="qty"/>
+									<field name="unit_price" sum="unit_price"/>																
+									<field name="dealer_discount" sum="dealer_discount"/>
+									<field name="customer_discount" sum="customer_discount"/>
+									<field name="special_discount" sum="special_discount"/>
+									<field name="tax" sum="tax"/>
+									<field name="p_f" sum="p_f"/>
+									<field name="freight" sum="freight"/>
+									<field name="insurance" sum="insurance"/>									
+									<field name="total_price" sum="total_price"/>									
+								</tree>
+							</field>
+
+						</group>
+						<group string="Spare Details">
+							<field name="line_ids_a" colspan="4" nolabel="1">
+								<tree string="Spare History" create="false" delete="false">									
+									<field name="pump_id" required="1"/>
+									<field name="item_code" required="1"/>
+									<field name="item_name" required="1"/>
+									<field name="moc_id"/>
+									<field name="qty" sum="qty"/>									
+									<field name="unit_price" sum="unit_price"/>									
+									<field name="dealer_discount" sum="dealer_discount"/>
+									<field name="customer_discount" sum="customer_discount"/>
+									<field name="special_discount" sum="special_discount"/>
+									<field name="tax" sum="tax"/>
+									<field name="p_f" sum="p_f"/>
+									<field name="freight" sum="freight"/>
+									<field name="insurance" sum="insurance"/>
+									<field name="total_price" sum="total_price"/>
+								
+									
+								</tree>
+							</field>
+
+						</group>
+						<group string="Accessories Details">
+							<field name="line_ids_b" colspan="4" nolabel="1">
+								<tree string="Accessories History" create="false" delete="false">
+									<field name="access_id" required="1" readonly="1"/>
+									<field name="pump_id" required="1" readonly="1"/>
+									<field name="moc_id" required="1" readonly="1"/>
+									<field name="qty" sum="qty"/>
+									<field name="unit_price" sum="unit_price"/>
+									<field name="per_access_prime_cost" sum="per_access_prime_cost" readonly="1"/>
+									<field name="prime_cost" sum="prime_cost" readonly="1"/>
+									<field name="sam_ratio" sum="sam_ratio"/>
+									<field name="dealer_discount" sum="dealer_discount"/>
+									<field name="customer_discount" sum="customer_discount"/>
+									<field name="special_discount" sum="special_discount"/>
+									<field name="tax" sum="tax"/>
+									<field name="p_f" sum="p_f"/>
+									<field name="freight" sum="freight"/>
+									<field name="insurance" sum="insurance"/>
+									<field name="total_price" sum="total_price"/>
+																	
+								</tree>
+							</field>
+						</group>						
+						
+						<group string="Additional charge Details">
+							<field name="line_ids_c" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}" >
+								<tree string="Additional charge History" editable="top">
+									<field name="expense" required="1"/>
+									<field name="description"/>
+									<field name="amount" required="1" />
+									<field name="tax_id" widget="many2many_tags"/>
+									<field name="expense_amt" readonly="1"/>																	
+								</tree>
+							</field>
+						</group>
+						
+						<button name="load_advance" string="Load Advance" type="object" states="draft"/>
+							    <group string = "Advance Adjustment Details">
+								   <group>
+									 <field name="line_ids_d" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}" >
+										<tree editable="bottom" create="false" >
+											<field name="order_id" required="1" readonly="1"/>
+											<field name="order_amt" invisible="1"/>
+											<field name="cus_advance_id"/>
+											<field name="cus_advance_date" readonly="1"/>
+											<field name="tot_advance_amt" />
+											<field name="already_adjusted_amt" invisible="1"/>
+											<field name="balance_amt"/>
+											<field name="current_adv_amt"/>
+										</tree>
+									  </field>
+								  </group>
+							    </group>
+								
+					<group class="oe_subtotal_footer oe_right" colspan="2">
+                                <field name="total_amt" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+                                <field name="add_charge" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+                                <field name="advance_amt" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+                                <field name="round_off_amt" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+                              
+                                <div class="oe_subtotal_footer_separator oe_inline">
+                                    <label for="net_amt" />
+                                </div>
+                                <field name="net_amt" nolabel="1" class="oe_subtotal_footer_separator" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+                            </group>
+				</form>
+			</field>
+		</record>
+		
+		<record id="t_form_v_pump_sale_invoice" model="ir.ui.view">
+			<field name="name">Pump Invoice Entry Form</field>
+			<field name="model">ch.pumpspare.invoice</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<form string="Pump Invoice Details" version="7.0" create="false" delete="false">
+				
+					<group string="Pump Invoice Details">
+						<group>
+							<field name="pump_model_id" required="1" readonly="1"/>
+							<field name="order_category" required="1"  readonly="1"/>
+							<field name="qty" required="1"  readonly="1"/>
+							<field name="note" required="1"  readonly="1"/>
+						
+						</group>
+						<group>
+							<field name="customer_discount"/>
+							<field name="special_discount"/>
+							<field name="tax"/>
+							<field name="p_f"/>
+							<field name="freight"/>
+							<field name="insurance"/>
+						</group>					
+					</group>
+								
+				</form>
+			</field>
+		</record>
+		
+		<record id="t_form_v_spare_sale_invoice" model="ir.ui.view">
+			<field name="name">Spare Offer Entry Form</field>
+			<field name="model">ch.spare.invoice</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<form string="Spare Offer Details" version="7.0" create="false" delete="false">
+				<sheet>
+					<group string="Spare Offer Details">
+						<group>
+							
+							<field name="pump_id" required="1" readonly="1"/>
+							<field name="item_code" required="1" readonly="1"/>
+							<field name="item_name" required="1" readonly="1"/>
+							<field name="moc_id" required="1" readonly="1"/>
+							<field name="qty" readonly="1"/>
+							<field name="unit_price" readonly="1"/>
+						
+							<field name="pattern_id" readonly="1" invisible="1"/>
+							<field name="ms_id" readonly="1" invisible="1"/>
+							<field name="bot_id" readonly="1" invisible="1"/>
+						</group>
+						<group>
+							<field name="dealer_discount"/>
+							<field name="customer_discount"/>
+							<field name="special_discount"/>
+							<field name="tax"/>
+							<field name="p_f"/>
+							<field name="freight"/>
+							<field name="insurance"/>
+						</group>					
+					</group>
+						
+				</sheet>
+				</form>
+			</field>
+		</record>
+		
+		<record id="t_form_v_accessories_sale_invoice" model="ir.ui.view">
+			<field name="name">Accessories Offer Entry Form</field>
+			<field name="model">ch.accessories.invoice</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<form string="Accessories Offer Details" version="7.0" create="false" delete="false">
+				<sheet>
+					<group string="Accessories Offer Details">
+						<group>
+						<field name="access_id" required="1" readonly="1"/>
+						<field name="moc_id" required="1" readonly="1"/>
+						<field name="pump_id" readonly="1"/>
+						<field name="qty" readonly="1"/>
+						<field name="prime_cost" readonly="1"/>
+						<field name="sam_ratio"/>
+						<field name="dealer_discount"/>
+						<field name="customer_discount"/>
+						</group>
+						<group>
+						<field name="special_discount"/>
+						<field name="tax"/>
+						<field name="p_f"/>
+						<field name="freight"/>
+						<field name="insurance"/>
+
+						</group>
+					</group>
+						
+						
+						
+				</sheet>
+				</form>
+			</field>
+		</record>
+		
+		<record id="t_tree_v_sale_invoice_process" model="ir.ui.view">
+			<field name="name">Sale Invoice Entry Tree</field>
+			<field name="model">kg.sale.invoice</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';black:state == 'confirmed';gray:state == 'cancel'" 
+								toolbar="True" string="Enquiry Entry Tree" >					
+					<field name="name"/>
+					<field name="invoice_date"/>
+					<field name="invoice_no"/>
+					<field name="customer_id"/>	
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+		<!-- Search View Start -->
+
+		<record id="t_search_v_sale_invoice_process" model="ir.ui.view">
+            <field name="name">Invoice Entry Search</field>
+            <field name="model">kg.sale.invoice</field>
+            <field name="arch" type="xml">
+                <search string="Offer Entry Search">
+					<field name="name" string="Offer No"  filter_domain="[('name','ilike',self)]" />
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="Customer" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'customer_id'}"/>
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->
+	
+	<!-- Menu Action Start-->
+		
+		<record id="tma_sale_proforma_invoice" model="ir.actions.act_window">
+			<field name="name">Proforma Invoice</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.sale.invoice</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="domain">[('state','!=','invoice')]</field>
+			<field name="view_id" ref="t_tree_v_sale_invoice_process"/>
+			<field name="search_view_id" ref="t_search_v_sale_invoice_process"/>			
+		</record>
+		
+		<record id="tma_sale_cus_invoice" model="ir.actions.act_window">
+			<field name="name">Customer Invoice</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.sale.invoice</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="domain">[('state','=','invoice')]</field>
+			<field name="view_id" ref="t_tree_v_sale_invoice_process"/>
+			<field name="search_view_id" ref="t_search_v_sale_invoice_process"/>			
+		</record>
+	
+	
+	 <!-- Sequence Number Setting Starts Here -->
+	
+		<record forcecreate="1" id="seq_type_proforma" model="ir.sequence.type">	
+			<field name="name">KG Proforma Invoice</field>
+			<field name="code">kg.proforma.invoice</field>
+		</record>
+
+		<record forcecreate="1" id="seq_proforma" model="ir.sequence">
+		  <field name="name">KG Proforma Invoice</field>
+		  <field name="code">kg.proforma.invoice</field>
+		  <field name="padding" eval="3"/>
+		  <field name="prefix">PRO/IN/%(year)s/</field>
+		  <field name="reset_sequence">fiscal_reset</field>
+		</record>
+		
+		
+		<record forcecreate="1" id="seq_type_invoice" model="ir.sequence.type">	
+			<field name="name">KG Invoice</field>
+			<field name="code">kg.sale.invoice</field>
+		</record>
+
+		<record forcecreate="1" id="seq_invoice" model="ir.sequence">
+		  <field name="name">KG Invoice</field>
+		  <field name="code">kg.sale.invoice</field>
+		  <field name="padding" eval="3"/>
+		  <field name="prefix">IN/%(year)s/</field>
+		  <field name="reset_sequence">fiscal_reset</field>
+		</record>
+		
+		<!-- Sequence Number Setting Ends Here -->
+
+	
+        <!-- Menu item -->
+
+        <menuitem name="Sales"
+            id="menu_kg_sale_root"
+            sequence="90"/>
+
+		<menuitem id="menu_sale_parent" parent="menu_kg_sale_root" name="Invoice" sequence="2"/>		
+	
+		<menuitem id="kg_draft_bill_menu" parent="menu_sale_parent" name="Proforma Invoice" action="tma_sale_proforma_invoice" sequence="1"/>	
+		<menuitem id="kg_draft_bill_menus" parent="menu_sale_parent" name="Customer Invoice" action="tma_sale_cus_invoice" sequence="2"/>	
+
+		
+	</data>
+</openerp>

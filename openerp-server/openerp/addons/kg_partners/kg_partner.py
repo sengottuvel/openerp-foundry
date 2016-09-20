@@ -305,7 +305,8 @@ class kg_delivery_address(osv.osv):
 	_description = "Delivery Address"
 	
 	_columns = {
-
+	
+	'name': fields.char('Name'),
 	'src_id': fields.many2one('res.partner', 'Partner Master'),
 	'street': fields.char('Street', size=128,select=True),
 	'street1': fields.char('Street 1', size=128,select=True),
@@ -334,7 +335,8 @@ class kg_billing_address(osv.osv):
 	_description = "Billing Address"
 	
 	_columns = {
-
+	
+	'name': fields.char('Name'),
 	'bill_id': fields.many2one('res.partner', 'Partner Master'),
 	'street': fields.char('Street', size=128,select=True),
 	'street1': fields.char('Street 1', size=128,select=True),

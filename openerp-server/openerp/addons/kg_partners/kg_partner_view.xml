@@ -127,16 +127,17 @@
 					<form string="Delivery Address"	>
 						<group>
 							<group>
+								<field name="name"/>
 								<field name="landmark" placeholder="Landmark"/>
 								<field name="street" string="Street1"/>
 								<field name="street1" string="Street2"/>
 								<field name="city_id"/>
-								<field name="state_id"/>
-								<field name="country_id"/>
 							</group>
 							<group>
 								<field name="contact_no"/>
 								<field name="zip"/>
+								<field name="state_id"/>
+								<field name="country_id"/>
 								<field name="default"/>
 							</group>
 						</group>
@@ -160,16 +161,17 @@
 					<form string="Billing Address"	>
 						<group>
 							<group>
+								<field name="name"/>
 								<field name="landmark" placeholder="Landmark"/>
 								<field name="street" string="Street1"/>
 								<field name="street1" string="Street2"/>
 								<field name="city_id"/>
-								<field name="state_id"/>
-								<field name="country_id"/>
 							</group>
 							<group>
 								<field name="contact_no"/>
 								<field name="zip"/>
+								<field name="state_id"/>
+								<field name="country_id"/>
 								<field name="default"/>
 							</group>
 						</group>
