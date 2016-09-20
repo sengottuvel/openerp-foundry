@@ -230,6 +230,9 @@ class purchase_order(osv.osv):
 		'company_id': fields.many2one('res.company','Company',required=True,select=1, states={'approved':[('readonly',True)]}),
 		'journal_id': fields.many2one('account.journal', 'Journal'),
 		'approval_flag': fields.boolean('Approval Flag'),
+		'can_remark': fields.text('Cancel Remarks'),
+		'reject_remark': fields.text('Reject Remarks'),
+		
 		
 	}
 	_defaults = {
@@ -279,7 +282,7 @@ class purchase_order(osv.osv):
 				raise osv.except_osv(_('Invalid Action!'), _('In order to delete a purchase order, you must cancel it first.'))
 		
 		for s in purchase_orders:
-			if s['state'] in ['cancel']:
+			if s['state'] in ['draft']:
 				unlink_ids.append(s['id'])
 			else:
 				raise osv.except_osv(_('Invalid Action!'), _('In order to delete a purchase order, you must cancel it first.'))
