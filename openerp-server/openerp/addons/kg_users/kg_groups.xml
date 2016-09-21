@@ -41,6 +41,7 @@
             ref('kg_stock_inward.tpm_transactions'),
             ref('kg_stock_inward.tpm_planning_transactions'),
             ref('kg_stock_inward.tam_stock_inward'),
+            ref('kg_stock_inward.tam_stock_inward_details'),
             ref('kg_work_order.tam_work_order'),
             ref('kg_work_order.tam_unscheduled_work_order'),
             ref('kg_schedule.tam_schedule'),
@@ -76,6 +77,9 @@
             ref('kg_fettling.tam_welding'),
             ref('kg_fettling.tam_finish_grinding'),
             ref('kg_fettling.tam_reshot_blasting'),
+            ref('kg_fettling.tam_knock_out_sa'),
+            ref('kg_fettling.tam_finish_grinding_sa'),
+            ref('kg_fettling.tam_foundry_rejection_list'),
             
             
             ref('kg_fettling.tpm_fettling_batch_process'),
