@@ -14,9 +14,7 @@
             <form string="Department Issue" version="7.0">
 				<header>
 					<button name="entry_confirm" string="Confirm" type="object" states="confirmed" class="oe_highlight"/>
-<!--
 					<button name="action_process" states="approve" string="Issue to Substore" type="object" class="oe_highlight"/>
--->
 					<button name="entry_cancel" states="done" string="Cancel" type="object" class="oe_highlight"/>
 					<button name="entry_reject" states="approve" string="Reject" type="object" class="oe_highlight"/>
 				<!--<button name="print_issue_slip" states="done" string="Print Issue Slip" type="object" class="oe_highlight"/>	
