@@ -89,6 +89,7 @@ class kg_work_order(osv.osv):
 		],'Progress Status', readonly=True),
 		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode', readonly=True),
 		'version':fields.char('Version'),
+		'flag_for_stock': fields.boolean('For Stock'),
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		
@@ -102,7 +103,7 @@ class kg_work_order(osv.osv):
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
-		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),	   
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
 		
 		
 	}
@@ -119,7 +120,8 @@ class kg_work_order(osv.osv):
 		'active': True,
 		'division_id':_get_default_division,
 		'delivery_date' : lambda * a: time.strftime('%Y-%m-%d'),
-		'version': '00'
+		'version': '00',
+		'flag_for_stock': False,
 	}
 	
 	def onchange_priority(self, cr, uid, ids, order_category):
@@ -257,9 +259,9 @@ class kg_work_order(osv.osv):
 							_('Specify MOC for Pump Model %s!!')%(item.pump_model_id.name))
 						
 			cr.execute(''' update ch_order_bom_details set state = 'confirmed' where header_id = %s and flag_applicable = 't' ''',[item.id])
-			
+		
 		if entry.order_priority == 'normal' and entry.order_category in ('spare','service'):
-			
+		
 			### Schedule Creation ###
 			
 			schedule_item_vals = {
@@ -294,7 +296,7 @@ class kg_work_order(osv.osv):
 				'order_priority': 'emergency',
 				'delivery_date': entry.delivery_date,
 				'order_line_ids': [(6, 0, order_line_ids)],
-				'state' : 'draft',
+				'state' : 'draft',			   
 				'entry_mode' : 'auto',			   
 			}
 			
@@ -320,7 +322,7 @@ class kg_work_order(osv.osv):
 				'delivery_date': entry.delivery_date,
 				'order_line_ids': [(6, 0, order_line_ids)],
 				'state' : 'draft',
-				'entry_mode' : 'auto',					   
+				'entry_mode' : 'auto',				   
 			}
 			
 			schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
@@ -447,6 +449,7 @@ class ch_work_order_details(osv.osv):
 		### Used for Dynamic Length Calculation
 		'bp':fields.float('BP',required=True),
 		'shaft_ext':fields.float('Shaft Ext',required=True),
+		'flag_for_stock': fields.boolean('For Stock'),
 		
 	}
 	
@@ -456,16 +459,15 @@ class ch_work_order_details(osv.osv):
 		'state': 'draft',
 		'schedule_status': 'allow',
 		'delivery_date' : lambda * a: time.strftime('%Y-%m-%d'),
-		'flag_load_bom':False
+		'flag_load_bom':False,
+		'flag_for_stock':False
 		
 	}
 	
 	
 	def default_get(self, cr, uid, fields, context=None):
 		return context
-	
-	
-	
+		
 	def onchange_delivery_date(self, cr, uid, ids, delivery_date):
 		today = date.today()
 		today = str(today)
@@ -526,6 +528,7 @@ class ch_work_order_details(osv.osv):
 						LEFT JOIN kg_pattern_master pattern on pattern.id = bom.pattern_id
 						where bom.header_id = (select id from kg_bom where pump_model_id = %s and active='t') ''',[pump_model_id])
 				bom_details = cr.dictfetchall()
+				
 				if order_category == 'pump' :
 					for bom_details in bom_details:
 						if bom_details['position_id'] == None:
@@ -1079,9 +1082,12 @@ class ch_work_order_details(osv.osv):
 								if qty > 0:
 									bom_qty = qty * foundry_bom_qty
 								print "bom_qty",bom_qty
+								
 								if vertical_foundry['position_id'] == None:
 									raise osv.except_osv(_('Warning!'),
 									_('Kindly Configure Position No. in Foundry Items for respective Pump Bom and proceed further !!'))
+								
+								
 								bom_vals.append({
 																	
 									'bom_id': vertical_foundry['header_id'],

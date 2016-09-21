@@ -68,7 +68,6 @@
 										<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
 										<field name="cancel_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
 										<field name="update_user_id"/>
-										
 									</group>
 									<group>
 										<field name="crt_date"/>

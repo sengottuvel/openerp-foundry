@@ -9,8 +9,13 @@ from datetime import datetime
 dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
 ORDER_PRIORITY = [
-   ('normal','Normal'),
-   ('emergency','Emergency')
+   ('1','MS NC'),
+   ('2','NC'),
+   ('3','Service'),
+   ('4','Emergency'),
+   ('5','Spare'),
+   ('6','Normal'),
+  
 ]
 
 ORDER_CATEGORY = [
@@ -77,7 +82,7 @@ class kg_qc_verification(osv.osv):
 		'order_bomline_id': fields.related('schedule_line_id','order_bomline_id', type='many2one', relation='ch.order.bom.details', string='Schedule BOM Line Id', store=True, readonly=True),
 		
 		'order_no': fields.related('order_line_id','order_no', type='char', string='WO No.', store=True, readonly=True),
-		'order_priority': fields.related('order_id','order_priority', type='selection', selection=ORDER_PRIORITY, string='Priority', store=True, readonly=True),
+		'order_priority': fields.selection(ORDER_PRIORITY, string='Priority', readonly=True),
 		'order_category': fields.related('order_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 
 		
@@ -90,7 +95,7 @@ class kg_qc_verification(osv.osv):
 		
 		'stock_qty': fields.related('schedule_line_id','stock_qty', type='integer', string='Stock Qty', store=True, readonly=True),
 		'allocated_qty': fields.integer('Allocated Qty',readonly=True),
-		'qty': fields.integer('Qty', required=True),
+		'qty': fields.integer('Accepted Qty', required=True),
 		'rework_qty': fields.integer('Rework Qty'),
 		'reject_qty': fields.integer('Rejection Qty'),
 		'position_no': fields.char('Pos No.'),
@@ -99,6 +104,7 @@ class kg_qc_verification(osv.osv):
 		'reject_remark': fields.text('Rejection Remarks'),
 		'each_weight': fields.function(_get_each_weight, string='Each Weight(Kgs)', method=True, store=True, type='float'),
 		'total_weight': fields.function(_get_total_weight, string='Total Weight(Kgs)', method=True, store=True, type='float'),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
@@ -165,7 +171,7 @@ class kg_qc_verification(osv.osv):
        
 
 	def entry_confirm(self,cr,uid,ids,context=None):
-		"""
+	
 		production_obj = self.pool.get('kg.production')
 		schedule_line_obj = self.pool.get('ch.weekly.schedule.details')
 		planning_line_obj = self.pool.get('ch.daily.planning.details')
@@ -183,72 +189,705 @@ class kg_qc_verification(osv.osv):
 		
 		### Rejection Qty Updation
 		
-		reject_qty = entry.allocated_qty - (entry.qty + entry.rework_qty)
+		reject_qty = entry.allocated_qty - entry.qty
 		
+		if reject_qty > 0 and entry.reject_remarks_id.id == False:
+			raise osv.except_osv(_('Warning !'), _('Kindly give rejection remarks !!'))
+			
 		self.write(cr, uid, ids, {'cancel_remark':False, 'reject_qty':reject_qty or 0})
 		
-		### Creating Prroduction When Rejection
+		### Creating MS Inward for Accept Qty ###
 		
-		if reject_qty > 0:
-		
-			production_vals = {
-												
-				'name': self.pool.get('ir.sequence').get(cr, uid, 'kg.production') or '/',
-				'planning_id': entry.planning_id.id,
-				'planning_date': entry.planning_id.entry_date,
-				'division_id': entry.division_id.id,
-				'location' : entry.location,
-				'planning_line_id': entry.planning_line_id.id,
-				'schedule_id': entry.schedule_id.id,
-				'schedule_line_id': entry.schedule_line_id.id,
-				'qc_id': entry.id,
-				'production_qty': reject_qty,
-				'bal_produc_qty': reject_qty,
-				'qty' : 0,	
-				'excess_qty' : 0,
-				'production_type':'nc',
-				'state' : 'draft',
-				'order_type':entry.order_type,
-				'pattern_id' : entry.planning_line_id.pattern_id.id,
-				'pattern_name' : entry.planning_line_id.pattern_id.pattern_name,
-								
+		if entry.qty > 0:
+			ms_obj = self.pool.get('kg.machineshop')
+			entry_rec = self.browse(cr, uid, ids[0])
+			
+			### Sequence Number Generation ###
+			ms_name = ''    
+			ms_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.ms.inward')])
+			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,ms_seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(ms_seq_id[0],seq_rec.code))
+			ms_name = cr.fetchone();
+			
+			ms_vals = {
+				'name': ms_name[0],
+				'location':entry.location,
+				'schedule_id':entry.schedule_id.id,
+				'schedule_date':entry.schedule_date,
+				'schedule_line_id':entry.schedule_line_id.id,
+				'order_bomline_id':entry.order_bomline_id.id,
+				'order_id':entry.order_id.id,
+				'order_line_id':entry.order_line_id.id,
+				'order_no':entry.order_no,
+				'order_delivery_date':entry.order_line_id.delivery_date,
+				'order_date':entry.order_id.entry_date,
+				'order_category':entry.order_category,
+				'order_priority':entry.order_priority,
+				'pump_model_id':entry.pump_model_id.id,
+				'pattern_id':entry.pattern_id.id,
+				'pattern_name':entry.pattern_name,
+				'moc_id':entry.moc_id.id,
+				'schedule_qty':entry.qty,
+				'fettling_qty':entry.qty,
+				'inward_accept_qty':entry.qty,
+				'state':'waiting',
+				'ms_sch_qty': entry.qty,
+				'ms_type': 'foundry_item',
+				'item_code': entry.pattern_id.code,
+				'item_name': entry.pattern_name,
+				'position_id': entry_rec.order_bomline_id.position_id.id,
+			
 			}
 			
+			ms_id = ms_obj.create(cr, uid, ms_vals)
 		
-			production_id = production_obj.create(cr, uid, production_vals)
+		### Creating QC or Stock Allocation When Rejection
+		
+		if reject_qty > 0:
+			
+			reject_rem_qty = reject_qty
 				
-			sch_bomline_obj.write(cr, uid, entry.sch_bomline_id.id, {'transac_state':'sent_for_produc'})
+			### Checking in Stock Inward for Ready for MS ###
 			
-			schedule_line_obj.write(cr, uid, entry.schedule_line_id.id, {'transac_state':'sent_for_produc'})
+			cr.execute(""" select sum(available_qty) as stock_qty
+				from ch_stock_inward_details  
+				where pattern_id = %s and moc_id = %s
+				and foundry_stock_state = 'ready_for_ms' and available_qty > 0  """%(entry.pattern_id.id,entry.moc_id.id))
+			stock_inward_qty = cr.fetchone();
 			
-			planning_line_obj.write(cr, uid, entry.planning_line_id.id, {'transac_state':'sent_for_produc'})
-		
-		#### Stock Table Updatation Block ####
-		
-		cr.execute(''' select qty,allocation_id from kg_qc_verification where planning_line_id = %s
-		''',[entry.planning_line_id.id])
-		stock_qc_qty = cr.dictfetchall()
-		
-		for stock_item in stock_qc_qty:
+			if stock_inward_qty:
+				if stock_inward_qty[0] != None:
+					reject_rem_qty =  reject_qty - stock_inward_qty[0]
+					
+					if reject_rem_qty <= 0:
+						reject_rem_qty = 0
+						qc_qty = reject_qty
+					else:
+						reject_rem_qty = reject_rem_qty
+						qc_qty = stock_inward_qty[0]
+					
+					### Creating QC Verification ###
+					
+					qc_obj = self.pool.get('kg.qc.verification')
+					
+					### QC Sequence Number Generation  ###
+					qc_name = ''    
+					qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.qc.verification')])
+					rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
+					cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.entry_date))
+					qc_name = cr.fetchone();
+				
+					qc_vals = {
+													
+						'name': qc_name[0],
+						'schedule_id': entry.schedule_id.id,
+						'schedule_date': entry.schedule_date,
+						'division_id': entry.division_id.id,
+						'location' : entry.location,
+						'schedule_line_id': entry.schedule_line_id.id,
+						'order_id': entry.order_id.id,
+						'order_line_id': entry.order_line_id.id,
+						'qty' : qc_qty,
+						'stock_qty':qc_qty,                
+						'allocated_qty':qc_qty,              
+						'state' : 'draft',
+						'order_category':entry.order_category,
+						'order_priority':entry.order_priority,
+						'pattern_id' : entry.pattern_id.id,
+						'pattern_name' : entry.pattern_id.pattern_name, 
+						'moc_id' : entry.moc_id.id,
+								
+						}
+					
+					qc_id = qc_obj.create(cr, uid, qc_vals)
+					
+					### Qty Updation in Stock Inward ###
+					
+					inward_line_obj = self.pool.get('ch.stock.inward.details')
+					
+					cr.execute(""" select id,available_qty
+						from ch_stock_inward_details  
+						where pattern_id = %s and moc_id = %s
+						and foundry_stock_state = 'ready_for_ms' 
+						and available_qty > 0 """%(entry.pattern_id.id,entry.moc_id.id))
+						
+					stock_inward_items = cr.dictfetchall();
+					
+					stock_updation_qty = qc_qty
+					
+					
+					for stock_inward_item in stock_inward_items:
+						if stock_updation_qty > 0:
+							
+							if stock_inward_item['available_qty'] <= stock_updation_qty:
+								stock_avail_qty = 0
+								inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty,'foundry_stock_state':'reject'})
+							if stock_inward_item['available_qty'] > stock_updation_qty:
+								stock_avail_qty = stock_inward_item['available_qty'] - stock_updation_qty
+								inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
+								
+							if stock_inward_item['available_qty'] <= stock_updation_qty:
+								stock_updation_qty = stock_updation_qty - stock_inward_item['available_qty']
+							elif stock_inward_item['available_qty'] > stock_updation_qty:
+								stock_updation_qty = 0
+											
+							 
+			### Checking in Stock Inward for Foundry In Progress ###
 			
+			cr.execute(""" select sum(available_qty) as stock_qty
+				from ch_stock_inward_details  
+				where pattern_id = %s and moc_id = %s
+				and foundry_stock_state = 'foundry_inprogress' and available_qty > 0  """%(entry.pattern_id.id,entry.moc_id.id))
+			stock_inward_qty = cr.fetchone();
+			
+			if stock_inward_qty:
+				if stock_inward_qty[0] != None:
+					
+					rem_qty = reject_rem_qty
+					
+					### Checking STK WO ##
+					
+					cr.execute(""" select id,order_id,order_line_id,order_no,state,inward_accept_qty,
+						stage_id,stage_name,state from kg_fettling where order_id = 
+						(select id from kg_work_order where flag_for_stock = 't')
+						and pattern_id = %s and moc_id = %s and state != 'complete' """%(entry.pattern_id.id,entry.moc_id.id))
+					stk_ids = cr.dictfetchall();
+					
+					if stk_ids:
+					
+						for stk_item in stk_ids:
+							
+							### Qty Updation in Stock Inward ###
+						
+							inward_line_obj = self.pool.get('ch.stock.inward.details')
+							
+							cr.execute(""" select id,available_qty
+								from ch_stock_inward_details  
+								where pattern_id = %s and moc_id = %s
+								and foundry_stock_state = 'foundry_inprogress' 
+								and available_qty > 0 """%(entry.pattern_id.id,entry.moc_id.id))
+								
+							stock_inward_items = cr.dictfetchall();
+							
+							stock_updation_qty = rem_qty
+							
+							
+							for stock_inward_item in stock_inward_items:
+								if stock_updation_qty > 0:
+									
+									if stock_inward_item['available_qty'] <= stock_updation_qty:
+										stock_avail_qty = 0
+										inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty,'foundry_stock_state':'reject'})
+									if stock_inward_item['available_qty'] > stock_updation_qty:
+										stock_avail_qty = stock_inward_item['available_qty'] - stock_updation_qty
+										inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
+										
+									if stock_inward_item['available_qty'] <= stock_updation_qty:
+										stock_updation_qty = stock_updation_qty - stock_inward_item['available_qty']
+									elif stock_inward_item['available_qty'] > stock_updation_qty:
+										stock_updation_qty = 0
+											
+							
+							fettling_obj = self.pool.get('kg.fettling')
+							
+							stk_item_rec = fettling_obj.browse(cr, uid, stk_item['id'])
 
-			cr.execute(''' update kg_foundry_stock set 
-					qty = %s,qc_id = %s
-					where allocation_id = (
-					select allocation_id from kg_foundry_stock 
-					where 
-					schedule_id = %s and 
-					schedule_line_id = %s and 
-					planning_id = %s and
-					planning_line_id = %s and
-					allocation_id = %s and
-					sch_bomline_id = %s and
-					type = 'OUT' and
-					alloc_qty > 0)
-					''',
-					[stock_item['qty'], entry.id, entry.schedule_id.id, entry.schedule_line_id.id, 
-					entry.planning_id.id, entry.planning_line_id.id, stock_item['allocation_id'],entry.sch_bomline_id.id])
-		"""
+							### Sequence Number Generation ###
+							fettling_name = ''  
+							fettling_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.fettling.inward')])
+							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,fettling_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(fettling_seq_id[0],seq_rec.code))
+							fettling_name = cr.fetchone();
+							
+							fettling_vals = {
+								'name': fettling_name[0],
+								'location':entry.location,
+								'schedule_id':entry.schedule_id.id,
+								'schedule_date':entry.schedule_date,
+								'schedule_line_id':entry.schedule_line_id.id,
+								'order_bomline_id':entry.order_bomline_id.id,
+								'order_id':entry.order_id.id,
+								'order_line_id':entry.order_line_id.id,
+								'order_no':entry.order_no,
+								'order_delivery_date':entry.order_delivery_date,
+								'order_date':entry.order_date,
+								'order_category':entry.order_category,
+								'order_priority':entry.order_priority,
+								'pump_model_id':entry.pump_model_id.id,
+								'pattern_id':entry.pattern_id.id,
+								'pattern_code':entry.pattern_code,
+								'pattern_name':entry.pattern_name,
+								'moc_id':entry.moc_id.id,
+								'schedule_qty':rem_qty,
+								'production_id':entry.production_id.id,
+								'pour_qty':rem_qty,
+								'inward_accept_qty': rem_qty,
+								'state':'waiting',
+								
+								}
+							   
+							fettling_id = fettling_obj.create(cr, uid, fettling_vals)
+							
+							if stk_item['stage_name'] == None:
+								
+								### Updation in STK WO ###
+								stk_rem_qty =  stk_item_rec.inward_accept_qty - rem_qty
+								if stk_rem_qty > 0:
+									fettling_obj.write(cr, uid, stk_item['id'], {'inward_accept_qty': stk_rem_qty,'pour_qty':stk_rem_qty})
+								else:
+									fettling_obj.write(cr, uid, stk_item['id'], {'state':'complete'})
+									
+								if rem_qty <= stk_item_rec.inward_accept_qty:
+									inward_accept_qty = rem_qty
+								if rem_qty > stk_item_rec.inward_accept_qty:
+									inward_accept_qty = stk_item_rec.inward_accept_qty
+									
+								fettling_obj.write(cr, uid, fettling_id, {'inward_accept_qty': inward_accept_qty,'allocated_qty':inward_accept_qty,
+									'flag_allocated':'t','allocated_accepted_qty':inward_accept_qty,'allocation_state':'waiting'})
+									
+								allocated_qty = inward_accept_qty
+							
+							if stk_item['stage_name'] == 'KNOCK OUT':
+								
+								stk_knockout_qty = stk_item_rec.knockout_qty
+								
+								if rem_qty <= stk_knockout_qty:
+									knockout_qty = rem_qty
+								if rem_qty > stk_knockout_qty:
+									knockout_qty = stk_knockout_qty
+
+								### Sequence Number Generation ###
+								knockout_name = ''  
+								knockout_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.knock.out')])
+								seq_rec = self.pool.get('ir.sequence').browse(cr,uid,knockout_seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(knockout_seq_id[0],seq_rec.code))
+								knockout_name = cr.fetchone();
+								fettling_obj.write(cr, uid, fettling_id, {'state':'accept','pour_qty':knockout_qty,'inward_accept_qty': knockout_qty,
+								'stage_id':stk_item['stage_id'],'stage_name':stk_item['stage_name'],'knockout_date':time.strftime('%Y-%m-%d'),'knockout_qty': knockout_qty,'knockout_accept_qty':knockout_qty,'knockout_name':knockout_name[0],'allocated_qty':knockout_qty,
+										'flag_allocated':'t','allocated_accepted_qty':knockout_qty,'allocation_state':'waiting'})
+								
+								### Updation in STK WO ###
+								stk_rem_qty =  stk_knockout_qty - knockout_qty
+								if stk_rem_qty > 0:
+									fettling_obj.write(cr, uid, stk_item['id'], {'knockout_qty': stk_rem_qty,'knockout_accept_qty':stk_rem_qty})
+								else:
+									fettling_obj.write(cr, uid, stk_item['id'], {'state':'complete'})
+									
+								allocated_qty = knockout_qty
+							
+							if stk_item['stage_name'] == 'DECORING':
+								
+								stk_decoring_qty = stk_item_rec.decoring_qty
+								
+								if rem_qty <= stk_decoring_qty:
+									decoring_qty = rem_qty
+								if rem_qty > stk_decoring_qty:
+									decoring_qty = stk_decoring_qty
+								### Sequence Number Generation ###
+								decoring_name = ''  
+								decoring_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.decoring')])
+								seq_rec = self.pool.get('ir.sequence').browse(cr,uid,decoring_seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(decoring_seq_id[0],seq_rec.code))
+								decoring_name = cr.fetchone();
+								fettling_obj.write(cr, uid, fettling_id, {'state':'accept','pour_qty':decoring_qty,'inward_accept_qty': decoring_qty,'stage_id':stk_item['stage_id'],'stage_name':stk_item['stage_name'],'decoring_date':time.strftime('%Y-%m-%d'),
+								'decoring_qty': decoring_qty,'decoring_accept_qty':decoring_qty,'decoring_name':decoring_name[0],'allocated_qty':decoring_qty,
+										'flag_allocated':'t','allocated_accepted_qty':decoring_qty,'allocation_state':'waiting'})
+								
+								### Updation in STK WO ###
+								stk_rem_qty =  stk_decoring_qty - decoring_qty
+								if stk_rem_qty > 0:
+									fettling_obj.write(cr, uid, stk_item['id'], {'decoring_qty': stk_rem_qty,'decoring_accept_qty':stk_rem_qty})
+								else:
+									fettling_obj.write(cr, uid, stk_item['id'], {'state':'complete'})
+									
+								allocated_qty = decoring_qty
+							
+							
+							if stk_item['stage_name'] == 'SHOT BLAST':
+								
+								stk_shot_blast_qty = stk_item_rec.shot_blast_qty
+								
+								if rem_qty <= stk_shot_blast_qty:
+									shot_blast_qty = rem_qty
+								if rem_qty > stk_shot_blast_qty:
+									shot_blast_qty = stk_shot_blast_qty
+								### Sequence Number Generation ###
+								shot_blast_name = ''    
+								shot_blast_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.shot.blast')])
+								seq_rec = self.pool.get('ir.sequence').browse(cr,uid,shot_blast_seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(shot_blast_seq_id[0],seq_rec.code))
+								shot_blast_name = cr.fetchone();
+								fettling_obj.write(cr, uid, fettling_id, {'state':'accept','pour_qty':shot_blast_qty,'inward_accept_qty': shot_blast_qty,
+								'stage_id':stk_item['stage_id'],'stage_name':stk_item['stage_name'],'shot_blast_date':time.strftime('%Y-%m-%d'),
+								'shot_blast_qty': shot_blast_qty,'shot_blast_accept_qty':shot_blast_qty,'shot_blast_name':shot_blast_name[0],'allocated_qty':shot_blast_qty,
+										'flag_allocated':'t','allocated_accepted_qty':shot_blast_qty,'allocation_state':'waiting'})
+							
+								### Updation in STK WO ###
+								stk_rem_qty =  stk_shot_blast_qty - shot_blast_qty
+								if stk_rem_qty > 0:
+									fettling_obj.write(cr, uid, stk_item['id'], {'shot_blast_qty': stk_rem_qty,'shot_blast_accept_qty':stk_rem_qty})
+								else:
+									fettling_obj.write(cr, uid, stk_item['id'], {'state':'complete'})
+							
+								allocated_qty = shot_blast_qty
+							
+							if stk_item['stage_name'] == 'HAMMERING':
+								
+								stk_hammering_qty = stk_item_rec.hammering_qty
+								
+								if rem_qty <= stk_hammering_qty:
+									hammering_qty = rem_qty
+								if rem_qty > stk_hammering_qty:
+									hammering_qty = stk_hammering_qty
+								### Sequence Number Generation ###
+								hammering_name = '' 
+								hammering_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.hammering')])
+								seq_rec = self.pool.get('ir.sequence').browse(cr,uid,hammering_seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(hammering_seq_id[0],seq_rec.code))
+								hammering_name = cr.fetchone();
+								fettling_obj.write(cr, uid, fettling_id, {'state':'accept','pour_qty':hammering_qty,'inward_accept_qty': hammering_qty,
+								'stage_id':stk_item['stage_id'],'stage_name':stk_item['stage_name'],'hammering_date':time.strftime('%Y-%m-%d'),
+								'hammering_qty': hammering_qty,'hammering_accept_qty': hammering_qty,'hammering_name':hammering_name[0],'allocated_qty':hammering_qty,
+									'flag_allocated':'t','allocated_accepted_qty':hammering_qty,'allocation_state':'waiting'})
+							
+								### Updation in STK WO ###
+								stk_rem_qty =  stk_hammering_qty - hammering_qty
+								if stk_rem_qty > 0:
+									fettling_obj.write(cr, uid, stk_item['id'], {'hammering_qty': stk_rem_qty,'hammering_accept_qty':stk_rem_qty})
+								else:
+									fettling_obj.write(cr, uid, stk_item['id'], {'state':'complete'})
+									
+									
+								allocated_qty = hammering_qty
+							
+							if stk_item['stage_name'] == 'WHEEL CUTTING':
+								
+								stk_wheel_cutting_qty = stk_item_rec.wheel_cutting_qty
+								
+								if rem_qty <= stk_wheel_cutting_qty:
+									wheel_cutting_qty = rem_qty
+								if rem_qty > stk_wheel_cutting_qty:
+									wheel_cutting_qty = stk_wheel_cutting_qty
+								### Sequence Number Generation ###
+								wheel_cutting_name = '' 
+								wheel_cutting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.wheel.cutting')])
+								seq_rec = self.pool.get('ir.sequence').browse(cr,uid,wheel_cutting_seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(wheel_cutting_seq_id[0],seq_rec.code))
+								wheel_cutting_name = cr.fetchone();
+								fettling_obj.write(cr, uid, fettling_id, {'state':'accept','pour_qty':wheel_cutting_qty,'inward_accept_qty': wheel_cutting_qty,
+								'stage_id':stk_item['stage_id'],'stage_name':stk_item['stage_name'],'wheel_cutting_date':time.strftime('%Y-%m-%d'),
+								'wheel_cutting_qty': wheel_cutting_qty,'wheel_cutting_accept_qty': wheel_cutting_qty,'wheel_cutting_name':wheel_cutting_name[0],'allocated_qty':wheel_cutting_qty,
+									'flag_allocated':'t','allocated_accepted_qty':wheel_cutting_qty,'allocation_state':'waiting'})
+							
+								### Updation in STK WO ###
+								stk_rem_qty =  stk_wheel_cutting_qty - wheel_cutting_qty
+								if stk_rem_qty > 0:
+									fettling_obj.write(cr, uid, stk_item['id'], {'wheel_cutting_qty': stk_rem_qty,'wheel_cutting_accept_qty':stk_rem_qty})
+								else:
+									fettling_obj.write(cr, uid, stk_item['id'], {'state':'complete'})
+									
+								allocated_qty = wheel_cutting_qty
+							
+							if stk_item['stage_name'] == 'GAS CUTTING':
+								
+								stk_gas_cutting_qty = stk_item_rec.gas_cutting_qty
+								
+								if rem_qty <= stk_gas_cutting_qty:
+									gas_cutting_qty = rem_qty
+								if rem_qty > stk_gas_cutting_qty:
+									gas_cutting_qty = stk_gas_cutting_qty
+								### Sequence Number Generation ###
+								gas_cutting_name = ''   
+								gas_cutting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gas.cutting')])
+								seq_rec = self.pool.get('ir.sequence').browse(cr,uid,gas_cutting_seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(gas_cutting_seq_id[0],seq_rec.code))
+								gas_cutting_name = cr.fetchone();
+								fettling_obj.write(cr, uid, fettling_id, {'state':'accept','pour_qty':gas_cutting_qty,'inward_accept_qty': gas_cutting_qty,
+								'stage_id':stk_item['stage_id'],'stage_name':stk_item['stage_name'],'gas_cutting_date':time.strftime('%Y-%m-%d'),
+								'gas_cutting_qty': gas_cutting_qty,'gas_cutting_accept_qty': gas_cutting_qty,'gas_cutting_name':gas_cutting_name[0],'allocated_qty':gas_cutting_qty,
+									'flag_allocated':'t','allocated_accepted_qty':gas_cutting_qty,'allocation_state':'waiting'})
+							
+								### Updation in STK WO ###
+								stk_rem_qty =  stk_gas_cutting_qty - gas_cutting_qty
+								if stk_rem_qty > 0:
+									fettling_obj.write(cr, uid, stk_item['id'], {'gas_cutting_qty': stk_rem_qty,'gas_cutting_accept_qty':stk_rem_qty})
+								else:
+									fettling_obj.write(cr, uid, stk_item['id'], {'state':'complete'})
+									
+								allocated_qty = gas_cutting_qty
+							
+							if stk_item['stage_name'] == 'ARC CUTTING':
+								
+								stk_arc_cutting_qty = stk_item_rec.arc_cutting_qty
+								
+								if rem_qty <= stk_arc_cutting_qty:
+									arc_cutting_qty = rem_qty
+								if rem_qty > stk_arc_cutting_qty:
+									arc_cutting_qty = stk_arc_cutting_qty
+								### Sequence Number Generation ###
+								arc_cutting_name = ''   
+								arc_cutting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.arc.cutting')])
+								seq_rec = self.pool.get('ir.sequence').browse(cr,uid,arc_cutting_seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(arc_cutting_seq_id[0],seq_rec.code))
+								arc_cutting_name = cr.fetchone();
+								fettling_obj.write(cr, uid, fettling_id, {'state':'accept','pour_qty':arc_cutting_qty,'inward_accept_qty': arc_cutting_qty,
+								'stage_id':stk_item['stage_id'],'stage_name':stk_item['stage_name'],'arc_cutting_date':time.strftime('%Y-%m-%d'),
+								'arc_cutting_qty': arc_cutting_qty,'arc_cutting_accept_qty': arc_cutting_qty,'arc_cutting_name':arc_cutting_name[0],'allocated_qty':arc_cutting_qty,
+									'flag_allocated':'t','allocated_accepted_qty':arc_cutting_qty,'allocation_state':'waiting'})
+							
+								### Updation in STK WO ###
+								stk_rem_qty =  stk_arc_cutting_qty - arc_cutting_qty
+								if stk_rem_qty > 0:
+									fettling_obj.write(cr, uid, stk_item['id'], {'arc_cutting_qty': stk_rem_qty,'arc_cutting_accept_qty':stk_rem_qty})
+								else:
+									fettling_obj.write(cr, uid, stk_item['id'], {'state':'complete'})
+									
+								allocated_qty = arc_cutting_qty
+							
+							
+							if stk_item['stage_name'] == 'HEAT TREATMENT':
+								
+								stk_heat_qty = stk_item_rec.heat_qty
+								
+								if rem_qty <= stk_heat_qty:
+									heat_total_qty = rem_qty
+								if rem_qty > stk_heat_qty:
+									heat_total_qty = stk_heat_qty
+								### Next Stage Qty ###
+								heat_total_qty = entry.inward_reject_qty
+								fettling_obj.write(cr, uid, fettling_id, {'state':'accept','pour_qty':heat_total_qty,'inward_accept_qty': heat_total_qty,
+								'stage_id':stk_item['stage_id'],'stage_name':stk_item['stage_name'],'heat_date':time.strftime('%Y-%m-%d'),
+								'heat_total_qty': heat_total_qty,'heat_qty':heat_total_qty,'allocated_qty':heat_total_qty,
+									'flag_allocated':'t','allocated_accepted_qty':heat_total_qty,'allocation_state':'waiting'})
+							
+								### Updation in STK WO ###
+								stk_rem_qty =  stk_heat_qty - heat_total_qty
+								if stk_rem_qty > 0:
+									fettling_obj.write(cr, uid, stk_item['id'], {'heat_total_qty': stk_rem_qty,'heat_qty':stk_rem_qty,})
+								else:
+									fettling_obj.write(cr, uid, stk_item['id'], {'state':'complete'})
+									
+									
+								allocated_qty = heat_total_qty
+							
+							
+							if stk_item['stage_name'] == 'ROUGH GRINDING':
+								
+								stk_rough_grinding_qty = stk_item_rec.rough_grinding_qty
+								
+								if rem_qty <= stk_rough_grinding_qty:
+									rough_grinding_qty = rem_qty
+								if rem_qty > stk_rough_grinding_qty:
+									rough_grinding_qty = stk_rough_grinding_qty
+								### Sequence Number Generation ###
+								rough_grinding_name = ''    
+								rough_grinding_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.rough.grinding')])
+								seq_rec = self.pool.get('ir.sequence').browse(cr,uid,rough_grinding_seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(rough_grinding_seq_id[0],seq_rec.code))
+								rough_grinding_name = cr.fetchone();
+								fettling_obj.write(cr, uid, fettling_id, {'state':'accept','pour_qty':rough_grinding_qty,'inward_accept_qty': rough_grinding_qty,
+								'stage_id':stk_item['stage_id'],'stage_name':stk_item['stage_name'],'rough_grinding_date':time.strftime('%Y-%m-%d'),
+								'rough_grinding_qty': rough_grinding_qty,'rough_grinding_accept_qty': rough_grinding_qty,
+								'rough_grinding_name':rough_grinding_name[0],'allocated_qty':rough_grinding_qty,
+									'flag_allocated':'t','allocated_accepted_qty':rough_grinding_qty,'allocation_state':'waiting'})
+							
+								### Updation in STK WO ###
+								stk_rem_qty =  stk_rough_grinding_qty - rough_grinding_qty
+								if stk_rem_qty > 0:
+									fettling_obj.write(cr, uid, stk_item['id'], {'rough_grinding_qty': stk_rem_qty,'rough_grinding_accept_qty':stk_rem_qty})
+								else:
+									fettling_obj.write(cr, uid, stk_item['id'], {'state':'complete'})
+									
+								allocated_qty = rough_grinding_qty
+							
+							if stk_item['stage_name'] == 'FINISH GRINDING':
+								
+								stk_finish_grinding_qty = stk_item_rec.finish_grinding_qty
+								
+								if rem_qty <= stk_finish_grinding_qty:
+									finish_grinding_qty = rem_qty
+								if rem_qty > stk_finish_grinding_qty:
+									finish_grinding_qty = stk_finish_grinding_qty
+								### Sequence Number Generation ###
+								finish_grinding_name = ''   
+								finish_grinding_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.finish.grinding')])
+								seq_rec = self.pool.get('ir.sequence').browse(cr,uid,finish_grinding_seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(finish_grinding_seq_id[0],seq_rec.code))
+								finish_grinding_name = cr.fetchone();
+								fettling_obj.write(cr, uid, fettling_id, {'state':'accept','pour_qty':finish_grinding_qty,'inward_accept_qty': finish_grinding_qty,
+								'pour_qty':finish_grinding_qty,'inward_accept_qty': finish_grinding_qty,'stage_id':stk_item['stage_id'],
+								'stage_name':stk_item['stage_name'],'finish_grinding_date':time.strftime('%Y-%m-%d'),'finish_grinding_qty': finish_grinding_qty,
+								'finish_grinding_accept_qty': finish_grinding_qty,'finish_grinding_name':finish_grinding_name[0],'allocated_qty':finish_grinding_qty,
+									'flag_allocated':'t','allocated_accepted_qty':finish_grinding_qty,'allocation_state':'waiting'})
+								
+								### Updation in STK WO ###
+								stk_rem_qty =  stk_finish_grinding_qty - finish_grinding_qty
+								if stk_rem_qty > 0:
+									fettling_obj.write(cr, uid, stk_item['id'], {'finish_grinding_qty': stk_rem_qty,'finish_grinding_accept_qty':stk_rem_qty})
+								else:
+									fettling_obj.write(cr, uid, stk_item['id'], {'state':'complete'})
+									
+								allocated_qty = finish_grinding_qty
+							
+							
+							if stk_item['stage_name'] == 'RE SHOT BLASTING':
+								
+								stk_reshot_blasting_qty = stk_item_rec.reshot_blasting_qty
+								
+								if rem_qty <= stk_reshot_blasting_qty:
+									reshot_blasting_qty = rem_qty
+								if rem_qty > stk_reshot_blasting_qty:
+									reshot_blasting_qty = stk_reshot_blasting_qty
+								### Sequence Number Generation ###
+								reshot_blasting_name = ''   
+								reshot_blasting_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.reshot.blasting')])
+								seq_rec = self.pool.get('ir.sequence').browse(cr,uid,reshot_blasting_seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(reshot_blasting_seq_id[0],seq_rec.code))
+								reshot_blasting_name = cr.fetchone();
+								fettling_obj.write(cr, uid, fettling_id, {'state':'accept','pour_qty':reshot_blasting_qty,'inward_accept_qty': reshot_blasting_qty,
+								'stage_id':stk_item['stage_id'],'stage_name':stk_item['stage_name'],'reshot_blasting_date':time.strftime('%Y-%m-%d'),
+								'reshot_blasting_qty': reshot_blasting_qty,'reshot_blasting_accept_qty': reshot_blasting_qty,'reshot_blasting_name':reshot_blasting_name[0],'allocated_qty':reshot_blasting_qty,
+									'flag_allocated':'t','allocated_accepted_qty':reshot_blasting_qty,'allocation_state':'waiting'})
+						
+								### Updation in STK WO ###
+								stk_rem_qty =  stk_reshot_blasting_qty - reshot_blasting_qty
+								if stk_rem_qty > 0:
+									fettling_obj.write(cr, uid, stk_item['id'], {'reshot_blasting_qty': stk_rem_qty,'reshot_blasting_accept_qty':stk_rem_qty})
+								else:
+									fettling_obj.write(cr, uid, stk_item['id'], {'state':'complete'})
+									
+								allocated_qty = reshot_blasting_qty
+								
+							if stk_item['stage_name'] == 'WELDING':
+								
+								stk_welding_qty = stk_item_rec.welding_qty
+								
+								if rem_qty <= stk_welding_qty:
+									welding_qty = rem_qty
+								if rem_qty > stk_welding_qty:
+									welding_qty = stk_welding_qty
+								### Sequence Number Generation ###
+								welding_name = ''   
+								welding_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.welding')])
+								seq_rec = self.pool.get('ir.sequence').browse(cr,uid,welding_seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(welding_seq_id[0],seq_rec.code))
+								welding_name = cr.fetchone();
+								fettling_obj.write(cr, uid, fettling_id, {'state':'accept','pour_qty':welding_qty,'inward_accept_qty': welding_qty,'stage_id':stk_item['stage_id'],
+								'stage_name':stk_item['stage_name'],'welding_date':time.strftime('%Y-%m-%d'),
+								'welding_qty': welding_qty,'welding_accept_qty': welding_qty,
+								'welding_name':welding_name[0],'allocated_qty':welding_qty,
+									'flag_allocated':'t','allocated_accepted_qty':welding_qty,'allocation_state':'waiting'})
+						
+								### Updation in STK WO ###
+								stk_rem_qty =  stk_welding_qty - welding_qty
+								if stk_rem_qty > 0:
+									fettling_obj.write(cr, uid, stk_item['id'], {'welding_qty': stk_rem_qty,'welding_accept_qty':stk_rem_qty})
+								else:
+									fettling_obj.write(cr, uid, stk_item['id'], {'state':'complete'})
+									
+								allocated_qty = welding_qty
+							
+							rem_qty = rem_qty - allocated_qty
+					
+				else:
+					rem_qty = reject_rem_qty
+				
+				if rem_qty > 0:
+					
+					#### NC Creation for reject Qty ###
+					
+					### Production Number ###
+					produc_name = ''    
+					produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
+					rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
+					cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry.entry_date))
+					produc_name = cr.fetchone();
+					
+					### Issue Number ###
+					issue_name = '' 
+					issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
+					rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
+					cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry.entry_date))
+					issue_name = cr.fetchone();
+					
+					### Core Log Number ###
+					core_name = ''  
+					core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
+					rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
+					cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry.entry_date))
+					core_name = cr.fetchone();
+					
+					### Mould Log Number ###
+					mould_name = '' 
+					mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
+					rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
+					cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry.entry_date))
+					mould_name = cr.fetchone();
+					
+					if entry.order_id.flag_for_stock == False:
+					
+						production_vals = {
+												
+							'name': produc_name[0],
+							'schedule_id': entry.schedule_id.id,
+							'schedule_date': entry.schedule_date,
+							'division_id': entry.division_id.id,
+							'location' : entry.location,
+							'schedule_line_id': entry.schedule_line_id.id,
+							'order_id': entry.order_id.id,
+							'order_line_id': entry.order_line_id.id,
+							'qty' : rem_qty,              
+							'schedule_qty' : rem_qty,            
+							'state' : 'issue_done',
+							'order_category':entry.order_category,
+							'order_priority': '2',
+							'pattern_id' : entry.pattern_id.id,
+							'pattern_name' : entry.pattern_id.pattern_name, 
+							'moc_id' : entry.moc_id.id,
+							'request_state': 'done',
+							'issue_no': issue_name[0],
+							'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+							'issue_qty': 1,
+							'issue_state': 'issued',
+							'core_no': core_name[0],
+							'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+							'core_qty': rem_qty,
+							'core_rem_qty': rem_qty,
+							'core_state': 'pending',
+							'mould_no': mould_name[0],
+							'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+							'mould_qty': rem_qty,
+							'mould_rem_qty': rem_qty,
+							'mould_state': 'pending',      
+						}
+						production_id = production_obj.create(cr, uid, production_vals)
+			
+			
+		if reject_qty > 0:
+			
+			### Entry Creation in Foundry Rejection List ###
+			foundry_rejection_obj = self.pool.get('kg.foundry.rejection.list')
+			
+			rejection_vals = {
+				
+				'division_id': entry.division_id.id,
+				'location': entry.location,
+				'order_id': entry.order_id.id,
+				'order_line_id': entry.order_line_id.id,
+				'order_priority': entry.order_priority,
+				'pattern_id': entry.pattern_id.id,
+				'moc_id': entry.moc_id.id,
+				'stage_id':entry.stage_id.id,
+				'stage_name': 'QC Verification',
+				'qty': reject_qty,
+				'each_weight': entry.each_weight,
+				'reject_remarks_id': entry.reject_remarks_id.id
+			}
+			
+			foundry_rejection_id = foundry_rejection_obj.create(cr, uid, rejection_vals)	
+		
+		
+		
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		
 		return True

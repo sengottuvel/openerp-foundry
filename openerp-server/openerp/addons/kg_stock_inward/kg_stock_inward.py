@@ -99,6 +99,7 @@ class kg_stock_inward(osv.osv):
 
 	def entry_confirm(self,cr,uid,ids,context=None):
 		foundry_obj = self.pool.get('kg.foundry.stock')
+		inward_line_obj = self.pool.get('ch.stock.inward.details')
 		
 		today = date.today()
 		today = str(today)
@@ -123,6 +124,8 @@ class kg_stock_inward(osv.osv):
 			}
 							
 			stock_id = foundry_obj.create(cr, uid, foundry_stock_vals)
+			
+			inward_line_obj.write(cr, uid, [line_item.id], {'available_qty':line_item.qty})
 					
 			#### Stock Updation Block Ends Here ###
 			
@@ -145,7 +148,6 @@ class kg_stock_inward(osv.osv):
 			inward_name = inward_name[0]
 		else:
 			inward_name = entry.name
-		
 		
 		self.write(cr, uid, ids, {'name':inward_name,'total_value':total,'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		cr.execute(''' update ch_stock_inward_details set state = 'confirmed' where header_id = %s ''',[ids[0]])
@@ -207,8 +209,13 @@ class ch_stock_inward_details(osv.osv):
 		'serial_no': fields.char('Serial No', size=128),
 		'heat_no': fields.char('Heat No', size=128),
 		'moc_construction_id':fields.many2one('kg.moc.construction','MOC Construction',domain="[('active','=','t')]"),
-		
-		
+		'stock_mode': fields.selection([('manual','Manual'),('excess','Excess')],'Stock Mode'),
+		'foundry_stock_state': fields.selection([('foundry_inprogress','Foundry In Progress'),('ready_for_ms','Ready for MS'),('reject','Rejected')],'Status'),
+		'available_qty': fields.integer('Stock Qty'),
+		'stock_item': fields.selection([('foundry_item','Foundry'),('ms_item','MS Item')],'MS Item'),
+		'ms_stock_state': fields.selection([('operation_inprogress','Operation In Progress'),('ready_for_ass','Ready for Assembly'),('reject','Rejected')],'Status'),
+		'item_code': fields.char('Item Code', size=128),
+		'item_name': fields.char('Item Name', size=128),
 	
 	}
 	
@@ -217,6 +224,9 @@ class ch_stock_inward_details(osv.osv):
 	
 		'state': 'draft',				
 		'active': True,
+		'stock_mode': 'manual',
+		'foundry_stock_state': 'ready_for_ms',
+		'stock_item': 'foundry_item' 
 		
 	}
 		
@@ -267,8 +277,7 @@ class ch_stock_inward_details(osv.osv):
 		pattern_name = False
 		pattern_obj = self.pool.get('kg.pattern.master')
 		moc_obj = self.pool.get('kg.moc.master')
-		
-		if vals.get('moc_id') != None:
+		if vals.get('moc_id') > 0:
 			moc_rec = moc_obj.browse(cr, uid, vals.get('moc_id') )
 			mat_amt = moc_rec.rate
 		else:
@@ -298,7 +307,7 @@ class ch_stock_inward_details(osv.osv):
 		entry_rec = self.browse(cr, uid, ids[0] )
 		
 		if entry_rec.stock_type == 'pattern':
-			if vals.get('moc_id') == None: 
+			if vals.get('moc_id') == None or vals.get('moc_id') == False: 
 				moc_rec = moc_obj.browse(cr, uid, entry_rec.moc_id.id )
 				mat_amt = moc_rec.rate
 			else:
@@ -359,13 +368,16 @@ class ch_stock_inward_details(osv.osv):
 	
 	_constraints = [        
               
-        (_check_values, 'System not allow to save with zero and less than zero qty .!!',['Quantity']),
+        #~ (_check_values, 'System not allow to save with zero and less than zero qty .!!',['Quantity']),
         #(_check_line_duplicates, 'Inward Details are duplicate. Kindly check !! ', ['']),
         
         
        ]
 	
 ch_stock_inward_details()
+
+
+
 
 
 

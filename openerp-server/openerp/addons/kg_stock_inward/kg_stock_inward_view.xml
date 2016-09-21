@@ -107,26 +107,55 @@
 			<field name="model">ch.stock.inward.details</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<tree string="Stock Inward Details Entry Tree" editable="top" >					
+				<tree string="Stock Inward Details Entry Tree" create="false" edit="false" delete="false">					
 					<field name="location"/>
 					<field name="stock_type"/>
-					<field name="pump_model_id" attrs="{'required': [('stock_type','=','pump')]}"/>
-					<field name="pattern_id" attrs="{'required': [('stock_type','=','pattern')]}"/>
-					<field name="pattern_name" readonly="1"/>
+					<field name="pump_model_id"/>
+					<field name="pattern_id" string="Item Code"/>
+					<field name="pattern_name" string="Item Name"/>
 					<field name="moc_id"/>
-					<field name="qty"/>
-					<field name="serial_no"/>
-					<field name="heat_no"/>
+					<field name="available_qty"/>
+					<field name="serial_no" invisible="1"/>
+					<field name="heat_no" invisible="1"/>
 					<field name="each_wgt"/>
-					<field name="total_wgt" readonly="1"/>
-					<field name="unit_price" readonly="1"/>
-					<field name="total_value" readonly="1"/>
+					<field name="total_wgt"/>
+					<field name="unit_price" invisible="1" />
+					<field name="total_value" invisible="1" />
+					<field name="stock_mode"/>
+					<field name="foundry_stock_state"/>
 				    
 				</tree>
 			</field>
 		</record>
 		
 	<!-- Child Class Tree View End -->
+	
+	<!-- Search View for Child Class Start -->
+
+		<record id="t_search_v_stock_inward_details" model="ir.ui.view">
+            <field name="name">Stock Inward Details Entry Search</field>
+            <field name="model">ch.stock.inward.details</field>
+            <field name="arch" type="xml">
+                <search string="Stock Inward Details Entry Search">
+					<field name="pattern_id" string="Item Code"  filter_domain="[('pattern_id','ilike',self)]" />
+					<field name="pattern_name" string="Item Name"  filter_domain="[('pattern_name','ilike',self)]" />
+					<filter icon="terp-check" name="foundry_inprogress" string="Foundry In Progress" domain="[('foundry_stock_state','=','foundry_inprogress')]"/>
+					<filter icon="terp-check" name="ready_for_ms" string="Ready for MS" domain="[('foundry_stock_state','=','ready_for_ms')]"/>					
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="Type" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'stock_type'}"/>
+                        <filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
+                        <filter string="Item Code" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
+                        <filter string="Item Name" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_name'}"/>
+                        <filter string="MOC" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_id'}"/>
+                        <filter string="Stock Mode" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'stock_mode'}"/>
+                        <filter string="Stock State" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'foundry_stock_state'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View for Child Class End -->		
 			
 		
 	<!-- Search View Start -->
@@ -148,7 +177,9 @@
 			</field>
 		</record>
 		
-	<!-- Search View End -->		
+	<!-- Search View End -->	
+		
+	
 			
         
 	<!-- Menu Action Start-->
@@ -169,15 +200,95 @@
 	<!-- Child Menu Action Start-->
 		
 		<record id="tma_stock_inward_details" model="ir.actions.act_window">
-			<field name="name">Stock Inward Details</field>
+			<field name="name">Foundry Stock List</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">ch.stock.inward.details</field>
 			<field name="view_type">form</field>
+			<field name="view_mode">tree</field>
 			<field name="context">{}</field>
 			<field name="view_id" ref="t_tree_v_stock_inward_details"/>
+			<field name="search_view_id" ref="t_search_v_stock_inward_details"/>
+			<field name="domain">[('available_qty','>',0),('stock_item','=','foundry_item')]</field>
 		</record>
 		
 	<!-- Child Menu Action End-->
+	
+	
+	<!-- MS Stock List -->
+	
+	<!-- Child Class Tree View Start -->
+		
+		<record id="t_tree_v_ms_stock_details" model="ir.ui.view">
+			<field name="name">MS Stock Details Entry Tree</field>
+			<field name="model">ch.stock.inward.details</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree string="MS Stock Details Entry Tree" create="false" edit="false" delete="false">					
+					<field name="location"/>
+					<field name="stock_type" invisible="1"/>
+					<field name="pump_model_id"/>
+					<field name="item_code" string="Item Code"/>
+					<field name="item_name" string="Item Name"/>
+					<field name="moc_id"/>
+					<field name="available_qty"/>
+					<field name="serial_no" invisible="1"/>
+					<field name="heat_no" invisible="1"/>
+					<field name="each_wgt"/>
+					<field name="total_wgt" readonly="1"/>
+					<field name="unit_price" invisible="1" />
+					<field name="total_value" invisible="1" />
+					<field name="stock_mode"/>
+					<field name="ms_stock_state"/>
+				    
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Child Class Tree View End -->
+	
+	<!-- Search View for Child Class Start -->
+
+		<record id="t_search_v_ms_stock_details" model="ir.ui.view">
+            <field name="name">MS Stock Details Entry Search</field>
+            <field name="model">ch.stock.inward.details</field>
+            <field name="arch" type="xml">
+                <search string="MS Stock Details Entry Search">
+					<field name="item_code" string="Item Code"  filter_domain="[('item_code','ilike',self)]" />
+					<field name="item_name" string="Item Name"  filter_domain="[('item_name','ilike',self)]" />
+					<filter icon="terp-check" name="operation_inprogress" string="Operation In Progress" domain="[('ms_stock_state','=','operation_inprogress')]"/>
+					<filter icon="terp-check" name="ready_for_ass" string="Ready for Assembly" domain="[('ms_stock_state','=','ready_for_ass')]"/>					
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="Type" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'stock_type'}"/>
+                        <filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
+                        <filter string="Item Code" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'item_code'}"/>
+                        <filter string="Item Name" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'item_name'}"/>
+                        <filter string="MOC" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_id'}"/>
+                        <filter string="Stock Mode" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'stock_mode'}"/>
+                        <filter string="Stock State" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'ms_stock_state'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View for Child Class End -->
+	
+	
+	<!-- MS Stock List Action Start-->
+		
+		<record id="tma_ms_stock_details" model="ir.actions.act_window">
+			<field name="name">MS Stock List</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">ch.stock.inward.details</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_ms_stock_details"/>
+			<field name="search_view_id" ref="t_search_v_ms_stock_details"/>
+			<field name="domain">[('available_qty','>',0),('stock_item','=','ms_item')]</field>
+		</record>
+		
+	<!-- MS Stock List Action End-->
 	
 	<!-- Audit Log Xml Data Start -->
 		
@@ -200,20 +311,20 @@
     <!-- Sequence Number Setting Starts Here -->
 	
 <!--
-	<record forcecreate="1" id="seq_type_stock_inward" model="ir.sequence.type">	
-		<field name="name">Stock Inward</field>
-		<field name="code">kg.stock.inward</field>
-	</record>
+		<record forcecreate="1" id="seq_type_stock_inward" model="ir.sequence.type">	
+			<field name="name">Stock Inward</field>
+			<field name="code">kg.stock.inward</field>
+		</record>
 
-	<record forcecreate="1" id="seq_stock_inward" model="ir.sequence">
-	  <field name="name">Stock Inward</field>
-	  <field name="code">kg.stock.inward</field>
-	  <field name="padding" eval="3"/>
-	  <field name="prefix">SI/%(year)s/%(month)s/</field>
-	  <field name="reset_sequence">fiscal_reset</field>
-	</record>
-	
+		<record forcecreate="1" id="seq_stock_inward" model="ir.sequence">
+		  <field name="name">Stock Inward</field>
+		  <field name="code">kg.stock.inward</field>
+		  <field name="padding" eval="3"/>
+		  <field name="prefix">SI/%(year)s/%(month)s/</field>
+		  <field name="reset_sequence">fiscal_reset</field>
+		</record>
 -->
+	
 	<!-- Sequence Number Setting Ends Here -->
     
 	<!-- Menu Item Start -->

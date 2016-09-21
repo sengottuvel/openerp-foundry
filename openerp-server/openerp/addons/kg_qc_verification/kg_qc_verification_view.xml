@@ -42,13 +42,15 @@
 							<group>
 								<field name="stock_qty" readonly="1"/>
 								<field name="qty" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-								<field name="reject_qty" readonly="1"/>
-								<field name="diameter" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+								
+								<field name="diameter" invisible="1"/>
+								<field name="reject_remarks_id" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 							</group>											
 							<group>
 								<field name="allocated_qty" readonly="1"/>
-								<field name="rework_qty" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-								<field name="position_no" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+								<field name="reject_qty" readonly="1"/>
+								<field name="rework_qty" invisible="1"/>
+								<field name="position_no" invisible="1"/>
 								<field name="remark" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 							</group>					
 						</group>

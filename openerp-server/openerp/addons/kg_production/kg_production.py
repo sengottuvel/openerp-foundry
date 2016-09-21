@@ -35,7 +35,7 @@ class kg_production(osv.osv):
 	_rec_name = "pattern_code"
 	
 	def _get_default_division(self, cr, uid, context=None):
-		res = self.pool.get('kg.division.master').search(cr, uid, [('code','=','SAM'),('state','=','approved'), ('active','=','t')], context=context)
+		res = self.pool.get('kg.division.master').search(cr, uid, [('code','=','SAM'),('state','=','approved'),('active','=','t')], context=context)
 		return res and res[0] or False
 		
 		
@@ -76,7 +76,11 @@ class kg_production(osv.osv):
 		result = {}
 		pending_qty = 0.00
 		for entry in self.browse(cr, uid, ids, context=context):
-			pending_qty = entry.qty - entry.pour_qty		
+			if entry.total_mould_qty > entry.qty:
+				pending_qty = entry.total_mould_qty - entry.pour_qty
+			else:
+				pending_qty = entry.qty - entry.pour_qty
+		
 		result[entry.id]= pending_qty
 		return result
 	
@@ -109,17 +113,20 @@ class kg_production(osv.osv):
 		'order_category': fields.related('order_line_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'order_priority': fields.selection(ORDER_PRIORITY, string='Priority', store=True, readonly=True),
 		'order_value': fields.related('order_id','order_value', type='float', string='WO Value', store=True, readonly=True),
+
 		
 		'pump_model_id': fields.related('order_line_id','pump_model_id', type='many2one', relation='kg.pumpmodel.master', string='Pump Model', store=True, readonly=True),
 		'pattern_id': fields.related('schedule_line_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern Number', store=True, readonly=True),
 		'pattern_code': fields.related('pattern_id','name', type='char', string='Pattern Code', store=True, readonly=True),
 		'pattern_name': fields.related('pattern_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
 		'moc_id': fields.related('schedule_line_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
-		'schedule_qty': fields.related('schedule_line_id','qty', type='integer', size=100, string='Schedule Qty', store=True, readonly=True),
+		#~ 'schedule_qty': fields.related('schedule_line_id','qty', type='integer', size=100, string='Schedule Qty', store=True, readonly=True),
+		'schedule_qty': fields.integer('Schedule Qty', readonly=True),
 		'qty': fields.integer('Qty', required=True),
 		'each_weight': fields.function(_get_each_weight, string='Each Weight(Kgs)', method=True, store=True, type='float'),
 		'total_weight': fields.function(_get_total_weight, string='Total Weight(Kgs)', method=True, store=True, type='float'),
-		
+		'assembly_id': fields.integer('Assembly Inward', readonly=True),
+		'assembly_line_id': fields.integer('Assembly Inward Line', readonly=True),
 		
 		### Status Field ###
 		
@@ -199,6 +206,7 @@ class kg_production(osv.osv):
 		
 		### Core vs Mould Qty ###
 		'difference_qty': fields.function(_get_difference_qty, string='Difference', store=True, type='float'),
+		'allocated_wo': fields.text('Allocated WO'),
 		
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
@@ -269,11 +277,13 @@ class kg_production(osv.osv):
 		'core_no': core_name[0],
 		'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
 		'core_qty': entry_rec.qty,
+		'core_rem_qty': entry_rec.qty,
 		'core_state': 'pending',
 		'core_remarks': entry_rec.order_bomline_id.add_spec,
 		'mould_no': mould_name[0],
 		'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
 		'mould_qty': entry_rec.qty,
+		'mould_rem_qty': entry_rec.qty,
 		'mould_state': 'pending',
 		'core_remarks': entry_rec.order_bomline_id.add_spec,
 		'state' : 'issue_done',
@@ -292,7 +302,6 @@ class kg_production(osv.osv):
 		if core_date > today:
 			raise osv.except_osv(_('Warning!'),
 							_('System not allow to save with future date. !!'))
-		
 		if entry_rec.core_by == 'comp_employee':
 			if entry_rec.core_helper <= 0 or entry_rec.core_helper <= 0 or entry_rec.core_qty <=0:
 				raise osv.except_osv(_('Warning!'),
@@ -306,11 +315,11 @@ class kg_production(osv.osv):
 		total_core_qty = entry_rec.total_core_qty + entry_rec.core_qty
 		if total_core_qty < sch_qty:
 			core_state = 'partial'
-		if total_core_qty == sch_qty:
+		if total_core_qty >= sch_qty:
 			core_state = 'done'
-		if total_core_qty > sch_qty:
-			raise osv.except_osv(_('Warning!'),
-						_('Core Qty should be greater than Schedule Qty !!'))
+		#~ if total_core_qty > sch_qty:
+			#~ raise osv.except_osv(_('Warning!'),
+						#~ _('Core Qty should be greater than Schedule Qty !!'))
 		if core_state == 'partial':
 			core_entry_qty = 0
 		else:
@@ -323,7 +332,12 @@ class kg_production(osv.osv):
 			#~ upper_pan_no = (pan_no.upper())
 		
 		## Remaining Qty ###
-		remain_qty = entry_rec.qty - total_core_qty 
+		remain_qty = entry_rec.qty - total_core_qty
+		
+		if remain_qty < 0:
+			remain_qty = 0
+		else:
+			remain_qty = remain_qty
 			
 			
 		self.write(cr, uid, ids,{
@@ -346,8 +360,6 @@ class kg_production(osv.osv):
 		if mould_date > today:
 			raise osv.except_osv(_('Warning!'),
 							_('System not allow to save with future date. !!'))
-		
-		
 		if entry_rec.mould_by == 'comp_employee':
 			if entry_rec.mould_moulder <= 0 or entry_rec.mould_helper <= 0 or entry_rec.mould_qty <=0:
 				raise osv.except_osv(_('Warning!'),
@@ -361,12 +373,12 @@ class kg_production(osv.osv):
 		if total_mould_qty < sch_qty:
 			mould_state = 'partial'
 			state = 'issue_done'
-		if total_mould_qty == sch_qty:
+		if total_mould_qty >= sch_qty:
 			mould_state = 'done'
 			state = 'mould_com'
-		if total_mould_qty > sch_qty:
-			raise osv.except_osv(_('Warning!'),
-						_('Mould Qty should not be greater than Schedule Qty !!'))
+		#~ if total_mould_qty > sch_qty:
+			#~ raise osv.except_osv(_('Warning!'),
+						#~ _('Mould Qty should not be greater than Schedule Qty !!'))
 						
 		if mould_state == 'partial':
 			mould_entry_qty = 0
@@ -380,7 +392,12 @@ class kg_production(osv.osv):
 			#~ upper_pan_no = (pan_no.upper())
 			
 		## Remaining Qty ###
-		remain_qty = entry_rec.qty - total_mould_qty 
+		remain_qty = entry_rec.qty - total_mould_qty
+		
+		if remain_qty < 0:
+			remain_qty = 0
+		else:
+			remain_qty = remain_qty
 			
 		self.write(cr, uid, ids,{
 		
@@ -410,7 +427,6 @@ class kg_production(osv.osv):
 		mould_date = str(rec.mould_date)
 		if mould_date > today:
 			return False
-		
 		return True
 		
 	_constraints = [		
