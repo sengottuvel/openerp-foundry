@@ -49,11 +49,9 @@ class kg_moc_master(osv.osv):
 	def _production_cost(self, cursor, user, ids, name, arg, context=None):	
 		res = {}
 		total_pro_cost = 0.00
-		for purchase in self.browse(cursor, user, ids, context=context):
-			print"purchase"	,purchase
+		for purchase in self.browse(cursor, user, ids, context=context):			
 			pro_cost = 0	
-			for item in purchase.line_ids:
-				print"item",item
+			for item in purchase.line_ids:				
 				pro_cost_line=item.rate * item.qty			
 				pro_cost += pro_cost_line
 				total_pro_cost=pro_cost/100			
@@ -80,10 +78,11 @@ class kg_moc_master(osv.osv):
 		'line_ids_b':fields.one2many('ch.mechanical.chart', 'header_id', "Mechanical Chart"),
 		'line_ids_c':fields.one2many('ch.fettling.process', 'header_id', "Fettling Process"),
 		
-		'weight_type': fields.selection([('ci','CI'),('ss','SS'),('non_ferrous','Non-Ferrous')],'Family Type',required=True),
+		'weight_type': fields.selection([('ci','CI'),('ss','SS'),('non_ferrous','Non-Ferrous')],'Family Type' ,required=True),
 		'alias_name': fields.char('Alias Name', size=128),
 		'moc_type': fields.selection([('foundry_moc','Foundry MOC'),('purchase_moc','Purchase MOC'),('both','Both')],'Type'),
 		'product_id': fields.many2one('product.product','Equivalent Rejection Material'),	
+		'moc_cate_id': fields.many2one('kg.moc.category','MOC Category',required=True,domain="[('state','not in',('reject','cancel'))]"),	
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),	
 		
 		
@@ -257,8 +256,7 @@ class ch_moc_raw_material(osv.osv):
 				left join kg_brandmoc_rate header on header.id = line.header_id
 
 				where header.product_id = %s ORDER BY line.id ASC limit 1 """ %(purchase.product_id.id))
-			purchase_cost = cursor.fetchone()
-			print"purchase_cost",purchase_cost
+			purchase_cost = cursor.fetchone()			
 			if purchase_cost is not None:
 				if purchase_cost[0]:				
 					total_pro_cost = purchase_cost[0]
@@ -295,8 +293,7 @@ class ch_moc_raw_material(osv.osv):
 			vals.update({'uom': uom_name})
 		return super(ch_moc_raw_material, self).create(cr, uid, vals, context=context)
 		
-	def write(self, cr, uid, ids, vals, context=None):
-		print "idsidsidsidsidsidsids",ids
+	def write(self, cr, uid, ids, vals, context=None):		
 		pro_obj = self.pool.get('product.product')
 		if vals.get('product_id'):
 			uom_rec = pro_obj.browse(cr, uid, vals.get('product_id') )
@@ -362,8 +359,7 @@ class ch_mechanical_chart(osv.osv):
 	
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.range_flag == False:
-			print"www"
+		if entry.range_flag == False:			
 			if entry.min > entry.max:
 				return False
 		return True
@@ -423,11 +419,8 @@ class ch_fettling_process(osv.osv):
 		res = True
 		if rec.seq_no:
 			seq_no = rec.seq_no					
-			cr.execute(""" select seq_no from ch_fettling_process where seq_no  = '%s' and header_id =%s """ %(seq_no,rec.header_id.id))
-			print "seq_no", seq_no,rec.header_id.id
-			data = cr.dictfetchall()	
-			print"data",data		
-			print"data len",len(data)		
+			cr.execute(""" select seq_no from ch_fettling_process where seq_no  = '%s' and header_id =%s """ %(seq_no,rec.header_id.id))			
+			data = cr.dictfetchall()						
 			if len(data) > 1:
 				res = False
 			else:

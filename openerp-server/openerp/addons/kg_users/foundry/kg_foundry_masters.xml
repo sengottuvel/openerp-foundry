@@ -1255,6 +1255,15 @@
 		
 		<!-- End -->
 		
+		<record id="m_foundry_kg_moc_category" model="ir.model.access">
+			<field name="model_id" ref="kg_moc_category.model_kg_moc_category"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">MOC Category Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
 		
 		
 		

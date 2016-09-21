@@ -22,6 +22,7 @@
 							<group>						
 								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 								<field name="alias_name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+								<field name="moc_cate_id" />								
 								<field name="rate" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="pro_cost"/>
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
