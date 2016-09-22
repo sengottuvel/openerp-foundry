@@ -788,6 +788,9 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'market_division': fields.selection([('cp','CP'),('ip','IP')],'Market Division'),
 		'lubrication_type': fields.selection([('grease','Grease'),('oil','Oil')],'Lubrication'),
 		'flag_standard': fields.boolean('Non Standard'),
+		'push_bearing': fields.selection([('grease_bronze','Grease/Bronze'),('cft','CFT'),('cut','Cut Less Rubber')],'Push Bearing'),
+		'suction_size': fields.selection([('32','32'),('40','40'),('50','50'),('65','65'),('80','80'),('100','100'),('125','125'),('150','150'),('200','2000'),('250','250'),('300','300')],'Suction Size'),
+		'speed_in_rpm': fields.selection([('1450','1450'),('2900','2900')],'Speed in RPM'),
 		
 		##### Product model values ##########
 		#'impeller_type': fields.char('Impeller Type', readonly=True),

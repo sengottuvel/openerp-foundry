@@ -305,6 +305,9 @@
 								<field name="impeller_dia_max" />
 								<field name="max_allowable_test" />
 								<field name="crm_type" />
+								<field name="push_bearing" />
+								<field name="suction_size" />
+								<field name="speed_in_rpm" />
 								<field name="casing_design" />
 								<field name="shut_off_head" on_change="onchange_shut_off_pressure(shut_off_head)"/>
 								<field name="shut_off_pressure" on_change="onchange_hydrostatic_test_pressure(shut_off_pressure,discharge_pressure_kg)"/>

@@ -487,13 +487,41 @@ class kg_crm_offer(osv.osv):
 					psm.name as pumpseries,
 					psms.name as pumpseries,
 					enq_line.pre_suppliy_ref as pre_suppliy_ref,
-					enq_line.shaft_sealing as shaft_sealing,
-					enq_line.scope_of_supply as scope_of_supply,
+					(CASE WHEN enq_line.shaft_sealing = 'gld_packing_tiga' 
+						THEN 'Gland Packing-TIGA'
+						WHEN enq_line.shaft_sealing = 'gld_packing_ptfe' 
+						THEN 'Gland Packing-PTFE'
+						WHEN enq_line.shaft_sealing = 'mc_seal' 
+						THEN 'M/C Seal'
+						WHEN enq_line.shaft_sealing = 'dynamic_seal' 
+						THEN 'Dynamic Seal'
+						ELSE ''
+						end ) as shaft_sealing,
+					(CASE WHEN enq_line.scope_of_supply = 'bare_pump' 
+						THEN 'Bare Pump'
+						WHEN enq_line.scope_of_supply = 'pump_with_acces' 
+						THEN 'Pump With Accessories'
+						WHEN enq_line.scope_of_supply = 'pump_with_acces_motor' 
+						THEN 'Pump With Accessories And Motor'
+						ELSE ''
+						end ) as scope_of_supply,
 					enq_line.number_of_stages as number_of_stages,
-					enq_line.impeller_type as impeller_type,
+					(CASE WHEN enq_line.impeller_type = 'open' 
+						THEN 'Open'
+						WHEN enq_line.impeller_type = 'semi_open' 
+						THEN 'Semi Open'
+						WHEN enq_line.impeller_type = 'close' 
+						THEN 'Closed'
+						ELSE ''
+						end ) as impeller_type,
 					enq_line.impeller_dia_min as impeller_dia_min,
 					enq_line.size_suctionx as size_suctionx,
-					enq_line.flange_type as flange_type,
+					(CASE WHEN enq_line.flange_type = 'standard' 
+						THEN 'Standard'
+						WHEN enq_line.flange_type = 'optional' 
+						THEN 'Optional'
+						ELSE ''
+						end ) as flange_type,
 					psf.name as flange_standard,
 					enq_line.efficiency_in as efficiency_in,
 					enq_line.npsh_r_m as npsh_r_m,
@@ -505,7 +533,12 @@ class kg_crm_offer(osv.osv):
 					enq_line.hydrostatic_test_pressure as hydrostatic_test_pressure,
 					enq_line.setting_height as setting_height,
 					enq_line.full_load_rpm as full_load_rpm,
-					enq_line.frequency as frequency,
+					(CASE WHEN enq_line.frequency = '50' 
+						THEN '50'
+						WHEN enq_line.frequency = '60' 
+						THEN '60'
+						ELSE ''
+						end ) as frequency,
 					enq_line.motor_kw as motor_kw,
 					enq_line.motor_margin as motor_margin,
 					enq_line.speed_in_motor as speed_in_motor,
@@ -513,11 +546,32 @@ class kg_crm_offer(osv.osv):
 					enq_line.critical_speed as critical_speed,
 					enq_line.maximum_allowable_soild as maximum_allowable_soild,
 					enq_line.impeller_number as impeller_number,
-					
 					enq_line.impeller_dia_max as impeller_dia_max,
 					enq_line.max_allowable_test as max_allowable_test,
-					enq_line.crm_type as crm_type,
-					enq_line.casing_design as casing_design,
+					(CASE WHEN enq_line.crm_type = 'pull_out' 
+						THEN 'End Suction Back Pull Out'
+						WHEN enq_line.crm_type = 'split_case' 
+						THEN 'Split Case'
+						WHEN enq_line.crm_type = 'multistage' 
+						THEN 'Multistage'
+						WHEN enq_line.crm_type = 'twin_casing' 
+						THEN 'Twin Casing'
+						WHEN enq_line.crm_type = 'single_casing' 
+						THEN 'Single Casing'
+						WHEN enq_line.crm_type = 'self_priming' 
+						THEN 'Self Priming'
+						WHEN enq_line.crm_type = 'vo_vs4' 
+						THEN 'VO-VS4'
+						WHEN enq_line.crm_type = 'vg_vs5' 
+						THEN 'VG-VS5'
+						ELSE ''
+						end ) as crm_type,
+					(CASE WHEN enq_line.casing_design = 'base' 
+						THEN 'Base'
+						WHEN enq_line.casing_design = 'center_line' 
+						THEN 'Center Line'
+						ELSE ''
+						end ) as casing_design,
 					enq_line.shut_off_head as shut_off_head,
 					enq_line.shut_off_pressure as shut_off_pressure,
 					enq_line.minimum_contionuous as minimum_contionuous,
@@ -529,9 +583,28 @@ class kg_crm_offer(osv.osv):
 					enq_line.bearing_make as bearing_make,
 					enq_line.bearing_number_nde as bearing_number_nde,
 					enq_line.bearing_qty_nde as bearing_qty_nde,
-					enq_line.lubrication_type as lubrication_type,
-					enq_line.primemover_categ as primemover_categ,
-					enq_line.type_of_drive as type_of_drive,
+					(CASE WHEN enq_line.lubrication_type = 'grease' 
+						THEN 'Grease'
+						WHEN enq_line.lubrication_type = 'oil' 
+						THEN 'Oil'
+						ELSE ''
+						end ) as lubrication_type,
+					(CASE WHEN enq_line.primemover_categ = 'engine' 
+						THEN 'Engine'
+						WHEN enq_line.primemover_categ = 'motor' 
+						THEN 'Motor'
+						WHEN enq_line.primemover_categ = 'vfd' 
+						THEN 'VFD'
+						ELSE ''
+						end ) as primemover_categ,
+					(CASE WHEN enq_line.type_of_drive = 'motor_direct' 
+						THEN 'Motor-direct'
+						WHEN enq_line.type_of_drive = 'belt_drive' 
+						THEN 'Belt drive'
+						WHEN enq_line.type_of_drive = 'fc_gb' 
+						THEN 'Fluid Coupling Gear Box'
+						ELSE ''
+						end ) as type_of_drive,
 					pm.name as primemover,
 					enq_line.operation_range as operation_range
 					
