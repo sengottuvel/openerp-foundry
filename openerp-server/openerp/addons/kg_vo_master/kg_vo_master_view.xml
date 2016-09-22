@@ -57,7 +57,7 @@
 										<field name="min"/>										
 										<field name="max"/>	
 										<field name="star" />
-										<field name="part_list_id" />
+										<field name="part_list_id" invisible="1"/>
 										<field name="remarks" widget="char"/>																												
 									</tree>
 								</field>																								
@@ -70,6 +70,8 @@
 										<field name="value" invisible ="1"/>	
 										<field name="packing" />
 										<field name="partlist_id" />
+										<field name="bp"/>
+										<field name="shaft_ext"/>
 										<field name="remarks" widget="char"/>																												
 									</tree>
 								</field>																								
@@ -99,7 +101,8 @@
 							<page string="DeliveryPipe">	
 								<field name="line_ids_d" nolabel="1" >
 									<tree string="DeliveryPipe Assembly Tree" editable="top" >																								
-										<field name="size"/>																		
+										<field name="size"/>
+										<field name="star"/>																			
 										<field name="partlist_id"/>											
 										<field name="remarks" widget="char"/>																												
 									</tree>
@@ -109,7 +112,7 @@
 							<page string="Casing" invisible="1">	
 								<field name="line_ids_e" nolabel="1" >
 									<tree string="Casing Assembly Tree" editable="top" >																								
-										<field name="product_id"/>																		
+										<field name="product_id"/>																											
 										<field name="partlist_id"/>											
 										<field name="remarks" widget="char"/>																												
 									</tree>
@@ -118,7 +121,8 @@
 							<page string="Lubricant">	
 								<field name="line_ids_f" nolabel="1" >
 									<tree string="Lubricant Tree" editable="top" >																								
-										<field name="type"/>																		
+										<field name="type"/>
+										<field name="star"/>																				
 										<field name="partlist_id"/>											
 										<field name="remarks" widget="char"/>																												
 									</tree>

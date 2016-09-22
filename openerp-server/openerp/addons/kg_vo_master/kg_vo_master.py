@@ -232,6 +232,8 @@ class ch_bed_assembly(osv.osv):
 		'header_id':fields.many2one('kg.vo.master', 'VO Entry', required=True, ondelete='cascade'),		
 		'limitation':fields.selection([('upto_3000','Upto 3000'),('above_3000','Above 3000')],'Limitation',required=True),		
 		'value': fields.float('Value'),
+		'bp': fields.float('BP',required=True),
+		'shaft_ext': fields.float('Shaft Ext',required=True),
 		'packing': fields.selection([('g_p','G.P'),('m_s','M.S'),('f_s','F.S')],'Packing',required=True),
 		'partlist_id': fields.many2one('kg.bom', 'Part list Name',required=True,domain="[('category_type','=','part_list_bom')]"),
 		'remarks':fields.text('Remarks'),		
@@ -250,8 +252,8 @@ class ch_motor_assembly(osv.osv):
 	
 	_columns = {
 			
-		'header_id':fields.many2one('kg.vo.master', 'VO Entry', required=True, ondelete='cascade'),				
-		'value': fields.float('Value',required=True),	
+		'header_id':fields.many2one('kg.vo.master', 'VO Entry', required=True, ondelete='cascade'),			
+		'value': fields.selection([('90','90'),('100','100'),('112','112'),('132','132'),('160','160'),('180','180'),('200','200'),('225','225'),('250','250'),('280','280')],'Value',required=True),	
 		'partlist_id': fields.many2one('kg.bom', 'Part list Name',required=True,domain="[('category_type','=','part_list_bom')]"),
 		'remarks':fields.text('Remarks'),		
 	}
@@ -270,7 +272,7 @@ class ch_columnpipe_assembly(osv.osv):
 	_columns = {
 			
 		'header_id':fields.many2one('kg.vo.master', 'VO Entry', required=True, ondelete='cascade'),				
-		'pipe_type': fields.selection([('grease','Grease'),('cft_ext','CFT-EXT'),('cft_self','CFT-SELF'),('cut_less_rubber','Cut less Rubber')],'Type',required=True),
+		'pipe_type': fields.selection([('grease','Grease/Bronze'),('cft_self','CFT'),('cut_less_rubber','Cut less Rubber')],'Type',required=True),
 		'star': fields.selection([('nil','Nil'),('1','1'),('2','2'),('3','3'),('4','4'),('5','5'),('6','6'),('7','7')],'Star (in No)',required=True),
 		'partlist_id': fields.many2one('kg.bom', 'Part list Name',required=True,domain="[('category_type','=','part_list_bom')]"),
 		'remarks':fields.text('Remarks'),		
@@ -289,9 +291,10 @@ class ch_deliverypipe_assembly(osv.osv):
 	
 	_columns = {
 			
-		'header_id':fields.many2one('kg.vo.master', 'VO Entry', required=True, ondelete='cascade'),				
-		'size': fields.float('Size',required=True),
+		'header_id':fields.many2one('kg.vo.master', 'VO Entry', required=True, ondelete='cascade'),			
+		'size': fields.selection([('32','32'),('40','40'),('50','50'),('65','65'),('80','80'),('100','100'),('125','125'),('150','150'),('200','200'),('250','250'),('300','300')],'Size',required=True),
 		'partlist_id': fields.many2one('kg.bom', 'Part list Name',required=True,domain="[('category_type','=','part_list_bom')]"),
+		'star': fields.selection([('nil','Nil'),('1','1'),('2','2'),('3','3'),('4','4'),('5','5'),('6','6'),('7','7')],'Star (in No)',required=True),
 		'remarks':fields.text('Remarks'),		
 	}
 	
@@ -309,7 +312,7 @@ class ch_casing_assembly(osv.osv):
 			
 		'header_id':fields.many2one('kg.vo.master', 'VO Entry', required=True, ondelete='cascade'),		
 		'product_id': fields.many2one('kg.pumpmodel.master', 'Product model',required=True,domain="[('active','=','t')]"),
-		'partlist_id': fields.many2one('kg.bom', 'Part list Name',required=True,domain="[('category_type','=','part_list_bom')]"),
+		'partlist_id': fields.many2one('kg.bom', 'Part list Name',required=True,domain="[('category_type','=','part_list_bom')]"),		
 		'remarks':fields.text('Remarks'),		
 	}
 	
@@ -328,6 +331,7 @@ class ch_lubricant(osv.osv):
 		'header_id':fields.many2one('kg.vo.master', 'VO Entry', required=True, ondelete='cascade'),		
 		'type': fields.selection([('grease','Grease'),('cft_ext','CFT-EXT'),('cft_self','CFT-SELF'),('cut_less_rubber','Cut less Rubber')],'Type',required=True),
 		'partlist_id': fields.many2one('kg.bom', 'Part list Name',required=True,domain="[('category_type','=','part_list_bom')]"),
+		'star': fields.selection([('nil','Nil'),('1','1'),('2','2'),('3','3'),('4','4'),('5','5'),('6','6'),('7','7')],'Star (in No)',required=True),
 		'remarks':fields.text('Remarks'),		
 	}
 	
