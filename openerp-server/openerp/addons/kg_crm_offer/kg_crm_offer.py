@@ -368,7 +368,7 @@ class kg_crm_offer(osv.osv):
 		sheet1.row(13).height = 400
 		sheet1.write_merge(25, 25, 0, len_col, 'Pump Specification:', style5)
 		sheet1.row(25).height = 400
-		sheet1.write_merge(46, 46, 0, len_col, 'Material of construction:', style5)
+		sheet1.write_merge(76, 76, 0, len_col, 'Material of construction:', style5)
 		sheet1.row(46).height = 400
 		########
 		
@@ -398,43 +398,76 @@ class kg_crm_offer(osv.osv):
 		sheet1.write(s2+1,0,"Tag No",style6)
 		sheet1.write(s2+2,0,"Description",style6)
 		sheet1.write(s2+3,0,"Quantity in nos",style6)
-		sheet1.write(s2+5,0,"Liquid Handled",style6)
+		sheet1.write(s2+5,0,"Liquid",style6)
 		sheet1.write(s2+6,0,"Temperature in C",style6)
-		sheet1.write(s2+7,0,"Specific Gravity",style6)
-		sheet1.write(s2+8,0,"Capacity in LPM",style6)
-		sheet1.write(s2+9,0,"Capacity in M 3 / hr",style6)
-		sheet1.write(s2+10,0,"Head in M",style6)
-		sheet1.write(s2+11,0,"Shut off Head(Rated Impeller)-M",style6)
-		sheet1.write(s2+12,0,"% of Shut off head",style6)
-		sheet1.write(s2+13,0,"Min. Continuous Flow in M3/hr.",style6)
-		sheet1.write(s2+14,0,"Design pressure in Kg/cm2",style6)
-		sheet1.write(s2+15,0,"Hydro Test Pressure in kg/cm2",style6)
+		sheet1.write(s2+7,0,"Solid Concentration in %",style6)
+		sheet1.write(s2+8,0,"Specific Gravity",style6)
+		sheet1.write(s2+9,0,"Viscosity in CST",style6)
+		sheet1.write(s2+10,0,"Max Particle Size-mm",style6)
+		sheet1.write(s2+11,0,"NPSH-AVL",style6)
+		sheet1.write(s2+12,0,"Density(kg/m3)",style6)
+		sheet1.write(s2+13,0,"Capacity in M3/hr(Liquid)",style6)
+		sheet1.write(s2+14,0,"Total Head in Mlc(Liquid)",style6)
+		sheet1.write(s2+15,0,"Consistency In %",style6)
 		sheet1.write(s2+17,0,"Pump Type",style6)
 		sheet1.row(s2+17).height = 490
 		sheet1.write(s2+18,0,"Pump Model",style6)
-		sheet1.write(s2+19,0,"Size in mm",style6)
-		sheet1.write(s2+20,0,"Flange Standard",style6)
-		sheet1.write(s2+21,0,"Efficiency in % ",style6)
-		sheet1.write(s2+22,0,"BKW",style6)
-		sheet1.write(s2+23,0,"End of curve power-KW Rated.Imp",style6)
-		sheet1.write(s2+24,0,"Motor KW ",style6)
-		sheet1.write(s2+25,0,"Pump Speed in RPM",style6)
-		sheet1.write(s2+26,0,"Type of Drive",style6)
-		sheet1.write(s2+27,0,"NPSH R - M",style6)
-		sheet1.write(s2+28,0,"Impeller Type",style6)
-		sheet1.write(s2+29,0,"Max.Allowable Solid Size In mm",style6)
-		sheet1.write(s2+30,0,"Type of Bearing(DE+NDE)",style6)
-		sheet1.write(s2+31,0,"Max Noise Level",style6)
-		sheet1.write(s2+32,0,"Vibration Limit",style6)
-		sheet1.write(s2+33,0,"Weight of Pump + Acc",style6)
-		sheet1.write(s2+34,0,"Weight of Motor",style6)
-		sheet1.write(s2+35,0,"Reducer required at",style6)
-		sheet1.write(s2+36,0,"Balancing device",style6)
+		sheet1.write(s2+19,0,"Pumpseries",style6)
+		sheet1.write(s2+20,0,"Previous Supply Reference",style6)
+		sheet1.write(s2+21,0,"Shaft Sealing",style6)
+		sheet1.write(s2+22,0,"Scope of Supply",style6)
+		sheet1.write(s2+23,0,"Number of stages",style6)
+		sheet1.write(s2+24,0,"Impeller Type",style6)
+		sheet1.write(s2+25,0,"Impeller Dia Min mm",style6)
+		sheet1.write(s2+26,0,"Size-SuctionX Delivery(mm)",style6)
+		sheet1.write(s2+27,0,"Flange Type",style6)
+		sheet1.write(s2+28,0,"Flange Standard",style6)
+		sheet1.write(s2+29,0,"Efficiency in % Wat",style6)
+		sheet1.write(s2+30,0,"NPSH R - M",style6)
+		sheet1.write(s2+31,0,"Best Efficiency NPSH in M",style6)
+		sheet1.write(s2+32,0,"BKW Water",style6)
+		sheet1.write(s2+33,0,"BKW Liq",style6)
+		sheet1.write(s2+34,0,"Impeller Dia Rated mm",style6)
+		sheet1.write(s2+35,0,"Impeller Tip Speed -M/Sec",style6)
+		sheet1.write(s2+36,0,"Hydrostatic Test Pressure - Kg/cm2",style6)
+		sheet1.write(s2+37,0,"Setting Height",style6)
+		sheet1.write(s2+38,0,"Speed in RPM",style6)
+		sheet1.write(s2+39,0,"Motor frequency (HZ)",style6)
+		sheet1.write(s2+40,0,"Motor KW",style6)
+		sheet1.write(s2+41,0,"Motor Margin(%)",style6)
+		sheet1.write(s2+42,0,"Speed in RPM-Motor",style6)
+		sheet1.write(s2+43,0,"End of the curve - KW(Rated) liquid",style6)
+		sheet1.write(s2+44,0,"Critical Speed",style6)
+		sheet1.write(s2+45,0,"Maximum Allowable Soild Size - MM",style6)
+		sheet1.write(s2+46,0,"Impeller Number of vanes",style6)
+		
+		sheet1.write(s2+47,0,"Impeller Dia Max mm",style6)
+		sheet1.write(s2+48,0,"Max Allowable Test Pressure",style6)
+		sheet1.write(s2+49,0,"Type",style6)
+		sheet1.write(s2+50,0,"Casing Feet Location",style6)
+		sheet1.write(s2+51,0,"Shut off Head in M",style6)
+		sheet1.write(s2+52,0,"Shut off Pressure",style6)
+		sheet1.write(s2+53,0,"Minimum Contionuous Flow - M3/hr",style6)
+		sheet1.write(s2+54,0,"Specific Speed",style6)
+		sheet1.write(s2+55,0,"Suction Specific Speed",style6)
+		sheet1.write(s2+56,0,"Sealing Water Pressure Kg/cm^2",style6)
+		sheet1.write(s2+57,0,"Sealing Water Capcity- m3/hr",style6)
+		sheet1.write(s2+58,0,"GD SQ value",style6)
+		sheet1.write(s2+59,0,"Bearing Make",style6)
+		sheet1.write(s2+60,0,"BEARING NUMBER NDE / DE",style6)
+		sheet1.write(s2+61,0,"Bearing Qty NDE / DE",style6)
+		sheet1.write(s2+62,0,"Lubrication",style6)
+		sheet1.write(s2+63,0,"Primemover Category",style6)
+		sheet1.write(s2+64,0,"Transmission",style6)
+		sheet1.write(s2+65,0,"Primemover",style6)
+		sheet1.write(s2+66,0,"Operation Range",style6)
 		
 		if line_data:
 			coln_no = 1
 			s_no = 1
 			for item in line_data:
+				print"item['enquiry_line_id']--------------------------",item['enquiry_line_id']
+				print"item['pump_id']",item['pump_id']
 				item_sql = """
 					select 
 					enq_line.equipment_no as equipment_no,
@@ -442,26 +475,73 @@ class kg_crm_offer(osv.osv):
 					enq_line.qty as qty,
 					liquid.name as liquid_name,
 					enq_line.temperature_in_c as temperature_in_c,
+					enq_line.solid_concen as solid_concen,
 					enq_line.specific_gravity as specific_gravity,
+					enq_line.viscosity as viscosity,
+					enq_line.max_particle_size_mm as max_particle_size_mm,
+					enq_line.npsh_avl as npsh_avl,
+					enq_line.density as density,
 					enq_line.capacity_in_liquid as capacity_in_liquid,
 					enq_line.head_in_liquid as head_in_liquid,
-					enq_line.shut_off_head as shut_off_head,
-					enq_line.minimum_contionuous as minimum_contionuous,
-					enq_line.hydrostatic_test_pressure as hydrostatic_test_pressure,
+					enq_line.consistency as consistency,
+					psm.name as pumpseries,
+					psms.name as pumpseries,
+					enq_line.pre_suppliy_ref as pre_suppliy_ref,
+					enq_line.shaft_sealing as shaft_sealing,
+					enq_line.scope_of_supply as scope_of_supply,
+					enq_line.number_of_stages as number_of_stages,
+					enq_line.impeller_type as impeller_type,
+					enq_line.impeller_dia_min as impeller_dia_min,
+					enq_line.size_suctionx as size_suctionx,
+					enq_line.flange_type as flange_type,
 					psf.name as flange_standard,
 					enq_line.efficiency_in as efficiency_in,
-					enq_line.motor_kw as motor_kw,
-					enq_line.speed_in_pump as speed_in_pump,
-					enq_line.type_of_drive as type_of_drive,
 					enq_line.npsh_r_m as npsh_r_m,
-					enq_line.impeller_type as impeller_type,
+					enq_line.best_efficiency as best_efficiency,
+					enq_line.bkw_water as bkw_water,
+					enq_line.bkw_liq as bkw_liq,
+					enq_line.impeller_dia_rated as impeller_dia_rated,
+					enq_line.impeller_tip_speed as impeller_tip_speed,
+					enq_line.hydrostatic_test_pressure as hydrostatic_test_pressure,
+					enq_line.setting_height as setting_height,
+					enq_line.full_load_rpm as full_load_rpm,
+					enq_line.frequency as frequency,
+					enq_line.motor_kw as motor_kw,
+					enq_line.motor_margin as motor_margin,
+					enq_line.speed_in_motor as speed_in_motor,
+					enq_line.end_of_the_curve as end_of_the_curve,
+					enq_line.critical_speed as critical_speed,
 					enq_line.maximum_allowable_soild as maximum_allowable_soild,
-					enq_line.bearing_number_nde as bearing_number_nde
+					enq_line.impeller_number as impeller_number,
+					
+					enq_line.impeller_dia_max as impeller_dia_max,
+					enq_line.max_allowable_test as max_allowable_test,
+					enq_line.crm_type as crm_type,
+					enq_line.casing_design as casing_design,
+					enq_line.shut_off_head as shut_off_head,
+					enq_line.shut_off_pressure as shut_off_pressure,
+					enq_line.minimum_contionuous as minimum_contionuous,
+					enq_line.specific_speed as specific_speed,
+					enq_line.suction_specific_speed as suction_specific_speed,
+					enq_line.sealing_water_pressure as sealing_water_pressure,
+					enq_line.sealing_water_capacity as sealing_water_capacity,
+					enq_line.gd_sq_value as gd_sq_value,
+					enq_line.bearing_make as bearing_make,
+					enq_line.bearing_number_nde as bearing_number_nde,
+					enq_line.bearing_qty_nde as bearing_qty_nde,
+					enq_line.lubrication_type as lubrication_type,
+					enq_line.primemover_categ as primemover_categ,
+					enq_line.type_of_drive as type_of_drive,
+					pm.name as primemover,
+					enq_line.operation_range as operation_range
 					
 					from ch_kg_crm_pumpmodel enq_line
 					
 					left join kg_fluid_master liquid on(liquid.id=enq_line.fluid_id)
 					left join ch_pumpseries_flange psf on(psf.id=enq_line.flange_standard)
+					left join kg_pumpseries_master psm on(psm.id=enq_line.pumpseries_id)
+					left join kg_pumpseries_master psms on(psms.id=enq_line.spare_pumpseries_id)
+					left join kg_primemover_master pm on(pm.id=enq_line.primemover_id)
 					where enq_line.id = """+ str(item['enquiry_line_id']) +""" and enq_line.pump_id = """+ str(item['pump_id']) + """ order by enq_line.pump_id
 					"""
 				cr.execute(item_sql)		
@@ -475,36 +555,67 @@ class kg_crm_offer(osv.osv):
 						sheet1.write(s2+3,coln_no,ele['qty'] or "-",style6)
 						sheet1.write(s2+5,coln_no,ele['liquid_name'] or "-",style6)
 						sheet1.write(s2+6,coln_no,ele['temperature_in_c'] or "-",style6)
-						sheet1.write(s2+7,coln_no,ele['specific_gravity'] or "-",style6)
+						sheet1.write(s2+7,coln_no,ele['solid_concen'] or "-",style6)
 						sheet1.write(s2+8,coln_no,ele['specific_gravity'] or "-",style6)
-						sheet1.write(s2+9,coln_no,ele['capacity_in_liquid'] or "-",style6)
-						sheet1.write(s2+10,coln_no,ele['head_in_liquid'] or "-",style6)
-						sheet1.write(s2+11,coln_no,ele['shut_off_head'] or "-",style6)
-						sheet1.write(s2+12,coln_no,ele['shut_off_head'] or "-",style6)
-						sheet1.write(s2+13,coln_no,ele['minimum_contionuous'] or "-",style6)
-						sheet1.write(s2+14,coln_no,ele['hydrostatic_test_pressure'] or "-",style6)
-						sheet1.write(s2+15,coln_no,ele['hydrostatic_test_pressure'] or "-",style6)
+						sheet1.write(s2+9,coln_no,ele['viscosity'] or "-",style6)
+						sheet1.write(s2+10,coln_no,ele['max_particle_size_mm'] or "-",style6)
+						sheet1.write(s2+11,coln_no,ele['npsh_avl'] or "-",style6)
+						sheet1.write(s2+12,coln_no,ele['density'] or "-",style6)
+						sheet1.write(s2+13,coln_no,ele['capacity_in_liquid'] or "-",style6)
+						sheet1.write(s2+14,coln_no,ele['head_in_liquid'] or "-",style6)
+						sheet1.write(s2+15,coln_no,ele['consistency'] or "-",style6)
 						sheet1.write(s2+17,coln_no,"Horizontal Centrifual Front pull out Design Pump" or "-",style7)
 						sheet1.row(s2+17).height = 490
 						sheet1.write(s2+18,coln_no,item['name'] or "-",style1)
-						sheet1.write(s2+19,coln_no,item['name'] or "-",style6)	
-						sheet1.write(s2+20,coln_no,ele['flange_standard'] or "-",style6)
-						sheet1.write(s2+21,coln_no,ele['efficiency_in'] or "-",style6)
-						sheet1.write(s2+22,coln_no,ele['efficiency_in'] or "-",style6)
-						sheet1.write(s2+23,coln_no,ele['efficiency_in'] or "-",style6)
-						sheet1.write(s2+24,coln_no,ele['motor_kw'] or "-",style6)
-						sheet1.write(s2+25,coln_no,ele['speed_in_pump'] or "-",style6)
-						sheet1.write(s2+26,coln_no,ele['type_of_drive'] or "-",style6)
-						sheet1.write(s2+27,coln_no,ele['npsh_r_m'] or "-",style6)
-						sheet1.write(s2+28,coln_no,ele['impeller_type'] or "-",style6)
-						sheet1.write(s2+29,coln_no,ele['maximum_allowable_soild'] or "-",style6)
-						sheet1.write(s2+30,coln_no,ele['bearing_number_nde'] or "-",style6)
-						sheet1.write(s2+31,coln_no,ele['bearing_number_nde'] or "-",style6)
-						sheet1.write(s2+32,coln_no,ele['bearing_number_nde'] or "-",style6)
-						sheet1.write(s2+33,coln_no,ele['bearing_number_nde'] or "-",style6)
-						sheet1.write(s2+34,coln_no,ele['bearing_number_nde'] or "-",style6)
-						sheet1.write(s2+35,coln_no,ele['bearing_number_nde'] or "-",style6)
-						sheet1.write(s2+36,coln_no,ele['bearing_number_nde'] or "-",style6)
+						sheet1.write(s2+19,coln_no,ele['pumpseries'] or "-",style6)	
+						sheet1.write(s2+20,coln_no,ele['pre_suppliy_ref'] or "-",style6)
+						sheet1.write(s2+21,coln_no,ele['shaft_sealing'] or "-",style6)
+						sheet1.write(s2+22,coln_no,ele['scope_of_supply'] or "-",style6)
+						sheet1.write(s2+23,coln_no,ele['number_of_stages'] or "-",style6)
+						sheet1.write(s2+24,coln_no,ele['impeller_type'] or "-",style6)
+						sheet1.write(s2+25,coln_no,ele['impeller_dia_min'] or "-",style6)
+						sheet1.write(s2+26,coln_no,ele['size_suctionx'] or "-",style6)
+						sheet1.write(s2+27,coln_no,ele['flange_type'] or "-",style6)
+						sheet1.write(s2+28,coln_no,ele['flange_standard'] or "-",style6)
+						sheet1.write(s2+29,coln_no,ele['efficiency_in'] or "-",style6)
+						sheet1.write(s2+30,coln_no,ele['npsh_r_m'] or "-",style6)
+						sheet1.write(s2+31,coln_no,ele['best_efficiency'] or "-",style6)
+						sheet1.write(s2+32,coln_no,ele['bkw_water'] or "-",style6)
+						sheet1.write(s2+33,coln_no,ele['bkw_liq'] or "-",style6)
+						sheet1.write(s2+34,coln_no,ele['impeller_dia_rated'] or "-",style6)
+						sheet1.write(s2+35,coln_no,ele['impeller_tip_speed'] or "-",style6)
+						sheet1.write(s2+36,coln_no,ele['hydrostatic_test_pressure'] or "-",style6)
+						sheet1.write(s2+37,coln_no,ele['setting_height'] or "-",style6)
+						sheet1.write(s2+38,coln_no,ele['full_load_rpm'] or "-",style6)
+						sheet1.write(s2+39,coln_no,ele['frequency'] or "-",style6)
+						sheet1.write(s2+40,coln_no,ele['motor_kw'] or "-",style6)
+						sheet1.write(s2+41,coln_no,ele['motor_margin'] or "-",style6)
+						sheet1.write(s2+42,coln_no,ele['speed_in_motor'] or "-",style6)
+						sheet1.write(s2+43,coln_no,ele['end_of_the_curve'] or "-",style6)
+						sheet1.write(s2+44,coln_no,ele['critical_speed'] or "-",style6)
+						sheet1.write(s2+45,coln_no,ele['maximum_allowable_soild'] or "-",style6)
+						sheet1.write(s2+46,coln_no,ele['impeller_number'] or "-",style6)
+						
+						sheet1.write(s2+47,coln_no,ele['impeller_dia_max'] or "-",style6)
+						sheet1.write(s2+48,coln_no,ele['max_allowable_test'] or "-",style6)
+						sheet1.write(s2+49,coln_no,ele['crm_type'] or "-",style6)
+						sheet1.write(s2+50,coln_no,ele['casing_design'] or "-",style6)
+						sheet1.write(s2+51,coln_no,ele['shut_off_head'] or "-",style6)
+						sheet1.write(s2+52,coln_no,ele['shut_off_pressure'] or "-",style6)
+						sheet1.write(s2+53,coln_no,ele['minimum_contionuous'] or "-",style6)
+						sheet1.write(s2+54,coln_no,ele['specific_speed'] or "-",style6)
+						sheet1.write(s2+55,coln_no,ele['suction_specific_speed'] or "-",style6)
+						sheet1.write(s2+56,coln_no,ele['sealing_water_pressure'] or "-",style6)
+						sheet1.write(s2+57,coln_no,ele['sealing_water_capacity'] or "-",style6)
+						sheet1.write(s2+58,coln_no,ele['gd_sq_value'] or "-",style6)
+						sheet1.write(s2+59,coln_no,ele['bearing_make'] or "-",style6)
+						sheet1.write(s2+60,coln_no,ele['bearing_number_nde'] or "-",style6)
+						sheet1.write(s2+61,coln_no,ele['bearing_qty_nde'] or "-",style6)
+						sheet1.write(s2+62,coln_no,ele['lubrication_type'] or "-",style6)
+						sheet1.write(s2+63,coln_no,ele['primemover_categ'] or "-",style6)
+						sheet1.write(s2+64,coln_no,ele['type_of_drive'] or "-",style6)
+						sheet1.write(s2+65,coln_no,ele['primemover'] or "-",style6)
+						sheet1.write(s2+66,coln_no,ele['operation_range'] or "-",style6)
 						
 						s_no = s_no + 1
 					coln_no = coln_no + 1
@@ -544,7 +655,38 @@ class kg_crm_offer(osv.osv):
 					sheet1.write(s2+34,coln_no,"-",style6)
 					sheet1.write(s2+35,coln_no,"-",style6)
 					sheet1.write(s2+36,coln_no,"-",style6)
-					coln_no = coln_no + 1
+					sheet1.write(s2+37,coln_no,"-",style6)
+					sheet1.write(s2+38,coln_no,"-",style6)
+					sheet1.write(s2+39,coln_no,"-",style6)
+					sheet1.write(s2+40,coln_no,"-",style6)
+					sheet1.write(s2+41,coln_no,"-",style6)
+					sheet1.write(s2+42,coln_no,"-",style6)
+					sheet1.write(s2+43,coln_no,"-",style6)
+					sheet1.write(s2+44,coln_no,"-",style6)
+					sheet1.write(s2+45,coln_no,"-",style6)
+					sheet1.write(s2+46,coln_no,"-",style6)
+					
+					sheet1.write(s2+47,coln_no,"-",style6)
+					sheet1.write(s2+48,coln_no,"-",style6)
+					sheet1.write(s2+49,coln_no,"-",style6)
+					sheet1.write(s2+50,coln_no,"-",style6)
+					sheet1.write(s2+51,coln_no,"-",style6)
+					sheet1.write(s2+52,coln_no,"-",style6)
+					sheet1.write(s2+53,coln_no,"-",style6)
+					sheet1.write(s2+54,coln_no,"-",style6)
+					sheet1.write(s2+55,coln_no,"-",style6)
+					sheet1.write(s2+56,coln_no,"-",style6)
+					sheet1.write(s2+57,coln_no,"-",style6)
+					sheet1.write(s2+58,coln_no,"-",style6)
+					sheet1.write(s2+59,coln_no,"-",style6)
+					sheet1.write(s2+60,coln_no,"-",style6)
+					sheet1.write(s2+61,coln_no,"-",style6)
+					sheet1.write(s2+62,coln_no,"-",style6)
+					sheet1.write(s2+63,coln_no,"-",style6)
+					sheet1.write(s2+64,coln_no,"-",style6)
+					sheet1.write(s2+65,coln_no,"-",style6)
+					sheet1.write(s2+66,coln_no,"-",style6)
+					coln_no = coln_no+ 1
 					
 		if line_data:
 			em_col = 1
@@ -564,7 +706,7 @@ class kg_crm_offer(osv.osv):
 				cr.execute(mat_sql)		
 				mat_data = cr.dictfetchall()
 				print"mat_data",mat_data
-				row_no = s2+38
+				row_no = s2+68
 				
 				if mat_data:
 					for item_1 in mat_data:

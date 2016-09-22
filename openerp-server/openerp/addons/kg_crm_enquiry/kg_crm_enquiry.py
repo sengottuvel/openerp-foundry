@@ -922,7 +922,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 	
 	_constraints = [
 	
-		#~ (_check_qty,'You cannot save with zero qty !',['Qty']),
+		(_check_qty,'You cannot save with zero qty !',['Qty']),
 		(_check_is_applicable,'You cannot save without Is applicable !',['Is Applicable']),
 		
 		]
