@@ -368,9 +368,9 @@ class kg_position_number(osv.osv):
 						if new_position_len == source_position_len == source_old_position_len:
 							pos_dup = 'yes'
 						print"pos_duppos_dup",pos_dup
-						#~ if pos_dup == 'yes':
-							#~ raise osv.except_osv(_('Warning!'),
-											#~ _('Same Operation Details are already exist !!'))
+						if pos_dup == 'yes':
+							raise osv.except_osv(_('Warning!'),
+											_('Same Operation Details are already exist !!'))
 								
 			
 								
@@ -445,7 +445,8 @@ class ch_kg_position_number(osv.osv):
 	_columns = {
 		
 		'header_id':fields.many2one('kg.position.number', 'Position No', required=True, ondelete='cascade'),  
-		'operation_id': fields.many2one('kg.operation.master','Operation', required=True,domain="[('state','not in',('reject','cancel'))]"), 		
+		'operation_id': fields.many2one('kg.operation.master','Operation', required=True,domain="[('state','not in',('reject','cancel'))]"), 	
+		'name': fields.related('operation_id','name', type='char', string='Operation Name', store=True, readonly=True),	
 		'is_last_operation': fields.boolean('Is Last Operation'), 
 		'time_consumption':fields.float('Time Consumption(Hrs)'),
 		'in_house_cost': fields.float('In-house Cost/hr'),
@@ -455,6 +456,7 @@ class ch_kg_position_number(osv.osv):
 		'clamping_area': fields.char('Clamping Area', required=True), 	
 		'remark': fields.text('Remarks'),
 		'line_ids': fields.one2many('kg.dimension','header_id','Dimension'),
+		'line_ids_a': fields.one2many('ch.moccategory.mapping','header_id','MOC Category'),
 	}
 	
 	def onchange_total_cost(self, cr, uid, ids, total_cost,time_consumption,in_house_cost, context=None):
@@ -525,3 +527,43 @@ class kg_dimension(osv.osv):
 		]
 		
 kg_dimension()
+
+class ch_moccategory_mapping(osv.osv):
+	
+	_name = 'ch.moccategory.mapping'
+	
+	_columns = {
+		
+		'header_id':fields.many2one('ch.kg.position.number', 'Position No', required=True, ondelete='cascade'),  
+		'moc_cate_id': fields.many2one('kg.moc.category','MOC Category', required=True,domain="[('state','not in',('reject','cancel'))]"),		
+		'rate': fields.float('Rate' ,required=True), 		 
+		'remark': fields.text('Remarks'),
+		
+	}
+	
+	def _check_rate(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])			
+		if rec.rate <= 0.00:
+			return False					
+		return True
+		
+	def _moc_cate_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.moc_cate_id:					
+			cr.execute(""" select moc_cate_id from ch_moccategory_mapping where moc_cate_id  = '%s' and header_id =%s """ %(rec.moc_cate_id.id,rec.header_id.id))
+			data = cr.dictfetchall()			
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res	
+			
+	_constraints = [
+	
+		(_check_rate,'System not allow to save Zero and Negative values in Rate field !!',['MOC Category Details Tab']),
+		(_moc_cate_validate, 'Please Check MOC Category should be unique!!!',['MOC Category']),	
+		
+		]
+		
+ch_moccategory_mapping()

@@ -220,6 +220,15 @@
 								</tree>
 							</field>
 						</page>
+						<page string="MOC Category Details">
+							<field name="line_ids_a" colspan="4" nolabel="1">
+								<tree string="MOC Category Details" editable="bottom">
+								   <field name="moc_cate_id"/>
+								   <field name="rate"/>								  
+								   <field name="remark" widget="char"/>
+								</tree>
+							</field>
+						</page>
 					</notebook>
 				</form>
 			</field>
