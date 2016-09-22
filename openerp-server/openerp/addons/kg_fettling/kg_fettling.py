@@ -559,7 +559,8 @@ class kg_fettling(osv.osv):
 		entry_date = entry.entry_date
 		entry_date = str(entry_date)
 		entry_date = datetime.strptime(entry_date, '%Y-%m-%d')
-		
+		print "entry_date",entry_date
+		print "today",today
 		if entry_date > today:
 			raise osv.except_osv(_('Warning!'),
 				_('System not allow to save with future date !!'))
