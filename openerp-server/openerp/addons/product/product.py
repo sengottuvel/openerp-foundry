@@ -616,7 +616,7 @@ class product_template(osv.osv):
 
 	def onchange_uom(self, cursor, user, ids, uom_id, uom_po_id):
 		if uom_id:
-			return {'value': {'uom_po_id': uom_id}}
+			return {'value': {'uom_po_id': ''}}
 		return {}
 
 	def write(self, cr, uid, ids, vals, context=None):
@@ -637,7 +637,7 @@ class product_template(osv.osv):
 		'sale_ok': 0,
 		'produce_delay': 1,
 		'uom_id': _get_uom_id,
-		'uom_po_id': _get_uom_id,
+		#~ 'uom_po_id': _get_uom_id,
 		'uos_coeff' : 1.0,
 		'mes_type' : 'fixed',
 		'categ_id' : _default_category,
@@ -1025,7 +1025,7 @@ class product_product(osv.osv):
 			uom=uom_obj.browse(cursor,user,[uom_id])[0]
 			uom_po=uom_obj.browse(cursor,user,[uom_po_id])[0]
 			if uom.category_id.id != uom_po.category_id.id:
-				return {'value': {'uom_po_id': uom_id}}
+				return {'value': {'uom_po_id': ''}}
 		return False
 
 	def _check_ean_key(self, cr, uid, ids, context=None):
