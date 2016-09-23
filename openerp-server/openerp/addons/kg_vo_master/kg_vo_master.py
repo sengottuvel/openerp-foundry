@@ -202,7 +202,7 @@ class ch_power_series(osv.osv):
 		'min':fields.float('Setting Height MIN',required=True),		
 		'max':fields.float('Setting Height MAX',required=True),	
 		'star': fields.selection([('nil','Nil'),('1','1'),('2','2'),('3','3'),('4','4'),('5','5'),('6','6'),('7','7')],'Star (in No)',required=True),
-		'part_list_id': fields.many2one('kg.bom', 'Part List Name', required=True,domain = [('category_type','=','part_list_bom')]),
+		'part_list_id': fields.many2one('kg.bom', 'Part List Name',domain = [('category_type','=','part_list_bom')]),
 		'remarks':fields.text('Remarks'),		
 	}
 	def _check_values(self, cr, uid, ids, context=None):
