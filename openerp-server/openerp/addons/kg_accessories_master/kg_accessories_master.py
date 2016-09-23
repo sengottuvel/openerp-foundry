@@ -515,13 +515,15 @@ class ch_kg_accessories_master(osv.osv):
 		
 		'header_id':fields.many2one('kg.accessories.master', 'Accessories No', required=True, ondelete='cascade'),  
 		'product_id': fields.many2one('product.product','Item Name', required=True,domain="[('state','not in',('reject','cancel'))]"),
-		'brand_id': fields.many2one('kg.brand.master','Brand', domain="[('state','not in',('reject','cancel'))]"), 		
+		'brand_id': fields.many2one('kg.brand.master','Brand', required=True,domain="[('state','not in',('reject','cancel'))]"), 		
 		'moc_id': fields.many2one('kg.moc.master','MOC', domain="[('state','not in',('reject','cancel'))]"), 		
 		'uom_id': fields.many2one('product.uom','UOM'),
 		'uom_conversation_factor': fields.selection([('one_dimension','One Dimension'),('two_dimension','Two Dimension')],'UOM Conversation Factor'),
 		'length': fields.float('Length'),
 		'breadth': fields.float('Breadth'),
-		'qty': fields.float('Qty',required=True),
+		'qty': fields.float('Qty'),
+		'weight': fields.float('Weight' ,digits=(16,5)),
+		'temp_qty':fields.float('Qty',required=True),
 		'remark': fields.text('Remarks'),
 		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
 		
@@ -530,60 +532,95 @@ class ch_kg_accessories_master(osv.osv):
 	
 	_defaults = {
 				'entry_mode': 'manual',
+				'length': 1.00,
 				
 				}
 				
+	def onchange_product_uom(self, cr, uid, ids, product_id, uom_id,  context=None):		
+		prod = self.pool.get('product.product').browse(cr, uid, product_id, context=context)		
+		if uom_id != prod.uom_id.id:
+			if uom_id != prod.uom_po_id.id:				 			
+				raise osv.except_osv(
+					_('UOM Mismatching Error !'),
+					_('You choosed wrong UOM and you can choose either %s or %s for %s !!!') % (prod.uom_id.name,prod.uom_po_id.name,prod.name))	
+
+		return True	
+	
 	def onchange_uom(self, cr, uid, ids, product_id, context=None):
+		
 		value = {'uom_id': '','uom_conversation_factor':''}
 		if product_id:
-			prod_rec = self.pool.get('product.product').browse(cr,uid,product_id)
-			print"prod_rec.uom_po_id.id",prod_rec.uom_po_id.id
-			value = {'uom_id': prod_rec.uom_po_id.id,'uom_conversation_factor':prod_rec.uom_conversation_factor}
-		return {'value': value}
-	
-	#~ def _check_length(self, cr, uid, ids, context=None):
-		#~ rec = self.browse(cr, uid, ids[0])
-		#~ if rec.header_id.state in ('confirmed'):
-			#~ if rec.uom_conversation_factor == 'two_dimension':
-				#~ if rec.length <= 0.00:
-					#~ return False
-		#~ return True
-		
-	#~ def _check_breadth(self, cr, uid, ids, context=None):
-		#~ rec = self.browse(cr, uid, ids[0])
-		#~ if rec.header_id.state in ('confirmed'):
-			#~ if rec.uom_conversation_factor == 'two_dimension':
-				#~ if rec.breadth <= 0.00:
-					#~ return False
-		#~ return True
-		
-	def _check_qty(self, cr, uid, ids, context=None):
-		rec = self.browse(cr, uid, ids[0])
-		if rec.qty <= 0.00:
-			return False
-		return True
-	
-	def _check_item(self, cr, uid, ids, context=None):
-		rec = self.browse(cr,uid,ids[0])		
-		cr.execute("""select id,product_id from ch_kg_accessories_master where header_id = %s"""%(rec.header_id.id))
-		line_data = cr.dictfetchall()
-		for line in line_data :			
-			for sub_line in line_data:				
-				if line['id'] == sub_line['id']:					
-					pass
-				else:
-					if line['product_id'] == sub_line['product_id']:						
-						return False
-		return True	
+			uom_rec = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
+			value = {'uom_conversation_factor':uom_rec.uom_conversation_factor}
 			
-	_constraints = [
-	
-		(_check_qty,'You cannot save with zero qty !',['Qty']),
-		#~ (_check_length,'You cannot save with zero length !',['Length']),
-		#~ (_check_breadth,'You cannot save with zero breadth !',['Breadth']),
-		(_check_item,'System not allow to same Item !',['Raw Material Details']),	
+		return {'value': value}
 		
-		]
+	def onchange_weight(self, cr, uid, ids, uom_conversation_factor,length,breadth,temp_qty,product_id, context=None):		
+		value = {'qty': '','weight': '',}
+		prod_rec = self.pool.get('product.product').browse(cr,uid,product_id)
+		qty_value = 0.00
+		weight=0.00
+		if uom_conversation_factor == 'one_dimension':	
+			if prod_rec.uom_id.id == prod_rec.uom_po_id.id:
+				qty_value = temp_qty
+				weight = 0.00
+			else:				
+				qty_value = length * temp_qty			
+				weight = qty_value * prod_rec.po_uom_in_kgs
+		if uom_conversation_factor == 'two_dimension':
+			qty_value = length * breadth * temp_qty				
+			weight = qty_value * prod_rec.po_uom_in_kgs		
+		value = {'qty': qty_value,'weight':weight}			
+		return {'value': value}
+		
+	
+	
+	def _check_values(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		cr.execute(""" select product_id from ch_kg_accessories_master where product_id  = '%s' and header_id = '%s' """ %(entry.product_id.id,entry.header_id.id))
+		data = cr.dictfetchall()			
+		if len(data) > 1:		
+			return False
+		return True	
+		
+	def _check_one_values(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		prod_rec = self.pool.get('product.product').browse(cr,uid,entry.product_id.id)
+		if entry.uom_conversation_factor =='one_dimension':
+			if prod_rec.uom_id.id == prod_rec.uom_po_id.id:
+				if entry.qty == 0:				
+					return False
+				return True	
+			else:
+				if entry.qty == 0 or entry.length == 0:				
+					return False				
+				return True				
+		return True
+		
+	def _check_two_values(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		if entry.uom_conversation_factor =='two_dimension':
+			if entry.length == 0 or entry.qty == 0 or entry.breadth == 0:				
+				return False
+			return True
+		return True
+		
+	def _check_uom_values(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		prod = self.pool.get('product.product').browse(cr, uid, entry.product_id.id)						
+		if entry.uom_id.id != prod.uom_id.id:
+			if entry.uom_id.id  != prod.uom_po_id.id:
+				return False			
+		return True	
+		
+	_constraints = [		
+			  
+		(_check_one_values, 'Check the zero values not allowed..!!',['Qty or Length']),	
+		(_check_two_values, 'Check the zero values not allowed..!!',['Breadth or Length or Qty']),
+		(_check_values, 'Please Check the same Raw Material not allowed..!!',['Raw Material']),	
+		(_check_uom_values, 'UOM Mismatching Error, You choosed wrong UOM !!!',['UOM']),	
+		
+	   ]
 			
 ch_kg_accessories_master()
 

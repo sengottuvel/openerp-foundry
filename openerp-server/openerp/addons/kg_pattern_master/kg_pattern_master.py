@@ -195,7 +195,7 @@ class kg_pattern_master(osv.osv):
 		encoded_user = base64.b64encode(rec_user)
 		encoded_pwd = base64.b64encode(rec_pwd)
 		
-		url = 'http://10.100.9.60/DMS/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&wo_no='+rec_code
+		url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&wo_no='+rec_code
 		
 		#url = 'http://192.168.1.150:81/pbxclick2call.php?exten='+exe_no+'&phone='+str(m_no)
 		return {
@@ -209,18 +209,22 @@ class kg_pattern_master(osv.osv):
 			
 	def list_moc(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
+		
 		if rec.moc_const_type:				
 			moc_type_ids = []
-			for moc_type in rec.moc_const_type:	
-				moc_type_ids.append(moc_type.id)			
+			for moc_type in rec.moc_const_type:
+				print"rec.moc_const_type",rec.moc_const_type
+				moc_type_ids.append(moc_type.id)
+			print"moc_type_ids",moc_type_ids		
 			moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('constuction_type_id','in',moc_type_ids)]))
 		else:
-			moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('active','=',True)]))			
+			moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('active','=',True)]))	
+					
 		for item in moc_const_obj:			
 			moc_const_rec = self.pool.get('kg.moc.construction').browse(cr,uid,item)
 			sql_check = """ select code from ch_mocwise_rate where code=%s and header_id  = %s """ %(moc_const_rec.id,ids[0])
 			cr.execute(sql_check)
-			data = cr.dictfetchall()			
+			data = cr.dictfetchall()
 			if data == []:			
 				line = self.pool.get('ch.mocwise.rate').create(cr,uid,{
 					   'header_id':rec.id,

@@ -33,12 +33,14 @@
              <field name="target">new</field>
        </record>
 
+<!--
        <record model="ir.values" id="ir_values_account_partner_ledger">
            <field name="key2" eval="'client_print_multi'"/>
            <field name="model" eval="'res.partner'"/>
            <field name="name">Print Partner Ledger</field>
            <field name="value" eval="'ir.actions.act_window,%d'%action_account_partner_ledger"/>
        </record>
+-->
 
         <menuitem icon="STOCK_PRINT"
             name="Partner Ledger"

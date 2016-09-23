@@ -88,14 +88,15 @@
 							<page string="BOT">
 								<field colspan="4" mode="tree" name="line_ids" nolabel="1" widget="one2many_list">
 								<tree string="BOT" editable="top"> 
-									<field name="product_id" on_change="onchange_uom(product_id)"/>
+									<field name="product_id"  on_change="onchange_uom(product_id)"/>
 									<field name="brand_id"/>
-<!--								<field name="moc_id"/>-->
-									<field name="uom_id" required ="1" readonly="1"/>
-<!--								<field name="length" attrs="{'required':[('uom_conversation_factor','=','two_dimension')]}"/>
-									<field name="breadth" attrs="{'required':[('uom_conversation_factor','=','two_dimension')]}"/>-->
-									<field name="qty"/>
-									<field name="remark"/>
+									<field name="uom_id" required ="1" on_change="onchange_product_uom(product_id,uom_id)"/>
+									<field name="length" attrs="{'required': [('uom_conversation_factor','in',['one_dimension','two_dimension'])]}" on_change="onchange_weight(uom_conversation_factor,length,breadth,temp_qty,product_id)"/>	
+									<field name="breadth" attrs="{'required': [('uom_conversation_factor','in',['two_dimension'])],'readonly': [('uom_conversation_factor','in',['one_dimension'])]}" on_change="onchange_weight(uom_conversation_factor,length,breadth,temp_qty,product_id)"/>									
+									<field name="temp_qty" required="1" on_change="onchange_weight(uom_conversation_factor,length,breadth,temp_qty,product_id)"/>																
+									<field name="qty" invisible="1"/>
+									<field name="weight" readonly="1"/>
+									<field name="remark" widget="char"/>
 									<field name="uom_conversation_factor" invisible="1"/>
 								</tree>
 								<form string="Raw Materials" >
@@ -200,6 +201,9 @@
 		</record>	
 		
 		<!-- Menu Action End-->
+		<!--Accessories Master Menu -->		
+		
+		<menuitem action="mma_accessories_master" name="Accessories" id="mam_accessories_master_menu" parent="kg_pumpmodel_master.mpm_planning_master" sequence="32"/> 
 
 	</data>
 </openerp>

@@ -37,7 +37,8 @@
             ref('kg_ladle_master.mam_ladle_master'),
             ref('kg_vo_master.mam_vo_master'),
             ref('kg_offer_materials.mam_offermaterials_master'),
-             ref('kg_moc_category.mam_moc_category_master'), 
+            ref('kg_moc_category.mam_moc_category_master'), 
+            ref('kg_accessories_master.mam_accessories_master_menu'),
             
             ref('kg_stock_inward.tpm_transactions'),
             ref('kg_stock_inward.tpm_planning_transactions'),
