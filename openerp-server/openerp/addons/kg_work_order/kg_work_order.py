@@ -855,9 +855,9 @@ class ch_work_order_details(osv.osv):
 							
 							
 							  ''',[limitation,shaft_sealing,rpm,pump_model_id,motor_power,rpm,pump_model_id,
-							  bush_bearing,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,delivery_pipe_size,
-							  setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,lubrication,rpm,pump_model_id,
-							  setting_height,setting_height,rpm,pump_model_id])
+							  bush_bearing,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,
+							  delivery_pipe_size,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,
+							  lubrication,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,])
 						vertical_foundry_details = cr.dictfetchall()
 						
 						if order_category == 'pump' :
@@ -1235,8 +1235,8 @@ class ch_work_order_details(osv.osv):
 
 							  ''',[limitation,shaft_sealing,rpm,pump_model_id,motor_power,rpm,pump_model_id,
 							  bush_bearing,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,delivery_pipe_size,
-							  setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,lubrication,rpm,pump_model_id,
-							  setting_height,setting_height,rpm,pump_model_id])
+							  setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,lubrication,
+							  setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,])
 						vertical_ms_details = cr.dictfetchall()
 						for vertical_ms_details in vertical_ms_details:
 							if qty == 0:
@@ -1380,8 +1380,8 @@ class ch_work_order_details(osv.osv):
 
 							  ''',[limitation,shaft_sealing,rpm,pump_model_id,motor_power,rpm,pump_model_id,
 							  bush_bearing,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,delivery_pipe_size,
-							  setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,lubrication,rpm,pump_model_id,
-							  setting_height,setting_height,rpm,pump_model_id])
+							  setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,lubrication,
+							  setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,])
 						vertical_bot_details = cr.dictfetchall()
 						
 						for vertical_bot_details in vertical_bot_details:
