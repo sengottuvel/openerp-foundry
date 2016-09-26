@@ -676,7 +676,7 @@ class ch_work_order_details(osv.osv):
 						if setting_height > 3000:
 							limitation = 'above_3000'
 						
-						print"rpm,pump_model_id",rpm,pump_model_id
+						print"rpm,pump_model_id",limitation,shaft_sealing,rpm,pump_model_id,motor_power,bush_bearing,setting_height,delivery_pipe_size,lubrication
 						cr.execute('''
 						
 							
