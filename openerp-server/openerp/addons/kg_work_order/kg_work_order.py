@@ -676,7 +676,6 @@ class ch_work_order_details(osv.osv):
 						if setting_height > 3000:
 							limitation = 'above_3000'
 						
-						print"rpm,pump_model_id",limitation,shaft_sealing,rpm,pump_model_id,motor_power,bush_bearing,setting_height,delivery_pipe_size,lubrication
 						cr.execute('''
 						
 							
@@ -802,7 +801,13 @@ class ch_work_order_details(osv.osv):
 							(
 							select id from kg_bom 
 							where id = (select partlist_id from ch_deliverypipe_assembly 
-							where size = %s and header_id = 
+							where size = %s and star = (select star from ch_power_series 
+							where %s BETWEEN min AND max and %s < max
+							
+							and header_id = ( select vo_id from ch_vo_mapping
+							where rpm = %s and header_id = %s)
+							
+							) and header_id = 
 
 							( select vo_id from ch_vo_mapping
 							where rpm = %s and header_id = %s))
@@ -835,7 +840,13 @@ class ch_work_order_details(osv.osv):
 							(
 							select id from kg_bom 
 							where id = (select partlist_id from ch_lubricant 
-							where type = %s and header_id = 
+							where type = %s and star = (select star from ch_power_series 
+							where %s BETWEEN min AND max and %s < max
+							
+							and header_id = ( select vo_id from ch_vo_mapping
+							where rpm = %s and header_id = %s)
+							
+							) and header_id = 
 
 							( select vo_id from ch_vo_mapping
 							where rpm = %s and header_id = %s))
@@ -845,7 +856,8 @@ class ch_work_order_details(osv.osv):
 							
 							  ''',[limitation,shaft_sealing,rpm,pump_model_id,motor_power,rpm,pump_model_id,
 							  bush_bearing,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,delivery_pipe_size,
-							  rpm,pump_model_id,lubrication,rpm,pump_model_id])
+							  setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,lubrication,rpm,pump_model_id,
+							  setting_height,setting_height,rpm,pump_model_id])
 						vertical_foundry_details = cr.dictfetchall()
 						
 						if order_category == 'pump' :
@@ -1180,7 +1192,13 @@ class ch_work_order_details(osv.osv):
 									(
 									select id from kg_bom 
 									where id = (select partlist_id from ch_deliverypipe_assembly 
-									where size = %s and header_id = 
+									where size = %s and star = (select star from ch_power_series 
+									where %s BETWEEN min AND max and %s < max
+									
+									and header_id = ( select vo_id from ch_vo_mapping
+									where rpm = %s and header_id = %s)
+									
+									) and header_id = 
 
 									( select vo_id from ch_vo_mapping
 									where rpm = %s and header_id = %s))
@@ -1200,7 +1218,13 @@ class ch_work_order_details(osv.osv):
 									(
 									select id from kg_bom 
 									where id = (select partlist_id from ch_lubricant 
-									where type = %s and header_id = 
+									where type = %s and star = (select star from ch_power_series 
+									where %s BETWEEN min AND max and %s < max
+									
+									and header_id = ( select vo_id from ch_vo_mapping
+									where rpm = %s and header_id = %s)
+									
+									) and header_id = 
 
 									( select vo_id from ch_vo_mapping
 									where rpm = %s and header_id = %s ))
@@ -1211,7 +1235,8 @@ class ch_work_order_details(osv.osv):
 
 							  ''',[limitation,shaft_sealing,rpm,pump_model_id,motor_power,rpm,pump_model_id,
 							  bush_bearing,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,delivery_pipe_size,
-							  rpm,pump_model_id,lubrication,rpm,pump_model_id])
+							  setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,lubrication,rpm,pump_model_id,
+							  setting_height,setting_height,rpm,pump_model_id])
 						vertical_ms_details = cr.dictfetchall()
 						for vertical_ms_details in vertical_ms_details:
 							if qty == 0:
@@ -1314,7 +1339,13 @@ class ch_work_order_details(osv.osv):
 									(
 									select id from kg_bom 
 									where id = (select partlist_id from ch_deliverypipe_assembly 
-									where size = %s and header_id = 
+									where size = %s and star = (select star from ch_power_series 
+									where %s BETWEEN min AND max and %s < max
+									
+									and header_id = ( select vo_id from ch_vo_mapping
+									where rpm = %s and header_id = %s)
+									
+									) and header_id = 
 
 									( select vo_id from ch_vo_mapping
 									where rpm = %s and header_id = %s))
@@ -1332,7 +1363,13 @@ class ch_work_order_details(osv.osv):
 									(
 									select id from kg_bom 
 									where id = (select partlist_id from ch_lubricant 
-									where type = %s and header_id = 
+									where type = %s and star = (select star from ch_power_series 
+									where %s BETWEEN min AND max and %s < max
+									
+									and header_id = ( select vo_id from ch_vo_mapping
+									where rpm = %s and header_id = %s)
+									
+									) and header_id = 
 
 									( select vo_id from ch_vo_mapping
 									where rpm = %s and header_id = %s))
@@ -1343,7 +1380,8 @@ class ch_work_order_details(osv.osv):
 
 							  ''',[limitation,shaft_sealing,rpm,pump_model_id,motor_power,rpm,pump_model_id,
 							  bush_bearing,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,delivery_pipe_size,
-							  rpm,pump_model_id,lubrication,rpm,pump_model_id])
+							  setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,lubrication,rpm,pump_model_id,
+							  setting_height,setting_height,rpm,pump_model_id])
 						vertical_bot_details = cr.dictfetchall()
 						
 						for vertical_bot_details in vertical_bot_details:
