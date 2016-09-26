@@ -357,8 +357,7 @@ class kg_work_order(osv.osv):
 						
 		else:
 			self.write(cr, uid, ids, {'state': 'cancel','flag_cancel':0,'cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-			cr.execute(''' update ch_work_order_details set state = 'cancel',flag_cancel='f' where header_id = %s ''',[entry.id])
-			
+			cr.execute(''' update ch_work_order_details set state = 'cancel',flag_cancel='f' where header_id = %s ''',[entry.id])			
 		
 		return True
 		
@@ -438,10 +437,19 @@ class ch_work_order_details(osv.osv):
 		'setting_height':fields.float('Setting Height (MM)',required=True),
 		'bed_length':fields.float('Bed Length(MM)',required=True),
 		'shaft_sealing': fields.selection([('g_p','G.P'),('m_s','M.S'),('f_s','F.S')],'Shaft Sealing',required=True),
-		'motor_power':fields.float('Motor Power',required=True),
-		'bush_bearing': fields.selection([('grease','Grease'),('cft_ext','CFT-EXT'),
-			('cft_self','CFT-SELF'),('cut_less_rubber','Cut less Rubber')],'Bush Bearing',required=True),
-		'delivery_pipe_size':fields.float('Delivery Pipe Size(MM)',required=True),
+		#~ 'motor_power':fields.float('Motor Power',required=True),
+		'motor_power': fields.selection([('90','90'),('100','100'),('112','112'),('132','132'),('160','160'),('180','180'),('200','200'),('225','225'),
+				('250','250'),('280','280'),('315','315'),('315_l','315L')],'Motor Frame size',required=True),
+				
+		'm_power': fields.float('Motor Power'),
+		
+		#~ 'bush_bearing': fields.selection([('grease','Grease'),('cft_ext','CFT-EXT'),
+			#~ ('cft_self','CFT-SELF'),('cut_less_rubber','Cut less Rubber')],'Bush Bearing',required=True),
+			
+		'bush_bearing': fields.selection([('grease','Bronze/Grease'),('cft_self','CFT'),('cut_less_rubber','Cut less Rubber')],'Bush Bearing',required=True),
+		#~ 'delivery_pipe_size':fields.float('Delivery Pipe Size(MM)',required=True),
+		'delivery_pipe_size': fields.selection([('32','32'),('40','40'),('50','50'),('65','65'),('80','80'),('100','100'),('125','125'),('150','150'),('200','200'),('250','250'),('300','300')],'Delivery Pipe Size(MM)',required=True),
+		
 		'lubrication': fields.selection([('grease','Grease'),('cft_ext','CFT-EXT'),
 			('cft_self','CFT-SELF'),('cut_less_rubber','Cut less Rubber')],'Lubrication',required=True),
 			
@@ -505,8 +513,7 @@ class ch_work_order_details(osv.osv):
 		return {'value': {'moc_construction_name': moc_construction_name}}
 		
 	def onchange_bom_details(self, cr, uid, ids, pump_model_id, qty,moc_construction_id, order_category,flag_standard,
-		rpm,setting_height,bed_length,shaft_sealing,motor_power,bush_bearing,delivery_pipe_size,lubrication,unit_price,delivery_date,note,
-		bp,shaft_ext,pump_model_type):
+		rpm,setting_height,shaft_sealing,motor_power,bush_bearing,delivery_pipe_size,lubrication,unit_price,delivery_date,note,pump_model_type):
 		
 		
 		bom_vals=[]
@@ -660,44 +667,17 @@ class ch_work_order_details(osv.osv):
 				if rpm != False:
 					
 					
-					if bed_length > 0 and shaft_sealing != False and motor_power > 0 and bush_bearing != False and setting_height > 0 and delivery_pipe_size > 0 and lubrication != False:
+					if shaft_sealing != False and motor_power != False and bush_bearing != False and setting_height > 0 and delivery_pipe_size != False and lubrication != False:
 						
 						#### Load Foundry Items ####
 						
-						if bed_length <= 3000:
+						if setting_height <= 3000:
 							limitation = 'upto_3000'
-						if bed_length > 3000:
+						if setting_height > 3000:
 							limitation = 'above_3000'
 
 						cr.execute('''
-							-- Power Series --
-							select bom.id,
-							bom.header_id,
-							bom.pattern_id,
-							bom.pattern_name,
-							bom.qty, 
-							bom.pos_no,
-							bom.position_id,
-							pattern.pcs_weight, 
-							pattern.ci_weight,
-							pattern.nonferous_weight
-
-							from ch_bom_line as bom
-
-							LEFT JOIN kg_pattern_master pattern on pattern.id = bom.pattern_id
-
-							where bom.header_id = 
-							(
-							select id from kg_bom 
-							where id = (select part_list_id from ch_power_series   
-							where %s BETWEEN min AND max and %s < max
-							and header_id = ( select vo_id from ch_vo_mapping
-							where rpm = %s and header_id = %s)
-							)
-							and active='t'
-							)
-							
-							union all
+						
 							
 							-- Bed Assembly ----
 							select bom.id,
@@ -862,12 +842,14 @@ class ch_work_order_details(osv.osv):
 							) 
 							
 							
-							  ''',[setting_height,setting_height,rpm,pump_model_id,limitation,shaft_sealing,rpm,pump_model_id,motor_power,rpm,pump_model_id,
+							  ''',[limitation,shaft_sealing,rpm,pump_model_id,motor_power,rpm,pump_model_id,
 							  bush_bearing,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,delivery_pipe_size,
 							  rpm,pump_model_id,lubrication,rpm,pump_model_id])
 						vertical_foundry_details = cr.dictfetchall()
+						
 						if order_category == 'pump' :
 							for vertical_foundry in vertical_foundry_details:
+								
 								if order_category == 'pump' :
 									applicable = True
 								if order_category in ('spare','pump_spare'):
@@ -941,7 +923,7 @@ class ch_work_order_details(osv.osv):
 										where rpm = %s and header_id = %s) ''',[setting_height,setting_height,rpm,pump_model_id])
 									star_val = cr.fetchone()
 									star_value = star_val[0]
-									print "star_valuestar_valuestar_value",star_value
+									
 									### Getting ABOVE BP(H),BEND from pump model ###
 									cr.execute(''' select h_value,b_value from ch_delivery_pipe
 										where header_id = %s and delivery_size = %s ''',[pump_model_id,delivery_pipe_size])
@@ -962,6 +944,21 @@ class ch_work_order_details(osv.osv):
 											#3.5+BP+SETTING HEIGHT-A1
 											###
 											length = 3.5 + bp + setting_height - a1_value
+											
+									### Getting BP and Shaft Ext from VO Master ###
+									cr.execute('''
+						
+										 (select bp,shaft_ext from ch_bed_assembly 
+										where limitation = %s and packing = %s and header_id = 
+
+										( select vo_id from ch_vo_mapping
+										where rpm = %s and header_id = %s))
+										
+										
+										  ''',[limitation,shaft_sealing,rpm,pump_model_id])
+									bed_ass_details = cr.dictfetchone()
+									bp = bed_ass_details['bp']
+									shaft_ext = bed_ass_details['shaft_ext']
 										
 									if pattern_rec.length_type == 'single_shaft':
 										
@@ -985,11 +982,7 @@ class ch_work_order_details(osv.osv):
 											### Formula ###
 											#(ABOVE BP(H)+BP+SETTING HEIGHT-A-BEND-3)/2
 											###
-											print "h_value",h_value
-											print "bp",bp
-											print "setting_height",setting_height
-											print "a_value",a_value
-											print "b_value",b_value
+											
 											length = (h_value + bp + setting_height - a_value - b_value - 3)/2
 											
 										if star_value > 1:
@@ -1070,18 +1063,17 @@ class ch_work_order_details(osv.osv):
 											line_column_pipe = vertical_foundry['qty']
 											drive_col_pipe = (3.5+bp+setting_height-a1_value-star_value-line_column_pipe)/2
 											length = (star_value/2-1)+drive_col_pipe-3.5+shaft_ext
-								print "lengthlengthlength",length
+								
 								if length > 0:
 									foundry_bom_qty = round(length,0)
 								else:
 									foundry_bom_qty = vertical_foundry['qty']
-								print "qty",qty
-								print "foundry_bom_qty",foundry_bom_qty
+								
 								if qty == 0:
 									bom_qty = foundry_bom_qty
 								if qty > 0:
 									bom_qty = qty * foundry_bom_qty
-								print "bom_qty",bom_qty
+								
 								
 								if vertical_foundry['position_id'] == None:
 									raise osv.except_osv(_('Warning!'),
@@ -1108,26 +1100,12 @@ class ch_work_order_details(osv.osv):
 						
 									})
 									
+								
 									
 						#### Load Machine Shop Items ####
 						
 						bom_ms_obj = self.pool.get('ch.machineshop.details')
 						cr.execute(''' 
-									-- Power Series --
-									select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
-									from ch_machineshop_details
-									where header_id = 
-									(
-									select id from kg_bom 
-									where id = (select part_list_id from ch_power_series   
-									where %s BETWEEN min AND max and %s < max
-									and header_id = ( select vo_id from ch_vo_mapping
-									where rpm = %s and header_id = %s)
-									)
-									and active='t'
-									)
-									
-									union all
 									
 									-- Bed Assembly ----
 									select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
@@ -1230,7 +1208,7 @@ class ch_work_order_details(osv.osv):
 									
 									
 
-							  ''',[setting_height,setting_height,rpm,pump_model_id,limitation,shaft_sealing,rpm,pump_model_id,motor_power,rpm,pump_model_id,
+							  ''',[limitation,shaft_sealing,rpm,pump_model_id,motor_power,rpm,pump_model_id,
 							  bush_bearing,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,delivery_pipe_size,
 							  rpm,pump_model_id,lubrication,rpm,pump_model_id])
 						vertical_ms_details = cr.dictfetchall()
@@ -1269,22 +1247,6 @@ class ch_work_order_details(osv.osv):
 						
 						bom_bot_obj = self.pool.get('ch.machineshop.details')
 						cr.execute(''' 
-									-- Power Series --
-									
-									select id,bot_id,qty,header_id as bom_id
-									from ch_bot_details
-									where header_id =
-									(
-									select id from kg_bom 
-									where id =(select part_list_id from ch_power_series   
-									where %s BETWEEN min AND max and %s < max
-									and header_id = ( select vo_id from ch_vo_mapping
-									where rpm = %s and header_id = %s)
-									)
-									and active='t'
-									)
-									
-									union all
 									
 									-- Bed Assembly ----
 									select id,bot_id,qty,header_id as bom_id
@@ -1378,7 +1340,7 @@ class ch_work_order_details(osv.osv):
 									
 									
 
-							  ''',[setting_height,setting_height,rpm,pump_model_id,limitation,shaft_sealing,rpm,pump_model_id,motor_power,rpm,pump_model_id,
+							  ''',[limitation,shaft_sealing,rpm,pump_model_id,motor_power,rpm,pump_model_id,
 							  bush_bearing,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,delivery_pipe_size,
 							  rpm,pump_model_id,lubrication,rpm,pump_model_id])
 						vertical_bot_details = cr.dictfetchall()

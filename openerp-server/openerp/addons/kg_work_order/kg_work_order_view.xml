@@ -151,10 +151,12 @@
 							<field name="order_ref_no" invisible="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="moc_construction_id" on_change="onchange_moccons_name(moc_construction_id)" required="1"  attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
 							<field name="rpm"   attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
-							<field name="bed_length"   attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
+							<field name="bed_length"  invisible="1"/>
 							<field name="motor_power"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
 							<field name="delivery_pipe_size"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
-							<field name="bp"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
+							<field name="bush_bearing"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
+							<field name="bp" invisible="1"/>
+							<field name="m_power" attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
 							<field name="unit_price"  attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
 							<field name="flag_standard"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
 							<field name="state" invisible="1"/>
@@ -173,9 +175,9 @@
 							<field name="moc_construction_name"/>
 							<field name="setting_height"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
 							<field name="shaft_sealing"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
-							<field name="bush_bearing"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
+							
 							<field name="lubrication"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
-							<field name="shaft_ext"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
+							<field name="shaft_ext" invisible="1"/>
 							<field name="delivery_date" on_change="onchange_delivery_date(delivery_date)"  attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
 							<field name="note" string="Remarks"  attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
 						</group>
@@ -183,7 +185,7 @@
 					<newline/>
 					<group>
 						<group>
-							<field name="flag_load_bom"  on_change="onchange_bom_details(pump_model_id, qty,moc_construction_id,order_category,flag_standard,rpm,setting_height,bed_length,shaft_sealing,motor_power,bush_bearing,delivery_pipe_size,lubrication,unit_price,delivery_date,note,bp,shaft_ext,pump_model_type)"/>
+							<field name="flag_load_bom"  on_change="onchange_bom_details(pump_model_id, qty,moc_construction_id,order_category,flag_standard,rpm,setting_height,shaft_sealing,motor_power,bush_bearing,delivery_pipe_size,lubrication,unit_price,delivery_date,note,pump_model_type)"/>
 						</group>
 						<group></group>
 					</group>
