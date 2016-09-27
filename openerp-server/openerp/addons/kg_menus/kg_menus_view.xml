@@ -89,6 +89,15 @@
 				<!-- Service Complaint --> 
 				<menuitem action="kg_service_enquiry.tma_service_enquiry" name="Service Complaint" id="tma_service_enquiry" parent="cpm_crm_enquiry_menu" sequence="3"/>
 				
+				<!-- Site Visit Pending --> 
+				<menuitem action="kg_site_visit_pending.tma_site_visit_pending" name="Site Visit Pending" id="tma_site_visit_pending" parent="cpm_crm_enquiry_menu" sequence="4"/>
+				
+				<!-- Site Visit Plan --> 
+				<menuitem action="kg_site_visit_plan.tma_site_visit_plan" name="Site Visit Plan" id="tma_site_visit_plan" parent="cpm_crm_enquiry_menu" sequence="5"/>
+				
+				<!-- Site Visit Status --> 
+				<menuitem action="kg_site_visit_plan.tma_ch_site_visit_plan" name="Plan Status Update" id="tma_ch_site_visit_plan" parent="cpm_crm_enquiry_menu" sequence="6"/>
+				
 		<!-- MS Process Menu -->
 		
 		<menuitem name="MS Process" id="mpm_crm" sequence="20"/>
