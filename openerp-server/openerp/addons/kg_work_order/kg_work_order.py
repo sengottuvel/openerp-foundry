@@ -1111,7 +1111,7 @@ class ch_work_order_details(osv.osv):
 								h_value = 0.00
 								b_value = 0.00
 							
-							if pattern_rec.length_type == 'single_column_pipe':
+							if ms_rec.length_type == 'single_column_pipe':
 								
 								if star_value == 0:
 								 
