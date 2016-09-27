@@ -105,7 +105,7 @@ class kg_excel_po_register(osv.osv):
 		if not rec.status or rec.status == 'approved' or rec.status == 'cancelled':	
 			sql = """		
 				SELECT
-					  po.id AS po_id,
+					  distinct po.id AS po_id,
 					  po.name AS po_no,
 					  to_char(po.date_order,'dd/mm/yyyy') AS po_date,
 					  po.date_order AS date,
@@ -149,7 +149,7 @@ class kg_excel_po_register(osv.osv):
 		elif rec.status == 'pending':
 			sql = """		
 				SELECT
-				  po.id AS po_id,
+				  distinct po.id AS po_id,
 				  po.name AS po_no,
 				  to_char(po.date_order,'dd/mm/yyyy') AS po_date,
 				  po.date_order AS date,
