@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+
+	<!-- Form View Start -->
+
+		<record id="t_form_v_site_visit_pending" model="ir.ui.view">
+			<field name="name">Site Visit Entry Form</field>
+			<field name="model">kg.site.visit.pending</field>
+			<field name="arch" type="xml">
+				<form string="Site Visit Enquiry" version="7.0" create="false" delete="false">
+					<header>
+<!--					<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
+						<button name="entry_update" type="object" string="Update" states="open,in_progress" class="oe_highlight"/>
+						<button name="entry_close" type="object" string="Closed" states="in_progress" class="oe_highlight"/>-->
+					</header>
+						<group>
+							<group>
+								<field name="customer_id" readonly="1"/>
+								<field name="wo_no" readonly="1" required="1"/>
+								<field name="purpose" readonly="1" required="1"/>
+								<field name="pump_id" readonly="1" required="1"/>
+								<field name="moc_const_id" readonly="1" required="1"/>
+								<field name="defect_id" readonly="1" required="1"/>
+								<field name="remarks" readonly="1"/>
+								<field name="decision" readonly="1" invisible="1"/>
+								<field name="item_code" readonly="1" invisible="1"/>
+							</group>											
+							<group>
+								<field name="complaint_no"/>
+								<field name="registration_date"/>
+								<field name="s_no" readonly="1"/>
+								<field name="wo_line_id" readonly="1" required="1"/>
+								<field name="complaint_due_to" readonly="1" required="1"/>
+								<field name="state" style="width: 30%%" class="att_state_change"/>
+								<field name="item_name" readonly="1" invisible="1"/>
+							</group>	
+						</group>
+						<notebook>
+							<page string="Entry Info">
+								<group>
+									<group>
+										<field name="company_id"/>
+									</group>
+									<group>
+										<field name="active"/>
+									</group>
+									<group>
+										<field name="user_id"/>
+										<field name="update_user_id"/>
+									</group>
+									<group>
+										<field name="crt_date"/>
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_site_visit_pending" model="ir.ui.view">
+			<field name="name">Site Visit Entry Tree</field>
+			<field name="model">kg.site.visit.pending</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'pending';black:state == 'plan';red:state == 'close'" 
+								toolbar="True" string="Site Visit Tree" create="false" delete="false">
+					<field name="complaint_no"/>
+					<field name="registration_date"/>
+					<field name="customer_id"/>	
+					<field name="pump_id"/>	
+					<field name="defect_id"/>	
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Search View Start -->
+
+		<record id="t_search_v_site_visit_pending" model="ir.ui.view">
+            <field name="name">Site Visit Search</field>
+            <field name="model">kg.site.visit.pending</field>
+            <field name="arch" type="xml">
+                <search string="Site Visit Search">
+					<field name="complaint_no" string="Complaint No" filter_domain="[('complaint_no','ilike',self)]" />
+					<field name="customer_id" string="Customer Name" filter_domain="[('customer_id','ilike',self)]" />
+					<field name="pump_id" string="Pump Model" filter_domain="[('pump_id','ilike',self)]" />
+					<filter icon="terp-check" name="pending" string="Pending" domain="[('state','=','pending')]"/>
+					<filter icon="terp-check" name="plan" string="Planned" domain="[('state','=','plan')]"/>
+					<filter icon="terp-check" name="close" string="Closed" domain="[('state','=','close')]"/>
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="Customer" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'customer_id'}"/>
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->
+
+	<!-- Menu Action Start-->
+		
+		<record id="tma_site_visit_pending" model="ir.actions.act_window">
+			<field name="name">Site Visit Pending</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.site.visit.pending</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="domain">[('state','!=','close')]</field>
+			<field name="view_id" ref="t_tree_v_site_visit_pending"/>
+			<field name="search_view_id" ref="t_search_v_site_visit_pending"/>
+			<field name="context">{}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Sequence Number Setting Starts Here -->
+	
+		<record forcecreate="1" id="seq_site_visit_pending" model="ir.sequence.type">	
+			<field name="name">Site Visit Pending</field>
+			<field name="code">kg.site.visit.pending</field>
+		</record>
+
+		<record forcecreate="1" id="site_visit_pending" model="ir.sequence">
+		  <field name="name">Site Visit Pending</field>
+		  <field name="code">kg.site.visit.pending</field>
+		  <field name="padding" eval="4"/>
+		  <field name="prefix">SVP/%(year)s/</field>
+		  <field name="reset_sequence">fiscal_reset</field>
+		</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	</data>
+</openerp>

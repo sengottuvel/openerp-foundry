@@ -11,15 +11,15 @@
 				<form string="Service Enquiry" version="7.0">
 					<header>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
-						<button name="entry_update" type="object" string="Update" states="open,in_progress" class="oe_highlight"/>
-						<button name="entry_close" type="object" string="Closed" states="in_progress" class="oe_highlight"/>
+<!--					<button name="entry_update" type="object" string="Update" states="open" class="oe_highlight"/>
+						<button name="entry_close" type="object" string="Closed" states="in_progress" class="oe_highlight"/>-->
 					</header>
-					<sheet>		
 						<group>
 							<group>
 								<field name="name" readonly="1"/>
 								<field name="customer_id" required="1"/>
 								<field name="purpose"/>
+								<field name="remarks"/>
 							</group>											
 							<group>
 								<field name="complaint_date"/>
@@ -28,7 +28,7 @@
 						</group>
 						<notebook>
 							<page string="Complaint Details">
-								<field name="line_ids" colspan="4" nolabel="1">
+								<field name="line_ids" colspan="4" nolabel="1" context="{'purpose':purpose,'complaint_categ':'pump'}">
 									<tree string="Complaint Details">
 										<field name="s_no" required="1"/>
 										<field name="wo_line_id" required="1"/>
@@ -77,7 +77,6 @@
 								</group>
 							</page>
 						</notebook>
-					</sheet>
 				</form>
 			</field>
 		</record>
@@ -132,33 +131,47 @@
 		<field eval="8" name="priority"/>
 		<field name="arch" type="xml">
 			<form string="Complaint Details" version="7.0" >
-				<sheet>
 					<group>
 						<group>
 							<field name="s_no" required="1"/>
 							<field name="market_division" required="1"/>
-							<field name="dealer_id" required="1"/>
+							<field name="dealer_id" attrs="{'required':[('ref_mode','=','dealer')]}"/>
+							<field name="despatch_date" required="1"/>
 							<field name="pump_id" required="1"/>
 							<field name="moc_const_id" required="1"/>
+							
+							<field name="defect_id" attrs="{'required':[('complaint_categ','in',('pump'))]}"/>
+							<field name="complaint_categ" readonly="1" invisible="1"/>
 						</group>
 						<group>
-							<field name="wo_line_id" required="1" on_change="onchange_wo_id(wo_line_id)"/>
+							<field name="wo_no" on_change="onchange_wo_no(wo_no)" attrs="{'readonly':[('load_bom','=',True)]}"/>
+							<field name="wo_line_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
 							<field name="ref_mode" required="1"/>
-							<field name="purpose" required="1"/>
+							<field name="purpose" required="1" readonly="1"/>
 							<field name="pumpseries_id" required="1"/>
+							<field name="complaint_due_to" attrs="{'required':['|',('defect_id','!=',False),('complaint_categ','in',('pump'))]}"/>
+							<field name="decision" attrs="{'required':['|',('defect_id','!=',False),('complaint_categ','in',('pump'))]}"/>
 							<field name="nature_of_complaint"/>
 						</group>
+					<group invisible="1">
+						<field name="load_bom" on_change="onchange_load_bom(wo_line_id,load_bom,complaint_categ)"/>
 					</group>
-					
-					<notebook>
+						<group invisible="1">
+						</group>
+					</group>
+					<notebook  invisible="1">
 						<page string="Foundry Items">
 							<field name="line_ids_fou">
 								<tree string="FOU Details Tree" editable="top" create="false" delete="false">
-									<field name="is_applicalbe"/>
+									<field name="is_applicable"/>
 									<field name="position_id"  readonly="1"/>
 									<field name="pattern_id" required="1" readonly="1"/>
 									<field name="pattern_name" required="1" readonly="1"/>
 									<field name="qty" required="1" readonly="1"/>
+									<field name="complaint_categ" invisible="1"/>
+									<field name="defect_id" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('parts'))]}"/>
+									<field name="complaint_due_to" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('parts'))]}"/>
+									<field name="decision" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('parts'))]}"/>
 									<field name="remark"/>
 								</tree>
 							</field>
@@ -166,10 +179,14 @@
 						<page string="Machine Shop">
 							<field name="line_ids_ms">
 								<tree string="MS Details Tree" editable="top" create="false" delete="false">
-									<field name="is_applicalbe"/>
+									<field name="is_applicable"/>
 									<field name="ms_name_id" required="1" readonly="1"/>
 									<field name="ms_id" required="1" readonly="1"/>
 									<field name="qty" required="1" readonly="1"/>
+									<field name="complaint_categ" invisible="1"/>
+									<field name="defect_id" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('parts'))]}"/>
+									<field name="complaint_due_to" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('parts'))]}"/>
+									<field name="decision" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('parts'))]}"/>
 									<field name="remark"/>
 								</tree>
 							</field>
@@ -177,17 +194,20 @@
 						<page string="BOT">
 							<field name="line_ids_bot">
 								<tree string="BOT Details Tree" editable="top" create="false" delete="false">
-									<field name="is_applicalbe"/>
+									<field name="is_applicable"/>
 									<field name="bot_id" required="1" readonly="1"/>
 									<field name="bot_name" required="1" readonly="1"/>
 									<field name="qty" required="1" readonly="1"/>
+									<field name="complaint_categ" invisible="1"/>
+									<field name="defect_id" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('parts'))]}"/>
+									<field name="complaint_due_to" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('parts'))]}"/>
+									<field name="decision" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('parts'))]}"/>
 									<field name="remark"/>
 								</tree>
 							</field>
 						</page>
 					</notebook>
 					
-				</sheet>
 			</form>
 		</field>
 	</record>	

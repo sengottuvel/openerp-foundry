@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+
+	<!-- Form View Start -->
+
+		<record id="t_form_v_site_visit_plan" model="ir.ui.view">
+			<field name="name">Site Visit Plan Entry Form</field>
+			<field name="model">kg.site.visit.plan</field>
+			<field name="arch" type="xml">
+				<form string="Site Visit Plan Enquiry" version="7.0">
+					<header>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
+						<button name="entry_approve" type="object" string="Approve" states="confirm" class="oe_highlight"/>
+						<button name="entry_reject" type="object" string="Reject" states="confirm" class="oe_highlight"/>
+<!--					<button name="entry_close" type="object" string="Closed" states="plan" class="oe_highlight"/>-->
+					</header>
+						<group>
+							<group>
+								<field name="name" readonly="1"/>
+								<field name="from_date"/>
+								<field name="no_of_days" readonly="1"/>
+								<field name="engineer_id"/>
+								<field name="payment" required="1"/>
+								<field name="sam_amt" attrs="{'required':[('payment','=','both')],'invisible':[('payment','!=','both')]}"/>
+								<field name="remarks"/>
+							</group>											
+							<group>
+								<field name="region"/>
+								<field name="cr_date" readonly="1"/>
+								<field name="to_date" on_change="onchange_no_of_days(from_date,to_date)"/>
+								<field name="purpose_of_visit" readonly="1"/>
+								<field name="customer_amt" attrs="{'required':[('payment','=','both')],'invisible':[('payment','!=','both')]}"/>
+								<field name="allowance_date" required="1"/>
+								<field name="state" style="width: 30%%" class="att_state_change"/>
+							</group>	
+						</group>
+						<notebook>
+							<page string="Select Plan Details">
+								<field name="sv_pending_ids" nolabel="1">
+									<tree string = "Pending Site Visit" delete="false">
+										<field name="complaint_no" readonly="1"/>
+										<field name="customer_id" readonly="1"/>
+										<field name="registration_date" readonly="1"/>
+										<field name="wo_no" readonly="1"/>
+										<field name="wo_line_id" readonly="1"/>
+										<field name="purpose" readonly="1"/>
+										<field name="pump_id" readonly="1"/>
+										<field name="moc_const_id" readonly="1"/>
+									</tree>
+								</field>
+								<button name="update_plan_line" type='object' states="draft,confirm" string="Save Record"/>
+								<group string="Plan List" attrs="{'invisible': [('state','=','draft')]}">
+									<field name="line_ids" colspan="4" nolabel="1" create="false" delete="false">
+										<tree string = "Pending List">
+											<field name="complaint_no"/>
+											<field name="customer_id"/>
+											<field name="registration_date"/>
+											<field name="wo_no"/>
+											<field name="wo_line_id"/>
+											<field name="pump_id"/>
+											<field name="moc_const_id"/>
+											<field name="defect_id"/>
+											<field name="no_of_days"/>
+											<field name="tot_plan_amt"/>
+										</tree>
+										<form string="Ch Site Visit Plan Details" version="7.0" create="false" delete="false">
+											<group>
+												<group>
+													<field name="complaint_no" required="1" readonly="1"/>
+													<field name="customer_id" required="1" readonly="1"/>
+													<field name="dealer_id" readonly="1"/>
+													<field name="registration_date" readonly="1"/>
+													<field name="wo_no" readonly="1"/>
+													<field name="defect_id" required="1" readonly="1"/>
+													<field name="s_no" required="1" readonly="1"/>
+													<field name="sv_pending_id" readonly="1" invisible="1"/>
+												</group>
+												<group>
+													<field name="wo_line_id" readonly="1"/>
+													<field name="pump_id" required="1" readonly="1"/>
+													<field name="moc_const_id" required="1" readonly="1"/>
+													<field name="no_of_days" required="1"/>
+													<field name="tot_plan_amt"/>
+												</group>
+											</group>
+											<notebook>
+												<page string="Allowance Breakups">
+													<field name="ch_line_ids">
+														<tree string="Allowance Breakups Tree" editable="top">
+															<field name="date" required="1"/>
+															<field name="description" required="1"/>
+															<field name="mode_of_travel" required="1"/>
+															<field name="out_station_amt" on_change="onchange_total(out_station_amt,local_travel_amt,boarding_amt,lodging_amt,misc_charge_amt)" required="1"/>
+															<field name="local_travel_amt" on_change="onchange_total(out_station_amt,local_travel_amt,boarding_amt,lodging_amt,misc_charge_amt)" required="1"/>
+															<field name="boarding_amt" on_change="onchange_total(out_station_amt,local_travel_amt,boarding_amt,lodging_amt,misc_charge_amt)" required="1"/>
+															<field name="lodging_amt" on_change="onchange_total(out_station_amt,local_travel_amt,boarding_amt,lodging_amt,misc_charge_amt)" required="1"/>
+															<field name="misc_charge_amt" on_change="onchange_total(out_station_amt,local_travel_amt,boarding_amt,lodging_amt,misc_charge_amt)" required="1"/>
+															<field name="total_amt" readonly="1"/>
+															<field name="details" widget="char"/>
+														</tree>
+													</field>
+												</page>
+											</notebook>
+										</form>
+									</field>
+								</group>
+								</page>
+								<page string="Entry Info">
+									<group>
+										<group>
+											<field name="company_id"/>
+										</group>
+										<group>
+											<field name="active"/>
+										</group>
+										<group>
+											<field name="user_id"/>
+											<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+											<field name="approve_user_id" attrs="{'invisible':[('state','in',['draft', 'plan'])]}"/>
+											<field name="close_user_id" attrs="{'invisible':[('state','in',['draft', 'plan'])]}"/>
+											<field name="update_user_id"/>
+										</group>
+										<group>
+											<field name="crt_date"/>
+											<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+											<field name="approve_date" attrs="{'invisible':[('state','in',['draft', 'plan'])]}"/>
+											<field name="close_date" attrs="{'invisible':[('state','in',['draft', 'plan'])]}"/>
+											<field name="update_date"/>
+										</group>
+									</group>
+								</page>
+						</notebook>
+						<group>
+							<group>
+							</group>
+							<group class="oe_subtotal_footer oe_right">
+								<field name="tot_plan_amt" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+							</group>
+						</group>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_site_visit_plan" model="ir.ui.view">
+			<field name="name">Site Visit Paln Entry Tree</field>
+			<field name="model">kg.site.visit.plan</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';black:state == 'plan';gray:state == 'reject';red:state == 'confirm'" 
+								toolbar="True" string="Site Visit Plan Tree">
+					<field name="name"/>
+					<field name="region"/>
+					<field name="from_date"/>
+					<field name="to_date"/>	
+					<field name="allowance_amt"/>	
+					<field name="purpose_of_visit"/>	
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Search View Start -->
+
+		<record id="t_search_v_site_visit_plan" model="ir.ui.view">
+            <field name="name">Site Visit Plan Search</field>
+            <field name="model">kg.site.visit.plan</field>
+            <field name="arch" type="xml">
+                <search string="Site Visit Plan Search">
+					<field name="name" string="Name" filter_domain="[('name','ilike',self)]" />
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirm" string="WFA" domain="[('state','=','confirm')]"/>
+					<filter icon="terp-check" name="plan" string="Planned" domain="[('state','=','plan')]"/>
+					<filter icon="terp-check" name="close" string="Closed" domain="[('state','=','close')]"/>
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->
+
+	<!-- Menu Action Start-->
+		
+		<record id="tma_site_visit_plan" model="ir.actions.act_window">
+			<field name="name">Site Visit Plan</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.site.visit.plan</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_site_visit_plan"/>
+			<field name="search_view_id" ref="t_search_v_site_visit_plan"/>
+			<field name="context">{}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Sequence Number Setting Starts Here -->
+	
+		<record forcecreate="1" id="seq_site_visit_plan" model="ir.sequence.type">	
+			<field name="name">Site Visit Plan</field>
+			<field name="code">kg.site.visit.plan</field>
+		</record>
+
+		<record forcecreate="1" id="site_visit_plan" model="ir.sequence">
+		  <field name="name">Site Visit Plan</field>
+		  <field name="code">kg.site.visit.plan</field>
+		  <field name="padding" eval="4"/>
+		  <field name="prefix">SVP/%(year)s/</field>
+		  <field name="reset_sequence">fiscal_reset</field>
+		</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	
+		<record id="t_form_v_ch_site_visit_plan" model="ir.ui.view">
+			<field name="name">Ch Site Visit Plan Entry Form</field>
+			<field name="model">ch.site.visit.plan</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<form string="Ch Site Visit Plan Details" version="7.0" create="false" delete="false">
+					<header>
+						<button name="entry_confirm" type="object" string="Confirm" states="pending" class="oe_highlight"/>
+					</header>
+					<group>
+						<group>
+							<field name="complaint_no" required="1" readonly="1"/>
+							<field name="header_id" required="1" readonly="1"/>
+							<field name="customer_id" required="1" readonly="1"/>
+							<field name="wo_no" readonly="1"/>
+							<field name="defect_id" required="1" readonly="1"/>
+							<field name="s_no" required="1" readonly="1"/>
+							<field name="sv_pending_id" readonly="1" invisible="1"/>
+							<field name="registration_date" readonly="1" invisible="1"/>
+							<field name="dealer_id" readonly="1" invisible="1"/>
+						</group>
+						<group>
+							<field name="plan_date" readonly="1"/>
+							<field name="wo_line_id" readonly="1"/>
+							<field name="pump_id" required="1" readonly="1"/>
+							<field name="moc_const_id" required="1" readonly="1"/>
+							<field name="no_of_days" required="1" readonly="1"/>
+							<field name="purpose" required="1" />
+							<field name="state" style="width: 30%%" class="att_state_change"/>
+						</group>
+					</group>
+					<group string="Plan Details">
+						<group>
+							<field name="decision" required="1"/>
+							<field name="returnable" attrs="{'required':[('decision','in',('replace_free'))]}"/>
+							<field name="replace_categ" attrs="{'required':[('decision','in',('replace','replace_free'))],'invisible':[('decision','not in',('replace','replace_free'))]}"/>
+							<field name="remarks"/>
+						</group>
+						<group>
+							<field name="tot_plan_amt" readonly="1"/>
+							<field name="expense_amt" required="1" on_change="onchange_bal_amt(expense_amt,tot_plan_amt)"/>
+							<field name="bal_amt" required="1" readonly="1"/>
+						</group>
+					</group>
+					
+					<group>
+						<group>
+							<field name="load_bom" on_change="onchange_load_bom(load_bom,pump_id,wo_line_id,purpose,moc_const_id,decision,replace_categ)" attrs="{'invisible':[('decision','not in',('replace','replace_free'))]}"/>
+						</group>
+						<group>
+						</group>
+					</group>
+						
+					<notebook attrs="{'invisible':[('decision','not in',('replace','replace_free'))]}">
+						<page string = "Foundry Items">
+							<field name="line_ids">
+								<tree string="Foundry Item Tree" editable="top" create="false" delete="false">
+									<field name="is_applicable"/>
+									<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+									<field name="pattern_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+									<field name="pattern_name" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+									<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}"/>
+									<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
+									<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+									<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
+									<field name="load_bom" invisible="1"/>
+								</tree>
+							</field>								
+						</page>
+						<page string = "MS Items">
+							<field name="line_ids_a">
+								<tree string="MS Item Tree" editable="top" create="false" delete="false">
+									<field name="is_applicable"/>
+									<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+									<field name="ms_id" attrs="{'required':[('is_applicable','=',True)],'readonly':[('load_bom','=',True)]}"/>
+									<field name="name" attrs="{'readonly':[('load_bom','=',True)]}"/>
+									<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}"/>
+									<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
+									<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+									<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
+									<field name="load_bom" invisible="1"/>
+								</tree>
+							</field>								
+						</page>
+						<page string = "BOT Items">
+							<field name="line_ids_b">
+								<tree string="BOT Item Tree" editable="top" create="false" delete="false">
+									<field name="is_applicable"/>
+									<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+									<field name="ms_id" attrs="{'required':[('is_applicable','=',True)],'readonly':[('load_bom','=',True)]}"/>
+									<field name="item_name" attrs="{'readonly':[('load_bom','=',True)]}"/>
+									<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}"/>
+									<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+									<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
+									<field name="load_bom" invisible="1"/>
+								</tree>
+							</field>								
+						</page>
+						<page string = "Accessories">
+							<field name="line_ids_c">
+								<tree string="Accessories Tree" editable="top">
+									<field name="is_applicable"/>
+									<field name="access_id" attrs="{'required':[('is_applicable','=',True)]}"/>
+									<field name="qty" attrs="{'required':[('is_applicable','=',True)]}"/>
+								</tree>
+							</field>								
+						</page>
+					</notebook>
+			
+					<notebook>
+						<page string="Allowance Breakups">
+							<field name="ch_line_ids" readonly="1">
+								<tree string="Allowance Breakups Tree" editable="top">
+									<field name="date" required="1"/>
+									<field name="description" required="1"/>
+									<field name="mode_of_travel" required="1"/>
+									<field name="out_station_amt" on_change="onchange_total(out_station_amt,local_travel_amt,boarding_amt,lodging_amt,misc_charge_amt)" required="1"/>
+									<field name="local_travel_amt" on_change="onchange_total(out_station_amt,local_travel_amt,boarding_amt,lodging_amt,misc_charge_amt)" required="1"/>
+									<field name="boarding_amt" on_change="onchange_total(out_station_amt,local_travel_amt,boarding_amt,lodging_amt,misc_charge_amt)" required="1"/>
+									<field name="lodging_amt" on_change="onchange_total(out_station_amt,local_travel_amt,boarding_amt,lodging_amt,misc_charge_amt)" required="1"/>
+									<field name="misc_charge_amt" on_change="onchange_total(out_station_amt,local_travel_amt,boarding_amt,lodging_amt,misc_charge_amt)" required="1"/>
+									<field name="total_amt" readonly="1"/>
+									<field name="details" widget="char"/>
+								</tree>
+							</field>
+						</page>
+					</notebook>
+				</form>
+			</field>
+		</record>	
+		
+		<record id="t_tree_v_ch_site_visit_plan" model="ir.ui.view">
+			<field name="name">Ch Site Visit Paln Entry Tree</field>
+			<field name="model">ch.site.visit.plan</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" colors="blue:state == 'pending';black:state == 'close'" 
+						string="Ch Site Visit Plan Tree" create="false" delete="false">
+					<field name="complaint_no"/>
+					<field name="header_id"/>
+					<field name="plan_date"/>
+					<field name="customer_id"/>
+					<field name="s_no"/>
+					<field name="wo_no"/>
+					<field name="pump_id"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+		<record id="t_search_v_ch_site_visit_plan" model="ir.ui.view">
+            <field name="name">Ch Site Visit Plan Search</field>
+            <field name="model">ch.site.visit.plan</field>
+            <field name="arch" type="xml">
+                <search string="Ch Site Visit Plan Search">
+					<field name="complaint_no" string="Complaint No" filter_domain="[('complaint_no','ilike',self)]" />
+					<field name="customer_id" string="Customer Name" filter_domain="[('customer_id','ilike',self)]" />
+					<field name="pump_id" string="Pump Model" filter_domain="[('pump_id','ilike',self)]" />
+					<filter icon="terp-check" name="pending" string="Pending" domain="[('state','=','pending')]"/>
+					<filter icon="terp-check" name="close" string="Closed" domain="[('state','=','close')]"/>
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+		<record id="tma_ch_site_visit_plan" model="ir.actions.act_window">
+			<field name="name">Site Visit Status</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">ch.site.visit.plan</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="domain">[('state','in',('pending','close'))]</field>
+			<field name="view_id" ref="t_tree_v_ch_site_visit_plan"/>
+			<field name="search_view_id" ref="t_search_v_ch_site_visit_plan"/>
+		</record>
+	
+	</data>
+</openerp>
