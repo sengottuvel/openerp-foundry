@@ -497,10 +497,10 @@ class kg_depindent_line(osv.osv):
 			if uom != prod.uom_po_id.id:
 				dep_po_qty_test = qty / prod.po_uom_coeff
 				dep_po_qty = (math.ceil(dep_po_qty_test))
-				value = {'pending_qty': qty, 'issue_pending_qty' : qty, 'po_qty' : dep_po_qty }
+				value = {'pending_qty': qty, 'issue_pending_qty' : qty, 'po_qty' : dep_po_qty ,'cutting_qty': qty}
 				print " if value.............................."	, value
 			else:
-				value = {'pending_qty': qty, 'issue_pending_qty' : qty, 'po_qty' : qty}
+				value = {'pending_qty': qty, 'issue_pending_qty' : qty, 'po_qty' : qty,'cutting_qty': qty}
 				print " elseelse value.............................."	, value
 
 		return {'value': value}
@@ -574,6 +574,7 @@ class kg_depindent_line(osv.osv):
 	'po_qty': fields.float('PO Qty',),
 	'pending_qty': fields.float('Pending Qty'),
 	'issue_pending_qty': fields.float('Issue.Pending Qty'),
+	'cutting_qty': fields.float('Cutting Qty'),
 	#'main_store_qty': fields.float('Main Store Qty'),
 	'main_store_qty': fields.function(_stock_qty, type='float', string='Quantity On Hand'),
 	'dep_id': fields.many2one('kg.depmaster', 'Dep.Name'),

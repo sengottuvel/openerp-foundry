@@ -1164,6 +1164,7 @@ class kg_schedule(osv.osv):
 								'uom':product_rec.uom_id.id,
 								'qty':foundry_indent_item['indent_qty']/order_line_rec.qty,
 								'pending_qty':foundry_indent_item['indent_qty']/order_line_rec.qty,
+								'cutting_qty':foundry_indent_item['indent_qty']/order_line_rec.qty,
 							}
 							
 							indent_line_id = dep_indent_line_obj.create(cr, uid, foundry_dep_indent_line_vals)
@@ -1222,10 +1223,10 @@ class kg_schedule(osv.osv):
 						indent_id = dep_indent_obj.create(cr, uid, ms_dep_indent_vals)
 						
 						cr.execute("""
-							select pump_model_id,ms_item,product_id,order_line_id,sum(indent_qty) as indent_qty from 
+							select pump_model_id,ms_item,product_id,uom,order_line_id,sum(indent_qty) as indent_qty from 
 
 								(
-								select (raw.qty * order_ms.qty) as indent_qty,raw.product_id,wo_line.pump_model_id,
+								select (raw.qty * order_ms.qty) as indent_qty,raw.product_id,raw.uom,wo_line.pump_model_id,
 								order_ms.header_id as order_line_id, order_ms.id as ms_item
 								from ch_ms_raw_material as raw
 								left join ch_order_machineshop_details order_ms on raw.header_id = order_ms.ms_id
@@ -1237,7 +1238,7 @@ class kg_schedule(osv.osv):
 
 								as sub_query
 								where pump_model_id = %s and order_line_id = %s
-								group by order_line_id,pump_model_id,ms_item,product_id """%(entry.id,ms_pm_item['pump_model_id'],order_line_rec.id))
+								group by order_line_id,pump_model_id,ms_item,product_id,uom """%(entry.id,ms_pm_item['pump_model_id'],order_line_rec.id))
 						ms_product_details = cr.dictfetchall();
 						
 						for ms_indent_item in ms_product_details:
@@ -1247,9 +1248,10 @@ class kg_schedule(osv.osv):
 							ms_dep_indent_line_vals = {
 							'indent_id':indent_id,
 							'product_id':ms_indent_item['product_id'],
-							'uom':product_rec.uom_id.id,
+							'uom':ms_indent_item['uom'],
 							'qty':ms_indent_item['indent_qty']/order_line_rec.qty,
 							'pending_qty':ms_indent_item['indent_qty']/order_line_rec.qty,
+							'cutting_qty':ms_indent_item['indent_qty']/order_line_rec.qty,
 							}
 							
 							indent_line_id = dep_indent_line_obj.create(cr, uid, ms_dep_indent_line_vals)
@@ -1314,11 +1316,11 @@ class kg_schedule(osv.osv):
 						indent_id = dep_indent_obj.create(cr, uid, bot_dep_indent_vals)
 						
 						cr.execute("""
-							select order_line_id,pump_model_id,bot_item,product_id,sum(indent_qty) as indent_qty from 
+							select order_line_id,pump_model_id,bot_item,product_id,uom,sum(indent_qty) as indent_qty from 
 
 								(
 
-								select (raw.qty * order_bot.qty) as indent_qty,raw.product_id,
+								select (raw.qty * order_bot.qty) as indent_qty,raw.product_id,raw.uom,
 								order_bot.header_id as order_line_id,wo_line.pump_model_id,
 								order_bot.id as bot_item
 								from ch_ms_raw_material as raw
@@ -1332,7 +1334,7 @@ class kg_schedule(osv.osv):
 
 								as sub_query
 								where pump_model_id = %s and order_line_id = %s
-								group by order_line_id,pump_model_id,bot_item,product_id
+								group by order_line_id,pump_model_id,bot_item,product_id,uom
 								 """%(entry.id,ms_pm_item['pump_model_id'],order_line_rec.id))
 						bot_product_details = cr.dictfetchall();
 						
@@ -1343,9 +1345,10 @@ class kg_schedule(osv.osv):
 							bot_dep_indent_line_vals = {
 								'indent_id':indent_id,
 								'product_id':bot_indent_item['product_id'],
-								'uom':product_rec.uom_id.id,
+								'uom':bot_indent_item['uom'],
 								'qty':bot_indent_item['indent_qty']/order_line_rec.qty,
 								'pending_qty':bot_indent_item['indent_qty']/order_line_rec.qty,
+								'cutting_qty':bot_indent_item['indent_qty']/order_line_rec.qty,
 							}
 							
 							indent_line_id = dep_indent_line_obj.create(cr, uid, bot_dep_indent_line_vals)
