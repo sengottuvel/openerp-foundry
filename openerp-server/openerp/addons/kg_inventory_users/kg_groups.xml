@@ -91,6 +91,9 @@
 			ref('kg_menus.tma_crm_offer'),
 			ref('kg_menus.tma_service_enquiry'),
 			ref('kg_menus.mam_defect_master_menu'),
+			ref('kg_menus.tma_site_visit_pending'),
+			ref('kg_menus.tma_site_visit_plan'),
+			ref('kg_menus.tma_ch_site_visit_plan'),
 			
             ])]" name="menu_access"/>
             <field name="users" eval="[(4, ref('base.user_root'))]"/>

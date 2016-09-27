@@ -741,6 +741,87 @@
 			<field eval="1" name="perm_create"/>
 			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
 		</record>
+		
+		<record id="crm_admin_site_visit_pending" model="ir.model.access">
+			<field name="model_id" ref="kg_site_visit_pending.model_kg_site_visit_pending"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Site Visit Pending</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_site_visit_plan" model="ir.model.access">
+			<field name="model_id" ref="kg_site_visit_plan.model_kg_site_visit_plan"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Site Visit Plan</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_ch_site_visit_plan" model="ir.model.access">
+			<field name="model_id" ref="kg_site_visit_plan.model_ch_site_visit_plan"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch Site Visit Plan</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_ch_site_visit_plan_allowance" model="ir.model.access">
+			<field name="model_id" ref="kg_site_visit_plan.model_ch_site_visit_plan_allowance"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch Site Visit Plan Allowance</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_ch_sv_foundry_item" model="ir.model.access">
+			<field name="model_id" ref="kg_site_visit_plan.model_ch_sv_foundry_item"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch SV Fou</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_ch_sv_ms_item" model="ir.model.access">
+			<field name="model_id" ref="kg_site_visit_plan.model_ch_sv_ms_item"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch SV MS</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_ch_sv_bot_item" model="ir.model.access">
+			<field name="model_id" ref="kg_site_visit_plan.model_ch_sv_bot_item"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch SV BOT</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
+		<record id="crm_admin_ch_sv_access" model="ir.model.access">
+			<field name="model_id" ref="kg_site_visit_plan.model_ch_sv_access"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch SV Accessories</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_crm_admin')]"/>
+		</record>
+		
     </data>
 </openerp>
 	
