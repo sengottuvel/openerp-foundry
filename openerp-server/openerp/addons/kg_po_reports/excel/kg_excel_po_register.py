@@ -194,7 +194,7 @@ class kg_excel_po_register(osv.osv):
 		data = cr.dictfetchall()
 		
 		data.sort(key=lambda data: data['date'])
-		
+		print"data....................................",data
 		record={}
 		sno=1
 		wbk = xlwt.Workbook()
@@ -330,6 +330,7 @@ class kg_excel_po_register(osv.osv):
 		for ele in data:
 			#~ ele['tax'] = 0
 			#~ ele['po_ad_amt'] = 0
+			print"ele['po_no']ele['po_no']",ele['po_no']
 			ele['received_qty'] = ele['qty'] - ele['pending_qty']
 			sheet1.write(s2,0,sno)
 			sheet1.write(s2,1,ele['su_name'])
