@@ -78,6 +78,7 @@
 				<tree toolbar="True" string="Subcontract List Tree" create="false">					
 					<field name="name" invisible="1"/>
 					<field name="order_no"/>
+					<field name="contractor_id"/>
 					<field name="order_delivery_date"/>
 					<field name="order_category" invisible="1"/>
 					<field name="order_priority" string="Category"/>

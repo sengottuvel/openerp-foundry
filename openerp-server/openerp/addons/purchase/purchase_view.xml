@@ -164,7 +164,7 @@
             <field name="name">purchase.order.form</field>
             <field name="model">purchase.order</field>
             <field name="arch" type="xml">
-                <form string="Purchase Order" version="7.0">
+                <form string="Purchase Order" version="7.0" create='false'>
                 <header>
                     <button name="wkf_send_rfq" states="draft" string="Send by Email" type="object" context="{'send_rfq':True}" class="oe_highlight"/>
                     <button name="wkf_send_rfq" states="sent" string="Send by Email" type="object" context="{'send_rfq':True}"/>
@@ -351,6 +351,26 @@
                 </tree>
             </field>
         </record>
+        
+        <record id="purchase_order_spl_tree" model="ir.ui.view">
+            <field name="name">purchase.order.tree</field>
+            <field name="model">purchase.order</field>
+            <field name="arch" type="xml">
+                <tree fonts="bold:message_unread==True" create='false' colors="grey:state in ('cancel');blue:state in ('draft');red:state in ('confirmed');black:state in ('approved')" string="Purchase Order">
+                    <field name="message_unread" invisible="1"/>
+                    <field name="name" string="Reference"/>
+                    <field name="date_order" />
+                    <field name="partner_id"/>
+                    <field name="company_id" groups="base.group_multi_company" widget="selection"/>
+                    <field name="minimum_planned_date" invisible="context.get('quotation_only', False)"/>
+                    <field name="origin"/>
+                    <field name="amount_untaxed" sum="Total Untaxed amount" string="Untaxed"/>
+                    <field name="amount_total" sum="Total amount"/>
+                    <field name="state"/>
+                    <field name="approval_flag" invisible="1"/>
+                </tree>
+            </field>
+        </record>
 
         <record id="purchase_rfq" model="ir.actions.act_window">
             <field name="name">Purchase Order</field>
@@ -360,6 +380,7 @@
             <field name="domain">[('state','in',('draft','confirmed')),('approval_flag','=',False)]</field>
             <field name="view_mode">tree,form,graph,calendar</field>
             <field name="search_view_id" ref="view_purchase_order_filter"/>
+            <field name="view_id" ref="purchase_order_tree"/>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
                 Click to create a request for quotation.
@@ -382,6 +403,7 @@
             <field name="domain">[('state','=','confirmed'),('approval_flag','=',True)]</field>
             <field name="view_mode">tree,form,graph,calendar</field>
             <field name="search_view_id" ref="view_purchase_order_filter"/>
+            <field name="view_id" ref="purchase_order_spl_tree"/>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
                 Click to create a request for quotation.

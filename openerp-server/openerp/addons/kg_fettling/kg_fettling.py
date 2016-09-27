@@ -1441,9 +1441,9 @@ class kg_fettling(osv.osv):
 		
 		total_casting_val = casting_wgt + casting_wgt_tol_val
 		
-		if entry.finish_grinding_weight > total_casting_val:
+		if entry.knockout_weight > total_casting_val:
 			casting_wgt_result = 'fail'
-		if entry.finish_grinding_weight <= total_casting_val:
+		if entry.knockout_weight <= total_casting_val:
 			casting_wgt_result = 'pass'
 		
 		
@@ -1460,9 +1460,9 @@ class kg_fettling(osv.osv):
 		
 		total_design_val = design_wgt + design_wgt_tol_val
 		
-		if entry.finish_grinding_weight > total_design_val:
+		if entry.knockout_weight > total_design_val:
 			design_wgt_result = 'fail'
-		if entry.finish_grinding_weight <= total_design_val:
+		if entry.knockout_weight <= total_design_val:
 			design_wgt_result = 'pass'
 		
 		if casting_wgt_result == 'fail' or design_wgt_result == 'fail':

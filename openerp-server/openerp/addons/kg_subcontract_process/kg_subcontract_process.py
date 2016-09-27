@@ -46,6 +46,7 @@ class kg_subcontract_process(osv.osv):
 		'division_id': fields.many2one('kg.division.master','Division'),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location'),
 		'active': fields.boolean('Active'),
+		'contractor_id': fields.many2one('res.partner','Contractor Name',required=True),
 		
 		'ms_plan_id': fields.many2one('kg.ms.daily.planning','Planning Id'),
 		'ms_plan_line_id': fields.many2one('ch.ms.daily.planning.details','Planning Line Id'),
@@ -1887,13 +1888,8 @@ class kg_subcontract_invoice(osv.osv):
 		return True
 		
 	_constraints = [		
-			  
-		
-		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
-		
-	   ]
-	
-	
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),		
+	   ]	
 	
 kg_subcontract_invoice()
 
