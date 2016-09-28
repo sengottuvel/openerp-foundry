@@ -771,7 +771,7 @@ class kg_service_order_line(osv.osv):
 
 	'service_id': fields.many2one('kg.service.order', 'Service.order.NO', required=True, ondelete='cascade'),
 	'price_subtotal': fields.function(_amount_line, string='Linetotal', digits_compute= dp.get_precision('Account')),
-	'product_id': fields.many2one('product.product', 'Product', domain=[('state','not in',('cancel','reject'))]),
+	'product_id': fields.many2one('product.product', 'Product', domain="[('state','not in',('reject','cancel')),('purchase_ok','=',True)]"),
 	'product_uom': fields.many2one('product.uom', 'UOM'),
 	'product_qty': fields.float('Quantity'),
 	'soindent_qty':fields.float('Indent Qty'),

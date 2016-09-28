@@ -1841,7 +1841,7 @@ class po_grn_line(osv.osv):
 		'po_grn_date':fields.date('PO GRN Date'),
 		'po_grn_id':fields.many2one('kg.po.grn','PO GRN Entry'),
 		'name':fields.char('Product'),
-		'product_id':fields.many2one('product.product','Product Name',required=True, domain=[('state','=','approved')]),
+		'product_id':fields.many2one('product.product','Product Name',required=True, domain="[('state','=','approved'),('purchase_ok','=',True)]"),
 		'uom_id':fields.many2one('product.uom','UOM',required=True),
 		'po_grn_qty':fields.float('Quantity',required=True),
 		'po_qty':fields.float('PO Qty'),

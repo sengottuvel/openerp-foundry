@@ -567,7 +567,7 @@ class kg_depindent_line(osv.osv):
 
 	'indent_id': fields.many2one('kg.depindent', 'Dep.Indent.NO', required=True, ondelete='cascade'),
 	'line_date': fields.date('Indent Date', required=True, readonly=True),
-	'product_id': fields.many2one('product.product', 'Product', required=True),
+	'product_id': fields.many2one('product.product', 'Product', required=True,domain="[('state','not in',('reject','cancel')),('purchase_ok','=',True)]"),
 	'uom': fields.many2one('product.uom', 'UOM', required=True),
 	'po_uom': fields.many2one('product.uom', 'PO UOM'),
 	'qty': fields.float('Indent Qty', required=True),

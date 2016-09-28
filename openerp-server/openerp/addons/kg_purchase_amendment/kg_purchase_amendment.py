@@ -867,7 +867,7 @@ class kg_purchase_amendment_line(osv.osv):
 	'order_id': fields.many2one('purchase.order', 'Order ID'),
 	'amendment_id':fields.many2one('kg.purchase.amendment','Amendment', select=True, required=True, ondelete='cascade'),
 	'pi_line_id':fields.many2one('purchase.requisition.line','PI Line', invisible=True),
-	'product_id':fields.many2one('product.product', 'Product', required=True),
+	'product_id':fields.many2one('product.product', 'Product', required=True,domain="[('state','not in',('reject','cancel')),('purchase_ok','=',True)]"),
 	'kg_discount': fields.float('Discount Amount', digits_compute= dp.get_precision('Discount')),
 	'price_unit': fields.float('Unit Price', digits_compute= dp.get_precision('Product Price')),
 	'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),

@@ -1032,9 +1032,28 @@ class product_product(osv.osv):
 		for product in self.read(cr, uid, ids, ['ean13'], context=context):
 			res = check_ean(product['ean13'])
 		return res
+	def _check_reorder_values(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		if entry.flag_minqty_rule == True:
+			if entry.reorder_qty <= 0.00:
+				return False
+			return True
+		return True	
+	def _check_min_values(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		if entry.flag_minqty_rule == True:
+			if entry.minimum_qty <= 0.00:
+				return False
+			return True
+		return True	
 
 
-	_constraints = [(_check_ean_key, 'You provided an invalid "EAN13 Barcode" reference. You may use the "Internal Reference" field instead.', ['ean13'])]
+	_constraints = [
+	(_check_ean_key, 'You provided an invalid "EAN13 Barcode" reference. You may use the "Internal Reference" field instead.', ['ean13']),
+	(_check_reorder_values, 'System not allow to save negative and zero values..!!',['Reorder Qty']),
+	(_check_min_values, 'System not allow to save negative and zero values..!!',['Minimum Qty']),
+	
+	]
 
 	def on_order(self, cr, uid, ids, orderline, quantity):
 		pass

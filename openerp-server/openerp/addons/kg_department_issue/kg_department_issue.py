@@ -628,7 +628,7 @@ class kg_department_issue_line(osv.osv):
 		'issue_date':fields.date('PO GRN Date'),
 		'issue_id':fields.many2one('kg.department.issue','Department Issue Entry'),
 		'name': fields.related('issue_id','name', type='char', string='Issue No'),
-		'product_id':fields.many2one('product.product','Product Name',required=True),
+		'product_id':fields.many2one('product.product','Product Name',required=True,domain="[('state','not in',('reject','cancel')),('purchase_ok','=',True)]"),
 		'uom_id':fields.many2one('product.uom','UOM',readonly=True),
 		'issue_qty':fields.float('Issue Quantity',required=True),
 		'issue_qty_2':fields.float('Issue Quantity 2',required=True),

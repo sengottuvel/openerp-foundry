@@ -352,6 +352,7 @@
             </field>
         </record>
         
+        
         <record id="purchase_order_spl_tree" model="ir.ui.view">
             <field name="name">purchase.order.tree</field>
             <field name="model">purchase.order</field>
@@ -371,6 +372,8 @@
                 </tree>
             </field>
         </record>
+        
+        
 
         <record id="purchase_rfq" model="ir.actions.act_window">
             <field name="name">Purchase Order</field>
@@ -378,7 +381,7 @@
             <field name="res_model">purchase.order</field>
             <field name="context">{}</field>
             <field name="domain">[('state','in',('draft','confirmed')),('approval_flag','=',False)]</field>
-            <field name="view_mode">tree,form,graph,calendar</field>
+            <field name="view_mode">tree,form</field>
             <field name="search_view_id" ref="view_purchase_order_filter"/>
             <field name="view_id" ref="purchase_order_tree"/>
             <field name="help" type="html">
@@ -401,9 +404,9 @@
             <field name="res_model">purchase.order</field>
             <field name="context">{}</field>
             <field name="domain">[('state','=','confirmed'),('approval_flag','=',True)]</field>
-            <field name="view_mode">tree,form,graph,calendar</field>
+            <field name="view_mode">tree,form</field>
             <field name="search_view_id" ref="view_purchase_order_filter"/>
-            <field name="view_id" ref="purchase_order_spl_tree"/>
+             <field name="view_id" ref="purchase_order_spl_tree"/>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
                 Click to create a request for quotation.
@@ -619,28 +622,34 @@
         
         <!-- Product Suppliers-->
         
+
         <record id="view_product_supplier_inherit" model="ir.ui.view">
             <field name="name">product.normal.supplier.form.inherit</field>
             <field name="model">product.product</field>
             <field name="inherit_id" ref="product.product_normal_form_view"/>
             <field name="arch" type="xml">
+
 <!--
                 <div name="options" position="inside">
                     <field name="purchase_ok" invisible ="1"/>
                     <label for="purchase_ok" invisible ="1"/>
                 </div>
 -->
+
 				<field name="product_code" position="after">
 				<field name="purchase_ok"/>
 				</field>
+
 <!--
                 <group name="procurement" position="after">
                      <separator string="Suppliers"/>
                      <field name="seller_ids" context="{'uom_id': uom_id}"/>
                 </group>
 -->
+
             </field>
         </record>
+
 
 <!--
         <record id="product_product_normal_form_procurement_help_view" model="ir.ui.view">

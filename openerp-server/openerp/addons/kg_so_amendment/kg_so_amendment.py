@@ -656,7 +656,7 @@ class kg_so_amendment_line(osv.osv):
 	_columns = {
 		'price_subtotal': fields.function(_amount_line, string='Subtotal', digits_compute= dp.get_precision('Account')),
 		'amendment_id': fields.many2one('kg.so.amendment','SO Amendment',ondelete='cascade',select=True),
-		'product_id': fields.many2one('product.product', 'Item Name', required=True,readonly=True),
+		'product_id': fields.many2one('product.product', 'Item Name', required=True,readonly=True,domain="[('state','not in',('reject','cancel')),('purchase_ok','=',True)]"),
 		'uom_id': fields.many2one('product.uom', 'UOM', required=True),
 		
 		'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),

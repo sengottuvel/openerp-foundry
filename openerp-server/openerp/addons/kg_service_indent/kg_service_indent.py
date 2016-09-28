@@ -231,7 +231,7 @@ class kg_service_indent_line(osv.osv):
 	_columns = {
 
 	'service_id': fields.many2one('kg.service.indent', 'Indent No', required=True, ondelete='cascade'),
-	'product_id': fields.many2one('product.product', 'Product', required=True,domain = [('state','=','approved')]),
+	'product_id': fields.many2one('product.product', 'Product', required=True,domain="[('state','=','approved'),('purchase_ok','=',True)]"),
 	'uom': fields.many2one('product.uom', 'UOM', required=True),
 	'qty': fields.float('Quantity', required=True),
 	'pending_qty':fields.float('Pending Qty'),
