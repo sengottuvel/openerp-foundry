@@ -143,6 +143,8 @@ class kg_machineshop(osv.osv):
 		'ms_completed_qty': fields.integer('MS Operation Completed Qty'),
 		'ms_rejected_qty': fields.integer('MS Operation Rejected Qty'),
 		'ms_plan_qty': fields.integer('Planning Completed Qty'),
+		'assembly_id': fields.integer('Assembly Inward', readonly=True),
+		'assembly_line_id': fields.integer('Assembly Inward Line', readonly=True),
 		
 
 		### Entry Info ####

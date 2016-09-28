@@ -49,12 +49,16 @@ class kg_ms_operations(osv.osv):
 		'ms_plan_id': fields.many2one('kg.ms.daily.planning','Planning Id'),
 		'ms_plan_line_id': fields.many2one('ch.ms.daily.planning.details','Planning Line Id'),
 		'position_id': fields.related('ms_plan_line_id','position_id', type='many2one', relation='kg.position.number', string='Position No.', store=True, readonly=True),
-		'order_id': fields.related('ms_plan_line_id','order_id', type='many2one', relation='kg.work.order', string='Work Order', store=True, readonly=True),
-		'order_line_id': fields.related('ms_plan_line_id','order_line_id', type='many2one', relation='ch.work.order.details', string='Order Line', store=True, readonly=True),
-		'order_no': fields.related('ms_plan_line_id','order_no', type='char', string='WO No.', store=True, readonly=True),
+		#~ 'order_id': fields.related('ms_plan_line_id','order_id', type='many2one', relation='kg.work.order', string='Work Order', store=True, readonly=True),
+		#~ 'order_line_id': fields.related('ms_plan_line_id','order_line_id', type='many2one', relation='ch.work.order.details', string='Order Line', store=True, readonly=True),
+		
+		'order_id': fields.many2one('kg.work.order','Work Order',readonly=True),
+		'order_line_id': fields.many2one('ch.work.order.details','Order Line',readonly=True),
+		'order_no': fields.related('order_line_id','order_no', type='char', string='WO No.', store=True, readonly=True),
 		
 		'order_category': fields.related('ms_plan_line_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'order_priority': fields.related('ms_plan_line_id','order_priority', type='selection', selection=ORDER_PRIORITY, string='Priority', store=True, readonly=True),
+		
 		'pump_model_id': fields.related('ms_plan_line_id','pump_model_id', type='many2one', relation='kg.pumpmodel.master', string='Pump Model', store=True, readonly=True),
 		'pattern_id': fields.related('ms_plan_line_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern Number', store=True, readonly=True),
 		'pattern_code': fields.related('ms_plan_line_id','pattern_code', type='char', string='Pattern Code', store=True, readonly=True),

@@ -165,6 +165,7 @@
 					<filter icon="terp-check" name="reject" string="Reject" domain="[('op1_state','=','reject')]"/>				
 					<separator/>
 					<group expand="0" string="Group By...">
+						<filter string="Work Order" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
 						<filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'op1_state'}"/>
 					</group>
 				</search>
@@ -363,6 +364,7 @@
 					<filter icon="terp-check" name="reject" string="Reject" domain="[('op2_state','=','reject')]"/>							
 					<separator/>
 					<group expand="0" string="Group By...">
+						<filter string="Work Order" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
 						<filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'op2_state'}"/>
 					</group>
 				</search>
@@ -561,6 +563,7 @@
 					<filter icon="terp-check" name="reject" string="Reject" domain="[('op3_state','=','reject')]"/>							
 					<separator/>
 					<group expand="0" string="Group By...">
+						<filter string="Work Order" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
 						<filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'op3_state'}"/>
 					</group>
 				</search>
@@ -761,6 +764,7 @@
 					<filter icon="terp-check" name="reject" string="Reject" domain="[('op4_state','=','reject')]"/>							
 					<separator/>
 					<group expand="0" string="Group By...">
+						<filter string="Work Order" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
 						<filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'op4_state'}"/>
 					</group>
 				</search>
@@ -961,6 +965,7 @@
 					<filter icon="terp-check" name="reject" string="Reject" domain="[('op5_state','=','reject')]"/>							
 					<separator/>
 					<group expand="0" string="Group By...">
+						<filter string="Work Order" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
 						<filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'op5_state'}"/>
 					</group>
 				</search>
@@ -1161,6 +1166,7 @@
 					<filter icon="terp-check" name="reject" string="Reject" domain="[('op6_state','=','reject')]"/>							
 					<separator/>
 					<group expand="0" string="Group By...">
+						<filter string="Work Order" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
 						<filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'op6_state'}"/>
 					</group>
 				</search>
@@ -1361,6 +1367,7 @@
 					<filter icon="terp-check" name="reject" string="Reject" domain="[('op7_state','=','reject')]"/>							
 					<separator/>
 					<group expand="0" string="Group By...">
+						<filter string="Work Order" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
 						<filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'op7_state'}"/>
 					</group>
 				</search>
@@ -1561,6 +1568,7 @@
 					<filter icon="terp-check" name="reject" string="Reject" domain="[('op8_state','=','reject')]"/>							
 					<separator/>
 					<group expand="0" string="Group By...">
+						<filter string="Work Order" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
 						<filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'op8_state'}"/>
 					</group>
 				</search>
@@ -1761,6 +1769,7 @@
 					<filter icon="terp-check" name="reject" string="Reject" domain="[('op9_state','=','reject')]"/>							
 					<separator/>
 					<group expand="0" string="Group By...">
+						<filter string="Work Order" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
 						<filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'op9_state'}"/>
 					</group>
 				</search>
@@ -1961,6 +1970,7 @@
 					<filter icon="terp-check" name="reject" string="Reject" domain="[('op10_state','=','reject')]"/>							
 					<separator/>
 					<group expand="0" string="Group By...">
+						<filter string="Work Order" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
 						<filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'op10_state'}"/>
 					</group>
 				</search>
@@ -2161,6 +2171,7 @@
 					<filter icon="terp-check" name="reject" string="Reject" domain="[('op11_state','=','reject')]"/>							
 					<separator/>
 					<group expand="0" string="Group By...">
+						<filter string="Work Order" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
 						<filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'op11_state'}"/>
 					</group>
 				</search>
@@ -2361,6 +2372,7 @@
 					<filter icon="terp-check" name="reject" string="Reject" domain="[('op12_state','=','reject')]"/>							
 					<separator/>
 					<group expand="0" string="Group By...">
+						<filter string="Work Order" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
 						<filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'op12_state'}"/>
 					</group>
 				</search>

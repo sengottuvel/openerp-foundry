@@ -28,7 +28,7 @@
 							<page string="Planning Details" attrs="{'invisible': [('flag_planning','!=',True)]}">
 								<group>
 									<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
-										<tree string="Planning Details" editable="bottom">					
+										<tree string="Planning Details Tree">					
 											<field name="order_no"/>
 											<field name="position_id"/>
 											<field name="item_code"/>
@@ -40,6 +40,36 @@
 											<field name="sc_qty" required="1"/>
 											<field name="specification" widget="char"/>
 										</tree>
+										<form string="Planning Details Form">
+											<group>
+												<group>
+													<field name="order_no"/>
+													<field name="item_code"/>
+													<field name="csd_no"/>
+													<field name="schedule_qty" readonly="1"/>
+													<field name="sc_qty" required="1" readonly="1"/>
+												</group>
+												<group>
+													<field name="position_id"/>
+													<field name="item_name"/>
+													<field name="moc_id" />
+													<field name="inhouse_qty" required="1"/>
+													<field name="specification"/>
+												</group>
+											</group>
+											<newline/>
+											<group>
+												<field name="line_ids" nolabel="1">
+													<tree string="Planning SC Details Tree" editable="bottom">
+														<field name="contractor_id" required="1"/>
+														<field name="sc_qty" required="1"/>
+														<field name="excess_qty" invisible="1"/>
+													</tree>
+												</field>
+											</group>		
+
+											
+										</form>
 									</field>
 								</group>
 							</page>
