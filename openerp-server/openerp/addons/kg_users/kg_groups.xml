@@ -43,6 +43,7 @@
             ref('kg_stock_inward.tpm_transactions'),
             ref('kg_stock_inward.tpm_planning_transactions'),
             ref('kg_stock_inward.tam_stock_inward'),
+          
             ref('kg_stock_inward.tam_stock_inward_details'),
             ref('kg_work_order.tam_work_order'),
             ref('kg_work_order.tam_unscheduled_work_order'),
@@ -99,8 +100,9 @@
             ref('kg_fettling.tam_batch_finish_grinding'),
             ref('kg_fettling.tam_batch_reshot_blasting'),
             
-             ref('kg_machineshop.tpm_ms_process'),
+            ref('kg_machineshop.tpm_ms_process'),
             ref('kg_machineshop.tam_ms_inward'),
+            ref('kg_machineshop.tam_ms_stock_list'),
             ref('kg_ms_planning.tam_ms_daily_planning'),
             ref('kg_ms_operations.tam_ms_operation1'),
             ref('kg_ms_operations.tam_ms_operation2'),
