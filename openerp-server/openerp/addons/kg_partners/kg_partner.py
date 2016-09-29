@@ -287,6 +287,7 @@ class kg_partner(osv.osv):
 		if rec.name:
 			partner_name = rec.name
 			name=partner_name.upper()
+			data=''
 			if rec.customer == True:
 				cr.execute(""" select upper(name) from res_partner where upper(name) = '%s' and customer = True """ %(name))
 				data = cr.dictfetchall()
