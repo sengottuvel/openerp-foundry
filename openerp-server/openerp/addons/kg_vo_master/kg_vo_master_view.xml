@@ -29,14 +29,15 @@
 								<field name="state" style="width: 30%%" class="att_state_change"/>								
 							</group>
 						</group>
-						<group string="Length calculation  details" invisible ="1">
+						<group string="Length calculation  details">
 							<group>
+								<field name="star" string="Star Value" required="1"/>	
 								<field name="shaft_above" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" invisible ="1"/>								
 								<field name="lcp" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" invisible ="1"/>								
 								<field name="base_upto" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" invisible ="1"/>								
 							</group>											
 							<group>
-								<field name="star" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" invisible ="1"/>							
+														
 								<field name="ls" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" invisible ="1"/>							
 								<field name="base_above" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" invisible ="1"/>							
 							</group>					

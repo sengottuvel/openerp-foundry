@@ -1134,6 +1134,20 @@ class ch_work_order_details(osv.osv):
 							bed_ass_details = cr.dictfetchone()
 							bp = bed_ass_details['bp']
 							shaft_ext = bed_ass_details['shaft_ext']
+							
+							### Getting Star Value ###
+							cr.execute('''
+							
+								select star from kg_vo_master 
+								where id in 
+
+								( select vo_id from ch_vo_mapping
+								where rpm = %s and header_id = %s)
+								
+								
+								  ''',[rpm,pump_model_id])
+							vo_star_value = cr.dictfetchone()
+							
 								
 							if ms_rec.length_type == 'single_shaft':
 								
@@ -1164,7 +1178,7 @@ class ch_work_order_details(osv.osv):
 									### Formula ###
 									#(ABOVE BP(H)+BP+SETTING HEIGHT-A-BEND-1.5)-(NO OF STAR SUPPORT*1.5)/NO OF STAR SUPPORT+1
 									###
-									length = (h_value+bp+setting_height-a_value-b_value-1.5)-(star_value*1.5)/1.5+1
+									length = (h_value+bp+setting_height-a_value-b_value-1.5)-(star_value*1.5)/star_value+1
 										
 							if ms_rec.length_type == 'drive_column_pipe':
 								
@@ -1172,7 +1186,7 @@ class ch_work_order_details(osv.osv):
 									### Formula ###
 									#(3.5+bp+setting height-a1-no of star support)/2
 									###
-									length = (3.5+bp+setting_height-a1_value-star_value)/2
+									length = (3.5+bp+setting_height-a1_value-vo_star_value['star'])/2
 									
 									
 								if star_value > 1:
@@ -1182,7 +1196,7 @@ class ch_work_order_details(osv.osv):
 									### Calculating Line Column Pipe ###
 									### Formula = Standard Length ###
 									line_column_pipe = vertical_foundry['qty']
-									length = (3.5+bp+setting_height-a1_value-star_value-line_column_pipe)/2
+									length = (3.5+bp+setting_height-a1_value-(star_value * vo_star_value['star'])-line_column_pipe)/2
 									
 									
 							if ms_rec.length_type == 'pump_column_pipe':
@@ -1191,7 +1205,7 @@ class ch_work_order_details(osv.osv):
 									### Formula ###
 									#(3.5+bp+setting height-a1-no of star support)/2
 									###
-									length = (3.5+bp+setting_height-a1_value-star_value)/2
+									length = (3.5+bp+setting_height-a1_value-vo_star_value['star'])/2
 									
 									
 								if star_value > 1:
@@ -1201,7 +1215,7 @@ class ch_work_order_details(osv.osv):
 									### Calculating Line Column Pipe ###
 									### Formula = Standard Length ###
 									line_column_pipe = vertical_foundry['qty']
-									length = (3.5+bp+setting_height-a1_value-star_value-line_column_pipe)/2
+									length = (3.5+bp+setting_height-a1_value-(star_value * vo_star_value['star'])-line_column_pipe)/2
 									
 									
 							if ms_rec.length_type == 'pump_shaft':
@@ -1210,7 +1224,7 @@ class ch_work_order_details(osv.osv):
 									### Formula ###
 									#(STAR SUPPORT/2-1)+PUMP COLOUMN PIPE+A2
 									###
-									pump_column_pipe = (3.5+bp+setting_height-a1_value-star_value)/2
+									pump_column_pipe = (3.5+bp+setting_height-a1_value-vo_star_value['star'])/2
 									length = (star_value/2-1)+pump_column_pipe+a2_value
 									
 									
@@ -1219,8 +1233,25 @@ class ch_work_order_details(osv.osv):
 									#(STAR SUPPORT/2-1)+PUMP COLOUMN PIPE+A2
 									###
 									line_column_pipe = vertical_foundry['qty']
-									pump_column_pipe = (3.5+bp+setting_height-a1_value-star_value-line_column_pipe)/2
-									length = (star_value/2-1)+pump_column_pipe+a2_value
+									pump_column_pipe = (3.5+bp+setting_height-a1_value-(star_value * vo_star_value['star'])-line_column_pipe)/2
+									length = (vo_star_value['star']/2-1)+pump_column_pipe+a2_value
+									
+							if ms_rec.length_type == 'drive_shaft':
+								
+								if star_value == 1:
+									### Formula ###
+									#(STAR SUPPORT/2-1)+DRIVE COLOUMN PIPE-3.5+SHAFT EXT
+									###
+									drive_col_pipe = (3.5+bp+setting_height-a1_value-vo_star_value['star'])/2
+									length = (star_value/2-1)+drive_col_pipe-3.5+shaft_ext
+									
+								if star_value > 1:
+									### Formula ###
+									#(STAR SUPPORT/2-1)+DRIVE COLOUMN PIPE-3.5+SHAFT EXT
+									###
+									line_column_pipe = vertical_foundry['qty']
+									drive_col_pipe = (3.5+bp+setting_height-a1_value-(star_value * vo_star_value['star'])-line_column_pipe)/2
+									length = (vo_star_value['star']/2-1)+drive_col_pipe-3.5+shaft_ext
 									
 							if ms_rec.length_type == 'drive_shaft':
 								
