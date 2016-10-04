@@ -1178,8 +1178,15 @@ class ch_work_order_details(osv.osv):
 									### Formula ###
 									#(ABOVE BP(H)+BP+SETTING HEIGHT-A-BEND-1.5)-(NO OF STAR SUPPORT*1.5)/NO OF STAR SUPPORT+1
 									###
+									print "h_value",h_value
+									print "bp",bp
+									print "setting_height",setting_height
+									print "a_value",a_value
+									print "b_value",b_value
+									print "star_value",star_value
+									
 									length = ((h_value+bp+setting_height-a_value-b_value-1.5)-(star_value*1.5))/(star_value+1)
-										
+									print "length",length
 							if ms_rec.length_type == 'drive_column_pipe':
 								
 								if star_value == 1:
