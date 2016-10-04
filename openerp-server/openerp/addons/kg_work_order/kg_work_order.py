@@ -1138,7 +1138,7 @@ class ch_work_order_details(osv.osv):
 							### Getting Star Value ###
 							cr.execute('''
 							
-								select star from kg_vo_master 
+								select star,lcp,ls from kg_vo_master 
 								where id in 
 
 								( select vo_id from ch_vo_mapping
@@ -1178,15 +1178,8 @@ class ch_work_order_details(osv.osv):
 									### Formula ###
 									#(ABOVE BP(H)+BP+SETTING HEIGHT-A-BEND-1.5)-(NO OF STAR SUPPORT*1.5)/NO OF STAR SUPPORT+1
 									###
-									print "h_value",h_value
-									print "bp",bp
-									print "setting_height",setting_height
-									print "a_value",a_value
-									print "b_value",b_value
-									print "star_value",star_value
-									
 									length = ((h_value+bp+setting_height-a_value-b_value-1.5)-(star_value*1.5))/(star_value+1)
-									print "length",length
+									
 							if ms_rec.length_type == 'drive_column_pipe':
 								
 								if star_value == 1:
@@ -1202,7 +1195,7 @@ class ch_work_order_details(osv.osv):
 									###
 									### Calculating Line Column Pipe ###
 									### Formula = Standard Length ###
-									line_column_pipe = 775
+									line_column_pipe = vo_star_value['lcp']
 									length = (3.5+bp+setting_height-a1_value-(star_value * vo_star_value['star'])-((star_value-1)*line_column_pipe))/2
 									
 									
@@ -1221,7 +1214,7 @@ class ch_work_order_details(osv.osv):
 									###
 									### Calculating Line Column Pipe ###
 									### Formula = Standard Length ###
-									line_column_pipe = 775
+									line_column_pipe = vo_star_value['lcp']
 									length = (3.5+bp+setting_height-a1_value-(star_value * vo_star_value['star'])-((star_value-1)*line_column_pipe))/2
 									
 									
@@ -1239,7 +1232,7 @@ class ch_work_order_details(osv.osv):
 									### Formula ###
 									#(STAR SUPPORT/2-1)+PUMP COLOUMN PIPE+A2
 									###
-									line_column_pipe = 775
+									line_column_pipe = vo_star_value['lcp']
 									pump_column_pipe = (3.5+bp+setting_height-a1_value-(star_value * vo_star_value['star'])-((star_value-1)*line_column_pipe))/2
 									length = ((vo_star_value['star']/2)-1)+pump_column_pipe+a2_value
 									
@@ -1256,7 +1249,7 @@ class ch_work_order_details(osv.osv):
 									### Formula ###
 									#(STAR SUPPORT/2-1)+DRIVE COLOUMN PIPE-3.5+SHAFT EXT
 									###
-									line_column_pipe = 775
+									line_column_pipe = vo_star_value['lcp']
 									drive_col_pipe = (3.5+bp+setting_height-a1_value-(star_value * vo_star_value['star'])-((star_value-1)*line_column_pipe))/2
 									length = ((vo_star_value['star']/2)-1)+drive_col_pipe-3.5+shaft_ext
 						
