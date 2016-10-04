@@ -1067,11 +1067,20 @@ class kg_ms_operations(osv.osv):
 			cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
 			sc_name = cr.fetchone();
 			
+			wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
+			if entry_rec.order_id.id == wo_id[0]:
+				sc_actual_qty = 0
+			else:
+				sc_actual_qty = entry_rec.inhouse_qty
+			
 			sc_vals = {
 				'name': sc_name[0],
 				'ms_plan_id': entry_rec.ms_plan_id.id,
 				'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
 				'sc_qty': entry_rec.inhouse_qty,
+				'total_qty': entry_rec.inhouse_qty,
+				'pending_qty': entry_rec.inhouse_qty,
+				'actual_qty': sc_actual_qty,
 				'ms_op_id': entry_rec.id,
 			}
 			sc_id = sc_obj.create(cr, uid,sc_vals)
@@ -1677,11 +1686,20 @@ class kg_ms_operations(osv.osv):
 			cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
 			sc_name = cr.fetchone();
 			
+			wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
+			if entry_rec.order_id.id == wo_id[0]:
+				sc_actual_qty = 0
+			else:
+				sc_actual_qty = entry_rec.inhouse_qty
+			
 			sc_vals = {
 				'name': sc_name[0],
 				'ms_plan_id': entry_rec.ms_plan_id.id,
 				'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
 				'sc_qty': entry_rec.inhouse_qty,
+				'total_qty': entry_rec.inhouse_qty,
+				'pending_qty': entry_rec.inhouse_qty,
+				'actual_qty': sc_actual_qty,
 				'ms_op_id': entry_rec.id,
 			}
 			sc_id = sc_obj.create(cr, uid,sc_vals)
@@ -2284,11 +2302,20 @@ class kg_ms_operations(osv.osv):
 			cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
 			sc_name = cr.fetchone();
 			
+			wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
+			if entry_rec.order_id.id == wo_id[0]:
+				sc_actual_qty = 0
+			else:
+				sc_actual_qty = entry_rec.inhouse_qty
+			
 			sc_vals = {
 				'name': sc_name[0],
 				'ms_plan_id': entry_rec.ms_plan_id.id,
 				'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
 				'sc_qty': entry_rec.inhouse_qty,
+				'total_qty': entry_rec.inhouse_qty,
+				'pending_qty': entry_rec.inhouse_qty,
+				'actual_qty': sc_actual_qty,
 				'ms_op_id': entry_rec.id,
 			}
 			sc_id = sc_obj.create(cr, uid,sc_vals)
@@ -2892,11 +2919,20 @@ class kg_ms_operations(osv.osv):
 			cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
 			sc_name = cr.fetchone();
 			
+			wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
+			if entry_rec.order_id.id == wo_id[0]:
+				sc_actual_qty = 0
+			else:
+				sc_actual_qty = entry_rec.inhouse_qty
+			
 			sc_vals = {
 				'name': sc_name[0],
 				'ms_plan_id': entry_rec.ms_plan_id.id,
 				'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
 				'sc_qty': entry_rec.inhouse_qty,
+				'total_qty': entry_rec.inhouse_qty,
+				'pending_qty': entry_rec.inhouse_qty,
+				'actual_qty': sc_actual_qty,
 				'ms_op_id': entry_rec.id,
 			}
 			sc_id = sc_obj.create(cr, uid,sc_vals)
@@ -3499,11 +3535,20 @@ class kg_ms_operations(osv.osv):
 			cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
 			sc_name = cr.fetchone();
 			
+			wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
+			if entry_rec.order_id.id == wo_id[0]:
+				sc_actual_qty = 0
+			else:
+				sc_actual_qty = entry_rec.inhouse_qty
+			
 			sc_vals = {
 				'name': sc_name[0],
 				'ms_plan_id': entry_rec.ms_plan_id.id,
 				'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
 				'sc_qty': entry_rec.inhouse_qty,
+				'total_qty': entry_rec.inhouse_qty,
+				'pending_qty': entry_rec.inhouse_qty,
+				'actual_qty': sc_actual_qty,
 				'ms_op_id': entry_rec.id,
 			}
 			sc_id = sc_obj.create(cr, uid,sc_vals)
@@ -4106,11 +4151,20 @@ class kg_ms_operations(osv.osv):
 			cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
 			sc_name = cr.fetchone();
 			
+			wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
+			if entry_rec.order_id.id == wo_id[0]:
+				sc_actual_qty = 0
+			else:
+				sc_actual_qty = entry_rec.inhouse_qty
+			
 			sc_vals = {
 				'name': sc_name[0],
 				'ms_plan_id': entry_rec.ms_plan_id.id,
 				'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
 				'sc_qty': entry_rec.inhouse_qty,
+				'total_qty': entry_rec.inhouse_qty,
+				'pending_qty': entry_rec.inhouse_qty,
+				'actual_qty': sc_actual_qty,
 				'ms_op_id': entry_rec.id,
 			}
 			sc_id = sc_obj.create(cr, uid,sc_vals)
@@ -4713,11 +4767,20 @@ class kg_ms_operations(osv.osv):
 			cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
 			sc_name = cr.fetchone();
 			
+			wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
+			if entry_rec.order_id.id == wo_id[0]:
+				sc_actual_qty = 0
+			else:
+				sc_actual_qty = entry_rec.inhouse_qty
+			
 			sc_vals = {
 				'name': sc_name[0],
 				'ms_plan_id': entry_rec.ms_plan_id.id,
 				'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
 				'sc_qty': entry_rec.inhouse_qty,
+				'total_qty': entry_rec.inhouse_qty,
+				'pending_qty': entry_rec.inhouse_qty,
+				'actual_qty': sc_actual_qty,
 				'ms_op_id': entry_rec.id,
 			}
 			sc_id = sc_obj.create(cr, uid,sc_vals)
@@ -5321,11 +5384,20 @@ class kg_ms_operations(osv.osv):
 			cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
 			sc_name = cr.fetchone();
 			
+			wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
+			if entry_rec.order_id.id == wo_id[0]:
+				sc_actual_qty = 0
+			else:
+				sc_actual_qty = entry_rec.inhouse_qty
+			
 			sc_vals = {
 				'name': sc_name[0],
 				'ms_plan_id': entry_rec.ms_plan_id.id,
 				'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
 				'sc_qty': entry_rec.inhouse_qty,
+				'total_qty': entry_rec.inhouse_qty,
+				'pending_qty': entry_rec.inhouse_qty,
+				'actual_qty': sc_actual_qty,
 				'ms_op_id': entry_rec.id,
 			}
 			sc_id = sc_obj.create(cr, uid,sc_vals)
@@ -5928,11 +6000,21 @@ class kg_ms_operations(osv.osv):
 			cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
 			sc_name = cr.fetchone();
 			
+			wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
+			if entry_rec.order_id.id == wo_id[0]:
+				sc_actual_qty = 0
+			else:
+				sc_actual_qty = entry_rec.inhouse_qty
+			
+			
 			sc_vals = {
 				'name': sc_name[0],
 				'ms_plan_id': entry_rec.ms_plan_id.id,
 				'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
 				'sc_qty': entry_rec.inhouse_qty,
+				'total_qty': entry_rec.inhouse_qty,
+				'pending_qty': entry_rec.inhouse_qty,
+				'actual_qty': sc_actual_qty,
 				'ms_op_id': entry_rec.id,
 			}
 			sc_id = sc_obj.create(cr, uid,sc_vals)
@@ -6535,11 +6617,20 @@ class kg_ms_operations(osv.osv):
 			cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
 			sc_name = cr.fetchone();
 			
+			wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
+			if entry_rec.order_id.id == wo_id[0]:
+				sc_actual_qty = 0
+			else:
+				sc_actual_qty = entry_rec.inhouse_qty
+			
 			sc_vals = {
 				'name': sc_name[0],
 				'ms_plan_id': entry_rec.ms_plan_id.id,
 				'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
 				'sc_qty': entry_rec.inhouse_qty,
+				'total_qty': entry_rec.inhouse_qty,
+				'pending_qty': entry_rec.inhouse_qty,
+				'actual_qty': sc_actual_qty,
 				'ms_op_id': entry_rec.id,
 			}
 			sc_id = sc_obj.create(cr, uid,sc_vals)
@@ -7142,11 +7233,20 @@ class kg_ms_operations(osv.osv):
 			cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
 			sc_name = cr.fetchone();
 			
+			wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
+			if entry_rec.order_id.id == wo_id[0]:
+				sc_actual_qty = 0
+			else:
+				sc_actual_qty = entry_rec.inhouse_qty
+			
 			sc_vals = {
 				'name': sc_name[0],
 				'ms_plan_id': entry_rec.ms_plan_id.id,
 				'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
 				'sc_qty': entry_rec.inhouse_qty,
+				'total_qty': entry_rec.inhouse_qty,
+				'pending_qty': entry_rec.inhouse_qty,
+				'actual_qty': sc_actual_qty,
 				'ms_op_id': entry_rec.id,
 			}
 			sc_id = sc_obj.create(cr, uid,sc_vals)
@@ -7749,11 +7849,20 @@ class kg_ms_operations(osv.osv):
 			cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
 			sc_name = cr.fetchone();
 			
+			wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
+			if entry_rec.order_id.id == wo_id[0]:
+				sc_actual_qty = 0
+			else:
+				sc_actual_qty = entry_rec.inhouse_qty
+			
 			sc_vals = {
 				'name': sc_name[0],
 				'ms_plan_id': entry_rec.ms_plan_id.id,
 				'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
 				'sc_qty': entry_rec.inhouse_qty,
+				'total_qty': entry_rec.inhouse_qty,
+				'pending_qty': entry_rec.inhouse_qty,
+				'actual_qty': sc_actual_qty,
 				'ms_op_id': entry_rec.id,
 			}
 			sc_id = sc_obj.create(cr, uid,sc_vals)
