@@ -1253,15 +1253,19 @@ class ch_work_order_details(osv.osv):
 									drive_col_pipe = (3.5+bp+setting_height-a1_value-(star_value * vo_star_value['star'])-((star_value-1)*line_column_pipe))/2
 									length = ((vo_star_value['star']/2)-1)+drive_col_pipe-3.5+shaft_ext
 						
+						print "length---------------------------->>>>",length
 						if length > 0:
 							ms_bom_qty = round(length,0)
 						else:
 							ms_bom_qty = 0
-						
+						print "ms_bom_qty---------------------------->>>>",ms_bom_qty
+						print "qty---------------------------->>>>",qty
 						if qty == 0:
 							vertical_ms_qty = vertical_ms_details['qty']
 						if qty > 0:
 							vertical_ms_qty = qty * ms_bom_qty
+							
+						print "vertical_ms_qty---------------------------->>>>",vertical_ms_qty
 							
 						if vertical_ms_details['position_id'] == None:
 							raise osv.except_osv(_('Warning!'),
