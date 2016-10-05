@@ -625,6 +625,7 @@ class ch_work_order_details(osv.osv):
 						'ms_id': bom_ms_details['ms_id'],
 						'name': bom_ms_details['name'],
 						'qty': bom_ms_qty,
+						'length': 0.00,
 						'flag_applicable' : applicable,
 						'flag_standard':flag_standard,
 						'entry_mode':'auto'
