@@ -1263,7 +1263,7 @@ class ch_work_order_details(osv.osv):
 						if qty == 0:
 							vertical_ms_qty = vertical_ms_details['qty']
 						if qty > 0:
-							vertical_ms_qty = qty * ms_bom_qty
+							vertical_ms_qty = vertical_ms_details['qty'] * ms_bom_qty
 							
 						print "vertical_ms_qty---------------------------->>>>",vertical_ms_qty
 							
