@@ -1256,10 +1256,10 @@ class ch_work_order_details(osv.osv):
 						if length > 0:
 							ms_bom_qty = round(length,0)
 						else:
-							ms_bom_qty = vertical_ms_details['qty']
+							ms_bom_qty = 0
 						
 						if qty == 0:
-							vertical_ms_qty = ms_bom_qty
+							vertical_ms_qty = vertical_ms_details['qty']
 						if qty > 0:
 							vertical_ms_qty = qty * ms_bom_qty
 							
@@ -1275,7 +1275,8 @@ class ch_work_order_details(osv.osv):
 							'bom_id': vertical_ms_details['bom_id'],
 							'ms_id': vertical_ms_details['ms_id'],
 							'name': vertical_ms_details['name'],
-							'qty': vertical_ms_qty,
+							'qty': qty * vertical_ms_details['qty'],
+							'length': vertical_ms_qty,
 							'flag_applicable' : applicable,
 							'flag_standard':flag_standard,
 							'entry_mode':'auto'
@@ -1650,6 +1651,7 @@ class ch_order_machineshop_details(osv.osv):
 		#~ 'name':fields.char('Item Name', size=128),
 		'name': fields.related('ms_id','name', type='char',size=128,string='Item Name', store=True), 	  
 		'qty': fields.integer('Qty', required=True),
+		'length': fields.float('Length(mm)'),
 		'flag_applicable': fields.boolean('Is Applicable'),
 		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'remarks':fields.text('Remarks'), 

@@ -227,6 +227,7 @@
 									<field name="name" attrs="{'readonly': [('entry_mode','=','auto')]}"/>
 									<field name="position_id" attrs="{'readonly': [('entry_mode','=','auto')]}"/>		
 									<field name="qty"/>
+									<field name="length" readonly="1"/>
 									<field name="flag_applicable"/>
 									<field name="moc_id" attrs="{'required': [('flag_applicable','!=',False)],'readonly': [('flag_standard','=',False)]}"/>
 									<field name="remarks" widget="char"/>
