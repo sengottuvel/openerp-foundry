@@ -26,12 +26,92 @@ dt_time = a.strftime('%m/%d/%Y %H:%M:%S')
 
 class kg_purchase_invoice(osv.osv):
 	
-	
 	def _get_domain(self, cr, uid, ids, service_order_id,po_id, arg, context=None):
 		record_id = ids[0] 
 		
 		return True
-
+	
+	def _amount_line_tax(self, cr, uid, line, context=None):
+		val = 0.0
+		if line.price_type == 'per_kg':
+			if line.product_id.uom_conversation_factor == 'two_dimension':
+				if line.product_id.po_uom_in_kgs > 0:
+					qty = line.tot_rec_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
+			elif line.product_id.uom_conversation_factor == 'one_dimension':
+				if line.product_id.po_uom_in_kgs > 0:
+					qty = line.tot_rec_qty * line.product_id.po_uom_in_kgs
+				else:
+					qty = line.tot_rec_qty
+			else:
+				qty = line.tot_rec_qty
+		else:
+			qty = line.tot_rec_qty
+		print"qtyyyyyyyyyyyy",qty
+		amt_to_per = (line.discount / (qty * line.price_unit or 1.0 )) * 100
+		kg_discount_per = line.kg_discount_per
+		tot_discount_per = amt_to_per + kg_discount_per
+		print"tot_discount_pertot_discount_per",tot_discount_per
+		print"kg_discount_perkg_discount_per",kg_discount_per
+		
+		for c in self.pool.get('account.tax').compute_all(cr, uid, line.invoice_tax_ids,
+			line.price_unit * (1-(tot_discount_per or 0.0)/100.0), qty, line.product_id,
+			 line.invoice_header_id.supplier_id)['taxes']:			 
+			val += c.get('amount', 0.0)
+		print"vallllllllllllll",val
+		return val
+	
+	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
+		res = {}
+		cur_obj=self.pool.get('res.currency')
+		other_charges_amt = 0
+		order_pogrn_line_ids = ''
+		for order in self.browse(cr, uid, ids, context=context):
+			print"orderrrrrrrrrrrrRR",order
+			res[order.id] = {
+				'total_amt': 0.0,
+				'tax_amt': 0.0,
+				'amount_total': 0.0,
+				'net_amt' : 0.0,
+				'other_charges_amt': 0.0,
+			}
+			val = val1 = val3 = 0.0
+			cur = order.supplier_id.property_product_pricelist_purchase.currency_id
+				
+			#~ if order.expense_line_id:
+				#~ for item in order.expense_line_id:
+					#~ other_charges_amt += item.expense_amt
+			#~ else:
+				#~ other_charges_amt = 0
+			if order.pogrn_line_ids:
+				order_pogrn_line_ids = order.pogrn_line_ids
+			elif order.gengrn_line_ids:
+				order_pogrn_line_ids = order.gengrn_line_ids
+			for line in order_pogrn_line_ids:
+				per_to_amt = (line.tot_rec_qty * line.price_unit) * line.kg_discount_per / 100.00
+				print"per_to_amtper_to_amt",per_to_amt
+				tot_discount = line.discount + per_to_amt
+				print"tot_discount",tot_discount
+				val1 += line.net_amt
+				val += self._amount_line_tax(cr, uid, line, context=context)
+				
+				val3 += tot_discount
+			print"valvalvalvalvalval",val
+			res[order.id]['other_charges_amt']=(round(other_charges_amt,0))
+			res[order.id]['tax_amt']=(round(val,0))
+			print"res[order.id]['tax_amt']",res[order.id]['tax_amt']
+			res[order.id]['total_amt']=(round(val1,0)) - (round(val,0)) + (round(val3,0))
+			res[order.id]['discount_amt']=(round(val3,0))   
+			res[order.id]['net_amt'] = res[order.id]['total_amt'] - res[order.id]['discount_amt'] + res[order.id]['tax_amt'] + res[order.id]['other_charges_amt']
+		
+		return res
+	
+	def _get_order(self, cr, uid, ids, context=None):
+		result = {}
+		for line in self.pool.get('kg.pogrn.purchase.invoice.line').browse(cr, uid, ids, context=context):
+			result[line.invoice_header_id.id] = True
+		return result.keys()
+			
+		
 	_name = "kg.purchase.invoice"
 	_order = "invoice_date desc"
 	_description = "Purchase Invoice"
@@ -42,13 +122,14 @@ class kg_purchase_invoice(osv.osv):
 		'invoice_date':fields.date('Invoice Date',readonly=True,required=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'type': fields.selection([('from_po', 'Product'), ('from_so', 'Service'),('from_gp','Gate Pass')], 'Product/Service',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'purpose': fields.selection([('consu', 'Consumables'), ('project', 'Project'), ('asset', 'Asset')], 'Purpose',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
-		'grn_type': fields.selection([('from_po_grn', 'PO/SO GRN'), ('from_general_grn', 'General GRN'), ('others', 'Others')], 'GRN Type',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
+		'grn_type': fields.selection([('from_po_grn', 'PO/SO GRN'), ('from_general_grn', 'General GRN'), ('others', 'Others')], 'GRN Type'),
 		'state': fields.selection([('draft','Draft'),('confirmed','Waiting for approval'),('approved','Approved'),
 				('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True,track_visibility='onchange',select=True),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),		
 		'confirm_flag':fields.boolean('Confirm Flag'),
 		'approve_flag':fields.boolean('Expiry Flag'),
 		'domain_field': fields.function(_get_domain, type='char', size=255, method=True, string="Domain"),
+		'notes': fields.text('Notes'),
 		
 		# Entry Info
 		
@@ -67,12 +148,14 @@ class kg_purchase_invoice(osv.osv):
 
 		## Vendor Information ##
 		
-		'supplier_id':fields.many2one('res.partner','Supplier',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
+		'supplier_id':fields.many2one('res.partner','Supplier', domain="[('supplier','=',True)]", readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'sup_address':fields.text('Supplier Address',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'sup_invoice_no':fields.char('Supplier Invoice No',size=200,readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'sup_invoice_date':fields.date('Supplier Invoice Date',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'payment_id':fields.many2one('kg.payment.master','Payment Terms',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'payment_due_date':fields.date('Payment Due Date',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
+		'can_remark': fields.text('Cancel Remarks'),
+		'reject_remark': fields.text('Reject Remarks'),
 		'remarks': fields.text('Remarks',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'payment_type': fields.selection([('cash', 'Cash'), ('credit', 'Credit')], 'Payment Type',readonly=True),
 		
@@ -91,7 +174,7 @@ class kg_purchase_invoice(osv.osv):
 		#### GRN Search #######
 		
 		'po_grn_ids': fields.many2many('kg.po.grn', 'purchase_invoice_grn_ids', 'invoice_id','grn_id', 'GRN', delete=False,
-			 domain="[('state','=','done'),'&',('supplier_id','=',supplier_id),'&',('grn_type','=',type),'&',('billing_status','=','applicable')]"),
+			 domain="[('state','=','done'),'&',('supplier_id','=',supplier_id),'&',('grn_type','=',type),'&',('billing_status','=','applicable'),'&',('inv_flag','=',False)]"),
 		'general_grn_ids': fields.many2many('kg.general.grn', 'purchase_invoice_general_grn_ids', 'invoice_id','grn_id', 'GRN', delete=False,
 			 domain="[('supplier_id','=',supplier_id), '&', ('state','=','done'), '&', ('bill','=','applicable')]"),
 		'labour_ids': fields.many2many('kg.service.invoice', 'service_invoice_grn_ids', 'invoice_id','service_id', 'GRN', delete=False,domain="[('state','=','approved'),'&',('partner_id','=',supplier_id)]"),
@@ -106,16 +189,37 @@ class kg_purchase_invoice(osv.osv):
 		
 		### Value Calculation ###
 		
-		'total_amt': fields.float('Total Amount',readonly=True),
-		'discount_amt': fields.float('Discount(-)',readonly=True),
-		'tax_amt': fields.float('Tax(+)',readonly=True),
-		'other_charges_amt': fields.float('Other Charges',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
+		#~ 'total_amt': fields.float('Total Amount',readonly=True),
+		#~ 'discount_amt': fields.float('Discount(-)',readonly=True),
+		#~ 'tax_amt': fields.float('Tax(+)',readonly=True),
+		#~ 'other_charges_amt': fields.float('Other Charges',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'actual_amt': fields.float('Actual Amount',readonly=True),
 		'round_off_amt': fields.float('Round off(+/-)',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'advance_adjusted_amt': fields.float('Advanced Adjustment Amount(-)',readonly=True),
 		'invoice_amt': fields.float('Invoice Amount',readonly=True),
-		'net_amt': fields.float('Net Amount',readonly=True),
+		#~ 'net_amt': fields.float('Net Amount',readonly=True),
 		
+		
+		'other_charges_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Other Charges',
+			 multi="sums", help="The amount without tax", track_visibility='always'),	  
+		'discount_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Discount(-)',
+			store={
+				'kg.purchase.invoice': (lambda self, cr, uid, ids, c={}: ids, ['pogrn_line_ids'], 10),
+				'kg.pogrn.purchase.invoice.line': (_get_order, ['price_unit', 'invoice_tax_ids', 'discount', 'tot_rec_qty'], 10),
+			}, multi="sums", help="The amount without tax", track_visibility='always'),
+		'total_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Amount',
+			store={
+				'kg.purchase.invoice': (lambda self, cr, uid, ids, c={}: ids, ['pogrn_line_ids'], 10),
+				'kg.pogrn.purchase.invoice.line': (_get_order, ['price_unit', 'invoice_tax_ids', 'discount', 'tot_rec_qty'], 10),
+			}, multi="sums", help="The amount without tax", track_visibility='always'),
+		'tax_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Tax(+)',
+			store={
+				'kg.purchase.invoice': (lambda self, cr, uid, ids, c={}: ids, ['pogrn_line_ids'], 10),
+				'po.pogrn.purchase.invoice.line': (_get_order, ['price_unit', 'invoice_tax_ids', 'discount', 'tot_rec_qty'], 10),
+			}, multi="sums", help="The tax amount"),
+		'net_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',
+			store=True,multi="sums",help="The total amount"),
+			
 		### Flags ##
 		
 		'load_items_flag':fields.boolean('load_items_flag'),
@@ -132,9 +236,9 @@ class kg_purchase_invoice(osv.osv):
 		
 		'created_by': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).id ,
 		'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
-		'invoice_date': fields.date.context_today,
+		'invoice_date': lambda * a: time.strftime('%Y-%m-%d'),
 		#'sup_invoice_date': fields.date.context_today,
-		'payment_due_date': fields.date.context_today,
+		'payment_due_date': lambda * a: time.strftime('%Y-%m-%d'),
 		'load_items_flag': False,
 		'state':'draft',
 		'name':'',
@@ -144,35 +248,22 @@ class kg_purchase_invoice(osv.osv):
 
 	}
 	
-	def sechedular_email_ids(self,cr,uid,ids,context = None):
-		email_from = []
-		email_to = []
-		email_cc = []
-		val = {'email_from':'','email_to':'','email_cc':''}
-		ir_model = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		mail_form_ids = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		for ids in mail_form_ids:
-			mail_form_rec = self.pool.get('kg.mail.settings').browse(cr,uid,ids)
-			if mail_form_rec.sch_type == 'scheduler':
-				s = mail_form_rec.sch_name
-				s = s.lower()
-				if s == 'unaccounted credit register':
-					email_sub = mail_form_rec.subject
-					email_from.append(mail_form_rec.name)
-					mail_line_id = self.pool.get('kg.mail.settings.line').search(cr,uid,[('line_entry','=',ids)])
-					for mail_id in mail_line_id:
-						mail_line_rec = self.pool.get('kg.mail.settings.line').browse(cr,uid,mail_id)
-						if mail_line_rec.to_address:
-							email_to.append(mail_line_rec.mail_id)
-						if mail_line_rec.cc_address:
-							email_cc.append(mail_line_rec.mail_id)
-				else:
-					pass
-		val['email_from'] = email_from
-		val['email_to'] = email_to
-		val['email_cc'] = email_cc
-		return val
-	
+	def _name_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		
+		res = True
+		if rec.sup_invoice_no:
+			sup_invoice_no = rec.sup_invoice_no
+			name=sup_invoice_no.upper()			
+			cr.execute(""" select upper(sup_invoice_no) from kg_purchase_invoice where upper(sup_invoice_no) = '%s' and supplier_id = %s """ %(name,rec.supplier_id.id))
+			data = cr.dictfetchall()	
+			print"dataaaaa",data		
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res
+		
 	def _future_date_check(self,cr,uid,ids,contaxt=None):
 		rec = self.browse(cr,uid,ids[0])
 		today = date.today()
@@ -188,11 +279,18 @@ class kg_purchase_invoice(osv.osv):
 			return False
 		if sup_invoice_date > today:
 			return False
+			
+		today = date.today()
+		inv_date = datetime.strptime(rec.invoice_date,'%Y-%m-%d').date()
+		if inv_date > today:
+			return False
+		
 		return True
 		
 	_constraints = [		
 					  
-		(_future_date_check, 'System not allow to save with future date. !!',['price']),
+		(_future_date_check, 'System not allow to save with future date. !!',['Invoice Date']),
+		(_name_validate, 'Supplier Inv No. must be unique !!', ['Supplier Invoice No.']),		
 		
 	   ]
 	
@@ -202,10 +300,23 @@ class kg_purchase_invoice(osv.osv):
 	
 	def entry_cancel(self, cr, uid, ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if not rec.remarks:
+		if not rec.can_remark:
 			raise osv.except_osv(
 				_('Remarks Needed !!'),
 				_('Enter Remark in Remarks ....'))
+		if rec.type == 'from_po':
+			if rec.grn_type == 'from_po_grn':
+				cr.execute(""" select grn_id from purchase_invoice_grn_ids where invoice_id = %s """ %(rec.id))
+				grn_data = cr.dictfetchall()
+				for item in grn_data:
+					grn_sql = """ update kg_po_grn set state='done',inv_flag=False where id = %s  """ %(item['grn_id'])
+					cr.execute(grn_sql)
+			if rec.grn_type == 'from_general_grn':
+				cr.execute(""" select grn_id from purchase_invoice_general_grn_ids where invoice_id = %s """ %(rec.id))
+				grn_data = cr.dictfetchall()
+				for item in grn_data:
+					grn_sql = """ update kg_general_grn set state='done' where id = %s  """ %(item['grn_id'])
+					cr.execute(grn_sql)
 		self.write(cr, uid,ids,{'state' : 'cancel',
 								'cancel_user_id': uid,
 								'cancel_date': time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -214,11 +325,11 @@ class kg_purchase_invoice(osv.osv):
 			
 	def entry_reject(self, cr, uid, ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if not rec.remarks:
+		if not rec.reject_remark:
 			raise osv.except_osv(
 				_('Remarks Needed !!'),
 				_('Enter Remark in Remarks ....'))
-		self.write(cr, uid,ids,{'state' : 'reject',
+		self.write(cr, uid,ids,{'state' : 'draft',
 								'rej_user_id': uid,
 								'reject_date': time.strftime("%Y-%m-%d %H:%M:%S"),
 								})
@@ -386,8 +497,23 @@ class kg_purchase_invoice(osv.osv):
 						grn_line_record.price_unit * (1-(tot_discount_per or 0.0)/100.0), grn_line_record.po_grn_qty, grn_line_record.product_id,
 						grn_record.supplier_id)['taxes']:
 						val += c.get('amount', 0.0)
-					tot_amt = grn_line_record.po_grn_qty * (grn_line_record.price_unit * (1-(tot_discount_per or 0.0)/100.0))
+					
+					if grn_line_record.price_type == 'per_kg':
+						if grn_line_record.product_id.uom_conversation_factor == 'two_dimension':
+							if grn_line_record.product_id.po_uom_in_kgs > 0:
+								qty = grn_line_record.po_grn_qty * grn_line_record.product_id.po_uom_in_kgs * grn_line_record.length * grn_line_record.breadth
+						elif grn_line_record.product_id.uom_conversation_factor == 'one_dimension':
+							if grn_line_record.product_id.po_uom_in_kgs > 0:
+								qty = grn_line_record.po_grn_qty * grn_line_record.product_id.po_uom_in_kgs
+							else:
+								qty = grn_line_record.po_grn_qty
+						else:
+							qty = grn_line_record.po_grn_qty
+					else:
+						qty = grn_line_record.po_grn_qty
+					tot_amt = qty * (grn_line_record.price_unit * (1-(tot_discount_per or 0.0)/100.0))
 					net_amount = tot_amt + val
+					
 					po_grn_invoice_line_vals = {
 							'invoice_header_id':invoice_rec.id,
 							'po_grn_id': grn_record.id,
@@ -407,9 +533,10 @@ class kg_purchase_invoice(osv.osv):
 							'net_amt': net_amount,
 							'grn_type':'from_po_grn',
 							'price_type': grn_line_record.price_type,
+							'length': grn_line_record.length,
+							'breadth':  grn_line_record.breadth,
 							
 						}
-					print "po_grn_invoice_line_valspo_grn_invoice_line_valspo_grn_invoice_line_vals",po_grn_invoice_line_vals
 					pogrn_invoice_line_obj.create(cr, uid, po_grn_invoice_line_vals)
 			self.write(cr, uid, ids[0], {'po_so_name' :po_name ,'po_so_date':po_date})			
 		if invoice_rec.grn_type == 'from_general_grn':
@@ -439,6 +566,7 @@ class kg_purchase_invoice(osv.osv):
 						val += c.get('amount', 0.0)
 					tot_amt = grn_line_record.grn_qty * (grn_line_record.price_unit * (1-(tot_discount_per or 0.0)/100.0))
 					net_amount = tot_amt + val
+					print"grn_line_record.price_type",grn_line_record.price_type
 					gengrn_invoice_line_obj.create(cr, uid, {
 							'invoice_header_id':invoice_rec.id,
 							'general_grn_id': grn_record.id,
@@ -454,6 +582,7 @@ class kg_purchase_invoice(osv.osv):
 							'net_amt': net_amount,
 							'grn_type':'from_general_grn',
 							'price_type': grn_line_record.price_type,
+							
 							
 						})
 		if invoice_rec.grn_type == 'others':
@@ -643,21 +772,66 @@ class kg_purchase_invoice(osv.osv):
 		final_net_value = total_net_value = final_actual_amount = line_total = total_amount = final_total_amount = total_discount = final_tot_discount = total_tax = final_tax = final_other_charges = final_adj_amt=0.00
 		if invoice_rec.grn_type == 'from_po_grn':
 			for line in invoice_rec.pogrn_line_ids:
-				val = 0.00		
-				amt_to_per = (line.discount / (line.tot_rec_qty * line.price_unit or 1.0 )) * 100
+				val = 0.00
+				print"line.price_type",line.price_type
+				if line.price_type == 'per_kg':
+					if line.product_id.uom_conversation_factor == 'two_dimension':
+						if line.product_id.po_uom_in_kgs > 0:
+							print"line.tot_rec_qtyline.tot_rec_qty",line.tot_rec_qty
+							print"line.product_id.po_uom_in_kgs",line.product_id.po_uom_in_kgs
+							print"line.length",line.length
+							print"line.breadth",line.breadth
+							#~ qty = line.tot_rec_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
+							qty = line.tot_rec_qty * line.product_id.po_uom_in_kgs * 50
+							print"qqqqqqqqqqqqq",qty
+					elif line.product_id.uom_conversation_factor == 'one_dimension':
+						if line.product_id.po_uom_in_kgs > 0:
+							qty = line.tot_rec_qty * line.product_id.po_uom_in_kgs
+						else:
+							qty = line.tot_rec_qty
+					else:
+						qty = line.tot_rec_qty
+				else:
+					qty = line.tot_rec_qty
+				print"qtyqtyqty",qty
+				amt_to_per = (line.discount / (qty * line.price_unit or 1.0 )) * 100
+				print"amt_to_peramt_to_per",amt_to_per
 				kg_discount_per = line.kg_discount_per
 				tot_discount_per = amt_to_per + kg_discount_per
+				if line.kg_discount_per:
+					tot_disc = ((line_total * tot_discount_per)/100)
+				elif line.discount:
+					tot_disc = line.discount
+				else:
+					tot_disc = 0.00
+					
+				print"tot_discount_pertot_discount_per",tot_discount_per
 				for c in self.pool.get('account.tax').compute_all(cr, uid, line.invoice_tax_ids,
-					line.price_unit * (1-(tot_discount_per or 0.0)/100.0), line.tot_rec_qty, line.product_id)['taxes']:
+					line.price_unit * (1-(tot_disc or 0.0)/100.0), qty, line.product_id)['taxes']:
 					val += c.get('amount', 0.0)
+			
+				print"vallllllll",val
 				### Total Amount ###
-				line_total = line.tot_rec_qty * line.price_unit
-				final_total_amount += line_total
+				line_total = qty * line.price_unit + val - tot_disc
+				line_total_1 = qty * line.price_unit 
+				print"line_totalline_total",line_total
 				
+				print"line_total",line_total
+				final_total_amount += line_total_1
+				print"final_total_amount",final_total_amount
+				
+				line.write({'net_amt':line_total})
 				## Total Discount###
-				tot_disc = ((line_total * tot_discount_per)/100)
+				if line.kg_discount_per:
+					tot_disc = ((line_total * tot_discount_per)/100)
+				elif line.discount:
+					tot_disc = line.discount
+				else:
+					tot_disc = 0.00
+				print"tot_disc",tot_disc
 				total_discount = tot_disc
 				final_tot_discount += total_discount
+				print"final_tot_discountfinal_tot_discount",final_tot_discount
 				
 				### Tax Amount ###
 				final_tax += val
@@ -667,20 +841,39 @@ class kg_purchase_invoice(osv.osv):
 	
 				### Net Amount, Actual Amount, Invoice Amount ####
 				total_net_value += line.net_amt
+				print"total_net_value",total_net_value
 				final_net_value = ((total_net_value + final_other_charges) - invoice_rec.advance_adjusted_amt) + invoice_rec.round_off_amt
 				final_actual_amount = total_net_value + final_other_charges
-				
+		print"final_net_valuefinal_net_value",final_net_value
+		print"final_actual_amount",final_actual_amount
+		
 		if invoice_rec.grn_type == 'from_general_grn':
 			for line in invoice_rec.gengrn_line_ids:
 				val = 0.00
+				if line.price_type == 'per_kg':
+					if line.product_id.uom_conversation_factor == 'two_dimension':
+						if line.product_id.po_uom_in_kgs > 0:
+							qty = line.tot_rec_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
+					elif line.product_id.uom_conversation_factor == 'one_dimension':
+						if line.product_id.po_uom_in_kgs > 0:
+							qty = line.tot_rec_qty * line.product_id.po_uom_in_kgs
+						else:
+							qty = line.tot_rec_qty
+					else:
+						qty = line.tot_rec_qty
+				else:
+					qty = line.tot_rec_qty
+				
 				other_charges = line.general_grn_id.other_charge
-				amt_to_per = (line.discount / (line.tot_rec_qty * line.price_unit or 1.0 )) * 100
+				amt_to_per = (line.discount / (qty * line.price_unit or 1.0 )) * 100
+				print"amt_to_per",amt_to_per
 				kg_discount_per = line.kg_discount_per
 				tot_discount_per = amt_to_per + kg_discount_per
+				print"tot_discount_pertot_discount_per",tot_discount_per
 				for c in self.pool.get('account.tax').compute_all(cr, uid, line.invoice_tax_ids,
-					line.price_unit * (1-(tot_discount_per or 0.0)/100.0), line.tot_rec_qty, line.product_id)['taxes']:
+					line.price_unit * (1-(tot_discount_per or 0.0)/100.0), qty, line.product_id)['taxes']:
 					val += c.get('amount', 0.0)
-				tot_amt = line.tot_rec_qty * (line.price_unit * (1-(tot_discount_per or 0.0)/100.0))
+				tot_amt = qty * (line.price_unit * (1-(tot_discount_per or 0.0)/100.0))
 				net_amount = tot_amt + val	
 					
 				## Writing values into invoice lines ###
@@ -692,8 +885,11 @@ class kg_purchase_invoice(osv.osv):
 				
 				## Total Discount###
 				tot_disc = ((line_total * tot_discount_per)/100)
+				print"tot_disc",tot_disc
 				total_discount = tot_disc
+				print"total_discount",total_discount
 				final_tot_discount += total_discount
+				
 				
 				### Tax Amount ###
 				final_tax += val
@@ -707,14 +903,28 @@ class kg_purchase_invoice(osv.osv):
 		if invoice_rec.grn_type == 'others':
 			for line in invoice_rec.service_line_ids:
 				val = 0.00		
-				amt_to_per = (line.discount / (line.tot_rec_qty * line.price_unit or 1.0 )) * 100
+				if line.price_type == 'per_kg':
+					if line.product_id.uom_conversation_factor == 'two_dimension':
+						if line.product_id.po_uom_in_kgs > 0:
+							qty = line.tot_rec_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
+					elif line.product_id.uom_conversation_factor == 'one_dimension':
+						if line.product_id.po_uom_in_kgs > 0:
+							qty = line.tot_rec_qty * line.product_id.po_uom_in_kgs
+						else:
+							qty = line.tot_rec_qty
+					else:
+						qty = line.tot_rec_qty
+				else:
+					qty = line.tot_rec_qty
+					
+				amt_to_per = (line.discount / (qty * line.price_unit or 1.0 )) * 100
 				kg_discount_per = line.kg_discount_per
 				tot_discount_per = amt_to_per + kg_discount_per
 				for c in self.pool.get('account.tax').compute_all(cr, uid, line.invoice_tax_ids,
-					line.price_unit * (1-(tot_discount_per or 0.0)/100.0), line.tot_rec_qty, line.product_id)['taxes']:
+					line.price_unit * (1-(tot_discount_per or 0.0)/100.0), qty, line.product_id)['taxes']:
 					val += c.get('amount', 0.0)
 				### Total Amount ###
-				line_total = line.tot_rec_qty * line.price_unit
+				line_total = qty * line.price_unit
 				final_total_amount += line_total
 				
 				## Total Discount###
@@ -748,7 +958,7 @@ class kg_purchase_invoice(osv.osv):
 		
 	def entry_confirm(self, cr, uid, ids,context=None):
 		invoice_rec = self.browse(cr,uid,ids[0])
-		self.compute_values(cr,uid,ids,context = context)
+		#~ self.compute_values(cr,uid,ids,context = context)
 		
 		### Checking Advance date ###
 		
@@ -763,7 +973,7 @@ class kg_purchase_invoice(osv.osv):
 					_('Supplier Invoice Date should not be greater than current date'))
 		
 		### Check Advance Amount greater than Zero ###
-		
+
 		if invoice_rec.grn_type == 'from_po_grn':
 			if not invoice_rec.pogrn_line_ids:
 				raise osv.except_osv(
@@ -775,6 +985,14 @@ class kg_purchase_invoice(osv.osv):
 						raise osv.except_osv(
 							_('Price Unit Cannot be zero!'),
 							_('You cannot process Invoice with Price Unit Zero for Product %s.' %(line.product_id.name)))
+		
+		if invoice_rec.grn_type == 'from_po_grn':
+			cr.execute(""" select grn_id from purchase_invoice_grn_ids where invoice_id = %s """ %(invoice_rec.id))
+			grn_data = cr.dictfetchall()
+			for item in grn_data:
+				grn_sql = """ update kg_po_grn set inv_flag = True where id = %s  """ %(item['grn_id'])
+				cr.execute(grn_sql)
+		
 		if invoice_rec.grn_type == 'from_general__grn':
 			if not invoice_rec.gengrn_line_ids:
 				raise osv.except_osv(
@@ -786,21 +1004,28 @@ class kg_purchase_invoice(osv.osv):
 						raise osv.except_osv(
 							_('Price Unit Cannot be zero!'),
 							_('You cannot process Invoice with Price Unit Zero for Product %s.' %(line.product_id.name)))
-		seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.purchase.invoice')])
-		seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
-		cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,invoice_rec.invoice_date))
-		seq_name = cr.fetchone();
+		inv_no = ''
+		if not invoice_rec.name:
+			seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.purchase.invoice')])
+			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,invoice_rec.invoice_date))
+			seq_name = cr.fetchone();
+			inv_no = seq_name[0]
+		elif invoice_rec.name:
+			inv_no = invoice_rec.name
 		self.write(cr,uid,ids[0],{'state':'confirmed',
 								  'confirm_flag':'True',
 								  'conf_user_id':uid,
 								  'confirmed_date':dt_time,
-								  'name': seq_name[0]
+								  'name': inv_no,
 								   })
 		
 		return True
 		
 	def entry_approve(self, cr, uid, ids,context=None):
 		invoice_rec = self.browse(cr,uid,ids[0])
+		self.compute_values(cr,uid,ids,context = context)
+		
 		po_advance_obj = self.pool.get('kg.po.advance')
 		so_advance_obj = self.pool.get('kg.so.advance')
 		po_advance_line_obj = self.pool.get('kg.po.advance.line')
@@ -1071,6 +1296,46 @@ class kg_pogrn_purchase_invoice_line(osv.osv):
 
 	_name = "kg.pogrn.purchase.invoice.line"
 	_description = "PO GRN Purchase Invoice Line"
+	
+	def _amount_line(self, cr, uid, ids, prop, arg, context=None):
+		cur_obj=self.pool.get('res.currency')
+		tax_obj = self.pool.get('account.tax')
+		res = {}
+		if context is None:
+			context = {}
+		for line in self.browse(cr, uid, ids, context=context):
+			qty = 0.00
+			print"price_typeprice_typeprice_type",line.price_type
+			if line.price_type == 'per_kg':
+				if line.product_id.uom_conversation_factor == 'two_dimension':
+					if line.product_id.po_uom_in_kgs > 0:
+						qty = line.tot_rec_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
+				elif line.product_id.uom_conversation_factor == 'one_dimension':
+					if line.product_id.po_uom_in_kgs > 0:
+						qty = line.tot_rec_qty * line.product_id.po_uom_in_kgs
+					else:
+						qty = line.tot_rec_qty
+				else:
+					qty = line.tot_rec_qty
+			else:
+				qty = line.tot_rec_qty
+			# Price Calculation
+			price_amt = 0
+			if line.price_type == 'per_kg':
+				if line.product_id.po_uom_in_kgs > 0:
+					price_amt = line.tot_rec_qty / line.product_id.po_uom_in_kgs * line.price_unit
+			else:
+				price_amt = qty * line.price_unit
+			amt_to_per = (line.discount / (qty * line.price_unit or 1.0 )) * 100
+			kg_discount_per = line.kg_discount_per
+			tot_discount_per = amt_to_per + kg_discount_per
+			price = line.price_unit * (1 - (tot_discount_per or 0.0) / 100.0)
+			taxes = tax_obj.compute_all(cr, uid, line.invoice_tax_ids, price, qty, line.product_id, line.invoice_header_id.supplier_id)
+			cur = line.invoice_header_id.supplier_id.property_product_pricelist_purchase.currency_id
+			res[line.id] = cur_obj.round(cr, uid, cur, taxes['total_included'])
+		return res
+	
+	
 	_columns = {
 	
 		'po_grn_id' : fields.many2one('kg.po.grn', 'GRN NO.'),		
@@ -1087,13 +1352,17 @@ class kg_pogrn_purchase_invoice_line(osv.osv):
 		'discount': fields.float('DISCOUNT(-)'),
 		'kg_discount_per': fields.float('DISCOUNT%(-)'),
 		'invoice_tax_ids': fields.many2many('account.tax', 'pogrn_purchase_invoice_tax', 'pogrn_invoice_line_id', 'taxes_id', 'Taxes(+)'),
-		'net_amt': fields.float('NET AMOUNT'),
+		#~ 'net_amt': fields.float('NET AMOUNT'),
+		'net_amt': fields.function(_amount_line, string='Net Amount', digits_compute= dp.get_precision('Account')),
+		
 		'invoice_header_id' : fields.many2one('kg.purchase.invoice', 'Header ID'),
 		'po_grn_line_id':fields.many2one('po.grn.line','PO GRN Entry Line'),
 		'po_line_id':fields.many2one('purchase.order.line','PO Line'),
 		'so_line_id':fields.many2one('kg.service.order.line','SO Line'),
 		'brand_id':fields.many2one('kg.brand.master','Brand'),
 		'price_type': fields.selection([('po_uom','PO UOM'),('per_kg','Per KG')],'Price Type'),
+		'length': fields.float('Length'),
+		'breadth': fields.float('Breadth'),
 		
 	}
 	
@@ -1153,6 +1422,9 @@ class kg_gengrn_purchase_invoice_line(osv.osv):
 		'invoice_tax_ids': fields.many2many('account.tax', 'gengrn_purchase_invoice_tax', 'gengrn_invoice_line_id', 'taxes_id', 'Taxes(+)'),
 		'net_amt': fields.float('NET AMOUNT'),
 		'invoice_header_id' : fields.many2one('kg.purchase.invoice', 'Header ID'),
+		'price_type': fields.selection([('po_uom','PO UOM'),('per_kg','Per KG')],'Price Type'),
+		'length': fields.float('Length'),
+		'breadth': fields.float('Breadth'),
 		
 	}
 	
