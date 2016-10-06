@@ -577,7 +577,7 @@ class ch_kg_accessories_master(osv.osv):
 	
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		cr.execute(""" select product_id from ch_kg_accessories_master where product_id  = '%s' and header_id = '%s' """ %(entry.product_id.id,entry.header_id.id))
+		cr.execute(""" select product_id from ch_kg_accessories_master where product_id  = '%s' and header_id = '%s' and length ='%s' """ %(entry.product_id.id,entry.header_id.id,entry.length))
 		data = cr.dictfetchall()			
 		if len(data) > 1:		
 			return False
