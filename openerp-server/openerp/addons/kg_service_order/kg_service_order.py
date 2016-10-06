@@ -171,6 +171,7 @@ class kg_service_order(osv.osv):
 		'payment_type': fields.selection([('cash', 'Cash'), ('credit', 'Credit')], 'Payment Type',readonly=True,states={'draft':[('readonly',False)]}),
 		'version':fields.char('Version'),
 		'expense_line_id': fields.one2many('kg.service.order.expense.track','expense_id','Expense Track'),
+		'adv_flag': fields.boolean('Advance Flag'),
 		
 		# Entry Info
 		
@@ -201,6 +202,7 @@ class kg_service_order(osv.osv):
 		'creation_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'version':'00',
 		'pricelist_id': 2,
+		'adv_flag': False,
 		
 	}
 	

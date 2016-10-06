@@ -191,6 +191,7 @@ class kg_purchase_order(osv.osv):
 		'item_quality_term': fields.many2one('kg.item.quality.master','Item Quality Term',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		'item_quality_term_id': fields.many2many('kg.item.quality.master','general_term','po_id','term_id','Item Quality Term',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'sent_mail_flag': fields.boolean('Sent Mail Flag'),
+		'adv_flag': fields.boolean('Advance Flag'),
 		
 		# Entry Info
 		
@@ -225,6 +226,7 @@ class kg_purchase_order(osv.osv):
 		'type_flag': False,
 		'insurance': 'na',
 		'sent_mail_flag': False,
+		'adv_flag': False,
 		
 	}
 	

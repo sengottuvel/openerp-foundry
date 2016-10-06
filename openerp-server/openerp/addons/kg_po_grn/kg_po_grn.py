@@ -973,7 +973,7 @@ class kg_po_grn(osv.osv):
 				#po_id = grn_entry.po_id.id
 				#po_obj.write(cr,uid,po_id, {'grn_flag':False})
 				if line.po_line_id.order_id:
-					po_obj.write(cr,uid,line.po_line_id.order_id.id, {'grn_flag': False})
+					po_obj.write(cr,uid,line.po_line_id.order_id.id, {'grn_flag': False,'adv_flag':True})
 				if line.billing_type == 'cost':
 					if line.po_grn_qty > line.po_pending_qty:
 						rec_qty = line.po_line_id.received_qty
@@ -1093,7 +1093,7 @@ class kg_po_grn(osv.osv):
 				so_id = grn_entry.so_id.id
 				so_obj.write(cr,uid,so_id, {'grn_flag':False})
 				if line.so_line_id:
-					so_obj.write(cr,uid,line.so_line_id.service_id.id, {'grn_flag': False})
+					so_obj.write(cr,uid,line.so_line_id.service_id.id, {'grn_flag': False,'adv_flag':True})
 				if line.billing_type == 'cost':
 					if line.po_grn_qty > line.so_pending_qty:
 						raise osv.except_osv(_('Warning!'), _('GRN Qty should not be greater than SO Qty for %s !!' %(line.product_id.name)))
