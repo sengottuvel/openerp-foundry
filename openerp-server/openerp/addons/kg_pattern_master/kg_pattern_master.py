@@ -320,20 +320,20 @@ class kg_pattern_master(osv.osv):
 		if rec.list_moc_flag == False:
 			raise osv.except_osv(_('List MOC Construction!!'),
 						_('Enter the List MOC Construction Button !!'))		
-		if rec.line_ids_c:
-			for item in rec.line_ids_c:
-				if item.pouring_tolerance > 0.00:
-					if item.pouring_weight <= 0.00:
-						raise osv.except_osv(_('Production Weight tap !!'),
-						_('Enter the Pouring weight in save with zero value !!'))
-				if item.casting_tolerance > 0.00:
-					if item.casting_weight <= 0.00:
-						raise osv.except_osv(_('Production Weight tap !!'),
-						_('Enter the Rough Casting weight in save with zero value !!'))
-				if item.finished_casting_tolerance > 0.00:
-					if item.finished_casting_weight <= 0.00:
-						raise osv.except_osv(_('Production Weight tap !!'),
-						_('Enter the Finished Casting Weight in save with zero value !!'))
+		#~ if rec.line_ids_c:
+			#~ for item in rec.line_ids_c:
+				#~ if item.pouring_tolerance > 0.00:
+					#~ if item.pouring_weight <= 0.00:
+						#~ raise osv.except_osv(_('Production Weight tap !!'),
+						#~ _('Enter the Pouring weight in save with zero value !!'))
+				#~ if item.casting_tolerance > 0.00:
+					#~ if item.casting_weight <= 0.00:
+						#~ raise osv.except_osv(_('Production Weight tap !!'),
+						#~ _('Enter the Rough Casting weight in save with zero value !!'))
+				#~ if item.finished_casting_tolerance > 0.00:
+					#~ if item.finished_casting_weight <= 0.00:
+						#~ raise osv.except_osv(_('Production Weight tap !!'),
+						#~ _('Enter the Finished Casting Weight in save with zero value !!'))
 		if rec.pattern_type == 'copy_pattern':
 			
 			### Check Duplicates MOC Construction and Rate Details Items start ###
@@ -748,11 +748,11 @@ class ch_latest_weight(osv.osv):
 	_columns = {  
 			
 		'header_id':fields.many2one('kg.pattern.master', 'Latest Weight details', required=True, ondelete='cascade'),	
-		'weight_type': fields.selection([('ci','CI'),('ss','SS'),('non_ferrous','Non-Ferrous')],'Family Type' ,required=True),	
-		'pouring_weight': fields.float('Pouring weight' ,required=True),	
-		'pouring_tolerance': fields.float('Pouring Tolerance(-/+%)' ,required=True),	
-		'casting_weight': fields.float('Rough Casting weight' ,required=True),	
-		'casting_tolerance': fields.float('Rough Casting Tolerance(-/+%)' ,required=True),	
+		'weight_type': fields.selection([('ci','CI'),('ss','SS'),('non_ferrous','Non-Ferrous')],'Family Type' ),	
+		'pouring_weight': fields.float('Pouring weight' ),	
+		'pouring_tolerance': fields.float('Pouring Tolerance(-/+%)' ),	
+		'casting_weight': fields.float('Rough Casting weight' ),	
+		'casting_tolerance': fields.float('Rough Casting Tolerance(-/+%)'),	
 		'finished_casting_weight': fields.float('Finished Casting Weight'),	
 		'finished_casting_tolerance': fields.float('Finished Casting Tolerance(-/+%)'),	
 		

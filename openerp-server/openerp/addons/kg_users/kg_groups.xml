@@ -259,6 +259,7 @@
 			ref('kg_menus.apm_advance_menu'),
 			ref('kg_menus.aam_po_advance'),
 			ref('kg_menus.aam_so_advance'),
+			ref('kg_supplier_advance.tam_sup_advance'),
 			
 			ref('kg_menus.rpm_report_menu'),
 			ref('kg_menus.ram_po_register_reports'),

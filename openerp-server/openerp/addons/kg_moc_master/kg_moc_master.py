@@ -82,7 +82,7 @@ class kg_moc_master(osv.osv):
 		'alias_name': fields.char('Alias Name', size=128),
 		'moc_type': fields.selection([('foundry_moc','Foundry MOC'),('purchase_moc','Purchase MOC'),('both','Both')],'Type'),
 		'product_id': fields.many2one('product.product','Equivalent Rejection Material'),	
-		'moc_cate_id': fields.many2one('kg.moc.category','MOC Category',required=True,domain="[('state','not in',('reject','cancel'))]"),	
+		'moc_cate_id': fields.many2one('kg.moc.category','MOC Category',domain="[('state','not in',('reject','cancel'))]"),	
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),	
 		
 		
