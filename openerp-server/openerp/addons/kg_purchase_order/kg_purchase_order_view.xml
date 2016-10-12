@@ -55,17 +55,7 @@
 		<button name="print_quotation" string="Print" type="object" states="draft" class="oe_highlight" groups="base.group_user" position="replace">
 		<button name="print_quotation" string="Print" type="object" states="draft" class="oe_highlight" groups="base.group_user" invisible="1"/>
 		</button>
-		<!--<button name="print_quotation" string="Print" type="object" states="sent" groups="base.group_user" position="replace">
-		<button name="print_quotation" string="Print PO" type="object" states="approved"/>
-		</button> -->
-		<button name="wkf_send_rfq" states="draft" string="Send by Email" type="object" context="{'send_rfq':True}" 
-									class="oe_highlight" position="replace">
-		<button name="wkf_send_rfq" states="draft" string="Send by Email" type="object" context="{'send_rfq':True}" 
-					class="oe_highlight" invisible="1"/>
-		</button>
-		<button name="wkf_send_rfq" states="sent" string="Send by Email" type="object" context="{'send_rfq':True}" position="replace">
-		<button name="wkf_send_rfq" states="approved" string="Send by Email" type="object" context="{'send_rfq':True}" invisible="1"/>
-		</button>
+		
 		<button name="purchase_confirm" states="draft" string="Confirm Order" position="replace">
 			<button name="purchase_confirm" states="confirmed" string="Approve" confirm="Are you sure to proceed ?" />
 			<button name="entry_reject" string="Reject" confirm="Are you sure to proceed ?" type="object" states="confirmed" />
@@ -82,7 +72,7 @@
 		</field>
 		
 		<field name="bill_type" position="replace">
-			 <field name="date_order" required="1"  on_change="onchange_date_order(date_order)"/>
+			 <field name="date_order" required="1"/>
 			 <field name="quotation_date" />
 			 <field name="quot_ref_no" />
 			 <field name="delivery_address"/>
@@ -242,9 +232,6 @@
 			</field>
 			<field name="product_qty" position="replace">
 			<field name="product_qty" required="True" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}" on_change="onchange_qty(product_qty,pending_qty,pi_line_id,pi_qty,uom_conversation_factor,length,breadth,price_type,product_id)"/>
-<!--
-			<field name="product_qty" required="True" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}"/>
--->
 			</field>
 			<field name="product_uom" 
 						on_change="onchange_product_uom(parent.pricelist_id,product_id,product_qty,product_uom,
@@ -278,22 +265,14 @@
 				<field name="price_unit" position="replace">
 					<field name="price_unit" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}"/>
 				</field>
-<!--
-				<field name="product_qty" position="before">
-					<field name="uom_conversation_factor" readonly="1" invisible="1"/>
-					<field name="length" attrs="{'invisible':[('uom_conversation_factor','=','one_dimension')],'required':[('uom_conversation_factor','=','two_dimension')]}"/>
-					<field name="breadth" attrs="{'invisible':[('uom_conversation_factor','=','one_dimension')],'required':[('uom_conversation_factor','=','two_dimension')]}"/>
-				</field>
--->
+
 				<field name="price_unit" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}" position="after">
                 <field name="cancel_qty" readonly="1" attrs="{'invisible': [('cancel_qty','=',0)]}"/>				
 				<field name="received_qty" readonly="1"	attrs="{'invisible': [('received_qty','=',0)]}" />
 				<field name = "quantity" readonly="1"/>
 				<field name = "price_type" on_change="onchange_price_type(product_qty,uom_conversation_factor,length,breadth,price_type,product_id)" required="1"/>
 				<field name = "cancel_flag" invisible="1"/>
-				<!--<field name="cancel_remark" attrs="{'readonly': [('cancel_flag','=', False)]}"/>
-				<button name="pol_cancel" type="object" string="Cancel" icon="gtk-cancel"
-				class="oe_highlight" attrs="{'invisible': [('line_state','=', 'cancel')]}"/> -->
+
 				<group string="Price History">
 				<field name="least_price" readonly="1"/>
 				<field name="high_price" readonly="1"/>
@@ -335,7 +314,6 @@
 							</field>
 					</page>
 				</xpath>
-				
         </field>
     </record>
     
@@ -346,7 +324,6 @@
         <field name="model">purchase.order</field>
         <field name="inherit_id" ref="purchase.purchase_order_tree"/>
         <field name="arch" type="xml">
-			
 			<field name="name" string="Reference" position="replace">
 			<field name="name" string="Purchase Order No"/>
 			<field name="revision"/>
@@ -361,21 +338,18 @@
 			<field name="amend_flag"/>
 			<field name="bill_flag"/>
 			</field>
-			
 		</field>
 		</record>
     
     <!-- purchase order line tree view -->
     
-    
-     <!-- Purchase Order Spl Tree view -->
+    <!-- Purchase Order Spl Tree view -->
     
 		<record model="ir.ui.view" id="kg_purchase_order_spl_tree_inherit">
         <field name="name">kg.purchase.order.tree.inherit</field>
         <field name="model">purchase.order</field>
         <field name="inherit_id" ref="purchase.purchase_order_spl_tree"/>
         <field name="arch" type="xml">
-			
 			<field name="name" string="Reference" position="replace">
 			<field name="name" string="Purchase Order No"/>
 			<field name="revision"/>
@@ -390,7 +364,6 @@
 			<field name="amend_flag"/>
 			<field name="bill_flag"/>
 			</field>
-			
 		</field>
 		</record>
     

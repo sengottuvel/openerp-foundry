@@ -17,7 +17,7 @@
 		-->
 		
 		<field name="categ_id" position="after">
-			<field name="is_accessories"/>
+			<field name="is_accessories" invisible="1"/>
 			<field name="capital" invisible="1"/>
 			<field name="abc" invisible="1"/>
 		</field>

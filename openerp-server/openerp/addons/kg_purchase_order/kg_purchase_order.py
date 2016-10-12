@@ -53,11 +53,7 @@ class kg_purchase_order(osv.osv):
 		amt_to_per = (line.kg_discount / (qty * line.price_unit or 1.0 )) * 100
 		kg_discount_per = line.kg_discount_per
 		tot_discount_per = amt_to_per + kg_discount_per
-		#~ if line.price_type == 'per_kg':	
-			#~ if line.product_id.po_uom_in_kgs > 0:
-				#~ qty = line.product_qty * line.product_id.po_uom_in_kgs
-			#~ else:
-				#~ qty = line.product_qty
+		
 		for c in self.pool.get('account.tax').compute_all(cr, uid, line.taxes_id,
 			line.price_unit * (1-(tot_discount_per or 0.0)/100.0), qty, line.product_id,
 				line.order_id.partner_id)['taxes']:
@@ -97,7 +93,6 @@ class kg_purchase_order(osv.osv):
 				tot_discount = line.kg_discount + discount_per_value
 				val1 += line.price_subtotal
 				
-				#for c in self.pool.get('account.tax').compute_all(cr, uid, line.taxes_id, line.price_unit, line.product_qty, line.product_id, order.partner_id)['taxes']:
 				val += self._amount_line_tax(cr, uid, line, context=context)
 				val3 += tot_discount
 			res[order.id]['other_charge']= other_charges_amt or 0
@@ -232,24 +227,10 @@ class kg_purchase_order(osv.osv):
 	
 	
 	def create(self, cr, uid, vals,context=None):
-		"""inv_seq = vals['kg_seq_id']
-		next_seq_num = self.pool.get('ir.sequence').kg_get_id(cr, uid, inv_seq,'id',{'noupdate':False})
-		print "next_seq_num...........................", next_seq_num
-		vals.update({
-						'name':next_seq_num,
-						
-						})"""
-		
 		order =  super(kg_purchase_order, self).create(cr, uid, vals, context=context)
 		return order
 	
 	def onchange_seq_id(self, cr, uid, ids, kg_seq_id,name):
-		print "kgggggggggggggggggg --  onchange_seq_id called"		
-		"""value = {'name':''}
-		if kg_seq_id:
-			next_seq_num = self.pool.get('ir.sequence').kg_get_id(cr, uid, kg_seq_id,'id',{'noupdate':False})
-			print "next_seq_num:::::::::::", next_seq_num
-			value = {'name': next_seq_num}"""
 		return True
 		
 	def onchange_type_flag(self, cr, uid, ids, po_type):
@@ -258,7 +239,6 @@ class kg_purchase_order(osv.osv):
 			value = {'type_flag': True}
 		else:
 			value = {'pi_flag': True}
-		print"valueeeeeeeeE",value
 		return {'value': value}
 	
 	def onchange_company(self, cr, uid, ids, company_id,delivery_address):
@@ -273,46 +253,6 @@ class kg_purchase_order(osv.osv):
 		return {'value': value}	
 		
 	### Back Entry Date #####	
-		
-	def onchange_date_order(self, cr, uid, ids, date_order):
-		today_date = today.strftime('%Y-%m-%d')
-		back_list = []
-		today_new = today.date()
-		bk_date = date.today() - timedelta(days=2)
-		back_date = bk_date.strftime('%Y-%m-%d')
-		d1 = today_new
-		d2 = bk_date
-		delta = d1 - d2
-		for i in range(delta.days + 1):
-			bkk_date = d1 - timedelta(days=i)
-			backk_date = bkk_date.strftime('%Y-%m-%d')
-			back_list.append(backk_date)
-		holiday_obj = self.pool.get('kg.holiday.master.line')
-		holiday_ids = holiday_obj.search(cr, uid, [('leave_date','in',back_list)])
-		#~ if date_order > today_date:
-			#~ raise osv.except_osv(
-					#~ _('Warning'),
-					#~ _('PO Date should be less than or equal to current date!'))	
-		if holiday_ids:
-			hol_bk_date = date.today() - timedelta(days=(2+len(holiday_ids)))
-			hol_back_date = hol_bk_date.strftime('%Y-%m-%d')
-			if date_order < hol_back_date:
-				raise osv.except_osv(
-					_('Warning'),
-					_('PO Entry is not allowed for this date!'))
-		elif (x for x in back_list if calendar.day_name[x.weekday()]  == 'Sunday'):
-			hol_bk_date = date.today() - timedelta(days=3)
-			hol_back_date = hol_bk_date.strftime('%Y-%m-%d')
-			if date_order < hol_back_date:
-				raise osv.except_osv(
-					_('Warning'),
-					_('PO Entry is not allowed for this date!'))
-		else:
-			if date_order <= back_date:
-				raise osv.except_osv(
-					_('Warning'),
-					_('PO Entry is not allowed!'))
-		return True
 		
 	def onchange_frieght_flag(self, cr, uid, ids, term_freight):
 		value = {'frieght_flag':False}
@@ -423,35 +363,7 @@ class kg_purchase_order(osv.osv):
 		sql = """ select id,name,date_order from purchase_order where state != 'draft' and state != 'cancel 'order by id desc limit 1 """
 		cr.execute(sql)
 		data = cr.dictfetchall()
-		#~ if date_order1 > today_date:
-			#~ raise osv.except_osv(
-					#~ _('Warning'),
-					#~ _('PO Date should be less than or equal to current date!'))
-		#~ if data:
-			#~ if data[0]['date_order'] > date_order:
-				#~ raise osv.except_osv(
-					#~ _('Warning'),
-					#~ _('Current PO Date should be greater than or equal to Previous PO date!'))				
-			
-		#~ if holiday_ids:
-			#~ hol_bk_date = date.today() - timedelta(days=(2+len(holiday_ids)))
-			#~ hol_back_date = hol_bk_date.strftime('%Y-%m-%d')
-			#~ if date_order < hol_back_date:
-				#~ raise osv.except_osv(
-					#~ _('Warning'),
-					#~ _('PO Entry is not allowed for this date!'))
-		#~ elif (x for x in back_list if calendar.day_name[x.weekday()]  == 'Sunday'):
-			#~ hol_bk_date = date.today() - timedelta(days=3)
-			#~ hol_back_date = hol_bk_date.strftime('%Y-%m-%d')
-			#~ if date_order < hol_back_date:
-				#~ raise osv.except_osv(
-					#~ _('Warning'),
-					#~ _('PO Entry is not allowed for this date!'))		
-		#~ else:
-			#~ if date_order <= back_date:
-				#~ raise osv.except_osv(
-					#~ _('Warning'),
-					#~ _('PO Entry is not allowed!'))
+		
 		if not obj.name:
 			if obj.division == 'ipd':
 				seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','purchase.order')])
@@ -467,13 +379,7 @@ class kg_purchase_order(osv.osv):
 				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,obj.date_order))
 			seq_name = cr.fetchone();
 			self.write(cr,uid,ids,{'name':seq_name[0]})
-		"""if obj.frieght_flag == True and obj.value1 == 0.00: 
-			raise osv.except_osv(
-					_('Warning'),
-					_('You should specify Frieght charges!'))"""
-		#~ for i in obj.order_line:
-			#~ if not i.pi_line_id:
-				#~ raise osv.except_osv(_('PO From PI Only!'),_("You must select a PO lines From PI !") )
+		
 		if obj.amount_total <= 0:
 			raise osv.except_osv(
 					_('Purchase Order Value Error !'),
@@ -540,7 +446,6 @@ class kg_purchase_order(osv.osv):
 					if user_rec.special_approval == True:
 						pass
 					else:
-						#~ self.spl_po_apl_mail(cr,uid,ids,obj,context)
 						raise osv.except_osv(
 							_('Warning'),
 							_('%s price is exceeding last purchase price. It should be approved by special approver'%(item.product_id.name)))
@@ -555,7 +460,6 @@ class kg_purchase_order(osv.osv):
 							if user_rec.special_approval == True:
 								pass
 							else:
-								#~ self.spl_po_apl_mail(cr,uid,ids,obj,context)
 								raise osv.except_osv(
 									_('Warning'),
 									_('%s price is exceeding design price. It should be approved by special approver'%(item.product_id.name)))
@@ -576,12 +480,6 @@ class kg_purchase_order(osv.osv):
 			else:
 				qty = item.product_qty
 			self.pool.get('purchase.order.line').write(cr,uid,item.id,{'quantity':qty})	
-		
-		#~ if obj.confirmed_by.id == uid:
-			#~ raise osv.except_osv(
-					#~ _('Warning'),
-					#~ _('Approve cannot be done by Confirmed user'))
-		#~ else:
 		
 		if obj.payment_mode.term_category == 'advance':
 			cr.execute("""select * from kg_po_advance where state='approved' and po_id= %s"""  %(str(ids[0])))
@@ -682,8 +580,6 @@ class kg_purchase_order(osv.osv):
 				for item in bmr_rec.line_ids:
 					if item.brand_id.id == po_lines[i].brand_id.id and item.moc_id.id == po_lines[i].moc_id.id:
 						self.pool.get('ch.brandmoc.rate.details').write(cr,uid,item.id,{'purchase_price' : po_lines[i].price_unit})
-					#~ elif item.brand_id.id == po_lines[i].brand_id.id or item.moc_id.id == po_lines[i].moc_id.id:
-						#~ self.pool.get('ch.brandmoc.rate.details').write(cr,uid,item.id,{'purchase_price' : po_lines[i].price_unit})
 					else:
 						pass
 		
@@ -807,13 +703,6 @@ class kg_purchase_order(osv.osv):
 		else:
 			self.write(cr,uid,ids,{'state':'cancel','cancel_user_id': uid,'cancel_date':time.strftime('%Y-%m-%d %H:%M:%S')})
 			
-		"""		
-		for inv in purchase.invoice_ids:
-			
-			if inv:
-				wf_service.trg_validate(uid, 'account.invoice', inv.id, 'invoice_cancel', cr)
-				"""
-			
 		for (id, name) in self.name_get(cr, uid, ids):
 			wf_service.trg_validate(uid, 'purchase.order', id, 'purchase_cancel', cr)
 		return True			
@@ -828,7 +717,7 @@ class kg_purchase_order(osv.osv):
 				_('Remarks Needed !!'),
 				_('Enter Remark in Remarks Tab....'))
 		else:
-			self.write(cr,uid,ids,{'state':'reject','rej_user_id': uid,'reject_date':time.strftime('%Y-%m-%d %H:%M:%S')})
+			self.write(cr,uid,ids,{'state':'draft','rej_user_id': uid,'reject_date':time.strftime('%Y-%m-%d %H:%M:%S')})
 			
 		return True
 		
@@ -878,7 +767,6 @@ class kg_purchase_order(osv.osv):
 				 'ids': ids,
 				 'form': self.read(cr, uid, ids[0], context=context),
 		}
-		#print "datas ------------------------", datas
 		return {'type': 'ir.actions.report.xml', 'report_name': 'onscreen.po.report', 'datas': datas, 'ids' : ids, 'nodestroy': True}
 	
 kg_purchase_order()
@@ -925,15 +813,7 @@ class kg_purchase_order_line(osv.osv):
 				else:
 					qty = line.product_qty
 			else:
-				#~ if line.product_id.uom_conversation_factor == 'two_dimension':
-					#~ if line.product_id.po_uom_in_kgs > 0.00:
-						#~ qty = line.product_qty * line.product_id.po_uom_in_kgs * line.length * line.breadth
-						#~ print"bbbbbbbbbbbbb",qty
-				#~ elif line.product_id.uom_conversation_factor == 'one_dimension':		
-					#~ qty = line.product_qty
-				#~ else:
 				qty = line.product_qty
-			print"qtyqtyqty",qty
 			
 			# Price Calculation
 			price_amt = 0
@@ -947,30 +827,10 @@ class kg_purchase_order_line(osv.osv):
 			kg_discount_per = line.kg_discount_per
 			tot_discount_per = amt_to_per + kg_discount_per
 			price = line.price_unit * (1 - (tot_discount_per or 0.0) / 100.0)
-			#~ price = line.price_unit * (1 - (tot_discount_per or 0.0) / 100.0)
-			#~ taxes = tax_obj.compute_all(cr, uid, line.taxes_id, price, line.product_qty, line.product_id, line.order_id.partner_id)
 			taxes = tax_obj.compute_all(cr, uid, line.taxes_id, price, qty, line.product_id, line.order_id.partner_id)
 			cur = line.order_id.pricelist_id.currency_id
 			res[line.id] = cur_obj.round(cr, uid, cur, taxes['total_included'])
-			print"rerereressssssssss",res
 		return res
-		
-	#~ def _amount_line(self, cr, uid, ids, prop, arg, context=None):
-		#~ logger.info('[KG OpenERP] Class: kg_purchase_order_line, Method: _amount_line called...')
-		#~ cur_obj=self.pool.get('res.currency')
-		#~ tax_obj = self.pool.get('account.tax')
-		#~ res = {}
-		#~ if context is None:
-			#~ context = {}
-		#~ for line in self.browse(cr, uid, ids, context=context):
-			#~ amt_to_per = (line.kg_discount / (line.product_qty * line.price_unit or 1.0 )) * 100
-			#~ kg_discount_per = line.kg_discount_per
-			#~ tot_discount_per = amt_to_per + kg_discount_per
-			#~ price = line.price_unit * (1 - (tot_discount_per or 0.0) / 100.0)
-			#~ taxes = tax_obj.compute_all(cr, uid, line.taxes_id, price, line.product_qty, line.product_id, line.order_id.partner_id)
-			#~ cur = line.order_id.pricelist_id.currency_id
-			#~ res[line.id] = taxes['total_included']
-		#~ return res
 		
 	_name = "purchase.order.line"
 	_inherit = "purchase.order.line"
@@ -1088,7 +948,6 @@ class kg_purchase_order_line(osv.osv):
 			recent_data = cr.dictfetchall()
 			if max_data:
 				max_val = max_data[0]['max'] or 0
-				#max_val = max_val.values()[0]
 				min_val = max_data[0]['min'] or 0
 			else:
 				max_val = 0
@@ -1152,8 +1011,7 @@ class kg_purchase_order_line(osv.osv):
 	
 	def onchange_qty(self, cr, uid, ids,product_qty,pending_qty,pi_line_id,pi_qty,uom_conversation_factor,length,breadth,price_type,product_id):
 		logger.info('[KG OpenERP] Class: kg_purchase_order_line, Method: onchange_qty called...')
-		#if pi_line_id == False:
-			#raise osv.except_osv(_('PO From PI Only!'),_("You must select a PO lines From PI !") )
+		
 		# Need to do block flow
 		value = {'pending_qty': '','quantity': 0}
 		quantity = 0
@@ -1224,17 +1082,12 @@ class kg_purchase_order_line(osv.osv):
 			self.write(cr,uid,ids,{'line_state':'cancel'})
 		return True
 
-			
 	def unlink(self, cr, uid, ids, context=None):
-		print "Purchase order line unlink method calling--->>", ids
 		if context is None:
 			context = {}
 		for rec in self.browse(cr, uid, ids, context=context):
-			print "rec ===================>>>>>", rec, "context====>", context
 			parent_rec = rec.order_id
-			print "parent_rec.state", parent_rec.state
 			if parent_rec.state not in ['draft','confirmed']:
-				print "iffffffffffff"
 				raise osv.except_osv(_('Invalid Action!'), _('Cannot delete a purchase order line which is in state \'%s\'.') %(parent_rec.state,))
 			else:
 				if parent_rec.po_type == 'direct' or parent_rec.po_type == 'fromquote':
@@ -1249,24 +1102,18 @@ class kg_purchase_order_line(osv.osv):
 					return super(kg_purchase_order_line, self).unlink(cr, uid, ids, context=context)
 				
 	def get_old_details(self,cr,uid,ids,context=None):
-		print "ids..................",ids
 		rec = self.browse(cr, uid, ids[0])
 		last_obj = self.pool.get('kg.po.line')
-		print "rec............................", rec.product_id.id		
 		sql = """ select id,price_unit,order_id,kg_discount,kg_discount_per,tax_structure_id from purchase_order_line where product_id=%s and order_id != %s order by id desc limit 5 """%(rec.product_id.id,rec.order_id.id)
 		cr.execute(sql)
 		data = cr.dictfetchall()
-		print "data.......................", data
 		
 		last_ids = last_obj.search(cr, uid, [('line_id','=',rec.id)])
-		print "last_ids............>>>",last_ids
 		if last_ids:
 			for i in last_ids:
 				last_obj.unlink(cr, uid, i, context=context)
 		for item in data:
-			print "item....................", item
 			po_rec = self.pool.get('purchase.order').browse(cr,uid,item['order_id'])
-			print "po_rec......................", po_rec
 			vals = {
 			
 				'line_id':item['id'],
@@ -1280,7 +1127,6 @@ class kg_purchase_order_line(osv.osv):
 				'po_no': po_rec.id,
 			
 			}
-			print "price..........",vals
 			po_entry = self.write(cr,uid,rec.id,{'po_order':[(0,0,vals)]})
 	
 		return data
@@ -1306,7 +1152,6 @@ class kg_po_line(osv.osv):
 	}
 	
 kg_po_line()
-
 
 class kg_purchase_order_expense_track(osv.osv):
 
@@ -1346,7 +1191,7 @@ class ch_purchase_wo(osv.osv):
 			'w_order_id': fields.many2one('kg.work.order','WO',required=True, domain="[('state','=','confirmed')]"),
 			'w_order_line_id': fields.many2one('ch.work.order.details','WO',required=True),
 			'qty': fields.float('Qty'),
-	
+			
 	}
 	
 	def onchange_wo(self, cr, uid, ids,w_order_line_id):
