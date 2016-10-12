@@ -761,7 +761,7 @@ class ch_work_order_details(osv.osv):
 						select id from kg_bom 
 						where id = (select partlist_id from ch_columnpipe_assembly 
 						where pipe_type = %s and star = (select star from ch_power_series 
-						where %s BETWEEN min AND max and %s < max
+						where %s BETWEEN min AND max and %s <= max
 						
 						and header_id = ( select vo_id from ch_vo_mapping
 						where rpm = %s and header_id = %s)
@@ -800,7 +800,7 @@ class ch_work_order_details(osv.osv):
 						select id from kg_bom 
 						where id = (select partlist_id from ch_deliverypipe_assembly 
 						where size = %s and star = (select star from ch_power_series 
-						where %s BETWEEN min AND max and %s < max
+						where %s BETWEEN min AND max and %s <= max
 						
 						and header_id = ( select vo_id from ch_vo_mapping
 						where rpm = %s and header_id = %s)
@@ -839,7 +839,7 @@ class ch_work_order_details(osv.osv):
 						select id from kg_bom 
 						where id = (select partlist_id from ch_lubricant 
 						where type = %s and star = (select star from ch_power_series 
-						where %s BETWEEN min AND max and %s < max
+						where %s BETWEEN min AND max and %s <= max
 						
 						and header_id = ( select vo_id from ch_vo_mapping
 						where rpm = %s and header_id = %s)
@@ -978,7 +978,7 @@ class ch_work_order_details(osv.osv):
 								select id from kg_bom 
 								where id = (select partlist_id from ch_columnpipe_assembly 
 								where pipe_type = %s and star = (select star from ch_power_series 
-								where %s BETWEEN min AND max and %s < max
+								where %s BETWEEN min AND max and %s <= max
 								
 								and header_id = ( select vo_id from ch_vo_mapping
 								where rpm = %s and header_id = %s)
@@ -1004,7 +1004,7 @@ class ch_work_order_details(osv.osv):
 								select id from kg_bom 
 								where id = (select partlist_id from ch_deliverypipe_assembly 
 								where size = %s and star = (select star from ch_power_series 
-								where %s BETWEEN min AND max and %s < max
+								where %s BETWEEN min AND max and %s <= max
 								
 								and header_id = ( select vo_id from ch_vo_mapping
 								where rpm = %s and header_id = %s)
@@ -1030,7 +1030,7 @@ class ch_work_order_details(osv.osv):
 								select id from kg_bom 
 								where id = (select partlist_id from ch_lubricant 
 								where type = %s and star = (select star from ch_power_series 
-								where %s BETWEEN min AND max and %s < max
+								where %s BETWEEN min AND max and %s <= max
 								
 								and header_id = ( select vo_id from ch_vo_mapping
 								where rpm = %s and header_id = %s)
@@ -1094,7 +1094,7 @@ class ch_work_order_details(osv.osv):
 							### Getting No of Star Support from VO ###
 							
 							cr.execute(''' select (case when star = 'nil' then '0' else star end)::int as star from ch_power_series 
-								where %s BETWEEN min AND max and %s < max
+								where %s BETWEEN min AND max and %s = max
 								and header_id = ( select vo_id from ch_vo_mapping
 								where rpm = %s and header_id = %s) ''',[setting_height,setting_height,rpm,pump_model_id])
 							star_val = cr.fetchone()
@@ -1328,7 +1328,7 @@ class ch_work_order_details(osv.osv):
 								select id from kg_bom 
 								where id = (select partlist_id from ch_columnpipe_assembly 
 								where pipe_type = %s and star = (select star from ch_power_series 
-								where %s BETWEEN min AND max and %s < max
+								where %s BETWEEN min AND max and %s <= max
 								and header_id = ( select vo_id from ch_vo_mapping
 								where rpm = %s and header_id = %s)
 								
@@ -1351,7 +1351,7 @@ class ch_work_order_details(osv.osv):
 								select id from kg_bom 
 								where id = (select partlist_id from ch_deliverypipe_assembly 
 								where size = %s and star = (select star from ch_power_series 
-								where %s BETWEEN min AND max and %s < max
+								where %s BETWEEN min AND max and %s <= max
 								
 								and header_id = ( select vo_id from ch_vo_mapping
 								where rpm = %s and header_id = %s)
@@ -1375,7 +1375,7 @@ class ch_work_order_details(osv.osv):
 								select id from kg_bom 
 								where id = (select partlist_id from ch_lubricant 
 								where type = %s and star = (select star from ch_power_series 
-								where %s BETWEEN min AND max and %s < max
+								where %s BETWEEN min AND max and %s <= max
 								
 								and header_id = ( select vo_id from ch_vo_mapping
 								where rpm = %s and header_id = %s)
