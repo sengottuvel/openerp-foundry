@@ -12,7 +12,8 @@
 					<header>
 						<button name="entry_confirm" type="object" string="Process Offer" states="draft" class="oe_highlight"/>
 						<button name="entry_call_back" type="object" string="Call Back" states="draft" class="oe_highlight"/>
-						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>	
+						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
+						<button name="entry_revision" type="object" string="Create Revision" class="oe_highlight"/>
 						<!--<field name="state" widget="statusbar" 
 						statusbar_visible="draft,moved_to_offer,call,quote"
 						statusbar_colors='{
@@ -49,6 +50,7 @@
 								<field name="drive" invisible="1"/>
 								<field name="transmision" invisible="1"/>
 								<field name="acces" invisible="1"/>
+								<field name="revision" invisible="1"/>
 							</group>	
 						</group>
 <!--
@@ -174,6 +176,7 @@
 					<field name="customer_id"/>	
 					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>							
 					<field name="state"/>
+					<field name="revision" invisible="1"/>
 				</tree>
 			</field>
 		</record>
@@ -544,11 +547,10 @@
 									<field name="line_ids_b" nolabel="1">
 										<tree string="BOT Item" editable="top" create="false" delete="false">
 											<field name="is_applicable"/>
-											<field name="product_id" readonly="1"/>
-											<field name="brand_id"/>
-											<field name="uom_id" readonly="1"/>
-											<field name="uom_conversation_factor" readonly="1"/>
+											<field name="ms_id" readonly="1"/>
+											<field name="name" readonly="1"/>
 											<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}"/>
+											<field name="csd_no" readonly="1"/>
 											<field name="qty" required="1"/>
 											<field name="prime_cost" readonly="1"/>
 											<field name="remarks"/>

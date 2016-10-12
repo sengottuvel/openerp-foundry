@@ -513,26 +513,34 @@ class ch_kg_accessories_master(osv.osv):
 	
 	_columns = {
 		
-		'header_id':fields.many2one('kg.accessories.master', 'Accessories No', required=True, ondelete='cascade'),  
-		'product_id': fields.many2one('product.product','Item Name', required=True,domain="[('state','not in',('reject','cancel'))]"),
-		'brand_id': fields.many2one('kg.brand.master','Brand', required=True,domain="[('state','not in',('reject','cancel'))]"), 		
-		'moc_id': fields.many2one('kg.moc.master','MOC', domain="[('state','not in',('reject','cancel'))]"), 		
-		'uom_id': fields.many2one('product.uom','UOM'),
-		'uom_conversation_factor': fields.selection([('one_dimension','One Dimension'),('two_dimension','Two Dimension')],'UOM Conversation Factor'),
-		'length': fields.float('Length'),
-		'breadth': fields.float('Breadth'),
-		'qty': fields.float('Qty'),
-		'weight': fields.float('Weight' ,digits=(16,5)),
-		'temp_qty':fields.float('Qty',required=True),
+		#~ 'header_id':fields.many2one('kg.accessories.master', 'Accessories No', required=True, ondelete='cascade'),  
+		#~ 'product_id': fields.many2one('product.product','Item Name', required=True,domain="[('state','not in',('reject','cancel'))]"),
+		#~ 'brand_id': fields.many2one('kg.brand.master','Brand', required=True,domain="[('state','not in',('reject','cancel'))]"), 		
+		#~ 'moc_id': fields.many2one('kg.moc.master','MOC', domain="[('state','not in',('reject','cancel'))]"), 		
+		#~ 'uom_id': fields.many2one('product.uom','UOM'),
+		#~ 'uom_conversation_factor': fields.selection([('one_dimension','One Dimension'),('two_dimension','Two Dimension')],'UOM Conversation Factor'),
+		#~ 'length': fields.float('Length'),
+		#~ 'breadth': fields.float('Breadth'),
+		#~ 'qty': fields.float('Qty'),
+		#~ 'weight': fields.float('Weight' ,digits=(16,5)),
+		#~ 'temp_qty':fields.float('Qty',required=True),
+		#~ 'remark': fields.text('Remarks'),
+		#~ 'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
+		
+		'header_id':fields.many2one('kg.accessories.master', 'Accessories No', required=True, ondelete='cascade'),
+		'position_id': fields.many2one('kg.position.number','Position No'),
+		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', domain=[('type','=','bot'),('state','not in',('reject','cancel'))], ondelete='cascade',required=True),
+		'item_name': fields.related('ms_id','name', type='char', size=128, string='Item Name', store=True, readonly=True),
+		'code':fields.char('Item Code', size=128),	  
+		'qty': fields.integer('Qty', required=True),
 		'remark': fields.text('Remarks'),
-		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
+		'csd_no': fields.char('CSD No.'),
 		
-		
-	}
+		}
 	
 	_defaults = {
-				'entry_mode': 'manual',
-				'length': 1.00,
+				#~ 'entry_mode': 'manual',
+				#~ 'length': 1.00,
 				
 				}
 				
@@ -615,10 +623,10 @@ class ch_kg_accessories_master(osv.osv):
 		
 	_constraints = [		
 			  
-		(_check_one_values, 'Check the zero values not allowed..!!',['Qty or Length']),	
-		(_check_two_values, 'Check the zero values not allowed..!!',['Breadth or Length or Qty']),
-		(_check_values, 'Please Check the same Raw Material not allowed..!!',['Raw Material']),	
-		(_check_uom_values, 'UOM Mismatching Error, You choosed wrong UOM !!!',['UOM']),	
+		#~ (_check_one_values, 'Check the zero values not allowed..!!',['Qty or Length']),	
+		#~ (_check_two_values, 'Check the zero values not allowed..!!',['Breadth or Length or Qty']),
+		#~ (_check_values, 'Please Check the same Raw Material not allowed..!!',['Raw Material']),	
+		#~ (_check_uom_values, 'UOM Mismatching Error, You choosed wrong UOM !!!',['UOM']),	
 		
 	   ]
 			

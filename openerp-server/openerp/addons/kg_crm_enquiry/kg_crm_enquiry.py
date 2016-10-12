@@ -68,6 +68,8 @@ class kg_crm_enquiry(osv.osv):
 		'requirements': fields.text('Requirements'),
 		'source': fields.selection([('service','Service'),('market','Marketing')],'Source'),
 		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
+		'revision': fields.integer('Revision'),
+		'wo_flag': fields.boolean('WO Flag'),
 		
 		########## Karthikeyan Added Start here ################
 		'enquiry_no': fields.char('Customer Enquiry No.', size=128,select=True),
@@ -104,6 +106,8 @@ class kg_crm_enquiry(osv.osv):
 		'call_type': 'new_enquiry',
 		'active': True,
 		'entry_mode': 'manual',
+		'revision': 0,
+		'wo_flag': False,
 		#~ 'division_id':_get_default_division,
 		#~ 'due_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		
@@ -277,7 +281,44 @@ class kg_crm_enquiry(osv.osv):
 						_('Delivery Date should not be less than current date!!'))
 		return True
 	  """
-
+	
+	def entry_revision(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
+		revision = 0
+		if entry.wo_flag == False:
+			del_sql = """ delete from kg_crm_offer where enquiry_id = %s """ %(entry.id)
+			cr.execute(del_sql)
+			revision = entry.revision + 1
+			print"revisionrevisionrevision",revision
+			vals = {
+					'state' : 'draft',
+					'revision' : revision,
+					}
+			enquiry_id = self.copy(cr, uid, entry.id,vals, context) 
+			print"enquiry_idenquiry_id",enquiry_id
+			#~ offer_id = self.create(cr,uid,{'name': entry.name,
+								#~ 'enquiry_no': entry.enquiry_no,
+								#~ 'offer_date': entry.offer_date,
+								#~ 'enquiry_date': entry.enquiry_date,
+								#~ 'customer_id': entry.customer_id.id,
+								#~ 'segment': entry.segment,
+								#~ 'ref_mode': entry.ref_mode,
+								#~ 'location': entry.location,
+								#~ 'market_division': entry.market_division,
+								#~ 'state': 'draft',
+								#~ 'revision': revision,
+								#~ 'note': entry.note,
+								#~ 'purpose': entry.purpose,
+								#~ 'wo_flag': entry.wo_flag,
+								#~ 'offer_net_amount': entry.offer_net_amount,
+								#~ })
+					
+			#~ self.write(cr, uid, ids, {
+									  #~ 'state': 'revised',
+									#~ })
+								
+		return True
+		
 	def list_details(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		obj = self.search(cr,uid,[('id','!=',rec.id),('customer_id','=',rec.customer_id.id)])
@@ -313,32 +354,39 @@ class kg_crm_enquiry(osv.osv):
 		
 	def entry_confirm(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.call_type == 'service':		
-			off_no = ''	
-			qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.crm.enquiry')])
-			rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
-			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.enquiry_date))
-			off_no = cr.fetchone();
-		elif entry.call_type == 'new_enquiry':
-			if entry.market_division == 'cp':				
+		if not entry.name:
+			if entry.call_type == 'service':		
 				off_no = ''	
-				qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','crm.enquiry.cp')])
+				qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.crm.enquiry')])
 				rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
 				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.enquiry_date))
 				off_no = cr.fetchone();
-			elif entry.market_division == 'ip':				
-				off_no = ''	
-				qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','crm.enquiry.ip')])
-				rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
-				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.enquiry_date))
-				off_no = cr.fetchone();
+				off_no = off_no[0]
+			elif entry.call_type == 'new_enquiry':
+				if entry.market_division == 'cp':				
+					off_no = ''	
+					qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','crm.enquiry.cp')])
+					rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
+					cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.enquiry_date))
+					off_no = cr.fetchone();
+					off_no = off_no[0]
+				elif entry.market_division == 'ip':				
+					off_no = ''	
+					qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','crm.enquiry.ip')])
+					rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
+					cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.enquiry_date))
+					off_no = cr.fetchone();
+					off_no = off_no[0]
+				else:
+					pass
 			else:
 				pass
-		else:
-			pass
+		elif entry.name:
+			off_no = entry.name
+		
 		offer_id = self.pool.get('kg.crm.offer').create(cr,uid,{
 																'enquiry_id': entry.id,
-																'enquiry_no': off_no[0],
+																'enquiry_no': off_no,
 																'enquiry_date': entry.offer_date,
 																'customer_id': entry.customer_id.id,
 																'ref_mode': entry.ref_mode,
@@ -464,7 +512,7 @@ class kg_crm_enquiry(osv.osv):
 			
 		self.write(cr, uid, ids, {
 									#'name':self.pool.get('ir.sequence').get(cr, uid, 'kg.crm.enquiry'),
-									'name':off_no[0],
+									'name':off_no,
 									'state': 'moved_to_offer',
 									'confirm_user_id': uid, 
 									'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')
@@ -604,13 +652,17 @@ class kg_crm_enquiry(osv.osv):
 											qty = raw_line.weight
 									elif raw_line.product_id.uom_conversation_factor == 'two_dimension':
 										qty = raw_line.weight
-									if catg == 'non_acc':
-										self.pool.get('ch.kg.crm.machineshop.item').write(cr,uid,ms_line.id,{'prime_cost':design_rate * qty * ms_line.qty})
-									elif catg == 'acc':
-										self.pool.get('ch.crm.access.ms').write(cr,uid,ms_line.id,{'prime_cost': design_rate * qty * ms_line.qty})
+									#~ if catg == 'non_acc':
+										#~ self.pool.get('ch.kg.crm.machineshop.item').write(cr,uid,ms_line.id,{'prime_cost':design_rate * qty * ms_line.qty})
+									#~ elif catg == 'acc':
+										#~ self.pool.get('ch.crm.access.ms').write(cr,uid,ms_line.id,{'prime_cost': design_rate * qty * ms_line.qty})
 									price = design_rate * qty
 								tot_price += price
 				ms_price += tot_price * ms_line.qty
+				if catg == 'non_acc':
+					self.pool.get('ch.kg.crm.machineshop.item').write(cr,uid,ms_line.id,{'prime_cost':design_rate * qty * ms_line.qty})
+				elif catg == 'acc':
+					self.pool.get('ch.crm.access.ms').write(cr,uid,ms_line.id,{'prime_cost': design_rate * qty * ms_line.qty})
 			print"ms_pricems_price",ms_price
 		
 		# BOT Item 
@@ -620,72 +672,79 @@ class kg_crm_enquiry(osv.osv):
 			if bot_line.is_applicable == True:
 				tot_price = 0.00
 				if catg == 'non_acc':
-					ms_obj = self.pool.get('kg.machine.shop').search(cr,uid,[('id','=',bot_line.ms_id.id)])
-					if ms_obj:
-						ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,ms_obj[0])
-						if not bot_line.ms_id:
-							if item.purpose_categ == 'pump':
-								item_moc_const_id = item.moc_const_id.code
-							elif item.purpose_categ == 'spare':
-								item_moc_const_id = item.spare_moc_const_id.code
-							ms_line_obj = self.pool.get('ch.machine.mocwise').search(cr,uid,[('code','=',item_moc_const_id),('header_id','=',ms_rec.id)])
-							if ms_line_obj:
-								ms_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,ms_line_obj[0])
-								moc_id = ms_line_rec.moc_id.id
-						else:
-							moc_id = bot_line.moc_id.id
-						if moc_id:
-							if ms_rec.line_ids:
-								for raw_line in ms_rec.line_ids:
-									brandmoc_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',raw_line.product_id.id),('state','=','approved')])
-									if brandmoc_obj:
-										brandmoc_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,brandmoc_obj[0])
-										brandmoc_line_sql = """ select rate from ch_brandmoc_rate_details where moc_id =  %s and header_id = %s order by rate desc limit 1"""%(moc_id,brandmoc_rec.id)
-										cr.execute(brandmoc_line_sql)		
-										brandmoc_line_data = cr.dictfetchall()
-										if brandmoc_line_data:
-											design_rate = brandmoc_line_data[0]['rate']
-											if raw_line.product_id.uom_conversation_factor == 'one_dimension':
-												if raw_line.uom.id == brandmoc_rec.uom_id.id:
-													qty = raw_line.qty
-												elif raw_line.uom.id != brandmoc_rec.uom_id.id:
-													qty = raw_line.weight
-											elif raw_line.product_id.uom_conversation_factor == 'two_dimension':
-												qty = raw_line.weight
-											if catg == 'non_acc':
-												self.pool.get('ch.kg.crm.bot').write(cr,uid,bot_line.id,{'prime_cost':design_rate * qty * bot_line.qty})		
-											elif catg == 'acc':
-												self.pool.get('ch.crm.access.bot').write(cr,uid,bot_line.id,{'prime_cost': design_rate * qty * bot_line.qty})
-											price = design_rate * qty
-										tot_price += price
-						bot_price += tot_price * bot_line.qty
-						print"bot_pricebot_price",bot_price
-						
+					ms_id = bot_line.ms_id.id
 				elif catg == 'acc':
-					
-					for raw_line in item.line_ids_b:
-						moc_id = item.moc_id.id
-						brandmoc_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',raw_line.product_id.id),('state','=','approved')])
-						if brandmoc_obj:
-							brandmoc_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,brandmoc_obj[0])
-							brandmoc_line_sql = """ select rate from ch_brandmoc_rate_details where moc_id =  %s and header_id = %s order by rate desc limit 1"""%(moc_id,brandmoc_rec.id)
-							cr.execute(brandmoc_line_sql)		
-							brandmoc_line_data = cr.dictfetchall()
-							if brandmoc_line_data:
-								design_rate = brandmoc_line_data[0]['rate']
-								if raw_line.product_id.uom_conversation_factor == 'one_dimension':
-									if raw_line.uom_id.id == brandmoc_rec.uom_id.id:
-										qty = raw_line.qty
-									elif raw_line.uom_id.id != brandmoc_rec.uom_id.id:
-										qty = raw_line.weight
-								elif raw_line.product_id.uom_conversation_factor == 'two_dimension':
-									qty = raw_line.weight
-								if catg == 'acc':
-									self.pool.get('ch.crm.access.bot').write(cr,uid,bot_line.id,{'prime_cost': design_rate * qty})
-								price = design_rate * qty
-							tot_price += price
-					bot_price += tot_price 
+					ms_id = bot_line.ms_id.id
+				ms_obj = self.pool.get('kg.machine.shop').search(cr,uid,[('id','=',bot_line.ms_id.id)])
+				if ms_obj:
+					ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,ms_obj[0])
+					if not bot_line.ms_id:
+						if item.purpose_categ == 'pump':
+							item_moc_const_id = item.moc_const_id.code
+						elif item.purpose_categ == 'spare':
+							item_moc_const_id = item.spare_moc_const_id.code
+						ms_line_obj = self.pool.get('ch.machine.mocwise').search(cr,uid,[('code','=',item_moc_const_id),('header_id','=',ms_rec.id)])
+						if ms_line_obj:
+							ms_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,ms_line_obj[0])
+							moc_id = ms_line_rec.moc_id.id
+					else:
+						moc_id = bot_line.moc_id.id
+					if moc_id:
+						if ms_rec.line_ids:
+							for raw_line in ms_rec.line_ids:
+								brandmoc_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',raw_line.product_id.id),('state','=','approved')])
+								if brandmoc_obj:
+									brandmoc_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,brandmoc_obj[0])
+									brandmoc_line_sql = """ select rate from ch_brandmoc_rate_details where moc_id =  %s and header_id = %s order by rate desc limit 1"""%(moc_id,brandmoc_rec.id)
+									cr.execute(brandmoc_line_sql)		
+									brandmoc_line_data = cr.dictfetchall()
+									if brandmoc_line_data:
+										design_rate = brandmoc_line_data[0]['rate']
+										if raw_line.product_id.uom_conversation_factor == 'one_dimension':
+											if raw_line.uom.id == brandmoc_rec.uom_id.id:
+												qty = raw_line.qty
+											elif raw_line.uom.id != brandmoc_rec.uom_id.id:
+												qty = raw_line.weight
+										elif raw_line.product_id.uom_conversation_factor == 'two_dimension':
+											qty = raw_line.weight
+										#~ if catg == 'non_acc':
+											#~ self.pool.get('ch.kg.crm.bot').write(cr,uid,bot_line.id,{'prime_cost':design_rate * qty * bot_line.qty})		
+										#~ elif catg == 'acc':
+											#~ self.pool.get('ch.crm.access.bot').write(cr,uid,bot_line.id,{'prime_cost': design_rate * qty * bot_line.qty})
+										price = design_rate * qty
+									tot_price += price
+					bot_price += tot_price * bot_line.qty
+					if catg == 'non_acc':
+						self.pool.get('ch.kg.crm.bot').write(cr,uid,bot_line.id,{'prime_cost': bot_price})		
+					elif catg == 'acc':
+						self.pool.get('ch.crm.access.bot').write(cr,uid,bot_line.id,{'prime_cost': bot_price})
 					print"bot_pricebot_price",bot_price
+						
+				#~ elif catg == 'acc':
+					#~ 
+					#~ for raw_line in item.line_ids_b:
+						#~ moc_id = item.moc_id.id
+						#~ brandmoc_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',raw_line.product_id.id),('state','=','approved')])
+						#~ if brandmoc_obj:
+							#~ brandmoc_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,brandmoc_obj[0])
+							#~ brandmoc_line_sql = """ select rate from ch_brandmoc_rate_details where moc_id =  %s and header_id = %s order by rate desc limit 1"""%(moc_id,brandmoc_rec.id)
+							#~ cr.execute(brandmoc_line_sql)		
+							#~ brandmoc_line_data = cr.dictfetchall()
+							#~ if brandmoc_line_data:
+								#~ design_rate = brandmoc_line_data[0]['rate']
+								#~ if raw_line.product_id.uom_conversation_factor == 'one_dimension':
+									#~ if raw_line.uom_id.id == brandmoc_rec.uom_id.id:
+										#~ qty = raw_line.qty
+									#~ elif raw_line.uom_id.id != brandmoc_rec.uom_id.id:
+										#~ qty = raw_line.weight
+								#~ elif raw_line.product_id.uom_conversation_factor == 'two_dimension':
+									#~ qty = raw_line.weight
+								#~ if catg == 'acc':
+									#~ self.pool.get('ch.crm.access.bot').write(cr,uid,bot_line.id,{'prime_cost': design_rate * qty})
+								#~ price = design_rate * qty
+							#~ tot_price += price
+					#~ bot_price += tot_price 
+					#~ print"bot_pricebot_price",bot_price
 		print"prime_cost",prime_cost
 		print"ms_price",ms_price
 		print"bot_price",bot_price
@@ -1888,15 +1947,18 @@ class ch_kg_crm_accessories(osv.osv):
 			if data_rec.line_ids:
 				for item in data_rec.line_ids:	
 					bot_vals.append({
-									'product_id': item.product_id.id,
-									'brand_id': item.brand_id.id,
-									'uom_id': item.uom_id.id,
-									'uom_conversation_factor': item.uom_conversation_factor,
+									#~ 'product_id': item.product_id.id,
+									#~ 'brand_id': item.brand_id.id,
+									#~ 'uom_id': item.uom_id.id,
+									#~ 'uom_conversation_factor': item.uom_conversation_factor,
+									'name': item.item_name,
+									'position_id': item.position_id.id,							
+									'ms_id': item.ms_id.id,
 									'moc_id': moc_id,
 									'qty': item.qty,
 									'load_bom': True,
 									'is_applicable': True,
-									#~ 'csd_no': item.csd_no,
+									'csd_no': item.csd_no,
 									'remarks': item.remark,
 									})
 					print"bot_valsbot_vals",bot_vals	
@@ -1980,10 +2042,14 @@ class ch_crm_access_bot(osv.osv):
 		### machineshop Item Details ####
 		'header_id':fields.many2one('ch.kg.crm.accessories', 'Access Id', ondelete='cascade'),
 		'enquiry_id':fields.many2one('kg.crm.enquiry', 'Enquiry'),
-		'product_id':fields.many2one('product.product', 'Item Name',domain="[('state','not in',('reject','cancel'))]"),
-		'brand_id': fields.many2one('kg.brand.master','Brand', domain="[('state','not in',('reject','cancel'))]"), 
-		'uom_id': fields.many2one('product.uom','UOM'),		
-		'uom_conversation_factor': fields.selection([('one_dimension','One Dimension'),('two_dimension','Two Dimension')],'UOM Conversation Factor'),
+		#~ 'product_id':fields.many2one('product.product', 'Item Name',domain="[('state','not in',('reject','cancel'))]"),
+		#~ 'brand_id': fields.many2one('kg.brand.master','Brand', domain="[('state','not in',('reject','cancel'))]"), 
+		#~ 'uom_id': fields.many2one('product.uom','UOM'),		
+		#~ 'uom_conversation_factor': fields.selection([('one_dimension','One Dimension'),('two_dimension','Two Dimension')],'UOM Conversation Factor'),
+			'position_id': fields.many2one('kg.position.number','Position No'),
+		'csd_no': fields.char('CSD No.'),
+		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', domain=[('type','=','ms')], ondelete='cascade',required=True),
+		'name': fields.related('ms_id','name', type='char',size=128,string='Item Name', store=True),
 		'qty': fields.integer('Qty', required=True),
 		'flag_applicable': fields.boolean('Is Applicable'),
 		'remarks':fields.text('Remarks'),   
