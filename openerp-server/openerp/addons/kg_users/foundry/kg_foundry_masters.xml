@@ -706,7 +706,7 @@
 			<field name="model_id" ref="kg_vo_master.model_kg_vo_master"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">VO</field>
-			<field eval="0" name="perm_unlink"/>
+			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
@@ -720,7 +720,7 @@
 			<field name="model_id" ref="kg_vo_master.model_ch_power_series"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">VO Power Series</field>
-			<field eval="0" name="perm_unlink"/>
+			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
@@ -734,7 +734,7 @@
 			<field name="model_id" ref="kg_vo_master.model_ch_bed_assembly"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">VO Bed</field>
-			<field eval="0" name="perm_unlink"/>
+			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
@@ -748,7 +748,7 @@
 			<field name="model_id" ref="kg_vo_master.model_ch_motor_assembly"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">VO Motor</field>
-			<field eval="0" name="perm_unlink"/>
+			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
@@ -762,7 +762,7 @@
 			<field name="model_id" ref="kg_vo_master.model_ch_columnpipe_assembly"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">VO ColumnPipe</field>
-			<field eval="0" name="perm_unlink"/>
+			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
@@ -776,7 +776,7 @@
 			<field name="model_id" ref="kg_vo_master.model_ch_deliverypipe_assembly"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">VO DeliveryPipe</field>
-			<field eval="0" name="perm_unlink"/>
+			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
@@ -790,7 +790,7 @@
 			<field name="model_id" ref="kg_vo_master.model_ch_casing_assembly"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">VO Casing</field>
-			<field eval="0" name="perm_unlink"/>
+			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
@@ -804,7 +804,7 @@
 			<field name="model_id" ref="kg_vo_master.model_ch_lubricant"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">VO Lubricant</field>
-			<field eval="0" name="perm_unlink"/>
+			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
@@ -818,7 +818,7 @@
 			<field name="model_id" ref="kg_vo_master.model_ch_vo_mapping"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">VO Mapping</field>
-			<field eval="0" name="perm_unlink"/>
+			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
@@ -847,7 +847,7 @@
 			<field name="model_id" ref="kg_pumpmodel_master.model_ch_alpha_value"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">Alpha Value</field>
-			<field eval="0" name="perm_unlink"/>
+			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
@@ -861,7 +861,7 @@
 			<field name="model_id" ref="kg_pumpmodel_master.model_ch_delivery_pipe"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">Delivery Pipe</field>
-			<field eval="0" name="perm_unlink"/>
+			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
