@@ -199,37 +199,38 @@
 				<form string="Subcontract WO" version="7.0">
 					<header>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="confirm_dc" type="object" string="Confirm &amp; DC" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="approve_dc" type="object" string="Approve &amp; DC" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
 					<sheet>		
 						<group>
 							<group>
 								<field name="name"/>
-								<field name="contractor_id" on_change="onchange_contractor(contractor_id)" required="1"  attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="contractor_id" on_change="onchange_contractor(contractor_id)" required="1"  attrs="{'readonly': [('state','not in',['draft'])]}"/>
 								<field name="phone" readonly="1"/>
 								<field name="wo_value" readonly="1"/>								
 							</group>											
 							<group>
-								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 								<field name="contact_person" readonly="1"/>
-								<field name="billing_type" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
-								<field name="delivery_date" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="billing_type" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+								<field name="delivery_date" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 								<field name="flag_order" invisible="1"/>
+								<field name="flag_spl_app" invisible="1"/>
+								<field name="flag_app" invisible="1"/>
 								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
 							</group>					
 						</group>
 						<notebook>
 							<page string="Work Order Details" attrs="{'invisible': [('flag_order','!=',True)]}">
-								<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
-									<tree string = "Work Order Items" editable="bottom">
+								<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}" >
+									<tree string = "Work Order Items" >
 										<field name="order_no" readonly="1"/>
 										<field name="item_code" readonly="1"/>
 										<field name="item_name" readonly="1"/>
 										<field name="position_id" readonly="1"/>
 										<field name="moc_id" readonly="1"/>
-										<field name="qty" required="1" on_change="onchange_sc_rate(operation_id,position_id,qty,rate)"/>
-										<field name="operation_id" on_change="onchange_sc_rate(operation_id,position_id,qty,rate)" required="1" widget="many2many_tags"/>
-										<field name="rate" readonly="1" on_change="onchange_sc_rate(operation_id,position_id,qty,rate)"/>
+										<field name="qty" required="1"/>										
 										<field name="amount" required="1" readonly="1"/>
 										<field name="remarks" widget="char"/>
 										<field name="dc_flag" invisible="1"/>
@@ -237,7 +238,7 @@
 								</field>
 							</page>
 							<page string="Select Items">
-								<field name="sc_line_ids" attrs="{'readonly': [('state','in',['confirmed'])]}">
+								<field name="sc_line_ids" attrs="{'readonly': [('state','not in',['draft'])]}">
 									<tree string="SC Items" create="false">
 										<field name="order_no"/>
 										<field name="order_delivery_date"/>
@@ -249,7 +250,7 @@
 										<field name="actual_qty"/>
 									</tree>
 								</field>
-								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
+								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','not in',['draft'])]}"/>
 							</page>
 							
 							<page string="Entry Info">
@@ -303,8 +304,32 @@
 		
 	<!-- Tree View End -->
 	
+	<!-- WO SPL Tree View Start -->
+		
+		<record id="t_tree_v_sc_wo_spl" model="ir.ui.view">
+			<field name="name">Subcontract WO Tree</field>
+			<field name="model">kg.subcontract.wo</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree create="false" colors="blue:state == 'draft';black:state == 'confirmed'
+						;black:state == 'confirmed_dc';gray:state == 'cancel'" 
+						toolbar="True" string="Subcontract WO Tree">					
+					<field name="name"/>
+					<field name="entry_date"/>
+					<field name="contractor_id"/>
+					<field name="billing_type"/>
+					<field name="wo_value"/>
+					<field name="delivery_date"/>
+					<field name="state"/>
+					
+				</tree>
+			</field>
+		</record>
+		
+	<!-- WO SPL Tree View End -->
 	
-	<!-- WO Line Tree View Start -->
+	
+	<!-- Subcontract WO Line Tree View Start -->
 		
 		<record id="t_tree_v_sc_wo_line" model="ir.ui.view">
 			<field name="name">Subcontract WO Line Tree</field>
@@ -327,7 +352,56 @@
 			</field>
 		</record>
 		
-	<!-- Tree View End -->
+	<!-- Subcontract WO Line Tree View End -->
+	
+	
+	
+	<!-- Subcontract WO Line Form View Start -->
+
+		<record id="t_form_v_sc_wo_ch_line" model="ir.ui.view">
+			<field name="name">Subcontract WO Line Form</field>
+			<field name="model">ch.subcontract.wo.line</field>
+			<field name="arch" type="xml">
+				<form string="Subcontract WO Line" version="7.0">				
+						
+						<group>
+							<group>
+								<field name="order_no"/>
+								<field name="order_priority"/>
+								<field name="item_code"/>
+								<field name="moc_id"/>
+								<field name="qty" required="1"/>
+								<field name="remarks"/>
+								
+																
+							</group>											
+							<group>
+								<field name="position_id"/>
+								<field name="pump_model_id"/>
+								<field name="item_name"/>
+								<field name="amount" readonly="1"/>
+							</group>					
+						</group>
+						<notebook>						
+							<page string="Work Order Operation Details" >
+								<field colspan="4" name="line_ids" nolabel="1" context="{'position_id':position_id,'moc_id':moc_id}">
+									<tree string = "Work Order Operation Items" editable="bottom">
+										<field name="operation_id" on_change="onchange_operation_rate(operation_id,position_id,moc_id)"/>
+										<field name="op_rate"/>										
+										<field name="position_id" invisible="1"/>										
+										<field name="moc_id" invisible="1"/>										
+										<field name="remarks" widget="char"/>										
+									</tree>
+								</field>
+							</page>
+							
+						</notebook>
+					
+				</form>
+			</field>
+		</record>
+		
+	<!-- Subcontract WO Line Form View End -->
 	
 	<!-- Search View Start -->
 
@@ -369,6 +443,7 @@
 			<field name="view_type">form</field>
 			<field name="context">{}</field>
 			<field name="search_view_id" ref="t_search_v_sc_wo"/>
+			<field name="domain">[('state','in',('draft','confirmed','approved','approved_dc','cancel')),('flag_app','=',False)]</field>
 		</record>
 		
 		 <record model="ir.actions.act_window.view" id="tma_sc_wo_tree_view">
@@ -382,6 +457,34 @@
             <field name="view_mode">form</field>
             <field name="view_id" ref="t_form_v_sc_wo"/>
             <field name="act_window_id" ref="tma_sc_wo"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Menu Action Start -->
+		
+		
+		<record id="tma_sc_wo_spl" model="ir.actions.act_window">
+			<field name="name">Special Approval WO</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.subcontract.wo</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="search_view_id" ref="t_search_v_sc_wo"/>
+			<field name="domain">[('state','=','confirmed'),('flag_app','=',True)]</field>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_sc_wo_tree_view_spl">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_sc_wo_spl"/>
+            <field name="act_window_id" ref="tma_sc_wo_spl"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_sc_wo_form_view_spl">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_sc_wo"/>
+            <field name="act_window_id" ref="tma_sc_wo_spl"/>
         </record>
 		
 	<!-- Menu Action End-->
@@ -459,7 +562,7 @@
 										<field name="position_id" readonly="1"/>
 										<field name="moc_id" readonly="1"/>
 										<field name="qty" required="1" attrs="{'readonly': [('entry_mode','=','from_wo')]}"/>	
-										<field name="operation_id" required="1" widget="many2many_tags"/>									
+										<field name="operation_id" readonly="1" widget="many2many_tags"/>									
 										<field name="each_weight" required="1" on_change="onchange_total_weight(each_weight,qty)"/>
 										<field name="totel_weight" readonly="1"/>
 										<field name="entry_mode" invisible="1"/>
@@ -708,8 +811,8 @@
 										<field name="position_id" readonly="1"/>
 										<field name="moc_id" readonly="1"/>
 										<field name="qty" required="1"/>
-										<field name="operation_id" required="1" widget="many2many_tags" readonly="1"/>											
-										<field name="com_operation_id" required="1" widget="many2many_tags"/>											
+										<field name="operation_id" widget="many2many_tags" readonly="1"/>											
+										<field name="com_operation_id" readonly="1" widget="many2many_tags"/>											
 										<field name="each_weight" readonly="1" />
 										<field name="com_weight" required="1" on_change="onchange_com_weight(com_weight,qty)"/>
 										<field name="totel_weight" readonly="1"/>										
@@ -924,8 +1027,8 @@
 						<group>
 							<group>
 								<field name="name"/>																			
-								<field name="contractor_id"/>																			
-								<field name="advance_amt" required="1"/>																											
+								<field name="contractor_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>																			
+								<field name="advance_amt" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>																											
 								
 							</group>											
 							<group>
@@ -936,7 +1039,7 @@
 						</group>
 						<notebook>		
 							<page string="WO Items">
-								<field name="wo_ids"/>
+								<field name="wo_ids" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							</page>
 							
 							<page string="Entry Info">
@@ -1074,14 +1177,7 @@
 	<!-- Sequence Number Setting Ends Here -->	
 	
 	
-	<!-- DC Code End Here -->
-	
-	
-	
-	
-		
-		
-		
+	<!-- DC Code End Here -->		
 		
 		
 		
@@ -1282,11 +1378,11 @@
 			
 		<menuitem action="tma_sc_list" id="tam_sc_list" parent="tpm_sc_process" sequence="1" />
 		<menuitem action="tma_sc_wo" id="tam_sc_wo" parent="tpm_sc_process" sequence="2" />
+		<menuitem action="tma_sc_wo_spl" id="tam_sc_wo_spl" parent="tpm_sc_process" sequence="2" />
 		<menuitem action="tma_sc_dc" id="tam_sc_dc" parent="tpm_sc_process" sequence="3" />
 		<menuitem action="tma_sc_inward" id="tam_sc_inward" parent="tpm_sc_process" sequence="4" />
 		<menuitem action="tma_sc_advance" id="tam_sc_advance" parent="tpm_sc_process" sequence="5" />	
 		<menuitem action="tma_sc_invoice" id="tam_sc_invoice" parent="tpm_sc_process" sequence="6" />	
-		
 		
 		
 		

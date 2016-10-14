@@ -70,7 +70,7 @@ class kg_subcontract_process(osv.osv):
 		'ms_type': fields.related('ms_plan_line_id','ms_type', type='selection', selection=[('foundry_item','Foundry Item'),('ms_item','MS Item')], string='Item Type', store=True, readonly=True),
 		'ms_op_id': fields.many2one('kg.ms.operations','MS Operation Id'),		
 		
-		'actual_qty': fields.integer('Actual Qty'),		
+		'actual_qty': fields.integer('Schedule Qty'),		
 		'total_qty': fields.integer('Total Qty'),
 		'sc_wo_qty': fields.integer('SC WO Qty'),
 		'sc_dc_qty': fields.integer('SC DC Qty'),
@@ -159,10 +159,12 @@ class kg_subcontract_wo(osv.osv):
 		'wo_value': fields.function(_get_order_value, string='WO Value', method=True, store=True, type='float'),
 		'billing_type': fields.selection([('applicable','Applicable'),('not_applicable','Not Applicable')],'Billing Type'),
 		'sc_line_ids': fields.many2many('kg.subcontract.process','m2m_sc_details' , 'order_id', 'sc_id', 'SC Items',
-			domain="[('wo_state','in',('pending','partial')),('wo_process_state','=','allow')]"),
+			domain="[('wo_state','in',('pending','partial')),('wo_process_state','=','allow'),('contractor_id','=',contractor_id)]"),
 		'line_ids': fields.one2many('ch.subcontract.wo.line','header_id','Subcontract WO Line'),   
-		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('confirmed_dc','Confirmed & DC'),('cancel','Cancelled')],'Status', readonly=True),
+		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('approved','Approved'),('approved_dc','Approved & DC'),('cancel','Cancelled')],'Status', readonly=True),
 		'flag_order': fields.boolean('Flag Order'),
+		'flag_spl_app': fields.boolean('Special Approvel'),
+		'flag_app': fields.boolean('Approvel'),
 		
 		
 		### Entry Info ####
@@ -188,6 +190,8 @@ class kg_subcontract_wo(osv.osv):
 		'billing_type': 'applicable',
 		'division_id':_get_default_division,
 		'flag_order': False,
+		'flag_spl_app': False,
+		'flag_app': False,
 		'state': 'draft'
 		
 	}
@@ -223,9 +227,69 @@ class kg_subcontract_wo(osv.osv):
 			
 		return True
 		
+		
 	def entry_confirm(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
+		if entry.line_ids:
+			for line in entry.line_ids:
+				print"line",line
+				print"line",line.line_ids
+				for op_line in line.line_ids:
+					moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,op_line.moc_id.id)
+					oper_id_rec = self.pool.get('ch.kg.position.number').browse(cr,uid,op_line.operation_id.id)
+					print"moc_rec.....",moc_rec.moc_cate_id.id
+					print"position_id.....",op_line.position_id.id
+					print"operation_id.....",oper_id_rec.operation_id.id					
+					cr.execute('''select line.rate from ch_kg_position_number as header
+									left join ch_moccategory_mapping line on line.header_id = header.id
+									where header.header_id = %s and header.operation_id = %s and line.moc_cate_id = %s
+											  ''',[op_line.position_id.id,oper_id_rec.operation_id.id,moc_rec.moc_cate_id.id])
+					operation_rate= cr.fetchone()							
+					if operation_rate is not None:
+						if operation_rate[0] < op_line.op_rate:
+							self.write(cr, uid, ids, {'flag_spl_app': True,'flag_app':True})							
+						else:
+							pass
+					else:
+						line = self.pool.get('ch.moccategory.mapping').create(cr,uid,{
+						   'header_id':oper_id_rec.id,
+						   'moc_cate_id':moc_rec.moc_cate_id.id,
+						   'rate':op_line.op_rate,						 
+						  })			
+		
+		
+		sc_wo_name = ''	
+		sc_wo_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.wo')])
+		rec = self.pool.get('ir.sequence').browse(cr,uid,sc_wo_seq_id[0])
+		cr.execute("""select generatesequenceno(%s,'%s','%s') """%(sc_wo_seq_id[0],rec.code,entry.entry_date))
+		sc_wo_name = cr.fetchone();
+							
+		self.write(cr, uid, ids, {'state': 'confirmed','name':sc_wo_name[0]})		
+							
+		return True
+		
+	def entry_approve(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
 		sc_obj = self.pool.get('kg.subcontract.process')
+		if entry.line_ids:
+			for line in entry.line_ids:				
+				for op_line in line.line_ids:
+					moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,op_line.moc_id.id)
+					oper_id_rec = self.pool.get('ch.kg.position.number').browse(cr,uid,op_line.operation_id.id)									
+					cr.execute('''select line.rate from ch_kg_position_number as header
+									left join ch_moccategory_mapping line on line.header_id = header.id
+									where header.header_id = %s and header.operation_id = %s and line.moc_cate_id = %s
+											  ''',[op_line.position_id.id,oper_id_rec.operation_id.id,moc_rec.moc_cate_id.id])
+					operation_rate= cr.fetchone()					
+					if operation_rate is not None:
+						if operation_rate[0] < op_line.op_rate:						
+							for oper in oper_id_rec.line_ids_a:
+								self.pool.get('ch.moccategory.mapping').write(cr,uid,oper.id,{'rate':op_line.op_rate})																					
+						else:
+							pass
+					else:
+						pass	
+					
 		if len(entry.line_ids) == 0:
 			raise osv.except_osv(_('Warning!'),
 							_('System not allow to without line items !!'))
@@ -235,9 +299,7 @@ class kg_subcontract_wo(osv.osv):
 			if line_item.qty < 0 and line_item.rate < 0:
 				raise osv.except_osv(_('Warning!'),
 							_('System not allow to save negative values !!'))
-			if line_item.rate == 0:
-				raise osv.except_osv(_('Warning!'),
-							_('System not allow to save Zero values in Rate !!'))							
+										
 			if line_item.qty == 0:
 				raise osv.except_osv(_('Warning!'),
 							_('System not allow to save Zero values !!'))				
@@ -256,35 +318,55 @@ class kg_subcontract_wo(osv.osv):
 			sc_obj.write(cr, uid, line_item.sc_id.id, 
 				{'pending_qty':line_item.sc_id.pending_qty - line_item.qty,'sc_wo_qty': line_item.sc_id.sc_wo_qty + line_item.qty,'wo_state': wo_state,'wo_process_state':wo_process_state,'state':'wo_inprocess'})
 							
-		sc_wo_name = ''	
-		sc_wo_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.wo')])
-		rec = self.pool.get('ir.sequence').browse(cr,uid,sc_wo_seq_id[0])
-		cr.execute("""select generatesequenceno(%s,'%s','%s') """%(sc_wo_seq_id[0],rec.code,entry.entry_date))
-		sc_wo_name = cr.fetchone();
+		
 							
-		self.write(cr, uid, ids, {'state': 'confirmed','name':sc_wo_name[0]})		
+		self.write(cr, uid, ids, {'state': 'approved','flag_app':False})		
 							
 		return True
 		
-	def confirm_dc(self,cr,uid,ids,context=None):
+	def approve_dc(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		sc_obj = self.pool.get('kg.subcontract.process')
 		dc_obj = self.pool.get('kg.subcontract.dc')
 		dc_obj_line = self.pool.get('ch.subcontract.dc.line')		
 		dc_id = dc_obj.create(cr,uid,{'transfer_type':'sub_contractor','contractor_id':entry.contractor_id.id,'flag_dc':True,'entry_mode': 'from_wo'})	
+		if entry.line_ids:
+			for line in entry.line_ids:				
+				for op_line in line.line_ids:
+					moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,op_line.moc_id.id)
+					oper_id_rec = self.pool.get('ch.kg.position.number').browse(cr,uid,op_line.operation_id.id)									
+					cr.execute('''select line.rate from ch_kg_position_number as header
+									left join ch_moccategory_mapping line on line.header_id = header.id
+									where header.header_id = %s and header.operation_id = %s and line.moc_cate_id = %s
+											  ''',[op_line.position_id.id,oper_id_rec.operation_id.id,moc_rec.moc_cate_id.id])
+					operation_rate= cr.fetchone()					
+					if operation_rate is not None:
+						if operation_rate[0] < op_line.op_rate:						
+							for oper in oper_id_rec.line_ids_a:
+								self.pool.get('ch.moccategory.mapping').write(cr,uid,oper.id,{'rate':op_line.op_rate})																					
+						else:
+							pass
+					else:
+						pass
 		if len(entry.line_ids) == 0:
 			raise osv.except_osv(_('Warning!'),
 							_('System not allow to without line items !!'))
-		for line_item in entry.line_ids:			
-			dc_line = dc_obj_line.create(cr,uid,{'header_id':dc_id,'sc_id':line_item.sc_id.id,'qty':line_item.qty,'sc_dc_qty':line_item.qty,'operation_id':[(6, 0, [x.id for x in line_item.operation_id])],		
-			'actual_qty':line_item.actual_qty,'sc_wo_line_id': line_item.id,'entry_mode': 'from_wo','pending_qty':line_item.qty})			
+		for line_item in entry.line_ids:
+			print"line_itemline_itemline_item",line_item.line_ids		
+					
+			dc_line = dc_obj_line.create(cr,uid,{'header_id':dc_id,'sc_id':line_item.sc_id.id,'qty':line_item.qty,'sc_dc_qty':line_item.qty,		
+			'actual_qty':line_item.actual_qty,'sc_wo_line_id': line_item.id,'entry_mode': 'from_wo','pending_qty':line_item.qty})		
+			for line in line_item.line_ids:	
+				print"line.operation_id.id",line.operation_id.id
+				print"dc_line.id",dc_line
+				sql = """ insert into m2m_dc_operation_details (dc_operation_id,dc_sub_id) VALUES(%s,%s) """ %(dc_line,line.operation_id.id)
+				cr.execute(sql)
+
+			
 			
 			if line_item.qty < 0 and line_item.rate < 0:
 				raise osv.except_osv(_('Warning!'),
-							_('System not allow to save negative values !!'))
-			if line_item.rate == 0:
-				raise osv.except_osv(_('Warning!'),
-							_('System not allow to save Zero values in Rate !!'))	
+							_('System not allow to save negative values !!'))				
 							
 			if line_item.qty == 0:
 				raise osv.except_osv(_('Warning!'),
@@ -304,13 +386,9 @@ class kg_subcontract_wo(osv.osv):
 			sc_obj.write(cr, uid, line_item.sc_id.id, 
 				{'pending_qty':line_item.sc_id.pending_qty - line_item.qty,'sc_wo_qty': line_item.sc_id.sc_wo_qty + line_item.qty,'wo_state': wo_state,'wo_process_state':wo_process_state})
 							
-		sc_wo_name = ''	
-		sc_wo_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.wo')])
-		rec = self.pool.get('ir.sequence').browse(cr,uid,sc_wo_seq_id[0])
-		cr.execute("""select generatesequenceno(%s,'%s','%s') """%(sc_wo_seq_id[0],rec.code,entry.entry_date))
-		sc_wo_name = cr.fetchone();
+		
 							
-		self.write(cr, uid, ids, {'state': 'confirmed','name':sc_wo_name[0]})
+		self.write(cr, uid, ids, {'state': 'approved_dc','flag_app':False})
 							
 							
 		return True
@@ -361,6 +439,21 @@ class ch_subcontract_wo_line(osv.osv):
 	_name = "ch.subcontract.wo.line"
 	_description = "Subcontract WO Line"
 	
+	
+	def _get_oper_value(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		total_value = 0.00
+		value = 0.00
+		for entry in self.browse(cr, uid, ids, context=context):
+			for line in entry.line_ids:
+				print"entry.qty",entry.qty
+				print"line.op_rate",line.op_rate
+				total_value= entry.qty * line.op_rate				
+				value += total_value
+			print"total_value",value
+			result[entry.id] = value
+		return result
+	
 	_columns = {
 		
 		'header_id': fields.many2one('kg.subcontract.wo','Header Id'),
@@ -386,13 +479,16 @@ class ch_subcontract_wo_line(osv.osv):
 		'ms_type': fields.related('sc_id','ms_type', type='selection', selection=[('foundry_item','Foundry Item'),('ms_item','MS Item')], string='Item Type', store=True, readonly=True),
 		'operation_id': fields.many2many('ch.kg.position.number', 'm2m_wo_operation_details', 'wo_operation_id', 'wo_sub_id','Operation' , domain="[('header_id','=',position_id)]"),
 		
+		'line_ids':fields.one2many('ch.wo.operation.details', 'header_id', "WO Operation Details"),
+		
 		'actual_qty': fields.integer('Actual Qty',readonly=True),
 		'sc_dc_qty': fields.integer('DC Qty',readonly=True),		
 		'qty': fields.integer('Quantity'),
 		'pending_qty': fields.integer('Pending Qty'),
 		
-		'rate': fields.float('Rate'),
-		'amount': fields.float('Amount'),
+		'amount': fields.function(_get_oper_value, string='Total Value', method=True, store=True, type='float'),
+		
+		
 		'remarks': fields.text('Remarks'),		
 		'dc_state': fields.selection([('pending','Pending'),('partial','Partial'),('done','Done')], 'DC Status', readonly=True),
 		'dc_flag': fields.boolean('DC Flag'),
@@ -432,7 +528,69 @@ class ch_subcontract_wo_line(osv.osv):
 					sc_cost = sc_cost[0]			
 			amount = qty * sc_cost
 		return {'value': {'rate': sc_cost,'amount':amount}}
-ch_subcontract_wo_line()	
+ch_subcontract_wo_line()
+
+
+
+class ch_wo_operation_details(osv.osv):
+	
+	_name = "ch.wo.operation.details"
+	_description = "WO Operation Details"
+	
+	_columns = {
+		
+		
+		'header_id':fields.many2one('ch.subcontract.wo.line', 'WO line Details', required=True, ondelete='cascade'),		
+		'position_id': fields.many2one('kg.position.number','Position No'),
+		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'operation_id': fields.many2one('ch.kg.position.number','Operation',required=True,domain="[('header_id','=',position_id)]"),			
+		'op_rate':fields.float('Rate(Rs)',required=True),			
+		'remarks':fields.text('Remarks'),		
+	}
+	def default_get(self, cr, uid, fields, context=None):
+		return context
+	
+	def onchange_operation_rate(self,cr, uid, ids, operation_id,position_id,moc_id, context=None):		
+		moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
+		oper_id_rec = self.pool.get('ch.kg.position.number').browse(cr,uid,operation_id)		
+		if moc_rec.moc_cate_id.id == False:
+			raise osv.except_osv(_('MOC Master Configure!!'),
+							_('Please mapping in Moc Category in MOC Master!!'))
+		cr.execute('''select line.rate from ch_kg_position_number as header
+						left join ch_moccategory_mapping line on line.header_id = header.id
+						where header.header_id = %s and header.operation_id = %s and line.moc_cate_id = %s
+								  ''',[position_id,oper_id_rec.operation_id.id,moc_rec.moc_cate_id.id])
+		operation_rate= cr.fetchone()				
+		if operation_rate is not None:
+			if operation_rate[0]:
+				operation_rate = operation_rate[0]				
+			else:
+				operation_rate = 0.00					
+		else:
+			operation_rate = 0.00			
+		
+		return {'value': {'op_rate': operation_rate}}
+	
+	def _check_rate(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])			
+		if rec.op_rate <= 0.00:
+			return False					
+		return True
+		
+	def _check_same_values(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		cr.execute(""" select operation_id from ch_wo_operation_details where operation_id  = '%s' and header_id = '%s' """ %(entry.operation_id.id,entry.header_id.id))
+		data = cr.dictfetchall()			
+		if len(data) > 1:		
+			return False
+		return True	
+		
+	_constraints = [	
+		(_check_rate,'System not allow to save Zero and Negative values in Rate field !!',['Rate']),
+		(_check_same_values, 'Please Check the same Operation Name not allowed..!!',['Operation']),		
+		]	
+	   
+ch_wo_operation_details()	
 
 
 
@@ -551,7 +709,8 @@ class kg_subcontract_dc(osv.osv):
 					'actual_qty':sc_qty,					
 					'sc_dc_qty':item.qty - item.sc_dc_qty,					
 					'sc_wo_line_id': item.id,
-					'operation_id':[(6, 0, [x.id for x in item.operation_id])],		
+					'operation_id':[(6, 0, [x.id for x in item.operation_id])],
+							
 				}
 				
 				wo_line_id = wo_line_obj.create(cr, uid,vals)
@@ -571,7 +730,7 @@ class kg_subcontract_dc(osv.osv):
 		special_char = ''.join( c for c in entry.vehicle_detail if  c in '!@#$%^~*{}?+/=_-><?/`' )
 		if len(entry.line_ids) == 0:
 			raise osv.except_osv(_('Warning!'),
-							_('System not allow to without line items !!'))
+							_('System not allow to without line items !!'))		
 		
 		if special_char:
 			raise osv.except_osv(_('Vehicle Detail'),
@@ -581,7 +740,11 @@ class kg_subcontract_dc(osv.osv):
 			for line_item in entry.line_ids:				
 				if line_item.qty < 0:
 					raise osv.except_osv(_('Warning!'),
-								_('System not allow to save negative values !!'))							
+								_('System not allow to save negative values !!'))
+								
+				if line_item.qty > line_item.sc_dc_qty:
+					raise osv.except_osv(_('Warning!'),
+								_('System not allow Excess qty !!'))							
 				if line_item.qty == 0:
 					raise osv.except_osv(_('Warning!'),
 								_('System not allow to save Zero values !!'))	
@@ -616,7 +779,10 @@ class kg_subcontract_dc(osv.osv):
 			for line_item in entry.line_ids:				
 				if line_item.qty < 0 and line_item.rate < 0:
 					raise osv.except_osv(_('Warning!'),
-								_('System not allow to save negative values !!'))								
+								_('System not allow to save negative values !!'))
+				if line_item.qty > line_item.sc_dc_qty:
+					raise osv.except_osv(_('Warning!'),
+								_('System not allow Excess qty !!'))									
 				if line_item.qty == 0:
 					raise osv.except_osv(_('Warning!'),
 								_('System not allow to save Zero values !!'))
@@ -650,7 +816,11 @@ class kg_subcontract_dc(osv.osv):
 			for line_item in entry.line_ids:				
 				if line_item.qty < 0:
 					raise osv.except_osv(_('Warning!'),
-								_('System not allow to save negative values !!'))							
+								_('System not allow to save negative values !!'))
+								
+				if line_item.qty > line_item.sc_dc_qty:
+					raise osv.except_osv(_('Warning!'),
+								_('System not allow Excess qty !!'))							
 				if line_item.qty == 0:
 					raise osv.except_osv(_('Warning!'),
 								_('System not allow to save Zero values !!'))								
@@ -878,6 +1048,7 @@ class kg_subcontract_inward(osv.osv):
 				'each_weight':item.each_weight,					
 				'sc_dc_line_id':item.id,	
 				'operation_id':[(6, 0, [x.id for x in item.operation_id])],
+				'com_operation_id':[(6, 0, [x.id for x in item.operation_id])],
 				
 			}
 			
@@ -895,6 +1066,7 @@ class kg_subcontract_inward(osv.osv):
 				'each_weight':item.each_weight,					
 				'sc_dc_line_id':item.id,	
 				'operation_id':[(6, 0, [x.id for x in item.operation_id])],
+				'com_operation_id':[(6, 0, [x.id for x in item.operation_id])],
 				
 			}
 			
@@ -919,6 +1091,10 @@ class kg_subcontract_inward(osv.osv):
 		if len(entry.line_ids) == 0:
 			raise osv.except_osv(_('Warning!'),
 							_('System not allow to without line items !!'))
+		for line in entry.line_ids:			
+			if line.com_weight <= 0.00:
+				raise osv.except_osv(_('Warning!'),
+							_('System not allow to save Zero and Negative values in Completed weight field !!'))
 		if data:
 			for ele in data:
 				sql_id = """select id from ch_subcontract_inward_line where sc_id = %s limit 1""" %(ele['sc_id'])
@@ -1537,11 +1713,13 @@ class kg_subcontract_inward(osv.osv):
 		if entry_date > today:
 			return False	
 		return True
+	
 		
 	_constraints = [		
 			  
 		
 		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
+		
 		
 	   ]
 	
@@ -1611,7 +1789,9 @@ class ch_subcontract_inward_line(osv.osv):
 	}
 	def onchange_com_weight(self, cr, uid, ids, com_weight,qty):				
 		total_weight = qty * com_weight
-		return {'value': {'totel_weight': total_weight}}
+		return {'value': {'totel_weight': total_weight}}	
+		
+	
 
 
 ch_subcontract_inward_line()
