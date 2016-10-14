@@ -14,7 +14,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'MS_Trasaction_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
 		</record>
 		
 		
@@ -30,7 +30,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'MS_Trasaction_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
 		</record>
 		
 		
@@ -46,7 +46,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'MS_Trasaction_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
 		</record>
 		
 		
@@ -62,7 +62,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'MS_Trasaction_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
 		</record>
 		
 		
@@ -77,7 +77,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'MS_Trasaction_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
 		</record>
 		
 		
@@ -92,7 +92,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'MS_Trasaction_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
 		</record>
 		
 		
@@ -107,26 +107,12 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'MS_Trasaction_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
 		</record>
 		
 		
 		<!-- MS Operations Dimension Details End -->
 		
-		<!-- MS Subcontract Process Start --> 
-		
-		<record id="t_ms_subcontract_process" model="ir.model.access">
-			<field name="model_id" ref="kg_subcontract_process.model_kg_subcontract_process"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">MS Subcontract Process</field>
-			<field eval="1" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'MS_Trasaction_Admin')]"/>
-		</record>
-		
-		
-		<!-- MS Subcontract Process End -->
 		
 		<!-- MS Stores Process Start --> 
 		
@@ -137,11 +123,116 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'MS_Trasaction_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
 		</record>
 		
 		
 		<!-- MS Store Process End -->
+		
+		<!-- MS Subcontract Process Start --> 
+		
+		<record id="t_ms_subcontract_process" model="ir.model.access">
+			<field name="model_id" ref="kg_subcontract_process.model_kg_subcontract_process"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">MS Subcontract Process</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		
+		<record id="t_ms_subcontract_process_wo" model="ir.model.access">
+			<field name="model_id" ref="kg_subcontract_process.model_kg_subcontract_wo"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Subcontract Process WO</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<record id="t_ms_subcontract_process_wo_line" model="ir.model.access">
+			<field name="model_id" ref="kg_subcontract_process.model_ch_subcontract_wo_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Subcontract Process WO Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<record id="t_ms_subcontract_process_dc" model="ir.model.access">
+			<field name="model_id" ref="kg_subcontract_process.model_kg_subcontract_dc"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Subcontract Process DC</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<record id="t_ms_subcontract_process_dc_line" model="ir.model.access">
+			<field name="model_id" ref="kg_subcontract_process.model_ch_subcontract_dc_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Subcontract Process DC Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<record id="t_ms_subcontract_process_inward" model="ir.model.access">
+			<field name="model_id" ref="kg_subcontract_process.model_kg_subcontract_inward"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Subcontract Process Inward</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<record id="t_ms_subcontract_process_inward_line" model="ir.model.access">
+			<field name="model_id" ref="kg_subcontract_process.model_ch_subcontract_inward_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Subcontract Process Inward Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<record id="t_ms_subcontract_process_advance" model="ir.model.access">
+			<field name="model_id" ref="kg_subcontract_process.model_kg_subcontract_advance"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Subcontract Process Advance</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<record id="t_ms_subcontract_process_invoice" model="ir.model.access">
+			<field name="model_id" ref="kg_subcontract_process.model_kg_subcontract_invoice"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Subcontract Process Invoice</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<record id="t_ms_subcontract_process_invoice_line" model="ir.model.access">
+			<field name="model_id" ref="kg_subcontract_process.model_ch_subcontract_invoice_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Subcontract Process Invoice Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- MS Subcontract Process End -->
 		
     </data>
 </openerp>
