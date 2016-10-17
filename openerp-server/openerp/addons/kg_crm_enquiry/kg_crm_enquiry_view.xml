@@ -13,7 +13,7 @@
 						<button name="entry_confirm" type="object" string="Process Offer" states="draft" class="oe_highlight"/>
 						<button name="entry_call_back" type="object" string="Call Back" states="draft" class="oe_highlight"/>
 						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
-						<button name="entry_revision" type="object" string="Create Revision" class="oe_highlight"/>
+						<button name="entry_revision" type="object" string="Create Revision" attrs="{'invisible': [('state','in',('wo_created'))]}" class="oe_highlight"/>
 						<!--<field name="state" widget="statusbar" 
 						statusbar_visible="draft,moved_to_offer,call,quote"
 						statusbar_colors='{
@@ -603,6 +603,7 @@
 			<field name="view_id" ref="t_tree_v_crm_enquiry"/>
 			<field name="search_view_id" ref="t_search_v_crm_enquiry"/>
 			<field name="context">{}</field>
+			<field name="domain">[('state','!=','revised')]</field>
 		</record>
 		
 	<!-- Menu Action End-->

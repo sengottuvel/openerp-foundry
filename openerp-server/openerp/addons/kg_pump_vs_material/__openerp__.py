@@ -1,21 +1,24 @@
 ##############################################################################
 #
-#   This is New Customized CRM Offer Module
+#   Standard Transaction Module
 #
 ##############################################################################
 
 {
-
-    'name': 'CRM Offer',
+    'name': 'Pump vs Material',
     'version': '0.1',
     'author': 'Thangaraj',    
-    'depends' : ['base','kg_industry_master','kg_machine_shop','kg_bom','kg_crm_enquiry'],
+    'depends' : ['base','kg_moc_construction','kg_pumpmodel_master','kg_position_number','kg_pattern_master','kg_moc_master'],
     'data': [
-				'kg_crm_offer_view.xml',
+    
+			'kg_pump_vs_material_view.xml',
+			'sequence_data.xml',
+			#~ 'onscreen_report_data.xml',
+			
 			],
+			
     'css': ['static/src/css/state.css'], 
     'auto_install': False,
     'installable': True,
-    
 }
 

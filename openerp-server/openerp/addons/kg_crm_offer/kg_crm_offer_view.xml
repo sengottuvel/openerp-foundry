@@ -11,7 +11,8 @@
 				<form string="CRM Offer" version="7.0" create="false" delete="false">
 					<header>
 						<button name="entry_confirm" type="object" string="Process Offer" states="draft" class="oe_highlight"/>
-						<button name="entry_call_back" type="object" string="Call Back" states="draft" class="oe_highlight"/>
+						<button name="wo_creation" type="object" string="WO Creation" attrs="{'invisible':[('state','!=','moved_to_offer'),('wo_flag','=',True)]}" class="oe_highlight"/>
+						<button name="entry_revision" type="object" string="Create Revision" attrs="{'invisible': [('state','in',('wo_created'))]}" class="oe_highlight"/>
 						<button name="offer_copy" type="object" string="Offer Copy" class="oe_highlight"/>
 					</header>
 						<group>
@@ -21,14 +22,17 @@
 								<field name="customer_id" required="1" readonly="1"/>
 								<field name="ref_mode" readonly="1"/>
 								<field name="market_division" readonly="1"/>
+								<field name="revision" readonly="1"/>
 								<field name="note"/>
 								<field name="purpose" readonly="1"/>
+								<field name="wo_flag" invisible="1"/>
 							</group>											
 							<group>
 								<field name="enquiry_id" readonly="1" invisible="1"/>
 								<field name="enquiry_no" readonly="1"/>
 								<field name="enquiry_date" readonly="1"/>
 								<field name="segment" readonly="1"/>	
+								<field name="location" required="1"/>	
 								<field name="state" style="width: 30%%" class="att_state_change" readonly="1"/>
 								<field name="rep_data" readonly="1" width="100" filename="offer_copy"/>
 							</group>	
@@ -473,10 +477,10 @@
 								<field name="off_bot_id" colspan="4" nolabel="1" mode="tree">
 									<tree string="BOT Items"  delete="false" create="false" editable="bottom">
 										<field name="is_applicable" readonly="1"/>
-										<field name="product_id" readonly="1"/>
-										<field name="brand_id" readonly="1"/>
-										<field name="uom_id" readonly="1"/>
-										<field name="uom_conversation_factor" readonly="1"/>
+										<field name="ms_id" readonly="1"/>
+										<field name="name" readonly="1"/>
+										<field name="moc_id" readonly="1"/>
+										<field name="csd_no" readonly="1"/>
 										<field name="qty" required="1" readonly="1"/>
 										<field name="prime_cost" readonly="1"/>
 										<field name="remarks" readonly="1"/>
@@ -526,8 +530,10 @@
 					<field name="name"/>
 					<field name="enquiry_date"/>
 					<field name="enquiry_no"/>
+					<field name="revision"/>
 					<field name="customer_id"/>	
 					<field name="state"/>
+					<field name="wo_flag" invisible="1"/>
 				</tree>
 			</field>
 		</record>
@@ -563,6 +569,7 @@
 			<field name="view_id" ref="t_tree_v_crm_offer"/>
 			<field name="search_view_id" ref="t_search_v_crm_offer"/>
 			<field name="context">{}</field>
+			<field name="domain">[('state','!=','revised')]</field>
 		</record>
 		
 	<!-- Menu Action End-->

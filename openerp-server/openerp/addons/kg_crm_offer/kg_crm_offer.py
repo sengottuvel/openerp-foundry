@@ -6,6 +6,8 @@ from datetime import date
 import openerp.addons.decimal_precision as dp
 from datetime import datetime
 import base64
+from itertools import groupby
+
 
 from PIL import Image
 
@@ -19,7 +21,7 @@ PURPOSE_SELECTION = [
     ('pump','Pump'),('spare','Spare'),('prj','Project'),('pump_spare','Pump With Spare')
 ]
 STATE_SELECTION = [
-    ('draft','Draft'),('moved_to_offer','Moved To Offer'),('call','Call Back'),('quote','Quote Process'),('wo_released','WO Released'),('reject','Rejected')
+    ('draft','Draft'),('moved_to_offer','Moved To Offer'),('call','Call Back'),('quote','Quote Process'),('wo_created','WO Created'),('wo_released','WO Released'),('reject','Rejected'),('revised','Revised')
 ]
 MARKET_SELECTION = [
 	('cp','CP'),('ip','IP')
@@ -79,7 +81,10 @@ class kg_crm_offer(osv.osv):
 		'cancel_remark': fields.text('Cancel Remarks'),
 		'active': fields.boolean('Active'),
 		'state': fields.selection(STATE_SELECTION,'Status', readonly=True),
+		'location': fields.selection([('ipd','IPD'),('ppd','PPD'),('export','Export')],'Location'),
 		'offer_copy': fields.char('Offer Copy'),
+		'revision': fields.integer('Revision'),
+		'wo_flag': fields.boolean('WO Flag'),
 		
 		'line_pump_ids': fields.one2many('ch.pump.offer', 'header_id', "Pump Offer"),
 		'line_spare_ids': fields.one2many('ch.spare.offer', 'header_id', "Spare Offer"),
@@ -176,9 +181,10 @@ class kg_crm_offer(osv.osv):
 		'ref_mode': 'direct',
 		'call_type': 'new_enquiry',
 		'active': True,
+		'wo_flag': False,
 	#	'division_id':_get_default_division,
 		'due_date' : lambda * a: time.strftime('%Y-%m-%d'),
-		
+		'revision': 0,
 	}
 	
 	def unlink(self,cr,uid,ids,context=None):
@@ -199,20 +205,383 @@ class kg_crm_offer(osv.osv):
 		entry = self.browse(cr,uid,ids[0])
 		
 		#~ for line in entry.line_pump_ids:
+		if not entry.name:
+			off_no = ''	
+			seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.crm.offer')])
+			rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],rec.code,entry.offer_date))
+			off_no = cr.fetchone();
+			off_no = off_no[0]
+		else:
+			off_no = entry.name
+		#~ self.wo_creation(cr,uid,entry)
 		
-		off_no = ''	
-		seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.crm.offer')])
-		rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
-		cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],rec.code,entry.offer_date))
-		off_no = cr.fetchone();
 		self.write(cr, uid, ids, {
-									'name':off_no[0],
+									'name':off_no,
 									'state': 'moved_to_offer',
 									'confirm_user_id': uid, 
 									'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')
 								})
 		return True
-		
+	
+	def entry_revision(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
+		revision = 0
+		if entry.wo_flag == False:
+			revision = entry.revision + 1
+			print"revisionrevisionrevision",revision
+			vals = {
+					'state' : 'draft',
+					'revision' : revision,
+					}
+			offer_id = self.copy(cr, uid, entry.id,vals, context) 
+			print"offer_idoffer_idoffer_id",offer_id
+			#~ offer_id = self.create(cr,uid,{'name': entry.name,
+								#~ 'enquiry_no': entry.enquiry_no,
+								#~ 'offer_date': entry.offer_date,
+								#~ 'enquiry_date': entry.enquiry_date,
+								#~ 'customer_id': entry.customer_id.id,
+								#~ 'segment': entry.segment,
+								#~ 'ref_mode': entry.ref_mode,
+								#~ 'location': entry.location,
+								#~ 'market_division': entry.market_division,
+								#~ 'state': 'draft',
+								#~ 'revision': revision,
+								#~ 'note': entry.note,
+								#~ 'purpose': entry.purpose,
+								#~ 'wo_flag': entry.wo_flag,
+								#~ 'offer_net_amount': entry.offer_net_amount,
+								#~ })
+					
+			self.write(cr, uid, ids, {
+									  'state': 'revised',
+									})
+								
+		return True
+	
+	def wo_creation(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
+		wo_id = self.pool.get('kg.work.order').create(cr,uid,{'order_category': entry.purpose,
+															  'name': '',
+															  'offer_no': entry.name,
+															  'location': entry.location,
+															  'entry_mode': 'auto',
+															  'partner_id': entry.customer_id.id,
+																})
+		if wo_id:
+			if entry.line_pump_ids:
+				groups = []
+				#~ for item in entry.line_spare_ids:
+				for key, group in groupby(entry.line_pump_ids, lambda x: x.enquiry_line_id.id):
+					groups.append(map(lambda r:r,group))
+				print"ffffffffffffffffffff",groups
+				for key,group in enumerate(groups):
+					enquiry_line_id = group[0].enquiry_line_id.id
+					off_line_id = group[0]
+					print"enquiry_line_idenquiry_line_id",enquiry_line_id
+					print"off_line_idoff_line_id",off_line_id
+					purpose = 'pump'
+					pump_vals = self._prepare_pump_details(cr,uid,wo_id,entry,enquiry_line_id,off_line_id,purpose)
+					if pump_vals:
+						wo_line_id = self.pool.get('ch.work.order.details').create(cr, uid, pump_vals, context=context)
+						if wo_line_id:
+							item = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,enquiry_line_id)
+							if item:
+								self.prepare_bom(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
+			if entry.line_spare_ids:
+				groups = []
+				#~ for item in entry.line_spare_ids:
+				for key, group in groupby(entry.line_spare_ids, lambda x: x.pump_id.id):
+					groups.append(map(lambda r:r,group))
+				print"ffffffffffffffffffff",groups
+				for key,group in enumerate(groups):
+					enquiry_line_id = group[0].enquiry_line_id.id
+					off_line_id = group[0]
+					spa_off_obj = self.pool.get('ch.spare.offer').search(cr,uid,[('enquiry_line_id','=',enquiry_line_id)])
+					print"spa_off_obj",spa_off_obj
+					print"enquiry_line_idenquiry_line_id*************************",enquiry_line_id
+					print"enquiry_line_idenquiry_line_id********off_line_id*****************",off_line_id
+					purpose = 'spare'
+					pump_vals = self._prepare_pump_details(cr,uid,wo_id,entry,enquiry_line_id,off_line_id,purpose)
+					if pump_vals:
+						wo_line_id = self.pool.get('ch.work.order.details').create(cr, uid, pump_vals, context=context)
+						if wo_line_id:
+							item = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,enquiry_line_id)
+							if item:
+								for li in spa_off_obj:
+									print"liliii",li
+									off_line_id = spa_off_obj
+								self.prepare_bom(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
+			
+			if entry.line_accessories_ids:
+				groups = []
+				for key, group in groupby(entry.line_accessories_ids, lambda x: x.pump_id.id):
+					groups.append(map(lambda r:r,group))
+				print"ffffffffffffffffffff",groups
+				for key,group in enumerate(groups):
+					enquiry_line_id = group[0].enquiry_line_id.id
+					off_line_id = group[0]
+					acc_off_obj = self.pool.get('ch.accessories.offer').search(cr,uid,[('enquiry_line_id','=',enquiry_line_id)])
+					print"enquiry_line_idenquiry_line_id",enquiry_line_id
+					purpose = 'access'
+					pump_vals = self._prepare_pump_details(cr,uid,wo_id,entry,enquiry_line_id,off_line_id,purpose)
+					if pump_vals:
+						wo_line_id = self.pool.get('ch.work.order.details').create(cr, uid, pump_vals, context=context)
+						if wo_line_id:
+							item = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,enquiry_line_id)
+							if item:
+								for li in acc_off_obj:
+									print"liliii",li
+									off_line_id = acc_off_obj
+								self.prepare_bom(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
+					
+		print"wo_idwo_idwo_id",wo_id
+		if wo_id:
+			self.write(cr, uid, ids, {'wo_flag': True,'state':'wo_created'})
+			self.pool.get('kg.crm.enquiry').write(cr,uid,entry.enquiry_id.id,{'wo_flag':True,'state':'wo_created'})
+		return True
+	
+	#~ def _prepare_pump_details(self,cr,uid,wo_id,entry,item,context=None):		
+		#~ print"item.pump_iditem.pump_id.name",item.pump_id.name
+		#~ pump_vals = {
+			#~ 
+			#~ 'header_id': wo_id,
+			#~ 'pump_model_id': item.pump_id.id,
+			#~ 'order_category': 'pump',
+			#~ 'moc_construction_id': item.moc_const_id.id,
+			#~ 'unit_price': item.net_amount,
+			#~ 'qty': item.qty,
+			#~ 'flag_load_bom': True,
+			#~ }			
+			#~ 
+		#~ return pump_vals
+			
+	def _prepare_pump_details(self,cr,uid,wo_id,entry,enquiry_line_id,off_line_id,purpose,context=None):	
+		print"iteiteitieiteitieit",enquiry_line_id
+		item = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,enquiry_line_id)
+		#~ purpose = item.purpose_categ
+		qty = 1
+		moc_const_id = m_power = setting_height = 0
+		pump_model_type = speed_in_rpm = bush_bearing = shaft_sealing = lubrication_type = ''
+		if purpose == 'pump':
+			qty = item.qty
+			moc_const_id = item.moc_const_id.id
+			pump_id = item.pump_id.id
+			pump_model_type = item.pump_model_type
+			speed_in_rpm = item.speed_in_rpm
+			if item.push_bearing == 'grease_bronze':
+				 bush_bearing = 'grease'
+			elif item.push_bearing == 'cft':
+				 bush_bearing = 'cft_self'
+			elif item.push_bearing == 'cut':
+				 bush_bearing = 'cut_less_rubber'
+			m_power = item.mototr_output_power_rated
+			setting_height = float(item.setting_height)
+			if item.shaft_sealing == 'gld_packing_tiga':
+				 shaft_sealing = 'g_p'
+			elif item.shaft_sealing == 'mc_seal':
+				 shaft_sealing = 'm_s'
+			elif item.shaft_sealing == 'dynamic_seal':
+				 shaft_sealing = 'f_s'
+			if item.lubrication_type == 'grease':
+				 lubrication_type = 'grease'
+		elif purpose == 'spare':
+			purpose == 'spare'
+			moc_const_id = item.spare_moc_const_id.id
+			pump_id = item.spare_pump_id.id
+		elif purpose == 'access':
+			purpose == 'access'
+			if item.purpose_categ == 'pump':
+				moc_const_id = item.moc_const_id.id
+				pump_id = item.pump_id.id
+			elif item.purpose_categ in ('spare','access'):
+				moc_const_id = item.spare_moc_const_id.id
+				pump_id = item.spare_pump_id.id
+		pump_vals = {
+			
+			'header_id': wo_id,
+			'pump_model_id': item.spare_pump_id.id,
+			'order_category': purpose,
+			'moc_construction_id': moc_const_id,
+			'unit_price': 1,
+			'qty': qty,
+			'flag_load_bom': True,
+			'delivery_date': item.header_id.del_date,
+			'pump_offer_line_id': off_line_id,
+			'pump_model_type': pump_model_type,
+			'rpm': speed_in_rpm,
+			'bush_bearing': bush_bearing,
+			'm_power': m_power,
+			'setting_height': setting_height,
+			'shaft_sealing': shaft_sealing,
+			'lubrication_type': lubrication_type,
+			}
+			
+		return pump_vals
+			
+	def prepare_bom(self,cr,uid,wo_line_id,item,off_line_id,purpose,context=None):	
+		prime_cost = 0
+		if purpose in ('pump','spare'):
+			if item.purpose_categ in ('pump','spare'):
+				arr = of_li_id = 0
+				if item.line_ids:
+					#~ spa_off_obj = self.pool.get('ch.spare.offer').search(cr,uid,[('enquiry_line_id','=',enquiry_line_id)])
+					#~ print"spa_off_obj",spa_off_obj
+					print"off_line_idoff_line_idoff_line_idoff_line_idoff_line_id",off_line_id
+					for ele in item.line_ids:
+						if ele.is_applicable == True:
+							if purpose == 'spare':
+								of_li_id = off_line_id[arr]
+								print"of_li_id",of_li_id
+							print"ele.position_id.idele.position_id.id",ele.position_id.name
+							fou_line = self.pool.get('ch.order.bom.details').create(cr,uid,{'header_id': wo_line_id,
+																							'flag_applicable': True,
+																							'flag_standard': True,
+																							'qty': ele.qty,
+																							'position_id': ele.position_id.id,
+																							'pattern_id': ele.pattern_id.id,
+																							'pattern_name': ele.pattern_name,
+																							'unit_price': ele.prime_cost,
+																							'moc_id': ele.moc_id.id,
+																							'entry_mode': 'auto',
+																							'spare_offer_line_id': of_li_id,
+																							})
+							prime_cost += ele.prime_cost
+							print"aaaaaaaaaaaaa",prime_cost
+							arr = arr+1
+						else:
+							if purpose == 'spare':
+								of_li_id = 0
+				if item.line_ids_a:
+					for ele in item.line_ids_a:
+						if ele.is_applicable == True:
+							if purpose == 'spare':
+								of_li_id = off_line_id[arr]
+								print"of_li_id",of_li_id
+							ms_line = self.pool.get('ch.order.machineshop.details').create(cr,uid,{'header_id': wo_line_id,
+																							'flag_applicable': True,
+																							'flag_standard': True,
+																							'qty': ele.qty,
+																							'position_id': ele.position_id.id,
+																							'ms_id': ele.ms_id.id,
+																							'unit_price': ele.prime_cost,
+																							'moc_id': ele.moc_id.id,
+																							'entry_mode': 'auto',
+																							'spare_offer_line_id': of_li_id,
+																							})
+							prime_cost += ele.prime_cost
+							print"bbbbbbbbbbbbbb",prime_cost
+							arr = arr+1
+						else:
+							if purpose == 'spare':
+								of_li_id = 0
+				if item.line_ids_b:
+					for ele in item.line_ids_b:
+						if ele.is_applicable == True:
+							if purpose == 'spare':
+								of_li_id = off_line_id[arr]
+								print"of_li_id",of_li_id
+							bot_line = self.pool.get('ch.order.bot.details').create(cr,uid,{'header_id': wo_line_id,
+																							'flag_applicable': True,
+																							'flag_standard': True,
+																							'qty': ele.qty,
+																							'position_id': ele.position_id.id,
+																							'bot_id': ele.ms_id.id,
+																							'unit_price': ele.prime_cost,
+																							'moc_id': ele.moc_id.id,
+																							'entry_mode': 'auto',
+																							'spare_offer_line_id': of_li_id,
+																							})
+							prime_cost += ele.prime_cost
+							print"ccccccccccccccccc",prime_cost
+							arr = arr+1
+						else:
+							if purpose == 'spare':
+								of_li_id = 0
+				prime_cost = 0.00
+				if item.purpose_categ == 'pump':
+					self.pool.get('ch.work.order.details').write(cr,uid,wo_line_id,{'unit_price':off_line_id.net_amount})
+				elif item.purpose_categ == 'spare':
+					off_spare_obj = self.pool.get('ch.spare.offer').search(cr,uid,[('enquiry_line_id','=',item.id),('pump_id','=',item.spare_pump_id.id)])
+					if off_spare_obj:
+						print"off_spare_obj",off_spare_obj
+						for line in off_spare_obj:
+							print"linelelelelelle",line
+							off_spare_rec = self.pool.get('ch.spare.offer').browse(cr,uid,line)
+							prime_cost += off_spare_rec.net_amount
+						self.pool.get('ch.work.order.details').write(cr,uid,wo_line_id,{'unit_price':prime_cost})
+		if purpose == 'access':
+			prime_cost = 0
+			print"ddddddddddddddddddddddddddddD",prime_cost
+			if item.acces == 'yes':
+				arr = of_li_id = 0
+				if item.line_ids_access_a:
+					for line in item.line_ids_access_a:
+						of_li_id = off_line_id[arr]
+						print"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",of_li_id
+						wo_access_id = self.pool.get('ch.wo.accessories').create(cr,uid,{'header_id':wo_line_id,
+																						 'access_id':line.access_id.id,
+																						 'moc_id':line.moc_id.id,
+																						 'qty':line.qty,
+																						 'load_access':line.load_access,
+																						 'access_offer_line_id': of_li_id,
+																						})
+						arr = arr+1
+						if wo_access_id:
+							if line.line_ids:
+								for ele in line.line_ids:
+									if ele.is_applicable == True:
+										fou_line = self.pool.get('ch.wo.accessories.foundry').create(cr,uid,{'header_id': wo_access_id,
+																										'is_applicable': True,
+																										'qty': ele.qty,
+																										'position_id': ele.position_id.id,
+																										'pattern_id': ele.pattern_id.id,
+																										'prime_cost': ele.prime_cost,
+																										'moc_id': ele.moc_id.id,
+																										#~ 'access_offer_line_id': off_line_id,
+																										})
+										prime_cost += ele.prime_cost
+							if line.line_ids_a:
+								for ele in line.line_ids_a:
+									if ele.is_applicable == True:
+										fou_line = self.pool.get('ch.wo.accessories.ms').create(cr,uid,{'header_id': wo_access_id,
+																										'is_applicable': True,
+																										'qty': ele.qty,
+																										'position_id': ele.position_id.id,
+																										'ms_id': ele.ms_id.id,
+																										'prime_cost': ele.prime_cost,
+																										'moc_id': ele.moc_id.id,
+																										#~ 'access_offer_line_id': off_line_id,
+																										})
+										prime_cost += ele.prime_cost
+							if line.line_ids_b:
+								for ele in line.line_ids_b:
+									if ele.is_applicable == True:
+										fou_line = self.pool.get('ch.wo.accessories.bot').create(cr,uid,{'header_id': wo_access_id,
+																										'is_applicable': True,
+																										'qty': ele.qty,
+																										'position_id': ele.position_id.id,
+																										'csd_no': ele.csd_no,
+																										'ms_id': ele.ms_id.id,
+																										'prime_cost': ele.prime_cost,
+																										'moc_id': ele.moc_id.id,
+																										#~ 'access_offer_line_id': off_line_id,
+																										})
+										prime_cost += ele.prime_cost
+							prime_cost = 0.00
+							off_access_obj = self.pool.get('ch.accessories.offer').search(cr,uid,[('enquiry_line_id','=',item.id),('pump_id','=',item.pump_id.id)])
+							if off_access_obj:
+								print"off_access_obj",off_access_obj
+								for line in off_access_obj:
+									print"linelelelelelle",line
+									off_access_rec = self.pool.get('ch.accessories.offer').browse(cr,uid,line)
+									prime_cost += off_access_rec.net_amount
+								print"*************************************************",prime_cost
+								self.pool.get('ch.work.order.details').write(cr,uid,wo_line_id,{'unit_price':prime_cost})
+						
+		print"prime_costprime_cost",prime_cost
+		return True
+			
 	def offer_copy(self,cr,uid,ids,context=None):
 		import StringIO
 		import base64
