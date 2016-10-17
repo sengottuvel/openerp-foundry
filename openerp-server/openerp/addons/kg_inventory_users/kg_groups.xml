@@ -94,6 +94,7 @@
 			ref('kg_menus.tma_site_visit_pending'),
 			ref('kg_menus.tma_site_visit_plan'),
 			ref('kg_menus.tma_ch_site_visit_plan'),
+			ref('kg_menus.tam_pump_vs_material'),
 			
             ])]" name="menu_access"/>
             <field name="users" eval="[(4, ref('base.user_root'))]"/>

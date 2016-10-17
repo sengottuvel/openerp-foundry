@@ -98,6 +98,9 @@
 				<!-- Site Visit Status --> 
 				<menuitem action="kg_site_visit_plan.tma_ch_site_visit_plan" name="Plan Status Update" id="tma_ch_site_visit_plan" parent="cpm_crm_enquiry_menu" sequence="6"/>
 				
+				<!-- Site Visit Status --> 
+				<menuitem action="kg_pump_vs_material.tma_pump_vs_material" name="Prime Cost View" id="tam_pump_vs_material" parent="cpm_crm_enquiry_menu" sequence="8"/>
+				
 		<!-- MS Process Menu -->
 		
 		<menuitem name="MS Process" id="mpm_crm" sequence="20"/>
