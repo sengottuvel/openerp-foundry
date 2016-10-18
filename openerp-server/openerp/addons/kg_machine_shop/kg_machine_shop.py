@@ -201,7 +201,9 @@ class kg_machine_shop(osv.osv):
 		for item in rec.line_ids:
 			prod = self.pool.get('product.product').browse(cr, uid, item.product_id.id, context=context)	
 			print"item.uom.id",item.uom.id				
-			print"prod.uom_po_id.id",prod.uom_po_id.id				
+			print"prod.uom_po_id.id",prod.uom_po_id.id	
+			qty_value = 0.00			
+			weight = 0.00			
 			if item.uom.id != prod.uom_id.id:
 				if item.uom.id  != prod.uom_po_id.id:				 			
 					raise osv.except_osv(
@@ -472,7 +474,7 @@ class ch_ms_raw_material(osv.osv):
 	
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		cr.execute(""" select product_id from ch_ms_raw_material where product_id  = '%s' and header_id = '%s' """ %(entry.product_id.id,entry.header_id.id))
+		cr.execute(""" select product_id from ch_ms_raw_material where product_id  = '%s' and length = '%s' and header_id = '%s' """ %(entry.product_id.id,entry.length,entry.header_id.id))
 		data = cr.dictfetchall()			
 		if len(data) > 1:		
 			return False
