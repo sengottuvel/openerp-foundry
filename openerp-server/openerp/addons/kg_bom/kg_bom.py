@@ -457,9 +457,7 @@ class kg_bom(osv.osv):
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
 		
 	def create(self, cr, uid, vals, context=None):
-		"""if vals.get('qty'):
-			qty = vals.get('qty')
-			vals.update({'qty': qty,'planning_qty':qty})	"""
+		
 		return super(kg_bom, self).create(cr, uid, vals, context=context)
 		
 	def write(self, cr, uid, ids, vals, context=None):		

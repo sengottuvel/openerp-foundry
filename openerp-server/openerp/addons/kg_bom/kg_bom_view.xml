@@ -51,8 +51,7 @@
 								<field name="pump_model_id" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire']),('category_type','=','pump_bom')],'required': [('category_type','in',['pump_bom'])]}"/>
 								<field name="qty" readonly="1"/>
 								<field name="copy_flag" invisible="1"/>									
-								<field name="modify" invisible="1"/>									
-								<field name="active"/>									
+								<field name="modify" invisible="1"/>															
 								<field name="type" invisible="1"/>									
 								<field name="state" style="width: 30%%" class="att_state_change"/>								
 							</group>
@@ -124,6 +123,7 @@
 							<page string="Entry Info">
 									<group>
 										<field name="company_id"/>
+										<field name="active"/>	
 									</group>
 									<group>
 									<group>

@@ -253,7 +253,7 @@ class ch_motor_assembly(osv.osv):
 	_columns = {
 			
 		'header_id':fields.many2one('kg.vo.master', 'VO Entry', required=True, ondelete='cascade'),			
-		'value': fields.selection([('90','90'),('100','100'),('112','112'),('132','132'),('160','160'),('180','180'),('200','200'),('225','225'),('250','250'),('280','280')],'Value',required=True),	
+		'value': fields.selection([('90','90'),('100','100'),('112','112'),('132','132'),('160','160'),('180','180'),('200','200'),('225','225'),('250','250'),('280','280'),('315','315'),('315_l','315L')],'Motor Frame Size',required=True),	
 		'partlist_id': fields.many2one('kg.bom', 'Part list Name',required=True,domain="[('category_type','=','part_list_bom')]"),
 		'remarks':fields.text('Remarks'),		
 	}
@@ -272,7 +272,7 @@ class ch_columnpipe_assembly(osv.osv):
 	_columns = {
 			
 		'header_id':fields.many2one('kg.vo.master', 'VO Entry', required=True, ondelete='cascade'),				
-		'pipe_type': fields.selection([('grease','Grease/Bronze'),('cft_self','CFT'),('cut_less_rubber','Cut less Rubber')],'Type',required=True),
+		'pipe_type': fields.selection([('grease','Bronze/Grease'),('cft_self','CFT'),('cut_less_rubber','Cut less Rubber')],'Type',required=True),
 		'star': fields.selection([('nil','Nil'),('1','1'),('2','2'),('3','3'),('4','4'),('5','5'),('6','6'),('7','7')],'Star (in No)',required=True),
 		'partlist_id': fields.many2one('kg.bom', 'Part list Name',required=True,domain="[('category_type','=','part_list_bom')]"),
 		'remarks':fields.text('Remarks'),		

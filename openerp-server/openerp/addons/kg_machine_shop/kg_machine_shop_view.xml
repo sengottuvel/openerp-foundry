@@ -51,8 +51,7 @@
 								<field name="csd_code"/>
 								<field name="breadth" invisible="1"/>
 								<field name="thickness" invisible="1"/>																
-								<field name="length_type" attrs="{'invisible':[('type','=','bot')],'required': [('dynamic_length','=',True)]}"/>		
-								<field name="active"/>									
+								<field name="length_type" attrs="{'invisible':[('type','=','bot')],'required': [('dynamic_length','=',True)]}"/>																
 								<field name="state" style="width: 30%%" class="att_state_change"/>								
 							</group>
 						</group>
@@ -104,6 +103,7 @@
 							<page string="Entry Info">
 									<group>
 										<field name="company_id"/>
+										<field name="active"/>
 									</group>
 									<group>
 									<group>

@@ -25,8 +25,7 @@
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 							</group>
 							<group>
-								<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="active"/>								
+								<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>												
 								<field name="state" style="width: 30%%" class="att_state_change"/>								
 							</group>
 						</group>						
@@ -52,6 +51,7 @@
 							<page string="Entry Info">
 									<group>
 										<field name="company_id"/>
+										<field name="active"/>				
 									</group>
 									<group>
 									<group>

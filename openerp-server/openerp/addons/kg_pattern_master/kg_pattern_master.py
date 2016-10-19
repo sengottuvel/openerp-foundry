@@ -16,8 +16,7 @@ class kg_pattern_master(osv.osv):
 	_name = "kg.pattern.master"
 	_description = "SAM Pattern Master"
 	
-	def fields_view_get(self, cr, uid, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
-		print"kg_pattern_master",view_type
+	def fields_view_get(self, cr, uid, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):		
 		if context is None:
 			context={}
 
@@ -153,22 +152,8 @@ class kg_pattern_master(osv.osv):
 		rec = self.browse(cr, uid, ids[0])		
 		if rec.ci_weight <= 0.00:			
 			return False					
-		return True
-	
-	#~ def _Validation(self, cr, uid, ids, context=None):
-		#~ flds = self.browse(cr , uid , ids[0])
-		#~ special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )
-		#~ if special_char:
-			#~ return False
-		#~ return True
-	#~ 
-	#~ def _CodeValidation(self, cr, uid, ids, context=None):
-		#~ flds = self.browse(cr , uid , ids[0])		
-		#~ if flds.code:	
-			#~ code_special_char = ''.join( c for c in flds.code if  c in '!@#$%^~*{}?+/=' )		
-			#~ if code_special_char:
-				#~ return False
-		#~ return True		
+		return True	
+		
 		
 	def _name_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -190,8 +175,7 @@ class kg_pattern_master(osv.osv):
 		res_rec=self.pool.get('res.users').browse(cr,uid,uid)		
 		rec_user = str(res_rec.login)
 		rec_pwd = str(res_rec.password)
-		rec_code = str(rec.code)
-		#~ url = 'http://iasqa1.kgisl.com/?uname='+rec_user+'&s='+rec_work_order
+		rec_code = str(rec.code)		
 		encoded_user = base64.b64encode(rec_user)
 		encoded_pwd = base64.b64encode(rec_pwd)
 		
@@ -212,10 +196,8 @@ class kg_pattern_master(osv.osv):
 		
 		if rec.moc_const_type:				
 			moc_type_ids = []
-			for moc_type in rec.moc_const_type:
-				print"rec.moc_const_type",rec.moc_const_type
-				moc_type_ids.append(moc_type.id)
-			print"moc_type_ids",moc_type_ids		
+			for moc_type in rec.moc_const_type:				
+				moc_type_ids.append(moc_type.id)					
 			moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('constuction_type_id','in',moc_type_ids)]))
 		else:
 			moc_const_obj = self.pool.get('kg.moc.construction').search(cr,uid,([('active','=',True)]))	
@@ -538,8 +520,7 @@ class kg_pattern_master(osv.osv):
 		moc_rate_lines=rec.line_ids	
 		moc_obj=self.pool.get('kg.moc.master')	
 		
-		for item in rec.line_ids:
-			print"dddd",	
+		for item in rec.line_ids:				
 			vals = {
 				'read_flag': True,				
 					}
@@ -603,8 +584,7 @@ class kg_pattern_master(osv.osv):
 		
 	
 	_constraints = [
-		#(_Validation, 'Special Character Not Allowed !!!', ['name']),
-		#(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
+		
 		(_name_validate, 'Pattern No must be unique !!', ['no']),		
 		#(_check_pcs_weight,'You cannot save with zero value !',['SS Weight(kgs)']),
 		#(_check_nonferous_weight,'You cannot save with zero value !',['Non-Ferrous Weight(kgs)']),

@@ -30,8 +30,7 @@
 							<group>
 								<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="weight_type"/>									
-								<field name="product_id"/>									
-								<field name="active"/>	
+								<field name="product_id"/>								
 								<field name="modify" invisible="1"/>				
 								<field name="moc_type"/>									
 								<field name="state" style="width: 30%%" class="att_state_change"/>								
@@ -82,7 +81,8 @@
 								<field name="line_ids_c" nolabel="1" >
 									<tree string="Fettling Process Cycle Tree" editable="top" >									
 										<field name="stage_id"/>								
-										<field name="seq_no"/>	
+										<field name="seq_no"/>
+										<field name="flag_ms"/>
 										<field name="remarks" widget="char"/>																																								
 									</tree>
 								</field>																								
@@ -90,6 +90,7 @@
 							<page string="Entry Info">
 									<group>
 										<field name="company_id"/>
+										<field name="active"/>	
 									</group>
 									<group>
 									<group>

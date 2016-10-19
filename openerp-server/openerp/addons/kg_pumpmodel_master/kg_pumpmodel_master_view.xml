@@ -62,9 +62,7 @@
 								<field name="suction_orientation" />		
 								<field name="gd_sq_value" />		
 								<field name="companion_flange" invisible="1"/>		
-								<field name="max_solid_size" invisible="1"/>		
-								
-								<field name="active"/>		
+								<field name="max_solid_size" invisible="1"/>									
 								<field name="state" style="width: 30%%" class="att_state_change"/>									
 							</group>
 						</group>
@@ -100,6 +98,7 @@
 							<page string="Entry Info">
 									<group>
 										<field name="company_id"/>
+										<field name="active"/>		
 									</group>
 									<group>
 									<group>

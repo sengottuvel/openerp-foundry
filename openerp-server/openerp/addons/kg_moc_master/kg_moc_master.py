@@ -166,14 +166,11 @@ class kg_moc_master(osv.osv):
 		res_rec=self.pool.get('res.users').browse(cr,uid,uid)		
 		rec_user = str(res_rec.login)
 		rec_pwd = str(res_rec.password)
-		rec_code = str(rec.code)
-		#~ url = 'http://iasqa1.kgisl.com/?uname='+rec_user+'&s='+rec_work_order
+		rec_code = str(rec.code)		
 		encoded_user = base64.b64encode(rec_user)
-		encoded_pwd = base64.b64encode(rec_pwd)
+		encoded_pwd = base64.b64encode(rec_pwd)		
+		url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&wo_no='+rec_code	
 		
-		url = 'http://192.168.1.7/sam-dms/login.html?xmxyypzr='+encoded_user+'&mxxrqx='+encoded_pwd+'&wo_no='+rec_code
-		
-		#url = 'http://192.168.1.150:81/pbxclick2call.php?exten='+exe_no+'&phone='+str(m_no)
 		return {
 					  'name'	 : 'Go to website',
 					  'res_model': 'ir.actions.act_url',
@@ -408,7 +405,8 @@ class ch_fettling_process(osv.osv):
 		'header_id':fields.many2one('kg.moc.master', 'Fettling Entry', required=True, ondelete='cascade'),							
 		'stage_id': fields.many2one('kg.stage.master','Name', required=True,domain="[('active','=','t')]"),	
 		'seq_no':fields.integer('Sequence',required=True),
-		'remarks':fields.text('Remarks'),	
+		'remarks':fields.text('Remarks'),
+		'flag_ms':fields.boolean('Simultaneously create MS'),
 		
 	}
 	

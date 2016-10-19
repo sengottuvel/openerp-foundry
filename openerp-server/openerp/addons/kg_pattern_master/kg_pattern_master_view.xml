@@ -58,8 +58,7 @@
 								<field name="making_cost"/>																		
 								<field name="dynamic_length"/>									
 								<field name="length_type" attrs="{'required': [('dynamic_length','=',True)]}"/>									
-								<field name="need_hydro_test"/>									
-								<field name="active"/>									
+								<field name="need_hydro_test"/>															
 								<field name="pattern_state" style="width: 50%%" class="att_state_change"/>							
 								<field name="state" style="width: 30%%" class="att_state_change"/>							
 							</group>
@@ -146,6 +145,7 @@
 							<page string="Entry Info">
 									<group>
 										<field name="company_id"/>
+										<field name="active"/>		
 									</group>
 									<group>
 									<group>
