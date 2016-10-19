@@ -461,11 +461,11 @@ class kg_purchase_amendment(osv.osv):
 						_('You can not increase PO Qty for product %s')%(amend_line.product_id.name))
 				else:
 					pass
-				if amend_line.product_id != amend_line.product_id_amend:
-					if not amend_line.kg_poindent_lines:
-						raise osv.except_osv(
-							_('If you want to change PO Product'),
-							_('Select PI for this Product')) 
+				#~ if amend_line.product_id != amend_line.product_id_amend:
+					#~ if not amend_line.kg_poindent_lines:
+						#~ raise osv.except_osv(
+							#~ _('If you want to change PO Product'),
+							#~ _('Select PI for this Product')) 
 							
 		self.write(cr,uid,ids[0],{
 								  'state':'confirm',
