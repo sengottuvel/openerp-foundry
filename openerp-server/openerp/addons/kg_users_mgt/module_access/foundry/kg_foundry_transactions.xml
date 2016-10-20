@@ -1,0 +1,893 @@
+<?xml version="1.0" ?>
+<openerp>
+<data noupdate="0">       
+        
+      
+        <!-- Planning Admin - Model Access Rights for user -->
+        
+        
+        <!-- Stock Inward Start-->
+		
+		<record id="t_foundry_stock_inward" model="ir.model.access">
+			<field name="model_id" ref="kg_stock_inward.model_kg_stock_inward"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Stock Inward</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Stock Inward End -->
+		
+		<!-- Stock Inward Child Class Start-->
+		
+		<record id="t_foundry_stock_inward_details" model="ir.model.access">
+			<field name="model_id" ref="kg_stock_inward.model_ch_stock_inward_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Stock Inward Details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Stock Inward Child Class End-->
+        
+		<!-- Work Order Start-->
+		
+		<record id="t_foundry_work_order" model="ir.model.access">
+			<field name="model_id" ref="kg_work_order.model_kg_work_order"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Work Order</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Work Order End-->
+		
+		<!-- Work Order (Child Class) Start-->
+		
+		<record id="t_foundry_ch_work_order_details" model="ir.model.access">
+			<field name="model_id" ref="kg_work_order.model_ch_work_order_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Work Order Details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Work Order (Child Class) End-->
+		
+		<!-- Work Order BOM Child Class Start --> 
+		
+		<record id="t_foundry_orderbom_details" model="ir.model.access">
+			<field name="model_id" ref="kg_work_order.model_ch_order_bom_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Order BOM Details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Work Order BOM Child Class End --> 
+		
+		
+		<!-- Work Order Machine Shop Items Start --> 
+		
+		<record id="t_foundry_order_machineshop_item" model="ir.model.access">
+			<field name="model_id" ref="kg_work_order.model_ch_order_machineshop_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Work Order Machine Shop Items</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Work Order Machine Shop Items End -->
+		
+		<!-- Work Order BOT Start --> 
+		
+		<record id="t_foundry_sch_bot" model="ir.model.access">
+			<field name="model_id" ref="kg_work_order.model_ch_order_bot_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Work Order BOT Items</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Work Order BOT End --> 
+		
+		<!-- Schedule Start -->
+		
+		<record id="t_foundry_schedule" model="ir.model.access">
+			<field name="model_id" ref="kg_schedule.model_kg_schedule"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Schedule</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Schedule End -->
+		
+		<!-- Schedule Child Class Start -->
+		
+		<record id="t_foundry_ch_schedule_details" model="ir.model.access">
+			<field name="model_id" ref="kg_schedule.model_ch_schedule_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Schedule Details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Schedule Child Class End -->
+		
+		<!-- Schedule (Allocation Details) Start -->
+		
+		<record id="t_foundry_ch_allocation_details" model="ir.model.access">
+			<field name="model_id" ref="kg_schedule.model_ch_stock_allocation_detail"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Allocation Details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Schedule (Allocation Details) End -->
+		
+		<!-- QC Verification Start -->
+		
+		<record id="t_foundry_qc_verification" model="ir.model.access">
+			<field name="model_id" ref="kg_qc_verification.model_kg_qc_verification"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">QC Verification</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- QC Verification End -->
+		
+		
+		<!-- Production Start -->
+		
+		<record id="t_foundry_production" model="ir.model.access">
+			<field name="model_id" ref="kg_production.model_kg_production"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Production</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Production End -->
+		
+		<!-- Melting Start -->
+
+		<record id="t_foundry_melting" model="ir.model.access">
+			<field name="model_id" ref="kg_melting.model_kg_melting"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Melting Log</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Melting End -->
+		
+		
+		<!-- Pouring Log Start --> 
+		
+		<record id="t_foundry_pouring_log" model="ir.model.access">
+			<field name="model_id" ref="kg_pouring_log.model_kg_pouring_log"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Pouring Log</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Pouring Log End-->
+		
+		<!-- Pouring Child Class Start --> 
+		
+		<record id="t_foundry_pouring_log_details" model="ir.model.access">
+			<field name="model_id" ref="kg_pouring_log.model_ch_pouring_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Pouring Details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Pouring Child Class End-->
+		
+		
+		<!-- Pattern Batch Issue Start --> 
+		
+		<record id="t_foundry_pattern_batch_issue" model="ir.model.access">
+			<field name="model_id" ref="kg_production.model_kg_pattern_batch_issue"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Pattern Batch Issue</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Pattern Batch Issue End --> 
+		
+		<!-- Pattern Batch Issue Line Start--> 
+		
+		<record id="t_foundry_pattern_batch_issue_line" model="ir.model.access">
+			<field name="model_id" ref="kg_production.model_ch_pattern_batch_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Pattern Batch Issue Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Pattern Batch Issue Line End --> 
+		
+		<!-- Core Batch Start--> 
+		
+		<record id="t_foundry_core_batch" model="ir.model.access">
+			<field name="model_id" ref="kg_production.model_kg_core_batch"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Core Batch</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Core Batch Ends--> 
+		
+		<!-- Core Batch Line Start --> 
+		
+		<record id="t_foundry_core_batch_line" model="ir.model.access">
+			<field name="model_id" ref="kg_production.model_ch_core_batch_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Core Batch Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Core Batch Ends--> 
+		
+		<!-- Mould Batch Start --> 
+		
+		<record id="t_foundry_mould_batch" model="ir.model.access">
+			<field name="model_id" ref="kg_production.model_kg_mould_batch"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Mould Batch</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Mould Batch Ends--> 
+		
+		<!-- Mould Batch Line Start --> 
+		
+		<record id="t_foundry_mould_batch_line" model="ir.model.access">
+			<field name="model_id" ref="kg_production.model_ch_mould_batch_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Mould Batch Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Core Batch Ends-->
+		
+		<!-- Foundry Stock Start -->
+		
+		<record id="t_foundry_foundry_stock" model="ir.model.access">
+			<field name="model_id" ref="kg_foundry_stock.model_kg_foundry_stock"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Foundry Stock</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Foundry Stock End -->
+		
+		
+		<!-- Fettling Inward Start --> 
+		
+		<record id="t_foundry_fettling" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_kg_fettling"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Pouring Details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Fettling Inward End-->
+		
+		
+		<!-- Fettling Batch Accept Start --> 
+		
+		<record id="t_foundry_fettling_batch_accept" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_kg_fettling_batch_accept"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Fettling Batch Accept</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Fettling Batch Accept End -->
+		
+		
+		<!-- Fettling Batch Accept Line Start --> 
+		
+		<record id="t_foundry_fettling_batch_accept_line" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_ch_fettling_batch_accept_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Fettling Batch Accept Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Fettling Batch Accept End -->
+		
+		<!-- Batch Knock Out Batch Start --> 
+		
+		<record id="t_foundry_batch_knock_out" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_kg_batch_knock_out"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Knock Out Batch</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Batch Knock Out End -->
+		
+		
+		<!-- Batch Knock Out Line Start --> 
+		
+		<record id="t_foundry_batch_knock_out_line" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_ch_batch_knockout_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Knock Out Batch Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Batch Knock Out Line End -->
+		
+		<!-- Batch Decoring Batch Start --> 
+		
+		<record id="t_foundry_batch_decoring" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_kg_batch_decoring"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Decoring Batch</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Batch Decoring End -->
+		
+		
+		<!-- Batch Decoring Line Start --> 
+		
+		<record id="t_foundry_batch_decoring_line" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_ch_batch_decoring_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Decoring Batch Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Batch Decoring Line End -->
+		
+		<!-- Batch Shot Blast Batch Start --> 
+		
+		<record id="t_foundry_batch_shot_blast" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_kg_batch_shot_blast"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Shot Blast Batch</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Batch Shot Blast End -->
+		
+		
+		<!-- Batch Shot Blast Line Start --> 
+		
+		<record id="t_foundry_batch_shot_blast_line" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_ch_batch_shot_blast_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Shot Blast Batch Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Batch Shot Blast Line End -->
+		
+		
+		<!-- Batch Hammering Batch Start --> 
+		
+		<record id="t_foundry_batch_hammering" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_kg_batch_hammering"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Hammering Batch</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Batch Hammering End -->
+		
+		
+		<!-- Batch Hammering Line Start --> 
+		
+		<record id="t_foundry_batch_hammering_line" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_ch_batch_hammering_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Hammering Batch Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Batch Hammering Line End -->
+		
+		<!-- Batch Wheel Cutting Batch Start --> 
+		
+		<record id="t_foundry_wheel_cutting" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_kg_batch_wheel_cutting"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Wheel Cutting Batch</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Batch Wheel Cutting End -->
+		
+		
+		<!-- Batch Wheel Cutting Line Start --> 
+		
+		<record id="t_foundry_batch_wheel_cutting_line" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_ch_batch_wheel_cutting_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Wheel Cutting Batch Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Batch Wheel Cutting Line End -->
+		
+		<!-- Batch Gas Cutting Batch Start --> 
+		
+		<record id="t_foundry_gas_cutting" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_kg_batch_gas_cutting"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Gas Cutting Batch</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Batch Gas Cutting End -->
+		
+		
+		<!-- Batch Gas Cutting Line Start --> 
+		
+		<record id="t_foundry_batch_gas_cutting_line" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_ch_batch_gas_cutting_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Gas Cutting Batch Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Batch Gas Cutting Line End -->
+		
+		<!-- Batch Arc Cutting Batch Start --> 
+		
+		<record id="t_foundry_arc_cutting" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_kg_batch_arc_cutting"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Arc Cutting Batch</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Batch Arc Cutting End -->
+		
+		
+		<!-- Batch Arc Cutting Line Start --> 
+		
+		<record id="t_foundry_batch_arc_cutting_line" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_ch_batch_arc_cutting_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Arc Cutting Batch Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Batch Arc Cutting Line End -->
+		
+		<!-- Batch Rough Grinding Batch Start --> 
+		
+		<record id="t_foundry_rough_grinding" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_kg_batch_rough_grinding"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Rough Grinding Batch</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Batch Rough Grinding End -->
+		
+		
+		<!-- Batch Rough Grinding Line Start --> 
+		
+		<record id="t_foundry_batch_rough_grinding_line" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_ch_batch_rough_grinding_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Rough Grinding Batch Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Batch Rough Grinding Line End -->
+		
+		<!-- Batch Finish Grinding Batch Start --> 
+		
+		<record id="t_foundry_finish_grinding" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_kg_batch_finish_grinding"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Finish Grinding Batch</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Batch Finish Grinding End -->
+		
+		
+		<!-- Batch Rough Grinding Line Start --> 
+		
+		<record id="t_foundry_batch_rough_grinding_line" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_ch_batch_rough_grinding_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Rough Grinding Batch Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Batch Rough Grinding Line End -->
+		
+		<!-- Melting Log Charge Details Line Start --> 
+		
+		<record id="t_melting_log_line_a" model="ir.model.access">
+			<field name="model_id" ref="kg_melting.model_ch_melting_charge_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Melting Log Charge Details Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Melting Log Charge Details Line End -->
+		
+		<!-- Melting Log Chemistry Details Line Start --> 
+		
+		<record id="t_melting_log_line_b" model="ir.model.access">
+			<field name="model_id" ref="kg_melting.model_ch_melting_chemistry_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Melting Log Chemistry Details Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Melting Log Chemistry Details Line End -->
+		
+		<!-- Department Indent Start --> 
+		
+		<record id="t_foundry_dep_indent" model="ir.model.access">
+			<field name="model_id" ref="kg_depindent.model_kg_depindent"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Dep Indent</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Department Indent End -->
+		
+		<!-- Department Indent Line Start --> 
+		
+		<record id="t_foundry_dep_indent_line" model="ir.model.access">
+			<field name="model_id" ref="kg_depindent.model_kg_depindent_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Dep Indent Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Department Indent LINE End -->
+		
+		<!-- Department Indent WO Line Start --> 
+		
+		<record id="t_foundry_dep_indent_wo_line" model="ir.model.access">
+			<field name="model_id" ref="kg_depindent.model_ch_depindent_wo"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Dep Indent WO Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Department Indent WO LINE End -->
+		
+		<!-- WO Amendment Start --> 
+		
+		<record id="t_foundry_wo_amendment" model="ir.model.access">
+			<field name="model_id" ref="kg_wo_amendment.model_kg_wo_amendment"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">WO Amendment</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- WO Amendment End -->
+		
+		
+		<!-- Work Order Amendment (Child Class) Start-->
+		
+		<record id="t_foundry_ch_amend_work_order_details" model="ir.model.access">
+			<field name="model_id" ref="kg_wo_amendment.model_ch_amend_work_order_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">WO Amendment Details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Work Order Amendment  (Child Class) End-->
+		
+		<!-- Work Order Amendment  BOM Child Class Start --> 
+		
+		<record id="t_foundry_orderbom_details" model="ir.model.access">
+			<field name="model_id" ref="kg_wo_amendment.model_ch_amend_order_bom_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Order BOM Details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Work Order Amendment  BOM Child Class End --> 
+		
+		
+		<!-- Work Order Amendment  Machine Shop Items Start --> 
+		
+		<record id="t_foundry_order_machineshop_item" model="ir.model.access">
+			<field name="model_id" ref="kg_wo_amendment.model_ch_amend_order_machineshop_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Work Order Machine Shop Items</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Work Order Amendment  Machine Shop Items End -->
+		
+		<!-- Work Order Amendment  BOT Start --> 
+		
+		<record id="t_foundry_sch_bot" model="ir.model.access">
+			<field name="model_id" ref="kg_wo_amendment.model_ch_amend_order_bot_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Work Order BOT Items</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Work Order Amendment  BOT End --> 
+		
+		<!-- Batch Welding Batch Start --> 
+		
+		<record id="t_foundry_batch_welding" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_kg_batch_welding"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Welding Batch</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Batch Welding End -->
+		
+		
+		<!-- Batch Welding Line Start --> 
+		
+		<record id="t_foundry_batch_welding_line" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_ch_batch_welding_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Welding Batch Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Batch Welding Line End -->
+		
+		<!-- Batch Heat Treatment Batch Start --> 
+		
+		<record id="t_foundry_batch_heat_treatment" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_kg_batch_heat_treatment"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Heat Treatment Batch</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Batch Heat Treatment End -->
+		
+		
+		<!-- Batch Heat Treatment Line Start --> 
+		
+		<record id="t_foundry_batch_heat_treatment_line" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_ch_batch_heat_treatment_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Heat Treatment Batch Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Batch Heat Treatment Line End -->
+		
+		<!-- Batch Re Shot Blasting Batch Start --> 
+		
+		<record id="t_foundry_batch_reshot_blasting" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_kg_batch_reshot_blasting"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Re Shot Blasting Batch</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Batch Re Shot Blasting End -->
+		
+		
+		<!-- Batch Re Shot Blasting Line Start --> 
+		
+		<record id="t_foundry_batch_reshot_blasting_line" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_ch_batch_reshot_blasting_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Re Shot Blasting Batch Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Batch Re Shot Blasting Line End -->
+		
+		
+    </data>
+</openerp>
+	

@@ -1,0 +1,358 @@
+<?xml version="1.0" ?>
+<openerp>
+<data noupdate="0"> 
+
+		<record id="m_purchase_depmasters" model="ir.model.access">
+			<field name="model_id" ref="kg_depmaster.model_kg_depmaster"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Department</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+
+		<record id="m_purchase_divisions" model="ir.model.access">
+			<field name="model_id" ref="kg_division_master.model_kg_division_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Division Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+
+		<record id="m_purchase_holidays" model="ir.model.access">
+			<field name="model_id" ref="kg_holiday_master.model_kg_holiday_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Holiday Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+		
+		<record id="m_purchase_holiday_lines" model="ir.model.access">
+			<field name="model_id" ref="kg_holiday_master.model_kg_holiday_master_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Holiday Master Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+		
+		<record id="m_purchase_brand_masters" model="ir.model.access">
+			<field name="model_id" ref="kg_po_masters.model_kg_brand_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Brand Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+			
+		<record id="m_purchase_delivery_masters" model="ir.model.access">
+			<field name="model_id" ref="kg_po_masters.model_kg_delivery_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Delivery Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+			
+		<record id="m_purchase_payment_masters" model="ir.model.access">
+			<field name="model_id" ref="kg_po_masters.model_kg_payment_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Payment Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+			
+		<record id="m_purchase_industry_masters" model="ir.model.access">
+			<field name="model_id" ref="kg_industry_master.model_kg_industry_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Industry Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+			
+		<record id="m_purchase_outwards" model="ir.model.access">
+			<field name="model_id" ref="kg_outwardmaster.model_kg_outwardmaster"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Outward Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+		
+		<record id="m_purchase_account_invoice_taxs" model="ir.model.access">
+			<field name="model_id" ref="account.model_account_invoice_tax"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Account Invoice Tax</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+		
+		<record id="m_purchase_account_periods" model="ir.model.access">
+			<field name="model_id" ref="account.model_account_period"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Account Period</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+		
+		<record id="m_purchase_account_accounts" model="ir.model.access">
+			<field name="model_id" ref="account.model_account_account"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Account</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+		
+		<record id="m_purchase_product_products" model="ir.model.access">
+			<field name="model_id" ref="product.model_product_product"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Product</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+		
+		<record id="m_purchase_product_templates" model="ir.model.access">
+			<field name="model_id" ref="product.model_product_template"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Product Template</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+		
+		<record id="m_purchase_product_uom_names" model="ir.model.access">
+			<field name="model_id" ref="product.model_product_uom"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Product UOM</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+		
+		<record id="m_purchase_delivery_type_masters" model="ir.model.access">
+			<field name="model_id" ref="kg_deliverytype_master.model_kg_deliverytype_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Delivery Type Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+		
+		<record id="m_purchase_product_pricelists" model="ir.model.access">
+			<field name="model_id" ref="product.model_product_pricelist"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Product Price List</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+		
+		<record id="m_purchase_res_countrys" model="ir.model.access">
+			<field name="model_id" ref="base.model_res_country"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Country</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+		
+		<record id="m_purchase_res_country_state" model="ir.model.access">
+			<field name="model_id" ref="base.model_res_country_state"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">State</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+		
+		<record id="m_purchase_res_city_master" model="ir.model.access">
+			<field name="model_id" ref="base.model_res_city"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">City</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+		
+		<record id="m_purchase_consultant_fee_master" model="ir.model.access">
+			<field name="model_id" ref="kg_partners.model_kg_consultant_fee"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Consultant Fee</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+		
+		<record id="m_purchase_product_supplierinfos" model="ir.model.access">
+			<field name="model_id" ref="product.model_product_supplierinfo"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Product Supplierinfo</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+		
+		<record id="m_purchase_product_categorys" model="ir.model.access">
+			<field name="model_id" ref="product.model_product_category"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Product Category</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+		
+		<record id="m_purchase_tax_structures" model="ir.model.access">
+			<field name="model_id" ref="kg_tax_structure.model_kg_tax_structure"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Tax Structure</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+		
+		<record id="m_purchase_tax_structure_lines" model="ir.model.access">
+			<field name="model_id" ref="kg_tax_structure.model_kg_tax_structure_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Tax Structure Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+		
+		<record id="m_purchase_delivery_address_master" model="ir.model.access">
+			<field name="model_id" ref="kg_partners.model_kg_delivery_address"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Delivery Adress</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+		
+		<record id="m_purchase_billing_address_master" model="ir.model.access">
+			<field name="model_id" ref="kg_partners.model_kg_billing_address"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Billing Adress</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+		
+		<record id="m_purchase_project_master_users" model="ir.model.access">
+			<field name="model_id" ref="kg_project_master.model_kg_project_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Project</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>		
+		
+		<record id="m_purchase_transport_masters" model="ir.model.access">
+			<field name="model_id" ref="kg_transport.model_kg_transport"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Transport</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>		
+		
+		<record id="m_purchase_transport_line_masters" model="ir.model.access">
+			<field name="model_id" ref="kg_transport.model_kg_transport_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Transport Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+		
+		<record id="m_purchase_moc_masters" model="ir.model.access">
+			<field name="model_id" ref="kg_moc_master.model_kg_moc_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">MOC Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+		
+		<record id="m_purchase_expense_masters" model="ir.model.access">
+			<field name="model_id" ref="kg_expense_master.model_kg_expense_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">kg expense master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+		
+		<record id="m_purchase_brandmoc_rate_masters" model="ir.model.access">
+			<field name="model_id" ref="kg_brandmoc_rate.model_kg_brandmoc_rate"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Brand Moc Rate</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+		
+		<record id="m_purchase_brandmoc_rate_details_masters" model="ir.model.access">
+			<field name="model_id" ref="kg_brandmoc_rate.model_ch_brandmoc_rate_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Brand Moc Rate Details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+		
+		<record id="m_purchase_item_quality_masters" model="ir.model.access">
+			<field name="model_id" ref="kg_item_quality_master.model_kg_item_quality_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Item Quality</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Purchase Admin')]"/>
+		</record>
+		
+		
+		
+</data>
+</openerp>

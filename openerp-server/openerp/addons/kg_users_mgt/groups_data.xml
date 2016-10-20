@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data noupdate="0">
+	
+	
+	<!-- Planning Admin Group -->
+	
+    <record id="group_planning_admin" model="res.groups">
+		<field name="name">Planning Admin</field> 
+		<field name="custom_group">True</field>         
+		<field name="category_id" ref="base.module_category_manufacturing"/>
+        <field eval="[(6,0,[
+			ref('kg_pumpmodel_master.mpm_masters'),
+            ref('kg_pumpmodel_master.mpm_planning_master'),              
+            ref('kg_pumpmodel_master.mam_pumpmodel_master'),
+          
+            ref('kg_stage_master.mam_stage_master'),
+            ref('kg_moc_master.mam_moc_master'),
+            ref('kg_division_master.mam_division_master'),
+            ref('kg_bom.mam_bom_master'),
+            ref('kg_machine_shop.mam_machineshop_ms_master'),
+            ref('kg_machine_shop.mam_machineshop_bot_master'),
+            ref('kg_bom_amendment.mam_bom_amendment'),
+            ref('kg_box_master.mam_box_master'),
+            ref('kg_chemical_master.mam_chemical_master'),
+            ref('kg_mechanical_master.mam_mechanical_master'),
+            ref('kg_moc_construction.mam_mocconstruction_master'),           
+            ref('kg_bom.mam_bom_details'),
+            ref('kg_brandmoc_rate.mam_brandmocrate_design_master'),
+            ref('kg_shift_master.mam_shift_master'),
+            ref('kg_contractor_category.mam_contractor_category_master'),            
+            ref('kg_rejection_master.mam_rejection_master'),
+            ref('kg_moc_category.mam_moc_category_master'),
+            ref('kg_accessories_master.mam_accessories_master_menu'),
+            ref('kg_rate_revision.mam_rate_revision_master'),
+          
+            
+            ref('kg_stock_inward.tpm_transactions'),
+            ref('kg_stock_inward.tpm_planning_transactions'),
+            ref('kg_stock_inward.tam_stock_inward'),
+            ref('kg_work_order.tam_work_order'),
+            ref('kg_schedule.tam_schedule'),
+            ref('kg_qc_verification.tam_qc_verification'),
+            ref('kg_production.tam_production'),
+            ref('kg_production.tam_pattern_issue'),
+            ref('kg_production.tpm_batch_entries'),
+            ref('kg_production.tam_pattern_batch_issue'),
+            ref('kg_production.tam_core_log'),
+            ref('kg_production.tam_core_batch'),
+            ref('kg_production.tam_mould_log'),
+            ref('kg_production.tam_mould_batch'),
+           
+            
+           
+            ref('kg_fettling.tam_fettling_inward'),           
+            ref('kg_fettling.tam_batch_fettling_accept'),
+                      
+            
+            ref('kg_menus.rpm_reports'),
+            ref('kg_menus.rpm_planning_reports'),
+            ref('kg_menus.kg_dash_board'),
+            ref('kg_menus.ram_schedule_register'),
+            ref('kg_menus.ram_planning_register'),
+            ref('kg_menus.ram_qc_register'),
+            ref('kg_menus.ram_production_register'),
+            ref('kg_menus.ram_allotted_components'),
+            ref('kg_menus.ram_stock_statement'),
+            
+            
+            ref('kg_sale_invoice.menu_kg_sale_root'),
+            ref('kg_sale_invoice.menu_sale_parent'),
+            ref('kg_sale_invoice.kg_draft_bill_menu'),
+            ref('kg_sale_invoice.kg_draft_bill_menus'),
+           
+            
+            
+            ])]" name="menu_access"/>
+		<field name="users" eval="[(4, ref('base.user_root'))]"/>
+            
+    </record>
+    
+    <!-- Planning Master Access Group -->
+	
+    <record id="group_planning_master_access" model="res.groups">
+		<field name="name">Planning Master Access</field> 
+		<field name="custom_group">True</field>         
+		<field name="category_id" ref="base.module_category_manufacturing"/>
+        <field eval="[(6,0,[
+			ref('kg_pumpmodel_master.mpm_masters'),
+            ref('kg_pumpmodel_master.mpm_planning_master'),              
+            ref('kg_pumpmodel_master.mam_pumpmodel_master'),
+            ref('kg_menus.mam_uom_master'),
+            ref('kg_stage_master.mam_stage_master'),
+            ref('kg_moc_master.mam_moc_master'),
+            ref('kg_division_master.mam_division_master'),
+            ref('kg_bom.mam_bom_master'),
+            ref('kg_machine_shop.mam_machineshop_ms_master'),
+            ref('kg_machine_shop.mam_machineshop_bot_master'),
+            ref('kg_bom_amendment.mam_bom_amendment'),
+            ref('kg_box_master.mam_box_master'),
+            ref('kg_chemical_master.mam_chemical_master'),
+            ref('kg_mechanical_master.mam_mechanical_master'),
+            ref('kg_moc_construction.mam_mocconstruction_master'),           
+            ref('kg_bom.mam_bom_details'),
+            ref('kg_brandmoc_rate.mam_brandmocrate_design_master'),
+            ref('kg_shift_master.mam_shift_master'),
+            ref('kg_contractor_category.mam_contractor_category_master'),            
+            ref('kg_rejection_master.mam_rejection_master'),
+                
+            
+            
+            
+            
+            ])]" name="menu_access"/>
+		<field name="users" eval="[(4, ref('base.user_root'))]"/>
+            
+    </record> 
+    
+   <record id="group_purchase_admin" model="res.groups">
+        <field name="name">Purchase Admin</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="custom_group">True</field>       
+        <field name="category_id" ref="base.module_category_purchase_management"/>
+        <field eval="[(6,0,[
+       
+			ref('base.menu_purchase_root'),
+			ref('account.menu_action_invoice_tree2'),
+			ref('purchase.menu_procurement_management'),
+			ref('kg_menus.pam_po_amendment'),
+			ref('kg_menus.spm_service_order_menu'),
+			ref('kg_menus.sam_so_amendment'),
+			ref('kg_menus.mam_so_manual_closing'),
+			ref('kg_menus.ipm_indent'),
+			ref('kg_menus.ipm_dep_indent_menu'),
+			ref('kg_menus.iam_depindent'),
+			ref('kg_menus.ipm_service_indent_menu'),
+			ref('kg_menus.iam_service_indent'),
+			ref('kg_menus.ipm_purchase_indent_menu'),
+			ref('kg_menus.iam_pruchase_indent'),
+			ref('kg_menus.iam_depindent_line'),
+			ref('kg_menus.iam_pruchase_indent_line'),
+			
+			ref('kg_menus.ppm_master_menu'),
+			ref('kg_menus.mam_supplier_master'),
+			ref('kg_menus.mam_product_master'),
+			ref('kg_menus.kg_product_catg_master'),
+			ref('kg_menus.mam_uom_master'),
+			ref('kg_menus.mam_payment_master'),
+			ref('kg_menus.mam_delivery_master'),
+			ref('kg_menus.mam_po_master'),
+			ref('kg_menus.kg_country_master'),
+			ref('kg_menus.kg_state_master'),
+			ref('kg_menus.mam_city_master'),
+			ref('kg_menus.mam_transport_master'),
+			ref('kg_menus.mam_brandmocrate_purchase_master'),
+			ref('kg_menus.mam_expense_master'),
+			ref('kg_menus.mam_dispatch_master'),
+			ref('kg_menus.mam_item_quality_master'),
+			
+			ref('kg_menus.qpm_quotations_menu'),
+			ref('kg_menus.qam_quotation'),
+			ref('kg_menus.qam_quotation_submit'),
+			ref('kg_menus.qam_quotation_comp'),
+			
+			ref('kg_menus.pam_purchase_order'),
+			ref('purchase.menu_purchase_form_action'),
+			ref('kg_menus.sam_service_order'),
+			ref('kg_menus.pam_purchase_order_line'),
+			
+			ref('kg_menus.apm_advance_menu'),
+			ref('kg_menus.aam_po_advance'),
+			ref('kg_supplier_advance.tam_sup_advance'),
+			ref('kg_menus.aam_so_advance'),
+			
+			ref('kg_menus.rpm_report_menu'),
+			ref('kg_menus.rpm_excel_report_menu'),
+			ref('kg_menus.ram_excel_po_register_reports'),
+			
+            ])]" name="menu_access"/>
+            <field name="users" eval="[(4, ref('base.user_root'))]"/>
+    </record>
+    
+    
+    <record id="group_purchase_master_admin" model="res.groups">
+        <field name="name">Purchase Master Admin</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="custom_group">True</field>       
+        <field name="category_id" ref="base.module_category_purchase_management"/>
+        <field eval="[(6,0,[
+       
+			ref('base.menu_purchase_root'),
+			
+			ref('kg_menus.ppm_master_menu'),
+			ref('kg_menus.mam_supplier_master'),
+			ref('kg_menus.mam_product_master'),
+			ref('kg_menus.kg_product_catg_master'),
+			ref('kg_menus.mam_uom_master'),
+			ref('kg_menus.mam_payment_master'),
+			ref('kg_menus.mam_delivery_master'),
+			ref('kg_menus.mam_po_master'),
+			ref('kg_menus.kg_country_master'),
+			ref('kg_menus.kg_state_master'),
+			ref('kg_menus.mam_city_master'),
+			ref('kg_menus.mam_transport_master'),
+			ref('kg_menus.mam_brandmocrate_purchase_master'),
+			ref('kg_menus.mam_expense_master'),
+			ref('kg_menus.mam_dispatch_master'),
+			ref('kg_menus.mam_item_quality_master'),
+			
+			
+            ])]" name="menu_access"/>
+            <field name="users" eval="[(4, ref('base.user_root'))]"/>
+    </record>   
+   
+    
+    <record id="group_vendor_quote" model="res.groups">
+        <field name="name">Vendor Quote</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="category_id" ref="base.module_category_purchase_management"/>
+        <field name="custom_group">True</field>    
+        <field eval="[(6,0,[
+			
+			ref('kg_quotation.menu_kg_vendor_quote_parent'), 
+			ref('kg_quotation.menu_kg_vendor_quote_header'), 
+			ref('kg_quotation.kg_rfq_vendor_quote_menu'),        
+			ref('account.menu_action_invoice_tree2'),
+			
+			])]" name="menu_access"/>
+			<field name="users" eval="[(4, ref('base.user_root'))]"/>
+    </record>
+    
+    <record id="group_inventory_admin" model="res.groups">
+        <field name="name">Inventory Admin</field>
+        <field name="category_id" ref="base.module_category_warehouse_management"/>
+        <field name="custom_group">True</field>       
+        <field name="implied_ids" eval="[(4, ref('stock.group_stock_user'))]"/>
+        
+        <field eval="[(6,0,[
+       
+			ref('account.menu_action_invoice_tree2'),
+			ref('kg_menus.aam_service_invoice'),	
+			ref('stock.menu_stock_root'),
+			ref('kg_menus.ipm_indent'),
+			ref('kg_menus.ipm_dep_indent_menu'),
+			ref('kg_menus.iam_depindent'),
+			ref('kg_menus.rpm_report_menu'),	
+			ref('kg_menus.ipm_service_indent_menu'),
+			ref('kg_menus.iam_service_indent'),
+			ref('kg_menus.ipm_purchase_indent_menu'),
+			ref('kg_menus.iam_pruchase_indent'),
+			
+			ref('kg_menus.mpm_store_master'),
+			ref('kg_menus.menu_depmaster_action_form'),
+			ref('kg_menus.mam_inward_master'),
+			ref('kg_menus.mam_outward_master'),
+			ref('kg_menus.mam_inventory_master'),
+			
+			
+			ref('kg_menus.gpm_grn_issue_menu'),
+			ref('kg_menus.gam_general_grn'),
+			ref('kg_menus.gam_po_grn'),
+			ref('kg_menus.gam_dept_issue'),
+			ref('kg_menus.gam_bot_issue'),
+			ref('kg_menus.gam_ms_issue'),
+			ref('kg_menus.iam_issue_return'),
+			
+			
+			ref('kg_menus.gpm_gate_pass_menu'),
+			ref('kg_menus.gam_gate_pass'),
+			
+			ref('kg_menus.ppm_purchase_invoice_menu'),
+			ref('kg_menus.pam_purchase_invoice'),
+			
+			ref('kg_menus.cpm_contractor_inward_menu'),
+			ref('kg_menus.cam_contractor'),
+			
+			ref('kg_menus.mpm_manual_closing_menu'),
+			ref('kg_menus.mam_po_manual_closing'),
+			ref('kg_menus.mam_so_manual_closing'),
+			
+			ref('kg_menus.ipm_item_ledger_menu'),
+			ref('kg_menus.iam_item_ledger'),
+			
+			ref('kg_menus.rpm_str_reports'),
+			ref('kg_menus.ram_closing_stock'),
+			
+            ])]" name="menu_access"/>
+<!--
+            ref('kg_menus.gam_grn_register'),
+			ref('kg_menus.iam_physical_stock'),
+			ref('kg_menus.gam_consumption_entry'),
+-->
+            <field name="users" eval="[(4, ref('base.user_root'))]"/>
+    </record>
+     
+    <record id="group_inventory_master_admin" model="res.groups">
+        <field name="name">Inventory Master Admin</field>
+        <field name="implied_ids" eval="[(4, ref('stock.group_stock_user'))]"/>
+        <field name="custom_group">True</field>       
+        <field name="category_id" ref="base.module_category_warehouse_management"/>
+        <field eval="[(6,0,[
+       
+			ref('stock.menu_stock_root'),
+			
+			ref('kg_menus.mpm_store_master'),
+			ref('kg_menus.menu_depmaster_action_form'),
+			ref('kg_menus.mam_inward_master'),
+			ref('kg_menus.mam_outward_master'),
+			ref('kg_menus.mam_inventory_master'),
+			
+            ])]" name="menu_access"/>
+            <field name="users" eval="[(4, ref('base.user_root'))]"/>
+    </record>
+    
+    <record id="group_machineshop_master_admin" model="res.groups">
+        <field name="name">Machineshop Master Admin</field>
+        <field name="implied_ids" eval="[(4, ref('stock.group_stock_user'))]"/>
+        <field name="custom_group">True</field>       
+        <field name="category_id" ref="base.module_category_warehouse_management"/>
+        <field eval="[(6,0,[
+       
+			ref('kg_menus.mpm_crm'),
+			
+			ref('kg_menus.mpm_ms_master_menu'),
+			ref('kg_menus.mam_operation_master_menu'),
+			ref('kg_menus.mam_dimension_master_menu'),
+			ref('kg_menus.mam_position_number_menu'),
+			
+            ])]" name="menu_access"/>
+            <field name="users" eval="[(4, ref('base.user_root'))]"/>
+    </record>
+    
+    
+      <!-- CRM Admin Group-->
+    
+	 <record id="group_kg_crm_admin1" model="res.groups">
+        <field name="name">CRM Admin</field>
+        <field name="custom_group">True</field> 
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="category_id" ref="base.module_category_purchase_management"/>
+        <field eval="[(6,0,[
+       
+			ref('kg_menus.cpm_crm'),
+			ref('kg_menus.cpm_crm_master_menu'),
+			ref('kg_menus.cam_crm_customer_master'),
+			ref('kg_menus.cam_crm_dealer_master'),
+			ref('kg_menus.cam_crm_country_master'),
+			ref('kg_menus.cam_crm_state_master'),
+			ref('kg_menus.cam_crm_city_master'),
+			ref('kg_menus.cam_crm_chemical_master'),
+			ref('kg_menus.cam_crm_industry_master'),
+			ref('kg_menus.cpm_crm_enquiry_menu'),
+			ref('kg_menus.tma_crm_enquiry'),
+			ref('kg_menus.tma_crm_offer'),
+			ref('kg_menus.tma_service_enquiry'),
+			ref('kg_menus.mam_defect_master_menu'),
+			ref('kg_menus.tma_site_visit_pending'),
+			ref('kg_menus.tma_site_visit_plan'),
+			ref('kg_menus.tma_ch_site_visit_plan'),
+			
+			
+			
+            ])]" name="menu_access"/>
+            <field name="users" eval="[(4, ref('base.user_root'))]"/>
+    </record>    
+   
+    
+    <!-- Warehouse Groups -->
+
+    <record id="group_sam_sub_store_user" model="res.groups">
+        <field name="name">Sub Store User</field>
+        <field name="custom_group">True</field> 
+        <field name="category_id" ref="base.module_category_warehouse_management"/>
+       <!-- <field name="implied_ids" eval="[(4, ref('stock.group_stock_user'))]"/> -->
+        <field eval="[(6,0,[
+       			
+			ref('kg_menus.ipm_indent'),
+			ref('kg_menus.ipm_dep_indent_menu'),
+			ref('kg_menus.iam_depindent'),
+			ref('kg_menus.ipm_service_indent_menu'),
+			ref('kg_menus.iam_service_indent'),
+			ref('stock.menu_stock_root'),
+			
+            ])]" name="menu_access"/>
+            <field name="users" eval="[(4, ref('base.user_root'))]"/>
+    </record>
+
+    <record id="group_sam_main_store_user" model="res.groups">
+        <field name="name">Main Store User</field>
+        <field name="custom_group">True</field> 
+        <field name="category_id" ref="base.module_category_warehouse_management"/>
+        <field name="implied_ids" eval="[(4, ref('stock.group_stock_user'))]"/>
+        
+        <field eval="[(6,0,[
+       
+			ref('base.menu_purchase_root'),
+			ref('account.menu_action_invoice_tree2'),
+			ref('kg_menus.aam_service_invoice'),	
+			ref('stock.menu_stock_root'),
+			ref('kg_menus.ipm_indent'),
+			ref('kg_menus.ipm_dep_indent_menu'),
+			ref('kg_menus.iam_depindent'),
+			ref('kg_menus.ram_product_reg'),
+			ref('kg_menus.rpm_report_menu'),	
+			ref('kg_menus.gam_po_grn'),
+			ref('kg_menus.gam_general_grn'),
+			
+			
+            ])]" name="menu_access"/>
+            <field name="users" eval="[(4, ref('base.user_root'))]"/>
+    </record>
+    
+    
+</data>
+</openerp>
