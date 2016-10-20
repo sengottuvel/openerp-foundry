@@ -399,9 +399,7 @@
 			ref('stock.menu_stock_root'),
 			ref('kg_menus.ipm_indent'),
 			ref('kg_menus.ipm_dep_indent_menu'),
-			ref('kg_menus.iam_depindent'),
-			ref('kg_menus.ram_product_reg'),
-			ref('kg_menus.rpm_report_menu'),	
+			ref('kg_menus.iam_depindent'),				
 			ref('kg_menus.gam_po_grn'),
 			ref('kg_menus.gam_general_grn'),
 			
