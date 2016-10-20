@@ -71,6 +71,7 @@ class groups(osv.osv):
 		'comment' : fields.text('Comment', size=250, translate=True),
 		'category_id': fields.many2one('ir.module.category', 'Application', select=True),
 		'full_name': fields.function(_get_full_name, type='char', string='Group Name', fnct_search=_search_group),
+		'custom_group': fields.boolean('Custom Group'),
 	}
 
 	_sql_constraints = [
