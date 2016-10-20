@@ -266,15 +266,19 @@
 			<menuitem id="rpm_report_menu" name="Reports" parent="base.menu_purchase_root" sequence="6"/>
 				 
 				 <!-- PO Menu -->
+<!--
 				<menuitem name="PO Register" parent="rpm_report_menu" action="kg_po_reports.action_po_stm_report" id="ram_po_register_reports" sequence="1"/>
+-->
 				
 				<!-- SO Menu -->
+<!--
 				<menuitem name="SO Register" parent="rpm_report_menu" action="kg_po_reports.action_so_stm_report" id="ram_po_register_report" sequence="2"/>
+-->
 			
 			<menuitem id="rpm_excel_report_menu" name="Excel Reports" parent="base.menu_purchase_root" sequence="7"/>
 				
 				<!-- PO Menu -->
-				<menuitem name="PO Register" parent="rpm_excel_report_menu" action="kg_po_reports.action_po_reg_report" id="ram_excel_po_register_reports" sequence="1"/>
+				<menuitem name="PO Register" parent="rpm_excel_report_menu" action="kg_reports.ram_po_reg_excel_report" id="ram_excel_po_register_reports" sequence="1"/>
 				 	 
 		<!-- Warehouse Menu -->
 		        
@@ -371,37 +375,57 @@
             <menuitem name="Reports" id="rpm_str_reports" parent = "stock.menu_stock_root" sequence="7"/>
             
 				<!-- Product Register Menu -->
+<!--
 				<menuitem name="Product Register" parent="rpm_str_reports" action="kg_store_reports.action_kg_product_reg_wizard" id="ram_product_reg" sequence="1"/>
+-->
 				
 				<!-- Supplier Register Menu -->
+<!--
 				<menuitem name="Supplier Register" parent="rpm_str_reports" action="kg_store_reports.action_kg_supplier_reg_wizard" id="ram_supplier_reg" sequence="2"/>
+-->
 				
 				<!-- Product Warranty Menu -->
+<!--
 				<menuitem name="Product Warranty Report" parent="rpm_str_reports" action="kg_store_reports.action_kg_product_warranty_report" id="ram_product_warranty" sequence="3"/>
+-->
 				
 				<!-- Service Indent Regsiter Menu -->
+<!--
 				<menuitem name="Service Indent Register" parent="rpm_str_reports" action="kg_store_reports.action_kg_serindent_detail_wizard" id="ram_service_indent" sequence="4"/>
+-->
 				
 				<!-- Service Indent Regsiter Menu -->
+<!--
 				<menuitem name="Department Indent Register" parent="rpm_str_reports" action="kg_store_reports.action_kg_depindent_detail_wizard" id="ram_department_indent" sequence="5"/>
+-->
 				
 				<!-- Purchase Indent Regsiter Menu -->
+<!--
 				<menuitem name="Purchase Indent Register" parent="rpm_str_reports" action="kg_store_reports.action_kg_pi_detail_wizard" id="ram_purchase_indent" sequence="6"/>
+-->
 				
 				<!-- Gate Pass Regsiter Menu -->
+<!--
 				<menuitem name="Gate Pass Register" parent="rpm_str_reports" action="kg_store_reports.action_gate_pass_report" id="ram_gate_pass" sequence="7"/>
+-->
 				
 				<!-- GRN Regsiter Menu -->
+<!--
 				<menuitem name="GRN Register" parent="rpm_str_reports" action="kg_store_reports.action_grn_report" id="ram_grn_register" sequence="8"/>
+-->
 				
 				<!-- Issue Regsiter Menu -->
+<!--
 				<menuitem name="Issue Register" parent="rpm_str_reports" action="kg_store_reports.action_dep_issue_report" id="ram_issue_register" sequence="9"/>
+-->
 				
 				<!-- Purchase Invoice Regsiter Menu -->
+<!--
 				<menuitem name="Purchase Invoice Register" parent="rpm_str_reports" action="kg_po_reports.action_purchase_invoice_report" id="ram_purchase_invoice_register" sequence="10"/>
+-->
 				
 				<!-- Closing Stock Menu -->
-				<menuitem name="Closing Stock" parent="rpm_str_reports" action="kg_store_reports.action_main_close_stock" id="ram_closing_stock" sequence="11"/>
+				<menuitem name="Closing Stock" parent="rpm_str_reports" action="kg_reports.ram_close_stock_report" id="ram_closing_stock" sequence="11"/>
 				
 				
 		<!-- Parent Report Menu -->

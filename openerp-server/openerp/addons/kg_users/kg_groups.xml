@@ -268,8 +268,8 @@
 			ref('kg_supplier_advance.tam_sup_advance'),
 			
 			ref('kg_menus.rpm_report_menu'),
-			ref('kg_menus.ram_po_register_reports'),
-			ref('kg_menus.ram_po_register_report'),
+			ref('kg_menus.rpm_excel_report_menu'),
+			ref('kg_menus.ram_excel_po_register_reports'),
 			
             ])]" name="menu_access"/>
             <field name="users" eval="[(4, ref('base.user_root'))]"/>
@@ -397,16 +397,6 @@
 			ref('kg_menus.iam_item_ledger'),
 			
 			ref('kg_menus.rpm_str_reports'),
-			ref('kg_menus.ram_product_reg'),
-			ref('kg_menus.ram_supplier_reg'),
-			ref('kg_menus.ram_product_warranty'),
-			ref('kg_menus.ram_service_indent'),
-			ref('kg_menus.ram_department_indent'),
-			ref('kg_menus.ram_purchase_indent'),
-			ref('kg_menus.ram_gate_pass'),
-			ref('kg_menus.ram_grn_register'),
-			ref('kg_menus.ram_issue_register'),
-			ref('kg_menus.ram_purchase_invoice_register'),
 			ref('kg_menus.ram_closing_stock'),
 			
             ])]" name="menu_access"/>

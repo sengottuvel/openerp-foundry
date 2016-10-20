@@ -7,7 +7,5 @@
 ##############################################################################
 
 
-#~ 
-#~ import report
-#~ import wizard
-#~ import excel
+import mains_closing_stock_report
+
