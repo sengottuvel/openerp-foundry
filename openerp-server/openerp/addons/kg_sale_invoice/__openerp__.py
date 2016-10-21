@@ -10,7 +10,7 @@
     'author': 'Kaerhikeyan S',
     'category': 'CRM',
     'website': 'http://www.openerp.com',
-    'depends' : ['base','account','kg_partners'],
+    'depends' : ['base','account','kg_partners','kg_work_order'],
     'data': ['kg_sale_invoice_view.xml'],
     'auto_install': False,
     'installable': True,
