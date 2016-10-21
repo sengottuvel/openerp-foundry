@@ -9,20 +9,20 @@
 			<field name="arch" type="xml">
 				<form string="Attendance Reader" version="7.0">
 					<header>
-						<button name="attendance_entry_move" type="object" string="Load"/>
+						<button name="attendance_entry_move" type="object" string="Load" invisible="1"/>
 					</header>
 					<group>
 					<group>
 						<field name="employee_id"/>							
 						<field name="date"/>							
-						<field name="punch_date"/>							
+						<field name="punch_time"/>
+						<field name="machine_no" invisible="0"/>							
 					</group>
 					<group>
-						<field name="punch_type"/>
-						<field name="punch_time"/>
+						<field name="punch_date"/>	
+						<field name="punch_type"/>							
 						<field name="time_in" widget="float_time"/>
-						<field name="active" invisible="0"/>				
-						<field name="machine_no" invisible="0"/>				
+						<field name="active" invisible="0"/>									
 					</group>
 					</group>
 				
