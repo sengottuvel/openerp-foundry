@@ -10,7 +10,7 @@
     'author': 'Kaerhikeyan S',
     'category': 'CRM',
     'website': 'http://www.openerp.com',
-    'depends' : ['base','account','kg_partners','kg_work_order','kg_patten_master','kg_moc_master','kg_pumpmodel_master','kg_accessories_master','kg_expense_master','kg_customer_advance'],
+    'depends' : ['base','account','kg_partners','kg_work_order','kg_pattern_master','kg_moc_master','kg_pumpmodel_master','kg_accessories_master','kg_expense_master','kg_customer_advance'],
     'data': ['kg_sale_invoice_view.xml'],
     'auto_install': False,
     'installable': True,
