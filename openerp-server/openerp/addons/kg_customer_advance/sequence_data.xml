@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+	<!-- Customer Advance start here-->
+		
+	<record forcecreate="1" id="seq_type_invoice_advance" model="ir.sequence.type">	
+			<field name="name">KG Invoice Advance</field>
+			<field name="code">kg.customer.advance</field>
+		</record>
+
+		<record forcecreate="1" id="seq_invoice_advance" model="ir.sequence">
+		  <field name="name">KG Invoice Advance</field>
+		  <field name="code">kg.customer.advance</field>
+		  <field name="padding" eval="3"/>
+		  <field name="prefix">AD/%(year)s/</field>
+		  <field name="reset_sequence">fiscal_reset</field>
+		</record>
+		
+	<!-- Customer Advance end here-->
+		
+</data>
+	</openerp>

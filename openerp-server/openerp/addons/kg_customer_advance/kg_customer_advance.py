@@ -1,275 +1,201 @@
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
-import time
-import re
-from operator import itemgetter
-from itertools import groupby
-from openerp.osv import fields, osv
-from openerp.tools.translate import _
-from openerp import netsvc
 from openerp import tools
-from openerp.tools import float_compare, DEFAULT_SERVER_DATETIME_FORMAT
-import openerp.addons.decimal_precision as dp
-import logging
-_logger = logging.getLogger(__name__)
+from openerp.osv import osv, fields
+from openerp.tools.translate import _
+import time
 from datetime import date
+import openerp.addons.decimal_precision as dp
 from datetime import datetime
-from datetime import timedelta
-from dateutil import relativedelta
-import calendar
-today = datetime.now()
-
-a = datetime.now()
-dt_time = a.strftime('%m/%d/%Y %H:%M:%S')
-
+dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
 class kg_customer_advance(osv.osv):
 
 	_name = "kg.customer.advance"
 	_description = "Customer Advance"
+	_order = "entry_date desc"
+	
+	
+	def _balance_amount_value(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		bal_value = 0.00
+		for entry in self.browse(cr, uid, ids, context=context):
+			bal_value = entry.advance_amt - entry.adjusted_amt			
+			result[entry.id] = bal_value
+		return result
+	
 	_columns = {
 	
+		## Version 0.1
+	
+		## Basic Info
+				
+		'name': fields.char('Advance No', size=24,select=True,readonly=True),
+		'entry_date': fields.date('Advance Date',required=True),		
+		'note': fields.text('Notes'),
+		'cancel_remark': fields.text('Cancel'),
+		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),
+		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode', readonly=True),
+		'flag_sms': fields.boolean('SMS Notification'),
+		'flag_email': fields.boolean('Email Notification'),
+		'flag_spl_approve': fields.boolean('Special Approval'),
 		
-		
-		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),		
+		### Entry Info ####
 			
-		'confirm_flag':fields.boolean('Confirm Flag'),
-		'approve_flag':fields.boolean('Expiry Flag'),
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),	
+		'active': fields.boolean('Active'),	
+		'crt_date': fields.datetime('Creation Date',readonly=True),
+		'user_id': fields.many2one('res.users', 'Created By', readonly=True),		
+		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
+		'confirm_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),		
+		'ap_rej_date': fields.datetime('Approved/Reject Date', readonly=True),
+		'ap_rej_user_id': fields.many2one('res.users', 'Approved/Reject By', readonly=True),	
+		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
+		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
+		'update_date': fields.datetime('Last Updated Date', readonly=True),
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),			
 		
-		'name':fields.char('Advance No',readonly=True),
-		'advance_date':fields.date('Advance Date',readonly=False, states={'approved':[('readonly',True)]}),
-		'state': fields.selection([('draft','Draft'),('confirmed','Waiting for approval'),('approved','Approved'),('update','Update'),
-				('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True,track_visibility='onchange',select=True),
-		'line_ids':fields.one2many('ch.customer.advance.line','header_id','Line Id',readonly=True),
-		'active': fields.boolean('Active',readonly=True),
-		'remark': fields.text('Remarks'),
+		## Module Requirement Info	
+		
 		'customer_id':fields.many2one('res.partner','Customer',required=True,readonly=False, states={'approved':[('readonly',True)]}, domain=[('customer', '=', True)]),
+		
 		'order_id':fields.many2one('kg.work.order','Work Order No',
 				domain="[('partner_id','=',customer_id), '&', ('state','!=','draft')]",required=True,
 				readonly=False, states={'approved':[('readonly',True)]}),
-		'order_date':fields.date('Order Date',readonly=True),
-		'net_amt': fields.float('Total Net Amount',readonly=True),
-		'advance_amt': fields.float('Advance Amount',required=True,readonly=False, states={'approved':[('readonly',True)]}),
-		'balance_advance_amt': fields.float('Balance Net Amount',readonly=True),
-		'amt_paid_so_far':fields.float('Advance Paid So far',readonly=True),
-		'bal_adv':fields.float('Balance Advance',readonly=True),
-		'line_state':fields.selection([('draft','Draft'),('loaded','Loaded')],'Status'),
 		
-		'cancel_remark': fields.text('Cancel Remarks',readonly=True,states={'approved':[('readonly',False)]}),
-		'created_by' : fields.many2one('res.users', 'Created By', readonly=True),
-		'creation_date':fields.datetime('Creation Date',required=True,readonly=True),
-		'confirmed_by' : fields.many2one('res.users', 'Confirmed By', readonly=True,select=True),
-		'confirmed_date': fields.datetime('Confirmed Date',readonly=True),
-		'reject_date': fields.datetime('Reject Date', readonly=True),
-		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
-		'approved_by' : fields.many2one('res.users', 'Approved By', readonly=True,select=True),
-		'approved_date' : fields.datetime('Approved Date',readonly=True),
-		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
-		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
-		'update_date' : fields.datetime('Last Updated Date',readonly=True),
-		'update_user_id' : fields.many2one('res.users','Last Updated By',readonly=True),
+		
+	    'advance_amt': fields.float('Advance Amount'),			
+		'order_value': fields.float('Order Value'),		
+		'adjusted_amt': fields.float('Adjusted Amount'),		
+		'balance_amt': fields.function(_balance_amount_value, string='Balance Amount',store=True, type='float'),		
+		'order_no': fields.char('Order NO',readonly=True),				
+		
+		## Child Tables Declaration 				
+		'line_ids': fields.one2many('ch.cus.advance.line', 'header_id', "Line Details"),		
+				
 	}
 		
-	def _future_date_check(self,cr,uid,ids,context=None):
+	_defaults = {
+	
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_customer_advance', context=c),			
+		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'user_id': lambda obj, cr, uid, context: uid,
+		'crt_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+		'state': 'draft',		
+		'active': True,
+		'entry_mode': 'manual',		
+		'flag_sms': False,		
+		'flag_email': False,		
+		'flag_spl_approve': False,					
+		
+	}
+	
+	def onchange_order_value(self, cr, uid, ids, order_id, context=None):
+		value = {'order_value':0.00}		
+		total_value = 0.00
+		order_no = ''
+		if order_id:			
+			work_rec = self.pool.get('kg.work.order').browse(cr,uid,order_id)		
+			total_value = work_rec.order_value
+			order_no = work_rec.name
+			
+		return {'value': {'order_value' : total_value,'order_no':order_no}}	
+	
+	
+	def onchange_customer_id(self, cr, uid, ids, customer_id, context=None):
+		value = {}		
+		sup_ids = self.pool.get('kg.customer.advance').search(cr,uid,[('customer_id','=',customer_id),('state','=','confirmed')])		
+		adv_line_vals=[]			
+		for ele in sup_ids:			
+			adv_rec = self.pool.get('kg.customer.advance').browse(cr,uid,ele)			
+			adv_line_vals.append({
+							'advance_no':adv_rec.name,
+						   'advance_date':adv_rec.entry_date,
+						   'order_no':adv_rec.order_no,
+						   'advance_amt':adv_rec.advance_amt,
+						   'adjusted_amt':adv_rec.adjusted_amt,
+						   'balance_amt':adv_rec.balance_amt,
+							})
+			value['line_ids'] = adv_line_vals			
+		return {'value': value}
+	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		today = date.today()
 		today = str(today)
 		today = datetime.strptime(today, '%Y-%m-%d')
-		advance_date = rec.advance_date
-		advance_date = str(advance_date)
-		advance_date = datetime.strptime(advance_date, '%Y-%m-%d')
-		if advance_date > today:
+		entry_date = rec.entry_date
+		entry_date = str(entry_date)
+		entry_date = datetime.strptime(entry_date, '%Y-%m-%d')
+		if entry_date > today:
 			return False
-		return True		
+		return True
+		
 		
 	def _check_adv_amt(self,cr,uid,ids,context = None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.advance_amt <= 0.00:
+		total = 0.00
+		for line in rec.line_ids:
+			if rec.order_no == line.order_no:
+				total += line.balance_amt
+		total_amt = rec.advance_amt + total
+		if rec.advance_amt <= 0.00 or total_amt > rec.order_value:
 			return False
 		else:
-			return True
-			
-	_constraints = [		
-			  
-		(_future_date_check, 'System not allow to save with future date. !!',['date']),
-		(_check_adv_amt, 'Please Check the advance amount. Advance amount should be greater than Zero!!',['Advance amount']),
+			return True		
+	
+	_constraints = [                   
+        
+        (_future_entry_date_check, 'System not allow to save with future date. !!',['Advance Date']),         
+        (_check_adv_amt, 'Please Check the advance amount. Advance amount should not be allow zero,negative and greater than Order Value amount !!',['Advance amount']),       
+        
+       ]
+       
 
-	   ]
-	 
-	_defaults = {
-		
-		'created_by': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).id ,
-		'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
-		'advance_date': fields.date.context_today,
-		'state': 'draft',
-		'name':'',
-		'active': True,
-		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_customer_advance', context=c),			
-		'line_state':'draft'
-	}
-	
-	
-	
-	def load_order_details(self,cr,uid,ids,context = None):
+	def entry_confirm(self,cr,uid,ids,context=None):		
 		rec = self.browse(cr,uid,ids[0])
-		adv_amt = 0.00
-		bal_amt = 0.00
-		net_amt = 0.00
-		cr.execute("""select name,advance_date,advance_amt,net_amt,balance_advance_amt from kg_customer_advance where order_id = %s and state = 'approved'"""%(rec.order_id.id))
-		data = cr.dictfetchall()
-		cr.execute("""delete from ch_customer_advance_line where header_id = %s"""%(ids[0]))
-		for pre_rec in data:
-			self.pool.get('ch.customer.advance.line').create(cr,uid,{
-				'header_id':ids[0],
-				'advance_no':pre_rec['name'],
-				'advance_date':pre_rec['advance_date'],
-				'adv_amt':pre_rec['advance_amt'],
-				'balance_net_amt':pre_rec['balance_advance_amt'],
-				})
-			adv_amt += pre_rec['advance_amt']
-			net_amt = pre_rec['net_amt']
-		bal_amt = net_amt - adv_amt
-		rec.write({'line_state':'loaded','balance_advance_amt':bal_amt,'amt_paid_so_far':adv_amt})
-		return True	
-	
-	def onchange_order_id(self, cr, uid, ids, order_id,advance_amt):
-		value = {'order_date':'','net_amt':0.00}
-		adv_amt = 0.00
-		bal_amt = 0.00
-		net_amt = 0.00
-		order_rec = self.pool.get('kg.work.order').browse(cr,uid,order_id)
-		cr.execute("""select name,advance_date,advance_amt,net_amt,balance_advance_amt from kg_customer_advance where order_id = %s and state = 'approved'"""%(order_id))
-		data = cr.dictfetchall()
-		for pre_rec in data:
-			adv_amt += pre_rec['advance_amt']
-			net_amt = pre_rec['net_amt']
-		bal_amt = net_amt - adv_amt
-		return {'value': {
-			'order_date' : order_rec.entry_date,
-			'net_amt':order_rec.order_value,
-			'amt_paid_so_far':adv_amt,
-			'balance_advance_amt':bal_amt
-		}}
-	
-	def onchane_adv_amt(self,cr,uid,ids,order_id,advance_amt,net_amt):
-		order_rec = self.pool.get('kg.work.order').browse(cr,uid,order_id)
-		adv_amt = 0.00
-		cr.execute("""select name,advance_date,advance_amt,net_amt from kg_customer_advance where order_id = %s and state = 'approved'"""%(order_id))
-		data = cr.dictfetchall()
-		for pre_rec in data:
-			adv_amt += pre_rec['advance_amt']
-		adv_amt += advance_amt
-		if adv_amt > net_amt:
-			raise osv.except_osv(
-					_('Please check the advance amount.'),
-					_('Advance Amount Should not be greater than Net Amount!'))
+		today = date.today()
+		today = str(today)
+		today = datetime.strptime(today, '%Y-%m-%d')
+		entry_date = rec.entry_date
+		entry_date = str(entry_date)
+		entry_date = datetime.strptime(entry_date, '%Y-%m-%d')
+		if entry_date < today:
+			raise osv.except_osv(_('Advance Date !!'),
+				_('System not allow to save with past date.!!'))	
+				
 		else:
-			return True
-			
-	def entry_confirm(self, cr, uid, ids,context=None):
-		advance_rec = self.browse(cr,uid,ids[0])
-		### Checking Advance date ###
-		today_date = today.strftime('%Y-%m-%d')
-		adv_amt = 0.00
+			pass
 		
+		### Sequence Number Generation  ###
 		
-		cr.execute("""select name,advance_date,advance_amt,net_amt from kg_customer_advance where order_id = %s and state = 'approved'"""%(advance_rec.order_id.id))
-		data = cr.dictfetchall()
-		adv_amt = 0.00
-		adv_amt_2 = 0.00
-		for pre_rec in data:
-			adv_amt += pre_rec['advance_amt']
-			adv_amt_2 = adv_amt
-		adv_amt_2 += advance_rec.advance_amt
-		bal_amt = advance_rec.net_amt - adv_amt 
-		if adv_amt_2 > advance_rec.net_amt:
-			raise osv.except_osv(
-				_('Please check the advance amount.'),
-				_('Advance Amount Should not be greater than Net Amount!'))
-					
-		poa_name = ''		
-		if not advance_rec.name:
-					
-			poa_no = self.pool.get('ir.sequence').get(cr, uid, 'kg.customer.advance') or ''
-			poa_no_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.customer.advance')])
-			rec = self.pool.get('ir.sequence').browse(cr,uid,poa_no_id[0])
-			
-			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(poa_no_id[0],rec.code,advance_rec.advance_date))
-			poa_name = cr.fetchone();	
-			self.write(cr,uid,ids,{'name':str(poa_name[0])})			
+		if rec.name == '' or rec.name == False:
+			seq_obj_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.customer.advance')])
+			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_obj_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_obj_id[0],seq_rec.code,rec.entry_date))
+			entry_name = cr.fetchone();
+			entry_name = entry_name[0]
+		else:
+			entry_name = rec.name		
 		
-					
-		self.write(cr,uid,ids[0],{'state':'confirmed',
-								  'confirm_flag':'True',
-								  'confirmed_by':uid,
-								  'confirmed_date':dt_time,
-								  'balance_advance_amt':bal_amt,
-								  'amt_paid_so_far':adv_amt,
-								  
-								   })
-		
-		return True	
-	
-	def entry_approve(self, cr, uid, ids,context=None):
-		advance_rec = self.browse(cr,uid,ids[0])		
-		adv_amt = 0.00
-		sql = """select name,advance_date,advance_amt,net_amt from kg_customer_advance where order_id = %s and state = 'approved'"""%(advance_rec.order_id.id)
-		cr.execute(sql)			
-		data = cr.dictfetchall()
-		adv_amt = 0.00
-		for pre_rec in data:
-			adv_amt += pre_rec['advance_amt']
-		bal_amt = advance_rec.net_amt - (advance_rec.advance_amt + adv_amt)
-		self.write(cr,uid,ids[0],{'state':'approved',
-								  'approve_flag':'True',
-								  'approved_by':uid,
-								  'approved_date':dt_time,
-								  'amt_paid_so_far':adv_amt,
-								  'balance_advance_amt':bal_amt,
-								  'bal_adv':advance_rec.advance_amt,
-								  'update':True
-								   })	
+		self.write(cr, uid, ids, {'name':entry_name,'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		
 		return True
-	
-	def entry_reject(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])
-		if rec.remark:
-			self.write(cr, uid, ids, {
-						'state': 'reject',
-						'rej_user_id': uid,
-						'reject_date': dt_time})
-		else:
-			raise osv.except_osv(_('Rejection remark is must !!'),
-				_('Enter rejection remark in remark field !!'))
+		
+	def entry_approve(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
-
+		
+		
 	def entry_cancel(self,cr,uid,ids,context=None):
-		## Don't allow to cancel if this id linked with other transaction or master
 		rec = self.browse(cr,uid,ids[0])
-		if not rec.cancel_remark :
-			raise osv.except_osv(_('Cancel remark is must !!'),
-				_('Enter Cancel remark in remark field !!'))
+		if rec.cancel_remark:
+			self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		else:
-			self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid,
-				'cancel_date': dt_time})
+			raise osv.except_osv(_('Cancel remark is must !!'),
+				_('Enter the remarks in Cancel remarks field !!'))
 		return True
-	
-	def create(self, cr, uid,vals,context=None):
-		order_rec = self.pool.get('kg.work.order').browse(cr,uid,vals['order_id'])
 		
-		vals.update({'net_amt':order_rec.order_value,
-					'order_date':order_rec.entry_date,
-							})						  
-		order =  super(kg_customer_advance, self).create(cr, uid, vals, context=context)
-		return order
-	
-	def entry_draft(self,cr,uid,ids,context=None):
-		# While change state corresponding back updated to be done
-		self.write(cr, uid, ids, {'state': 'draft'})
-		return True
-	
-	def unlink(self,cr,uid,ids,context = None):
+		
+	def unlink(self,cr,uid,ids,context=None):
 		unlink_ids = []		
 		for rec in self.browse(cr,uid,ids):	
 			if rec.state != 'draft':			
@@ -279,26 +205,50 @@ class kg_customer_advance(osv.osv):
 				unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
 		
-	
+	def create(self, cr, uid, vals, context=None):
+		return super(kg_customer_advance, self).create(cr, uid, vals, context=context)
 		
-	def write(self, cr, uid, ids, vals, context=None):		
+	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_customer_advance, self).write(cr, uid, ids, vals, context)
 		
+	_sql_constraints = [
+	
+		('name', 'unique(name)', 'No must be Unique !!'),
+	]	
+	
 kg_customer_advance()
 
-class ch_customer_advance_line(osv.osv):
 
-	_name = "ch.customer.advance.line"
-	_description = "Customer Advance Line"
-	_order = "advance_date"
-	_columns = {
-		
-		'advance_no':fields.char('Advance No',readonly=True),
-		'advance_date':fields.date('Advance Date'),
-		'header_id' : fields.many2one('kg.customer.advance', 'Header ID'),
-		'adv_amt':fields.float('Advance Amount'),
-		'balance_net_amt':fields.float('Balance Net Amount'),
-	}
+class ch_cus_advance_line(osv.osv):
+
+	_name = "ch.cus.advance.line"
+	_description = "Advance History"
 	
-ch_customer_advance_line()
+	_columns = {
+	
+		### Basic Info
+		
+		'header_id':fields.many2one('kg.customer.advance', 'Advance', required=1, ondelete='cascade'),
+		'remark': fields.text('Remarks'),
+		'active': fields.boolean('Active'),			
+		
+		### Module Requirement
+		'advance_no':fields.char('Advance No',readonly=True),
+		'advance_date':fields.date('Advance Date'),		
+		'order_no': fields.char('Order NO',readonly=True),
+		'advance_amt': fields.float('Advance Amount',required=True),		
+		'adjusted_amt': fields.float('Adjusted Amount',readonly=True),		
+		'balance_amt': fields.float('Balance Amount',readonly=True),		
+		
+		## Child Tables Declaration 			
+		
+	}
+		
+	_defaults = {
+	
+		'active': True,
+		
+	}
+		
+ch_cus_advance_line()
