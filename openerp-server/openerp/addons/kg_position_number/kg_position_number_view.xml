@@ -12,8 +12,7 @@
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes')]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
-<!--					<button name="entry_cancel" type="object" states="reject,approved" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
+						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>	
 						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>	
 					</header>
@@ -234,15 +233,21 @@
 			</field>
 		</record>
 		
-		 <!-- Audit Log Xml Data Start
+		 <!-- Audit Log Xml Data Start -->
 		
         <record id="position_number_model" model="audittrail.rule">
             <field name="name">Audit Log Position Number Master</field>
             <field name="object_id" eval="ref('kg_position_number.model_kg_position_number')"/>       
             <field name="state">subscribed</field>              
-        </record> -->
+        </record> 
         
         <!-- Audit Log Xml Data End-->
+        
+         <!-- Menu Name Start here --> 
+        	
+        	<menuitem name="Position Number" parent="kg_operation_master.mpm_ms_master_menu" action="mma_position_number_master" id="mam_position_number_menu" sequence="3"/>
+
+		<!-- Menu Name End here --> 
 		
 
 	</data>

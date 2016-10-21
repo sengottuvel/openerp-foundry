@@ -12,7 +12,7 @@
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="entry_cancel" type="object" string="Cancel" states="reject,approved" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 						<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
@@ -20,12 +20,12 @@
 						<group>
 							<group>						
 								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
-								<field name="active"/>
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 							</group>
 							<group>
 								<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="state" style="width: 30%%" class="att_state_change"/>								
+								<field name="state" style="width: 30%%" class="att_state_change"/>	
+								<field name="modify" invisible="1"/>							
 							</group>
 						</group>						
 						<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
@@ -54,6 +54,7 @@
 							<page string="Entry Info">
 									<group>
 										<field name="company_id"/>
+										<field name="active"/>
 									</group>
 									<group>
 									<group>
@@ -148,7 +149,7 @@
 		
 		<!-- Menu Name Start here --> 
 		
-			<menuitem action="mma_machinery_master" name="Machinery" id="mam_machinery_master" parent="kg_menus.mpm_ms_master_menu" sequence="4"/>
+			<menuitem action="mma_machinery_master" name="Machinery" id="mam_machinery_master" parent="kg_operation_master.mpm_ms_master_menu" sequence="4"/>
 
 		<!-- Menu Name End here --> 
 

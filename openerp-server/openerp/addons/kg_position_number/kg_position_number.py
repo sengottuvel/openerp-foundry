@@ -97,24 +97,11 @@ class kg_position_number(osv.osv):
 	
 	_sql_constraints = [
 	
-		#~ ('name', 'unique(name)', 'Name must be unique!!'),
+		
 		('code', 'unique(code)', 'Code must be unique!!'),
 	]
 	
-	"""def _Validation(self, cr, uid, ids, context=None):
-		flds = self.browse(cr , uid , ids[0])
-		name_special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )		
-		if name_special_char:
-			return False		
-		return True	
-		
-	def _CodeValidation(self, cr, uid, ids, context=None):
-		flds = self.browse(cr , uid , ids[0])	
-		if flds.code:		
-			code_special_char = ''.join( c for c in flds.code if  c in '!@#$%^~*{}?+/=' )		
-			if code_special_char:
-				return False
-		return True		"""
+	
 		
 	def onchange_pattern(self, cr, uid, ids,pattern_id):
 		value = {'pattern_name': ''}
@@ -426,8 +413,7 @@ class kg_position_number(osv.osv):
 		return True	
 	
 	_constraints = [
-		#(_Validation, 'Special Character Not Allowed !!!', ['Check Name']),
-		#(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
+		
 		(_name_validate, 'Position No must be unique !!', ['Position No']),		
 		(_code_validate, 'Position code must be unique !!', ['code']),		
 		#~ (_check_line,'You can not save this with out Operation Details !',['line_ids']),

@@ -188,7 +188,7 @@
 	
 	<!-- Menu Item Starts Here -->
 	
-	<menuitem name="MS Store Process" id="tpm_ms_store_process" parent="kg_menus.mpm_crm" sequence="5"/>
+	<menuitem name="MS Store Process" id="tpm_ms_store_process" parent="kg_operation_master.mpm_crm" sequence="5"/>
 			
 		<menuitem action="tma_ms_stores_list" id="tam_ms_stores_list" parent="tpm_ms_store_process" sequence="1" />
 		

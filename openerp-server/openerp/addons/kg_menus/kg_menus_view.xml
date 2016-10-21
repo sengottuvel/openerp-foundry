@@ -101,22 +101,8 @@
 				<!-- Site Visit Status --> 
 				<menuitem action="kg_pump_vs_material.tma_pump_vs_material" name="Prime Cost View" id="tam_pump_vs_material" parent="cpm_crm_enquiry_menu" sequence="8"/>
 				
-		<!-- MS Process Menu -->
+		<!-- MS Inward List -->
 		
-		<menuitem name="MS Process" id="mpm_crm" sequence="20"/>
-		
-			<!-- MS Master Menu -->
-			<menuitem id="mpm_ms_master_menu" name="Masters" parent="mpm_crm" sequence="1"/>
-				
-				<!--Openration Master Menu -->
-				<menuitem name="Operation" parent="mpm_ms_master_menu" action="kg_operation_master.mma_operation_master" id="mam_operation_master_menu" sequence="1"/>
-				
-				<!--Dimension Master Menu -->
-				<menuitem name="Dimension" parent="mpm_ms_master_menu" action="kg_dimension_master.mma_dimension_master" id="mam_dimension_master_menu" sequence="2"/>
-		
-				<!--Posotion Number Master Menu -->
-				<menuitem name="Position Number" parent="mpm_ms_master_menu" action="kg_position_number.mma_position_number_master" id="mam_position_number_menu" sequence="3"/>
-				
 				<!-- BOT Store Inward Transaction Menu -->
 				<menuitem action="kg_department_issue.action_bot_issue" id="gam_bot_issue" name="BOT Store Inward" parent="kg_machineshop.tpm_ms_process" sequence="18"/>
 				

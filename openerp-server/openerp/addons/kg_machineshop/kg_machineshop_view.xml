@@ -547,13 +547,13 @@
 	
 	<!-- Menu Item Starts Here -->
 	
-	<menuitem name="MS Process" id="tpm_ms_process" parent="kg_menus.mpm_crm" sequence="2"/>
+	<menuitem name="MS Process" id="tpm_ms_process" parent="kg_operation_master.mpm_crm" sequence="2"/>
 			
 		<menuitem action="kg_stock_inward.tma_ms_stock_details" id="tam_ms_stock_list" parent="tpm_ms_process" sequence="1" />
 		<menuitem action="tma_ms_inward" id="tam_ms_inward" parent="tpm_ms_process" sequence="2" />
 		<menuitem action="tma_ms_sch_list" id="tam_ms_sch_list" parent="tpm_ms_process" sequence="3" />
 		
-	<menuitem name="Batch Entries" id="tpm_ms_batch" parent="kg_menus.mpm_crm" sequence="3"/>
+	<menuitem name="Batch Entries" id="tpm_ms_batch" parent="kg_operation_master.mpm_crm" sequence="3"/>
 	
 		<menuitem action="tma_batch_ms_accept" id="tam_batch_ms_accept" parent="tpm_ms_batch" sequence="1" />
 	

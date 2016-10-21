@@ -12,9 +12,9 @@
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="entry_cancel" type="object" states="reject,approved" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>	
-						<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>	
+						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
 					<sheet>
 						<group>
@@ -23,9 +23,9 @@
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 							</group>
 							<group>
-								<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="active"/>
-								<field name="state" style="width: 30%%" class="att_state_change"/>								
+								<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+								<field name="state" style="width: 30%%" class="att_state_change"/>
+								<field name="modify" invisible="1"/>
 							</group>
 						</group>						
 						<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
@@ -40,6 +40,7 @@
 							<page string="Entry Info">
 									<group>
 										<field name="company_id"/>
+										<field name="active"/>
 									</group>
 									<group>
 									<group>
@@ -122,15 +123,27 @@
 		<!-- Menu Action End-->
 		
 		
-		 <!-- Audit Log Xml Data Start
+		 <!-- Audit Log Xml Data Start-->
 		
         <record id="operation_model" model="audittrail.rule">
             <field name="name">Audit Log Operation Composition Master</field>
             <field name="object_id" eval="ref('kg_operation_master.model_kg_operation_master')"/>       
             <field name="state">subscribed</field>              
-        </record> -->
+        </record> 
         
         <!-- Audit Log Xml Data End-->
+        
+        <!-- Menu Name Start here --> 
+        
+			<!-- MS Process Menu -->
+			
+			<menuitem name="MS Process" id="mpm_crm" sequence="20"/>
+        	
+        	<menuitem id="mpm_ms_master_menu" name="Masters" parent="mpm_crm" sequence="1"/>
+		
+			<menuitem name="Operation" parent="mpm_ms_master_menu" action="mma_operation_master" id="mam_operation_master_menu" sequence="1"/>
+
+		<!-- Menu Name End here --> 
 		
 
 	</data>
