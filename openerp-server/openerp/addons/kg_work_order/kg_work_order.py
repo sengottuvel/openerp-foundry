@@ -90,6 +90,7 @@ class kg_work_order(osv.osv):
 		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode', readonly=True),
 		'version':fields.char('Version'),
 		'flag_for_stock': fields.boolean('For Stock'),
+		'invoice_flag': fields.boolean('For Invoice'),
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		
@@ -122,6 +123,7 @@ class kg_work_order(osv.osv):
 		'delivery_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		'version': '00',
 		'flag_for_stock': False,
+		'invoice_flag': False,
 	}
 	
 	def onchange_priority(self, cr, uid, ids, order_category):
