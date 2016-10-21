@@ -1374,7 +1374,7 @@
 		
 	<!-- Menu Item Starts Here -->
 	
-	<menuitem name="Subcontract Process" id="tpm_sc_process" parent="kg_menus.mpm_crm" sequence="4"/>
+	<menuitem name="Subcontract Process" id="tpm_sc_process" parent="kg_operation_master.mpm_crm" sequence="4"/>
 			
 		<menuitem action="tma_sc_list" id="tam_sc_list" parent="tpm_sc_process" sequence="1" />
 		<menuitem action="tma_sc_wo" id="tam_sc_wo" parent="tpm_sc_process" sequence="2" />
