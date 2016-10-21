@@ -45,7 +45,8 @@
 									<field name="pump_model_id" required="1"/>
 									<field name="order_category" required="1"/>	
 									<field name="qty" sum="qty"/>
-									<field name="unit_price" sum="unit_price"/>																
+									<field name="prime_cost" sum="prime_cost"/>																
+									<field name="sam_ratio" sum="sam_ratio"/>																
 									<field name="dealer_discount" sum="dealer_discount"/>
 									<field name="customer_discount" sum="customer_discount"/>
 									<field name="special_discount" sum="special_discount"/>
@@ -53,7 +54,9 @@
 									<field name="p_f" sum="p_f"/>
 									<field name="freight" sum="freight"/>
 									<field name="insurance" sum="insurance"/>									
-									<field name="total_price" sum="total_price"/>									
+																	
+									<field name="tot_price" sum="tot_price"/>									
+									<field name="net_amount" sum="net_amount"/>									
 								</tree>
 							</field>
 
@@ -66,7 +69,8 @@
 									<field name="item_name" required="1"/>
 									<field name="moc_id"/>
 									<field name="qty" sum="qty"/>									
-									<field name="unit_price" sum="unit_price"/>									
+									<field name="prime_cost" sum="prime_cost"/>									
+									<field name="sam_ratio" sum="sam_ratio"/>									
 									<field name="dealer_discount" sum="dealer_discount"/>
 									<field name="customer_discount" sum="customer_discount"/>
 									<field name="special_discount" sum="special_discount"/>
@@ -74,7 +78,8 @@
 									<field name="p_f" sum="p_f"/>
 									<field name="freight" sum="freight"/>
 									<field name="insurance" sum="insurance"/>
-									<field name="total_price" sum="total_price"/>
+									<field name="tot_price" sum="tot_price"/>									
+									<field name="net_amount" sum="net_amount"/>	
 								
 									
 								</tree>
@@ -87,9 +92,7 @@
 									<field name="access_id" required="1" readonly="1"/>
 									<field name="pump_id" required="1" readonly="1"/>
 									<field name="moc_id" required="1" readonly="1"/>
-									<field name="qty" sum="qty"/>
-									<field name="unit_price" sum="unit_price"/>
-									<field name="per_access_prime_cost" sum="per_access_prime_cost" readonly="1"/>
+									<field name="qty" sum="qty"/>							
 									<field name="prime_cost" sum="prime_cost" readonly="1"/>
 									<field name="sam_ratio" sum="sam_ratio"/>
 									<field name="dealer_discount" sum="dealer_discount"/>
@@ -99,7 +102,8 @@
 									<field name="p_f" sum="p_f"/>
 									<field name="freight" sum="freight"/>
 									<field name="insurance" sum="insurance"/>
-									<field name="total_price" sum="total_price"/>
+									<field name="tot_price" sum="tot_price"/>									
+									<field name="net_amount" sum="net_amount"/>	
 																	
 								</tree>
 							</field>
@@ -117,10 +121,10 @@
 							</field>
 						</group>
 						
-						<button name="load_advance" string="Load Advance" type="object" states="draft"/>
-							    <group string = "Advance Adjustment Details">
+						<button name="load_advance" string="Load Advance" type="object"  attrs="{'invisible':[('state','=','draft')]}"/>
+							    <group string = "Advance Adjustment Details" attrs="{'invisible':[('state','=','draft')]}">
 								   <group>
-									 <field name="line_ids_d" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','approved','invoice','cancel'])]}" >
+									 <field name="line_ids_d" nolabel="1" attrs="{'readonly': [('state','in',['approved','invoice','cancel'])],'invisible':[('state','=','draft')]}" >
 										<tree editable="bottom" create="false" >
 											<field name="order_id" required="1" readonly="1"/>
 											<field name="order_amt" invisible="1"/>
@@ -138,7 +142,7 @@
 					<group class="oe_subtotal_footer oe_right" colspan="2">
                                 <field name="total_amt" widget='monetary' options="{'currency_field': 'currency_id'}"/>
                                 <field name="add_charge" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-                                <field name="advance_amt" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+                                <field name="advance_amt" widget='monetary' options="{'currency_field': 'currency_id'}" attrs="{'invisible':[('state','=','draft')]}"/>
                                 <field name="round_off_amt" widget='monetary' options="{'currency_field': 'currency_id'}"/>
                               
                                 <div class="oe_subtotal_footer_separator oe_inline">
