@@ -363,7 +363,7 @@ class kg_pump_vs_material(osv.osv):
 										price = design_rate * qty
 									tot_price += price
 					ms_price += tot_price * ms_line.qty
-					self.pool.get('ch.pump.vs.material.ms').write(cr,uid,ms_line.id,{'prime_cost': ms_price})
+					self.pool.get('ch.pump.vs.material.ms').write(cr,uid,ms_line.id,{'prime_cost': design_rate * qty * ms_line.qty})
 				print"ms_pricems_price",ms_price
 		
 		# BOT Item 
@@ -407,7 +407,7 @@ class kg_pump_vs_material(osv.osv):
 											price = design_rate * qty
 										tot_price += price
 						bot_price += tot_price * bot_line.qty
-						self.pool.get('ch.pump.vs.material.bot').write(cr,uid,bot_line.id,{'prime_cost': bot_price})
+						self.pool.get('ch.pump.vs.material.bot').write(cr,uid,bot_line.id,{'prime_cost': design_rate * qty * bot_line.qty})
 						print"bot_pricebot_price",bot_price
 				
 		print"prime_cost",prime_cost
