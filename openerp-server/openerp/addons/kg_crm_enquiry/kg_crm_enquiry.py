@@ -679,9 +679,9 @@ class kg_crm_enquiry(osv.osv):
 								tot_price += price
 				ms_price += tot_price * ms_line.qty
 				if catg == 'non_acc':
-					self.pool.get('ch.kg.crm.machineshop.item').write(cr,uid,ms_line.id,{'prime_cost': ms_price})
+					self.pool.get('ch.kg.crm.machineshop.item').write(cr,uid,ms_line.id,{'prime_cost': design_rate * qty * ms_line.qty})
 				elif catg == 'acc':
-					self.pool.get('ch.crm.access.ms').write(cr,uid,ms_line.id,{'prime_cost': ms_price})
+					self.pool.get('ch.crm.access.ms').write(cr,uid,ms_line.id,{'prime_cost': design_rate * qty * ms_line.qty})
 			print"ms_pricems_price",ms_price
 		if bom == 'ms' and purpose_categ == 'spare' and catg == 'non_acc':
 			primecost_vals = ms_price
@@ -738,9 +738,9 @@ class kg_crm_enquiry(osv.osv):
 									tot_price += price
 					bot_price += tot_price * bot_line.qty
 					if catg == 'non_acc':
-						self.pool.get('ch.kg.crm.bot').write(cr,uid,bot_line.id,{'prime_cost': bot_price})		
+						self.pool.get('ch.kg.crm.bot').write(cr,uid,bot_line.id,{'prime_cost': design_rate * qty * bot_line.qty})		
 					elif catg == 'acc':
-						self.pool.get('ch.crm.access.bot').write(cr,uid,bot_line.id,{'prime_cost': bot_price})
+						self.pool.get('ch.crm.access.bot').write(cr,uid,bot_line.id,{'prime_cost': design_rate * qty * bot_line.qty})
 					print"bot_pricebot_price",bot_price
 						
 				#~ elif catg == 'acc':
