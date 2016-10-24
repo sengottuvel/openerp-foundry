@@ -38,6 +38,11 @@ class kg_excel_po_register(osv.osv):
 		
 		}
 	
+	#~ def _get_month_first(self, cr, uid,ids, context=None):
+		#~ today = datetime.date.today()
+		#~ first = datetime.date(day=1, month=today.month, year=today.year)
+		#~ res = first.strftime('%Y-%m-%d')
+		#~ return res
 			
 	_defaults = {
 		
@@ -100,7 +105,7 @@ class kg_excel_po_register(osv.osv):
 		if not rec.status or rec.status == 'approved' or rec.status == 'cancelled':	
 			sql = """		
 				SELECT
-					  po.id AS po_id,
+					  distinct po.id AS po_id,
 					  po.name AS po_no,
 					  to_char(po.date_order,'dd/mm/yyyy') AS po_date,
 					  po.date_order AS date,
@@ -140,11 +145,11 @@ class kg_excel_po_register(osv.osv):
 					  left JOIN kg_po_advance po_ad ON (po_ad.po_id = po.id)
 					  left JOIN kg_moc_master moc ON (moc.id=pol.moc_id)
 					  where po.state = """+po_state+""" and po.date_order >="""+date_from+""" and po.date_order <="""+date_to+' '+""" """+ supplier +""" """+ product+ """
-					  order by po.date_order  """
+					  order by po.date_order """
 		elif rec.status == 'pending':
 			sql = """		
 				SELECT
-				  po.id AS po_id,
+				  distinct po.id AS po_id,
 				  po.name AS po_no,
 				  to_char(po.date_order,'dd/mm/yyyy') AS po_date,
 				  po.date_order AS date,
@@ -184,12 +189,11 @@ class kg_excel_po_register(osv.osv):
 				  left JOIN kg_po_advance po_ad ON (po_ad.po_id = po.id)
 				  left JOIN kg_moc_master moc ON (moc.id=pol.moc_id)
 				  where po.state='approved' and pol.pending_qty > 0 and po.date_order >="""+date_from+""" and po.date_order <="""+date_to+' '+""" """+ supplier +""" """+ product+ """
-				  order by po.date_order """
+				  order by po.date_order  """
 		cr.execute(sql)		
 		data = cr.dictfetchall()
 		
-		data.sort(key=lambda data: data['date'])
-		
+		data.sort(key=lambda data: data['date'])		
 		record={}
 		sno=1
 		wbk = xlwt.Workbook()
@@ -324,7 +328,8 @@ class kg_excel_po_register(osv.osv):
 		
 		for ele in data:
 			#~ ele['tax'] = 0
-			#~ ele['po_ad_amt'] = 0
+			#~ ele['po_ad_amt'] = 0		
+			
 			ele['received_qty'] = ele['qty'] - ele['pending_qty']
 			sheet1.write(s2,0,sno)
 			sheet1.write(s2,1,ele['su_name'])

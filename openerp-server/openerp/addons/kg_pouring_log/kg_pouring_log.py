@@ -699,7 +699,7 @@ class kg_pouring_log(osv.osv):
 								'pattern_id': production_rec.pattern_id.id,
 								'pattern_name': production_rec.pattern_name,
 								'moc_id': production_rec.moc_id.id,
-								'stage_id': production_rec.stage_id.id,
+								#~ 'stage_id': production_rec.stage_id.id,
 								'qty': rem_qty,
 								'available_qty': rem_qty,
 								'each_wgt': production_rec.each_weight,
