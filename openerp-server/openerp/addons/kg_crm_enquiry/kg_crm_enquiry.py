@@ -676,6 +676,8 @@ class kg_crm_enquiry(osv.osv):
 									#~ elif catg == 'acc':
 										#~ self.pool.get('ch.crm.access.ms').write(cr,uid,ms_line.id,{'prime_cost': design_rate * qty * ms_line.qty})
 									price = design_rate * qty
+								else:
+									qty = 0
 								tot_price += price
 				ms_price += tot_price * ms_line.qty
 				if catg == 'non_acc':
@@ -735,6 +737,8 @@ class kg_crm_enquiry(osv.osv):
 										#~ elif catg == 'acc':
 											#~ self.pool.get('ch.crm.access.bot').write(cr,uid,bot_line.id,{'prime_cost': design_rate * qty * bot_line.qty})
 										price = design_rate * qty
+									else:
+										qty = 0
 									tot_price += price
 					bot_price += tot_price * bot_line.qty
 					if catg == 'non_acc':
