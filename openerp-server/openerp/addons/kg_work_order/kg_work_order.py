@@ -438,22 +438,22 @@ class ch_work_order_details(osv.osv):
 		'rpm': fields.selection([('1450','1450'),('2900','2900')],'RPM', required=True),
 		'setting_height':fields.float('Setting Height (MM)',required=True),
 		'bed_length':fields.float('Bed Length(MM)',required=True),
-		'shaft_sealing': fields.selection([('g_p','G.P'),('m_s','M.S'),('f_s','F.S')],'Shaft Sealing',required=True),
+		'shaft_sealing': fields.selection([('g_p','Gland Packing'),('m_s','Mechanical Seal'),('f_s','Felt Seal')],'Shaft Sealing',required=True),
 		#~ 'motor_power':fields.float('Motor Power',required=True),
 		'motor_power': fields.selection([('90','90'),('100','100'),('112','112'),('132','132'),('160','160'),('180','180'),('200','200'),('225','225'),
 				('250','250'),('280','280'),('315','315'),('315_l','315L')],'Motor Frame size',required=True),
 				
-		'm_power': fields.float('Motor Power'),
+		'm_power': fields.float('Motor power in KW'),
 		
 		#~ 'bush_bearing': fields.selection([('grease','Grease'),('cft_ext','CFT-EXT'),
 			#~ ('cft_self','CFT-SELF'),('cut_less_rubber','Cut less Rubber')],'Bush Bearing',required=True),
 			
-		'bush_bearing': fields.selection([('grease','Bronze/Grease'),('cft_self','CFT'),('cut_less_rubber','Cut less Rubber')],'Bush Bearing',required=True),
+		'bush_bearing': fields.selection([('grease','Grease'),('cft_self','CFT'),('cut_less_rubber','Cut less Rubber')],'Bush Bearing',required=True),
 		#~ 'delivery_pipe_size':fields.float('Delivery Pipe Size(MM)',required=True),
 		'delivery_pipe_size': fields.selection([('32','32'),('40','40'),('50','50'),('65','65'),('80','80'),('100','100'),('125','125'),('150','150'),('200','200'),('250','250'),('300','300')],'Delivery Pipe Size(MM)',required=True),
 		
-		'lubrication': fields.selection([('grease','Grease'),('cft_ext','CFT-EXT'),
-			('cft_self','CFT-SELF'),('cut_less_rubber','Cut less Rubber')],'Lubrication',required=True),
+		'lubrication': fields.selection([('grease','Grease'),('cft_ext','External'),
+			('cft_self','Self'),('cut_less_rubber','External Under Pressure')],'Bush bearing Lubrication',required=True),
 			
 		'flag_load_bom': fields.boolean('Load BOM'),
 		### Used for Dynamic Length Calculation
