@@ -33,7 +33,7 @@
 								
 								<field name="pump_size"/>
 								<field name="bearing_qty"/>								
-								<field name="discharge"/>
+								<field name="delivery_pipe_size"/>
 								<field name="rotation_type"/>
 								<field name="wear_ring_type"/>
 								<field name="feet_location"/>

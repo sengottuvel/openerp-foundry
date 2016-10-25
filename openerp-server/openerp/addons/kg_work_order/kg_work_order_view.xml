@@ -205,7 +205,7 @@
 								   <field name="nonferous_weight" readonly="1"/>
 -->
 								   <field name="order_category" invisible="1"/>
-								   <field name="qty" required="1"/>
+								   <field name="qty" required="1" attrs="{'readonly': [('order_category','=','pump')]}"/>
 								   <field name="unit_price"/>
 								   <field name="schedule_qty" invisible="1"/>
 								   <field name="production_qty" invisible="1"/>
