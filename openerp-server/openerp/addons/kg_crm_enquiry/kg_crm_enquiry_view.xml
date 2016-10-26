@@ -210,10 +210,12 @@
 				<form string="Pumpmodel Details" version="7.0">
 					<sheet>
 						<group>
-							<field name="purpose_categ" on_change="onchange_purpose_categ(purpose_categ)" required="1" attrs="{'readonly':[('purpose_categ','in',('pump','spare','access'))]}"/>
-						</group>	
-						<group>
-							<field name="pump_model_type" required="1"/>
+							<group>
+								<field name="purpose_categ" on_change="onchange_purpose_categ(purpose_categ)" required="1" attrs="{'readonly':[('purpose_categ','in',('pump','spare','access'))]}"/>
+							</group>	
+							<group>
+								<field name="pump_model_type" required="1"/>
+							</group>	
 						</group>	
 		<notebook>
 			<page string="Pump Details"  attrs="{'invisible':[('purpose_categ','!=','pump')]}">

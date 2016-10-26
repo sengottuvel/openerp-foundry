@@ -16,7 +16,7 @@
 					</header>
 						<group>
 							<group>
-								<field name="name" readonly="1"/>
+								<field name="name" required="1"/>
 								<field name="customer_id" required="1"/>
 								<field name="purpose"/>
 								<field name="remarks"/>
@@ -28,7 +28,7 @@
 						</group>
 						<notebook>
 							<page string="Complaint Details">
-								<field name="line_ids" colspan="4" nolabel="1" context="{'purpose':purpose,'complaint_categ':'pump'}">
+								<field name="line_ids" colspan="4" nolabel="1" context="{'purpose':purpose,'complaint_categ':purpose}">
 									<tree string="Complaint Details">
 										<field name="s_no" required="1"/>
 										<field name="wo_line_id" required="1"/>
@@ -133,33 +133,37 @@
 			<form string="Complaint Details" version="7.0" >
 					<group>
 						<group>
-							<field name="s_no" required="1"/>
+							<field name="complaint_categ" required="1" attrs="{'readonly':[('complaint_categ','in',('pump','parts'))]}"/>
+						</group>
+						<group>
+						</group>
+						<group>
+							<field name="s_no" attrs="{'required':[('complaint_categ','=','pump')]}"/>
 							<field name="market_division" required="1"/>
 							<field name="dealer_id" attrs="{'required':[('ref_mode','=','dealer')]}"/>
 							<field name="despatch_date" required="1"/>
-							<field name="pump_id" required="1"/>
-							<field name="moc_const_id" required="1"/>
-							
-							<field name="defect_id" attrs="{'required':[('complaint_categ','in',('pump'))]}"/>
-							<field name="complaint_categ" readonly="1" invisible="1"/>
+							<field name="pump_id" required="1" attrs="{'readonly':[('pump_id','!=',False)]}"/>
+							<field name="moc_const_id" required="1" attrs="{'readonly':[('moc_const_id','!=',False)]}"/>
+							<field name="defect_id" attrs="{'required':[('complaint_categ','in',('pump','parts'))]}"/>
 						</group>
 						<group>
 							<field name="wo_no" on_change="onchange_wo_no(wo_no)" attrs="{'readonly':[('load_bom','=',True)]}"/>
-							<field name="wo_line_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
+							<field name="wo_line_id" on_change="onchange_wo(wo_line_id)" attrs="{'readonly':[('load_bom','=',True)]}"/>
 							<field name="ref_mode" required="1"/>
 							<field name="purpose" required="1" readonly="1"/>
-							<field name="pumpseries_id" required="1"/>
-							<field name="complaint_due_to" attrs="{'required':['|',('defect_id','!=',False),('complaint_categ','in',('pump'))]}"/>
-							<field name="decision" attrs="{'required':['|',('defect_id','!=',False),('complaint_categ','in',('pump'))]}"/>
+							<field name="pumpseries_id" required="1" attrs="{'readonly':[('pumpseries_id','!=',False)]}"/>
+							<field name="complaint_due_to" attrs="{'required':['|',('defect_id','!=',False),('complaint_categ','in',('pump','parts'))]}"/>
+							<field name="decision" attrs="{'required':['|',('defect_id','!=',False),('complaint_categ','in',('pump','parts'))]}"/>
 							<field name="nature_of_complaint"/>
 						</group>
-					<group invisible="1">
-						<field name="load_bom" on_change="onchange_load_bom(wo_line_id,load_bom,complaint_categ)"/>
+					<group>
+						<field name="load_bom" on_change="onchange_load_bom(pump_id,pumpseries_id,wo_line_id,moc_const_id,load_bom,complaint_categ,purpose,defect_id,complaint_due_to,decision)" 
+						attrs="{'invisible':[('complaint_categ','not in',('pump','parts'))]}"/>
 					</group>
-						<group invisible="1">
+						<group>
 						</group>
 					</group>
-					<notebook  invisible="1">
+					<notebook attrs="{'invisible':[('complaint_categ','not in',('pump','parts'))]}">
 						<page string="Foundry Items">
 							<field name="line_ids_fou">
 								<tree string="FOU Details Tree" editable="top" create="false" delete="false">
@@ -167,11 +171,11 @@
 									<field name="position_id"  readonly="1"/>
 									<field name="pattern_id" required="1" readonly="1"/>
 									<field name="pattern_name" required="1" readonly="1"/>
-									<field name="qty" required="1" readonly="1"/>
+									<field name="qty" required="1"/>
 									<field name="complaint_categ" invisible="1"/>
-									<field name="defect_id" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('parts'))]}"/>
-									<field name="complaint_due_to" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('parts'))]}"/>
-									<field name="decision" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('parts'))]}"/>
+									<field name="defect_id" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
+									<field name="complaint_due_to" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
+									<field name="decision" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
 									<field name="remark"/>
 								</tree>
 							</field>
@@ -182,11 +186,11 @@
 									<field name="is_applicable"/>
 									<field name="ms_name_id" required="1" readonly="1"/>
 									<field name="ms_id" required="1" readonly="1"/>
-									<field name="qty" required="1" readonly="1"/>
+									<field name="qty" required="1"/>
 									<field name="complaint_categ" invisible="1"/>
-									<field name="defect_id" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('parts'))]}"/>
-									<field name="complaint_due_to" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('parts'))]}"/>
-									<field name="decision" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('parts'))]}"/>
+									<field name="defect_id" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
+									<field name="complaint_due_to" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
+									<field name="decision" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
 									<field name="remark"/>
 								</tree>
 							</field>
@@ -197,11 +201,11 @@
 									<field name="is_applicable"/>
 									<field name="bot_id" required="1" readonly="1"/>
 									<field name="bot_name" required="1" readonly="1"/>
-									<field name="qty" required="1" readonly="1"/>
+									<field name="qty" required="1"/>
 									<field name="complaint_categ" invisible="1"/>
-									<field name="defect_id" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('parts'))]}"/>
-									<field name="complaint_due_to" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('parts'))]}"/>
-									<field name="decision" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('parts'))]}"/>
+									<field name="defect_id" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
+									<field name="complaint_due_to" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
+									<field name="decision" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
 									<field name="remark"/>
 								</tree>
 							</field>
@@ -242,6 +246,7 @@
 		</record>
 	
 	<!-- Sequence Number Setting Ends Here -->
-	
+			
+		
 	</data>
 </openerp>
