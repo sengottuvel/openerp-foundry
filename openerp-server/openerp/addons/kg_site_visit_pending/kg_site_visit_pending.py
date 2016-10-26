@@ -30,7 +30,7 @@ class kg_site_visit_pending(osv.osv):
 		'customer_id': fields.many2one('res.partner','Customer Name',domain=[('customer','=',True),('contact','=',False)],required=True),
 		'purpose': fields.selection(PURPOSE_SELECTION,'Purpose',required=True,readonly=True),
 		's_no': fields.char('Serial Number'),
-		'wo_no': fields.char('WO No'),
+		'wo_no': fields.char('Old WO No'),
 		'wo_line_id': fields.many2one('ch.work.order.details','WO No'),
 		'complaint_line_id': fields.many2one('ch.service.enquiry','Ch Service Enquiry'),
 		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Model'),
@@ -50,7 +50,11 @@ class kg_site_visit_pending(osv.osv):
 		'remarks': fields.text('Remarks'),
 		'note': fields.char('Notes'),
 		'cancel_remark': fields.text('Cancel Remarks'),
-				
+		
+		'complaint_fou_id': fields.related('complaint_line_id','line_ids_fou', type='one2many', relation='ch.service.enquiry.fou', string='Foundry Items'),
+		'complaint_ms_id': fields.related('complaint_line_id','line_ids_ms', type='one2many', relation='ch.service.enquiry.ms', string='MS Items'),
+		'complaint_bot_id': fields.related('complaint_line_id','line_ids_bot', type='one2many', relation='ch.service.enquiry.bot', string='BOT Items'),
+			
 		### Entry Info ####
 		
 		'active': fields.boolean('Active'),

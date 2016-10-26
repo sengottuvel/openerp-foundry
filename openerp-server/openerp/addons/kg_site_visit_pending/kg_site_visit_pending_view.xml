@@ -8,7 +8,7 @@
 			<field name="name">Site Visit Entry Form</field>
 			<field name="model">kg.site.visit.pending</field>
 			<field name="arch" type="xml">
-				<form string="Site Visit Enquiry" version="7.0" create="false" delete="false">
+				<form string="Site Visit Enquiry" version="7.0" create="false" delete="false" edit="false">
 					<header>
 <!--					<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 						<button name="entry_update" type="object" string="Update" states="open,in_progress" class="oe_highlight"/>
@@ -37,7 +37,59 @@
 							</group>	
 						</group>
 						<notebook>
-							<page string="Entry Info">
+						<page string="Foundry Items">
+							<group colspan="6" col="6">		
+								<field name="complaint_fou_id" colspan="4" nolabel="1" mode="tree"  readonly="1">
+									<tree string="Foundry Items"  delete="false" create="false" editable="bottom">
+										<field name="is_applicable"/>
+										<field name="position_id"  readonly="1"/>
+										<field name="pattern_id" required="1" readonly="1"/>
+										<field name="pattern_name" required="1" readonly="1"/>
+										<field name="qty" required="1"/>
+										<field name="complaint_categ" invisible="1"/>
+										<field name="defect_id" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
+										<field name="complaint_due_to" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
+										<field name="decision" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
+										<field name="remark"/>
+									</tree>	
+								</field>
+							</group>
+						</page>
+						<page string="MS Items">
+							<group colspan="6" col="6">		
+								<field name="complaint_ms_id" colspan="4" nolabel="1" mode="tree" readonly="1">
+									<tree string="MS Items"  delete="false" create="false" editable="bottom">
+										<field name="is_applicable"/>
+										<field name="ms_name_id" required="1" readonly="1"/>
+										<field name="ms_id" required="1" readonly="1"/>
+										<field name="qty" required="1"/>
+										<field name="complaint_categ" invisible="1"/>
+										<field name="defect_id" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
+										<field name="complaint_due_to" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
+										<field name="decision" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
+										<field name="remark"/>
+									</tree>	
+								</field>
+							</group>
+						</page>
+						<page string="BOT Items">
+							<group colspan="6" col="6">		
+								<field name="complaint_bot_id" colspan="4" nolabel="1" mode="tree" readonly="1">
+									<tree string="BOT Items"  delete="false" create="false" editable="bottom">
+										<field name="is_applicable"/>
+										<field name="bot_id" required="1" readonly="1"/>
+										<field name="bot_name" required="1" readonly="1"/>
+										<field name="qty" required="1"/>
+										<field name="complaint_categ" invisible="1"/>
+										<field name="defect_id" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
+										<field name="complaint_due_to" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
+										<field name="decision" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
+										<field name="remark"/>
+									</tree>	
+								</field>
+							</group>
+						</page>
+						<page string="Entry Info">
 								<group>
 									<group>
 										<field name="company_id"/>
@@ -55,7 +107,8 @@
 									</group>
 								</group>
 							</page>
-						</notebook>
+					</notebook>
+						
 				</form>
 			</field>
 		</record>
@@ -140,5 +193,6 @@
 	
 	<!-- Sequence Number Setting Ends Here -->
 	
+		
 	</data>
 </openerp>
