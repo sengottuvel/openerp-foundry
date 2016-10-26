@@ -386,7 +386,7 @@ class kg_crm_offer(osv.osv):
 			if item.lubrication_type == 'grease':
 				 lubrication_type = 'grease'
 			if item.speed_in_rpm:
-				if item.speed_in_rpm <= 1800:
+				if item.speed_in_rpm <= 1800  or item.speed_in_rpm == 0.00:
 					rpm = '1450'
 				elif item.speed_in_rpm >= 1801 and item.speed_in_rpm <= 3600:
 					rpm = '2900'
@@ -420,7 +420,8 @@ class kg_crm_offer(osv.osv):
 			'setting_height': setting_height,
 			'shaft_sealing': shaft_sealing,
 			'lubrication_type': lubrication_type,
-			'rpm': 
+			'rpm': rpm,
+			
 			}
 			
 		return pump_vals
