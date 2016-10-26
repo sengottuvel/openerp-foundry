@@ -362,7 +362,7 @@ class kg_crm_offer(osv.osv):
 		#~ purpose = item.purpose_categ
 		qty = 1
 		moc_const_id = m_power = setting_height = 0
-		pump_model_type = speed_in_rpm = bush_bearing = shaft_sealing = lubrication_type = ''
+		pump_model_type = speed_in_rpm = bush_bearing = shaft_sealing = lubrication_type = rpm = ''
 		if purpose == 'pump':
 			qty = item.qty
 			moc_const_id = item.moc_const_id.id
@@ -385,6 +385,11 @@ class kg_crm_offer(osv.osv):
 				 shaft_sealing = 'f_s'
 			if item.lubrication_type == 'grease':
 				 lubrication_type = 'grease'
+			if item.speed_in_rpm:
+				if item.speed_in_rpm <= 1800:
+					rpm = '1450'
+				elif item.speed_in_rpm >= 1801 and item.speed_in_rpm <= 3600:
+					rpm = '2900'
 		elif purpose == 'spare':
 			purpose == 'spare'
 			moc_const_id = item.spare_moc_const_id.id
@@ -415,6 +420,7 @@ class kg_crm_offer(osv.osv):
 			'setting_height': setting_height,
 			'shaft_sealing': shaft_sealing,
 			'lubrication_type': lubrication_type,
+			'rpm': 
 			}
 			
 		return pump_vals
@@ -666,8 +672,9 @@ class kg_crm_offer(osv.osv):
 		style3 = xlwt.easyxf('font: height 200,color_index black;' 'align: horiz center;''borders: left thin, right thin, top thin, bottom thin') 
 		style4 = xlwt.easyxf('font: height 200,color_index black;' 'align: horiz left;''borders: left thin, right thin, top thin, bottom thin') 
 		style5 = xlwt.easyxf('font: bold on,height 200,color_index black;' 'align: horiz left;''borders: left thin, right thin, top thin, bottom thin;''font: underline on;') 
-		style6 = xlwt.easyxf('font: height 200,color_index black;' 'align: vert centre, horiz center;''borders: left thin, right thin, top thin, bottom thin') 
+		style6 = xlwt.easyxf('font: height 200,color_index black;' 'align: vert centre, horiz left;''borders: left thin, right thin, top thin, bottom thin') 
 		style7 = xlwt.easyxf('font: height 200,color_index black;' 'align: wrap on, vert centre, horiz left;''borders: left thin, right thin, top thin, bottom thin') 
+		style8 = xlwt.easyxf('font: height 200,color_index black;' 'align: wrap on, vert centre, horiz centre;''borders: left thin, right thin, top thin, bottom thin') 
 		
 		
 		img = Image.open('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.png')
@@ -991,73 +998,73 @@ class kg_crm_offer(osv.osv):
 				print"item_dataitem_data",item_data
 				if item_data:
 					for ele in item_data:
-						sheet1.write(s2,coln_no,s_no,style6)
-						sheet1.write(s2+1,coln_no,ele['equipment_no'] or "-",style6)
-						sheet1.write(s2+2,coln_no,ele['description'] or "-",style6)
-						sheet1.write(s2+3,coln_no,ele['qty'] or "-",style6)
-						sheet1.write(s2+5,coln_no,ele['liquid_name'] or "-",style6)
-						sheet1.write(s2+6,coln_no,ele['temperature_in_c'] or "-",style6)
-						sheet1.write(s2+7,coln_no,ele['solid_concen'] or "-",style6)
-						sheet1.write(s2+8,coln_no,ele['specific_gravity'] or "-",style6)
-						sheet1.write(s2+9,coln_no,ele['viscosity'] or "-",style6)
-						sheet1.write(s2+10,coln_no,ele['max_particle_size_mm'] or "-",style6)
-						sheet1.write(s2+11,coln_no,ele['npsh_avl'] or "-",style6)
-						sheet1.write(s2+12,coln_no,ele['density'] or "-",style6)
-						sheet1.write(s2+13,coln_no,ele['capacity_in_liquid'] or "-",style6)
-						sheet1.write(s2+14,coln_no,ele['head_in_liquid'] or "-",style6)
-						sheet1.write(s2+15,coln_no,ele['consistency'] or "-",style6)
+						sheet1.write(s2,coln_no,s_no,style8)
+						sheet1.write(s2+1,coln_no,ele['equipment_no'] or "-",style8)
+						sheet1.write(s2+2,coln_no,ele['description'] or "-",style8)
+						sheet1.write(s2+3,coln_no,ele['qty'] or "-",style8)
+						sheet1.write(s2+5,coln_no,ele['liquid_name'] or "-",style8)
+						sheet1.write(s2+6,coln_no,ele['temperature_in_c'] or "-",style8)
+						sheet1.write(s2+7,coln_no,ele['solid_concen'] or "-",style8)
+						sheet1.write(s2+8,coln_no,ele['specific_gravity'] or "-",style8)
+						sheet1.write(s2+9,coln_no,ele['viscosity'] or "-",style8)
+						sheet1.write(s2+10,coln_no,ele['max_particle_size_mm'] or "-",style8)
+						sheet1.write(s2+11,coln_no,ele['npsh_avl'] or "-",style8)
+						sheet1.write(s2+12,coln_no,ele['density'] or "-",style8)
+						sheet1.write(s2+13,coln_no,ele['capacity_in_liquid'] or "-",style8)
+						sheet1.write(s2+14,coln_no,ele['head_in_liquid'] or "-",style8)
+						sheet1.write(s2+15,coln_no,ele['consistency'] or "-",style8)
 						sheet1.write(s2+17,coln_no,"Horizontal Centrifual Front pull out Design Pump" or "-",style7)
 						sheet1.row(s2+17).height = 490
 						sheet1.write(s2+18,coln_no,item['name'] or "-",style1)
-						sheet1.write(s2+19,coln_no,ele['pumpseries'] or "-",style6)	
-						sheet1.write(s2+20,coln_no,ele['pre_suppliy_ref'] or "-",style6)
-						sheet1.write(s2+21,coln_no,ele['shaft_sealing'] or "-",style6)
-						sheet1.write(s2+22,coln_no,ele['scope_of_supply'] or "-",style6)
-						sheet1.write(s2+23,coln_no,ele['number_of_stages'] or "-",style6)
-						sheet1.write(s2+24,coln_no,ele['impeller_type'] or "-",style6)
-						sheet1.write(s2+25,coln_no,ele['impeller_dia_min'] or "-",style6)
-						sheet1.write(s2+26,coln_no,ele['size_suctionx'] or "-",style6)
-						sheet1.write(s2+27,coln_no,ele['flange_type'] or "-",style6)
-						sheet1.write(s2+28,coln_no,ele['flange_standard'] or "-",style6)
-						sheet1.write(s2+29,coln_no,ele['efficiency_in'] or "-",style6)
-						sheet1.write(s2+30,coln_no,ele['npsh_r_m'] or "-",style6)
-						sheet1.write(s2+31,coln_no,ele['best_efficiency'] or "-",style6)
-						sheet1.write(s2+32,coln_no,ele['bkw_water'] or "-",style6)
-						sheet1.write(s2+33,coln_no,ele['bkw_liq'] or "-",style6)
-						sheet1.write(s2+34,coln_no,ele['impeller_dia_rated'] or "-",style6)
-						sheet1.write(s2+35,coln_no,ele['impeller_tip_speed'] or "-",style6)
-						sheet1.write(s2+36,coln_no,ele['hydrostatic_test_pressure'] or "-",style6)
-						sheet1.write(s2+37,coln_no,ele['setting_height'] or "-",style6)
-						sheet1.write(s2+38,coln_no,ele['full_load_rpm'] or "-",style6)
-						sheet1.write(s2+39,coln_no,ele['frequency'] or "-",style6)
-						sheet1.write(s2+40,coln_no,ele['motor_kw'] or "-",style6)
-						sheet1.write(s2+41,coln_no,ele['motor_margin'] or "-",style6)
-						sheet1.write(s2+42,coln_no,ele['speed_in_motor'] or "-",style6)
-						sheet1.write(s2+43,coln_no,ele['end_of_the_curve'] or "-",style6)
-						sheet1.write(s2+44,coln_no,ele['critical_speed'] or "-",style6)
-						sheet1.write(s2+45,coln_no,ele['maximum_allowable_soild'] or "-",style6)
-						sheet1.write(s2+46,coln_no,ele['impeller_number'] or "-",style6)
+						sheet1.write(s2+19,coln_no,ele['pumpseries'] or "-",style8)	
+						sheet1.write(s2+20,coln_no,ele['pre_suppliy_ref'] or "-",style8)
+						sheet1.write(s2+21,coln_no,ele['shaft_sealing'] or "-",style8)
+						sheet1.write(s2+22,coln_no,ele['scope_of_supply'] or "-",style8)
+						sheet1.write(s2+23,coln_no,ele['number_of_stages'] or "-",style8)
+						sheet1.write(s2+24,coln_no,ele['impeller_type'] or "-",style8)
+						sheet1.write(s2+25,coln_no,ele['impeller_dia_min'] or "-",style8)
+						sheet1.write(s2+26,coln_no,ele['size_suctionx'] or "-",style8)
+						sheet1.write(s2+27,coln_no,ele['flange_type'] or "-",style8)
+						sheet1.write(s2+28,coln_no,ele['flange_standard'] or "-",style8)
+						sheet1.write(s2+29,coln_no,ele['efficiency_in'] or "-",style8)
+						sheet1.write(s2+30,coln_no,ele['npsh_r_m'] or "-",style8)
+						sheet1.write(s2+31,coln_no,ele['best_efficiency'] or "-",style8)
+						sheet1.write(s2+32,coln_no,ele['bkw_water'] or "-",style8)
+						sheet1.write(s2+33,coln_no,ele['bkw_liq'] or "-",style8)
+						sheet1.write(s2+34,coln_no,ele['impeller_dia_rated'] or "-",style8)
+						sheet1.write(s2+35,coln_no,ele['impeller_tip_speed'] or "-",style8)
+						sheet1.write(s2+36,coln_no,ele['hydrostatic_test_pressure'] or "-",style8)
+						sheet1.write(s2+37,coln_no,ele['setting_height'] or "-",style8)
+						sheet1.write(s2+38,coln_no,ele['full_load_rpm'] or "-",style8)
+						sheet1.write(s2+39,coln_no,ele['frequency'] or "-",style8)
+						sheet1.write(s2+40,coln_no,ele['motor_kw'] or "-",style8)
+						sheet1.write(s2+41,coln_no,ele['motor_margin'] or "-",style8)
+						sheet1.write(s2+42,coln_no,ele['speed_in_motor'] or "-",style8)
+						sheet1.write(s2+43,coln_no,ele['end_of_the_curve'] or "-",style8)
+						sheet1.write(s2+44,coln_no,ele['critical_speed'] or "-",style8)
+						sheet1.write(s2+45,coln_no,ele['maximum_allowable_soild'] or "-",style8)
+						sheet1.write(s2+46,coln_no,ele['impeller_number'] or "-",style8)
 						
-						sheet1.write(s2+47,coln_no,ele['impeller_dia_max'] or "-",style6)
-						sheet1.write(s2+48,coln_no,ele['max_allowable_test'] or "-",style6)
-						sheet1.write(s2+49,coln_no,ele['crm_type'] or "-",style6)
-						sheet1.write(s2+50,coln_no,ele['casing_design'] or "-",style6)
-						sheet1.write(s2+51,coln_no,ele['shut_off_head'] or "-",style6)
-						sheet1.write(s2+52,coln_no,ele['shut_off_pressure'] or "-",style6)
-						sheet1.write(s2+53,coln_no,ele['minimum_contionuous'] or "-",style6)
-						sheet1.write(s2+54,coln_no,ele['specific_speed'] or "-",style6)
-						sheet1.write(s2+55,coln_no,ele['suction_specific_speed'] or "-",style6)
-						sheet1.write(s2+56,coln_no,ele['sealing_water_pressure'] or "-",style6)
-						sheet1.write(s2+57,coln_no,ele['sealing_water_capacity'] or "-",style6)
-						sheet1.write(s2+58,coln_no,ele['gd_sq_value'] or "-",style6)
-						sheet1.write(s2+59,coln_no,ele['bearing_make'] or "-",style6)
-						sheet1.write(s2+60,coln_no,ele['bearing_number_nde'] or "-",style6)
-						sheet1.write(s2+61,coln_no,ele['bearing_qty_nde'] or "-",style6)
-						sheet1.write(s2+62,coln_no,ele['lubrication_type'] or "-",style6)
-						sheet1.write(s2+63,coln_no,ele['primemover_categ'] or "-",style6)
-						sheet1.write(s2+64,coln_no,ele['type_of_drive'] or "-",style6)
-						sheet1.write(s2+65,coln_no,ele['primemover'] or "-",style6)
-						sheet1.write(s2+66,coln_no,ele['operation_range'] or "-",style6)
+						sheet1.write(s2+47,coln_no,ele['impeller_dia_max'] or "-",style8)
+						sheet1.write(s2+48,coln_no,ele['max_allowable_test'] or "-",style8)
+						sheet1.write(s2+49,coln_no,ele['crm_type'] or "-",style8)
+						sheet1.write(s2+50,coln_no,ele['casing_design'] or "-",style8)
+						sheet1.write(s2+51,coln_no,ele['shut_off_head'] or "-",style8)
+						sheet1.write(s2+52,coln_no,ele['shut_off_pressure'] or "-",style8)
+						sheet1.write(s2+53,coln_no,ele['minimum_contionuous'] or "-",style8)
+						sheet1.write(s2+54,coln_no,ele['specific_speed'] or "-",style8)
+						sheet1.write(s2+55,coln_no,ele['suction_specific_speed'] or "-",style8)
+						sheet1.write(s2+56,coln_no,ele['sealing_water_pressure'] or "-",style8)
+						sheet1.write(s2+57,coln_no,ele['sealing_water_capacity'] or "-",style8)
+						sheet1.write(s2+58,coln_no,ele['gd_sq_value'] or "-",style8)
+						sheet1.write(s2+59,coln_no,ele['bearing_make'] or "-",style8)
+						sheet1.write(s2+60,coln_no,ele['bearing_number_nde'] or "-",style8)
+						sheet1.write(s2+61,coln_no,ele['bearing_qty_nde'] or "-",style8)
+						sheet1.write(s2+62,coln_no,ele['lubrication_type'] or "-",style8)
+						sheet1.write(s2+63,coln_no,ele['primemover_categ'] or "-",style8)
+						sheet1.write(s2+64,coln_no,ele['type_of_drive'] or "-",style8)
+						sheet1.write(s2+65,coln_no,ele['primemover'] or "-",style8)
+						sheet1.write(s2+66,coln_no,ele['operation_range'] or "-",style8)
 						
 						s_no = s_no + 1
 					coln_no = coln_no + 1
@@ -1155,11 +1162,11 @@ class kg_crm_offer(osv.osv):
 						if item_1['mat_name'] or item_1['moc']:
 							m_col_no = 0
 							sheet1.write(row_no,m_col_no,item_1['mat_name'])
-							sheet1.write(row_no,em_col,item_1['moc'] or "-",style6)
+							sheet1.write(row_no,em_col,item_1['moc'] or "-",style8)
 							row_no = row_no+1
 				else:
 					m_col_no = 0
-					sheet1.write(row_no,em_col,"-",style6)
+					sheet1.write(row_no,em_col,"-",style8)
 					row_no = row_no+1
 				em_col = em_col + 1 
 		print"row_norow_norow_norow_no",row_no
@@ -1192,20 +1199,20 @@ class kg_crm_offer(osv.osv):
 					for item_1 in mech_data:
 						if item_1['shaft_sealing'] or item_1['gland']:
 							m_col_no = 1
-							sheet1.write(row_no,em_col,item_1['shaft_sealing'],style6)
-							sheet1.write(row_no+1,em_col,item_1['gland'],style6)
+							sheet1.write(row_no,em_col,item_1['shaft_sealing'],style8)
+							sheet1.write(row_no+1,em_col,item_1['gland'],style8)
 							m_col_no = m_col_no+1
 						else:
 							m_col_no = 1
-							sheet1.write(row_no,em_col,"-",style6)
-							sheet1.write(row_no+1,em_col,"-",style6)
+							sheet1.write(row_no,em_col,"-",style8)
+							sheet1.write(row_no+1,em_col,"-",style8)
 							m_col_no = m_col_no+1
 						s = s + 1
 						em_col = em_col + 1
 						print"sssssssssssss",s
 				else:
-					sheet1.write(row_no,em_col,"-",style6)
-					sheet1.write(row_no+1,em_col,"-",style6)
+					sheet1.write(row_no,em_col,"-",style8)
+					sheet1.write(row_no+1,em_col,"-",style8)
 					em_col = em_col + 1
 					
 			print"row_norow_nodddddD",row_no
@@ -1237,19 +1244,19 @@ class kg_crm_offer(osv.osv):
 				if mm_data:
 					for item_1 in mm_data:
 						if item_1['shaft_sealing'] or item_1['qty']:
-							sheet1.write(row_no,em_col,item_1['shaft_sealing'] or "-",style6)
-							sheet1.write(row_no+1,em_col,item_1['qty'] or "-",style6)
-							sheet1.write(row_no+2,em_col,item_1['qty'] or "-",style6)
+							sheet1.write(row_no,em_col,item_1['shaft_sealing'] or "-",style8)
+							sheet1.write(row_no+1,em_col,item_1['qty'] or "-",style8)
+							sheet1.write(row_no+2,em_col,item_1['qty'] or "-",style8)
 						else:
-							sheet1.write(row_no,em_col,"-",style6)
-							sheet1.write(row_no+1,em_col,"-",style6)
-							sheet1.write(row_no+2,em_col,"-",style6)
+							sheet1.write(row_no,em_col,"-",style8)
+							sheet1.write(row_no+1,em_col,"-",style8)
+							sheet1.write(row_no+2,em_col,"-",style8)
 						s = s + 2
 						em_col = em_col + 1
 				else:
-					sheet1.write(row_no,em_col,"-",style6)
-					sheet1.write(row_no+1,em_col,"-",style6)
-					sheet1.write(row_no+2,em_col,"-",style6)
+					sheet1.write(row_no,em_col,"-",style8)
+					sheet1.write(row_no+1,em_col,"-",style8)
+					sheet1.write(row_no+2,em_col,"-",style8)
 					em_col = em_col + 1
 		row_no = row_no + s
 		
@@ -1275,12 +1282,12 @@ class kg_crm_offer(osv.osv):
 				if ss_data:
 					for item_1 in ss_data:
 						if item_1['net_amount']:
-							sheet1.write(row_no,em_col,item_1['net_amount'] or "-",style6)
+							sheet1.write(row_no,em_col,item_1['net_amount'] or "-",style8)
 						else:
-							sheet1.write(row_no,em_col,"-",style6)
+							sheet1.write(row_no,em_col,"-",style8)
 						em_col = em_col + 1
 				else:
-					sheet1.write(row_no,em_col,"-",style6)
+					sheet1.write(row_no,em_col,"-",style8)
 					em_col = em_col + 1
 		row_no = row_no
 		print"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",row_no
@@ -1305,12 +1312,12 @@ class kg_crm_offer(osv.osv):
 				if access_data:
 					for item_1 in access_data:
 						if item_1['net_amount'] or item_1['access_name']:
-							sheet1.write(row_no+1,0,item_1['access_name'],style6)
-							sheet1.write(row_no+1,em_col,item_1['net_amount'] or "-",style6)
+							sheet1.write(row_no+1,0,item_1['access_name'],style8)
+							sheet1.write(row_no+1,em_col,item_1['net_amount'] or "-",style8)
 							row_no = row_no+1
 					em_col = em_col + 1
 				else:
-					sheet1.write(row_no+1,em_col,"-",style6)
+					sheet1.write(row_no+1,em_col,"-",style8)
 					em_col = em_col + 1
 		row_no = row_no
 		
@@ -1337,11 +1344,11 @@ class kg_crm_offer(osv.osv):
 					for item_1 in spare_data:
 						if item_1['spare_name'] or item_1['net_amount']:
 							m_col_no = 1
-							sheet1.write(row_no+2,0,item_1['spare_name'],style6)
-							sheet1.write(row_no+2,em_col,item_1['net_amount'] or "-",style6)
+							sheet1.write(row_no+2,0,item_1['spare_name'],style8)
+							sheet1.write(row_no+2,em_col,item_1['net_amount'] or "-",style8)
 							row_no = row_no+1
 				else:
-					sheet1.write(row_no+2,em_col,"-",style6)
+					sheet1.write(row_no+2,em_col,"-",style8)
 					em_col = em_col + 1
 		row_no = row_no
 		print"row_norow_norow_norow_norow_norow_no",row_no

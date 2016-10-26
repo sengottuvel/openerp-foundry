@@ -587,5 +587,6 @@
 		  <field name="reset_sequence">fiscal_reset</field>
 		</record>
 		
+		
 	</data>
 </openerp>
