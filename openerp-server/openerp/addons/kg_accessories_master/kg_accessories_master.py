@@ -193,165 +193,165 @@ class kg_accessories_master(osv.osv):
 		
 	def entry_confirm(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		
-		if not rec.line_ids:
-			raise osv.except_osv(_('Warning !!'),
-				_('You can not save this with out Raw material Details !!'))
+		if rec.state == 'draft':
+			if not rec.line_ids:
+				raise osv.except_osv(_('Warning !!'),
+					_('You can not save this with out Raw material Details !!'))
+					
+			if rec.access_type == 'copy':
 				
-		if rec.access_type == 'copy':
+				cr.execute('''select 
+						access_line.product_id,
+						access_line.brand_id,
+						access_line.moc_id,
+						access_line.uom_id,
+						access_line.uom_conversation_factor,
+						access_line.length,
+						access_line.breadth,
+						access_line.qty,
+						access_line.remark
+						from ch_kg_accessories_master access_line 
+						left join kg_accessories_master header on header.id  = access_line.header_id
+						where header.access_type = 'copy' and header.id = %s''',[rec.id])
+				source_position_ids = cr.fetchall()
+				source_position_len = len(source_position_ids)
+				print"dddddddllll",source_position_len
+				cr.execute('''select 
+						access_line.product_id,
+						access_line.brand_id,
+						access_line.moc_id,
+						access_line.uom_id,
+						access_line.uom_conversation_factor,
+						access_line.length,
+						access_line.breadth,
+						access_line.qty,
+						access_line.remark
+						from ch_kg_accessories_master access_line 
+						where access_line.header_id  = %s''',[rec.access_id.id])
+				source_old_position_ids = cr.fetchall()
+				source_old_position_len = len(source_old_position_ids)	
+				print"ddddssssssss",source_old_position_len
+				cr.execute('''select 
+
+						access_line.product_id,
+						access_line.brand_id,
+						access_line.moc_id,
+						access_line.uom_id,
+						access_line.uom_conversation_factor,
+						access_line.length,
+						access_line.breadth,
+						access_line.qty,
+						access_line.remark
+						from ch_kg_accessories_master access_line 
+						left join kg_accessories_master header on header.id  = access_line.header_id
+						where header.access_type = 'copy' and header.id = %s
+
+						INTERSECT
+
+						select 
+						access_line.product_id,
+						access_line.brand_id,
+						access_line.moc_id,
+						access_line.uom_id,
+						access_line.uom_conversation_factor,
+						access_line.length,
+						access_line.breadth,
+						access_line.qty,
+						access_line.remark
+						from ch_kg_accessories_master access_line 
+						where access_line.header_id  = %s ''',[rec.id,rec.access_id.id])
+				repeat_ids = cr.fetchall()
+				new_position_len = len(repeat_ids)
+				print"ddddddddddddddd",new_position_len
+				pos_dup = ''
+				if new_position_len  == source_position_len == source_old_position_len:
+					pos_dup = 'yes'
+				
+				if pos_dup == 'yes':
+					raise osv.except_osv(_('Warning!'),
+									_('Same Raw Material Details are already exist !!'))
+			####################
+			if rec.access_type == 'copy':
+				
+				obj = self.search(cr,uid,[('access_id','=',rec.access_id.id)])
+				if obj:
+					for item in obj:
+						if rec.id != item:
+							obj_rec = self.browse(cr,uid,item)
+							print"aaaaaaaaaaaaaa",obj_rec.id
+							
+							cr.execute('''select 
+									access_line.product_id,
+									access_line.brand_id,
+									access_line.moc_id,
+									access_line.uom_id,
+									access_line.uom_conversation_factor,
+									access_line.length,
+									access_line.breadth,
+									access_line.qty,
+									access_line.remark
+									from ch_kg_accessories_master access_line 
+									left join kg_accessories_master header on header.id  = access_line.header_id
+									where header.access_type = 'copy' and header.id = %s''',[rec.id])
+							source_position_ids = cr.fetchall()
+							source_position_len = len(source_position_ids)
+							print"source_position_len",source_position_len
+							cr.execute('''select 
+									access_line.product_id,
+									access_line.brand_id,
+									access_line.moc_id,
+									access_line.uom_id,
+									access_line.uom_conversation_factor,
+									access_line.length,
+									access_line.breadth,
+									access_line.qty,
+									access_line.remark
+									from ch_kg_accessories_master access_line 
+									where access_line.header_id  = %s''',[obj_rec.id])
+							source_old_position_ids = cr.fetchall()
+							source_old_position_len = len(source_old_position_ids)	
+							print"source_old_position_len",source_old_position_len
+							cr.execute('''select 
+
+									access_line.product_id,
+									access_line.brand_id,
+									access_line.moc_id,
+									access_line.uom_id,
+									access_line.uom_conversation_factor,
+									access_line.length,
+									access_line.breadth,
+									access_line.qty,
+									access_line.remark
+									from ch_kg_accessories_master access_line 
+									left join kg_accessories_master header on header.id  = access_line.header_id
+									where header.access_type = 'copy' and header.id = %s
+
+									INTERSECT
+
+									select 
+									access_line.product_id,
+									access_line.brand_id,
+									access_line.moc_id,
+									access_line.uom_id,
+									access_line.uom_conversation_factor,
+									access_line.length,
+									access_line.breadth,
+									access_line.qty,
+									access_line.remark
+									from ch_kg_accessories_master access_line 
+									where access_line.header_id  = %s ''',[rec.id,obj_rec.id])
+							repeat_ids = cr.fetchall()
+							new_position_len = len(repeat_ids)
+							print"new_position_len",new_position_len
+							pos_dup = ''
+							if new_position_len == source_position_len == source_old_position_len:
+								pos_dup = 'yes'
+							print"pos_duppos_dup",pos_dup
+							if pos_dup == 'yes':
+								raise osv.except_osv(_('Warning!'),
+												_('Same Raw Material Details are already exist !!'))
 			
-			cr.execute('''select 
-					access_line.product_id,
-					access_line.brand_id,
-					access_line.moc_id,
-					access_line.uom_id,
-					access_line.uom_conversation_factor,
-					access_line.length,
-					access_line.breadth,
-					access_line.qty,
-					access_line.remark
-					from ch_kg_accessories_master access_line 
-					left join kg_accessories_master header on header.id  = access_line.header_id
-					where header.access_type = 'copy' and header.id = %s''',[rec.id])
-			source_position_ids = cr.fetchall()
-			source_position_len = len(source_position_ids)
-			print"dddddddllll",source_position_len
-			cr.execute('''select 
-					access_line.product_id,
-					access_line.brand_id,
-					access_line.moc_id,
-					access_line.uom_id,
-					access_line.uom_conversation_factor,
-					access_line.length,
-					access_line.breadth,
-					access_line.qty,
-					access_line.remark
-					from ch_kg_accessories_master access_line 
-					where access_line.header_id  = %s''',[rec.access_id.id])
-			source_old_position_ids = cr.fetchall()
-			source_old_position_len = len(source_old_position_ids)	
-			print"ddddssssssss",source_old_position_len
-			cr.execute('''select 
-
-					access_line.product_id,
-					access_line.brand_id,
-					access_line.moc_id,
-					access_line.uom_id,
-					access_line.uom_conversation_factor,
-					access_line.length,
-					access_line.breadth,
-					access_line.qty,
-					access_line.remark
-					from ch_kg_accessories_master access_line 
-					left join kg_accessories_master header on header.id  = access_line.header_id
-					where header.access_type = 'copy' and header.id = %s
-
-					INTERSECT
-
-					select 
-					access_line.product_id,
-					access_line.brand_id,
-					access_line.moc_id,
-					access_line.uom_id,
-					access_line.uom_conversation_factor,
-					access_line.length,
-					access_line.breadth,
-					access_line.qty,
-					access_line.remark
-					from ch_kg_accessories_master access_line 
-					where access_line.header_id  = %s ''',[rec.id,rec.access_id.id])
-			repeat_ids = cr.fetchall()
-			new_position_len = len(repeat_ids)
-			print"ddddddddddddddd",new_position_len
-			pos_dup = ''
-			if new_position_len  == source_position_len == source_old_position_len:
-				pos_dup = 'yes'
-			
-			if pos_dup == 'yes':
-				raise osv.except_osv(_('Warning!'),
-								_('Same Raw Material Details are already exist !!'))
-		####################
-		if rec.access_type == 'copy':
-			
-			obj = self.search(cr,uid,[('access_id','=',rec.access_id.id)])
-			if obj:
-				for item in obj:
-					if rec.id != item:
-						obj_rec = self.browse(cr,uid,item)
-						print"aaaaaaaaaaaaaa",obj_rec.id
-						
-						cr.execute('''select 
-								access_line.product_id,
-								access_line.brand_id,
-								access_line.moc_id,
-								access_line.uom_id,
-								access_line.uom_conversation_factor,
-								access_line.length,
-								access_line.breadth,
-								access_line.qty,
-								access_line.remark
-								from ch_kg_accessories_master access_line 
-								left join kg_accessories_master header on header.id  = access_line.header_id
-								where header.access_type = 'copy' and header.id = %s''',[rec.id])
-						source_position_ids = cr.fetchall()
-						source_position_len = len(source_position_ids)
-						print"source_position_len",source_position_len
-						cr.execute('''select 
-								access_line.product_id,
-								access_line.brand_id,
-								access_line.moc_id,
-								access_line.uom_id,
-								access_line.uom_conversation_factor,
-								access_line.length,
-								access_line.breadth,
-								access_line.qty,
-								access_line.remark
-								from ch_kg_accessories_master access_line 
-								where access_line.header_id  = %s''',[obj_rec.id])
-						source_old_position_ids = cr.fetchall()
-						source_old_position_len = len(source_old_position_ids)	
-						print"source_old_position_len",source_old_position_len
-						cr.execute('''select 
-
-								access_line.product_id,
-								access_line.brand_id,
-								access_line.moc_id,
-								access_line.uom_id,
-								access_line.uom_conversation_factor,
-								access_line.length,
-								access_line.breadth,
-								access_line.qty,
-								access_line.remark
-								from ch_kg_accessories_master access_line 
-								left join kg_accessories_master header on header.id  = access_line.header_id
-								where header.access_type = 'copy' and header.id = %s
-
-								INTERSECT
-
-								select 
-								access_line.product_id,
-								access_line.brand_id,
-								access_line.moc_id,
-								access_line.uom_id,
-								access_line.uom_conversation_factor,
-								access_line.length,
-								access_line.breadth,
-								access_line.qty,
-								access_line.remark
-								from ch_kg_accessories_master access_line 
-								where access_line.header_id  = %s ''',[rec.id,obj_rec.id])
-						repeat_ids = cr.fetchall()
-						new_position_len = len(repeat_ids)
-						print"new_position_len",new_position_len
-						pos_dup = ''
-						if new_position_len == source_position_len == source_old_position_len:
-							pos_dup = 'yes'
-						print"pos_duppos_dup",pos_dup
-						if pos_dup == 'yes':
-							raise osv.except_osv(_('Warning!'),
-											_('Same Raw Material Details are already exist !!'))
-		
-		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		
 		return True
 		
@@ -361,12 +361,12 @@ class kg_accessories_master(osv.osv):
 
 	def entry_approve(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		
-		if not rec.line_ids:
-			raise osv.except_osv(_('Warning !!'),
-				_('You can not save this with out Raw material Details !!'))
-				
-		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		if rec.state == 'confirmed':	
+			if not rec.line_ids:
+				raise osv.except_osv(_('Warning !!'),
+					_('You can not save this with out Raw material Details !!'))
+					
+			self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
 	def entry_reject(self,cr,uid,ids,context=None):

@@ -211,41 +211,42 @@ class kg_pumpmodel_master(osv.osv):
 		return True
 
 	def entry_confirm(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])		
-		line = rec.line_ids	
-		if rec.line_ids_b:			
-			cr.execute(""" select count from
-				( select count(delivery_size),delivery_size from ch_delivery_pipe where header_id = %s group by delivery_size ) as dup
-				where count > 1 """ %(rec.id))
-			data = cr.dictfetchall()			
-			if len(data) > 0:
-				raise osv.except_osv(_('Delivery Pipe Check !!'),
-				_('Not allow same Delivery Size!!'))
-			else:
-				pass
-			
-		if rec.line_ids_a:			
-			cr.execute(""" select count from
-				( select count(alpha_type),alpha_type from ch_alpha_value where header_id = %s group by alpha_type ) as dup
-				where count > 1 """ %(rec.id))
-			data = cr.dictfetchall()			
-			if len(data) > 0:
-				raise osv.except_osv(_('Alpha Value Check !!'),
-				_('Not allow same Alpha type!!'))
-			else:
-				pass	
-		if rec.line_ids:
-								
-			cr.execute(""" select count from
-				( select count(rpm),rpm from ch_vo_mapping where header_id = %s group by rpm ) as dup
-				where count > 1 """ %(rec.id))
-			data = cr.dictfetchall()			
-			if len(data) > 0:
-				raise osv.except_osv(_('VO Mapping Check !!'),
-				_('Not allow same RPM in VO Mapping!!'))
-			else:
-				pass		
-		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'draft':		
+			line = rec.line_ids	
+			if rec.line_ids_b:			
+				cr.execute(""" select count from
+					( select count(delivery_size),delivery_size from ch_delivery_pipe where header_id = %s group by delivery_size ) as dup
+					where count > 1 """ %(rec.id))
+				data = cr.dictfetchall()			
+				if len(data) > 0:
+					raise osv.except_osv(_('Delivery Pipe Check !!'),
+					_('Not allow same Delivery Size!!'))
+				else:
+					pass
+				
+			if rec.line_ids_a:			
+				cr.execute(""" select count from
+					( select count(alpha_type),alpha_type from ch_alpha_value where header_id = %s group by alpha_type ) as dup
+					where count > 1 """ %(rec.id))
+				data = cr.dictfetchall()			
+				if len(data) > 0:
+					raise osv.except_osv(_('Alpha Value Check !!'),
+					_('Not allow same Alpha type!!'))
+				else:
+					pass	
+			if rec.line_ids:
+									
+				cr.execute(""" select count from
+					( select count(rpm),rpm from ch_vo_mapping where header_id = %s group by rpm ) as dup
+					where count > 1 """ %(rec.id))
+				data = cr.dictfetchall()			
+				if len(data) > 0:
+					raise osv.except_osv(_('VO Mapping Check !!'),
+					_('Not allow same RPM in VO Mapping!!'))
+				else:
+					pass		
+			self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 		
 	def entry_draft(self,cr,uid,ids,context=None):

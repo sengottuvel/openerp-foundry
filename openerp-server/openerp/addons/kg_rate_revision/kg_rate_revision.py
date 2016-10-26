@@ -178,23 +178,25 @@ class kg_rate_revision(osv.osv):
 
 
 	def entry_confirm(self,cr,uid,ids,context=None):
-		entry = self.browse(cr,uid,ids[0])		
-		for line in entry.line_ids:
-			if line.new_design_rate <= 0.00:
-				raise osv.except_osv(_('New Design Rate'),
-					_('System not allow to save negative and zero values..!!'))
-		revision_name = ''	
-		revision_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.rate.revision')])
-		rec = self.pool.get('ir.sequence').browse(cr,uid,revision_seq_id[0])
-		cr.execute("""select generatesequenceno(%s,'%s','%s') """%(revision_seq_id[0],rec.code,entry.entry_date))
-		revision_name = cr.fetchone();
-		self.write(cr, uid, ids, {'name':revision_name[0],'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		entry = self.browse(cr,uid,ids[0])	
+		if entry.state == 'draft':	
+			for line in entry.line_ids:
+				if line.new_design_rate <= 0.00:
+					raise osv.except_osv(_('New Design Rate'),
+						_('System not allow to save negative and zero values..!!'))
+			revision_name = ''	
+			revision_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.rate.revision')])
+			rec = self.pool.get('ir.sequence').browse(cr,uid,revision_seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(revision_seq_id[0],rec.code,entry.entry_date))
+			revision_name = cr.fetchone();
+			self.write(cr, uid, ids, {'name':revision_name[0],'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 	def entry_approve(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
-		for line in entry.line_ids:					
-			self.pool.get('ch.brandmoc.rate.details').write(cr,uid,line.brand_line_ids.id,{'rate':line.new_design_rate})
-		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		if entry.state == 'confirmed':	
+			for line in entry.line_ids:					
+				self.pool.get('ch.brandmoc.rate.details').write(cr,uid,line.brand_line_ids.id,{'rate':line.new_design_rate})
+			self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
 	def entry_reject(self,cr,uid,ids,context=None):

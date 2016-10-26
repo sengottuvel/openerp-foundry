@@ -194,181 +194,184 @@ class kg_machine_shop(osv.osv):
 		return True
 
 	def entry_confirm(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])	
-		if rec.list_moc_flag == False:
-			raise osv.except_osv(_('List MOC Construction !!'),
-				_('Click the List MOC Construction Button !!'))
-		for item in rec.line_ids:
-			prod = self.pool.get('product.product').browse(cr, uid, item.product_id.id, context=context)	
-			print"item.uom.id",item.uom.id				
-			print"prod.uom_po_id.id",prod.uom_po_id.id	
-			qty_value = 0.00			
-			weight = 0.00			
-			if item.uom.id != prod.uom_id.id:
-				if item.uom.id  != prod.uom_po_id.id:				 			
-					raise osv.except_osv(
-						_('UOM Mismatching Error !'),
-						_('You choosed wrong UOM and you can choose either %s or %s for %s !!!') % (prod.uom_id.name,prod.uom_po_id.name,prod.name))
-								
-			if item.uom_conversation_factor == 'one_dimension':	
-				if prod.uom_id.id == prod.uom_po_id.id:
-					qty_value = item.temp_qty
-					weight = 0.00
-				if item.length == 0.00:
-					qty_value = item.temp_qty
-					weight = 0.00
-				else:				
-					qty_value = item.length * item.temp_qty			
-					weight = qty_value * prod.po_uom_in_kgs
-			if item.uom_conversation_factor == 'two_dimension':
-				if item.length == 0.00 or item.breadth == 0.00:
-					qty_value = item.temp_qty
-					weight = 0.00
-				else:
-					qty_value = item.temp_qty
-					weight = 0.00
-				qty_value = item.length * item.breadth * item.temp_qty				
-				weight = qty_value * prod.po_uom_in_kgs	
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'draft':	
+			if rec.list_moc_flag == False:
+				raise osv.except_osv(_('List MOC Construction !!'),
+					_('Click the List MOC Construction Button !!'))
+			for item in rec.line_ids:
+				prod = self.pool.get('product.product').browse(cr, uid, item.product_id.id, context=context)	
+				print"item.uom.id",item.uom.id				
+				print"prod.uom_po_id.id",prod.uom_po_id.id	
+				qty_value = 0.00			
+				weight = 0.00			
+				if item.uom.id != prod.uom_id.id:
+					if item.uom.id  != prod.uom_po_id.id:				 			
+						raise osv.except_osv(
+							_('UOM Mismatching Error !'),
+							_('You choosed wrong UOM and you can choose either %s or %s for %s !!!') % (prod.uom_id.name,prod.uom_po_id.name,prod.name))
+									
+				if item.uom_conversation_factor == 'one_dimension':	
+					if prod.uom_id.id == prod.uom_po_id.id:
+						qty_value = item.temp_qty
+						weight = 0.00
+					if item.length == 0.00:
+						qty_value = item.temp_qty
+						weight = 0.00
+					else:				
+						qty_value = item.length * item.temp_qty			
+						weight = qty_value * prod.po_uom_in_kgs
+				if item.uom_conversation_factor == 'two_dimension':
+					if item.length == 0.00 or item.breadth == 0.00:
+						qty_value = item.temp_qty
+						weight = 0.00
+					else:
+						qty_value = item.temp_qty
+						weight = 0.00
+					qty_value = item.length * item.breadth * item.temp_qty				
+					weight = qty_value * prod.po_uom_in_kgs	
+					
+				self.pool.get('ch.ms.raw.material').write(cr,uid,item.id,{'qty':qty_value,'weight':weight})			
+			
+			if rec.ms_type == 'copy_item':
 				
-			self.pool.get('ch.ms.raw.material').write(cr,uid,item.id,{'qty':qty_value,'weight':weight})			
-		
-		if rec.ms_type == 'copy_item':
-			
-			### Check Duplicates Raw Materials Items start ###
-			
-			cr.execute('''select 
+				### Check Duplicates Raw Materials Items start ###
+				
+				cr.execute('''select 
 
-					raw_line.product_id,
-					raw_line.uom,
-					raw_line.qty
+						raw_line.product_id,
+						raw_line.uom,
+						raw_line.qty
 
-					from ch_ms_raw_material raw_line 
+						from ch_ms_raw_material raw_line 
 
-					left join kg_machine_shop header on header.id  = raw_line.header_id
+						left join kg_machine_shop header on header.id  = raw_line.header_id
 
-					where header.ms_type = 'copy_item' and header.id = %s''',[rec.id])
-			
-			source_raw_ids = cr.fetchall()		
-			source_raw_len = len(source_raw_ids)	
-			
-			cr.execute('''select 
+						where header.ms_type = 'copy_item' and header.id = %s''',[rec.id])
+				
+				source_raw_ids = cr.fetchall()		
+				source_raw_len = len(source_raw_ids)	
+				
+				cr.execute('''select 
 
-					raw_line.product_id,
-					raw_line.uom,
-					raw_line.qty
+						raw_line.product_id,
+						raw_line.uom,
+						raw_line.qty
 
-					from ch_ms_raw_material raw_line 
+						from ch_ms_raw_material raw_line 
 
-					where raw_line.header_id  = %s''',[rec.source_item.id])
-			
-			source_old_raw_ids = cr.fetchall()
-			
-			source_old_raw_len = len(source_old_raw_ids)
-							
-			cr.execute('''select 
+						where raw_line.header_id  = %s''',[rec.source_item.id])
+				
+				source_old_raw_ids = cr.fetchall()
+				
+				source_old_raw_len = len(source_old_raw_ids)
+								
+				cr.execute('''select 
 
-					raw_line.product_id,
-					raw_line.uom,
-					raw_line.qty
+						raw_line.product_id,
+						raw_line.uom,
+						raw_line.qty
 
-					from ch_ms_raw_material raw_line 
+						from ch_ms_raw_material raw_line 
 
-					left join kg_machine_shop header on header.id  = raw_line.header_id
+						left join kg_machine_shop header on header.id  = raw_line.header_id
 
-					where header.ms_type = 'copy_item' and header.id = %s
+						where header.ms_type = 'copy_item' and header.id = %s
 
-					INTERSECT
+						INTERSECT
 
-					select 
+						select 
 
-					raw_line.product_id,
-					raw_line.uom,
-					raw_line.qty
+						raw_line.product_id,
+						raw_line.uom,
+						raw_line.qty
 
-					from ch_ms_raw_material raw_line 
+						from ch_ms_raw_material raw_line 
 
-					where raw_line.header_id  = %s ''',[rec.id,rec.source_item.id])
-			repeat_ids = cr.fetchall()			
-			new_raw_len = len(repeat_ids)			
-			### Check Duplicates Raw Materials Items end.... ###
-			
-			
-			### Check Duplicates MOC Construction and Rate Details Items start ###
-			
-			cr.execute('''select 
+						where raw_line.header_id  = %s ''',[rec.id,rec.source_item.id])
+				repeat_ids = cr.fetchall()			
+				new_raw_len = len(repeat_ids)			
+				### Check Duplicates Raw Materials Items end.... ###
+				
+				
+				### Check Duplicates MOC Construction and Rate Details Items start ###
+				
+				cr.execute('''select 
 
-					machine_line.moc_id,
-					machine_line.code,
-					machine_line.remarks
+						machine_line.moc_id,
+						machine_line.code,
+						machine_line.remarks
 
-					from ch_machine_mocwise machine_line 
+						from ch_machine_mocwise machine_line 
 
-					left join kg_machine_shop header on header.id  = machine_line.header_id
+						left join kg_machine_shop header on header.id  = machine_line.header_id
 
-					where header.ms_type = 'copy_item' and header.id = %s''',[rec.id])
-			
-			source_machine_ids = cr.fetchall()		
-			source_machine_len = len(source_machine_ids)	
-			
-			cr.execute('''select 
+						where header.ms_type = 'copy_item' and header.id = %s''',[rec.id])
+				
+				source_machine_ids = cr.fetchall()		
+				source_machine_len = len(source_machine_ids)	
+				
+				cr.execute('''select 
 
-					machine_line.moc_id,
-					machine_line.code,
-					machine_line.remarks
+						machine_line.moc_id,
+						machine_line.code,
+						machine_line.remarks
 
-					from ch_machine_mocwise machine_line 
+						from ch_machine_mocwise machine_line 
 
-					where machine_line.header_id  = %s''',[rec.source_item.id])
-			
-			source_old_machine_ids = cr.fetchall()
-			
-			source_old_machine_len = len(source_old_machine_ids)
-							
-			cr.execute('''select 
+						where machine_line.header_id  = %s''',[rec.source_item.id])
+				
+				source_old_machine_ids = cr.fetchall()
+				
+				source_old_machine_len = len(source_old_machine_ids)
+								
+				cr.execute('''select 
 
-					machine_line.moc_id,
-					machine_line.code,
-					machine_line.remarks
+						machine_line.moc_id,
+						machine_line.code,
+						machine_line.remarks
 
-					from ch_machine_mocwise machine_line 
+						from ch_machine_mocwise machine_line 
 
-					left join kg_machine_shop header on header.id  = machine_line.header_id
+						left join kg_machine_shop header on header.id  = machine_line.header_id
 
-					where header.ms_type = 'copy_item' and header.id = %s
+						where header.ms_type = 'copy_item' and header.id = %s
 
-					INTERSECT
+						INTERSECT
 
-					select 
+						select 
 
-					machine_line.moc_id,
-					machine_line.code,
-					machine_line.remarks
+						machine_line.moc_id,
+						machine_line.code,
+						machine_line.remarks
 
-					from ch_machine_mocwise machine_line 
+						from ch_machine_mocwise machine_line 
 
-					where machine_line.header_id  = %s ''',[rec.id,rec.source_item.id])
-			repeat_ids = cr.fetchall()			
-			new_machine_len = len(repeat_ids)			
-			### Check Duplicates MOC Construction and Rate Details Items end.... ###
-			
-			
-			raw_dup = machine_dup = ''		
-			if new_raw_len == source_raw_len == source_old_raw_len:			
-				raw_dup = 'yes'		
-			if new_machine_len == source_machine_len == source_old_machine_len:			
-				machine_dup = 'yes'			
-			
-			
-			if raw_dup == 'yes' and machine_dup == 'yes':			
-				raise osv.except_osv(_('Warning!'),
-								_('Same Details are already exist !!'))
-			
-			
-		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+						where machine_line.header_id  = %s ''',[rec.id,rec.source_item.id])
+				repeat_ids = cr.fetchall()			
+				new_machine_len = len(repeat_ids)			
+				### Check Duplicates MOC Construction and Rate Details Items end.... ###
+				
+				
+				raw_dup = machine_dup = ''		
+				if new_raw_len == source_raw_len == source_old_raw_len:			
+					raw_dup = 'yes'		
+				if new_machine_len == source_machine_len == source_old_machine_len:			
+					machine_dup = 'yes'			
+				
+				
+				if raw_dup == 'yes' and machine_dup == 'yes':			
+					raise osv.except_osv(_('Warning!'),
+									_('Same Details are already exist !!'))
+				
+				
+			self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'confirmed':
+			self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
 	def entry_reject(self,cr,uid,ids,context=None):

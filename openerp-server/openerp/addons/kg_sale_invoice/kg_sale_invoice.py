@@ -271,47 +271,50 @@ class kg_sale_invoice(osv.osv):
 					
 	def invoice_confirm(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		print"rec.name",rec.name
-		if rec.name == False:					
-			proforma_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.proforma.invoice')])
-			proforma_rec = self.pool.get('ir.sequence').browse(cr,uid,proforma_id[0])
-			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(proforma_id[0],proforma_rec.code,rec.invoice_date))
-			proforma_name = cr.fetchone();	
-		
-		if rec.line_ids_d:
-			for line in rec.line_ids_d:
-				print"line",line
-				cus_advance_line_rec = self.pool.get('kg.customer.advance').browse(cr, uid, line.cus_advance_id.id)
-				cus_advance_bal_amt = cus_advance_line_rec.bal_adv - line.current_adv_amt				
-				cus_advance_line_rec.write({'bal_adv':cus_advance_bal_amt})				
-		self.write(cr, uid, ids, {'state': 'confirmed','name':proforma_name[0]})
+		if rec.state == 'draft':
+			print"rec.name",rec.name
+			if rec.name == False:					
+				proforma_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.proforma.invoice')])
+				proforma_rec = self.pool.get('ir.sequence').browse(cr,uid,proforma_id[0])
+				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(proforma_id[0],proforma_rec.code,rec.invoice_date))
+				proforma_name = cr.fetchone();	
+			
+			if rec.line_ids_d:
+				for line in rec.line_ids_d:
+					print"line",line
+					cus_advance_line_rec = self.pool.get('kg.customer.advance').browse(cr, uid, line.cus_advance_id.id)
+					cus_advance_bal_amt = cus_advance_line_rec.bal_adv - line.current_adv_amt				
+					cus_advance_line_rec.write({'bal_adv':cus_advance_bal_amt})				
+			self.write(cr, uid, ids, {'state': 'confirmed','name':proforma_name[0]})
 		return True
 		
 	def invoice_approve(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		cus_adv_obj = self.pool.get('kg.customer.advance')			
-		cus_adv_inv_obj = self.pool.get('ch.customer.advance.invoice.line')			
-		for item in [x.id for x in rec.work_order_ids]:			
-			work_rec = self.pool.get('kg.work.order').browse(cr,uid,item)				
-			for line in rec.line_ids_d:	
-				print"line.order_id",line.order_id
-				adv_ids = self.pool.get('kg.customer.advance').search(cr, uid, [('order_id','=',line.order_id.id)])
-				print"adv_ids",adv_ids							
-				adv_rec = self.pool.get('kg.customer.advance').browse(cr, uid,adv_ids[0])				
-				adjusted_amt = adv_rec.adjusted_amt + line.current_adv_amt 
-				balance_amt = line.current_adv_amt - adjusted_amt
-				cus_adv_obj.write(cr, uid, line.cus_advance_id.id, {'adjusted_amt': adjusted_amt,'balance_amt':balance_amt})	
-		self.write(cr, uid, ids, {'state': 'approved'})
+		if rec.state == 'confirmed':
+			cus_adv_obj = self.pool.get('kg.customer.advance')			
+			cus_adv_inv_obj = self.pool.get('ch.customer.advance.invoice.line')			
+			for item in [x.id for x in rec.work_order_ids]:			
+				work_rec = self.pool.get('kg.work.order').browse(cr,uid,item)				
+				for line in rec.line_ids_d:	
+					print"line.order_id",line.order_id
+					adv_ids = self.pool.get('kg.customer.advance').search(cr, uid, [('order_id','=',line.order_id.id)])
+					print"adv_ids",adv_ids							
+					adv_rec = self.pool.get('kg.customer.advance').browse(cr, uid,adv_ids[0])				
+					adjusted_amt = adv_rec.adjusted_amt + line.current_adv_amt 
+					balance_amt = line.current_adv_amt - adjusted_amt
+					cus_adv_obj.write(cr, uid, line.cus_advance_id.id, {'adjusted_amt': adjusted_amt,'balance_amt':balance_amt})	
+			self.write(cr, uid, ids, {'state': 'approved'})
 		return True
 		
 	def invoice_process(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])		
-		invoice_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.sale.invoice')])
-		invoice_rec = self.pool.get('ir.sequence').browse(cr,uid,invoice_id[0])
-		cr.execute("""select generatesequenceno(%s,'%s','%s') """%(invoice_id[0],invoice_rec.code,rec.invoice_date))
-		invoice_name = cr.fetchone();			
-		
-		self.write(cr, uid, ids, {'state': 'invoice','invoice_no':invoice_name[0]})
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'approved':		
+			invoice_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.sale.invoice')])
+			invoice_rec = self.pool.get('ir.sequence').browse(cr,uid,invoice_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(invoice_id[0],invoice_rec.code,rec.invoice_date))
+			invoice_name = cr.fetchone();			
+			
+			self.write(cr, uid, ids, {'state': 'invoice','invoice_no':invoice_name[0]})
 		return True
 	
 	def load_advance(self, cr, uid, ids,context=None):

@@ -152,31 +152,32 @@ class kg_customer_advance(osv.osv):
 
 	def entry_confirm(self,cr,uid,ids,context=None):		
 		rec = self.browse(cr,uid,ids[0])
-		today = date.today()
-		today = str(today)
-		today = datetime.strptime(today, '%Y-%m-%d')
-		entry_date = rec.entry_date
-		entry_date = str(entry_date)
-		entry_date = datetime.strptime(entry_date, '%Y-%m-%d')
-		if entry_date < today:
-			raise osv.except_osv(_('Advance Date !!'),
-				_('System not allow to save with past date.!!'))	
-				
-		else:
-			pass
-		
-		### Sequence Number Generation  ###
-		
-		if rec.name == '' or rec.name == False:
-			seq_obj_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.customer.advance')])
-			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_obj_id[0])
-			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_obj_id[0],seq_rec.code,rec.entry_date))
-			entry_name = cr.fetchone();
-			entry_name = entry_name[0]
-		else:
-			entry_name = rec.name		
-		
-		self.write(cr, uid, ids, {'name':entry_name,'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		if rec.state == 'draft':
+			today = date.today()
+			today = str(today)
+			today = datetime.strptime(today, '%Y-%m-%d')
+			entry_date = rec.entry_date
+			entry_date = str(entry_date)
+			entry_date = datetime.strptime(entry_date, '%Y-%m-%d')
+			if entry_date < today:
+				raise osv.except_osv(_('Advance Date !!'),
+					_('System not allow to save with past date.!!'))	
+					
+			else:
+				pass
+			
+			### Sequence Number Generation  ###
+			
+			if rec.name == '' or rec.name == False:
+				seq_obj_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.customer.advance')])
+				seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_obj_id[0])
+				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_obj_id[0],seq_rec.code,rec.entry_date))
+				entry_name = cr.fetchone();
+				entry_name = entry_name[0]
+			else:
+				entry_name = rec.name		
+			
+			self.write(cr, uid, ids, {'name':entry_name,'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		
 		return True
 		

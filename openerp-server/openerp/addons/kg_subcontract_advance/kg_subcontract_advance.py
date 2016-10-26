@@ -167,19 +167,21 @@ class kg_subcontract_advance(osv.osv):
 		
 		rec = self.browse(cr,uid,ids[0])		
 		
-		### Sequence Number Generation  ###
-		
-		if rec.name == '' or rec.name == False:
-			seq_obj_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.advance')])
-			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_obj_id[0])
-			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_obj_id[0],seq_rec.code,rec.entry_date))
-			entry_name = cr.fetchone();
-			entry_name = entry_name[0]
-		else:
-			entry_name = rec.name		
+		if rec.state == 'draft':
 			
-		
-		self.write(cr, uid, ids, {'name':entry_name,'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			### Sequence Number Generation  ###
+			
+			if rec.name == '' or rec.name == False:
+				seq_obj_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.advance')])
+				seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_obj_id[0])
+				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_obj_id[0],seq_rec.code,rec.entry_date))
+				entry_name = cr.fetchone();
+				entry_name = entry_name[0]
+			else:
+				entry_name = rec.name		
+				
+			
+			self.write(cr, uid, ids, {'name':entry_name,'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		
 		return True
 		

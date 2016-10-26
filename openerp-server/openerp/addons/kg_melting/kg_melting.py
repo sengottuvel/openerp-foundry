@@ -217,60 +217,61 @@ class kg_melting(osv.osv):
 		return {'value': {'line_ids': raw_material_vals,'line_ids_a': chemistry_details_vals,'line_ids_b': mech_details_vals}}
 	
 	def entry_confirm(self,cr,uid,ids,context=None):
-		entry = self.browse(cr,uid,ids[0])		
-		line_ids =entry.line_ids
-		grand_total =0.00
-		melt_cost =0.00
-		for entry in entry.line_ids_b:
-			cr.execute(''' select moc_line.header_id from 
+		entry = self.browse(cr,uid,ids[0])	
+		if entry.state == 'draft':	
+			line_ids =entry.line_ids
+			grand_total =0.00
+			melt_cost =0.00
+			for entry in entry.line_ids_b:
+				cr.execute(''' select moc_line.header_id from 
 
-									ch_mechanical_chart as moc_line
-									left join kg_mechanical_master mech on mech.id = moc_line.mechanical_id
-									where 
-									case when mech.value_limit = 'based_on_value' then
-									(case when moc_line.range_flag = 't' then 
-									%s >= moc_line.min
-									when moc_line.range_flag = 'f' then
-									%s >= moc_line.min and
-									%s <= moc_line.max
-									end)
-									else
-									(case when moc_line.range_flag = 't' then 
-									%s >= moc_line.min
-									when moc_line.range_flag = 'f' then
-									%s >= moc_line.min and
-									%s <= moc_line.max
-									end) end 
-									
+										ch_mechanical_chart as moc_line
+										left join kg_mechanical_master mech on mech.id = moc_line.mechanical_id
+										where 
+										case when mech.value_limit = 'based_on_value' then
+										(case when moc_line.range_flag = 't' then 
+										%s >= moc_line.min
+										when moc_line.range_flag = 'f' then
+										%s >= moc_line.min and
+										%s <= moc_line.max
+										end)
+										else
+										(case when moc_line.range_flag = 't' then 
+										%s >= moc_line.min
+										when moc_line.range_flag = 'f' then
+										%s >= moc_line.min and
+										%s <= moc_line.max
+										end) end 
+										
 
-									and
-									moc_line.header_id = %s and moc_line.mechanical_id = %s
-							  ''',[entry.mech_value,entry.mech_value,entry.mech_value,entry.mpa_value,entry.mpa_value,entry.mpa_value,entry.moc_id.id,entry.mechanical_id.id])
-			values= cr.fetchone()			
-			if values:
-				return True
+										and
+										moc_line.header_id = %s and moc_line.mechanical_id = %s
+								  ''',[entry.mech_value,entry.mech_value,entry.mech_value,entry.mpa_value,entry.mpa_value,entry.mpa_value,entry.moc_id.id,entry.mechanical_id.id])
+				values= cr.fetchone()			
+				if values:
+					return True
+				else:
+					raise osv.except_osv(_('Mechanical Chart'),
+							_('Specified Mechanical Properties has not available in MOC Master and check the values !!'))
+			
+			
+			for line in line_ids:			
+				melt_cost += line.total_amount			
+				grand_total += line.total_weight	
+			if entry.total_weight_metal > 0.00 and grand_total > 0.00:	
+				print"wwwwwww"
+				#various_formula = ((entry.total_weight_metal/grand_total)/grand_total)	* 100
+				various_formula = (grand_total - entry.total_weight_metal)/((grand_total + entry.total_weight_metal)/2)*100		
 			else:
-				raise osv.except_osv(_('Mechanical Chart'),
-						_('Specified Mechanical Properties has not available in MOC Master and check the values !!'))
-		
-		
-		for line in line_ids:			
-			melt_cost += line.total_amount			
-			grand_total += line.total_weight	
-		if entry.total_weight_metal > 0.00 and grand_total > 0.00:	
-			print"wwwwwww"
-			#various_formula = ((entry.total_weight_metal/grand_total)/grand_total)	* 100
-			various_formula = (grand_total - entry.total_weight_metal)/((grand_total + entry.total_weight_metal)/2)*100		
-		else:
-			various_formula = 0.00
-		melting_total_rate = melt_cost + entry.amount
-		
-		if various_formula > 3.000:	
-			if entry.remark == False:
-				raise osv.except_osv(_('Warning!'),
-						_('Various above 3% Remarks is must !!'))			
-		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-		'various': various_formula,'melt_cost': melting_total_rate})
+				various_formula = 0.00
+			melting_total_rate = melt_cost + entry.amount
+			
+			if various_formula > 3.000:	
+				if entry.remark == False:
+					raise osv.except_osv(_('Warning!'),
+							_('Various above 3% Remarks is must !!'))			
+			self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+			'various': various_formula,'melt_cost': melting_total_rate})
 		return True
 	
 		

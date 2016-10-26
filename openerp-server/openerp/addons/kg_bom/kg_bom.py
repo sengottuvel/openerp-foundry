@@ -171,248 +171,249 @@ class kg_bom(osv.osv):
 
 	def entry_confirm(self,cr,uid,ids,context=None):		
 		rec = self.browse(cr,uid,ids[0])
-		bom_obj = self.pool.get('kg.bom')
-		bom_foundry_lines=rec.line_ids			 
-		machine_shop_lines=rec.line_ids_a			 
-		bot_lines=rec.line_ids_b			 
-		consu_lines=rec.line_ids_c			
-		if len(rec.line_ids) == 0  and len(rec.line_ids_a) == 0 and len(rec.line_ids_b) == 0:
-			raise osv.except_osv(
-					_('Warning !!!'),
-					_('Please Check Line empty values not allowed!!'))		
-		for bom_foundry_item in bom_foundry_lines:			
-			if bom_foundry_item.qty == 0:
+		if rec.state == 'draft':
+			bom_obj = self.pool.get('kg.bom')
+			bom_foundry_lines=rec.line_ids			 
+			machine_shop_lines=rec.line_ids_a			 
+			bot_lines=rec.line_ids_b			 
+			consu_lines=rec.line_ids_c			
+			if len(rec.line_ids) == 0  and len(rec.line_ids_a) == 0 and len(rec.line_ids_b) == 0:
 				raise osv.except_osv(
-					_('Warning !'),
-					_('Please foundry items zero qty not accepted!!')) 					
-		for machine_shop_item in machine_shop_lines:			
-			if machine_shop_item.qty == 0:
-				raise osv.except_osv(
-					_('Warning !'),
-					_('Please machine shop items zero qty not accepted!!'))
-		for bot_item in bot_lines:			
-			if bot_item.qty == 0:
-				raise osv.except_osv(
-					_('Warning !'),
-					_('Please BOT zero qty not accepted!!')) 			
-		for consu_item in consu_lines:			
-			if consu_item.qty == 0:
-				raise osv.except_osv(
-					_('Warning !'),
-					_('Please Consumable items zero qty not accepted!!'))		 
-		old_ids = self.search(cr,uid,[('state','=','approved'),('name','=',rec.name)])
-		#~ if old_ids:
-			#~ bom_rec = bom_obj.browse(cr, uid, old_ids[0])			  
-			#~ if rec.name == bom_rec.name and rec.type != 'amendment':
-				#~ raise osv.except_osv(_('Warning !'), _('BOM Name must be uniqe!!'))	
+						_('Warning !!!'),
+						_('Please Check Line empty values not allowed!!'))		
+			for bom_foundry_item in bom_foundry_lines:			
+				if bom_foundry_item.qty == 0:
+					raise osv.except_osv(
+						_('Warning !'),
+						_('Please foundry items zero qty not accepted!!')) 					
+			for machine_shop_item in machine_shop_lines:			
+				if machine_shop_item.qty == 0:
+					raise osv.except_osv(
+						_('Warning !'),
+						_('Please machine shop items zero qty not accepted!!'))
+			for bot_item in bot_lines:			
+				if bot_item.qty == 0:
+					raise osv.except_osv(
+						_('Warning !'),
+						_('Please BOT zero qty not accepted!!')) 			
+			for consu_item in consu_lines:			
+				if consu_item.qty == 0:
+					raise osv.except_osv(
+						_('Warning !'),
+						_('Please Consumable items zero qty not accepted!!'))		 
+			old_ids = self.search(cr,uid,[('state','=','approved'),('name','=',rec.name)])
+			#~ if old_ids:
+				#~ bom_rec = bom_obj.browse(cr, uid, old_ids[0])			  
+				#~ if rec.name == bom_rec.name and rec.type != 'amendment':
+					#~ raise osv.except_osv(_('Warning !'), _('BOM Name must be uniqe!!'))	
+					
+			### Check Duplicates Foundry Items  start ###
+			
+			if rec.bom_type == 'copy_bom':
 				
-		### Check Duplicates Foundry Items  start ###
-		
-		if rec.bom_type == 'copy_bom':
+				cr.execute('''select 
+
+						bom_line.pattern_id,
+						bom_line.pos_no,
+						bom_line.qty
+
+						from ch_bom_line bom_line 
+
+						left join kg_bom header on header.id  = bom_line.header_id
+
+						where header.bom_type = 'copy_bom' and header.id = %s''',[rec.id])
+				
+				source_bom_ids = cr.fetchall()
+				
+				source_bom_len = len(source_bom_ids)
+				
+				
+				
+				cr.execute('''select 
+
+						bom_line.pattern_id,
+						bom_line.pos_no,
+						bom_line.qty
+
+						from ch_bom_line bom_line 
+
+						where bom_line.header_id  = %s''',[rec.source_bom.id])
+				
+				source_old_bom_ids = cr.fetchall()
+				
+				source_old_bom_len = len(source_old_bom_ids)
+								
+				cr.execute('''select 
+
+						bom_line.pattern_id,
+						bom_line.pos_no,
+						bom_line.qty
+
+						from ch_bom_line bom_line 
+
+						left join kg_bom header on header.id  = bom_line.header_id
+
+						where header.bom_type = 'copy_bom' and header.id = %s
+
+						INTERSECT
+
+						select 
+
+						bom_line.pattern_id,
+						bom_line.pos_no,
+						bom_line.qty
+
+						from ch_bom_line bom_line 
+
+						where bom_line.header_id  = %s ''',[rec.id,rec.source_bom.id])
+				repeat_ids = cr.fetchall()
+				
+				new_bom_len = len(repeat_ids)
+				
+				### Check Duplicates Foundry Items end.... ###
+				
+				
+				
+				### Check Duplicates Machine Shop Items  start ###
+				
+				cr.execute('''select 
+
+						machine_line.ms_id,
+						machine_line.pos_no,
+						machine_line.qty
+
+						from ch_machineshop_details machine_line 
+
+						left join kg_bom header on header.id  = machine_line.header_id
+
+						where header.bom_type = 'copy_bom' and header.id = %s''',[rec.id])
+				
+				ms_new_bom_ids = cr.fetchall()
+				
+				ms_new_bom_len = len(ms_new_bom_ids)
+				
+				cr.execute('''select 
+
+						machine_line.ms_id,
+						machine_line.pos_no,
+						machine_line.qty
+
+						from ch_machineshop_details machine_line 
+
+						where machine_line.header_id  = %s''',[rec.source_bom.id])
+				
+				ms_old_bom_ids = cr.fetchall()
+				
+				ms_old_bom_len = len(ms_old_bom_ids)
+								
+				cr.execute('''select 
+
+						machine_line.ms_id,
+						machine_line.pos_no,
+						machine_line.qty
+
+						from ch_machineshop_details machine_line 
+
+						left join kg_bom header on header.id  = machine_line.header_id
+
+						where header.bom_type = 'copy_bom' and header.id = %s
+
+						INTERSECT
+
+						select 
+
+						machine_line.ms_id,
+						machine_line.pos_no,
+						machine_line.qty
+
+						from ch_machineshop_details machine_line 
+
+						where machine_line.header_id  = %s ''',[rec.id,rec.source_bom.id])
+				ms_repeat_ids = cr.fetchall()
+				
+				ms_join_bom_len = len(ms_repeat_ids)
+				
+				### Check Duplicates Machine Shop end.... ###
+				
+				
+				
+				### Check Duplicates BOT Items  start ###
+				
+				
+				
+				cr.execute('''select 
+
+						bot_line.bot_id,
+						bot_line.pos_no,
+						bot_line.qty
+
+						from ch_bot_details bot_line 
+
+						left join kg_bom header on header.id  = bot_line.header_id
+
+						where header.bom_type = 'copy_bom' and header.id = %s''',[rec.id])
+				
+				bot_new_bom_ids = cr.fetchall()
+				
+				bot_new_bom_len = len(bot_new_bom_ids)
+				
+				cr.execute('''select 
+
+						bot_line.bot_id,
+						bot_line.pos_no,
+						bot_line.qty
+
+						from ch_bot_details bot_line 
+
+						where bot_line.header_id  = %s ''',[rec.source_bom.id])
+				
+				bot_old_bom_ids = cr.fetchall()
+				
+				bot_old_bom_len = len(bot_old_bom_ids)
+								
+				cr.execute('''select 
+
+						bot_line.bot_id,
+						bot_line.pos_no,
+						bot_line.qty
+
+						from ch_bot_details bot_line 
+
+						left join kg_bom header on header.id  = bot_line.header_id
+
+						where header.bom_type = 'copy_bom' and header.id = %s
+
+						INTERSECT
+
+						select 
+
+						bot_line.bot_id,
+						bot_line.pos_no,
+						bot_line.qty
+
+						from ch_bot_details bot_line 
+
+						where bot_line.header_id  = %s ''',[rec.id,rec.source_bom.id])
+				bot_repeat_ids = cr.fetchall()
+				
+				bot_join_bom_len = len(bot_repeat_ids)
+				
+				### Check Duplicates BOT end.... ###	
+				
+				bom_dup = ms_dup = bot_dup = ''		
+				if new_bom_len == source_bom_len == source_old_bom_len:			
+					bom_dup = 'yes'		
+				if ms_new_bom_len == ms_join_bom_len == ms_old_bom_len:			
+					ms_dup = 'yes'		
+				if bot_new_bom_len == bot_join_bom_len == bot_old_bom_len:
+					bot_dup = 'yes'
+				
+				
+				if bom_dup == 'yes' and ms_dup == 'yes' and bot_dup == 'yes':			
+					raise osv.except_osv(_('Warning!'),
+									_('Same BOM Details are already exist !!'))
 			
-			cr.execute('''select 
-
-					bom_line.pattern_id,
-					bom_line.pos_no,
-					bom_line.qty
-
-					from ch_bom_line bom_line 
-
-					left join kg_bom header on header.id  = bom_line.header_id
-
-					where header.bom_type = 'copy_bom' and header.id = %s''',[rec.id])
-			
-			source_bom_ids = cr.fetchall()
-			
-			source_bom_len = len(source_bom_ids)
-			
-			
-			
-			cr.execute('''select 
-
-					bom_line.pattern_id,
-					bom_line.pos_no,
-					bom_line.qty
-
-					from ch_bom_line bom_line 
-
-					where bom_line.header_id  = %s''',[rec.source_bom.id])
-			
-			source_old_bom_ids = cr.fetchall()
-			
-			source_old_bom_len = len(source_old_bom_ids)
-							
-			cr.execute('''select 
-
-					bom_line.pattern_id,
-					bom_line.pos_no,
-					bom_line.qty
-
-					from ch_bom_line bom_line 
-
-					left join kg_bom header on header.id  = bom_line.header_id
-
-					where header.bom_type = 'copy_bom' and header.id = %s
-
-					INTERSECT
-
-					select 
-
-					bom_line.pattern_id,
-					bom_line.pos_no,
-					bom_line.qty
-
-					from ch_bom_line bom_line 
-
-					where bom_line.header_id  = %s ''',[rec.id,rec.source_bom.id])
-			repeat_ids = cr.fetchall()
-			
-			new_bom_len = len(repeat_ids)
-			
-			### Check Duplicates Foundry Items end.... ###
-			
-			
-			
-			### Check Duplicates Machine Shop Items  start ###
-			
-			cr.execute('''select 
-
-					machine_line.ms_id,
-					machine_line.pos_no,
-					machine_line.qty
-
-					from ch_machineshop_details machine_line 
-
-					left join kg_bom header on header.id  = machine_line.header_id
-
-					where header.bom_type = 'copy_bom' and header.id = %s''',[rec.id])
-			
-			ms_new_bom_ids = cr.fetchall()
-			
-			ms_new_bom_len = len(ms_new_bom_ids)
-			
-			cr.execute('''select 
-
-					machine_line.ms_id,
-					machine_line.pos_no,
-					machine_line.qty
-
-					from ch_machineshop_details machine_line 
-
-					where machine_line.header_id  = %s''',[rec.source_bom.id])
-			
-			ms_old_bom_ids = cr.fetchall()
-			
-			ms_old_bom_len = len(ms_old_bom_ids)
-							
-			cr.execute('''select 
-
-					machine_line.ms_id,
-					machine_line.pos_no,
-					machine_line.qty
-
-					from ch_machineshop_details machine_line 
-
-					left join kg_bom header on header.id  = machine_line.header_id
-
-					where header.bom_type = 'copy_bom' and header.id = %s
-
-					INTERSECT
-
-					select 
-
-					machine_line.ms_id,
-					machine_line.pos_no,
-					machine_line.qty
-
-					from ch_machineshop_details machine_line 
-
-					where machine_line.header_id  = %s ''',[rec.id,rec.source_bom.id])
-			ms_repeat_ids = cr.fetchall()
-			
-			ms_join_bom_len = len(ms_repeat_ids)
-			
-			### Check Duplicates Machine Shop end.... ###
-			
-			
-			
-			### Check Duplicates BOT Items  start ###
-			
-			
-			
-			cr.execute('''select 
-
-					bot_line.bot_id,
-					bot_line.pos_no,
-					bot_line.qty
-
-					from ch_bot_details bot_line 
-
-					left join kg_bom header on header.id  = bot_line.header_id
-
-					where header.bom_type = 'copy_bom' and header.id = %s''',[rec.id])
-			
-			bot_new_bom_ids = cr.fetchall()
-			
-			bot_new_bom_len = len(bot_new_bom_ids)
-			
-			cr.execute('''select 
-
-					bot_line.bot_id,
-					bot_line.pos_no,
-					bot_line.qty
-
-					from ch_bot_details bot_line 
-
-					where bot_line.header_id  = %s ''',[rec.source_bom.id])
-			
-			bot_old_bom_ids = cr.fetchall()
-			
-			bot_old_bom_len = len(bot_old_bom_ids)
-							
-			cr.execute('''select 
-
-					bot_line.bot_id,
-					bot_line.pos_no,
-					bot_line.qty
-
-					from ch_bot_details bot_line 
-
-					left join kg_bom header on header.id  = bot_line.header_id
-
-					where header.bom_type = 'copy_bom' and header.id = %s
-
-					INTERSECT
-
-					select 
-
-					bot_line.bot_id,
-					bot_line.pos_no,
-					bot_line.qty
-
-					from ch_bot_details bot_line 
-
-					where bot_line.header_id  = %s ''',[rec.id,rec.source_bom.id])
-			bot_repeat_ids = cr.fetchall()
-			
-			bot_join_bom_len = len(bot_repeat_ids)
-			
-			### Check Duplicates BOT end.... ###	
-			
-			bom_dup = ms_dup = bot_dup = ''		
-			if new_bom_len == source_bom_len == source_old_bom_len:			
-				bom_dup = 'yes'		
-			if ms_new_bom_len == ms_join_bom_len == ms_old_bom_len:			
-				ms_dup = 'yes'		
-			if bot_new_bom_len == bot_join_bom_len == bot_old_bom_len:
-				bot_dup = 'yes'
-			
-			
-			if bom_dup == 'yes' and ms_dup == 'yes' and bot_dup == 'yes':			
-				raise osv.except_osv(_('Warning!'),
-								_('Same BOM Details are already exist !!'))
-		
-		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 	
 	def convert_partlist_bom(self,cr,uid,ids,context=None):
@@ -426,11 +427,12 @@ class kg_bom(osv.osv):
 		return True
 	
 	def entry_approve(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])		
-		old_ids = self.search(cr,uid,[('state','=','approved'),('name','=',rec.name)])	  
-		if old_ids:		 
-			self.write(cr, uid, old_ids[0], {'state': 'expire','expire_user_id': uid, 'expire_date': time.strftime('%Y-%m-%d %H:%M:%S')})		   
-		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'confirmed':		
+			old_ids = self.search(cr,uid,[('state','=','approved'),('name','=',rec.name)])	  
+			if old_ids:		 
+				self.write(cr, uid, old_ids[0], {'state': 'expire','expire_user_id': uid, 'expire_date': time.strftime('%Y-%m-%d %H:%M:%S')})		   
+			self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
 	def entry_reject(self,cr,uid,ids,context=None):

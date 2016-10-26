@@ -168,82 +168,88 @@ class kg_brandmoc_rate(osv.osv):
 
 	def entry_confirm(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		prod = self.pool.get('product.product').browse(cr, uid, rec.product_id.id, context=context)		
-		if rec.uom_id.id != prod.uom_id.id:
-			if rec.uom_id.id != prod.uom_po_id.id:				 			
-				raise osv.except_osv(
-					_('UOM Mismatching Error !'),
-					_('You choosed wrong UOM and you can choose either %s or %s for %s !!!') % (prod.uom_id.name,prod.uom_po_id.name,prod.name))		
-		#~ pro_ids = self.search(cr,uid,[('product_id','=',rec.product_id.id),('state','!=','expire')])		
-		#~ if pro_ids:	
-			#~ raise osv.except_osv(_('Same product !!'),
-				#~ _('Enter the same product not allow!!'))	
-					
-		
+		if rec.state == 'draft':
+			if not rec.line_ids:
+				raise osv.except_osv(_('Line Item Details !!'),
+				_('Enter the Brand MOC Rate Details !!'))
+				
+			prod = self.pool.get('product.product').browse(cr, uid, rec.product_id.id, context=context)		
+			if rec.uom_id.id != prod.uom_id.id:
+				if rec.uom_id.id != prod.uom_po_id.id:				 			
+					raise osv.except_osv(
+						_('UOM Mismatching Error !'),
+						_('You choosed wrong UOM and you can choose either %s or %s for %s !!!') % (prod.uom_id.name,prod.uom_po_id.name,prod.name))		
+			#~ pro_ids = self.search(cr,uid,[('product_id','=',rec.product_id.id),('state','!=','expire')])		
+			#~ if pro_ids:	
+				#~ raise osv.except_osv(_('Same product !!'),
+					#~ _('Enter the same product not allow!!'))	
+						
 			
-		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+				
+			self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		
-		obj_ids = self.search(cr,uid,[('product_id','=',rec.product_id.id),('id','!=',rec.id),('state','=','approved')])
-		if obj_ids:
-			obj_rec = self.browse(cr,uid,obj_ids[0])
-			for item in obj_rec.line_ids:
-				#~ obj_rec = self.browse(cr,uid,obj_ids[0])
-				brand_rec = self.pool.get('kg.brand.master').browse(cr,uid,item.brand_id.id)				
-				sql_check = """ select brd_id,prod_id from prod_brnd where brd_id=%s and prod_id=%s""" %(brand_rec.id,obj_rec.product_id.id)
-				cr.execute(sql_check)
-				data = cr.dictfetchall()
+		if rec.state == 'confirmed':
+			obj_ids = self.search(cr,uid,[('product_id','=',rec.product_id.id),('id','!=',rec.id),('state','=','approved')])
+			if obj_ids:
+				obj_rec = self.browse(cr,uid,obj_ids[0])
+				for item in obj_rec.line_ids:
+					#~ obj_rec = self.browse(cr,uid,obj_ids[0])
+					brand_rec = self.pool.get('kg.brand.master').browse(cr,uid,item.brand_id.id)				
+					sql_check = """ select brd_id,prod_id from prod_brnd where brd_id=%s and prod_id=%s""" %(brand_rec.id,obj_rec.product_id.id)
+					cr.execute(sql_check)
+					data = cr.dictfetchall()
+					
+					if data:
+						sql = """ delete from prod_brnd where brd_id =%s and prod_id=%s """ %(brand_rec.id,obj_rec.product_id.id)
+						cr.execute(sql)
+					else:				
+						#~ self.pool.get('kg.brand.master').write(cr,uid,brand_rec.id,{'product_ids':[(6, 0, [rec.product_id.id])]})				
+						pass
 				
-				if data:
-					sql = """ delete from prod_brnd where brd_id =%s and prod_id=%s """ %(brand_rec.id,obj_rec.product_id.id)
-					cr.execute(sql)
-				else:				
-					#~ self.pool.get('kg.brand.master').write(cr,uid,brand_rec.id,{'product_ids':[(6, 0, [rec.product_id.id])]})				
-					pass
-			
-			self.write(cr,uid,obj_rec.id,{'state':'expire'})
-		if rec.product_id:
-			for item in rec.line_ids:
-				if item.brand_id.id:
+				self.write(cr,uid,obj_rec.id,{'state':'expire'})
+			if rec.product_id:
+				for item in rec.line_ids:
+					if item.brand_id.id:
+						brand_rec = self.pool.get('kg.brand.master').browse(cr,uid,item.brand_id.id)				
+						sql_check = """ select brd_id,prod_id from prod_brnd where brd_id=%s and prod_id=%s""" %(brand_rec.id,rec.product_id.id)
+						cr.execute(sql_check)
+						data = cr.dictfetchall()
+						
+						if data:
+							pass
+						else:				
+							#~ self.pool.get('kg.brand.master').write(cr,uid,brand_rec.id,{'product_ids':[(6, 0, [rec.product_id.id])]})				
+							sql = """ insert into prod_brnd (brd_id,prod_id) VALUES(%s,%s) """ %(brand_rec.id,rec.product_id.id)
+							cr.execute(sql)
+					else:
+						pass
+			self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		return True
+
+	def entry_reject(self,cr,uid,ids,context=None):		
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'confirmed':
+			if rec.product_id:
+				for item in rec.line_ids:
 					brand_rec = self.pool.get('kg.brand.master').browse(cr,uid,item.brand_id.id)				
 					sql_check = """ select brd_id,prod_id from prod_brnd where brd_id=%s and prod_id=%s""" %(brand_rec.id,rec.product_id.id)
 					cr.execute(sql_check)
 					data = cr.dictfetchall()
 					
 					if data:
-						pass
+						sql = """ delete from prod_brnd where brd_id =%s and prod_id=%s """ %(brand_rec.id,rec.product_id.id)
+						cr.execute(sql)
 					else:				
 						#~ self.pool.get('kg.brand.master').write(cr,uid,brand_rec.id,{'product_ids':[(6, 0, [rec.product_id.id])]})				
-						sql = """ insert into prod_brnd (brd_id,prod_id) VALUES(%s,%s) """ %(brand_rec.id,rec.product_id.id)
-						cr.execute(sql)
-				else:
-					pass
-		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		return True
-
-	def entry_reject(self,cr,uid,ids,context=None):		
-		rec = self.browse(cr,uid,ids[0])
-		if rec.product_id:
-			for item in rec.line_ids:
-				brand_rec = self.pool.get('kg.brand.master').browse(cr,uid,item.brand_id.id)				
-				sql_check = """ select brd_id,prod_id from prod_brnd where brd_id=%s and prod_id=%s""" %(brand_rec.id,rec.product_id.id)
-				cr.execute(sql_check)
-				data = cr.dictfetchall()
-				
-				if data:
-					sql = """ delete from prod_brnd where brd_id =%s and prod_id=%s """ %(brand_rec.id,rec.product_id.id)
-					cr.execute(sql)
-				else:				
-					#~ self.pool.get('kg.brand.master').write(cr,uid,brand_rec.id,{'product_ids':[(6, 0, [rec.product_id.id])]})				
-					pass
-		if rec.remark:
-			self.write(cr, uid, ids, {'state': 'reject','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		else:
-			raise osv.except_osv(_('Rejection remark is must !!'),
-				_('Enter the remarks in rejection remark field !!'))
+						pass
+			if rec.remark:
+				self.write(cr, uid, ids, {'state': 'reject','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			else:
+				raise osv.except_osv(_('Rejection remark is must !!'),
+					_('Enter the remarks in rejection remark field !!'))
 		return True
 	
 	

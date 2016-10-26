@@ -214,7 +214,7 @@ class kg_subcontract_invoice(osv.osv):
 											
 			self.write(cr, uid, ids, {'state': 'confirmed','name':sc_invoice_name})								
 								
-			return True
+		return True
 		
 		
 		

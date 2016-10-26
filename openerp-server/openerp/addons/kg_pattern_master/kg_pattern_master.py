@@ -299,259 +299,261 @@ class kg_pattern_master(osv.osv):
 
 	def entry_confirm(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.list_moc_flag == False:
-			raise osv.except_osv(_('List MOC Construction!!'),
-						_('Enter the List MOC Construction Button !!'))		
-		#~ if rec.line_ids_c:
-			#~ for item in rec.line_ids_c:
-				#~ if item.pouring_tolerance > 0.00:
-					#~ if item.pouring_weight <= 0.00:
-						#~ raise osv.except_osv(_('Production Weight tap !!'),
-						#~ _('Enter the Pouring weight in save with zero value !!'))
-				#~ if item.casting_tolerance > 0.00:
-					#~ if item.casting_weight <= 0.00:
-						#~ raise osv.except_osv(_('Production Weight tap !!'),
-						#~ _('Enter the Rough Casting weight in save with zero value !!'))
-				#~ if item.finished_casting_tolerance > 0.00:
-					#~ if item.finished_casting_weight <= 0.00:
-						#~ raise osv.except_osv(_('Production Weight tap !!'),
-						#~ _('Enter the Finished Casting Weight in save with zero value !!'))
-		if rec.pattern_type == 'copy_pattern':
-			
-			### Check Duplicates MOC Construction and Rate Details Items start ###
-			
-			cr.execute('''select 
-						  
-					rate_line.moc_id,
-					rate_line.code,
-					rate_line.rate,
-					rate_line.amount,
-					rate_line.pro_cost,
-					rate_line.remarks
+		if rec.state == 'draft':
+			if rec.list_moc_flag == False:
+				raise osv.except_osv(_('List MOC Construction!!'),
+							_('Enter the List MOC Construction Button !!'))		
+			#~ if rec.line_ids_c:
+				#~ for item in rec.line_ids_c:
+					#~ if item.pouring_tolerance > 0.00:
+						#~ if item.pouring_weight <= 0.00:
+							#~ raise osv.except_osv(_('Production Weight tap !!'),
+							#~ _('Enter the Pouring weight in save with zero value !!'))
+					#~ if item.casting_tolerance > 0.00:
+						#~ if item.casting_weight <= 0.00:
+							#~ raise osv.except_osv(_('Production Weight tap !!'),
+							#~ _('Enter the Rough Casting weight in save with zero value !!'))
+					#~ if item.finished_casting_tolerance > 0.00:
+						#~ if item.finished_casting_weight <= 0.00:
+							#~ raise osv.except_osv(_('Production Weight tap !!'),
+							#~ _('Enter the Finished Casting Weight in save with zero value !!'))
+			if rec.pattern_type == 'copy_pattern':
+				
+				### Check Duplicates MOC Construction and Rate Details Items start ###
+				
+				cr.execute('''select 
+							  
+						rate_line.moc_id,
+						rate_line.code,
+						rate_line.rate,
+						rate_line.amount,
+						rate_line.pro_cost,
+						rate_line.remarks
 
-					from ch_mocwise_rate rate_line 
+						from ch_mocwise_rate rate_line 
 
-					left join kg_pattern_master header on header.id  = rate_line.header_id
+						left join kg_pattern_master header on header.id  = rate_line.header_id
 
-					where header.pattern_type = 'copy_pattern' and header.id = %s''',[rec.id])
-			
-			source_rate_ids = cr.fetchall()		
-			source_rate_len = len(source_rate_ids)	
-			
-			cr.execute('''select 
+						where header.pattern_type = 'copy_pattern' and header.id = %s''',[rec.id])
+				
+				source_rate_ids = cr.fetchall()		
+				source_rate_len = len(source_rate_ids)	
+				
+				cr.execute('''select 
 
-					rate_line.moc_id,
-					rate_line.code,
-					rate_line.rate,
-					rate_line.amount,
-					rate_line.pro_cost,
-					rate_line.remarks
+						rate_line.moc_id,
+						rate_line.code,
+						rate_line.rate,
+						rate_line.amount,
+						rate_line.pro_cost,
+						rate_line.remarks
 
-					from ch_mocwise_rate rate_line 
+						from ch_mocwise_rate rate_line 
 
-					where rate_line.header_id  = %s''',[rec.source_pattern.id])
-			
-			source_old_rate_ids = cr.fetchall()
-			
-			source_old_rate_len = len(source_old_rate_ids)
-							
-			cr.execute('''select 
+						where rate_line.header_id  = %s''',[rec.source_pattern.id])
+				
+				source_old_rate_ids = cr.fetchall()
+				
+				source_old_rate_len = len(source_old_rate_ids)
+								
+				cr.execute('''select 
 
-					rate_line.code,
-					rate_line.rate
-					
-
-					from ch_mocwise_rate rate_line 
-
-					left join kg_pattern_master header on header.id  = rate_line.header_id
-
-					where header.pattern_type = 'copy_pattern' and header.id = %s
-
-					INTERSECT
-
-					select 
-
-					rate_line.code,
-					rate_line.rate
-
-					from ch_mocwise_rate rate_line 
-
-					where rate_line.header_id  = %s ''',[rec.id,rec.source_pattern.id])
-			repeat_rates_ids = cr.fetchall()			
-			new_rate_len = len(repeat_rates_ids)			
-			### Check Duplicates MOC Construction and Rate Details Items end.... ###
-			
-			
-			### Check Duplicates Attachments Items start ###
-			
-			cr.execute('''select 
-					 
-					attach_line.date,
-					attach_line.attach_file
-					
-
-					from ch_pattern_attachment attach_line 
-
-					left join kg_pattern_master header on header.id  = attach_line.header_id
-
-					where header.pattern_type = 'copy_pattern' and header.id = %s''',[rec.id])
-			
-			source_attach_ids = cr.fetchall()		
-			source_attach_len = len(source_attach_ids)	
-			
-			cr.execute('''select 
-
-					attach_line.date,
-					attach_line.attach_file
-
-					from ch_pattern_attachment attach_line 
-
-					where attach_line.header_id  = %s''',[rec.source_pattern.id])
-			
-			source_old_attach_ids = cr.fetchall()
-			
-			source_old_attach_len = len(source_old_attach_ids)
-							
-			cr.execute('''select 
-
-					attach_line.date,
-					attach_line.attach_file
-
-					from ch_pattern_attachment attach_line 
-
-					left join kg_pattern_master header on header.id  = attach_line.header_id
-
-					where header.pattern_type = 'copy_pattern' and header.id = %s
-
-					INTERSECT
-
-					select 
-
-					attach_line.date,
-					attach_line.attach_file
-
-					from ch_pattern_attachment attach_line 
-
-					where attach_line.header_id  = %s ''',[rec.id,rec.source_pattern.id])
-			repeat_attach_ids = cr.fetchall()			
-			new_attach_len = len(repeat_attach_ids)			
-			### Check Duplicates Attachments Items end.... ###
-			
-			### Check Duplicates Pattern History Items start ###
-			
-			cr.execute('''select 
-					   
-					history_line.s_no,
-					history_line.date,
-					history_line.reason,
-					history_line.remarks
-
-					from ch_pattern_history history_line 
-
-					left join kg_pattern_master header on header.id  = history_line.header_id
-
-					where header.pattern_type = 'copy_pattern' and header.id = %s''',[rec.id])
-			
-			source_history_ids = cr.fetchall()		
-			source_history_len = len(source_history_ids)	
-			
-			cr.execute('''select 
-
-					history_line.s_no,
-					history_line.date,
-					history_line.reason,
-					history_line.remarks
-
-					from ch_pattern_history history_line 
-
-					where history_line.header_id  = %s''',[rec.source_pattern.id])
-			
-			source_old_history_ids = cr.fetchall()
-			
-			source_old_history_len = len(source_old_history_ids)
-							
-			cr.execute('''select 
-
-					history_line.s_no,
-					history_line.date,
-					history_line.reason,
-					history_line.remarks
-
-					from ch_pattern_history history_line 
-
-					left join kg_pattern_master header on header.id  = history_line.header_id
-
-					where header.pattern_type = 'copy_pattern' and header.id = %s
-
-					INTERSECT
-
-					select 
-
-					history_line.s_no,
-					history_line.date,
-					history_line.reason,
-					history_line.remarks
-
-					from ch_pattern_history history_line 
-
-					where history_line.header_id  = %s ''',[rec.id,rec.source_pattern.id])
-			repeat_history_ids = cr.fetchall()			
-			new_history_len = len(repeat_history_ids)			
-			### Check Duplicates Pattern History Items end.... ###
-			
-			
-			rate_dup = attach_dup = history_dup =  ''		
-			if new_rate_len == source_rate_len == source_old_rate_len:			
-				rate_dup = 'yes'		
-			if new_attach_len == source_attach_len == source_old_attach_len:			
-				attach_dup = 'yes'	
-			if new_history_len == source_history_len == source_old_history_len:			
-				history_dup = 'yes'			
-			
-			if rate_dup == 'yes' and attach_dup == 'yes' and history_dup == 'yes':			
-				raise osv.except_osv(_('Warning!'),
-								_('Same Pattern Details are already exist !!'))
+						rate_line.code,
+						rate_line.rate
 						
-		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+
+						from ch_mocwise_rate rate_line 
+
+						left join kg_pattern_master header on header.id  = rate_line.header_id
+
+						where header.pattern_type = 'copy_pattern' and header.id = %s
+
+						INTERSECT
+
+						select 
+
+						rate_line.code,
+						rate_line.rate
+
+						from ch_mocwise_rate rate_line 
+
+						where rate_line.header_id  = %s ''',[rec.id,rec.source_pattern.id])
+				repeat_rates_ids = cr.fetchall()			
+				new_rate_len = len(repeat_rates_ids)			
+				### Check Duplicates MOC Construction and Rate Details Items end.... ###
+				
+				
+				### Check Duplicates Attachments Items start ###
+				
+				cr.execute('''select 
+						 
+						attach_line.date,
+						attach_line.attach_file
+						
+
+						from ch_pattern_attachment attach_line 
+
+						left join kg_pattern_master header on header.id  = attach_line.header_id
+
+						where header.pattern_type = 'copy_pattern' and header.id = %s''',[rec.id])
+				
+				source_attach_ids = cr.fetchall()		
+				source_attach_len = len(source_attach_ids)	
+				
+				cr.execute('''select 
+
+						attach_line.date,
+						attach_line.attach_file
+
+						from ch_pattern_attachment attach_line 
+
+						where attach_line.header_id  = %s''',[rec.source_pattern.id])
+				
+				source_old_attach_ids = cr.fetchall()
+				
+				source_old_attach_len = len(source_old_attach_ids)
+								
+				cr.execute('''select 
+
+						attach_line.date,
+						attach_line.attach_file
+
+						from ch_pattern_attachment attach_line 
+
+						left join kg_pattern_master header on header.id  = attach_line.header_id
+
+						where header.pattern_type = 'copy_pattern' and header.id = %s
+
+						INTERSECT
+
+						select 
+
+						attach_line.date,
+						attach_line.attach_file
+
+						from ch_pattern_attachment attach_line 
+
+						where attach_line.header_id  = %s ''',[rec.id,rec.source_pattern.id])
+				repeat_attach_ids = cr.fetchall()			
+				new_attach_len = len(repeat_attach_ids)			
+				### Check Duplicates Attachments Items end.... ###
+				
+				### Check Duplicates Pattern History Items start ###
+				
+				cr.execute('''select 
+						   
+						history_line.s_no,
+						history_line.date,
+						history_line.reason,
+						history_line.remarks
+
+						from ch_pattern_history history_line 
+
+						left join kg_pattern_master header on header.id  = history_line.header_id
+
+						where header.pattern_type = 'copy_pattern' and header.id = %s''',[rec.id])
+				
+				source_history_ids = cr.fetchall()		
+				source_history_len = len(source_history_ids)	
+				
+				cr.execute('''select 
+
+						history_line.s_no,
+						history_line.date,
+						history_line.reason,
+						history_line.remarks
+
+						from ch_pattern_history history_line 
+
+						where history_line.header_id  = %s''',[rec.source_pattern.id])
+				
+				source_old_history_ids = cr.fetchall()
+				
+				source_old_history_len = len(source_old_history_ids)
+								
+				cr.execute('''select 
+
+						history_line.s_no,
+						history_line.date,
+						history_line.reason,
+						history_line.remarks
+
+						from ch_pattern_history history_line 
+
+						left join kg_pattern_master header on header.id  = history_line.header_id
+
+						where header.pattern_type = 'copy_pattern' and header.id = %s
+
+						INTERSECT
+
+						select 
+
+						history_line.s_no,
+						history_line.date,
+						history_line.reason,
+						history_line.remarks
+
+						from ch_pattern_history history_line 
+
+						where history_line.header_id  = %s ''',[rec.id,rec.source_pattern.id])
+				repeat_history_ids = cr.fetchall()			
+				new_history_len = len(repeat_history_ids)			
+				### Check Duplicates Pattern History Items end.... ###
+				
+				
+				rate_dup = attach_dup = history_dup =  ''		
+				if new_rate_len == source_rate_len == source_old_rate_len:			
+					rate_dup = 'yes'		
+				if new_attach_len == source_attach_len == source_old_attach_len:			
+					attach_dup = 'yes'	
+				if new_history_len == source_history_len == source_old_history_len:			
+					history_dup = 'yes'			
+				
+				if rate_dup == 'yes' and attach_dup == 'yes' and history_dup == 'yes':			
+					raise osv.except_osv(_('Warning!'),
+									_('Same Pattern Details are already exist !!'))
+							
+			self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])				
-		moc_rate_lines=rec.line_ids	
-		moc_obj=self.pool.get('kg.moc.master')	
-		
-		for item in rec.line_ids:				
-			vals = {
-				'read_flag': True,				
-					}
-			self.pool.get('ch.mocwise.rate').write(cr,uid,item.id,vals)
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'confirmed':				
+			moc_rate_lines=rec.line_ids	
+			moc_obj=self.pool.get('kg.moc.master')	
 			
-		for moc_rate_item in moc_rate_lines:			
-			moc_rate_ids=moc_obj.search(cr,uid,[('name','=',moc_rate_item.moc_id.name),('active','=',True)])					
-			moc_rec = moc_obj.browse(cr,uid,moc_rate_ids[0])
-									
-			if moc_rec.weight_type == 'ci':			
-				amount=rec.ci_weight * moc_rate_item.rate
+			for item in rec.line_ids:				
 				vals = {
-				'amount': amount,				
-					}
-				self.pool.get('ch.mocwise.rate').write(cr,uid,moc_rate_item.id,vals)	
-			elif moc_rec.weight_type == 'ss':				
-				amount=rec.pcs_weight * moc_rate_item.rate
-				vals = {
-				'amount': amount,				
-					}
-				self.pool.get('ch.mocwise.rate').write(cr,uid,moc_rate_item.id,vals)	
-			elif moc_rec.weight_type == 'non_ferrous':				
-				amount=rec.nonferous_weight * moc_rate_item.rate
-				vals = {
-				'amount': amount,				
-					}
-				self.pool.get('ch.mocwise.rate').write(cr,uid,moc_rate_item.id,vals)	
-			else:
-				pass
-					
-		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+					'read_flag': True,				
+						}
+				self.pool.get('ch.mocwise.rate').write(cr,uid,item.id,vals)
+				
+			for moc_rate_item in moc_rate_lines:			
+				moc_rate_ids=moc_obj.search(cr,uid,[('name','=',moc_rate_item.moc_id.name),('active','=',True)])					
+				moc_rec = moc_obj.browse(cr,uid,moc_rate_ids[0])
+										
+				if moc_rec.weight_type == 'ci':			
+					amount=rec.ci_weight * moc_rate_item.rate
+					vals = {
+					'amount': amount,				
+						}
+					self.pool.get('ch.mocwise.rate').write(cr,uid,moc_rate_item.id,vals)	
+				elif moc_rec.weight_type == 'ss':				
+					amount=rec.pcs_weight * moc_rate_item.rate
+					vals = {
+					'amount': amount,				
+						}
+					self.pool.get('ch.mocwise.rate').write(cr,uid,moc_rate_item.id,vals)	
+				elif moc_rec.weight_type == 'non_ferrous':				
+					amount=rec.nonferous_weight * moc_rate_item.rate
+					vals = {
+					'amount': amount,				
+						}
+					self.pool.get('ch.mocwise.rate').write(cr,uid,moc_rate_item.id,vals)	
+				else:
+					pass
+						
+			self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 	
 	def entry_draft(self,cr,uid,ids,context=None):
