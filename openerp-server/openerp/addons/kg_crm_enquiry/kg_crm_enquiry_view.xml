@@ -44,7 +44,7 @@
 								<field name="del_date" on_change="onchange_del_date(del_date)" required="1"/>
 								<field name="expected_value"/>								
 								<field name="segment" required="1"/>		
-								<field name="source"/>		
+								<field name="source" required="1" readonly="1"/>		
 								<field name="service_det" attrs="{'invisible': [('call_type','!=','service')],'required': [('call_type','=','service')]}"/>					
 								<field name="state" style="width: 30%%" class="att_state_change"/>
 								<field name="drive" invisible="1"/>
@@ -212,6 +212,9 @@
 						<group>
 							<field name="purpose_categ" on_change="onchange_purpose_categ(purpose_categ)" required="1" attrs="{'readonly':[('purpose_categ','in',('pump','spare','access'))]}"/>
 						</group>	
+						<group>
+							<field name="pump_model_type" required="1"/>
+						</group>	
 		<notebook>
 			<page string="Pump Details"  attrs="{'invisible':[('purpose_categ','!=','pump')]}">
 						<group string="Item Details">
@@ -263,6 +266,7 @@
 								<field name="pump_id" on_change="onchange_pumpmodel(pump_id,market_division,suction_pressure_kg,discharge_pressure_kg,purpose_categ)" attrs="{'required':[('purpose_categ','in',('pump'))]}"/>
 								<field name="qty" required="1"/>
 								<field name="pumpseries_id" on_change="onchange_pumpseries(pumpseries_id,flange_standard,flange_type)" attrs="{'required':[('purpose_categ','in',('pump'))]}"/>
+								<field name="del_pipe_size"/>
 								<field name="pre_suppliy_ref"/>
 								<field name="shaft_sealing"/>
 								<field name="scope_of_supply" on_change="onchange_scope_of_supply(scope_of_supply,primemover_categ)"/>
@@ -282,6 +286,8 @@
 								<field name="hydrostatic_test_pressure" />
 								<field name="setting_height" />
 								<field name="full_load_rpm" on_change="onchange_impeller_tip_speed(impeller_tip_speed,impeller_dia_rated,full_load_rpm)"/>
+								<field name="engine_make" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
+								<field name="engine_type" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
 								<field name="belt_loss_in_kw" on_change="onchange_belt_loss_in_kw(belt_loss_in_kw,bkw_liq)" attrs="{'invisible':[('type_of_drive','not in',['belt_drive'])]}"/>
 								<field name="frequency" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
 								<field name="motor_kw" on_change="onchange_motor_margin(motor_kw,bkw_liq)"  attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct','fc_gb'])]}"/>
@@ -309,7 +315,7 @@
 								<field name="impeller_dia_max" />
 								<field name="max_allowable_test" />
 								<field name="crm_type" />
-								<field name="pump_model_type" attrs="{'required':[('purpose_categ','=','pump')]}"/>
+								<field name="bush_bearing_lubrication" attrs="{'invisible':[('pump_model_type','!=','vertical')]}"/>
 								<field name="push_bearing" />
 								<field name="suction_size" />
 								<field name="speed_in_rpm" />
@@ -333,6 +339,9 @@
 								<field name="type_of_drive"/>
 								<field name="primemover_id" on_change="onchange_primemover(primemover_id)"/>
 								<field name="operation_range"/>
+								<field name="motor_make"/>
+								<field name="motor_type"/>
+								<field name="motor_mounting"/>
 								<field name="gear_box_loss_high_speed" on_change="onchange_motor_output_power_high_speed(pump_input_higher_speed,gear_box_loss_high_speed,fluid_coupling_loss,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
 								<field name="fluid_coupling_loss" on_change="onchange_motor_output_power_high_speed(pump_input_higher_speed,gear_box_loss_high_speed,fluid_coupling_loss,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
 								<field name="motor_output_power_high_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
@@ -595,15 +604,26 @@
 	<!-- Menu Action Start-->
 		
 		<record id="tma_crm_enquiry" model="ir.actions.act_window">
-			<field name="name">Enquiry</field>
+			<field name="name">Service Enquiry</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.crm.enquiry</field>
 			<field name="view_type">form</field>
 			<field name="context">{}</field>
 			<field name="view_id" ref="t_tree_v_crm_enquiry"/>
 			<field name="search_view_id" ref="t_search_v_crm_enquiry"/>
-			<field name="context">{}</field>
-			<field name="domain">[('state','!=','revised')]</field>
+			<field name="context">{'default_source': 'service'}</field>
+			<field name="domain">[('state','!=','revised'),('source','=','service')]</field>
+		</record>
+		
+		<record id="tma_crm_enquiry_marketing" model="ir.actions.act_window">
+			<field name="name">Marketing Enquiry</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.crm.enquiry</field>
+			<field name="view_type">form</field>
+			<field name="view_id" ref="t_tree_v_crm_enquiry"/>
+			<field name="search_view_id" ref="t_search_v_crm_enquiry"/>
+			<field name="context">{'default_source': 'market'}</field>
+			<field name="domain">[('state','!=','revised'),('source','=','market')]</field>
 		</record>
 		
 	<!-- Menu Action End-->

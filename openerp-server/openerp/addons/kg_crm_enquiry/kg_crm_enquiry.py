@@ -915,8 +915,8 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		########## Pump Specification Added Start here ################	
 		'pump_type': fields.char('Pump Model'),		
 		'casing_design': fields.selection([('base','Base'),('center_line','Center Line')],'Casing Feet Location'),
-		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Type', required=True,domain="[('active','=','t')]"),		
-		'spare_pump_id': fields.many2one('kg.pumpmodel.master','Pump Type', required=True,domain="[('active','=','t')]"),		
+		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True,domain="[('active','=','t')]"),		
+		'spare_pump_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True,domain="[('active','=','t')]"),		
 		'size_suctionx': fields.char('Size-SuctionX Delivery(mm)'),
 		'flange_standard': fields.many2one('ch.pumpseries.flange','Flange Standard',domain="[('flange_type','=',flange_type),('header_id','=',pumpseries_id)]"),
 		'efficiency_in': fields.float('Efficiency in % Wat'),
@@ -938,9 +938,14 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'gd_sq_value': fields.float('GD SQ value'),
 		'critical_speed': fields.float('Critical Speed'),
 		'bearing_make': fields.many2one('kg.brand.master','Bearing Make'),
+		'engine_make': fields.many2one('kg.brand.master','Engine Make'),
+		'motor_make': fields.many2one('kg.brand.master','Motor Make'),
+		'engine_type': fields.char('Engine Type'),
+		'motor_type': fields.selection([('eff_1','EFF-1'),('eff_2','EFF-2'),('eff_3','EFF-3')],'Motor Type'),
+		'motor_mounting': fields.selection([('foot','Foot'),('flange','Flange')],'Motor Mounting'),
 		'bearing_number_nde': fields.char('BEARING NUMBER NDE / DE'),
 		'bearing_qty_nde': fields.float('Bearing qty NDE / DE'),
-		'type_of_drive': fields.selection([('motor_direct','Motor-direct'),('belt_drive','Belt drive'),('fc_gb','Fluid Coupling Gear Box')],'Transmission'),
+		'type_of_drive': fields.selection([('motor_direct','Direct'),('belt_drive','Belt drive'),('fc_gb','Fluid Coupling Gear Box')],'Transmission'),
 		'end_of_the_curve': fields.float('End of the curve - KW(Rated) liquid'),
 		'motor_frequency_hz': fields.float('Motor frequency HZ'),
 		'frequency': fields.selection([('50','50'),('60','60')],'Motor frequency (HZ)'),
@@ -948,7 +953,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'motor_kw': fields.float('Motor KW'),
 		'speed_in_pump': fields.float('Speed in RPM-Pump'),
 		'speed_in_motor': fields.float('Speed in RPM-Motor'),
-		'full_load_rpm': fields.float('Speed in RPM'),
+		'full_load_rpm': fields.float('Speed in RPM - Engine'),
 		'engine_kw': fields.float('Engine KW'),
 		'belt_loss_in_kw': fields.float('Belt Loss in Kw - 3% of BKW'),
 		'type_make_selection': fields.selection([('base','Base'),('center_line','Center Line')],'Type Make Selection'),
@@ -961,10 +966,12 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'market_division': fields.selection([('cp','CP'),('ip','IP')],'Market Division'),
 		'lubrication_type': fields.selection([('grease','Grease'),('oil','Oil')],'Lubrication'),
 		'flag_standard': fields.boolean('Non Standard'),
-		'push_bearing': fields.selection([('grease_bronze','Grease/Bronze'),('cft','CFT'),('cut','Cut Less Rubber')],'Push Bearing'),
+		'push_bearing': fields.selection([('grease_bronze','Grease'),('cft','CFT'),('cut','Cut Less Rubber')],'Bush Bearing'),
 		'suction_size': fields.selection([('32','32'),('40','40'),('50','50'),('65','65'),('80','80'),('100','100'),('125','125'),('150','150'),('200','2000'),('250','250'),('300','300')],'Suction Size'),
-		'speed_in_rpm': fields.selection([('1450','1450'),('2900','2900')],'Speed in RPM'),
-		'pump_model_type':fields.selection([('vertical','Vertical'),('horizontal','Horizontal')], 'Type'),
+		'speed_in_rpm': fields.float('Speed in RPM - Pump'),
+		'pump_model_type':fields.selection([('vertical','Vertical'),('horizontal','Horizontal')], 'Pump Type'),
+		'bush_bearing_lubrication':fields.selection([('grease','Grease'),('external','External'),('self','Self'),('ex_pressure','External Under Pressure')], 'Bush Bearing Lubrication'),
+		'del_pipe_size': fields.selection([('32','32'),('40','40'),('50','50'),('65','65'),('80','80'),('100','100'),('125','125'),('150','150'),('200','200'),('250','250'),('300','300')],'Delivery Pipe Size(MM)'),
 		
 		##### Product model values ##########
 		#'impeller_type': fields.char('Impeller Type', readonly=True),
@@ -977,8 +984,8 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'number_of_stages': fields.integer('Number of stages'),
 		#'crm_type': fields.char('Type', readonly=True),
 		'crm_type': fields.selection([('pull_out','End Suction Back Pull Out'),('split_case','Split Case'),('multistage','Multistage'),('twin_casing','Twin Casing'),('single_casing','Single Casing'),('self_priming','Self Priming'),('vo_vs4','VO-VS4'),('vg_vs5','VG-VS5')],'Type'),
-		'pumpseries_id': fields.many2one('kg.pumpseries.master','Pumpseries'),
-		'spare_pumpseries_id': fields.many2one('kg.pumpseries.master','Pumpseries'),
+		'pumpseries_id': fields.many2one('kg.pumpseries.master','Pump Series'),
+		'spare_pumpseries_id': fields.many2one('kg.pumpseries.master','Pump Series'),
 		'primemover_id': fields.many2one('kg.primemover.master','Primemover'),
 		'operation_range': fields.char('Operation Range'),
 		'primemover_categ': fields.selection([('engine','ENGINE'),('motor','MOTOR'),('vfd','VFD')],'Primemover Category'),
@@ -1534,7 +1541,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		value = {'impeller_type': '','impeller_number': '','impeller_dia_max': '','impeller_dia_min': '','maximum_allowable_soild': '',
 				'max_allowable_test': '','number_of_stages': '','crm_type': '','bearing_number_nde':'','bearing_qty_nde':'',
 				'pumpseries_id':'','crm_type':'','casing_design':'','sealing_water_capacity':'','size_suctionx':'','gd_sq_value':'',
-				'sealing_water_pressure':'','lubrication_type':'','spare_pump_id':''}
+				'sealing_water_pressure':'','lubrication_type':'','spare_pump_id':'','del_pipe_size':''}
 		total = 0.00
 		
 		if pump_id:
@@ -1550,7 +1557,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			'number_of_stages': pump_rec.number_of_stages,'crm_type': pump_rec.crm_type,'bearing_number_nde':pump_rec.bearing_no,'bearing_qty_nde':pump_rec.bearing_qty,
 			'pumpseries_id':pump_rec.series_id.id,'crm_type':pump_rec.crm_type,'casing_design':pump_rec.feet_location,
 			'sealing_water_capacity':pump_rec.sealing_water_capacity,'size_suctionx':pump_rec.pump_size,'gd_sq_value':pump_rec.gd_sq_value,
-			'sealing_water_pressure':total,'lubrication_type':pump_rec.lubrication_type,'spare_pump_id':pump_id}
+			'sealing_water_pressure':total,'lubrication_type':pump_rec.lubrication_type,'spare_pump_id':pump_id,'del_pipe_size':pump_rec.delivery_pipe_size}
 		print"valuevaluevalue",value
 		return {'value': value}
 		
