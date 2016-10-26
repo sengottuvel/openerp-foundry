@@ -92,6 +92,7 @@ class kg_pumpmodel_master(osv.osv):
 		'maximum_allowable_soild': fields.float(' Maximum Allowable Solid Size - mm'),
 		'max_allowable_test': fields.float('Max Allowable Test Pressure'),
 		'number_of_stages': fields.integer('Number of stages'),
+		
 		'delivery_pipe_size': fields.selection([('32','32'),('40','40'),('50','50'),('65','65'),('80','80'),('100','100'),('125','125'),('150','150'),('200','200'),('250','250'),('300','300')],'Delivery Pipe Size(MM)',required=True),	
 		
 		'pump_size': fields.char('Size-SuctionX Delivery(mm)'),
@@ -113,6 +114,7 @@ class kg_pumpmodel_master(osv.osv):
 		'max_solid_size': fields.char('Max Solid size'),
 		'sealing_water_capacity': fields.float('Sealing Water Capacity - m3/hr'),
 		'gd_sq_value': fields.float('GD SQ value'),
+		'pump_shaft_dia_at': fields.float('Pump Shaft Dia at Coupling End'),
 		
 	}
 	

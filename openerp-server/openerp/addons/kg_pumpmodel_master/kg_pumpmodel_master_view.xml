@@ -61,6 +61,7 @@
 								<field name="lubrication_type" />		
 								<field name="suction_orientation" />		
 								<field name="gd_sq_value" />		
+								<field name="pump_shaft_dia_at" />		
 								<field name="companion_flange" invisible="1"/>		
 								<field name="max_solid_size" invisible="1"/>									
 								<field name="state" style="width: 30%%" class="att_state_change"/>									
