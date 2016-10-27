@@ -45,22 +45,23 @@ class kg_site_visit_plan(osv.osv):
 		'from_date': fields.date('From Date',required=True,readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'to_date': fields.date('To Date',required=True,readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'no_of_days': fields.integer('No.of Days',required=True),
-		'payment': fields.selection([('sam','SAM'),('customer','Customer'),('both','Both')],'Payment',readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
-		'sam_amt': fields.float('SAM Amount',readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
-		'customer_amt': fields.float('Customer Amount',readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
+		#~ 'payment': fields.selection([('sam','SAM'),('customer','Customer'),('both','Both')],'Payment',readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
+		#~ 'sam_amt': fields.float('SAM Amount',readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
+		#~ 'customer_amt': fields.float('Customer Amount',readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'allowance_date': fields.date('Amount Required On',readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'purpose_of_visit': fields.selection([('service','Service')],'Purpose of Visit'),
 		'remarks': fields.text('Remarks',readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'state': fields.selection(STATE_SELECTION,'Status', readonly=True),
 		'note': fields.char('Notes'),
 		'cancel_remark': fields.text('Cancel Remarks'),
+		#~ 'day_charge': fields.float('Charges/Day',readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		
 		'sv_pending_ids': fields.many2many('kg.site.visit.pending', 'm2m_svp', 'plan_id','pending_id', 'Site Visit Pending', delete=False,
 			 domain="[('state','=','pending')]",readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}	),
 		'line_ids': fields.one2many('ch.site.visit.plan', 'header_id', "Allowance Breakup", readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
-			
+		
 		'customer_id': fields.many2one('res.partner','Customer Name',domain=[('customer','=',True),('contact','=',False)]),
-		'engineer_id': fields.many2one('hr.employee','Engineer Name',readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
+		'engineer_id': fields.many2one('hr.employee','Engineer Name',required=True, readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'purpose': fields.selection(PURPOSE_SELECTION,'Purpose',readonly=True),
 		
 		'allowance_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Allowance Amount',
@@ -101,27 +102,31 @@ class kg_site_visit_plan(osv.osv):
 	  
 	def _to_date_check(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		from_date = rec.from_date
-		from_date = str(from_date)
+		from_date = str(rec.from_date)
 		from_date = datetime.strptime(from_date, '%Y-%m-%d')
-		to_date = rec.to_date
-		to_date = str(to_date)
+		to_date = str(rec.to_date)
 		to_date = datetime.strptime(to_date, '%Y-%m-%d')
-		print"from_date",from_date
-		print"to_date",to_date
 		if to_date <= from_date:
 			return False
 		return True
 	
 	def _past_date(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		today = date.today()
-		today = str(today)
+		today = str(date.today())
 		today = datetime.strptime(today, '%Y-%m-%d')
-		allowance_date = rec.allowance_date
-		allowance_date = str(allowance_date)
+		allowance_date = str(rec.allowance_date)
 		allowance_date = datetime.strptime(allowance_date, '%Y-%m-%d')
 		if allowance_date >= today:
+			return True
+		return False
+		
+	def _from_past_date(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = str(date.today())
+		today = datetime.strptime(today, '%Y-%m-%d')
+		from_date = str(rec.from_date)
+		from_date = datetime.strptime(from_date, '%Y-%m-%d')
+		if from_date >= today:
 			return True
 		return False
 		
@@ -132,11 +137,51 @@ class kg_site_visit_plan(osv.osv):
 				return False
 		return True
 		
+	def _check_sv_pending(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		if not entry.sv_pending_ids:
+			raise osv.except_osv(
+				_('Warning!'),
+				_('System should not be save with out plan details !'))
+		return True
+		
+	def _check_allowance(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		total = 0
+		if entry.state in ('plan'):
+			if entry.line_ids:
+				for item in entry.line_ids:
+					if not item.ch_line_ids:
+						raise osv.except_osv(
+							_('Warning!'),
+							_('System should not be save with out Allowance Breakups !'))
+					elif item.ch_line_ids:
+						for ele in item.ch_line_ids:
+							if ele.date >= entry.from_date and ele.date <= entry.to_date:
+								pass
+							else:
+								invalid_date = datetime.strptime(ele.date, '%Y-%m-%d')
+								invalid_date = invalid_date.strftime('%d/%m/%Y')
+								raise osv.except_osv(
+									_('Warning!'),
+									_('%s Allowance date should be greater than or equal From date or less than or equal To date !'%(invalid_date)))
+				
+				total = sum(ele.no_of_days for ele in entry.line_ids)
+				if total > entry.no_of_days:
+					raise osv.except_osv(
+							_('Warning!'),
+							_('No.of days exceeds from Total no.of days !'))
+		
+		return True
+	
 	_constraints = [		
 		
-		(_to_date_check, 'Should be greater than from date !!',['To Date']),
-		(_past_date, 'System not allow to save with past date. !!',['Amount Required On']),
-		(_check_lineitems, 'System not allow to save with empty Plan List !!',['']),
+		#~ (_to_date_check, 'Should be greater than from date !!',['To Date']),
+		#~ (_past_date, 'System not allow to save with past date. !!',['Amount Required On']),
+		#~ (_from_past_date, 'System not allow to save with past date. !!',['From Date']),
+		(_check_lineitems, 'System not allow to save with empty Plan List !',['']),
+		(_check_sv_pending, 'System not allow to save with empty Plan Details !',['']),
+		(_check_allowance, 'System not allow to save with empty Allowance Breakups !',['']),
 		
 	   ]
 	   	 
@@ -148,9 +193,35 @@ class kg_site_visit_plan(osv.osv):
 			no_of_days = str((d2-d1).days)
 			no_of_days = int(no_of_days)
 		value = {'no_of_days': no_of_days}
+		if from_date and to_date:
+			if to_date < from_date:
+				raise osv.except_osv(
+				_('Warning!'),
+				_('To Date should not be less than From Date! '))
+			
 		print"value",value
 	
 		return {'value': value}
+		
+	def onchange_allowance_date(self,cr,uid,ids,from_date,to_date,allowance_date,context=None):
+		if from_date and to_date and allowance_date:
+			if allowance_date >= from_date and allowance_date <= to_date:
+				pass
+			else:
+				raise osv.except_osv(
+					_('Warning!'),
+					_('Amount Required On should be greater than or equal From date or less than or equal To date! '))
+		return True
+		
+	def onchange_from_date(self,cr,uid,ids,from_date,context=None):
+		if from_date:
+			from_date = from_date
+			curnt_date = time.strftime('%Y-%m-%d')
+			if from_date < curnt_date:
+				raise osv.except_osv(
+					_('Warning!'),
+					_('From date not accept with past date! '))
+		return True
 		
 	def entry_confirm(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
@@ -159,6 +230,9 @@ class kg_site_visit_plan(osv.osv):
 		seq_rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
 		cr.execute("""select generatesequenceno(%s,'%s',now()::date) """%(qc_seq_id[0],seq_rec.code))
 		ser_no = cr.fetchone();
+		
+		self.date_validation(cr,uid,entry)
+		
 		self.write(cr, uid, ids, {
 									'name':ser_no[0],
 									'state': 'confirm',
@@ -250,18 +324,46 @@ class kg_site_visit_plan(osv.osv):
 					_('Warning!'),
 					_('%s System not allow to save without no of days'%(item.complaint_no.name)))
 			self.pool.get('ch.site.visit.plan').write(cr,uid,item.id,{'state':'pending'})
-		if entry.payment == 'both':
-			tot_amt = 0
-			tot_amt = entry.sam_amt + entry.customer_amt
-			if tot_amt > entry.tot_plan_amt:
-				raise osv.except_osv(
-					_('Warning!'),
-					_('System should not be accept greater than total plan amount'))
+		#~ if entry.payment == 'both':
+			#~ tot_amt = 0
+			#~ tot_amt = entry.sam_amt + entry.customer_amt
+			#~ if tot_amt > entry.tot_plan_amt:
+				#~ raise osv.except_osv(
+					#~ _('Warning!'),
+					#~ _('System should not be accept greater than total plan amount'))
 		
 		if not entry.line_ids:
 			raise osv.except_osv(
 				_('Warning!'),
 				_('System not allow to save with empty Plan Details'))
+		
+		today = str(date.today())
+		today = datetime.strptime(today, '%Y-%m-%d')
+		from_date = str(entry.from_date)
+		from_date = datetime.strptime(from_date, '%Y-%m-%d')
+		to_date = str(entry.to_date)
+		to_date = datetime.strptime(to_date, '%Y-%m-%d')
+		allowance_date = str(entry.allowance_date)
+		allowance_date = datetime.strptime(allowance_date, '%Y-%m-%d')
+		if from_date < today:
+			raise osv.except_osv(
+				_('Warning!'),
+				_('From date not accept with past date! '))
+		elif allowance_date < today:
+			raise osv.except_osv(
+				_('Warning!'),
+				_('Amount Required On not accept with past date! '))
+		elif from_date > to_date:
+			raise osv.except_osv(
+				_('Warning!'),
+				_('To Date should not be greater than From date! '))
+		elif allowance_date > to_date:
+			raise osv.except_osv(
+				_('Warning!'),
+				_('Amount Required On should not be greater than To date! '))
+		
+		self.date_validation(cr,uid,entry)
+		
 		self.write(cr, uid, ids, {
 									'state': 'plan',
 									'approve_user_id': uid, 
@@ -269,7 +371,36 @@ class kg_site_visit_plan(osv.osv):
 		 							})
 		 												
 		return True
+	
+	def date_validation(self,cr,uid,entry,context=None):
 		
+		today = str(date.today())
+		today = datetime.strptime(today, '%Y-%m-%d')
+		from_date = str(entry.from_date)
+		from_date = datetime.strptime(from_date, '%Y-%m-%d')
+		to_date = str(entry.to_date)
+		to_date = datetime.strptime(to_date, '%Y-%m-%d')
+		allowance_date = str(entry.allowance_date)
+		allowance_date = datetime.strptime(allowance_date, '%Y-%m-%d')
+		if from_date < today:
+			raise osv.except_osv(
+				_('Warning!'),
+				_('From date not accept with past date! '))
+		elif allowance_date < today:
+			raise osv.except_osv(
+				_('Warning!'),
+				_('Amount Required On not accept with past date! '))
+		elif from_date > to_date:
+			raise osv.except_osv(
+				_('Warning!'),
+				_('To Date should not be greater than From date! '))
+		elif allowance_date > to_date:
+			raise osv.except_osv(
+				_('Warning!'),
+				_('Amount Required On should not be greater than To date! '))
+		
+		return True
+			
 	def entry_reject(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		
@@ -342,7 +473,7 @@ class ch_site_visit_plan(osv.osv):
 		'customer_id': fields.many2one('res.partner','Customer Name',domain=[('customer','=',True),('contact','=',False)]),
 		'dealer_id': fields.many2one('res.partner','Dealer Name',domain=[('dealer','=',True),('contact','=',False)]),
 		'registration_date': fields.date('Complaint Date'),
-		'wo_no': fields.char('WO No'),
+		'wo_no': fields.char('Old WO No'),
 		'wo_line_id': fields.many2one('ch.work.order.details','WO No'),
 		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Model'),
 		'moc_const_id': fields.many2one('kg.moc.construction','MOC Construction'),
@@ -351,6 +482,10 @@ class ch_site_visit_plan(osv.osv):
 		'defect_id': fields.many2one('kg.defect.master','Pump Defect type'),
 		'no_of_days': fields.integer('No Of Days'),
 		's_no': fields.char('Serial No.'),
+		'payment': fields.selection([('sam','SAM'),('customer','Customer'),('both','Both')],'Payment'),
+		'sam_amt': fields.float('SAM Amount'),
+		'customer_amt': fields.float('Customer Amount'),
+		'day_charge': fields.float('Charges/Day'),
 		
 		'decision': fields.selection([('no_fault','No Fault'),('service','Service Done'),('replace','Replacement(Cost)'),('replace_free','Replacement(Free)')],'Decision',readonly=True, states={'pending':[('readonly',False)]}),
 		'expense_amt': fields.float('Expense Amount',readonly=True, states={'pending':[('readonly',False)]}),
@@ -591,7 +726,80 @@ class ch_site_visit_plan(osv.osv):
 																						  'access_id': item.access_id.id,
 																						  'is_applicable': item.is_applicable,
 																						})																	
-																					
+			
+			# Service Inward Entry Creation
+			limit = len_is_apl = 0	
+			if entry.returnable == 'yes':
+				if entry.replace_categ == 'pump':
+					replace_categ = 'pump'
+					service_inward_id = self.pool.get('kg.service.inward').create(cr,uid,{'customer_id': entry.customer_id.id,
+																				  'complaint_no': entry.complaint_no.id,
+																				  'complaint_date': entry.registration_date,
+																				  's_no': entry.s_no,
+																				  'wo_no': entry.wo_no,
+																				  'wo_line_id': entry.wo_line_id.id,
+																				  'pump_id': entry.pump_id.id,
+																				  'moc_const_id': entry.moc_const_id.id,
+																				  'defect_id': entry.defect_id.id,
+																				  'purpose_categ': replace_categ,
+																				  'entry_mode': 'auto',
+																					})
+				elif entry.replace_categ == 'spare':
+					replace_categ = 'part'
+					for item in entry.line_ids:
+						if item.is_applicable == True:
+							for ele in range(item.qty):
+								service_inward_id = self.pool.get('kg.service.inward').create(cr,uid,{'customer_id': entry.customer_id.id,
+																				  'complaint_no': entry.complaint_no.id,
+																				  'complaint_date': entry.registration_date,
+																				  's_no': entry.s_no,
+																				  'wo_no': entry.wo_no,
+																				  'wo_line_id': entry.wo_line_id.id,
+																				  'pump_id': entry.pump_id.id,
+																				  'moc_const_id': entry.moc_const_id.id,
+																				  'defect_id': entry.defect_id.id,
+																				  'purpose_categ': replace_categ,
+																				  'entry_mode': 'auto',
+																				  'item_code': item.pattern_id.name,
+																				  'item_name': item.pattern_name,
+																					})
+							
+					for item in entry.line_ids_a:
+						if item.is_applicable == True:
+							for ele in range(item.qty):
+								service_inward_id = self.pool.get('kg.service.inward').create(cr,uid,{'customer_id': entry.customer_id.id,
+																				  'complaint_no': entry.complaint_no.id,
+																				  'complaint_date': entry.registration_date,
+																				  's_no': entry.s_no,
+																				  'wo_no': entry.wo_no,
+																				  'wo_line_id': entry.wo_line_id.id,
+																				  'pump_id': entry.pump_id.id,
+																				  'moc_const_id': entry.moc_const_id.id,
+																				  'defect_id': entry.defect_id.id,
+																				  'purpose_categ': replace_categ,
+																				  'entry_mode': 'auto',
+																				  'item_code': item.ms_id.name,
+																				  'item_name': item.ms_id.code,
+																					})
+					for item in entry.line_ids_b:
+						if item.is_applicable == True:
+							for ele in range(item.qty):
+								service_inward_id = self.pool.get('kg.service.inward').create(cr,uid,{'customer_id': entry.customer_id.id,
+																				  'complaint_no': entry.complaint_no.id,
+																				  'complaint_date': entry.registration_date,
+																				  's_no': entry.s_no,
+																				  'wo_no': entry.wo_no,
+																				  'wo_line_id': entry.wo_line_id.id,
+																				  'pump_id': entry.pump_id.id,
+																				  'moc_const_id': entry.moc_const_id.id,
+																				  'defect_id': entry.defect_id.id,
+																				  'purpose_categ': replace_categ,
+																				  'entry_mode': 'auto',
+																				  'item_code': item.ms_id.name,
+																				  'item_name': item.ms_id.code,
+																					})
+							
+					
 		self.pool.get('kg.site.visit.pending').write(cr,uid,entry.sv_pending_id.id,{'state':'close'})
 		
 		self.write(cr, uid, ids, {
@@ -645,6 +853,22 @@ class ch_site_visit_plan_allowance(osv.osv):
 		print"total",total
 		value = {'total_amt': total}
 		return {'value': value}
+	
+	def _check_line_duplicates(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		cr.execute('''select id from ch_site_visit_plan_allowance where date = %s and description = %s and mode_of_travel = %s and id != %s and header_id = %s 
+						''',[entry.date,entry.description,entry.mode_of_travel,entry.id,entry.header_id.id])
+		duplicate_id = cr.fetchone()
+		if duplicate_id:
+			if duplicate_id[0] != None:
+				return False
+		return True 
+		
+	_constraints = [
+		
+		(_check_line_duplicates, 'Duplicate allowance entry not aollowed', ['']),	   
+		
+	]
 	
 ch_site_visit_plan_allowance()
 

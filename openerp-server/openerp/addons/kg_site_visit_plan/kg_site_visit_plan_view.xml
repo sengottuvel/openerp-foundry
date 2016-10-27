@@ -18,11 +18,12 @@
 						<group>
 							<group>
 								<field name="name" readonly="1"/>
-								<field name="from_date"/>
+								<field name="from_date" on_change="onchange_from_date(from_date)"/>
 								<field name="no_of_days" readonly="1"/>
 								<field name="engineer_id"/>
-								<field name="payment" required="1"/>
+<!--							<field name="payment" required="1"/>
 								<field name="sam_amt" attrs="{'required':[('payment','=','both')],'invisible':[('payment','!=','both')]}"/>
+								<field name="day_charge" attrs="{'required':[('payment','=','customer')],'invisible':[('payment','!=','customer')]}"/>-->
 								<field name="remarks"/>
 							</group>											
 							<group>
@@ -30,8 +31,8 @@
 								<field name="cr_date" readonly="1"/>
 								<field name="to_date" on_change="onchange_no_of_days(from_date,to_date)"/>
 								<field name="purpose_of_visit" readonly="1"/>
-								<field name="customer_amt" attrs="{'required':[('payment','=','both')],'invisible':[('payment','!=','both')]}"/>
-								<field name="allowance_date" required="1"/>
+<!--							<field name="customer_amt" attrs="{'required':[('payment','=','both')],'invisible':[('payment','!=','both')]}"/>-->
+								<field name="allowance_date" required="1" on_change="onchange_allowance_date(from_date,to_date,allowance_date)"/>
 								<field name="state" style="width: 30%%" class="att_state_change"/>
 							</group>	
 						</group>
@@ -73,13 +74,17 @@
 													<field name="registration_date" readonly="1"/>
 													<field name="wo_no" readonly="1"/>
 													<field name="defect_id" required="1" readonly="1"/>
-													<field name="s_no" required="1" readonly="1"/>
+													<field name="payment" required="1"/>
+													<field name="sam_amt" attrs="{'required':[('payment','=','both')],'invisible':[('payment','!=','both')]}"/>
+													<field name="customer_amt" attrs="{'required':[('payment','=','both')],'invisible':[('payment','!=','both')]}"/>
+													<field name="day_charge" attrs="{'required':[('payment','=','customer')],'invisible':[('payment','!=','customer')]}"/>
 													<field name="sv_pending_id" readonly="1" invisible="1"/>
 												</group>
 												<group>
 													<field name="wo_line_id" readonly="1"/>
 													<field name="pump_id" required="1" readonly="1"/>
 													<field name="moc_const_id" required="1" readonly="1"/>
+													<field name="s_no" readonly="1"/>
 													<field name="no_of_days" required="1"/>
 													<field name="tot_plan_amt"/>
 												</group>
@@ -237,7 +242,10 @@
 							<field name="customer_id" required="1" readonly="1"/>
 							<field name="wo_no" readonly="1"/>
 							<field name="defect_id" required="1" readonly="1"/>
-							<field name="s_no" required="1" readonly="1"/>
+							<field name="payment" readonly="1"/>
+							<field name="sam_amt" readonly="1" attrs="{'invisible':[('payment','!=','both')]}"/>
+							<field name="customer_amt" readonly="1" attrs="{'invisible':[('payment','!=','both')]}"/>
+							<field name="day_charge" readonly="1" attrs="{'invisible':[('payment','!=','customer')]}"/>
 							<field name="sv_pending_id" readonly="1" invisible="1"/>
 							<field name="registration_date" readonly="1" invisible="1"/>
 							<field name="dealer_id" readonly="1" invisible="1"/>
@@ -247,6 +255,7 @@
 							<field name="wo_line_id" readonly="1"/>
 							<field name="pump_id" required="1" readonly="1"/>
 							<field name="moc_const_id" required="1" readonly="1"/>
+							<field name="s_no" required="1" readonly="1"/>
 							<field name="no_of_days" required="1" readonly="1"/>
 							<field name="purpose" required="1" />
 							<field name="state" style="width: 30%%" class="att_state_change"/>
@@ -390,7 +399,7 @@
 		</record>
 		
 		<record id="tma_ch_site_visit_plan" model="ir.actions.act_window">
-			<field name="name">Site Visit Status</field>
+			<field name="name">Plan Status Update</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">ch.site.visit.plan</field>
 			<field name="view_type">form</field>
@@ -400,5 +409,6 @@
 			<field name="search_view_id" ref="t_search_v_ch_site_visit_plan"/>
 		</record>
 	
+		
 	</data>
 </openerp>
