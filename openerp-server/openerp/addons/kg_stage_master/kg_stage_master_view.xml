@@ -40,6 +40,17 @@
 							</group>
 						</group>
 						<notebook>
+							<page string="Rate Details">	
+								<field name="line_ids" nolabel="1" >
+									<tree string="Rate Details Entry Tree" editable="top" >									
+										<field name="moc_cate_id" />											
+										<field name="min_val" />				   
+										<field name="max_val" />
+										<field name="rate" />
+										<field name="remarks" widget="char"/>														
+									</tree>
+								</field>																								
+							</page>
 							<page string="Entry Info">
 									<group>
 										<field name="company_id"/>

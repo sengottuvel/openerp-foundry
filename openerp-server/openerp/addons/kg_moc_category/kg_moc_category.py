@@ -54,6 +54,7 @@ class kg_moc_category(osv.osv):
 		'code': fields.char('Code', size=128, required=True),
 		'active': fields.boolean('Active'),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
+		'type_moc_cate': fields.selection([('ms','Machine Shop'),('fettling','Fettling')],'Type as MOC Category', readonly=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),

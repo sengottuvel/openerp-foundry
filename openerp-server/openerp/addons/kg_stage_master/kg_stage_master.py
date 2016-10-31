@@ -59,6 +59,8 @@ class kg_stage_master(osv.osv):
 		'cancel_remark': fields.text('Cancel'),
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),	
 		
+		'line_ids':fields.one2many('ch.stage.fettling', 'header_id', "Rate Details"),
+		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
 		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
@@ -146,6 +148,10 @@ class kg_stage_master(osv.osv):
 		return True
 
 	def entry_confirm(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if not rec.line_ids:
+			raise osv.except_osv(_('Rate details !!'),
+				_('Enter the Rate details tap !!'))
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 		
@@ -190,3 +196,63 @@ class kg_stage_master(osv.osv):
 	]
 	
 kg_stage_master()
+
+
+
+
+class ch_stage_fettling(osv.osv):
+	
+	_name = "ch.stage.fettling"
+	_description = "Fettling Process"
+	
+	_columns = {
+			
+		'header_id':fields.many2one('kg.stage.master', 'Stage Entry', required=True, ondelete='cascade'),							
+		'moc_cate_id': fields.many2one('kg.moc.category','Name', required=True,domain="[('state','not in',('reject','cancel')),('type_moc_cate','=','fettling')]"),	
+		'min_val':fields.integer('Min Value(KG.)',required=True),
+		'max_val':fields.integer('Max Value(KG.)',required=True),
+		'rate':fields.float('Rate',required=True),
+		'remarks':fields.text('Remarks'),		
+		
+	}
+
+			
+	def _moc_cate_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.moc_cate_id:
+			moc_cate_id = rec.moc_cate_id			
+			cr.execute(""" select moc_cate_id from ch_stage_fettling where moc_cate_id  = '%s' and header_id =%s 
+				and %s BETWEEN min_val AND max_val and %s <= max_val
+			""" %(moc_cate_id.id,rec.header_id.id,rec.min_val,rec.min_val))
+			data = cr.dictfetchall()			
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res
+		
+	def _value_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])		
+		if rec.min_val <= 0 or  rec.max_val <= 0 or rec.rate <= 0:
+			return False
+		return True
+		
+	def _min_max_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])		
+		if rec.min_val > rec.max_val:
+			return False
+		return True
+				
+	
+		
+	_constraints = [		
+			  
+				
+		(_moc_cate_validate, 'Please Check MOC Category Name and should be unique!!!',['MOC Category Name']),		
+		(_value_validate, 'Please Check negative and zero value not allowed!!!',['Values']),		
+		(_min_max_validate, 'Please Check Min value greater than Max value not allowed!!!',['Min Max Value']),		
+	   ]
+	
+ch_stage_fettling()
+
