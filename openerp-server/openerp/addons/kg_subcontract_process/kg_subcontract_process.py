@@ -687,6 +687,7 @@ class kg_subcontract_dc(osv.osv):
 					'pending_qty':sc_qty - item.sc_wo_qty,
 					'sc_dc_qty':sc_qty - item.sc_wo_qty,
 					'actual_qty':sc_qty,
+					'entry_mode':'direct',
 					
 					
 				}
@@ -713,11 +714,16 @@ class kg_subcontract_dc(osv.osv):
 					'sc_dc_qty':item.qty - item.sc_dc_qty,					
 					'sc_wo_line_id': item.id,
 					'operation_id':[(6, 0, [x.id for x in item.operation_id])],
+					'entry_mode':'from_wo',
 							
 				}
 				
 				wo_line_id = wo_line_obj.create(cr, uid,vals)
 				
+				for line in item.line_ids:
+					
+					sql = """ insert into m2m_dc_operation_details (dc_operation_id,dc_sub_id) VALUES(%s,%s) """ %(wo_line_id,line.operation_id.id)
+					cr.execute(sql)			
 				
 				
 			self.write(cr, uid, ids, {'flag_dc': True})
@@ -959,7 +965,7 @@ class ch_subcontract_dc_line(osv.osv):
 	_defaults = {
 		
 		'state': 'pending',
-		'entry_mode': 'direct',
+		
 		
 	}
 	

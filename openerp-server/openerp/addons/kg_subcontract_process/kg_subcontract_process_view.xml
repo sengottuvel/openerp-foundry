@@ -562,7 +562,7 @@
 										<field name="position_id" readonly="1"/>
 										<field name="moc_id" readonly="1"/>
 										<field name="qty" required="1" attrs="{'readonly': [('entry_mode','=','from_wo')]}"/>	
-										<field name="operation_id" readonly="1" widget="many2many_tags"/>									
+										<field name="operation_id" required="1" widget="many2many_tags" attrs="{'readonly': [('entry_mode','=','from_wo')]}"/>							
 										<field name="each_weight" required="1" on_change="onchange_total_weight(each_weight,qty)"/>
 										<field name="totel_weight" readonly="1"/>
 										<field name="entry_mode" invisible="1"/>

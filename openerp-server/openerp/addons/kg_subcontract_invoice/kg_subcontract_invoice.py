@@ -67,7 +67,7 @@ class kg_subcontract_invoice(osv.osv):
 		## Module Requirement Info	
 		
 		'contractor_id': fields.many2one('res.partner','Subcontractor',required=True),
-		'inward_id': fields.many2one('kg.subcontract.inward','Inward No.',required=True),
+		'inward_id': fields.many2one('kg.subcontract.inward','Inward No.',domain="[('contractor_id','=',contractor_id)]",required=True),
 		'phone': fields.char('Phone',size=64),
 		'contact_person': fields.char('Contact Person', size=128),
 				
@@ -108,7 +108,7 @@ class kg_subcontract_invoice(osv.osv):
 		entry_date = rec.entry_date
 		entry_date = str(entry_date)
 		entry_date = datetime.strptime(entry_date, '%Y-%m-%d')
-		if entry_date > today:
+		if entry_date > today or entry_date < today:
 			return False
 		return True
 			
@@ -123,7 +123,7 @@ class kg_subcontract_invoice(osv.osv):
 	_constraints = [		
 			  
 		
-		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
+		(_future_entry_date_check, 'System not allow to save with future and past date. !!',['Invoice Date']),
 		#~ (_check_lineitems, 'System not allow to save with empty Details !!',['']),
 	   
 		
