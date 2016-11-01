@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		
+		<record forcecreate="1" id="seq_service_inward" model="ir.sequence.type">	
+			<field name="name">Service Inward</field>
+			<field name="code">kg.service.inward</field>
+		</record>
+
+		<record forcecreate="1" id="service_inward" model="ir.sequence">
+		  <field name="name">Service Inward</field>
+		  <field name="code">kg.service.inward</field>
+		  <field name="padding" eval="3"/>
+		  <field name="prefix">SI/%(year)s/</field>
+		  <field name="reset_sequence">fiscal_reset</field>
+		</record>
+		
+	</data>
+</openerp>
