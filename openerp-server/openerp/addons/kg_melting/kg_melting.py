@@ -128,7 +128,7 @@ class kg_melting(osv.osv):
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_melting', context=c),
 		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		'user_id': lambda obj, cr, uid, context: uid,
-		'crt_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'active': True,
 		'state':'draft',
 		

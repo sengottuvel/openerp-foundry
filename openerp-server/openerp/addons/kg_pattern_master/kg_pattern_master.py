@@ -127,7 +127,7 @@ class kg_pattern_master(osv.osv):
 		'list_moc_flag': False,
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
-		'crt_date':fields.datetime.now,	
+		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'delivery_lead':8,	
 		'modify': 'no',
 		'pattern_state': 'active',

@@ -8,6 +8,7 @@ import time
 import openerp.exceptions
 import datetime
 from datetime import date
+dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
 
 class kg_bom_amendment(osv.osv):

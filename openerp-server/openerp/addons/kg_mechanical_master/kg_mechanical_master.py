@@ -81,7 +81,7 @@ class kg_mechanical_master(osv.osv):
 		'state': 'draft',
 		'value_limit': 'based_on_value',
 		'user_id': lambda obj, cr, uid, context: uid,
-		'crt_date':fields.datetime.now,	
+		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'modify': 'no',
 		
 	}
