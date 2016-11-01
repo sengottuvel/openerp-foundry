@@ -358,6 +358,7 @@
 			ref('kg_menus.tma_site_visit_plan'),
 			ref('kg_menus.tma_ch_site_visit_plan'),
 			
+			ref('kg_service_inward.tam_service_inward'),
 			
 			
             ])]" name="menu_access"/>
