@@ -83,6 +83,7 @@
 					<group>
 						<group>
 							<field name="coupling_type" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
+							<field name="coupling_make" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
 							<field name="power_kw" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
 							<field name="max_bore" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>
 							<field name="spacer_length" attrs="{'readonly':[('state','in',('approved','reject'))]}"/>

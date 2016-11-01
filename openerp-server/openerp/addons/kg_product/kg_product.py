@@ -77,6 +77,8 @@ class kg_product(osv.osv):
 		'gland_plate': fields.selection([('w_gland_plate','With Gland Plate'),('wo_gland_plate','Without Gland Plate')],'Gland Plate'),
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
 		'sleeve_dia': fields.char('Sleeve dia(MM)'),
+		'coupling_make': fields.many2one('kg.brand.master','Coupling Make'),
+		
 		#~ 'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		
 	}
