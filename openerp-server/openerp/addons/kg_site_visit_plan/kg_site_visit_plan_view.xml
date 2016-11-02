@@ -408,7 +408,14 @@
 			<field name="view_id" ref="t_tree_v_ch_site_visit_plan"/>
 			<field name="search_view_id" ref="t_search_v_ch_site_visit_plan"/>
 		</record>
-	
 		
+		<!-- Site Visit Plan --> 
+		
+		<menuitem action="tma_site_visit_plan" name="Site Visit Plan" id="tam_site_visit_plan" parent="kg_menus.cpm_crm_enquiry_menu" sequence="6"/>
+				
+		<!-- Site Visit Status --> 
+		
+		<menuitem action="tma_ch_site_visit_plan" name="Plan Status Update" id="tam_ch_site_visit_plan" parent="kg_menus.cpm_crm_enquiry_menu" sequence="7"/>
+			
 	</data>
 </openerp>

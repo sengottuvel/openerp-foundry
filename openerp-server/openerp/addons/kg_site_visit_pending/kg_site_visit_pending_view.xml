@@ -193,6 +193,7 @@
 	
 	<!-- Sequence Number Setting Ends Here -->
 	
+		<menuitem action="tma_site_visit_pending" name="Site Visit Pending" id="tam_site_visit_pending" parent="kg_menus.cpm_crm_enquiry_menu" sequence="5"/>
 		
 	</data>
 </openerp>

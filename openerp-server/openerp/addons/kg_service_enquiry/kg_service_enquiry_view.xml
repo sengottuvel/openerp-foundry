@@ -246,7 +246,9 @@
 		</record>
 	
 	<!-- Sequence Number Setting Ends Here -->
-			
+		
+		<menuitem action="tma_service_enquiry" name="Service Complaint" id="tam_service_enquiry" parent="kg_menus.cpm_crm_enquiry_menu" sequence="4"/>
+		
 		
 	</data>
 </openerp>

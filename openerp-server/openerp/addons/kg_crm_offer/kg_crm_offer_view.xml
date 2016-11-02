@@ -587,6 +587,7 @@
 		  <field name="reset_sequence">fiscal_reset</field>
 		</record>
 		
+		<menuitem action="tma_crm_offer" name="Offer" id="tam_crm_offer" parent="kg_menus.cpm_crm_enquiry_menu" sequence="3"/>
 		
 	</data>
 </openerp>

@@ -176,5 +176,7 @@
             <field name="state">subscribed</field>              
         </record>
 		
+		<menuitem action="tma_pump_vs_material" name="Prime Cost View" id="tam_pump_vs_material" parent="kg_menus.cpm_crm_enquiry_menu" sequence="9"/>
+		
 	</data>
 </openerp>
