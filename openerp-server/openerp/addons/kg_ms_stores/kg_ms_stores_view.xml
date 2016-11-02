@@ -10,6 +10,9 @@
 			<field name="model">kg.ms.stores</field>
 			<field name="arch" type="xml">
 				<form string="MS Stores List" version="7.0" create="false">
+					<header>
+						<button name="assembly_update" string="Assembly Update" type="object"/>
+					</header>
 					<sheet>		
 						
 						<group string="MS Details">
