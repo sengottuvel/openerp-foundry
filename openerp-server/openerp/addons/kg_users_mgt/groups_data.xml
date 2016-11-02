@@ -44,6 +44,7 @@
             ref('kg_work_order.tam_unscheduled_work_order'),
             ref('kg_schedule.tam_schedule'),
             ref('kg_qc_verification.tam_qc_verification'),
+            ref('kg_qc_verification.tam_pump_qc_verification'),
             ref('kg_production.tam_production'),
             ref('kg_production.tam_pattern_issue'),
             ref('kg_production.tpm_batch_entries'),
