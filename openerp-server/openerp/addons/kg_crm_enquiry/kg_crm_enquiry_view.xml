@@ -673,5 +673,12 @@
 		
 	<!-- Sequence Number Setting Ends Here -->
 	
+	<!-- Service Enquiry --> 
+	<menuitem action="tma_crm_enquiry" name="Service Enquiry" id="tma_crm_enquiry_service" parent="kg_menus.cpm_crm_enquiry_menu" sequence="1"/>
+	
+	<!-- Marketing Enquiry --> 
+	<menuitem action="tma_crm_enquiry_marketing" name="Marketing Enquiry" id="tma_crm_enquiry_marketings" parent="kg_menus.cpm_crm_enquiry_menu" sequence="2"/>
+	
+	
 	</data>
 </openerp>
