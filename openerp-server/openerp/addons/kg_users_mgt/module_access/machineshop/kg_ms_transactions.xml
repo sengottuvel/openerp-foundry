@@ -235,5 +235,61 @@
 		
 		<!-- MS Subcontract Process End -->
 		
+		<!-- Assembly Inward Start -->
+		
+		<record id="t_ms_assembly_inward" model="ir.model.access">
+			<field name="model_id" ref="kg_assembly_inward.model_kg_assembly_inward"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Assembly Inward Entry</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Assembly Inward End -->
+		
+		<!-- Assembly BOM Details Start -->
+		
+		<record id="t_ms_assembly_bom_details" model="ir.model.access">
+			<field name="model_id" ref="kg_assembly_inward.model_ch_assembly_bom_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Assembly BOM Details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Assembly BOM Details End -->
+		
+		<!-- Assembly machineshop Details Start -->
+		
+		<record id="t_ms_assembly_machineshop_details" model="ir.model.access">
+			<field name="model_id" ref="kg_assembly_inward.model_ch_assembly_machineshop_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Assembly machineshop Details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Assembly machineshop Details End -->
+		
+		<!-- Assembly BOT Details Start -->
+		
+		<record id="t_ms_assembly_bot_details" model="ir.model.access">
+			<field name="model_id" ref="kg_assembly_inward.model_ch_assembly_bot_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Assembly BOT Details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Assembly BOT Details End -->
+		
     </data>
 </openerp>
