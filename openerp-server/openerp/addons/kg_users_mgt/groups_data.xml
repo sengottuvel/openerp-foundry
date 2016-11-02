@@ -349,18 +349,18 @@
 			ref('kg_menus.cam_crm_city_master'),
 			ref('kg_menus.cam_crm_chemical_master'),
 			ref('kg_menus.cam_crm_industry_master'),
-			ref('kg_menus.cpm_crm_enquiry_menu'),
+			ref('kg_menus.mam_defect_master_menu'),
 			
+			ref('kg_menus.cpm_crm_enquiry_menu'),
 			ref('kg_crm_enquiry.tma_crm_enquiry_service'),
 			ref('kg_crm_enquiry.tma_crm_enquiry_marketings'),
-			ref('kg_menus.tma_crm_offer'),
-			ref('kg_menus.tma_service_enquiry'),
-			ref('kg_menus.mam_defect_master_menu'),
-			ref('kg_menus.tma_site_visit_pending'),
-			ref('kg_menus.tma_site_visit_plan'),
-			ref('kg_menus.tma_ch_site_visit_plan'),
-			
+			ref('kg_crm_offer.tam_crm_offer'),
+			ref('kg_service_enquiry.tam_service_enquiry'),
+			ref('kg_site_visit_pending.tam_site_visit_pending'),
+			ref('kg_site_visit_plan.tam_site_visit_plan'),
+			ref('kg_site_visit_plan.tam_ch_site_visit_plan'),
 			ref('kg_service_inward.tam_service_inward'),
+			ref('kg_pump_vs_material.tam_pump_vs_material'),
 			
 			
             ])]" name="menu_access"/>

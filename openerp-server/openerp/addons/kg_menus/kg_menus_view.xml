@@ -80,24 +80,6 @@
 			<!-- CRM Enquiry Menu -->
 			<menuitem id="cpm_crm_enquiry_menu" name="Enquiry" parent="cpm_crm" sequence="2"/>
 					
-				<!-- Offer --> 
-				<menuitem action="kg_crm_offer.tma_crm_offer" name="Offer" id="tma_crm_offer" parent="cpm_crm_enquiry_menu" sequence="2"/>
-				
-				<!-- Service Complaint --> 
-				<menuitem action="kg_service_enquiry.tma_service_enquiry" name="Service Complaint" id="tma_service_enquiry" parent="cpm_crm_enquiry_menu" sequence="3"/>
-				
-				<!-- Site Visit Pending --> 
-				<menuitem action="kg_site_visit_pending.tma_site_visit_pending" name="Site Visit Pending" id="tma_site_visit_pending" parent="cpm_crm_enquiry_menu" sequence="4"/>
-				
-				<!-- Site Visit Plan --> 
-				<menuitem action="kg_site_visit_plan.tma_site_visit_plan" name="Site Visit Plan" id="tma_site_visit_plan" parent="cpm_crm_enquiry_menu" sequence="5"/>
-				
-				<!-- Site Visit Status --> 
-				<menuitem action="kg_site_visit_plan.tma_ch_site_visit_plan" name="Plan Status Update" id="tma_ch_site_visit_plan" parent="cpm_crm_enquiry_menu" sequence="6"/>
-				
-				<!-- Site Visit Status --> 
-				<menuitem action="kg_pump_vs_material.tma_pump_vs_material" name="Prime Cost View" id="tam_pump_vs_material" parent="cpm_crm_enquiry_menu" sequence="8"/>
-				
 		<!-- MS Inward List -->
 		
 				<!-- BOT Store Inward Transaction Menu -->
