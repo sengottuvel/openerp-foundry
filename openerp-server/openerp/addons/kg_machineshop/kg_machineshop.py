@@ -126,6 +126,7 @@ class kg_machineshop(osv.osv):
 		'ms_sch_qty': fields.integer('Schedule Qty', required=True),
 		'ms_type': fields.selection([('foundry_item','Foundry Item'),('ms_item','MS Item')],'MS Type'),
 		'order_ms_line_id': fields.many2one('ch.order.machineshop.details','Machine shop Line Id'),
+		'acc_ms_line_id': fields.many2one('ch.wo.accessories.ms','Acc Machine shop Line Id'),
 		'ms_id':fields.many2one('kg.machine.shop', 'Item Code'),
 		'ms_bom_id': fields.many2one('kg.bom','BOM'),
 		'ms_bom_line_id':fields.many2one('ch.machineshop.details', 'Machine Shop Id'),
@@ -178,90 +179,93 @@ class kg_machineshop(osv.osv):
 		reject_qty = entry_rec.fettling_qty - entry_rec.inward_accept_qty 
 		production_obj = self.pool.get('kg.production')
 		
-		if entry_rec.inward_accept_qty < 0:
-			raise osv.except_osv(_('Warning!'),
-						_('System not allow to save negative values !!'))
-		
-		if (entry_rec.inward_accept_qty + entry_rec.inward_reject_qty) > entry_rec.fettling_qty:
-			raise osv.except_osv(_('Warning!'),
-						_('Accept and Reject qty should not exceed Schedule Qty !!'))
-						
-		if (entry_rec.inward_accept_qty + entry_rec.inward_reject_qty) < entry_rec.fettling_qty:
-			raise osv.except_osv(_('Warning!'),
-						_('Accept and Reject qty should be equal to Schedule Qty !!'))
-						
-		if entry_rec.inward_reject_qty > 0 and not entry_rec.inward_reject_remarks_id:
-			raise osv.except_osv(_('Warning!'),
-				_('Remarks is must for Rejection !!'))
-		
-		if reject_qty > 0:
-			#### NC Creation for reject Qty ###
+		if entry_rec.state == 'waiting':
+			if entry_rec.inward_accept_qty < 0:
+				raise osv.except_osv(_('Warning!'),
+							_('System not allow to save negative values !!'))
 			
-			### Production Number ###
-			produc_name = ''	
-			produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
-			rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
-			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry_rec.entry_date))
-			produc_name = cr.fetchone();
+			if (entry_rec.inward_accept_qty + entry_rec.inward_reject_qty) > entry_rec.fettling_qty:
+				raise osv.except_osv(_('Warning!'),
+							_('Accept and Reject qty should not exceed Schedule Qty !!'))
+							
+			if (entry_rec.inward_accept_qty + entry_rec.inward_reject_qty) < entry_rec.fettling_qty:
+				raise osv.except_osv(_('Warning!'),
+							_('Accept and Reject qty should be equal to Schedule Qty !!'))
+							
+			if entry_rec.inward_reject_qty > 0 and not entry_rec.inward_reject_remarks_id:
+				raise osv.except_osv(_('Warning!'),
+					_('Remarks is must for Rejection !!'))
 			
-			### Issue Number ###
-			issue_name = ''	
-			issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
-			rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
-			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry_rec.entry_date))
-			issue_name = cr.fetchone();
+			if reject_qty > 0:
+				#### NC Creation for reject Qty ###
+				
+				### Production Number ###
+				produc_name = ''	
+				produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
+				rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
+				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry_rec.entry_date))
+				produc_name = cr.fetchone();
+				
+				### Issue Number ###
+				issue_name = ''	
+				issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
+				rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
+				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry_rec.entry_date))
+				issue_name = cr.fetchone();
+				
+				### Core Log Number ###
+				core_name = ''	
+				core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
+				rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
+				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry_rec.entry_date))
+				core_name = cr.fetchone();
+				
+				### Mould Log Number ###
+				mould_name = ''	
+				mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
+				rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
+				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry_rec.entry_date))
+				mould_name = cr.fetchone();
+				
+				production_vals = {
+										
+					'name': produc_name[0],
+					'schedule_id': entry_rec.schedule_id.id,
+					'schedule_date': entry_rec.schedule_date,
+					'division_id': entry_rec.division_id.id,
+					'location' : entry_rec.location,
+					'schedule_line_id': entry_rec.schedule_line_id.id,
+					'order_id': entry_rec.order_id.id,
+					'order_line_id': entry_rec.order_line_id.id,
+					'qty' : reject_qty,			  
+					'schedule_qty' : reject_qty,				  
+					'state' : 'issue_done',
+					'order_category':entry_rec.order_category,
+					'order_priority': '2',
+					'pattern_id' : entry_rec.pattern_id.id,
+					'pattern_name' : entry_rec.pattern_id.pattern_name,	
+					'moc_id' : entry_rec.moc_id.id,
+					'request_state': 'done',
+					'issue_no': issue_name[0],
+					'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+					'issue_qty': 1,
+					'issue_state': 'issued',
+					'core_no': core_name[0],
+					'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+					'core_qty': reject_qty,		
+					'core_rem_qty': reject_qty,	
+					'core_state': 'pending',
+					'mould_no': mould_name[0],
+					'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+					'mould_qty': reject_qty,	
+					'mould_rem_qty': reject_qty,	
+					'mould_state': 'pending',		
+				}
+				production_id = production_obj.create(cr, uid, production_vals) 
 			
-			### Core Log Number ###
-			core_name = ''	
-			core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
-			rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
-			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry_rec.entry_date))
-			core_name = cr.fetchone();
-			
-			### Mould Log Number ###
-			mould_name = ''	
-			mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
-			rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
-			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry_rec.entry_date))
-			mould_name = cr.fetchone();
-			
-			production_vals = {
-									
-				'name': produc_name[0],
-				'schedule_id': entry_rec.schedule_id.id,
-				'schedule_date': entry_rec.schedule_date,
-				'division_id': entry_rec.division_id.id,
-				'location' : entry_rec.location,
-				'schedule_line_id': entry_rec.schedule_line_id.id,
-				'order_id': entry_rec.order_id.id,
-				'order_line_id': entry_rec.order_line_id.id,
-				'qty' : reject_qty,			  
-				'schedule_qty' : reject_qty,				  
-				'state' : 'issue_done',
-				'order_category':entry_rec.order_category,
-				'order_priority': '2',
-				'pattern_id' : entry_rec.pattern_id.id,
-				'pattern_name' : entry_rec.pattern_id.pattern_name,	
-				'moc_id' : entry_rec.moc_id.id,
-				'request_state': 'done',
-				'issue_no': issue_name[0],
-				'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-				'issue_qty': 1,
-				'issue_state': 'issued',
-				'core_no': core_name[0],
-				'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-				'core_qty': reject_qty,		
-				'core_rem_qty': reject_qty,	
-				'core_state': 'pending',
-				'mould_no': mould_name[0],
-				'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-				'mould_qty': reject_qty,	
-				'mould_rem_qty': reject_qty,	
-				'mould_state': 'pending',		
-			}
-			production_id = production_obj.create(cr, uid, production_vals) 
-		
-		self.write(cr,uid, ids,{'state':'accept','ms_state':'in_plan','ms_sch_qty':entry_rec.inward_accept_qty,'inward_reject_qty':reject_qty})
+			self.write(cr,uid, ids,{'state':'accept','ms_state':'in_plan','ms_sch_qty':entry_rec.inward_accept_qty,'inward_reject_qty':reject_qty})
+		else:
+			pass
 		return True
 	
 kg_machineshop()
@@ -369,38 +373,40 @@ class kg_ms_batch_accept(osv.osv):
 		
 	def entry_accept(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
-		ms_obj = self.pool.get('kg.machineshop')		
-		if not entry.line_ids:
-			raise osv.except_osv(_('Warning!'),
-						_('System not allow to confirm without Line Items !!'))
-						
-						
-		### Updation against Bactch Fettling Accept ###
-		for accept_item in entry.line_ids:
-			reject_qty = accept_item.schedule_qty - accept_item.accept_qty
-			if accept_item.reject_qty > 0 and accept_item.reject_remarks_id.id == False:
+		ms_obj = self.pool.get('kg.machineshop')
+		if entry.state == 'draft':		
+			if not entry.line_ids:
 				raise osv.except_osv(_('Warning!'),
-				_('Remarks is must for Rejection !!'))
-			
-			ms_obj.write(cr, uid,accept_item.ms_id.id,{
-			'inward_remarks':accept_item.remarks,
-			'inward_accept_qty': accept_item.accept_qty,
-			'inward_reject_qty': accept_item.reject_qty,
-			'inward_accept_user_id': accept_item.accept_user_id.id,
-			'inward_reject_remarks_id': accept_item.reject_remarks_id.id,
-			'entry_date': accept_item.ms_inward_date,
-			'inward_accept_user_id': accept_item.accept_user_id.id
-			})
-			ms_obj.ms_accept(cr, uid, [accept_item.ms_id.id])
-			
-		### Sequence Number Generation  ###
-		ms_batch_name = ''	
-		ms_batch_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.ms.batch.accept')])
-		rec = self.pool.get('ir.sequence').browse(cr,uid,ms_batch_seq_id[0])
-		cr.execute("""select generatesequenceno(%s,'%s','%s') """%(ms_batch_seq_id[0],rec.code,entry.entry_date))
-		ms_batch_name = cr.fetchone();
-		self.write(cr, uid, ids, {'name':ms_batch_name[0],'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-	
+							_('System not allow to confirm without Line Items !!'))
+							
+							
+			### Updation against Bactch Fettling Accept ###
+			for accept_item in entry.line_ids:
+				reject_qty = accept_item.schedule_qty - accept_item.accept_qty
+				if accept_item.reject_qty > 0 and accept_item.reject_remarks_id.id == False:
+					raise osv.except_osv(_('Warning!'),
+					_('Remarks is must for Rejection !!'))
+				
+				ms_obj.write(cr, uid,accept_item.ms_id.id,{
+				'inward_remarks':accept_item.remarks,
+				'inward_accept_qty': accept_item.accept_qty,
+				'inward_reject_qty': accept_item.reject_qty,
+				'inward_accept_user_id': accept_item.accept_user_id.id,
+				'inward_reject_remarks_id': accept_item.reject_remarks_id.id,
+				'entry_date': accept_item.ms_inward_date,
+				'inward_accept_user_id': accept_item.accept_user_id.id
+				})
+				ms_obj.ms_accept(cr, uid, [accept_item.ms_id.id])
+				
+			### Sequence Number Generation  ###
+			ms_batch_name = ''	
+			ms_batch_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.ms.batch.accept')])
+			rec = self.pool.get('ir.sequence').browse(cr,uid,ms_batch_seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(ms_batch_seq_id[0],rec.code,entry.entry_date))
+			ms_batch_name = cr.fetchone();
+			self.write(cr, uid, ids, {'name':ms_batch_name[0],'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		else:
+			pass
 		return True
 		
 	def write(self, cr, uid, ids, vals, context=None):

@@ -20,7 +20,9 @@ ORDER_CATEGORY = [
    ('spare','Spare'),
    ('pump_spare','Pump and Spare'),
    ('service','Service'),
-   ('project','Project')
+   ('project','Project'),
+   ('access','Accessories')
+   
 ]
 
 
@@ -91,7 +93,10 @@ class kg_work_order(osv.osv):
 		'version':fields.char('Version'),
 		'flag_for_stock': fields.boolean('For Stock'),
 		'invoice_flag': fields.boolean('For Invoice'),
+		'offer_no': fields.char('Offer No'),
+		
 		### Entry Info ####
+		
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		
 		'crt_date': fields.datetime('Creation Date',readonly=True),
@@ -159,8 +164,9 @@ class kg_work_order(osv.osv):
 		
 	def _check_lineitems(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if not entry.line_ids:
-			return False
+		if entry.entry_mode == 'manual':
+			if not entry.line_ids:
+				return False
 		return True
 		
 	def _Validation(self, cr, uid, ids, context=None):
@@ -172,13 +178,15 @@ class kg_work_order(osv.osv):
 		
 	def _check_name(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		cr.execute(""" select name from kg_work_order where name  = '%s' """ %(entry.name))
-		data = cr.dictfetchall()
-			
-		if len(data) > 1:
-			res = False
-		else:
-			res = True	
+		res = True	
+		if entry.entry_mode == 'manual':
+			cr.execute(""" select name from kg_work_order where name  = '%s' """ %(entry.name))
+			data = cr.dictfetchall()
+				
+			if len(data) > 1:
+				res = False
+			else:
+				res = True	
 		return res 
 			
 	
@@ -205,139 +213,277 @@ class kg_work_order(osv.osv):
 				raise osv.except_osv(_('Warning!'),
 						_('Delivery Date should not be less than current date!!'))
 		return True
-	   
+		
+	#~ def mail_test(self,cr,uid,ids,context=None):
+	   #~ ### Mail Testing ###
+		#~ scheduler_obj = self.pool.get('kg.scheduler')
+		#~ body = '<html><body><p>The below mentioned Material Requisition is waiting for approval.</p></body></html>'
+		#~ scheduler_obj.send_mail(cr, uid,ids,'sangeetha.subramaniam@kggroup.com',['sangeetha.subramaniam@kggroup.com'],
+			#~ [],[],'Test',body,'')
+		#~ ###
+		#~ return True
 	
 	def entry_confirm(self,cr,uid,ids,context=None):
+		
 		schedule_obj = self.pool.get('kg.schedule')
 		line_obj = self.pool.get('ch.work.order.details')
 		today = date.today()
 		today = str(today)
 		today = datetime.strptime(today, '%Y-%m-%d')
 		entry = self.browse(cr,uid,ids[0])
-		order_line_ids = []
-		
-		delivery_date = str(entry.delivery_date)
-		delivery_date = datetime.strptime(delivery_date, '%Y-%m-%d')
-		if delivery_date < today:
-			raise osv.except_osv(_('Warning!'),
-						_('Delivery Date should not be less than current date for Order !!'))
-						
-		number = 1
-		for item in entry.line_ids:
+		if entry.state == 'draft':
+			order_line_ids = []
 			
-			### Work Order Number Generation in Line Details
-			cr.execute(''' select to_char(%s, 'FMRN') ''',[number])	  
-			roman = cr.fetchone()
-			order_name = entry.name + '-' + str(roman[0])
-			line_obj.write(cr, uid, item.id, {'order_no': order_name})
-			number = number + 1
-			
-			order_line_ids.append(item.id)
-			line_delivery_date = str(item.delivery_date)
-			line_delivery_date = datetime.strptime(line_delivery_date, '%Y-%m-%d')
-			if line_delivery_date < today:
+			delivery_date = str(entry.delivery_date)
+			delivery_date = datetime.strptime(delivery_date, '%Y-%m-%d')
+			if delivery_date < today:
 				raise osv.except_osv(_('Warning!'),
-						_('Delivery Date should not be less than current date for Pump Model %s !!')%(item.pump_model_id.name))
-						
-			
-			if not item.line_ids:
-				raise osv.except_osv(_('Warning!'),
-							_('Specify BOM Details for Pump Model %s !!')%(item.pump_model_id.name))
+							_('Delivery Date should not be less than current date for Order !!'))
+							
+			number = 1
+			for item in entry.line_ids:
 				
-			else:
-				cr.execute(''' select id from ch_order_bom_details where flag_applicable = 't' and header_id = %s ''',[item.id])	  
-				bom_check_id = cr.fetchone()
+				### Work Order Number Generation in Line Details
+				cr.execute(''' select to_char(%s, 'FMRN') ''',[number])	  
+				roman = cr.fetchone()
+				order_name = entry.name + '-' + str(roman[0])
+				line_obj.write(cr, uid, item.id, {'order_no': order_name})
+				number = number + 1
 				
-				if bom_check_id == None:
+				order_line_ids.append(item.id)
+				line_delivery_date = str(item.delivery_date)
+				line_delivery_date = datetime.strptime(line_delivery_date, '%Y-%m-%d')
+				if line_delivery_date < today:
 					raise osv.except_osv(_('Warning!'),
-							_('Kindly enable BOM Details for Pump Model %s!!')%(item.pump_model_id.name))
-					
+							_('Delivery Date should not be less than current date for Pump Model %s !!')%(item.pump_model_id.name))
+							
 				
-				cr.execute(''' select id from ch_order_bom_details where flag_applicable = 't' and moc_id is null and header_id = %s ''',[item.id])	   
-				order_bom_id = cr.fetchone()
-				if order_bom_id:
-					if order_bom_id[0] != None:
+				if item.order_category != 'access':
+					if not item.line_ids:
 						raise osv.except_osv(_('Warning!'),
-							_('Specify MOC for Pump Model %s!!')%(item.pump_model_id.name))
+									_('Specify BOM Details for Pump Model %s !!')%(item.pump_model_id.name))
+					
+				else:
+					cr.execute(''' select id from ch_order_bom_details where flag_applicable = 't' and header_id = %s ''',[item.id])	  
+					bom_check_id = cr.fetchone()
+					
+					if item.order_category != 'access':
+						if item.line_ids: 
+							if bom_check_id == None:
+								raise osv.except_osv(_('Warning!'),
+										_('Kindly enable BOM Details for Pump Model %s!!')%(item.pump_model_id.name))
 						
-			cr.execute(''' update ch_order_bom_details set state = 'confirmed' where header_id = %s and flag_applicable = 't' ''',[item.id])
-		
-		if entry.order_priority == 'normal' and entry.order_category in ('spare','service'):
-		
-			### Schedule Creation ###
+					
+					cr.execute(''' select id from ch_order_bom_details where flag_applicable = 't' and moc_id is null and header_id = %s ''',[item.id])	   
+					order_bom_id = cr.fetchone()
+					if order_bom_id:
+						if order_bom_id[0] != None:
+							raise osv.except_osv(_('Warning!'),
+								_('Specify MOC for Pump Model %s!!')%(item.pump_model_id.name))
+							
+				cr.execute(''' update ch_order_bom_details set state = 'confirmed' where header_id = %s and flag_applicable = 't' ''',[item.id])
+				
+				rem_qty = item.qty
+				
+				if item.order_category in 'pump':
+				
+					### Checking the Pump Stock ###
+								
+					### Checking in Stock Inward for Ready for MS ###
+					
+					cr.execute(""" select sum(available_qty) as stock_qty
+						from ch_stock_inward_details  
+						where pump_model_id = %s
+						and foundry_stock_state = 'ready_for_ms' and available_qty > 0 and stock_type = 'pump' and stock_mode = 'manual' """%(item.pump_model_id.id))
+					stock_inward_qty = cr.fetchone();
+					
+					if stock_inward_qty:
+						if stock_inward_qty[0] != None:
+							rem_qty =  item.qty - stock_inward_qty[0]
+							
+							if rem_qty <= 0:
+								rem_qty = 0
+								qc_qty = item.qty
+							else:
+								rem_qty = rem_qty
+								qc_qty = stock_inward_qty[0]
+							
+							print "qc_qty",qc_qty
+							
+							### Order Priority ###
+									
+							if entry.order_category in ('pump','pump_spare','project'):
+								if entry.order_priority == 'normal':
+									priority = '6'
+								if entry.order_priority == 'emergency':
+									priority = '4'
+							if entry.order_category == 'service':
+								priority = '3'
+							if entry.order_category == 'spare':
+								priority = '5'
+							
+							print "priority",priority
+							
+							### Creating QC Verification ###
+							
+							qc_obj = self.pool.get('kg.qc.verification')
+							
+							### QC Sequence Number Generation  ###
+							qc_name = ''	
+							qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.qc.verification')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.entry_date))
+							qc_name = cr.fetchone();
+						
+							qc_vals = {
+															
+								'name': qc_name[0],
+								#~ 'schedule_id': entry.id,
+								#~ 'schedule_date': entry.entry_date,
+								'division_id': entry.division_id.id,
+								'location' : entry.location,
+								#~ 'schedule_line_id': schedule_item.id,
+								'order_id': entry.id,
+								'order_line_id': item.id,
+								'qty' : qc_qty,
+								'stock_qty': qc_qty,                   
+								'allocated_qty':qc_qty,                 
+								'state' : 'draft',
+								'order_category':entry.order_category,
+								'order_priority':priority,
+								'pump_model_id' : item.pump_model_id.id,
+								'moc_construction_id' : item.moc_construction_id.id,
+								'stock_type': 'pump'
+										
+								}
+								
+							print "qc_vals",qc_vals
+							
+							qc_id = qc_obj.create(cr, uid, qc_vals)
+							
+							### Qty Updation in Stock Inward ###
+							
+							inward_line_obj = self.pool.get('ch.stock.inward.details')
+							
+							cr.execute(""" select id,available_qty
+								from ch_stock_inward_details  
+								where pump_model_id = %s
+								and foundry_stock_state = 'ready_for_ms' and available_qty > 0 
+								and stock_type = 'pump' and stock_mode = 'manual' """%(item.pump_model_id.id))
+								
+							stock_inward_items = cr.dictfetchall();
+							
+							stock_updation_qty = qc_qty
+							
+							for stock_inward_item in stock_inward_items:
+								if stock_updation_qty > 0:
+									
+									if stock_inward_item['available_qty'] <= stock_updation_qty:
+										stock_avail_qty = 0
+										inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty,'foundry_stock_state':'reject'})
+									if stock_inward_item['available_qty'] > stock_updation_qty:
+										stock_avail_qty = stock_inward_item['available_qty'] - stock_updation_qty
+										inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
+										
+									if stock_inward_item['available_qty'] <= stock_updation_qty:
+										stock_updation_qty = stock_updation_qty - stock_inward_item['available_qty']
+									elif stock_inward_item['available_qty'] > stock_updation_qty:
+										stock_updation_qty = 0
+									print "stock_avail_qty",stock_avail_qty
 			
-			schedule_item_vals = {
-											
-				'name': '',
-				'location' : entry.location,
-				'order_priority': 'normal',
-				'delivery_date': entry.delivery_date,
-				'order_line_ids': [(6, 0, order_line_ids)],
-				'state' : 'draft',
-				'entry_mode' : 'auto',				   
-			}
-			
-			schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
-			
-			### Schedule Line Item Creation ###
-			
-			schedule_obj.update_line_items(cr, uid, [schedule_id])
-			
-			### Schedule Confirmation ###
-			
-			schedule_obj.entry_confirm(cr, uid, [schedule_id])
-			
-		if entry.order_priority == 'emergency' and entry.order_category in ('pump','spare','pump_spare','service'):
-			
-			### Schedule Creation ###
-			
-			schedule_item_vals = {
-											
-				'name': '',
-				'location' : entry.location,
-				'order_priority': 'emergency',
-				'delivery_date': entry.delivery_date,
-				'order_line_ids': [(6, 0, order_line_ids)],
-				'state' : 'draft',			   
-				'entry_mode' : 'auto',			   
-			}
-			
-			schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
-			
-			### Schedule Line Item Creation ###
-			
-			schedule_obj.update_line_items(cr, uid, [schedule_id])
-			
-			### Schedule Confirmation ###
-			
-			schedule_obj.entry_confirm(cr, uid, [schedule_id])
-			
-		if entry.order_priority == 'emergency' and entry.order_category in ('project'):
-			
-			### Schedule Creation ###
-			
-			schedule_item_vals = {
-											
-				'name': '',
-				'location' : entry.location,
-				'order_priority': 'emergency',
-				'delivery_date': entry.delivery_date,
-				'order_line_ids': [(6, 0, order_line_ids)],
-				'state' : 'draft',
-				'entry_mode' : 'auto',				   
-			}
-			
-			schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
-			
-			### Schedule Line Item Creation ###
-			
-			schedule_obj.update_line_items(cr, uid, [schedule_id])
-			
-			
-		cr.execute(''' select sum(unit_price) from ch_work_order_details where header_id = %s ''',[entry.id])	   
-		order_value = cr.fetchone()
-		self.write(cr, uid, ids, {'order_value':order_value[0],'state': 'confirmed','flag_cancel':1,'confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		cr.execute(''' update ch_work_order_details set state = 'confirmed', flag_cancel='t', schedule_status = 'allow' where header_id = %s ''',[ids[0]])
+								
+				line_obj.write(cr, uid, item.id, {'pump_rem_qty':rem_qty})
+				
+				if entry.order_priority == 'normal' and entry.order_category in ('spare','service'):
+				
+					### Schedule Creation ###
+					
+					schedule_item_vals = {
+													
+						'name': '',
+						'location' : entry.location,
+						'order_priority': 'normal',
+						'delivery_date': entry.delivery_date,
+						'order_line_ids': [(6, 0, order_line_ids)],
+						'state' : 'draft',
+						'entry_mode' : 'auto',				   
+					}
+					
+					schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
+					
+					### Schedule Line Item Creation ###
+					
+					if item.order_category == 'pump':
+					
+						schedule_obj.update_line_items(cr, uid, [schedule_id],rem_qty)
+					else:
+						schedule_obj.update_line_items(cr, uid, [schedule_id],0)
+					
+					### Schedule Confirmation ###
+					
+					schedule_obj.entry_confirm(cr, uid, [schedule_id])
+					
+				if entry.order_priority == 'emergency' and entry.order_category in ('pump','spare','pump_spare','service'):
+					
+					### Schedule Creation ###
+					
+					schedule_item_vals = {
+													
+						'name': '',
+						'location' : entry.location,
+						'order_priority': 'emergency',
+						'delivery_date': entry.delivery_date,
+						'order_line_ids': [(6, 0, order_line_ids)],
+						'state' : 'draft',			   
+						'entry_mode' : 'auto',			   
+					}
+					
+					schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
+					
+					### Schedule Line Item Creation ###
+					
+					if item.order_category == 'pump':
+					
+						schedule_obj.update_line_items(cr, uid, [schedule_id],rem_qty)
+					else:
+						schedule_obj.update_line_items(cr, uid, [schedule_id],0)
+					
+					### Schedule Confirmation ###
+					
+					schedule_obj.entry_confirm(cr, uid, [schedule_id])
+					
+				if entry.order_priority == 'emergency' and entry.order_category in ('project'):
+					
+					### Schedule Creation ###
+					
+					schedule_item_vals = {
+													
+						'name': '',
+						'location' : entry.location,
+						'order_priority': 'emergency',
+						'delivery_date': entry.delivery_date,
+						'order_line_ids': [(6, 0, order_line_ids)],
+						'state' : 'draft',
+						'entry_mode' : 'auto',				   
+					}
+					
+					schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
+					
+					### Schedule Line Item Creation ###
+					
+					if item.order_category == 'pump':
+					
+						schedule_obj.update_line_items(cr, uid, [schedule_id],rem_qty)
+					else:
+						schedule_obj.update_line_items(cr, uid, [schedule_id],0)
+				
+				
+			cr.execute(''' select sum(unit_price) from ch_work_order_details where header_id = %s ''',[entry.id])	   
+			order_value = cr.fetchone()
+			self.write(cr, uid, ids, {'order_value':order_value[0],'state': 'confirmed','flag_cancel':1,'confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			cr.execute(''' update ch_work_order_details set state = 'confirmed', flag_cancel='t', schedule_status = 'allow' where header_id = %s ''',[ids[0]])
+		else:
+			pass
 		return True
 		
 	def entry_cancel(self,cr,uid,ids,context=None):
@@ -416,13 +562,14 @@ class ch_work_order_details(osv.osv):
 		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True,domain="[('active','=','t')]"),
 		'pump_model_type':fields.selection([('vertical','Vertical'),('horizontal','Horizontal'),('others','Others')], 'Type',required=True),
 		'order_no': fields.char('Order No.', size=128,select=True),
-		'order_category': fields.selection([('pump','Pump'),('spare','Spare')],'Purpose', required=True),
+		'order_category': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories')],'Purpose', required=True),
 		'qty': fields.integer('Qty', required=True),
+		'pump_rem_qty': fields.integer('Pump Remaining Qty'),
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),
 		'note': fields.text('Notes'),
 		'remarks': fields.text('Approve/Reject Remarks'),
 		'cancel_remark': fields.text('Cancel Remarks'),
-		'delivery_date': fields.date('Delivery Date',required=True),
+		'delivery_date': fields.date('Delivery Date'),
 		'line_ids': fields.one2many('ch.order.bom.details', 'header_id', "BOM Details"),
 		'line_ids_a': fields.one2many('ch.order.machineshop.details', 'header_id', "Machine Shop Details"),
 		'line_ids_b': fields.one2many('ch.order.bot.details', 'header_id', "BOT Details"),
@@ -460,6 +607,9 @@ class ch_work_order_details(osv.osv):
 		'bp':fields.float('BP',required=True),
 		'shaft_ext':fields.float('Shaft Ext',required=True),
 		'flag_for_stock': fields.boolean('For Stock'),
+		### Offer Details ###
+		'pump_offer_line_id': fields.integer('Pump Offer'),
+		'line_ids_d': fields.one2many('ch.wo.accessories', 'header_id', "Accessories"),
 		
 	}
 	
@@ -569,7 +719,9 @@ class ch_work_order_details(osv.osv):
 						moc_id = False
 					wgt = 0.00	
 					if moc_id != False:
+						print "moc_id",moc_id
 						moc_rec = moc_obj.browse(cr, uid, moc_id)
+						print "moc_rec",moc_rec
 						if moc_rec.weight_type == 'ci':
 							wgt =  bom_details['ci_weight']
 						if moc_rec.weight_type == 'ss':
@@ -627,10 +779,10 @@ class ch_work_order_details(osv.osv):
 						'ms_id': bom_ms_details['ms_id'],
 						'name': bom_ms_details['name'],
 						'qty': bom_ms_qty,
-						'length': 0.00,
 						'flag_applicable' : applicable,
 						'flag_standard':flag_standard,
-						'entry_mode':'auto'
+						'entry_mode':'auto',
+						'order_category':	order_category,
 								  
 						})
 						
@@ -656,7 +808,8 @@ class ch_work_order_details(osv.osv):
 						'qty': bom_bot_qty,
 						'flag_applicable' : applicable,
 						'flag_standard':flag_standard,
-						'entry_mode':'auto'	
+						'entry_mode':'auto',
+						'order_category':order_category,
 								  
 						})
 							
@@ -1102,6 +1255,7 @@ class ch_work_order_details(osv.osv):
 							star_val = cr.fetchone()
 							star_value = star_val[0]
 							
+							
 							### Getting ABOVE BP(H),BEND from pump model ###
 							cr.execute(''' select h_value,b_value from ch_delivery_pipe
 								where header_id = %s and delivery_size = %s ''',[pump_model_id,delivery_pipe_size])
@@ -1135,8 +1289,18 @@ class ch_work_order_details(osv.osv):
 								
 								  ''',[limitation,shaft_sealing,rpm,pump_model_id])
 							bed_ass_details = cr.dictfetchone()
-							bp = bed_ass_details['bp']
-							shaft_ext = bed_ass_details['shaft_ext']
+							if not bed_ass_details:
+								bp = 0
+								shaft_ext = 0
+							else:
+								if bed_ass_details['bp'] == None:
+									bp = 0
+								else:
+									bp = bed_ass_details['bp']
+								if bed_ass_details['shaft_ext'] == None:
+									shaft_ext = 0
+								else:
+									shaft_ext = bed_ass_details['shaft_ext']
 							
 							### Getting Star Value ###
 							cr.execute('''
@@ -1174,7 +1338,6 @@ class ch_work_order_details(osv.osv):
 									### Formula ###
 									#(ABOVE BP(H)+BP+SETTING HEIGHT-A-BEND-3)/2
 									###
-									
 									length = (h_value + bp + setting_height - a_value - b_value - 3)/2
 									
 								if star_value > 1:
@@ -1256,10 +1419,19 @@ class ch_work_order_details(osv.osv):
 									drive_col_pipe = (3.5+bp+setting_height-a1_value-(star_value * vo_star_value['star'])-((star_value-1)*line_column_pipe))/2
 									length = ((vo_star_value['star']/2)-1)+drive_col_pipe-3.5+shaft_ext
 						
+						print "length---------------------------->>>>",length
 						if length > 0:
 							ms_bom_qty = round(length,0)
 						else:
 							ms_bom_qty = 0
+						print "ms_bom_qty---------------------------->>>>",ms_bom_qty
+						print "qty---------------------------->>>>",qty
+						if qty == 0:
+							vertical_ms_qty = vertical_ms_details['qty']
+						if qty > 0:
+							vertical_ms_qty = qty * ms_bom_qty
+							
+						print "vertical_ms_qty---------------------------->>>>",vertical_ms_qty
 						
 						if vertical_ms_details['position_id'] == None:
 							raise osv.except_osv(_('Warning!'),
@@ -1274,10 +1446,11 @@ class ch_work_order_details(osv.osv):
 							'ms_id': vertical_ms_details['ms_id'],
 							'name': vertical_ms_details['name'],
 							'qty': qty * vertical_ms_details['qty'],
-							'length': ms_bom_qty,
+							'length': vertical_ms_qty,
 							'flag_applicable' : applicable,
 							'flag_standard':flag_standard,
-							'entry_mode':'auto'
+							'entry_mode':'auto',
+							'order_category':	order_category,
 									  
 							})
 					
@@ -1411,7 +1584,8 @@ class ch_work_order_details(osv.osv):
 							'qty': vertical_bot_qty,
 							'flag_applicable' : applicable,
 							'flag_standard':flag_standard,
-							'entry_mode':'auto'	
+							'entry_mode':'auto',
+							'order_category':	order_category,
 									  
 							})
 				
@@ -1450,8 +1624,9 @@ class ch_work_order_details(osv.osv):
 		
 	def _check_unit_price(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.unit_price == 0.00 or entry.unit_price < 0:
-			return False
+		if entry.header_id.entry_mode == 'manual':
+			if entry.unit_price == 0.00 or entry.unit_price < 0:
+				return False
 		return True
 		
 	def _check_line_items(self, cr, uid, ids, context=None):
@@ -1547,6 +1722,8 @@ class ch_order_bom_details(osv.osv):
 		'flag_standard': fields.boolean('Non Standard'),
 		'flag_pattern_check': fields.boolean('Is Pattern Check'),
 		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
+		### Offer Details ###
+		'spare_offer_line_id': fields.integer('Spare Offer'),
 	
 	}
 	
@@ -1562,6 +1739,7 @@ class ch_order_bom_details(osv.osv):
 	
 	
 	def default_get(self, cr, uid, fields, context=None):
+		
 		context.update({'entry_mode': 'manual'})
 		return context
 		
@@ -1644,17 +1822,20 @@ class ch_order_machineshop_details(osv.osv):
 		'pos_no': fields.related('ms_line_id','pos_no', type='integer', string='Position No', store=True),
 		'position_id': fields.many2one('kg.position.number','Position No'),
 		'bom_id': fields.many2one('kg.bom','BOM'),
-		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', ondelete='cascade',required=True),
+		'ms_id':fields.many2one('kg.machine.shop', 'Item Code',domain = [('type','=','ms')], ondelete='cascade',required=True),
 		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),
 		#~ 'name':fields.char('Item Name', size=128),
 		'name': fields.related('ms_id','name', type='char',size=128,string='Item Name', store=True), 	  
 		'qty': fields.integer('Qty', required=True),
+		'unit_price': fields.float('Unit Price'),
 		'length': fields.float('Length(mm)'),
 		'flag_applicable': fields.boolean('Is Applicable'),
 		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'remarks':fields.text('Remarks'), 
 		'flag_standard': fields.boolean('Non Standard'), 
 		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
+		### Offer Details ###
+		'spare_offer_line_id': fields.integer('Spare Offer'),
 	
 	}  
 	
@@ -1665,6 +1846,7 @@ class ch_order_machineshop_details(osv.osv):
 	}
 	
 	def default_get(self, cr, uid, fields, context=None):
+		
 		context.update({'entry_mode': 'manual'})
 		return context
 		
@@ -1690,11 +1872,14 @@ class ch_order_bot_details(osv.osv):
 		'bom_id': fields.many2one('kg.bom','BOM'),
 		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),
 		'qty': fields.integer('Qty', required=True),
+		'unit_price': fields.float('Unit Price'),
 		'flag_applicable': fields.boolean('Is Applicable'),
 		'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'remarks':fields.text('Remarks'),
 		'flag_standard': fields.boolean('Non Standard'),
 		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
+		### Offer Details ###
+		'spare_offer_line_id': fields.integer('Spare Offer'),
 	
 	}
 	
@@ -1748,6 +1933,194 @@ class ch_order_consu_details(osv.osv):
 
 ch_order_consu_details()
 
+### For Accessories ###
+
+class ch_wo_accessories(osv.osv):
+
+	_name = "ch.wo.accessories"
+	_description = "Ch WO Accessories"
+	
+	_columns = {
+	
+		
+		'header_id':fields.many2one('ch.work.order.details', 'Header Id', ondelete='cascade'),
+		'access_id': fields.many2one('kg.accessories.master','Accessories',domain="[('active','=','t'),('state','not in',('draft','reject','cancal'))]"),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t'),('state','not in',('reject','cancal'))]"),
+		'qty': fields.float('Qty'),
+		'oth_spec': fields.char('Other Specification'),
+		'load_access': fields.boolean('Load BOM'),
+		
+		'line_ids': fields.one2many('ch.wo.accessories.foundry', 'header_id', 'Accessories Foundry'),
+		'line_ids_a': fields.one2many('ch.wo.accessories.ms', 'header_id', 'Accessories MS'),
+		'line_ids_b': fields.one2many('ch.wo.accessories.bot', 'header_id', 'Accessories BOT'),
+		'access_offer_line_id': fields.integer('Accessories Offer'),
+		
+	}
+	
+	def _check_qty(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.qty <= 0.00:
+			return False
+		return True
+	
+	_constraints = [
+	
+		#~ (_check_qty,'You cannot save with zero qty !',['Qty']),
+		
+		]
+		
+	def onchange_load_access(self, cr, uid, ids, load_access,access_id,moc_id):
+		fou_vals=[]
+		ms_vals=[]
+		bot_vals=[]
+		data_rec = ''
+		
+		if load_access == True and access_id:
+			access_obj = self.pool.get('kg.accessories.master').search(cr, uid, [('id','=',access_id)])
+			if access_obj:
+				data_rec = self.pool.get('kg.accessories.master').browse(cr, uid, access_obj[0])
+		print"data_recdata_rec",data_rec
+		if data_rec:
+			if data_rec.line_ids_b:
+				for item in data_rec.line_ids_b:
+					fou_vals.append({
+									'position_id': item.position_id.id,
+									'pattern_id': item.pattern_id.id,
+									'pattern_name': item.pattern_name,
+									'moc_id': moc_id,
+									'qty': item.qty,
+									'load_bom': True,
+									'is_applicable': True,
+									
+									})
+				print"fou_valsfou_vals",fou_vals
+			if data_rec.line_ids_a:
+				for item in data_rec.line_ids_a:	
+					ms_vals.append({
+									'name': item.name,
+									'position_id': item.position_id.id,							
+									'ms_id': item.ms_id.id,
+									'moc_id': moc_id,
+									'qty': item.qty,
+									'load_bom': True,
+									'is_applicable': True,
+									
+									})
+					print"ms_valsms_vals",ms_vals	
+			if data_rec.line_ids:
+				for item in data_rec.line_ids:	
+					bot_vals.append({
+									'name': item.item_name,
+									'position_id': item.position_id.id,							
+									'ms_id': item.ms_id.id,
+									'moc_id': moc_id,
+									'qty': item.qty,
+									'load_bom': True,
+									'is_applicable': True,
+									'csd_no': item.csd_no,
+									'remarks': item.remark,
+									})
+					print"bot_valsbot_vals",bot_vals	
+		return {'value': {'line_ids': fou_vals,'line_ids_a': ms_vals,'line_ids_b': bot_vals}}
+		
+		
+ch_wo_accessories()
+
+
+class ch_wo_accessories_foundry(osv.osv):
+
+	_name = "ch.wo.accessories.foundry"
+	_description = "WO Accessories Foundry Details"
+	
+	_columns = {
+	
+		### Foundry Item Details ####
+		'header_id':fields.many2one('ch.wo.accessories', 'Header Id', ondelete='cascade'),
+		
+		'pump_id':fields.many2one('kg.pumpmodel.master', 'Pump'),
+		'qty':fields.integer('Quantity'),
+		'oth_spec':fields.char('Other Specification'),
+		'position_id': fields.many2one('kg.position.number','Position No'),
+		'csd_no': fields.char('CSD No.', size=128),
+		'pattern_name': fields.char('Pattern Name'),
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern No'),
+		'remarks': fields.char('Remarks'),
+		'is_applicable': fields.boolean('Is Applicable'),
+		'load_bom': fields.boolean('Load BOM'),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),
+		'prime_cost': fields.float('Prime Cost'),
+		
+	}
+	
+ch_wo_accessories_foundry()
+
+class ch_wo_accessories_ms(osv.osv):
+
+	_name = "ch.wo.accessories.ms"
+	_description = "WO Accessories MS"
+	
+	_columns = {
+	
+		### machineshop Item Details ####
+		'header_id':fields.many2one('ch.wo.accessories', 'Header Id', ondelete='cascade'),
+		
+		'pos_no': fields.related('position_id','name', type='integer', string='Position No', store=True),
+		'position_id': fields.many2one('kg.position.number','Position No'),
+		'csd_no': fields.char('CSD No.'),
+		'bom_id': fields.many2one('kg.bom','BOM'),
+		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', domain=[('type','=','ms')], ondelete='cascade',required=True),
+		'name': fields.related('ms_id','name', type='char',size=128,string='Item Name', store=True),
+		
+		'qty': fields.integer('Qty', required=True),
+		'flag_applicable': fields.boolean('Is Applicable'),
+		'remarks':fields.text('Remarks'),   
+		'is_applicable': fields.boolean('Is Applicable'),
+		'load_bom': fields.boolean('Load BOM'),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),
+		'prime_cost': fields.float('Prime Cost'),
+		
+	}
+	
+	
+	_defaults = {
+		
+		'is_applicable':False,
+		'load_bom':False,
+		
+	}
+	
+ch_wo_accessories_ms()
+
+class ch_wo_accessories_bot(osv.osv):
+
+	_name = "ch.wo.accessories.bot"
+	_description = "WO Accessories BOT"
+	
+	_columns = {
+	
+		### BOT Item Details ####
+		'header_id':fields.many2one('ch.wo.accessories', 'Header Id', ondelete='cascade'),
+		
+		#~ 'product_id':fields.many2one('product.product', 'Item Name',domain="[('state','not in',('reject','cancel'))]"),
+		#~ 'brand_id': fields.many2one('kg.brand.master','Brand', domain="[('state','not in',('reject','cancel'))]"), 
+		#~ 'uom_id': fields.many2one('product.uom','UOM'),		
+		#~ 'uom_conversation_factor': fields.selection([('one_dimension','One Dimension'),('two_dimension','Two Dimension')],'UOM Conversation Factor'),
+		'position_id': fields.many2one('kg.position.number','Position No'),
+		'csd_no': fields.char('CSD No.'),
+		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', domain=[('type','=','ms')], ondelete='cascade',required=True),
+		'item_name': fields.related('ms_id','name', type='char',size=128,string='Item Name', store=True),
+		'qty': fields.integer('Qty', required=True),
+		'flag_applicable': fields.boolean('Is Applicable'),
+		'remarks':fields.text('Remarks'),   
+		'is_applicable': fields.boolean('Is Applicable'),
+		'load_bom': fields.boolean('Load BOM'),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),
+		'prime_cost': fields.float('Prime Cost'),
+		
+	}
+	
+ch_wo_accessories_bot()
+
 
 ### For Sequence No Generation ###
 
@@ -1764,6 +2137,8 @@ class kg_sequence_generate_det(osv.osv):
 		'fiscal_year_id' : fields.integer('Fiscal Year ID'),
 	}
 kg_sequence_generate_det()
+
+
 
 
 

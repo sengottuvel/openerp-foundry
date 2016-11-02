@@ -19,21 +19,23 @@
 						<group string="Schedule Details">
 							<group>
 								<field name="name"/>
-								<field name="schedule_id" readonly="1"/>
+								<field name="schedule_id" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
 								<field name="division_id" readonly="1"/>
 								<field name="order_id" readonly="1"/>
-								<field name="pattern_id" readonly="1"/>
-								<field name="moc_id" readonly="1"/>
-								<field name="total_weight" readonly="1"/>
+								<field name="pattern_id" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
+								<field name="moc_construction_id" readonly="1" attrs="{'invisible': [('stock_type','=','part')]}"/>
+								<field name="moc_id" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
+								<field name="total_weight" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
 								<field name="stage_id" invisible="1"/>
+								<field name="stock_type" invisible="1"/>
 							</group>											
 							<group>
 								<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-								<field name="schedule_date" readonly="1"/>
+								<field name="schedule_date" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
 								<field name="location" readonly="1"/>
 								<field name="pump_model_id" readonly="1"/>
-								<field name="pattern_name" readonly="1"/>
-								<field name="each_weight" readonly="1"/>
+								<field name="pattern_name" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
+								<field name="each_weight" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
 								<field name="active" invisible="1"/>
 								<field name="state" style="width: 30%%" class="att_state_change"/>	
 							</group>					
@@ -45,9 +47,11 @@
 								
 								<field name="diameter" invisible="1"/>
 								<field name="reject_remarks_id" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+								<field name="sent_to" attrs="{'readonly': [('state','not in',['draft'])],'required': [('stock_type','=','pump')]}"/>
 							</group>											
 							<group>
 								<field name="allocated_qty" readonly="1"/>
+								<field name="reject_qty" readonly="1"/>
 								<field name="reject_qty" readonly="1"/>
 								<field name="rework_qty" invisible="1"/>
 								<field name="position_no" invisible="1"/>
@@ -95,7 +99,7 @@
 	<!-- Form View End -->
 		
 	
-	<!-- Tree View Start -->
+	<!-- Tree View Start for Part QC Verification-->
 		
 		<record id="t_tree_v_qc_verification" model="ir.ui.view">
 			<field name="name">QC Verification Entry Tree</field>
@@ -124,9 +128,33 @@
 			</field>
 		</record>
 		
-	<!-- Tree View End -->
+	<!-- Tree View End for Part QC Verification -->
+	
+	<!-- Tree View Start for Pump QC Verification-->
 		
-	<!-- Search View Start -->
+		<record id="t_tree_v_pump_qc_verification" model="ir.ui.view">
+			<field name="name">Pump QC Verification Entry Tree</field>
+			<field name="model">kg.qc.verification</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';black:state == 'confirmed'" 
+								toolbar="True" string="QC Verification Entry Tree" create="false">					
+					<field name="name" invisible="1"/>
+					<field name="entry_date" string="Date"/>
+					<field name="order_no"/>
+					<field name="pump_model_id"/>
+					<field name="moc_construction_id"/>
+					<field name="allocated_qty" sum="Total Qty" invisible="1"/>
+					<field name="qty" sum="Total Qty"/>
+					<field name="remark"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End for Pump QC Verification -->
+		
+	<!-- Search View Start Part QC Verification -->
 
 		<record id="t_search_v_qc_verification" model="ir.ui.view">
             <field name="name">QC Verification Entry Search</field>
@@ -153,10 +181,36 @@
 			</field>
 		</record>
 		
-	<!-- Search View End -->		
+	<!-- Search View End Part QC Verification -->
+		
+	<!-- Search View Start Pump QC Verification -->
+
+		<record id="t_search_v_pump_qc_verification" model="ir.ui.view">
+            <field name="name">Pump QC Verification Entry Search</field>
+            <field name="model">kg.qc.verification</field>
+            <field name="arch" type="xml">
+                <search string="QC Verification Entry Search">
+					<field name="order_no" string="Work Order"  filter_domain="[('order_no','ilike',self)]" />
+					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>						
+					<filter icon="terp-check" name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>						
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="Work Order" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
+						<filter string="Division" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'division_id'}"/>
+						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
+						<filter string="MOC Construction" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_construction_id'}"/>
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End Pump QC Verification -->	
 			
         
-	<!-- Menu Action Start-->
+	<!-- Menu Action Start for Part QC Verication-->
 		
 		
 		<record id="tma_qc_verification" model="ir.actions.act_window">
@@ -167,10 +221,28 @@
 			<field name="context">{}</field>
 			<field name="view_id" ref="t_tree_v_qc_verification"/>
 			<field name="search_view_id" ref="t_search_v_qc_verification"/>
+			<field name="domain">[('stock_type','=','part')]</field>
 			<field name="context">{"search_default_draft":1}</field>
 		</record>
 		
-	<!-- Menu Action End-->
+	<!-- Menu Action End for Part QC Verication-->
+	
+	<!-- Menu Action Start for Pump QC Verication-->
+		
+		
+		<record id="tma_pump_qc_verification" model="ir.actions.act_window">
+			<field name="name">Pump QC Verification</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.qc.verification</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_pump_qc_verification"/>
+			<field name="search_view_id" ref="t_search_v_pump_qc_verification"/>
+			<field name="domain">[('stock_type','=','pump')]</field>
+			<field name="context">{"search_default_draft":1}</field>
+		</record>
+		
+	<!-- Menu Action End for Part QC Verication-->
 	
 	<!-- Audit Log Xml Data Start-->
 		
@@ -185,8 +257,10 @@
 	
 	<!-- Menu Item Start -->
 	
-		<!-- QC Verification -->
+		<!-- Part QC Verification -->
 		<menuitem action="tma_qc_verification" id="tam_qc_verification" parent="kg_stock_inward.tpm_planning_transactions" sequence="5"/>
+		<!-- Pump QC Verification -->
+		<menuitem action="tma_pump_qc_verification" id="tam_pump_qc_verification" parent="kg_stock_inward.tpm_planning_transactions" sequence="5"/>
 		
 		
 	

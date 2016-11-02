@@ -14,11 +14,15 @@
 						<!--<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible': [('flag_cancel','=',False)]}"
 							 class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
 						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
+<!--
+						<button name="mail_test" type="object" string="Mail" class="oe_highlight"/>
+-->
 					</header>
 					<sheet>		
 						<group>
 							<group>
 								<field name="name" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="offer_no" readonly="1"/>
 								<field name="division_id"/>
 								<field name="order_category" on_change="onchange_priority(order_category)" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="partner_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
@@ -47,11 +51,12 @@
 							<page string="Work Order Details" >
 								<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}" context="{'order_category':order_category,'delivery_date':delivery_date}">
 									<tree string = "Work Order Items">
-										<field name="order_no" readonly="1"/>
-										<field name="order_category" readonly="1"/>
-										<field name="pump_model_id" readonly="1"/>
-										<field name="qty" readonly="1"/>
-										<field name="delivery_date" readonly="1"/>
+										<field name="order_no"/>
+										<field name="order_category" />
+										<field name="pump_model_id" />
+										<field name="qty" sum="Total Qty"/>
+										<field name="unit_price" sum="Total Price"/>
+										<field name="delivery_date"/>
 									</tree>
 								</field>
 							</page>
@@ -127,6 +132,7 @@
 					<field name="order_category"/>
 					<field name="pump_model_id"/>
 					<field name="qty" sum="Total Qty"/>
+					<field name="unit_price" sum="Total Price"/>
 					<field name="delivery_date"/>
 					
 				    <field name="state" invisible="1"/>
@@ -226,7 +232,8 @@
 									<field name="ms_id" attrs="{'readonly': [('entry_mode','=','auto')]}"/>		
 									<field name="name" attrs="{'readonly': [('entry_mode','=','auto')]}"/>
 									<field name="position_id" attrs="{'readonly': [('entry_mode','=','auto')]}"/>		
-									<field name="qty"/>
+									<field name="qty" attrs="{'readonly': [('order_category','=','pump')]}"/>
+									<field name="unit_price"/>
 									<field name="length" readonly="1"/>
 									<field name="flag_applicable"/>
 									<field name="moc_id" attrs="{'required': [('flag_applicable','!=',False)],'readonly': [('flag_standard','=',False)]}"/>
@@ -242,7 +249,8 @@
 									<field name="order_category" invisible="1"/>
 									<field name="item_name" attrs="{'readonly': [('entry_mode','=','auto')]}"/>
 									<field name="bot_id" attrs="{'readonly': [('entry_mode','=','auto')]}"/>											
-									<field name="qty"/>
+									<field name="qty" attrs="{'readonly': [('order_category','=','pump')]}"/>
+									<field name="unit_price"/>
 									<field name="flag_applicable"/>
 									<field name="moc_id" attrs="{'required': [('flag_applicable','!=',False)],'readonly': [('flag_standard','=',False)]}"/>
 									<field name="remarks" widget="char"/>
@@ -252,6 +260,86 @@
 							</field>
 						</page>
 							
+							
+						<page string="Accessories">
+							<field name="line_ids_d" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
+								<tree string="Accessories Entry Tree">
+									<field name="access_id" required="1"/>
+									<field name="moc_id" required="1"/>
+									<field name="qty" required="1"/>
+									<field name="oth_spec"/>
+								</tree>
+								<form string="Accessories Entry Form">
+									<group colspan="4">
+										<group>
+											<field name="access_id" required="1"/>
+											<field name="moc_id" required="1"/>
+										</group>
+										<group>
+											<field name="qty" required="1"/>
+											<field name="oth_spec"/>
+										</group>
+										<group>
+										<group>
+											<field name="load_access" on_change="onchange_load_access(load_access,access_id,moc_id)"/>
+										</group>
+										<group>
+										</group>
+										</group>
+									</group>
+									<notebook>
+										<page string = "Foundry Items">
+											<field name="line_ids" nolabel="1">
+												<tree string="Foundry Item Tree" editable="top" create="false" delete="false">
+													<field name="is_applicable"/>
+													<field name="position_id" readonly="1"/>
+													<field name="pattern_id" readonly="1"/>
+													<field name="pattern_name" readonly="1"/>
+													<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}"/>
+													<field name="csd_no" readonly="1"/>
+													<field name="qty" required="1"/>
+													<field name="prime_cost" readonly="1"/>
+													<field name="remarks" />
+													<field name="load_bom" invisible="1"/>
+												</tree>
+											</field>								
+										</page>
+										<page string = "MS Items">
+											<field name="line_ids_a" nolabel="1">
+												<tree string="MS Item" editable="top" create="false" delete="false">
+													<field name="is_applicable"/>
+													<field name="position_id" readonly="1"/>
+													<field name="ms_id" readonly="1"/>
+													<field name="name" readonly="1"/>
+													<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}"/>
+													<field name="csd_no" readonly="1"/>
+													<field name="qty" required="1"/>
+													<field name="prime_cost" readonly="1"/>
+													<field name="remarks"/>
+													<field name="load_bom" invisible="1"/>
+												</tree>
+											</field>								
+										</page>
+										<page string = "BOT Items">
+											<field name="line_ids_b" nolabel="1">
+												<tree string="BOT Item" editable="top" create="false" delete="false">
+													<field name="is_applicable"/>
+													<field name="position_id" readonly="1"/>
+													<field name="ms_id" readonly="1"/>
+													<field name="item_name" readonly="1"/>
+													<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}"/>
+													<field name="csd_no" required="1"/>
+													<field name="qty" required="1"/>
+													<field name="prime_cost" readonly="1"/>
+													<field name="remarks"/>
+													<field name="load_bom" invisible="1"/>
+												</tree>
+											</field>								
+										</page>
+									</notebook>
+								</form>
+							</field>								
+						</page>
 						<!--<page string="Consumable">
 							<field name="line_ids_c" nolabel="1" context="{'order_category':order_category}" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
 								<tree string="Order Consumable Details Entry Tree" editable="bottom">					

@@ -23,7 +23,8 @@ ORDER_CATEGORY = [
    ('spare','Spare'),
    ('pump_spare','Pump and Spare'),
    ('service','Service'),
-   ('project','Project')
+   ('project','Project'),
+   ('access','Accessories')
 ]
 
 
@@ -251,164 +252,174 @@ class kg_production(osv.osv):
 	def pattern_issue_update(self,cr,uid,ids,context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		
-		today = datetime.today()
-		issue_date = entry_rec.issue_date
-		issue_date = str(issue_date)
-		issue_date = datetime.strptime(issue_date, '%Y-%m-%d')
-		if issue_date > today:
-			raise osv.except_osv(_('Warning!'),
-							_('System not allow to save with future date. !!'))
-		
-		### Core Log Number ###
-		core_name = ''	
-		core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
-		rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
-		cr.execute("""select generatesequenceno(%s,'%s',now()::date) """%(core_seq_id[0],rec.code))
-		core_name = cr.fetchone();
-		
-		### Mould Log Number ###
-		mould_name = ''	
-		mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
-		rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
-		cr.execute("""select generatesequenceno(%s,'%s',now()::date) """%(mould_seq_id[0],rec.code))
-		mould_name = cr.fetchone();
-		
-		self.write(cr, uid, ids,{
-		'core_no': core_name[0],
-		'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-		'core_qty': entry_rec.qty,
-		'core_rem_qty': entry_rec.qty,
-		'core_state': 'pending',
-		'core_remarks': entry_rec.order_bomline_id.add_spec,
-		'mould_no': mould_name[0],
-		'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-		'mould_qty': entry_rec.qty,
-		'mould_rem_qty': entry_rec.qty,
-		'mould_state': 'pending',
-		'core_remarks': entry_rec.order_bomline_id.add_spec,
-		'state' : 'issue_done',
-		'issue_state' : 'issued',
-		})
+		if entry_rec.issue_state == 'pending':
+			today = datetime.today()
+			issue_date = entry_rec.issue_date
+			issue_date = str(issue_date)
+			issue_date = datetime.strptime(issue_date, '%Y-%m-%d')
+			if issue_date > today:
+				raise osv.except_osv(_('Warning!'),
+								_('System not allow to save with future date. !!'))
+			
+			### Core Log Number ###
+			core_name = ''	
+			core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
+			rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s',now()::date) """%(core_seq_id[0],rec.code))
+			core_name = cr.fetchone();
+			
+			### Mould Log Number ###
+			mould_name = ''	
+			mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
+			rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s',now()::date) """%(mould_seq_id[0],rec.code))
+			mould_name = cr.fetchone();
+			
+			self.write(cr, uid, ids,{
+			'core_no': core_name[0],
+			'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+			'core_qty': entry_rec.qty,
+			'core_rem_qty': entry_rec.qty,
+			'core_state': 'pending',
+			'core_remarks': entry_rec.order_bomline_id.add_spec,
+			'mould_no': mould_name[0],
+			'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+			'mould_qty': entry_rec.qty,
+			'mould_rem_qty': entry_rec.qty,
+			'mould_state': 'pending',
+			'core_remarks': entry_rec.order_bomline_id.add_spec,
+			'state' : 'issue_done',
+			'issue_state' : 'issued',
+			})
+		else:
+			pass
 		return True
 		
 	def core_update(self,cr,uid,ids,context=None):
 		
 		entry_rec = self.browse(cr, uid, ids[0])
 		
-		today = datetime.today()
-		core_date = entry_rec.core_date
-		core_date = str(core_date)
-		core_date = datetime.strptime(core_date, '%Y-%m-%d')
-		if core_date > today:
-			raise osv.except_osv(_('Warning!'),
-							_('System not allow to save with future date. !!'))
-		if entry_rec.core_by == 'comp_employee':
-			if entry_rec.core_helper <= 0 or entry_rec.core_helper <= 0 or entry_rec.core_qty <=0:
+		if entry_rec.core_state == 'pending':
+			
+			today = datetime.today()
+			core_date = entry_rec.core_date
+			core_date = str(core_date)
+			core_date = datetime.strptime(core_date, '%Y-%m-%d')
+			if core_date > today:
+				raise osv.except_osv(_('Warning!'),
+								_('System not allow to save with future date. !!'))
+			if entry_rec.core_by == 'comp_employee':
+				if entry_rec.core_helper <= 0 or entry_rec.core_helper <= 0 or entry_rec.core_qty <=0:
+					raise osv.except_osv(_('Warning!'),
+								_('System not allow to save negative or zero values !!'))
+								
+			if entry_rec.core_qty <=0:
 				raise osv.except_osv(_('Warning!'),
 							_('System not allow to save negative or zero values !!'))
-							
-		if entry_rec.core_qty <=0:
-			raise osv.except_osv(_('Warning!'),
-						_('System not allow to save negative or zero values !!'))
-		
-		sch_qty = entry_rec.qty
-		total_core_qty = entry_rec.total_core_qty + entry_rec.core_qty
-		if total_core_qty < sch_qty:
-			core_state = 'partial'
-		if total_core_qty >= sch_qty:
-			core_state = 'done'
-		#~ if total_core_qty > sch_qty:
-			#~ raise osv.except_osv(_('Warning!'),
-						#~ _('Core Qty should be greater than Schedule Qty !!'))
-		if core_state == 'partial':
-			core_entry_qty = 0
+			
+			sch_qty = entry_rec.qty
+			total_core_qty = entry_rec.total_core_qty + entry_rec.core_qty
+			if total_core_qty < sch_qty:
+				core_state = 'partial'
+			if total_core_qty >= sch_qty:
+				core_state = 'done'
+			#~ if total_core_qty > sch_qty:
+				#~ raise osv.except_osv(_('Warning!'),
+							#~ _('Core Qty should be greater than Schedule Qty !!'))
+			if core_state == 'partial':
+				core_entry_qty = 0
+			else:
+				core_entry_qty = entry_rec.core_qty
+				
+			### PAN No ###
+			#~ upper_pan_no = ''
+			#~ pan_no = entry_rec.core_pan_no
+			#~ if pan_no:
+				#~ upper_pan_no = (pan_no.upper())
+			
+			## Remaining Qty ###
+			remain_qty = entry_rec.qty - total_core_qty
+			
+			if remain_qty < 0:
+				remain_qty = 0
+			else:
+				remain_qty = remain_qty
+				
+				
+			self.write(cr, uid, ids,{
+			'core_state': core_state,
+			'total_core_qty':total_core_qty,
+			'core_qty':core_entry_qty,
+			'core_rem_qty':remain_qty,
+			'core_user_id':uid,
+			#~ 'core_pan_no':upper_pan_no
+			})
 		else:
-			core_entry_qty = entry_rec.core_qty
-			
-		### PAN No ###
-		#~ upper_pan_no = ''
-		#~ pan_no = entry_rec.core_pan_no
-		#~ if pan_no:
-			#~ upper_pan_no = (pan_no.upper())
-		
-		## Remaining Qty ###
-		remain_qty = entry_rec.qty - total_core_qty
-		
-		if remain_qty < 0:
-			remain_qty = 0
-		else:
-			remain_qty = remain_qty
-			
-			
-		self.write(cr, uid, ids,{
-		'core_state': core_state,
-		'total_core_qty':total_core_qty,
-		'core_qty':core_entry_qty,
-		'core_rem_qty':remain_qty,
-		'core_user_id':uid,
-		#~ 'core_pan_no':upper_pan_no
-		})
+			pass
 		return True
 		
 	def mould_update(self,cr,uid,ids,context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		
-		today = datetime.today()
-		mould_date = entry_rec.mould_date
-		mould_date = str(mould_date)
-		mould_date = datetime.strptime(mould_date, '%Y-%m-%d')
-		if mould_date > today:
-			raise osv.except_osv(_('Warning!'),
-							_('System not allow to save with future date. !!'))
-		if entry_rec.mould_by == 'comp_employee':
-			if entry_rec.mould_moulder <= 0 or entry_rec.mould_helper <= 0 or entry_rec.mould_qty <=0:
+		if entry_rec.mould_state == 'pending':
+			today = datetime.today()
+			mould_date = entry_rec.mould_date
+			mould_date = str(mould_date)
+			mould_date = datetime.strptime(mould_date, '%Y-%m-%d')
+			if mould_date > today:
+				raise osv.except_osv(_('Warning!'),
+								_('System not allow to save with future date. !!'))
+			if entry_rec.mould_by == 'comp_employee':
+				if entry_rec.mould_moulder <= 0 or entry_rec.mould_helper <= 0 or entry_rec.mould_qty <=0:
+					raise osv.except_osv(_('Warning!'),
+								_('System not allow to save negative or zero values !!'))
+								
+			if entry_rec.mould_qty <=0:
 				raise osv.except_osv(_('Warning!'),
 							_('System not allow to save negative or zero values !!'))
+			sch_qty = entry_rec.qty
+			total_mould_qty = entry_rec.total_mould_qty + entry_rec.mould_qty
+			if total_mould_qty < sch_qty:
+				mould_state = 'partial'
+				state = 'issue_done'
+			if total_mould_qty >= sch_qty:
+				mould_state = 'done'
+				state = 'mould_com'
+			#~ if total_mould_qty > sch_qty:
+				#~ raise osv.except_osv(_('Warning!'),
+							#~ _('Mould Qty should not be greater than Schedule Qty !!'))
 							
-		if entry_rec.mould_qty <=0:
-			raise osv.except_osv(_('Warning!'),
-						_('System not allow to save negative or zero values !!'))
-		sch_qty = entry_rec.qty
-		total_mould_qty = entry_rec.total_mould_qty + entry_rec.mould_qty
-		if total_mould_qty < sch_qty:
-			mould_state = 'partial'
-			state = 'issue_done'
-		if total_mould_qty >= sch_qty:
-			mould_state = 'done'
-			state = 'mould_com'
-		#~ if total_mould_qty > sch_qty:
-			#~ raise osv.except_osv(_('Warning!'),
-						#~ _('Mould Qty should not be greater than Schedule Qty !!'))
-						
-		if mould_state == 'partial':
-			mould_entry_qty = 0
+			if mould_state == 'partial':
+				mould_entry_qty = 0
+			else:
+				mould_entry_qty = entry_rec.mould_qty
+				
+			### PAN No ###
+			#~ upper_pan_no = ''
+			#~ pan_no = entry_rec.mould_pan_no
+			#~ if pan_no:
+				#~ upper_pan_no = (pan_no.upper())
+				
+			## Remaining Qty ###
+			remain_qty = entry_rec.qty - total_mould_qty
+			
+			if remain_qty < 0:
+				remain_qty = 0
+			else:
+				remain_qty = remain_qty
+				
+			self.write(cr, uid, ids,{
+			
+			'mould_state': mould_state,
+			'total_mould_qty':total_mould_qty,
+			'mould_qty':mould_entry_qty,
+			'mould_rem_qty':remain_qty,
+			'state':state,
+			'mould_user_id':uid,
+			#~ 'mould_pan_no':upper_pan_no
+			})
 		else:
-			mould_entry_qty = entry_rec.mould_qty
-			
-		### PAN No ###
-		#~ upper_pan_no = ''
-		#~ pan_no = entry_rec.mould_pan_no
-		#~ if pan_no:
-			#~ upper_pan_no = (pan_no.upper())
-			
-		## Remaining Qty ###
-		remain_qty = entry_rec.qty - total_mould_qty
-		
-		if remain_qty < 0:
-			remain_qty = 0
-		else:
-			remain_qty = remain_qty
-			
-		self.write(cr, uid, ids,{
-		
-		'mould_state': mould_state,
-		'total_mould_qty':total_mould_qty,
-		'mould_qty':mould_entry_qty,
-		'mould_rem_qty':remain_qty,
-		'state':state,
-		'mould_user_id':uid,
-		#~ 'mould_pan_no':upper_pan_no
-		})
+			pass
 		return True
 	
 	def _future_entry_date_check(self,cr,uid,ids,context=None):
@@ -550,26 +561,28 @@ class kg_pattern_batch_issue(osv.osv):
 		
 	def entry_issue(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
-		production_obj = self.pool.get('kg.production')		
-		if not entry.line_ids:
-			raise osv.except_osv(_('Warning!'),
-						_('System not allow to confirm without Issue Items !!'))
-						
-						
-		### Issue Updation against Pattern Issue ###
-		
-		for issue_item in entry.line_ids:
-			production_obj.write(cr, uid,issue_item.production_id.id,{'issue_remarks':issue_item.remarks})
-			production_obj.pattern_issue_update(cr, uid, [issue_item.production_id.id])
+		if entry.state == 'draft':
+			production_obj = self.pool.get('kg.production')		
+			if not entry.line_ids:
+				raise osv.except_osv(_('Warning!'),
+							_('System not allow to confirm without Issue Items !!'))
+							
+							
+			### Issue Updation against Pattern Issue ###
 			
-		### Issue Batch Sequence Number Generation  ###
-		issue_batch_name = ''	
-		issue_batch_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.batch.pattern.issue')])
-		rec = self.pool.get('ir.sequence').browse(cr,uid,issue_batch_seq_id[0])
-		cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_batch_seq_id[0],rec.code,entry.entry_date))
-		issue_batch_name = cr.fetchone();
-		self.write(cr, uid, ids, {'name':issue_batch_name[0],'state': 'issue','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-	
+			for issue_item in entry.line_ids:
+				production_obj.write(cr, uid,issue_item.production_id.id,{'issue_remarks':issue_item.remarks})
+				production_obj.pattern_issue_update(cr, uid, [issue_item.production_id.id])
+				
+			### Issue Batch Sequence Number Generation  ###
+			issue_batch_name = ''	
+			issue_batch_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.batch.pattern.issue')])
+			rec = self.pool.get('ir.sequence').browse(cr,uid,issue_batch_seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_batch_seq_id[0],rec.code,entry.entry_date))
+			issue_batch_name = cr.fetchone();
+			self.write(cr, uid, ids, {'name':issue_batch_name[0],'state': 'issue','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		else:
+			pass
 		return True
 		
 	def write(self, cr, uid, ids, vals, context=None):
@@ -756,30 +769,32 @@ class kg_core_batch(osv.osv):
 		
 	def entry_confirm(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
-		production_obj = self.pool.get('kg.production')		
-		if not entry.line_ids:
-			raise osv.except_osv(_('Warning!'),
-						_('System not allow to confirm without Issue Items !!'))
-						
-						
-		### Core Updation ###
-		
-		for req_item in entry.line_ids:
-			production_obj.write(cr, uid,req_item.production_id.id,{'core_remarks':req_item.remarks,'core_date':req_item.core_date,
-			'core_shift_id':req_item.core_shift_id.id,'core_contractor':req_item.core_contractor.id,'core_operator':req_item.core_operator,
-			'core_helper':req_item.core_helper,'core_qty':req_item.core_qty,'core_hardness':req_item.core_hardness,
-			'core_by':req_item.core_by
-			})
-			production_obj.core_update(cr, uid, [req_item.production_id.id])
+		if entry.state == 'draft':
+			production_obj = self.pool.get('kg.production')		
+			if not entry.line_ids:
+				raise osv.except_osv(_('Warning!'),
+							_('System not allow to confirm without Issue Items !!'))
+							
+							
+			### Core Updation ###
 			
-		### Core Batch Sequence Number Generation  ###
-		core_batch_name = ''	
-		core_batch_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.batch')])
-		rec = self.pool.get('ir.sequence').browse(cr,uid,core_batch_seq_id[0])
-		cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_batch_seq_id[0],rec.code,entry.entry_date))
-		core_batch_name = cr.fetchone();
-		self.write(cr, uid, ids, {'name':core_batch_name[0],'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-	
+			for req_item in entry.line_ids:
+				production_obj.write(cr, uid,req_item.production_id.id,{'core_remarks':req_item.remarks,'core_date':req_item.core_date,
+				'core_shift_id':req_item.core_shift_id.id,'core_contractor':req_item.core_contractor.id,'core_operator':req_item.core_operator,
+				'core_helper':req_item.core_helper,'core_qty':req_item.core_qty,'core_hardness':req_item.core_hardness,
+				'core_by':req_item.core_by
+				})
+				production_obj.core_update(cr, uid, [req_item.production_id.id])
+				
+			### Core Batch Sequence Number Generation  ###
+			core_batch_name = ''	
+			core_batch_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.batch')])
+			rec = self.pool.get('ir.sequence').browse(cr,uid,core_batch_seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_batch_seq_id[0],rec.code,entry.entry_date))
+			core_batch_name = cr.fetchone();
+			self.write(cr, uid, ids, {'name':core_batch_name[0],'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		else:
+			pass
 		return True
 		
 	def write(self, cr, uid, ids, vals, context=None):
@@ -984,29 +999,31 @@ class kg_mould_batch(osv.osv):
 		
 	def entry_confirm(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
-		production_obj = self.pool.get('kg.production')		
-		if not entry.line_ids:
-			raise osv.except_osv(_('Warning!'),
-						_('System not allow to confirm without Mould Items !!'))
-						
-						
-		### Issue Creation against Mould Issue ###
-		
-		for req_item in entry.line_ids:
-			production_obj.write(cr, uid,req_item.production_id.id,{'mould_remarks':req_item.remarks,'mould_date':req_item.mould_date,
-			'mould_shift_id':req_item.mould_shift_id.id,'mould_contractor':req_item.mould_contractor.id,'mould_moulder':req_item.mould_moulder,
-			'mould_helper':req_item.mould_helper,'mould_qty':req_item.mould_qty,'mould_hardness':req_item.mould_hardness,'mould_box_id':req_item.mould_box_id.id,
-			'mould_by':req_item.mould_by,'mould_operator':req_item.mould_operator})
-			production_obj.mould_update(cr, uid, [req_item.production_id.id])
+		if entry.state == 'draft':
+			production_obj = self.pool.get('kg.production')		
+			if not entry.line_ids:
+				raise osv.except_osv(_('Warning!'),
+							_('System not allow to confirm without Mould Items !!'))
+							
+							
+			### Issue Creation against Mould Issue ###
 			
-		### Mould Batch Sequence Number Generation  ###
-		mould_batch_name = ''	
-		mould_batch_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.batch')])
-		rec = self.pool.get('ir.sequence').browse(cr,uid,mould_batch_seq_id[0])
-		cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_batch_seq_id[0],rec.code,entry.entry_date))
-		mould_batch_name = cr.fetchone();
-		self.write(cr, uid, ids, {'name':mould_batch_name[0],'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-	
+			for req_item in entry.line_ids:
+				production_obj.write(cr, uid,req_item.production_id.id,{'mould_remarks':req_item.remarks,'mould_date':req_item.mould_date,
+				'mould_shift_id':req_item.mould_shift_id.id,'mould_contractor':req_item.mould_contractor.id,'mould_moulder':req_item.mould_moulder,
+				'mould_helper':req_item.mould_helper,'mould_qty':req_item.mould_qty,'mould_hardness':req_item.mould_hardness,'mould_box_id':req_item.mould_box_id.id,
+				'mould_by':req_item.mould_by,'mould_operator':req_item.mould_operator})
+				production_obj.mould_update(cr, uid, [req_item.production_id.id])
+				
+			### Mould Batch Sequence Number Generation  ###
+			mould_batch_name = ''	
+			mould_batch_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.batch')])
+			rec = self.pool.get('ir.sequence').browse(cr,uid,mould_batch_seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_batch_seq_id[0],rec.code,entry.entry_date))
+			mould_batch_name = cr.fetchone();
+			self.write(cr, uid, ids, {'name':mould_batch_name[0],'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		else:
+			pass
 		return True
 		
 	def write(self, cr, uid, ids, vals, context=None):
