@@ -79,10 +79,7 @@
 		
 			<!-- CRM Enquiry Menu -->
 			<menuitem id="cpm_crm_enquiry_menu" name="Enquiry" parent="cpm_crm" sequence="2"/>
-				
-				<!-- Enquiry --> 
-				<menuitem action="kg_crm_enquiry.tma_crm_enquiry" name="Enquiry" id="tma_crm_enquiry" parent="cpm_crm_enquiry_menu" sequence="1"/>
-				
+					
 				<!-- Offer --> 
 				<menuitem action="kg_crm_offer.tma_crm_offer" name="Offer" id="tma_crm_offer" parent="cpm_crm_enquiry_menu" sequence="2"/>
 				
