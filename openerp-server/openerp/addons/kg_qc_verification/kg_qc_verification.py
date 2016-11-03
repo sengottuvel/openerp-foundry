@@ -742,7 +742,7 @@ class kg_qc_verification(osv.osv):
 										allocated_qty = arc_cutting_qty
 									
 									
-									if stk_item['stage_name'] == 'HEAT TREATMENT1':
+									if stk_item['stage_name'] == 'HEAT TREATMENT':
 										
 										stk_heat_qty = stk_item_rec.heat_qty
 										

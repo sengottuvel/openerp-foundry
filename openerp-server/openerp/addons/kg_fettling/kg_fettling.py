@@ -737,7 +737,7 @@ class kg_fettling(osv.osv):
 							cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(arc_cutting_seq_id[0],seq_rec.code))
 							arc_cutting_name = cr.fetchone();
 							self.write(cr, uid, ids, {'arc_cutting_date':time.strftime('%Y-%m-%d'),'arc_cutting_qty': arc_cutting_qty,'arc_cutting_accept_qty': arc_cutting_qty,'arc_cutting_name':arc_cutting_name[0]})
-						if stage_item['stage_name'] == 'HEAT TREATMENT1':
+						if stage_item['stage_name'] == 'HEAT TREATMENT':
 							heat_total_qty = entry.inward_accept_qty
 							self.write(cr, uid, ids, {'heat_date':time.strftime('%Y-%m-%d'),'heat_total_qty': heat_total_qty,'heat_qty':heat_total_qty})
 						if stage_item['stage_name'] == 'HEAT TREATMENT2':
@@ -1221,7 +1221,7 @@ class kg_fettling(osv.osv):
 										allocated_qty = arc_cutting_qty
 									
 									
-									if stk_item['stage_name'] == 'HEAT TREATMENT1':
+									if stk_item['stage_name'] == 'HEAT TREATMENT':
 										
 										stk_heat_qty = stk_item_rec.heat_qty
 										
@@ -1627,7 +1627,7 @@ class kg_fettling(osv.osv):
 						arc_cutting_name = cr.fetchone();
 						self.write(cr, uid, ids, {'arc_cutting_date':time.strftime('%Y-%m-%d'),'arc_cutting_qty': arc_cutting_qty,'arc_cutting_accept_qty': arc_cutting_qty,'arc_cutting_name':arc_cutting_name[0]})
 					
-					if stage_item['stage_name'] == 'HEAT TREATMENT1':
+					if stage_item['stage_name'] == 'HEAT TREATMENT':
 						### Next Stage Qty ###
 						heat_total_qty = fettling_accept_qty
 						self.write(cr, uid, ids, {'heat_date':time.strftime('%Y-%m-%d'),'heat_total_qty': heat_total_qty,'heat_qty':heat_total_qty})
@@ -2108,7 +2108,7 @@ class kg_fettling(osv.osv):
 									allocated_qty = arc_cutting_qty
 								
 								
-								if stk_item['stage_name'] == 'HEAT TREATMENT1':
+								if stk_item['stage_name'] == 'HEAT TREATMENT':
 									
 									stk_heat_qty = stk_item_rec.heat_qty
 									
@@ -3529,7 +3529,7 @@ class kg_fettling(osv.osv):
 										allocated_qty = arc_cutting_qty
 									
 									
-									if stk_item['stage_name'] == 'HEAT TREATMENT1':
+									if stk_item['stage_name'] == 'HEAT TREATMENT':
 										
 										stk_heat_qty = stk_item_rec.heat_qty
 										
@@ -4059,7 +4059,7 @@ class kg_fettling(osv.osv):
 					self.write(cr, uid, ids, {'arc_cutting_accept_qty': entry.allocated_accepted_qty,'arc_cutting_qty': entry.allocated_accepted_qty,
 					'flag_allocated': False,'allocation_state':'accept'})
 					
-				if entry.stage_name == 'HEAT TREATMENT1':
+				if entry.stage_name == 'HEAT TREATMENT':
 					
 					self.write(cr, uid, ids, {'heat_qty':entry.allocated_accepted_qty,'heat_total_qty': entry.allocated_accepted_qty,
 					'flag_allocated': False,'allocation_state':'accept'})
@@ -4492,7 +4492,7 @@ class kg_fettling(osv.osv):
 									allocated_qty = arc_cutting_qty
 								
 								
-								if stk_item['stage_name'] == 'HEAT TREATMENT1':
+								if stk_item['stage_name'] == 'HEAT TREATMENT':
 									
 									stk_heat_qty = stk_item_rec.heat_qty
 									
@@ -6637,7 +6637,7 @@ class kg_batch_heat_treatment(osv.osv):
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed')],'Status', readonly=True),
 
 		'heat_treatment_ids':fields.many2many('kg.fettling','m2m_heat_treatment_details' , 'batch_id', 'heat_treatment_id', 'Heat Treatment Items',
-			domain="[('stage_name','=','HEAT TREATMENT1'),('state','=','accept')]"),
+			domain="[('stage_name','=','HEAT TREATMENT'),('state','=','accept')]"),
 			
 		'line_ids': fields.one2many('ch.batch.heat.treatment.line', 'header_id', "Batch Line Details"),
 		

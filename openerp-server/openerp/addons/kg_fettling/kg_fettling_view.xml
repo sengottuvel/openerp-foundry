@@ -1685,7 +1685,7 @@
 			<field name="res_model">kg.fettling</field>
 			<field name="view_type">form</field>
 			<field name="context">{}</field>
-			<field name="domain">[('stage_name','=',('HEAT TREATMENT1')),('state','!=',('complete')),('flag_allocated','!=', 't')]</field>
+			<field name="domain">[('stage_name','=',('HEAT TREATMENT')),('state','!=',('complete')),('flag_allocated','!=', 't')]</field>
 			<field name="search_view_id" ref="t_search_v_heat_treatment"/>
 		</record>
 		
