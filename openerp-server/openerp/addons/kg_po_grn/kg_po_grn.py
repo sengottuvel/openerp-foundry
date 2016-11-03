@@ -853,7 +853,7 @@ class kg_po_grn(osv.osv):
 								product_qty = po_line_id.product_qty
 						else:
 							product_qty = po_line_id.product_qty
-						po_rec = self.pool.get('po.grn.line').search(cr,uid,[('po_line_id','=',line.po_line_id.id),('id','!=',line.id)])
+						po_rec = self.pool.get('po.grn.line').search(cr,uid,[('po_line_id','=',line.po_line_id.id),('id','!=',line.id),('product_id','!=',line.product_id.id)])
 						if line.product_id.tolerance_applicable == True:
 							product_qty=po_line_id.product_qty+po_line_id.product_qty/100.00*line.product_id.tolerance_plus
 						po_grn_qty= 0
