@@ -110,13 +110,13 @@ class kg_sale_invoice(osv.osv):
 		del_address = ''		
 		values = {'contact_person':'','billing_address':'','del_address':''}
 		for bill in cust_rec.billing_ids:	
-			bill_ids = self.pool.get('kg.billing.address').search(cr, uid, [('bill_id','=',cust_rec.id),('default','=',True)])
-			if bill_ids:									
+			bill_ids = self.pool.get('kg.billing.address').search(cr, uid, [('bill_id','=',cust_rec.id),('default','=',True)])	
+			if bill_ids:							
 				bill_rec = self.pool.get('kg.billing.address').browse(cr, uid,bill_ids[0])			
 				billing_address = bill_rec.id			
 		for delivery in cust_rec.delivery_ids:
 			del_ids = self.pool.get('kg.delivery.address').search(cr, uid, [('src_id','=',cust_rec.id),('default','=',True)])
-			if del_ids:							
+			if del_ids:									
 				del_rec = self.pool.get('kg.delivery.address').browse(cr, uid,del_ids[0])			
 				del_address = del_rec.id				
 		if cust_rec.contact_person :
@@ -132,9 +132,7 @@ class kg_sale_invoice(osv.osv):
 		for item in [x.id for x in rec.work_order_ids]:
 			print"item",item
 			work_obj = self.pool.get('kg.work.order')
-			work_rec = self.pool.get('kg.work.order').browse(cr,uid,item)
-			print"line_idsline_ids",work_rec.line_ids
-			work_obj.write(cr, uid, work_rec.id, {'invoice_flag': True})
+			work_rec = self.pool.get('kg.work.order').browse(cr,uid,item)			
 			for line in work_rec.line_ids:
 				print"line",line.id
 				if line.order_category == 'pump':	
@@ -165,11 +163,9 @@ class kg_sale_invoice(osv.osv):
 				
 				
 				if line.order_category == 'spare':					
-					for bom_line in line.line_ids:	
-						print"bom_line",bom_line
+					for bom_line in line.line_ids:					
 						print"bom_line.spare_of222222222222222222222222222222222@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2fer_line_id",bom_line.spare_offer_line_id
 						offer_rec = self.pool.get('ch.spare.offer').browse(cr,uid,bom_line.spare_offer_line_id)						
-						print"bom_line_rec.pattern_id",bom_line.pattern_id
 						invoice_line = self.pool.get('ch.spare.invoice').create(cr,uid,{
 						   'header_id':rec.id,
 						   'pump_id':line.pump_model_id.id,
@@ -192,52 +188,54 @@ class kg_sale_invoice(osv.osv):
 						   'total_price':offer_rec.total_price,						  
 						   })						
 						
-						for machine_shop_line in line.line_ids_a:	
-							offer_rec = self.pool.get('ch.spare.offer').browse(cr,uid,machine_shop_line.spare_offer_line_id)								
-							machine_shop_line = self.pool.get('ch.spare.invoice').create(cr,uid,{
-							   'header_id':rec.id,
-							   'pump_id':line.pump_model_id.id,
-							   'order_category':line.order_category,
-							   'ms_id':machine_shop_line.ms_id.id,							   
-							   'moc_id':machine_shop_line.moc_id.id,
-							   'item_name':machine_shop_line.ms_id.name,
-							   'item_code':machine_shop_line.ms_id.code,
-							   'unit_price':0.00,
-							   'qty':machine_shop_line.qty,
-							   'prime_cost':offer_rec.prime_cost,						   
-							   'sam_ratio':offer_rec.sam_ratio,
-							   'dealer_discount':offer_rec.dealer_discount,
-							   'customer_discount':offer_rec.customer_discount,
-							   'special_discount':offer_rec.special_discount,
-							   'tax':offer_rec.tax,
-							   'p_f':offer_rec.p_f,
-							   'freight':offer_rec.freight,
-							   'insurance':offer_rec.insurance,
-							   'total_price':offer_rec.total_price
-							   })
+					for machine_shop_line in line.line_ids_a:
+						print"machine_shop_line.spare_offer_line_id",machine_shop_line.spare_offer_line_id	
+						offer_rec = self.pool.get('ch.spare.offer').browse(cr,uid,machine_shop_line.spare_offer_line_id)								
+						machine_shop_line = self.pool.get('ch.spare.invoice').create(cr,uid,{
+						   'header_id':rec.id,
+						   'pump_id':line.pump_model_id.id,
+						   'order_category':line.order_category,
+						   'ms_id':machine_shop_line.ms_id.id,							   
+						   'moc_id':machine_shop_line.moc_id.id,
+						   'item_name':machine_shop_line.ms_id.name,
+						   'item_code':machine_shop_line.ms_id.code,
+						   'unit_price':0.00,
+						   'qty':machine_shop_line.qty,
+						   'prime_cost':offer_rec.prime_cost,						   
+						   'sam_ratio':offer_rec.sam_ratio,
+						   'dealer_discount':offer_rec.dealer_discount,
+						   'customer_discount':offer_rec.customer_discount,
+						   'special_discount':offer_rec.special_discount,
+						   'tax':offer_rec.tax,
+						   'p_f':offer_rec.p_f,
+						   'freight':offer_rec.freight,
+						   'insurance':offer_rec.insurance,
+						   'total_price':offer_rec.total_price
+						   })
 						   
-							for bot_line in line.line_ids_b:
-								offer_rec = self.pool.get('ch.spare.offer').browse(cr,uid,bot_line.spare_offer_line_id)									
-								bot_line = self.pool.get('ch.spare.invoice').create(cr,uid,{
-								   'header_id':rec.id,
-								   'pump_id':line.pump_model_id.id,
-								   'order_category':line.order_category,
-								   'bot_id':bot_line.bot_id.id,
-								   'item_name':bot_line.bot_id.name,
-								   'item_code':bot_line.bot_id.code,								  
-								   'moc_id':bot_line.moc_id.id,
-								   'unit_price':0.00,
-								   'qty':bot_line.qty,
-								   'prime_cost':offer_rec.prime_cost,						   
-								   'sam_ratio':offer_rec.sam_ratio,
-								   'dealer_discount':offer_rec.dealer_discount,
-								   'customer_discount':offer_rec.customer_discount,
-								   'special_discount':offer_rec.special_discount,
-								   'tax':offer_rec.tax,
-								   'p_f':offer_rec.p_f,
-								   'freight':offer_rec.freight,
-								   'insurance':offer_rec.insurance,
-								   'total_price':offer_rec.total_price	})
+					for bot_line in line.line_ids_b:
+						print"bot_line.spare_offer_line_id",bot_line.spare_offer_line_id	
+						offer_rec = self.pool.get('ch.spare.offer').browse(cr,uid,bot_line.spare_offer_line_id)									
+						bot_line = self.pool.get('ch.spare.invoice').create(cr,uid,{
+						   'header_id':rec.id,
+						   'pump_id':line.pump_model_id.id,
+						   'order_category':line.order_category,
+						   'bot_id':bot_line.bot_id.id,
+						   'item_name':bot_line.bot_id.name,
+						   'item_code':bot_line.bot_id.code,								  
+						   'moc_id':bot_line.moc_id.id,
+						   'unit_price':0.00,
+						   'qty':bot_line.qty,
+						   'prime_cost':offer_rec.prime_cost,						   
+						   'sam_ratio':offer_rec.sam_ratio,
+						   'dealer_discount':offer_rec.dealer_discount,
+						   'customer_discount':offer_rec.customer_discount,
+						   'special_discount':offer_rec.special_discount,
+						   'tax':offer_rec.tax,
+						   'p_f':offer_rec.p_f,
+						   'freight':offer_rec.freight,
+						   'insurance':offer_rec.insurance,
+						   'total_price':offer_rec.total_price	})
 								   
 				if line.order_category == 'access':											
 						
@@ -271,10 +269,56 @@ class kg_sale_invoice(osv.osv):
 				else:
 					pass
 					
+	def update_actual_values(self, cr, uid, ids,context=None):
+		invoice_rec = self.browse(cr,uid,ids[0])		
+		pump_net_amount = spare_net_amount = access_net_amount = advance_net_amt = add_net_amount = net_amt = total_amt = 0.00
+		for order in self.browse(cr, uid, ids, context=context):		
+			
+			for line in order.line_ids:
+				pump_net_amount += line.net_amount
+				print"pump_net_amount",pump_net_amount	
+				
+			for line in order.line_ids_a:
+				spare_net_amount += line.net_amount
+				print"spare_net_amount",spare_net_amount	
+				
+			for line in order.line_ids_b:
+				access_net_amount += line.net_amount
+				print"access_net_amount",access_net_amount	
+			for line in order.line_ids_c:
+				add_net_amount += line.expense_amt
+				print"add_net_amount",add_net_amount	
+				
+			for line in order.line_ids_d:					
+				advance_net_amt += line.current_adv_amt 
+				print"advance_net_amt",advance_net_amt				
+		
+		self.write(cr, uid, ids[0], {
+					'pump_net_amount': pump_net_amount,
+					'spare_net_amount': spare_net_amount,
+					'access_net_amount':access_net_amount,
+					'add_charge':add_net_amount,
+					'advance_amt' : advance_net_amt, 
+					'net_amt' : (pump_net_amount + spare_net_amount + access_net_amount + add_net_amount + order.round_off_amt) - advance_net_amt, 
+					'total_amt' : pump_net_amount + spare_net_amount + access_net_amount, 
+					})
+			
+
+		return True	
+
+		
+					
 	def invoice_confirm(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
+		
 		if rec.state == 'draft':
-			print"rec.name",rec.name
+			for item in [x.id for x in rec.work_order_ids]:
+				print"item",item
+				work_obj = self.pool.get('kg.work.order')
+				work_rec = self.pool.get('kg.work.order').browse(cr,uid,item)
+				print"line_idsline_ids",work_rec.line_ids
+				work_obj.write(cr, uid, work_rec.id, {'invoice_flag': True})
+			
 			if rec.name == False:					
 				proforma_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.proforma.invoice')])
 				proforma_rec = self.pool.get('ir.sequence').browse(cr,uid,proforma_id[0])
@@ -345,8 +389,14 @@ class kg_sale_invoice(osv.osv):
 	
 
 	def unlink(self,cr,uid,ids,context=None):
-		raise osv.except_osv(_('Warning!'),
-				_('You can not delete Entry !!'))
+		unlink_ids = []	 
+		for rec in self.browse(cr,uid,ids): 
+			if rec.state != 'draft':			
+				raise osv.except_osv(_('Warning!'),
+						_('You can not delete this entry !!'))
+			else:
+				unlink_ids.append(rec.id)
+		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
 					
 	
 kg_sale_invoice()

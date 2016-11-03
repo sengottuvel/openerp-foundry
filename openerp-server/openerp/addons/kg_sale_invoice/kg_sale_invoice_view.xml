@@ -8,7 +8,7 @@
 			<field name="name">Invoice Entry Form</field>
 			<field name="model">kg.sale.invoice</field>
 			<field name="arch" type="xml">
-				<form string="Sale Invoice" version="7.0" create="false" delete="false">
+				<form string="Sale Invoice" version="7.0" delete="false">
 					<header>
 						<button name="invoice_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 						<button name="invoice_approve" type="object" string="Approve" states="confirmed" class="oe_highlight"/>
@@ -138,8 +138,11 @@
 									  </field>
 								  </group>
 							    </group>
-								
-					<group class="oe_subtotal_footer oe_right" colspan="2">
+							   	
+						<button name="update_actual_values" string="Update Actual Values" type="object" />	
+						
+					<group class="oe_subtotal_footer oe_right" colspan="2">							
+						
                                 <field name="total_amt" widget='monetary' options="{'currency_field': 'currency_id'}"/>
                                 <field name="add_charge" widget='monetary' options="{'currency_field': 'currency_id'}"/>
                                 <field name="advance_amt" widget='monetary' options="{'currency_field': 'currency_id'}" attrs="{'invisible':[('state','=','draft')]}"/>
