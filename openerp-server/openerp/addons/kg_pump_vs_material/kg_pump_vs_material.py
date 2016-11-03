@@ -264,7 +264,7 @@ class kg_pump_vs_material(osv.osv):
 		
 		
 			if rpm != False:
-				
+				print "Coming Inside"
 				if shaft_sealing != False and motor_power != False and bush_bearing != False and setting_height > 0 and delivery_pipe_size != False and lubrication != False:
 					
 					#### Load Foundry Items ####
@@ -445,7 +445,7 @@ class kg_pump_vs_material(osv.osv):
 						  setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,lubrication,setting_height,setting_height,
 						  rpm,pump_model_id,rpm,pump_model_id])
 					vertical_foundry_details = cr.dictfetchall()
-					
+					print "vertical_foundry_details------->>>",vertical_foundry_details
 					#~ if order_category == 'pump' :
 					for vertical_foundry in vertical_foundry_details:
 						
