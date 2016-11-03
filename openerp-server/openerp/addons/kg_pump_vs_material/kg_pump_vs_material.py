@@ -1133,9 +1133,9 @@ class kg_pump_vs_material(osv.osv):
 											if entry.pump_model_type == 'vertical':
 												if ms_rec.dynamic_length == True:
 													if raw_line.uom.id == brandmoc_rec.uom_id.id:
-														qty = raw_line.length * raw_line.temp_qty
+														qty = ms_line.length * raw_line.temp_qty
 													elif raw_line.uom.id != brandmoc_rec.uom_id.id:
-														qty = raw_line.length * raw_line.temp_qty * raw_line.product_id.po_uom_in_kgs
+														qty = ms_line.length * raw_line.temp_qty * raw_line.product_id.po_uom_in_kgs
 												else:
 													if raw_line.uom.id == brandmoc_rec.uom_id.id:
 														qty = raw_line.qty
