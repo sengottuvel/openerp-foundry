@@ -245,13 +245,17 @@ class kg_subcontract_wo(osv.osv):
 										left join ch_moccategory_mapping line on line.header_id = header.id
 										where header.header_id = %s and header.operation_id = %s and line.moc_cate_id = %s
 												  ''',[op_line.position_id.id,oper_id_rec.operation_id.id,moc_rec.moc_cate_id.id])
-						operation_rate= cr.fetchone()							
+						operation_rate= cr.fetchone()
+						print"operation_rate",operation_rate					
+													
 						if operation_rate is not None:
 							if operation_rate[0] < op_line.op_rate:
 								self.write(cr, uid, ids, {'flag_spl_app': True,'flag_app':True})							
 							else:
 								pass
 						else:
+							self.write(cr, uid, ids, {'flag_spl_app': True,'flag_app':True})
+							
 							line = self.pool.get('ch.moccategory.mapping').create(cr,uid,{
 							   'header_id':oper_id_rec.id,
 							   'moc_cate_id':moc_rec.moc_cate_id.id,
