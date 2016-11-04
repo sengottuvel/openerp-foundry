@@ -90,12 +90,21 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
-		<!-- Division -->
+		<!-- Stage Master -->
 		
 		<record id="m_foundry_stage_master" model="ir.model.access">
 			<field name="model_id" ref="kg_stage_master.model_kg_stage_master"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">Stage Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		<record id="m_foundry_stage_master_ch" model="ir.model.access">
+			<field name="model_id" ref="kg_stage_master.model_ch_stage_fettling"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Stage Master Fettling</field>
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>

@@ -52,7 +52,7 @@ class kg_stage_master(osv.osv):
 		'code': fields.char('Code', size=128, required=True),
 		'active': fields.boolean('Active'),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
-		'category': fields.selection([('fettling','Fettling'),('machine_shop','Machine shop'),('testing','Testing'),('common','Common')],'Category',required=True),
+		'category': fields.selection([('fettling','Fettling'),('machine_shop','Machine shop')],'Category',required=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'stage_seq_id': fields.integer('Stage Sequence' , size=128),

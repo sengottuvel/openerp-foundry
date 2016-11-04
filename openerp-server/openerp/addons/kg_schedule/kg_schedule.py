@@ -144,21 +144,17 @@ class kg_schedule(osv.osv):
 		
 		if entry.order_line_ids:
 			for order_item in entry.order_line_ids:
-				print "order_item",order_item
+				
 				### Creating Schedule items for Purpose Pump ###
 				for bom_item in order_item.line_ids:
-					print "bom_qty-------",bom_qty
-					print "order_item.pump_rem_qty-------",order_item.pump_rem_qty
-					print "order_item.qty-------",order_item.qty
-					print "bom_item.qty-------",bom_item.qty
-					print "order_item.order_category-------",order_item.order_category
-					print "type(bom_qty)-------",type(bom_qty)
 					if type(bom_qty) is dict:
 						if order_item.order_category == 'pump':
 							if order_item.pump_rem_qty != 0:
 								if order_item.pump_rem_qty < order_item.qty:
 									real_bom_qty = bom_item.qty / order_item.qty
 									sch_bom_qty = real_bom_qty * order_item.pump_rem_qty
+								else:
+									sch_bom_qty = bom_item.qty
 							else:
 								sch_bom_qty = bom_item.qty
 						else:	
@@ -170,7 +166,6 @@ class kg_schedule(osv.osv):
 						sch_bom_qty = real_bom_qty * order_item.pump_rem_qty
 					
 					if bom_item.flag_applicable == True:
-						print "sch_bom_qty",sch_bom_qty
 						schedule_item_vals = {
 													
 							'header_id': entry.id,
