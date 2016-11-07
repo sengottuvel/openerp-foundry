@@ -2107,7 +2107,7 @@ class ch_wo_accessories_bot(osv.osv):
 		#~ 'uom_conversation_factor': fields.selection([('one_dimension','One Dimension'),('two_dimension','Two Dimension')],'UOM Conversation Factor'),
 		'position_id': fields.many2one('kg.position.number','Position No'),
 		'csd_no': fields.char('CSD No.'),
-		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', domain=[('type','=','ms')], ondelete='cascade',required=True),
+		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', domain=[('type','=','bot')], ondelete='cascade',required=True),
 		'item_name': fields.related('ms_id','name', type='char',size=128,string='Item Name', store=True),
 		'qty': fields.integer('Qty', required=True),
 		'flag_applicable': fields.boolean('Is Applicable'),

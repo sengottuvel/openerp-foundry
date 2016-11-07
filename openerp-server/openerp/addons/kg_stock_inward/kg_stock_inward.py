@@ -98,7 +98,7 @@ class kg_stock_inward(osv.osv):
        
 
 	def entry_confirm(self,cr,uid,ids,context=None):
-		foundry_obj = self.pool.get('kg.foundry.stock')
+		
 		inward_line_obj = self.pool.get('ch.stock.inward.details')
 		
 		today = date.today()
@@ -106,24 +106,6 @@ class kg_stock_inward(osv.osv):
 		
 		entry = self.browse(cr,uid,ids[0])
 		for line_item in entry.line_ids:
-			#### Stock Updation Block Starts Here ###
-			
-			foundry_stock_vals = {
-			'company_id':entry.company_id.id,
-			'division_id':entry.division_id.id or None,
-			'location':line_item.location,
-			'pattern_id':line_item.pattern_id.id or None,
-			'moc_id':line_item.moc_id.id or None,
-			'stock_inward_id':line_item.id,
-			'qty':line_item.qty,
-			'alloc_qty':0,
-			'type':'IN',
-			'creation_date':entry.entry_date,
-			'unit_price':line_item.unit_price or 0.00,
-			'pump_model_id':line_item.pump_model_id.id or None
-			}
-							
-			stock_id = foundry_obj.create(cr, uid, foundry_stock_vals)
 			
 			inward_line_obj.write(cr, uid, [line_item.id], {'available_qty':line_item.qty})
 					

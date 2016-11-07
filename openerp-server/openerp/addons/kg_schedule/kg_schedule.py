@@ -1426,7 +1426,7 @@ class kg_schedule(osv.osv):
 						select (raw.qty * acc_order_ms.qty) as indent_qty,raw.product_id,wo_line.pump_model_id,
 						wo_acc_line.header_id as order_line_id
 						from ch_ms_raw_material as raw
-						left join ch_wo_accessories_ms acc_order_ms on raw.header_id = acc_order_ms.moc_id
+						left join ch_wo_accessories_ms acc_order_ms on raw.header_id = acc_order_ms.ms_id
 						left join ch_wo_accessories wo_acc_line on acc_order_ms.header_id = wo_acc_line.id
 						left join ch_work_order_details wo_line on wo_acc_line.header_id = wo_line.id
 						where acc_order_ms.flag_applicable = 't' and wo_acc_line.header_id in (select distinct order_line_id 
@@ -1491,7 +1491,7 @@ class kg_schedule(osv.osv):
 										select (raw.qty * acc_order_ms.qty) as indent_qty,raw.product_id,raw.uom,wo_line.pump_model_id,
 										wo_acc_line.header_id as order_line_id, raw.id as ms_item, acc_order_ms.id as order_ms_id
 										from ch_ms_raw_material as raw
-										left join ch_wo_accessories_ms acc_order_ms on raw.header_id = acc_order_ms.moc_id
+										left join ch_wo_accessories_ms acc_order_ms on raw.header_id = acc_order_ms.ms_id
 										left join ch_wo_accessories wo_acc_line on acc_order_ms.header_id = wo_acc_line.id
 										left join ch_work_order_details wo_line on wo_acc_line.header_id = wo_line.id
 										where acc_order_ms.flag_applicable = 't' and wo_acc_line.header_id in (select distinct order_line_id 
@@ -1568,7 +1568,7 @@ class kg_schedule(osv.osv):
 						select (raw.qty * acc_order_bot.qty) as indent_qty,raw.product_id,wo_line.pump_model_id,
 						wo_acc_line.header_id as order_line_id
 						from ch_ms_raw_material as raw
-						left join ch_wo_accessories_bot acc_order_bot on raw.header_id = acc_order_bot.moc_id
+						left join ch_wo_accessories_bot acc_order_bot on raw.header_id = acc_order_bot.ms_id
 						left join ch_wo_accessories wo_acc_line on acc_order_bot.header_id = wo_acc_line.id
 						left join ch_work_order_details wo_line on wo_acc_line.header_id = wo_line.id
 						where acc_order_bot.flag_applicable = 't' and wo_acc_line.header_id in (select distinct order_line_id 
@@ -1636,7 +1636,7 @@ class kg_schedule(osv.osv):
 									wo_acc_line.header_id as order_line_id,wo_line.pump_model_id,
 									acc_order_bot.id as bot_item
 									from ch_ms_raw_material as raw
-									left join ch_wo_accessories_bot acc_order_bot on raw.header_id = acc_order_bot.moc_id
+									left join ch_wo_accessories_bot acc_order_bot on raw.header_id = acc_order_bot.ms_id
 									left join ch_wo_accessories wo_acc_line on acc_order_bot.header_id = wo_acc_line.id
 									left join ch_work_order_details wo_line on wo_acc_line.header_id = wo_line.id
 									where acc_order_bot.flag_applicable = 't' and wo_acc_line.header_id in (select distinct order_line_id 
