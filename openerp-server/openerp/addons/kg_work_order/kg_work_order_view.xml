@@ -272,16 +272,16 @@
 								<form string="Accessories Entry Form">
 									<group colspan="4">
 										<group>
-											<field name="access_id" required="1"/>
-											<field name="moc_id" required="1"/>
+											<field name="access_id" required="1" attrs="{'readonly': [('load_access','=',True)]}"/>
+											<field name="moc_id" required="1" attrs="{'readonly': [('load_access','=',True)]}"/>
 										</group>
 										<group>
-											<field name="qty" required="1"/>
-											<field name="oth_spec"/>
+											<field name="qty" required="1" attrs="{'readonly': [('load_access','=',True)]}"/>
+											<field name="oth_spec" attrs="{'readonly': [('load_access','=',True)]}"/>
 										</group>
 										<group>
 										<group>
-											<field name="load_access" on_change="onchange_load_access(load_access,access_id,moc_id)"/>
+											<field name="load_access" on_change="onchange_load_access(load_access,access_id,moc_id,qty)"/>
 										</group>
 										<group>
 										</group>

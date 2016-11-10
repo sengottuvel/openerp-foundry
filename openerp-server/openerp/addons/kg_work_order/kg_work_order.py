@@ -1969,7 +1969,7 @@ class ch_wo_accessories(osv.osv):
 		
 		]
 		
-	def onchange_load_access(self, cr, uid, ids, load_access,access_id,moc_id):
+	def onchange_load_access(self, cr, uid, ids, load_access,access_id,moc_id,qty):
 		fou_vals=[]
 		ms_vals=[]
 		bot_vals=[]
@@ -1988,7 +1988,7 @@ class ch_wo_accessories(osv.osv):
 									'pattern_id': item.pattern_id.id,
 									'pattern_name': item.pattern_name,
 									'moc_id': moc_id,
-									'qty': item.qty,
+									'qty': item.qty * qty,
 									'load_bom': True,
 									'is_applicable': True,
 									
@@ -2001,7 +2001,7 @@ class ch_wo_accessories(osv.osv):
 									'position_id': item.position_id.id,							
 									'ms_id': item.ms_id.id,
 									'moc_id': moc_id,
-									'qty': item.qty,
+									'qty': item.qty * qty,
 									'load_bom': True,
 									'is_applicable': True,
 									
@@ -2014,7 +2014,7 @@ class ch_wo_accessories(osv.osv):
 									'position_id': item.position_id.id,							
 									'ms_id': item.ms_id.id,
 									'moc_id': moc_id,
-									'qty': item.qty,
+									'qty': item.qty * qty,
 									'load_bom': True,
 									'is_applicable': True,
 									'csd_no': item.csd_no,
@@ -2072,7 +2072,6 @@ class ch_wo_accessories_ms(osv.osv):
 		'name': fields.related('ms_id','name', type='char',size=128,string='Item Name', store=True),
 		
 		'qty': fields.integer('Qty', required=True),
-		'flag_applicable': fields.boolean('Is Applicable'),
 		'remarks':fields.text('Remarks'),   
 		'is_applicable': fields.boolean('Is Applicable'),
 		'load_bom': fields.boolean('Load BOM'),
@@ -2100,17 +2099,11 @@ class ch_wo_accessories_bot(osv.osv):
 	
 		### BOT Item Details ####
 		'header_id':fields.many2one('ch.wo.accessories', 'Header Id', ondelete='cascade'),
-		
-		#~ 'product_id':fields.many2one('product.product', 'Item Name',domain="[('state','not in',('reject','cancel'))]"),
-		#~ 'brand_id': fields.many2one('kg.brand.master','Brand', domain="[('state','not in',('reject','cancel'))]"), 
-		#~ 'uom_id': fields.many2one('product.uom','UOM'),		
-		#~ 'uom_conversation_factor': fields.selection([('one_dimension','One Dimension'),('two_dimension','Two Dimension')],'UOM Conversation Factor'),
 		'position_id': fields.many2one('kg.position.number','Position No'),
 		'csd_no': fields.char('CSD No.'),
 		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', domain=[('type','=','bot')], ondelete='cascade',required=True),
 		'item_name': fields.related('ms_id','name', type='char',size=128,string='Item Name', store=True),
 		'qty': fields.integer('Qty', required=True),
-		'flag_applicable': fields.boolean('Is Applicable'),
 		'remarks':fields.text('Remarks'),   
 		'is_applicable': fields.boolean('Is Applicable'),
 		'load_bom': fields.boolean('Load BOM'),
