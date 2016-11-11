@@ -247,8 +247,8 @@
 							<field name="line_ids_b" nolabel="1" context="{'order_category':order_category,'flag_standard':flag_standard}" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
 								<tree string="Order BOT Details Entry Tree" editable="bottom">	
 									<field name="order_category" invisible="1"/>
-									<field name="item_name" attrs="{'readonly': [('entry_mode','=','auto')]}"/>
-									<field name="bot_id" attrs="{'readonly': [('entry_mode','=','auto')]}"/>											
+									<field name="bot_id" attrs="{'readonly': [('entry_mode','=','auto')]}"/>	
+									<field name="item_name" attrs="{'readonly': [('entry_mode','=','auto')]}"/>																			
 									<field name="qty" attrs="{'readonly': [('order_category','=','pump')]}"/>
 									<field name="unit_price"/>
 									<field name="flag_applicable"/>
