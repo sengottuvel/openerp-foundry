@@ -686,132 +686,132 @@ class ch_work_order_details(osv.osv):
 					where bom.header_id = (select id from kg_bom where pump_model_id = %s and active='t') ''',[pump_model_id])
 			bom_details = cr.dictfetchall()
 			
-			if order_category == 'pump' :
-				for bom_details in bom_details:
-					if bom_details['position_id'] == None:
-						raise osv.except_osv(_('Warning!'),
-						_('Kindly Configure Position No. in Foundry Items for respective Pump Bom and proceed further !!'))
+			
+			for bom_details in bom_details:
+				if bom_details['position_id'] == None:
+					raise osv.except_osv(_('Warning!'),
+					_('Kindly Configure Position No. in Foundry Items for respective Pump Bom and proceed further !!'))
+				
+				if order_category == 'pump' :
+					applicable = True
+				if order_category in ('spare','pump_spare'):
+					applicable = False
 					
-					if order_category == 'pump' :
-						applicable = True
-					if order_category in ('spare','pump_spare'):
-						applicable = False
-						
-					if qty == 0:
-						bom_qty = bom_details['qty']
-					if qty > 0:
-						bom_qty = qty * bom_details['qty']
-						
-					### Loading MOC from MOC Construction
+				if qty == 0:
+					bom_qty = bom_details['qty']
+				if qty > 0:
+					bom_qty = qty * bom_details['qty']
 					
-					if moc_construction_id != False:
-						
-						cr.execute(''' select pat_moc.moc_id
-							from ch_mocwise_rate pat_moc
-							LEFT JOIN kg_moc_construction const on const.id = pat_moc.code
-							where pat_moc.header_id = %s and const.id = %s ''',[bom_details['pattern_id'],moc_construction_id])
-						const_moc_id = cr.fetchone()
-						if const_moc_id != None:
-							moc_id = const_moc_id[0]
-						else:
-							moc_id = False
+				### Loading MOC from MOC Construction
+				
+				if moc_construction_id != False:
+					
+					cr.execute(''' select pat_moc.moc_id
+						from ch_mocwise_rate pat_moc
+						LEFT JOIN kg_moc_construction const on const.id = pat_moc.code
+						where pat_moc.header_id = %s and const.id = %s ''',[bom_details['pattern_id'],moc_construction_id])
+					const_moc_id = cr.fetchone()
+					if const_moc_id != None:
+						moc_id = const_moc_id[0]
 					else:
 						moc_id = False
-					wgt = 0.00	
-					if moc_id != False:
-						print "moc_id",moc_id
-						moc_rec = moc_obj.browse(cr, uid, moc_id)
-						print "moc_rec",moc_rec
-						if moc_rec.weight_type == 'ci':
-							wgt =  bom_details['ci_weight']
-						if moc_rec.weight_type == 'ss':
-							wgt = bom_details['pcs_weight']
-						if moc_rec.weight_type == 'non_ferrous':
-							wgt = bom_details['nonferous_weight']
-						
-						
-					bom_vals.append({
-														
-						'bom_id': bom_details['header_id'],
-						'bom_line_id': bom_details['id'],
-						'pattern_id': bom_details['pattern_id'],
-						'pattern_name': bom_details['pattern_name'],						
-						'weight': wgt or 0.00,								  
-						'pos_no': bom_details['pos_no'],
-						'position_id': bom_details['position_id'],				  
-						'qty' : bom_qty,				   
-						'schedule_qty' : bom_qty,				  
-						'production_qty' : 0,				   
-						'flag_applicable' : applicable,
-						'order_category':	order_category,
-						'moc_id': moc_id,
-						'flag_standard':flag_standard,
-						'entry_mode':'auto'	  
-						})
-						
+				else:
+					moc_id = False
+				wgt = 0.00	
+				if moc_id != False:
+					print "moc_id",moc_id
+					moc_rec = moc_obj.browse(cr, uid, moc_id)
+					print "moc_rec",moc_rec
+					if moc_rec.weight_type == 'ci':
+						wgt =  bom_details['ci_weight']
+					if moc_rec.weight_type == 'ss':
+						wgt = bom_details['pcs_weight']
+					if moc_rec.weight_type == 'non_ferrous':
+						wgt = bom_details['nonferous_weight']
 					
-				#### Loading Machine Shop details
+					
+				bom_vals.append({
+													
+					'bom_id': bom_details['header_id'],
+					'bom_line_id': bom_details['id'],
+					'pattern_id': bom_details['pattern_id'],
+					'pattern_name': bom_details['pattern_name'],						
+					'weight': wgt or 0.00,								  
+					'pos_no': bom_details['pos_no'],
+					'position_id': bom_details['position_id'],				  
+					'qty' : bom_qty,				   
+					'schedule_qty' : bom_qty,				  
+					'production_qty' : 0,				   
+					'flag_applicable' : applicable,
+					'order_category':	order_category,
+					'moc_id': moc_id,
+					'flag_standard':flag_standard,
+					'entry_mode':'auto'	  
+					})
+					
 				
-				bom_ms_obj = self.pool.get('ch.machineshop.details')
-				cr.execute(''' select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
-						from ch_machineshop_details
-						where header_id = (select id from kg_bom where pump_model_id = %s and active='t') ''',[pump_model_id])
-				bom_ms_details = cr.dictfetchall()
-				for bom_ms_details in bom_ms_details:
-					if bom_ms_details['position_id'] == None:
-						raise osv.except_osv(_('Warning!'),
-						_('Kindly Configure Position No. in MS Items for respective Pump Bom and proceed further !!'))
-					if qty == 0:
-						bom_ms_qty = bom_ms_details['qty']
-					if qty > 0:
-						bom_ms_qty = qty * bom_ms_details['qty']
-						
-					if bom_ms_details['pos_no'] == None:
-						pos_no = 0
-					else:
-						pos_no = bom_ms_details['pos_no']
-						
-					machine_shop_vals.append({
-						
-						'pos_no': bom_ms_details['pos_no'],
-						'position_id': bom_ms_details['position_id'],
-						'bom_id': bom_ms_details['bom_id'],
-						'ms_id': bom_ms_details['ms_id'],
-						'name': bom_ms_details['name'],
-						'qty': bom_ms_qty,
-						'flag_applicable' : applicable,
-						'flag_standard':flag_standard,
-						'entry_mode':'auto',
-						'order_category':	order_category,
-								  
-						})
-						
-				#### Loading BOT Details
-				
-				bom_bot_obj = self.pool.get('ch.bot.details')
-				cr.execute(''' select id,bot_id,qty,header_id as bom_id
-						from ch_bot_details
-						where header_id = (select id from kg_bom where pump_model_id = %s and  active='t') ''',[pump_model_id])
-				bom_bot_details = cr.dictfetchall()
-				for bom_bot_details in bom_bot_details:
-					if qty == 0:
-						bom_bot_qty = bom_bot_details['qty']
-					if qty > 0:
-						bom_bot_qty = qty * bom_bot_details['qty']
-						
-						
-					bot_vals.append({
-						
-						'bot_line_id': bom_bot_details['id'],
-						'bom_id': bom_bot_details['bom_id'],							
-						'bot_id': bom_bot_details['bot_id'],
-						'qty': bom_bot_qty,
-						'flag_applicable' : applicable,
-						'flag_standard':flag_standard,
-						'entry_mode':'auto',
-						'order_category':order_category,
-								  
-						})
+			#### Loading Machine Shop details
+			
+			bom_ms_obj = self.pool.get('ch.machineshop.details')
+			cr.execute(''' select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
+					from ch_machineshop_details
+					where header_id = (select id from kg_bom where pump_model_id = %s and active='t') ''',[pump_model_id])
+			bom_ms_details = cr.dictfetchall()
+			for bom_ms_details in bom_ms_details:
+				if bom_ms_details['position_id'] == None:
+					raise osv.except_osv(_('Warning!'),
+					_('Kindly Configure Position No. in MS Items for respective Pump Bom and proceed further !!'))
+				if qty == 0:
+					bom_ms_qty = bom_ms_details['qty']
+				if qty > 0:
+					bom_ms_qty = qty * bom_ms_details['qty']
+					
+				if bom_ms_details['pos_no'] == None:
+					pos_no = 0
+				else:
+					pos_no = bom_ms_details['pos_no']
+					
+				machine_shop_vals.append({
+					
+					'pos_no': bom_ms_details['pos_no'],
+					'position_id': bom_ms_details['position_id'],
+					'bom_id': bom_ms_details['bom_id'],
+					'ms_id': bom_ms_details['ms_id'],
+					'name': bom_ms_details['name'],
+					'qty': bom_ms_qty,
+					'flag_applicable' : applicable,
+					'flag_standard':flag_standard,
+					'entry_mode':'auto',
+					'order_category':	order_category,
+							  
+					})
+					
+			#### Loading BOT Details
+			
+			bom_bot_obj = self.pool.get('ch.bot.details')
+			cr.execute(''' select id,bot_id,qty,header_id as bom_id
+					from ch_bot_details
+					where header_id = (select id from kg_bom where pump_model_id = %s and  active='t') ''',[pump_model_id])
+			bom_bot_details = cr.dictfetchall()
+			for bom_bot_details in bom_bot_details:
+				if qty == 0:
+					bom_bot_qty = bom_bot_details['qty']
+				if qty > 0:
+					bom_bot_qty = qty * bom_bot_details['qty']
+					
+					
+				bot_vals.append({
+					
+					'bot_line_id': bom_bot_details['id'],
+					'bom_id': bom_bot_details['bom_id'],							
+					'bot_id': bom_bot_details['bot_id'],
+					'qty': bom_bot_qty,
+					'flag_applicable' : applicable,
+					'flag_standard':flag_standard,
+					'entry_mode':'auto',
+					'order_category':order_category,
+							  
+					})
 							
 				
 			bed_bom_obj = self.pool.get('ch.order.bom.details')
