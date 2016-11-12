@@ -16,86 +16,84 @@
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
-					<sheet>
+					<group>
 						<group>
-							<group>
-								<field name="brand_type" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire'])]}"/>
-							</group>
-							<group>
-							</group>
+							<field name="brand_type" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire'])]}"/>
 						</group>
 						<group>
-							<group>
-								<field name="source_brand" attrs="{'invisible':[('brand_type','=','new_brand')],'readonly': [('copy_flag','=',True)], 'required': [('brand_type','=','copy_brand')]}"/>
-							</group>
-							<group>
-								<button name="copy_brand" type="object" string="Copy" class="oe_highlight" attrs="{'invisible':['|',('brand_type','=','new_brand'),('copy_flag','=',True)]}"/>
-							</group>
-						</group>		
-						
-						
+						</group>
+					</group>
+					<group>
 						<group>
-							<group>						
-								<field name="product_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" on_change="onchange_product(product_id)"/>
-								<field name="uom_id" on_change="onchange_product_uom(product_id,uom_id)" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="latest_price" invisible="1"/>																				
-								<field name="name" invisible="1"/>																				
-								<field name="category_type" invisible="1"/>	
-								<field name="modify" invisible = "1"/>																			
-								<field name="copy_flag" invisible="1"/>																				
-								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
-							</group>
-							<group>
-								
-								<field name="eff_date" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>														
-								<field name="state" style="width: 30%%" class="att_state_change"/>								
-							</group>
+							<field name="source_brand" attrs="{'invisible':[('brand_type','=','new_brand')],'readonly': [('copy_flag','=',True)], 'required': [('brand_type','=','copy_brand')]}"/>
 						</group>
-						<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
-							<group>	
-								<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							</group>
-							<group>												
-								<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','confirmed'])], 'readonly': [('state','in',['cancel'])]}"/>												
-							</group>
+						<group>
+							<button name="copy_brand" type="object" string="Copy" class="oe_highlight" attrs="{'invisible':['|',('brand_type','=','new_brand'),('copy_flag','=',True)]}"/>
 						</group>
-						<notebook>
-							<page string="Brand MOC Rate Details">	
-								<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire'])]}">
-									<tree string="Brand Moc Rate Details Entry Tree" editable="top" >									
-										<field name="brand_id" required="1"/>											
-										<field name="moc_id" on_change="onchange_moc(moc_id)" required="1"/>	
-										<field name="rate" />
-										<field name="purchase_price" />
-										<field name="remarks" widget="char"/>														
-										<field name="name" invisible="1"/>														
-									</tree>
-								</field>																								
-							</page>
-							<page string="Entry Info">
-									<group>
-										<field name="company_id"/>
-										<field name="active"/>			
-									</group>
-									<group>
-									<group>
-										<field name="user_id"/>
-										<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
-										<field name="ap_rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>
-										<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
-										<field name="update_user_id"/>
-									</group>
-									<group>
-										<field name="crt_date"/>
-										<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
-										<field name="ap_rej_date" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>
-										<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
-										<field name="update_date"/>
-									</group>
+					</group>		
+					
+					
+					<group>
+						<group>						
+							<field name="product_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" on_change="onchange_product(product_id)"/>
+							<field name="uom_id" on_change="onchange_product_uom(product_id,uom_id)" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="latest_price" invisible="1"/>																				
+							<field name="name" invisible="1"/>																				
+							<field name="category_type" invisible="1"/>	
+							<field name="modify" invisible = "1"/>																			
+							<field name="copy_flag" invisible="1"/>																				
+							<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+						</group>
+						<group>
+							
+							<field name="eff_date" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>														
+							<field name="state" style="width: 30%%" class="att_state_change"/>								
+						</group>
+					</group>
+					<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
+						<group>	
+							<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+						</group>
+						<group>												
+							<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','confirmed'])], 'readonly': [('state','in',['cancel'])]}"/>												
+						</group>
+					</group>
+					<notebook>
+						<page string="Brand MOC Rate Details">	
+							<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire'])]}">
+								<tree string="Brand Moc Rate Details Entry Tree" editable="top" >									
+									<field name="brand_id" required="1"/>											
+									<field name="moc_id" on_change="onchange_moc(moc_id)" required="1"/>	
+									<field name="rate" />
+									<field name="purchase_price" />
+									<field name="remarks" widget="char"/>														
+									<field name="name" invisible="1"/>														
+								</tree>
+							</field>																								
+						</page>
+						<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+									<field name="active"/>			
 								</group>
-							</page>
-						</notebook>															
-					</sheet>
+								<group>
+								<group>
+									<field name="user_id"/>
+									<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="ap_rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>
+									<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="ap_rej_date" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>
+									<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>															
 				</form>
 			</field> 
 		</record>
@@ -195,7 +193,10 @@
 		<!-- Menu Name Start here --> 
 		
 			<menuitem action="mma_brandmocrate_design_master" name="Brand/Moc/Rate-Design" id="mam_brandmocrate_design_master" parent="kg_pumpmodel_master.mpm_planning_master" sequence="15"/> 
-			
+		
+		<!-- Brand/Moc/Rate-Purchase Master  --> 
+			<menuitem action="mma_brandmocrate_purchase_master" name="Brand/Moc/Rate-Purchase" id="mam_brandmocrate_purchase_master" parent="kg_menus.ppm_master_menu" sequence="13"/>
+				 
 		<!-- Menu Name End here --> 
 
 	

@@ -11,56 +11,53 @@
 			<field name="name">Subcontract List Form</field>
 			<field name="model">kg.subcontract.process</field>
 			<field name="arch" type="xml">
-				<form string="Subcontract List" version="7.0" create="false">
-					<sheet>		
+				<form string="Subcontract List" version="7.0" create="false">						
+					<group string="SC Details">
+						<group>
+							<field name="name"/>
+							<field name="actual_qty" readonly="1"/>
+						</group>											
+						<group>
+							<field name="entry_date" readonly="1"/>
+							<field name="wo_state" invisible="1"/>
+						</group>					
+					</group>
+					<group string="Work Order Details">
+						<group>
+							<field name="order_no" readonly="1"/>
+							<field name="order_priority" string="Category" readonly="1"/>
+							<field name="pattern_id" invisible="1"/>
+							<field name="item_code" readonly="1" />
+							<field name="moc_id" readonly="1"/>
+						</group>											
+						<group>
+							<field name="order_delivery_date"/>
+							<field name="pump_model_id" readonly="1"/>
+							<field name="pattern_name" invisible="1"/>
+							<field name="item_name" readonly="1"/>
+						</group>					
+					</group>
+					<notebook>
 						
-						<group string="SC Details">
+						<page string="Entry Info">
 							<group>
-								<field name="name"/>
-								<field name="actual_qty" readonly="1"/>
-							</group>											
+								<field name="company_id"/>
+							</group>
 							<group>
-								<field name="entry_date" readonly="1"/>
-								<field name="wo_state" invisible="1"/>
-							</group>					
-						</group>
-						<group string="Work Order Details">
+								<field name="active"/>
+							</group>
 							<group>
-								<field name="order_no" readonly="1"/>
-								<field name="order_priority" string="Category" readonly="1"/>
-								<field name="pattern_id" invisible="1"/>
-								<field name="item_code" readonly="1" />
-								<field name="moc_id" readonly="1"/>
-							</group>											
-							<group>
-								<field name="order_delivery_date"/>
-								<field name="pump_model_id" readonly="1"/>
-								<field name="pattern_name" invisible="1"/>
-								<field name="item_name" readonly="1"/>
-							</group>					
-						</group>
-						<notebook>
-							
-							<page string="Entry Info">
 								<group>
-									<field name="company_id"/>
+									<field name="user_id"/>
+									<field name="update_user_id"/>
 								</group>
 								<group>
-									<field name="active"/>
+									<field name="crt_date"/>
+									<field name="update_date"/>
 								</group>
-								<group>
-									<group>
-										<field name="user_id"/>
-										<field name="update_user_id"/>
-									</group>
-									<group>
-										<field name="crt_date"/>
-										<field name="update_date"/>
-									</group>
-								</group>
-							</page>
-						</notebook>
-					</sheet>
+							</group>
+						</page>
+					</notebook>
 				</form>
 			</field>
 		</record>
@@ -202,77 +199,75 @@
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="approve_dc" type="object" string="Approve &amp; DC" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
-					<sheet>		
+					<group>
 						<group>
+							<field name="name"/>
+							<field name="contractor_id" on_change="onchange_contractor(contractor_id)" required="1"  attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="phone" readonly="1"/>
+							<field name="wo_value" readonly="1"/>								
+						</group>											
+						<group>
+							<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="contact_person" readonly="1"/>
+							<field name="billing_type" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="delivery_date" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="flag_order" invisible="1"/>
+							<field name="flag_spl_app" invisible="1"/>
+							<field name="flag_app" invisible="1"/>
+							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
+						</group>					
+					</group>
+					<notebook>
+						<page string="Work Order Details" attrs="{'invisible': [('flag_order','!=',True)]}">
+							<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}" >
+								<tree string = "Work Order Items" >
+									<field name="order_no" readonly="1"/>
+									<field name="item_code" readonly="1"/>
+									<field name="item_name" readonly="1"/>
+									<field name="position_id" readonly="1"/>
+									<field name="moc_id" readonly="1"/>
+									<field name="qty" required="1"/>										
+									<field name="amount" required="1" readonly="1"/>
+									<field name="remarks" widget="char"/>
+									<field name="dc_flag" invisible="1"/>
+								</tree>
+							</field>
+						</page>
+						<page string="Select Items">
+							<field name="sc_line_ids" attrs="{'readonly': [('state','not in',['draft'])]}">
+								<tree string="SC Items" create="false">
+									<field name="order_no"/>
+									<field name="order_delivery_date"/>
+									<field name="order_priority" string="Category"/>
+									<field name="pump_model_id"/>
+									<field name="item_code" />
+									<field name="item_name"/>
+									<field name="moc_id"/>
+									<field name="actual_qty"/>
+								</tree>
+							</field>
+							<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','not in',['draft'])]}"/>
+						</page>
+						
+						<page string="Entry Info">
 							<group>
-								<field name="name"/>
-								<field name="contractor_id" on_change="onchange_contractor(contractor_id)" required="1"  attrs="{'readonly': [('state','not in',['draft'])]}"/>
-								<field name="phone" readonly="1"/>
-								<field name="wo_value" readonly="1"/>								
-							</group>											
+								<field name="company_id"/>
+							</group>
 							<group>
-								<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-								<field name="contact_person" readonly="1"/>
-								<field name="billing_type" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-								<field name="delivery_date" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-								<field name="flag_order" invisible="1"/>
-								<field name="flag_spl_app" invisible="1"/>
-								<field name="flag_app" invisible="1"/>
-								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
-							</group>					
-						</group>
-						<notebook>
-							<page string="Work Order Details" attrs="{'invisible': [('flag_order','!=',True)]}">
-								<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}" >
-									<tree string = "Work Order Items" >
-										<field name="order_no" readonly="1"/>
-										<field name="item_code" readonly="1"/>
-										<field name="item_name" readonly="1"/>
-										<field name="position_id" readonly="1"/>
-										<field name="moc_id" readonly="1"/>
-										<field name="qty" required="1"/>										
-										<field name="amount" required="1" readonly="1"/>
-										<field name="remarks" widget="char"/>
-										<field name="dc_flag" invisible="1"/>
-									</tree>
-								</field>
-							</page>
-							<page string="Select Items">
-								<field name="sc_line_ids" attrs="{'readonly': [('state','not in',['draft'])]}">
-									<tree string="SC Items" create="false">
-										<field name="order_no"/>
-										<field name="order_delivery_date"/>
-										<field name="order_priority" string="Category"/>
-										<field name="pump_model_id"/>
-										<field name="item_code" />
-										<field name="item_name"/>
-										<field name="moc_id"/>
-										<field name="actual_qty"/>
-									</tree>
-								</field>
-								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','not in',['draft'])]}"/>
-							</page>
-							
-							<page string="Entry Info">
+								<field name="active"/>
+							</group>
+							<group>
 								<group>
-									<field name="company_id"/>
+									<field name="user_id"/>
+									<field name="update_user_id"/>
 								</group>
 								<group>
-									<field name="active"/>
+									<field name="crt_date"/>
+									<field name="update_date"/>
 								</group>
-								<group>
-									<group>
-										<field name="user_id"/>
-										<field name="update_user_id"/>
-									</group>
-									<group>
-										<field name="crt_date"/>
-										<field name="update_date"/>
-									</group>
-								</group>
-							</page>
-						</notebook>
-					</sheet>
+							</group>
+						</page>
+					</notebook>
 				</form>
 			</field>
 		</record>
@@ -532,96 +527,94 @@
 					<header>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
-					<sheet>		
+					<group>
 						<group>
-							<group>
-								<field name="name"/>
-								<field name="transfer_type" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
-								<field name="to_division_id" attrs="{'invisible': [('transfer_type','=','sub_contractor')],'required': [('transfer_type','=','internal')],'readonly': [('state','in',['confirmed','cancel'])]}"/>
-								<field name="contractor_id" on_change="onchange_contractor(contractor_id)"  attrs="{'readonly': [('state','in',['confirmed','cancel'])], 'invisible': [('transfer_type','=','internal')],'required': [('transfer_type','=','sub_contractor')]}"/>	
-								<field name="phone" readonly="1" attrs="{'invisible': [('transfer_type','=','internal')]}"/>												
-								
-							</group>											
-							<group>
-								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>								
-								<field name="division_id" readonly="1"/>
-								<field name="contact_person" readonly="1" attrs="{'invisible': [('transfer_type','=','internal')]}"/>
-								<field name="vehicle_detail" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}" required="1"/>			
-								<field name="flag_dc" invisible="1"/>			
-								<field name="entry_mode" invisible="1"/>	
-								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>		
-							</group>					
-						</group>
-						<notebook>
-							<page string="DC Details" attrs="{'invisible': [('flag_dc','!=',True)]}">
-								<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
-									<tree string = "Work Order Items" editable="bottom">
-										<field name="order_no" readonly="1"/>
-										<field name="item_code" readonly="1"/>
-										<field name="item_name" readonly="1"/>
-										<field name="position_id" readonly="1"/>
-										<field name="moc_id" readonly="1"/>
-										<field name="qty" required="1" attrs="{'readonly': [('entry_mode','=','from_wo')]}"/>	
-										<field name="operation_id" required="1" widget="many2many_tags" attrs="{'readonly': [('entry_mode','=','from_wo')]}"/>							
-										<field name="each_weight" required="1" on_change="onchange_total_weight(each_weight,qty)"/>
-										<field name="totel_weight" readonly="1"/>
-										<field name="entry_mode" invisible="1"/>
-										<field name="entry_type" invisible="1"/>
-										<field name="state" invisible="1"/>
-										
-										<field name="remarks" widget="char"/>
-									</tree>
-								</field>
-							</page>
-							<page string="Select Items" attrs="{'invisible': [('entry_mode','=','from_wo')]}">
-								<field name="dc_internal_line_ids" attrs="{'readonly': [('state','in',['confirmed'])],'invisible': [('transfer_type','=','sub_contractor')]}">
-									<tree string="SC Items" create="false">
-										<field name="order_no"/>
-										<field name="order_delivery_date"/>
-										<field name="order_priority" string="Category"/>
-										<field name="pump_model_id"/>
-										<field name="item_code" />
-										<field name="item_name"/>
-										<field name="moc_id"/>
-										<field name="actual_qty"/>
-									</tree>
-								</field>
-								<field name="dc_sub_line_ids" attrs="{'readonly': [('state','in',['confirmed'])],'invisible': [('transfer_type','=','internal')]}">
-									<tree string="SC Items" create="false">
-										<field name="order_no"/>
-										<field name="order_delivery_date"/>
-										<field name="order_priority" string="Category"/>
-										<field name="pump_model_id"/>
-										<field name="item_code" />
-										<field name="item_name"/>
-										<field name="moc_id"/>
-										<field name="qty"/>
-									</tree>
-								</field>
-								
-								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
-							</page>
+							<field name="name"/>
+							<field name="transfer_type" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="to_division_id" attrs="{'invisible': [('transfer_type','=','sub_contractor')],'required': [('transfer_type','=','internal')],'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="contractor_id" on_change="onchange_contractor(contractor_id)"  attrs="{'readonly': [('state','in',['confirmed','cancel'])], 'invisible': [('transfer_type','=','internal')],'required': [('transfer_type','=','sub_contractor')]}"/>	
+							<field name="phone" readonly="1" attrs="{'invisible': [('transfer_type','=','internal')]}"/>												
 							
-							<page string="Entry Info">
+						</group>											
+						<group>
+							<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>								
+							<field name="division_id" readonly="1"/>
+							<field name="contact_person" readonly="1" attrs="{'invisible': [('transfer_type','=','internal')]}"/>
+							<field name="vehicle_detail" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}" required="1"/>			
+							<field name="flag_dc" invisible="1"/>			
+							<field name="entry_mode" invisible="1"/>	
+							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>		
+						</group>					
+					</group>
+					<notebook>
+						<page string="DC Details" attrs="{'invisible': [('flag_dc','!=',True)]}">
+							<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
+								<tree string = "Work Order Items" editable="bottom">
+									<field name="order_no" readonly="1"/>
+									<field name="item_code" readonly="1"/>
+									<field name="item_name" readonly="1"/>
+									<field name="position_id" readonly="1"/>
+									<field name="moc_id" readonly="1"/>
+									<field name="qty" required="1" attrs="{'readonly': [('entry_mode','=','from_wo')]}"/>	
+									<field name="operation_id" required="1" widget="many2many_tags" attrs="{'readonly': [('entry_mode','=','from_wo')]}"/>							
+									<field name="each_weight" required="1" on_change="onchange_total_weight(each_weight,qty)"/>
+									<field name="totel_weight" readonly="1"/>
+									<field name="entry_mode" invisible="1"/>
+									<field name="entry_type" invisible="1"/>
+									<field name="state" invisible="1"/>
+									
+									<field name="remarks" widget="char"/>
+								</tree>
+							</field>
+						</page>
+						<page string="Select Items" attrs="{'invisible': [('entry_mode','=','from_wo')]}">
+							<field name="dc_internal_line_ids" attrs="{'readonly': [('state','in',['confirmed'])],'invisible': [('transfer_type','=','sub_contractor')]}">
+								<tree string="SC Items" create="false">
+									<field name="order_no"/>
+									<field name="order_delivery_date"/>
+									<field name="order_priority" string="Category"/>
+									<field name="pump_model_id"/>
+									<field name="item_code" />
+									<field name="item_name"/>
+									<field name="moc_id"/>
+									<field name="actual_qty"/>
+								</tree>
+							</field>
+							<field name="dc_sub_line_ids" attrs="{'readonly': [('state','in',['confirmed'])],'invisible': [('transfer_type','=','internal')]}">
+								<tree string="SC Items" create="false">
+									<field name="order_no"/>
+									<field name="order_delivery_date"/>
+									<field name="order_priority" string="Category"/>
+									<field name="pump_model_id"/>
+									<field name="item_code" />
+									<field name="item_name"/>
+									<field name="moc_id"/>
+									<field name="qty"/>
+								</tree>
+							</field>
+							
+							<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
+						</page>
+						
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
 								<group>
-									<field name="company_id"/>
+									<field name="user_id"/>
+									<field name="update_user_id"/>
 								</group>
 								<group>
-									<field name="active"/>
+									<field name="crt_date"/>
+									<field name="update_date"/>
 								</group>
-								<group>
-									<group>
-										<field name="user_id"/>
-										<field name="update_user_id"/>
-									</group>
-									<group>
-										<field name="crt_date"/>
-										<field name="update_date"/>
-									</group>
-								</group>
-							</page>
-						</notebook>
-					</sheet>
+							</group>
+						</page>
+					</notebook>
 				</form>
 			</field>
 		</record>
@@ -783,92 +776,90 @@
 					<header>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
-					<sheet>		
+					<group>
 						<group>
-							<group>
-								<field name="name"/>
-								<field name="transfer_type" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
-								<field name="to_division_id" attrs="{'invisible': [('transfer_type','=','sub_contractor')],'required': [('transfer_type','=','internal')],'readonly': [('state','in',['confirmed','cancel'])]}"/>
-								<field name="contractor_id" on_change="onchange_contractor(contractor_id)"  attrs="{'readonly': [('state','in',['confirmed','cancel'])], 'invisible': [('transfer_type','=','internal')],'required': [('transfer_type','=','sub_contractor')]}"/>	
-								<field name="phone" readonly="1" attrs="{'invisible': [('transfer_type','=','internal')]}"/>																			
-								
-							</group>											
-							<group>
-								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
-								<field name="division_id" readonly="1"/>
-								<field name="contact_person" readonly="1" attrs="{'invisible': [('transfer_type','=','internal')]}"/>									
-								<field name="flag_inward" invisible="1"/>			
-								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
-							</group>					
-						</group>
-						<notebook>
-							<page string="Inward Details" attrs="{'invisible': [('flag_inward','!=',True)]}">
-								<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
-									<tree string = "Inward Items" editable="bottom">
-										<field name="order_no" readonly="1"/>
-										<field name="item_code" readonly="1"/>
-										<field name="item_name" readonly="1"/>
-										<field name="position_id" readonly="1"/>
-										<field name="moc_id" readonly="1"/>
-										<field name="qty" required="1"/>
-										<field name="operation_id" widget="many2many_tags" readonly="1"/>											
-										<field name="com_operation_id" readonly="1" widget="many2many_tags"/>											
-										<field name="each_weight" readonly="1" />
-										<field name="com_weight" required="1" on_change="onchange_com_weight(com_weight,qty)"/>
-										<field name="totel_weight" readonly="1"/>										
-										<field name="remarks" widget="char"/>
-									</tree>
-								</field>
-							</page>
-							<page string="Select Items">
-								<field name="dc_line_ids" attrs="{'readonly': [('state','in',['confirmed'])],'invisible': [('transfer_type','=','sub_contractor')]}">
-									<tree string="SC Items" create="false">
-										<field name="order_no"/>
-										<field name="order_delivery_date"/>
-										<field name="order_priority" string="Category"/>
-										<field name="pump_model_id"/>
-										<field name="item_code" />
-										<field name="item_name"/>
-										<field name="moc_id"/>
-										
-									</tree>
-								</field>
-								<field name="inward_sub_line_ids" attrs="{'readonly': [('state','in',['confirmed'])],'invisible': [('transfer_type','=','internal')]}">
-									<tree string="SC Items" create="false">
-										<field name="order_no"/>
-										<field name="order_delivery_date"/>
-										<field name="order_priority" string="Category"/>
-										<field name="pump_model_id"/>
-										<field name="item_code" />
-										<field name="item_name"/>
-										<field name="moc_id"/>
-										
-									</tree>
-								</field>							
-								
-								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
-							</page>
+							<field name="name"/>
+							<field name="transfer_type" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="to_division_id" attrs="{'invisible': [('transfer_type','=','sub_contractor')],'required': [('transfer_type','=','internal')],'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="contractor_id" on_change="onchange_contractor(contractor_id)"  attrs="{'readonly': [('state','in',['confirmed','cancel'])], 'invisible': [('transfer_type','=','internal')],'required': [('transfer_type','=','sub_contractor')]}"/>	
+							<field name="phone" readonly="1" attrs="{'invisible': [('transfer_type','=','internal')]}"/>																			
 							
-							<page string="Entry Info">
+						</group>											
+						<group>
+							<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="division_id" readonly="1"/>
+							<field name="contact_person" readonly="1" attrs="{'invisible': [('transfer_type','=','internal')]}"/>									
+							<field name="flag_inward" invisible="1"/>			
+							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+						</group>					
+					</group>
+					<notebook>
+						<page string="Inward Details" attrs="{'invisible': [('flag_inward','!=',True)]}">
+							<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
+								<tree string = "Inward Items" editable="bottom">
+									<field name="order_no" readonly="1"/>
+									<field name="item_code" readonly="1"/>
+									<field name="item_name" readonly="1"/>
+									<field name="position_id" readonly="1"/>
+									<field name="moc_id" readonly="1"/>
+									<field name="qty" required="1"/>
+									<field name="operation_id" widget="many2many_tags" readonly="1"/>											
+									<field name="com_operation_id" readonly="1" widget="many2many_tags"/>											
+									<field name="each_weight" readonly="1" />
+									<field name="com_weight" required="1" on_change="onchange_com_weight(com_weight,qty)"/>
+									<field name="totel_weight" readonly="1"/>										
+									<field name="remarks" widget="char"/>
+								</tree>
+							</field>
+						</page>
+						<page string="Select Items">
+							<field name="dc_line_ids" attrs="{'readonly': [('state','in',['confirmed'])],'invisible': [('transfer_type','=','sub_contractor')]}">
+								<tree string="SC Items" create="false">
+									<field name="order_no"/>
+									<field name="order_delivery_date"/>
+									<field name="order_priority" string="Category"/>
+									<field name="pump_model_id"/>
+									<field name="item_code" />
+									<field name="item_name"/>
+									<field name="moc_id"/>
+									
+								</tree>
+							</field>
+							<field name="inward_sub_line_ids" attrs="{'readonly': [('state','in',['confirmed'])],'invisible': [('transfer_type','=','internal')]}">
+								<tree string="SC Items" create="false">
+									<field name="order_no"/>
+									<field name="order_delivery_date"/>
+									<field name="order_priority" string="Category"/>
+									<field name="pump_model_id"/>
+									<field name="item_code" />
+									<field name="item_name"/>
+									<field name="moc_id"/>
+									
+								</tree>
+							</field>							
+							
+							<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
+						</page>
+						
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
 								<group>
-									<field name="company_id"/>
+									<field name="user_id"/>
+									<field name="update_user_id"/>
 								</group>
 								<group>
-									<field name="active"/>
+									<field name="crt_date"/>
+									<field name="update_date"/>
 								</group>
-								<group>
-									<group>
-										<field name="user_id"/>
-										<field name="update_user_id"/>
-									</group>
-									<group>
-										<field name="crt_date"/>
-										<field name="update_date"/>
-									</group>
-								</group>
-							</page>
-						</notebook>
-					</sheet>
+							</group>
+						</page>
+					</notebook>
 				</form>
 			</field>
 		</record>

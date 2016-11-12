@@ -15,67 +15,65 @@
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 						
 					</header>
-					<sheet>
-						<group>
-							<group>						
-								<field name="name"/>								
-								<field name="product_id" widget="many2many_tags" attrs="{'readonly': [('state','in',['approved','reject'])]}"/>
-								<field name="revision_mode" attrs="{'readonly': [('state','in',['approved','reject'])]}"/>	
-								<field name="rate" attrs="{'invisible':[('revision_mode','=','individual')], 'required': [('revision_mode','=','all')], 'readonly': [('state','in',['approved','reject'])]}"/>	
-								<field name="modify" invisible = "1"/>
-								<field name="line_product_id" invisible = "1"/>
-								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject'])]}"/>				
-							</group>
-							<group>	
-								<field name="entry_date" attrs="{'readonly': [('state','in',['approved','confirmed','reject'])]}"/>							
-								<field name="category_type" attrs="{'readonly': [('state','in',['approved','reject'])]}"/>							
-								<field name="value_type" attrs="{'invisible':[('revision_mode','=','individual')], 'required': [('revision_mode','=','all')], 'readonly': [('state','in',['approved','reject'])]}"/>							
-								<field name="state" style="width: 30%%" class="att_state_change"/>								
-							</group>
+					<group>
+						<group>						
+							<field name="name"/>								
+							<field name="product_id" widget="many2many_tags" attrs="{'readonly': [('state','in',['approved','reject'])]}"/>
+							<field name="revision_mode" attrs="{'readonly': [('state','in',['approved','reject'])]}"/>	
+							<field name="rate" attrs="{'invisible':[('revision_mode','=','individual')], 'required': [('revision_mode','=','all')], 'readonly': [('state','in',['approved','reject'])]}"/>	
+							<field name="modify" invisible = "1"/>
+							<field name="line_product_id" invisible = "1"/>
+							<field name="notes" attrs="{'readonly': [('state','in',['approved','reject'])]}"/>				
 						</group>
-						<group>							
-							<button name="load_item" type="object" string="Load Items" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible': [('state','in',['approved','reject'])]}"/>
-						</group>												
-						<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
-							<group>	
-								<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject'])]}"/>
-							</group>							
+						<group>	
+							<field name="entry_date" attrs="{'readonly': [('state','in',['approved','confirmed','reject'])]}"/>							
+							<field name="category_type" attrs="{'readonly': [('state','in',['approved','reject'])]}"/>							
+							<field name="value_type" attrs="{'invisible':[('revision_mode','=','individual')], 'required': [('revision_mode','=','all')], 'readonly': [('state','in',['approved','reject'])]}"/>							
+							<field name="state" style="width: 30%%" class="att_state_change"/>								
 						</group>
-						<notebook>
-							<page string="Rate Revision Details">	
-								<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject'])]}">
-									<tree string="Rate Revision Details Entry Tree" editable="top" create="false">	
-										<field name="product_id" readonly="1"/>										
-										<field name="brand_id" readonly="1"/>																		
-										<field name="moc_id" readonly="1" />	
-										<field name="design_rate" readonly="1" />										
-										<field name="new_design_rate" required="1" attrs="{'readonly': [('revision_mode','=','all')]}" />																																
-										<field name="revision_mode" invisible="1"/>																																
-									</tree>
-								</field>																								
-							</page>
-							<page string="Entry Info">
-									<group>
-										<field name="company_id"/>
-										<field name="active"/>
-									</group>
-									<group>
-									<group>
-										<field name="user_id"/>
-										<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
-										<field name="ap_rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>									
-										<field name="update_user_id"/>
-									</group>
-									<group>
-										<field name="crt_date"/>
-										<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
-										<field name="ap_rej_date" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>										
-										<field name="update_date"/>
-									</group>
+					</group>
+					<group>							
+						<button name="load_item" type="object" string="Load Items" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible': [('state','in',['approved','reject'])]}"/>
+					</group>												
+					<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
+						<group>	
+							<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject'])]}"/>
+						</group>							
+					</group>
+					<notebook>
+						<page string="Rate Revision Details">	
+							<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject'])]}">
+								<tree string="Rate Revision Details Entry Tree" editable="top" create="false">	
+									<field name="product_id" readonly="1"/>										
+									<field name="brand_id" readonly="1"/>																		
+									<field name="moc_id" readonly="1" />	
+									<field name="design_rate" readonly="1" />										
+									<field name="new_design_rate" required="1" attrs="{'readonly': [('revision_mode','=','all')]}" />																																
+									<field name="revision_mode" invisible="1"/>																																
+								</tree>
+							</field>																								
+						</page>
+						<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+									<field name="active"/>
 								</group>
-							</page>
-						</notebook>															
-					</sheet>
+								<group>
+								<group>
+									<field name="user_id"/>
+									<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="ap_rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>									
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="ap_rej_date" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>										
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>															
 				</form>
 			</field> 
 		</record>

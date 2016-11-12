@@ -13,231 +13,229 @@
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_cancel" type="object" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?" states="confirmed"/>
 					</header>
-					<sheet>		
-						<group string="Melting Details">
-							<group>
-								
-								<field name="name" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-								<field name="moc_id" attrs="{'readonly': [('state','not in',['draft'])]}" on_change="onchange_moc_details(moc_id)"/>
-								<field name="lining_age" attrs="{'readonly': [('state','not in',['draft'])]}"/>					
-								<field name="remark" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-								
-							</group>											
-							<group>
-								<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-								<field name="ladle_id" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-								<field name="furnace_id" attrs="{'readonly': [('state','not in',['draft'])]}"/>								
-								<field name="melting_hrs"  widget="float_time" attrs="{'readonly': [('state','not in',['draft'])]}"/>	
-								<field name="state" style="width: 30%%" class="att_state_change"/>	
-							</group>					
-						</group>
-						
-						<group string="Worker Details">
-							<group>
-								
-								<field name="supervisor_name" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-								<field name="employee_id" attrs="{'invisible': [('done_by','=','contractor')],'readonly': [('state','not in',['draft'])]}" widget="many2many_tags"/>
-								<field name="contractor_id" attrs="{'invisible': [('done_by','=','company_employee')],'readonly': [('state','not in',['draft'])]}"/>								
-							</group>											
-							<group>
-								<field name="done_by" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-								<field name="helper_count" attrs="{'invisible': [('done_by','=','contractor')],'readonly': [('state','not in',['draft'])]}"/>								
-							</group>					
-						</group>
-						
-						<group string="Power Control Details">
-							<group>
-								<label for="time" string="Time"/>
-								<div>
-									<div class="address_format">
-										<field name="time"  widget="float_time" style="width: 40%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-										<field name="time_type" style="width: 20%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-									</div>
+					<group string="Melting Details">
+						<group>
+							
+							<field name="name" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="moc_id" attrs="{'readonly': [('state','not in',['draft'])]}" on_change="onchange_moc_details(moc_id)"/>
+							<field name="lining_age" attrs="{'readonly': [('state','not in',['draft'])]}"/>					
+							<field name="remark" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							
+						</group>											
+						<group>
+							<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="ladle_id" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="furnace_id" attrs="{'readonly': [('state','not in',['draft'])]}"/>								
+							<field name="melting_hrs"  widget="float_time" attrs="{'readonly': [('state','not in',['draft'])]}"/>	
+							<field name="state" style="width: 30%%" class="att_state_change"/>	
+						</group>					
+					</group>
+					
+					<group string="Worker Details">
+						<group>
+							
+							<field name="supervisor_name" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="employee_id" attrs="{'invisible': [('done_by','=','contractor')],'readonly': [('state','not in',['draft'])]}" widget="many2many_tags"/>
+							<field name="contractor_id" attrs="{'invisible': [('done_by','=','company_employee')],'readonly': [('state','not in',['draft'])]}"/>								
+						</group>											
+						<group>
+							<field name="done_by" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="helper_count" attrs="{'invisible': [('done_by','=','contractor')],'readonly': [('state','not in',['draft'])]}"/>								
+						</group>					
+					</group>
+					
+					<group string="Power Control Details">
+						<group>
+							<label for="time" string="Time"/>
+							<div>
+								<div class="address_format">
+									<field name="time"  widget="float_time" style="width: 40%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+									<field name="time_type" style="width: 20%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 								</div>
-								
-								<field name="frequency" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-								<field name="output_volt" attrs="{'readonly': [('state','not in',['draft'])]}"/>								
-							</group>											
-							<group>
-								<field name="input_volt" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-								<field name="kw" attrs="{'readonly': [('state','not in',['draft'])]}"/>								
-							</group>					
-						</group>
-						<group string="Power Consumption">
-							<group>
-								<label for="initial_reading" string="Initial Reading"/>
-								<div>
-									<div class="address_format">
-										<field name="initial_reading" on_change="onchange_reading(initial_reading,final_reading)" style="width: 40%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-										<field name="initial_reading_type" style="width: 20%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-									</div>
-								</div>														
-							</group>
-							<group>
-								<label for="final_reading" string="Final Reading"/>
-								<div>
-									<div class="address_format">
-										<field name="final_reading" on_change="onchange_reading(initial_reading,final_reading)" style="width: 43%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-										<field name="final_reading_type" style="width: 20%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-									</div>
+							</div>
+							
+							<field name="frequency" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="output_volt" attrs="{'readonly': [('state','not in',['draft'])]}"/>								
+						</group>											
+						<group>
+							<field name="input_volt" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="kw" attrs="{'readonly': [('state','not in',['draft'])]}"/>								
+						</group>					
+					</group>
+					<group string="Power Consumption">
+						<group>
+							<label for="initial_reading" string="Initial Reading"/>
+							<div>
+								<div class="address_format">
+									<field name="initial_reading" on_change="onchange_reading(initial_reading,final_reading)" style="width: 40%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+									<field name="initial_reading_type" style="width: 20%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 								</div>
-							</group>											
-							<newline/>
-							<group>
-								<label for="total_units" string="Total Units"/>
-								<div>
-									<div class="address_format">
-										<field name="total_units" style="width: 40%%" />Units																
-									</div>
-								</div>
-							</group>	
-							<newline/>
-							<group>						
-									<field name="amount" style="width: 40%%" />	
-							</group>				
+							</div>														
 						</group>
-						<group string="Temp Details">
-							<group>
-								<label for="pouring_temp" string="Pouring Temp(℃ )"/>
-								<div>
-									<div class="address_format">
-										<field name="pouring_temp" style="width: 15%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>at
-										<field name="pouring_hrs" nolabel="1" widget="float_time" style="width: 15%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-										<field name="pouring_hrs_type" nolabel="1" style="width: 20%%" attrs="{'readonly': [('state','not in',['draft'])]}"/> Hour.
-									</div>
-								</div>							
-							</group>
-							<newline/>
-							<group>
-								<label for="ret" string="Return Metal"/>
-								<div>
-									<div class="address_format">
-										<field name="ret" style="width: 40%%" attrs="{'readonly': [('state','not in',['draft'])]}"/> Weight.										 										
-									</div>
+						<group>
+							<label for="final_reading" string="Final Reading"/>
+							<div>
+								<div class="address_format">
+									<field name="final_reading" on_change="onchange_reading(initial_reading,final_reading)" style="width: 43%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+									<field name="final_reading_type" style="width: 20%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 								</div>
-							</group>
-							<newline/>
-							<group>
-								<label for="tapping_temp" string="Tapping Temp(℃ )"/>
-								<div>
-									<div class="address_format">
-										<field name="tapping_temp" style="width: 40%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>									
-									</div>
-								</div>
-							</group>
-							<newline/>
-							<group>
-								<label for="pouring_finished" string="Pouring Finished at"/>
-								<div>
-									<div class="address_format">
-										<field name="pouring_finished"  widget="float_time" style="width: 15%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-										<field name="pouring_finished_time_type" style="width: 10%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>Liquid Metal Wt(kgs).
-										<field name="liquid_metal_wt" style="width: 15%%" attrs="{'readonly': [('state','not in',['draft'])]}" on_change="onchange_weight(liquid_metal_wt,ingot_wt)"/> Ingot Wt(kgs).
-										<field name="ingot_wt" style="width: 15%%" attrs="{'readonly': [('state','not in',['draft'])]}" on_change="onchange_weight(liquid_metal_wt,ingot_wt)"/>									
-									</div>
-								</div>								
-							</group>	
-							<newline/>
-							<group>
-								<label for="total_weight_metal" string="Total Weight"/>
-								<div>
-									<div class="address_format">
-										<field name="total_weight_metal" readonly="1"/>																
-									</div>									
-								</div>								
-							</group>										
-						</group>
-						<newline/>
-							<group>
-								<label for="various"/>
-								<div>
-									<div class="address_format">
-										<field name="various" readonly="1"/>																
-									</div>
-								</div>		
-						</group>
-						<newline/>
-							<group>
-								<label for="melt_cost" string="Melting Cost(Rs.)"/>
-								<div>
-									<div class="address_format">
-										<field name="melt_cost" readonly="1"/>																
-									</div>									
-								</div>								
-							</group>	
+							</div>
+						</group>											
 						<newline/>
 						<group>
+							<label for="total_units" string="Total Units"/>
+							<div>
+								<div class="address_format">
+									<field name="total_units" style="width: 40%%" />Units																
+								</div>
+							</div>
+						</group>	
+						<newline/>
+						<group>						
+								<field name="amount" style="width: 40%%" />	
+						</group>				
+					</group>
+					<group string="Temp Details">
+						<group>
+							<label for="pouring_temp" string="Pouring Temp(℃ )"/>
+							<div>
+								<div class="address_format">
+									<field name="pouring_temp" style="width: 15%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>at
+									<field name="pouring_hrs" nolabel="1" widget="float_time" style="width: 15%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+									<field name="pouring_hrs_type" nolabel="1" style="width: 20%%" attrs="{'readonly': [('state','not in',['draft'])]}"/> Hour.
+								</div>
+							</div>							
+						</group>
+						<newline/>
+						<group>
+							<label for="ret" string="Return Metal"/>
+							<div>
+								<div class="address_format">
+									<field name="ret" style="width: 40%%" attrs="{'readonly': [('state','not in',['draft'])]}"/> Weight.										 										
+								</div>
+							</div>
+						</group>
+						<newline/>
+						<group>
+							<label for="tapping_temp" string="Tapping Temp(℃ )"/>
+							<div>
+								<div class="address_format">
+									<field name="tapping_temp" style="width: 40%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>									
+								</div>
+							</div>
+						</group>
+						<newline/>
+						<group>
+							<label for="pouring_finished" string="Pouring Finished at"/>
+							<div>
+								<div class="address_format">
+									<field name="pouring_finished"  widget="float_time" style="width: 15%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+									<field name="pouring_finished_time_type" style="width: 10%%" attrs="{'readonly': [('state','not in',['draft'])]}"/>Liquid Metal Wt(kgs).
+									<field name="liquid_metal_wt" style="width: 15%%" attrs="{'readonly': [('state','not in',['draft'])]}" on_change="onchange_weight(liquid_metal_wt,ingot_wt)"/> Ingot Wt(kgs).
+									<field name="ingot_wt" style="width: 15%%" attrs="{'readonly': [('state','not in',['draft'])]}" on_change="onchange_weight(liquid_metal_wt,ingot_wt)"/>									
+								</div>
+							</div>								
+						</group>	
+						<newline/>
+						<group>
+							<label for="total_weight_metal" string="Total Weight"/>
+							<div>
+								<div class="address_format">
+									<field name="total_weight_metal" readonly="1"/>																
+								</div>									
+							</div>								
+						</group>										
+					</group>
+					<newline/>
+						<group>
+							<label for="various"/>
+							<div>
+								<div class="address_format">
+									<field name="various" readonly="1"/>																
+								</div>
+							</div>		
+					</group>
+					<newline/>
+						<group>
+							<label for="melt_cost" string="Melting Cost(Rs.)"/>
+							<div>
+								<div class="address_format">
+									<field name="melt_cost" readonly="1"/>																
+								</div>									
+							</div>								
+						</group>	
+					<newline/>
+					<group>
+						<group>
+							<field name="cancel_remark" attrs="{'invisible': [('state','not in',['cancel','confirmed'])],'readonly': [('state','not in',['confirmed'])]}"/>
+						</group>					
+					</group>						
+					<notebook>							
+						<page string="Raw Materials Details">	
+							<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel','reject'])]}" context="{'moc_id':moc_id}">
+								<tree string="Charge Details Entry Tree" editable="top" >									
+									<field name="product_id" />										   
+									<field name="moc_id" invisible="1"/>
+									<field name="first_addition" required="1" on_change="onchange_purchase_rate(product_id,moc_id,first_addition,second_addition)"/>
+									<field name="second_addition" required="1" on_change="onchange_purchase_rate(product_id,moc_id,first_addition,second_addition)"/>
+									<field name="total_weight" readonly="1" sum="Total Value" on_change="onchange_purchase_rate(product_id,moc_id,first_addition,second_addition)"/>
+									<field name="total_amount" readonly="1" sum="Total Value"/>
+									<field name="remarks" widget="char"/>														
+								</tree>
+							</field>																								
+						</page>
+						
+						<page string="Chemistry Details">	
+							<field name="line_ids_a" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel','reject'])]}" >
+								<tree string="Chemistry Details Entry Tree" editable="top" >									
+									<field name="chemistry_id" />										   
+									<field name="required_chemistry" required="1"/>
+									<field name="required_chemistry_max" required="1"/>
+									<field name="bath_1" required="1"/>
+									<field name="bath_2" />
+									<field name="final" required="1"/>
+									<field name="remarks" widget="char"/>														
+								</tree>
+							</field>																								
+						</page>
+						
+						<page string="Mechanical Properties">	
+							<field name="line_ids_b" nolabel="1" context="{'moc_id':moc_id}" >
+								<tree string="Mechanical Properties chart Tree" editable="top" >									
+									<field name="mechanical_id" on_change="onchange_uom_name(mechanical_id)"/>	
+									<field name="moc_id" invisible="1"/>										
+									<field name="uom" readonly="1" />											
+									<field name="min"/>											
+									<field name="max"/>											
+									<field name="mech_value" on_change="onchange_mpa_value(mech_value)"/>	
+									<field name="mpa_value" />				   
+																																					
+								</tree>
+							</field>																								
+						</page>			
+						<page string="Entry Info">
 							<group>
-								<field name="cancel_remark" attrs="{'invisible': [('state','not in',['cancel','confirmed'])],'readonly': [('state','not in',['confirmed'])]}"/>
-							</group>					
-						</group>						
-						<notebook>							
-							<page string="Raw Materials Details">	
-								<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel','reject'])]}" context="{'moc_id':moc_id}">
-									<tree string="Charge Details Entry Tree" editable="top" >									
-										<field name="product_id" />										   
-										<field name="moc_id" invisible="1"/>
-										<field name="first_addition" required="1" on_change="onchange_purchase_rate(product_id,moc_id,first_addition,second_addition)"/>
-										<field name="second_addition" required="1" on_change="onchange_purchase_rate(product_id,moc_id,first_addition,second_addition)"/>
-										<field name="total_weight" readonly="1" sum="Total Value" on_change="onchange_purchase_rate(product_id,moc_id,first_addition,second_addition)"/>
-										<field name="total_amount" readonly="1" sum="Total Value"/>
-										<field name="remarks" widget="char"/>														
-									</tree>
-								</field>																								
-							</page>
-							
-							<page string="Chemistry Details">	
-								<field name="line_ids_a" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel','reject'])]}" >
-									<tree string="Chemistry Details Entry Tree" editable="top" >									
-										<field name="chemistry_id" />										   
-										<field name="required_chemistry" required="1"/>
-										<field name="required_chemistry_max" required="1"/>
-										<field name="bath_1" required="1"/>
-										<field name="bath_2" />
-										<field name="final" required="1"/>
-										<field name="remarks" widget="char"/>														
-									</tree>
-								</field>																								
-							</page>
-							
-							<page string="Mechanical Properties">	
-								<field name="line_ids_b" nolabel="1" context="{'moc_id':moc_id}" >
-									<tree string="Mechanical Properties chart Tree" editable="top" >									
-										<field name="mechanical_id" on_change="onchange_uom_name(mechanical_id)"/>	
-										<field name="moc_id" invisible="1"/>										
-										<field name="uom" readonly="1" />											
-										<field name="min"/>											
-										<field name="max"/>											
-										<field name="mech_value" on_change="onchange_mpa_value(mech_value)"/>	
-										<field name="mpa_value" />				   
-																																						
-									</tree>
-								</field>																								
-							</page>			
-							<page string="Entry Info">
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
 								<group>
-									<field name="company_id"/>
+									<field name="user_id"/>
+									<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>
+									<field name="cancel_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+									<field name="update_user_id"/>
 								</group>
 								<group>
-									<field name="active"/>
+									<field name="crt_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>
+									<field name="cancel_date" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+									<field name="update_date"/>
 								</group>
-								<group>
-									<group>
-										<field name="user_id"/>
-										<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>
-										<field name="cancel_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
-										<field name="update_user_id"/>
-									</group>
-									<group>
-										<field name="crt_date"/>
-										<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>
-										<field name="cancel_date" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
-										<field name="update_date"/>
-									</group>
-								</group>
-							</page>
-						</notebook>
-					</sheet>
+							</group>
+						</page>
+					</notebook>
 				</form>
 			</field>
 		</record>

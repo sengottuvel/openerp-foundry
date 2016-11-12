@@ -16,54 +16,52 @@
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
-					<sheet>
-						<group>
-							<group>						
-								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
-								<field name="condition" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
-								<field name="type_method" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="modify" invisible = "1"/>
-								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
-							</group>
-							<group>
-								<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="availability" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>							
-								<field name="state" style="width: 30%%" class="att_state_change"/>								
-							</group>
-						</group>						
-						<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
-							<group>	
-								<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							</group>
-							<group>												
-								<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','confirmed'])], 'readonly': [('state','in',['cancel'])]}"/>		
-							</group>
+					<group>
+						<group>						
+							<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+							<field name="condition" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+							<field name="type_method" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="modify" invisible = "1"/>
+							<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 						</group>
-						<notebook>
-							<page string="Entry Info">
-									<group>
-										<field name="company_id"/>
-										<field name="active"/>
-									</group>
-									<group>
-									<group>
-										<field name="user_id"/>
-										<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
-										<field name="ap_rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>
-										<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
-										<field name="update_user_id"/>
-									</group>
-									<group>
-										<field name="crt_date"/>
-										<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
-										<field name="ap_rej_date" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>
-										<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
-										<field name="update_date"/>
-									</group>
+						<group>
+							<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="availability" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>							
+							<field name="state" style="width: 30%%" class="att_state_change"/>								
+						</group>
+					</group>						
+					<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
+						<group>	
+							<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+						</group>
+						<group>												
+							<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','confirmed'])], 'readonly': [('state','in',['cancel'])]}"/>		
+						</group>
+					</group>
+					<notebook>
+						<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+									<field name="active"/>
 								</group>
-							</page>
-						</notebook>															
-					</sheet>
+								<group>
+								<group>
+									<field name="user_id"/>
+									<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="ap_rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>
+									<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="ap_rej_date" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>
+									<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>															
 				</form>
 			</field> 
 		</record>

@@ -19,99 +19,96 @@
 					<header>						
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>						
 						<button name="entry_confirm" type="object" string="Confirm" attrs="{'invisible': ['|',('load_bom','!=',True),('state','in',('confirmed','approved'))]}"/>
-					</header>
-					
-					<sheet>
-						<group>
-							<group>	
-								<field name="amend_no" />	
-								<field name="bom_id" attrs="{'readonly': [('load_bom','=',True)]}"/>																								
-								<field name="uom"/>																
-								<field name="revision" invisible="1"/>																
-								<field name="notes"/>																
-							</group>
-							<group>
-								<field name="entry_date" attrs="{'readonly': [('load_bom','=',True)]}" />	
-								<field name="pump_model_id" />																			
-								<field name="qty" />							
-								<field name="load_bom" invisible="1"/>							
-								<field name="state" />							
-							</group>
+					</header>				
+					<group>
+						<group>	
+							<field name="amend_no" />	
+							<field name="bom_id" attrs="{'readonly': [('load_bom','=',True)]}"/>																								
+							<field name="uom"/>																
+							<field name="revision" invisible="1"/>																
+							<field name="notes"/>																
 						</group>
-						<button name="bom_amendment" type="object" string="Load BOM" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible': [('load_bom','=',True)]}"/>
-						<notebook>
-						<page string="Foundry Items">
-						<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['approved'])]}">
-							<tree string="BOM Details Entry Tree" editable="top" >					
-								
-								<field name="pos_no" />	
-								<field name="pattern_id" on_change="onchange_pattern_name(pattern_id)"/>
-								<field name="pattern_name" readonly="1"/>				   
-								<field name="qty"/>
-								<field name="remarks" widget="char"/>
-								<field name="state" invisible="1"/>
-				    
-							</tree>
-						</field>
+						<group>
+							<field name="entry_date" attrs="{'readonly': [('load_bom','=',True)]}" />	
+							<field name="pump_model_id" />																			
+							<field name="qty" />							
+							<field name="load_bom" invisible="1"/>							
+							<field name="state" />							
+						</group>
+					</group>
+					<button name="bom_amendment" type="object" string="Load BOM" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible': [('load_bom','=',True)]}"/>
+					<notebook>
+					<page string="Foundry Items">
+					<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['approved'])]}">
+						<tree string="BOM Details Entry Tree" editable="top" >					
+							
+							<field name="pos_no" />	
+							<field name="pattern_id" on_change="onchange_pattern_name(pattern_id)"/>
+							<field name="pattern_name" readonly="1"/>				   
+							<field name="qty"/>
+							<field name="remarks" widget="char"/>
+							<field name="state" invisible="1"/>
+				
+						</tree>
+					</field>
+					</page>
+					<page string="Machine Shop">
+							<field name="line_ids_a" nolabel="1" attrs="{'readonly': [('state','in',['approved'])]}" >
+								<tree string="Machine Shop Details Entry Tree" editable="top" >			
+									<field name="pos_no" />	
+									<field name="ms_id" on_change="onchange_machineshop_name(ms_id)"/>	
+									<field name="name" readonly="1"/>
+									<field name="qty"/>
+									<field name="remarks" widget="char"/>
+								</tree>
+							</field>
 						</page>
-						<page string="Machine Shop">
-								<field name="line_ids_a" nolabel="1" attrs="{'readonly': [('state','in',['approved'])]}" >
-									<tree string="Machine Shop Details Entry Tree" editable="top" >			
-										<field name="pos_no" />	
-										<field name="ms_id" on_change="onchange_machineshop_name(ms_id)"/>	
-										<field name="name" readonly="1"/>
-										<field name="qty"/>
-										<field name="remarks" widget="char"/>
-									</tree>
-								</field>
-							</page>
-							<page string="BOT">
-								<field name="line_ids_b" nolabel="1" attrs="{'readonly': [('state','in',['approved'])]}" >
-									<tree string="BOT Details Entry Tree" editable="top" >	
-										<field name="pos_no" />		
-										<field name="product_temp_id" on_change="onchange_bot_code(product_temp_id)"/>
-										<field name="code" readonly="1" />											
-										<field name="qty"/>
-										<field name="remarks" widget="char"/>
-									</tree>
-								</field>
-							</page>						
-							<page string="Consumable" invisible="1">
-								<field name="line_ids_c" nolabel="1" attrs="{'readonly': [('state','in',['approved'])]}" >
-									<tree string="Consumable Details Entry Tree" editable="top" >					
-										
-										<field name="product_temp_id" on_change="onchange_consu_code(product_temp_id)"/>
-										<field name="code" readonly="1"/>											
-										<field name="qty"/>
-										<field name="remarks"  widget="char"/>
-									</tree>
-								</field>
-							</page>
-							<page string="Core" invisible="1">					
-								
-							</page>
-							<page string="Entry Info">
-									<group>
-										<field name="company_id"/>
-										<field name="active"/>	
-									</group>
-									<group>
-									<group>
-										<field name="user_id"/>
-										<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
-										<field name="ap_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>										
-										<field name="update_user_id"/>
-									</group>
-									<group>
-										<field name="crt_date"/>
-										<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>		
-										<field name="ap_date" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>								
-										<field name="update_date"/>
-									</group>
+						<page string="BOT">
+							<field name="line_ids_b" nolabel="1" attrs="{'readonly': [('state','in',['approved'])]}" >
+								<tree string="BOT Details Entry Tree" editable="top" >	
+									<field name="pos_no" />		
+									<field name="product_temp_id" on_change="onchange_bot_code(product_temp_id)"/>
+									<field name="code" readonly="1" />											
+									<field name="qty"/>
+									<field name="remarks" widget="char"/>
+								</tree>
+							</field>
+						</page>						
+						<page string="Consumable" invisible="1">
+							<field name="line_ids_c" nolabel="1" attrs="{'readonly': [('state','in',['approved'])]}" >
+								<tree string="Consumable Details Entry Tree" editable="top" >					
+									
+									<field name="product_temp_id" on_change="onchange_consu_code(product_temp_id)"/>
+									<field name="code" readonly="1"/>											
+									<field name="qty"/>
+									<field name="remarks"  widget="char"/>
+								</tree>
+							</field>
+						</page>
+						<page string="Core" invisible="1">					
+							
+						</page>
+						<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+									<field name="active"/>	
 								</group>
-							</page>
-						</notebook>										
-					</sheet>
+								<group>
+								<group>
+									<field name="user_id"/>
+									<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="ap_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>										
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>		
+									<field name="ap_date" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>								
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>		
 				</form>
 			</field> 
 		</record>

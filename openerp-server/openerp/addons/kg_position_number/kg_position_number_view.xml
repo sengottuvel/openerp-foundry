@@ -16,111 +16,109 @@
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>	
 						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>	
 					</header>
-					<sheet>
+					<group>
 						<group>
-							<group>
-								<field name="position_type" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
-							</group>
-							<group>
-							</group>
+							<field name="position_type" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
 						</group>
 						<group>
-							<group>
-								<field name="position_no" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'required': [('position_type','=','copy')],'invisible': [('position_type','=','new')]}"/>
-							</group>
-							<group>
-								<button name="copy_position" type="object" string="Copy" class="oe_highlight"  attrs="{'invisible': ['|',('position_type','in',['new']),('copy_flag','=',True)]}"/>
-							</group>
 						</group>
+					</group>
+					<group>
+						<group>
+							<field name="position_no" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'required': [('position_type','=','copy')],'invisible': [('position_type','=','new')]}"/>
+						</group>
+						<group>
+							<button name="copy_position" type="object" string="Copy" class="oe_highlight"  attrs="{'invisible': ['|',('position_type','in',['new']),('copy_flag','=',True)]}"/>
+						</group>
+					</group>
+					
+					<group>
+						<group>						
+							<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="pattern_id" on_change="onchange_pattern(pattern_id)" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="ms_id" on_change="onchange_ms_id(ms_id)"/>
+							<field name="bot_id" on_change="onchange_bot_id(bot_id)"/>
+							<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+						</group>
+						<group>
+							<field name="pumpmodel_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="pattern_name" readonly="1"/>
+							<field name="ms_code" readonly="1"/>
+							<field name="bot_code" readonly="1"/>
+							<field name="active"/>
+							<field name="state" style="width: 30%%" class="att_state_change"/>
+							<field name="copy_flag" invisible="1"/>
+							<field name="modify" invisible="1"/>
+						</group>
+					</group>
+					<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
+						<group>	
+							<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+						</group>
+						<group>												
+							<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','confirmed'])], 'readonly': [('state','in',['cancel'])]}"/>	
+						</group>
+					</group>
+					<notebook>
 						
-						<group>
-							<group>						
-								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="pattern_id" on_change="onchange_pattern(pattern_id)" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="ms_id" on_change="onchange_ms_id(ms_id)"/>
-								<field name="bot_id" on_change="onchange_bot_id(bot_id)"/>
-								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							</group>
-							<group>
-								<field name="pumpmodel_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="pattern_name" readonly="1"/>
-								<field name="ms_code" readonly="1"/>
-								<field name="bot_code" readonly="1"/>
-								<field name="active"/>
-								<field name="state" style="width: 30%%" class="att_state_change"/>
-								<field name="copy_flag" invisible="1"/>
-								<field name="modify" invisible="1"/>
-							</group>
-						</group>
-						<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
-							<group>	
-								<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							</group>
-							<group>												
-								<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','confirmed'])], 'readonly': [('state','in',['cancel'])]}"/>	
-							</group>
-						</group>
-						<notebook>
-							
-							<page string="Operation Configuration">
-								<field colspan="4" mode="tree" name="line_ids" nolabel="1" widget="one2many_list">
-							   <tree string="Operation Configuration"> 
-									<field name="operation_id"/>
-									<field name="stage_id"/>
-									<field name="clamping_area"/>
-									<field name="is_last_operation"/>
-									<field name="time_consumption"/>
-									<field name="in_house_cost"/>
-									<field name="total_cost"/>
-									<field name="sc_cost"/>
-									<field name="remark"/>
-								</tree>
+						<page string="Operation Configuration">
+							<field colspan="4" mode="tree" name="line_ids" nolabel="1" widget="one2many_list">
+						   <tree string="Operation Configuration"> 
+								<field name="operation_id"/>
+								<field name="stage_id"/>
+								<field name="clamping_area"/>
+								<field name="is_last_operation"/>
+								<field name="time_consumption"/>
+								<field name="in_house_cost"/>
+								<field name="total_cost"/>
+								<field name="sc_cost"/>
+								<field name="remark"/>
+							</tree>
 <!--
-								<form string="Operation Configuration" >
-									<group>
-									<group>
-										<field name="operation_id" on_change="onchange_product_id(product_id,uom,po_uom)"/>
-										<field name="is_last_operation" 
-												on_change="onchange_product_uom(product_id, uom, po_uom,qty)"/>
-										<field name="total_cost" invisible="1"/>
-										<field name="remark" 
-											attrs="{'readonly': [('uom', '=', False)]}"
-											on_change="onchange_qty(uom,product_id,qty,pending_qty,issue_pending_qty,po_qty)"/>
-										</group>
-										<group>
-											<field name="time_consumption"/>
-											<field name="in_house_cost"/>
-											<field name="sc_cost"/>
-										</group>
-									</group>
-								</form>
--->
-								</field>
-							</page>
-                
-							<page string="Entry Info">
-									<group>
-										<field name="company_id"/>
-									</group>
+							<form string="Operation Configuration" >
 								<group>
-									<group>
-										<field name="user_id"/>
-										<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
-										<field name="ap_rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>
-										<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
-										<field name="update_user_id"/>
+								<group>
+									<field name="operation_id" on_change="onchange_product_id(product_id,uom,po_uom)"/>
+									<field name="is_last_operation" 
+											on_change="onchange_product_uom(product_id, uom, po_uom,qty)"/>
+									<field name="total_cost" invisible="1"/>
+									<field name="remark" 
+										attrs="{'readonly': [('uom', '=', False)]}"
+										on_change="onchange_qty(uom,product_id,qty,pending_qty,issue_pending_qty,po_qty)"/>
 									</group>
 									<group>
-										<field name="crt_date"/>
-										<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
-										<field name="ap_rej_date" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>
-										<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
-										<field name="update_date"/>
+										<field name="time_consumption"/>
+										<field name="in_house_cost"/>
+										<field name="sc_cost"/>
 									</group>
 								</group>
-							</page>
-						</notebook>															
-					</sheet>
+							</form>
+-->
+							</field>
+						</page>
+			
+						<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+							<group>
+								<group>
+									<field name="user_id"/>
+									<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="ap_rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>
+									<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="ap_rej_date" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>
+									<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>															
 				</form>
 			</field> 
 		</record>

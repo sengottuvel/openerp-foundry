@@ -16,102 +16,100 @@
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>	
-					</header>
-					<sheet>
+					</header>				
+					<group>
+						<group>						
+							<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+							<field name="alias_name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+							<field name="moc_cate_id" />								
+							<field name="rate" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="pro_cost"/>
+							<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+						</group>
 						<group>
-							<group>						
-								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
-								<field name="alias_name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
-								<field name="moc_cate_id" />								
-								<field name="rate" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="pro_cost"/>
-								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
-							</group>
-							<group>
-								<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="weight_type"/>									
-								<field name="moc_cate_fetting"/>									
-								<field name="product_id"/>								
-								<field name="modify" invisible="1"/>				
-								<field name="moc_type"/>									
-								<field name="state" style="width: 30%%" class="att_state_change"/>								
-							</group>
+							<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="weight_type"/>									
+							<field name="moc_cate_fetting"/>									
+							<field name="product_id"/>								
+							<field name="modify" invisible="1"/>				
+							<field name="moc_type"/>									
+							<field name="state" style="width: 30%%" class="att_state_change"/>								
 						</group>
-						<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
-							<group>	
-								<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							</group>
-							<group>												
-								<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','confirmed'])], 'readonly': [('state','in',['cancel'])]}"/>													
-							</group>
+					</group>
+					<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
+						<group>	
+							<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 						</group>
-						<notebook>
-							<page string="Raw Materials">	
-								<field name="line_ids" nolabel="1" >
-									<tree string="Raw Materials Entry Tree" editable="top" >									
-										<field name="product_id" on_change="onchange_uom(product_id)" />											
-										<field name="uom" readonly="1"/>				   
-										<field name="rate" readonly="1"/>
-										<field name="qty" />
-										<field name="remarks" widget="char"/>														
-									</tree>
-								</field>																								
-							</page>
-							<page string="Chemical Composition">	
-								<field name="line_ids_a" nolabel="1" >
-									<tree string="Chemical Composition Chart Tree" editable="top" >									
-										<field name="chemical_id" />
-										<field name="range_flag" invisible="1"/>														
-										<field name="min" attrs="{'required': [('range_flag','=',False)]}"/>										
-										<field name="max" attrs="{'required': [('range_flag','=',False)]}"/>																												
-									</tree>
-								</field>																								
-							</page>
-							<page string="Mechanical Properties">	
-								<field name="line_ids_b" nolabel="1" >
-									<tree string="Mechanical Properties chart Tree" editable="top" >									
-										<field name="mechanical_id" on_change="onchange_uom_name(mechanical_id)"/>											
-										<field name="uom" readonly="1" />											
-										<field name="min"/>	
-										<field name="range_flag" />				   
-										<field name="max" attrs="{'required': [('range_flag','=',False)]}"/>																													
-									</tree>
-								</field>																								
-							</page>			
-							<page string="Fettling Process Cycle">	
-								<field name="line_ids_c" nolabel="1" >
-									<tree string="Fettling Process Cycle Tree" editable="top" >									
-										<field name="stage_id"/>								
-										<field name="seq_no"/>
-										<field name="flag_ms"/>
-										<field name="remarks" widget="char"/>																																								
-									</tree>
-								</field>																								
-							</page>								
-							<page string="Entry Info">
-									<group>
-										<field name="company_id"/>
-										<field name="active"/>	
-									</group>
-									<group>
-									<group>
-										<field name="user_id"/>
-										<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
-										<field name="ap_rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>
-										<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
-										<field name="update_user_id"/>
-									</group>
-									<group>
-										<field name="crt_date"/>
-										<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
-										<field name="ap_rej_date" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>
-										<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
-										<field name="update_date"/>
-									</group>
+						<group>												
+							<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','confirmed'])], 'readonly': [('state','in',['cancel'])]}"/>													
+						</group>
+					</group>
+					<notebook>
+						<page string="Raw Materials">	
+							<field name="line_ids" nolabel="1" >
+								<tree string="Raw Materials Entry Tree" editable="top" >									
+									<field name="product_id" on_change="onchange_uom(product_id)" />											
+									<field name="uom" readonly="1"/>				   
+									<field name="rate" readonly="1"/>
+									<field name="qty" />
+									<field name="remarks" widget="char"/>														
+								</tree>
+							</field>																								
+						</page>
+						<page string="Chemical Composition">	
+							<field name="line_ids_a" nolabel="1" >
+								<tree string="Chemical Composition Chart Tree" editable="top" >									
+									<field name="chemical_id" />
+									<field name="range_flag" invisible="1"/>														
+									<field name="min" attrs="{'required': [('range_flag','=',False)]}"/>										
+									<field name="max" attrs="{'required': [('range_flag','=',False)]}"/>																												
+								</tree>
+							</field>																								
+						</page>
+						<page string="Mechanical Properties">	
+							<field name="line_ids_b" nolabel="1" >
+								<tree string="Mechanical Properties chart Tree" editable="top" >									
+									<field name="mechanical_id" on_change="onchange_uom_name(mechanical_id)"/>											
+									<field name="uom" readonly="1" />											
+									<field name="min"/>	
+									<field name="range_flag" />				   
+									<field name="max" attrs="{'required': [('range_flag','=',False)]}"/>																													
+								</tree>
+							</field>																								
+						</page>			
+						<page string="Fettling Process Cycle">	
+							<field name="line_ids_c" nolabel="1" >
+								<tree string="Fettling Process Cycle Tree" editable="top" >									
+									<field name="stage_id"/>								
+									<field name="seq_no"/>
+									<field name="flag_ms"/>
+									<field name="remarks" widget="char"/>																																								
+								</tree>
+							</field>																								
+						</page>								
+						<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+									<field name="active"/>	
 								</group>
-							</page>
-						</notebook>															
-					</sheet>
+								<group>
+								<group>
+									<field name="user_id"/>
+									<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="ap_rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>
+									<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="ap_rej_date" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>
+									<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>			
 				</form>
 			</field> 
 		</record>

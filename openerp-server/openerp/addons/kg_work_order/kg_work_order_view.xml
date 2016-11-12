@@ -17,8 +17,7 @@
 <!--
 						<button name="mail_test" type="object" string="Mail" class="oe_highlight"/>
 -->
-					</header>
-					<sheet>		
+					</header>						
 						<group>
 							<group>
 								<field name="name" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
@@ -82,8 +81,7 @@
 									</group>
 								</group>
 							</page>
-						</notebook>
-					</sheet>
+						</notebook>					
 				</form>
 			</field>
 		</record>

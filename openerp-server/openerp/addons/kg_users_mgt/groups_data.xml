@@ -119,7 +119,12 @@
             ref('kg_assembly.tam_assembly_inward'),
             ref('kg_assembly.tam_performance_testing'),
             
-            ref('kg_subcontract_process.tpm_sc_process'),          
+            ref('kg_subcontract_process.tpm_sc_process'),           
+            ref('kg_subcontract_process.tam_sc_list'),
+            ref('kg_subcontract_process.tam_sc_wo'),
+            ref('kg_subcontract_process.tam_sc_wo_spl'),
+            ref('kg_subcontract_process.tam_sc_dc'),
+            ref('kg_subcontract_process.tam_sc_inward'),         
             ref('kg_ms_stores.tpm_ms_store_process'),
             ref('kg_ms_stores.tam_ms_stores_list'),
                       

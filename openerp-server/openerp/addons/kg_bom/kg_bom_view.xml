@@ -18,134 +18,132 @@
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>						
 						<button name="convert_partlist_bom" type="object" string="Convert Pump BOM" class="oe_highlight" attrs="{'invisible':['|',('category_type','=','pump_bom'),('state','!=','approved')]}"/>
-					</header>
-					<sheet>
+					</header>					
+					<group>
 						<group>
-							<group>
-								<field name="bom_type" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire'])]}"/>
-							</group>
-							<group>
-							</group>
+							<field name="bom_type" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire'])]}"/>
 						</group>
 						<group>
-							<group>
-								<field name="source_bom" attrs="{'invisible':[('bom_type','=','new_bom')],'readonly': [('copy_flag','=',True)], 'required': [('bom_type','=','copy_bom')]}"/>
-							</group>
-							<group>
-								<button name="copy_bom" type="object" string="Copy" class="oe_highlight" attrs="{'invisible':['|',('bom_type','=','new_bom'),('copy_flag','=',True)]}"/>
-							</group>
+						</group>
+					</group>
+					<group>
+						<group>
+							<field name="source_bom" attrs="{'invisible':[('bom_type','=','new_bom')],'readonly': [('copy_flag','=',True)], 'required': [('bom_type','=','copy_bom')]}"/>
 						</group>
 						<group>
-							<group>	
-									
-								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire'])]}"/>								
-								<field name="category_type" invisible="1"/>															
-								<field name="uom" readonly="1"/>
-								<field name="revision" readonly="1"/>
-								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire'])]}"/>								
-							</group>
-							<group>
+							<button name="copy_bom" type="object" string="Copy" class="oe_highlight" attrs="{'invisible':['|',('bom_type','=','new_bom'),('copy_flag','=',True)]}"/>
+						</group>
+					</group>
+					<group>
+						<group>	
 								
-								
+							<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire'])]}"/>								
+							<field name="category_type" invisible="1"/>															
+							<field name="uom" readonly="1"/>
+							<field name="revision" readonly="1"/>
+							<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire'])]}"/>								
+						</group>
+						<group>
 							
-								<field name="pump_model_id" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire']),('category_type','=','pump_bom')],'required': [('category_type','in',['pump_bom'])]}"/>
-								<field name="qty" readonly="1"/>
-								<field name="copy_flag" invisible="1"/>									
-								<field name="modify" invisible="1"/>															
-								<field name="type" invisible="1"/>									
-								<field name="state" style="width: 30%%" class="att_state_change"/>								
-							</group>
+							
+						
+							<field name="pump_model_id" attrs="{'readonly': [('state','in',['approved','reject','cancel','expire']),('category_type','=','pump_bom')],'required': [('category_type','in',['pump_bom'])]}"/>
+							<field name="qty" readonly="1"/>
+							<field name="copy_flag" invisible="1"/>									
+							<field name="modify" invisible="1"/>															
+							<field name="type" invisible="1"/>									
+							<field name="state" style="width: 30%%" class="att_state_change"/>								
 						</group>
-						<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
-							<group>	
-								<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject','cancel','expire'])]}"/>
-							</group>
-							<group>												
-								<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','confirmed'])], 'readonly': [('state','in',['cancel'])]}"/>												
-							</group>
+					</group>
+					<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
+						<group>	
+							<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject','cancel','expire'])]}"/>
 						</group>
-						<notebook>
-						<page string="Foundry Items">
-						<field name="line_ids" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
-							<tree string="BOM Details Entry Tree" editable="top" >					
-								
-								<field name="pos_no" invisible="1"/>	
-								<field name="position_id" />	
-								<field name="pattern_id" on_change="onchange_pattern_name(pattern_id)"/>
-								<field name="pattern_name" readonly="1"/>					   
-								<field name="csd_no"/>					   
-								<field name="qty"/>
-								<field name="remarks" widget="char"/>
-								<field name="state" invisible="1"/>
-				    
-							</tree>
-						</field>
+						<group>												
+							<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','confirmed'])], 'readonly': [('state','in',['cancel'])]}"/>												
+						</group>
+					</group>
+					<notebook>
+					<page string="Foundry Items">
+					<field name="line_ids" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
+						<tree string="BOM Details Entry Tree" editable="top" >					
+							
+							<field name="pos_no" invisible="1"/>	
+							<field name="position_id" />	
+							<field name="pattern_id" on_change="onchange_pattern_name(pattern_id)"/>
+							<field name="pattern_name" readonly="1"/>					   
+							<field name="csd_no"/>					   
+							<field name="qty"/>
+							<field name="remarks" widget="char"/>
+							<field name="state" invisible="1"/>
+				
+						</tree>
+					</field>
+					</page>
+					<page string="Machine Shop">
+							<field name="line_ids_a" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
+								<tree string="Machine Shop Details Entry Tree" editable="top" >			
+									<field name="pos_no" invisible="1"/>	
+									<field name="position_id" />	
+									<field name="ms_id" on_change="onchange_machineshop_name(ms_id)"/>	
+									<field name="name" readonly="1"/>
+									<field name="csd_no" readonly="1"/>										
+									<field name="qty"/>
+									<field name="remarks" widget="char"/>
+								</tree>
+							</field>
 						</page>
-						<page string="Machine Shop">
-								<field name="line_ids_a" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
-									<tree string="Machine Shop Details Entry Tree" editable="top" >			
-										<field name="pos_no" invisible="1"/>	
-										<field name="position_id" />	
-										<field name="ms_id" on_change="onchange_machineshop_name(ms_id)"/>	
-										<field name="name" readonly="1"/>
-										<field name="csd_no" readonly="1"/>										
-										<field name="qty"/>
-										<field name="remarks" widget="char"/>
-									</tree>
-								</field>
-							</page>
-							<page string="BOT">
-								<field name="line_ids_b" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
-									<tree string="BOT Details Entry Tree" editable="top" >	
-										<field name="pos_no" invisible="1"/>		
-										<field name="position_id" />		
-										<field name="bot_id" on_change="onchange_bot_name(bot_id)"/>
-										<field name="name" readonly="1" />																			
-										<field name="qty"/>
-										<field name="remarks" widget="char"/>
-									</tree>
-								</field>
-							</page>							
-							<page string="Consumable" invisible="1">
-								<field name="line_ids_c" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
-									<tree string="Consumable Details Entry Tree" editable="top" >					
-										
-										<field name="product_temp_id" on_change="onchange_consu_code(product_temp_id)"/>
-										<field name="code" readonly="1"/>											
-										<field name="qty"/>
-										<field name="remarks"  widget="char"/>
-									</tree>
-								</field>
-							</page>
-							<page string="Core" invisible="1">					
-								
-							</page>
-							<page string="Entry Info">
-									<group>
-										<field name="company_id"/>
-										<field name="active"/>	
-									</group>
-									<group>
-									<group>
-										<field name="user_id"/>
-										<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
-										<field name="ap_rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>
-										<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved','expire'])]}"/>
-										<field name="expire_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved','cancel'])]}"/>
-										<field name="update_user_id"/>
-									</group>
-									<group>
-										<field name="crt_date"/>
-										<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
-										<field name="ap_rej_date" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>
-										<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved','expire'])]}"/>
-										<field name="expire_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved','cancel'])]}"/>
-										<field name="update_date"/>
-									</group>
+						<page string="BOT">
+							<field name="line_ids_b" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
+								<tree string="BOT Details Entry Tree" editable="top" >	
+									<field name="pos_no" invisible="1"/>		
+									<field name="position_id" />		
+									<field name="bot_id" on_change="onchange_bot_name(bot_id)"/>
+									<field name="name" readonly="1" />																			
+									<field name="qty"/>
+									<field name="remarks" widget="char"/>
+								</tree>
+							</field>
+						</page>							
+						<page string="Consumable" invisible="1">
+							<field name="line_ids_c" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
+								<tree string="Consumable Details Entry Tree" editable="top" >					
+									
+									<field name="product_temp_id" on_change="onchange_consu_code(product_temp_id)"/>
+									<field name="code" readonly="1"/>											
+									<field name="qty"/>
+									<field name="remarks"  widget="char"/>
+								</tree>
+							</field>
+						</page>
+						<page string="Core" invisible="1">					
+							
+						</page>
+						<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+									<field name="active"/>	
 								</group>
-							</page>
-						</notebook>																								
-					</sheet>
+								<group>
+								<group>
+									<field name="user_id"/>
+									<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="ap_rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>
+									<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved','expire'])]}"/>
+									<field name="expire_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved','cancel'])]}"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="ap_rej_date" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>
+									<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved','expire'])]}"/>
+									<field name="expire_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved','cancel'])]}"/>
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>	
 				</form>
 			</field> 
 		</record>

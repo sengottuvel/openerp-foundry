@@ -192,7 +192,6 @@
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
 				<form string="Spare Offer Details" version="7.0" create="false" delete="false">
-				<sheet>
 					<group string="Spare Offer Details">
 						<group>
 							
@@ -216,9 +215,7 @@
 							<field name="freight"/>
 							<field name="insurance"/>
 						</group>					
-					</group>
-						
-				</sheet>
+					</group>						
 				</form>
 			</field>
 		</record>
@@ -229,7 +226,6 @@
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
 				<form string="Accessories Offer Details" version="7.0" create="false" delete="false">
-				<sheet>
 					<group string="Accessories Offer Details">
 						<group>
 						<field name="access_id" required="1" readonly="1"/>
@@ -249,11 +245,8 @@
 						<field name="insurance"/>
 
 						</group>
-					</group>
+					</group>			
 						
-						
-						
-				</sheet>
 				</form>
 			</field>
 		</record>
