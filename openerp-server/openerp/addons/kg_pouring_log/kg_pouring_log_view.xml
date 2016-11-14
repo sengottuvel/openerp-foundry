@@ -13,60 +13,58 @@
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
-					<sheet>		
+					<group>
 						<group>
+							<field name="name" readonly="1"/>
+							<field name="melting_id" on_change="onchange_melting_id(melting_id)" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="shift_id" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="pour_close_team" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="remark" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+						</group>											
+						<group>
+							<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="moc_id" required="1" readonly="1"/>
+							<field name="supervisor" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+						</group>					
+					</group>
+					<notebook>
+						<page string="Pouring Details">	
+							<field name="line_ids"  context="{'moc_id':moc_id}" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}">
+								<tree string="Pouring Details Entry Tree" editable="top" >									
+									<field name="order_line_id" on_change="onchange_pattern_name(order_line_id,production_id)"/>																					
+									<field name="production_id" on_change="onchange_pattern_name(order_line_id,production_id)"/>																				
+									<field name="pattern_name" readonly="1"/>				   
+									<field name="qty" required="1"/>
+									<field name="weight"/>
+									<field name="remarks" widget="char"/>														
+								</tree>
+							</field>																								
+						</page>
+						
+						<page string="Entry Info">
 							<group>
-								<field name="name" readonly="1"/>
-								<field name="melting_id" on_change="onchange_melting_id(melting_id)" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-								<field name="shift_id" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-								<field name="pour_close_team" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-								<field name="remark" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-							</group>											
+								<field name="company_id"/>
+							</group>
 							<group>
-								<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-								<field name="moc_id" required="1" readonly="1"/>
-								<field name="supervisor" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
-							</group>					
-						</group>
-						<notebook>
-							<page string="Pouring Details">	
-								<field name="line_ids"  context="{'moc_id':moc_id}" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}">
-									<tree string="Pouring Details Entry Tree" editable="top" >									
-										<field name="order_line_id" on_change="onchange_pattern_name(order_line_id,production_id)"/>																					
-										<field name="production_id" on_change="onchange_pattern_name(order_line_id,production_id)"/>																				
-										<field name="pattern_name" readonly="1"/>				   
-										<field name="qty" required="1"/>
-										<field name="weight"/>
-										<field name="remarks" widget="char"/>														
-									</tree>
-								</field>																								
-							</page>
-							
-							<page string="Entry Info">
+								<field name="active"/>
+							</group>
+							<group>
 								<group>
-									<field name="company_id"/>
+									<field name="user_id"/>
+									<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>
+									<field name="approve_user_id" attrs="{'invisible':[('state','not in',['approve'])]}"/>
+									<field name="update_user_id"/>
 								</group>
 								<group>
-									<field name="active"/>
+									<field name="crt_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>
+									<field name="approve_date" attrs="{'invisible':[('state','not in',['approve'])]}"/>
+									<field name="update_date"/>
 								</group>
-								<group>
-									<group>
-										<field name="user_id"/>
-										<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>
-										<field name="approve_user_id" attrs="{'invisible':[('state','not in',['approve'])]}"/>
-										<field name="update_user_id"/>
-									</group>
-									<group>
-										<field name="crt_date"/>
-										<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>
-										<field name="approve_date" attrs="{'invisible':[('state','not in',['approve'])]}"/>
-										<field name="update_date"/>
-									</group>
-								</group>
-							</page>
-						</notebook>	
-					</sheet>
+							</group>
+						</page>
+					</notebook>	
 				</form>
 			</field>
 		</record>

@@ -13,63 +13,61 @@
 						<button name="ms_accept" type="object" string="Update" class="oe_highlight"
 						attrs="{'invisible': [('state','in',['accept'])]}"/>
 					</header>
-					<sheet>		
 						
-						<group string="MS Details">
+					<group string="MS Details">
+						<group>
+							<field name="name"/>
+							<field name="inward_accept_qty" required="1" attrs="{'readonly': [('state','in',['accept'])]}"/>
+							<field name="inward_accept_user_id" string="QC by" attrs="{'readonly': [('state','in',['accept'])]}"/>
+							<field name="state" invisible="1"/>
+							<field name="stage_id" widget="selection" invisible="1"/>
+							<field name="stage_name" invisible="1"/>
+						</group>											
+						<group>
+							<field name="entry_date" attrs="{'readonly': [('state','in',['accept'])]}"/>
+							<field name="inward_reject_qty" attrs="{'readonly': [('state','in',['accept'])]}"/>
+							<field name="inward_reject_remarks_id" attrs="{'readonly': [('state','in',['accept'])]}"/>
+							<field name="inward_remarks" attrs="{'readonly': [('state','in',['accept'])]}"/>
+						</group>					
+					</group>
+					<group string="Work Order Details">
+						<group>
+							<field name="order_no" readonly="1"/>
+							<field name="order_priority" string="Category" readonly="1"/>
+							<field name="pattern_id" readonly="1"/>
+							<field name="moc_id" readonly="1"/>
+							<field name="fettling_qty" string="Fettling Completed Qty" readonly="1"/>
+							<field name="total_weight" readonly="1"/>
+						</group>											
+						<group>
+							<field name="order_delivery_date"/>
+							<field name="pump_model_id" readonly="1"/>
+							<field name="pattern_name" readonly="1"/>
+							<field name="melting_id" readonly="1"/>
+							<field name="each_weight" readonly="1"/>
+						</group>					
+					</group>
+					<notebook>
+						
+						<page string="Entry Info">
 							<group>
-								<field name="name"/>
-								<field name="inward_accept_qty" required="1" attrs="{'readonly': [('state','in',['accept'])]}"/>
-								<field name="inward_accept_user_id" string="QC by" attrs="{'readonly': [('state','in',['accept'])]}"/>
-								<field name="state" invisible="1"/>
-								<field name="stage_id" widget="selection" invisible="1"/>
-								<field name="stage_name" invisible="1"/>
-							</group>											
+								<field name="company_id"/>
+							</group>
 							<group>
-								<field name="entry_date" attrs="{'readonly': [('state','in',['accept'])]}"/>
-								<field name="inward_reject_qty" attrs="{'readonly': [('state','in',['accept'])]}"/>
-								<field name="inward_reject_remarks_id" attrs="{'readonly': [('state','in',['accept'])]}"/>
-								<field name="inward_remarks" attrs="{'readonly': [('state','in',['accept'])]}"/>
-							</group>					
-						</group>
-						<group string="Work Order Details">
+								<field name="active"/>
+							</group>
 							<group>
-								<field name="order_no" readonly="1"/>
-								<field name="order_priority" string="Category" readonly="1"/>
-								<field name="pattern_id" readonly="1"/>
-								<field name="moc_id" readonly="1"/>
-								<field name="fettling_qty" string="Fettling Completed Qty" readonly="1"/>
-								<field name="total_weight" readonly="1"/>
-							</group>											
-							<group>
-								<field name="order_delivery_date"/>
-								<field name="pump_model_id" readonly="1"/>
-								<field name="pattern_name" readonly="1"/>
-								<field name="melting_id" readonly="1"/>
-								<field name="each_weight" readonly="1"/>
-							</group>					
-						</group>
-						<notebook>
-							
-							<page string="Entry Info">
 								<group>
-									<field name="company_id"/>
+									<field name="user_id"/>
+									<field name="update_user_id"/>
 								</group>
 								<group>
-									<field name="active"/>
+									<field name="crt_date"/>
+									<field name="update_date"/>
 								</group>
-								<group>
-									<group>
-										<field name="user_id"/>
-										<field name="update_user_id"/>
-									</group>
-									<group>
-										<field name="crt_date"/>
-										<field name="update_date"/>
-									</group>
-								</group>
-							</page>
-						</notebook>
-					</sheet>
+							</group>
+						</page>
+					</notebook>
 				</form>
 			</field>
 		</record>
@@ -209,58 +207,56 @@
 			<field name="model">kg.machineshop</field>
 			<field name="arch" type="xml">
 				<form string="MS Schedule List" version="7.0" create="false">
-					<sheet>		
 						
-						<group string="MS Details">
+					<group string="MS Details">
+						<group>
+							<field name="name"/>
+							<field name="ms_sch_qty" readonly="1"/>
+							<field name="ms_type" invisible="1"/>
+						</group>											
+						<group>
+							<field name="entry_date" readonly="1"/>
+							<field name="ms_state" readonly="1"/>
+						</group>					
+					</group>
+					<group string="Work Order Details">
+						<group>
+							<field name="order_no" readonly="1"/>
+							<field name="order_priority" string="Category" readonly="1"/>
+							<field name="pattern_id" invisible="1"/>
+							<field name="item_code" readonly="1" />
+							<field name="moc_id" readonly="1"/>
+							<field name="total_weight" invisible="1"/>
+						</group>											
+						<group>
+							<field name="order_delivery_date"/>
+							<field name="pump_model_id" readonly="1"/>
+							<field name="pattern_name" invisible="1"/>
+							<field name="item_name" readonly="1"/>
+							<field name="each_weight" invisible="1"/>
+						</group>					
+					</group>
+					<notebook>
+						
+						<page string="Entry Info">
 							<group>
-								<field name="name"/>
-								<field name="ms_sch_qty" readonly="1"/>
-								<field name="ms_type" invisible="1"/>
-							</group>											
+								<field name="company_id"/>
+							</group>
 							<group>
-								<field name="entry_date" readonly="1"/>
-								<field name="ms_state" readonly="1"/>
-							</group>					
-						</group>
-						<group string="Work Order Details">
+								<field name="active"/>
+							</group>
 							<group>
-								<field name="order_no" readonly="1"/>
-								<field name="order_priority" string="Category" readonly="1"/>
-								<field name="pattern_id" invisible="1"/>
-								<field name="item_code" readonly="1" />
-								<field name="moc_id" readonly="1"/>
-								<field name="total_weight" invisible="1"/>
-							</group>											
-							<group>
-								<field name="order_delivery_date"/>
-								<field name="pump_model_id" readonly="1"/>
-								<field name="pattern_name" invisible="1"/>
-								<field name="item_name" readonly="1"/>
-								<field name="each_weight" invisible="1"/>
-							</group>					
-						</group>
-						<notebook>
-							
-							<page string="Entry Info">
 								<group>
-									<field name="company_id"/>
+									<field name="user_id"/>
+									<field name="update_user_id"/>
 								</group>
 								<group>
-									<field name="active"/>
+									<field name="crt_date"/>
+									<field name="update_date"/>
 								</group>
-								<group>
-									<group>
-										<field name="user_id"/>
-										<field name="update_user_id"/>
-									</group>
-									<group>
-										<field name="crt_date"/>
-										<field name="update_date"/>
-									</group>
-								</group>
-							</page>
-						</notebook>
-					</sheet>
+							</group>
+						</page>
+					</notebook>
 				</form>
 			</field>
 		</record>
@@ -378,76 +374,74 @@
 					<header>
 						<button name="entry_accept" type="object" string="Update" states="draft" class="oe_highlight"/>
 					</header>
-					<sheet>		
+					<group>
 						<group>
+							<field name="name" readonly="1"/>
+							<field name="ms_inward_date" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="flag_msline" invisible="1"/>
+							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+							
+						</group>											
+						<group>
+							<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="inward_accept_user_id" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+						</group>					
+					</group>
+					<notebook>
+						<page string="MS Inward Items" attrs="{'invisible':[('flag_msline','=',False)]}">
+							<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
+								<tree string="MS Batch Accept Line Entry" editable="top" create="false" delete="false">	
+									<field name="ms_inward_no" readonly="1"/>
+									<field name="ms_inward_date" required="1"/>
+									<field name="schedule_qty" readonly="1"/>
+									<field name="accept_qty"/>
+									<field name="reject_qty"/>
+									<field name="reject_remarks_id" attrs="{'required': [('reject_qty','>',0)]}"/>
+									<field name="accept_user_id"/>
+									<field name="reject_user_id" invisible="1"/>
+									<field name="remarks" widget="char"/>
+								</tree>
+							</field>
+						</page>
+						<page string="Select MS Inward Items">	
+							<field name="ms_line_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
+							context="{'tree_view_ref' : 't_tree_v_common_batch_tree'}">
+								<tree string = "MS Items" create="false" edit="false">
+									<field name="name"/>
+									<field name="entry_date"/>
+									<field name="order_no"/>
+									<field name="order_priority"/>
+									<field name="pump_model_id"/>
+									<field name="pattern_id"/>										
+									<field name="pattern_name"/>										
+									<field name="moc_id"/>									
+									<field name="schedule_qty"/>									
+								</tree>
+							</field>
+							<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
+						</page>
+						<page string="Entry Info">
 							<group>
-								<field name="name" readonly="1"/>
-								<field name="ms_inward_date" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="flag_msline" invisible="1"/>
-								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
-								
-							</group>											
+								<field name="company_id"/>
+							</group>
 							<group>
-								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="inward_accept_user_id" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-							</group>					
-						</group>
-						<notebook>
-							<page string="MS Inward Items" attrs="{'invisible':[('flag_msline','=',False)]}">
-								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
-									<tree string="MS Batch Accept Line Entry" editable="top" create="false" delete="false">	
-										<field name="ms_inward_no" readonly="1"/>
-										<field name="ms_inward_date" required="1"/>
-										<field name="schedule_qty" readonly="1"/>
-										<field name="accept_qty"/>
-										<field name="reject_qty"/>
-										<field name="reject_remarks_id" attrs="{'required': [('reject_qty','>',0)]}"/>
-										<field name="accept_user_id"/>
-										<field name="reject_user_id" invisible="1"/>
-										<field name="remarks" widget="char"/>
-									</tree>
-								</field>
-							</page>
-							<page string="Select MS Inward Items">	
-								<field name="ms_line_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
-								context="{'tree_view_ref' : 't_tree_v_common_batch_tree'}">
-									<tree string = "MS Items" create="false" edit="false">
-										<field name="name"/>
-										<field name="entry_date"/>
-										<field name="order_no"/>
-										<field name="order_priority"/>
-										<field name="pump_model_id"/>
-										<field name="pattern_id"/>										
-										<field name="pattern_name"/>										
-										<field name="moc_id"/>									
-										<field name="schedule_qty"/>									
-									</tree>
-								</field>
-								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
-							</page>
-							<page string="Entry Info">
+								<field name="active"/>
+							</group>
+							<group>
 								<group>
-									<field name="company_id"/>
+									<field name="user_id"/>
+									<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>										
+									<field name="update_user_id"/>
 								</group>
 								<group>
-									<field name="active"/>
+									<field name="crt_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>									
+									<field name="update_date"/>
 								</group>
-								<group>
-									<group>
-										<field name="user_id"/>
-										<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>										
-										<field name="update_user_id"/>
-									</group>
-									<group>
-										<field name="crt_date"/>
-										<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>									
-										<field name="update_date"/>
-									</group>
-								</group>
-							</page>
-						</notebook>
-					</sheet>
+							</group>
+						</page>
+					</notebook>
 				</form>
 			</field>
 		</record>

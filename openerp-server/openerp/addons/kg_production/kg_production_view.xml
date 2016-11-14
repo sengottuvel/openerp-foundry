@@ -9,60 +9,58 @@
 			<field name="model">kg.production</field>
 			<field name="arch" type="xml">
 				<form string="Production" version="7.0" create="false" edit="false">
-					<sheet>		
-						<group string="Work Order Details">
-							<group>
-								<field name="name" invisible="1"/>
-								<field name="division_id" invisible="1" readonly="1"/>
-								<field name="order_no" readonly="1"/>
-								<field name="order_priority" string="Category" readonly="1"/>
-								<field name="sch_remarks" readonly="1"/>
-							</group>											
-							<group>
-								<field name="entry_date" invisible="1"/>
-								<field name="order_delivery_date"/>
-								<field name="location" readonly="1"/>
-								<field name="order_date" invisible="1" readonly="1"/>
-								<field name="order_category" invisible="1" readonly="1"/>
-								<field name="state" style="width: 30%%" class="att_state_change"/>	
-							</group>					
-						</group>
-						<group string="Specification">
-							<group>
-							    <field name="pump_model_id" readonly="1"/>
-							    <field name="pattern_name" readonly="1"/>
-							    <field name="each_weight" readonly="1"/>
-							    <field name="qty" readonly="1"/>
-							</group>											
-							<group>
-								<field name="pattern_id" readonly="1"/>
-								<field name="moc_id" readonly="1"/>
-								<field name="total_weight" readonly="1"/>
-								
-							</group>					
-						</group>
-						<notebook>
+					<group string="Work Order Details">
+						<group>
+							<field name="name" invisible="1"/>
+							<field name="division_id" invisible="1" readonly="1"/>
+							<field name="order_no" readonly="1"/>
+							<field name="order_priority" string="Category" readonly="1"/>
+							<field name="sch_remarks" readonly="1"/>
+						</group>											
+						<group>
+							<field name="entry_date" invisible="1"/>
+							<field name="order_delivery_date"/>
+							<field name="location" readonly="1"/>
+							<field name="order_date" invisible="1" readonly="1"/>
+							<field name="order_category" invisible="1" readonly="1"/>
+							<field name="state" style="width: 30%%" class="att_state_change"/>	
+						</group>					
+					</group>
+					<group string="Specification">
+						<group>
+							<field name="pump_model_id" readonly="1"/>
+							<field name="pattern_name" readonly="1"/>
+							<field name="each_weight" readonly="1"/>
+							<field name="qty" readonly="1"/>
+						</group>											
+						<group>
+							<field name="pattern_id" readonly="1"/>
+							<field name="moc_id" readonly="1"/>
+							<field name="total_weight" readonly="1"/>
 							
-							<page string="Entry Info">
+						</group>					
+					</group>
+					<notebook>
+						
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
 								<group>
-									<field name="company_id"/>
+									<field name="user_id"/>
+									<field name="update_user_id"/>
 								</group>
 								<group>
-									<field name="active"/>
+									<field name="crt_date"/>
+									<field name="update_date"/>
 								</group>
-								<group>
-									<group>
-										<field name="user_id"/>
-										<field name="update_user_id"/>
-									</group>
-									<group>
-										<field name="crt_date"/>
-										<field name="update_date"/>
-									</group>
-								</group>
-							</page>
-						</notebook>
-					</sheet>
+							</group>
+						</page>
+					</notebook>
 				</form>
 			</field>
 		</record>
@@ -202,47 +200,45 @@
 						<button name="pattern_issue_update" type="object" string="Issue" class="oe_highlight"
 						attrs="{'invisible': [('issue_state','in',['issued'])]}"/>
 					</header>
-					<sheet>		
-						<group string="Issue Details">
+					<group string="Issue Details">
+						<group>
+							<field name="issue_no" readonly="1"/>
+							<field name="order_no" readonly="1"/>
+							<field name="issue_remarks" required="1" attrs="{'readonly': [('issue_state','in',['issued'])]}"/>
+						</group>											
+						<group>
+							<field name="issue_date" required="1" attrs="{'readonly': [('issue_state','in',['issued'])]}"/>
+							<field name="order_delivery_date" readonly="1"/>
+							<field name="issue_state" style="width: 30%%" class="att_state_change"/>	
+						</group>					
+					</group>
+					<group string="Specification">
+						<group>
+							
+							<field name="pump_model_id" readonly="1"/>
+							<field name="pattern_name" readonly="1"/>
+							<field name="issue_qty" readonly="1"/>
+						</group>											
+						<group>
+							<field name="pattern_id" readonly="1"/>
+							<field name="moc_id" readonly="1"/>
+						</group>					
+					</group>
+					<notebook>
+						<page string="Entry Info">
 							<group>
-								<field name="issue_no" readonly="1"/>
-								<field name="order_no" readonly="1"/>
-								<field name="issue_remarks" required="1" attrs="{'readonly': [('issue_state','in',['issued'])]}"/>
-							</group>											
+								<field name="company_id"/>
+							</group>
 							<group>
-								<field name="issue_date" required="1" attrs="{'readonly': [('issue_state','in',['issued'])]}"/>
-								<field name="order_delivery_date" readonly="1"/>
-								<field name="issue_state" style="width: 30%%" class="att_state_change"/>	
-							</group>					
-						</group>
-						<group string="Specification">
+								<field name="active"/>
+							</group>
 							<group>
-								
-							    <field name="pump_model_id" readonly="1"/>
-							    <field name="pattern_name" readonly="1"/>
-							    <field name="issue_qty" readonly="1"/>
-							</group>											
-							<group>
-								<field name="pattern_id" readonly="1"/>
-								<field name="moc_id" readonly="1"/>
-							</group>					
-						</group>
-						<notebook>
-							<page string="Entry Info">
 								<group>
-									<field name="company_id"/>
+									<field name="issue_user_id"/>
 								</group>
-								<group>
-									<field name="active"/>
-								</group>
-								<group>
-									<group>
-										<field name="issue_user_id"/>
-									</group>
-								</group>
-							</page>
-						</notebook>
-					</sheet>
+							</group>
+						</page>
+					</notebook>
 				</form>
 			</field>
 		</record>
@@ -379,66 +375,64 @@
 					<header>
 						<button name="entry_issue" type="object" string="Issue" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
-					<sheet>		
+					<group>
 						<group>
+							<field name="name" readonly="1"/>
+							<field name="remarks" attrs="{'readonly': [('state','in',['issue'])]}"/>
+							<field name="flag_issueline" invisible="1"/>
+						</group>											
+						<group>
+							<field name="entry_date" attrs="{'readonly': [('state','in',['issue'])]}"/>
+							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+						</group>					
+					</group>
+					<notebook>
+						<page string="Issue Items" attrs="{'invisible':[('flag_issueline','=',False)]}">
+							<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['issue'])]}">
+								<tree string="Issue Line Entry" editable="top" create="false" delete="false">	
+									<field name="issue_no" readonly="1"/>
+									<field name="order_no" readonly="1"/>
+									<field name="pump_model_id" readonly="1"/>
+									<field name="pattern_id" readonly="1"/>
+									<field name="pattern_name" readonly="1"/>
+									<field name="qty" readonly="1"/>
+									<field name="remarks" widget="char"/>
+								</tree>
+							</field>
+						</page>
+						<page string="Select Issue Items">
+							<field name="issue_line_ids" attrs="{'readonly': [('state','in',['issue'])]}">
+								<tree string = "Issue Entry Tree" create="false" edit="false">
+									<field name="issue_no" string="Issue No."/>
+									<field name="order_no"/>
+									<field name="pattern_id"/>
+									<field name="pattern_name"/>
+									<field name="issue_qty"/>										
+								</tree>
+							</field>
+							<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['issue'])]}"/>
+						</page>
+						<page string="Entry Info">
 							<group>
-								<field name="name" readonly="1"/>
-								<field name="remarks" attrs="{'readonly': [('state','in',['issue'])]}"/>
-								<field name="flag_issueline" invisible="1"/>
-							</group>											
+								<field name="company_id"/>
+							</group>
 							<group>
-								<field name="entry_date" attrs="{'readonly': [('state','in',['issue'])]}"/>
-								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
-							</group>					
-						</group>
-						<notebook>
-							<page string="Issue Items" attrs="{'invisible':[('flag_issueline','=',False)]}">
-								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['issue'])]}">
-									<tree string="Issue Line Entry" editable="top" create="false" delete="false">	
-										<field name="issue_no" readonly="1"/>
-										<field name="order_no" readonly="1"/>
-										<field name="pump_model_id" readonly="1"/>
-										<field name="pattern_id" readonly="1"/>
-										<field name="pattern_name" readonly="1"/>
-										<field name="qty" readonly="1"/>
-										<field name="remarks" widget="char"/>
-									</tree>
-								</field>
-							</page>
-							<page string="Select Issue Items">
-								<field name="issue_line_ids" attrs="{'readonly': [('state','in',['issue'])]}">
-									<tree string = "Issue Entry Tree" create="false" edit="false">
-										<field name="issue_no" string="Issue No."/>
-										<field name="order_no"/>
-										<field name="pattern_id"/>
-										<field name="pattern_name"/>
-										<field name="issue_qty"/>										
-									</tree>
-								</field>
-								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['issue'])]}"/>
-							</page>
-							<page string="Entry Info">
+								<field name="active"/>
+							</group>
+							<group>
 								<group>
-									<field name="company_id"/>
+									<field name="user_id"/>
+									<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['issue'])]}"/>										
+									<field name="update_user_id"/>
 								</group>
 								<group>
-									<field name="active"/>
+									<field name="crt_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','not in',['issue'])]}"/>									
+									<field name="update_date"/>
 								</group>
-								<group>
-									<group>
-										<field name="user_id"/>
-										<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['issue'])]}"/>										
-										<field name="update_user_id"/>
-									</group>
-									<group>
-										<field name="crt_date"/>
-										<field name="confirm_date" attrs="{'invisible':[('state','not in',['issue'])]}"/>									
-										<field name="update_date"/>
-									</group>
-								</group>
-							</page>
-						</notebook>
-					</sheet>
+							</group>
+						</page>
+					</notebook>
 				</form>
 			</field>
 		</record>
@@ -558,63 +552,61 @@
 						<button name="core_update" type="object" string="Update" class="oe_highlight"
 						attrs="{'invisible': [('core_state','in',['done'])]}"/>
 					</header>
-					<sheet>		
-						<group string="Core Log">
-							<group>
-								<field name="core_no" readonly="1"/>
-								<field name="core_shift_id" required="1" attrs="{'readonly': [('core_state','in',['done'])]}"/>
-								<field name="core_operator" attrs="{'required':[('core_by','=','comp_employee')],'invisible':[('core_by','!=','comp_employee')],'readonly': [('core_state','in',['done'])]}"/>
-								<field name="core_moulder" string="Moulder Count"  invisible="1"/>
-								<field name="core_hardness" attrs="{'readonly': [('core_state','in',['done'])]}"/>
+					<group string="Core Log">
+						<group>
+							<field name="core_no" readonly="1"/>
+							<field name="core_shift_id" required="1" attrs="{'readonly': [('core_state','in',['done'])]}"/>
+							<field name="core_operator" attrs="{'required':[('core_by','=','comp_employee')],'invisible':[('core_by','!=','comp_employee')],'readonly': [('core_state','in',['done'])]}"/>
+							<field name="core_moulder" string="Moulder Count"  invisible="1"/>
+							<field name="core_hardness" attrs="{'readonly': [('core_state','in',['done'])]}"/>
 <!--
-								<field name="core_pan_no" attrs="{'invisible':[('core_by','!=','contractor')],'readonly': [('core_state','in',['done'])]}"/>
+							<field name="core_pan_no" attrs="{'invisible':[('core_by','!=','contractor')],'readonly': [('core_state','in',['done'])]}"/>
 -->
-								<field name="core_remarks" attrs="{'readonly': [('core_state','in',['done'])]}"/>
-							</group>											
+							<field name="core_remarks" attrs="{'readonly': [('core_state','in',['done'])]}"/>
+						</group>											
+						<group>
+							<field name="core_date" required="1" attrs="{'readonly': [('core_state','in',['done'])]}"/>
+							<field name="core_by" required="1" attrs="{'readonly': [('core_state','in',['done'])]}"/>
+							<field name="core_contractor" attrs="{'required':[('core_by','=','contractor')],'invisible':[('core_by','!=','contractor')],'readonly': [('core_state','in',['done'])]}"/>
+							<field name="core_helper" string="Helper Count" attrs="{'required':[('core_by','=','comp_employee')],'invisible':[('core_by','!=','comp_employee')],'readonly': [('core_state','in',['done'])]}"/>
+							<field name="core_qty" required="1" attrs="{'readonly': [('core_state','in',['done'])]}"/>
+							<field name="core_state" style="width: 30%%" class="att_state_change"/>
+						</group>					
+					</group>
+					<group string="Schedule Details">
+						<group>
+							<field name="order_no" readonly="1"/>
+							<field name="pump_model_id" readonly="1"/>
+							<field name="pattern_name" readonly="1"/>
+							<field name="total_core_qty" string="Total core Qty" invisible="1"/>
+							<field name="each_weight" readonly="1"/>
+							<field name="qty" string="Schedule Qty" readonly="1"/>
+							
+						</group>											
+						<group>
+							<field name="order_delivery_date" invisible="1"/>
+							<field name="order_priority" string="Category"/>
+							<field name="pattern_id" readonly="1"/>
+							<field name="moc_id" readonly="1"/>
+							<field name="total_weight" readonly="1"/>
+							<field name="core_rem_qty" string="Remaining Qty"/>
+						</group>					
+					</group>
+					<notebook>
+						<page string="Entry Info">
 							<group>
-								<field name="core_date" required="1" attrs="{'readonly': [('core_state','in',['done'])]}"/>
-								<field name="core_by" required="1" attrs="{'readonly': [('core_state','in',['done'])]}"/>
-								<field name="core_contractor" attrs="{'required':[('core_by','=','contractor')],'invisible':[('core_by','!=','contractor')],'readonly': [('core_state','in',['done'])]}"/>
-								<field name="core_helper" string="Helper Count" attrs="{'required':[('core_by','=','comp_employee')],'invisible':[('core_by','!=','comp_employee')],'readonly': [('core_state','in',['done'])]}"/>
-								<field name="core_qty" required="1" attrs="{'readonly': [('core_state','in',['done'])]}"/>
-								<field name="core_state" style="width: 30%%" class="att_state_change"/>
-							</group>					
-						</group>
-						<group string="Schedule Details">
+								<field name="company_id"/>
+							</group>
 							<group>
-								<field name="order_no" readonly="1"/>
-								<field name="pump_model_id" readonly="1"/>
-								<field name="pattern_name" readonly="1"/>
-							    <field name="total_core_qty" string="Total core Qty" invisible="1"/>
-							    <field name="each_weight" readonly="1"/>
-							    <field name="qty" string="Schedule Qty" readonly="1"/>
-							    
-							</group>											
+								<field name="active"/>
+							</group>
 							<group>
-								<field name="order_delivery_date" invisible="1"/>
-								<field name="order_priority" string="Category"/>
-								<field name="pattern_id" readonly="1"/>
-								<field name="moc_id" readonly="1"/>
-								<field name="total_weight" readonly="1"/>
-								<field name="core_rem_qty" string="Remaining Qty"/>
-							</group>					
-						</group>
-						<notebook>
-							<page string="Entry Info">
 								<group>
-									<field name="company_id"/>
+									<field name="core_user_id" string="Core Updated By"/>
 								</group>
-								<group>
-									<field name="active"/>
-								</group>
-								<group>
-									<group>
-										<field name="core_user_id" string="Core Updated By"/>
-									</group>
-								</group>
-							</page>
-						</notebook>
-					</sheet>
+							</group>
+						</page>
+					</notebook>
 				</form>
 			</field>
 		</record>
@@ -754,94 +746,92 @@
 					<header>
 						<button name="entry_confirm" type="object" string="Update" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
-					<sheet>		
+					<group>
 						<group>
-							<group>
-								<field name="name" readonly="1"/>
-								<field name="core_date" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="core_by" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="core_operator" attrs="{'required':[('core_by','=','comp_employee')],'invisible':[('core_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="core_contractor" attrs="{'required':[('core_by','=','contractor')],'invisible':[('core_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="flag_issueline" invisible="1"/>
-								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
-							</group>											
-							<group>
-								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="core_shift_id" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="core_helper" attrs="{'required':[('core_by','=','comp_employee')],'invisible':[('core_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="name" readonly="1"/>
+							<field name="core_date" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="core_by" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="core_operator" attrs="{'required':[('core_by','=','comp_employee')],'invisible':[('core_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="core_contractor" attrs="{'required':[('core_by','=','contractor')],'invisible':[('core_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="flag_issueline" invisible="1"/>
+							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
+						</group>											
+						<group>
+							<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="core_shift_id" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="core_helper" attrs="{'required':[('core_by','=','comp_employee')],'invisible':[('core_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
 <!--
-								<field name="core_pan_no" attrs="{'invisible':[('core_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="core_pan_no" attrs="{'invisible':[('core_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
 -->
-								<field name="core_hardness" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								
-								
-							</group>					
-						</group>
-						<notebook>
-							<page string="Core Items" attrs="{'invisible':[('flag_issueline','=',False)]}">
-								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
-									<tree string="Issue Line Entry" editable="top" create="false" delete="false">	
-										<field name="core_date" required="1"/>
-										<field name="core_no" invisible="1"/>
-										<field name="order_no" readonly="1"/>
-										<field name="pump_model_id" readonly="1"/>
-										<field name="pattern_id" string="Part No." readonly="1"/>
-										<field name="pattern_name" invisible="1"/>
-										<field name="moc_id" invisible="1"/>
-										<field name="core_shift_id" required="1"/>
-										<field name="core_by" required="1"/>
-										<field name="core_contractor" attrs="{'required':[('core_by','=','contractor')]}"/>
+							<field name="core_hardness" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							
+							
+						</group>					
+					</group>
+					<notebook>
+						<page string="Core Items" attrs="{'invisible':[('flag_issueline','=',False)]}">
+							<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
+								<tree string="Issue Line Entry" editable="top" create="false" delete="false">	
+									<field name="core_date" required="1"/>
+									<field name="core_no" invisible="1"/>
+									<field name="order_no" readonly="1"/>
+									<field name="pump_model_id" readonly="1"/>
+									<field name="pattern_id" string="Part No." readonly="1"/>
+									<field name="pattern_name" invisible="1"/>
+									<field name="moc_id" invisible="1"/>
+									<field name="core_shift_id" required="1"/>
+									<field name="core_by" required="1"/>
+									<field name="core_contractor" attrs="{'required':[('core_by','=','contractor')]}"/>
 <!--
-										<field name="core_pan_no"/>
+									<field name="core_pan_no"/>
 -->
-										<field name="core_operator" attrs="{'required':[('core_by','=','comp_employee')]}"/>
-										<field name="core_helper" attrs="{'required':[('core_by','=','comp_employee')]}" string="Helper Count"/>
-										<field name="core_hardness"/>
-										<field name="production_qty" readonly="1"/>
-										<field name="core_qty" required="1"/>
-										<field name="remarks" widget="char"/>
-									</tree>
-								</field>
-							</page>
-							<page string="Select Core Items">
-								<field name="core_line_ids" attrs="{'readonly': [('state','in',['confirmed'])]}">
-									<tree string = "Core Entry Tree" create="false" edit="false">
-										<field name="core_no" string="Core Log No."/>
-										<field name="order_no"/>
-										<field name="order_delivery_date"/>
-										<field name="order_priority" string="Category"/>
-										<field name="pump_model_id"/>
-										<field name="pattern_id"/>
-										<field name="pattern_name"/>
-										<field name="moc_id"/>
-										<field name="qty" string="Schedule Qty"/>										
-									</tree>
-								</field>
-								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
-							</page>
-							<page string="Entry Info">
+									<field name="core_operator" attrs="{'required':[('core_by','=','comp_employee')]}"/>
+									<field name="core_helper" attrs="{'required':[('core_by','=','comp_employee')]}" string="Helper Count"/>
+									<field name="core_hardness"/>
+									<field name="production_qty" readonly="1"/>
+									<field name="core_qty" required="1"/>
+									<field name="remarks" widget="char"/>
+								</tree>
+							</field>
+						</page>
+						<page string="Select Core Items">
+							<field name="core_line_ids" attrs="{'readonly': [('state','in',['confirmed'])]}">
+								<tree string = "Core Entry Tree" create="false" edit="false">
+									<field name="core_no" string="Core Log No."/>
+									<field name="order_no"/>
+									<field name="order_delivery_date"/>
+									<field name="order_priority" string="Category"/>
+									<field name="pump_model_id"/>
+									<field name="pattern_id"/>
+									<field name="pattern_name"/>
+									<field name="moc_id"/>
+									<field name="qty" string="Schedule Qty"/>										
+								</tree>
+							</field>
+							<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
+						</page>
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
 								<group>
-									<field name="company_id"/>
+									<field name="user_id"/>
+									<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>										
+									<field name="update_user_id"/>
 								</group>
 								<group>
-									<field name="active"/>
+									<field name="crt_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>									
+									<field name="update_date"/>
 								</group>
-								<group>
-									<group>
-										<field name="user_id"/>
-										<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>										
-										<field name="update_user_id"/>
-									</group>
-									<group>
-										<field name="crt_date"/>
-										<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>									
-										<field name="update_date"/>
-									</group>
-								</group>
-							</page>
-						</notebook>
-					</sheet>
+							</group>
+						</page>
+					</notebook>
 				</form>
 			</field>
 		</record>
@@ -959,65 +949,63 @@
 						<button name="mould_update" type="object" string="Update" class="oe_highlight"
 						attrs="{'invisible': [('mould_state','in',['done'])]}"/>
 					</header>
-					<sheet>		
-						<group string="Mould Log">
-							<group>
-								<field name="mould_no" readonly="1"/>
-								<field name="mould_shift_id" required="1" attrs="{'readonly': [('mould_state','in',['done'])]}"/>
-								<field name="mould_operator" attrs="{'required':[('mould_by','=','comp_employee')],'invisible':[('mould_by','!=','comp_employee')],'readonly': [('mould_state','in',['done'])]}"/>
-								<field name="mould_moulder" string="Moulder Count"  attrs="{'required':[('mould_by','=','comp_employee')],'invisible':[('mould_by','!=','comp_employee')],'readonly': [('mould_state','in',['done'])]}"/>
-								<field name="mould_hardness" attrs="{'readonly': [('mould_state','in',['done'])]}"/>
+					<group string="Mould Log">
+						<group>
+							<field name="mould_no" readonly="1"/>
+							<field name="mould_shift_id" required="1" attrs="{'readonly': [('mould_state','in',['done'])]}"/>
+							<field name="mould_operator" attrs="{'required':[('mould_by','=','comp_employee')],'invisible':[('mould_by','!=','comp_employee')],'readonly': [('mould_state','in',['done'])]}"/>
+							<field name="mould_moulder" string="Moulder Count"  attrs="{'required':[('mould_by','=','comp_employee')],'invisible':[('mould_by','!=','comp_employee')],'readonly': [('mould_state','in',['done'])]}"/>
+							<field name="mould_hardness" attrs="{'readonly': [('mould_state','in',['done'])]}"/>
 <!--
-								<field name="mould_pan_no" attrs="{'invisible':[('mould_by','!=','contractor')],'readonly': [('mould_state','in',['done'])]}"/>
+							<field name="mould_pan_no" attrs="{'invisible':[('mould_by','!=','contractor')],'readonly': [('mould_state','in',['done'])]}"/>
 -->
-								<field name="mould_remarks" attrs="{'readonly': [('mould_state','in',['done'])]}"/>
-							</group>											
-							<group>
-								<field name="mould_date" required="1" attrs="{'readonly': [('mould_state','in',['done'])]}"/>
-								<field name="mould_by" required="1" attrs="{'readonly': [('mould_state','in',['done'])]}"/>
-								<field name="mould_contractor" attrs="{'required':[('mould_by','=','contractor')],'invisible':[('mould_by','!=','contractor')],'readonly': [('mould_state','in',['done'])]}"/>
-								<field name="mould_helper" string="Helper Count" attrs="{'required':[('mould_by','=','comp_employee')],'invisible':[('mould_by','!=','comp_employee')],'readonly': [('mould_state','in',['done'])]}"/>
-								<field name="mould_box_id" readonly="1"/>
-								<field name="mould_qty" required="1" attrs="{'readonly': [('mould_state','in',['done'])]}"/>
-								<field name="mould_state" style="width: 30%%" class="att_state_change"/>
-							</group>					
-						</group>
-						<group string="Schedule Details">
-							<group>
-								<field name="order_no" readonly="1"/>
-								<field name="pump_model_id" readonly="1"/>
-								<field name="pattern_name" readonly="1"/>
-							    <field name="total_mould_qty" string="Total mould Qty" invisible="1"/>
-							    <field name="each_weight" readonly="1"/>
-							    <field name="qty" string="Schedule Qty" readonly="1"/>
-							   
-							</group>											
-							<group>
-								<field name="order_delivery_date" invisible="1"/>
-								<field name="order_priority" string="Category"/>
-								<field name="pattern_id" readonly="1"/>
-								<field name="moc_id" readonly="1"/>
-								<field name="total_weight" readonly="1"/>
-								<field name="mould_rem_qty" string="Remaining Qty"/>
+							<field name="mould_remarks" attrs="{'readonly': [('mould_state','in',['done'])]}"/>
+						</group>											
+						<group>
+							<field name="mould_date" required="1" attrs="{'readonly': [('mould_state','in',['done'])]}"/>
+							<field name="mould_by" required="1" attrs="{'readonly': [('mould_state','in',['done'])]}"/>
+							<field name="mould_contractor" attrs="{'required':[('mould_by','=','contractor')],'invisible':[('mould_by','!=','contractor')],'readonly': [('mould_state','in',['done'])]}"/>
+							<field name="mould_helper" string="Helper Count" attrs="{'required':[('mould_by','=','comp_employee')],'invisible':[('mould_by','!=','comp_employee')],'readonly': [('mould_state','in',['done'])]}"/>
+							<field name="mould_box_id" readonly="1"/>
+							<field name="mould_qty" required="1" attrs="{'readonly': [('mould_state','in',['done'])]}"/>
+							<field name="mould_state" style="width: 30%%" class="att_state_change"/>
+						</group>					
+					</group>
+					<group string="Schedule Details">
+						<group>
+							<field name="order_no" readonly="1"/>
+							<field name="pump_model_id" readonly="1"/>
+							<field name="pattern_name" readonly="1"/>
+							<field name="total_mould_qty" string="Total mould Qty" invisible="1"/>
+							<field name="each_weight" readonly="1"/>
+							<field name="qty" string="Schedule Qty" readonly="1"/>
+						   
+						</group>											
+						<group>
+							<field name="order_delivery_date" invisible="1"/>
+							<field name="order_priority" string="Category"/>
+							<field name="pattern_id" readonly="1"/>
+							<field name="moc_id" readonly="1"/>
+							<field name="total_weight" readonly="1"/>
+							<field name="mould_rem_qty" string="Remaining Qty"/>
 
-							</group>					
-						</group>
-						<notebook>
-							<page string="Entry Info">
+						</group>					
+					</group>
+					<notebook>
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
 								<group>
-									<field name="company_id"/>
+									<field name="mould_user_id" string="Mould Updated By"/>
 								</group>
-								<group>
-									<field name="active"/>
-								</group>
-								<group>
-									<group>
-										<field name="mould_user_id" string="Mould Updated By"/>
-									</group>
-								</group>
-							</page>
-						</notebook>
-					</sheet>
+							</group>
+						</page>
+					</notebook>
 				</form>
 			</field>
 		</record>
@@ -1157,95 +1145,93 @@
 					<header>
 						<button name="entry_confirm" type="object" string="Update" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
-					<sheet>
+					<group>
 						<group>
-							<group>
-								<field name="name" readonly="1"/>
-								<field name="mould_date" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="mould_by" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="mould_contractor" attrs="{'required':[('mould_by','=','contractor')],'invisible':[('mould_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="mould_operator" attrs="{'required':[('mould_by','=','comp_employee')],'invisible':[('mould_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="flag_issueline" invisible="1"/>
-								<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
-							</group>											
-							<group>
-								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="mould_shift_id" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="mould_moulder" attrs="{'required':[('mould_by','=','comp_employee')],'invisible':[('mould_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="mould_helper" attrs="{'required':[('mould_by','=','comp_employee')],'invisible':[('mould_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="name" readonly="1"/>
+							<field name="mould_date" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="mould_by" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="mould_contractor" attrs="{'required':[('mould_by','=','contractor')],'invisible':[('mould_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="mould_operator" attrs="{'required':[('mould_by','=','comp_employee')],'invisible':[('mould_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="flag_issueline" invisible="1"/>
+							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
+						</group>											
+						<group>
+							<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="mould_shift_id" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="mould_moulder" attrs="{'required':[('mould_by','=','comp_employee')],'invisible':[('mould_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="mould_helper" attrs="{'required':[('mould_by','=','comp_employee')],'invisible':[('mould_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
 <!--
-								<field name="mould_pan_no" string="PAND" attrs="{'invisible':[('mould_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="mould_pan_no" string="PAND" attrs="{'invisible':[('mould_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
 -->
-								<field name="mould_hardness" required="0" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								
-								
-							</group>
+							<field name="mould_hardness" required="0" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							
+							
 						</group>
-						<notebook>
-							<page string="Mould Items" attrs="{'invisible':[('flag_issueline','=',False)]}">
-								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
-									<tree string="Issue Line Entry" editable="top" create="false" delete="false">	
-										<field name="mould_date" required="1"/>
-										<field name="mould_no" invisible="1"/>
-										<field name="order_no" readonly="1"/>
-										<field name="pump_model_id" readonly="1"/>
-										<field name="pattern_id" string="Part No." readonly="1"/>
-										<field name="mould_box_id" readonly="1"/>
-										<field name="mould_shift_id" required="1"/>
-										<field name="mould_by" required="1"/>												
-										<field name="mould_contractor" attrs="{'required':[('mould_by','=','contractor')]}"/>												
+					</group>
+					<notebook>
+						<page string="Mould Items" attrs="{'invisible':[('flag_issueline','=',False)]}">
+							<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
+								<tree string="Issue Line Entry" editable="top" create="false" delete="false">	
+									<field name="mould_date" required="1"/>
+									<field name="mould_no" invisible="1"/>
+									<field name="order_no" readonly="1"/>
+									<field name="pump_model_id" readonly="1"/>
+									<field name="pattern_id" string="Part No." readonly="1"/>
+									<field name="mould_box_id" readonly="1"/>
+									<field name="mould_shift_id" required="1"/>
+									<field name="mould_by" required="1"/>												
+									<field name="mould_contractor" attrs="{'required':[('mould_by','=','contractor')]}"/>												
 <!--
-										<field name="mould_pan_no" attrs="{'required':[('mould_by','=','contractor')]}"/>												
+									<field name="mould_pan_no" attrs="{'required':[('mould_by','=','contractor')]}"/>												
 -->
-										<field name="mould_operator" attrs="{'required':[('mould_by','=','comp_employee')]}"/>																	
-										<field name="mould_helper" attrs="{'required':[('mould_by','=','comp_employee')]}"/>																	
-										<field name="mould_moulder" attrs="{'required':[('mould_by','=','comp_employee')]}"/>
-										<field name="mould_hardness"/>
-										<field name="production_qty" readonly="1"/>
-										<field name="mould_qty" required="1"/>
-										<field name="remarks" widget="char"/>
-									</tree>
-								</field>
-							</page>
-							<page string="Select Mould Items">
-								<field name="mould_line_ids" attrs="{'readonly': [('state','in',['confirmed'])]}">
-									<tree string = "Issue Entry Tree" create="false" edit="false">
-										<field name="mould_no" string="Mould Log No."/>
-										<field name="order_no"/>
-										<field name="order_delivery_date"/>
-										<field name="order_priority" string="Category"/>
-										<field name="pump_model_id"/>
-										<field name="pattern_id"/>
-										<field name="pattern_name"/>
-										<field name="moc_id"/>
-										<field name="qty" string="Schedule Qty"/>													
-									</tree>
-								</field>
-								<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
-							</page>
-							<page string="Entry Info">
+									<field name="mould_operator" attrs="{'required':[('mould_by','=','comp_employee')]}"/>																	
+									<field name="mould_helper" attrs="{'required':[('mould_by','=','comp_employee')]}"/>																	
+									<field name="mould_moulder" attrs="{'required':[('mould_by','=','comp_employee')]}"/>
+									<field name="mould_hardness"/>
+									<field name="production_qty" readonly="1"/>
+									<field name="mould_qty" required="1"/>
+									<field name="remarks" widget="char"/>
+								</tree>
+							</field>
+						</page>
+						<page string="Select Mould Items">
+							<field name="mould_line_ids" attrs="{'readonly': [('state','in',['confirmed'])]}">
+								<tree string = "Issue Entry Tree" create="false" edit="false">
+									<field name="mould_no" string="Mould Log No."/>
+									<field name="order_no"/>
+									<field name="order_delivery_date"/>
+									<field name="order_priority" string="Category"/>
+									<field name="pump_model_id"/>
+									<field name="pattern_id"/>
+									<field name="pattern_name"/>
+									<field name="moc_id"/>
+									<field name="qty" string="Schedule Qty"/>													
+								</tree>
+							</field>
+							<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
+						</page>
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
 								<group>
-									<field name="company_id"/>
+									<field name="user_id"/>
+									<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>										
+									<field name="update_user_id"/>
 								</group>
 								<group>
-									<field name="active"/>
+									<field name="crt_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>									
+									<field name="update_date"/>
 								</group>
-								<group>
-									<group>
-										<field name="user_id"/>
-										<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>										
-										<field name="update_user_id"/>
-									</group>
-									<group>
-										<field name="crt_date"/>
-										<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>									
-										<field name="update_date"/>
-									</group>
-								</group>
-							</page>
-						</notebook>
-					</sheet>
+							</group>
+						</page>
+					</notebook>
 				</form>
 			</field>
 		</record>
@@ -1458,62 +1444,60 @@
 			<field name="model">kg.production</field>
 			<field name="arch" type="xml">
 				<form string="Pouring Pending" version="7.0" create="false" >
-					<sheet>		
-						<group string="Work Order Details">
-							<group>
-								<field name="name" invisible="1"/>
-								<field name="division_id" invisible="1" readonly="1"/>
-								<field name="order_no" readonly="1"/>
-								<field name="order_priority" string="Category" readonly="1"/>
-								<field name="pour_remarks" string="Pour Remarks" readonly="1"/>
-								<field name="state" style="width: 30%%" class="att_state_change"/>	
-							</group>											
-							<group>
-								<field name="entry_date" invisible="1"/>
-								<field name="order_delivery_date"/>
-								<field name="location" readonly="1"/>
-								<field name="order_date" invisible="1" readonly="1"/>
-								<field name="order_category" invisible="1" readonly="1"/>
-								<field name="pour_pending_remarks" string="Remarks" readonly="0"/>
-								
-							</group>					
-						</group>
-						<group string="Specification">
-							<group>
-							    <field name="pump_model_id" readonly="1"/>
-							    <field name="pattern_name" readonly="1"/>
-							    <field name="each_weight" readonly="1"/>
-							    <field name="qty" readonly="1"/>
-							</group>											
-							<group>
-								<field name="pattern_id" readonly="1"/>
-								<field name="moc_id" readonly="1"/>
-								<field name="total_weight" readonly="1"/>
-								
-							</group>					
-						</group>
-						<notebook>
+					<group string="Work Order Details">
+						<group>
+							<field name="name" invisible="1"/>
+							<field name="division_id" invisible="1" readonly="1"/>
+							<field name="order_no" readonly="1"/>
+							<field name="order_priority" string="Category" readonly="1"/>
+							<field name="pour_remarks" string="Pour Remarks" readonly="1"/>
+							<field name="state" style="width: 30%%" class="att_state_change"/>	
+						</group>											
+						<group>
+							<field name="entry_date" invisible="1"/>
+							<field name="order_delivery_date"/>
+							<field name="location" readonly="1"/>
+							<field name="order_date" invisible="1" readonly="1"/>
+							<field name="order_category" invisible="1" readonly="1"/>
+							<field name="pour_pending_remarks" string="Remarks" readonly="0"/>
 							
-							<page string="Entry Info">
+						</group>					
+					</group>
+					<group string="Specification">
+						<group>
+							<field name="pump_model_id" readonly="1"/>
+							<field name="pattern_name" readonly="1"/>
+							<field name="each_weight" readonly="1"/>
+							<field name="qty" readonly="1"/>
+						</group>											
+						<group>
+							<field name="pattern_id" readonly="1"/>
+							<field name="moc_id" readonly="1"/>
+							<field name="total_weight" readonly="1"/>
+							
+						</group>					
+					</group>
+					<notebook>
+						
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
 								<group>
-									<field name="company_id"/>
+									<field name="user_id"/>
+									<field name="update_user_id"/>
 								</group>
 								<group>
-									<field name="active"/>
+									<field name="crt_date"/>
+									<field name="update_date"/>
 								</group>
-								<group>
-									<group>
-										<field name="user_id"/>
-										<field name="update_user_id"/>
-									</group>
-									<group>
-										<field name="crt_date"/>
-										<field name="update_date"/>
-									</group>
-								</group>
-							</page>
-						</notebook>
-					</sheet>
+							</group>
+						</page>
+					</notebook>
 				</form>
 			</field>
 		</record>
@@ -1626,62 +1610,60 @@
 			<field name="model">kg.production</field>
 			<field name="arch" type="xml">
 				<form string="Pouring Completed" version="7.0" create="false">
-					<sheet>		
-						<group string="Work Order Details">
-							<group>
-								<field name="name" invisible="1"/>
-								<field name="division_id" invisible="1" readonly="1"/>
-								<field name="order_no" readonly="1"/>
-								<field name="order_priority" string="Category" readonly="1"/>
-								<field name="pour_remarks" string="Pour Remarks" readonly="1"/>
-								<field name="state" style="width: 30%%" class="att_state_change"/>	
-							</group>											
-							<group>
-								<field name="entry_date" invisible="1"/>
-								<field name="order_delivery_date"/>
-								<field name="location" readonly="1"/>
-								<field name="order_date" invisible="1" readonly="1"/>
-								<field name="order_category" invisible="1" readonly="1"/>
-								<field name="fettling_progress_remarks" string="Remarks"/>
-								
-							</group>					
-						</group>
-						<group string="Specification">
-							<group>
-							    <field name="pump_model_id" readonly="1"/>
-							    <field name="pattern_name" readonly="1"/>
-							    <field name="each_weight" readonly="1"/>
-							    <field name="qty" readonly="1"/>
-							</group>											
-							<group>
-								<field name="pattern_id" readonly="1"/>
-								<field name="moc_id" readonly="1"/>
-								<field name="total_weight" readonly="1"/>
-								
-							</group>					
-						</group>
-						<notebook>
+					<group string="Work Order Details">
+						<group>
+							<field name="name" invisible="1"/>
+							<field name="division_id" invisible="1" readonly="1"/>
+							<field name="order_no" readonly="1"/>
+							<field name="order_priority" string="Category" readonly="1"/>
+							<field name="pour_remarks" string="Pour Remarks" readonly="1"/>
+							<field name="state" style="width: 30%%" class="att_state_change"/>	
+						</group>											
+						<group>
+							<field name="entry_date" invisible="1"/>
+							<field name="order_delivery_date"/>
+							<field name="location" readonly="1"/>
+							<field name="order_date" invisible="1" readonly="1"/>
+							<field name="order_category" invisible="1" readonly="1"/>
+							<field name="fettling_progress_remarks" string="Remarks"/>
 							
-							<page string="Entry Info">
+						</group>					
+					</group>
+					<group string="Specification">
+						<group>
+							<field name="pump_model_id" readonly="1"/>
+							<field name="pattern_name" readonly="1"/>
+							<field name="each_weight" readonly="1"/>
+							<field name="qty" readonly="1"/>
+						</group>											
+						<group>
+							<field name="pattern_id" readonly="1"/>
+							<field name="moc_id" readonly="1"/>
+							<field name="total_weight" readonly="1"/>
+							
+						</group>					
+					</group>
+					<notebook>
+						
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
 								<group>
-									<field name="company_id"/>
+									<field name="user_id"/>
+									<field name="update_user_id"/>
 								</group>
 								<group>
-									<field name="active"/>
+									<field name="crt_date"/>
+									<field name="update_date"/>
 								</group>
-								<group>
-									<group>
-										<field name="user_id"/>
-										<field name="update_user_id"/>
-									</group>
-									<group>
-										<field name="crt_date"/>
-										<field name="update_date"/>
-									</group>
-								</group>
-							</page>
-						</notebook>
-					</sheet>
+							</group>
+						</page>
+					</notebook>
 				</form>
 			</field>
 		</record>

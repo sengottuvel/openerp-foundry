@@ -16,82 +16,80 @@
 						 attrs="{'invisible': [('flag_amend','!=',False)]}" />
 						
 					</header>
-					<sheet>
-						<group>
-							<group string="WO Details">
-								<field name="wo_id" attrs="{'readonly': [('flag_amend','!=',False)]}"/>
-								<field name="wo_date" readonly="1"/>
-								<field name="wo_division_id" readonly="1"/>
-								<field name="wo_location" readonly="1"/>
-								<field name="wo_order_category" readonly="1"/>
-								<field name="wo_order_priority" readonly="1"/>
-								<field name="wo_partner_id" readonly="1"/>
-								<field name="wo_delivery_date" readonly="1"/>
-								<field name="wo_order_value" readonly="1"/>
-								<field name="wo_remarks" readonly="1"/>
-								
-							</group>											
-							<group string="Amendment Details">
-								<field name="name" readonly="1"/>
-								<field name="entry_date" readonly="1" string="Creation Date"/>
-								<field name="wo_amend_date" readonly="1" attrs="{'required': [('flag_amend','!=',False)]}" />
-								<field name="wo_amend_division_id" />
-								<field name="wo_amend_location" attrs="{'required': [('flag_amend','!=',False)],'readonly': [('state','in',['confirmed','cancel'])]}"/>
-								<field name="wo_amend_order_category" readonly="1" attrs="{'required': [('flag_amend','!=',False)]}"/>
-								<field name="wo_amend_order_priority" readonly="1" attrs="{'required': [('flag_amend','!=',False)]}"/>
-								<field name="wo_amend_partner_id" attrs="{'required': [('flag_amend','!=',False)],'readonly': [('state','in',['confirmed','cancel'])]}"/>
-								<field name="wo_amend_delivery_date" attrs="{'required': [('flag_amend','!=',False)],'readonly': [('state','in',['confirmed','cancel'])]}"/>
-								<field name="wo_amend_order_value" readonly="1"/>
-								<field name="wo_amend_remarks" attrs="{'required': [('flag_amend','!=',False)],'readonly': [('state','in',['confirmed','cancel'])]}"/>
-								<field name="state"/>
-								<field name="flag_amend" invisible="1"/>
-								<field name="flag_confirm" invisible="1"/>
+					<group>
+						<group string="WO Details">
+							<field name="wo_id" attrs="{'readonly': [('flag_amend','!=',False)]}"/>
+							<field name="wo_date" readonly="1"/>
+							<field name="wo_division_id" readonly="1"/>
+							<field name="wo_location" readonly="1"/>
+							<field name="wo_order_category" readonly="1"/>
+							<field name="wo_order_priority" readonly="1"/>
+							<field name="wo_partner_id" readonly="1"/>
+							<field name="wo_delivery_date" readonly="1"/>
+							<field name="wo_order_value" readonly="1"/>
+							<field name="wo_remarks" readonly="1"/>
 							
-							
-							
-							</group>					
-						</group>
+						</group>											
+						<group string="Amendment Details">
+							<field name="name" readonly="1"/>
+							<field name="entry_date" readonly="1" string="Creation Date"/>
+							<field name="wo_amend_date" readonly="1" attrs="{'required': [('flag_amend','!=',False)]}" />
+							<field name="wo_amend_division_id" />
+							<field name="wo_amend_location" attrs="{'required': [('flag_amend','!=',False)],'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="wo_amend_order_category" readonly="1" attrs="{'required': [('flag_amend','!=',False)]}"/>
+							<field name="wo_amend_order_priority" readonly="1" attrs="{'required': [('flag_amend','!=',False)]}"/>
+							<field name="wo_amend_partner_id" attrs="{'required': [('flag_amend','!=',False)],'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="wo_amend_delivery_date" attrs="{'required': [('flag_amend','!=',False)],'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="wo_amend_order_value" readonly="1"/>
+							<field name="wo_amend_remarks" attrs="{'required': [('flag_amend','!=',False)],'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="state"/>
+							<field name="flag_amend" invisible="1"/>
+							<field name="flag_confirm" invisible="1"/>
 						
-						<notebook>
+						
+						
+						</group>					
+					</group>
+					
+					<notebook>
 
-							<page string="Work Order Details" >
-								<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"
-								context="{'order_category':wo_amend_order_category,'delivery_date':wo_amend_delivery_date}">
-									<tree string = "Work Order Items">
-										<field name="order_no" readonly="1"/>
-										<field name="order_category" readonly="1"/>
-										<field name="pump_model_id" readonly="1"/>
-										<field name="qty" readonly="1"/>
-										<field name="delivery_date" readonly="1"/>
-									</tree>
-								</field>
-							</page>
+						<page string="Work Order Details" >
+							<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"
+							context="{'order_category':wo_amend_order_category,'delivery_date':wo_amend_delivery_date}">
+								<tree string = "Work Order Items">
+									<field name="order_no" readonly="1"/>
+									<field name="order_category" readonly="1"/>
+									<field name="pump_model_id" readonly="1"/>
+									<field name="qty" readonly="1"/>
+									<field name="delivery_date" readonly="1"/>
+								</tree>
+							</field>
+						</page>
 
-							<page string="Entry Info">
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
 								<group>
-									<field name="company_id"/>
+									<field name="user_id"/>
+									<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="cancel_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+									<field name="update_user_id"/>
+									
 								</group>
 								<group>
-									<field name="active"/>
+									<field name="crt_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="cancel_date" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+									<field name="update_date"/>
 								</group>
-								<group>
-									<group>
-										<field name="user_id"/>
-										<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
-										<field name="cancel_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
-										<field name="update_user_id"/>
-										
-									</group>
-									<group>
-										<field name="crt_date"/>
-										<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
-										<field name="cancel_date" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
-										<field name="update_date"/>
-									</group>
-								</group>
-							</page>
-						</notebook>
-					</sheet>
+							</group>
+						</page>
+					</notebook>
 				</form>
 			</field>
 		</record>

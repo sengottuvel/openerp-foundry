@@ -15,82 +15,80 @@
 						<button name="entry_cancel" type="object" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?" states="confirmed"/>
 						<button name="entry_draft" type="object" string="Set to Draft" states="cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
-					<sheet>		
-						<group string="Schedule Details">
-							<group>
-								<field name="name"/>
-								<field name="schedule_id" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
-								<field name="division_id" readonly="1"/>
-								<field name="order_id" readonly="1"/>
-								<field name="pattern_id" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
-								<field name="moc_construction_id" readonly="1" attrs="{'invisible': [('stock_type','=','part')]}"/>
-								<field name="moc_id" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
-								<field name="total_weight" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
-								<field name="stage_id" invisible="1"/>
-								<field name="stock_type" invisible="1"/>
-							</group>											
-							<group>
-								<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-								<field name="schedule_date" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
-								<field name="location" readonly="1"/>
-								<field name="pump_model_id" readonly="1"/>
-								<field name="pattern_name" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
-								<field name="each_weight" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
-								<field name="active" invisible="1"/>
-								<field name="state" style="width: 30%%" class="att_state_change"/>	
-							</group>					
-						</group>
-						<group string="QC Updates">
-							<group>
-								<field name="stock_qty" readonly="1"/>
-								<field name="qty" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-								
-								<field name="diameter" invisible="1"/>
-								<field name="reject_remarks_id" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-								<field name="sent_to" attrs="{'invisible': [('stock_type','=','part')], 'readonly': [('state','not in',['draft'])],'required': [('stock_type','=','pump')]}"/>
-							</group>											
-							<group>
-								<field name="allocated_qty" readonly="1"/>
-								<field name="reject_qty" readonly="1"/>
-								<field name="rework_qty" invisible="1"/>
-								<field name="position_no" invisible="1"/>
-								<field name="remark" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-							</group>					
-						</group>
-						
+					<group string="Schedule Details">
 						<group>
+							<field name="name"/>
+							<field name="schedule_id" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
+							<field name="division_id" readonly="1"/>
+							<field name="order_id" readonly="1"/>
+							<field name="pattern_id" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
+							<field name="moc_construction_id" readonly="1" attrs="{'invisible': [('stock_type','=','part')]}"/>
+							<field name="moc_id" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
+							<field name="total_weight" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
+							<field name="stage_id" invisible="1"/>
+							<field name="stock_type" invisible="1"/>
+						</group>											
+						<group>
+							<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="schedule_date" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
+							<field name="location" readonly="1"/>
+							<field name="pump_model_id" readonly="1"/>
+							<field name="pattern_name" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
+							<field name="each_weight" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
+							<field name="active" invisible="1"/>
+							<field name="state" style="width: 30%%" class="att_state_change"/>	
+						</group>					
+					</group>
+					<group string="QC Updates">
+						<group>
+							<field name="stock_qty" readonly="1"/>
+							<field name="qty" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							
+							<field name="diameter" invisible="1"/>
+							<field name="reject_remarks_id" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="sent_to" attrs="{'invisible': [('stock_type','=','part')], 'readonly': [('state','not in',['draft'])],'required': [('stock_type','=','pump')]}"/>
+						</group>											
+						<group>
+							<field name="allocated_qty" readonly="1"/>
+							<field name="reject_qty" readonly="1"/>
+							<field name="rework_qty" invisible="1"/>
+							<field name="position_no" invisible="1"/>
+							<field name="remark" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+						</group>					
+					</group>
+					
+					<group>
+						<group>
+							<field name="cancel_remark" attrs="{'invisible': [('state','not in',['cancel','confirmed'])],'readonly': [('state','not in',['confirmed'])]}"/>
+							<!--<field name="reject_remark" attrs="{'invisible': [('state','not in',['draft','reject'])],'readonly': [('state','in',['reject','cancel','confirmed'])]}"/>-->
+						</group>					
+					</group>
+					<notebook>
+						<page string="Entry Info">
 							<group>
-								<field name="cancel_remark" attrs="{'invisible': [('state','not in',['cancel','confirmed'])],'readonly': [('state','not in',['confirmed'])]}"/>
-								<!--<field name="reject_remark" attrs="{'invisible': [('state','not in',['draft','reject'])],'readonly': [('state','in',['reject','cancel','confirmed'])]}"/>-->
-							</group>					
-						</group>
-						<notebook>
-							<page string="Entry Info">
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
 								<group>
-									<field name="company_id"/>
+									<field name="user_id"/>
+									<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>
+									<!--<field name="reject_user_id" attrs="{'invisible':[('state','not in',['reject'])]}"/>-->
+									<field name="cancel_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+									<field name="update_user_id"/>
 								</group>
 								<group>
-									<field name="active"/>
+									<field name="crt_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>
+									<!--<field name="reject_date" attrs="{'invisible':[('state','not in',['reject'])]}"/>-->
+									<field name="cancel_date" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+									<field name="update_date"/>
 								</group>
-								<group>
-									<group>
-										<field name="user_id"/>
-										<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>
-										<!--<field name="reject_user_id" attrs="{'invisible':[('state','not in',['reject'])]}"/>-->
-										<field name="cancel_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
-										<field name="update_user_id"/>
-									</group>
-									<group>
-										<field name="crt_date"/>
-										<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>
-										<!--<field name="reject_date" attrs="{'invisible':[('state','not in',['reject'])]}"/>-->
-										<field name="cancel_date" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
-										<field name="update_date"/>
-									</group>
-								</group>
-							</page>
-						</notebook>
-					</sheet>
+							</group>
+						</page>
+					</notebook>
 				</form>
 			</field>
 		</record>

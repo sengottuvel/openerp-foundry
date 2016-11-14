@@ -13,130 +13,128 @@
 						<button name="entry_approve" type="object" string="Update" states="waiting" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_reject" type="object" string="Reject" states="waiting" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
-					<sheet>		
+					<group>
 						<group>
-							<group>
-								<field name="name" invisible="1" readonly="1"/>
-								<field name="entry_date" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
-								<field name="pump_model_id"/>
-								<field name="remarks" string="Remarks" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
-							</group>											
-							<group>
-								<field name="order_id" readonly="1"/>
-								<field name="moc_construction_id" readonly="1"/>
-								<field name="state" style="width: 30%%" class="att_state_change"/>
-								<field name="entry_mode" invisible="1"/>
-							</group>					
-						</group>
-						
-						<notebook>
-							<page string="Foundry Items">
-								<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}">
-									<tree string="Assembly BOM Details Tree" create="false" delete="false">
-									   <field name="pattern_id" readonly="1"/>
-									   <field name="pattern_name" readonly="1"/>
-									   <field name="position_id" readonly="1"/>
-									   <field name="weight" readonly="1" invisible="1"/>
-									   <field name="order_bom_qty" readonly="1"/>
-									   <field name="unit_price" readonly="1" invisible="1"/>
-									   <field name="flag_applicable" readonly="1" invisible="1"/>
-									   <field name="flag_pattern_check" readonly="1" invisible="1"/>
-									   <field name="moc_id" readonly="1"/>
-									   <field name="add_spec" readonly="1" widget="char"/>
-									   <field name="flag_standard" invisible="1"/>
-									   <field name="order_entry_mode" invisible="1"/>
-									   <field name="entry_mode" invisible="1"/>
-									   <field name="state" style="width: 30%%" class="att_state_change"/>
-									</tree>
-									<form string="Assembly BOM Details Form">
-										<group>
-											<field name="pattern_id" readonly="1"/>
-											<field name="position_id" readonly="1"/>
-											<field name="moc_id" readonly="1"/>
-											<field name="state" style="width: 30%%" class="att_state_change"/>
-											<button name="entry_reject" type="object" string="Reject" states="waiting" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-										</group>
-										<group>
-											<field name="pattern_name" readonly="1"/>
-											<field name="order_bom_qty" readonly="1"/>
-											<field name="add_spec" readonly="1" widget="char"/>
-											<field name="reject_remarks"/>
-										</group>
-									</form>
-								</field>
-							</page>
-						
-							<page string="Machine Shop">
-								<field name="line_ids_a" nolabel="1" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}">
-									<tree string="Assembly Machine Shop Details Entry Tree" create="false" delete="false">
-										<field name="ms_id" readonly="1"/>		
-										<field name="name" readonly="1"/>
-										<field name="position_id" readonly="1"/>		
-										<field name="order_ms_qty" readonly="1"/>
-										<field name="flag_applicable" readonly="1" invisible="1"/>
+							<field name="name" invisible="1" readonly="1"/>
+							<field name="entry_date" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+							<field name="pump_model_id"/>
+							<field name="remarks" string="Remarks" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+						</group>											
+						<group>
+							<field name="order_id" readonly="1"/>
+							<field name="moc_construction_id" readonly="1"/>
+							<field name="state" style="width: 30%%" class="att_state_change"/>
+							<field name="entry_mode" invisible="1"/>
+						</group>					
+					</group>
+					
+					<notebook>
+						<page string="Foundry Items">
+							<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}">
+								<tree string="Assembly BOM Details Tree" create="false" delete="false">
+								   <field name="pattern_id" readonly="1"/>
+								   <field name="pattern_name" readonly="1"/>
+								   <field name="position_id" readonly="1"/>
+								   <field name="weight" readonly="1" invisible="1"/>
+								   <field name="order_bom_qty" readonly="1"/>
+								   <field name="unit_price" readonly="1" invisible="1"/>
+								   <field name="flag_applicable" readonly="1" invisible="1"/>
+								   <field name="flag_pattern_check" readonly="1" invisible="1"/>
+								   <field name="moc_id" readonly="1"/>
+								   <field name="add_spec" readonly="1" widget="char"/>
+								   <field name="flag_standard" invisible="1"/>
+								   <field name="order_entry_mode" invisible="1"/>
+								   <field name="entry_mode" invisible="1"/>
+								   <field name="state" style="width: 30%%" class="att_state_change"/>
+								</tree>
+								<form string="Assembly BOM Details Form">
+									<group>
+										<field name="pattern_id" readonly="1"/>
+										<field name="position_id" readonly="1"/>
 										<field name="moc_id" readonly="1"/>
-										<field name="order_ms_remarks" widget="char" readonly="1"/>
-										<field name="flag_standard" invisible="1"/>
-										<field name="order_entry_mode" invisible="1"/>
-										 <field name="entry_mode" invisible="1"/>
 										<field name="state" style="width: 30%%" class="att_state_change"/>
-									</tree>
-									<form string="Assembly Machine Shop Details Entry Form">
-										<group>
-											<field name="ms_id" readonly="1"/>
-											<field name="position_id" readonly="1"/>
-											<field name="moc_id" readonly="1"/>
-											<field name="state" style="width: 30%%" class="att_state_change"/>
-											<button name="entry_reject" type="object" string="Reject" states="waiting" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-										</group>
-										<group>
-											<field name="name" readonly="1"/>
-											<field name="order_ms_qty" readonly="1"/>
-											<field name="order_ms_remarks" widget="char" readonly="1"/>
-											<field name="reject_remarks"/>
-										</group>
-									</form>
-								</field>
-							</page>
-							<page string="BOT">
-								<field name="line_ids_b" nolabel="1" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}">
-									<tree string="Assembly BOT Details Entry Tree" editable="bottom" create="false" delete="false">	
-										<field name="bot_id" readonly="1"/>		
-										<field name="item_name" readonly="1"/>								
-										<field name="order_bot_qty" readonly="1"/>
-										<field name="flag_applicable" readonly="1" invisible="1"/>
+										<button name="entry_reject" type="object" string="Reject" states="waiting" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+									</group>
+									<group>
+										<field name="pattern_name" readonly="1"/>
+										<field name="order_bom_qty" readonly="1"/>
+										<field name="add_spec" readonly="1" widget="char"/>
+										<field name="reject_remarks"/>
+									</group>
+								</form>
+							</field>
+						</page>
+					
+						<page string="Machine Shop">
+							<field name="line_ids_a" nolabel="1" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}">
+								<tree string="Assembly Machine Shop Details Entry Tree" create="false" delete="false">
+									<field name="ms_id" readonly="1"/>		
+									<field name="name" readonly="1"/>
+									<field name="position_id" readonly="1"/>		
+									<field name="order_ms_qty" readonly="1"/>
+									<field name="flag_applicable" readonly="1" invisible="1"/>
+									<field name="moc_id" readonly="1"/>
+									<field name="order_ms_remarks" widget="char" readonly="1"/>
+									<field name="flag_standard" invisible="1"/>
+									<field name="order_entry_mode" invisible="1"/>
+									 <field name="entry_mode" invisible="1"/>
+									<field name="state" style="width: 30%%" class="att_state_change"/>
+								</tree>
+								<form string="Assembly Machine Shop Details Entry Form">
+									<group>
+										<field name="ms_id" readonly="1"/>
+										<field name="position_id" readonly="1"/>
 										<field name="moc_id" readonly="1"/>
-										<field name="order_bot_remarks" widget="char" readonly="1"/>
-										<field name="flag_standard" invisible="1"/>
-										<field name="order_entry_mode" invisible="1"/>
-										 <field name="entry_mode" invisible="1"/>
-									</tree>
-								</field>
-							</page>
-							<page string="Entry Info">
-								<group>
-									<field name="company_id"/>
-								</group>
-								<group>
-									<field name="active"/>
-								</group>
-								<group>
-									<group>
-										<field name="user_id"/>
-										<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
-										<field name="cancel_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
-										<field name="update_user_id"/>
+										<field name="state" style="width: 30%%" class="att_state_change"/>
+										<button name="entry_reject" type="object" string="Reject" states="waiting" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 									</group>
 									<group>
-										<field name="crt_date"/>
-										<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
-										<field name="cancel_date" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
-										<field name="update_date"/>
+										<field name="name" readonly="1"/>
+										<field name="order_ms_qty" readonly="1"/>
+										<field name="order_ms_remarks" widget="char" readonly="1"/>
+										<field name="reject_remarks"/>
 									</group>
+								</form>
+							</field>
+						</page>
+						<page string="BOT">
+							<field name="line_ids_b" nolabel="1" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}">
+								<tree string="Assembly BOT Details Entry Tree" editable="bottom" create="false" delete="false">	
+									<field name="bot_id" readonly="1"/>		
+									<field name="item_name" readonly="1"/>								
+									<field name="order_bot_qty" readonly="1"/>
+									<field name="flag_applicable" readonly="1" invisible="1"/>
+									<field name="moc_id" readonly="1"/>
+									<field name="order_bot_remarks" widget="char" readonly="1"/>
+									<field name="flag_standard" invisible="1"/>
+									<field name="order_entry_mode" invisible="1"/>
+									 <field name="entry_mode" invisible="1"/>
+								</tree>
+							</field>
+						</page>
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
+								<group>
+									<field name="user_id"/>
+									<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="cancel_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+									<field name="update_user_id"/>
 								</group>
-							</page>
-						</notebook>
-					</sheet>
+								<group>
+									<field name="crt_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="cancel_date" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>
 				</form>
 			</field>
 		</record>
@@ -285,130 +283,128 @@
 					<button name="entry_reject" type="object" string="Reject" states="waiting" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 				</header>
 -->
-				<sheet>		
+				<group>
 					<group>
-						<group>
-							<field name="name" invisible="1" readonly="1"/>
-							<field name="entry_date" attrs="{'readonly': [('state','not in',['waiting'])]}"/>
-							<field name="pump_model_id"/>
-							<field name="remarks" string="Remarks" attrs="{'readonly': [('state','not in',['waiting'])]}"/>
-						</group>											
-						<group>
-							<field name="order_id" readonly="1"/>
-							<field name="moc_construction_id" readonly="1"/>
-							<field name="state" style="width: 30%%" class="att_state_change"/>
-							<field name="entry_mode" invisible="1"/>
-						</group>					
-					</group>
-					
-					<notebook>
-						<page string="Foundry Items">
-							<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','not in',['waiting'])]}">
-								<tree string="Performance Testing BOM Details Tree" create="false" delete="false">
-								   <field name="pattern_id" readonly="1"/>
-								   <field name="pattern_name" readonly="1"/>
-								   <field name="position_id" readonly="1"/>
-								   <field name="weight" readonly="1" invisible="1"/>
-								   <field name="order_bom_qty" readonly="1"/>
-								   <field name="unit_price" readonly="1" invisible="1"/>
-								   <field name="flag_applicable" readonly="1" invisible="1"/>
-								   <field name="flag_pattern_check" readonly="1" invisible="1"/>
-								   <field name="moc_id" readonly="1"/>
-								   <field name="add_spec" readonly="1" widget="char"/>
-								   <field name="flag_standard" invisible="1"/>
-								   <field name="order_entry_mode" invisible="1"/>
-								   <field name="entry_mode" invisible="1"/>
-								   <field name="state" style="width: 30%%" class="att_state_change"/>
-								</tree>
-								<form string="Performance Testing BOM Details Form">
-									<group>
-										<field name="pattern_id" readonly="1"/>
-										<field name="position_id" readonly="1"/>
-										<field name="moc_id" readonly="1"/>
-										<field name="state" style="width: 30%%" class="att_state_change"/>
-										<button name="entry_reject" type="object" string="Reject" states="waiting" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-									</group>
-									<group>
-										<field name="pattern_name" readonly="1"/>
-										<field name="order_bom_qty" readonly="1"/>
-										<field name="add_spec" readonly="1" widget="char"/>
-										<field name="reject_remarks"/>
-									</group>
-								</form>
-							</field>
-						</page>
-					
-						<page string="Machine Shop">
-							<field name="line_ids_a" nolabel="1" attrs="{'readonly': [('state','not in',['waiting'])]}">
-								<tree string="Performance Testing Machine Shop Details Entry Tree" create="false" delete="false">
-									<field name="ms_id" readonly="1"/>		
-									<field name="name" readonly="1"/>
-									<field name="position_id" readonly="1"/>		
-									<field name="order_ms_qty" readonly="1"/>
-									<field name="flag_applicable" readonly="1" invisible="1"/>
+						<field name="name" invisible="1" readonly="1"/>
+						<field name="entry_date" attrs="{'readonly': [('state','not in',['waiting'])]}"/>
+						<field name="pump_model_id"/>
+						<field name="remarks" string="Remarks" attrs="{'readonly': [('state','not in',['waiting'])]}"/>
+					</group>											
+					<group>
+						<field name="order_id" readonly="1"/>
+						<field name="moc_construction_id" readonly="1"/>
+						<field name="state" style="width: 30%%" class="att_state_change"/>
+						<field name="entry_mode" invisible="1"/>
+					</group>					
+				</group>
+				
+				<notebook>
+					<page string="Foundry Items">
+						<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','not in',['waiting'])]}">
+							<tree string="Performance Testing BOM Details Tree" create="false" delete="false">
+							   <field name="pattern_id" readonly="1"/>
+							   <field name="pattern_name" readonly="1"/>
+							   <field name="position_id" readonly="1"/>
+							   <field name="weight" readonly="1" invisible="1"/>
+							   <field name="order_bom_qty" readonly="1"/>
+							   <field name="unit_price" readonly="1" invisible="1"/>
+							   <field name="flag_applicable" readonly="1" invisible="1"/>
+							   <field name="flag_pattern_check" readonly="1" invisible="1"/>
+							   <field name="moc_id" readonly="1"/>
+							   <field name="add_spec" readonly="1" widget="char"/>
+							   <field name="flag_standard" invisible="1"/>
+							   <field name="order_entry_mode" invisible="1"/>
+							   <field name="entry_mode" invisible="1"/>
+							   <field name="state" style="width: 30%%" class="att_state_change"/>
+							</tree>
+							<form string="Performance Testing BOM Details Form">
+								<group>
+									<field name="pattern_id" readonly="1"/>
+									<field name="position_id" readonly="1"/>
 									<field name="moc_id" readonly="1"/>
-									<field name="order_ms_remarks" widget="char" readonly="1"/>
-									<field name="flag_standard" invisible="1"/>
-									<field name="order_entry_mode" invisible="1"/>
-									 <field name="entry_mode" invisible="1"/>
 									<field name="state" style="width: 30%%" class="att_state_change"/>
-								</tree>
-								<form string="Performance Testing Machine Shop Details Entry Form">
-									<group>
-										<field name="ms_id" readonly="1"/>
-										<field name="position_id" readonly="1"/>
-										<field name="moc_id" readonly="1"/>
-										<field name="state" style="width: 30%%" class="att_state_change"/>
-										<button name="entry_reject" type="object" string="Reject" states="waiting" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-									</group>
-									<group>
-										<field name="name" readonly="1"/>
-										<field name="order_ms_qty" readonly="1"/>
-										<field name="order_ms_remarks" widget="char" readonly="1"/>
-										<field name="reject_remarks"/>
-									</group>
-								</form>
-							</field>
-						</page>
-						<page string="BOT">
-							<field name="line_ids_b" nolabel="1" attrs="{'readonly': [('state','not in',['waiting'])]}">
-								<tree string="Performance Testing BOT Details Entry Tree" editable="bottom" create="false" delete="false">	
-									<field name="bot_id" readonly="1"/>		
-									<field name="item_name" readonly="1"/>								
-									<field name="order_bot_qty" readonly="1"/>
-									<field name="flag_applicable" readonly="1" invisible="1"/>
+									<button name="entry_reject" type="object" string="Reject" states="waiting" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+								</group>
+								<group>
+									<field name="pattern_name" readonly="1"/>
+									<field name="order_bom_qty" readonly="1"/>
+									<field name="add_spec" readonly="1" widget="char"/>
+									<field name="reject_remarks"/>
+								</group>
+							</form>
+						</field>
+					</page>
+				
+					<page string="Machine Shop">
+						<field name="line_ids_a" nolabel="1" attrs="{'readonly': [('state','not in',['waiting'])]}">
+							<tree string="Performance Testing Machine Shop Details Entry Tree" create="false" delete="false">
+								<field name="ms_id" readonly="1"/>		
+								<field name="name" readonly="1"/>
+								<field name="position_id" readonly="1"/>		
+								<field name="order_ms_qty" readonly="1"/>
+								<field name="flag_applicable" readonly="1" invisible="1"/>
+								<field name="moc_id" readonly="1"/>
+								<field name="order_ms_remarks" widget="char" readonly="1"/>
+								<field name="flag_standard" invisible="1"/>
+								<field name="order_entry_mode" invisible="1"/>
+								 <field name="entry_mode" invisible="1"/>
+								<field name="state" style="width: 30%%" class="att_state_change"/>
+							</tree>
+							<form string="Performance Testing Machine Shop Details Entry Form">
+								<group>
+									<field name="ms_id" readonly="1"/>
+									<field name="position_id" readonly="1"/>
 									<field name="moc_id" readonly="1"/>
-									<field name="order_bot_remarks" widget="char" readonly="1"/>
-									<field name="flag_standard" invisible="1"/>
-									<field name="order_entry_mode" invisible="1"/>
-									 <field name="entry_mode" invisible="1"/>
-								</tree>
-							</field>
-						</page>
-						<page string="Entry Info">
-							<group>
-								<field name="company_id"/>
-							</group>
-							<group>
-								<field name="active"/>
-							</group>
-							<group>
-								<group>
-									<field name="user_id"/>
-									<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
-									<field name="cancel_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
-									<field name="update_user_id"/>
+									<field name="state" style="width: 30%%" class="att_state_change"/>
+									<button name="entry_reject" type="object" string="Reject" states="waiting" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 								</group>
 								<group>
-									<field name="crt_date"/>
-									<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
-									<field name="cancel_date" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
-									<field name="update_date"/>
+									<field name="name" readonly="1"/>
+									<field name="order_ms_qty" readonly="1"/>
+									<field name="order_ms_remarks" widget="char" readonly="1"/>
+									<field name="reject_remarks"/>
 								</group>
+							</form>
+						</field>
+					</page>
+					<page string="BOT">
+						<field name="line_ids_b" nolabel="1" attrs="{'readonly': [('state','not in',['waiting'])]}">
+							<tree string="Performance Testing BOT Details Entry Tree" editable="bottom" create="false" delete="false">	
+								<field name="bot_id" readonly="1"/>		
+								<field name="item_name" readonly="1"/>								
+								<field name="order_bot_qty" readonly="1"/>
+								<field name="flag_applicable" readonly="1" invisible="1"/>
+								<field name="moc_id" readonly="1"/>
+								<field name="order_bot_remarks" widget="char" readonly="1"/>
+								<field name="flag_standard" invisible="1"/>
+								<field name="order_entry_mode" invisible="1"/>
+								 <field name="entry_mode" invisible="1"/>
+							</tree>
+						</field>
+					</page>
+					<page string="Entry Info">
+						<group>
+							<field name="company_id"/>
+						</group>
+						<group>
+							<field name="active"/>
+						</group>
+						<group>
+							<group>
+								<field name="user_id"/>
+								<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+								<field name="cancel_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+								<field name="update_user_id"/>
 							</group>
-						</page>
-					</notebook>
-				</sheet>
+							<group>
+								<field name="crt_date"/>
+								<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+								<field name="cancel_date" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+								<field name="update_date"/>
+							</group>
+						</group>
+					</page>
+				</notebook>
 			</form>
 		</field>
 	</record>

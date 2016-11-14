@@ -13,57 +13,55 @@
 					<header>
 						<button name="assembly_update" string="Assembly Update" type="object"/>
 					</header>
-					<sheet>		
 						
-						<group string="MS Details">
-							<group>
-								<field name="name" invisible="1"/>
-								<field name="qty" readonly="1"/>
-								<field name="ms_type" invisible="1"/>
-							</group>											
-							<group>
-								<field name="entry_date" readonly="1" invisible="1"/>
-							</group>					
-						</group>
-						<group string="Work Order Details">
-							<group>
-								<field name="order_no" readonly="1"/>
-								
-								<field name="pattern_id" invisible="1"/>
-								<field name="item_code" readonly="1" />
-								<field name="moc_id" readonly="1"/>
-								
-							</group>											
-							<group>
-								<field name="order_priority" string="Category" readonly="1"/>
-								<field name="pump_model_id" readonly="1"/>
-								<field name="pattern_name" invisible="1"/>
-								<field name="item_name" readonly="1"/>
-								
-							</group>					
-						</group>
-						<notebook>
+					<group string="MS Details">
+						<group>
+							<field name="name" invisible="1"/>
+							<field name="qty" readonly="1"/>
+							<field name="ms_type" invisible="1"/>
+						</group>											
+						<group>
+							<field name="entry_date" readonly="1" invisible="1"/>
+						</group>					
+					</group>
+					<group string="Work Order Details">
+						<group>
+							<field name="order_no" readonly="1"/>
 							
-							<page string="Entry Info">
+							<field name="pattern_id" invisible="1"/>
+							<field name="item_code" readonly="1" />
+							<field name="moc_id" readonly="1"/>
+							
+						</group>											
+						<group>
+							<field name="order_priority" string="Category" readonly="1"/>
+							<field name="pump_model_id" readonly="1"/>
+							<field name="pattern_name" invisible="1"/>
+							<field name="item_name" readonly="1"/>
+							
+						</group>					
+					</group>
+					<notebook>
+						
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
 								<group>
-									<field name="company_id"/>
+									<field name="user_id"/>
+									<field name="update_user_id"/>
 								</group>
 								<group>
-									<field name="active"/>
+									<field name="crt_date"/>
+									<field name="update_date"/>
 								</group>
-								<group>
-									<group>
-										<field name="user_id"/>
-										<field name="update_user_id"/>
-									</group>
-									<group>
-										<field name="crt_date"/>
-										<field name="update_date"/>
-									</group>
-								</group>
-							</page>
-						</notebook>
-					</sheet>
+							</group>
+						</page>
+					</notebook>
 				</form>
 			</field>
 		</record>
