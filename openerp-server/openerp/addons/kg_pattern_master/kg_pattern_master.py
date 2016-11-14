@@ -9,6 +9,7 @@ import math
 import time
 from datetime import date
 import base64
+
 dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
 class kg_pattern_master(osv.osv):
@@ -60,7 +61,8 @@ class kg_pattern_master(osv.osv):
 	
 	
 	_columns = {
-			
+		
+		
 		'name': fields.char('Part/Pattern No', size=128, required=True),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'box_id': fields.many2one('kg.box.master','Box',readonly=True,domain="[('active','=','t')]"),		
@@ -127,7 +129,7 @@ class kg_pattern_master(osv.osv):
 		'list_moc_flag': False,
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
-		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
+		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),	
 		'delivery_lead':8,	
 		'modify': 'no',
 		'pattern_state': 'active',

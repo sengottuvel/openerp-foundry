@@ -8,7 +8,6 @@ import time
 import openerp.exceptions
 import datetime
 from datetime import date
-
 dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
 class kg_bom(osv.osv):
@@ -98,7 +97,7 @@ class kg_bom(osv.osv):
 	  'state': 'draft',
 	  'qty': 1,
 	  'user_id': lambda obj, cr, uid, context: uid,
-	  'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
+	  'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),	
 	  'type':'new', 
 	  'bom_type':'new_bom', 
 	  'uom':'Nos', 

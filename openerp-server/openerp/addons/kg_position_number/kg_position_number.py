@@ -88,7 +88,7 @@ class kg_position_number(osv.osv):
 		'active': True,		
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
-		'crt_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
+		'crt_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),	
 		'position_type': 'new',
 		'copy_flag' : False,
 		'modify': 'yes',

@@ -93,8 +93,8 @@ class kg_brandmoc_rate(osv.osv):
 		'active': True,
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
-		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),	
-		'eff_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
+		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
+		'eff_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),	
 		'modify': 'no',
 		'copy_flag' : False,
 		'brand_type':'new_brand',
@@ -291,7 +291,6 @@ class kg_brandmoc_rate(osv.osv):
 		if eff_date > today:
 			return False
 		return True
-		
 	
 	
 	_constraints = [		

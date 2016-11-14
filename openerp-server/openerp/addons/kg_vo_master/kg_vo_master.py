@@ -230,7 +230,7 @@ class ch_bed_assembly(osv.osv):
 	_columns = {
 			
 		'header_id':fields.many2one('kg.vo.master', 'VO Entry', required=True, ondelete='cascade'),		
-		'limitation':fields.selection([('upto_3000','Upto 3000'),('above_3000','Above 3000')],'Limitation',required=True),		
+		'limitation':fields.selection([('upto_3000','Upto 2999'),('above_3000','Above 3000')],'Limitation',required=True),		
 		'value': fields.float('Value'),
 		'bp': fields.float('BP',required=True),
 		'shaft_ext': fields.float('Shaft Ext',required=True),

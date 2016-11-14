@@ -71,7 +71,7 @@ class kg_dimension_master(osv.osv):
 		'active': True,		
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
-		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
+		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),	
 		'modify': 'no',
 		
 	}
