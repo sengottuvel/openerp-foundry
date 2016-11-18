@@ -824,9 +824,9 @@ class ch_work_order_details(osv.osv):
 					
 					#### Load Foundry Items ####
 					
-					if setting_height <= 3000:
+					if setting_height < 3000:
 						limitation = 'upto_3000'
-					if setting_height > 3000:
+					if setting_height >= 3000:
 						limitation = 'above_3000'
 
 					cr.execute('''
