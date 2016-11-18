@@ -5,6 +5,7 @@
 ##############################################################################
 
 {
+
     'name': 'Supplier Advance',
     'version': '0.1',
     'author': 'Karthikeyan.S',    
@@ -20,5 +21,6 @@
     'css': ['static/src/css/state.css'], 
     'auto_install': False,
     'installable': True,
+    
 }
 

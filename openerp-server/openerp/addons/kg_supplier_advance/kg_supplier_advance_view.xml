@@ -16,22 +16,23 @@
 						<group>
 							<group>
 								<field name="name"/>
-								<field name="supplier_id" required="1" on_change="onchange_supplier_id(supplier_id)" attrs="{'readonly': [('state','in',['confirmed'])]}" />
-								<field name="po_id" on_change="onchange_order_value(po_id,so_id)" attrs="{'invisible': [('order_category','!=','purchase')],'readonly': [('state','in',['confirmed'])],'required': [('order_category','=','purchase')]}" />
-								<field name="so_id" on_change="onchange_order_value(po_id,so_id)" attrs="{'invisible': [('order_category','!=','service')],'readonly': [('state','in',['confirmed'])],'required': [('order_category','=','service')]}"/>
+								<field name="supplier_id" required="1" on_change="onchange_supplier_id(supplier_id)" attrs="{'readonly': ['|',('state','=','confirmed'),('entry_mode','=','auto')]}" />
+								<field name="po_id" on_change="onchange_order_value(po_id,so_id)" attrs="{'invisible': [('order_category','!=','purchase')],'readonly': ['|',('state','=','confirmed'),('entry_mode','=','auto')],'required': [('order_category','=','purchase')]}" />
+								<field name="so_id" on_change="onchange_order_value(po_id,so_id)" attrs="{'invisible': [('order_category','!=','service')],'readonly': ['|',('state','=','confirmed'),('entry_mode','=','auto')],'required': [('order_category','=','service')]}"/>
 								<field name="order_value" readonly="1"/>
 								<field name="balance_amt" readonly="1"/>
 								<field name="note" string="Remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
 								
 							</group>											
 							<group>
-								<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
-								<field name="order_category" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+								<field name="entry_date" attrs="{'readonly': ['|',('state','=','confirmed'),('entry_mode','=','auto')]}"/>
+								<field name="order_category" required="1" attrs="{'readonly': ['|',('state','=','confirmed'),('entry_mode','=','auto')]}"/>
 								<field name="advance_amt" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
 								<field name="adjusted_amt" readonly="1"/>
 								<field name="order_no" invisible="1"/>								
 								<field name="state" style="width: 30%%" class="att_state_change"/>
-							</group>					
+								<field name="entry_mode" invisible="1"/>
+							</group>				
 						</group>
 						<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">							
 							<group>												
@@ -91,7 +92,6 @@
 		</record>
 		
 	<!-- Form View End -->
-		
 	
 	<!-- Tree View Start -->
 		
@@ -115,7 +115,6 @@
 		</record>
 		
 	<!-- Tree View End -->
-	
 	
 	<!-- Child Class Tree View Start -->
 		
@@ -157,7 +156,6 @@
 		
 	<!-- Search View End -->		
 			
-        
 	<!-- Menu Action Start-->
 		
 		<record id="tma_sup_advance" model="ir.actions.act_window">
@@ -173,8 +171,6 @@
 		
 	<!-- Menu Action End-->
 	
-	
-	
 	<!-- Audit Log Xml Data Start -->
 		
         <record id="audit_sup_advance" model="audittrail.rule">
@@ -188,23 +184,14 @@
             <field name="object_id" eval="ref('kg_supplier_advance.model_ch_advance_line')"/>       
             <field name="state">subscribed</field>              
         </record>       
-    
         
     <!-- Audit Log Xml Data End-->
     
-   
-    
 	<!-- Menu Item Start -->
-	
             
-		<!-- Supplier Advance -->
 		<menuitem action="tma_sup_advance" id="tam_sup_advance" parent="kg_menus.apm_advance_menu" sequence="5"/>
 				
-				
-	
-	<!-- Menu Item End -->
-	
-	
+	<!-- Menu Item End -->	
 		
 	</data>
 </openerp>

@@ -5,7 +5,6 @@ import time
 from datetime import date
 import openerp.addons.decimal_precision as dp
 from datetime import datetime
-dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
 class kg_supplier_advance(osv.osv):
 
@@ -13,19 +12,22 @@ class kg_supplier_advance(osv.osv):
 	_description = "Supplier Advance"
 	_order = "entry_date desc"
 	
-	
 	def _balance_amount_value(self, cr, uid, ids, field_name, arg, context=None):
 		result = {}
 		bal_value = 0.00
 		for entry in self.browse(cr, uid, ids, context=context):
-			bal_value = entry.advance_amt - entry.adjusted_amt			
-			result[entry.id] = bal_value
+			result[entry.id] = {
+				'balance_amt': 0.0,
+			}
+			bal_value = entry.advance_amt - entry.adjusted_amt
+			print"bal_valuebal_value",bal_value
+			result[entry.id]['balance_amt'] = bal_value or 0.00
+			print"result[entry.id]['balance_amt']",result[entry.id]['balance_amt'] 
+			
 		return result
 	
 	_columns = {
-	
-		## Version 0.1
-	
+		
 		## Basic Info
 				
 		'name': fields.char('Advance No', size=24,select=True,readonly=True),
@@ -57,13 +59,14 @@ class kg_supplier_advance(osv.osv):
 		
 		'supplier_id': fields.many2one('res.partner', 'Supplier Name', domain = "['|',('contractor','=',True),('supplier','=',True)]"),		
 		'order_category': fields.selection([('purchase','Purchase'),('service','Service')],'Order Category', readonly=True),		
-		'po_id':fields.many2one('purchase.order','PO No',domain="[('state','=','approved'), '&', ('adv_flag','=',False), '&', ('partner_id','=',supplier_id), '&', ('order_line.line_state','!=','cancel')]"),
+		'po_id':fields.many2one('purchase.order','PO No',domain="[('state','=','approved'), '&', ('adv_flag','=',False), '&', ('partner_id','=',supplier_id), '&', ('order_line.line_state','!=','cancel'),'&', ('bill_type','=','advance')]"),
 		
-		'so_id':fields.many2one('kg.service.order','SO No',domain="[('state','=','approved'), '&', ('adv_flag','=',False), '&', ('partner_id','=',supplier_id),'&',('so_type','=','service')]"),
+		'so_id':fields.many2one('kg.service.order','SO No',domain="[('state','=','approved'), '&', ('adv_flag','=',False), '&', ('partner_id','=',supplier_id),'&',('so_type','=','service'),'&', ('payment_type','=','advance')]"),
 	    'advance_amt': fields.float('Advance Amount'),			
 		'order_value': fields.float('Order Value'),		
 		'adjusted_amt': fields.float('Adjusted Amount'),		
-		'balance_amt': fields.function(_balance_amount_value, string='Balance Amount',store=True, type='float'),		
+		'balance_amt': fields.function(_balance_amount_value, digits_compute= dp.get_precision('Account'),string='Balance Amount',store=True, type='float',multi="sums"),	
+				
 		'order_no': fields.char('Order NO',readonly=True),				
 		
 		## Child Tables Declaration 				
@@ -100,21 +103,23 @@ class kg_supplier_advance(osv.osv):
 			order_no = so_rec.name		
 		return {'value': {'order_value' : total_value,'order_no':order_no}}	
 	
-	
 	def onchange_supplier_id(self, cr, uid, ids, supplier_id, context=None):
 		value = {}		
 		sup_ids = self.pool.get('kg.supplier.advance').search(cr,uid,[('supplier_id','=',supplier_id),('state','=','confirmed')])		
-		adv_line_vals=[]			
-		for ele in sup_ids:			
-			adv_rec = self.pool.get('kg.supplier.advance').browse(cr,uid,ele)			
-			adv_line_vals.append({
-							'advance_no':adv_rec.name,
-						   'advance_date':adv_rec.entry_date,
-						   'order_no':adv_rec.order_no,
-						   'advance_amt':adv_rec.advance_amt,
-						   'adjusted_amt':adv_rec.adjusted_amt,
-						   'balance_amt':adv_rec.balance_amt,
-							})
+		adv_line_vals=[]
+		if sup_ids:
+			for ele in sup_ids:
+				adv_rec = self.pool.get('kg.supplier.advance').browse(cr,uid,ele)
+				adv_line_vals.append({
+							   'advance_no':adv_rec.name,
+							   'advance_date':adv_rec.entry_date,
+							   'order_no':adv_rec.order_no,
+							   'advance_amt':adv_rec.advance_amt,
+							   'adjusted_amt':adv_rec.adjusted_amt,
+							   'balance_amt':adv_rec.balance_amt,
+								})
+				value['line_ids'] = adv_line_vals
+		else:
 			value['line_ids'] = adv_line_vals			
 		return {'value': value}
 	
@@ -132,14 +137,15 @@ class kg_supplier_advance(osv.osv):
 		
 	def _past_entry_date_check(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		today = date.today()
-		today = str(today)
-		today = datetime.strptime(today, '%Y-%m-%d')
-		entry_date = rec.entry_date
-		entry_date = str(entry_date)
-		entry_date = datetime.strptime(entry_date, '%Y-%m-%d')
-		if entry_date < today:
-			return False
+		if rec.entry_mode == 'manual':
+			today = date.today()
+			today = str(today)
+			today = datetime.strptime(today, '%Y-%m-%d')
+			entry_date = rec.entry_date
+			entry_date = str(entry_date)
+			entry_date = datetime.strptime(entry_date, '%Y-%m-%d')
+			if entry_date < today:
+				return False
 		return True		
 		
 	def _check_adv_amt(self,cr,uid,ids,context = None):
@@ -152,42 +158,97 @@ class kg_supplier_advance(osv.osv):
 		if rec.advance_amt <= 0.00 or total_amt > rec.order_value:
 			return False
 		else:
-			return True		
-	
+			return True
+		
+	def _duplicate_entry(self,cr,uid,ids,context = None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.order_category == 'purchase':
+			po_obj = self.search(cr,uid,[('state','=','draft'),('po_id','=',rec.po_id.id)])
+			if len(po_obj) > 1:
+				raise osv.except_osv(_('Warning!'),
+					_('Mentioned PO Advance entry is already in DRAFT state.'))
+		if rec.order_category == 'service':
+			so_obj = self.search(cr,uid,[('state','=','draft'),('so_id','=',rec.so_id.id)])
+			if len(so_obj) > 1:
+				raise osv.except_osv(_('Warning!'),
+					_('Mentioned SO Advance entry is already in DRAFT state.'))
+		return True
+		
 	_constraints = [                   
         
-        (_future_entry_date_check, 'System not allow to save with future date. !!',['Advance Date']), 
-        (_past_entry_date_check, 'System not allow to save with past date. !!',['Advance Date']), 
-        (_check_adv_amt, 'Please Check the advance amount. Advance amount should not be allow zero,negative and greater than Order Value amount !!',['Advance amount']),       
-        
+        (_future_entry_date_check, 'System not allow to save with future date!',['Advance Date']), 
+        (_past_entry_date_check, 'System not allow to save with past date!',['Advance Date']), 
+        (_check_adv_amt, 'Please Check the advance amount. Advance amount should not be allow zero,negative and greater than Order Value amount!',['Advance amount']),       
+        (_duplicate_entry, 'Mentioned Order Advance entry is already in DRAFT state.',['']), 
+         
        ]
        
-
 	def entry_confirm(self,cr,uid,ids,context=None):
 		
-		rec = self.browse(cr,uid,ids[0])		
-		
-		### Sequence Number Generation  ###
-		if rec.order_category == 'purchase':
-			if rec.name == '' or rec.name == False:
-				seq_obj_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.supplier.advance')])
-				seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_obj_id[0])
-				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_obj_id[0],seq_rec.code,rec.entry_date))
-				entry_name = cr.fetchone();
-				entry_name = entry_name[0]
-			else:
-				entry_name = rec.name		
-		if rec.order_category == 'service':
-			if rec.name == '' or rec.name == False:
-				seq_obj_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','ch.advance.line')])
-				seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_obj_id[0])
-				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_obj_id[0],seq_rec.code,rec.entry_date))
-				entry_name = cr.fetchone();
-				entry_name = entry_name[0]
-			else:
-				entry_name = rec.name		
-		
-		self.write(cr, uid, ids, {'name':entry_name,'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		rec = self.browse(cr,uid,ids[0])
+		pre_total = po_advance_amt = cur_adv = 0		
+		if rec.state == 'draft':
+			### Sequence Number Generation  ###
+			if rec.order_category == 'purchase':
+				if rec.name == '' or rec.name == False:
+					seq_obj_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.supplier.advance')])
+					seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_obj_id[0])
+					cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_obj_id[0],seq_rec.code,rec.entry_date))
+					entry_name = cr.fetchone();
+					entry_name = entry_name[0]
+				else:
+					entry_name = rec.name
+				order_id = rec.po_id
+				order_obj = self.pool.get('purchase.order')
+				obj = self.search(cr,uid,[('state','=','confirmed'),('po_id','=',order_id.id)])
+				#~ obj = self.search(cr,uid,[('state','=','confirmed'),('po_id','=',rec.po_id.id)])
+				#~ if obj:
+					#~ for item in obj:
+						#~ pre_rec = self.browse(cr,uid,item)
+						#~ pre_total += pre_rec.advance_amt
+				#~ print"pre_totalpre_total",pre_total
+				#~ 
+				#~ po_advance_amt = (rec.po_id.amount_total / 100.00) * rec.po_id.advance_amt
+				#~ print"po_advance_amt",po_advance_amt
+				#~ if pre_total <= po_advance_amt:
+					#~ cur_adv = po_advance_amt - pre_total
+					#~ print"cur_advcur_advcur_adv",cur_adv
+					#~ if rec.advance_amt > cur_adv:
+						#~ raise osv.except_osv(_('Warning!'),
+							#~ _('Advance amount sholud not be greater than PO advance!'))
+					#~ else:
+						#~ if po_advance_amt == rec.advance_amt + pre_total:
+							#~ self.pool.get('purchase.order').write(cr,uid,po_id.id,{'adv_flag':True})
+			if rec.order_category == 'service':
+				if rec.name == '' or rec.name == False:
+					seq_obj_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','ch.advance.line')])
+					seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_obj_id[0])
+					cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_obj_id[0],seq_rec.code,rec.entry_date))
+					entry_name = cr.fetchone();
+					entry_name = entry_name[0]
+				else:
+					entry_name = rec.name
+				order_id = rec.so_id
+				order_obj = self.pool.get('kg.service.order')
+				obj = self.search(cr,uid,[('state','=','confirmed'),('so_id','=',order_id.id)])
+				
+			if obj:
+				for item in obj:
+					pre_rec = self.browse(cr,uid,item)
+					pre_total += pre_rec.advance_amt
+			print"pre_totalpre_total",pre_total
+			po_advance_amt = (order_id.amount_total / 100.00) * order_id.advance_amt
+			print"po_advance_amt",po_advance_amt
+			if pre_total <= po_advance_amt:
+				cur_adv = po_advance_amt - pre_total
+				print"cur_advcur_advcur_adv",cur_adv
+				if rec.advance_amt > cur_adv:
+					raise osv.except_osv(_('Warning!'),
+						_('Advance amount sholud not be greater than Order advance!'))
+				else:
+					if po_advance_amt == rec.advance_amt + pre_total:
+						order_obj.write(cr,uid,order_id.id,{'adv_flag':True})
+			self.write(cr, uid, ids, {'name':entry_name,'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		
 		return True
 		
@@ -195,16 +256,16 @@ class kg_supplier_advance(osv.osv):
 		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 		
-		
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.cancel_remark:
-			self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		else:
-			raise osv.except_osv(_('Cancel remark is must !!'),
-				_('Enter the remarks in Cancel remarks field !!'))
+		if rec.state =='confirmed':
+			if rec.state == 'entry_cancel':
+				if rec.cancel_remark:
+					self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+				else:
+					raise osv.except_osv(_('Cancel remark is must !!'),
+						_('Enter the remarks in Cancel remarks field !!'))
 		return True
-		
 		
 	def unlink(self,cr,uid,ids,context=None):
 		unlink_ids = []		
