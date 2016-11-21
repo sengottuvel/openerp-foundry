@@ -646,21 +646,6 @@
 		<!-- Batch Finish Grinding Line End -->
 		
 		
-		<!-- Batch Rough Grinding Line Start --> 
-		
-		<record id="t_foundry_batch_rough_grinding_line" model="ir.model.access">
-			<field name="model_id" ref="kg_fettling.model_ch_batch_rough_grinding_line"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">Rough Grinding Batch Line</field>
-			<field eval="1" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
-		</record>
-		
-		
-		<!-- Batch Rough Grinding Line End -->
-		
 		<!-- Melting Log Charge Details Line Start --> 
 		
 		<record id="t_melting_log_line_a" model="ir.model.access">
