@@ -72,40 +72,40 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Inventory Admin')]"/>
 		</record>
 		
-		<record id="t_inventory_pogrn_purchase_invoice_line" model="ir.model.access">
-			<field name="model_id" ref="kg_purchase_invoice.model_kg_pogrn_purchase_invoice_line"/>
+		<record id="t_inventory_ch_invoice_line" model="ir.model.access">
+			<field name="model_id" ref="kg_purchase_invoice.model_ch_invoice_line"/>
 			<field eval="1" name="perm_read"/>
-			<field name="name">PO GRN Invoice Line</field>
+			<field name="name">Ch Invoice Line</field>
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Inventory Admin')]"/>
 		</record>
 		
-		<record id="t_inventory_gengrn_purchase_invoice_line" model="ir.model.access">
-			<field name="model_id" ref="kg_purchase_invoice.model_kg_gengrn_purchase_invoice_line"/>
+		<record id="t_inventory_ch_kg_purchase_payment_history" model="ir.model.access">
+			<field name="model_id" ref="kg_purchase_invoice.model_kg_purchase_payment_history"/>
 			<field eval="1" name="perm_read"/>
-			<field name="name">General GRN Invoice Line</field>
-			<field eval="1" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Inventory Admin')]"/>
-		</record>
-
-		<record id="t_inventory_grn_service_invoice_line" model="ir.model.access">
-			<field name="model_id" ref="kg_purchase_invoice.model_kg_grn_service_invoice_line"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">Service AMC Invoice Line</field>
+			<field name="name">Ch Purchase Payment</field>
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Inventory Admin')]"/>
 		</record>
 		
-		<record id="t_inventory_poadvance_purchase_invoice_line" model="ir.model.access">
-			<field name="model_id" ref="kg_purchase_invoice.model_kg_poadvance_purchase_invoice_line"/>
+		<record id="t_inventory_ch_kg_credit_note" model="ir.model.access">
+			<field name="model_id" ref="kg_purchase_invoice.model_ch_kg_credit_note"/>
 			<field eval="1" name="perm_read"/>
-			<field name="name">PO Advance GRN Invoice Line</field>
+			<field name="name">Ch Credit Note</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Inventory Admin')]"/>
+		</record>
+		
+		<record id="t_inventory_ch_expense_details" model="ir.model.access">
+			<field name="model_id" ref="kg_purchase_invoice.model_ch_expense_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch Expense Details</field>
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
@@ -113,9 +113,9 @@
 		</record>
 		
 		<record id="t_inventory_soadvance_purchase_invoice_line" model="ir.model.access">
-			<field name="model_id" ref="kg_purchase_invoice.model_kg_soadvance_purchase_invoice_line"/>
+			<field name="model_id" ref="kg_purchase_invoice.model_ch_poadvance_purchase_invoice_line"/>
 			<field eval="1" name="perm_read"/>
-			<field name="name">SO Advance GRN Invoice Line</field>
+			<field name="name">Advance Invoice Line</field>
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
