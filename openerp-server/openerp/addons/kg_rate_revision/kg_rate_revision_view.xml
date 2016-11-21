@@ -17,9 +17,9 @@
 					</header>
 					<group>
 						<group>						
-							<field name="name"/>								
-							<field name="product_id" widget="many2many_tags" attrs="{'readonly': [('state','in',['approved','reject'])]}"/>
+							<field name="name"/>						
 							<field name="revision_mode" attrs="{'readonly': [('state','in',['approved','reject'])]}"/>	
+							<field name="product_id" widget="many2many_tags" attrs="{'readonly': [('state','in',['approved','reject'])]}"/>
 							<field name="rate" attrs="{'invisible':[('revision_mode','=','individual')], 'required': [('revision_mode','=','all')], 'readonly': [('state','in',['approved','reject'])]}"/>	
 							<field name="modify" invisible = "1"/>
 							<field name="line_product_id" invisible = "1"/>
@@ -160,11 +160,13 @@
 		
 		 <!-- Audit Log Xml Data Start -->
 		
+<!--
         <record id="rate_revision_model" model="audittrail.rule">
             <field name="name">Audit Log Rate Revision</field>
             <field name="object_id" eval="ref('kg_rate_revision.model_kg_rate_revision')"/>       
             <field name="state">subscribed</field>              
         </record>
+-->
         
         <!-- Audit Log Xml Data End-->
 		

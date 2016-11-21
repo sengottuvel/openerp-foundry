@@ -19,9 +19,7 @@ class grn_register_report_wizard(osv.osv_memory):
 		'supplier':fields.many2many('res.partner','grn_register_supplier','grn_id','supplier_id','Supplier',domain="[('partner_state','not in',('cancel','reject')),('supplier','=',True)]"),
 		'filter': fields.selection([('filter_no', 'No Filters'), ('filter_date', 'Date')], "Filter by", required=True),
 		'product_type': fields.selection([('consu', 'Consumable Items'),('cap','Capital Goods'),('service','Service Items')], 
-					'Product Type'),
-	    
-	    #'product':fields.many2many('product.product','purchase_requisition_line','product_id','Product','Product'),
+					'Product Type'),	    
 	    'product':fields.many2many('product.product','wizard_id','product_id','grn_product_map','Product',domain="[('state','in',('draft','confirm','approved'))]"),				
 		'date_from': fields.date("Start Date"),
 		'date_to': fields.date("End Date"),
@@ -56,7 +54,6 @@ class grn_register_report_wizard(osv.osv_memory):
 	  
 	  
 	def _build_contexts(self, cr, uid, ids, data, context=None):
-		print "_build_contexts data ^^^^^^^^^^^^^^^^^^^^^^^^", data
 		if context is None:
 			context = {}
 		result = {}
@@ -94,7 +91,6 @@ class grn_register_report_wizard(osv.osv_memory):
 		if context is None:
 			context = {}
 		data = self.pre_print_report(cr, uid, ids, data, context=context)
-		print "data..................,,,,,,,,,,,,,,", data
 		data['form'].update(self.read(cr, uid, ids[0]))
 		if data['form']:
 			date_from = str(data['form']['date_from'])
@@ -134,10 +130,7 @@ class grn_register_report_wizard(osv.osv_memory):
 				data['form']['status_name'] = 'Invoiced'
 			else:
 				data['form']['status_name'] = ''
-				
-			#~ cr_date = datetime.strptime(rec.print_date, '%Y-%m-%d %H:%M:%S')
-			#~ date = cr_date.strftime('%d/%m/%Y %H:%M:%S')	
-			#~ data['form']['print_date'] = date	
+			
 			print_date = rec.print_date
 			cr_date = datetime.strptime(print_date, '%Y-%m-%d %H:%M:%S')			
 			ist_time = cr_date + timedelta(minutes = 308)

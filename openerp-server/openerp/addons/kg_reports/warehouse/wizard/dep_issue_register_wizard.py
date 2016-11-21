@@ -58,7 +58,6 @@ class dep_issue_register_wizard(osv.osv_memory):
 		
 	def create_report(self, cr, uid, ids, context={}):
 		data = self.read(cr,uid,ids,)[-1]
-		print data,' create_report('
 		return {
 			'type'		 : 'ir.actions.report.xml',
 			'report_name'   : 'jasper_kg_dep_issue',

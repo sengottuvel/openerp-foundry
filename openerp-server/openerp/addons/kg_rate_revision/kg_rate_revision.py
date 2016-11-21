@@ -105,7 +105,7 @@ class kg_rate_revision(osv.osv):
 		if rec.revision_mode == 'all':
 			if rec.rate <= 0.00:
 					raise osv.except_osv(_('Value'),
-					_('System not allow to Load negative and zero values..!!'))		
+					_('System not allow to Load negative and zero values..!!'))				
 		if rec.product_id == []:		
 			if rec.category_type == 'purchase_item':
 				brand_moc_rec = self.pool.get('kg.brandmoc.rate').search(cr,uid,([('category_type','=','purchase_item'),('state','=','approved')]))	
@@ -179,11 +179,19 @@ class kg_rate_revision(osv.osv):
 
 	def entry_confirm(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])	
+		purchase_ids = self.pool.get('purchase.order').search(cr,uid,[('state','=','confirmed')])		
 		if entry.state == 'draft':	
 			for line in entry.line_ids:
 				if line.new_design_rate <= 0.00:
 					raise osv.except_osv(_('New Design Rate'),
 						_('System not allow to save negative and zero values..!!'))
+				for purchase in purchase_ids:
+					purchase_rec = self.pool.get('purchase.order').browse(cr,uid,purchase)
+					purchase_line_ids = self.pool.get('purchase.order.line').search(cr,uid,[('order_id','=',purchase),('product_id','=',line.product_id.id)])					
+					if purchase_line_ids:						
+						 raise osv.except_osv(
+						_('Purchase Order Waiting for approval!!!'),
+						_('System not allow to confirm. Need to confirm purchase order contains product name %s and Po No. %s'%(line.product_id.name,purchase_rec.name)))   					
 			revision_name = ''	
 			revision_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.rate.revision')])
 			rec = self.pool.get('ir.sequence').browse(cr,uid,revision_seq_id[0])
@@ -193,8 +201,16 @@ class kg_rate_revision(osv.osv):
 		return True
 	def entry_approve(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
+		purchase_ids = self.pool.get('purchase.order').search(cr,uid,[('state','=','confirmed')])	
 		if entry.state == 'confirmed':	
-			for line in entry.line_ids:					
+			for line in entry.line_ids:
+				for purchase in purchase_ids:
+					purchase_rec = self.pool.get('purchase.order').browse(cr,uid,purchase)
+					purchase_line_ids = self.pool.get('purchase.order.line').search(cr,uid,[('order_id','=',purchase),('product_id','=',line.product_id.id)])					
+					if purchase_line_ids:						
+						 raise osv.except_osv(
+						_('Purchase Order Waiting for approval!!!'),
+						_('System not allow to Approve. Need to confirm purchase order contains product name %s and Po No. %s'%(line.product_id.name,purchase_rec.name)))					
 				self.pool.get('ch.brandmoc.rate.details').write(cr,uid,line.brand_line_ids.id,{'rate':line.new_design_rate})
 			self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True

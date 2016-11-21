@@ -46,11 +46,9 @@ class grn_register_report(report_sxw.rml_parse):
 		if form['product']:
 			for ids2 in form['product']:
 				product.append("grn_line.product_id = %s"%(ids2))
-		print "--------------------------",form
 		
 		if form['inward_type']:
 			inward = form['inward_type']
-			print "--------------------------",inward
 			inward_type.append("grn_line.inward_type = '%s'"%(inward[0]))		
 		
 		if inward_type:
@@ -81,12 +79,7 @@ class grn_register_report(report_sxw.rml_parse):
 			product =  product+')'
 		else:
 			product = ''
-		
-		print "where_sql --------------------------->>>", where_sql	
-		print "po_partner --------------------------->>>", po_partner
-		print "gen_partner --------------------------->>>", gen_partner
-		print "product------------------------------>",product
-		
+
 		if form['status'] == 'approved':
 			grn_state = 'done'
 		elif form['status'] == 'cancelled':
@@ -181,7 +174,6 @@ class grn_register_report(report_sxw.rml_parse):
 			   ''',('in', grn_state, form['date_from'],form['date_to'],'in', grn_state, form['date_from'],form['date_to']))
 		
 		data=self.cr.dictfetchall()
-		print "data ::::::::::::::=====>>>>", data
 		
 		data.sort(key=lambda data: data['grn_number'])
 		# GRN NO and Supplier should be blank if a GRN have more than one line
@@ -190,19 +182,14 @@ class grn_register_report(report_sxw.rml_parse):
 		total_value = 0.0
 		line_value = 0.0
 		for pos1, item in enumerate(data):
-			delete_items = []
-			print "GRN Line Id",item['line_id']
-			
+			delete_items = []			
 			if item['grn_total'] != '':
-				print "item['grn_total'].........................>>>",item['grn_total']
 				total_value += item['grn_total']
 			item['total'] = total_value
-			print item['total']
 			item['line_total'] = item['qty'] * item ['cost_price']
 			line_value += item['line_total']
 			item['grand_total'] = line_value
 			grn_date = item['grn_datee']
-			print "date,,,,,,,,,,,,,,,",grn_date
 			fmt = '%Y-%m-%d'
 			from_date = grn_date    
 			to_date = date.today()
@@ -210,24 +197,17 @@ class grn_register_report(report_sxw.rml_parse):
 			d1 = datetime.strptime(from_date, fmt)
 			d2 = datetime.strptime(to_date, fmt)
 			daysDiff = str((d2-d1).days)
-			print "daysDiff--------------->>", daysDiff
 			item['pending_days'] = daysDiff
 			self.cr.execute(""" select taxes_id from po_grn_tax where order_id = %s """ %(item['line_id']))
 			po_tax_data = self.cr.dictfetchall()
-			
-			#print "po_tax_data............................>>>>>",po_tax_data
-			
 			self.cr.execute(""" select taxes_id from po_gen_grn_tax where order_id = %s """ %(item['line_id']))
 			gen_tax_data = self.cr.dictfetchall()
-			
-			#print "gen_tax_data............................>>>>>",gen_tax_data
-			
+
 			if po_tax_data:
 				if len(po_tax_data) !=1:				
 					tax_name = []
 					for tax in po_tax_data:
 						tax_rec = self.pool.get('account.tax').browse(self.cr, self.uid, tax['taxes_id'])
-						#print "po_tax_rec.......................>>>",tax_rec
 						name = tax_rec.name
 						tax_name.append(name)
 						tax = (''.join('' + item + '\n' for item in tax_name))
@@ -245,7 +225,6 @@ class grn_register_report(report_sxw.rml_parse):
 					tax_name = []
 					for tax in gen_tax_data:
 						tax_rec = self.pool.get('account.tax').browse(self.cr, self.uid, tax['taxes_id'])
-						#print "general_tax_rec.......................>>>",tax_rec
 						name = tax_rec.name
 						tax_name.append(name)
 						tax = (''.join('' + item + '\n' for item in tax_name))
@@ -263,9 +242,6 @@ class grn_register_report(report_sxw.rml_parse):
 			if po_grn_id:
 			
 				po_grn_rec = self.pool.get('kg.po.grn').browse(self.cr, self.uid, po_grn_id[0])
-				
-				#print "po_grn_rec........................>>>",po_grn_rec
-				
 				if po_grn_rec:
 					item['po_no'] = po_grn_rec.order_no
 					item['po_date'] = po_grn_rec.order_date
@@ -287,16 +263,12 @@ class grn_register_report(report_sxw.rml_parse):
 					if item['grn_id'] == item2['grn_id'] and item['part_name'] == item2['part_name']:
 						if count == 0:
 							new_data.append(item)
-							#print "new_data -------------------------------->>>>", new_data
 							count = count + 1
 						item2_2 = item2
 						item2_2['pending_days'] = 0
 						new_data.append(item2_2)
-						#print "new_data 2222222222222222", new_data
 						delete_items.append(item2)
-						#print "delete_items _____________________>>>>>", delete_items
-				else:
-					print "Few GRN have one line"
+				
 			
 		return data	
 

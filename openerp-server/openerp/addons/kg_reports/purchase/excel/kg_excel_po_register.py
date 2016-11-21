@@ -359,8 +359,8 @@ class kg_excel_po_register(osv.osv):
 						new_data.append(item2_2)
 						delete_items.append(item2)
 				
-				else:
-					print "Few PO have one line"
+				#~ else:
+					#~ print "Few PO have one line"
 			#~ item1['po_ad_amt'] = ad_amt
 		
 		for ele in data:

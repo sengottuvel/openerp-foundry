@@ -42,7 +42,6 @@ class kg_dep_issue(JasperDataParser.JasperDataParser):
 		val['company_name']=1
 		val['company_add']=''
 		frm_rec = data['form']['from_date']
-		print "_________________________________________________________from date--------------------------------------------------------------",frm_rec
 		current_time = datetime.now()
 		ist_time = current_time + timedelta(minutes = 308)
 		crt_time = ist_time.strftime('%d/%m/%Y %H:%M:%S')	
@@ -55,7 +54,6 @@ class kg_dep_issue(JasperDataParser.JasperDataParser):
 		val['wiz_id'] = data['form']['id']
 		altered_time=data['form']['print_date']
 		val['print_date'] = crt_time
-		print "()()()()()()()()()()()()()))))))))))))))))))))))))))))))))))))))))))))))))))))",val['print_date']
 		return val
 
 
