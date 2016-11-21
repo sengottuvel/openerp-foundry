@@ -25,7 +25,7 @@
     'images': ['images/purchase_requisitions.jpeg'],
     'website': 'http://www.openerp.com',
     'description': """ This module is used to get both General GRN and PO GRN Details """,
-    'depends' : ['base','kg_po_grn','kg_general_grn','account','kg_po_advance','kg_so_advance'],
+    'depends' : ['base','kg_po_grn','kg_general_grn','account'],
     'data': ['kg_purchase_invoice_view.xml'],
     'auto_install': False,
     'installable': True,
