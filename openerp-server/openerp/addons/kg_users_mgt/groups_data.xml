@@ -235,10 +235,11 @@
 			ref('kg_menus.qam_quotation_submit'),
 			ref('kg_menus.qam_quotation_comp'),
 			
-			ref('kg_menus.pam_purchase_order'),
+			ref('kg_purchase_order.pam_purchase_order'),
+			ref('kg_purchase_order.pam_purchase_order_spl_approvals'),
 			ref('purchase.menu_purchase_form_action'),
 			ref('kg_menus.sam_service_order'),
-			ref('kg_menus.pam_purchase_order_line'),
+			ref('kg_purchase_order.pam_purchase_order_line'),
 			
 			ref('kg_menus.apm_advance_menu'),
 			ref('kg_menus.aam_po_advance'),

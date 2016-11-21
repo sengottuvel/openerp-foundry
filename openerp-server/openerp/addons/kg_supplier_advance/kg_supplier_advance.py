@@ -61,7 +61,7 @@ class kg_supplier_advance(osv.osv):
 		'order_category': fields.selection([('purchase','Purchase'),('service','Service')],'Order Category', readonly=True),		
 		'po_id':fields.many2one('purchase.order','PO No',domain="[('state','=','approved'), '&', ('adv_flag','=',False), '&', ('partner_id','=',supplier_id), '&', ('order_line.line_state','!=','cancel'),'&', ('bill_type','=','advance')]"),
 		
-		'so_id':fields.many2one('kg.service.order','SO No',domain="[('state','=','approved'), '&', ('adv_flag','=',False), '&', ('partner_id','=',supplier_id),'&',('so_type','=','service'),'&', ('payment_type','=','advance')]"),
+		'so_id':fields.many2one('kg.service.order','SO No',domain="[('state','=','approved'), '&', ('adv_flag','=',False), '&', ('partner_id','=',supplier_id),'&', ('payment_type','=','advance')]"),
 	    'advance_amt': fields.float('Advance Amount'),			
 		'order_value': fields.float('Order Value'),		
 		'adjusted_amt': fields.float('Adjusted Amount'),		

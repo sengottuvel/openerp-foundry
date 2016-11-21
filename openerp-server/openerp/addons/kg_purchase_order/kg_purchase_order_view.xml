@@ -10,14 +10,12 @@
         <field name="inherit_id" ref="purchase.purchase_order_form"/>
         <field name="arch" type="xml">
 		<field name="partner_id" context="{'search_default_supplier':1,'default_supplier':1,'default_customer':0}" domain="[('supplier','=',True)]" position="replace">
-			<field name="kg_seq_id" invisible="1"/>
 			<field name="name" readonly="1"/>
 			<field name="division" required="1"/>
 			<field name="partner_id" on_change="onchange_partner_id(partner_id,add_text)" context="{'search_default_supplier':1,'default_supplier':1,'default_customer':0}" />
 		</field>
         <field name="partner_ref" position="replace">
 			<field name="add_text" />
-			<field name="dep_project_name" invisible="1"/>
 			<field name="term_price" />
 			<field name="delivery_mode" />
 			<field name="term_freight" on_change="onchange_frieght_flag(term_freight)" />
@@ -26,11 +24,8 @@
 			
 			<field name="item_quality_term_id" widget="many2many_tags"/>
 			<field name="type_flag" invisible="1" />
-			<field name="confirm_flag" invisible="1"/>
-			<field name="approve_flag" invisible="1"/>	
 			<field name="frieght_flag" invisible="1"/>	
 			<field name="item_quality_term" invisible="1"/>	
-			<field name="dep_project" invisible="1"/>
 		</field>
 		
 		<label string="Request for Quotation " attrs="{'invisible': [('state','not in',('draft','sent'))]}" position="replace">
@@ -56,6 +51,14 @@
 		<button name="print_quotation" string="Print" type="object" states="draft" class="oe_highlight" groups="base.group_user" invisible="1"/>
 		</button>
 		
+		<button name="wkf_send_rfq" states="draft" string="Send by Email" type="object" context="{'send_rfq':True}" 
+									class="oe_highlight" position="replace">
+		<button name="wkf_send_rfq" states="draft" string="Send by Email" type="object" context="{'send_rfq':True}" 
+					class="oe_highlight" invisible="1"/>
+		</button>
+		<button name="wkf_send_rfq" states="sent" string="Send by Email" type="object" context="{'send_rfq':True}" position="replace">
+		<button name="wkf_send_rfq" states="approved" string="Send by Email" type="object" context="{'send_rfq':True}" invisible="1"/>
+		</button>
 		<button name="purchase_confirm" states="draft" string="Confirm Order" position="replace">
 			<button name="purchase_confirm" states="confirmed" string="Approve" confirm="Are you sure to proceed ?" />
 			<button name="entry_reject" string="Reject" confirm="Are you sure to proceed ?" type="object" states="confirmed" />
@@ -72,12 +75,13 @@
 		</field>
 		
 		<field name="bill_type" position="replace">
-			 <field name="date_order" required="1"/>
+			 <field name="date_order" required="1"  on_change="onchange_date_order(date_order)"/>
 			 <field name="quotation_date" />
 			 <field name="quot_ref_no" />
 			 <field name="delivery_address"/>
 			 <field name="bill_type" required="1"/>
-			 <field name="payment_mode" />
+			 <field name="payment_mode" attrs="{'required': [('bill_type','=','credit')]}"/>
+			 <field name="advance_amt" attrs="{'required': [('bill_type','=','advance')]}"/>
 			 <field name="term_warranty" />
 			 <field name="po_type" required="1" on_change="onchange_type_flag(po_type)"/>
 			 <field name="purpose" required="1"/>
@@ -128,6 +132,7 @@
 		<field name="price_unit" position="after">
 		<field name="kg_discount"/>
 		<field name="kg_discount_per"/>
+		<field name="approval_flag"/>
 		
 		</field>
 		<field name="product_qty" on_change="onchange_product_id(parent.pricelist_id,product_id,product_qty,product_uom,parent.partner_id,parent.date_order,parent.fiscal_position,date_planned,name,price_unit,context)" position="after">
@@ -184,7 +189,7 @@
 			</group>
 			<group>
 				<group>
-					<field name="user_id" on_change="onchange_user(user_id,location_id)"/>
+					<field name="user_id"/>
 					<field name="confirmed_by" attrs="{'invisible': [('state','=','draft')]}"/>
 					<field name="rej_user_id" attrs="{'invisible': [('state','not in',('reject'))]}"/>
 					<field name="approved_by" attrs="{'invisible': [('state','in',('draft','confirmed','reject'))]}"/>
@@ -208,7 +213,7 @@
 	
     <!-- purchase order line form inherit -->
     
-      <record model="ir.ui.view" id="kg_purchase_order_line_form_inherit">
+	<record model="ir.ui.view" id="kg_purchase_order_line_form_inherit">
         <field name="name">kg.purchase.order.line.form.inherit</field>
         <field name="model">purchase.order.line</field>
         <field name="inherit_id" ref="purchase.purchase_order_line_form"/>
@@ -232,6 +237,7 @@
 			</field>
 			<field name="product_qty" position="replace">
 			<field name="product_qty" required="True" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}" on_change="onchange_qty(product_qty,pending_qty,pi_line_id,pi_qty,uom_conversation_factor,length,breadth,price_type,product_id)"/>
+
 			</field>
 			<field name="product_uom" 
 						on_change="onchange_product_uom(parent.pricelist_id,product_id,product_qty,product_uom,
@@ -251,6 +257,7 @@
                 <field name="taxes_id" position="replace" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}">
 				<field name="pending_qty" invisible="1" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}"/>
 				<field name="pi_qty" readonly="1"/>
+				<field name="rate_revise" attrs="{'required': [('approval_flag','=', True)],'invisible': [('approval_flag','=', False)]}"/>
                 <field name="kg_discount" attrs="{'readonly': ['|','|',('cancel_flag','=', True),('line_flag', '=', True),('discount_flag', '=', True)]}" on_change="onchange_disc_amt(kg_discount,product_qty,price_unit,kg_disc_amt_per)" />
                 <field name="kg_disc_amt_per" invisible="1" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}"/>
                 <field name="kg_discount_per" attrs="{'readonly': ['|','|',('cancel_flag','=', True),('line_flag', '=', True),('discount_per_flag', '=', True)]}" on_change="onchange_discount_value_calc(kg_discount_per, product_qty, price_unit)"/> 
@@ -258,9 +265,9 @@
                 <field name="discount_flag" invisible="1"/>
 				<field name="discount_per_flag" invisible="1"/>
 				<field name="total_disc" invisible="1"/>
-				<field name="tax_structure_id" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}" on_change="onchange_tax_structure(tax_structure_id)" invisible="1"/>
                 <field name="taxes_id" widget="many2many_tags" domain="[('parent_id','=',False),('type_tax_use','!=','sale')]" />
                 <field name="pi_line_id" invisible="1"/>
+                <field name="approval_flag" invisible="1"/>
 				</field>
 				<field name="price_unit" position="replace">
 					<field name="price_unit" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}"/>
@@ -272,13 +279,12 @@
 				<field name = "quantity" readonly="1"/>
 				<field name = "price_type" on_change="onchange_price_type(product_qty,uom_conversation_factor,length,breadth,price_type,product_id)" required="1"/>
 				<field name = "cancel_flag" invisible="1"/>
-
+				
 				<group string="Price History">
 				<field name="least_price" readonly="1"/>
 				<field name="high_price" readonly="1"/>
 				<field name="recent_price" readonly="1"/>
 				</group>
-				<button name="get_old_details" string="Show Price List" type="object" class="oe_highlight" invisible="1"/>
                 </field>
                
                 <xpath expr = "//page[@string='Notes']" position="before">
@@ -291,7 +297,6 @@
 								<field name="price_unit"/>
 								<field name="kg_discount"/>
 								<field name="kg_discount_per"/>
-								<field name="tax"/>
 							</tree>
 						</field>
 					</page>
@@ -314,16 +319,18 @@
 							</field>
 					</page>
 				</xpath>
+				
         </field>
     </record>
     
     <!-- Purchase Order Tree view -->
     
-		<record model="ir.ui.view" id="kg_purchase_order_tree_inherit">
+	<record model="ir.ui.view" id="kg_purchase_order_tree_inherit">
         <field name="name">kg.purchase.order.tree.inherit</field>
         <field name="model">purchase.order</field>
         <field name="inherit_id" ref="purchase.purchase_order_tree"/>
         <field name="arch" type="xml">
+			
 			<field name="name" string="Reference" position="replace">
 			<field name="name" string="Purchase Order No"/>
 			<field name="revision"/>
@@ -338,8 +345,9 @@
 			<field name="amend_flag"/>
 			<field name="bill_flag"/>
 			</field>
+			
 		</field>
-		</record>
+	</record>
     
     <!-- purchase order line tree view -->
     
@@ -375,17 +383,12 @@
         <field name="inherit_id" ref="purchase.purchase_order_line_tree"/>
         <field name="arch" type="xml">
 			<tree string="Purchase Order Lines">
-			
-            <field name="date_planned" position="after">
-                <field name="discount"/>
-            </field>
-            <field name="product_qty" position="after">				
-				<!--<field name="pending_qty"/>-->
-            </field>
-            <field name="name" position="replace">
-            <field name="name" invisible="1"/>
-            </field>
-            
+				<field name="date_planned" position="after">
+					<field name="discount"/>
+				</field>
+				<field name="name" position="replace">
+				<field name="name" invisible="1"/>
+				</field>
             </tree>
         </field>
     </record>
@@ -444,7 +447,14 @@
 		<field name="view_id" ref="kg_po_line_tree_view"/>
 		<field name="act_window_id" ref="kg_poline_confirmed_action"/>
 	</record>
-        
+    
+    <menuitem action="purchase.purchase_rfq" id="pam_purchase_order" name="Generate PO" parent="purchase.menu_procurement_management" sequence="1"/>
+	
+	<!-- Special Approval PO -->
+	<menuitem action="purchase.purchase_rfq_spl_approval" id="pam_purchase_order_spl_approvals" name="Special Approval PO" parent="purchase.menu_procurement_management" sequence="2"/>
+	
+	<!-- PO Item Details  --> 
+	<menuitem action="kg_poline_confirmed_action" id="pam_purchase_order_line" name="PO Item Details" parent="purchase.menu_procurement_management" sequence="9"/>
 
     </data>
 </openerp>
