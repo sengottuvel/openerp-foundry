@@ -406,7 +406,7 @@ class kg_excel_po_register(osv.osv):
 		"""string encode of data in wksheet"""		
 		out=base64.encodestring(file_data.getvalue())
 		"""returning the output xls as binary"""
-		report_name = 'PO_Register_Report' + '.' + 'xlsx'
+		report_name = 'PO_Register_Report' + '.' + 'xls'
 		
 		return self.write(cr, uid, ids, {'rep_data':out, 'name':report_name,'state': 'done'},context=context)
 		
