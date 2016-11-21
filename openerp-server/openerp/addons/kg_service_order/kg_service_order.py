@@ -25,7 +25,6 @@ class kg_service_order(osv.osv):
 	_description = "KG Service Order"
 	_order = "date desc"
 
-	
 	def _amount_line_tax(self, cr, uid, line, context=None):
 		val = 0.0
 		#new_amt_to_per = line.kg_discount or 0.0 / line.product_qty
@@ -68,9 +67,10 @@ class kg_service_order(osv.osv):
 				val3 += tot_discount
 			res[order.id]['other_charge']=(round(other_charges_amt,0))
 			res[order.id]['amount_tax']=(round(val,0))
-			res[order.id]['amount_untaxed']=(round(val1,0))
-			res[order.id]['amount_total']=res[order.id]['amount_untaxed'] + res[order.id]['amount_tax'] + res[order.id]['other_charge']
+			res[order.id]['amount_untaxed']=(round(val1,0)) + (round(val3,0))
+			res[order.id]['amount_total']=res[order.id]['amount_untaxed'] + res[order.id]['amount_tax'] + res[order.id]['other_charge'] - val3
 			res[order.id]['discount']=(round(val3,0))
+		
 		return res
 		
 	def _get_journal(self, cr, uid, context=None):
@@ -93,7 +93,6 @@ class kg_service_order(osv.osv):
 			result[line.service_id.id] = True
 		return result.keys()
 	
-	
 	_columns = {
 		'name': fields.char('SO No', size=64,readonly=True),
 		'dep_name': fields.many2one('kg.depmaster','Department Name', translate=True, select=True,readonly=True, 
@@ -106,11 +105,10 @@ class kg_service_order(osv.osv):
 		'service_order_line': fields.one2many('kg.service.order.line', 'service_id', 'Order Lines', 
 					readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'active': fields.boolean('Active'),
-		'state': fields.selection([('draft', 'Draft'),('confirm','Waiting For Approval'),('approved','Approved'),('inv','Invoiced'),('cancel','Cancel'),('reject','Rejected')], 'Status', track_visibility='onchange'),
-		'payment_mode': fields.many2one('kg.payment.master', 'Mode of Payment', 
-		          required=True, readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
-		'delivery_type':fields.many2one('kg.deliverytype.master', 'Delivery Schedule', 
-		             required=False, readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
+		'state': fields.selection([('draft', 'Draft'),('confirm','Waiting For Approval'),('approved','Approved'),('inv','Invoiced'),('cancel','Cancelled'),('reject','Rejected')], 'Status', track_visibility='onchange'),
+		'payment_mode': fields.many2one('kg.payment.master', 'Mode of Payment',readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
+		#~ 'delivery_type':fields.many2one('kg.deliverytype.master', 'Delivery Schedule', 
+		             #~ required=False, readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'delivery_mode': fields.many2one('kg.delivery.master','Delivery Schedule', 
 		               required=True, readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'po_expenses_type1': fields.selection([('freight','Freight Charges'),('others','Others')], 'Expenses Type1', 
@@ -146,7 +144,7 @@ class kg_service_order(osv.osv):
 		'so_flag': fields.boolean('SO Flag'),
 		'amend_flag': fields.boolean('Amend Flag'),
 		
-		'remark': fields.text('Remarks', readonly=True, states={'approve': [('readonly', False)],'done':[('readonly',False)]}),
+		'remark': fields.text('Remarks', readonly=True, states={'approved': [('readonly', False)],'done':[('readonly',False)]}),
 		'so_bill': fields.boolean('SO Bill', readonly=True),
 		'currency_id': fields.many2one('res.currency', 'Currency', readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'specification':fields.text('Specification'),
@@ -160,18 +158,18 @@ class kg_service_order(osv.osv):
 		'so_type': fields.selection([('amc','AMC'),('service', 'Service'),('labor', 'Labor Only')], 'Type',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'amc_from': fields.date('AMC From Date',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'amc_to': fields.date('AMC To Date',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
-		'origin': fields.char('Project', size=256,readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
-		'origin_project': fields.many2one('kg.project.master','Project', size=256,readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
+		
 		'gp_id': fields.many2one('kg.gate.pass', 'Gate Pass No',domain="[('state','=','done'), '&',('partner_id','=',partner_id),'&',('mode','=','frm_indent')]",
 					readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'warranty': fields.char('Warranty', size=256,readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'grn_flag':fields.boolean('GRN Flag'),
 		'button_flag':fields.boolean('Button Flag',invisible=True),
 		'so_reonly_flag':fields.boolean('SO Flag'),
-		'payment_type': fields.selection([('cash', 'Cash'), ('credit', 'Credit')], 'Payment Type',readonly=True,states={'draft':[('readonly',False)]}),
+		'payment_type': fields.selection([('cash', 'Cash'),('credit', 'Credit'),('advance','Advance')], 'Payment Mode',readonly=True,states={'draft':[('readonly',False)]}),
 		'version':fields.char('Version'),
 		'expense_line_id': fields.one2many('kg.service.order.expense.track','expense_id','Expense Track'),
 		'adv_flag': fields.boolean('Advance Flag'),
+		'advance_amt': fields.float('Advance(%)',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		
 		# Entry Info
 		
@@ -189,9 +187,9 @@ class kg_service_order(osv.osv):
 		'update_user_id' : fields.many2one('res.users','Last Updated By',readonly=True),
 		
 	}
-	#_sql_constraints = [('code_uniq','unique(name)', 'Service Order number must be unique!')]
-
+	
 	_defaults = {
+		
 		'state' : 'draft',
 		'active' : 'True',
 		'button_flag' : False,
@@ -205,60 +203,6 @@ class kg_service_order(osv.osv):
 		'adv_flag': False,
 		
 	}
-	
-	def email_ids(self,cr,uid,ids,context = None):
-		email_from = []
-		email_to = []
-		email_cc = []
-		val = {'email_from':'','email_to':'','email_cc':''}
-		ir_model = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		mail_form_ids = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		for ids in mail_form_ids:
-			mail_form_rec = self.pool.get('kg.mail.settings').browse(cr,uid,ids)
-			if mail_form_rec.doc_name.model == 'kg.service.order':
-				email_from.append(mail_form_rec.name)
-				mail_line_id = self.pool.get('kg.mail.settings.line').search(cr,uid,[('line_entry','=',ids)])
-				for mail_id in mail_line_id:
-					mail_line_rec = self.pool.get('kg.mail.settings.line').browse(cr,uid,mail_id)
-					if mail_line_rec.to_address:
-						email_to.append(mail_line_rec.mail_id)
-					if mail_line_rec.cc_address:
-						email_cc.append(mail_line_rec.mail_id)
-			else:
-				pass			
-		val['email_from'] = email_from
-		val['email_to'] = email_to
-		val['email_cc'] = email_cc
-		return val	
-	
-	def sechedular_email_ids(self,cr,uid,ids,context = None):
-		email_from = []
-		email_to = []
-		email_cc = []
-		val = {'email_from':'','email_to':'','email_cc':''}
-		ir_model = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		mail_form_ids = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		for ids in mail_form_ids:
-			mail_form_rec = self.pool.get('kg.mail.settings').browse(cr,uid,ids)
-			if mail_form_rec.sch_type == 'scheduler':
-				s = mail_form_rec.sch_name
-				s = s.lower()
-				if s == 'so register':
-					email_sub = mail_form_rec.subject
-					email_from.append(mail_form_rec.name)
-					mail_line_id = self.pool.get('kg.mail.settings.line').search(cr,uid,[('line_entry','=',ids)])
-					for mail_id in mail_line_id:
-						mail_line_rec = self.pool.get('kg.mail.settings.line').browse(cr,uid,mail_id)
-						if mail_line_rec.to_address:
-							email_to.append(mail_line_rec.mail_id)
-						if mail_line_rec.cc_address:
-							email_cc.append(mail_line_rec.mail_id)
-				else:
-					pass
-		val['email_from'] = email_from
-		val['email_to'] = email_to
-		val['email_cc'] = email_cc
-		return val
 	
 	def onchange_type(self,cr,uid,ids,so_type,so_flag,context=None):
 		value = {'so_flag':'','so_reonly_flag':''}
@@ -305,149 +249,138 @@ class kg_service_order(osv.osv):
 		service_line_obj = self.pool.get('kg.service.order.line')
 		today_date = datetime.date(today)
 		rec = self.browse(cr,uid,ids[0])
-		
-		for t in self.browse(cr,uid,ids):
-			date_order = t.date
-			date_order1 = datetime.strptime(date_order, '%Y-%m-%d')
-			date_order1 = datetime.date(date_order1)
-			if date_order1 > today_date:
-				raise osv.except_osv(
-						_('Warning'),
-						_('SO Date should be less than or equal to current date!'))	
-			if not t.service_order_line:
-				raise osv.except_osv(
-						_('Empty Service Order'),
-						_('You can not confirm an empty Service Order'))
-			for line in t.service_order_line:
-				if line.product_qty==0:
+		if rec.state == 'draft':
+			for t in self.browse(cr,uid,ids):
+				date_order = t.date
+				date_order1 = datetime.strptime(date_order, '%Y-%m-%d')
+				date_order1 = datetime.date(date_order1)
+				if date_order1 > today_date:
 					raise osv.except_osv(
-					_('Warning'),
-					_('Service Order quantity can not be zero'))
-				if line.price_unit==0.00:
+							_('Warning'),
+							_('SO Date should be less than or equal to current date!'))	
+				if not t.service_order_line:
 					raise osv.except_osv(
-					_('Warning'),
-					_('You can not confirm Service Order with Zero Value'))
-				if t.so_type == 'service':
-					if line.product_qty > line.soindent_qty:
+							_('Empty Service Order'),
+							_('You can not confirm an empty Service Order'))
+				for line in t.service_order_line:
+					if line.product_qty==0:
 						raise osv.except_osv(
-						_('If Service Order From Service Indent'),
-						_('Service Order Qty can not greater than Service Indent Qty For Product --> %s'%(line.product_id.name)))
-				product_tax_amt = self._amount_line_tax(cr, uid, line, context=context)
-				cr.execute("""update kg_service_order_line set product_tax_amt = %s where id = %s"""%(product_tax_amt,line.id))	
-				service_line_obj.write(cr,uid,line.id,{'state':'confirm'})		
-			seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.service.order')])
-			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
-			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,rec.date))
-			seq_name = cr.fetchone();
-			self.write(cr,uid,ids,{ 'state':'confirm',
-									'confirmed_by':uid,
-									'confirmed_date':time.strftime('%Y-%m-%d %H:%M:%S'),
-								    'so_reonly_flag':'True',
-								    'name': seq_name[0],
-								    })
-			#cr.execute("""select all_transaction_mails('Serive Order Approval',%s)"""%(ids[0]))
-			"""Raj
-			data = cr.fetchall();
-			vals = self.email_ids(cr,uid,ids,context = context)
-			if (not vals['email_to']) and (not vals['email_cc']):
-				pass
-			else:
-				ir_mail_server = self.pool.get('ir.mail_server')
-				msg = ir_mail_server.build_email(
-						email_from = vals['email_from'][0],
-						email_to = vals['email_to'],
-						subject = "	Service order - Waiting For Approval",
-						body = data[0][0],
-						email_cc = vals['email_cc'],
-						object_id = ids[0] and ('%s-%s' % (ids[0], 'kg.service.order')),
-						subtype = 'html',
-						subtype_alternative = 'plain')
-				res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
-			"""
+						_('Warning'),
+						_('Service Order quantity can not be zero'))
+					if line.price_unit==0.00:
+						raise osv.except_osv(
+						_('Warning'),
+						_('You can not confirm Service Order with Zero Value'))
+					if t.so_type == 'service':
+						if line.product_qty > line.soindent_qty:
+							raise osv.except_osv(
+							_('If Service Order From Service Indent'),
+							_('Service Order Qty can not greater than Service Indent Qty For Product --> %s'%(line.product_id.name)))
+					product_tax_amt = self._amount_line_tax(cr, uid, line, context=context)
+					cr.execute("""update kg_service_order_line set product_tax_amt = %s where id = %s"""%(product_tax_amt,line.id))	
+					service_line_obj.write(cr,uid,line.id,{'state':'confirm'})		
+				seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.service.order')])
+				seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,rec.date))
+				seq_name = cr.fetchone();
+				self.write(cr,uid,ids,{ 'state':'confirm',
+										'confirmed_by':uid,
+										'confirmed_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+										'so_reonly_flag':'True',
+										'name': seq_name[0],
+										})
+				
 			return True
 			
 	def approve_order(self, cr, uid, ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		#if rec.confirmed_by.id == uid:
-		#	raise osv.except_osv(
-		#			_('Warning'),
-		#			_('Approve cannot be done by Confirmed user'))
-		#else:
-		if rec.payment_mode.term_category == 'advance':
-			cr.execute("""select * from kg_so_advance where state='approved' and so_id= %s"""  %(str(ids[0])))
-			data = cr.dictfetchall()
-			if not data:
-				
-				raise osv.except_osv(
-					_('Warning'),
-					_('Advance is mandate for this SO'))
-			else:
-				pass	
-		text_amount = number_to_text_convert_india.amount_to_text_india(rec.amount_total,"INR:")
-		self.write(cr,uid,ids,{'state':'approved','approved_by':uid,'text_amt':text_amount,'approved_date':time.strftime('%Y-%m-%d %H:%M:%S')})
-		obj = self.browse(cr,uid,ids[0])
-		product_obj = self.pool.get('product.product')
-		cr.execute(""" select serindent_line_id from kg_serindent_so_line where so_id = %s """ %(str(ids[0])))
-		data = cr.dictfetchall()
-		val = [d['serindent_line_id'] for d in data if 'serindent_line_id' in d] # Get a values form list of dict if the dict have with empty values
-		so_lines = obj.service_order_line
-		if not so_lines:
-			raise osv.except_osv(
-					_('Empty Service Order'),
-					_('System not allow to approve without Service Order Line'))
-		else:
-			for i in range(len(so_lines)):
-				self.pool.get('kg.service.order.line').write(cr, uid,so_lines[i].id,{'so_type_flag':'True','service_flag':'True','state':'approved'})
-				product_id = so_lines[i].product_id.id
-				product_record = product_obj.browse(cr, uid, product_id)
-				product = so_lines[i].product_id.name
-				if rec.so_type == 'service':
-					if so_lines[i].soindent_line_id:
-						soindent_line_id=so_lines[i].soindent_line_id
-						orig_soindent_qty = so_lines[i].soindent_qty
-						so_used_qty = so_lines[i].product_qty
-						pending_soindent_qty = orig_soindent_qty -  so_used_qty
-						sql = """ update kg_service_indent_line set pending_qty=%s where id = %s """%(pending_soindent_qty,
-													soindent_line_id.id)
-						cr.execute(sql)
-
-						sql1 = """ update kg_gate_pass_line set so_pending_qty=(so_pending_qty - %s),so_flag = 't' where si_line_id = %s and gate_id = %s"""%(so_used_qty,
-													soindent_line_id.id,obj.gp_id.id)
-						cr.execute(sql1)
-						
-						sql2 = """ update kg_service_order_line set gp_line_id=(select id from kg_gate_pass_line where si_line_id = %s and gate_id = %s limit 1)"""%(soindent_line_id.id,obj.gp_id.id)
-						cr.execute(sql2)
-					else:
-						raise osv.except_osv(
-							_('Direct Service Order Not Allow'),
-							_('System not allow to raise a Service Order with out Service Indent for %s' %(product)))
+		if rec.state == 'confirm':
+			if rec.payment_type == 'advance':
+				obj = rec
+				self.advance_creation(cr,uid,obj)
+			
+			if rec.payment_mode.term_category == 'advance':
+				cr.execute("""select * from kg_supplier_advance where state='confirmed' and so_id= %s"""  %(str(ids[0])))
+				data = cr.dictfetchall()
+				if not data:
+					raise osv.except_osv(
+						_('Warning'),
+						_('Advance is mandate for this SO'))
 				else:
-					rec.write({'button_flag':True})
-		for line in rec.service_order_line:
-			product_tax_amt = self._amount_line_tax(cr, uid, line, context=context)
-			cr.execute("""update kg_service_order_line set product_tax_amt = %s where id = %s"""%(product_tax_amt,line.id))
-		#cr.execute("""select all_transaction_mails('Serive Order Approval',%s)"""%(ids[0]))
-		"""Raj
-		data = cr.fetchall();
-		vals = self.email_ids(cr,uid,ids,context = context)
-		if (not vals['email_to']) and (not vals['email_cc']):
-			pass
-		else:
-			ir_mail_server = self.pool.get('ir.mail_server')
-			msg = ir_mail_server.build_email(
-					email_from = vals['email_from'][0],
-					email_to = vals['email_to'],
-					subject = "	Service order - Approved",
-					body = data[0][0],
-					email_cc = vals['email_cc'],
-					object_id = ids[0] and ('%s-%s' % (ids[0], 'kg.service.order')),
-					subtype = 'html',
-					subtype_alternative = 'plain')
-			res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)		
-		"""
+					pass
+			text_amount = number_to_text_convert_india.amount_to_text_india(rec.amount_total,"INR:")
+			self.write(cr,uid,ids,{'state':'approved','approved_by':uid,'text_amt':text_amount,'approved_date':time.strftime('%Y-%m-%d %H:%M:%S')})
+			obj = self.browse(cr,uid,ids[0])
+			product_obj = self.pool.get('product.product')
+			cr.execute(""" select serindent_line_id from kg_serindent_so_line where so_id = %s """ %(str(ids[0])))
+			data = cr.dictfetchall()
+			val = [d['serindent_line_id'] for d in data if 'serindent_line_id' in d] # Get a values form list of dict if the dict have with empty values
+			so_lines = obj.service_order_line
+			if not so_lines:
+				raise osv.except_osv(
+						_('Empty Service Order'),
+						_('System not allow to approve without Service Order Line'))
+			else:
+				for i in range(len(so_lines)):
+					self.pool.get('kg.service.order.line').write(cr, uid,so_lines[i].id,{'so_type_flag':'True','service_flag':'True','state':'approved'})
+					product_id = so_lines[i].product_id.id
+					product_record = product_obj.browse(cr, uid, product_id)
+					product = so_lines[i].product_id.name
+					if rec.so_type == 'service':
+						if so_lines[i].soindent_line_id:
+							soindent_line_id=so_lines[i].soindent_line_id
+							orig_soindent_qty = so_lines[i].soindent_qty
+							so_used_qty = so_lines[i].product_qty
+							pending_soindent_qty = orig_soindent_qty -  so_used_qty
+							sql = """ update kg_service_indent_line set pending_qty=%s where id = %s """%(pending_soindent_qty,
+														soindent_line_id.id)
+							cr.execute(sql)
+
+							sql1 = """ update kg_gate_pass_line set so_pending_qty=(so_pending_qty - %s),so_flag = 't' where si_line_id = %s and gate_id = %s"""%(so_used_qty,
+														soindent_line_id.id,obj.gp_id.id)
+							cr.execute(sql1)
+							
+							sql2 = """ update kg_service_order_line set gp_line_id=(select id from kg_gate_pass_line where si_line_id = %s and gate_id = %s limit 1)"""%(soindent_line_id.id,obj.gp_id.id)
+							cr.execute(sql2)
+						else:
+							raise osv.except_osv(
+								_('Direct Service Order Not Allow'),
+								_('System not allow to raise a Service Order with out Service Indent for %s' %(product)))
+					else:
+						rec.write({'button_flag':True})
+			for line in rec.service_order_line:
+				product_tax_amt = self._amount_line_tax(cr, uid, line, context=context)
+				cr.execute("""update kg_service_order_line set product_tax_amt = %s where id = %s"""%(product_tax_amt,line.id))
+			
 		return True
 		cr.close()
+	
+	def advance_creation(self,cr,uid,obj,context=None):
 		
+		advance_amt = (obj.amount_total / 100.00) * obj.advance_amt
+		print"advance_amt",advance_amt
+		sup_adv_id = self.pool.get('kg.supplier.advance').create(cr,uid,{'supplier_id': obj.partner_id.id,
+															'order_category': 'service',
+															'so_id': obj.id,
+															'advance_amt': advance_amt,
+															'order_value': obj.amount_total,
+															'order_no': obj.name,
+															'entry_mode': 'auto',
+															})
+		sup_ids = self.pool.get('kg.supplier.advance').search(cr,uid,[('supplier_id','=',obj.partner_id.id),('state','=','confirmed')])		
+		if sup_ids:
+			for ele in sup_ids:
+				adv_rec = self.pool.get('kg.supplier.advance').browse(cr,uid,ele)
+				self.pool.get('ch.advance.line').create(cr,uid,{'header_id': sup_adv_id,
+															   'advance_no':adv_rec.name,
+															   'advance_date':adv_rec.entry_date,
+															   'order_no':adv_rec.order_no,
+															   'advance_amt':adv_rec.advance_amt,
+															   'adjusted_amt':adv_rec.adjusted_amt,
+															   'balance_amt':adv_rec.balance_amt,
+																})
+		return True
+			
 	def cancel_order(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr,uid,ids[0])
 		if not rec.remark:
@@ -480,92 +413,7 @@ class kg_service_order(osv.osv):
 		self.pool.get('kg.service.order.line').unlink(cr, uid, indent_lines_to_del)
 		osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
 		return True
-	"""
-	def kg_email_attachment(self,cr,uid,ids,context=None):
-		ir_model_data = self.pool.get('ir.model.data')
-		email_tmp_obj = self.pool.get('email.template')
-		att_obj = self.pool.get('ir.attachment')
-		#template = email_tmp_obj.get_email_template(cr, uid, template_id, ids, context)
-		template = email_tmp_obj.browse(cr, uid, 9)
-		report_xml_pool = self.pool.get('ir.actions.report.xml')		
-		attachments = []
-		# Add report in attachments				
-		if template.report_template:
-			report_name = email_tmp_obj.render_template(cr, uid, template.report_name, template.model, ids, context=context)
-			report_service = 'report.' + report_xml_pool.browse(cr, uid, template.report_template.id, context).report_name
-			# Ensure report is rendered using template's language
-			ctx = context.copy()
-			if template.lang:
-				ctx['lang'] = email_tmp_obj.render_template(cr, uid, template.lang, template.model, ids, context)
-			service = netsvc.LocalService(report_service)
-			(result, format) = service.create(cr, uid, ids, {'model': template.model}, ctx)
-			result = base64.b64encode(result)
-			attachment_id = att_obj.create(cr, uid,
-                    {
-                        'name': 'SO.pdf',
-                        'datas': result,
-                        'datas_fname': 'SO_Confirmation.pdf',
-                        'res_model': self._name,
-                        'res_id': ids[0],
-                        'type': 'binary'
-                    }, context=context)
-			
-			self.send_mail(cr,uid,ids,attachment_id,template,context)
-	"""
 	
-	def send_mail(self, cr, uid, ids,attachment_id,template,context=None):
-		ir_attachment_obj = self.pool.get('ir.attachment')
-		rec = self.pool.get('kg.service.order').browse(cr, uid, ids[0])
-		sub = ""
-		email_from = []
-		email_to = []
-		email_cc = []
-		ir_model = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		#to_mails = []
-		#hr_mail_id = '' 
-		mail_form_ids = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		for ids in mail_form_ids:
-			mail_form_rec = self.pool.get('kg.mail.settings').browse(cr,uid,ids)
-			if mail_form_rec.doc_name.model == 'kg.service.order':
-				email_from.append(mail_form_rec.name)
-				mail_line_id = self.pool.get('kg.mail.settings.line').search(cr,uid,[('line_entry','=',ids)])
-				for mail_id in mail_line_id:
-					mail_line_rec = self.pool.get('kg.mail.settings.line').browse(cr,uid,mail_id)
-					if mail_line_rec.to_address:
-						email_to.append(mail_line_rec.mail_id)
-					if mail_line_rec.cc_address:
-						email_cc.append(mail_line_rec.mail_id)
-		if isinstance(self.browse(cr, uid, ids, context=context),list):
-			var = self.browse(cr, uid, ids, context=context)
-		else:
-			var = [self.browse(cr, uid, ids, context=context)]
-		
-		for wizard in var:
-			active_model_pool_name = 'kg.service.order'
-			active_model_pool = self.pool.get(active_model_pool_name)	
-			# wizard works in batch mode: [res_id] or active_ids
-			if isinstance(ids,int):
-				res_ids = [ids]
-			else:
-				res_ids = ids
-			for res_id in res_ids:			
-				attach = ir_attachment_obj.browse(cr,uid,attachment_id)
-				attachments = []
-				attachments.append((attach.datas_fname, base64.b64decode(attach.datas)))
-				ir_mail_server = self.pool.get('ir.mail_server')
-				msg = ir_mail_server.build_email(
-		                email_from = " ".join(str(x) for x in email_from),
-		                email_to = email_to,
-		                subject = template.subject + "  " +sub,
-		                body = template.body_html,
-		                email_cc = email_cc,
-		                attachments = attachments,
-		                object_id = res_id and ('%s-%s' % (res_id, 'kg.service.order')),
-		                subtype = 'html',
-		                subtype_alternative = 'plain')
-				res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)			
-		return True
-
 	def update_soindent(self,cr,uid,ids,context=False,):
 
 		soindent_line_obj = self.pool.get('kg.service.indent.line')
@@ -623,7 +471,6 @@ class kg_service_order(osv.osv):
 		self.write(cr,uid,ids,res)			
 		return True
 
-		
 	def _check_line(self, cr, uid, ids, context=None):
 		for so in self.browse(cr,uid,ids):
 			if so.kg_serindent_lines==[]:
@@ -645,77 +492,24 @@ class kg_service_order(osv.osv):
 		}
 		return {'type': 'ir.actions.report.xml', 'report_name': 'service.order.report', 'datas': datas, 'nodestroy': True}
 	
-	def so_register_scheduler(self,cr,uid,ids=0,context = None):
-		cr.execute(""" SELECT current_database();""")
-		db = cr.dictfetchall()
-		if db[0]['current_database'] == 'Empereal-KGDS':
-			db[0]['current_database'] = 'Empereal-KGDS'
-		elif db[0]['current_database'] == 'FSL':
-			db[0]['current_database'] = 'FSL'
-		elif db[0]['current_database'] == 'IIM':
-			db[0]['current_database'] = 'IIM'
-		elif db[0]['current_database'] == 'IIM_HOSTEL':
-			db[0]['current_database'] = 'IIM Hostel'
-		elif db[0]['current_database'] == 'KGISL-SD':
-			db[0]['current_database'] = 'KGISL-SD'
-		elif db[0]['current_database'] == 'CHIL':
-			db[0]['current_database'] = 'CHIL'
-		elif db[0]['current_database'] == 'KGCAS':
-			db[0]['current_database'] = 'KGCAS'
-		elif db[0]['current_database'] == 'KGISL':
-			db[0]['current_database'] = 'KGISL'
-		elif db[0]['current_database'] == 'KITE':
-			db[0]['current_database'] = 'KITE'
-		elif db[0]['current_database'] == 'TRUST':
-			db[0]['current_database'] = 'TRUST'
-		elif db[0]['current_database'] == 'CANTEEN':
-			db[0]['current_database'] = 'CANTEEN'
-		else:
-			db[0]['current_database'] = 'Others'
-			
-		line_rec = self.pool.get('kg.service.order').search(cr, uid, [('state','=','approved'),('approved_date','=',time.strftime('%Y-%m-%d'))])
-		
-		
-		print "---------------------------->",line_rec
-		
-		if line_rec:
-			
-			#cr.execute("""select all_daily_auto_scheduler_mails('SO Register')""")
-			#data = cr.fetchall();
-			#cr.execute("""select trim(TO_CHAR(round(sum(amount_total),2)::float, '999G999G99G999G99G99G990D99')) as sum
-			#				from kg_service_order where 	
-			#				to_char(kg_service_order.approved_date,'dd-mm-yyyy') = '%s' and
-			#				kg_service_order.state in ('approved')"""%(time.strftime('%d-%m-%Y')))
-			"""Raj
-			total_sum = cr.dictfetchall();
-			
-			db = db[0]['current_database'].encode('utf-8')
-			total_sum = str(total_sum[0]['sum'])
-			vals = self.sechedular_email_ids(cr,uid,ids,context = context)
-			if (not vals['email_to']) and (not vals['email_cc']):
-				pass
+	def _check_advance(self, cr, uid, ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.payment_type == 'advance':
+			if rec.advance_amt <= 0.00:
+				raise osv.except_osv(_('Warning !'),
+					_('System sholud not be accecpt with out Advance !'))
+			elif rec.advance_amt > 100:
+				raise osv.except_osv(_('Warning !'),
+					_('System sholud not be greater than 100 !'))
 			else:
-				ir_mail_server = self.pool.get('ir.mail_server')
-				msg = ir_mail_server.build_email(
-						email_from = vals['email_from'][0],
-						email_to = vals['email_to'],
-						subject = "ERP Service Order Register Details for "+db +' on '+time.strftime('%d-%m-%Y')+' Total Amount (Rs.):' + total_sum,
-						body = data[0][0],
-						email_cc = vals['email_cc'],
-						object_id = ids and ('%s-%s' % (ids, 'kg.service.order')),
-						subtype = 'html',
-						subtype_alternative = 'plain')
-				res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
-			"""
-		else:
-			pass		
-				
-		return True	
-			
+				pass
+		return True
+	
 	_constraints = [
-	
+		
 		(_check_line,'You can not save this Service Order with out Line and Zero Qty !',['line_ids']),
-	
+		(_check_advance,'System sholud not be accecpt with out Advance !',['']),
+		
 	]
 	
 kg_service_order()
@@ -813,17 +607,13 @@ class kg_service_order_line(osv.osv):
 		'received_qty': 0.00,
 		'state':'draft'
 	}
-		
 	
 kg_service_order_line()	
-
-
 
 class kg_service_order_expense_track(osv.osv):
 
 	_name = "kg.service.order.expense.track"
 	_description = "kg expense track"
-	
 	
 	_columns = {
 		

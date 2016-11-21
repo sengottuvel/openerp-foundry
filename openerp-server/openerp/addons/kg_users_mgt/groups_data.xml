@@ -238,7 +238,7 @@
 			ref('kg_purchase_order.pam_purchase_order'),
 			ref('kg_purchase_order.pam_purchase_order_spl_approvals'),
 			ref('purchase.menu_purchase_form_action'),
-			ref('kg_menus.sam_service_order'),
+			ref('kg_service_order.sam_service_order'),
 			ref('kg_purchase_order.pam_purchase_order_line'),
 			
 			ref('kg_menus.apm_advance_menu'),

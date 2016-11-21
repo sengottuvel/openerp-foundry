@@ -195,9 +195,6 @@
                 <!-- Service Order Menu -->
 				<menuitem id="spm_service_order_menu" name="Service" parent="base.menu_purchase_root" sequence="2"/>
 				
-				<!-- Service Order Transaction -->
-				<menuitem action="kg_service_order.action_kg_serviceorder_form" id="sam_service_order" name="Service Order" parent="spm_service_order_menu" sequence="1"/>
-			        
 				<!-- PO Amendment Order -->
 				<menuitem action="kg_purchase_amendment.action_kg_poamendment_form" id="pam_po_amendment" name="PO Amendment" parent="purchase.menu_procurement_management" sequence="10"/>
 			        
