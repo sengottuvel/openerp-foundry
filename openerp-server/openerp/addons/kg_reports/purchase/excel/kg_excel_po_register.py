@@ -14,6 +14,8 @@ from dateutil import relativedelta
 import datetime
 import calendar
 from datetime import datetime
+
+from PIL import Image
 	
 logger = logging.getLogger('server')
 
@@ -30,7 +32,6 @@ class kg_excel_po_register(osv.osv):
 		'date_from': fields.date("Start Date",required=True),
 		'date_to': fields.date("End Date",required=True),		
 		'status': fields.selection([('approved', 'Approved'),('cancelled','Cancelled'),('pending','Pending')], "Status"),
-		'dep_project':fields.many2one('kg.project.master','Dept/Project Name'),
 		"rep_data":fields.binary("File",readonly=True),
 		'state': fields.selection([('draft', 'Draft'),('done','Done')], 'Status', readonly=True),
 		'company_id': fields.many2one('res.company', 'Company'),
@@ -38,11 +39,6 @@ class kg_excel_po_register(osv.osv):
 		
 		}
 	
-	#~ def _get_month_first(self, cr, uid,ids, context=None):
-		#~ today = datetime.date.today()
-		#~ first = datetime.date(day=1, month=today.month, year=today.year)
-		#~ res = first.strftime('%Y-%m-%d')
-		#~ return res
 			
 	_defaults = {
 		
@@ -53,6 +49,40 @@ class kg_excel_po_register(osv.osv):
 		'date_to' : lambda * a: time.strftime('%Y-%m-%d'),
 		
 		}
+		
+	def _date_check(self,cr,uid,ids,context=None):
+		rec=self.browse(cr,uid,ids[0])
+		current_date=time.strftime('%Y-%m-%d')
+		if rec.date_from > current_date or rec.date_to > current_date:
+			raise osv.except_osv(_('Warning!'),
+						_('Future Date are not allowed in Start Date and End Date!!'))
+			return False
+		return True
+		
+	def _enddate_check(self,cr,uid,ids,context=None):
+		rec=self.browse(cr,uid,ids[0])
+		if rec.date_to < rec.date_from:
+			raise osv.except_osv(_('Warning!'),
+						_('End Date is lesser than Start Date!!'))
+			return False
+		return True
+		
+	_constraints = [
+	
+		(_date_check, 'Future Dates are Not Allowed !!!', ['Check Date']),
+		(_enddate_check, 'Future Dates are Not Allowed !!!', ['Check Date']),
+
+	]
+	
+	def unlink(self,cr,uid,ids,context=None):
+		unlink_ids = []		
+		for rec in self.browse(cr,uid,ids):	
+			if rec.state not in ('draft','cancel'):				
+				raise osv.except_osv(_('Warning!'),
+						_('You can not delete reports with done state !!'))
+			else:
+				unlink_ids.append(rec.id)
+		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
 		
 	def produce_xls(self, cr, uid, ids, context={}):
 		
@@ -105,7 +135,7 @@ class kg_excel_po_register(osv.osv):
 		if not rec.status or rec.status == 'approved' or rec.status == 'cancelled':	
 			sql = """		
 				SELECT
-					  distinct po.id AS po_id,
+					  po.id AS po_id,
 					  po.name AS po_no,
 					  to_char(po.date_order,'dd/mm/yyyy') AS po_date,
 					  po.date_order AS date,
@@ -141,15 +171,14 @@ class kg_excel_po_register(osv.osv):
 					  JOIN product_template pt ON (pt.id=prd.product_tmpl_id)
 					  JOIN product_uom uom ON (uom.id=pol.product_uom)
 					  left JOIN kg_brand_master brand ON (pol.brand_id = brand.id)
-					  left JOIN kg_project_master project ON (po.dep_project = project.id)
-					  left JOIN kg_po_advance po_ad ON (po_ad.po_id = po.id)
+					  left JOIN kg_supplier_advance po_ad ON (po_ad.po_id = po.id)
 					  left JOIN kg_moc_master moc ON (moc.id=pol.moc_id)
 					  where po.state = """+po_state+""" and po.date_order >="""+date_from+""" and po.date_order <="""+date_to+' '+""" """+ supplier +""" """+ product+ """
-					  order by po.date_order """
+					  order by po.date_order  """
 		elif rec.status == 'pending':
 			sql = """		
 				SELECT
-				  distinct po.id AS po_id,
+				  po.id AS po_id,
 				  po.name AS po_no,
 				  to_char(po.date_order,'dd/mm/yyyy') AS po_date,
 				  po.date_order AS date,
@@ -185,17 +214,18 @@ class kg_excel_po_register(osv.osv):
 				  JOIN product_template pt ON (pt.id=prd.product_tmpl_id)
 				  JOIN product_uom uom ON (uom.id=pol.product_uom)
 				  left JOIN kg_brand_master brand ON (pol.brand_id = brand.id)
-				  left JOIN kg_project_master project ON (po.dep_project = project.id)
-				  left JOIN kg_po_advance po_ad ON (po_ad.po_id = po.id)
+				  left JOIN kg_supplier_advance po_ad ON (po_ad.po_id = po.id)
 				  left JOIN kg_moc_master moc ON (moc.id=pol.moc_id)
 				  where po.state='approved' and pol.pending_qty > 0 and po.date_order >="""+date_from+""" and po.date_order <="""+date_to+' '+""" """+ supplier +""" """+ product+ """
-				  order by po.date_order  """
+				  order by po.date_order """
 		cr.execute(sql)		
 		data = cr.dictfetchall()
 		
-		data.sort(key=lambda data: data['date'])		
+		data.sort(key=lambda data: data['date'])
+		
 		record={}
 		sno=1
+		len_col = 0
 		wbk = xlwt.Workbook()
 		style1 = xlwt.easyxf('font: bold on,height 240,color_index 0X36;' 'align: horiz center;''borders: left thin, right thin, top thin') 
 		s1=0
@@ -223,8 +253,15 @@ class kg_excel_po_register(osv.osv):
 		sheet1.col(16).width = 4000
 		sheet1.col(17).width = 4000
 		
-		""" writing field headings """
+		#~ img = Image.open('/home/sujith/OpenErp_7.0/Sam_Turbo/sam_phase1/openerp-server/openerp/addons/kg_reports/sam.png')
+		#~ r, g, b, a = img.split()
+		#~ img = Image.merge("RGB", (r, g, b))
+		#~ img.save('/home/sujith/OpenErp_7.0/Sam_Turbo/sam_phase1/openerp-server/openerp/addons/kg_reports/sam.bmp')
+		#~ img = Image.open('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.png')
+		#~ img.save('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp')
 		
+		""" writing field headings """
+		#~ sheet1.write_merge(0, 0, 0, 9,"SAM TURBO INDUSTRY PRIVATE LIMITED",style1)
 		sheet1.write(s1,0,"S No",style1)
 		sheet1.write(s1,1,"Supplier Name",style1)
 		sheet1.write(s1,2,"PO No",style1)
@@ -328,8 +365,7 @@ class kg_excel_po_register(osv.osv):
 		
 		for ele in data:
 			#~ ele['tax'] = 0
-			#~ ele['po_ad_amt'] = 0		
-			
+			#~ ele['po_ad_amt'] = 0
 			ele['received_qty'] = ele['qty'] - ele['pending_qty']
 			sheet1.write(s2,0,sno)
 			sheet1.write(s2,1,ele['su_name'])
@@ -370,7 +406,7 @@ class kg_excel_po_register(osv.osv):
 		"""string encode of data in wksheet"""		
 		out=base64.encodestring(file_data.getvalue())
 		"""returning the output xls as binary"""
-		report_name = 'PO_Register_Report' + '.' + 'xls'
+		report_name = 'PO_Register_Report' + '.' + 'xlsx'
 		
 		return self.write(cr, uid, ids, {'rep_data':out, 'name':report_name,'state': 'done'},context=context)
 		

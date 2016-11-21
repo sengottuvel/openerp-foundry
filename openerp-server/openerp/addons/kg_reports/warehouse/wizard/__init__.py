@@ -8,4 +8,5 @@
 
 
 import main_closing_stock_wizard
-
+import grn_register_report_wizard
+import dep_issue_register_wizard

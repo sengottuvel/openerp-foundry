@@ -422,7 +422,28 @@
 				
 				<!-- Stock Inspection Report
 				<menuitem action="kg_reports.rma_stock_inspection" id="ram_stock_inspection" parent="rpm_planning_reports" sequence="7"/>-->
-		
+			
+			<!-- Purchase Reports Menu -->
+            <menuitem name="Purchase" id="rpm_purchase_reports" parent = "rpm_reports" sequence="1"/>
+				
+				<!-- PO Register Report-->
+				<menuitem name="PO Register" parent="rpm_purchase_reports" action="kg_reports.action_po_stm_report" id="ram_po_register_reports" sequence="1"/>
+			
+			<menuitem id="rpm_excel_report_menu" name="Excel Reports" parent="rpm_reports" sequence="2"/>
+				
+				<!-- PO Menu -->
+				
+				<menuitem name="PO Register" parent="rpm_excel_report_menu" action="kg_reports.ram_po_reg_excel_report" id="ram_excel_po_register_reports" sequence="1"/>
+	
+			<!-- Warehouse Reports Menu -->
+            <menuitem name="Warehouse" id="rpm_warehouse_reports" parent = "rpm_reports" sequence="3"/>
+				
+				<!-- GRN Register Report-->
+				<menuitem name="GRN Register" parent="rpm_warehouse_reports" action="kg_reports.action_grn_report" id="ram_grn_register_reports" sequence="1"/>
+				
+				<!-- Issue Register Report-->
+				<menuitem name="Issue Register" parent="rpm_warehouse_reports" action="kg_reports.action_dep_issue_register11" id="ram_issue_register_reports" sequence="2"/>
+				
 		
 		<!-- Scheduler Menu -->
 		<menuitem id="spm_scheduler" name="Scheduler" sequence="0" />

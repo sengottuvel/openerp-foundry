@@ -245,7 +245,9 @@
 			ref('kg_supplier_advance.tam_sup_advance'),
 			ref('kg_menus.aam_so_advance'),
 			
-			ref('kg_menus.rpm_report_menu'),
+			ref('kg_menus.rpm_reports'),
+			ref('kg_menus.rpm_purchase_reports'),
+			ref('kg_menus.ram_po_register_reports'),
 			ref('kg_menus.rpm_excel_report_menu'),
 			ref('kg_menus.ram_excel_po_register_reports'),
 			
@@ -356,6 +358,10 @@
 			
 			ref('kg_menus.rpm_str_reports'),
 			ref('kg_menus.ram_closing_stock'),
+			
+			ref('kg_menus.rpm_warehouse_reports'),
+			ref('kg_menus.ram_grn_register_reports'),
+			ref('kg_menus.ram_issue_register_reports'),
 			
             ])]" name="menu_access"/>
 <!--
