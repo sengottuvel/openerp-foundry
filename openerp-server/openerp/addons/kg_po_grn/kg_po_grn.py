@@ -390,11 +390,8 @@ class kg_po_grn(osv.osv):
 				podate_list.append(date_order)
 				po_name = ",".join(po_list)
 				po_date = ",".join(podate_list)
-				if po_record.dep_project_name:
-					poremark_list.append(po_record.dep_project_name)
-					po_remark = ",".join(poremark_list)
-				else:
-					po_remark = ""  
+				
+				po_remark = ""  
 				po_expenses_type1 = po_record.po_expenses_type1 
 				po_expenses_type2 = po_record.po_expenses_type2 
 				value1 += po_record.value1 or 0
