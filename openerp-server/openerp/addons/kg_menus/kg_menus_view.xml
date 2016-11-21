@@ -179,15 +179,7 @@
 				 
 				<!-- Item Quality Master  --> 
 				<menuitem action="kg_item_quality_master.mma_item_quality_master" name="General Term" id="mam_item_quality_master" parent="ppm_master_menu" sequence="16"/>
-				 
-				<menuitem action="purchase.purchase_rfq" id="pam_purchase_order" name="Generate PO" parent="purchase.menu_procurement_management" sequence="1"/>
 				
-				<!-- Special Approval PO -->
-				<menuitem action="purchase.purchase_rfq_spl_approval" id="pam_purchase_order_spl_approvals" name="Special Approval PO" parent="purchase.menu_procurement_management" sequence="2"/>
-				
-				<!-- PO Item Details  --> 
-				<menuitem action="kg_purchase_order.kg_poline_confirmed_action" id="pam_purchase_order_line" name="PO Item Details" parent="purchase.menu_procurement_management" sequence="9"/>
-                
                 <!-- Quotations Menu -->
 				<menuitem id="qpm_quotations_menu" name="Quotations" parent="base.menu_purchase_root" sequence="1"/>
 				
