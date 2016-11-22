@@ -163,6 +163,16 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
+		<record id="t_ms_subcontract_process_wo_line_details" model="ir.model.access">
+			<field name="model_id" ref="kg_subcontract_process.model_ch_wo_operation_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Subcontract Process WO Line Details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
 		<record id="t_ms_subcontract_process_dc" model="ir.model.access">
 			<field name="model_id" ref="kg_subcontract_process.model_kg_subcontract_dc"/>
 			<field eval="1" name="perm_read"/>
