@@ -7479,7 +7479,18 @@ class kg_batch_finish_grinding(osv.osv):
 		
 			for item in entry.finish_grinding_ids:
 				
-				
+				print"entry.id",entry.id
+				print"item.id",item.id
+				print"entry.id",item.finish_grinding_qty
+				print"item.finish_grinding_qty.id",item.finish_grinding_qty
+				print"finish_grinding_date.id",entry.finish_grinding_date
+				print"entry.shift_id.id.id",entry.shift_id.id
+				print"entry.id",entry.done_by
+				print"entry.contractor_id.id.id",entry.contractor_id.id
+				print"entry.entry.employee_name",entry.employee_name
+				print"entry.weight",entry.weight
+				print"eentry.remarkst",entry.remarks
+				print"eentry.entry.flag_reshot_blast_applicable",entry.flag_reshot_blast_applicable
 				vals = {
 				
 					'header_id': entry.id,
