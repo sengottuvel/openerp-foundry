@@ -917,6 +917,62 @@
 		
 		<!-- Foundry Rejection List End -->
 		
+		<!-- Work Order Accessories Start-->
+		
+		<record id="t_foundry_work_order_accessories" model="ir.model.access">
+			<field name="model_id" ref="kg_work_order.model_ch_wo_accessories"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Work Order Accessories</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- Work Order Accessories End-->
+		
+		<!-- Work Order Accessories Foundry Start-->
+		
+		<record id="t_foundry_work_order_accessories_foundry" model="ir.model.access">
+			<field name="model_id" ref="kg_work_order.model_ch_wo_accessories_foundry"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">WO Accessories Foundry</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- Work Order Accessories Foundry End-->
+		
+		<!-- Work Order Accessories MS Start-->
+		
+		<record id="t_foundry_work_order_accessories_ms" model="ir.model.access">
+			<field name="model_id" ref="kg_work_order.model_ch_wo_accessories_ms"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">WO Accessories MS</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- Work Order Accessories MS End-->
+		
+		<!-- Work Order Accessories BOT Start-->
+		
+		<record id="t_foundry_work_order_accessories_bot" model="ir.model.access">
+			<field name="model_id" ref="kg_work_order.model_ch_wo_accessories_bot"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">WO Accessories BOT</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+		</record>
+		
+		<!-- Work Order Accessories BOT End-->
+		
 		
     </data>
 </openerp>
