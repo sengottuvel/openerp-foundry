@@ -1205,6 +1205,8 @@ class related(function):
             # res[id] is a browse_record or False; convert it to (id, name) or False.
             # Perform name_get as root, as seeing the name of a related object depends on
             # access right of source document, not target, so user may not have access.
+            print "value**********",value
+            print "value.id**********",value.id
             value_ids = list(set(value.id for value in res.itervalues() if value))
             value_name = dict(obj.pool.get(self._obj).name_get(cr, SUPERUSER_ID, value_ids, context=context))
             res = dict((id, value and (value.id, value_name[value.id])) for id, value in res.iteritems())
