@@ -1645,6 +1645,16 @@ class ch_work_order_details(osv.osv):
 			return False
 		return True
 		
+	def _check_flag_applicable(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		if entry.order_category == 'spare':
+			cr.execute(''' select id from ch_order_bom_details where flag_applicable = 't' and
+				header_id = %s ''',[entry.id])
+			applicable_id = cr.fetchone()
+			if not applicable_id:
+				return False
+		return True
+		
 		
 	def create(self, cr, uid, vals, context=None):
 		header_rec = self.pool.get('kg.work.order').browse(cr, uid,vals['header_id'])
@@ -1678,6 +1688,7 @@ class ch_work_order_details(osv.osv):
 		(_check_unit_price, 'System not allow to save with zero and less than zero Unit Price .!!',['Unit Price']),
 		#~ (_check_line_duplicates, 'Work Order Details are duplicate. Kindly check !! ', ['']),
 		(_check_line_items, 'Work Order Detail cannot be created after confirmation !! ', ['']),
+		(_check_flag_applicable, 'Kindly select atleast one Foundry Item for spare !! ', ['']),
 	   
 		
 	   ]

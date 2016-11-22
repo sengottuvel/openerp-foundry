@@ -199,7 +199,8 @@
 						<page string="Foundry Items">
 							<field name="line_ids" colspan="4" nolabel="1" context="{'order_category':order_category,'flag_standard':flag_standard}"  attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
 								<tree string="BOM Details" editable="bottom">
-								    <field name="order_category" invisible="1"/>
+								   <field name="order_category" invisible="1"/>
+								   <field name="flag_applicable"/>
 								   <field name="pattern_id"  attrs="{'readonly': [('entry_mode','=','auto')]}"/>
 								   <field name="pattern_name" readonly="1"/>
 								   <field name="position_id" attrs="{'readonly': [('order_category','=','pump')]}"/>
@@ -213,7 +214,7 @@
 								   <field name="unit_price"/>
 								   <field name="schedule_qty" invisible="1"/>
 								   <field name="production_qty" invisible="1"/>
-								   <field name="flag_applicable"/>
+								   
 								   <field name="flag_pattern_check"/>
 								   <field name="moc_id" on_change="onchange_pattern_details(pattern_id,moc_id)" attrs="{'required': [('flag_applicable','!=',False)],'readonly': [('flag_standard','=',False)]}"/>
 								   <field name="add_spec" widget="char"/>
@@ -227,13 +228,14 @@
 							<field name="line_ids_a" nolabel="1" context="{'order_category':order_category,'flag_standard':flag_standard}" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
 								<tree string="Order Machine Shop Details Entry Tree" editable="bottom">
 									<field name="order_category" invisible="1"/>
+									<field name="flag_applicable"/>
 									<field name="ms_id" attrs="{'readonly': [('entry_mode','=','auto')]}"/>		
 									<field name="name" attrs="{'readonly': [('entry_mode','=','auto')]}"/>
 									<field name="position_id" attrs="{'readonly': [('entry_mode','=','auto')]}"/>		
 									<field name="qty" attrs="{'readonly': [('order_category','=','pump')]}"/>
 									<field name="unit_price"/>
 									<field name="length" readonly="1"/>
-									<field name="flag_applicable"/>
+									
 									<field name="moc_id" attrs="{'required': [('flag_applicable','!=',False)],'readonly': [('flag_standard','=',False)]}"/>
 									<field name="remarks" widget="char"/>
 									<field name="flag_standard" invisible="1"/>
@@ -245,11 +247,12 @@
 							<field name="line_ids_b" nolabel="1" context="{'order_category':order_category,'flag_standard':flag_standard}" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
 								<tree string="Order BOT Details Entry Tree" editable="bottom">	
 									<field name="order_category" invisible="1"/>
+									<field name="flag_applicable"/>
 									<field name="bot_id" attrs="{'readonly': [('entry_mode','=','auto')]}"/>	
 									<field name="item_name" attrs="{'readonly': [('entry_mode','=','auto')]}"/>																			
 									<field name="qty" attrs="{'readonly': [('order_category','=','pump')]}"/>
 									<field name="unit_price"/>
-									<field name="flag_applicable"/>
+									
 									<field name="moc_id" attrs="{'required': [('flag_applicable','!=',False)],'readonly': [('flag_standard','=',False)]}"/>
 									<field name="remarks" widget="char"/>
 									<field name="flag_standard" invisible="1"/>

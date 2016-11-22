@@ -7496,6 +7496,7 @@ class kg_batch_finish_grinding(osv.osv):
 					'flag_reshot_blast_applicable': entry.flag_reshot_blast_applicable
 				}
 				
+				print "vals",vals
 				line_id = line_obj.create(cr, uid,vals)
 				
 			self.write(cr, uid, ids, {'flag_batchline': True})
