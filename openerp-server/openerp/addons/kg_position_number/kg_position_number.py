@@ -68,6 +68,8 @@ class kg_position_number(osv.osv):
 		'bot_code': fields.char('BOT Name'),
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),
 		
+		'drawing_no': fields.char('Drawing No.'),
+		
 		### Entry Info ###
 		'crt_date': fields.datetime('Creation Date',readonly=True),
 		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
@@ -123,7 +125,20 @@ class kg_position_number(osv.osv):
 			bot_rec = self.pool.get('kg.machine.shop').browse(cr,uid,bot_id)
 			value = {'bot_code':bot_rec.name}
 		return {'value':value}
-		
+	
+	def _drawing_no_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.drawing_no:
+			drawing_no = rec.drawing_no
+			drawing_nos = drawing_no.upper()			
+			cr.execute(""" select upper(drawing_no) from kg_position_number where upper(drawing_no)  = '%s' """ %(drawing_nos))
+			data = cr.dictfetchall()			
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res	
 			
 	def _name_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -414,6 +429,7 @@ class kg_position_number(osv.osv):
 	
 	_constraints = [
 		
+		(_drawing_no_validate, 'Drawing No must be unique !!', ['Drawing No']),		
 		(_name_validate, 'Position No must be unique !!', ['Position No']),		
 		(_code_validate, 'Position code must be unique !!', ['code']),		
 		#~ (_check_line,'You can not save this with out Operation Details !',['line_ids']),

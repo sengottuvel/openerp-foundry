@@ -41,7 +41,8 @@
 							<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 						</group>
 						<group>
-							<field name="pumpmodel_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="drawing_no" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="pumpmodel_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>							
 							<field name="pattern_name" readonly="1"/>
 							<field name="ms_code" readonly="1"/>
 							<field name="bot_code" readonly="1"/>
