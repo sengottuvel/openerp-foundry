@@ -604,7 +604,7 @@ class kg_fettling(osv.osv):
 				### Status Updation ###
 				
 				print"entry_rec.production_id.id",entry_rec.production_id.id
-				print"entry_rec.production_id.id",entry_rec.id
+				print"entry_rec.id",entry_rec.id
 				
 				### Schedule List Updation ###
 				production_obj = self.pool.get('kg.production')
