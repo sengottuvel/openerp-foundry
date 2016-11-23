@@ -603,6 +603,8 @@ class kg_fettling(osv.osv):
 			
 				### Status Updation ###
 				
+				print"entry_rec.production_id.id",entry_rec.production_id.id
+				
 				### Schedule List Updation ###
 				production_obj = self.pool.get('kg.production')
 				cr.execute(''' update kg_production set state = 'moved_to_ms' where id = %s ''',[entry_rec.production_id.id])
