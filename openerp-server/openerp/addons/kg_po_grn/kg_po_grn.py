@@ -669,6 +669,8 @@ class kg_po_grn(osv.osv):
 							product_qty=po_line_id.product_qty+po_line_id.product_qty/100.00*line.product_id.tolerance_plus
 						if line.po_grn_qty <= product_qty:
 							po_rec = self.pool.get('po.grn.line').search(cr,uid,[('po_line_id','=',line.po_line_id.id),('id','!=',line.id)])
+							print"po_recpo_rec",po_rec.id
+							
 							po_grn_qty= 0
 							if po_rec:
 								for ele in po_rec:
@@ -680,7 +682,7 @@ class kg_po_grn(osv.osv):
 							d = product_qty - po_grn_qty
 							print"ddd",d
 							print"line.po_grn_qty",line.po_grn_qty
-							stop
+							
 							if line.po_grn_qty <= d:
 								pass
 							else:
