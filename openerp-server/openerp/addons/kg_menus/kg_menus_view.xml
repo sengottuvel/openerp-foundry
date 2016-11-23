@@ -204,12 +204,6 @@
 				<!-- Advance Menu -->
 				<menuitem id="apm_advance_menu" name="Advance" parent="base.menu_purchase_root" sequence="3"/>
 				
-				<!-- PO Advance Transaction -->
-				<menuitem action="kg_po_advance.kg_po_advance_action_form" id="aam_po_advance" name="PO Advance" parent="apm_advance_menu" sequence="1"/>
-			        
-				<!-- SO Advance Transaction -->
-				<menuitem action="kg_so_advance.kg_so_advance_action_form" id="aam_so_advance" name="SO Advance" parent="apm_advance_menu" sequence="2"/>
-			    
 			    <!-- Service Invoice Menu -->
 				<menuitem id="spm_service_invoice_menu" name="Bills" parent="base.menu_purchase_root" sequence="4"/>
 				   

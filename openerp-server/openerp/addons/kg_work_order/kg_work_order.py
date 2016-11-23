@@ -285,111 +285,113 @@ class kg_work_order(osv.osv):
 				
 				rem_qty = item.qty
 				
-				if item.order_category in 'pump':
+				if entry.order_category != 'project':
 				
-					### Checking the Pump Stock ###
-								
-					### Checking in Stock Inward for Ready for MS ###
+					if item.order_category in 'pump':
 					
-					cr.execute(""" select sum(available_qty) as stock_qty
-						from ch_stock_inward_details  
-						where pump_model_id = %s
-						and foundry_stock_state = 'ready_for_ms' and available_qty > 0 and stock_type = 'pump' and stock_mode = 'manual' """%(item.pump_model_id.id))
-					stock_inward_qty = cr.fetchone();
-					
-					if stock_inward_qty:
-						if stock_inward_qty[0] != None:
-							rem_qty =  item.qty - stock_inward_qty[0]
-							
-							if rem_qty <= 0:
-								rem_qty = 0
-								qc_qty = item.qty
-							else:
-								rem_qty = rem_qty
-								qc_qty = stock_inward_qty[0]
-							
-							print "qc_qty",qc_qty
-							
-							### Order Priority ###
+						### Checking the Pump Stock ###
 									
-							if entry.order_category in ('pump','pump_spare','project'):
-								if entry.order_priority == 'normal':
-									priority = '6'
-								if entry.order_priority == 'emergency':
-									priority = '4'
-							if entry.order_category == 'service':
-								priority = '3'
-							if entry.order_category == 'spare':
-								priority = '5'
-							
-							print "priority",priority
-							
-							### Creating QC Verification ###
-							
-							qc_obj = self.pool.get('kg.qc.verification')
-							
-							### QC Sequence Number Generation  ###
-							qc_name = ''	
-							qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.qc.verification')])
-							rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
-							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.entry_date))
-							qc_name = cr.fetchone();
+						### Checking in Stock Inward for Ready for MS ###
 						
-							qc_vals = {
-															
-								'name': qc_name[0],
-								#~ 'schedule_id': entry.id,
-								#~ 'schedule_date': entry.entry_date,
-								'division_id': entry.division_id.id,
-								'location' : entry.location,
-								#~ 'schedule_line_id': schedule_item.id,
-								'order_id': entry.id,
-								'order_line_id': item.id,
-								'qty' : qc_qty,
-								'stock_qty': qc_qty,                   
-								'allocated_qty':qc_qty,                 
-								'state' : 'draft',
-								'order_category':entry.order_category,
-								'order_priority':priority,
-								'pump_model_id' : item.pump_model_id.id,
-								'moc_construction_id' : item.moc_construction_id.id,
-								'stock_type': 'pump'
+						cr.execute(""" select sum(available_qty) as stock_qty
+							from ch_stock_inward_details  
+							where pump_model_id = %s
+							and foundry_stock_state = 'ready_for_ms' and available_qty > 0 and stock_type = 'pump' and stock_mode = 'manual' """%(item.pump_model_id.id))
+						stock_inward_qty = cr.fetchone();
+						
+						if stock_inward_qty:
+							if stock_inward_qty[0] != None:
+								rem_qty =  item.qty - stock_inward_qty[0]
+								
+								if rem_qty <= 0:
+									rem_qty = 0
+									qc_qty = item.qty
+								else:
+									rem_qty = rem_qty
+									qc_qty = stock_inward_qty[0]
+								
+								print "qc_qty",qc_qty
+								
+								### Order Priority ###
 										
-								}
+								if entry.order_category in ('pump','pump_spare','project'):
+									if entry.order_priority == 'normal':
+										priority = '6'
+									if entry.order_priority == 'emergency':
+										priority = '4'
+								if entry.order_category == 'service':
+									priority = '3'
+								if entry.order_category == 'spare':
+									priority = '5'
 								
-							print "qc_vals",qc_vals
-							
-							qc_id = qc_obj.create(cr, uid, qc_vals)
-							
-							### Qty Updation in Stock Inward ###
-							
-							inward_line_obj = self.pool.get('ch.stock.inward.details')
-							
-							cr.execute(""" select id,available_qty
-								from ch_stock_inward_details  
-								where pump_model_id = %s
-								and foundry_stock_state = 'ready_for_ms' and available_qty > 0 
-								and stock_type = 'pump' and stock_mode = 'manual' """%(item.pump_model_id.id))
+								print "priority",priority
 								
-							stock_inward_items = cr.dictfetchall();
+								### Creating QC Verification ###
+								
+								qc_obj = self.pool.get('kg.qc.verification')
+								
+								### QC Sequence Number Generation  ###
+								qc_name = ''	
+								qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.qc.verification')])
+								rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.entry_date))
+								qc_name = cr.fetchone();
 							
-							stock_updation_qty = qc_qty
-							
-							for stock_inward_item in stock_inward_items:
-								if stock_updation_qty > 0:
+								qc_vals = {
+																
+									'name': qc_name[0],
+									#~ 'schedule_id': entry.id,
+									#~ 'schedule_date': entry.entry_date,
+									'division_id': entry.division_id.id,
+									'location' : entry.location,
+									#~ 'schedule_line_id': schedule_item.id,
+									'order_id': entry.id,
+									'order_line_id': item.id,
+									'qty' : qc_qty,
+									'stock_qty': qc_qty,                   
+									'allocated_qty':qc_qty,                 
+									'state' : 'draft',
+									'order_category':entry.order_category,
+									'order_priority':priority,
+									'pump_model_id' : item.pump_model_id.id,
+									'moc_construction_id' : item.moc_construction_id.id,
+									'stock_type': 'pump'
+											
+									}
 									
-									if stock_inward_item['available_qty'] <= stock_updation_qty:
-										stock_avail_qty = 0
-										inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty,'foundry_stock_state':'reject'})
-									if stock_inward_item['available_qty'] > stock_updation_qty:
-										stock_avail_qty = stock_inward_item['available_qty'] - stock_updation_qty
-										inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
+								print "qc_vals",qc_vals
+								
+								qc_id = qc_obj.create(cr, uid, qc_vals)
+								
+								### Qty Updation in Stock Inward ###
+								
+								inward_line_obj = self.pool.get('ch.stock.inward.details')
+								
+								cr.execute(""" select id,available_qty
+									from ch_stock_inward_details  
+									where pump_model_id = %s
+									and foundry_stock_state = 'ready_for_ms' and available_qty > 0 
+									and stock_type = 'pump' and stock_mode = 'manual' """%(item.pump_model_id.id))
+									
+								stock_inward_items = cr.dictfetchall();
+								
+								stock_updation_qty = qc_qty
+								
+								for stock_inward_item in stock_inward_items:
+									if stock_updation_qty > 0:
 										
-									if stock_inward_item['available_qty'] <= stock_updation_qty:
-										stock_updation_qty = stock_updation_qty - stock_inward_item['available_qty']
-									elif stock_inward_item['available_qty'] > stock_updation_qty:
-										stock_updation_qty = 0
-									print "stock_avail_qty",stock_avail_qty
+										if stock_inward_item['available_qty'] <= stock_updation_qty:
+											stock_avail_qty = 0
+											inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty,'foundry_stock_state':'reject'})
+										if stock_inward_item['available_qty'] > stock_updation_qty:
+											stock_avail_qty = stock_inward_item['available_qty'] - stock_updation_qty
+											inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
+											
+										if stock_inward_item['available_qty'] <= stock_updation_qty:
+											stock_updation_qty = stock_updation_qty - stock_inward_item['available_qty']
+										elif stock_inward_item['available_qty'] > stock_updation_qty:
+											stock_updation_qty = 0
+										print "stock_avail_qty",stock_avail_qty
 			
 								
 				line_obj.write(cr, uid, item.id, {'pump_rem_qty':rem_qty})

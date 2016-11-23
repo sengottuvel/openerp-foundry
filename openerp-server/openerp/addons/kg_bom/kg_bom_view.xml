@@ -116,6 +116,16 @@
 								</tree>
 							</field>
 						</page>
+						
+						<page string="Base Plate" attrs="{'invisible':[('category_type','in',['part_list_bom'])]}">
+							<field name="line_ids_d" nolabel="1" attrs="{'readonly': ['|',('state','in',['approved','reject','cancel','expire']),('type','=','amendment')]}">
+								<tree string="Base Plate Details Entry Tree" editable="top" >										
+									<field name="limitation"/>
+									<field name="partlist_id"/>
+									<field name="remarks"  widget="char"/>
+								</tree>
+							</field>
+						</page>
 						<page string="Core" invisible="1">					
 							
 						</page>

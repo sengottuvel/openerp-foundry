@@ -54,6 +54,7 @@ class kg_bom(osv.osv):
 		'line_ids_a':fields.one2many('ch.machineshop.details', 'header_id', "Machine Shop Line"),
 		'line_ids_b':fields.one2many('ch.bot.details', 'header_id', "BOT Line"),
 		'line_ids_c':fields.one2many('ch.consu.details', 'header_id', "Consumable Line"),		
+		'line_ids_d':fields.one2many('ch.base.plate', 'header_id', "Base Plate"),		
 		'type': fields.selection([('new','New'),('copy','Copy'),('amendment','Amendment')],'Type', required=True),
 		'bom_type': fields.selection([('new_bom','New BOM'),('copy_bom','Copy BOM')],'Type', required=True),
 		
@@ -725,5 +726,37 @@ class ch_consu_details(osv.osv):
 		return super(ch_consu_details, self).write(cr, uid, ids, vals, context) 
 
 ch_consu_details()
+
+
+class ch_base_plate(osv.osv):
+	
+	_name = "ch.base.plate"
+	_description = "BOM Base Plate Details" 
+	
+	_columns = {
+	
+		'header_id':fields.many2one('kg.bom', 'BOM', ondelete='cascade',required=True),
+		'limitation':fields.selection([('upto_2999','Upto 2999'),('above_3000','Above 3000')],'Limitation',required=True),		
+		'partlist_id':fields.many2one('kg.bom', 'Partlist',domain = [('category_type','=','part_list_bom')], ondelete='cascade',required=True),		
+		'remarks':fields.text('Remarks'),
+	
+	}	
+	
+	def _check_same_values(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		cr.execute(""" select limitation from ch_base_plate where limitation ='%s' and header_id = '%s' """ %(entry.limitation,entry.header_id.id))
+		data = cr.dictfetchall()			
+		if len(data) > 1:		
+			return False
+		return True	
+		
+	_constraints = [		
+			  
+		
+		(_check_same_values, 'Please Check the same Limitation not allowed..!!',['Limitation']),	
+		
+	   ]
+
+ch_base_plate()
 
 
