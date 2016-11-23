@@ -675,6 +675,8 @@ class kg_po_grn(osv.osv):
 									po_grn_qty += po_recc.po_grn_qty
 							d = 0
 							d = product_qty - po_grn_qty
+							print"ddd",d
+							print"line.po_grn_qty",line.po_grn_qty
 							if line.po_grn_qty <= d:
 								pass
 							else:
