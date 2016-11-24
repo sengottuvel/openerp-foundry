@@ -602,10 +602,10 @@ class kg_fettling(osv.osv):
 				ms_id = ms_obj.create(cr, uid, ms_vals)
 			
 				### Status Updation ###
-				
-				### Schedule List Updation ###
-				production_obj = self.pool.get('kg.production')
-				cr.execute(''' update kg_production set state = 'moved_to_ms' where id = %s ''',[entry_rec.production_id.id])
+				if entry_rec.production_id.id != False:
+					### Schedule List Updation ###
+					production_obj = self.pool.get('kg.production')
+					cr.execute(''' update kg_production set state = 'moved_to_ms' where id = %s ''',[entry_rec.production_id.id])
 				self.write(cr, uid, ids, {'ms_state': 'created'})
 			
 		### Fettling Status Updation ###
@@ -7479,18 +7479,6 @@ class kg_batch_finish_grinding(osv.osv):
 		
 			for item in entry.finish_grinding_ids:
 				
-				print"entry.id",entry.id
-				print"item.id",item.id
-				print"entry.id",item.finish_grinding_qty
-				print"item.finish_grinding_qty.id",item.finish_grinding_qty
-				print"finish_grinding_date.id",entry.finish_grinding_date
-				print"entry.shift_id.id.id",entry.shift_id.id
-				print"entry.id",entry.done_by
-				print"entry.contractor_id.id.id",entry.contractor_id.id
-				print"entry.entry.employee_name",entry.employee_name
-				print"entry.weight",entry.weight
-				print"eentry.remarkst",entry.remarks
-				print"eentry.entry.flag_reshot_blast_applicable",entry.flag_reshot_blast_applicable
 				vals = {
 				
 					'header_id': entry.id,
