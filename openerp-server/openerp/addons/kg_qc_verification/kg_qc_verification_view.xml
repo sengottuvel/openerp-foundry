@@ -22,7 +22,7 @@
 							<field name="division_id" readonly="1"/>
 							<field name="order_id" readonly="1"/>
 							<field name="pattern_id" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
-							<field name="moc_construction_id" readonly="1" attrs="{'invisible': [('stock_type','=','part')]}"/>
+							<field name="moc_construction_id" readonly="1" attrs="{'invisible': [('stock_type','=','pattern')]}"/>
 							<field name="moc_id" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
 							<field name="total_weight" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
 							<field name="stage_id" invisible="1"/>
@@ -46,7 +46,7 @@
 							
 							<field name="diameter" invisible="1"/>
 							<field name="reject_remarks_id" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-							<field name="sent_to" attrs="{'invisible': [('stock_type','=','part')], 'readonly': [('state','not in',['draft'])],'required': [('stock_type','=','pump')]}"/>
+							<field name="sent_to" attrs="{'invisible': [('stock_type','=','pattern')], 'readonly': [('state','not in',['draft'])],'required': [('stock_type','=','pump')]}"/>
 						</group>											
 						<group>
 							<field name="allocated_qty" readonly="1"/>

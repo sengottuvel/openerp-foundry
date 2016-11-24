@@ -142,7 +142,7 @@ class kg_qc_verification(osv.osv):
 		'crt_date':time.strftime('%Y-%m-%d %H:%M:%S'),
 		'state': 'draft',	
 		'active': True,
-		'stock_type': 'part',
+		'stock_type': 'pattern',
 		
 		
 	}
@@ -214,7 +214,7 @@ class kg_qc_verification(osv.osv):
 			
 			if entry.qty > 0:
 				
-				if entry.stock_type == 'part':
+				if entry.stock_type == 'pattern':
 					ms_obj = self.pool.get('kg.machineshop')
 					
 					### Sequence Number Generation ###
@@ -338,7 +338,7 @@ class kg_qc_verification(osv.osv):
 			
 			if reject_qty > 0:
 				
-				if entry.stock_type == 'part':
+				if entry.stock_type == 'pattern':
 				
 					reject_rem_qty = reject_qty
 						
