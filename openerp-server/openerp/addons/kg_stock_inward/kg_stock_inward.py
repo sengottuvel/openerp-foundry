@@ -105,34 +105,37 @@ class kg_stock_inward(osv.osv):
 		today = str(today)
 		
 		entry = self.browse(cr,uid,ids[0])
-		for line_item in entry.line_ids:
+		if entry.state == 'draft':
+			for line_item in entry.line_ids:
+				
+				inward_line_obj.write(cr, uid, [line_item.id], {'available_qty':line_item.qty})
+						
+				#### Stock Updation Block Ends Here ###
+				
+				
+			### Total Value ###
+			cr.execute(''' select sum(total_value) from ch_stock_inward_details where header_id = %s ''',[ids[0]])
+			inward_total = cr.fetchone()
+			if inward_total[0] != None:
+				total = inward_total[0]
+			else:
+				total = 0.00
+				
+			### Sequence Number Generation  ###
+			inward_name = ''
+			if not entry.name:		
+				inward_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.stock.inward')])
+				rec = self.pool.get('ir.sequence').browse(cr,uid,inward_id[0])
+				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(inward_id[0],rec.code,entry.entry_date))
+				inward_name = cr.fetchone();
+				inward_name = inward_name[0]
+			else:
+				inward_name = entry.name
 			
-			inward_line_obj.write(cr, uid, [line_item.id], {'available_qty':line_item.qty})
-					
-			#### Stock Updation Block Ends Here ###
-			
-			
-		### Total Value ###
-		cr.execute(''' select sum(total_value) from ch_stock_inward_details where header_id = %s ''',[ids[0]])
-		inward_total = cr.fetchone()
-		if inward_total[0] != None:
-			total = inward_total[0]
+			self.write(cr, uid, ids, {'name':inward_name,'total_value':total,'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			cr.execute(''' update ch_stock_inward_details set state = 'confirmed' where header_id = %s ''',[ids[0]])
 		else:
-			total = 0.00
-			
-		### Sequence Number Generation  ###
-		inward_name = ''
-		if not entry.name:		
-			inward_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.stock.inward')])
-			rec = self.pool.get('ir.sequence').browse(cr,uid,inward_id[0])
-			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(inward_id[0],rec.code,entry.entry_date))
-			inward_name = cr.fetchone();
-			inward_name = inward_name[0]
-		else:
-			inward_name = entry.name
-		
-		self.write(cr, uid, ids, {'name':inward_name,'total_value':total,'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		cr.execute(''' update ch_stock_inward_details set state = 'confirmed' where header_id = %s ''',[ids[0]])
+			pass
 		return True
 		
 		

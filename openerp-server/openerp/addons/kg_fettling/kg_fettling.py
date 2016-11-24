@@ -484,6 +484,7 @@ class kg_fettling(osv.osv):
 		'finish_grinding_date':lambda * a: time.strftime('%Y-%m-%d'),
 		'finish_grinding_accept_user_id':lambda obj, cr, uid, context: uid,
 		'finish_grinding_state':'pending',
+		'flag_fg_special_app': False,
 		### Re Shot Blasting ###
 		'reshot_blasting_user_id':lambda obj, cr, uid, context: uid,
 		'reshot_blasting_date':lambda * a: time.strftime('%Y-%m-%d'),
