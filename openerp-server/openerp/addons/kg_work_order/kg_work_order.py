@@ -396,88 +396,88 @@ class kg_work_order(osv.osv):
 								
 				line_obj.write(cr, uid, item.id, {'pump_rem_qty':rem_qty})
 				
-				if entry.order_priority == 'normal' and entry.order_category in ('spare','service'):
+			if entry.order_priority == 'normal' and entry.order_category in ('spare','service'):
+			
+				### Schedule Creation ###
 				
-					### Schedule Creation ###
-					
-					schedule_item_vals = {
-													
-						'name': '',
-						'location' : entry.location,
-						'order_priority': 'normal',
-						'delivery_date': entry.delivery_date,
-						'order_line_ids': [(6, 0, order_line_ids)],
-						'state' : 'draft',
-						'entry_mode' : 'auto',				   
-					}
-					
-					schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
-					
-					### Schedule Line Item Creation ###
-					
-					if item.order_category == 'pump':
-					
-						schedule_obj.update_line_items(cr, uid, [schedule_id],rem_qty)
-					else:
-						schedule_obj.update_line_items(cr, uid, [schedule_id],0)
-					
-					### Schedule Confirmation ###
-					
-					schedule_obj.entry_confirm(cr, uid, [schedule_id])
-					
-				if entry.order_priority == 'emergency' and entry.order_category in ('pump','spare','pump_spare','service'):
-					
-					### Schedule Creation ###
-					
-					schedule_item_vals = {
-													
-						'name': '',
-						'location' : entry.location,
-						'order_priority': 'emergency',
-						'delivery_date': entry.delivery_date,
-						'order_line_ids': [(6, 0, order_line_ids)],
-						'state' : 'draft',			   
-						'entry_mode' : 'auto',			   
-					}
-					
-					schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
-					
-					### Schedule Line Item Creation ###
-					
-					if item.order_category == 'pump':
-					
-						schedule_obj.update_line_items(cr, uid, [schedule_id],rem_qty)
-					else:
-						schedule_obj.update_line_items(cr, uid, [schedule_id],0)
-					
-					### Schedule Confirmation ###
-					
-					schedule_obj.entry_confirm(cr, uid, [schedule_id])
-					
-				if entry.order_priority == 'emergency' and entry.order_category in ('project'):
-					
-					### Schedule Creation ###
-					
-					schedule_item_vals = {
-													
-						'name': '',
-						'location' : entry.location,
-						'order_priority': 'emergency',
-						'delivery_date': entry.delivery_date,
-						'order_line_ids': [(6, 0, order_line_ids)],
-						'state' : 'draft',
-						'entry_mode' : 'auto',				   
-					}
-					
-					schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
-					
-					### Schedule Line Item Creation ###
-					
-					if item.order_category == 'pump':
-					
-						schedule_obj.update_line_items(cr, uid, [schedule_id],rem_qty)
-					else:
-						schedule_obj.update_line_items(cr, uid, [schedule_id],0)
+				schedule_item_vals = {
+												
+					'name': '',
+					'location' : entry.location,
+					'order_priority': 'normal',
+					'delivery_date': entry.delivery_date,
+					'order_line_ids': [(6, 0, order_line_ids)],
+					'state' : 'draft',
+					'entry_mode' : 'auto',				   
+				}
+				
+				schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
+				
+				### Schedule Line Item Creation ###
+				
+				if item.order_category == 'pump':
+				
+					schedule_obj.update_line_items(cr, uid, [schedule_id],rem_qty)
+				else:
+					schedule_obj.update_line_items(cr, uid, [schedule_id],0)
+				
+				### Schedule Confirmation ###
+				
+				schedule_obj.entry_confirm(cr, uid, [schedule_id])
+				
+			if entry.order_priority == 'emergency' and entry.order_category in ('pump','spare','pump_spare','service'):
+				
+				### Schedule Creation ###
+				
+				schedule_item_vals = {
+												
+					'name': '',
+					'location' : entry.location,
+					'order_priority': 'emergency',
+					'delivery_date': entry.delivery_date,
+					'order_line_ids': [(6, 0, order_line_ids)],
+					'state' : 'draft',			   
+					'entry_mode' : 'auto',			   
+				}
+				
+				schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
+				
+				### Schedule Line Item Creation ###
+				
+				if item.order_category == 'pump':
+				
+					schedule_obj.update_line_items(cr, uid, [schedule_id],rem_qty)
+				else:
+					schedule_obj.update_line_items(cr, uid, [schedule_id],0)
+				
+				### Schedule Confirmation ###
+				
+				schedule_obj.entry_confirm(cr, uid, [schedule_id])
+				
+			if entry.order_priority == 'emergency' and entry.order_category in ('project'):
+				
+				### Schedule Creation ###
+				
+				schedule_item_vals = {
+												
+					'name': '',
+					'location' : entry.location,
+					'order_priority': 'emergency',
+					'delivery_date': entry.delivery_date,
+					'order_line_ids': [(6, 0, order_line_ids)],
+					'state' : 'draft',
+					'entry_mode' : 'auto',				   
+				}
+				
+				schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
+				
+				### Schedule Line Item Creation ###
+				
+				if item.order_category == 'pump':
+				
+					schedule_obj.update_line_items(cr, uid, [schedule_id],rem_qty)
+				else:
+					schedule_obj.update_line_items(cr, uid, [schedule_id],0)
 				
 				
 			cr.execute(''' select sum(unit_price) from ch_work_order_details where header_id = %s ''',[entry.id])	   
