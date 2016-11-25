@@ -203,14 +203,14 @@
 								   <field name="flag_applicable"/>
 								   <field name="pattern_id"  attrs="{'readonly': [('entry_mode','=','auto')]}"/>
 								   <field name="pattern_name" readonly="1"/>
-								   <field name="position_id" attrs="{'readonly': [('order_category','=','pump')]}"/>
+								   <field name="position_id" attrs="{'readonly': [('entry_mode','=','auto')]}"/>
 								   <field name="weight" readonly="1"/>
 <!--
 								   <field name="ci_weight" readonly="1"/>
 								   <field name="nonferous_weight" readonly="1"/>
 -->
 								   <field name="order_category" invisible="1"/>
-								   <field name="qty" required="1" attrs="{'readonly': [('order_category','=','pump')]}"/>
+								   <field name="qty" required="1" attrs="{'readonly': [('entry_mode','=','auto')]}"/>
 								   <field name="unit_price"/>
 								   <field name="schedule_qty" invisible="1"/>
 								   <field name="production_qty" invisible="1"/>
@@ -230,7 +230,7 @@
 									<field name="order_category" invisible="1"/>
 									<field name="flag_applicable"/>
 									<field name="ms_id" attrs="{'readonly': [('entry_mode','=','auto')]}"/>		
-									<field name="name" attrs="{'readonly': [('entry_mode','=','auto')]}"/>
+									<field name="name" readonly="1"/>
 									<field name="position_id" attrs="{'readonly': [('entry_mode','=','auto')]}"/>		
 									<field name="qty" attrs="{'readonly': [('order_category','=','pump')]}"/>
 									<field name="unit_price"/>
@@ -249,7 +249,7 @@
 									<field name="order_category" invisible="1"/>
 									<field name="flag_applicable"/>
 									<field name="bot_id" attrs="{'readonly': [('entry_mode','=','auto')]}"/>	
-									<field name="item_name" attrs="{'readonly': [('entry_mode','=','auto')]}"/>																			
+									<field name="item_name" readonly="1"/>																			
 									<field name="qty" attrs="{'readonly': [('order_category','=','pump')]}"/>
 									<field name="unit_price"/>
 									
