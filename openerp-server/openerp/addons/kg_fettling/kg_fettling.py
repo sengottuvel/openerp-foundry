@@ -7493,7 +7493,9 @@ class kg_batch_finish_grinding(osv.osv):
 					'employee_name': entry.employee_name,
 					'weight': entry.weight,
 					'remarks':  entry.remarks,
-					'flag_reshot_blast_applicable': entry.flag_reshot_blast_applicable
+					'flag_reshot_blast_applicable': entry.flag_reshot_blast_applicable,
+					'pattern_id': item.pattern_id.id,
+					'pattern_name': item.pattern_name
 				}
 				
 				print "vals",vals
