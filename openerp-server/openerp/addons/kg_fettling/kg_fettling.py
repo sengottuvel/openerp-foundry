@@ -7574,7 +7574,7 @@ class ch_batch_finish_grinding_line(osv.osv):
 		'finish_grinding_id':fields.many2one('kg.fettling', 'Fettling'),
 		'name': fields.related('finish_grinding_id','finish_grinding_name', type='char', string='Production Entry Code', store=True, readonly=True),
 		'order_no': fields.related('finish_grinding_id','order_no', type='char', string='WO No.', store=True, readonly=True),
-		'pattern_id': fields.related('finish_grinding_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern Number', store=True, readonly=True),
+		'pattern_id': fields.many2one('kg.pattern.master', 'Pattern Number', readonly=True),
 		'pattern_name': fields.related('finish_grinding_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
 		'moc_id': fields.related('finish_grinding_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
 		'date': fields.date('Date', store=True, required=True),
