@@ -38,6 +38,7 @@
 							<field name="uom_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" invisible="1"/>											
 							<field name="type" invisible="1"/>
 							<field name="dynamic_length" attrs="{'invisible':[('type','=','bot')]}"/>												
+							<field name="is_bearing" attrs="{'invisible':[('type','=','ms')]}"/>												
 							<field name="od" invisible="1"/>											
 							<field name="length" invisible="1"/>	
 							<field name="copy_flag" invisible="1"/>											

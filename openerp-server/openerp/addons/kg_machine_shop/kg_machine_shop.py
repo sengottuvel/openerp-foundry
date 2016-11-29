@@ -72,6 +72,7 @@ class kg_machine_shop(osv.osv):
 		'weight': fields.float('Weight'),
 		
 		'dynamic_length': fields.boolean('Dynamic Length'),			
+		'is_bearing': fields.boolean('Is Bearing'),			
 		'length_type': fields.selection([('single_column_pipe','Single Column Pipe'),('single_shaft','Single Shaft'),('delivery_pipe','Delivery Pipe'),('drive_column_pipe','Drive Column Pipe'),('pump_column_pipe','Pump Column Pipe'),('pump_shaft','Pump Shaft'),('drive_shaft','Drive Shaft')],'Length Type'),		
 		
 		'moc_const_type': fields.many2many('kg.construction.type', 'm2m_moc_construction_details', 'moc_const_id', 'const_type_id','Type', domain="[('active','=','t')]"),
