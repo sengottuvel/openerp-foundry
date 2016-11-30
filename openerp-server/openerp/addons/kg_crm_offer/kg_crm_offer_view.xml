@@ -11,9 +11,9 @@
 				<form string="CRM Offer" version="7.0" create="false" delete="false">
 					<header>
 						<button name="entry_confirm" type="object" string="Process Offer" states="draft" class="oe_highlight"/>
-						<button name="wo_creation" type="object" string="WO Creation" attrs="{'invisible':[('state','!=','moved_to_offer'),('wo_flag','=',True)]}" class="oe_highlight"/>
-						<button name="entry_revision" type="object" string="Create Revision" attrs="{'invisible': [('state','in',('wo_created'))]}" class="oe_highlight"/>
-						<button name="offer_copy" type="object" string="Offer Copy" class="oe_highlight"/>
+						<button name="wo_creation" type="object" string="WO Creation" states="moved_to_offer" class="oe_highlight"/>
+						<button name="entry_revision" type="object" string="Create Revision" states="moved_to_offer,wo_created" class="oe_highlight"/>
+						<button name="offer_copy" type="object" states="moved_to_offer,wo_created" string="Offer Copy" class="oe_highlight"/>
 					</header>
 						<group>
 							<group>
@@ -41,7 +41,7 @@
 							<field name="offer_net_amount"/>
 						</group>
 						<group string="Pump Offer">
-							<field name="line_pump_ids" colspan="4" nolabel="1">
+							<field name="line_pump_ids" colspan="4" nolabel="1" attrs="{'readonly':[('state','!=','draft')]}">
 								<tree string="Pump History" create="false" delete="false">
 									<field name="pumpseries_id" required="1"/>
 									<field name="pump_id" required="1"/>
@@ -83,7 +83,7 @@
 -->
 						</group>
 						<group string="Spare Offer">
-							<field name="line_spare_ids" colspan="4" nolabel="1">
+							<field name="line_spare_ids" colspan="4" nolabel="1" attrs="{'readonly':[('state','!=','draft')]}">
 								<tree string="Spare History" create="false" delete="false">
 									<field name="pumpseries_id" required="1"/>
 									<field name="pump_id" required="1"/>
@@ -127,7 +127,7 @@
 -->
 						</group>
 						<group string="Accessories Offer">
-							<field name="line_accessories_ids" colspan="4" nolabel="1">
+							<field name="line_accessories_ids" colspan="4" nolabel="1" attrs="{'readonly':[('state','!=','draft')]}">
 								<tree string="Accessories History" create="false" delete="false">
 									<field name="access_id" required="1" readonly="1"/>
 									<field name="pump_id" required="1" readonly="1"/>
@@ -250,6 +250,7 @@
 										<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 										<field name="item_name" attrs="{'readonly':[('load_bom','=',True)]}"/>
 										<field name="moc_id" readonly="1" required="1"/>
+										<field name="brand_id" readonly="1"/>
 										<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 										<field name="prime_cost" readonly="1"/>
 										<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
@@ -586,6 +587,8 @@
 		  <field name="prefix">CRMO/%(year)s/</field>
 		  <field name="reset_sequence">fiscal_reset</field>
 		</record>
+		
+		<!-- Service Complaint --> 
 		
 		<menuitem action="tma_crm_offer" name="Offer" id="tam_crm_offer" parent="kg_menus.cpm_crm_enquiry_menu" sequence="3"/>
 		
