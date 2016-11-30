@@ -348,8 +348,8 @@ class kg_work_order(osv.osv):
 									'order_id': entry.id,
 									'order_line_id': item.id,
 									'qty' : qc_qty,
-									'stock_qty': qc_qty,                   
-									'allocated_qty':qc_qty,                 
+									'stock_qty': qc_qty,				   
+									'allocated_qty':qc_qty,				 
 									'state' : 'draft',
 									'order_category':entry.order_category,
 									'order_priority':priority,
@@ -396,34 +396,34 @@ class kg_work_order(osv.osv):
 								
 				line_obj.write(cr, uid, item.id, {'pump_rem_qty':rem_qty})
 				
-			if entry.order_priority == 'normal' and entry.order_category in ('spare','service'):
-			
-				### Schedule Creation ###
-				
-				schedule_item_vals = {
-												
-					'name': '',
-					'location' : entry.location,
-					'order_priority': 'normal',
-					'delivery_date': entry.delivery_date,
-					'order_line_ids': [(6, 0, order_line_ids)],
-					'state' : 'draft',
-					'entry_mode' : 'auto',				   
-				}
-				
-				schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
-				
-				### Schedule Line Item Creation ###
-				
-				if item.order_category == 'pump':
-				
-					schedule_obj.update_line_items(cr, uid, [schedule_id],rem_qty)
-				else:
-					schedule_obj.update_line_items(cr, uid, [schedule_id],0)
-				
-				### Schedule Confirmation ###
-				
-				schedule_obj.entry_confirm(cr, uid, [schedule_id])
+			#~ if entry.order_priority == 'normal' and entry.order_category in ('spare','service'):
+			#~ 
+				#~ ### Schedule Creation ###
+				#~ 
+				#~ schedule_item_vals = {
+												#~ 
+					#~ 'name': '',
+					#~ 'location' : entry.location,
+					#~ 'order_priority': 'normal',
+					#~ 'delivery_date': entry.delivery_date,
+					#~ 'order_line_ids': [(6, 0, order_line_ids)],
+					#~ 'state' : 'draft',
+					#~ 'entry_mode' : 'auto',				   
+				#~ }
+				#~ 
+				#~ schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
+				#~ 
+				#~ ### Schedule Line Item Creation ###
+				#~ 
+				#~ if item.order_category == 'pump':
+				#~ 
+					#~ schedule_obj.update_line_items(cr, uid, [schedule_id],rem_qty)
+				#~ else:
+					#~ schedule_obj.update_line_items(cr, uid, [schedule_id],0)
+				#~ 
+				#~ ### Schedule Confirmation ###
+				#~ 
+				#~ schedule_obj.entry_confirm(cr, uid, [schedule_id])
 				
 			if entry.order_priority == 'emergency' and entry.order_category in ('pump','spare','pump_spare','service'):
 				
@@ -801,7 +801,9 @@ class ch_work_order_details(osv.osv):
 				if qty > 0:
 					bom_bot_qty = qty * bom_bot_details['qty']
 					
-					
+				bot_obj = self.pool.get('kg.machine.shop')
+				bot_rec = bot_obj.browse(cr, uid, bom_bot_details['bot_id'])
+				
 				bot_vals.append({
 					
 					'bot_line_id': bom_bot_details['id'],
@@ -812,6 +814,7 @@ class ch_work_order_details(osv.osv):
 					'flag_standard':flag_standard,
 					'entry_mode':'auto',
 					'order_category':order_category,
+					'flag_is_bearing': bot_rec.is_bearing
 							  
 					})
 							
@@ -1577,6 +1580,9 @@ class ch_work_order_details(osv.osv):
 							vertical_bot_qty = vertical_bot_details['qty']
 						if qty > 0:
 							vertical_bot_qty = qty * vertical_bot_details['qty']
+							
+						bot_obj = self.pool.get('kg.machine.shop')
+						bot_rec = bot_obj.browse(cr, uid, vertical_bot_details['bot_id'])
 					
 						bot_vals.append({
 							
@@ -1588,6 +1594,7 @@ class ch_work_order_details(osv.osv):
 							'flag_standard':flag_standard,
 							'entry_mode':'auto',
 							'order_category':	order_category,
+							'flag_is_bearing': bot_rec.is_bearing
 									  
 							})
 				
@@ -1891,6 +1898,8 @@ class ch_order_bot_details(osv.osv):
 		'remarks':fields.text('Remarks'),
 		'flag_standard': fields.boolean('Non Standard'),
 		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
+		'flag_is_bearing': fields.boolean('Is Bearing'),
+		'brand_id': fields.many2one('kg.brand.master','Brand'),	
 		### Offer Details ###
 		'spare_offer_line_id': fields.integer('Spare Offer'),
 	
@@ -1898,9 +1907,16 @@ class ch_order_bot_details(osv.osv):
 	
 	_defaults = {
 		
-		'entry_mode':'manual'
+		'entry_mode':'manual',
+		'flag_is_bearing': False
 		
 	}
+	
+	def onchange_bot(self, cr, uid, ids, bot_id):
+		bot_obj = self.pool.get('kg.machine.shop')
+		if bot_id:
+			bot_rec = bot_obj.browse(cr, uid, bot_id)
+		return {'value': {'flag_is_bearing': bot_rec.is_bearing}}
 	
 	def default_get(self, cr, uid, fields, context=None):
 		context.update({'entry_mode': 'manual'})

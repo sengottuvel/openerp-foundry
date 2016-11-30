@@ -47,7 +47,7 @@ class kg_schedule(osv.osv):
 		'line_ids': fields.one2many('ch.schedule.details', 'header_id', "Schedule Details"),
 		
 		'order_line_ids':fields.many2many('ch.work.order.details','m2m_work_order_details' , 'schedule_id', 'order_id', 'Work Order Lines',
-			domain="[('schedule_status','=','allow'),'&',('header_id.order_priority','=','normal'),'&',('header_id.order_category','in',('pump','pump_spare','project')),'&',('header_id.state','=','confirmed'),'&',('state','=','confirmed'),'&',('header_id.division_id','=',division_id),('header_id.location','=',location)]"),
+			domain="[('schedule_status','=','allow'),'&',('header_id.order_priority','=','normal'),'&',('header_id.order_category','in',('pump','pump_spare','project','spare','service','access')),'&',('header_id.state','=','confirmed'),'&',('state','=','confirmed'),'&',('header_id.division_id','=',division_id),('header_id.location','=',location)]"),
 		'flag_schedule': fields.boolean('Schedule'),
 		'flag_cancel': fields.boolean('Cancellation Flag'),
 		'cancel_remark': fields.text('Cancel Remarks'),
@@ -91,8 +91,8 @@ class kg_schedule(osv.osv):
 	}
 	
 	#~ _sql_constraints = [
-        #~ ('name_uniq', 'unique(name)', 'Schedule No. must be unique !!'),
-    #~ ]
+		#~ ('name_uniq', 'unique(name)', 'Schedule No. must be unique !!'),
+	#~ ]
 	
 	
 	def _future_entry_date_check(self,cr,uid,ids,context=None):
@@ -147,12 +147,6 @@ class kg_schedule(osv.osv):
 				print "order_item",order_item
 				### Creating Schedule items for Purpose Pump ###
 				for bom_item in order_item.line_ids:
-					print "bom_qty-------",bom_qty
-					print "order_item.pump_rem_qty-------",order_item.pump_rem_qty
-					print "order_item.qty-------",order_item.qty
-					print "bom_item.qty-------",bom_item.qty
-					print "order_item.order_category-------",order_item.order_category
-					print "type(bom_qty)-------",type(bom_qty)
 					if type(bom_qty) is dict:
 						if order_item.order_category == 'pump':
 							if order_item.pump_rem_qty != 0:
@@ -198,86 +192,87 @@ class kg_schedule(osv.osv):
 						order_line_obj.write(cr, uid, order_item.id, {'schedule_status':'not_allow'})		
 						tot_stock = 0
 						
-						### Checking stock exists for corresponding pattern ###
-						cr.execute(''' select sum(available_qty) as stock_qty
-							from ch_stock_inward_details  
-							where pattern_id = %s and moc_id = %s
-							and available_qty > 0 and stock_type = 'pattern'
+						if order_item.header_id.order_category != 'project':
+							### Checking stock exists for corresponding pattern ###
+							cr.execute(''' select sum(available_qty) as stock_qty
+								from ch_stock_inward_details  
+								where pattern_id = %s and moc_id = %s
+								and available_qty > 0 and stock_type = 'pattern'
+							
+							''',[bom_item.pattern_id.id
+								,bom_item.moc_id.id])
+							result_stock_qty = cr.fetchone()
+							
+							schedule_rec = schedule_line_obj.browse(cr, uid, schedule_line_id)
 						
-						''',[bom_item.pattern_id.id
-							,bom_item.moc_id.id])
-						result_stock_qty = cr.fetchone()
-						
-						schedule_rec = schedule_line_obj.browse(cr, uid, schedule_line_id)
-					
-						if result_stock_qty[0] == None:
-							stock_qty = 0
-							if schedule_rec.line_status == 'schedule':
-								line_status = 'schedule'
-							else:
-								line_status = 'schedule_alloc'
-						if result_stock_qty[0] != None:
-							if result_stock_qty[0] > 0:
-								stock_qty = result_stock_qty[0]
-								if schedule_rec.line_status == 'schedule':
-									line_status = 'schedule_alloc'
-								else:
-									line_status = 'schedule_alloc'
-							if result_stock_qty[0] == 0:
+							if result_stock_qty[0] == None:
 								stock_qty = 0
 								if schedule_rec.line_status == 'schedule':
-									line_status = 'schedule_alloc'
+									line_status = 'schedule'
 								else:
 									line_status = 'schedule_alloc'
-								
-						#### Allocation Creation When stock exists ####
-						
-						tot_stock += stock_qty
-						
+							if result_stock_qty[0] != None:
+								if result_stock_qty[0] > 0:
+									stock_qty = result_stock_qty[0]
+									if schedule_rec.line_status == 'schedule':
+										line_status = 'schedule_alloc'
+									else:
+										line_status = 'schedule_alloc'
+								if result_stock_qty[0] == 0:
+									stock_qty = 0
+									if schedule_rec.line_status == 'schedule':
+										line_status = 'schedule_alloc'
+									else:
+										line_status = 'schedule_alloc'
+									
+							#### Allocation Creation When stock exists ####
+							
+							tot_stock += stock_qty
+							
 
-						if stock_qty > 0:
-							
-							if schedule_rec.qty == stock_qty:
-								alloc_qty = schedule_rec.qty
-							if schedule_rec.qty > stock_qty:
-								alloc_qty = stock_qty
-							if schedule_rec.qty < stock_qty:
-								alloc_qty = schedule_rec.qty
-
-							if schedule_rec.order_priority == 'emergency' and order_item.header_id.order_category == 'project':
-								flag_allocate = False
-								flag_manual = True
-								allocation_qty = 0
-							elif bom_item.flag_pattern_check == True or bom_item.pattern_id.pattern_state != 'active':
-								flag_allocate = False
-								flag_manual = True
-								allocation_qty = 0
-							else:
-								flag_allocate = True
-								flag_manual = False
-								allocation_qty = alloc_qty
+							if stock_qty > 0:
 								
-							
-							allocation_item_vals = {
-													
-								'header_id': schedule_line_id,
-								'order_id': order_item.header_id.id,
-								'order_line_id': order_item.id,
-								'schedule_qty' : bom_item.schedule_qty,										
-								'qty' : allocation_qty,											
-								'stock_qty' : stock_qty,
-								'flag_allocate' : flag_allocate,			
-								'flag_manual' : flag_manual,			
-							}
-							
-							sch_qty = bom_item.qty - tot_stock
-							if sch_qty < 0:
-								sch_qty = 0
-							else:
-								sch_qty = sch_qty
-							schedule_line_obj.write(cr, uid, schedule_line_id, {'stock_qty':tot_stock,'line_status':line_status,'qty':sch_qty})
-							
-							allocation_id = allocation_line_obj.create(cr, uid, allocation_item_vals)
+								if schedule_rec.qty == stock_qty:
+									alloc_qty = schedule_rec.qty
+								if schedule_rec.qty > stock_qty:
+									alloc_qty = stock_qty
+								if schedule_rec.qty < stock_qty:
+									alloc_qty = schedule_rec.qty
+
+								if schedule_rec.order_priority == 'emergency' and order_item.header_id.order_category == 'project':
+									flag_allocate = False
+									flag_manual = True
+									allocation_qty = 0
+								elif bom_item.flag_pattern_check == True or bom_item.pattern_id.pattern_state != 'active':
+									flag_allocate = False
+									flag_manual = True
+									allocation_qty = 0
+								else:
+									flag_allocate = True
+									flag_manual = False
+									allocation_qty = alloc_qty
+									
+								
+								allocation_item_vals = {
+														
+									'header_id': schedule_line_id,
+									'order_id': order_item.header_id.id,
+									'order_line_id': order_item.id,
+									'schedule_qty' : bom_item.schedule_qty,										
+									'qty' : allocation_qty,											
+									'stock_qty' : stock_qty,
+									'flag_allocate' : flag_allocate,			
+									'flag_manual' : flag_manual,			
+								}
+								
+								sch_qty = bom_item.qty - tot_stock
+								if sch_qty < 0:
+									sch_qty = 0
+								else:
+									sch_qty = sch_qty
+								schedule_line_obj.write(cr, uid, schedule_line_id, {'stock_qty':tot_stock,'line_status':line_status,'qty':sch_qty})
+								
+								allocation_id = allocation_line_obj.create(cr, uid, allocation_item_vals)
 		
 				### Creating Schedule items for Purpose Accessories ###
 				for acc_item in order_item.line_ids_d:
@@ -384,9 +379,7 @@ class kg_schedule(osv.osv):
 									sch_qty = sch_qty
 								schedule_line_obj.write(cr, uid, schedule_line_id, {'stock_qty':tot_stock,'line_status':line_status,'qty':sch_qty})
 								
-								allocation_id = allocation_line_obj.create(cr, uid, allocation_item_vals)
-							
-							
+								allocation_id = allocation_line_obj.create(cr, uid, allocation_item_vals)			
 						
 		return True
 	   
@@ -504,8 +497,8 @@ class kg_schedule(osv.osv):
 											'order_line_id': schedule_item.order_line_id.id,
 											'pump_model_id': schedule_item.order_line_id.pump_model_id.id,
 											'qty' : qc_qty,
-											'stock_qty': qc_qty,                   
-											'allocated_qty':qc_qty,                 
+											'stock_qty': qc_qty,				   
+											'allocated_qty':qc_qty,				 
 											'state' : 'draft',
 											'order_category':schedule_item.order_id.order_category,
 											'order_priority':priority,
@@ -1112,8 +1105,8 @@ class kg_schedule(osv.osv):
 								'schedule_line_id': schedule_item.id,
 								'order_id': schedule_item.order_id.id,
 								'order_line_id': schedule_item.order_line_id.id,
-								'qty' : schedule_qty,              
-								'schedule_qty' : schedule_qty,              
+								'qty' : schedule_qty,			  
+								'schedule_qty' : schedule_qty,			  
 								'state' : 'issue_pending',
 								'order_category':schedule_item.order_id.order_category,
 								'order_priority':priority,
@@ -1169,8 +1162,8 @@ class kg_schedule(osv.osv):
 								'schedule_line_id': schedule_item.id,
 								'order_id': schedule_item.order_id.id,
 								'order_line_id': schedule_item.order_line_id.id,
-								'qty' : schedule_qty,              
-								'schedule_qty' : schedule_qty,              
+								'qty' : schedule_qty,			  
+								'schedule_qty' : schedule_qty,			  
 								'state' : 'issue_done',
 								'order_category':schedule_item.order_id.order_category,
 								'order_priority':priority,

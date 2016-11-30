@@ -23,7 +23,7 @@
 								<field name="name" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="offer_no" readonly="1"/>
 								<field name="division_id"/>
-								<field name="order_category" on_change="onchange_priority(order_category)" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+								<field name="order_category" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="partner_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="delivery_date" on_change="onchange_delivery_date(delivery_date)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 								<field name="flag_cancel" invisible="1"/>
@@ -235,8 +235,9 @@
 									<field name="qty" attrs="{'readonly': [('order_category','=','pump')]}"/>
 									<field name="unit_price"/>
 									<field name="length" readonly="1"/>
-									
+									<field name="flag_is_bearing" invisible="1"/>
 									<field name="moc_id" attrs="{'required': [('flag_applicable','!=',False)],'readonly': [('flag_standard','=',False)]}"/>
+									<field name="brand_id" attrs="{'required': [('flag_is_bearing','!=',False)]}"/>
 									<field name="remarks" widget="char"/>
 									<field name="flag_standard" invisible="1"/>
 									<field name="entry_mode" invisible="1"/>
@@ -486,7 +487,7 @@
 <!--
 			<field name="search_view_id" ref="t_search_v_work_order"/>
 -->
-			<field name="domain">[('schedule_status','in',('allow','not_allow')),('header_id.order_priority','=','normal'),('state','=','confirmed'),('header_id.order_category','in',('pump','pump_spare','project'))]</field>
+			<field name="domain">[('schedule_status','in',('allow','not_allow')),('header_id.order_priority','=','normal'),('state','=','confirmed'),('header_id.order_category','in',('pump','pump_spare','project','spare','service','access'))]</field>
 		</record>
 		
 	<!-- Menu Action End for Work Order -->
