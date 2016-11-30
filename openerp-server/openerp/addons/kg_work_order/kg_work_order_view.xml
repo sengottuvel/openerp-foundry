@@ -235,9 +235,8 @@
 									<field name="qty" attrs="{'readonly': [('order_category','=','pump')]}"/>
 									<field name="unit_price"/>
 									<field name="length" readonly="1"/>
-									<field name="flag_is_bearing" invisible="1"/>
+									
 									<field name="moc_id" attrs="{'required': [('flag_applicable','!=',False)],'readonly': [('flag_standard','=',False)]}"/>
-									<field name="brand_id" attrs="{'required': [('flag_is_bearing','!=',False)]}"/>
 									<field name="remarks" widget="char"/>
 									<field name="flag_standard" invisible="1"/>
 									<field name="entry_mode" invisible="1"/>
@@ -253,8 +252,9 @@
 									<field name="item_name" readonly="1"/>																			
 									<field name="qty" attrs="{'readonly': [('order_category','=','pump')]}"/>
 									<field name="unit_price"/>
-									
+									<field name="flag_is_bearing" invisible="1"/>
 									<field name="moc_id" attrs="{'required': [('flag_applicable','!=',False)],'readonly': [('flag_standard','=',False)]}"/>
+									<field name="brand_id" attrs="{'required': [('flag_is_bearing','!=',False)]}"/>
 									<field name="remarks" widget="char"/>
 									<field name="flag_standard" invisible="1"/>
 									<field name="entry_mode" invisible="1"/>
