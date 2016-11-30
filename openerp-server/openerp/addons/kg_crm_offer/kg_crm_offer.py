@@ -1368,6 +1368,7 @@ class kg_crm_offer(osv.osv):
 		
 		return self.write(cr, uid, ids, {'rep_data':out,'offer_copy':report_name},context=context)
 		
+			
 		
 kg_crm_offer()
 
