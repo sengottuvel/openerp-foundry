@@ -242,7 +242,7 @@
 			ref('kg_purchase_order.pam_purchase_order_line'),
 			
 			ref('kg_menus.apm_advance_menu'),
-			ref('kg_menus.aam_po_advance'),
+			
 			ref('kg_supplier_advance.tam_sup_advance'),
 			
 			ref('kg_menus.rpm_reports'),
