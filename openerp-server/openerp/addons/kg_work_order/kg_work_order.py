@@ -1018,7 +1018,7 @@ class ch_work_order_details(osv.osv):
 						  rpm,pump_model_id,rpm,pump_model_id])
 					vertical_foundry_details = cr.dictfetchall()
 					
-					if order_category == 'pump' :
+					if order_category in ('pump','spare') :
 						for vertical_foundry in vertical_foundry_details:
 							
 							if order_category == 'pump' :
