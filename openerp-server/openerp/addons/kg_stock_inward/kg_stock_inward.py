@@ -98,7 +98,6 @@ class kg_stock_inward(osv.osv):
        
 
 	def entry_confirm(self,cr,uid,ids,context=None):
-		
 		inward_line_obj = self.pool.get('ch.stock.inward.details')
 		
 		today = date.today()
@@ -107,6 +106,14 @@ class kg_stock_inward(osv.osv):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'draft':
 			for line_item in entry.line_ids:
+				
+				if line_item.serial_no != False:
+					cr.execute(''' select id from ch_stock_inward_details where
+						serial_no = %s and id != %s ''',[line_item.serial_no, line_item.id])
+					duplicate_id = cr.fetchone()
+					if duplicate_id:
+						raise osv.except_osv(_('Warning!'),
+						_('Serial No. must be Unique. Kindly check !!'))
 				
 				inward_line_obj.write(cr, uid, [line_item.id], {'available_qty':line_item.qty})
 						
@@ -215,10 +222,15 @@ class ch_stock_inward_details(osv.osv):
 		
 	}
 		
-	def onchange_stock_qty(self, cr, uid, ids, pattern_id,moc_id,qty,each_wgt,unit_price, context=None):
+	def onchange_stock_qty(self, cr, uid, ids, pattern_id,moc_id,qty,each_wgt,unit_price,stock_type, context=None):
 		mat_amt = 0.00
 		pattern_name = False
 		
+		if stock_type == 'pump':
+			stock_qty = 1.0
+		else:
+			stock_qty = qty
+		print "stock_qty-----------------------",stock_qty
 		if pattern_id != False:
 			pattern_rec = self.pool.get('kg.pattern.master').browse(cr, uid, pattern_id, context=context)
 			pattern_name = pattern_rec.pattern_name
@@ -228,13 +240,14 @@ class ch_stock_inward_details(osv.osv):
 		else:
 			mat_amt = unit_price
 			
-		total_weight = qty * each_wgt or 0.00
+		total_weight = stock_qty * each_wgt or 0.00
 		total_value = total_weight * mat_amt
 		value = {
 		'pattern_name': pattern_name,
 		'unit_price': mat_amt,
 		'total_wgt': total_weight,
-		'total_value': total_value
+		'total_value': total_value,
+		'qty': stock_qty
 		
 		}
 		return {'value': value}
@@ -256,21 +269,22 @@ class ch_stock_inward_details(osv.osv):
 			return False
 		return True
 		
-		
+	
 	def create(self, cr, uid, vals, context=None):
 		inward_obj = self.pool.get('kg.stock.inward')
 		pattern_name = False
 		pattern_obj = self.pool.get('kg.pattern.master')
 		moc_obj = self.pool.get('kg.moc.master')
+		
 		if vals.get('moc_id') > 0:
 			moc_rec = moc_obj.browse(cr, uid, vals.get('moc_id') )
-			mat_amt = moc_rec.rate
+			mat_amt = moc_rec.rate or 0.00
 		else:
-			mat_amt = vals.get('unit_price')
+			mat_amt = vals.get('unit_price') or 0.00
 		qty = vals.get('qty')
 		each_weight = vals.get('each_wgt')
 		total_weight = qty * each_weight
-		total_value = total_weight * mat_amt
+		total_value = total_weight * mat_amt or 0.00
 		vals.update({
 		
 		'each_wgt': each_weight,

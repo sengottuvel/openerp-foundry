@@ -46,11 +46,12 @@
 							
 							<field name="diameter" invisible="1"/>
 							<field name="reject_remarks_id" attrs="{'readonly': [('state','not in',['draft'])]}"/>
-							<field name="sent_to" attrs="{'invisible': [('stock_type','=','pattern')], 'readonly': [('state','not in',['draft'])],'required': [('stock_type','=','pump')]}"/>
+							<field name="serial_no" readonly="1" attrs="{'invisible': [('stock_type','!=','pump')]}"/>
 						</group>											
 						<group>
 							<field name="allocated_qty" readonly="1"/>
 							<field name="reject_qty" readonly="1"/>
+							<field name="sent_to" attrs="{'readonly': [('state','not in',['draft'])],'required': [('stock_type','=','pump')]}"/>
 							<field name="rework_qty" invisible="1"/>
 							<field name="position_no" invisible="1"/>
 							<field name="remark" attrs="{'readonly': [('state','not in',['draft'])]}"/>
