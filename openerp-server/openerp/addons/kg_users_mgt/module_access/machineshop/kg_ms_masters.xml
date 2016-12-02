@@ -63,6 +63,46 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Machineshop Master Admin')]"/>
 		</record>
 		
+			<!-- Machinery Master start -->
+		
+		<record id="m_ms_kg_machinery_master" model="ir.model.access">
+			<field name="model_id" ref="kg_machinery_master.model_kg_machinery_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Machinery</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Machineshop Master Admin')]"/>
+		</record>
+		
+		
+		<record id="m_ms_ch_efficiency" model="ir.model.access">
+			<field name="model_id" ref="kg_machinery_master.model_ch_efficiency"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Efficiency</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Machineshop Master Admin')]"/>
+		</record>
+		
+		<!-- Machinery Master end -->
+		
+		
+		<!-- Packing Type Master start -->
+		
+		<record id="m_ms_kg_packing_type" model="ir.model.access">
+			<field name="model_id" ref="kg_packing_type.model_kg_packing_type"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Packing Type</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Machineshop Master Admin')]"/>
+		</record>
+		
+		<!-- Packing Type Master end -->
+		
 	
     </data>
 </openerp>		
