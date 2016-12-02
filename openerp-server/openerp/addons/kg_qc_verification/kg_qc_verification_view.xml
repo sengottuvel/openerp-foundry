@@ -51,7 +51,7 @@
 						<group>
 							<field name="allocated_qty" readonly="1"/>
 							<field name="reject_qty" readonly="1"/>
-							<field name="sent_to" attrs="{'readonly': [('state','not in',['draft'])],'required': [('stock_type','=','pump')]}"/>
+							<field name="sent_to" attrs="{'readonly': [('state','not in',['draft'])],'required': [('stock_type','=','pump'),('qty','!=',0)]}"/>
 							<field name="rework_qty" invisible="1"/>
 							<field name="position_no" invisible="1"/>
 							<field name="remark" attrs="{'readonly': [('state','not in',['draft'])]}"/>
