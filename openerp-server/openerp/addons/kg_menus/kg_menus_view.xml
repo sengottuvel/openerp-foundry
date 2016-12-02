@@ -168,9 +168,6 @@
 				<!-- Transport Master  --> 
 				<menuitem action="kg_transport.transport_action_form" name="Transport" id="mam_transport_master" parent="ppm_master_menu" sequence="12"/>
 				
-				<!-- Brand/Moc/Rate-Purchase Master  --> 
-				<menuitem action="kg_brandmoc_rate.mma_brandmocrate_purchase_master" name="Brand/Moc/Rate-Purchase" id="mam_brandmocrate_purchase_master" parent="ppm_master_menu" sequence="13"/>
-				 
 				<!-- Expense Master  --> 
 				<menuitem action="kg_expense_master.mma_expense_master" name="Expense Master" id="mam_expense_master" parent="ppm_master_menu" sequence="14"/>
 				 
