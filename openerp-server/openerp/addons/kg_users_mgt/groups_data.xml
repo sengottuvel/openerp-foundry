@@ -399,8 +399,7 @@
         <field eval="[(6,0,[
        
 			ref('kg_operation_master.mpm_crm'),			
-			ref('kg_operation_master.mpm_ms_master_menu'),
-			ref('kg_operation_master.mam_operation_master_menu'),
+			ref('kg_operation_master.mpm_ms_master_menu'),			
 			ref('kg_dimension_master.mam_dimension_master_menu'),
 			ref('kg_position_number.mam_position_number_menu'),			
 			ref('kg_machinery_master.mam_machinery_master'),

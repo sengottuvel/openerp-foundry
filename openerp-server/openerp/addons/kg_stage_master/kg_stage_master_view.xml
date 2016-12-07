@@ -19,7 +19,7 @@
 					<group>
 						<group>						
 							<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
-							<field name="category" />								
+							<field name="category" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" />								
 							<!--<field name="stage_seq_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>-->
 							<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 						</group>

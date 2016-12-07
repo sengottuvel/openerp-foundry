@@ -149,9 +149,9 @@ class kg_stage_master(osv.osv):
 
 	def entry_confirm(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if not rec.line_ids:
+		if not rec.line_ids and rec.category == 'fettling':
 			raise osv.except_osv(_('Rate details !!'),
-				_('Enter the Rate details tap !!'))
+				_('Enter the Rate details tab !!'))
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 		
@@ -160,6 +160,10 @@ class kg_stage_master(osv.osv):
 		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if not rec.line_ids and rec.category == 'fettling':
+			raise osv.except_osv(_('Rate details !!'),
+				_('Enter the Rate details tab !!'))
 		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
@@ -208,7 +212,7 @@ class ch_stage_fettling(osv.osv):
 	_columns = {
 			
 		'header_id':fields.many2one('kg.stage.master', 'Stage Entry', required=True, ondelete='cascade'),							
-		'moc_cate_id': fields.many2one('kg.moc.category','Name', required=True,domain="[('state','not in',('reject','cancel')),('type_moc_cate','=','fettling')]"),	
+		'moc_cate_id': fields.many2one('kg.moc.category','Fettling MOC category', required=True,domain="[('state','not in',('reject','cancel')),('type_moc_cate','=','fettling')]"),	
 		'min_val':fields.integer('Min Value(KG.)',required=True),
 		'max_val':fields.integer('Max Value(KG.)',required=True),
 		'rate':fields.float('Rate',required=True),

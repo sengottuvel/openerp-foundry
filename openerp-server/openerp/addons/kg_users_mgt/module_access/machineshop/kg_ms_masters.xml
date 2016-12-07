@@ -3,6 +3,7 @@
 <data noupdate="0">       
 
        
+<!--
         <record id="m_ms_operation_master" model="ir.model.access">
 			<field name="model_id" ref="kg_operation_master.model_kg_operation_master"/>
 			<field eval="1" name="perm_read"/>
@@ -12,6 +13,7 @@
 			<field eval="1" name="perm_create"/>
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Machineshop Master Admin')]"/>
 		</record>
+-->
 		
         <record id="m_ms_dimension_master" model="ir.model.access">
 			<field name="model_id" ref="kg_dimension_master.model_kg_dimension_master"/>
@@ -102,6 +104,83 @@
 		</record>
 		
 		<!-- Packing Type Master end -->
+		
+		<!-- QAP Plan Master start -->
+		
+		<record id="m_ms_kg_qap_plan" model="ir.model.access">
+			<field name="model_id" ref="kg_qap_plan.model_kg_qap_plan"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">QAP Plan</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Machineshop Master Admin')]"/>
+		</record>
+		
+		<record id="m_ms_ch_dynamic_balancing" model="ir.model.access">
+			<field name="model_id" ref="kg_qap_plan.model_ch_dynamic_balancing"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">QAP Dynamic Balancing</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Machineshop Master Admin')]"/>
+		</record>
+		
+		<record id="m_ms_ch_hydro_pressure" model="ir.model.access">
+			<field name="model_id" ref="kg_qap_plan.model_ch_hydro_pressure"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">QAP Hydro Pressure</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Machineshop Master Admin')]"/>
+		</record>
+		
+		<record id="m_ms_ch_dimentional_inspection" model="ir.model.access">
+			<field name="model_id" ref="kg_qap_plan.model_ch_dimentional_inspection"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">QAP Dimentional Inspection</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Machineshop Master Admin')]"/>
+		</record>
+		
+		
+		<record id="m_ms_ch_dimentional_details" model="ir.model.access">
+			<field name="model_id" ref="kg_qap_plan.model_ch_dimentional_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">QAP Dimentional Details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Machineshop Master Admin')]"/>
+		</record>
+		
+		<record id="m_ms_ch_painting" model="ir.model.access">
+			<field name="model_id" ref="kg_qap_plan.model_ch_painting"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">QAP Painting</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Machineshop Master Admin')]"/>
+		</record>
+		
+		<record id="m_ms_ch_packing" model="ir.model.access">
+			<field name="model_id" ref="kg_qap_plan.model_ch_packing"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">QAP Packing</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Machineshop Master Admin')]"/>
+		</record>
+		
+		
+		
+		<!-- QAP Plan Master end -->
 		
 	
     </data>
