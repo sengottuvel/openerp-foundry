@@ -773,6 +773,22 @@ class ch_work_order_details(osv.osv):
 				else:
 					pos_no = bom_ms_details['pos_no']
 					
+				### Loading MOC from MOC Construction
+				
+				if moc_construction_id != False:
+					
+					cr.execute(''' select machine_moc.moc_id
+						from ch_machine_mocwise machine_moc
+						LEFT JOIN kg_moc_construction const on const.code = machine_moc.code
+						where machine_moc.header_id = %s and const.id = %s ''',[bom_ms_details['ms_id'],moc_construction_id])
+					const_moc_id = cr.fetchone()
+					if const_moc_id != None:
+						moc_id = const_moc_id[0]
+					else:
+						moc_id = False
+				else:
+					moc_id = False
+					
 				machine_shop_vals.append({
 					
 					'pos_no': bom_ms_details['pos_no'],
@@ -785,6 +801,7 @@ class ch_work_order_details(osv.osv):
 					'flag_standard':flag_standard,
 					'entry_mode':'auto',
 					'order_category':	order_category,
+					'moc_id': moc_id,
 							  
 					})
 					
@@ -804,6 +821,22 @@ class ch_work_order_details(osv.osv):
 				bot_obj = self.pool.get('kg.machine.shop')
 				bot_rec = bot_obj.browse(cr, uid, bom_bot_details['bot_id'])
 				
+				### Loading MOC from MOC Construction
+				
+				if moc_construction_id != False:
+					
+					cr.execute(''' select bot_moc.moc_id
+						from ch_machine_mocwise bot_moc
+						LEFT JOIN kg_moc_construction const on const.code = bot_moc.code
+						where bot_moc.header_id = %s and const.id = %s ''',[bom_bot_details['bot_id'],moc_construction_id])
+					const_moc_id = cr.fetchone()
+					if const_moc_id != None:
+						moc_id = const_moc_id[0]
+					else:
+						moc_id = False
+				else:
+					moc_id = False
+				
 				bot_vals.append({
 					
 					'bot_line_id': bom_bot_details['id'],
@@ -814,7 +847,8 @@ class ch_work_order_details(osv.osv):
 					'flag_standard':flag_standard,
 					'entry_mode':'auto',
 					'order_category':order_category,
-					'flag_is_bearing': bot_rec.is_bearing
+					'flag_is_bearing': bot_rec.is_bearing,
+					'moc_id': moc_id,
 							  
 					})
 							
@@ -1211,6 +1245,22 @@ class ch_work_order_details(osv.osv):
 					vertical_ms_details = cr.dictfetchall()
 					for vertical_ms_details in vertical_ms_details:
 						
+						### Loading MOC from MOC Construction
+				
+						if moc_construction_id != False:
+							
+							cr.execute(''' select machine_moc.moc_id
+								from ch_machine_mocwise machine_moc
+								LEFT JOIN kg_moc_construction const on const.code = machine_moc.code
+								where machine_moc.header_id = %s and const.id = %s ''',[vertical_ms_details['ms_id'],moc_construction_id])
+							const_moc_id = cr.fetchone()
+							if const_moc_id != None:
+								moc_id = const_moc_id[0]
+							else:
+								moc_id = False
+						else:
+							moc_id = False
+						
 							
 						if vertical_ms_details['pos_no'] == None:
 							pos_no = 0
@@ -1456,6 +1506,7 @@ class ch_work_order_details(osv.osv):
 							'flag_standard':flag_standard,
 							'entry_mode':'auto',
 							'order_category':	order_category,
+							'moc_id': moc_id
 									  
 							})
 					
@@ -1576,6 +1627,23 @@ class ch_work_order_details(osv.osv):
 					vertical_bot_details = cr.dictfetchall()
 					
 					for vertical_bot_details in vertical_bot_details:
+						
+						### Loading MOC from MOC Construction
+				
+						if moc_construction_id != False:
+							
+							cr.execute(''' select bot_moc.moc_id
+								from ch_machine_mocwise bot_moc
+								LEFT JOIN kg_moc_construction const on const.code = bot_moc.code
+								where bot_moc.header_id = %s and const.id = %s ''',[vertical_bot_details['bot_id'],moc_construction_id])
+							const_moc_id = cr.fetchone()
+							if const_moc_id != None:
+								moc_id = const_moc_id[0]
+							else:
+								moc_id = False
+						else:
+							moc_id = False
+						
 						if qty == 0:
 							vertical_bot_qty = vertical_bot_details['qty']
 						if qty > 0:
@@ -1594,7 +1662,8 @@ class ch_work_order_details(osv.osv):
 							'flag_standard':flag_standard,
 							'entry_mode':'auto',
 							'order_category':	order_category,
-							'flag_is_bearing': bot_rec.is_bearing
+							'flag_is_bearing': bot_rec.is_bearing,
+							'moc_id': moc_id
 									  
 							})
 				
