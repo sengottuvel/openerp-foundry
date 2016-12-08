@@ -404,7 +404,7 @@ class kg_crm_enquiry(osv.osv):
 					bom = ''
 					purpose_categ = 'pump'
 					primecost_vals = per_pump_prime_cost = 0.00
-					primecost_vals = self._prepare_primecost(cr,uid,item,catg,bom,purpose_categ)
+					primecost_vals = self._prepare_primecost(cr,uid,item,catg,bom,purpose_categ,offer_id)
 					print"primecost_valsprimecost_vals",primecost_vals
 					if primecost_vals != 0 and item.qty != 0:
 						per_pump_prime_cost = primecost_vals / item.qty
@@ -429,8 +429,9 @@ class kg_crm_enquiry(osv.osv):
 							if item_1.is_applicable == True:
 								bom = 'fou'
 								purpose_categ = 'spare'
-								primecost_vals = self._prepare_primecost(cr,uid,item,catg,bom,purpose_categ)
+								primecost_vals = self._prepare_primecost(cr,uid,item,catg,bom,purpose_categ,offer_id)
 								print"spare_primecost_vals",primecost_vals
+								
 								spare_id = self.pool.get('ch.spare.offer').create(cr,uid,{
 																				'header_id': offer_id,
 																				'pumpseries_id': item.spare_pumpseries_id.id,
@@ -444,52 +445,48 @@ class kg_crm_enquiry(osv.osv):
 																				'moc_id': item_1.moc_id.id,
 																				'qty': item_1.qty,
 																				})
+								
 							
 					if item.line_ids_a:
-						for item_1 in item.line_ids_a:
-							primecost_vals = 0.00
-							if item_1.is_applicable == True:
-								bom = 'ms'
-								purpose_categ = 'spare'
-								primecost_vals = self._prepare_primecost(cr,uid,item,catg,bom,purpose_categ)
-								print"spare_primecost_vals",primecost_vals
-								if item_1.is_applicable == True:
-									spare_id = self.pool.get('ch.spare.offer').create(cr,uid,{
-																					'header_id': offer_id,
-																					'pumpseries_id': item.spare_pumpseries_id.id,
-																					'pump_id': item.spare_pump_id.id,
-																					'moc_const_id': item.spare_moc_const_id.id,
-																					'prime_cost': primecost_vals,
-																					'enquiry_line_id': item.id,
-																					'item_code': item_1.ms_id.code,
-																					'item_name': item_1.ms_id.name,
-																					'ms_id': item_1.ms_id.id,
-																					'moc_id': item_1.moc_id.id,
-																					'qty': item_1.qty,
-																					})
+						#~ for item_1 in item.line_ids_a:
+						primecost_vals = 0.00
+						#~ if item_1.is_applicable == True:
+						bom = 'ms'
+						purpose_categ = 'spare'
+						#~ spare_id = self.pool.get('ch.spare.offer').create(cr,uid,{
+																		#~ 'header_id': offer_id,
+																		#~ 'pumpseries_id': item.spare_pumpseries_id.id,
+																		#~ 'pump_id': item.spare_pump_id.id,
+																		#~ 'moc_const_id': item.spare_moc_const_id.id,
+																		#~ 'prime_cost': primecost_vals,
+																		#~ 'enquiry_line_id': item.id,
+																		#~ 'item_code': item_1.ms_id.code,
+																		#~ 'item_name': item_1.ms_id.name,
+																		#~ 'ms_id': item_1.ms_id.id,
+																		#~ 'moc_id': item_1.moc_id.id,
+																		#~ 'qty': item_1.qty,
+																		#~ })
+						primecost_vals = self._prepare_primecost(cr,uid,item,catg,bom,purpose_categ,offer_id)
 					if item.line_ids_b:
-						for item_1 in item.line_ids_b:
-							primecost_vals = 0.00
-							if item_1.is_applicable == True:
-								bom = 'bot'
-								purpose_categ = 'spare'
-								primecost_vals = self._prepare_primecost(cr,uid,item,catg,bom,purpose_categ)
-								print"spare_primecost_vals",primecost_vals
-								if item_1.is_applicable == True:
-									spare_id = self.pool.get('ch.spare.offer').create(cr,uid,{
-																					'header_id': offer_id,
-																					'pumpseries_id': item.spare_pumpseries_id.id,
-																					'pump_id': item.spare_pump_id.id,
-																					'moc_const_id': item.spare_moc_const_id.id,
-																					'prime_cost': primecost_vals,
-																					'enquiry_line_id': item.id,
-																					'item_code': item_1.ms_id.code,
-																					'item_name': item_1.ms_id.name,
-																					'bot_id': item_1.ms_id.id,
-																					'moc_id': item_1.moc_id.id,
-																					'qty': item_1.qty,
-																					})
-					
+						#~ for item_1 in item.line_ids_b:
+						primecost_vals = 0.00
+						#~ if item_1.is_applicable == True:
+						bom = 'bot'
+						purpose_categ = 'spare'
+						#~ spare_id = self.pool.get('ch.spare.offer').create(cr,uid,{
+																		#~ 'header_id': offer_id,
+																		#~ 'pumpseries_id': item.spare_pumpseries_id.id,
+																		#~ 'pump_id': item.spare_pump_id.id,
+																		#~ 'moc_const_id': item.spare_moc_const_id.id,
+																		#~ 'prime_cost': item_1.prime_cost,
+																		#~ 'enquiry_line_id': item.id,
+																		#~ 'item_code': item_1.ms_id.code,
+																		#~ 'item_name': item_1.ms_id.name,
+																		#~ 'bot_id': item_1.ms_id.id,
+																		#~ 'moc_id': item_1.moc_id.id,
+																		#~ 'qty': item_1.qty,
+																		#~ })
+						primecost_vals = self._prepare_primecost(cr,uid,item,catg,bom,purpose_categ,offer_id)
 				if item.acces == 'yes':
 					ite = item
 					pump_id = ''
@@ -505,7 +502,7 @@ class kg_crm_enquiry(osv.osv):
 							per_access_prime_cost = 0.00
 							catg='acc'
 							bom = ''
-							primecost_vals = self._prepare_primecost(cr,uid,item,catg,bom,purpose_categ)
+							primecost_vals = self._prepare_primecost(cr,uid,item,catg,bom,purpose_categ,offer_id)
 							print"primecost_valsprimecost_vals====access=======",primecost_vals
 							if primecost_vals != 0 and item.qty != 0:
 								per_access_prime_cost = primecost_vals / item.qty
@@ -532,7 +529,7 @@ class kg_crm_enquiry(osv.osv):
 								})
 		return True
 	
-	def _prepare_primecost(self,cr,uid,item,catg,bom,purpose_categ,context=None):
+	def _prepare_primecost(self,cr,uid,item,catg,bom,purpose_categ,offer_id,context=None):
 		
 		#~ for item in entry.ch_line_ids:
 		
@@ -619,6 +616,9 @@ class kg_crm_enquiry(osv.osv):
 						self.pool.get('ch.kg.crm.foundry.item').write(cr,uid,fou_line.id,{'prime_cost': design_rate * qty})
 					elif catg == 'acc':
 						self.pool.get('ch.crm.access.fou').write(cr,uid,fou_line.id,{'prime_cost': design_rate * qty})
+					else:
+						pass
+					
 					pat_amt += design_rate * qty
 					print"pat_amtpat_amtpat_amt",pat_amt
 		prime_cost_1 = pat_amt 
@@ -671,26 +671,43 @@ class kg_crm_enquiry(osv.osv):
 											qty = raw_line.weight
 									elif raw_line.product_id.uom_conversation_factor == 'two_dimension':
 										qty = raw_line.weight
-									#~ if catg == 'non_acc':
-										#~ self.pool.get('ch.kg.crm.machineshop.item').write(cr,uid,ms_line.id,{'prime_cost':design_rate * qty * ms_line.qty})
-									#~ elif catg == 'acc':
-										#~ self.pool.get('ch.crm.access.ms').write(cr,uid,ms_line.id,{'prime_cost': design_rate * qty * ms_line.qty})
 									price = design_rate * qty
 								else:
-									qty = 0
+									qty = design_rate = price = 0
 								tot_price += price
+								if catg == 'non_acc':
+									self.pool.get('ch.kg.crm.machineshop.item').write(cr,uid,ms_line.id,{'prime_cost': tot_price * ms_line.qty})
+								elif catg == 'acc':
+									self.pool.get('ch.crm.access.ms').write(cr,uid,ms_line.id,{'prime_cost': tot_price * ms_line.qty})
+								else:
+									pass
+						if item.purpose_categ == 'spare' and catg == 'non_acc':
+								spare_id = self.pool.get('ch.spare.offer').create(cr,uid,{
+																'header_id': offer_id,
+																'pumpseries_id': item.spare_pumpseries_id.id,
+																'pump_id': item.spare_pump_id.id,
+																'moc_const_id': item.spare_moc_const_id.id,
+																'prime_cost': tot_price * ms_line.qty,
+																'enquiry_line_id': item.id,
+																'item_code': ms_line.ms_id.code,
+																'item_name': ms_line.ms_id.name,
+																'ms_id': ms_line.ms_id.id,
+																'moc_id': ms_line.moc_id.id,
+																'qty': ms_line.qty,
+																})
+																
 				ms_price += tot_price * ms_line.qty
-				if catg == 'non_acc':
-					self.pool.get('ch.kg.crm.machineshop.item').write(cr,uid,ms_line.id,{'prime_cost': design_rate * qty * ms_line.qty})
-				elif catg == 'acc':
-					self.pool.get('ch.crm.access.ms').write(cr,uid,ms_line.id,{'prime_cost': design_rate * qty * ms_line.qty})
+				#~ if catg == 'non_acc':
+					#~ self.pool.get('ch.kg.crm.machineshop.item').write(cr,uid,ms_line.id,{'prime_cost': design_rate * qty * ms_line.qty})
+				#~ elif catg == 'acc':
+					#~ self.pool.get('ch.crm.access.ms').write(cr,uid,ms_line.id,{'prime_cost': design_rate * qty * ms_line.qty})
 			print"ms_pricems_price",ms_price
 		if bom == 'ms' and purpose_categ == 'spare' and catg == 'non_acc':
 			primecost_vals = ms_price
 			return primecost_vals
 			
 		# BOT Item 
-		 
+		
 		bot_price = 0.00
 		for bot_line in bom_bot_line_id:
 			if bot_line.is_applicable == True:
@@ -720,9 +737,14 @@ class kg_crm_enquiry(osv.osv):
 								brandmoc_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',raw_line.product_id.id),('state','=','approved')])
 								if brandmoc_obj:
 									brandmoc_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,brandmoc_obj[0])
-									brandmoc_line_sql = """ select rate from ch_brandmoc_rate_details where moc_id =  %s and header_id = %s order by rate desc limit 1"""%(moc_id,brandmoc_rec.id)
-									cr.execute(brandmoc_line_sql)		
-									brandmoc_line_data = cr.dictfetchall()
+									if bot_line.brand_id.id:
+										brandmoc_line_sql = """ select rate from ch_brandmoc_rate_details where moc_id =  %s and header_id = %s and brand_id = %s order by rate desc limit 1"""%(moc_id,brandmoc_rec.id,bot_line.brand_id.id)
+										cr.execute(brandmoc_line_sql)		
+										brandmoc_line_data = cr.dictfetchall()
+									else:
+										brandmoc_line_sql = """ select rate from ch_brandmoc_rate_details where moc_id =  %s and header_id = %s order by rate desc limit 1"""%(moc_id,brandmoc_rec.id)
+										cr.execute(brandmoc_line_sql)		
+										brandmoc_line_data = cr.dictfetchall()
 									if brandmoc_line_data:
 										design_rate = brandmoc_line_data[0]['rate']
 										if raw_line.product_id.uom_conversation_factor == 'one_dimension':
@@ -732,54 +754,45 @@ class kg_crm_enquiry(osv.osv):
 												qty = raw_line.weight
 										elif raw_line.product_id.uom_conversation_factor == 'two_dimension':
 											qty = raw_line.weight
-										#~ if catg == 'non_acc':
-											#~ self.pool.get('ch.kg.crm.bot').write(cr,uid,bot_line.id,{'prime_cost':design_rate * qty * bot_line.qty})		
-										#~ elif catg == 'acc':
-											#~ self.pool.get('ch.crm.access.bot').write(cr,uid,bot_line.id,{'prime_cost': design_rate * qty * bot_line.qty})
 										price = design_rate * qty
 									else:
-										qty = 0
+										qty = design_rate = price = 0
 									tot_price += price
+									print"********************************",tot_price * bot_line.qty
+									print"**************item.purpose_categ******************",item.purpose_categ
+									if catg == 'non_acc':
+										self.pool.get('ch.kg.crm.bot').write(cr,uid,bot_line.id,{'prime_cost': tot_price * bot_line.qty})		
+									elif catg == 'acc':
+										self.pool.get('ch.crm.access.bot').write(cr,uid,bot_line.id,{'prime_cost': tot_price * bot_line.qty})
+									else:
+										pass
+							if item.purpose_categ == 'spare' and catg == 'non_acc':
+								spare_id = self.pool.get('ch.spare.offer').create(cr,uid,{
+																'header_id': offer_id,
+																'pumpseries_id': item.spare_pumpseries_id.id,
+																'pump_id': item.spare_pump_id.id,
+																'moc_const_id': item.spare_moc_const_id.id,
+																'prime_cost': tot_price * bot_line.qty,
+																'enquiry_line_id': item.id,
+																'item_code': bot_line.ms_id.code,
+																'item_name': bot_line.ms_id.name,
+																'bot_id': bot_line.ms_id.id,
+																'moc_id': bot_line.moc_id.id,
+																'qty': bot_line.qty,
+																})
 					bot_price += tot_price * bot_line.qty
-					if catg == 'non_acc':
-						self.pool.get('ch.kg.crm.bot').write(cr,uid,bot_line.id,{'prime_cost': design_rate * qty * bot_line.qty})		
-					elif catg == 'acc':
-						self.pool.get('ch.crm.access.bot').write(cr,uid,bot_line.id,{'prime_cost': design_rate * qty * bot_line.qty})
+					#~ if catg == 'non_acc':
+						#~ self.pool.get('ch.kg.crm.bot').write(cr,uid,bot_line.id,{'prime_cost': design_rate * qty * bot_line.qty})		
+					#~ elif catg == 'acc':
+						#~ self.pool.get('ch.crm.access.bot').write(cr,uid,bot_line.id,{'prime_cost': design_rate * qty * bot_line.qty})
 					print"bot_pricebot_price",bot_price
-						
-				#~ elif catg == 'acc':
-					#~ 
-					#~ for raw_line in item.line_ids_b:
-						#~ moc_id = item.moc_id.id
-						#~ brandmoc_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',raw_line.product_id.id),('state','=','approved')])
-						#~ if brandmoc_obj:
-							#~ brandmoc_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,brandmoc_obj[0])
-							#~ brandmoc_line_sql = """ select rate from ch_brandmoc_rate_details where moc_id =  %s and header_id = %s order by rate desc limit 1"""%(moc_id,brandmoc_rec.id)
-							#~ cr.execute(brandmoc_line_sql)		
-							#~ brandmoc_line_data = cr.dictfetchall()
-							#~ if brandmoc_line_data:
-								#~ design_rate = brandmoc_line_data[0]['rate']
-								#~ if raw_line.product_id.uom_conversation_factor == 'one_dimension':
-									#~ if raw_line.uom_id.id == brandmoc_rec.uom_id.id:
-										#~ qty = raw_line.qty
-									#~ elif raw_line.uom_id.id != brandmoc_rec.uom_id.id:
-										#~ qty = raw_line.weight
-								#~ elif raw_line.product_id.uom_conversation_factor == 'two_dimension':
-									#~ qty = raw_line.weight
-								#~ if catg == 'acc':
-									#~ self.pool.get('ch.crm.access.bot').write(cr,uid,bot_line.id,{'prime_cost': design_rate * qty})
-								#~ price = design_rate * qty
-							#~ tot_price += price
-					#~ bot_price += tot_price 
-					#~ print"bot_pricebot_price",bot_price
+					
 		print"prime_cost",prime_cost
 		print"ms_price",ms_price
 		print"bot_price",bot_price
-		if bom == 'bot' and purpose_categ == 'spare' and catg == 'non_acc':
-			primecost_vals = bot_price
-			return primecost_vals
-		d= prime_cost + ms_price + bot_price
-		print"ddddddddddddddddddddddDD",d
+		#~ if bom == 'bot' and purpose_categ == 'spare' and catg == 'non_acc':
+			#~ primecost_vals = bot_price
+			#~ return primecost_vals
 		if catg == 'non_acc':
 			if item.purpose_categ == 'pump':
 				item_qty = item.qty
@@ -1214,6 +1227,13 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		ms_vals=[]
 		bot_vals=[]
 		data_rec = ''
+		if not moc_const_id and purpose_categ == 'pump' and load_bom == True:
+			raise osv.except_osv(_('Warning!'),
+				_('System sholud not be accept without MOC Construction'))
+		if not spare_moc_const_id and purpose_categ == 'spare' and spare_load_bom == True:
+			raise osv.except_osv(_('Warning!'),
+				_('System sholud not be accept without MOC Construction'))
+		
 		print"spare_pump_id",spare_pump_id
 		print"pump_id",pump_id
 		print"load_bom",load_bom
@@ -1326,6 +1346,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 										'qty': item.qty,
 										'load_bom': True,
 										'is_applicable': False,
+										'flag_is_bearing': bot_rec.is_bearing,
 										#~ 'position_id': item.position_id.id,
 										#~ 'remarks': item.remarks,
 										})
@@ -1407,6 +1428,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 										'qty': item.qty,
 										'load_bom': True,
 										'is_applicable': True,
+										'flag_is_bearing': bot_rec.is_bearing,
 										#~ 'position_id': item.position_id.id,
 										#~ 'remarks': item.remarks,
 										})
@@ -1762,7 +1784,6 @@ class ch_kg_crm_machineshop_item(osv.osv):
 		'ms_id':fields.many2one('kg.machine.shop', 'Item Code', domain=[('type','=','ms')], ondelete='cascade',required=True),
 		'name': fields.related('ms_id','name', type='char',size=128,string='Item Name', store=True),
 		#~ 'ms_line_id':fields.many2one('ch.machineshop.details', 'Item Name'),
-		'name':fields.char('Item Name', size=128),	  
 		'qty': fields.integer('Qty', required=True),
 		'flag_applicable': fields.boolean('Is Applicable'),
 		#'order_category': fields.related('header_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
@@ -1823,6 +1844,8 @@ class ch_kg_crm_bot(osv.osv):
 		'load_bom': fields.boolean('Load BOM'),
 		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),
 		'prime_cost': fields.float('Prime Cost'),
+		'brand_id': fields.many2one('kg.brand.master','Brand '),
+		'flag_is_bearing': fields.boolean('Is Bearing'),
 		
 	}
 	
@@ -1830,6 +1853,7 @@ class ch_kg_crm_bot(osv.osv):
 		
 		'is_applicable':False,
 		'load_bom':False,
+		'flag_is_bearing': False,
 		
 	}
 		
@@ -2094,6 +2118,7 @@ class ch_crm_access_bot(osv.osv):
 		'load_bom': fields.boolean('Load BOM'),
 		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),
 		'prime_cost': fields.float('Prime Cost'),
+		'brand_id': fields.many2one('kg.brand.master','Brand'),
 		
 	}
 	

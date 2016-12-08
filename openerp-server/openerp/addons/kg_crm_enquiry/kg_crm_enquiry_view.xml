@@ -13,7 +13,7 @@
 						<button name="entry_confirm" type="object" string="Process Offer" states="draft" class="oe_highlight"/>
 						<button name="entry_call_back" type="object" string="Call Back" states="draft" class="oe_highlight"/>
 						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
-						<button name="entry_revision" type="object" string="Create Revision" attrs="{'invisible': [('state','in',('wo_created'))]}" class="oe_highlight"/>
+						<button name="entry_revision" type="object" string="Create Revision" attrs="{'invisible': [('state','not in',('moved_to_offer'))]}" class="oe_highlight"/>
 						<!--<field name="state" widget="statusbar" 
 						statusbar_visible="draft,moved_to_offer,call,quote"
 						statusbar_colors='{
@@ -215,7 +215,7 @@
 							</group>	
 							<group>
 								<field name="pump_model_type" required="1"/>
-							</group>	
+							</group>
 						</group>	
 		<notebook>
 			<page string="Pump Details"  attrs="{'invisible':[('purpose_categ','!=','pump')]}">
@@ -475,10 +475,12 @@
 							<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 							<field name="item_name" attrs="{'readonly':[('load_bom','=',True)]}"/>
 							<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}"/>
+							<field name="brand_id" attrs="{'required': [('flag_is_bearing','=',True),('is_applicable','=',True)]}"/>
 							<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 							<field name="prime_cost" readonly="1"/>
 							<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
 							<field name="load_bom" invisible="1"/>
+							<field name="flag_is_bearing" invisible="1"/>
 						</tree>
 					</field>								
 				</page>
@@ -663,7 +665,7 @@
 			<field name="code">crm.enquiry.ip</field>
 		</record>
 
-		<record forcecreate="1" id="crm_ip" model="ir.sequence">
+		<record forcecreate="1" id="crm_ip107" model="ir.sequence">
 		  <field name="name">CRM Enquiry IP</field>
 		  <field name="code">crm.enquiry.ip</field>
 		  <field name="padding" eval="3"/>
@@ -678,7 +680,6 @@
 	
 	<!-- Marketing Enquiry --> 
 	<menuitem action="tma_crm_enquiry_marketing" name="Marketing Enquiry" id="tma_crm_enquiry_marketings" parent="kg_menus.cpm_crm_enquiry_menu" sequence="2"/>
-	
 	
 	</data>
 </openerp>
