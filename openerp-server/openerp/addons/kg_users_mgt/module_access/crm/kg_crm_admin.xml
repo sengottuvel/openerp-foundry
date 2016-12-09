@@ -412,6 +412,36 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
 		</record>
 		
+		<record id="t_crm_admin_ch_crm_access_fou" model="ir.model.access">
+			<field name="model_id" ref="kg_crm_enquiry.model_ch_crm_access_fou"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">ch crm access fou</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
+		
+		<record id="t_crm_admin_ch_crm_access_ms" model="ir.model.access">
+			<field name="model_id" ref="kg_crm_enquiry.model_ch_crm_access_ms"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">ch crm access ms</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
+		
+		<record id="t_crm_admin_ch_crm_access_bot" model="ir.model.access">
+			<field name="model_id" ref="kg_crm_enquiry.model_ch_crm_access_bot"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">ch crm access bot</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
+		
 		<record id="t_crm_admin_crm_offer" model="ir.model.access">
 			<field name="model_id" ref="kg_crm_offer.model_kg_crm_offer"/>
 			<field eval="1" name="perm_read"/>
@@ -867,6 +897,36 @@
 			<field name="model_id" ref="kg_service_inward.model_kg_service_inward"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">Service Inward</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
+		
+		<record id="t_crm_admin_ch_wo_accessories_foundry" model="ir.model.access">
+			<field name="model_id" ref="kg_work_order.model_ch_wo_accessories_foundry"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">ch wo accessories foundry</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
+		
+		<record id="t_crm_admin_ch_wo_accessories_ms" model="ir.model.access">
+			<field name="model_id" ref="kg_work_order.model_ch_wo_accessories_ms"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">ch wo accessories ms</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
+		
+		<record id="t_crm_admin_ch_wo_accessories_bot" model="ir.model.access">
+			<field name="model_id" ref="kg_work_order.model_ch_wo_accessories_bot"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">ch wo accessories bot</field>
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
