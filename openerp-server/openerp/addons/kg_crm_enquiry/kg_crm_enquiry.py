@@ -758,8 +758,7 @@ class kg_crm_enquiry(osv.osv):
 									else:
 										qty = design_rate = price = 0
 									tot_price += price
-									print"********************************",tot_price * bot_line.qty
-									print"**************item.purpose_categ******************",item.purpose_categ
+									
 									if catg == 'non_acc':
 										self.pool.get('ch.kg.crm.bot').write(cr,uid,bot_line.id,{'prime_cost': tot_price * bot_line.qty})		
 									elif catg == 'acc':
