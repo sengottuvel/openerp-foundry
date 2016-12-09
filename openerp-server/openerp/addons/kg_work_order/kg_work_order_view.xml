@@ -203,7 +203,7 @@
 								   <field name="flag_applicable"/>
 								   <field name="pattern_id"  attrs="{'readonly': [('entry_mode','=','auto')]}"/>
 								   <field name="pattern_name" readonly="1"/>
-								   <field name="position_id" attrs="{'readonly': [('entry_mode','=','auto')]}"/>
+								   <field name="position_id"/>
 								   <field name="weight" readonly="1"/>
 <!--
 								   <field name="ci_weight" readonly="1"/>
@@ -231,7 +231,7 @@
 									<field name="flag_applicable"/>
 									<field name="ms_id" attrs="{'readonly': [('entry_mode','=','auto')]}"/>		
 									<field name="name" readonly="1"/>
-									<field name="position_id" attrs="{'readonly': [('entry_mode','=','auto')]}"/>		
+									<field name="position_id"/>		
 									<field name="qty" attrs="{'readonly': [('order_category','=','pump')]}"/>
 									<field name="unit_price"/>
 									<field name="length" readonly="1"/>

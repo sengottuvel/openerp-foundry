@@ -1513,6 +1513,7 @@
 		<field name="arch" type="xml">
 			<tree toolbar="True" string="Pouring Pending Tree" create="false">
 				<field name="order_delivery_date" string="Delivery Date"/>
+				<field name="schedule_id"/>
 				<field name="order_no"/>
 				<field name="order_priority" string="Category"/>
 				<field name="pattern_id" string="Part No."/>
