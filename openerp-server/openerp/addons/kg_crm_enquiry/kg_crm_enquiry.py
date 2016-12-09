@@ -980,7 +980,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'lubrication_type': fields.selection([('grease','Grease'),('oil','Oil')],'Lubrication'),
 		'flag_standard': fields.boolean('Non Standard'),
 		'push_bearing': fields.selection([('grease_bronze','Grease'),('cft','CFT'),('cut','Cut Less Rubber')],'Bush Bearing'),
-		'suction_size': fields.selection([('32','32'),('40','40'),('50','50'),('65','65'),('80','80'),('100','100'),('125','125'),('150','150'),('200','2000'),('250','250'),('300','300')],'Suction Size'),
+		'suction_size': fields.selection([('32','32'),('40','40'),('50','50'),('65','65'),('80','80'),('100','100'),('125','125'),('150','150'),('200','200'),('250','250'),('300','300')],'Suction Size'),
 		'speed_in_rpm': fields.float('Speed in RPM - Pump'),
 		'pump_model_type':fields.selection([('vertical','Vertical'),('horizontal','Horizontal')], 'Pump Type'),
 		'bush_bearing_lubrication':fields.selection([('grease','Grease'),('external','External'),('self','Self'),('ex_pressure','External Under Pressure')], 'Bush Bearing Lubrication'),
