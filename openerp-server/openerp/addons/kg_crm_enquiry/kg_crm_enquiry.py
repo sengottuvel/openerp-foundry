@@ -681,7 +681,8 @@ class kg_crm_enquiry(osv.osv):
 									self.pool.get('ch.crm.access.ms').write(cr,uid,ms_line.id,{'prime_cost': tot_price * ms_line.qty})
 								else:
 									pass
-						if item.purpose_categ == 'spare' and catg == 'non_acc':
+						if bom == 'ms':
+							if item.purpose_categ == 'spare' and catg == 'non_acc':
 								spare_id = self.pool.get('ch.spare.offer').create(cr,uid,{
 																'header_id': offer_id,
 																'pumpseries_id': item.spare_pumpseries_id.id,
@@ -765,8 +766,9 @@ class kg_crm_enquiry(osv.osv):
 										self.pool.get('ch.crm.access.bot').write(cr,uid,bot_line.id,{'prime_cost': tot_price * bot_line.qty})
 									else:
 										pass
-							if item.purpose_categ == 'spare' and catg == 'non_acc':
-								spare_id = self.pool.get('ch.spare.offer').create(cr,uid,{
+							if bom == 'bot':
+								if item.purpose_categ == 'spare' and catg == 'non_acc':
+									spare_id = self.pool.get('ch.spare.offer').create(cr,uid,{
 																'header_id': offer_id,
 																'pumpseries_id': item.spare_pumpseries_id.id,
 																'pump_id': item.spare_pump_id.id,
