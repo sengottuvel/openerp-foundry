@@ -820,7 +820,7 @@ class kg_crm_offer(osv.osv):
 		
 		sheet1.write(s2+46,0,"Impeller Dia Max mm",style6)
 		sheet1.write(s2+47,0,"Max Allowable Test Pressure",style6)
-		sheet1.write(s2+48,0,"Type",style6)
+		sheet1.write(s2+48,0,"Pump Design",style6)
 		sheet1.write(s2+49,0,"Casing Feet Location",style6)
 		sheet1.write(s2+50,0,"Shut off Head in M",style6)
 		sheet1.write(s2+51,0,"Shut off Pressure",style6)
@@ -1252,9 +1252,12 @@ class kg_crm_offer(osv.osv):
 				if mm_data:
 					for item_1 in mm_data:
 						if item_1['shaft_sealing'] or item_1['qty']:
-							sheet1.write(row_no,em_col,item_1['shaft_sealing'] or "-",style8)
-							sheet1.write(row_no+1,em_col,item_1['qty'] or "-",style8)
-							sheet1.write(row_no+2,em_col,item_1['qty'] or "-",style8)
+							sheet1.write(row_no,em_col,"-",style8)
+							sheet1.write(row_no+1,em_col,"-",style8)
+							sheet1.write(row_no+2,em_col,"-",style8)
+							#~ sheet1.write(row_no,em_col,item_1['shaft_sealing'] or "-",style8)
+							#~ sheet1.write(row_no+1,em_col,item_1['qty'] or "-",style8)
+							#~ sheet1.write(row_no+2,em_col,item_1['qty'] or "-",style8)
 						else:
 							sheet1.write(row_no,em_col,"-",style8)
 							sheet1.write(row_no+1,em_col,"-",style8)

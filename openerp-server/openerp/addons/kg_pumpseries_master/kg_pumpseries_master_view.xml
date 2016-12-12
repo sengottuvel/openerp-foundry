@@ -148,7 +148,7 @@
 		<!-- Menu Action Start-->
 		
 		 <record id="mma_pumpseries_master" model="ir.actions.act_window">
-			<field name="name">Pumpseries Master</field>
+			<field name="name">Pump Series</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.pumpseries.master</field>
 			<field name="view_type">form</field>
