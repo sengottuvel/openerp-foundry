@@ -590,7 +590,9 @@ class kg_depindent_line(osv.osv):
 	'line_id': fields.one2many('ch.depindent.wo','header_id','Ch Line Id'),
 	'moc_id': fields.many2one('kg.moc.master','MOC'),
 	'moc_id_temp': fields.many2one('ch.brandmoc.rate.details','MOC',domain="[('brand_id','=',brand_id),('header_id.product_id','=',product_id),('header_id.state','in',('draft','confirmed','approved'))]"),
-	'pattern_id': fields.many2one('kg.pattern.master', 'Pattern No.'),
+	'pattern_id': fields.many2one('kg.pattern.master', 'Pattern Name'),
+	'ms_bot_id': fields.many2one('kg.machine.shop', 'MS/BOT'),	
+	'fns_item_name': fields.char('Foundry/MS/BOT', size=128),
 	'order_line_id': fields.related('indent_id','order_line_id', type='many2one', relation='ch.work.order.details', string='WO No.', store=True, readonly=True),
 	}
 	

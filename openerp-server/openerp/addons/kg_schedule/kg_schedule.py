@@ -1448,7 +1448,7 @@ class kg_schedule(osv.osv):
 				ms_pumpmodel_details = cr.dictfetchall();
 				
 				if ms_pumpmodel_details:
-					
+										
 					for ms_pm_item in ms_pumpmodel_details:
 						
 						### Getting Pump Model Qty ###
@@ -1486,6 +1486,7 @@ class kg_schedule(osv.osv):
 										(
 										select (raw.qty * order_ms.qty) as indent_qty,raw.product_id,raw.uom,wo_line.pump_model_id,
 										order_ms.header_id as order_line_id, raw.id as ms_item, order_ms.id as order_ms_id,'foun' as type
+										
 										from ch_ms_raw_material as raw
 										left join ch_order_machineshop_details order_ms on raw.header_id = order_ms.ms_id
 										left join ch_work_order_details wo_line on order_ms.header_id = wo_line.id
@@ -1497,6 +1498,7 @@ class kg_schedule(osv.osv):
 
 										select (raw.qty * acc_order_ms.qty) as indent_qty,raw.product_id,raw.uom,wo_line.pump_model_id,
 										wo_acc_line.header_id as order_line_id, raw.id as ms_item, acc_order_ms.id as order_ms_id,'acc' as type
+										
 										from ch_ms_raw_material as raw
 										left join ch_wo_accessories_ms acc_order_ms on raw.header_id = acc_order_ms.ms_id
 										left join ch_wo_accessories wo_acc_line on acc_order_ms.header_id = wo_acc_line.id
@@ -1514,6 +1516,7 @@ class kg_schedule(osv.osv):
 								ms_product_details = cr.dictfetchall();
 								
 								for ms_indent_item in ms_product_details:
+																		
 									dep_indent_line_obj = self.pool.get('kg.depindent.line')
 									product_rec = self.pool.get('product.product').browse(cr, uid, ms_indent_item['product_id'])
 									
@@ -1553,7 +1556,9 @@ class kg_schedule(osv.osv):
 											'uom':ms_indent_item['uom'],
 											'qty':indent_qty/order_line_rec.qty,
 											'pending_qty':indent_qty/order_line_rec.qty,
-											'cutting_qty':cutting_qty/order_line_rec.qty,
+											'cutting_qty':ms_raw_rec.temp_qty,
+											'ms_bot_id':ms_order_rec.ms_id.id,
+											'fns_item_name':ms_order_rec.ms_id.code,
 										}
 										
 										indent_line_id = dep_indent_line_obj.create(cr, uid, ms_dep_indent_line_vals)

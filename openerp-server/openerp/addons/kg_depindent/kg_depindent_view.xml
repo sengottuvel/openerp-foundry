@@ -59,7 +59,7 @@
 						  <tree string="Department Indent Line" > 
 								<field name="product_id" on_change="onchange_product_id(product_id,uom,po_uom)"/>
 								<field name="brand_id"/>
-								<field name="pattern_id"/>
+								<field name="fns_item_name"/>
 								<field name="moc_id"/>
 								<field name="uom" on_change="onchange_product_uom(product_id, uom, po_uom,qty)"/>
 								<field name="qty" on_change="onchange_qty(uom,product_id,qty,pending_qty,issue_pending_qty,po_qty)"/>
