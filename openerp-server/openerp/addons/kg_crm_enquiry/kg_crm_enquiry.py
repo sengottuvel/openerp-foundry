@@ -994,7 +994,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'impeller_dia_max': fields.float('Impeller Dia Max mm'),
 		'impeller_dia_min': fields.float('Impeller Dia Min mm'),
 		'maximum_allowable_soild': fields.float('Maximum Allowable Soild Size - MM'),
-		'max_allowable_test': fields.float('Max Allowable Test Pressure'),
+		'max_allowable_test': fields.float('Max Allowable Casing Design Pressure'),
 		'number_of_stages': fields.integer('Number of stages'),
 		#'crm_type': fields.char('Type', readonly=True),
 		'crm_type': fields.selection([('pull_out','End Suction Back Pull Out'),('split_case','Split Case'),('multistage','Multistage'),('twin_casing','Twin Casing'),('single_casing','Single Casing'),('self_priming','Self Priming'),('vo_vs4','VO-VS4'),('vg_vs5','VG-VS5')],'Pump Design'),

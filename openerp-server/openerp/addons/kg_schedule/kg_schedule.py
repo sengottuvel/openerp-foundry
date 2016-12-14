@@ -1407,6 +1407,7 @@ class kg_schedule(osv.osv):
 									'uom':product_rec.uom_id.id,
 									'qty': indent_qty,
 									'pending_qty': indent_qty,
+									'issue_pending_qty': indent_qty,
 									'cutting_qty': indent_qty,
 								}
 								
@@ -1556,6 +1557,7 @@ class kg_schedule(osv.osv):
 											'uom':ms_indent_item['uom'],
 											'qty':indent_qty/order_line_rec.qty,
 											'pending_qty':indent_qty/order_line_rec.qty,
+											'issue_pending_qty': indent_qty/order_line_rec.qty,
 											'cutting_qty':ms_raw_rec.temp_qty,
 											'ms_bot_id':ms_order_rec.ms_id.id,
 											'fns_item_name':ms_order_rec.ms_id.code,
@@ -1683,6 +1685,7 @@ class kg_schedule(osv.osv):
 									'uom':bot_indent_item['uom'],
 									'qty': indent_qty,
 									'pending_qty': indent_qty,
+									'issue_pending_qty': indent_qty,
 									'cutting_qty': indent_qty,
 								}
 								
