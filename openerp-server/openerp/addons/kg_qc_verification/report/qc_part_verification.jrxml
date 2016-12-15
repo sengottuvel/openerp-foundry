@@ -57,8 +57,8 @@ where qc.state = 'draft' and qc.id in (select a::int from (select regexp_split_t
 	<background>
 		<band splitType="Stretch"/>
 	</background>
-	<pageHeader>
-		<band height="71" splitType="Stretch">
+	<title>
+		<band height="61">
 			<textField>
 				<reportElement x="156" y="0" width="462" height="34"/>
 				<box topPadding="12" leftPadding="3"/>
@@ -67,8 +67,12 @@ where qc.state = 'draft' and qc.id in (select a::int from (select regexp_split_t
 				</textElement>
 				<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
 			</textField>
+			<image>
+				<reportElement x="194" y="0" width="64" height="61"/>
+				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
+			</image>
 			<textField>
-				<reportElement x="292" y="45" width="199" height="20"/>
+				<reportElement x="291" y="41" width="199" height="20"/>
 				<box topPadding="2" bottomPadding="0"/>
 				<textElement textAlignment="Center">
 					<font size="12" isBold="true"/>
@@ -76,25 +80,21 @@ where qc.state = 'draft' and qc.id in (select a::int from (select regexp_split_t
 				<textFieldExpression><![CDATA["QC Verification List"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="699" y="45" width="103" height="20"/>
+				<reportElement x="698" y="41" width="103" height="20"/>
 				<textElement>
 					<font size="12" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{date}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="656" y="45" width="61" height="20"/>
+				<reportElement x="655" y="41" width="61" height="20"/>
 				<textElement>
 					<font size="12" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[" Date :"]]></textFieldExpression>
 			</textField>
-			<image>
-				<reportElement x="194" y="0" width="64" height="61"/>
-				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
-			</image>
 		</band>
-	</pageHeader>
+	</title>
 	<columnHeader>
 		<band height="17" splitType="Stretch">
 			<textField isStretchWithOverflow="true">
@@ -455,8 +455,12 @@ where qc.state = 'draft' and qc.id in (select a::int from (select regexp_split_t
 				</box>
 				<textElement/>
 			</textField>
+		</band>
+	</pageFooter>
+	<lastPageFooter>
+		<band height="50">
 			<textField>
-				<reportElement x="635" y="10" width="167" height="20"/>
+				<reportElement x="634" y="30" width="167" height="20"/>
 				<box>
 					<topPen lineWidth="0.5"/>
 				</box>
@@ -466,7 +470,7 @@ where qc.state = 'draft' and qc.id in (select a::int from (select regexp_split_t
 				<textFieldExpression><![CDATA["Verified by"]]></textFieldExpression>
 			</textField>
 		</band>
-	</pageFooter>
+	</lastPageFooter>
 	<noData>
 		<band height="50">
 			<textField>
