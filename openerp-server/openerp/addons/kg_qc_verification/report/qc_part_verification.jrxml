@@ -91,7 +91,7 @@ where qc.state = 'draft' and qc.id in (select a::int from (select regexp_split_t
 			</textField>
 			<image>
 				<reportElement x="194" y="0" width="64" height="61"/>
-				<imageExpression><![CDATA["/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
 			</image>
 		</band>
 	</pageHeader>
