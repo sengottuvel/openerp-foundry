@@ -457,7 +457,7 @@ where qc.state = 'draft' and qc.id in (select a::int from (select regexp_split_t
 			</textField>
 		</band>
 	</pageFooter>
-	<lastPageFooter>
+	<summary>
 		<band height="50">
 			<textField>
 				<reportElement x="634" y="30" width="167" height="20"/>
@@ -470,7 +470,7 @@ where qc.state = 'draft' and qc.id in (select a::int from (select regexp_split_t
 				<textFieldExpression><![CDATA["Verified by"]]></textFieldExpression>
 			</textField>
 		</band>
-	</lastPageFooter>
+	</summary>
 	<noData>
 		<band height="50">
 			<textField>
