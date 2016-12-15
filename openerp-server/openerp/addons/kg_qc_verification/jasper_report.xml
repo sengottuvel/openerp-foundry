@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+      
+
+
+		<report string="Part QC Verification" 
+        model="kg.qc.verification"
+        auto="True"
+        name="onscreen_part_qc_verification_report"
+        rml="kg_qc_verification/report/qc_part_verification.jrxml"        
+        id="qc_part_jasper_report_menu" 
+        menu="True"
+        header="False"
+      
+        />
+        
+        <report string="Pump QC Verification" 
+        model="kg.qc.verification"
+        auto="True"
+        name="onscreen_pump_qc_verification_report"
+        rml="kg_qc_verification/report/qc_pump_verification.jrxml"        
+        id="qc_pump_jasper_report_menu" 
+        menu="True"
+        header="False"
+      
+        />
+
+		
+
+
+    </data>
+</openerp>
