@@ -269,9 +269,9 @@ where qc.state = 'draft' and qc.id in (select a::int from (select regexp_split_t
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="20" splitType="Stretch">
+		<band height="31" splitType="Stretch">
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="73" height="20"/>
+				<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="73" height="31"/>
 				<box topPadding="3" leftPadding="3">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -282,7 +282,7 @@ where qc.state = 'draft' and qc.id in (select a::int from (select regexp_split_t
 				<textFieldExpression><![CDATA[$F{allocated_date}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="73" y="0" width="48" height="20"/>
+				<reportElement stretchType="RelativeToTallestObject" x="73" y="0" width="48" height="31"/>
 				<box topPadding="3" leftPadding="3">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -293,7 +293,7 @@ where qc.state = 'draft' and qc.id in (select a::int from (select regexp_split_t
 				<textFieldExpression><![CDATA[$F{location}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="121" y="0" width="66" height="20"/>
+				<reportElement stretchType="RelativeToTallestObject" x="121" y="0" width="66" height="31"/>
 				<box topPadding="3" leftPadding="3">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -304,7 +304,7 @@ where qc.state = 'draft' and qc.id in (select a::int from (select regexp_split_t
 				<textFieldExpression><![CDATA[$F{wo_no}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="187" y="0" width="81" height="20"/>
+				<reportElement stretchType="RelativeToTallestObject" x="187" y="0" width="81" height="31"/>
 				<box topPadding="3" leftPadding="3">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -315,7 +315,7 @@ where qc.state = 'draft' and qc.id in (select a::int from (select regexp_split_t
 				<textFieldExpression><![CDATA[$F{pattern_no}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="268" y="0" width="105" height="20"/>
+				<reportElement stretchType="RelativeToTallestObject" x="268" y="0" width="105" height="31"/>
 				<box topPadding="3" leftPadding="3">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -326,7 +326,7 @@ where qc.state = 'draft' and qc.id in (select a::int from (select regexp_split_t
 				<textFieldExpression><![CDATA[$F{pattern_name}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="373" y="0" width="85" height="20"/>
+				<reportElement stretchType="RelativeToTallestObject" x="373" y="0" width="85" height="31"/>
 				<box topPadding="3" leftPadding="3">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -337,7 +337,7 @@ where qc.state = 'draft' and qc.id in (select a::int from (select regexp_split_t
 				<textFieldExpression><![CDATA[$F{moc_name}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="458" y="0" width="33" height="20"/>
+				<reportElement stretchType="RelativeToTallestObject" x="458" y="0" width="33" height="31"/>
 				<box topPadding="3" leftPadding="0" rightPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -348,7 +348,7 @@ where qc.state = 'draft' and qc.id in (select a::int from (select regexp_split_t
 				<textFieldExpression><![CDATA[$F{stock_qty}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="491" y="0" width="53" height="20"/>
+				<reportElement stretchType="RelativeToTallestObject" x="491" y="0" width="53" height="31"/>
 				<box topPadding="3" leftPadding="0" rightPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -359,7 +359,7 @@ where qc.state = 'draft' and qc.id in (select a::int from (select regexp_split_t
 				<textFieldExpression><![CDATA[$F{allocated_qty}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="544" y="0" width="46" height="20"/>
+				<reportElement stretchType="RelativeToTallestObject" x="544" y="0" width="46" height="31"/>
 				<box topPadding="3" leftPadding="0" rightPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -370,7 +370,7 @@ where qc.state = 'draft' and qc.id in (select a::int from (select regexp_split_t
 				<textFieldExpression><![CDATA[$F{each_weight}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="590" y="0" width="53" height="20"/>
+				<reportElement stretchType="RelativeToTallestObject" x="590" y="0" width="53" height="31"/>
 				<box topPadding="3" leftPadding="0" rightPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -381,7 +381,7 @@ where qc.state = 'draft' and qc.id in (select a::int from (select regexp_split_t
 				<textFieldExpression><![CDATA[$F{total_weight}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="643" y="0" width="56" height="20"/>
+				<reportElement stretchType="RelativeToTallestObject" x="643" y="0" width="56" height="31"/>
 				<box topPadding="3" leftPadding="0" rightPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -391,7 +391,7 @@ where qc.state = 'draft' and qc.id in (select a::int from (select regexp_split_t
 				<textElement textAlignment="Right"/>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="699" y="0" width="47" height="20"/>
+				<reportElement stretchType="RelativeToTallestObject" x="699" y="0" width="47" height="31"/>
 				<box topPadding="3" leftPadding="0" rightPadding="3">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -401,7 +401,7 @@ where qc.state = 'draft' and qc.id in (select a::int from (select regexp_split_t
 				<textElement textAlignment="Right"/>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="746" y="0" width="56" height="20"/>
+				<reportElement stretchType="RelativeToTallestObject" x="746" y="0" width="56" height="31"/>
 				<box topPadding="3" leftPadding="3">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
