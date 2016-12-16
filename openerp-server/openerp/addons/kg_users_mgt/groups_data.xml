@@ -128,7 +128,7 @@
             ref('kg_ms_stores.tpm_ms_store_process'),
             ref('kg_ms_stores.tam_ms_stores_list'),
             
-           
+            ref('kg_production.tam_pouring_pending_mc'),
                       
             
             ref('kg_menus.rpm_reports'),
