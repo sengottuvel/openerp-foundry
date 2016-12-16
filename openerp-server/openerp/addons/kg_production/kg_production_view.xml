@@ -1855,8 +1855,8 @@
 		<field name="arch" type="xml">
 			<tree toolbar="True" string="Pouring Pending MC" create="false">
 				<field name="order_delivery_date" string="Delivery Date"/>
-				<field name="order_no"/>
 				<field name="schedule_id"/>
+				<field name="order_no"/>				
 				<field name="order_priority" string="Category"/>
 				<field name="pattern_id" string="Part No."/>
 				<field name="pattern_name" string="Part Name."/>
