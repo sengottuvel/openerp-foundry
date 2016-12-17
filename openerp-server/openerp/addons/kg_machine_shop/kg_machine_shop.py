@@ -85,12 +85,12 @@ class kg_machine_shop(osv.osv):
 		'list_moc_flag':fields.boolean('List MOC Flag'),
 		
 		### Entry Info ###
-		'crt_date': fields.datetime('Creation Date',readonly=True),
+		'crt_date': fields.datetime('Created Date',readonly=True),
 		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
 		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
 		'confirm_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
-		'ap_rej_date': fields.datetime('Approved/Reject Date', readonly=True),
-		'ap_rej_user_id': fields.many2one('res.users', 'Approved/Reject By', readonly=True),	
+		'ap_rej_date': fields.datetime('Approved/Rejected Date', readonly=True),
+		'ap_rej_user_id': fields.many2one('res.users', 'Approved/Rejected By', readonly=True),	
 		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
@@ -116,6 +116,21 @@ class kg_machine_shop(osv.osv):
 		('code', 'unique(code)', 'Code must be unique per Company !!'),
 	]	
 	
+	def _Validation(self, cr, uid, ids, context=None):
+		flds = self.browse(cr , uid , ids[0])				
+		if flds.name:
+			name_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )
+			if name_char:
+				return False	
+		if flds.code:
+			code_char = ''.join( c for c in flds.code if  c in '!@#$%^~*{}?+/=' )
+			if code_char:
+				return False
+		if flds.csd_code:
+			csd_code_char = ''.join( c for c in flds.csd_code if  c in '!@#$%^~*{}?+/=' )
+			if csd_code_char:
+				return False				
+		return True	
 			
 	def _code_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -400,7 +415,7 @@ class kg_machine_shop(osv.osv):
 		
 	
 	_constraints = [
-		
+		(_Validation, 'Special Character Not Allowed !!!', ['Check']),
 		(_code_validate, 'MOC code must be unique !!', ['code']),	
 	]
 	

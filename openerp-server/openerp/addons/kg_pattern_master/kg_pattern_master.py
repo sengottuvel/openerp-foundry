@@ -63,10 +63,10 @@ class kg_pattern_master(osv.osv):
 	_columns = {
 		
 		
-		'name': fields.char('Part/Pattern No', size=128, required=True),
+		'name': fields.char('No.', size=128, required=True),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'box_id': fields.many2one('kg.box.master','Box',readonly=True,domain="[('active','=','t')]"),		
-		'pattern_name': fields.char('Part/Pattern Name', size=128,required=True),
+		'pattern_name': fields.char('Name', size=128,required=True),
 		'code': fields.char('Customer Code No.', size=128),
 		'active': fields.boolean('Active'),
 		'pcs_weight': fields.float('SS Weight(kgs)'),
@@ -108,12 +108,12 @@ class kg_pattern_master(osv.osv):
 		'need_hydro_test': fields.boolean('Need Hydro Test'),	
 		
 		### Entry Info ###
-		'crt_date': fields.datetime('Creation Date',readonly=True),
+		'crt_date': fields.datetime('Created Date',readonly=True),
 		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
 		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
 		'confirm_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
-		'ap_rej_date': fields.datetime('Approved/Reject Date', readonly=True),
-		'ap_rej_user_id': fields.many2one('res.users', 'Approved/Reject By', readonly=True),	
+		'ap_rej_date': fields.datetime('Approved/Rejected Date', readonly=True),
+		'ap_rej_user_id': fields.many2one('res.users', 'Approved/Rejected By', readonly=True),	
 		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
@@ -137,6 +137,42 @@ class kg_pattern_master(osv.osv):
 		'tolerance_flag' : False,
 		'pattern_type':'new_pattern',
 	}
+	
+	def _Validation(self, cr, uid, ids, context=None):
+		flds = self.browse(cr , uid , ids[0])
+		cr.execute(""" UPDATE ch_pattern_history
+									SET s_no=subquery.row
+									FROM (SELECT row_number() OVER () as row,id as ch_id from ch_pattern_history where header_id = %s) AS subquery
+									WHERE ch_pattern_history.id=subquery.ch_id """ %(ids[0]))		
+		if flds.name:
+			name_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )
+			if name_char:
+				return False
+		if flds.pattern_name:
+			pattern_name_char = ''.join( c for c in flds.pattern_name if  c in '!@#$%^~*{}?+/=' )
+			if pattern_name_char:
+				return False
+		if flds.alias_name:
+			alias_name_char = ''.join( c for c in flds.alias_name if  c in '!@#$%^~*{}?+/=' )
+			if alias_name_char:
+				return False	
+		if flds.make_by:
+			make_by_char = ''.join( c for c in flds.make_by if  c in '!@#$%^~*{}?+/=' )
+			if make_by_char:
+				return False
+		if flds.code:
+			code_char = ''.join( c for c in flds.code if  c in '!@#$%^~*{}?+/=' )
+			if code_char:
+				return False
+		if flds.csd_code:
+			csd_code_char = ''.join( c for c in flds.csd_code if  c in '!@#$%^~*{}?+/=' )
+			if csd_code_char:
+				return False
+		if flds.location:
+			location_char = ''.join( c for c in flds.location if  c in '!@#$%^~*{}?+/=' )
+			if location_char:
+				return False		
+		return True	
 	
 	def _check_pcs_weight(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])		
@@ -581,14 +617,16 @@ class kg_pattern_master(osv.osv):
 				unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)	
 	
+	
 		
-	def write(self, cr, uid, ids, vals, context=None):
+	def write(self, cr, uid, ids, vals, context=None):					
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_pattern_master, self).write(cr, uid, ids, vals, context)
 		
 	
 	_constraints = [
-		
+	
+		(_Validation, 'Special Character Not Allowed !!!', ['Check']),
 		(_name_validate, 'Pattern No must be unique !!', ['no']),		
 		#(_check_pcs_weight,'You cannot save with zero value !',['SS Weight(kgs)']),
 		#(_check_nonferous_weight,'You cannot save with zero value !',['Non-Ferrous Weight(kgs)']),
@@ -655,16 +693,17 @@ class ch_pattern_history(osv.osv):
 	
 	_name = "ch.pattern.history"
 	_description = "Pattern History"
+	_order = "s_no desc"
 	
 	_columns = {   
 			
 		'header_id':fields.many2one('kg.pattern.master', 'Pattern Entry', required=True, ondelete='cascade'),	
-		's_no': fields.integer('S.No.', required=True),			
+		's_no': fields.integer('S.No.', readonly=True),			
 		'date':fields.date('Date',required=True),
 		'reason':fields.text('Reason for Rework',required=True),
 		'remarks':fields.text('Remarks'),
 		
-	}
+	}	
 	
 	def _future_entry_date_check(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
