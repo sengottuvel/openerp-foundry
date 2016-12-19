@@ -119,15 +119,15 @@ class kg_machine_shop(osv.osv):
 	def _Validation(self, cr, uid, ids, context=None):
 		flds = self.browse(cr , uid , ids[0])				
 		if flds.name:
-			name_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )
+			name_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+=' )
 			if name_char:
 				return False	
 		if flds.code:
-			code_char = ''.join( c for c in flds.code if  c in '!@#$%^~*{}?+/=' )
+			code_char = ''.join( c for c in flds.code if  c in '!@#$%^~*{}?+=' )
 			if code_char:
 				return False
 		if flds.csd_code:
-			csd_code_char = ''.join( c for c in flds.csd_code if  c in '!@#$%^~*{}?+/=' )
+			csd_code_char = ''.join( c for c in flds.csd_code if  c in '!@#$%^~*{}?+=' )
 			if csd_code_char:
 				return False				
 		return True	

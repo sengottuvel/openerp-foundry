@@ -145,31 +145,31 @@ class kg_pattern_master(osv.osv):
 									FROM (SELECT row_number() OVER () as row,id as ch_id from ch_pattern_history where header_id = %s) AS subquery
 									WHERE ch_pattern_history.id=subquery.ch_id """ %(ids[0]))		
 		if flds.name:
-			name_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )
+			name_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+=' )
 			if name_char:
 				return False
 		if flds.pattern_name:
-			pattern_name_char = ''.join( c for c in flds.pattern_name if  c in '!@#$%^~*{}?+/=' )
+			pattern_name_char = ''.join( c for c in flds.pattern_name if  c in '!@#$%^~*{}?+=' )
 			if pattern_name_char:
 				return False
 		if flds.alias_name:
-			alias_name_char = ''.join( c for c in flds.alias_name if  c in '!@#$%^~*{}?+/=' )
+			alias_name_char = ''.join( c for c in flds.alias_name if  c in '!@#$%^~*{}?+=' )
 			if alias_name_char:
 				return False	
 		if flds.make_by:
-			make_by_char = ''.join( c for c in flds.make_by if  c in '!@#$%^~*{}?+/=' )
+			make_by_char = ''.join( c for c in flds.make_by if  c in '!@#$%^~*{}?+=' )
 			if make_by_char:
 				return False
 		if flds.code:
-			code_char = ''.join( c for c in flds.code if  c in '!@#$%^~*{}?+/=' )
+			code_char = ''.join( c for c in flds.code if  c in '!@#$%^~*{}?+=' )
 			if code_char:
 				return False
 		if flds.csd_code:
-			csd_code_char = ''.join( c for c in flds.csd_code if  c in '!@#$%^~*{}?+/=' )
+			csd_code_char = ''.join( c for c in flds.csd_code if  c in '!@#$%^~*{}?+=' )
 			if csd_code_char:
 				return False
 		if flds.location:
-			location_char = ''.join( c for c in flds.location if  c in '!@#$%^~*{}?+/=' )
+			location_char = ''.join( c for c in flds.location if  c in '!@#$%^~*{}?+=' )
 			if location_char:
 				return False		
 		return True	
