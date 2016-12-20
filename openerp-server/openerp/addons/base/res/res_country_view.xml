@@ -42,6 +42,9 @@
                             <field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
                             <field name="state"  style="width: 30%%" class="att_state_change"/>
                         </group>
+                        <group>
+							<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+                        </group>
                     </group>
                     <group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
 					<group>	
@@ -84,12 +87,33 @@
                 </form>
             </field>
         </record>
+        
+        <record id="m_search_v_country" model="ir.ui.view">
+            <field name="name">Country Master Search</field>
+            <field name="model">res.country</field>
+            <field name="arch" type="xml">
+                <search string="Country Master Template">
+					<field name="name" string="Country" filter_domain="[('name','ilike',self)]" />
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>				
+					<filter icon="terp-check" name="approve" string="Approved" domain="[('state','=','approved')]"/>				
+					<filter icon="terp-check" name="reject" string="Rejected" domain="[('state','=','reject')]"/>				
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Country Name" icon="terp-personal" domain="[]" context="{'group_by':'name'}"/> 
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
 
         <record id="action_country" model="ir.actions.act_window">
             <field name="name">Country</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">res.country</field>
             <field name="view_type">form</field>
+            <field name="view_id" ref="view_country_tree"/>
+            <field name="search_view_id" ref="m_search_v_country"/>
             <field name="help">Display and manage the list of all countries that can be assigned to your partner records. You can create or delete countries to make sure the ones you are working on will be maintained.</field>
         </record>
 
@@ -137,6 +161,9 @@
                     <group>
 						<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
                         <field name="state"  style="width: 30%%" class="att_state_change"/>
+                    </group>
+                    <group>
+						<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
                     </group>
                     </group>
                     <group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
@@ -247,6 +274,9 @@
                         <group>
 							 <field name="state_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="state" style="width: 30%%" class="att_state_change"/>
+                        </group>
+                        <group>
+							<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
                         </group>
                     </group>
                     <group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">

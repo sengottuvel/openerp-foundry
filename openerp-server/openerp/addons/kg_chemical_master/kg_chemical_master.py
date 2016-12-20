@@ -89,7 +89,7 @@ class kg_chemical_master(osv.osv):
 		('code', 'unique(code)', 'Code must be unique!!'),
 	]
 	
-	"""def _Validation(self, cr, uid, ids, context=None):
+	def _Validation(self, cr, uid, ids, context=None):
 		flds = self.browse(cr , uid , ids[0])
 		name_special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )		
 		if name_special_char:
@@ -102,7 +102,7 @@ class kg_chemical_master(osv.osv):
 			code_special_char = ''.join( c for c in flds.code if  c in '!@#$%^~*{}?+/=' )		
 			if code_special_char:
 				return False
-		return True		"""
+		return True		
 		
 	def _name_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -178,8 +178,8 @@ class kg_chemical_master(osv.osv):
 		
 	
 	_constraints = [
-		#(_Validation, 'Special Character Not Allowed !!!', ['Check Name']),
-		#(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
+		(_Validation, 'Special Character Not Allowed !!!', ['Check Name']),
+		(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
 		(_name_validate, 'Chemical name must be unique !!', ['name']),		
 		(_code_validate, 'Chemical code must be unique !!', ['code']),		
 		

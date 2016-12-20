@@ -25,9 +25,6 @@ from datetime import date
 from datetime import datetime
 from openerp.tools.translate import _
 
-a = datetime.now()
-dt_time = a.strftime('%m/%d/%Y %H:%M:%S')
-
 def location_name_search(self, cr, user, name='', args=None, operator='ilike',
 						 context=None, limit=100):
 	if not args:
@@ -77,9 +74,9 @@ class Country(osv.osv):
 		return res
 		
 	_columns = {
-		'name': fields.char('Country Name', size=64,
+		'name': fields.char('Name', size=64,
 			help='The full name of the country.', required=True, translate=True),
-		'code': fields.char('Country Code', size=2,
+		'code': fields.char('Code', size=2,
 			help='The ISO country code in two chars.\n'
 			'You can use this field for quick search.'),
 		'address_format': fields.text('Address Format', help="""You can state here the usual format to use for the \
@@ -93,12 +90,12 @@ addresses belonging to this country.\n\nYou can use the python-style string pate
 		'active': fields.boolean('Active'),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
-		'creation_date':fields.datetime('Creation Date',readonly=True),
+		'creation_date':fields.datetime('Created Date',readonly=True),
 		'approve_date': fields.datetime('Approved Date', readonly=True),
 		'app_user_id': fields.many2one('res.users', 'Apprved By', readonly=True),
-		'confirm_date': fields.datetime('Confirm Date', readonly=True),
+		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
 		'conf_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
-		'reject_date': fields.datetime('Reject Date', readonly=True),
+		'reject_date': fields.datetime('Rejected Date', readonly=True),
 		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
@@ -108,6 +105,7 @@ addresses belonging to this country.\n\nYou can use the python-style string pate
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel Remarks'),
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
+		'notes': fields.text('Notes'),
 		
 	}
 	
@@ -131,6 +129,21 @@ addresses belonging to this country.\n\nYou can use the python-style string pate
 	_order='name'
 
 	name_search = location_name_search
+	
+	def _Validation(self, cr, uid, ids, context=None):
+		flds = self.browse(cr , uid , ids[0])
+		name_special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )		
+		if name_special_char:
+			return False		
+		return True	
+		
+	def _CodeValidation(self, cr, uid, ids, context=None):
+		flds = self.browse(cr , uid , ids[0])	
+		if flds.code:		
+			code_special_char = ''.join( c for c in flds.code if  c in '!@#$%^~*{}?+/=' )		
+			if code_special_char:
+				return False
+		return True	
 
 	def create(self, cursor, user, vals, context=None):
 		if vals.get('code'):
@@ -148,23 +161,39 @@ addresses belonging to this country.\n\nYou can use the python-style string pate
 	def entry_reject(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.remark:
-			self.write(cr, uid, ids, {'state': 'reject','rej_user_id': uid, 'reject_date': dt_time})
+			self.write(cr, uid, ids, {'state': 'reject','rej_user_id': uid, 'reject_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		else:
 			raise osv.except_osv(_('Rejection remark is must !!'),
 				_('Enter rejection remark in remark field !!'))
 		return True
 		
 	def entry_confirm(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'confirmed','conf_user_id': uid, 'confirm_date': dt_time})
+		self.write(cr, uid, ids, {'state': 'confirmed','conf_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 		
 	def entry_approve(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': dt_time})
+		self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 		
 	def entry_draft(self,cr,uid,ids,context=None):
 		self.write(cr, uid, ids, {'state': 'draft'})
 		return True
+		
+	def unlink(self,cr,uid,ids,context=None):
+		unlink_ids = []		
+		for rec in self.browse(cr,uid,ids):	
+			if rec.state not in ('draft','cancel'):				
+				raise osv.except_osv(_('Warning!'),
+						_('You can not delete this entry !!'))
+			else:
+				unlink_ids.append(rec.id)
+		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
+		
+	_constraints = [
+	
+		(_Validation, 'Special Character Not Allowed !!!', ['Check Name']),
+		(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
+	]
 		
 class CountryState(osv.osv):
 	_description="Country state"
@@ -199,12 +228,12 @@ class CountryState(osv.osv):
 	_columns = {
 		
 		'country_id': fields.many2one('res.country', 'Country',
-			required=True),
-		'name': fields.char('State Name', size=64, required=True, 
+			required=True,domain=[('state','=','approved')]),
+		'name': fields.char('Name', size=64, required=True, 
 							help='Administrative divisions of a country. E.g. Fed. State, Departement, Canton'),
-		'code': fields.char('State Code', size=3,
+		'code': fields.char('Code', size=3,
 			help='The state code in max. three chars.', required=True),
-		 'creation_date':fields.datetime('Creation Date',readonly=True),
+		 'creation_date':fields.datetime('Created Date',readonly=True),
 		'active': fields.boolean('Active'),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
@@ -213,9 +242,9 @@ class CountryState(osv.osv):
 		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
 		'approve_date': fields.datetime('Approved Date', readonly=True),
 		'app_user_id': fields.many2one('res.users', 'Approved By', readonly=True),
-		'confirm_date': fields.datetime('Confirm Date', readonly=True),
+		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
 		'conf_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
-		'reject_date': fields.datetime('Reject Date', readonly=True),
+		'reject_date': fields.datetime('Rejected Date', readonly=True),
 		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
@@ -225,6 +254,13 @@ class CountryState(osv.osv):
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
 		
 	}
+	
+	_sql_constraints = [
+	
+		('name', 'unique(name)', 'Name must be unique !!'),
+		('code', 'unique(code)', 'Code must be unique!!'),
+	]
+	
 	_order = 'code'
 	
 	_defaults = {
@@ -235,8 +271,25 @@ class CountryState(osv.osv):
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
 		'modify': 'no',
+		'country_id': 105
 		
 	}
+	
+	
+	def _Validation(self, cr, uid, ids, context=None):
+		flds = self.browse(cr , uid , ids[0])
+		name_special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )		
+		if name_special_char:
+			return False		
+		return True	
+		
+	def _CodeValidation(self, cr, uid, ids, context=None):
+		flds = self.browse(cr , uid , ids[0])	
+		if flds.code:		
+			code_special_char = ''.join( c for c in flds.code if  c in '!@#$%^~*{}?+/=' )		
+			if code_special_char:
+				return False
+		return True	
 	
 	def _name_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -251,21 +304,29 @@ class CountryState(osv.osv):
 			else:
 				res = True				
 		return res
-	
-	_constraints = [
 		
-		(_name_validate, 'State Name must be unique !!', ['State Name']),
-		
-	]
+	def _code_dup_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.code:
+			division_code = rec.code
+			code=division_code.upper()			
+			cr.execute(""" select upper(code) from res_country_state where upper(code)  = '%s' """ %(code))
+			data = cr.dictfetchall()			
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res	
 		
 	name_search = location_name_search
 	
 	def entry_confirm(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'confirmed','conf_user_id': uid, 'confirm_date': dt_time})
+		self.write(cr, uid, ids, {'state': 'confirmed','conf_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': dt_time})
+		self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 	
 	def entry_draft(self,cr,uid,ids,context=None):
@@ -275,7 +336,7 @@ class CountryState(osv.osv):
 	def entry_reject(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.remark:
-			self.write(cr, uid, ids, {'state': 'reject','rej_user_id': uid, 'reject_date': dt_time})
+			self.write(cr, uid, ids, {'state': 'reject','rej_user_id': uid, 'reject_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		else:
 			raise osv.except_osv(_('Rejection remark is must !!'),
 				_('Enter rejection remark in remark field !!'))
@@ -284,7 +345,7 @@ class CountryState(osv.osv):
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.cancel_remark:
-			self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': dt_time})
+			self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		else:
 			raise osv.except_osv(_('Cancel remark is must !!'),
 				_('Enter the remarks in Cancel remarks field !!'))
@@ -295,8 +356,22 @@ class CountryState(osv.osv):
 		return super(CountryState, self).write(cr, uid, ids, vals, context)
 	
 	def unlink(self,cr,uid,ids,context=None):
-		raise osv.except_osv(_('Warning!'),
-				_('You can not delete Entry !!'))
+		unlink_ids = []		
+		for rec in self.browse(cr,uid,ids):	
+			if rec.state not in ('draft','cancel'):				
+				raise osv.except_osv(_('Warning!'),
+						_('You can not delete this entry !!'))
+			else:
+				unlink_ids.append(rec.id)
+		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
+				
+	_constraints = [
+	
+		(_Validation, 'Special Character Not Allowed !!!', ['Check Name']),
+		(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
+		(_name_validate, 'Division name must be unique !!', ['name']),		
+		(_code_dup_validate, 'Division code must be unique !!', ['code']),		
+	]
 				
 class res_city(osv.osv):
 	_name = 'res.city'
@@ -330,10 +405,10 @@ class res_city(osv.osv):
 		
 	_columns = {
 	
-		'country_id': fields.many2one('res.country','Country',required=True),
-		'state_id': fields.many2one('res.country.state','State',required=True),
-		'name':fields.char('City',size=125, required=True),
-		'creation_date':fields.datetime('Creation Date',readonly=True),
+		'country_id': fields.many2one('res.country','Country',required=True,domain=[('state','=','approved')]),
+		'state_id': fields.many2one('res.country.state','State',required=True,domain=[('state','=','approved')]),
+		'name':fields.char('Name',size=125, required=True),
+		'creation_date':fields.datetime('Created Date',readonly=True),
 		'active': fields.boolean('Active'),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
@@ -342,9 +417,9 @@ class res_city(osv.osv):
 		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
 		'approve_date': fields.datetime('Approved Date', readonly=True),
 		'app_user_id': fields.many2one('res.users', 'Approved By', readonly=True),
-		'confirm_date': fields.datetime('Confirm Date', readonly=True),
+		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
 		'conf_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
-		'reject_date': fields.datetime('Reject Date', readonly=True),
+		'reject_date': fields.datetime('Rejected Date', readonly=True),
 		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
@@ -370,7 +445,7 @@ class res_city(osv.osv):
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
 		'modify': 'no',
-		
+		'country_id':105
 	}
 	
 	def create(self, cursor, user, vals, context=None):
@@ -388,11 +463,11 @@ class res_city(osv.osv):
 				context=context)
 				
 	def entry_confirm(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'confirmed','conf_user_id': uid, 'confirm_date': dt_time})
+		self.write(cr, uid, ids, {'state': 'confirmed','conf_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': dt_time})
+		self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 	
 	def entry_draft(self,cr,uid,ids,context=None):
@@ -402,7 +477,7 @@ class res_city(osv.osv):
 	def entry_reject(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.remark:
-			self.write(cr, uid, ids, {'state': 'reject','rej_user_id': uid, 'reject_date': dt_time})
+			self.write(cr, uid, ids, {'state': 'reject','rej_user_id': uid, 'reject_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		else:
 			raise osv.except_osv(_('Rejection remark is must !!'),
 				_('Enter rejection remark in remark field !!'))
@@ -412,7 +487,7 @@ class res_city(osv.osv):
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.cancel_remark:
-			self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': dt_time})
+			self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		else:
 			raise osv.except_osv(_('Cancel remark is must !!'),
 				_('Enter the remarks in Cancel remarks field !!'))
@@ -423,9 +498,42 @@ class res_city(osv.osv):
 		return super(res_city, self).write(cr, uid, ids, vals, context)
 	
 	def unlink(self,cr,uid,ids,context=None):
-		raise osv.except_osv(_('Warning!'),
-				_('You can not delete Entry !!'))
-				
+		unlink_ids = []		
+		for rec in self.browse(cr,uid,ids):	
+			if rec.state not in ('draft','cancel'):				
+				raise osv.except_osv(_('Warning!'),
+						_('You can not delete this entry !!'))
+			else:
+				unlink_ids.append(rec.id)
+		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
+	
+	
+	def _Validation(self, cr, uid, ids, context=None):
+		flds = self.browse(cr , uid , ids[0])
+		name_special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )		
+		if name_special_char:
+			return False		
+		return True	
+		
+	def _name_dup_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.name:
+			division_name = rec.name
+			name=division_name.upper()			
+			cr.execute(""" select upper(name) from res_city where upper(name)  = '%s' """ %(name))
+			data = cr.dictfetchall()			
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res
+		
+	_constraints = [
+	
+		(_Validation, 'Special Character Not Allowed !!!', ['Check Name']),
+		(_name_dup_validate, 'Division name must be unique !!', ['name']),		
+	]
 				
 res_city()
 

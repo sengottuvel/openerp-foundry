@@ -153,6 +153,7 @@ class kg_payment_master(osv.osv):
 kg_payment_master()
 
 
+
 class kg_delivery_master(osv.osv):
 
 	_name = "kg.delivery.master"
@@ -197,13 +198,13 @@ class kg_delivery_master(osv.osv):
 		
 		'active':fields.boolean('Active'),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
-		'creation_date':fields.datetime('Creation Date',readonly=True),
+		'creation_date':fields.datetime('Created Date',readonly=True),
 		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
 		'approve_date': fields.datetime('Approved Date', readonly=True),
 		'app_user_id': fields.many2one('res.users', 'Approved By', readonly=True),
-		'confirm_date': fields.datetime('Confirm Date', readonly=True),
+		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
 		'conf_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
-		'reject_date': fields.datetime('Reject Date', readonly=True),
+		'reject_date': fields.datetime('Rejected Date', readonly=True),
 		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
@@ -223,12 +224,17 @@ class kg_delivery_master(osv.osv):
 		
 	}
 	
+	_sql_constraints = [
+	
+		('name', 'unique(name)', 'Name must be unique!!'),
+	]
+	
 	def entry_confirm(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'confirmed','conf_user_id': uid, 'confirm_date': dt_time})
+		self.write(cr, uid, ids, {'state': 'confirmed','conf_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': dt_time})
+		self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 	
 	def entry_draft(self,cr,uid,ids,context=None):
@@ -238,7 +244,7 @@ class kg_delivery_master(osv.osv):
 	def entry_reject(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.remark:
-			self.write(cr, uid, ids, {'state': 'reject','rej_user_id': uid, 'reject_date': dt_time})
+			self.write(cr, uid, ids, {'state': 'reject','rej_user_id': uid, 'reject_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		else:
 			raise osv.except_osv(_('Rejection remark is must !!'),
 				_('Enter rejection remark in remark field !!'))
@@ -247,7 +253,7 @@ class kg_delivery_master(osv.osv):
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.cancel_remark:
-			self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': dt_time})
+			self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		else:
 			raise osv.except_osv(_('Cancel remark is must !!'),
 				_('Enter the remarks in Cancel remarks field !!'))
@@ -257,11 +263,18 @@ class kg_delivery_master(osv.osv):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_delivery_master, self).write(cr, uid, ids, vals, context)
 	
-	def unlink(self,cr,uid,ids,context=None):
-		raise osv.except_osv(_('Warning!'),
-				_('You can not delete Entry !!'))		
-		
-	"""	
+	def _Validation(self, cr, uid, ids, context=None):
+		flds = self.browse(cr , uid , ids[0])
+		name_special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )		
+		if name_special_char:
+			return False		
+		return True	
+	
+	_constraints = [
+	
+		(_Validation, 'Special Character Not Allowed !!!', ['Check Name']),
+	]
+	
 	def unlink(self,cr,uid,ids,context=None):
 		unlink_ids = []		
 		for rec in self.browse(cr,uid,ids):	
@@ -271,9 +284,10 @@ class kg_delivery_master(osv.osv):
 			else:
 				unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
-	"""
+	
 	
 kg_delivery_master()
+
 
 
 class kg_brand_master(osv.osv):
