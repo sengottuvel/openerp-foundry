@@ -41,7 +41,7 @@ The kernel of OpenERP, needed for all installation.
         'base_menu.xml',
         'res/res_security.xml',
         'res/res_config.xml',
-        'data/res.country.state.csv',
+        #~ 'data/res.country.state.csv',
         'ir/wizard/wizard_menu_view.xml',
         'ir/ir_actions.xml',
         'ir/ir_attachment_view.xml',
