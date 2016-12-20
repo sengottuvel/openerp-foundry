@@ -47,13 +47,19 @@
 				<menuitem action="kg_partners.kg_action_group_form" id="cam_crm_group_master" name="Group" parent="cpm_crm_master_menu" sequence="3"/>
 				
 				<!-- Country -->
+<!--
 				<menuitem id="cam_crm_country_master" parent="cpm_crm_master_menu" name="Country" action="base.action_country" sequence="4"/>
+-->
 				
 				<!-- State -->
+<!--
 				<menuitem id="cam_crm_state_master" parent="cpm_crm_master_menu" name="State" action="base.action_country_state" sequence="5"/>
+-->
 				
 				<!-- City Master  --> 
+<!--
 				<menuitem action="base.action_city" name="City" id="cam_crm_city_master" parent="cpm_crm_master_menu" sequence="6"/>
+-->
 				
 				<!-- Chemical Master  --> 
 				<menuitem action="kg_chemical_master.cma_chemical_master" name="Chemical" id="cam_crm_chemical_master" parent="cpm_crm_master_menu" sequence="7"/>
