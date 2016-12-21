@@ -252,7 +252,7 @@ class kg_production(osv.osv):
 	def pattern_issue_update(self,cr,uid,ids,context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		
-		if entry_rec.issue_state == 'pending':
+		if entry_rec.issue_state in ('pending','partial'):
 			today = datetime.today()
 			issue_date = entry_rec.issue_date
 			issue_date = str(issue_date)
@@ -361,7 +361,7 @@ class kg_production(osv.osv):
 	def mould_update(self,cr,uid,ids,context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		
-		if entry_rec.mould_state == 'pending':
+		if entry_rec.mould_state in ('pending','partial'):
 			today = datetime.today()
 			mould_date = entry_rec.mould_date
 			mould_date = str(mould_date)
