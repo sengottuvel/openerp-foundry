@@ -87,7 +87,7 @@ class kg_machineshop(osv.osv):
 		'schedule_line_id': fields.many2one('ch.schedule.details','Schedule Line Item'),
 		
 		### Work Order Details ###
-		'order_bomline_id': fields.related('schedule_line_id','order_bomline_id', type='many2one', relation='ch.order.bom.details', string='Order BOM Line Id', store=True, readonly=True),
+		'order_bomline_id': fields.many2one('ch.order.bom.details','Order BOM Line Id',readonly=True),
 		'order_id': fields.many2one('kg.work.order','Work Order'),
 		'order_line_id': fields.many2one('ch.work.order.details','Order Line'),
 		'order_no': fields.related('order_line_id','order_no', type='char', string='WO No.', store=True, readonly=True),
@@ -120,7 +120,7 @@ class kg_machineshop(osv.osv):
 		'inward_pending_qty': fields.function(_get_pending_qty, string='Pending Qty', method=True, store=True, type='integer'),
 		'each_weight': fields.function(_get_each_weight, string='Each Weight(Kgs)', method=True, store=True, type='float'),
 		'total_weight': fields.function(_get_total_weight, string='Total Weight(Kgs)', method=True, store=True, type='float'),
-		'state': fields.selection([('waiting','Waiting for Accept'),('accept','Accepted')],'Status', readonly=True),
+		'state': fields.selection([('waiting','Waiting for Accept'),('raw_pending','Pending'),('accept','Accepted')],'Status', readonly=True),
 		
 		### MS Inward Schedule List ###
 		'ms_sch_qty': fields.integer('Schedule Qty', required=True),

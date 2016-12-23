@@ -68,6 +68,7 @@
 							<field name="op1_cost_incurred" readonly="1"/>
 							<field name="op1_flag_sc" attrs="{'readonly': [('op1_button_status','=','invisible')]}"
 							on_change="onchange_operation1_sc(op1_flag_sc)"/>
+							<field name="op1_contractor_id" attrs="{'required': [('op1_sc_status','=','sc')],'invisible': [('op1_sc_status','!=','sc')]}"/>
 						</group>					
 					</group>
 					<group string="Work Order Details">
@@ -176,7 +177,7 @@
 	<!-- Menu Action Start-->
 		
 		<record id="tma_ms_operation1" model="ir.actions.act_window">
-			<field name="name">Operation 10</field>
+			<field name="name">Operation 1</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.ms.operations</field>
 			<field name="view_type">form</field>
@@ -265,6 +266,7 @@
 							<field name="op2_cost_incurred" readonly="1"/>
 							<field name="op2_flag_sc" attrs="{'readonly': [('op2_button_status','=','invisible')]}"
 							on_change="onchange_operation2_sc(op2_flag_sc)"/>
+							<field name="op2_contractor_id" attrs="{'required': [('op2_sc_status','=','sc')],'invisible': [('op2_sc_status','!=','sc')]}"/>
 						</group>					
 					</group>
 					<group string="Work Order Details">
@@ -373,7 +375,7 @@
 	<!-- Menu Action Start-->
 		
 		<record id="tma_ms_operation2" model="ir.actions.act_window">
-			<field name="name">Operation 20</field>
+			<field name="name">Operation 2</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.ms.operations</field>
 			<field name="view_type">form</field>
@@ -462,6 +464,7 @@
 							<field name="op3_cost_incurred" readonly="1"/>
 							<field name="op3_flag_sc" attrs="{'readonly': [('op3_button_status','=','invisible')]}"
 							on_change="onchange_operation3_sc(op3_flag_sc)"/>
+							<field name="op3_contractor_id" attrs="{'required': [('op3_sc_status','=','sc')],'invisible': [('op3_sc_status','!=','sc')]}"/>
 						</group>					
 					</group>
 					<group string="Work Order Details">
@@ -570,7 +573,7 @@
 	<!-- Menu Action Start-->
 		
 		<record id="tma_ms_operation3" model="ir.actions.act_window">
-			<field name="name">Operation 30</field>
+			<field name="name">Operation 3</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.ms.operations</field>
 			<field name="view_type">form</field>
@@ -661,6 +664,7 @@
 							<field name="op4_cost_incurred" readonly="1"/>
 							<field name="op4_flag_sc" attrs="{'readonly': [('op4_button_status','=','invisible')]}"
 							on_change="onchange_operation4_sc(op4_flag_sc)"/>
+							<field name="op4_contractor_id" attrs="{'required': [('op4_sc_status','=','sc')],'invisible': [('op4_sc_status','!=','sc')]}"/>
 						</group>					
 					</group>
 					<group string="Work Order Details">
@@ -769,7 +773,7 @@
 	<!-- Menu Action Start-->
 		
 		<record id="tma_ms_operation4" model="ir.actions.act_window">
-			<field name="name">Operation 40</field>
+			<field name="name">Operation 4</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.ms.operations</field>
 			<field name="view_type">form</field>
@@ -860,6 +864,7 @@
 							<field name="op5_cost_incurred" readonly="1"/>
 							<field name="op5_flag_sc" attrs="{'readonly': [('op5_button_status','=','invisible')]}"
 							on_change="onchange_operation5_sc(op5_flag_sc)"/>
+							<field name="op5_contractor_id" attrs="{'required': [('op5_sc_status','=','sc')],'invisible': [('op5_sc_status','!=','sc')]}"/>
 						</group>					
 					</group>
 					<group string="Work Order Details">
@@ -968,7 +973,7 @@
 	<!-- Menu Action Start-->
 		
 		<record id="tma_ms_operation5" model="ir.actions.act_window">
-			<field name="name">Operation 50</field>
+			<field name="name">Operation 5</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.ms.operations</field>
 			<field name="view_type">form</field>
@@ -1059,6 +1064,7 @@
 							<field name="op6_cost_incurred" readonly="1"/>
 							<field name="op6_flag_sc" attrs="{'readonly': [('op6_button_status','=','invisible')]}"
 							on_change="onchange_operation6_sc(op6_flag_sc)"/>
+							<field name="op6_contractor_id" attrs="{'required': [('op6_sc_status','=','sc')],'invisible': [('op6_sc_status','!=','sc')]}"/>
 						</group>					
 					</group>
 					<group string="Work Order Details">
@@ -1167,7 +1173,7 @@
 	<!-- Menu Action Start-->
 		
 		<record id="tma_ms_operation6" model="ir.actions.act_window">
-			<field name="name">Operation 60</field>
+			<field name="name">Operation 6</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.ms.operations</field>
 			<field name="view_type">form</field>
@@ -1258,6 +1264,7 @@
 							<field name="op7_cost_incurred" readonly="1"/>
 							<field name="op7_flag_sc" attrs="{'readonly': [('op7_button_status','=','invisible')]}"
 							on_change="onchange_operation7_sc(op7_flag_sc)"/>
+							<field name="op7_contractor_id" attrs="{'required': [('op7_sc_status','=','sc')],'invisible': [('op7_sc_status','!=','sc')]}"/>
 						</group>					
 					</group>
 					<group string="Work Order Details">
@@ -1366,7 +1373,7 @@
 	<!-- Menu Action Start-->
 		
 		<record id="tma_ms_operation7" model="ir.actions.act_window">
-			<field name="name">Operation 70</field>
+			<field name="name">Operation 7</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.ms.operations</field>
 			<field name="view_type">form</field>
@@ -1457,6 +1464,7 @@
 							<field name="op8_cost_incurred" readonly="1"/>
 							<field name="op8_flag_sc" attrs="{'readonly': [('op8_button_status','=','invisible')]}"
 							on_change="onchange_operation8_sc(op8_flag_sc)"/>
+							<field name="op8_contractor_id" attrs="{'required': [('op8_sc_status','=','sc')],'invisible': [('op8_sc_status','!=','sc')]}"/>
 						</group>					
 					</group>
 					<group string="Work Order Details">
@@ -1565,7 +1573,7 @@
 	<!-- Menu Action Start-->
 		
 		<record id="tma_ms_operation8" model="ir.actions.act_window">
-			<field name="name">Operation 80</field>
+			<field name="name">Operation 8</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.ms.operations</field>
 			<field name="view_type">form</field>
@@ -1656,6 +1664,7 @@
 							<field name="op9_cost_incurred" readonly="1"/>
 							<field name="op9_flag_sc" attrs="{'readonly': [('op9_button_status','=','invisible')]}"
 							on_change="onchange_operation9_sc(op9_flag_sc)"/>
+							<field name="op9_contractor_id" attrs="{'required': [('op9_sc_status','=','sc')],'invisible': [('op9_sc_status','!=','sc')]}"/>
 						</group>					
 					</group>
 					<group string="Work Order Details">
@@ -1764,7 +1773,7 @@
 	<!-- Menu Action Start-->
 		
 		<record id="tma_ms_operation9" model="ir.actions.act_window">
-			<field name="name">Operation 90</field>
+			<field name="name">Operation 9</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.ms.operations</field>
 			<field name="view_type">form</field>
@@ -1855,6 +1864,7 @@
 							<field name="op10_cost_incurred" readonly="1"/>
 							<field name="op10_flag_sc" attrs="{'readonly': [('op10_button_status','=','invisible')]}"
 							on_change="onchange_operation10_sc(op10_flag_sc)"/>
+							<field name="op10_contractor_id" attrs="{'required': [('op10_sc_status','=','sc')],'invisible': [('op10_sc_status','!=','sc')]}"/>
 						</group>					
 					</group>
 					<group string="Work Order Details">
@@ -1963,7 +1973,7 @@
 	<!-- Menu Action Start-->
 		
 		<record id="tma_ms_operation10" model="ir.actions.act_window">
-			<field name="name">Operation 100</field>
+			<field name="name">Operation 10</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.ms.operations</field>
 			<field name="view_type">form</field>
@@ -2054,6 +2064,7 @@
 							<field name="op11_cost_incurred" readonly="1"/>
 							<field name="op11_flag_sc" attrs="{'readonly': [('op11_button_status','=','invisible')]}"
 							on_change="onchange_operation11_sc(op11_flag_sc)"/>
+							<field name="op11_contractor_id" attrs="{'required': [('op11_sc_status','=','sc')],'invisible': [('op11_sc_status','!=','sc')]}"/>
 						</group>					
 					</group>
 					<group string="Work Order Details">
@@ -2162,7 +2173,7 @@
 	<!-- Menu Action Start-->
 		
 		<record id="tma_ms_operation11" model="ir.actions.act_window">
-			<field name="name">Operation 110</field>
+			<field name="name">Operation 11</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.ms.operations</field>
 			<field name="view_type">form</field>
@@ -2253,6 +2264,7 @@
 							<field name="op12_cost_incurred" readonly="1"/>
 							<field name="op12_flag_sc" attrs="{'readonly': [('op12_button_status','=','invisible')]}"
 							on_change="onchange_operation12_sc(op12_flag_sc)"/>
+							<field name="op12_contractor_id" attrs="{'required': [('op12_sc_status','=','sc')],'invisible': [('op12_sc_status','!=','sc')]}"/>
 						</group>					
 					</group>
 					<group string="Work Order Details">
@@ -2361,7 +2373,7 @@
 	<!-- Menu Action Start-->
 		
 		<record id="tma_ms_operation12" model="ir.actions.act_window">
-			<field name="name">Operation 120</field>
+			<field name="name">Operation 12</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.ms.operations</field>
 			<field name="view_type">form</field>

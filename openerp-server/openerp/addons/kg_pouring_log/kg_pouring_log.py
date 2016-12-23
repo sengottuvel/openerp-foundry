@@ -603,9 +603,8 @@ class kg_pouring_log(osv.osv):
 								else:
 									real_poured_qty = real_poured_qty
 								
-								if real_poured_qty > 0:
-									self.fettling_inward_update(cr, uid, ids, wo_produc_item['id'],entry.id,line_item.id,real_poured_qty)
-									production_obj.write(cr, uid, [wo_produc_item['id']], {'state': production_status})
+								self.fettling_inward_update(cr, uid, ids, wo_produc_item['id'],entry.id,line_item.id,real_poured_qty)
+								production_obj.write(cr, uid, [wo_produc_item['id']], {'state': production_status})
 							
 							
 							production_obj.write(cr, uid, [wo_produc_item['id']], 

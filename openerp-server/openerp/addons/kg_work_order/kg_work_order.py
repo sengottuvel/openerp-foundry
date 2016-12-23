@@ -94,6 +94,8 @@ class kg_work_order(osv.osv):
 		'flag_for_stock': fields.boolean('For Stock'),
 		'invoice_flag': fields.boolean('For Invoice'),
 		'offer_no': fields.char('Offer No'),
+		#~ 'enquiry_id': fields.many2one('kg.crm.enquiry','Enquiry No.'),
+		#~ 'offer_id': fields.many2one('kg.crm.offer','Offer No.'),
 		
 		### Entry Info ####
 		
@@ -293,108 +295,92 @@ class kg_work_order(osv.osv):
 									
 						### Checking in Stock Inward for Ready for MS ###
 						
-						cr.execute(""" select sum(available_qty) as stock_qty
+						cr.execute(""" select id,available_qty as stock_qty,serial_no
 							from ch_stock_inward_details  
 							where pump_model_id = %s
-							and foundry_stock_state = 'ready_for_ms' and available_qty > 0 and stock_type = 'pump' and stock_mode = 'manual' """%(item.pump_model_id.id))
-						stock_inward_qty = cr.fetchone();
+							and foundry_stock_state = 'ready_for_ms' and available_qty > 0 and stock_type = 'pump' and stock_mode = 'manual' 
+							order by serial_no """%(item.pump_model_id.id))
+						stock_inward_items = cr.dictfetchall();
 						
-						if stock_inward_qty:
-							if stock_inward_qty[0] != None:
-								rem_qty =  item.qty - stock_inward_qty[0]
-								
-								if rem_qty <= 0:
-									rem_qty = 0
-									qc_qty = item.qty
-								else:
-									rem_qty = rem_qty
-									qc_qty = stock_inward_qty[0]
-								
-								print "qc_qty",qc_qty
-								
-								### Order Priority ###
-										
-								if entry.order_category in ('pump','pump_spare','project'):
-									if entry.order_priority == 'normal':
-										priority = '6'
-									if entry.order_priority == 'emergency':
-										priority = '4'
-								if entry.order_category == 'service':
-									priority = '3'
-								if entry.order_category == 'spare':
-									priority = '5'
-								
-								print "priority",priority
-								
-								### Creating QC Verification ###
-								
-								qc_obj = self.pool.get('kg.qc.verification')
-								
-								### QC Sequence Number Generation  ###
-								qc_name = ''	
-								qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.qc.verification')])
-								rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
-								cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.entry_date))
-								qc_name = cr.fetchone();
+						if stock_inward_items:
 							
-								qc_vals = {
-																
-									'name': qc_name[0],
-									#~ 'schedule_id': entry.id,
-									#~ 'schedule_date': entry.entry_date,
-									'division_id': entry.division_id.id,
-									'location' : entry.location,
-									#~ 'schedule_line_id': schedule_item.id,
-									'order_id': entry.id,
-									'order_line_id': item.id,
-									'qty' : qc_qty,
-									'stock_qty': qc_qty,				   
-									'allocated_qty':qc_qty,				 
-									'state' : 'draft',
-									'order_category':entry.order_category,
-									'order_priority':priority,
-									'pump_model_id' : item.pump_model_id.id,
-									'moc_construction_id' : item.moc_construction_id.id,
-									'stock_type': 'pump'
-											
-									}
-									
-								print "qc_vals",qc_vals
-								
-								qc_id = qc_obj.create(cr, uid, qc_vals)
-								
-								### Qty Updation in Stock Inward ###
-								
-								inward_line_obj = self.pool.get('ch.stock.inward.details')
-								
-								cr.execute(""" select id,available_qty
-									from ch_stock_inward_details  
-									where pump_model_id = %s
-									and foundry_stock_state = 'ready_for_ms' and available_qty > 0 
-									and stock_type = 'pump' and stock_mode = 'manual' """%(item.pump_model_id.id))
-									
-								stock_inward_items = cr.dictfetchall();
-								
-								stock_updation_qty = qc_qty
-								
-								for stock_inward_item in stock_inward_items:
-									if stock_updation_qty > 0:
+							for stock_item in stock_inward_items:
+								if rem_qty != 0:
+									if stock_item['stock_qty'] != None:
 										
-										if stock_inward_item['available_qty'] <= stock_updation_qty:
-											stock_avail_qty = 0
-											inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty,'foundry_stock_state':'reject'})
-										if stock_inward_item['available_qty'] > stock_updation_qty:
-											stock_avail_qty = stock_inward_item['available_qty'] - stock_updation_qty
-											inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
+										if rem_qty < stock_item['stock_qty']:
+											rem_qty = 0
+											qc_qty = rem_qty
+										else:
+											rem_qty = rem_qty
+											qc_qty = stock_item['stock_qty']
 											
-										if stock_inward_item['available_qty'] <= stock_updation_qty:
-											stock_updation_qty = stock_updation_qty - stock_inward_item['available_qty']
-										elif stock_inward_item['available_qty'] > stock_updation_qty:
-											stock_updation_qty = 0
-										print "stock_avail_qty",stock_avail_qty
-			
+										rem_qty =  rem_qty - stock_item['stock_qty']
+										
+										### Order Priority ###
+												
+										if entry.order_category in ('pump','pump_spare','project'):
+											if entry.order_priority == 'normal':
+												priority = '6'
+											if entry.order_priority == 'emergency':
+												priority = '4'
+										if entry.order_category == 'service':
+											priority = '3'
+										if entry.order_category == 'spare':
+											priority = '5'
+										
+										
+										### Creating QC Verification ###
+										
+										qc_obj = self.pool.get('kg.qc.verification')
+										
+										### QC Sequence Number Generation  ###
+										qc_name = ''	
+										qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.qc.verification')])
+										rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
+										cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.entry_date))
+										qc_name = cr.fetchone();
+									
+										qc_vals = {
+																		
+											'name': qc_name[0],
+											#~ 'schedule_id': entry.id,
+											#~ 'schedule_date': entry.entry_date,
+											'division_id': entry.division_id.id,
+											'location' : entry.location,
+											#~ 'schedule_line_id': schedule_item.id,
+											'order_id': entry.id,
+											'order_line_id': item.id,
+											'qty' : qc_qty,
+											'stock_qty': qc_qty,                   
+											'allocated_qty':qc_qty,                 
+											'state' : 'draft',
+											'order_category':entry.order_category,
+											'order_priority':priority,
+											'pump_model_id' : item.pump_model_id.id,
+											'moc_construction_id' : item.moc_construction_id.id,
+											'stock_type': 'pump',
+											'serial_no': stock_item['serial_no']
+													
+											}
+											
+										
+										qc_id = qc_obj.create(cr, uid, qc_vals)
+										
+										### Qty Updation in Stock Inward ###
+										
+										inward_line_obj = self.pool.get('ch.stock.inward.details')
+										
+										stock_avail_qty = stock_item['stock_qty'] - qc_qty
+										print "stock_avail_qtystock_avail_qty",stock_avail_qty
+										if stock_avail_qty == 0:
+											inward_line_obj.write(cr, uid, [stock_item['id']],{'available_qty': stock_avail_qty,'foundry_stock_state':'reject'})
+										else:
+											inward_line_obj.write(cr, uid, [stock_item['id']],{'available_qty': stock_avail_qty})
+										
 								
 				line_obj.write(cr, uid, item.id, {'pump_rem_qty':rem_qty})
+			
 				
 			#~ if entry.order_priority == 'normal' and entry.order_category in ('spare','service'):
 			#~ 
@@ -509,6 +495,12 @@ class kg_work_order(osv.osv):
 			self.write(cr, uid, ids, {'state': 'cancel','flag_cancel':0,'cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 			cr.execute(''' update ch_work_order_details set state = 'cancel',flag_cancel='f' where header_id = %s ''',[entry.id])			
 		
+		off_obj = self.pool.get('kg.crm.offer').search(cr,uid,[('name','=',rec.offer_no),('state','=','wo_created')])
+		if off_obj:
+			off_rec = self.pool.get('kg.crm.offer').browse(cr,uid,off_obj[0])
+			self.pool.get('kg.crm.offer').write(cr,uid,off_rec.id,{'state': 'moved_to_offer','wo_flag': False})
+			self.pool.get('kg.crm.enquiry').write(cr,uid,off_rec.enquiry_id.id,{'state': 'moved_to_offer','wo_flag': False})
+				
 		return True
 		
 	def send_to_dms(self,cr,uid,ids,context=None):
@@ -538,6 +530,11 @@ class kg_work_order(osv.osv):
 				raise osv.except_osv(_('Warning!'),
 						_('You can not delete this entry !!'))
 			else:
+				off_obj = self.pool.get('kg.crm.offer').search(cr,uid,[('name','=',rec.offer_no),('state','=','wo_created')])
+				if off_obj:
+					off_rec = self.pool.get('kg.crm.offer').browse(cr,uid,off_obj[0])
+					self.pool.get('kg.crm.offer').write(cr,uid,off_rec.id,{'state': 'moved_to_offer','wo_flag': False})
+					self.pool.get('kg.crm.enquiry').write(cr,uid,off_rec.enquiry_id.id,{'state': 'moved_to_offer','wo_flag': False})
 				unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
 		
@@ -612,6 +609,8 @@ class ch_work_order_details(osv.osv):
 		### Offer Details ###
 		'pump_offer_line_id': fields.integer('Pump Offer'),
 		'line_ids_d': fields.one2many('ch.wo.accessories', 'header_id', "Accessories"),
+		## QAP ##
+		'qap_plan_id': fields.many2one('kg.qap.plan', 'QAP Standard',required=True),
 		
 	}
 	
@@ -836,7 +835,8 @@ class ch_work_order_details(osv.osv):
 						moc_id = False
 				else:
 					moc_id = False
-				
+					
+					
 				bot_vals.append({
 					
 					'bot_line_id': bom_bot_details['id'],
@@ -851,7 +851,7 @@ class ch_work_order_details(osv.osv):
 					'moc_id': moc_id,
 							  
 					})
-							
+						
 				
 			bed_bom_obj = self.pool.get('ch.order.bom.details')
 			
@@ -1091,7 +1091,7 @@ class ch_work_order_details(osv.osv):
 							if qty > 0:
 								bom_qty = qty * vertical_foundry['qty']
 							
-							
+							print "vertical_foundry['header_id']",vertical_foundry['header_id']
 							if vertical_foundry['position_id'] == None:
 								raise osv.except_osv(_('Warning!'),
 								_('Kindly Configure Position No. in Foundry Items for respective Pump Bom and proceed further !!'))
@@ -1260,7 +1260,7 @@ class ch_work_order_details(osv.osv):
 								moc_id = False
 						else:
 							moc_id = False
-						
+								
 							
 						if vertical_ms_details['pos_no'] == None:
 							pos_no = 0
@@ -1643,7 +1643,6 @@ class ch_work_order_details(osv.osv):
 								moc_id = False
 						else:
 							moc_id = False
-						
 						if qty == 0:
 							vertical_bot_qty = vertical_bot_details['qty']
 						if qty > 0:
@@ -1723,6 +1722,15 @@ class ch_work_order_details(osv.osv):
 			return False
 		return True
 		
+		
+	def create(self, cr, uid, vals, context=None):
+		header_rec = self.pool.get('kg.work.order').browse(cr, uid,vals['header_id'])
+		#~ if header_rec.state == 'draft':
+		res = super(ch_work_order_details, self).create(cr, uid, vals, context=context)
+		#~ else:
+			#~ res = False
+		return res
+		
 	def _check_flag_applicable(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.order_category == 'spare':
@@ -1732,15 +1740,6 @@ class ch_work_order_details(osv.osv):
 			if not applicable_id:
 				return False
 		return True
-		
-		
-	def create(self, cr, uid, vals, context=None):
-		header_rec = self.pool.get('kg.work.order').browse(cr, uid,vals['header_id'])
-		#~ if header_rec.state == 'draft':
-		res = super(ch_work_order_details, self).create(cr, uid, vals, context=context)
-		#~ else:
-			#~ res = False
-		return res
 		
 		
 	def write(self, cr, uid, ids, vals, context=None):
@@ -1971,6 +1970,7 @@ class ch_order_bot_details(osv.osv):
 		'brand_id': fields.many2one('kg.brand.master','Brand'),	
 		### Offer Details ###
 		'spare_offer_line_id': fields.integer('Spare Offer'),
+		
 	
 	}
 	

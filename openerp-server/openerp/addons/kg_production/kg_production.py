@@ -104,7 +104,7 @@ class kg_production(osv.osv):
 		'sch_remarks': fields.text('Remarks'),
 		
 		### Work Order Details ###
-		'order_bomline_id': fields.related('schedule_line_id','order_bomline_id', type='many2one', relation='ch.order.bom.details', string='Order BOM Line Id', store=True, readonly=True),
+		'order_bomline_id': fields.many2one('ch.order.bom.details','Order BOM Line Id',readonly=True),
 		'order_id': fields.many2one('kg.work.order','Work Order'),
 		'order_line_id': fields.many2one('ch.work.order.details','Order Line'),
 		'allocation_id': fields.many2one('ch.stock.allocation.detail','Allocation'),
@@ -117,10 +117,10 @@ class kg_production(osv.osv):
 
 		
 		'pump_model_id': fields.related('order_line_id','pump_model_id', type='many2one', relation='kg.pumpmodel.master', string='Pump Model', store=True, readonly=True),
-		'pattern_id': fields.related('schedule_line_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern Number', store=True, readonly=True),
+		'pattern_id': fields.many2one('kg.pattern.master', 'Pattern Number', readonly=True),
 		'pattern_code': fields.related('pattern_id','name', type='char', string='Pattern Code', store=True, readonly=True),
 		'pattern_name': fields.related('pattern_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
-		'moc_id': fields.related('schedule_line_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
+		'moc_id': fields.many2one('kg.moc.master','MOC',readonly=True),
 		#~ 'schedule_qty': fields.related('schedule_line_id','qty', type='integer', size=100, string='Schedule Qty', store=True, readonly=True),
 		'schedule_qty': fields.integer('Schedule Qty', readonly=True),
 		'qty': fields.integer('Qty', required=True),
@@ -252,7 +252,7 @@ class kg_production(osv.osv):
 	def pattern_issue_update(self,cr,uid,ids,context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		
-		if entry_rec.issue_state in ('pending','partial'):
+		if entry_rec.issue_state == 'pending':
 			today = datetime.today()
 			issue_date = entry_rec.issue_date
 			issue_date = str(issue_date)
@@ -299,7 +299,7 @@ class kg_production(osv.osv):
 		
 		entry_rec = self.browse(cr, uid, ids[0])
 		
-		if entry_rec.core_state == 'pending':
+		if entry_rec.core_state in ('pending','partial'):
 			
 			today = datetime.today()
 			core_date = entry_rec.core_date

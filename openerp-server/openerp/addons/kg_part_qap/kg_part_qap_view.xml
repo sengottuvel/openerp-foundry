@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+	
+	<!-- Dynamic Balancing -->
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_dynamic_balancing" model="ir.ui.view">
+			<field name="name">Dynamic Balancing Entry Form</field>
+			<field name="model">kg.part.qap</field>
+			<field name="arch" type="xml">
+				<form string="Dynamic Balancing" version="7.0" create="false" delete="false">
+					<header>
+						<button name="db_update" type="object" string="Update" class="oe_highlight" confirm="Are you sure to proceed ?"
+						attrs="{'invisible': [('db_state','=','completed')]}"/>
+					</header>
+						<group string="Dynamic Balancing">
+							<group>
+								<field name="db_date" attrs="{'readonly': [('db_state','=','completed')]}"/>
+								<field name="db_min_weight" attrs="{'readonly': ['|',('flag_db_customer_specific','!=',True),('db_state','=','completed')]}"/>
+								<field name="db_actual_unbal_weight" attrs="{'required': [('db_result','!=','reject')],'readonly': [('db_state','=','completed')]}"/>
+								<field name="db_shift_id" attrs="{'required': [('db_result','!=','reject')],'readonly': [('db_state','=','completed')]}"/>
+								<field name="db_verified_by" attrs="{'required': [('db_result','!=','reject')],'readonly': [('db_state','=','completed')]}"/>
+								<field name="db_reject_remarks_id" attrs="{'readonly': [('db_state','=','completed')],'invisible':[('db_result','!=','reject')],'required':[('db_result','=','reject')]}"/>
+								<field name="db_remarks" attrs="{'readonly': [('db_state','=','completed')]}"/>
+							</group>											
+							<group>
+								<field name="qap_plan_id"/>
+								<field name="db_max_weight" attrs="{'readonly': ['|',('flag_db_customer_specific','!=',True),('db_state','=','completed')]}"/>
+								<field name="db_machinery_id" attrs="{'required': [('db_result','!=','reject')],'readonly': [('db_state','=','completed')]}"/>
+								<field name="db_operator" attrs="{'required': [('db_result','!=','reject')],'readonly': [('db_state','=','completed')]}"/>
+								<field name="db_result" required="1" attrs="{'readonly': [('db_state','=','completed')]}"/>
+								<field name="flag_db_customer_specific" attrs="{'readonly': [('db_state','=','completed')]}"/>
+								<field name="db_state" invisible="1" attrs="{'readonly': [('db_state','=','completed')]}"/>
+								
+							</group>					
+						</group>
+						<group string="WO Details">
+							<group>
+								<field name="order_no"/>
+								<field name="item_code"/>
+								<field name="moc_id"/>
+							</group>											
+							<group>
+								<field name="order_category"/>
+								<field name="item_name"/>
+							</group>					
+						</group>
+						<notebook>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										
+										<field name="update_user_id"/>
+										
+									</group>
+									<group>
+										<field name="crt_date"/>
+										
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+<!--
+							<page string="Notification Info">								
+								<group>
+									<group>
+										<field name="flag_sms"/>										
+									</group>
+									<group>
+										<field name="flag_email"/>
+										<field name="flag_spl_approve"/>
+									</group>
+								</group>
+							</page>
+-->
+						</notebook>
+					</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_dynamic_balancing" model="ir.ui.view">
+			<field name="name">Dynamic Balancing Entry Tree</field>
+			<field name="model">kg.part.qap</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Dynamic Balancing" create="false" delete="false">					
+					<field name="order_no"/>
+					<field name="order_category"/>
+					<field name="item_code"/>
+					<field name="item_name"/>
+					<field name="moc_id"/>
+					<field name="db_result"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_dynamic_balancing" model="ir.ui.view">
+            <field name="name">Dynamic Balancing Entry Search</field>
+            <field name="model">kg.part.qap</field>
+            <field name="arch" type="xml">
+                <search string="Dynamic Balancing Entry Search">
+					
+					<field name="item_code" string="Item Code"  filter_domain="[('item_code','ilike',self)]" />
+					<field name="item_name" string="Item Name"  filter_domain="[('item_name','ilike',self)]" />
+					<field name="order_no" string="Work Order No."  filter_domain="[('order_no','ilike',self)]" />
+					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />				
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
+						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_category'}"/>
+						<filter string="Item Code" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'item_code'}"/>
+						<filter string="Item Name." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'item_name'}"/>
+						<filter string="MOC" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_id'}"/>
+						<filter string="Result" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'db_result'}"/>
+						
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+        
+	<!-- Menu Action Start-->
+		
+		<record id="tma_dynamic_balancing" model="ir.actions.act_window">
+			<field name="name">Dynamic Balancing</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.part.qap</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="search_view_id" ref="t_search_v_dynamic_balancing"/>
+			
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_dynamic_balancing_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_dynamic_balancing"/>
+            <field name="act_window_id" ref="tma_dynamic_balancing"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_dynamic_balancing_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_dynamic_balancing"/>
+            <field name="act_window_id" ref="tma_dynamic_balancing"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Hydro Static Pressure Test -->
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_pre_hydrostatic" model="ir.ui.view">
+			<field name="name">Pre Hydro Static Test Entry Form</field>
+			<field name="model">kg.part.qap</field>
+			<field name="arch" type="xml">
+				<form string="Pre Hydro Static Test" version="7.0" create="false" delete="false">
+					<header>
+						<button name="hs_update" type="object" string="Update" class="oe_highlight" confirm="Are you sure to proceed ?"
+						attrs="{'invisible': [('hs_state','=','completed')]}"/>
+					</header>
+						<group string="Pre Hydro Static Test">
+							<group>
+								<field name="hs_date" attrs="{'readonly': [('hs_state','=','completed')]}"/>
+								<field name="hs_pressure" attrs="{'required': [('hs_result','!=','reject')],'readonly': [('hs_state','=','completed')]}"/>
+								<field name="hs_actual_unbal_weight" attrs="{'required': [('hs_result','!=','reject')],'readonly': [('hs_state','=','completed')]}"/>
+								<field name="hs_shift_id" attrs="{'required': [('hs_result','!=','reject')],'readonly': [('hs_state','=','completed')]}"/>
+								<field name="hs_verified_by" attrs="{'required': [('hs_result','!=','reject')],'readonly': [('hs_state','=','completed')]}"/>
+								<field name="hs_reject_remarks_id" attrs="{'readonly': [('hs_state','=','completed')],'invisible':[('hs_result','!=','reject')],'required':[('hs_result','=','reject')]}"/>
+								<field name="hs_action" attrs="{'readonly': [('hs_state','=','completed')],'invisible':[('hs_result','not in',('leak','reject'))]}"/>
+								<field name="hs_remarks" attrs="{'readonly': [('hs_state','=','completed')]}"/>
+							</group>											
+							<group>
+								<field name="qap_plan_id"/>
+								<field name="hs_testing_time" attrs="{'required': [('hs_result','!=','reject')],'readonly': [('hs_state','=','completed')]}"/>
+								<field name="hs_machinery_id" attrs="{'required': [('hs_result','!=','reject')],'readonly': [('hs_state','=','completed')]}"/>
+								<field name="hs_operator" attrs="{'required': [('hs_result','!=','reject')],'readonly': [('hs_state','=','completed')]}"/>
+								<field name="hs_result" required="1" attrs="{'readonly': [('hs_state','=','completed')]}"/>
+								<field name="hs_leak_remarks" attrs="{'readonly': [('hs_state','=','completed')],'invisible':[('hs_result','!=','leak')],'required':[('hs_result','=','leak')]}"/>
+								<field name="flag_hs_customer_specific" invisible="1"/>
+								<field name="hs_state" invisible="1"/>
+							</group>					
+						</group>
+						<group string="WO Details">
+							<group>
+								<field name="order_no"/>
+								<field name="item_code"/>
+								<field name="moc_id"/>
+							</group>											
+							<group>
+								<field name="order_category"/>
+								<field name="item_name"/>
+							</group>					
+						</group>
+						<notebook>
+							<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<group>
+										<field name="user_id"/>
+										
+										<field name="update_user_id"/>
+										
+									</group>
+									<group>
+										<field name="crt_date"/>
+										
+										<field name="update_date"/>
+									</group>
+								</group>
+							</page>
+<!--
+							<page string="Notification Info">								
+								<group>
+									<group>
+										<field name="flag_sms"/>										
+									</group>
+									<group>
+										<field name="flag_email"/>
+										<field name="flag_spl_approve"/>
+									</group>
+								</group>
+							</page>
+-->
+						</notebook>
+					</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_pre_hydrostatic" model="ir.ui.view">
+			<field name="name">Pre Hydro Static Test Entry Tree</field>
+			<field name="model">kg.part.qap</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Pre Hydro Static Test" create="false" delete="false">					
+					<field name="order_no"/>
+					<field name="order_category"/>
+					<field name="item_code"/>
+					<field name="item_name"/>
+					<field name="moc_id"/>
+					<field name="hs_result"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_pre_hydrostatic" model="ir.ui.view">
+            <field name="name">Pre Hydro Static Test Entry Search</field>
+            <field name="model">kg.part.qap</field>
+            <field name="arch" type="xml">
+                <search string="Pre Hydro Static Test Entry Search">
+					
+					<field name="item_code" string="Item Code"  filter_domain="[('item_code','ilike',self)]" />
+					<field name="item_name" string="Item Name"  filter_domain="[('item_name','ilike',self)]" />
+					<field name="order_no" string="Work Order No."  filter_domain="[('order_no','ilike',self)]" />
+					<field name="moc_id" string="MOC"  filter_domain="[('moc_id','ilike',self)]" />				
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
+						<filter string="Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_category'}"/>
+						<filter string="Item Code" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'item_code'}"/>
+						<filter string="Item Name." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'item_name'}"/>
+						<filter string="MOC" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_id'}"/>
+						<filter string="Result" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'hs_result'}"/>
+						
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+        
+	<!-- Menu Action Start-->
+		
+		<record id="tma_pre_hydrostatic" model="ir.actions.act_window">
+			<field name="name">Pre Hydro Static Test</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.part.qap</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="search_view_id" ref="t_search_v_pre_hydrostatic"/>
+		</record>
+		
+		<record model="ir.actions.act_window.view" id="tma_pre_hydrostatic_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_pre_hydrostatic"/>
+            <field name="act_window_id" ref="tma_pre_hydrostatic"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_pre_hydrostatic_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_pre_hydrostatic"/>
+            <field name="act_window_id" ref="tma_pre_hydrostatic"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start -->
+		
+        <record id="audit_dynamic_balancing" model="audittrail.rule">
+            <field name="name">Audit Log Part QAP</field>
+            <field name="object_id" eval="ref('kg_part_qap.model_kg_part_qap')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+	 
+    <!-- Audit Log Xml Data End-->
+
+	<!-- Menu Item Start -->
+		
+		<menuitem name="QAP" id="tpm_qap" parent="kg_operation_master.mpm_crm" sequence="6"/>
+			
+			<menuitem action="tma_dynamic_balancing" id="tam_dynamic_balancing" parent="tpm_qap" sequence="1" />
+			
+			<menuitem action="tma_pre_hydrostatic" id="tam_pre_hydrostatic" parent="tpm_qap" sequence="2" />
+	
+	<!-- Menu Item End -->
+	
+	
+		
+	</data>
+</openerp>

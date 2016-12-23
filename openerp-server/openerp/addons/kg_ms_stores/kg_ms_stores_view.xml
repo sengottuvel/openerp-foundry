@@ -12,8 +12,7 @@
 				<form string="MS Stores List" version="7.0" create="false">
 					<header>
 						<button name="assembly_update" string="Assembly Update" type="object"/>
-					</header>
-						
+					</header>					
 					<group string="MS Details">
 						<group>
 							<field name="name" invisible="1"/>

@@ -17,14 +17,48 @@
 						<group>
 							<field name="name" invisible="1" readonly="1"/>
 							<field name="entry_date" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
-							<field name="pump_model_id"/>
+							<field name="qap_plan_id" readonly="1"/>
+							<field name="pump_serial_no" required="1" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
 							<field name="remarks" string="Remarks" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
 						</group>											
 						<group>
 							<field name="order_id" readonly="1"/>
+							<field name="pump_model_id" readonly="1"/>
 							<field name="moc_construction_id" readonly="1"/>
 							<field name="state" style="width: 30%%" class="att_state_change"/>
 							<field name="entry_mode" invisible="1"/>
+						</group>					
+					</group>
+					<group>
+						<group string="Bed Assembly">
+							<field name="bed_assembly_state" required="1" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+							<field name="bed_assembly_date" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+							<field name="bed_assembly_shift_id" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+							<field name="bed_assembly_done_by" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+						</group>											
+						<group string="Rotating Assembly">
+							<field name="rotate_assembly_state" required="1" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+							<field name="rotate_assembly_date" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+							<field name="rotate_assembly_shift_id" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+							<field name="rotate_assembly_done_by" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+						</group>					
+						<group string="Run Out test for Impellar">
+							<field name="runout_test_state" required="1" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+							<field name="runout_test_date" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+							<field name="runout_test_shift_id" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+							<field name="runout_test_done_by" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+						</group>					
+						<group string="Mechanical Assembly">
+							<field name="mech_assembly_state" required="1" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+							<field name="mech_assembly_date" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+							<field name="mech_assembly_shift_id" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+							<field name="mech_assembly_done_by" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+						</group>					
+						<group string="Full Assembly">
+							<field name="full_assembly_state" required="1" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+							<field name="full_assembly_date" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+							<field name="full_assembly_shift_id" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+							<field name="full_assembly_done_by" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
 						</group>					
 					</group>
 					

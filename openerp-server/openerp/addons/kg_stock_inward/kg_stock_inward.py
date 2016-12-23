@@ -208,6 +208,7 @@ class ch_stock_inward_details(osv.osv):
 		'ms_stock_state': fields.selection([('operation_inprogress','Operation In Progress'),('ready_for_ass','Ready for Assembly'),('reject','Rejected')],'Status'),
 		'item_code': fields.char('Item Code', size=128),
 		'item_name': fields.char('Item Name', size=128),
+		'stock_location_id': fields.many2one('stock.location','Stock Location',domain="[('usage','=','production')]")
 	
 	}
 	

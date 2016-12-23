@@ -58,7 +58,7 @@ class kg_fettling(osv.osv):
 		'schedule_line_id': fields.many2one('ch.schedule.details','Schedule Line Item'),
 		
 		### Work Order Details ###
-		'order_bomline_id': fields.related('schedule_line_id','order_bomline_id', type='many2one', relation='ch.order.bom.details', string='Order BOM Line Id', store=True, readonly=True),
+		'order_bomline_id': fields.many2one('ch.order.bom.details','Order BOM Line Id',readonly=True),
 		'order_id': fields.many2one('kg.work.order','Work Order'),
 		'order_line_id': fields.many2one('ch.work.order.details','Order Line'),
 		'allocation_id': fields.many2one('ch.stock.allocation.detail','Allocation'),
@@ -69,10 +69,10 @@ class kg_fettling(osv.osv):
 		'order_priority': fields.selection(ORDER_PRIORITY, string='Priority', store=True, readonly=True),
 		
 		'pump_model_id': fields.related('order_line_id','pump_model_id', type='many2one', relation='kg.pumpmodel.master', string='Pump Model', store=True, readonly=True),
-		'pattern_id': fields.related('schedule_line_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern Number', store=True, readonly=True),
+		'pattern_id': fields.many2one('kg.pattern.master', 'Pattern Number',readonly=True),
 		'pattern_code': fields.related('pattern_id','name', type='char', string='Pattern Code', store=True, readonly=True),
 		'pattern_name': fields.related('pattern_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
-		'moc_id': fields.related('schedule_line_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
+		'moc_id': fields.many2one('kg.moc.master', 'MOC', readonly=True),
 		'schedule_qty': fields.related('schedule_line_id','qty', type='integer', size=100, string='Schedule Qty', store=True, readonly=True),
 		'production_id':fields.many2one('kg.production','Production'),
 		'pour_qty': fields.integer('Poured Qty'),
@@ -484,7 +484,6 @@ class kg_fettling(osv.osv):
 		'finish_grinding_date':lambda * a: time.strftime('%Y-%m-%d'),
 		'finish_grinding_accept_user_id':lambda obj, cr, uid, context: uid,
 		'finish_grinding_state':'pending',
-		'flag_fg_special_app': False,
 		### Re Shot Blasting ###
 		'reshot_blasting_user_id':lambda obj, cr, uid, context: uid,
 		'reshot_blasting_date':lambda * a: time.strftime('%Y-%m-%d'),
@@ -738,7 +737,7 @@ class kg_fettling(osv.osv):
 							cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(arc_cutting_seq_id[0],seq_rec.code))
 							arc_cutting_name = cr.fetchone();
 							self.write(cr, uid, ids, {'arc_cutting_date':time.strftime('%Y-%m-%d'),'arc_cutting_qty': arc_cutting_qty,'arc_cutting_accept_qty': arc_cutting_qty,'arc_cutting_name':arc_cutting_name[0]})
-						if stage_item['stage_name'] == 'HEAT TREATMENT':
+						if stage_item['stage_name'] == 'HEAT TREATMENT1':
 							heat_total_qty = entry.inward_accept_qty
 							self.write(cr, uid, ids, {'heat_date':time.strftime('%Y-%m-%d'),'heat_total_qty': heat_total_qty,'heat_qty':heat_total_qty})
 						if stage_item['stage_name'] == 'HEAT TREATMENT2':
@@ -881,7 +880,8 @@ class kg_fettling(osv.osv):
 								'pattern_id' : entry.pattern_id.id,
 								'pattern_name' : entry.pattern_id.pattern_name, 
 								'moc_id' : entry.moc_id.id,
-								'stock_type': 'pattern'
+								'stock_type': 'pattern',
+								'order_bomline_id': entry.order_bomline_id.id
 										
 								}
 							
@@ -1222,7 +1222,7 @@ class kg_fettling(osv.osv):
 										allocated_qty = arc_cutting_qty
 									
 									
-									if stk_item['stage_name'] == 'HEAT TREATMENT':
+									if stk_item['stage_name'] == 'HEAT TREATMENT1':
 										
 										stk_heat_qty = stk_item_rec.heat_qty
 										
@@ -1441,6 +1441,7 @@ class kg_fettling(osv.osv):
 									'schedule_line_id': entry.schedule_line_id.id,
 									'order_id': entry.order_id.id,
 									'order_line_id': entry.order_line_id.id,
+									'order_bomline_id': entry.order_bomline_id.id,
 									'qty' : entry.inward_reject_qty,			  
 									'schedule_qty' : entry.inward_reject_qty,		   
 									'state' : 'issue_done',
@@ -1628,7 +1629,7 @@ class kg_fettling(osv.osv):
 						arc_cutting_name = cr.fetchone();
 						self.write(cr, uid, ids, {'arc_cutting_date':time.strftime('%Y-%m-%d'),'arc_cutting_qty': arc_cutting_qty,'arc_cutting_accept_qty': arc_cutting_qty,'arc_cutting_name':arc_cutting_name[0]})
 					
-					if stage_item['stage_name'] == 'HEAT TREATMENT':
+					if stage_item['stage_name'] == 'HEAT TREATMENT1':
 						### Next Stage Qty ###
 						heat_total_qty = fettling_accept_qty
 						self.write(cr, uid, ids, {'heat_date':time.strftime('%Y-%m-%d'),'heat_total_qty': heat_total_qty,'heat_qty':heat_total_qty})
@@ -1775,7 +1776,8 @@ class kg_fettling(osv.osv):
 							'pattern_id' : entry.pattern_id.id,
 							'pattern_name' : entry.pattern_id.pattern_name, 
 							'moc_id' : entry.moc_id.id,
-							'stock_type': 'pattern'
+							'stock_type': 'pattern',
+							'order_bomline_id': entry.order_bomline_id.id
 									
 							}
 						
@@ -2109,7 +2111,7 @@ class kg_fettling(osv.osv):
 									allocated_qty = arc_cutting_qty
 								
 								
-								if stk_item['stage_name'] == 'HEAT TREATMENT':
+								if stk_item['stage_name'] == 'HEAT TREATMENT1':
 									
 									stk_heat_qty = stk_item_rec.heat_qty
 									
@@ -2327,6 +2329,7 @@ class kg_fettling(osv.osv):
 								'schedule_line_id': entry.schedule_line_id.id,
 								'order_id': entry.order_id.id,
 								'order_line_id': entry.order_line_id.id,
+								'order_bomline_id': entry.order_bomline_id.id,
 								'qty' : rem_qty,			  
 								'schedule_qty' : rem_qty,		   
 								'state' : 'issue_done',
@@ -3199,7 +3202,8 @@ class kg_fettling(osv.osv):
 								'pattern_id' : entry.pattern_id.id,
 								'pattern_name' : entry.pattern_id.pattern_name, 
 								'moc_id' : entry.moc_id.id,
-								'stock_type': 'pattern'
+								'stock_type': 'pattern',
+								'order_bomline_id': entry.order_bomline_id.id
 										
 								}
 							
@@ -3530,7 +3534,7 @@ class kg_fettling(osv.osv):
 										allocated_qty = arc_cutting_qty
 									
 									
-									if stk_item['stage_name'] == 'HEAT TREATMENT':
+									if stk_item['stage_name'] == 'HEAT TREATMENT1':
 										
 										stk_heat_qty = stk_item_rec.heat_qty
 										
@@ -3748,6 +3752,7 @@ class kg_fettling(osv.osv):
 									'schedule_line_id': entry.schedule_line_id.id,
 									'order_id': entry.order_id.id,
 									'order_line_id': entry.order_line_id.id,
+									'order_bomline_id': entry.order_bomline_id.id,
 									'qty' : rem_qty,			  
 									'schedule_qty' : rem_qty,		   
 									'state' : 'issue_done',
@@ -4060,7 +4065,7 @@ class kg_fettling(osv.osv):
 					self.write(cr, uid, ids, {'arc_cutting_accept_qty': entry.allocated_accepted_qty,'arc_cutting_qty': entry.allocated_accepted_qty,
 					'flag_allocated': False,'allocation_state':'accept'})
 					
-				if entry.stage_name == 'HEAT TREATMENT':
+				if entry.stage_name == 'HEAT TREATMENT1':
 					
 					self.write(cr, uid, ids, {'heat_qty':entry.allocated_accepted_qty,'heat_total_qty': entry.allocated_accepted_qty,
 					'flag_allocated': False,'allocation_state':'accept'})
@@ -4158,7 +4163,8 @@ class kg_fettling(osv.osv):
 							'pattern_id' : entry.pattern_id.id,
 							'pattern_name' : entry.pattern_id.pattern_name, 
 							'moc_id' : entry.moc_id.id,
-							'stock_type': 'pattern'
+							'stock_type': 'pattern',
+							'order_bomline_id': entry.order_bomline_id.id
 									
 							}
 						
@@ -4493,7 +4499,7 @@ class kg_fettling(osv.osv):
 									allocated_qty = arc_cutting_qty
 								
 								
-								if stk_item['stage_name'] == 'HEAT TREATMENT':
+								if stk_item['stage_name'] == 'HEAT TREATMENT1':
 									
 									stk_heat_qty = stk_item_rec.heat_qty
 									
@@ -4716,6 +4722,7 @@ class kg_fettling(osv.osv):
 								'schedule_line_id': entry.schedule_line_id.id,
 								'order_id': entry.order_id.id,
 								'order_line_id': entry.order_line_id.id,
+								'order_bomline_id': entry.order_bomline_id.id,
 								'qty' : rem_qty,			  
 								'schedule_qty' : rem_qty,		   
 								'state' : 'issue_done',
@@ -6638,7 +6645,7 @@ class kg_batch_heat_treatment(osv.osv):
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed')],'Status', readonly=True),
 
 		'heat_treatment_ids':fields.many2many('kg.fettling','m2m_heat_treatment_details' , 'batch_id', 'heat_treatment_id', 'Heat Treatment Items',
-			domain="[('stage_name','=','HEAT TREATMENT'),('state','=','accept')]"),
+			domain="[('stage_name','=','HEAT TREATMENT1'),('state','=','accept')]"),
 			
 		'line_ids': fields.one2many('ch.batch.heat.treatment.line', 'header_id', "Batch Line Details"),
 		
@@ -7498,7 +7505,6 @@ class kg_batch_finish_grinding(osv.osv):
 					'pattern_name': item.pattern_name
 				}
 				
-				print "vals",vals
 				line_id = line_obj.create(cr, uid,vals)
 				
 			self.write(cr, uid, ids, {'flag_batchline': True})

@@ -81,7 +81,7 @@ class kg_qc_verification(osv.osv):
 		'moc_construction_name':fields.related('moc_construction_id','name', type='char', string='MOC Construction Name.', store=True, readonly=True),
 		'bom_id': fields.related('schedule_line_id','bom_id', type='many2one', relation='kg.bom', string='BOM Id', store=True, readonly=True),
 		'bom_line_id': fields.related('schedule_line_id','bom_line_id', type='many2one', relation='ch.bom.line', string='BOM Line Id', store=True, readonly=True),
-		'order_bomline_id': fields.related('schedule_line_id','order_bomline_id', type='many2one', relation='ch.order.bom.details', string='Schedule BOM Line Id', store=True, readonly=True),
+		'order_bomline_id': fields.many2one('ch.order.bom.details', 'Schedule BOM Line Id', readonly=True),
 		
 		'order_no': fields.related('order_line_id','order_no', type='char', string='WO No.', store=True, readonly=True),
 		'order_priority': fields.selection(ORDER_PRIORITY, string='Priority', readonly=True),
@@ -91,9 +91,9 @@ class kg_qc_verification(osv.osv):
 		#~ 'pump_model_id': fields.related('schedule_line_id','pump_model_id', type='many2one', relation='kg.pumpmodel.master', string='Pump Model', store=True, readonly=True),
 		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', readonly=True),
 		
-		'pattern_id': fields.related('schedule_line_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern No.', store=True, readonly=True),
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern No.',readonly=True),
 		'pattern_name': fields.related('pattern_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
-		'moc_id': fields.related('order_bomline_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
+		'moc_id': fields.many2one('kg.moc.master','MOC', readonly=True),
 		
 		'stage_id': fields.many2one('kg.stage.master','Stage', readonly=True),
 		
@@ -224,7 +224,7 @@ class kg_qc_verification(osv.osv):
 					seq_rec = self.pool.get('ir.sequence').browse(cr,uid,ms_seq_id[0])
 					cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(ms_seq_id[0],seq_rec.code))
 					ms_name = cr.fetchone();
-					
+					print "entry.order_bomline_id",entry.order_bomline_id
 					ms_vals = {
 						'name': ms_name[0],
 						'location':entry.location,
@@ -975,6 +975,7 @@ class kg_qc_verification(osv.osv):
 									'schedule_line_id': entry.schedule_line_id.id,
 									'order_id': entry.order_id.id,
 									'order_line_id': entry.order_line_id.id,
+									'order_bomline_id': entry.order_bomline_id.id,
 									'qty' : rem_qty,              
 									'schedule_qty' : rem_qty,            
 									'state' : 'issue_done',

@@ -25,7 +25,8 @@ ORDER_CATEGORY = [
    ('spare','Spare'),
    ('pump_spare','Pump and Spare'),
    ('service','Service'),
-   ('project','Project')
+   ('project','Project'),
+   ('access','Accessories')
 ]
 
 class kg_assembly_inward(osv.osv):
@@ -71,6 +72,34 @@ class kg_assembly_inward(osv.osv):
 		'line_ids_a': fields.one2many('ch.assembly.machineshop.details', 'header_id', "Machine Shop Details"),
 		'line_ids_b': fields.one2many('ch.assembly.bot.details', 'header_id', "BOT Details"),
 		
+		'qap_plan_id': fields.many2one('kg.qap.plan', 'QAP Standard',readonly=True,required=True),
+		'pump_serial_no': fields.char('Pump Serial No.'),
+		
+		'bed_assembly_state': fields.selection([('pending','Pending'),('completed','Completed')],'State', readonly=True),
+		'bed_assembly_date': fields.date('Date'),
+		'bed_assembly_shift_id': fields.many2one('kg.shift.master','Shift'),
+		'bed_assembly_done_by': fields.many2one('hr.employee','Done By'),
+		
+		'rotate_assembly_state': fields.selection([('pending','Pending'),('completed','Completed')],'State', readonly=True),
+		'rotate_assembly_date': fields.date('Date'),
+		'rotate_assembly_shift_id': fields.many2one('kg.shift.master','Shift'),
+		'rotate_assembly_done_by': fields.many2one('hr.employee','Done By'),
+		
+		'runout_test_state': fields.selection([('pending','Pending'),('completed','Completed')],'State', readonly=True),
+		'runout_test_date': fields.date('Date'),
+		'runout_test_shift_id': fields.many2one('kg.shift.master','Shift'),
+		'runout_test_done_by': fields.many2one('hr.employee','Done By'),
+		
+		'mech_assembly_state': fields.selection([('pending','Pending'),('completed','Completed')],'State', readonly=True),
+		'mech_assembly_date': fields.date('Date'),
+		'mech_assembly_shift_id': fields.many2one('kg.shift.master','Shift'),
+		'mech_assembly_done_by': fields.many2one('hr.employee','Done By'),
+		
+		'full_assembly_state': fields.selection([('pending','Pending'),('completed','Completed')],'State', readonly=True),
+		'full_assembly_date': fields.date('Date'),
+		'full_assembly_shift_id': fields.many2one('kg.shift.master','Shift'),
+		'full_assembly_done_by': fields.many2one('hr.employee','Done By'),
+		
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		
@@ -93,6 +122,11 @@ class kg_assembly_inward(osv.osv):
 	
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_assembly_inward', context=c),
 		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'bed_assembly_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'rotate_assembly_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'runout_test_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'mech_assembly_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'full_assembly_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':time.strftime('%Y-%m-%d %H:%M:%S'),
 		'state': 'waiting',
@@ -122,82 +156,71 @@ class kg_assembly_inward(osv.osv):
 		ass_bot_obj = self.pool.get('ch.assembly.bot.details')
 		entry_rec = self.browse(cr,uid,ids[0])
 		
-		cr.execute(''' select id from ch_assembly_bom_details where state = 're_process' and header_id=%s ''',[ids[0]])
-		bom_re_process = cr.fetchone()
-		cr.execute(''' select id from ch_assembly_machineshop_details where state = 're_process' and header_id=%s ''',[ids[0]])
-		ms_re_process = cr.fetchone()
-		cr.execute(''' select id from ch_assembly_bot_details where state = 're_process' and header_id=%s ''',[ids[0]])
-		bot_re_process = cr.fetchone()
+		if entry_rec.state in ('waiting','re_process'):
 		
-		if bom_re_process or ms_re_process or bot_re_process:
-			self.write(cr,uid,ids,{'state':'re_process'})
+			cr.execute(''' select id from ch_assembly_bom_details where state = 're_process' and header_id=%s ''',[ids[0]])
+			bom_re_process = cr.fetchone()
+			cr.execute(''' select id from ch_assembly_machineshop_details where state = 're_process' and header_id=%s ''',[ids[0]])
+			ms_re_process = cr.fetchone()
+			cr.execute(''' select id from ch_assembly_bot_details where state = 're_process' and header_id=%s ''',[ids[0]])
+			bot_re_process = cr.fetchone()
+			
+			if bom_re_process or ms_re_process or bot_re_process:
+				self.write(cr,uid,ids,{'state':'re_process'})
+			else:
+				self.write(cr,uid,ids,{'state':'in_progress'})
+				for bom_item in entry_rec.line_ids:
+					ass_bom_obj.write(cr,uid,bom_item.id,{'state':'in_progress'})
+				for ms_item in entry_rec.line_ids_a:
+					ass_ms_obj.write(cr,uid,ms_item.id,{'state':'in_progress'})
+				for bot_item in entry_rec.line_ids_b:
+					ass_bot_obj.write(cr,uid,bot_item.id,{'state':'in_progress'})
+				
+				### Checking Test process Remaining ###
+				cr.execute(''' select id from kg_part_qap where assembly_id = %s and order_id=%s and order_line_id =%s
+					and db_state = 'pending' or hs_state='pending' ''',[ids[0],entry_rec.order_id.id,entry_rec.order_line_id.id])
+				db_test_process_rem = cr.fetchone()
+				
+				cr.execute(''' select id from kg_part_qap where assembly_id = %s and order_id=%s and order_line_id =%s
+					and hs_state='pending' ''',[ids[0],entry_rec.order_id.id,entry_rec.order_line_id.id])
+				hs_test_process_rem = cr.fetchone()
+				print "ids[0],entry_rec.order_id.id,entry_rec.order_line_id.id",ids[0],entry_rec.order_id.id,entry_rec.order_line_id.id
+				print "db_test_process_rem",db_test_process_rem
+				print "hs_test_process_rem",hs_test_process_rem
+				if db_test_process_rem == None and hs_test_process_rem == None:
+					### Dimensional Inspection Creation ###
+					pump_qap_header_vals = {
+					
+						'qap_plan_id': entry_rec.qap_plan_id.id,
+						'order_id': entry_rec.order_id.id,
+						'order_line_id':  entry_rec.order_line_id.id,
+						'order_no': entry_rec.order_line_id.order_no,
+						'order_category': entry_rec.order_category,
+						'pump_model_id': entry_rec.pump_model_id.id,
+						'pump_serial_no': entry_rec.pump_serial_no,
+						'moc_construction_id': entry_rec.moc_construction_id.id,
+						'test_state':'di',
+						'di_state': 'pending',
+						'assembly_id': ids[0]
+					}
+					pump_qap_id = self.pool.get('kg.pump.qap').create(cr, uid, pump_qap_header_vals)
+					
+					dim_inspection_id = self.pool.get('ch.dimentional.inspection').search(cr,uid,[('pump_model_id','=',entry_rec.pump_model_id.id)])
+					dim_inspection_rec = self.pool.get('ch.dimentional.inspection').browse(cr,uid,dim_inspection_id[0])
+					for dim_item in dim_inspection_rec.line_ids:
+						print "dim_item",dim_item
+						pump_dimension_vals = {
+							'header_id': pump_qap_id, 		
+							'dimentional_details': dim_item.dimentional_details,
+							'min_weight': dim_item.min_weight,
+							'max_weight': dim_item.max_weight,	
+						}
+						pump_dimension_id = self.pool.get('ch.pump.dimentional.details').create(cr, uid, pump_dimension_vals)
+				else:
+					raise osv.except_osv(_('Warning !!'),
+					_('Test process remaining !!'))
 		else:
-			self.write(cr,uid,ids,{'state':'in_progress'})
-			for bom_item in entry_rec.line_ids:
-				ass_bom_obj.write(cr,uid,bom_item.id,{'state':'in_progress'})
-			for ms_item in entry_rec.line_ids_a:
-				ass_ms_obj.write(cr,uid,ms_item.id,{'state':'in_progress'})
-			for bot_item in entry_rec.line_ids_b:
-				ass_bot_obj.write(cr,uid,bot_item.id,{'state':'in_progress'})
-			### Performance Testing Entry Creation ###
-			pt_obj = self.pool.get('kg.performance.testing')
-			pt_bom_line_obj = self.pool.get('ch.test.bom.details')
-			pt_ms_line_obj = self.pool.get('ch.test.machineshop.details')
-			pt_bot_line_obj = self.pool.get('ch.test.bot.details')
-			
-			### Performance Testing Header Creation ###
-			
-			pt_header_vals = {
-				'assembly_id': entry_rec.id,
-				'order_id': entry_rec.order_id.id,
-				'order_line_id': entry_rec.order_line_id.id,
-				'entry_mode': 'auto',
-				'state': 'waiting',
-			}
-			pt_id = pt_obj.create(cr, uid, pt_header_vals)
-			
-			print "pt_id",pt_id
-			### Performance Testing Foundry Details ###
-			
-			for foundry_item in entry_rec.line_ids:
-				
-				pt_bom_vals = {
-					'header_id': pt_id,
-					'assembly_bom_line_id': foundry_item.id,
-					'order_bom_id': foundry_item.order_bom_id.id,
-					'entry_mode': 'auto',
-					'state': 'waiting',
-				}
-				pt_bom_id = pt_bom_line_obj.create(cr, uid, pt_bom_vals)
-				
-			### Performance Testing Machineshop Details ###
-			
-			for ms_item in entry_rec.line_ids_a:
-				
-				pt_ms_vals = {
-					'header_id': pt_id,
-					'assembly_ms_line_id': ms_item.id,
-					'order_ms_id': ms_item.order_ms_id.id,
-					'entry_mode': 'auto',
-					'state': 'waiting',
-				}
-				pt_ms_id = pt_ms_line_obj.create(cr, uid, pt_ms_vals)
-				
-			### Performance Testing BOT Details ###
-			
-			for bot_item in entry_rec.line_ids_b:
-				
-				pt_bot_vals = {
-					'header_id': pt_id,
-					'assembly_bot_line_id': bot_item.id,
-					'order_bot_id': bot_item.order_bot_id.id,
-					'entry_mode': 'auto',
-					'state': 'waiting',
-				}
-				pt_bot_id = pt_bot_line_obj.create(cr, uid, pt_bot_vals)
-				
-			
-			
+			pass
 		return True
 		
 	def entry_reject(self,cr,uid,ids,context=None):
@@ -222,7 +245,11 @@ class kg_assembly_inward(osv.osv):
 				schedule_id =  False
 				schedule_line_id = False
 				schedule_date = False
-			
+				
+			#### Updation in QAP Process After rejection of Assembly ###
+			cr.execute(''' update kg_part_qap set db_state = 'completed', db_result = 'reject', hs_state = 'completed',
+				hs_result = 'reject' where assembly_id = %s and order_id = %s and order_line_id = %s ''',[ids[0],entry_rec.order_id.id,entry_rec.order_line_id.id])
+				
 			### Sending Foundry Items to Schedule List ###
 			
 			#### NC Creation for reject Qty ###
@@ -262,6 +289,7 @@ class kg_assembly_inward(osv.osv):
 				'location' : entry_rec.location,
 				'order_id': entry_rec.order_id.id,
 				'order_line_id': entry_rec.order_line_id.id,
+				'order_bomline_id': bom_item.order_bom_id.id,
 				'schedule_id': schedule_id,
 				'schedule_line_id': schedule_line_id,
 				'schedule_date': schedule_date,
@@ -442,6 +470,11 @@ class ch_assembly_bom_details(osv.osv):
 				schedule_id =  False
 				schedule_line_id = False
 				schedule_date = False
+				
+			#### Updation in QAP Process After rejection of Assembly ###
+			cr.execute(''' update kg_part_qap set db_state = 'completed', db_result = 'reject', hs_state = 'completed',
+				hs_result = 'reject' where assembly_id = %s and order_id = %s and order_line_id = %s and pattern_id = %s and order_bom_id =%s ''',[entry_rec.header_id,entry_rec.order_id.id,
+				entry_rec.order_line_id.id,entry_rec.pattern_id.id,entry_rec.order_bom_id.id])
 
 			### Sending Foundry Items to Schedule List ###
 			
@@ -482,6 +515,7 @@ class ch_assembly_bom_details(osv.osv):
 				'location' : entry_rec.header_id.location,
 				'order_id': entry_rec.header_id.order_id.id,
 				'order_line_id': entry_rec.header_id.order_line_id.id,
+				'order_bomline_id': entry_rec.order_bom_id.id,
 				'schedule_id': schedule_id,
 				'schedule_line_id': schedule_line_id,
 				'schedule_date': schedule_date,
