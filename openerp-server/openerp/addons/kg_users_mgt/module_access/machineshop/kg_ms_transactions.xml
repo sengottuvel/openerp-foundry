@@ -255,6 +255,64 @@
 		
 		<!-- MS Subcontract Process End -->
 		
+		<!-- QAP Process Start -->
+		
+		
+		<record id="t_ms_kg_pump_qap" model="ir.model.access">
+			<field name="model_id" ref="kg_pump_qap.model_kg_pump_qap"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Pump QAP</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<record id="t_ms_ch_pump_dimentional_details" model="ir.model.access">
+			<field name="model_id" ref="kg_pump_qap.model_ch_pump_dimentional_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Pump QAP Dimentional</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>		
+		
+		
+		<record id="t_ms_kg_painting" model="ir.model.access">
+			<field name="model_id" ref="kg_pump_qap.model_kg_painting"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Pump QAP Painting</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_kg_packing" model="ir.model.access">
+			<field name="model_id" ref="kg_pump_qap.model_kg_packing"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Pump QAP Packing</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<record id="t_ms_kg_part_qap" model="ir.model.access">
+			<field name="model_id" ref="kg_part_qap.model_kg_part_qap"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Part QAP</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- QAP Process End -->
+		
 		<!-- Assembly Inward Start -->
 		
 		<record id="t_ms_assembly_inward" model="ir.model.access">

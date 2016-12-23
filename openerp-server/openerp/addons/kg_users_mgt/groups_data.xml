@@ -119,6 +119,15 @@
             ref('kg_assembly.tam_assembly_inward'),
             ref('kg_assembly.tam_performance_testing'),
             
+            ref('kg_part_qap.tpm_qap'),
+            ref('kg_part_qap.tam_dynamic_balancing'),
+            ref('kg_part_qap.tam_pre_hydrostatic'),
+            ref('kg_pump_qap.tam_dimensional_inspection'),
+            ref('kg_pump_qap.tam_hydrostatic_assembly'),
+            ref('kg_pump_qap.tam_performance_testing'),
+            ref('kg_pump_qap.tam_painting'),
+            ref('kg_pump_qap.tam_packing'),
+            
             ref('kg_subcontract_process.tpm_sc_process'),           
             ref('kg_subcontract_process.tam_sc_list'),
             ref('kg_subcontract_process.tam_sc_wo'),
