@@ -14,9 +14,6 @@ This module allows you to manage your Item Details.
     'data': ['kg_po_grn_view.xml',
 			 'kg_po_invoice_wizard.xml',
 			 'po_grn_report_view.xml'
-
-            
-		
 			],
 		
     'auto_install': False,

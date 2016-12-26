@@ -17,18 +17,15 @@
 					<button name="action_process" states="approve" string="Issue to Substore" type="object" class="oe_highlight"/>
 					<button name="entry_cancel" states="done" string="Cancel" type="object" class="oe_highlight"/>
 					<button name="entry_reject" states="approve" string="Reject" type="object" class="oe_highlight"/>
-				<!--<button name="print_issue_slip" states="done" string="Print Issue Slip" type="object" class="oe_highlight"/>	
-					<button name="%(stock.action_stock_invoice_onshipping)d" string="Create Invoice" attrs="{'invisible': [('state','!=','draft'),('billing_status','!=','applicable')]}"
-					     type="action" class="oe_highlight"/>
-				-->	
+				<!--<button name="print_issue_slip" states="done" string="Print Issue Slip" type="object" class="oe_highlight"/>-->	
 				</header>
-	            <sheet>
 					<group string="Issue Details">
 						<group>
 							<field name="name"/>
 							<field name="user_id" invisible="1"/>
 							<field name="department_id"/>
 							<field name="dep_issue_type" on_change = "onchange_direct_issue(dep_issue_type,products_flag)"/>
+							<field name="issue_type" required="1" />
 							<field name="wo_line_id" invisible="1"/>
 							<field name="confirm_flag" invisible="1"/>
 							<field name="products_flag" invisible="1"/>
@@ -36,17 +33,9 @@
 						</group>
 						<group> 
 							<field name="issue_date"/>
-							<field name="outward_type"/>
-							<field name="active"/>
+							<field name="outward_type" invisible="1"/>
 							<field name="state" style="width: 30%%" class="att_state_change"/>
 							<field name="building" invisible="1"/>
-						</group>
-					</group>
-					<group string = "Type">
-						<group>
-							<field name="issue_type" required="1" />
-						</group>
-						<group>
 							<field name="approve_flag" invisible="1"/>
 						</group>
 					</group>
@@ -60,9 +49,69 @@
 					</group>
 					<notebook>
 					<page string="Products" attrs="{'invisible': [('products_flag','=',False)]}" >
-						<field name="issue_line_ids" nolabel="1"/>
+						<field name="issue_line_ids" colspan="4" nolabel="1" context="{'issue_type':issue_type,'dep_issue_type':dep_issue_type,'wo_state':'accept','state':'draft'}">
+							<form string="Entry Tree">					
+								<group string="Product Details" colspan="4">
+									<group>
+										<field name="product_id" on_change="onchange_product_id(product_id)" attrs="{'readonly':[('dep_issue_type','!=','direct')]}"/>               
+										<field name="indent_qty" readonly="1"/>               
+										<field name="remarks"/>
+										<field name="dep_issue_type" invisible="1"/>
+										<field name="location_id" invisible="1"/>
+										<field name="state" invisible="1"/>
+										<field name="wo_state" attrs="{'readonly':[('state','in',('draft','confirmed'))]}" invisible="1"/>
+									</group> 
+									<group>
+										<field name="brand_id"/>
+										<field name="uom_id"/>
+										<field name="issue_qty" on_change="onchange_issue_qty_2(issue_qty)"/>
+										<field name="issue_type" invisible="1" required="1"/>
+										<field name="location_dest_id" invisible="1"/>
+										<field name="issue_qty_2" invisible="1"/>
+									</group>
+								  </group>
+								  <group string = "GRN Details" colspan="4">
+										<field name="kg_grn_moves" nolabel="1">
+<!--
+											<tree string = "Dep Indent" editable="bottom">
+												<field name="product_id" readonly="1"/>
+												<field name="product_uom" readonly="1"/>
+												<field name="reserved_qty" readonly="1" string="Available Qty"/>
+												<field name="batch_no" readonly="1" string="Serial No"/>
+												<field name="date" readonly="1" string="In Date"/>
+											</tree>
+-->
+										</field>
+								  </group>
+								  <group>
+									<!--<button name="update_lines" type='object' string="Update"/>-->	
+								  </group>
+								  <group string="Issue Details" colspan="4" attrs="{'invisible': [('state','!=','done')]}">
+									<field name="kg_itemwise_issue_line" nolabel="1">
+										<tree string = "Item wise Issue" editable="bottom">
+											<field name="product_id" readonly = "1"/>
+											<field name="uom_id" readonly = "1"/>
+											<field name="grn_qty" readonly = "1"/>
+											<field name="issue_qty"/>
+											<field name="expiry_date" readonly = "1"/>
+											<field name="batch_no" readonly = "1"/>
+										</tree>
+									</field>
+								  </group>							
+							</form>
+							<tree string="Entry Tree">					
+								<field name="product_id"/>
+								<field name="brand_id"/>              
+								<field name="uom_id"/>
+								<field name="issue_qty"/>
+								<field name="price_unit"/>
+								<field name="state" invisible="1"/>
+								<field name="wo_state" invisible="1"/>								
+							</tree>
+							
+						</field>	
 					</page>
-					<page string="Select Pending Department Indent" attrs="{'invisible': ['|',('dep_issue_type','=','direct'),('issue_type','in',('service'))]}">
+					<page string="Select Indent" attrs="{'invisible': ['|',('dep_issue_type','=','direct'),('issue_type','in',('service'))]}">
 						<field name="kg_dep_indent_line" colspan="4" nolabel="1"  >
 							<tree string = "Dep Indent" editable="bottom">
 								<field name="indent_id" readonly="1"/>
@@ -75,7 +124,7 @@
 						</field>
 						<button name="update_depindent_to_issue" type='object' states="draft,confirmed" string="Save Record"/>
 					</page>
-					<page string="Select Pending Service Indent" attrs="{'invisible': ['|',('dep_issue_type','=','direct'),('issue_type','in',('material'))]}">
+					<page string="Select Indent" attrs="{'invisible': ['|',('dep_issue_type','=','direct'),('issue_type','in',('material'))]}">
 						<field name="kg_service_indent_line" colspan="4" nolabel="1"  >
 								<tree string = "Service Indent" editable="bottom">
 									<field name="service_id" readonly="1"/>
@@ -90,6 +139,9 @@
 					<page string="Entry Info">
 					<group>
 						<field name="company_id"/>
+					</group>
+					<group>
+						<field name="active"/>
 					</group>
 					<group>
 						<group>
@@ -114,8 +166,6 @@
 				<group>
 				<field name="notes" placeholder="Notes..."/>
 				</group>
-				</sheet>
-				
                </form>
            </field>
         </record>
@@ -135,8 +185,10 @@
 					<field name="name"/>
 					<field name="issue_date"/>
 					<field name="department_id"/>
-					<field name="wo_line_id"/>
-					<field name="outward_type"/>
+					<field name="dep_issue_type"/>
+					<field name="issue_type"/>
+					<field name="wo_line_id" invisible="1"/>
+					<field name="outward_type" invisible="1"/>
                     <field name="state"/>
                 </tree> 
             </field>
@@ -147,6 +199,7 @@
         Line Form view
         =====================
         -->
+<!--
         <record id="kg_department_issue_line_form" model="ir.ui.view">
             <field name="name">kg.department.issue.line.form.view</field>
             <field name="model">kg.department.issue.line</field>
@@ -160,7 +213,7 @@
 						<field name="remarks"/>
 						<field name="location_id" invisible="1"/>
 						<field name="state" invisible="1"/>
-						<field name="wo_state" required="1" attrs="{'readonly':[('state','in',('draft','confirmed'))]}"/>
+						<field name="wo_state" attrs="{'readonly':[('state','in',('draft','confirmed'))]}"/>
                     </group> 
                     <group>
 						<field name="brand_id"/>
@@ -176,7 +229,9 @@
 						</field>
                   </group>
                   <group>
+-->
 					<!--<button name="update_lines" type='object' string="Update"/>-->	
+<!--
                   </group>
                   <group string="Issue Details">
 					<field name="kg_itemwise_issue_line" nolabel="1">
@@ -193,7 +248,9 @@
                 </form> 
             </field>
         </record>
+-->
         
+<!--
         <record id="kg_department_issue_line_tree" model="ir.ui.view">
             <field name="name">kg.department.issue.line.tree.view</field>
             <field name="model">kg.department.issue.line</field>
@@ -210,6 +267,7 @@
                 </tree> 
             </field>
         </record>
+-->
         
         <!-- Search View Start -->
 
@@ -220,15 +278,16 @@
                 <search string="Department Issue Search">
 					<field name="name" string="Issue No" filter_domain="[('name','ilike',self)]" />
 					<field name="department_id" string="Department" filter_domain="[('department_id','ilike',self)]" />
-					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
-					<filter icon="terp-check" name="confirmed" string="WFC" domain="[('state','=','confirmed')]"/>					
-					<filter icon="terp-check" name="approve" string="WFA" domain="[('state','=','approve')]"/>					
-					<filter icon="terp-check" name="done" string="Received" domain="[('state','=','done')]"/>					
+					<filter icon="terp-check" name="state" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="state" string="WFA" domain="[('state','=','approve')]"/>					
+					<filter icon="terp-check" name="issue_type" string="Material" domain="[('issue_type','=','material')]"/>					
 					<separator/>
                     <group expand="0" string="Group By...">
+						<filter string="Issue Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'issue_date'}"/>
 						<filter string="Department" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'department_id'}"/>
+                        <filter string="Issue Type" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'issue_type'}"/>
+                        <filter string="Issue Mode" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'dep_issue_type'}"/>
                         <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
-                        <filter string="Issue Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'issue_date'}"/>
 					</group>
                 </search>
 			</field>
@@ -246,6 +305,7 @@
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
 			<field name="domain">[('state','!=','approve')]</field>
+			<field name="context">{'search_default_issue_type':1, }</field>
 			<field name="search_view_id" ref="t_search_v_department_issue"/>
 		</record>
 		
@@ -286,12 +346,8 @@
 					<button name="action_process" states="approve" string="Accept" type="object" class="oe_highlight"/>
 					<button name="entry_cancel" states="done" string="Cancel" type="object" class="oe_highlight" invisible="1"/>
 					<button name="entry_reject" states="approve" string="Reject" type="object" class="oe_highlight"/>
-				<!--<button name="print_issue_slip" states="done" string="Print Issue Slip" type="object" class="oe_highlight"/>	
-					<button name="%(stock.action_stock_invoice_onshipping)d" string="Create Invoice" attrs="{'invisible': [('state','!=','draft'),('billing_status','!=','applicable')]}"
-					     type="action" class="oe_highlight"/>
-				-->	
+				<!--<button name="print_issue_slip" states="done" string="Print Issue Slip" type="object" class="oe_highlight"/>-->
 				</header>
-	            <sheet>
 					<group string="Issue Details">
 						<group>
 							<field name="name"/>
@@ -329,7 +385,7 @@
 					</group>
 					<notebook>
 					<page string="Products" attrs="{'invisible': [('products_flag','=',False)]}" >
-						<field name="issue_line_ids" colspan="4" nolabel="1">
+						<field name="issue_line_ids" colspan="4" nolabel="1" context="{'issue_type':issue_type,'wo_state':'accept','state':'draft'}">
 							<tree string="Product History" editable="bottom" create="false" delete="false">
 									<field name="product_id" string="Item Name" on_change="onchange_product_id(product_id)" readonly="1"/>
 									<field name="brand_id" readonly="1"/>
@@ -373,8 +429,6 @@
 				<group>
 				<field name="notes" placeholder="Notes..."/>
 				</group>
-				</sheet>
-				
                </form>
            </field>
         </record>
@@ -402,7 +456,7 @@
             <field name="res_model">kg.department.issue</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
-            <field name="domain">[('state','=',('approve','done')),('department_id.name','=','ASS')]</field>
+            <field name="domain">[('state','=',('approve','done')),('department_id.name','=','DP3')]</field>
             <field name="search_view_id" ref="t_search_v_department_issue"/>
         </record>
 
@@ -426,7 +480,7 @@
             <field name="res_model">kg.department.issue</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
-            <field name="domain">[('state','in',('approve','done')),('department_id.name','=','MS')]</field>
+            <field name="domain">[('state','in',('approve','done')),('department_id.name','=','DP2')]</field>
             <field name="search_view_id" ref="t_search_v_department_issue"/>
         </record>
 
@@ -444,5 +498,95 @@
             <field name="act_window_id" ref="action_ms_issue"/>
         </record>
          
+		<!-- MS Store Inward -->
+		
+		<record id="t_form_v_issue_line_form" model="ir.ui.view">
+            <field name="name">kg.department.issue.line.form.view</field>
+            <field name="model">kg.department.issue.line</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+				<form string="Department Issue Line" version="7.0" create="false" delete="false">
+					<header>
+						<button name="line_action_process" string="Accept" states="confirmed" type="object" class="oe_highlight"/>
+					</header>
+					<group string="Product Details">
+						<group>
+							<field name="issue_id" readonly="1"/>
+							<field name="w_order_line_id" readonly="1"/>
+							<field name="product_id" readonly="1"/>
+							<field name="remarks"/>
+						</group>
+						<group>
+							<field name="issue_date" readonly="1"/>
+							<field name="ms_bot_id" readonly="1"/>
+							<field name="issue_qty_2" string="Issue Qty" readonly="1"/>
+							<field name="issue_qty" string="Accepted Qty"/>
+							<field name="state" invisible="1"/>
+							<field name="wo_state" invisible="1"/>
+						</group>
+					</group>
+                </form> 
+            </field>
+        </record>
+        
+        <record id="t_tree_v_issue_line_tree" model="ir.ui.view">
+            <field name="name">kg.department.issue.line.tree.view</field>
+            <field name="model">kg.department.issue.line</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+				<tree string="Department Issue Line" create="false" delete="false">
+					<field name="issue_id"/>
+					<field name="issue_date"/>
+					<field name="w_order_line_id"/>
+					<field name="product_id" string="Item Name"/>
+					<field name="ms_bot_id"/>
+					<field name="issue_qty_2" string="Issue Qty"/>
+					<field name="issue_qty" string="Accepted Qty"/>
+					<field name="state" invisible="1"/>
+                </tree> 
+            </field>
+        </record>
+        
+        <record id="t_search_v_issue_line" model="ir.ui.view">
+            <field name="name">Issue Line Search</field>
+            <field name="model">kg.department.issue.line</field>
+            <field name="arch" type="xml">
+                <search string="Department Issue Search">
+					<field name="issue_id" string="Issue No" filter_domain="[('issue_id','ilike',self)]" />
+					<field name="w_order_line_id" string="Issue No" filter_domain="[('w_order_line_id','ilike',self)]" />
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="WO No" name="group_w_order_line_id" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'w_order_line_id'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+        <record id="tma_ms_issue_line" model="ir.actions.act_window">
+            <field name="name">MS Store</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">kg.department.issue.line</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('state','=','confirmed'),('issue_id.department_id.name','=','DP2')]</field>
+            <field name="context">{'search_default_group_w_order_line_id':1}</field>
+            <field name="search_view_id" ref="t_search_v_issue_line"/>
+        </record>
+
+        <record id="ms_store_issue_line_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_issue_line_tree"/>
+            <field name="act_window_id" ref="tma_ms_issue_line"/>
+        </record>
+		
+		<record id="ms_store_issue_line_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_issue_line_form"/>
+            <field name="act_window_id" ref="tma_ms_issue_line"/>
+        </record>
+        
     </data>
 </openerp>
