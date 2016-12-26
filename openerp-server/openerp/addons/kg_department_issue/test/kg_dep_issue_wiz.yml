@@ -1,0 +1,23 @@
+-
+  I check that Initially customer invoice state is "Draft"
+-
+  !assert {model: kg.department.issue.line, id: kg_dep_issue_wiz}:
+    - state == 'confirmed'
+-
+  I called the "Confirm Draft Invoices" wizard
+-
+  !record {model: kg.dep.issue.wiz, id: kg_dep_issue_wiz_0}:
+    {}
+-
+  I clicked on Confirm Invoices Button
+-
+  !python {model: kg.dep.issue.wiz}: |
+    self.dep_issue_confirm(cr, uid, [ref("kg_dep_issue_wiz_0")], {"lang": 'en_US',
+      "tz": False, "active_model": "kg.department.issue.line", "active_ids": [ref("kg_dep_issue_wiz")],
+      "type": "out_invoice", "active_id": ref("kg_dep_issue_wiz"), })
+-
+  I check that customer invoice state is "Open"
+-
+  !assert {model: kg.department.issue.line, id: kg_dep_issue_wiz}:
+    - state == 'done'
+
