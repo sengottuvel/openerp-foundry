@@ -114,8 +114,23 @@ class kg_po_grn(osv.osv):
 
 	_columns = {
 		
+		## Basic Info
+		
 		'name': fields.char('GRN NO',required=True,readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'grn_date':fields.date('Date',required=True,readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
+		'state': fields.selection([('item_load','Draft'),('draft', 'Waiting for Confirmation'), ('confirmed', 'Waiting for Approval'), ('done', 'Done'), ('inv', 'Invoiced'), ('cancel', 'Cancelled'),('reject','Rejected')], 'Status',readonly=True),
+		'can_remark':fields.text('Cancel Remarks'),
+		'reject_remark':fields.text('Reject Remarks', readonly=True, states={'confirmed':[('readonly',False)]}),
+		'remark':fields.text('Remarks'),
+		'notes':fields.text('Notes'),
+		'confirm_flag':fields.boolean('Confirm Flag'),
+		'approve_flag':fields.boolean('Expiry Flag'),
+		'bill_flag':fields.boolean('Bill Flag'),
+		'invoice_flag':fields.boolean('Invoice Flag'),
+		'inv_flag': fields.boolean('Invoice Flag'),
+		
+		## Module Requirement Info
+		
 		'dc_no': fields.char('DC No.', required=True,readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'dc_date':fields.date('DC Date',required=True, readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'po_id':fields.many2one('purchase.order', 'PO NO',
@@ -133,20 +148,9 @@ class kg_po_grn(osv.osv):
 			('applicable', 'Applicable'),
 			('not_applicable', 'Not Applicable')], 'Billing Status',required=True,readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'inward_type': fields.many2one('kg.inwardmaster', 'Inward Type',readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
-		'line_ids':fields.one2many('po.grn.line','po_grn_id','Line Entry',readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'department_id': fields.many2one('kg.depmaster','Department',readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
-		'state': fields.selection([('item_load','Draft'),('draft', 'Waiting for Confirmation'), ('confirmed', 'Waiting for Approval'), ('done', 'Done'), ('inv', 'Invoiced'), ('cancel', 'Cancelled'),('reject','Rejected')], 'Status',readonly=True),
 		'type': fields.selection([('in', 'IN'), ('out', 'OUT'), ('internal', 'Internal')], 'Type'),
-		'can_remark':fields.text('Cancel Remarks'),
-		'reject_remark':fields.text('Reject Remarks', readonly=True, states={'confirmed':[('readonly',False)]}),
-		'remark':fields.text('Remarks'),
-		'notes':fields.text('Notes'),
 		'po_so_remark':fields.text('PO/SO Remarks'),
-		'confirm_flag':fields.boolean('Confirm Flag'),
-		'approve_flag':fields.boolean('Expiry Flag'),
-		'bill_flag':fields.boolean('Bill Flag'),
-		'invoice_flag':fields.boolean('Invoice Flag'),
-
 		'other_charge': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Other Charges(+)',
 			 multi="sums", help="The amount without tax", track_visibility='always'),	  
 		'discount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Discount(-)',
@@ -196,8 +200,11 @@ class kg_po_grn(osv.osv):
 		'payment_type': fields.selection([('cash', 'Cash'), ('credit', 'Credit')], 'Payment Type', readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'sup_invoice_no':fields.char('Supplier Invoice No',size=200, readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'sup_invoice_date':fields.date('Supplier Invoice Date', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
+		
+		## Child Tables Declaration
+		
+		'line_ids':fields.one2many('po.grn.line','po_grn_id','Line Entry',readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'expense_line_id': fields.one2many('kg.po.grn.expense.track','expense_id','Expense Track',readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
-		'inv_flag': fields.boolean('Invoice Flag'),
 		
 		# Entry Info
 		
@@ -324,7 +331,8 @@ class kg_po_grn(osv.osv):
 		
 	def update_potogrn(self,cr,uid,ids,picking_id=False,context={}):
 		grn_entry_obj = self.browse(cr,uid,ids[0])
-		if grn_entry_obj.state == 'item_load':
+		print"grn_entry_objgrn_entry_obj",grn_entry_obj.state
+		if grn_entry_obj.state in ('draft','item_load'):
 			### PO TO GRN ####
 			self.write(cr,uid,ids[0],{'state':'draft'})
 			po_id = False
@@ -332,6 +340,8 @@ class kg_po_grn(osv.osv):
 			if grn_entry_obj.grn_type == 'from_po':
 				cr.execute(""" select po_id from multiple_po where grn_id = %s """ %(grn_entry_obj.id))
 				po_data = cr.dictfetchall()
+				print"po_datapo_data",po_data
+				
 				po_obj=self.pool.get('purchase.order')
 				po_grn_obj=self.pool.get('kg.po.grn')
 				po_grn_line_obj=self.pool.get('po.grn.line')
@@ -1423,18 +1433,21 @@ class po_grn_line(osv.osv):
 			taxes = tax_obj.compute_all(cr, uid, line.grn_tax_ids, price, qty, line.product_id, line.po_grn_id.supplier_id)
 			#~ cur = line.po_grn_id.supplier_id.property_product_pricelist_purchase.currency_id
 			cur = self.pool.get('res.currency').browse(cr,uid,1)
-		
-			#~ print "--------------------------------taxestaxestaxestaxestaxestaxes----------------",taxes['total']
 			res[line.id] = cur_obj.round(cr, uid, cur, taxes['total_included'])
 			
 		return res
 		
-		
-			
 	_columns = {
 		
-		'po_grn_date':fields.date('PO GRN Date'),
+		### Basic Info
+		
 		'po_grn_id':fields.many2one('kg.po.grn','PO GRN Entry'),
+		'state': fields.selection([('draft', 'Draft'), ('confirmed', 'Confirmed'),('done', 'Done'), ('cancel', 'Cancelled')], 'Status',readonly=True),
+		'remark':fields.text('Notes'),
+		
+		### Module Requirement Fields
+		
+		'po_grn_date':fields.date('PO GRN Date'),
 		'name':fields.char('Product'),
 		'product_id':fields.many2one('product.product','Product Name',required=True, domain="[('state','=','approved'),('purchase_ok','=',True)]"),
 		'uom_id':fields.many2one('product.uom','UOM',required=True),
@@ -1459,10 +1472,6 @@ class po_grn_line(osv.osv):
 		'gp_id':fields.many2one('kg.gate.pass','GP NO'),
 		'pi_line_id':fields.many2one('purchase.requisition.line','PI Line'),
 		'si_line_id':fields.many2one('kg.service.indent.line','SI Line'),
-		'po_exp_id':fields.one2many('kg.po.exp.batch','po_grn_line_id','Expiry Line'),
-		'line_wo_id': fields.one2many('ch.po.grn.wo','header_id','Ch Line Id'),
-		'state': fields.selection([('draft', 'Draft'), ('confirmed', 'Confirmed'),('done', 'Done'), ('cancel', 'Cancelled')], 'Status',readonly=True),
-		'remark':fields.text('Notes'),
 		'price_subtotal': fields.function(_amount_line, string='Line Total', digits_compute= dp.get_precision('Account'),store=True),
 		#'price_subtotal': fields.function(_amount_line, string='Line Total', digits_compute= dp.get_precision('Account')),
 		'brand_id':fields.many2one('kg.brand.master','Brand'),
@@ -1482,7 +1491,29 @@ class po_grn_line(osv.osv):
 		'breadth': fields.float('Breadth'),
 		'weight': fields.float('Weight'),
 		
+		## Child Tables Declaration
+		
+		'po_exp_id':fields.one2many('kg.po.exp.batch','po_grn_line_id','Expiry Line'),
+		'line_wo_id': fields.one2many('ch.po.grn.wo','header_id','Ch Line Id'),
+		
 	}
+	
+	def onchange_product_id(self, cr, uid, ids, product_id, uom_id,context=None):
+			
+		value = {'uom_id': ''}
+		if product_id:
+			prod = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
+			value = {'uom_id': prod.uom_id.id}
+
+		return {'value': value}
+	
+	_defaults = {
+		
+		'state': 'draft',
+		'billing_type': 'free',
+		'price_type': 'po_uom',
+		
+	}   
 	
 	def _check_weight(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])
@@ -1496,25 +1527,6 @@ class po_grn_line(osv.osv):
 		
 		]
 		
-	def onchange_product_id(self, cr, uid, ids, product_id, uom_id,context=None):
-			
-		value = {'uom_id': ''}
-		if product_id:
-			prod = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
-			value = {'uom_id': prod.uom_id.id}
-
-		return {'value': value}
-	
-	_defaults = {
-	
-		'state': 'draft',
-		'billing_type': 'free',
-		'price_type': 'po_uom',
-		
-	}   
-	
-	
-
 po_grn_line()
 
 class kg_po_exp_batch(osv.osv):
@@ -1524,7 +1536,12 @@ class kg_po_exp_batch(osv.osv):
 
 	_columns = {
 		
+		### Basic Info
+		
 		'po_grn_line_id':fields.many2one('po.grn.line','PO GRN Entry Line'),
+		
+		### Module Requirement Fields
+		
 		'exp_date':fields.date('Expiry Date'),
 		'batch_no':fields.char('Batch No'),
 		'product_qty':fields.float('Product Qty'),
@@ -1545,7 +1562,12 @@ class kg_po_grn_expense_track(osv.osv):
 	
 	_columns = {
 		
+		### Basic Info
+		
 		'expense_id': fields.many2one('kg.po.grn', 'Expense Track'),
+		
+		### Module Requirement Fields
+		
 		'name': fields.char('Number', size=128, select=True,readonly=False),
 		'date': fields.date('Creation Date'),
 		'company_id': fields.many2one('res.company', 'Company Name'),
@@ -1569,13 +1591,18 @@ class ch_po_grn_wo(osv.osv):
 	_description = "Ch PO GRN WO"
 	
 	_columns = {
-
-	'header_id': fields.many2one('po.grn.line', 'PO Line'),
-	'wo_id': fields.char('WO No.'),
-	'w_order_id': fields.many2one('kg.work.order','WO',domain="[('state','=','confirmed')]"),
-	'w_order_line_id': fields.many2one('ch.work.order.details','WO'),
-	'qty': fields.float('Qty'),
-	
+		
+		### Basic Info
+		
+		'header_id': fields.many2one('po.grn.line', 'PO Line'),
+		
+		### Module Requirement Fields
+		
+		'wo_id': fields.char('WO No.'),
+		'w_order_id': fields.many2one('kg.work.order','WO',domain="[('state','=','confirmed')]"),
+		'w_order_line_id': fields.many2one('ch.work.order.details','WO'),
+		'qty': fields.float('Qty'),
+		
 	}
 	
 	def onchange_wo(self, cr, uid, ids,w_order_line_id):
@@ -1593,7 +1620,7 @@ class ch_po_grn_wo(osv.osv):
 		return True
 		
 	_constraints = [
-	
+		
 		(_check_qty,'You cannot save with zero qty !',['Qty']),
 		
 		]

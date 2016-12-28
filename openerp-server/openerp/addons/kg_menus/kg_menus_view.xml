@@ -265,9 +265,6 @@
 				<!-- General GRN Transaction Menu -->
 				<menuitem action="kg_general_grn.action_kg_general_grn" id="gam_general_grn" name="General GRN" parent="gpm_grn_issue_menu" sequence="1"/>
 				
-				<!-- GRN Transaction Menu -->
-				<menuitem action="kg_po_grn.action_kg_po_grn" id="gam_po_grn" name="GRN" parent="gpm_grn_issue_menu" sequence="2"/>
-				
 				<!-- GRN Register Transaction Menu -->
 <!--
 				<menuitem action="kg_common_grn.kg_common_grn_action_form" id="gam_grn_register" name="GRN Register" parent="gpm_grn_issue_menu" sequence="3"/>
