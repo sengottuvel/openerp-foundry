@@ -35,7 +35,7 @@
 										<field name="market_division"/>
 										<field name="ref_mode"/>
 										<field name="dealer_id"/>
-										<field name="purpose"/>
+										<field name="complaint_categ"/>
 										<field name="pump_id"/>
 										<field name="pumpseries_id"/>
 										<field name="moc_const_id"/>
@@ -131,87 +131,88 @@
 		<field eval="8" name="priority"/>
 		<field name="arch" type="xml">
 			<form string="Complaint Details" version="7.0" >
+				<group>
 					<group>
-						<group>
-							<field name="complaint_categ" required="1" attrs="{'readonly':[('complaint_categ','in',('pump','parts'))]}"/>
-						</group>
-						<group>
-						</group>
-						<group>
-							<field name="s_no" attrs="{'required':[('complaint_categ','=','pump')]}"/>
-							<field name="market_division" required="1"/>
-							<field name="dealer_id" attrs="{'required':[('ref_mode','=','dealer')]}"/>
-							<field name="despatch_date" required="1"/>
-							<field name="pump_id" required="1" attrs="{'readonly':[('pump_id','!=',False)]}"/>
-							<field name="moc_const_id" required="1" attrs="{'readonly':[('moc_const_id','!=',False)]}"/>
-							<field name="defect_id" attrs="{'required':[('complaint_categ','in',('pump','parts'))]}"/>
-						</group>
-						<group>
-							<field name="wo_no" on_change="onchange_wo_no(wo_no)" attrs="{'readonly':[('load_bom','=',True)]}"/>
-							<field name="wo_line_id" on_change="onchange_wo(wo_line_id)" attrs="{'readonly':[('load_bom','=',True)]}"/>
-							<field name="ref_mode" required="1"/>
-							<field name="purpose" required="1" readonly="1"/>
-							<field name="pumpseries_id" required="1" attrs="{'readonly':[('pumpseries_id','!=',False)]}"/>
-							<field name="complaint_due_to" attrs="{'required':['|',('defect_id','!=',False),('complaint_categ','in',('pump','parts'))]}"/>
-							<field name="decision" attrs="{'required':['|',('defect_id','!=',False),('complaint_categ','in',('pump','parts'))]}"/>
-							<field name="nature_of_complaint"/>
-						</group>
+						<field name="complaint_categ" required="1" attrs="{'readonly':[('complaint_categ','in',('pump','parts'))]}"/>
+					</group>
 					<group>
-						<field name="load_bom" on_change="onchange_load_bom(pump_id,pumpseries_id,wo_line_id,moc_const_id,load_bom,complaint_categ,purpose,defect_id,complaint_due_to,decision)" 
-						attrs="{'invisible':[('complaint_categ','not in',('pump','parts'))]}"/>
 					</group>
-						<group>
-						</group>
+					<group>
+						<field name="s_no" attrs="{'required':[('complaint_categ','=','pump')]}"/>
+						<field name="market_division" required="1"/>
+						<field name="ref_mode" required="1"/>
+						<field name="despatch_date" required="1" on_change="onchange_despatch_date(despatch_date)"/>
+						<field name="pump_id" required="1" attrs="{'readonly':[('pump_id','!=',False)]}"/>
+						<field name="moc_const_id" required="1" attrs="{'readonly':[('moc_const_id','!=',False)]}"/>
+						<field name="defect_id" attrs="{'required':[('complaint_categ','in',('pump'))],'invisible':[('complaint_categ','!=','pump')]}"/>
 					</group>
-					<notebook attrs="{'invisible':[('complaint_categ','not in',('pump','parts'))]}">
-						<page string="Foundry Items">
-							<field name="line_ids_fou">
-								<tree string="FOU Details Tree" editable="top" create="false" delete="false">
-									<field name="is_applicable"/>
-									<field name="position_id"  readonly="1"/>
-									<field name="pattern_id" required="1" readonly="1"/>
-									<field name="pattern_name" required="1" readonly="1"/>
-									<field name="qty" required="1"/>
-									<field name="complaint_categ" invisible="1"/>
-									<field name="defect_id" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
-									<field name="complaint_due_to" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
-									<field name="decision" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
-									<field name="remark"/>
-								</tree>
-							</field>
-						</page>
-						<page string="Machine Shop">
-							<field name="line_ids_ms">
-								<tree string="MS Details Tree" editable="top" create="false" delete="false">
-									<field name="is_applicable"/>
-									<field name="ms_name_id" required="1" readonly="1"/>
-									<field name="ms_id" required="1" readonly="1"/>
-									<field name="qty" required="1"/>
-									<field name="complaint_categ" invisible="1"/>
-									<field name="defect_id" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
-									<field name="complaint_due_to" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
-									<field name="decision" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
-									<field name="remark"/>
-								</tree>
-							</field>
-						</page>
-						<page string="BOT">
-							<field name="line_ids_bot">
-								<tree string="BOT Details Tree" editable="top" create="false" delete="false">
-									<field name="is_applicable"/>
-									<field name="bot_id" required="1" readonly="1"/>
-									<field name="bot_name" required="1" readonly="1"/>
-									<field name="qty" required="1"/>
-									<field name="complaint_categ" invisible="1"/>
-									<field name="defect_id" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
-									<field name="complaint_due_to" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
-									<field name="decision" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
-									<field name="remark"/>
-								</tree>
-							</field>
-						</page>
-					</notebook>
-					
+					<group>
+						<field name="wo_no" on_change="onchange_wo_no(wo_no)" attrs="{'readonly':[('load_bom','=',True)]}"/>
+						<field name="wo_line_id" on_change="onchange_wo(wo_line_id)" attrs="{'readonly':[('load_bom','=',True)]}"/>
+						<field name="dealer_id" attrs="{'required':[('ref_mode','=','dealer')],'invisible':[('ref_mode','!=','dealer')]}"/>
+						
+						<field name="pumpseries_id" required="1" attrs="{'readonly':[('pumpseries_id','!=',False)]}"/>
+						<field name="complaint_due_to" attrs="{'required':['|',('defect_id','!=',False),('complaint_categ','in',('pump'))],'invisible':[('complaint_categ','!=','pump')]}"/>
+						<field name="decision" attrs="{'required':['|',('defect_id','!=',False),('complaint_categ','in',('pump'))],'invisible':[('complaint_categ','!=','pump')]}"/>
+						<field name="nature_of_complaint"/>
+						<field name="purpose" readonly="1" invisible="1"/>
+					</group>
+				<group>
+					<field name="load_bom" on_change="onchange_load_bom(pump_id,pumpseries_id,wo_line_id,moc_const_id,load_bom,complaint_categ,purpose,defect_id,complaint_due_to,decision)" 
+					attrs="{'invisible':[('complaint_categ','not in',('pump','parts'))]}"/>
+				</group>
+					<group>
+					</group>
+				</group>
+				<notebook attrs="{'invisible':[('complaint_categ','not in',('pump','parts'))]}">
+					<page string="Foundry Items">
+						<field name="line_ids_fou">
+							<tree string="FOU Details Tree" editable="top" create="false" delete="false">
+								<field name="is_applicable"/>
+								<field name="position_id"  readonly="1"/>
+								<field name="pattern_id" required="1" readonly="1"/>
+								<field name="pattern_name" required="1" readonly="1"/>
+								<field name="qty" required="1"/>
+								<field name="complaint_categ" invisible="1"/>
+								<field name="defect_id" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
+								<field name="complaint_due_to" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
+								<field name="decision" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
+								<field name="remark"/>
+							</tree>
+						</field>
+					</page>
+					<page string="Machine Shop">
+						<field name="line_ids_ms">
+							<tree string="MS Details Tree" editable="top" create="false" delete="false">
+								<field name="is_applicable"/>
+								<field name="ms_name_id" required="1" readonly="1"/>
+								<field name="ms_id" required="1" readonly="1"/>
+								<field name="qty" required="1"/>
+								<field name="complaint_categ" invisible="1"/>
+								<field name="defect_id" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
+								<field name="complaint_due_to" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
+								<field name="decision" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
+								<field name="remark"/>
+							</tree>
+						</field>
+					</page>
+					<page string="BOT">
+						<field name="line_ids_bot">
+							<tree string="BOT Details Tree" editable="top" create="false" delete="false">
+								<field name="is_applicable"/>
+								<field name="bot_id" required="1" readonly="1"/>
+								<field name="bot_name" required="1" readonly="1"/>
+								<field name="qty" required="1"/>
+								<field name="complaint_categ" invisible="1"/>
+								<field name="defect_id" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
+								<field name="complaint_due_to" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
+								<field name="decision" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
+								<field name="remark"/>
+							</tree>
+						</field>
+					</page>
+				</notebook>
+				
 			</form>
 		</field>
 	</record>	
@@ -246,9 +247,11 @@
 		</record>
 	
 	<!-- Sequence Number Setting Ends Here -->
-		
+	
+		<!-- Service Complaint --> 
+				
 		<menuitem action="tma_service_enquiry" name="Service Complaint" id="tam_service_enquiry" parent="kg_menus.cpm_crm_enquiry_menu" sequence="4"/>
-		
+					
 		
 	</data>
 </openerp>

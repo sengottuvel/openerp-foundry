@@ -28,7 +28,7 @@ class kg_service_enquiry(osv.osv):
 		'name': fields.char('Complaint No', size=128,select=True,readonly=True, states={'draft':[('readonly',False)]}),
 		'complaint_date': fields.date('Complaint Date',required=True,readonly=True, states={'draft':[('readonly',False)]}),
 		'customer_id': fields.many2one('res.partner','Customer Name',domain=[('customer','=',True),('contact','=',False)],readonly=True, states={'draft':[('readonly',False)]}),
-		'purpose': fields.selection(PURPOSE_SELECTION,'Purpose',required=True,readonly=True, states={'draft':[('readonly',False)]}),
+		'purpose': fields.selection(PURPOSE_SELECTION,'Category',required=True,readonly=True, states={'draft':[('readonly',False)]}),
 		'state': fields.selection(STATE_SELECTION,'Status', readonly=True),
 		'remarks': fields.text('Remarks',readonly=True, states={'draft':[('readonly',False)]}),
 		
@@ -61,7 +61,7 @@ class kg_service_enquiry(osv.osv):
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_service_enquiry', context=c),
 		'complaint_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		'user_id': lambda obj, cr, uid, context: uid,
-		'crt_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+		'crt_date': time.strftime('%Y-%m-%d %H:%M:%S'),
 		'state': 'draft',
 		'active': True,
 		
@@ -95,13 +95,6 @@ class kg_service_enquiry(osv.osv):
 	def entry_confirm(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'draft':
-			#~ ser_no = ''	
-			#~ qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.service.enquiry')])
-			#~ seq_rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
-			#~ cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],seq_rec.code,entry.complaint_date))
-			#~ ser_no = cr.fetchone();
-			#~ 
-			#~ self.write(cr, uid, ids, {'name':ser_no[0]})
 			if entry.line_ids:
 				for item in entry.line_ids:
 					if item.complaint_categ != 'pump':
@@ -121,7 +114,7 @@ class kg_service_enquiry(osv.osv):
 							pass
 						else:
 							raise osv.except_osv(_('Warning!'),
-								_('%s Please select anyone applicable'%(item.wo_line_id.order_no)))
+								_('%s Please select item is applicable'%(item.wo_line_id.order_no)))
 			
 			item_code = ''
 			item_name = ''
@@ -129,71 +122,60 @@ class kg_service_enquiry(osv.osv):
 			cr_no = cr_no_free = count = 0
 			
 			if entry.line_ids:
-				for item in entry.line_ids:
-					ser_no = ''	
-					qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.site.visit.pending')])
-					seq_rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
-					cr.execute("""select generatesequenceno(%s,'%s',now()::date) """%(qc_seq_id[0],seq_rec.code))
-					ser_no = cr.fetchone();
-					
-					if item.decision == 'site_visit':
-						if item.complaint_categ == 'pump':
-							purpose = 'pump'
-						elif item.complaint_categ == 'parts':
-							purpose = 'spare'
-						site_visit_pending_id = self.pool.get('kg.site.visit.pending').create(cr,uid,{ 'name': ser_no[0],
-																									   'complaint_no': entry.id,
-																									   'purpose': purpose,
-																									   'registration_date': entry.complaint_date,
-																									   'customer_id': entry.customer_id.id,
-																									   's_no': item.s_no,
-																									   'wo_no': item.wo_no,
-																									   'wo_line_id': item.wo_line_id.id,
-																									   'pump_id': item.pump_id.id,
-																									   'moc_const_id': item.moc_const_id.id,
-																									   'defect_id': item.defect_id.id,
-																									   'complaint_due_to': item.complaint_due_to,
-																									   'decision': item.decision,
-																									   'complaint_line_id': item.id,
-																									   'remarks': entry.remarks,
-																										})
-											
-					elif item.decision == 'replace':
-						number = [x.decision for x in item.line_ids_fou or item.line_ids_ms or item.line_ids_bot if x.decision == 'replace']
-						print"numbernumber",number
-						if number:
-							cr_no = cr_no + 1
-						print"cr_nocr_no",cr_no
-						free_number = [x.decision for x in item.line_ids_fou or item.line_ids_ms or item.line_ids_bot if x.decision == 'replace_free']
-						print"free_number",free_number
-						if free_number:
-							cr_no_free = cr_no_free + 1
-						print"cr_nocr_no_free",cr_no_free
-						
-				print"===============cr_nocr_no",cr_no
-				print"===============cr_no_free",cr_no_free
-				if cr_no >= 1 and cr_no_free >= 1:
-					print"xxxxxxxxxxxxx"
-					count = 2
+				mkt = [x.decision for x in entry.line_ids if x.decision == 'replace' and x.complaint_categ == 'pump']
+				print"mkt",mkt
+				if mkt:
 					decision = 'replace'
-				elif cr_no >= 1 and cr_no_free == 0:
-					print"yyyyyyyyyyyyyy"
-					count = 1
-					decision = 'replace'
-				elif cr_no == 0 and cr_no_free >= 1:
-					print"zzzzzzzzzzzzzzz"
-					count = 1
+					self.enquiry_creation(cr,uid,entry,decision)
+				
+				ser = [x.decision for x in entry.line_ids if x.decision == 'replace_free' and x.complaint_categ == 'pump']
+				print"ser",ser
+				if ser:
 					decision = 'replace_free'
+					self.enquiry_creation(cr,uid,entry,decision)
 				
-				print"countcountcountcount",count
-				if count > 0:
-					print"-----------------------",count
-					self.enquiry_creation(cr,uid,entry,count,decision)
-				
+				for item in entry.line_ids:
+					if item.despatch_date:
+						today = date.today()
+						despatch_date = datetime.strptime(item.despatch_date , '%Y-%m-%d').date()
+						if despatch_date > today:
+							raise osv.except_osv(_('Warning!'),
+								_('%s Despatch date sholud not be greater than current date !'%(item.pump_id.name)))
+					if item.complaint_categ == 'parts' and not item.load_bom:
+						raise osv.except_osv(_('Warning!'),
+							_('Please %s spare enable Load Bom !'%(item.pump_id.name)))
+					
+					if not mkt:
+						spr_mkt = [x.decision for x in item.line_ids_fou or item.line_ids_ms or item.line_ids_bot if x.decision == 'replace']
+						print"spr_mktspr_mkt",spr_mkt
+						if spr_mkt:
+							if cr_no == 0:
+								decision = 'replace'
+								self.enquiry_creation(cr,uid,entry,decision)
+								cr_no = cr_no + 1
+					if not ser:
+						spr_ser = [x.decision for x in item.line_ids_fou or item.line_ids_ms or item.line_ids_bot if x.decision == 'replace_free']
+						print"spr_serspr_ser",spr_ser
+						if spr_ser:
+							if cr_no_free == 0:
+								decision = 'replace_free'
+								self.enquiry_creation(cr,uid,entry,decision)
+								cr_no_free = cr_no_free + 1
+					if item.complaint_categ == 'pump':
+						if item.decision == 'site_visit':
+							self.site_visit_pending_creation(cr,uid,entry,item)
+					if item.complaint_categ == 'parts':
+						spr_svp = [x.decision for x in item.line_ids_fou or item.line_ids_ms or item.line_ids_bot if x.decision == 'site_visit' and x.is_applicable == True]
+						print"spr_svp",spr_svp
+						if spr_svp:
+							self.site_visit_pending_creation(cr,uid,entry,item)
+						
 			status = ''
 			if entry.line_ids:
 				line_data = [x for x in entry.line_ids if x.decision == 'site_visit']
-				if line_data:
+				for item in entry.line_ids:
+					bom_line_data = [x.decision for x in item.line_ids_fou or item.line_ids_ms or item.line_ids_bot if x.decision == 'site_visit']
+				if line_data or bom_line_data:
 					status = 'open'
 				else:
 					status = 'close'
@@ -203,39 +185,107 @@ class kg_service_enquiry(osv.osv):
 										'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')
 				
 										})
-		 												
+														
 		return True
 	
-	def enquiry_creation(self,cr,uid,entry,count,decision,context=None):
-		print"countcount",count
-		for cnt in range(count):
-			print"aaaaaaaAA",cnt
-			if count == 2:
-				if cnt == 0:
-					source = 'service'
-				elif cnt == 1:
-					source = 'market'
-			elif count == 1 and decision == 'replace':
-				source = 'service'
-			elif count == 1 and decision == 'replace_free':
-				source = 'market'
+	def site_visit_pending_creation(self,cr,uid,entry,item,context=None):
+		ser_no = ''
+		qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.site.visit.pending')])
+		seq_rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
+		cr.execute("""select generatesequenceno(%s,'%s',now()::date) """%(qc_seq_id[0],seq_rec.code))
+		ser_no = cr.fetchone();
+		if item.complaint_categ == 'pump':
+			purpose = 'pump'
+		elif item.complaint_categ == 'parts':
+			purpose = 'spare'
+		elif item.complaint_categ == 'access':
+			purpose = 'access'
+		svp_id = self.pool.get('kg.site.visit.pending').create(cr,uid,{ 'name': ser_no[0],
+																	   'complaint_no': entry.id,
+																	   'purpose': purpose,
+																	   'registration_date': entry.complaint_date,
+																	   'customer_id': entry.customer_id.id,
+																	   's_no': item.s_no,
+																	   'wo_no': item.wo_no,
+																	   'wo_line_id': item.wo_line_id.id,
+																	   'pump_id': item.pump_id.id,
+																	   'moc_const_id': item.moc_const_id.id,
+																	   'defect_id': item.defect_id.id,
+																	   'complaint_due_to': item.complaint_due_to,
+																	   'decision': item.decision,
+																	   'complaint_line_id': item.id,
+																	   'remarks': entry.remarks,
+																		})
+		if svp_id:
+			if item.line_ids_fou:
+				for line in item.line_ids_fou:
+					if line.decision == 'site_visit' and line.is_applicable == True:
+						self.pool.get('ch.site.pending.fou').create(cr,uid,{'header_id': svp_id,
+																			'is_applicable': line.is_applicable,
+																			'position_id': line.position_id.id,
+																			'pattern_id': line.pattern_id.id,
+																			'qty': line.qty,
+																			'complaint_categ': line.complaint_categ,
+																			'defect_id': line.defect_id.id,
+																			'complaint_due_to': line.complaint_due_to,
+																			'decision': line.decision,
+																			'remark': line.remark,
+																			})
+			if item.line_ids_ms:
+				for line in item.line_ids_ms:
+					if line.decision == 'site_visit' and line.is_applicable == True:
+						self.pool.get('ch.site.pending.ms').create(cr,uid,{'header_id': svp_id,
+																		   'is_applicable': line.is_applicable,
+																		   'ms_id': line.ms_id.id,
+																		   'qty': line.qty,
+																		   'complaint_categ': line.complaint_categ,
+																		   'defect_id': line.defect_id.id,
+																		   'complaint_due_to': line.complaint_due_to,
+																		   'decision': line.decision,
+																		   'remark': line.remark,
+																			})
+			if item.line_ids_bot:
+				for line in item.line_ids_bot:
+					if line.decision == 'site_visit' and line.is_applicable == True:
+						self.pool.get('ch.site.pending.bot').create(cr,uid,{'header_id': svp_id,
+																		   'is_applicable': line.is_applicable,
+																		   'bot_id': line.bot_id.id,
+																		   'qty': line.qty,
+																		   'complaint_categ': line.complaint_categ,
+																		   'defect_id': line.defect_id.id,
+																		   'complaint_due_to': line.complaint_due_to,
+																		   'decision': line.decision,
+																		   'remark': line.remark,
+																			})
 			
-			crm_id = self.pool.get('kg.crm.enquiry').create(cr,uid,{'customer_id': entry.customer_id.id,
-															   'purpose': entry.purpose,
-															   'source': source,
-															   'entry_mode': 'auto',
-															   'enquiry_no': entry.id,
-															   'market_division': 'ip',
-																})
-			print"crm_idcrm_id",crm_id
-			
-			if crm_id:
-				for item in entry.line_ids:
-					if item.decision == 'replace':
-						if item.complaint_categ == 'pump':
-							purpose = 'pump'
-						elif item.complaint_categ == 'parts':
-							purpose = 'spare'
+		return True
+		
+	def enquiry_creation(self,cr,uid,entry,decision,context=None):
+		print"entryentry",entry
+		print"decisiondecision",decision
+		if decision == 'replace':
+			source = 'market'
+		if decision == 'replace_free':
+			source = 'service'
+		print"source",source
+		
+		crm_id = self.pool.get('kg.crm.enquiry').create(cr,uid,{'customer_id': entry.customer_id.id,
+														   'purpose': entry.purpose,
+														   'source': source,
+														   'entry_mode': 'auto',
+														   'enquiry_no': entry.id,
+														   'market_division': 'ip',
+															})
+		print"crm_idcrm_id",crm_id
+		print"entry.line_ids",entry.line_ids
+		if crm_id:
+			enquiry_line_id = 0
+			for item in entry.line_ids:
+				print"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaAA",decision
+				print"item.decision",item.decision
+				if item.complaint_categ == 'pump':
+					if item.decision == decision:
+						print"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaAA"
 						enquiry_line_id = self.pool.get('ch.kg.crm.pumpmodel').create(cr,uid,{'header_id': crm_id,
 																						   'pump_id': item.pump_id.id,
 																						   'moc_const_id': item.moc_const_id.id,
@@ -243,7 +293,7 @@ class kg_service_enquiry(osv.osv):
 																						   'wo_line_id': item.wo_line_id.id,
 																						   'pumpseries_id': item.pumpseries_id.id,
 																						   'load_bom': True,
-																						   'purpose_categ': purpose,
+																						   'purpose_categ': item.complaint_categ,
 																						   'acces': 'no',
 																						   'wo_no': item.wo_no,
 																						   'spare_pump_id': item.pump_id.id,
@@ -252,48 +302,62 @@ class kg_service_enquiry(osv.osv):
 																						   'spare_pumpseries_id': item.pumpseries_id.id,
 																						   'spare_load_bom': True,
 																							})
-						
-						if enquiry_line_id:
-							for ele in item.line_ids_fou:
-								if cnt == 0:
-									den = 'replace_free'
-								elif cnt == 1:
-									den = 'replace'
-								if ele.is_applicable == True and ele.decision == den:
-									line_fou_id = self.pool.get('ch.kg.crm.foundry.item').create(cr,uid,{'header_id': enquiry_line_id,
-																									  'is_applicable': ele.is_applicable,
-																									  'position_id': ele.position_id.id,
-																									  'pattern_id': ele.pattern_id.id,
-																									  'pattern_name': ele.pattern_name,
-																									  'qty': ele.qty,
-																									  
-																										})
-							for ele in item.line_ids_ms:
-								if cnt == 0:
-									den = 'replace_free'
-								elif cnt == 1:
-									den = 'replace'
-								if ele.is_applicable == True and ele.decision == den:
-									line_fou_id = self.pool.get('ch.kg.crm.machineshop.item').create(cr,uid,{'header_id': enquiry_line_id,
-																									  'is_applicable': ele.is_applicable,
-																									  'ms_id': ele.ms_id.id,
-																									  'qty': ele.qty,
-																									  
-																										})
-							for ele in item.line_ids_bot:
-								if cnt == 0:
-									den = 'replace_free'
-								elif cnt == 1:
-									den = 'replace'
-								if ele.is_applicable == True and ele.decision == den:
-									line_fou_id = self.pool.get('ch.kg.crm.bot').create(cr,uid,{'header_id': enquiry_line_id,
-																									  'is_applicable': ele.is_applicable,
-																									  'ms_id': ele.bot_id.id,
-																									  'qty': ele.qty,
-																									  
-																										})
-																											
-							
+						print"enquiry_line_idenquiry_line_id",enquiry_line_id
+				elif item.complaint_categ == 'parts':
+					bom_mkt = [x.decision for x in item.line_ids_fou or item.line_ids_ms or item.line_ids_bot if x.decision == decision]
+					print"bom_mktbom_mktbom_mkt",bom_mkt
+					bom_ser = [x.decision for x in item.line_ids_fou or item.line_ids_ms or item.line_ids_bot if x.decision == decision]
+					print"bom_serbom_erbom_ser",bom_ser
+					
+					if bom_mkt or bom_ser:
+						enquiry_line_id = self.pool.get('ch.kg.crm.pumpmodel').create(cr,uid,{'header_id': crm_id,
+																						   'pump_id': item.pump_id.id,
+																						   'moc_const_id': item.moc_const_id.id,
+																						   'qty': 1,
+																						   'wo_line_id': item.wo_line_id.id,
+																						   'pumpseries_id': item.pumpseries_id.id,
+																						   'load_bom': True,
+																						   'purpose_categ': 'spare',
+																						   'acces': 'no',
+																						   'wo_no': item.wo_no,
+																						   'spare_pump_id': item.pump_id.id,
+																						   's_no': item.s_no,
+																						   'spare_moc_const_id': item.moc_const_id.id,
+																						   'spare_pumpseries_id': item.pumpseries_id.id,
+																						   'spare_load_bom': True,
+																							})
+					#~ if item.decision == decision:
+				else:
+					pass		
+				if enquiry_line_id > 0:
+					for ele in item.line_ids_fou:
+						if ele.is_applicable == True and ele.decision == decision:
+							line_fou_id = self.pool.get('ch.kg.crm.foundry.item').create(cr,uid,{'header_id': enquiry_line_id,
+																							  'is_applicable': ele.is_applicable,
+																							  'position_id': ele.position_id.id,
+																							  'pattern_id': ele.pattern_id.id,
+																							  'pattern_name': ele.pattern_name,
+																							  'qty': ele.qty,
+																							  
+																								})
+							print"line_fou_idline_fou_id",line_fou_id
+					for ele in item.line_ids_ms:
+						if ele.is_applicable == True and ele.decision == decision:
+							line_fou_id = self.pool.get('ch.kg.crm.machineshop.item').create(cr,uid,{'header_id': enquiry_line_id,
+																							  'is_applicable': ele.is_applicable,
+																							  'ms_id': ele.ms_id.id,
+																							  'qty': ele.qty,
+																							  
+																								})
+					for ele in item.line_ids_bot:
+						if ele.is_applicable == True and ele.decision == decision:
+							line_fou_id = self.pool.get('ch.kg.crm.bot').create(cr,uid,{'header_id': enquiry_line_id,
+																						'is_applicable': ele.is_applicable,
+																						'ms_id': ele.bot_id.id,
+																						'qty': ele.qty,
+																					  
+																						})
+																										
 		return True
 								
 	def entry_update(self,cr,uid,ids,context=None):
@@ -358,7 +422,7 @@ class ch_service_enquiry(osv.osv):
 		'enquiry_id':fields.many2one('kg.service.enquiry', 'Enquiry'),
 		's_no': fields.char('Serial Number'),
 		'wo_no': fields.char('Old WO No'),
-		'wo_line_id': fields.many2one('ch.work.order.details','WO No'),
+		'wo_line_id': fields.many2one('ch.work.order.details','WO No',domain="[('order_category','=',purpose),('header_id.partner_id','=',parent.customer_id),('header_id.state','=','confirmed')]"),
 		'load_bom': fields.boolean('Load BOM'),
 		'market_division': fields.selection([('cp','CP'),('ip','IP')],'Marketing Division'),
 		'ref_mode': fields.selection([('direct','Direct'),('dealer','Dealer')],'Reference Mode'),
@@ -371,7 +435,7 @@ class ch_service_enquiry(osv.osv):
 		'despatch_date': fields.date('Despatch Date'),
 		'defect_id': fields.many2one('kg.defect.master','Defect Type',domain="[('is_full_pump','=',True)]"),
 		'complaint_due_to': fields.selection([('sam','SAM'),('customer','Customer')],'Complaint Due To'),
-		'decision': fields.selection([('no_fault','No Fault'),('replace','Replacement'),('site_visit','Site Visit')],'Decision'),
+		'decision': fields.selection([('no_fault','No Fault'),('replace','Replacement(Cost)'),('replace_free','Replacement(Free)'),('site_visit','Site Visit')],'Decision'),
 		'nature_of_complaint': fields.text('Complaint Remarks'),
 		'line_ids_fou': fields.one2many('ch.service.enquiry.fou', 'header_id', "Complaint Details"),
 		'line_ids_ms': fields.one2many('ch.service.enquiry.ms', 'header_id', "Complaint Details"),
@@ -382,7 +446,7 @@ class ch_service_enquiry(osv.osv):
 	_defaults = {
 
 		'complaint_categ': 'pump',
-		
+		'load_bom': False,
 	}
 	
 	def default_get(self, cr, uid, fields, context):
@@ -418,12 +482,21 @@ class ch_service_enquiry(osv.osv):
 				pumpseries_id = pump_rec.series_id.id
 			value = {'pump_id': pump_id,'pumpseries_id':pumpseries_id,'moc_const_id':wo_line_rec.moc_construction_id.id}
 		return {'value': value}
-		
+	
+	def onchange_despatch_date(self, cr, uid, ids, despatch_date):
+		if despatch_date:
+			today = date.today()
+			despatch_date = datetime.strptime(despatch_date , '%Y-%m-%d').date()
+			if despatch_date > today:
+				raise osv.except_osv(_('Warning!'),
+					_('Despatch date sholud not be greater than current date !'))
+		return True
+	
 	def onchange_load_bom(self, cr, uid, ids,pump_id,pumpseries_id,wo_line_id,moc_const_id,load_bom,complaint_categ,purpose,defect_id,complaint_due_to,decision):
 		fou_vals=[]
 		ms_vals=[]
 		bot_vals=[]
-		
+		print"========================================",load_bom
 		if load_bom == True:
 			if wo_line_id:
 				wo_line_rec = self.pool.get('ch.work.order.details').browse(cr, uid, wo_line_id)
@@ -442,6 +515,9 @@ class ch_service_enquiry(osv.osv):
 										'qty': item.qty,
 										'complaint_categ': complaint_categ,
 										'is_applicable': item.flag_applicable,
+										'complaint_due_to': complaint_due_to,
+										'defect_id': defect_id,
+										'decision': decision,
 										})
 				for item in wo_line_rec.line_ids_a:
 					if item.flag_applicable == True:
@@ -451,6 +527,9 @@ class ch_service_enquiry(osv.osv):
 										'qty': item.qty,
 										'complaint_categ': complaint_categ,
 										'is_applicable': item.flag_applicable,
+										'complaint_due_to': complaint_due_to,
+										'defect_id': defect_id,
+										'decision': decision,
 										})
 				for item in wo_line_rec.line_ids_b:
 					if item.flag_applicable == True:
@@ -460,8 +539,12 @@ class ch_service_enquiry(osv.osv):
 										'qty': item.qty,
 										'complaint_categ': complaint_categ,
 										'is_applicable': item.flag_applicable,
+										'complaint_due_to': complaint_due_to,
+										'defect_id': defect_id,
+										'decision': decision,
 										})
 			elif pump_id:
+				print"--------------------------------"
 				purpose = purpose
 				moc_const = ''
 				bom_obj = self.pool.get('kg.bom').search(cr,uid,[('pump_model_id','=',pump_id)])
@@ -470,35 +553,62 @@ class ch_service_enquiry(osv.osv):
 					pump_rec = self.pool.get('kg.pumpmodel.master').browse(cr, uid, pump_id)
 					pumpseries_id = pump_rec.series_id.id
 					wo_line_rec = self.pool.get('kg.bom').browse(cr,uid,bom_obj[0])
-				for item in wo_line_rec.line_ids:
-					fou_vals.append({
-									'position_id': item.position_id.id,
-									'pattern_id': item.pattern_id.id,
-									'pattern_name': item.pattern_name,
-									'qty': item.qty,
-									'complaint_categ': complaint_categ,
-									})
-				for item in wo_line_rec.line_ids_a:
-					ms_vals.append({
-									'ms_name_id': item.name,
-									'ms_id': item.ms_id.id,
-									'qty': item.qty,
-									'complaint_categ': complaint_categ,
-									})
-				for item in wo_line_rec.line_ids_b:
-					if wo_line_id:
-						bot_name = item.item_name
-					elif pump_id:
-						bot_name = item.name
-					bot_vals.append({
-									'bot_id': item.bot_id.id,
-									'bot_name': bot_name,
-									'qty': item.qty,
-									'complaint_categ': complaint_categ,
-									})
+					for item in wo_line_rec.line_ids:
+						fou_vals.append({
+										'position_id': item.position_id.id,
+										'pattern_id': item.pattern_id.id,
+										'pattern_name': item.pattern_name,
+										'qty': item.qty,
+										'complaint_categ': complaint_categ,
+										'is_applicable': True,
+										'complaint_due_to': complaint_due_to,
+										'defect_id': defect_id,
+										'decision': decision,
+										})
+					for item in wo_line_rec.line_ids_a:
+						ms_vals.append({
+										'ms_name_id': item.name,
+										'ms_id': item.ms_id.id,
+										'qty': item.qty,
+										'complaint_categ': complaint_categ,
+										'is_applicable': True,
+										'complaint_due_to': complaint_due_to,
+										'defect_id': defect_id,
+										'decision': decision,
+										})
+					for item in wo_line_rec.line_ids_b:
+						if wo_line_id:
+							bot_name = item.item_name
+						elif pump_id:
+							bot_name = item.name
+						bot_vals.append({
+										'bot_id': item.bot_id.id,
+										'bot_name': bot_name,
+										'qty': item.qty,
+										'complaint_categ': complaint_categ,
+										'is_applicable': True,
+										'complaint_due_to': complaint_due_to,
+										'defect_id': defect_id,
+										'decision': decision,
+										})
 		
 		return {'value': {'line_ids_fou': fou_vals,'line_ids_ms': ms_vals,'line_ids_bot': bot_vals,'purpose':purpose,'pump_id':pump_id,'moc_const_id':moc_const_id,'pumpseries_id':pumpseries_id}}
+	
+	def _duplicate_removed(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.complaint_categ in ('pump','parts') and rec.load_bom != True:
+			cr.execute(''' delete from ch_service_enquiry_fou where header_id = %s '''%(rec.id))
+			cr.execute(''' delete from ch_service_enquiry_ms where header_id = %s '''%(rec.id))
+			cr.execute(''' delete from ch_service_enquiry_bot where header_id = %s '''%(rec.id))
+			
+		return True
 		
+	_constraints = [		
+		
+		(_duplicate_removed, 'Duplcates removed !',['']),
+		
+	   ]
+	   	
 ch_service_enquiry()
 
 class ch_service_enquiry_fou(osv.osv):
@@ -518,7 +628,7 @@ class ch_service_enquiry_fou(osv.osv):
 		'complaint_categ': fields.selection([('pump','Pump'),('parts','Parts'),('access','Access')],'Complaint Category'),
 		'defect_id': fields.many2one('kg.defect.master','Defect Type'),
 		'complaint_due_to': fields.selection([('sam','SAM'),('customer','Customer')],'Complaint Due To'),
-		'decision': fields.selection([('no_fault','No Fault'),('replace','Replacement(Cost)'),('replace_free','Replacement(Free)')],'Decision'),
+		'decision': fields.selection([('no_fault','No Fault'),('replace','Replacement(Cost)'),('replace_free','Replacement(Free)'),('site_visit','Site Visit')],'Decision'),
 		'remark': fields.text('Complaint Remarks'),
 		
 	}
@@ -543,7 +653,7 @@ class ch_service_enquiry_ms(osv.osv):
 		'complaint_categ': fields.selection([('pump','Pump'),('parts','Parts'),('access','Access')],'Complaint Category'),
 		'defect_id': fields.many2one('kg.defect.master','Defect Type'),
 		'complaint_due_to': fields.selection([('sam','SAM'),('customer','Customer')],'Complaint Due To'),
-		'decision': fields.selection([('no_fault','No Fault'),('replace','Replacement(Cost)'),('replace_free','Replacement(Free)')],'Decision'),
+		'decision': fields.selection([('no_fault','No Fault'),('replace','Replacement(Cost)'),('replace_free','Replacement(Free)'),('site_visit','Site Visit')],'Decision'),
 		'remark': fields.text('Complaint Remarks'),
 				
 	}
@@ -567,7 +677,7 @@ class ch_service_enquiry_bot(osv.osv):
 		'complaint_categ': fields.selection([('pump','Pump'),('parts','Parts'),('access','Access')],'Complaint Category'),
 		'defect_id': fields.many2one('kg.defect.master','Defect Type'),
 		'complaint_due_to': fields.selection([('sam','SAM'),('customer','Customer')],'Complaint Due To'),
-		'decision': fields.selection([('no_fault','No Fault'),('replace','Replacement(Cost)'),('replace_free','Replacement(Free)')],'Decision'),
+		'decision': fields.selection([('no_fault','No Fault'),('replace','Replacement(Cost)'),('replace_free','Replacement(Free)'),('site_visit','Site Visit')],'Decision'),
 		'remark': fields.text('Complaint Remarks'),
 		
 	}

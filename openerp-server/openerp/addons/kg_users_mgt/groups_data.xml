@@ -210,7 +210,7 @@
 			ref('base.menu_purchase_root'),
 			ref('account.menu_action_invoice_tree2'),
 			ref('purchase.menu_procurement_management'),
-			ref('kg_menus.pam_po_amendment'),
+			ref('kg_purchase_amendment.pam_po_amendment'),
 			ref('kg_menus.spm_service_order_menu'),
 			ref('kg_menus.sam_so_amendment'),
 			ref('kg_menus.mam_so_manual_closing'),
