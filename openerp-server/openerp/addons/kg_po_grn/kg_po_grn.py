@@ -662,8 +662,8 @@ class kg_po_grn(osv.osv):
 								d = product_qty - po_grn_qty
 								if line.po_grn_qty <= d:
 									pass
-								else:
-									raise osv.except_osv(_('Warning!'), _('GRN Qty should not be greater than PO Qty for %s !!' %(line.product_id.name)))
+								#~ else:
+									#~ raise osv.except_osv(_('Warning!'), _('GRN Qty should not be greater than PO Qty for %s !!' %(line.product_id.name)))
 							#~ else:
 								#~ raise osv.except_osv(_('Warning!'), _('GRN Qty should not be greater than PO Qty for %s !!' %(line.product_id.name)))
 						else:
@@ -857,8 +857,8 @@ class kg_po_grn(osv.osv):
 							
 							if line.po_grn_qty <= d:
 								pass
-							else:
-								raise osv.except_osv(_('Warning!'), _('GRN Qty should not be greater than PO Qty for %s !!' %(line.product_id.name)))
+							#~ else:
+								#~ raise osv.except_osv(_('Warning!'), _('GRN Qty should not be greater than PO Qty for %s !!' %(line.product_id.name)))
 							if line.price_type == 'per_kg':
 								if line.product_id.uom_conversation_factor == 'two_dimension':
 									rec_qty =(po_grn_qty / (float(line.length) * float(line.breadth) * float(line.product_id.po_uom_in_kgs)))
