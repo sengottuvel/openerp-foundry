@@ -612,7 +612,8 @@
 				<field name="date" string="In Date" readonly="1"/>
 				<field name="expiry_date" readonly="1"/>
 				<field name="product_qty" string="Received Qty" readonly="1"/>
-				<field name="pending_qty" string="Available Qty" readonly="1"/>
+				<field name="pending_qty" readonly="1"/>
+				<field name="reserved_qty" string="Available Qty" readonly="1"/>
 			</field>
 		</field>
 	</record>
@@ -625,22 +626,19 @@
 		<field eval="2" name="priority"/>
 		<field name="inherit_id" ref="stock.view_production_lot_tree"/>
 		<field name="arch" type="xml">
-<!--
-				<field name="name" position="replace">
-				<field name="grn_no"/>
-				</field>
--->
-				<field name="product_id" position="after">
-				<field name="product_uom"/>
-				
-				<field name="pending_qty" string="Available Qty"/>
-				<field name="price_unit" sum="price_unit"/>
-				<field name="date" string="In Date"/>
-				<field name="product_qty" string="Received Qty" invisible="1"/>
-				<field name="batch_no" string="Serial No" invisible="1"/>
-				<field name="expiry_date" invisible="1"/>
-				<field name="grn_type" invisible="1"/>
-				</field>
+			<field name="product_id" position="before">
+			<field name="batch_no" string="Serial No"/>
+			<field name="date" string="In Date"/>
+			</field>
+			<field name="product_id" position="after">
+			<field name="product_uom"/>
+			<field name="pending_qty" invisible="1"/>
+			<field name="reserved_qty" string="Available Qty"/>
+			<field name="price_unit" sum="price_unit" invisible="1"/>
+			<field name="product_qty" string="Received Qty" invisible="1"/>
+			<field name="expiry_date" invisible="1"/>
+			<field name="grn_type" invisible="1"/>
+			</field>
 		</field>
 	</record>
 	

@@ -1743,7 +1743,7 @@ class kg_stock_production_lot(osv.osv):
     
     _columns = {
     
-    'grn_move':fields.many2one('stock.move','GRN Move'),
+   'grn_move':fields.many2one('stock.move','GRN Move'),
     'grn_no':fields.char('GRN NO', char=128),
     'product_qty':fields.float('Quantity'),
     'pending_qty':fields.float('Pending Qty'),
@@ -1756,8 +1756,9 @@ class kg_stock_production_lot(osv.osv):
     'po_qty': fields.float('PO Qty'),
     'user_id':fields.many2one('res.users','LOT User'),
     'grn_type': fields.selection([('material', 'Material'), ('service', 'Service')], 'GRN Type'),
-    'brand_id':fields.many2one('kg.brand.master','Brand Name'),
-            
+    'brand_id': fields.many2one('kg.brand.master','Brand Name'),
+    'reserved_qty': fields.float('Reserved Qty'),
+    
     }   
     
     def name_get(self, cr, uid, ids, context={}):
