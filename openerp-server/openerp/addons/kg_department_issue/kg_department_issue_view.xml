@@ -588,5 +588,8 @@
             <field name="act_window_id" ref="tma_ms_issue_line"/>
         </record>
         
+        <!-- MS Store Inward Transaction Menu -->
+		<menuitem action="tma_ms_issue_line" id="tam_ms_issue_line" name="MS Store Inward" parent="kg_machineshop.tpm_ms_process" sequence="19"/>
+		
     </data>
 </openerp>
