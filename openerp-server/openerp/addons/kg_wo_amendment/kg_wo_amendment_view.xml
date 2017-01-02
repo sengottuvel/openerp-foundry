@@ -308,7 +308,9 @@
 	<!-- Menu Item Start -->
 	
 		<!-- Work Order Amendment-->
+<!--
 		<menuitem  action="tma_wo_amendment" id="tam_wo_amendment" parent="kg_stock_inward.tpm_planning_transactions" sequence="4"/>
+-->
 	
 	<!-- Menu Item End -->
 	
