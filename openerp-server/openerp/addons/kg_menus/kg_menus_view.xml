@@ -95,9 +95,7 @@
 <!--
 				<menuitem action="kg_department_issue.action_ms_issue" id="gam_ms_issue" name="MS Store Inward" parent="kg_machineshop.tpm_ms_process" sequence="17"/>
 -->
-				<!-- MS Store Inward Line Transaction Menu -->
-				<menuitem action="kg_department_issue.tma_ms_issue_line" id="tma_ms_issue_line" name="MS Store Inward" parent="kg_machineshop.tpm_ms_process" sequence="19"/>
-					
+				
 		<!-- Indent Menu -->
 		
 		<menuitem name="Indents" id="ipm_indent" sequence="20"/>
