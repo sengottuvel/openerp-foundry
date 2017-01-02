@@ -8,10 +8,7 @@ from datetime import datetime
 import base64
 from itertools import groupby
 
-
 from PIL import Image
-
-dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
 CALL_TYPE_SELECTION = [
     ('service','Service'),
@@ -79,7 +76,6 @@ class kg_crm_offer(osv.osv):
 		'service_det': fields.char('Service Details'),
 		'remarks': fields.text('Remarks'),
 		'cancel_remark': fields.text('Cancel Remarks'),
-		'active': fields.boolean('Active'),
 		'state': fields.selection(STATE_SELECTION,'Status', readonly=True),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD'),('export','Export')],'Location'),
 		'offer_copy': fields.char('Offer Copy'),
@@ -152,8 +148,10 @@ class kg_crm_offer(osv.osv):
 		'offer_net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Offer Amount',multi="sums",store=True),
 		
 		### Entry Info ####
+		
+		'active': fields.boolean('Active'),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
-		'crt_date': fields.datetime('Creation Date',readonly=True),
+		'crt_date': fields.datetime('Created Date',readonly=True),
 		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
 		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
 		'confirm_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
@@ -171,10 +169,10 @@ class kg_crm_offer(osv.osv):
 	_defaults = {
 	
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_crm_offer', context=c),
-		'enquiry_date' : lambda * a: time.strftime('%Y-%m-%d'),
-		'offer_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'enquiry_date': lambda * a: time.strftime('%Y-%m-%d'),
+		'offer_date': lambda * a: time.strftime('%Y-%m-%d'),
 		'user_id': lambda obj, cr, uid, context: uid,
-		'crt_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+		'crt_date': time.strftime('%Y-%m-%d %H:%M:%S'),
 		'state': 'draft',
 		'pump': 'gld_packing',
 		'transmision': 'cpl',
@@ -183,7 +181,7 @@ class kg_crm_offer(osv.osv):
 		'active': True,
 		'wo_flag': False,
 	#	'division_id':_get_default_division,
-		'due_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'due_date': lambda * a: time.strftime('%Y-%m-%d'),
 		'revision': 0,
 	}
 	
@@ -203,142 +201,151 @@ class kg_crm_offer(osv.osv):
 	
 	def entry_confirm(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
-		
-		#~ for line in entry.line_pump_ids:
-		if not entry.name:
-			off_no = ''	
-			seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.crm.offer')])
-			rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
-			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],rec.code,entry.offer_date))
-			off_no = cr.fetchone();
-			off_no = off_no[0]
-		else:
-			off_no = entry.name
-		#~ self.wo_creation(cr,uid,entry)
-		
-		self.write(cr, uid, ids, {
-									'name':off_no,
-									'state': 'moved_to_offer',
-									'confirm_user_id': uid, 
-									'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')
-								})
+		if entry.state == 'draft':
+			#~ for line in entry.line_pump_ids:
+			if not entry.name:
+				off_no = ''	
+				seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.crm.offer')])
+				rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],rec.code,entry.offer_date))
+				off_no = cr.fetchone();
+				off_no = off_no[0]
+			else:
+				off_no = entry.name
+			#~ self.wo_creation(cr,uid,entry)
+			
+			self.write(cr, uid, ids, {
+										'name':off_no,
+										'state': 'moved_to_offer',
+										'confirm_user_id': uid, 
+										'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')
+									})
 		return True
 	
 	def entry_revision(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
-		revision = 0
-		if entry.wo_flag == False:
-			revision = entry.revision + 1
-			print"revisionrevisionrevision",revision
-			vals = {
-					'state' : 'draft',
-					'revision' : revision,
-					}
-			offer_id = self.copy(cr, uid, entry.id,vals, context) 
-			print"offer_idoffer_idoffer_id",offer_id
-			#~ offer_id = self.create(cr,uid,{'name': entry.name,
-								#~ 'enquiry_no': entry.enquiry_no,
-								#~ 'offer_date': entry.offer_date,
-								#~ 'enquiry_date': entry.enquiry_date,
-								#~ 'customer_id': entry.customer_id.id,
-								#~ 'segment': entry.segment,
-								#~ 'ref_mode': entry.ref_mode,
-								#~ 'location': entry.location,
-								#~ 'market_division': entry.market_division,
-								#~ 'state': 'draft',
-								#~ 'revision': revision,
-								#~ 'note': entry.note,
-								#~ 'purpose': entry.purpose,
-								#~ 'wo_flag': entry.wo_flag,
-								#~ 'offer_net_amount': entry.offer_net_amount,
-								#~ })
-					
-			self.write(cr, uid, ids, {
-									  'state': 'revised',
-									})
+		if entry.state in ('moved_to_offer','wo_created'):
+			revision = 0
+			wo_obj = self.pool.get('kg.work.order')
+			wo_id = wo_obj.search(cr,uid,[('offer_id','=',entry.id),('state','not in',('draft','cancel'))])
+			if wo_id:
+				raise osv.except_osv(_('Warning!'),
+					_('You can not delete this entry because WO confirmed!'))
+						
+			if entry.wo_flag == False:
+				revision = entry.revision + 1
+				print"revisionrevisionrevision",revision
+				vals = {
+						'state' : 'draft',
+						'revision' : revision,
+						}
+				offer_id = self.copy(cr, uid, entry.id,vals, context) 
+				print"offer_idoffer_idoffer_id",offer_id
+				#~ offer_id = self.create(cr,uid,{'name': entry.name,
+									#~ 'enquiry_no': entry.enquiry_no,
+									#~ 'offer_date': entry.offer_date,
+									#~ 'enquiry_date': entry.enquiry_date,
+									#~ 'customer_id': entry.customer_id.id,
+									#~ 'segment': entry.segment,
+									#~ 'ref_mode': entry.ref_mode,
+									#~ 'location': entry.location,
+									#~ 'market_division': entry.market_division,
+									#~ 'state': 'draft',
+									#~ 'revision': revision,
+									#~ 'note': entry.note,
+									#~ 'purpose': entry.purpose,
+									#~ 'wo_flag': entry.wo_flag,
+									#~ 'offer_net_amount': entry.offer_net_amount,
+									#~ })
+						
+				self.write(cr, uid, ids, {
+										  'state': 'revised',
+										})
 								
 		return True
 	
 	def wo_creation(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
-		wo_id = self.pool.get('kg.work.order').create(cr,uid,{'order_category': entry.purpose,
-															  'name': '',
-															  'offer_no': entry.name,
-															  'location': entry.location,
-															  'entry_mode': 'auto',
-															  'partner_id': entry.customer_id.id,
-																})
-		if wo_id:
-			if entry.line_pump_ids:
-				groups = []
-				#~ for item in entry.line_spare_ids:
-				for key, group in groupby(entry.line_pump_ids, lambda x: x.enquiry_line_id.id):
-					groups.append(map(lambda r:r,group))
-				print"ffffffffffffffffffff",groups
-				for key,group in enumerate(groups):
-					enquiry_line_id = group[0].enquiry_line_id.id
-					off_line_id = group[0]
-					print"enquiry_line_idenquiry_line_id",enquiry_line_id
-					print"off_line_idoff_line_id",off_line_id
-					purpose = 'pump'
-					pump_vals = self._prepare_pump_details(cr,uid,wo_id,entry,enquiry_line_id,off_line_id,purpose)
-					if pump_vals:
-						wo_line_id = self.pool.get('ch.work.order.details').create(cr, uid, pump_vals, context=context)
-						if wo_line_id:
-							item = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,enquiry_line_id)
-							if item:
-								self.prepare_bom(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
-			if entry.line_spare_ids:
-				groups = []
-				#~ for item in entry.line_spare_ids:
-				for key, group in groupby(entry.line_spare_ids, lambda x: x.pump_id.id):
-					groups.append(map(lambda r:r,group))
-				print"ffffffffffffffffffff",groups
-				for key,group in enumerate(groups):
-					enquiry_line_id = group[0].enquiry_line_id.id
-					off_line_id = group[0]
-					spa_off_obj = self.pool.get('ch.spare.offer').search(cr,uid,[('enquiry_line_id','=',enquiry_line_id)])
-					print"spa_off_obj",spa_off_obj
-					print"enquiry_line_idenquiry_line_id*************************",enquiry_line_id
-					print"enquiry_line_idenquiry_line_id********off_line_id*****************",off_line_id
-					purpose = 'spare'
-					pump_vals = self._prepare_pump_details(cr,uid,wo_id,entry,enquiry_line_id,off_line_id,purpose)
-					if pump_vals:
-						wo_line_id = self.pool.get('ch.work.order.details').create(cr, uid, pump_vals, context=context)
-						if wo_line_id:
-							item = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,enquiry_line_id)
-							if item:
-								for li in spa_off_obj:
-									print"liliii",li
-									off_line_id = spa_off_obj
-								self.prepare_bom(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
-			
-			if entry.line_accessories_ids:
-				groups = []
-				for key, group in groupby(entry.line_accessories_ids, lambda x: x.pump_id.id):
-					groups.append(map(lambda r:r,group))
-				print"ffffffffffffffffffff",groups
-				for key,group in enumerate(groups):
-					enquiry_line_id = group[0].enquiry_line_id.id
-					off_line_id = group[0]
-					acc_off_obj = self.pool.get('ch.accessories.offer').search(cr,uid,[('enquiry_line_id','=',enquiry_line_id)])
-					print"enquiry_line_idenquiry_line_id",enquiry_line_id
-					purpose = 'access'
-					pump_vals = self._prepare_pump_details(cr,uid,wo_id,entry,enquiry_line_id,off_line_id,purpose)
-					if pump_vals:
-						wo_line_id = self.pool.get('ch.work.order.details').create(cr, uid, pump_vals, context=context)
-						if wo_line_id:
-							item = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,enquiry_line_id)
-							if item:
-								for li in acc_off_obj:
-									print"liliii",li
-									off_line_id = acc_off_obj
-								self.prepare_bom(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
-					
-		print"wo_idwo_idwo_id",wo_id
-		if wo_id:
-			self.write(cr, uid, ids, {'wo_flag': True,'state':'wo_created'})
-			self.pool.get('kg.crm.enquiry').write(cr,uid,entry.enquiry_id.id,{'wo_flag':True,'state':'wo_created'})
+		if entry.state == 'moved_to_offer':
+			wo_id = self.pool.get('kg.work.order').create(cr,uid,{'order_category': entry.purpose,
+																  'name': '',
+																  'offer_no': entry.name,
+																  'location': entry.location,
+																  'entry_mode': 'auto',
+																  'partner_id': entry.customer_id.id,
+																  'order_value': entry.offer_net_amount,
+																	})
+			if wo_id:
+				if entry.line_pump_ids:
+					groups = []
+					#~ for item in entry.line_spare_ids:
+					for key, group in groupby(entry.line_pump_ids, lambda x: x.enquiry_line_id.id):
+						groups.append(map(lambda r:r,group))
+					print"ffffffffffffffffffff",groups
+					for key,group in enumerate(groups):
+						enquiry_line_id = group[0].enquiry_line_id.id
+						off_line_id = group[0]
+						print"enquiry_line_idenquiry_line_id",enquiry_line_id
+						print"off_line_idoff_line_id",off_line_id
+						purpose = 'pump'
+						pump_vals = self._prepare_pump_details(cr,uid,wo_id,entry,enquiry_line_id,off_line_id,purpose)
+						if pump_vals:
+							wo_line_id = self.pool.get('ch.work.order.details').create(cr, uid, pump_vals, context=context)
+							if wo_line_id:
+								item = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,enquiry_line_id)
+								if item:
+									self.prepare_bom(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
+				if entry.line_spare_ids:
+					groups = []
+					#~ for item in entry.line_spare_ids:
+					for key, group in groupby(entry.line_spare_ids, lambda x: x.pump_id.id):
+						groups.append(map(lambda r:r,group))
+					print"ffffffffffffffffffff",groups
+					for key,group in enumerate(groups):
+						enquiry_line_id = group[0].enquiry_line_id.id
+						off_line_id = group[0]
+						spa_off_obj = self.pool.get('ch.spare.offer').search(cr,uid,[('enquiry_line_id','=',enquiry_line_id)])
+						print"spa_off_obj",spa_off_obj
+						print"enquiry_line_idenquiry_line_id*************************",enquiry_line_id
+						print"enquiry_line_idenquiry_line_id********off_line_id*****************",off_line_id
+						purpose = 'spare'
+						pump_vals = self._prepare_pump_details(cr,uid,wo_id,entry,enquiry_line_id,off_line_id,purpose)
+						if pump_vals:
+							wo_line_id = self.pool.get('ch.work.order.details').create(cr, uid, pump_vals, context=context)
+							if wo_line_id:
+								item = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,enquiry_line_id)
+								if item:
+									for li in spa_off_obj:
+										print"liliii",li
+										off_line_id = spa_off_obj
+									self.prepare_bom(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
+				
+				if entry.line_accessories_ids:
+					groups = []
+					for key, group in groupby(entry.line_accessories_ids, lambda x: x.pump_id.id):
+						groups.append(map(lambda r:r,group))
+					print"ffffffffffffffffffff",groups
+					for key,group in enumerate(groups):
+						enquiry_line_id = group[0].enquiry_line_id.id
+						off_line_id = group[0]
+						acc_off_obj = self.pool.get('ch.accessories.offer').search(cr,uid,[('enquiry_line_id','=',enquiry_line_id)])
+						print"enquiry_line_idenquiry_line_id",enquiry_line_id
+						purpose = 'access'
+						pump_vals = self._prepare_pump_details(cr,uid,wo_id,entry,enquiry_line_id,off_line_id,purpose)
+						if pump_vals:
+							wo_line_id = self.pool.get('ch.work.order.details').create(cr, uid, pump_vals, context=context)
+							if wo_line_id:
+								item = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,enquiry_line_id)
+								if item:
+									for li in acc_off_obj:
+										print"liliii",li
+										off_line_id = acc_off_obj
+									self.prepare_bom(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
+						
+			print"wo_idwo_idwo_id",wo_id
+			if wo_id:
+				self.write(cr, uid, ids, {'wo_flag': True,'state':'wo_created'})
+				self.pool.get('kg.crm.enquiry').write(cr,uid,entry.enquiry_id.id,{'wo_flag':True,'state':'wo_created'})
 		return True
 	
 	#~ def _prepare_pump_details(self,cr,uid,wo_id,entry,item,context=None):		
@@ -386,7 +393,7 @@ class kg_crm_offer(osv.osv):
 			if item.lubrication_type == 'grease':
 				 lubrication_type = 'grease'
 			if item.speed_in_rpm:
-				if item.speed_in_rpm <= 1800  or item.speed_in_rpm == 0.00:
+				if item.speed_in_rpm <= 1800 or item.speed_in_rpm == 0.00:
 					rpm = '1450'
 				elif item.speed_in_rpm >= 1801 and item.speed_in_rpm <= 3600:
 					rpm = '2900'
@@ -498,6 +505,7 @@ class kg_crm_offer(osv.osv):
 																							'moc_id': ele.moc_id.id,
 																							'entry_mode': 'auto',
 																							'spare_offer_line_id': of_li_id,
+																							'brand_id': ele.brand_id.id,
 																							})
 							prime_cost += ele.prime_cost
 							print"ccccccccccccccccc",prime_cost
@@ -1173,7 +1181,7 @@ class kg_crm_offer(osv.osv):
 					for item_1 in mat_data:
 						if item_1['mat_name'] or item_1['moc']:
 							m_col_no = 0
-							sheet1.write(row_no,m_col_no,item_1['mat_name'],style8)
+							sheet1.write(row_no,m_col_no,item_1['mat_name'],style4)
 							sheet1.write(row_no,em_col,item_1['moc'] or "-",style8)
 							row_no = row_no+1
 				else:
@@ -1183,24 +1191,70 @@ class kg_crm_offer(osv.osv):
 				em_col = em_col + 1 
 		print"row_norow_norow_norow_no",row_no
 		
-		sheet1.write_merge(row_no, row_no, 0, len_col, 'Mechanical Seal Details : Eagle Burgmann / Flow Serve / Leak Proof:', style5)
+		sheet1.write_merge(row_no, row_no, 0, len_col, 'Mechanical Seal Details:', style5)
 		sheet1.row(row_no).height = 400
 		row_no = row_no + 1
 		
-		sheet1.write_merge(row_no, row_no, 0, 0, 'Seal Type / Face Combination', style4)
+		sheet1.write_merge(row_no, row_no, 0, 0, 'Mech. Seal Make', style4)
 		print"row_norow_norow_nosssssssssS",row_no
 		print"row_norow_norow_nolen_collen_collen_col",len_col
-		sheet1.write_merge(row_no+1, row_no+1, 0, 0, 'Gland Plate / API Plan', style4)
+		sheet1.write_merge(row_no+1, row_no+1, 0, 0, 'Seal Type', style4)
+		sheet1.write_merge(row_no+2, row_no+2, 0, 0, 'Face Combination', style4)
+		sheet1.write_merge(row_no+3, row_no+3, 0, 0, 'Gland Plate', style4)
+		sheet1.write_merge(row_no+4, row_no+4, 0, 0, 'API Plan', style4)
 		if line_data:
 			em_col = 1
 			for item in line_data:
 				mech_sql = """
 							select 
 							enq_line.shaft_sealing as shaft_sealing,
-							enq_line.shaft_sealing as gland
+							enq_line.shaft_sealing as gland,
+							brand.name as mech_seal_make,
+							(CASE WHEN enq_line.seal_type = 'sums' 
+							THEN 'Single Unbalanced Multiple Spring'
+							WHEN enq_line.seal_type = 'suss' 
+							THEN 'Single Unbalanced Single Spring'
+							WHEN enq_line.seal_type = 'sbsm' 
+							THEN 'Single Balanced Spring Stationary Mounted'
+							WHEN enq_line.seal_type = 'cs' 
+							THEN 'Cartridge Seal'
+							WHEN enq_line.seal_type = 'sbms' 
+							THEN 'Single Balanced Multiple Spring'
+							WHEN enq_line.seal_type = 'sbss' 
+							THEN 'Single Balanced Single Spring'
+							WHEN enq_line.seal_type = 'sc' 
+							THEN 'Single Cartridge'
+							WHEN enq_line.seal_type = 'dubtb' 
+							THEN 'Double Unbalanced Back to Back'
+							WHEN enq_line.seal_type = 'dbbtb' 
+							THEN 'Double Balanced Back to Back'
+							WHEN enq_line.seal_type = 'ts' 
+							THEN 'Tandem Seal'
+							WHEN enq_line.seal_type = 'dc' 
+							THEN 'Double Cartridge'
+							WHEN enq_line.seal_type = 'drsu' 
+							THEN 'Dry Running - Single Unbalanced'
+							WHEN enq_line.seal_type = 'mbi' 
+							THEN 'Metallic Bellow Inside'
+							WHEN enq_line.seal_type = 'tbs' 
+							THEN 'Teflon Bellow Seal-Outside Mounted Dry Running'
+							ELSE ''
+							end ) as seal_type,
+							(CASE WHEN enq_line.face_combination = 'c_vs_sic' 
+							THEN 'C VS SIC'
+							WHEN enq_line.face_combination = 'sic_vs_sic' 
+							THEN 'SIC VS SIC'
+							WHEN enq_line.face_combination = 'c_vs_sic' 
+							THEN 'SIC VS SIC / C VS SIC'
+							WHEN enq_line.face_combination = 'gft_vs_ceramic' 
+							THEN 'GFT VS CERAMIC'
+							ELSE ''
+							end ) as face_combination,
+							enq_line.gland_plate as gland_plate,
+							enq_line.api_plan as api_plan
 							
 							from ch_kg_crm_pumpmodel enq_line
-							
+							left join kg_brand_master brand on(brand.id=enq_line.mech_seal_make)
 							where enq_line.id = """+ str(item['enquiry_line_id']) +""" and enq_line.pump_id = """+ str(item['pump_id']) + """
 							"""
 				cr.execute(mech_sql)		
@@ -1209,22 +1263,31 @@ class kg_crm_offer(osv.osv):
 				if mech_data:
 					s = 1
 					for item_1 in mech_data:
-						if item_1['shaft_sealing'] or item_1['gland']:
+						if item_1['mech_seal_make'] or item_1['seal_type'] or item_1['face_combination'] or item_1['gland_plate'] or item_1['api_plan']:
 							m_col_no = 1
-							sheet1.write(row_no,em_col,item_1['shaft_sealing'],style8)
-							sheet1.write(row_no+1,em_col,item_1['gland'],style8)
+							sheet1.write(row_no,em_col,item_1['mech_seal_make'],style8)
+							sheet1.write(row_no+1,em_col,item_1['seal_type'],style8)
+							sheet1.write(row_no+2,em_col,item_1['face_combination'],style8)
+							sheet1.write(row_no+3,em_col,item_1['gland_plate'],style8)
+							sheet1.write(row_no+4,em_col,item_1['api_plan'],style8)
 							m_col_no = m_col_no+1
 						else:
 							m_col_no = 1
 							sheet1.write(row_no,em_col,"-",style8)
 							sheet1.write(row_no+1,em_col,"-",style8)
+							sheet1.write(row_no+2,em_col,"-",style8)
+							sheet1.write(row_no+3,em_col,"-",style8)
+							sheet1.write(row_no+4,em_col,"-",style8)
 							m_col_no = m_col_no+1
-						s = s + 1
+						s = s + 4
 						em_col = em_col + 1
 						print"sssssssssssss",s
 				else:
 					sheet1.write(row_no,em_col,"-",style8)
 					sheet1.write(row_no+1,em_col,"-",style8)
+					sheet1.write(row_no+2,em_col,"-",style8)
+					sheet1.write(row_no+3,em_col,"-",style8)
+					sheet1.write(row_no+4,em_col,"-",style8)
 					em_col = em_col + 1
 					
 			print"row_norow_nodddddD",row_no
@@ -1275,7 +1338,7 @@ class kg_crm_offer(osv.osv):
 					em_col = em_col + 1
 		row_no = row_no + s
 		
-		sheet1.write_merge(row_no, row_no, 0, len_col, 'Scope Of Supply / Price per Each in Rs.', style5)
+		sheet1.write_merge(row_no, row_no, 0, len_col, 'Scope of Supply / Price per Each in Rs.', style5)
 		sheet1.row(row_no).height = 400
 		row_no = row_no + 1
 		
@@ -1286,7 +1349,7 @@ class kg_crm_offer(osv.osv):
 			for item in line_data:
 				ss_sql = """
 							select 
-							pump_offer.net_amount as net_amount
+							pump_offer.tot_price as tot_price
 							
 							from ch_pump_offer pump_offer
 							
@@ -1296,8 +1359,8 @@ class kg_crm_offer(osv.osv):
 				print"ss_data",ss_data
 				if ss_data:
 					for item_1 in ss_data:
-						if item_1['net_amount']:
-							sheet1.write(row_no,em_col,item_1['net_amount'] or "-",style8)
+						if item_1['tot_price']:
+							sheet1.write(row_no,em_col,item_1['tot_price'] or "-",style8)
 						else:
 							sheet1.write(row_no,em_col,"-",style8)
 						em_col = em_col + 1
@@ -1382,7 +1445,6 @@ class kg_crm_offer(osv.osv):
 		
 		return self.write(cr, uid, ids, {'rep_data':out,'offer_copy':report_name},context=context)
 		
-			
 		
 kg_crm_offer()
 
@@ -1495,7 +1557,6 @@ class ch_pump_offer(osv.osv):
 		'off_fou_id': fields.related('enquiry_line_id','line_ids', type='one2many', relation='ch.kg.crm.foundry.item', string='Foundry Items'),
 		'off_ms_id': fields.related('enquiry_line_id','line_ids_a', type='one2many', relation='ch.kg.crm.machineshop.item', string='MS Items'),
 		'off_bot_id': fields.related('enquiry_line_id','line_ids_b', type='one2many', relation='ch.kg.crm.bot', string='BOT Items'),
-		
 		
 	}
 	
@@ -1623,7 +1684,6 @@ class ch_spare_offer(osv.osv):
 		'off_ms_id': fields.related('enquiry_line_id','line_ids_a', type='one2many', relation='ch.kg.crm.machineshop.item', string='MS Items'),
 		'off_bot_id': fields.related('enquiry_line_id','line_ids_b', type='one2many', relation='ch.kg.crm.bot', string='BOT Items'),
 		
-		
 	}
 	
 
@@ -1739,8 +1799,6 @@ class ch_accessories_offer(osv.osv):
 		'off_ms_id': fields.related('enquiry_line_access_id','line_ids_a', type='one2many', relation='ch.crm.access.ms', string='MS Items'),
 		'off_bot_id': fields.related('enquiry_line_access_id','line_ids_b', type='one2many', relation='ch.crm.access.bot', string='BOT Items'),
 		
-		
 	}
 	
 ch_accessories_offer()
-

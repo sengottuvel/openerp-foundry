@@ -917,34 +917,6 @@
 		
 		<!-- Foundry Rejection List End -->
 		
-		<!-- MS Store Inward Start --> 
-		
-		<record id="t_foundry_store_issue" model="ir.model.access">
-			<field name="model_id" ref="kg_department_issue.model_kg_department_issue"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">Store Issue</field>
-			<field eval="1" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
-		</record>
-		
-		<!-- MS Store Inward End -->
-		
-		<!-- MS Store Inward Start --> 
-		
-		<record id="t_foundry_store_issue_line" model="ir.model.access">
-			<field name="model_id" ref="kg_department_issue.model_kg_department_issue_line"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">Store Issue Line</field>
-			<field eval="1" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
-		</record>
-		
-		<!-- MS Store Inward End -->
-		
 		
     </data>
 </openerp>

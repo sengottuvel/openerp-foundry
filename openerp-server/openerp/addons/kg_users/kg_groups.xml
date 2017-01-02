@@ -126,7 +126,6 @@
             ref('kg_subcontract_process.tam_sc_inward'),
             ref('kg_subcontract_process.tam_sc_advance'),
             ref('kg_subcontract_process.tam_sc_invoice'),
-            ref('kg_department_issue.tam_ms_issue_line'),
             
             ref('kg_menus.rpm_reports'),
             ref('kg_menus.rpm_planning_reports'),
