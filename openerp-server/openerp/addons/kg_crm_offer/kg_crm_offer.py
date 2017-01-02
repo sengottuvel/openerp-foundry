@@ -227,7 +227,8 @@ class kg_crm_offer(osv.osv):
 		if entry.state in ('moved_to_offer','wo_created'):
 			revision = 0
 			wo_obj = self.pool.get('kg.work.order')
-			wo_id = wo_obj.search(cr,uid,[('offer_id','=',entry.id),('state','not in',('draft','cancel'))])
+			#~ wo_id = wo_obj.search(cr,uid,[('offer_id','=',entry.id),('state','not in',('draft','cancel'))])
+			wo_id = wo_obj.search(cr,uid,[('offer_no','=',entry.name),('state','not in',('draft','cancel'))])
 			if wo_id:
 				raise osv.except_osv(_('Warning!'),
 					_('You can not delete this entry because WO confirmed!'))
