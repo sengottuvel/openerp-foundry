@@ -113,6 +113,8 @@ class kg_qc_verification(osv.osv):
 		'stock_type':fields.selection([('pump','Pump'),('pattern','Part')],'Type', required=True),
 		'sent_to':fields.selection([('assembly','Assembly'),('dispatch','Dispatch')],'Sent to'),
 		'serial_no': fields.char('Serial No', size=128),
+		'stock_location_id': fields.many2one('stock.location','Stock Location'),
+		'stock_inward_id': fields.many2one('ch.stock.inward.details', 'Stock Inward'),
 		
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
