@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+			
+	<!-- Form View Start -->
+
+		<record id="t_form_v_foundry_invoice" model="ir.ui.view">
+			<field name="name">Foundry Invoice Form</field>
+			<field name="model">kg.foundry.invoice</field>
+			<field name="arch" type="xml">
+				<form string="Foundry Invoice" version="7.0">
+					<header>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+					</header>
+					<group>
+						<group>
+							<field name="name"/>							
+							<field name="date_from" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>							
+							<field name="contractor_id" on_change="onchange_contractor(contractor_id)"  attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>	
+							<field name="phone" readonly="1" />																			
+							
+						</group>											
+						<group>
+							<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>														
+							<field name="date_to" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>									
+							<field name="contact_person" readonly="1" />									
+							<field name="flag_invoice" invisible="1"/>	
+							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>		
+								
+						</group>
+						<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>					
+					</group>
+					<notebook>
+						<page string="Invoice Details">
+							<field colspan="4" name="line_ids_a" nolabel="1" readonly="1" >
+								<tree string = "Invoice Items" create="false" delete ="false">
+									<field name="order_date" readonly="1"/>
+									<field name="stage_name" readonly="1"/>
+									<field name="each_weight" readonly="1"/>										
+									<field name="total_value" readonly="1"/>									
+								</tree>
+							</field>
+						</page>							
+						
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
+								<group>
+									<field name="user_id"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>
+					
+					<group string="Invoice Summary">
+							<field name="line_ids" colspan="4" nolabel="1" readonly="1" >
+								<tree string = "Invoice Items" create="false" delete ="false">
+										<field name="order_no" readonly="1"/>
+										<field name="pattern_code" readonly="1"/>
+										<field name="pattern_name" readonly="1"/>										
+										<field name="moc_id" readonly="1"/>
+										<field name="melting_id" readonly="1"/>
+										<field name="stage_name" readonly="1"/>										
+										<field name="qty" required="1"/>
+										<field name="each_weight" required="1"/>																				
+										<field name="rate" required="1"/>
+										<field name="total_weight" readonly="1" />
+										<field name="total_value" readonly="1"/>										
+										<field name="remark" widget="char"/>
+									</tree>
+							</field>
+						</group>			
+					
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_foundry_invoice" model="ir.ui.view">
+			<field name="name">Foundry Invoice Tree</field>
+			<field name="model">kg.foundry.invoice</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+					<tree colors="blue:state == 'draft';black:state == 'confirmed';
+						gray:state == 'cancel'" 
+						toolbar="True" string="Foundry Invoice Tree">							
+					<field name="name"/>
+					<field name="entry_date"/>					
+					<field name="date_from"/>					
+					<field name="date_to"/>					
+					<field name="state"/>				
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	
+	
+	
+	<!-- Search View Start -->
+
+		<record id="t_search_v_foundry_invoice" model="ir.ui.view">
+            <field name="name">Foundry Invoice Search</field>
+            <field name="model">kg.foundry.invoice</field>
+            <field name="arch" type="xml">
+                <search string="Foundry Invoice Search">
+					
+					<field name="name" string="Invoice No."  filter_domain="[('name','ilike',self)]" />
+					
+					
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>					
+					<filter icon="terp-check" name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>				
+				
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="Invoice No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'name'}"/>		
+						
+						<filter string="State" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+						
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+		
+		<!-- Menu Action Start -->
+		
+		
+		<record id="tma_foundry_invoice" model="ir.actions.act_window">
+			<field name="name">Foundry Invoice</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.foundry.invoice</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="search_view_id" ref="t_search_v_foundry_invoice"/>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_foundry_invoice_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_foundry_invoice"/>
+            <field name="act_window_id" ref="tma_foundry_invoice"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_foundry_invoice_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_foundry_invoice"/>
+            <field name="act_window_id" ref="tma_foundry_invoice"/>
+        </record>
+		
+		<!-- Menu Action End-->
+		
+		<menuitem action="tma_foundry_invoice" id="tam_foundry_invoice" parent="kg_fettling.tpm_fettling_process" sequence="20"/>
+	
+		
+	</data>
+</openerp>

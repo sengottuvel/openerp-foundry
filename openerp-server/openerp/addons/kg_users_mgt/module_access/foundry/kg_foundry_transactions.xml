@@ -1015,6 +1015,44 @@
 		
 		<!-- MS Store Inward End -->
 		
+		
+		<!-- Foundry Invoice Process Start here --> 
+		
+		<record id="t_foundry_kg_foundry_invoice" model="ir.model.access">
+			<field name="model_id" ref="kg_foundry_invoice.model_kg_foundry_invoice"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Foundry Invoice Process</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<record id="t_foundry_ch_foundry_invoice_line_details" model="ir.model.access">
+			<field name="model_id" ref="kg_foundry_invoice.model_ch_foundry_invoice_line_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Foundry Invoice Line Details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<record id="t_foundry_ch_foundry_invoice_line_summary" model="ir.model.access">
+			<field name="model_id" ref="kg_foundry_invoice.model_ch_foundry_invoice_line_summary"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Foundry Invoice Line Summary</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Foundry Invoice Process End -->
+		
     </data>
 </openerp>
 	
