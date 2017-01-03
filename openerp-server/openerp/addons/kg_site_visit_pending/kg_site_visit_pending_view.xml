@@ -39,13 +39,13 @@
 						<notebook>
 						<page string="Foundry Items">
 							<group colspan="6" col="6">		
-								<field name="complaint_fou_id" colspan="4" nolabel="1" mode="tree"  readonly="1">
+								<field name="line_ids" colspan="4" nolabel="1" mode="tree"  readonly="1">
 									<tree string="Foundry Items"  delete="false" create="false" editable="bottom">
 										<field name="is_applicable"/>
-										<field name="position_id"  readonly="1"/>
+										<field name="position_id" readonly="1"/>
 										<field name="pattern_id" required="1" readonly="1"/>
 										<field name="pattern_name" required="1" readonly="1"/>
-										<field name="qty" required="1"/>
+										<field name="qty" required="1" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
 										<field name="complaint_categ" invisible="1"/>
 										<field name="defect_id" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
 										<field name="complaint_due_to" attrs="{'required':[('is_applicable','=',True),('complaint_categ','in',('pump','parts'))]}"/>
@@ -57,7 +57,7 @@
 						</page>
 						<page string="MS Items">
 							<group colspan="6" col="6">		
-								<field name="complaint_ms_id" colspan="4" nolabel="1" mode="tree" readonly="1">
+								<field name="line_ids_a" colspan="4" nolabel="1" mode="tree" readonly="1">
 									<tree string="MS Items"  delete="false" create="false" editable="bottom">
 										<field name="is_applicable"/>
 										<field name="ms_name_id" required="1" readonly="1"/>
@@ -74,7 +74,7 @@
 						</page>
 						<page string="BOT Items">
 							<group colspan="6" col="6">		
-								<field name="complaint_bot_id" colspan="4" nolabel="1" mode="tree" readonly="1">
+								<field name="line_ids_b" colspan="4" nolabel="1" mode="tree" readonly="1">
 									<tree string="BOT Items"  delete="false" create="false" editable="bottom">
 										<field name="is_applicable"/>
 										<field name="bot_id" required="1" readonly="1"/>
@@ -193,7 +193,10 @@
 	
 	<!-- Sequence Number Setting Ends Here -->
 	
+		<!-- Site Visit Pending --> 
+			
 		<menuitem action="tma_site_visit_pending" name="Site Visit Pending" id="tam_site_visit_pending" parent="kg_menus.cpm_crm_enquiry_menu" sequence="5"/>
-		
+				
+				
 	</data>
 </openerp>

@@ -511,6 +511,7 @@
 							<field name="access_id" required="1"/>
 							<field name="moc_id" required="1"/>
 							<field name="qty" required="1"/>
+							<field name="prime_cost"/>
 							<field name="oth_spec"/>
 						</tree>
 						<form string="Accessories Entry Form">
@@ -522,10 +523,11 @@
 								<group>
 									<field name="qty" required="1" attrs="{'readonly':[('load_access','=',True)]}"/>
 									<field name="oth_spec"/>
+									<field name="prime_cost" invisible="1"/>
 								</group>
 								<group>
 								<group>
-									<field name="load_access" on_change="onchange_load_access(load_access,access_id,moc_id)"/>
+									<field name="load_access" on_change="onchange_load_access(load_access,access_id,moc_id,qty)"/>
 								</group>
 								<group>
 								</group>

@@ -753,10 +753,11 @@ class kg_crm_enquiry(osv.osv):
 		bot_price = 0.00
 		for bot_line in bom_bot_line_id:
 			if bot_line.is_applicable == True:
-				if bot_line.flag_is_bearing == True:
-					if not bot_line.brand_id:
-						raise osv.except_osv(_('Warning!'),
-							_('%s You cannot save without Brand'%(bot_line.ms_id.code)))
+				if catg == 'non_acc':
+					if bot_line.flag_is_bearing == True:
+						if not bot_line.brand_id:
+							raise osv.except_osv(_('Warning!'),
+								_('%s You cannot save without Brand'%(bot_line.ms_id.code)))
 				
 				moc_id = 0
 				tot_price = 0.00
@@ -2024,6 +2025,39 @@ class ch_kg_crm_accessories(osv.osv):
 	_name = "ch.kg.crm.accessories"
 	_description = "Ch KG CRM Accessories"
 	
+	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
+		res = {}
+		prime_cost = fou_tot = ms_tot = bot_tot = 0.00
+		for order in self.browse(cr, uid, ids, context=context):
+			res[order.id] = {
+				'prime_cost': 0.0,
+			}
+			val = val1 = val3 = line_total = 0.0
+	
+			#~ for line in order.line_ids:
+				#~ per_to_amt = (line.rec_qty * line.price_unit) * line.kg_discount_per / 100.00
+				#~ tot_discount = line.discount + per_to_amt
+				#~ val1 += line.price_subtotal
+				#~ line_total += line.rec_qty * line.price_unit
+				#~ val += self._amount_line_tax(cr, uid, line, context=context)
+				#~ val3 += tot_discount
+			#~ 
+			#~ if order.expense_line_ids:
+				#~ other_charges = (round(sum(map(lambda c:c.price_subtotal,order.expense_line_ids))))
+			#~ else:
+				#~ other_charges = 0.00
+			#~ 
+			#~ for line in order.advance_line_ids:
+				#~ advance_net_amt += line.current_adv_amt
+				
+			fou_tot = sum(line.prime_cost for line in order.line_ids)
+			ms_tot = sum(line.prime_cost for line in order.line_ids_a)
+			bot_tot = sum(line.prime_cost for line in order.line_ids_b)
+			
+			res[order.id]['prime_cost'] = prime_cost
+			
+		return res
+		
 	_columns = {
 		
 		'header_id':fields.many2one('ch.kg.crm.pumpmodel', 'Header Id', ondelete='cascade'),
@@ -2039,6 +2073,8 @@ class ch_kg_crm_accessories(osv.osv):
 		'qty': fields.float('Qty'),
 		'oth_spec': fields.char('Other Specification'),
 		'load_access': fields.boolean('Load BOM'),
+		'prime_cost': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Prime Cost',
+			 multi="sums", help="The amount without tax", track_visibility='always',store=True),
 		
 		'line_ids': fields.one2many('ch.crm.access.fou', 'header_id', 'Access FOU'),
 		'line_ids_a': fields.one2many('ch.crm.access.ms', 'header_id', 'Access MS'),
@@ -2058,7 +2094,7 @@ class ch_kg_crm_accessories(osv.osv):
 		
 		]
 		
-	def onchange_load_access(self, cr, uid, ids, load_access,access_id,moc_id):
+	def onchange_load_access(self,cr,uid,ids,load_access,access_id,moc_id,qty):
 		fou_vals=[]
 		ms_vals=[]
 		bot_vals=[]
@@ -2077,7 +2113,7 @@ class ch_kg_crm_accessories(osv.osv):
 									'pattern_id': item.pattern_id.id,
 									'pattern_name': item.pattern_name,
 									'moc_id': moc_id,
-									'qty': item.qty,
+									'qty': item.qty * qty,
 									'load_bom': True,
 									'is_applicable': True,
 									'csd_no': item.csd_no,
@@ -2091,7 +2127,7 @@ class ch_kg_crm_accessories(osv.osv):
 									'position_id': item.position_id.id,							
 									'ms_id': item.ms_id.id,
 									'moc_id': moc_id,
-									'qty': item.qty,
+									'qty': item.qty * qty,
 									'load_bom': True,
 									'is_applicable': True,
 									'csd_no': item.csd_no,
@@ -2109,7 +2145,7 @@ class ch_kg_crm_accessories(osv.osv):
 									'position_id': item.position_id.id,							
 									'ms_id': item.ms_id.id,
 									'moc_id': moc_id,
-									'qty': item.qty,
+									'qty': item.qty * qty,
 									'load_bom': True,
 									'is_applicable': True,
 									'csd_no': item.csd_no,

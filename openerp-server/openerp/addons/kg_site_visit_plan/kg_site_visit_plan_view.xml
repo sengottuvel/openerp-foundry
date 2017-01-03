@@ -235,7 +235,7 @@
 					<header>
 						<button name="entry_confirm" type="object" string="Confirm" states="pending" class="oe_highlight"/>
 					</header>
-					<group>
+					<group string="Plan Details">
 						<group>
 							<field name="complaint_no" required="1" readonly="1"/>
 							<field name="header_id" required="1" readonly="1"/>
@@ -255,74 +255,85 @@
 							<field name="wo_line_id" readonly="1"/>
 							<field name="pump_id" required="1" readonly="1"/>
 							<field name="moc_const_id" required="1" readonly="1"/>
-							<field name="s_no" required="1" readonly="1"/>
+							<field name="s_no" readonly="1"/>
 							<field name="no_of_days" required="1" readonly="1"/>
-							<field name="purpose" required="1" />
+							<field name="purpose" required="1" readonly="1"/>
 							<field name="state" style="width: 30%%" class="att_state_change"/>
 						</group>
 					</group>
-					<group string="Plan Details">
+					<group string="Status Update">
 						<group>
-							<field name="decision" required="1"/>
-							<field name="returnable" attrs="{'required':[('decision','in',('replace_free'))]}"/>
-							<field name="replace_categ" attrs="{'required':[('decision','in',('replace','replace_free'))],'invisible':[('decision','not in',('replace','replace_free'))]}"/>
+							<field name="decision" attrs="{'required':['|',('purpose','=','pump'),('replace_categ','=','pump')],'invisible':[('purpose','!=','pump'),('replace_categ','!=','pump')]}"/>
+							<field name="complaint_due_to" attrs="{'required':[('decision','in',('attended'))],'invisible':[('decision','not in',('attended','not_attended'))]}"/>
+							<field name="returnable" attrs="{'required':['|',('purpose','=','pump'),('replace_categ','=','pump'),('decision','in',('replace','replace_free'))],'invisible':[('purpose','!=','pump'),('replace_categ','!=','pump')]}"/>
+							<field name="replace_categ" attrs="{'required':[('decision','not in',('completed'))],'invisible':[('decision','in',('completed'))]}"/>
 							<field name="remarks"/>
 						</group>
 						<group>
 							<field name="tot_plan_amt" readonly="1"/>
-							<field name="expense_amt" required="1" on_change="onchange_bal_amt(expense_amt,tot_plan_amt)"/>
+							<field name="expense_amt" required="1"/>
 							<field name="bal_amt" required="1" readonly="1"/>
 						</group>
 					</group>
 					
 					<group>
 						<group>
-							<field name="load_bom" on_change="onchange_load_bom(load_bom,pump_id,wo_line_id,purpose,moc_const_id,decision,replace_categ)" attrs="{'invisible':[('decision','not in',('replace','replace_free'))]}"/>
+							<field name="load_bom" on_change="onchange_load_bom(load_bom,pump_id,wo_line_id,purpose,moc_const_id,decision,replace_categ,defect_id,complaint_due_to)" attrs="{'invisible':[('decision','in',('completed'))]}"/>
 						</group>
 						<group>
 						</group>
 					</group>
 						
-					<notebook attrs="{'invisible':[('decision','not in',('replace','replace_free'))]}">
+					<notebook attrs="{'invisible':[('decision','in',('completed'))]}">
 						<page string = "Foundry Items">
-							<field name="line_ids">
+							<field name="line_ids" attrs="{'readonly':['|',('state','not in',('pending')),('replace_categ','=','pump')]}">
 								<tree string="Foundry Item Tree" editable="top" create="false" delete="false">
 									<field name="is_applicable"/>
 									<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
 									<field name="pattern_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
 									<field name="pattern_name" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
-									<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}"/>
+									<field name="moc_id" attrs="{'required':[('is_applicable','=',True),('decision','!=','not_attended')]}"/>
+									<field name="decision" attrs="{'required':[('is_applicable','=',True)]}"/>
+									<field name="returnable" attrs="{'required':[('is_applicable','=',True),('decision','in',('replace','replace_free'))]}"/>
+									<field name="defect_id" attrs="{'required':[('is_applicable','=',True),('decision','!=','not_attended')]}"/>
+									<field name="complaint_due_to" attrs="{'required':[('is_applicable','=',True),('decision','!=','not_attended')]}"/>
 									<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
-									<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+									<field name="qty" attrs="{'required':[('is_applicable','=',True),('decision','!=','not_attended')]}" />
 									<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
 									<field name="load_bom" invisible="1"/>
 								</tree>
 							</field>								
 						</page>
 						<page string = "MS Items">
-							<field name="line_ids_a">
+							<field name="line_ids_a" attrs="{'readonly':['|',('state','not in',('pending')),('replace_categ','=','pump')]}">
 								<tree string="MS Item Tree" editable="top" create="false" delete="false">
 									<field name="is_applicable"/>
 									<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
-									<field name="ms_id" attrs="{'required':[('is_applicable','=',True)],'readonly':[('load_bom','=',True)]}"/>
+									<field name="ms_id" attrs="{'required':[('is_applicable','=',True),('decision','!=','not_attended')],'readonly':[('load_bom','=',True)]}"/>
 									<field name="name" attrs="{'readonly':[('load_bom','=',True)]}"/>
-									<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}"/>
+									<field name="moc_id" attrs="{'required':[('is_applicable','=',True),('decision','!=','not_attended')]}"/>
+									<field name="decision" attrs="{'required':[('is_applicable','=',True)]}"/>
+									<field name="defect_id" attrs="{'required':[('is_applicable','=',True),('decision','!=','not_attended')]}"/>
+									<field name="complaint_due_to" attrs="{'required':[('is_applicable','=',True),('decision','!=','not_attended')]}"/>
 									<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
-									<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+									<field name="qty" attrs="{'required':[('is_applicable','=',True),('decision','!=','not_attended')]}" />
 									<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
 									<field name="load_bom" invisible="1"/>
 								</tree>
 							</field>								
 						</page>
 						<page string = "BOT Items">
-							<field name="line_ids_b">
+							<field name="line_ids_b" attrs="{'readonly':['|',('state','not in',('pending')),('replace_categ','=','pump')]}">
 								<tree string="BOT Item Tree" editable="top" create="false" delete="false">
 									<field name="is_applicable"/>
 									<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
-									<field name="ms_id" attrs="{'required':[('is_applicable','=',True)],'readonly':[('load_bom','=',True)]}"/>
-									<field name="item_name" attrs="{'readonly':[('load_bom','=',True)]}"/>
-									<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}"/>
-									<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+									<field name="ms_id" attrs="{'required':[('is_applicable','=',True),('decision','!=','not_attended')],'readonly':[('load_bom','=',False)]}"/>
+									<field name="item_name" attrs="{'readonly':[('load_bom','=',False)]}"/>
+									<field name="moc_id" attrs="{'required':[('is_applicable','=',True),('decision','!=','not_attended')]}"/>
+									<field name="decision" attrs="{'required':[('is_applicable','=',True)]}"/>
+									<field name="defect_id" attrs="{'required':[('is_applicable','=',True),('decision','!=','not_attended')]}"/>
+									<field name="complaint_due_to" attrs="{'required':[('is_applicable','=',True),('decision','!=','not_attended')]}"/>
+									<field name="qty" attrs="{'required':[('is_applicable','=',True),('decision','!=','not_attended')]}" />
 									<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
 									<field name="load_bom" invisible="1"/>
 								</tree>
@@ -338,7 +349,6 @@
 							</field>								
 						</page>
 					</notebook>
-			
 					<notebook>
 						<page string="Allowance Breakups">
 							<field name="ch_line_ids" readonly="1">
@@ -351,7 +361,25 @@
 									<field name="boarding_amt" on_change="onchange_total(out_station_amt,local_travel_amt,boarding_amt,lodging_amt,misc_charge_amt)" required="1"/>
 									<field name="lodging_amt" on_change="onchange_total(out_station_amt,local_travel_amt,boarding_amt,lodging_amt,misc_charge_amt)" required="1"/>
 									<field name="misc_charge_amt" on_change="onchange_total(out_station_amt,local_travel_amt,boarding_amt,lodging_amt,misc_charge_amt)" required="1"/>
-									<field name="total_amt" readonly="1"/>
+									<field name="total_amt" readonly="1" sum="total_amt"/>
+									<field name="details" widget="char"/>
+								</tree>
+							</field>
+						</page>
+					</notebook>
+					<notebook>
+						<page string="Expense Details">
+							<field name="ch_line_ids_a" attrs="{'readonly':[('state','=','close')]}">
+								<tree string="Expense Details Tree" editable="top">
+									<field name="date" required="1"/>
+									<field name="description" required="1"/>
+									<field name="mode_of_travel" required="1"/>
+									<field name="out_station_amt" on_change="onchange_total(out_station_amt,local_travel_amt,boarding_amt,lodging_amt,misc_charge_amt)" required="1"/>
+									<field name="local_travel_amt" on_change="onchange_total(out_station_amt,local_travel_amt,boarding_amt,lodging_amt,misc_charge_amt)" required="1"/>
+									<field name="boarding_amt" on_change="onchange_total(out_station_amt,local_travel_amt,boarding_amt,lodging_amt,misc_charge_amt)" required="1"/>
+									<field name="lodging_amt" on_change="onchange_total(out_station_amt,local_travel_amt,boarding_amt,lodging_amt,misc_charge_amt)" required="1"/>
+									<field name="misc_charge_amt" on_change="onchange_total(out_station_amt,local_travel_amt,boarding_amt,lodging_amt,misc_charge_amt)" required="1"/>
+									<field name="total_amt" readonly="1" sum="total_amt"/>
 									<field name="details" widget="char"/>
 								</tree>
 							</field>
@@ -399,7 +427,7 @@
 		</record>
 		
 		<record id="tma_ch_site_visit_plan" model="ir.actions.act_window">
-			<field name="name">Plan Status Update</field>
+			<field name="name">Site Visit Status</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">ch.site.visit.plan</field>
 			<field name="view_type">form</field>
@@ -408,7 +436,7 @@
 			<field name="view_id" ref="t_tree_v_ch_site_visit_plan"/>
 			<field name="search_view_id" ref="t_search_v_ch_site_visit_plan"/>
 		</record>
-		
+	
 		<!-- Site Visit Plan --> 
 		
 		<menuitem action="tma_site_visit_plan" name="Site Visit Plan" id="tam_site_visit_plan" parent="kg_menus.cpm_crm_enquiry_menu" sequence="6"/>
@@ -416,6 +444,6 @@
 		<!-- Site Visit Status --> 
 		
 		<menuitem action="tma_ch_site_visit_plan" name="Plan Status Update" id="tam_ch_site_visit_plan" parent="kg_menus.cpm_crm_enquiry_menu" sequence="7"/>
-			
+				
 	</data>
 </openerp>
