@@ -876,6 +876,7 @@ class kg_pump_vs_material(osv.osv):
 							'load_bom': True,
 							'is_applicable': True,
 							'active': True,
+							'moc_id': moc_id,
 							
 							#~ 'pos_no':pos_no,
 							#~ 'ms_line_id': vertical_ms_details['id'],
@@ -1031,6 +1032,7 @@ class kg_pump_vs_material(osv.osv):
 							'load_bom': True,
 							'is_applicable': True,
 							'active': True,
+							'moc_id': moc_id,
 							
 							})
 							
