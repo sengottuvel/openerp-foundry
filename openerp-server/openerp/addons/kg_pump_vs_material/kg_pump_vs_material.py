@@ -160,7 +160,7 @@ class kg_pump_vs_material(osv.osv):
        
        ]
 	
-	def onchange_bom(self, cr, uid, ids, load_bom,pump_id,moc_const_id,speed_in_rpm,setting_height,shaft_sealing,motor_power,bush_bearing,del_pipe_size,bush_bearing_lubrication):
+	def onchange_bom(self, cr, uid, ids, load_bom,pump_id,moc_const_id,speed_in_rpm,setting_height,shaft_sealing,motor_power,bush_bearing,del_pipe_size,bush_bearing_lubrication,qty):
 		delivery_pipe_size = del_pipe_size
 		lubrication = bush_bearing_lubrication
 		if lubrication:
@@ -206,7 +206,7 @@ class kg_pump_vs_material(osv.osv):
 									'pattern_id': item.pattern_id.id,
 									'pattern_name': item.pattern_name,
 									'moc_id': moc_id,
-									'qty': item.qty,
+									'qty': item.qty * qty,
 									'load_bom': True,
 									'active': True,
 									'is_applicable': True,
@@ -230,7 +230,7 @@ class kg_pump_vs_material(osv.osv):
 										'ms_name': item.name,
 										'ms_id': item.ms_id.id,
 										'moc_id': moc_id,
-										'qty': item.qty,
+										'qty': item.qty * qty,
 										'load_bom': True,
 										'is_applicable': True,
 										'active': True,
@@ -255,7 +255,7 @@ class kg_pump_vs_material(osv.osv):
 										'bot_name': item_name,
 										'bot_id': item.bot_id.id,
 										'moc_id': moc_id,
-										'qty': item.qty,
+										'qty': item.qty * qty,
 										'load_bom': True,
 										'is_applicable': True,
 										'active': True,
@@ -492,7 +492,7 @@ class kg_pump_vs_material(osv.osv):
 							'pattern_id': vertical_foundry['pattern_id'],
 							'pattern_name': vertical_foundry['pattern_name'],						
 							'position_id': vertical_foundry['position_id'],			  
-							'qty' : bom_qty,
+							'qty' : bom_qty * qty,
 							'moc_id': moc_id,
 							'is_applicable': True,
 							'active': True,
@@ -620,6 +620,22 @@ class kg_pump_vs_material(osv.osv):
 					vertical_ms_details = cr.dictfetchall()
 					for vertical_ms_details in vertical_ms_details:
 						
+						### Loading MOC from MOC Construction
+				
+						if moc_construction_id != False:
+							
+							cr.execute(''' select machine_moc.moc_id
+								from ch_machine_mocwise machine_moc
+								LEFT JOIN kg_moc_construction const on const.code = machine_moc.code
+								where machine_moc.header_id = %s and const.id = %s ''',[vertical_ms_details['ms_id'],moc_construction_id])
+							const_moc_id = cr.fetchone()
+							if const_moc_id != None:
+								moc_id = const_moc_id[0]
+							else:
+								moc_id = False
+						else:
+							moc_id = False
+							
 						if vertical_ms_details['pos_no'] == None:
 							pos_no = 0
 						else:
@@ -854,7 +870,7 @@ class kg_pump_vs_material(osv.osv):
 							
 							'position_id':vertical_ms_details['position_id'],
 							'ms_id': vertical_ms_details['ms_id'],
-							'qty': vertical_ms_details['qty'],
+							'qty': vertical_ms_details['qty'] * qty,
 							'ms_name': vertical_ms_details['name'],
 							'length': vertical_ms_qty,
 							'load_bom': True,
@@ -985,7 +1001,20 @@ class kg_pump_vs_material(osv.osv):
 					vertical_bot_details = cr.dictfetchall()
 					
 					for vertical_bot_details in vertical_bot_details:
-						
+						if moc_construction_id != False:
+							
+							cr.execute(''' select bot_moc.moc_id
+								from ch_machine_mocwise bot_moc
+								LEFT JOIN kg_moc_construction const on const.code = bot_moc.code
+								where bot_moc.header_id = %s and const.id = %s ''',[vertical_bot_details['bot_id'],moc_construction_id])
+							const_moc_id = cr.fetchone()
+							if const_moc_id != None:
+								moc_id = const_moc_id[0]
+							else:
+								moc_id = False
+						else:
+							moc_id = False
+							
 						vertical_bot_qty = vertical_bot_details['qty']
 						
 					
@@ -998,7 +1027,7 @@ class kg_pump_vs_material(osv.osv):
 							#~ 'entry_mode':'auto',
 							#~ 'order_category':	order_category,
 							'bot_id': vertical_bot_details['bot_id'],
-							'qty': vertical_bot_qty,
+							'qty': vertical_bot_qty * qty,
 							'load_bom': True,
 							'is_applicable': True,
 							'active': True,
