@@ -240,7 +240,10 @@ class kg_subcontract_wo(osv.osv):
 						oper_id_rec = self.pool.get('ch.kg.position.number').browse(cr,uid,op_line.operation_id.id)
 						print"moc_rec.....",moc_rec.moc_cate_id.id
 						print"position_id.....",op_line.position_id.id
-						print"operation_id.....",oper_id_rec.operation_id.id					
+						print"operation_id.....",oper_id_rec.operation_id.id
+						if moc_rec.moc_cate_id.id is False:
+							raise osv.except_osv(_('Warning!'),
+								_('System not allow to MOC Master MS MOC Category fields!!')) 					
 						cr.execute('''select line.rate from ch_kg_position_number as header
 										left join ch_moccategory_mapping line on line.header_id = header.id
 										where header.header_id = %s and header.operation_id = %s and line.moc_cate_id = %s
