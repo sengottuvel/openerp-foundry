@@ -853,46 +853,6 @@
 		</record>	
 	
 		
-		<record id="t_crm_admin_pump_vs_material" model="ir.model.access">
-			<field name="model_id" ref="kg_pump_vs_material.model_kg_pump_vs_material"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">Pump vs Material</field>
-			<field eval="1" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
-		</record>
-		
-		<record id="t_crm_admin_ch_pump_vs_material_fou" model="ir.model.access">
-			<field name="model_id" ref="kg_pump_vs_material.model_ch_pump_vs_material_fou"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">ch pump vs material fou</field>
-			<field eval="1" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
-		</record>
-		
-		<record id="t_crm_admin_ch_pump_vs_material_ms" model="ir.model.access">
-			<field name="model_id" ref="kg_pump_vs_material.model_ch_pump_vs_material_ms"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">ch pump vs material ms</field>
-			<field eval="1" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
-		</record>
-		
-		<record id="t_crm_admin_ch_pump_vs_material_bot" model="ir.model.access">
-			<field name="model_id" ref="kg_pump_vs_material.model_ch_pump_vs_material_bot"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">ch pump vs material bot</field>
-			<field eval="1" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
-		</record>
-		
 		<record id="t_crm_admin_service_inward" model="ir.model.access">
 			<field name="model_id" ref="kg_service_inward.model_kg_service_inward"/>
 			<field eval="1" name="perm_read"/>

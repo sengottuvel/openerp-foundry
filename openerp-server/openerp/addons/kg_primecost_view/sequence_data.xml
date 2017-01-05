@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		
+		<record forcecreate="1" id="seq_primecost_view" model="ir.sequence.type">	
+			<field name="name">Primecost View</field>
+			<field name="code">kg.primecost.view</field>
+		</record>
+
+		<record forcecreate="1" id="primecost_view" model="ir.sequence">
+		  <field name="name">Primecost View</field>
+		  <field name="code">kg.primecost.view</field>
+		  <field name="padding" eval="3"/>
+		  <field name="prefix">PV/%(year)s/</field>
+		  <field name="reset_sequence">fiscal_reset</field>
+		</record>
+		
+	</data>
+</openerp>
+
