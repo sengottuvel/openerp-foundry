@@ -45,17 +45,17 @@ class kg_gate_pass(osv.osv):
 		'approve_flag':fields.boolean('Expiry Flag'),
 		'mode': fields.selection([('direct', 'Direct'), ('frm_indent', 'From Indent')], 'Entry Mode',required=True,readonly=True, states={'draft':[('readonly',False)]}),
 		'gp_type': fields.selection([('from_so', 'From SI'), ('direct', 'Direct')], 'GP Type',readonly=True),
-		'dep_project':fields.many2one('kg.project.master','Dept/Project Name',readonly=True,states={'draft': [('readonly', False)]}),	
 		'remark': fields.text('Remarks'),
 		
 		# Entry Info
 		
+		'active': fields.boolean('Active'),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),		
 		'user_id': fields.many2one('res.users', 'Created By',readonly=True),
-		'creation_date':fields.datetime('Creation Date',readonly=True),
+		'creation_date':fields.datetime('Created Date',readonly=True),
 		'confirmed_by' : fields.many2one('res.users', 'Confirmed By', readonly=True,select=True),
 		'confirmed_date':fields.datetime('Confirmed Date',readonly=True),
-		'reject_date': fields.datetime('Reject Date', readonly=True),
+		'reject_date': fields.datetime('Rejected Date', readonly=True),
 		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
 		'approved_by' : fields.many2one('res.users', 'Approved By', readonly=True,select=True),
 		'approved_date':fields.datetime('Approved Date',readonly=True),
@@ -67,197 +67,84 @@ class kg_gate_pass(osv.osv):
 	}
 	
 	_defaults = {
-	
+		
 		'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
-		'date' : fields.date.context_today,
-		'state':'draft',
+		'date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'state': 'draft',
 		'name': '',
 		'user_id': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).id ,
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.gate.pass', context=c),
 		'in_state': 'pending',
 		'indent_flag': False,
-		'gp_type':'from_so',
+		'gp_type': 'from_so',
+		'active': True,
+		
 	}	
-	
-	def email_ids(self,cr,uid,ids,context = None):
-		email_from = []
-		email_to = []
-		email_cc = []
-		val = {'email_from':'','email_to':'','email_cc':''}
-		ir_model = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		mail_form_ids = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		for ids in mail_form_ids:
-			mail_form_rec = self.pool.get('kg.mail.settings').browse(cr,uid,ids)
-			if mail_form_rec.sch_type == 'transaction':
-				if mail_form_rec.doc_name.model == 'kg.gate.pass':
-					email_from.append(mail_form_rec.name)
-					mail_line_id = self.pool.get('kg.mail.settings.line').search(cr,uid,[('line_entry','=',ids)])
-					for mail_id in mail_line_id:
-						mail_line_rec = self.pool.get('kg.mail.settings.line').browse(cr,uid,mail_id)
-						if mail_line_rec.to_address:
-							email_to.append(mail_line_rec.mail_id)
-						if mail_line_rec.cc_address:
-							email_cc.append(mail_line_rec.mail_id)
-				else:
-					pass
-		val['email_from'] = email_from
-		val['email_to'] = email_to
-		val['email_cc'] = email_cc
-		return val
 		
-	def gp_sechedular_email_ids(self,cr,uid,ids,reg_register,context = None):
-		email_from = []
-		email_to = []
-		email_cc = []
-		val = {'email_from':'','email_to':'','email_cc':''}
-		ir_model = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		mail_form_ids = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		for ids in mail_form_ids:
-			mail_form_rec = self.pool.get('kg.mail.settings').browse(cr,uid,ids)
-			if mail_form_rec.sch_type == 'scheduler':
-				s = mail_form_rec.sch_name
-				s = s.lower()
-				if s == reg_register:
-					email_sub = mail_form_rec.subject
-					email_from.append(mail_form_rec.name)
-					mail_line_id = self.pool.get('kg.mail.settings.line').search(cr,uid,[('line_entry','=',ids)])
-					for mail_id in mail_line_id:
-						mail_line_rec = self.pool.get('kg.mail.settings.line').browse(cr,uid,mail_id)
-						if mail_line_rec.to_address:
-							email_to.append(mail_line_rec.mail_id)
-						if mail_line_rec.cc_address:
-							email_cc.append(mail_line_rec.mail_id)
-				else:
-					pass
-		val['email_from'] = email_from
-		val['email_to'] = email_to
-		val['email_cc'] = email_cc
-		return val
-		
-	def ogp_sechedular_email_ids(self,cr,uid,ids,context = None):
-		email_from = []
-		email_to = []
-		email_cc = []
-		val = {'email_from':'','email_to':'','email_cc':''}
-		ir_model = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		mail_form_ids = self.pool.get('kg.mail.settings').search(cr,uid,[('active','=',True)])
-		for ids in mail_form_ids:
-			mail_form_rec = self.pool.get('kg.mail.settings').browse(cr,uid,ids)
-			if mail_form_rec.sch_type == 'scheduler':
-				s = mail_form_rec.sch_name
-				s = s.lower()
-				if s == 'open gate pass register':
-					email_sub = mail_form_rec.subject
-					email_from.append(mail_form_rec.name)
-					mail_line_id = self.pool.get('kg.mail.settings.line').search(cr,uid,[('line_entry','=',ids)])
-					for mail_id in mail_line_id:
-						mail_line_rec = self.pool.get('kg.mail.settings.line').browse(cr,uid,mail_id)
-						if mail_line_rec.to_address:
-							email_to.append(mail_line_rec.mail_id)
-						if mail_line_rec.cc_address:
-							email_cc.append(mail_line_rec.mail_id)
-		val['email_from'] = email_from
-		val['email_to'] = email_to
-		val['email_cc'] = email_cc
-		return val	
-	
 	def write(self, cr, uid, ids, vals, context=None):		
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_gate_pass, self).write(cr, uid, ids, vals, context)
 	
 	def cancel_entry(self, cr, uid, ids, context=None):
 		rec = self.browse(cr.uid.ids[0])
-		if not rec.remark:
-			raise osv.except_osv(_('Rejection remark is must !!'),
-				_('Enter rejection remark in remark field !!'))
-		self.write(cr, uid,ids,{'state' : 'cancel',
-								'cancel_user_id': uid,
-								'cancel_date': time.strftime("%Y-%m-%d %H:%M:%S"),
-								})
+		if rec.state == 'done':
+			if not rec.remark:
+				raise osv.except_osv(_('Rejection remark is must !!'),
+					_('Enter rejection remark in remark field !!'))
+			self.write(cr, uid,ids,{'state' : 'cancel',
+									'cancel_user_id': uid,
+									'cancel_date': time.strftime("%Y-%m-%d %H:%M:%S"),
+									})
 												
 	def reject_entry(self, cr, uid, ids, context=None):
 		rec = self.browse(cr.uid.ids[0])
-		if not rec.remark:
-			raise osv.except_osv(_('Rejection remark is must !!'),
-				_('Enter rejection remark in remark field !!'))
-		self.write(cr, uid,ids,{'state' : 'cancel',
-								'rej_user_id': uid,
-								'reject_date': time.strftime("%Y-%m-%d %H:%M:%S"),
-								})
+		if rec.state == 'confirmed':
+			if not rec.remark:
+				raise osv.except_osv(_('Rejection remark is must !!'),
+					_('Enter rejection remark in remark field !!'))
+			self.write(cr, uid,ids,{'state' : 'cancel',
+									'rej_user_id': uid,
+									'reject_date': time.strftime("%Y-%m-%d %H:%M:%S"),
+									})
 												
 	def confirm_entry(self, cr, uid, ids, context=None):	
 		entry = self.browse(cr,uid,ids[0])
-		#~ if entry.name == '':
-			#~ pass_no = self.pool.get('ir.sequence').get(cr, uid, 'kg.gate.pass') or ''
-		seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gate.pass')])
-		seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
-		cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry.date))
-		seq_name = cr.fetchone();
-		if entry.mode == 'frm_indent':
-			for line in entry.gate_line:
-				if line.qty > line.indent_qty:
-					raise osv.except_osv(_('Warning!'),
-							_('You cannot increase qty more than indent qty'))	
-			
-		self.write(cr,uid,ids[0],{'state':'confirmed','name':seq_name[0],'confirmed_by':uid,
-						'confirm_flag':True,'confirmed_date':time.strftime('%Y-%m-%d %H:%M:%S')})
+		if rec.state == 'draft':
+			#~ if entry.name == '':
+				#~ pass_no = self.pool.get('ir.sequence').get(cr, uid, 'kg.gate.pass') or ''
+			seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gate.pass')])
+			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry.date))
+			seq_name = cr.fetchone();
+			if entry.mode == 'frm_indent':
+				for line in entry.gate_line:
+					if line.qty > line.indent_qty:
+						raise osv.except_osv(_('Warning!'),
+								_('You cannot increase qty more than indent qty'))	
+				
+			self.write(cr,uid,ids[0],{'state':'confirmed','name':seq_name[0],'confirmed_by':uid,
+							'confirm_flag':True,'confirmed_date':time.strftime('%Y-%m-%d %H:%M:%S')})
 						
-		#cr.execute("""select all_transaction_mails('Gate Pass Request Approval',%s)"""%(ids[0]))
-		"""Raj
-		data = cr.fetchall();
-		vals = self.email_ids(cr,uid,ids,context = context)
-		if (not vals['email_to']) and (not vals['email_cc']):
-			pass
-		else:
-			ir_mail_server = self.pool.get('ir.mail_server')
-			msg = ir_mail_server.build_email(
-					email_from = vals['email_from'][0],
-					email_to = vals['email_to'],
-					subject = "Gate Pass - Waiting For Approval",
-					body = data[0][0],
-					email_cc = vals['email_cc'],
-					object_id = ids[0] and ('%s-%s' % (ids[0], 'kg.gate.pass')),
-					subtype = 'html',
-					subtype_alternative = 'plain')
-			res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
-		"""
 		return True
 		
 	def approve_entry(self, cr, uid, ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
-		#if rec.confirmed_by.id == uid:
-		#	raise osv.except_osv(
-		#			_('Warning'),
-		#			_('Approve cannot be done by Confirmed user'))
-		if rec.mode == 'frm_indent':
-			for line in rec.gate_line:
-				indent_pen_qty = line.indent_qty - line.qty
-				gp_qty = line.qty
-				old_indent_pen_qty = line.si_line_id.pending_qty
-				new_pen_qty = old_indent_pen_qty - gp_qty
-				line.si_line_id.write({'gate_pending_qty':new_pen_qty})
-		else:
-			pass
-		rec.write({'state': 'done','approved_by':uid,'approve_flag':True,'approved_date':time.strftime('%Y-%m-%d %H:%M:%S')})	
-		#cr.execute("""select all_transaction_mails('Gate Pass Request Approval',%s)"""%(ids[0]))
-		"""Raj
-		data = cr.fetchall();
-		vals = self.email_ids(cr,uid,ids,context = context)
-		if (not vals['email_to']) and (not vals['email_cc']):
-			pass
-		else:
-			ir_mail_server = self.pool.get('ir.mail_server')
-			msg = ir_mail_server.build_email(
-					email_from = vals['email_from'][0],
-					email_to = vals['email_to'],
-					subject = "Gate Pass - Approved",
-					body = data[0][0],
-					email_cc = vals['email_cc'],
-					object_id = ids[0] and ('%s-%s' % (ids[0], 'kg.gate.pass')),
-					subtype = 'html',
-					subtype_alternative = 'plain')
-			res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)	
-		"""
+		if rec.state == 'confirmed':
+			#if rec.confirmed_by.id == uid:
+			#	raise osv.except_osv(
+			#			_('Warning'),
+			#			_('Approve cannot be done by Confirmed user'))
+			if rec.mode == 'frm_indent':
+				for line in rec.gate_line:
+					indent_pen_qty = line.indent_qty - line.qty
+					gp_qty = line.qty
+					old_indent_pen_qty = line.si_line_id.pending_qty
+					new_pen_qty = old_indent_pen_qty - gp_qty
+					line.si_line_id.write({'gate_pending_qty':new_pen_qty})
+			else:
+				pass
+			rec.write({'state': 'done','approved_by':uid,'approve_flag':True,'approved_date':time.strftime('%Y-%m-%d %H:%M:%S')})	
+		
 		return True
 		
 	def gate_pass_print(self, cr, uid, ids, context=None):
@@ -403,133 +290,12 @@ class kg_gate_pass(osv.osv):
 						break		
 		return True
 	
-	def gate_pass_register_scheduler(self,cr,uid,ids=0,context = None):
-		cr.execute(""" SELECT current_database();""")
-		db = cr.dictfetchall()
-		if db[0]['current_database'] == 'Empereal-KGDS':
-			db[0]['current_database'] = 'Empereal-KGDS'
-		elif db[0]['current_database'] == 'FSL':
-			db[0]['current_database'] = 'FSL'
-		elif db[0]['current_database'] == 'IIM':
-			db[0]['current_database'] = 'IIM'
-		elif db[0]['current_database'] == 'IIM_HOSTEL':
-			db[0]['current_database'] = 'IIM Hostel'
-		elif db[0]['current_database'] == 'KGISL-SD':
-			db[0]['current_database'] = 'KGISL-SD'
-		elif db[0]['current_database'] == 'CHIL':
-			db[0]['current_database'] = 'CHIL'
-		elif db[0]['current_database'] == 'KGCAS':
-			db[0]['current_database'] = 'KGCAS'
-		elif db[0]['current_database'] == 'KGISL':
-			db[0]['current_database'] = 'KGISL'
-		elif db[0]['current_database'] == 'KITE':
-			db[0]['current_database'] = 'KITE'
-		elif db[0]['current_database'] == 'TRUST':
-			db[0]['current_database'] = 'TRUST'
-		else:
-			db[0]['current_database'] = 'Others'
-			
-		line_rec = self.pool.get('kg.gate.pass').search(cr, uid, [('state','=','done'),('approved_date','=',time.strftime('%Y-%m-%d'))])
-
-		if line_rec:	
-			
-			cr.execute("""select all_daily_auto_scheduler_mails('Gate Pass Register')""")
-			data = cr.fetchall();
-			cr.execute("""select  trim(TO_CHAR(sum(kg_gate_pass_line.qty * kg_service_order_line.price_unit)::float, '999G999G99G999G99G99G990D99')) as sum
-							from kg_gate_pass
-							left join kg_gate_pass_line on kg_gate_pass_line.gate_id = kg_gate_pass.id
-							left join kg_service_order_line on kg_service_order_line.soindent_line_id=kg_gate_pass_line.si_line_id
-							where to_char(kg_gate_pass.date,'dd-mm-yyyy') = '%s' and 
-							kg_gate_pass.state in ('done') """%(time.strftime('%d-%m-%Y')))
-							
-			total_sum = cr.dictfetchall();
-			db = db[0]['current_database'].encode('utf-8')
-			total_sum = str(total_sum[0]['sum'])
-			if total_sum == 'None':
-				total_sum = '0.00'
-			else:
-				total_sum = total_sum
-			vals = self.gp_sechedular_email_ids(cr,uid,ids,reg_register = 'gate pass register',context = context)
-			if (not vals['email_to']) and (not vals['email_cc']):
-				pass
-			else:
-				ir_mail_server = self.pool.get('ir.mail_server')
-				msg = ir_mail_server.build_email(
-						email_from = vals['email_from'][0],
-						email_to = vals['email_to'],
-						subject = "ERP Gate Pass Register Details for "+db +' as on '+time.strftime('%d-%m-%Y'),
-						body = data[0][0],
-						email_cc = vals['email_cc'],
-						object_id = ids and ('%s-%s' % (ids, 'purchase.order')),
-						subtype = 'html',
-						subtype_alternative = 'plain')
-				res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
-		else:
-			pass		
-				
-		return True
-	
-	def open_gate_pass_register_scheduler(self,cr,uid,ids=0,context = None):
-		cr.execute(""" SELECT current_database();""")
-		db = cr.dictfetchall()
-		if db[0]['current_database'] == 'Empereal-KGDS':
-			db[0]['current_database'] = 'Empereal-KGDS'
-		elif db[0]['current_database'] == 'FSL':
-			db[0]['current_database'] = 'FSL'
-		elif db[0]['current_database'] == 'IIM':
-			db[0]['current_database'] = 'IIM'
-		elif db[0]['current_database'] == 'IIM_HOSTEL':
-			db[0]['current_database'] = 'IIM Hostel'
-		elif db[0]['current_database'] == 'KGISL-SD':
-			db[0]['current_database'] = 'KGISL-SD'
-		elif db[0]['current_database'] == 'CHIL':
-			db[0]['current_database'] = 'CHIL'
-		elif db[0]['current_database'] == 'KGCAS':
-			db[0]['current_database'] = 'KGCAS'
-		elif db[0]['current_database'] == 'KGISL':
-			db[0]['current_database'] = 'KGISL'
-		elif db[0]['current_database'] == 'KITE':
-			db[0]['current_database'] = 'KITE'
-		elif db[0]['current_database'] == 'TRUST':
-			db[0]['current_database'] = 'TRUST'
-		else:
-			db[0]['current_database'] = 'Others'
-			
-		line_rec = self.pool.get('kg.gate.pass').search(cr, uid, [('state','=','done'),('in_state','!=','done'),('approved_date','<=',time.strftime('%Y-%m-%d'))])
-		
-		if line_rec:
-			
-			cr.execute("""select all_daily_auto_scheduler_mails('Open Gate Pass Register')""")
-			data = cr.fetchall();
-			vals = self.ogp_sechedular_email_ids(cr,uid,ids,context = context)
-			db = db[0]['current_database'].encode('utf-8')
-			if (not vals['email_to']) and (not vals['email_cc']):
-				pass
-			else:
-				ir_mail_server = self.pool.get('ir.mail_server')
-				msg = ir_mail_server.build_email(
-						email_from = vals['email_from'][0],
-						email_to = vals['email_to'],
-						subject = "ERP Open Gate Pass Details for "+ db +' as on '+time.strftime('%d-%m-%Y'),
-						body = data[0][0],
-						email_cc = vals['email_cc'],
-						object_id = ids and ('%s-%s' % (ids, 'purchase.order')),
-						subtype = 'html',
-						subtype_alternative = 'plain')
-				res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
-				
-		else:
-			pass		
-				
-		return True
-	
 kg_gate_pass()
 
 class kg_gate_pass_line(osv.osv):
 	
 	_name = "kg.gate.pass.line"
 	_description = "Gate Pass Line"
-	
 	
 	_columns = {
 

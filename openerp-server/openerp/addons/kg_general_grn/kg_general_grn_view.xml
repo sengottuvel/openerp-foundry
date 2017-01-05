@@ -40,9 +40,7 @@
 						<field name="dc_date"/>
 						<field name="sup_invoice_date"  attrs="{'invisible': [('grn_dc','!=','dc_invoice')],'required': [('grn_dc','=','dc_invoice')]}"/>
 						<field name="inward_type"/>
-						<field name="active"/>
 						<field name="state" style="width: 30%%" class="att_state_change"/>
-						<field name="dep_project" invisible="1"/>
                     </group>
                 </group>
                 <group string='Remarks' attrs="{'invisible':[('state','in',('draft'))]}">
@@ -66,29 +64,31 @@
 							</field>
 					</page>
 					<page string="Entry Info">
-					<group>
-						<field name="company_id"/>
-					</group>
-					<group>
 						<group>
-							<field name="user_id" on_change="onchange_user_id(user_id)"/>
-							<field name="confirmed_by" attrs="{'invisible':[('state','in',['draft'])]}"/>
-							<field name="rej_user_id" attrs="{'invisible':[('state','not in',['reject'])]}"/>
-							<field name="approved_by" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])]}"/>
-							<field name="cancel_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
-							<field name="update_user_id"/>
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
+								<field name="user_id" on_change="onchange_user_id(user_id)"/>
+								<field name="confirmed_by" attrs="{'invisible':[('state','in',['draft'])]}"/>
+								<field name="rej_user_id" attrs="{'invisible':[('state','not in',['reject'])]}"/>
+								<field name="approved_by" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])]}"/>
+								<field name="cancel_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+								<field name="update_user_id"/>
+							</group>
+							<group>
+								<field name="creation_date"/>
+								<field name="confirmed_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+								<field name="reject_date" attrs="{'invisible':[('state','not in',['reject'])]}"/>
+								<field name="approved_date" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])]}"/>
+								<field name="cancel_date" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+								<field name="update_date"/>
+							</group>
 						</group>
-						<group>
-							<field name="creation_date"/>
-							<field name="confirmed_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
-							<field name="reject_date" attrs="{'invisible':[('state','not in',['reject'])]}"/>
-							<field name="approved_date" attrs="{'invisible':[('state','in',['draft','reject','confirmed'])]}"/>
-							<field name="cancel_date" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
-							<field name="update_date"/>
-						</group>
-					</group>
-				</page>
-				
+					</page>
 				</notebook>
 				<group invisible="1">
 					<group invisible="1">
@@ -246,16 +246,14 @@
 				<field name="search_view_id" ref="t_search_v_general_grn"/>
 		</record>
 	
-		<act_window name="Create Invoice"
-            res_model="kg.generalgrn.invoice.wizard"
-            src_model="kg.general.grn"
-            key2="client_action_multi"
-            multi="True"
-            view_mode="form"
-            view_type="form"
-            target="new"
-            id="action_general_grn_invoice"/> 
-	
-                  
+		<act_window name="Create Invoice" res_model="kg.generalgrn.invoice.wizard"
+					src_model="kg.general.grn" key2="client_action_multi"
+					multi="True" view_mode="form"
+					view_type="form" target="new"
+					id="action_general_grn_invoice"/> 
+		
+		<!-- General GRN Menu -->
+		<menuitem action="action_kg_general_grn" id="gam_general_grn" name="General GRN" parent="kg_menus.gpm_grn_issue_menu" sequence="1"/>
+				
     </data>
 </openerp>

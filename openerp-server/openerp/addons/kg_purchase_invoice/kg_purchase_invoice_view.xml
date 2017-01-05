@@ -129,9 +129,12 @@
 							</page>
 							<page string="Entry Info">
 								<group>
-									<field name="company_id"/>
-								</group>
-								<group>
+									<group>
+										<field name="company_id"/>
+									</group>
+									<group>
+										<field name="active"/>
+									</group>
 									<group>
 										<field name="created_by"/>
 										<field name="conf_user_id" attrs="{'invisible':[('state','in',['draft','reject'])]}"/>
@@ -280,11 +283,8 @@
 		  <field name="reset_sequence">fiscal_reset</field>
 		</record>
 		
-<!--
-		<menuitem id="tmi_purchase_invoice_main_menu" name="Invoice" parent="stock.menu_stock_root" sequence="3"/>
-		
-		<menuitem id="tmi_kg_purchase_invoice_menu" name="Purchase Invoice" parent="tmi_purchase_invoice_main_menu" sequence="1" action="tma_kg_purchase_invoice_action_form" />
--->
+		<!-- Purchase Invoice Transaction Menu -->                
+		<menuitem action="tma_kg_purchase_invoice_action_form" id="pam_purchase_invoice" name="Purchase Invoice" parent="kg_menus.ppm_purchase_invoice_menu" sequence="1"/>
 
 </data>
 	</openerp>

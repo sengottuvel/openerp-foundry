@@ -44,7 +44,6 @@
 							<field name="state" style="width: 30%%" class="att_state_change"/>	
 							<field name="in_state"/>						
 							<field name="indent_flag" invisible="1"/>
-							<field name="dep_project" invisible="1"/>
 							<field name="taken_by" invisible="1"/>
 							<field name="approve_flag" invisible="1"/>						
 						</group>
@@ -91,9 +90,12 @@
 						</page>
 						<page string="Entry Info">
 							<group>
-								<field name="company_id"/>
-							</group>
-							<group>
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
 								<group>
 									<field name="user_id"/>
 									<field name="confirmed_by" attrs="{'invisible':[('state','in',['draft'])]}"/>
@@ -205,6 +207,9 @@
 		  <field name="prefix">GP/%(year)s/</field>
 		  <field name="reset_sequence">fiscal_reset</field>
 		</record>
+		
+		<!-- Gate Pass Transaction Menu -->
+		<menuitem action="action_gate_pass" id="gam_gate_pass" name="Gate Pass Entry" parent="kg_menus.gpm_gate_pass_menu" sequence="1"/>
 		
     </data>
 </openerp>

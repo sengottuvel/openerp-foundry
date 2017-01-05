@@ -20,8 +20,6 @@ from dateutil import relativedelta
 import calendar
 today = datetime.now()
 #~ import MySQLdb
-a = datetime.now()
-dt_time = a.strftime('%m/%d/%Y %H:%M:%S')
 
 class kg_purchase_invoice(osv.osv):
 	
@@ -47,13 +45,6 @@ class kg_purchase_invoice(osv.osv):
 		for c in self.pool.get('account.tax').compute_all(cr, uid, line.invoice_tax_ids,
 			line.price_unit * (1-(tot_discount_per or 0.0)/100.0), qty, line.product_id,
 			 line.header_id.supplier_id)['taxes']:			 
-			val += c.get('amount', 0.0)
-		return val
-	
-	def _amount_line_expense(self, cr, uid, line, context=None):
-		val = 0.0
-		
-		for c in self.pool.get('account.tax').compute_all(cr, uid, line.expense_tax_ids,line.expense_amt, 1, False,line.header_id.supplier_id)['taxes']:			 
 			val += c.get('amount', 0.0)
 		return val
 	
@@ -128,14 +119,14 @@ class kg_purchase_invoice(osv.osv):
 		
 		#Entry Info
 		
-		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),	
 		'active': fields.boolean('Active'),
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),	
 		'created_by' : fields.many2one('res.users', 'Created By', readonly=True),
-		'creation_date':fields.datetime('Creation Date',required=True,readonly=True),
+		'creation_date':fields.datetime('Created Date',required=True,readonly=True),
 		'confirmed_date': fields.datetime('Confirmed Date', readonly=True),
 		'conf_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
 		'approved_date': fields.datetime('Approved Date', readonly=True),
-		'app_user_id': fields.many2one('res.users', 'Apprved By', readonly=True),
+		'app_user_id': fields.many2one('res.users', 'Approved By', readonly=True),
 		'reject_date': fields.datetime('Rejected Date', readonly=True),
 		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
 		'cancel_date': fields.datetime('Canceled Date', readonly=True),
@@ -223,8 +214,6 @@ class kg_purchase_invoice(osv.osv):
 		### Flags ##
 		
 		'load_items_flag':fields.boolean('load_items_flag'),
-		'confirm_flag':fields.boolean('Confirm Flag'),
-		'approve_flag':fields.boolean('Expiry Flag'),
 		
 		### Other fields ###
 		'specification': fields.text('Specification',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
@@ -242,18 +231,18 @@ class kg_purchase_invoice(osv.osv):
 		'invoice_date': lambda * a: time.strftime('%Y-%m-%d'),
 		'payment_due_date': lambda * a: time.strftime('%Y-%m-%d'),
 		'load_items_flag': False,
-		'state':'draft',
-		'his_state':'pending',
-		'purpose':'consu',
-		'name':'',
+		'state': 'draft',
+		'his_state': 'pending',
+		'purpose': 'consu',
+		'name': '',
 		'active': True,
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_purchase_invoice', context=c),
-		'bal_amt': 0
+		'bal_amt': 0,
+		
 	}
 	
 	def _name_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
-		
 		res = True
 		if rec.sup_invoice_no:
 			sup_invoice_no = rec.sup_invoice_no
@@ -338,163 +327,164 @@ class kg_purchase_invoice(osv.osv):
 		
 	def load_details(self, cr, uid, ids,context=None):
 		invoice_rec = self.browse(cr,uid,ids[0])
-		invoice_line_obj = self.pool.get('ch.invoice.line')
-		po_grn_obj = self.pool.get('kg.po.grn')
-		po_grn_line_obj = self.pool.get('po.grn.line')
-		general_grn_obj = self.pool.get('kg.general.grn')
-		general_grn_line_obj = self.pool.get('kg.general.grn.line')
-		
-		service_grn_line_obj = self.pool.get('kg.service.invoice.line')
-		service_grn_obj = self.pool.get('kg.service.invoice')
-		po_name = ''
-		po_date = ''
-		po_list = []
-		podate_list = []
-		so_list = []
-		sodate_list = []
-		gp_list = []
-		gpdate_list = []
-		ch_line_ids = map(lambda x:x.id,invoice_rec.line_ids)
-		invoice_line_obj.unlink(cr,uid,ch_line_ids)
-		if invoice_rec.grn_type == 'from_po_grn':
-			self.write(cr, uid, ids[0], {'load_items_flag' : True})
-			cr.execute(""" select grn_id from purchase_invoice_grn_ids where invoice_id = %s """ %(invoice_rec.id))
-			grn_data = cr.dictfetchall()
+		if invoice_rec.state == 'draft':
+			invoice_line_obj = self.pool.get('ch.invoice.line')
+			po_grn_obj = self.pool.get('kg.po.grn')
+			po_grn_line_obj = self.pool.get('po.grn.line')
+			general_grn_obj = self.pool.get('kg.general.grn')
+			general_grn_line_obj = self.pool.get('kg.general.grn.line')
+			
+			service_grn_line_obj = self.pool.get('kg.service.invoice.line')
+			service_grn_obj = self.pool.get('kg.service.invoice')
+			po_name = ''
+			po_date = ''
+			po_list = []
+			podate_list = []
+			so_list = []
+			sodate_list = []
+			gp_list = []
+			gpdate_list = []
+			ch_line_ids = map(lambda x:x.id,invoice_rec.line_ids)
+			invoice_line_obj.unlink(cr,uid,ch_line_ids)
+			if invoice_rec.grn_type == 'from_po_grn':
+				self.write(cr, uid, ids[0], {'load_items_flag' : True})
+				cr.execute(""" select grn_id from purchase_invoice_grn_ids where invoice_id = %s """ %(invoice_rec.id))
+				grn_data = cr.dictfetchall()
+				
+				for item in grn_data:
+					grn_id = item['grn_id']
+					grn_record = po_grn_obj.browse(cr, uid, grn_id)
+					self.write(cr, uid, ids[0], {'payment_type' : grn_record.payment_type})
+					cr.execute(""" select id from po_grn_line where po_grn_id = %s and billing_type='cost' order by id """ %(grn_id))
+					grn_line_data = cr.dictfetchall()
+					for line_item in grn_line_data:
 						
-			for item in grn_data:
-				grn_id = item['grn_id']
-				grn_record = po_grn_obj.browse(cr, uid, grn_id)
-				self.write(cr, uid, ids[0], {'payment_type' : grn_record.payment_type})
-				cr.execute(""" select id from po_grn_line where po_grn_id = %s and billing_type='cost' order by id """ %(grn_id))
-				grn_line_data = cr.dictfetchall()
-				for line_item in grn_line_data:
-					
-					grn_line_record = po_grn_line_obj.browse(cr, uid, line_item['id'])
-					if grn_record.grn_type == 'from_po':
-						if grn_line_record.po_line_id.order_id.name not in po_list:
-							po_list.append(grn_line_record.po_line_id.order_id.name)
-							date_order = grn_line_record.po_line_id.order_id.date_order
-							date_order = datetime.strptime(date_order, '%Y-%m-%d')
-							date_order = date_order.strftime('%d/%m/%Y')
-							
-							podate_list.append(date_order)
-						po_name = ", ".join(po_list)
-						po_date = ", ".join(podate_list)
-						po_so_name = grn_line_record.po_line_id.order_id.name
-						po_so_qty = grn_line_record.po_qty
-					if grn_record.grn_type == 'from_gp':
-						if grn_line_record.gp_line_id.gate_id:
-							if grn_line_record.gp_line_id.gate_id.name not in gp_list:
-								gp_list.append(grn_line_record.gp_line_id.gate_id.name)
-								date_order = grn_line_record.gp_line_id.gate_id.date
+						grn_line_record = po_grn_line_obj.browse(cr, uid, line_item['id'])
+						if grn_record.grn_type == 'from_po':
+							if grn_line_record.po_line_id.order_id.name not in po_list:
+								po_list.append(grn_line_record.po_line_id.order_id.name)
+								date_order = grn_line_record.po_line_id.order_id.date_order
 								date_order = datetime.strptime(date_order, '%Y-%m-%d')
 								date_order = date_order.strftime('%d/%m/%Y')
-								gpdate_list.append(date_order)
-							po_name = ", ".join(gp_list)
-							po_date = ", ".join(gpdate_list)
-							po_so_name = grn_line_record.gp_line_id.gate_id.name
-							po_so_qty = grn_line_record.po_qty	
-					elif grn_record.grn_type == 'from_so':
-						if grn_line_record.so_line_id.service_id.name not in so_list:
-							so_list.append(grn_line_record.so_line_id.service_id.name)
-							date_order = grn_line_record.so_line_id.service_id.date
-							date_order = datetime.strptime(date_order, '%Y-%m-%d')
-							date_order = date_order.strftime('%d/%m/%Y')
-							sodate_list.append(date_order)
-						po_so_name = grn_line_record.so_line_id.service_id.name
-						po_so_qty = grn_line_record.so_qty
-						po_name = ",".join(so_list)
-						po_date = ",".join(sodate_list)
+								
+								podate_list.append(date_order)
+							po_name = ", ".join(po_list)
+							po_date = ", ".join(podate_list)
+							po_so_name = grn_line_record.po_line_id.order_id.name
+							po_so_qty = grn_line_record.po_qty
+						if grn_record.grn_type == 'from_gp':
+							if grn_line_record.gp_line_id.gate_id:
+								if grn_line_record.gp_line_id.gate_id.name not in gp_list:
+									gp_list.append(grn_line_record.gp_line_id.gate_id.name)
+									date_order = grn_line_record.gp_line_id.gate_id.date
+									date_order = datetime.strptime(date_order, '%Y-%m-%d')
+									date_order = date_order.strftime('%d/%m/%Y')
+									gpdate_list.append(date_order)
+								po_name = ", ".join(gp_list)
+								po_date = ", ".join(gpdate_list)
+								po_so_name = grn_line_record.gp_line_id.gate_id.name
+								po_so_qty = grn_line_record.po_qty	
+						elif grn_record.grn_type == 'from_so':
+							if grn_line_record.so_line_id.service_id.name not in so_list:
+								so_list.append(grn_line_record.so_line_id.service_id.name)
+								date_order = grn_line_record.so_line_id.service_id.date
+								date_order = datetime.strptime(date_order, '%Y-%m-%d')
+								date_order = date_order.strftime('%d/%m/%Y')
+								sodate_list.append(date_order)
+							po_so_name = grn_line_record.so_line_id.service_id.name
+							po_so_qty = grn_line_record.so_qty
+							po_name = ",".join(so_list)
+							po_date = ",".join(sodate_list)
+							
+						invoice_line_obj.create(cr, uid, {
+								'header_id': invoice_rec.id,
+								'order_no': po_so_name,
+								'grn_no': grn_line_record.po_grn_id.name or '',
+								'po_id': grn_line_record.po_id.id or False,
+								'so_id': grn_line_record.so_id.id or False,
+								'gp_id': grn_line_record.gp_id.id or False,
+								'po_line_id': grn_line_record.po_line_id.id or False,
+								'so_line_id': grn_line_record.so_line_id.id or False,
+								'gp_line_id': grn_line_record.gp_line_id.id or False,
+								'po_grn_id': grn_line_record.po_grn_id.id or False,
+								'po_grn_line_id': grn_line_record.id or False,
+							
+								'dc_no': grn_record.dc_no,
+								'product_id': grn_line_record.product_id.id,
+								'qty':po_so_qty,
+								'rec_qty':grn_line_record.po_grn_qty,
+								'uom_id': grn_line_record.uom_id.id,
+								'price_unit': grn_line_record.price_unit,
+								'total_amt': grn_line_record.po_grn_qty * grn_line_record.price_unit,
+								'discount': (grn_line_record.kg_discount / grn_line_record.po_qty) * grn_line_record.po_grn_qty,
+								'kg_discount_per': grn_line_record.kg_discount_per,
+								'invoice_tax_ids': [(6, 0, [x.id for x in grn_line_record.grn_tax_ids])],
+							})						
+				self.write(cr, uid, ids[0], {'po_so_name' :po_name ,'po_so_date':po_date})			
+			if invoice_rec.grn_type == 'from_general_grn':
+				self.write(cr, uid, ids[0], {'load_items_flag' : True})
+				cr.execute(""" select grn_id from purchase_invoice_general_grn_ids where invoice_id = %s """ %(invoice_rec.id))
+				general_grn_data = cr.dictfetchall()
+				
+				for item in general_grn_data:
+					grn_id = item['grn_id']
+					grn_record = general_grn_obj.browse(cr, uid, grn_id)
+					self.write(cr, uid, ids[0], {'payment_type' : grn_record.payment_type})
+					cr.execute(""" select id from kg_general_grn_line where grn_id = %s order by id """ %(grn_id))
+					grn_line_data = cr.dictfetchall()
+					for line_item in grn_line_data:
 						
-					invoice_line_obj.create(cr, uid, {
-							'header_id': invoice_rec.id,
-							'order_no': po_so_name,
-							'grn_no': grn_line_record.po_grn_id.name or '',
-							'po_id': grn_line_record.po_id.id or False,
-							'so_id': grn_line_record.so_id.id or False,
-							'gp_id': grn_line_record.gp_id.id or False,
-							'po_line_id': grn_line_record.po_line_id.id or False,
-							'so_line_id': grn_line_record.so_line_id.id or False,
-							'gp_line_id': grn_line_record.gp_line_id.id or False,
-							'po_grn_id': grn_line_record.po_grn_id.id or False,
-							'po_grn_line_id': grn_line_record.id or False,
+						grn_line_record = general_grn_line_obj.browse(cr, uid, line_item['id'])
+						invoice_line_obj.create(cr, uid, {
+								'header_id': invoice_rec.id,
+								'order_no': '',
+								'grn_no': grn_line_record.grn_id.name or '',
+								'general_grn_id': grn_line_record.grn_id.id or False,
+								'general_grn_line_id': grn_line_record.id or False,
+								'dc_no': grn_record.dc_no,
+								'product_id': grn_line_record.product_id.id,
+								'qty':grn_line_record.grn_qty,
+								'rec_qty':grn_line_record.grn_qty,
+								'uom_id': grn_line_record.uom_id.id,
+								'price_unit': grn_line_record.price_unit,
+								'total_amt': grn_line_record.grn_qty * grn_line_record.price_unit,
+								'discount': (grn_line_record.kg_discount / grn_line_record.grn_qty) * grn_line_record.grn_qty,
+								'kg_discount_per': grn_line_record.kg_discount_per,
+								'invoice_tax_ids': [(6, 0, [x.id for x in grn_line_record.grn_tax_ids])],
+								})
+			if invoice_rec.grn_type == 'others':
+				self.write(cr, uid, ids[0], {'load_items_flag' : True})
+				cr.execute(""" select service_id from service_invoice_grn_ids where invoice_id = %s """ %(invoice_rec.id))
+				service_grn_data = cr.dictfetchall()
+				
+				for item in service_grn_data:
+					service_id = item['service_id']
+					service_record = service_grn_obj.browse(cr, uid, service_id)
+					self.write(cr, uid, ids[0], {'payment_type' : service_record.payment_type})
+					cr.execute(""" select id from kg_service_invoice_line where service_id = %s order by id """ %(service_id))
+					service_line_data = cr.dictfetchall()
+					for line_item in service_line_data:
 						
-							'dc_no': grn_record.dc_no,
-							'product_id': grn_line_record.product_id.id,
-							'qty':po_so_qty,
-							'rec_qty':grn_line_record.po_grn_qty,
-							'uom_id': grn_line_record.uom_id.id,
-							'price_unit': grn_line_record.price_unit,
-							'total_amt': grn_line_record.po_grn_qty * grn_line_record.price_unit,
-							'discount': (grn_line_record.kg_discount / grn_line_record.po_qty) * grn_line_record.po_grn_qty,
-							'kg_discount_per': grn_line_record.kg_discount_per,
-							'invoice_tax_ids': [(6, 0, [x.id for x in grn_line_record.grn_tax_ids])],
-						})						
-			self.write(cr, uid, ids[0], {'po_so_name' :po_name ,'po_so_date':po_date})			
-		if invoice_rec.grn_type == 'from_general_grn':
-			self.write(cr, uid, ids[0], {'load_items_flag' : True})
-			cr.execute(""" select grn_id from purchase_invoice_general_grn_ids where invoice_id = %s """ %(invoice_rec.id))
-			general_grn_data = cr.dictfetchall()
-			
-			for item in general_grn_data:
-				grn_id = item['grn_id']
-				grn_record = general_grn_obj.browse(cr, uid, grn_id)
-				self.write(cr, uid, ids[0], {'payment_type' : grn_record.payment_type})
-				cr.execute(""" select id from kg_general_grn_line where grn_id = %s order by id """ %(grn_id))
-				grn_line_data = cr.dictfetchall()
-				for line_item in grn_line_data:
-					
-					grn_line_record = general_grn_line_obj.browse(cr, uid, line_item['id'])
-					invoice_line_obj.create(cr, uid, {
-							'header_id': invoice_rec.id,
-							'order_no': '',
-							'grn_no': grn_line_record.grn_id.name or '',
-							'general_grn_id': grn_line_record.grn_id.id or False,
-							'general_grn_line_id': grn_line_record.id or False,
-							'dc_no': grn_record.dc_no,
-							'product_id': grn_line_record.product_id.id,
-							'qty':grn_line_record.grn_qty,
-							'rec_qty':grn_line_record.grn_qty,
-							'uom_id': grn_line_record.uom_id.id,
-							'price_unit': grn_line_record.price_unit,
-							'total_amt': grn_line_record.grn_qty * grn_line_record.price_unit,
-							'discount': (grn_line_record.kg_discount / grn_line_record.grn_qty) * grn_line_record.grn_qty,
-							'kg_discount_per': grn_line_record.kg_discount_per,
-							'invoice_tax_ids': [(6, 0, [x.id for x in grn_line_record.grn_tax_ids])],
-							})
-		if invoice_rec.grn_type == 'others':
-			self.write(cr, uid, ids[0], {'load_items_flag' : True})
-			cr.execute(""" select service_id from service_invoice_grn_ids where invoice_id = %s """ %(invoice_rec.id))
-			service_grn_data = cr.dictfetchall()
-			
-			for item in service_grn_data:
-				service_id = item['service_id']
-				service_record = service_grn_obj.browse(cr, uid, service_id)
-				self.write(cr, uid, ids[0], {'payment_type' : service_record.payment_type})
-				cr.execute(""" select id from kg_service_invoice_line where service_id = %s order by id """ %(service_id))
-				service_line_data = cr.dictfetchall()
-				for line_item in service_line_data:
-					
-					service_line_record = service_grn_line_obj.browse(cr, uid, line_item['id'])
-					invoice_line_obj.create(cr, uid, {
-							'header_id': invoice_rec.id,
-							'order_no': service_record.service_order_id.name or '',
-							'grn_no': '',
-							'soi_id': service_record.id or False,
-							'so_id': service_record.service_order_id.id or False,
-							'soi_line_id': service_line_record.id or False,
-							'dc_no': '',
-							'product_id': service_line_record.product_id.id,
-							'qty':service_line_record.product_qty,
-							'rec_qty':service_line_record.product_qty,
-							'uom_id': service_line_record.product_uom.id,
-							'price_unit': service_line_record.price_unit,
-							'total_amt':service_line_record.product_qty * service_line_record.price_unit,
-							'discount': service_line_record.kg_discount,
-							'discount': (service_line_record.kg_discount / service_line_record.product_qty) * grn_line_record.product_qty,
-							'kg_discount_per': service_line_record.kg_discount_per,
-							'invoice_tax_ids': [(6, 0, [x.id for x in service_line_record.taxes_id])],
-							})
+						service_line_record = service_grn_line_obj.browse(cr, uid, line_item['id'])
+						invoice_line_obj.create(cr, uid, {
+								'header_id': invoice_rec.id,
+								'order_no': service_record.service_order_id.name or '',
+								'grn_no': '',
+								'soi_id': service_record.id or False,
+								'so_id': service_record.service_order_id.id or False,
+								'soi_line_id': service_line_record.id or False,
+								'dc_no': '',
+								'product_id': service_line_record.product_id.id,
+								'qty':service_line_record.product_qty,
+								'rec_qty':service_line_record.product_qty,
+								'uom_id': service_line_record.product_uom.id,
+								'price_unit': service_line_record.price_unit,
+								'total_amt':service_line_record.product_qty * service_line_record.price_unit,
+								'discount': service_line_record.kg_discount,
+								'discount': (service_line_record.kg_discount / service_line_record.product_qty) * grn_line_record.product_qty,
+								'kg_discount_per': service_line_record.kg_discount_per,
+								'invoice_tax_ids': [(6, 0, [x.id for x in service_line_record.taxes_id])],
+								})
 			
 		return True
 		
@@ -503,224 +493,218 @@ class kg_purchase_invoice(osv.osv):
 	
 	def load_advance(self, cr, uid, ids,context=None):
 		invoice_rec = self.browse(cr,uid,ids[0])
-		sup_adv_obj = self.pool.get('kg.supplier.advance')
-		sup_inadv_obj = self.pool.get('ch.poadvance.purchase.invoice.line')	
-		del_sql = """delete from ch_poadvance_purchase_invoice_line where header_id=%s"""%(ids[0])
-		cr.execute(del_sql)
-		
-		for item in invoice_rec.line_ids:
-			if invoice_rec.type == 'from_po':
-				po_obj = self.pool.get('purchase.order').search(cr,uid,[('name','=',item.order_no)])
-			elif invoice_rec.type == 'from_so':
-				po_obj = self.pool.get('kg.service.order').search(cr,uid,[('name','=',item.order_no)])
-			if po_obj:
+		if invoice_rec.state == 'confirmed':
+			sup_adv_obj = self.pool.get('kg.supplier.advance')
+			sup_inadv_obj = self.pool.get('ch.poadvance.purchase.invoice.line')	
+			del_sql = """delete from ch_poadvance_purchase_invoice_line where header_id=%s"""%(ids[0])
+			cr.execute(del_sql)
+			
+			for item in invoice_rec.line_ids:
 				if invoice_rec.type == 'from_po':
-					po_rec = self.pool.get('purchase.order').browse(cr,uid,po_obj[0])	
+					po_obj = self.pool.get('purchase.order').search(cr,uid,[('name','=',item.order_no)])
 				elif invoice_rec.type == 'from_so':
-					po_rec = self.pool.get('kg.service.order').browse(cr,uid,po_obj[0])	
-				if invoice_rec.type == 'from_po':
-					adv_search = self.pool.get('kg.supplier.advance').search(cr, uid, [('po_id','=',po_rec.id)])
-					cr.execute(""" select * from kg_supplier_advance where po_id = %s and balance_amt > 0 and state='confirmed'""" %(po_rec.id))
-				elif invoice_rec.type == 'from_so':
-					adv_search = self.pool.get('kg.supplier.advance').search(cr, uid, [('po_id','=',po_rec.id)])
-					cr.execute(""" select * from kg_supplier_advance where so_id = %s and balance_amt > 0 and state='confirmed'""" %(po_rec.id))
-				adv_data = cr.dictfetchall()			
-				for adv in adv_data:
-					sup_inadv_obj.create(cr,uid,{
-						'po_id' : adv['po_id'],
-						'sup_advance_id' : adv['id'],
-						'sup_advance_date' : adv['entry_date'],
-						'tot_advance_amt' : adv['advance_amt'],
-						'balance_amt' : adv['balance_amt'],
-						'current_adv_amt' : 0.0,
-						'header_id' : invoice_rec.id,
-						})
+					po_obj = self.pool.get('kg.service.order').search(cr,uid,[('name','=',item.order_no)])
+				if po_obj:
+					if invoice_rec.type == 'from_po':
+						po_rec = self.pool.get('purchase.order').browse(cr,uid,po_obj[0])	
+					elif invoice_rec.type == 'from_so':
+						po_rec = self.pool.get('kg.service.order').browse(cr,uid,po_obj[0])	
+					if invoice_rec.type == 'from_po':
+						adv_search = self.pool.get('kg.supplier.advance').search(cr, uid, [('po_id','=',po_rec.id)])
+						cr.execute(""" select * from kg_supplier_advance where po_id = %s and balance_amt > 0 and state='confirmed'""" %(po_rec.id))
+					elif invoice_rec.type == 'from_so':
+						adv_search = self.pool.get('kg.supplier.advance').search(cr, uid, [('po_id','=',po_rec.id)])
+						cr.execute(""" select * from kg_supplier_advance where so_id = %s and balance_amt > 0 and state='confirmed'""" %(po_rec.id))
+					adv_data = cr.dictfetchall()			
+					for adv in adv_data:
+						sup_inadv_obj.create(cr,uid,{
+							'po_id' : adv['po_id'],
+							'sup_advance_id' : adv['id'],
+							'sup_advance_date' : adv['entry_date'],
+							'tot_advance_amt' : adv['advance_amt'],
+							'balance_amt' : adv['balance_amt'],
+							'current_adv_amt' : 0.0,
+							'header_id' : invoice_rec.id,
+							})
 				
 		return True
 			
 	def entry_confirm(self, cr, uid, ids,context=None):
 		invoice_rec = self.browse(cr,uid,ids[0])
+		if invoice_rec.state == 'draft':
 		### Credit Note Checking ###
-		credit_amt = 0
+			credit_amt = 0
 
-		if invoice_rec.credit_note_ids:
-			for credit in invoice_rec.credit_note_ids:
-				credit_amt += credit.credit_amt
-				if credit_amt > invoice_rec.amount_total:
-					raise osv.except_osv(
-					_('Warning!'),
-					_('Credit Note amount should not be greater than Invoice amount'))
+			if invoice_rec.credit_note_ids:
+				for credit in invoice_rec.credit_note_ids:
+					credit_amt += credit.credit_amt
+					if credit_amt > invoice_rec.amount_total:
+						raise osv.except_osv(_('Warning!'),
+							_('Credit Note amount should not be greater than Invoice amount'))
 
-		### Checking Advance date ###
-		
-		today_date = today.strftime('%Y-%m-%d')
-		
-		if invoice_rec.invoice_date > today_date:
-			raise osv.except_osv(
-					_('Warning!'),
+			### Checking Advance date ###
+			
+			today_date = today.strftime('%Y-%m-%d')
+			
+			if invoice_rec.invoice_date > today_date:
+				raise osv.except_osv(_('Warning!'),
 					_('Invoice Date should not be greater than current date'))
-					
-		if invoice_rec.sup_invoice_date > today_date:
-			raise osv.except_osv(
-					_('Warning!'),
-					_('Supplier Invoice Date should not be greater than current date'))
-			
-		### Check Advance Amount greater than Zero ###
-			
-		if not invoice_rec.line_ids:
-			raise osv.except_osv(
-					_('Warning!'),
-					_('You cannot confirm the entry without Invoice Line'))
 						
-		else:
-			for line in invoice_rec.line_ids:
-				if line.price_unit == 0.00:
-					raise osv.except_osv(
-						_('Price Unit Cannot be zero!'),
-						_('You cannot process Invoice with Price Unit Zero for Product %s.' %(line.product_id.name)))
-		
-		if invoice_rec.grn_type == 'from_po_grn':
-			cr.execute(""" select grn_id from purchase_invoice_grn_ids where invoice_id = %s """ %(invoice_rec.id))
-			grn_data = cr.dictfetchall()
-			for item in grn_data:
-				grn_sql = """ update kg_po_grn set inv_flag = True where id = %s  """ %(item['grn_id'])
-				cr.execute(grn_sql)
-		
-		if invoice_rec.advance_line_ids:
-			for line in rec.advance_line_ids:
-				sup_advance_line_rec = self.pool.get('kg.supplier.advance').browse(cr, uid, line.cus_advance_id.id)
-				sup_advance_bal_amt = sup_advance_line_rec.bal_adv - line.current_adv_amt				
-				sup_advance_line_rec.write({'bal_adv': sup_advance_bal_amt})		
-												
-		inv_no = ''
-		if not invoice_rec.name:
-			seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.purchase.invoice')])
-			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
-			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,invoice_rec.invoice_date))
-			seq_name = cr.fetchone();
-			inv_no = seq_name[0]
-		elif invoice_rec.name:
-			inv_no = invoice_rec.name
-		self.write(cr,uid,ids[0],{'state': 'confirmed',
-								  'confirm_flag': 'True',
-								  'conf_user_id': uid,
-								  'confirmed_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-								  'name': inv_no,
-								   })
+			if invoice_rec.sup_invoice_date > today_date:
+				raise osv.except_osv(_('Warning!'),
+					_('Supplier Invoice Date should not be greater than current date'))
+				
+			### Check Advance Amount greater than Zero ###
+				
+			if not invoice_rec.line_ids:
+				raise osv.except_osv(_('Warning!'),
+					_('You cannot confirm the entry without Invoice Line'))
+							
+			else:
+				for line in invoice_rec.line_ids:
+					if line.price_unit == 0.00:
+						raise osv.except_osv(_('Price Unit Cannot be zero!'),
+							_('You cannot process Invoice with Price Unit Zero for Product %s.' %(line.product_id.name)))
+			
+			if invoice_rec.grn_type == 'from_po_grn':
+				cr.execute(""" select grn_id from purchase_invoice_grn_ids where invoice_id = %s """ %(invoice_rec.id))
+				grn_data = cr.dictfetchall()
+				for item in grn_data:
+					grn_sql = """ update kg_po_grn set inv_flag = True where id = %s  """ %(item['grn_id'])
+					cr.execute(grn_sql)
+			
+			if invoice_rec.advance_line_ids:
+				for line in rec.advance_line_ids:
+					sup_advance_line_rec = self.pool.get('kg.supplier.advance').browse(cr, uid, line.cus_advance_id.id)
+					sup_advance_bal_amt = sup_advance_line_rec.bal_adv - line.current_adv_amt				
+					sup_advance_line_rec.write({'bal_adv': sup_advance_bal_amt})		
+													
+			inv_no = ''
+			if not invoice_rec.name:
+				seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.purchase.invoice')])
+				seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,invoice_rec.invoice_date))
+				seq_name = cr.fetchone();
+				inv_no = seq_name[0]
+			elif invoice_rec.name:
+				inv_no = invoice_rec.name
+			self.write(cr,uid,ids[0],{'state': 'confirmed',
+									  'conf_user_id': uid,
+									  'confirmed_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+									  'name': inv_no,
+									   })
 		return True
 		
 	def entry_approve(self, cr, uid, ids,context=None):
 		invoice_rec = self.browse(cr,uid,ids[0])
-		credit_obj = self.pool.get('kg.credit.note')
-		
-		credit_amt = 0
-		
-		if invoice_rec.credit_note_ids:
-			for credit in invoice_rec.credit_note_ids:
-				credit_amt += credit.credit_amt
-				if credit_amt > invoice_rec.amount_total:
-					raise osv.except_osv(
-					_('Warning!'),
-					_('Credit Note amount should not be greater than Invoice amount'))
-		
-		if invoice_rec.grn_type == 'from_po_grn':
-			cr.execute(""" select grn_id from purchase_invoice_grn_ids where invoice_id = %s """ %(invoice_rec.id))
-			grn_data = cr.dictfetchall()
+		if invoice_rec.state == 'confirmed':
+			credit_obj = self.pool.get('kg.credit.note')
 			
-			for item in grn_data:
-				grn_sql = """ update kg_po_grn set state='inv' where id = %s  """ %(item['grn_id'])
-				cr.execute(grn_sql)
+			credit_amt = 0
+			
+			if invoice_rec.credit_note_ids:
+				for credit in invoice_rec.credit_note_ids:
+					credit_amt += credit.credit_amt
+					if credit_amt > invoice_rec.amount_total:
+						raise osv.except_osv(_('Warning!'),
+							_('Credit Note amount should not be greater than Invoice amount'))
+			
+			if invoice_rec.grn_type == 'from_po_grn':
+				cr.execute(""" select grn_id from purchase_invoice_grn_ids where invoice_id = %s """ %(invoice_rec.id))
+				grn_data = cr.dictfetchall()
 				
-		if invoice_rec.grn_type == 'from_general_grn':
-			cr.execute(""" select grn_id from purchase_invoice_general_grn_ids where invoice_id = %s """ %(invoice_rec.id))
-			grn_data = cr.dictfetchall()
-			
-			for item in grn_data:
-				grn_sql = """ update kg_general_grn set state='inv' where id = %s  """ %(item['grn_id'])
-				cr.execute(grn_sql)
-				
-		if invoice_rec.labour_ids == 'from_general_grn':		
-			cr.execute(""" select service_id from service_invoice_grn_ids where invoice_id = %s """ %(invoice_rec.id))
-			service_data = cr.dictfetchall()
-			
-			for item in service_data:
-				service_sql = """ update kg_service_invoice set state='inv' where id = %s  """ %(item['service_id'])
-				cr.execute(service_sql)
-		
-		sup_adv_obj = self.pool.get('kg.supplier.advance')			
-		sup_adv_inv_obj = self.pool.get('ch.poadvance.purchase.invoice.line')			
-		
-		for item in invoice_rec.line_ids:
-			if invoice_rec.type == 'from_po':
-				po_obj = self.pool.get('purchase.order').search(cr,uid,[('name','=',item.order_no)])
-			elif invoice_rec.type == 'from_so':
-				po_obj = self.pool.get('kg.service.order').search(cr,uid,[('name','=',item.order_no)])
-			if po_obj:
-				if invoice_rec.type == 'from_po':
-					po_rec = self.pool.get('purchase.order').browse(cr,uid,po_obj[0])	
-				elif invoice_rec.type == 'from_so':
-					po_rec = self.pool.get('kg.service.order').browse(cr,uid,po_obj[0])
+				for item in grn_data:
+					grn_sql = """ update kg_po_grn set state='inv' where id = %s  """ %(item['grn_id'])
+					cr.execute(grn_sql)
 					
-				for line in invoice_rec.advance_line_ids:
+			if invoice_rec.grn_type == 'from_general_grn':
+				cr.execute(""" select grn_id from purchase_invoice_general_grn_ids where invoice_id = %s """ %(invoice_rec.id))
+				grn_data = cr.dictfetchall()
+				
+				for item in grn_data:
+					grn_sql = """ update kg_general_grn set state='inv' where id = %s  """ %(item['grn_id'])
+					cr.execute(grn_sql)
+					
+			if invoice_rec.labour_ids == 'from_general_grn':		
+				cr.execute(""" select service_id from service_invoice_grn_ids where invoice_id = %s """ %(invoice_rec.id))
+				service_data = cr.dictfetchall()
+				
+				for item in service_data:
+					service_sql = """ update kg_service_invoice set state='inv' where id = %s  """ %(item['service_id'])
+					cr.execute(service_sql)
+			
+			sup_adv_obj = self.pool.get('kg.supplier.advance')			
+			sup_adv_inv_obj = self.pool.get('ch.poadvance.purchase.invoice.line')			
+			
+			for item in invoice_rec.line_ids:
+				if invoice_rec.type == 'from_po':
+					po_obj = self.pool.get('purchase.order').search(cr,uid,[('name','=',item.order_no)])
+				elif invoice_rec.type == 'from_so':
+					po_obj = self.pool.get('kg.service.order').search(cr,uid,[('name','=',item.order_no)])
+				if po_obj:
 					if invoice_rec.type == 'from_po':
-						adv_search = self.pool.get('kg.supplier.advance').search(cr, uid, [('po_id','=',po_rec.id)])
-						adv_ids = self.pool.get('kg.supplier.advance').search(cr, uid, [('po_id','=',line.po_id.id)])
+						po_rec = self.pool.get('purchase.order').browse(cr,uid,po_obj[0])	
 					elif invoice_rec.type == 'from_so':
-						adv_search = self.pool.get('kg.supplier.advance').search(cr, uid, [('so_id','=',po_rec.id)])
-						adv_ids = self.pool.get('kg.supplier.advance').search(cr, uid, [('so_id','=',line.so_id.id)])
-					adv_rec = self.pool.get('kg.supplier.advance').browse(cr, uid,adv_ids[0])				
-					adjusted_amt = adv_rec.adjusted_amt + line.current_adv_amt 
-					balance_amt = line.current_adv_amt - adjusted_amt
-					sup_adv_obj.write(cr, uid, line.sup_advance_id.id, {'adjusted_amt': adjusted_amt,'balance_amt':balance_amt})
-		
-		total = sum(line.current_adv_amt for line in invoice_rec.advance_line_ids)
-		if invoice_rec.amount_untaxed < total:
-			raise osv.except_osv(
-				_('Warning!'),
-				_('Adjust amount should not be greater than total amount'))
-		
-		self.write(cr,uid,ids[0],{'state': 'approved',
-								  'approve_flag': 'True',
-								  'app_user_id': uid,
-								  'approved_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-								   })	
+						po_rec = self.pool.get('kg.service.order').browse(cr,uid,po_obj[0])
+						
+					for line in invoice_rec.advance_line_ids:
+						if invoice_rec.type == 'from_po':
+							adv_search = self.pool.get('kg.supplier.advance').search(cr, uid, [('po_id','=',po_rec.id)])
+							adv_ids = self.pool.get('kg.supplier.advance').search(cr, uid, [('po_id','=',line.po_id.id)])
+						elif invoice_rec.type == 'from_so':
+							adv_search = self.pool.get('kg.supplier.advance').search(cr, uid, [('so_id','=',po_rec.id)])
+							adv_ids = self.pool.get('kg.supplier.advance').search(cr, uid, [('so_id','=',line.so_id.id)])
+						adv_rec = self.pool.get('kg.supplier.advance').browse(cr, uid,adv_ids[0])				
+						adjusted_amt = adv_rec.adjusted_amt + line.current_adv_amt 
+						balance_amt = line.current_adv_amt - adjusted_amt
+						sup_adv_obj.write(cr, uid, line.sup_advance_id.id, {'adjusted_amt': adjusted_amt,'balance_amt':balance_amt})
+			
+			total = sum(line.current_adv_amt for line in invoice_rec.advance_line_ids)
+			if invoice_rec.amount_untaxed < total:
+				raise osv.except_osv(_('Warning!'),
+					_('Adjust amount should not be greater than total amount'))
+			
+			self.write(cr,uid,ids[0],{'state': 'approved',
+									  'app_user_id': uid,
+									  'approved_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+									   })	
 		return True
 	
 	def entry_cancel(self, cr, uid, ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if not rec.can_remark:
-			raise osv.except_osv(
-				_('Remarks Needed !!'),
-				_('Enter Remark in Remarks ....'))
-		if rec.type == 'from_po':
-			if rec.grn_type == 'from_po_grn':
-				cr.execute(""" select grn_id from purchase_invoice_grn_ids where invoice_id = %s """ %(rec.id))
-				grn_data = cr.dictfetchall()
-				for item in grn_data:
-					grn_sql = """ update kg_po_grn set state='done',inv_flag=False where id = %s  """ %(item['grn_id'])
-					cr.execute(grn_sql)
-			if rec.grn_type == 'from_general_grn':
-				cr.execute(""" select grn_id from purchase_invoice_general_grn_ids where invoice_id = %s """ %(rec.id))
-				grn_data = cr.dictfetchall()
-				for item in grn_data:
-					grn_sql = """ update kg_general_grn set state='done' where id = %s  """ %(item['grn_id'])
-					cr.execute(grn_sql)
-		self.write(cr, uid,ids,{'state' : 'cancel',
-								'cancel_user_id': uid,
-								'cancel_date': time.strftime("%Y-%m-%d %H:%M:%S"),
-								})
+		if rec.state == 'approved':
+			if not rec.can_remark:
+				raise osv.except_osv(_('Remarks Needed !!'),
+					_('Enter Remark in Remarks ....'))
+			if rec.type == 'from_po':
+				if rec.grn_type == 'from_po_grn':
+					cr.execute(""" select grn_id from purchase_invoice_grn_ids where invoice_id = %s """ %(rec.id))
+					grn_data = cr.dictfetchall()
+					for item in grn_data:
+						grn_sql = """ update kg_po_grn set state='done',inv_flag=False where id = %s  """ %(item['grn_id'])
+						cr.execute(grn_sql)
+				if rec.grn_type == 'from_general_grn':
+					cr.execute(""" select grn_id from purchase_invoice_general_grn_ids where invoice_id = %s """ %(rec.id))
+					grn_data = cr.dictfetchall()
+					for item in grn_data:
+						grn_sql = """ update kg_general_grn set state='done' where id = %s  """ %(item['grn_id'])
+						cr.execute(grn_sql)
+			self.write(cr, uid,ids,{'state' : 'cancel',
+									'cancel_user_id': uid,
+									'cancel_date': time.strftime("%Y-%m-%d %H:%M:%S"),
+									})
 		return True
 	
 	def entry_reject(self, cr, uid, ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if not rec.reject_remark:
-			raise osv.except_osv(
-				_('Remarks Needed !!'),
-				_('Enter Remark in Remarks ....'))
-		self.write(cr, uid,ids,{'state' : 'draft',
-								'rej_user_id': uid,
-								'reject_date': time.strftime("%Y-%m-%d %H:%M:%S"),
-								})
+		if rec.state == 'confirmed':
+			if not rec.reject_remark:
+				raise osv.except_osv(_('Remarks Needed !!'),
+					_('Enter Remark in Remarks ....'))
+			self.write(cr, uid,ids,{'state' : 'draft',
+									'rej_user_id': uid,
+									'reject_date': time.strftime("%Y-%m-%d %H:%M:%S"),
+									})
 		return True
 				
 	def unlink(self,cr,uid,ids,context=None):
@@ -979,4 +963,3 @@ class ch_poadvance_purchase_invoice_line(osv.osv):
 	   ]
 	   
 ch_poadvance_purchase_invoice_line()
-

@@ -241,9 +241,6 @@
 		        <!-- GRN AND ISSUE -->
 				<menuitem id="gpm_grn_issue_menu" name="GRN AND ISSUE" parent="stock.menu_stock_root" sequence="1"/>
 				
-				<!-- General GRN Transaction Menu -->
-				<menuitem action="kg_general_grn.action_kg_general_grn" id="gam_general_grn" name="General GRN" parent="gpm_grn_issue_menu" sequence="1"/>
-				
 				<!-- GRN Register Transaction Menu -->
 <!--
 				<menuitem action="kg_common_grn.kg_common_grn_action_form" id="gam_grn_register" name="GRN Register" parent="gpm_grn_issue_menu" sequence="3"/>
@@ -265,9 +262,6 @@
 				<!-- Gate Pass -->
 				<menuitem id="gpm_gate_pass_menu" name="Gate Pass" parent="stock.menu_stock_root" sequence="2"/>
                 
-                <!-- Gate Pass Transaction Menu -->
-				<menuitem action="kg_gate_pass.action_gate_pass" id="gam_gate_pass" name="Gate Pass Entry" parent="gpm_gate_pass_menu" sequence="1"/>
-				
 				<!-- Purchase Invoice -->
 				<menuitem id="ppm_purchase_invoice_menu" name="Invoice" parent="stock.menu_stock_root" sequence="3"/>
                 
