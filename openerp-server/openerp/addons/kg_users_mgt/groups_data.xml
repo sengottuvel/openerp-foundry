@@ -300,7 +300,6 @@
     </record>   
    
     
-<!--
     <record id="group_vendor_quote" model="res.groups">
         <field name="name">Vendor Quote</field>
         <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
@@ -308,15 +307,14 @@
         <field name="custom_group">True</field>    
         <field eval="[(6,0,[
 			
-			ref('kg_quotation.menu_kg_vendor_quote_parent'), 
-			ref('kg_quotation.menu_kg_vendor_quote_header'), 
-			ref('kg_quotation.kg_rfq_vendor_quote_menu'),        
+			ref('kg_quotation.qam_quotation'),
+			ref('kg_quotation.qam_quotation_submit'),
+			ref('kg_quotation.qam_quotation_comp'),        
 			ref('account.menu_action_invoice_tree2'),
 			
 			])]" name="menu_access"/>
 			<field name="users" eval="[(4, ref('base.user_root'))]"/>
     </record>
--->
     
     <record id="group_inventory_admin" model="res.groups">
         <field name="name">Inventory Admin</field>
