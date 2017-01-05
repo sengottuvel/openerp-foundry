@@ -235,25 +235,6 @@
 			<!-- Store Masters Menu -->
 			<menuitem name="Store Masters" id="mpm_store_master" parent = "stock.menu_stock_root" sequence="0"/>
 				
-				<!-- Dep Master  --> 
-				<menuitem action="kg_depmaster.kg_depmaster_action_form" name="Department Master" id="menu_depmaster_action_form" parent="mpm_store_master" sequence="1"/>
-				  
-				<!-- Inward Master  --> 
-				<menuitem action="kg_inwardmaster.inwardmaster_action_form" name="Inward Master" id="mam_inward_master" parent="mpm_store_master" sequence="3"/>
-				 
-				<!-- Outward Master  --> 
-				<menuitem action="kg_outwardmaster.outwardmaster_action_form" name="Outward Master" id="mam_outward_master" parent="mpm_store_master" sequence="4"/>
-				 
-				<!-- Holiday Master  --> 
-<!--
-				<menuitem action="kg_holiday_master.action_holiday_master" name="Holiday Master" id="mam_holiday_master" parent="mpm_store_master" sequence="5"/>
--->
-				 
-				<!-- Project Master  --> 
-<!--
-				<menuitem action="kg_project_master.kg_project_master_menu_action" name="Project Master" id="mam_project_master" parent="mpm_store_master" sequence="6"/>
--->
-				 
 				<!-- Stock Locations Master  --> 
 				<menuitem action="stock.action_location_form" name="Stock Locations" id="mam_inventory_master" parent="mpm_store_master" sequence="10"/>
 			
