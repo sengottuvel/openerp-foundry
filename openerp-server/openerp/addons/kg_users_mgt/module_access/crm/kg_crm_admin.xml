@@ -851,7 +851,45 @@
 			<field eval="1" name="perm_create"/>
 			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
 		</record>	
-	
+		<record id="t_crm_admin_primecost_view" model="ir.model.access">
+			<field name="model_id" ref="kg_primecost_view.model_kg_primecost_view"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Primecost View</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
+		
+		<record id="t_crm_admin_ch_primecost_view_fou" model="ir.model.access">
+			<field name="model_id" ref="kg_primecost_view.model_ch_primecost_view_fou"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">ch primecost fou</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
+		
+		<record id="t_crm_admin_ch_primecost_view_ms" model="ir.model.access">
+			<field name="model_id" ref="kg_primecost_view.model_ch_primecost_view_ms"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">ch primecost ms</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
+		
+		<record id="t_crm_admin_ch_primecost_view_bot" model="ir.model.access">
+			<field name="model_id" ref="kg_primecost_view.model_ch_primecost_view_bot"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">ch primecost bot</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
 		
 		<record id="t_crm_admin_service_inward" model="ir.model.access">
 			<field name="model_id" ref="kg_service_inward.model_kg_service_inward"/>

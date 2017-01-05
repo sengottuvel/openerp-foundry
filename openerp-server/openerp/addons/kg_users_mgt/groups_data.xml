@@ -447,7 +447,7 @@
 			ref('kg_site_visit_plan.tam_site_visit_plan'),
 			ref('kg_site_visit_plan.tam_ch_site_visit_plan'),
 			ref('kg_service_inward.tam_service_inward'),
-			
+			ref('kg_primecost_view.tam_primecost_view'),
 			
             ])]" name="menu_access"/>
             <field name="users" eval="[(4, ref('base.user_root'))]"/>
