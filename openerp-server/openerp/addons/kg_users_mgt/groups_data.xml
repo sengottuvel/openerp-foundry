@@ -447,7 +447,6 @@
 			ref('kg_site_visit_plan.tam_site_visit_plan'),
 			ref('kg_site_visit_plan.tam_ch_site_visit_plan'),
 			ref('kg_service_inward.tam_service_inward'),
-			ref('kg_pump_vs_material.tam_pump_vs_material'),
 			
 			
             ])]" name="menu_access"/>
