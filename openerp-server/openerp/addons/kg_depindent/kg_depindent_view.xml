@@ -47,6 +47,7 @@
 								<field name="product_id" on_change="onchange_product_id(product_id,uom,po_uom)"/>
 								<field name="brand_id"/>
 								<field name="fns_item_name"/>
+								<field name="position_id"/>
 								<field name="moc_id"/>
 								<field name="uom" on_change="onchange_product_uom(product_id, uom, po_uom,qty)"/>
 								<field name="qty" on_change="onchange_qty(uom,product_id,qty,pending_qty,issue_pending_qty,po_qty)"/>
@@ -62,12 +63,12 @@
                 </page>
                 <page string="Entry Info">
 					<group>
-						<field name="company_id"/>
-					</group>
-					<group>
-						<field name="active"/>
-					</group>
-					<group>
+						<group>
+							<field name="company_id"/>
+						</group>
+						<group>
+							<field name="active"/>
+						</group>
 						<group>
 							<field name="user_id"/>
 							<field name="confirmed_by" attrs="{'invisible':[('state','in',['draft'])]}"/>
@@ -265,6 +266,11 @@
 			<field name="search_view_id" ref="di_search_view"/>
 		</record>
 		
-		
+		<!-- Department Indent -->
+		<menuitem action="action_kg_depindent_form" id="iam_depindent" name="Department Indent" parent="kg_menus.ipm_dep_indent_menu" sequence="1"/>
+
+		<!-- Department Indent Line-->
+		<menuitem action="action_kg_depindent_line_form" id="iam_depindent_line" name="Item Details" parent="kg_menus.ipm_dep_indent_menu" sequence="2"/>
+
     </data>
 </openerp>

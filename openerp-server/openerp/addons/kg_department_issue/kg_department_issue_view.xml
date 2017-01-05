@@ -54,7 +54,11 @@
 								<group string="Product Details" colspan="4">
 									<group>
 										<field name="product_id" on_change="onchange_product_id(product_id)" attrs="{'readonly':[('dep_issue_type','!=','direct')]}"/>               
-										<field name="indent_qty" readonly="1"/>               
+										<field name="wo_delivery_date" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
+										<field name="wo_position_id" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
+										<field name="order_priority" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
+										<field name="indent_qty" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
+										<field name="traceability_no"/>
 										<field name="remarks"/>
 										<field name="dep_issue_type" invisible="1"/>
 										<field name="location_id" invisible="1"/>
@@ -62,7 +66,9 @@
 										<field name="wo_state" attrs="{'readonly':[('state','in',('draft','confirmed'))]}" invisible="1"/>
 									</group> 
 									<group>
+										<field name="wo_pump_model_id" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
 										<field name="brand_id"/>
+										<field name="wo_moc_id" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
 										<field name="uom_id"/>
 										<field name="issue_qty" on_change="onchange_issue_qty_2(issue_qty)"/>
 										<field name="issue_type" invisible="1" required="1"/>
@@ -513,16 +519,24 @@
 						<group>
 							<field name="issue_id" readonly="1"/>
 							<field name="w_order_line_id" readonly="1"/>
+							<field name="wo_delivery_date" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
 							<field name="product_id" readonly="1"/>
+							<field name="wo_moc_id" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
+							<field name="order_priority" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
+							<field name="traceability_no" readonly="1"/>
 							<field name="remarks"/>
 						</group>
 						<group>
 							<field name="issue_date" readonly="1"/>
 							<field name="ms_bot_id" readonly="1"/>
-							<field name="issue_qty_2" string="Issue Qty" readonly="1"/>
+							<field name="wo_pump_model_id" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
+							<field name="wo_position_id" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
+							<field name="indent_qty" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
+							<field name="issue_qty_2" string="Issued Qty" readonly="1"/>
 							<field name="issue_qty" string="Accepted Qty"/>
 							<field name="state" invisible="1"/>
 							<field name="wo_state" invisible="1"/>
+							<field name="dep_issue_type" invisible="1"/>
 						</group>
 					</group>
                 </form> 
@@ -535,14 +549,20 @@
             <field name="type">tree</field>
             <field name="arch" type="xml">
 				<tree string="Department Issue Line" create="false" delete="false">
-					<field name="issue_id"/>
-					<field name="issue_date"/>
 					<field name="w_order_line_id"/>
-					<field name="product_id" string="Item Name"/>
+					<field name="wo_delivery_date"/>
+					<field name="issue_date"/>
+					<field name="order_priority"/>
+					<field name="wo_pump_model_id"/>
+					<field name="wo_position_id"/>
 					<field name="ms_bot_id"/>
-					<field name="issue_qty_2" string="Issue Qty"/>
+					<field name="product_id" string="Item Name"/>
+					<field name="wo_moc_id"/>
+					<field name="indent_qty"/>
+					<field name="issue_qty_2" string="Issued Qty"/>
 					<field name="issue_qty" string="Accepted Qty"/>
 					<field name="state" invisible="1"/>
+					<field name="issue_id" invisible="1"/>
                 </tree> 
             </field>
         </record>
@@ -588,8 +608,11 @@
             <field name="act_window_id" ref="tma_ms_issue_line"/>
         </record>
         
+        <!-- Store Issue Transaction Menu -->
+		<menuitem action="action_kg_department_issue" id="gam_dept_issue" name="Store Issue" parent="kg_menus.gpm_grn_issue_menu" sequence="4"/>
+        
         <!-- MS Store Inward Transaction Menu -->
 		<menuitem action="tma_ms_issue_line" id="tam_ms_issue_line" name="MS Store Inward" parent="kg_machineshop.tpm_ms_process" sequence="19"/>
-		
+					
     </data>
 </openerp>

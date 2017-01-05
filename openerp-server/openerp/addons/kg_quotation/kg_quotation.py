@@ -74,24 +74,26 @@ class kg_rfq_vendor_selection(osv.osv):
 
 	def _quotedate_validation(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
-		today = date.today()
-		today = str(today)
-		today = datetime.strptime(today, '%Y-%m-%d')
-		quote_submission_date = str(rec.quote_submission_date)
-		quote_submission_date = datetime.strptime(quote_submission_date, '%Y-%m-%d')
-		if quote_submission_date < today:
-			return False
+		if rec.state != 'comparison_approved':
+			today = date.today()
+			today = str(today)
+			today = datetime.strptime(today, '%Y-%m-%d')
+			quote_submission_date = str(rec.quote_submission_date)
+			quote_submission_date = datetime.strptime(quote_submission_date, '%Y-%m-%d')
+			if quote_submission_date < today:
+				return False
 		return True
 	
 	def _past_date_check(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		today = date.today()
-		today = str(today)
-		today = datetime.strptime(today, '%Y-%m-%d')
-		quotation_date = str(rec.quotation_date)
-		quotation_date = datetime.strptime(quotation_date, '%Y-%m-%d')
-		if quotation_date < today:
-			return False
+		if rec.state != 'comparison_approved':
+			today = date.today()
+			today = str(today)
+			today = datetime.strptime(today, '%Y-%m-%d')
+			quotation_date = str(rec.quotation_date)
+			quotation_date = datetime.strptime(quotation_date, '%Y-%m-%d')
+			if quotation_date < today:
+				return False
 		return True	
 		
 	_constraints = [

@@ -268,9 +268,6 @@
 				<menuitem action="kg_common_grn.kg_common_grn_action_form" id="gam_grn_register" name="GRN Register" parent="gpm_grn_issue_menu" sequence="3"/>
 -->
 				
-				<!-- Dept Issue Transaction Menu -->
-				<menuitem action="kg_department_issue.action_kg_department_issue" id="gam_dept_issue" name="Store Issue" parent="gpm_grn_issue_menu" sequence="4"/>
-				
 				<!-- Issue Return Transaction Menu -->
 				<menuitem action="kg_issue_return.action_kg_issuereturn_form" id="iam_issue_return" name="Issue Return" parent="gpm_grn_issue_menu" sequence="5"/>
 				

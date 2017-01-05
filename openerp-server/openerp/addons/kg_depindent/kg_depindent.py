@@ -20,7 +20,6 @@ from tools import number_to_text_convert_india
 logger = logging.getLogger('server')
 today = datetime.now()
 
-
 class kg_depindent(osv.osv):
 
 	_name = "kg.depindent"
@@ -58,10 +57,10 @@ class kg_depindent(osv.osv):
 		'active': fields.boolean('Active'),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'user_id' : fields.many2one('res.users', 'Created By', readonly=True,select=True),
-		'date': fields.datetime('Creation Date',readonly=True),
+		'date': fields.datetime('Created Date',readonly=True),
 		'confirmed_by' : fields.many2one('res.users', 'Confirmed By', readonly=True,select=True),
 		'confirmed_date': fields.datetime('Confirmed Date',readonly=True),
-		'reject_date': fields.datetime('Reject Date', readonly=True),
+		'reject_date': fields.datetime('Rejected Date', readonly=True),
 		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
 		'approved_by' : fields.many2one('res.users', 'Approved By', readonly=True,select=True),
 		'approved_date' : fields.datetime('Approved Date',readonly=True),
@@ -76,9 +75,9 @@ class kg_depindent(osv.osv):
 
 	_defaults = {
 		
-		'type' : 'direct',
-		'state' : 'draft',
-		'active' : True,
+		'type': 'direct',
+		'state': 'draft',
+		'active': True,
 		'date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'user_id': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).id ,
 		'ind_date': lambda * a: time.strftime('%Y-%m-%d'),
@@ -123,9 +122,9 @@ class kg_depindent(osv.osv):
 		]
 		
 	def confirm_indent(self, cr, uid, ids,context=None):
-		product_obj = self.pool.get('product.product')
 		indent_obj = self.browse(cr, uid,ids[0])
 		if indent_obj.state == 'draft':
+			product_obj = self.pool.get('product.product')
 			total = 0
 			indent_lines = indent_obj.dep_indent_line
 			for i in range(len(indent_lines)):
@@ -193,6 +192,7 @@ class kg_depindent(osv.osv):
 		rec = self.browse(cr, uid,ids[0])
 		if rec.state == 'cancel':
 			self.write(cr,uid,ids,{'state': 'draft'})
+		return True
 		
 	def approve_indent(self, cr, uid, ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -382,20 +382,20 @@ class kg_depindent_line(osv.osv):
 	'moc_id': fields.many2one('kg.moc.master','MOC'),
 	'moc_id_temp': fields.many2one('ch.brandmoc.rate.details','MOC',domain="[('brand_id','=',brand_id),('header_id.product_id','=',product_id),('header_id.state','in',('draft','confirmed','approved'))]"),
 	'pattern_id': fields.many2one('kg.pattern.master', 'Pattern No'),
-	'ms_bot_id': fields.many2one('kg.machine.shop', 'MS/BOT'),	
 	'fns_item_name': fields.char('Foundry/MS/BOT', size=128),
 	'order_line_id': fields.related('indent_id','order_line_id', type='many2one', relation='ch.work.order.details', string='WO.No', store=True, readonly=True),
 	'ms_bot_id': fields.many2one('kg.machine.shop', 'MS/BOT Item'),
 	'fns_item_name': fields.char('Foundry/MS/BOT', size=128),
+	'position_id': fields.many2one('kg.position.number', string='Position No'),
 	
 	}
 	
 	_defaults = {
-	
-	'line_state' : 'noprocess',
-	'name': 'Dep.Indent.Line',
-	'line_date' : lambda * a: time.strftime('%Y-%m-%d'),
-	
+		
+		'line_state': 'noprocess',
+		'name': 'Dep.Indent.Line',
+		'line_date': lambda * a: time.strftime('%Y-%m-%d'),
+		
 	}
 		
 	def onchange_moc(self, cr, uid, ids, moc_id_temp):
@@ -443,4 +443,4 @@ class ch_depindent_wo(osv.osv):
 		return {'value':value}
 				
 	
-ch_depindent_wo()	
+ch_depindent_wo()

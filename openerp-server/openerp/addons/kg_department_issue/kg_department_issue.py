@@ -21,6 +21,11 @@ from dateutil import relativedelta
 import calendar
 today = datetime.now()
 
+ORDER_PRIORITY = [
+   ('normal','Normal'),
+   ('emergency','Emergency')
+]
+
 class kg_department_issue(osv.osv):
 
 	_name = "kg.department.issue"
@@ -183,132 +188,133 @@ class kg_department_issue(osv.osv):
 		
 	def update_depindent_to_issue(self,cr,uid,ids,context=None):
 		obj =  self.browse(cr,uid,ids[0])
-		depindent_line_obj = self.pool.get('kg.depindent.line')
-		issue_line_obj = self.pool.get('kg.department.issue.line')
-		move_obj = self.pool.get('stock.move')
-		prod_obj = self.pool.get('product.product')
-		dep_obj = self.pool.get('kg.depmaster')
-		line_ids = []			   
-		res={}
-		line_ids = []
-		res['move_lines'] = []
-		if obj.issue_line_ids:
-			issue_lines = map(lambda x:x.id,obj.issue_line_ids)
-			move_obj.unlink(cr,uid,issue_lines)
-		dep_rec = dep_obj.browse(cr, uid, obj.user_id.dep_name.id)
-		issue_dep_id = obj.department_id.id
-		
-		obj.write({'state': 'confirmed'})
-		obj.write({'products_flag': True})
-		if obj.kg_dep_indent_line:
-			depindent_line_ids = map(lambda x:x.id,obj.kg_dep_indent_line)
-			depindent_line_browse = depindent_line_obj.browse(cr,uid,depindent_line_ids)
-			depindent_line_browse = sorted(depindent_line_browse, key=lambda k: k.product_id.id)
-			groups = []
-			for key, group in groupby(depindent_line_browse, lambda x: x.product_id.id):
-				groups.append(map(lambda r:r,group))
-			for key,group in enumerate(groups):
-				qty = sum(map(lambda x:float(x.issue_pending_qty),group)) #TODO: qty
-				depindent_line_ids = map(lambda x:x.id,group)
-				prod_browse = group[0].product_id
-				ms_bot_id = group[0].ms_bot_id.id
-				brand_id = group[0].brand_id.id				
-				uom =False
-				indent = group[0].indent_id
-				dep = indent.dep_name.id
-				uom = group[0].uom.id or False
-				depindent_obj = self.pool.get('kg.depindent').browse(cr, uid, indent.id)
-				dep_stock_location = depindent_obj.dest_location_id.id
-				main_location = depindent_obj.src_location_id.id
-									
-				vals = {
-				
-					'indent_id':depindent_obj.id,
-					'w_order_line_id':depindent_obj.order_line_id.id,
-					'ms_bot_id':ms_bot_id,
-					'product_id':prod_browse.id,
-					'brand_id':brand_id,
-					'uom_id':uom,
-					'issue_qty':qty,
-					'issue_qty_2':qty,
-					'indent_qty':qty,
-					'name':prod_browse.name,
-					'location_id':main_location,
-					'location_dest_id':dep_stock_location,
-					'state' : 'confirmed',
-					'indent_line_id' : group[0].id,
-					'issue_type':'material',
-					'wo_state':'accept',
-					'dep_issue_type':obj.dep_issue_type,
-					#~ 'state':'draft',
-					}
+		if obj.state in ('draft','confirmed'):
+			depindent_line_obj = self.pool.get('kg.depindent.line')
+			issue_line_obj = self.pool.get('kg.department.issue.line')
+			move_obj = self.pool.get('stock.move')
+			prod_obj = self.pool.get('product.product')
+			dep_obj = self.pool.get('kg.depmaster')
+			line_ids = []			   
+			res={}
+			line_ids = []
+			res['move_lines'] = []
+			if obj.issue_line_ids:
+				issue_lines = map(lambda x:x.id,obj.issue_line_ids)
+				move_obj.unlink(cr,uid,issue_lines)
+			dep_rec = dep_obj.browse(cr, uid, obj.user_id.dep_name.id)
+			issue_dep_id = obj.department_id.id
+			
+			obj.write({'state': 'confirmed'})
+			obj.write({'products_flag': True})
+			if obj.kg_dep_indent_line:
+				depindent_line_ids = map(lambda x:x.id,obj.kg_dep_indent_line)
+				depindent_line_browse = depindent_line_obj.browse(cr,uid,depindent_line_ids)
+				depindent_line_browse = sorted(depindent_line_browse, key=lambda k: k.product_id.id)
+				groups = []
+				for key, group in groupby(depindent_line_browse, lambda x: x.product_id.id):
+					groups.append(map(lambda r:r,group))
+				for key,group in enumerate(groups):
+					qty = sum(map(lambda x:float(x.issue_pending_qty),group)) #TODO: qty
+					depindent_line_ids = map(lambda x:x.id,group)
+					prod_browse = group[0].product_id
+					ms_bot_id = group[0].ms_bot_id.id
+					brand_id = group[0].brand_id.id				
+					uom =False
+					indent = group[0].indent_id
+					dep = indent.dep_name.id
+					uom = group[0].uom.id or False
+					depindent_obj = self.pool.get('kg.depindent').browse(cr, uid, indent.id)
+					dep_stock_location = depindent_obj.dest_location_id.id
+					main_location = depindent_obj.src_location_id.id
+										
+					vals = {
 					
-				if ids:
-					self.write(cr,uid,ids[0],{'issue_line_ids':[(0,0,vals)]})
-		self.write(cr,uid,ids,res)
+						'indent_id':depindent_obj.id,
+						'w_order_line_id':depindent_obj.order_line_id.id,
+						'wo_id':depindent_obj.order_line_id.header_id.id,
+						'ms_bot_id':ms_bot_id,
+						'product_id':prod_browse.id,
+						'brand_id':brand_id,
+						'uom_id':uom,
+						'issue_qty':qty,
+						'issue_qty_2':qty,
+						'indent_qty':qty,
+						'name':prod_browse.name,
+						'location_id':main_location,
+						'location_dest_id':dep_stock_location,
+						'state' : 'confirmed',
+						'indent_line_id' : group[0].id,
+						'issue_type':'material',
+						'wo_state':'accept',
+						'dep_issue_type':obj.dep_issue_type,
+						#~ 'state':'draft',
+						}
+						
+					if ids:
+						self.write(cr,uid,ids[0],{'issue_line_ids':[(0,0,vals)]})
+			self.write(cr,uid,ids,res)
 		return True
 		
 	def update_serviceindent_to_issue(self,cr,uid,ids,context=None):
 		obj =  self.browse(cr,uid,ids[0])
-		
-		serviceindent_line_obj = self.pool.get('kg.service.indent.line')
-		issue_line_obj = self.pool.get('kg.department.issue.line')
-		move_obj = self.pool.get('stock.move')
-		prod_obj = self.pool.get('product.product')
-		dep_obj = self.pool.get('kg.depmaster')
-		line_ids = []			   
-		res={}
-		line_ids = []
-		res['move_lines'] = []
-		if obj.issue_line_ids:
-			issue_lines = map(lambda x:x.id,obj.issue_line_ids)
-			move_obj.unlink(cr,uid,issue_lines)
-		
-		dep_rec = dep_obj.browse(cr, uid, obj.user_id.dep_name.id)
-		issue_dep_id = obj.department_id.id
-		obj.write({'state': 'confirmed'})
-		obj.write({'products_flag': True})
-		if obj.kg_service_indent_line:
-			serviceindent_line_ids = map(lambda x:x.id,obj.kg_service_indent_line)
-			serviceindent_line_browse = serviceindent_line_obj.browse(cr,uid,serviceindent_line_ids)
-			serviceindent_line_browse = sorted(serviceindent_line_browse, key=lambda k: k.product_id.id)
-			groups = []
-			for key, group in groupby(serviceindent_line_browse, lambda x: x.product_id.id):
-				groups.append(map(lambda r:r,group))
-			for key,group in enumerate(groups):
-				qty = sum(map(lambda x:float(x.issue_pending_qty),group)) #TODO: qty
-				depindent_line_ids = map(lambda x:x.id,group)
-				prod_browse = group[0].product_id
-				brand_id = group[0].brand_id.id				
-				uom =False
-				indent = group[0].service_id
-				dep = indent.dep_name.id
-				uom = group[0].uom.id or False
-				serviceindent_obj = self.pool.get('kg.service.indent').browse(cr, uid, indent.id)
-				dep_stock_location = serviceindent_obj.dep_name.stock_location.id
-				main_location = serviceindent_obj.dep_name.main_location.id
-									
-				vals = {
-				
-					'product_id':prod_browse.id,
-					'brand_id':brand_id,
-					'uom_id':uom,
-					'issue_qty':qty,
-					'indent_qty':qty,
-					'name':prod_browse.name,
-					'location_id':main_location,
-					'location_dest_id':dep_stock_location,
-					'state' : 'confirmed',
-					'service_indent_line_id' : group[0].id,
-					'issue_type':'service'
-					}
-				if ids:
-					self.write(cr,uid,ids[0],{'issue_line_ids':[(0,0,vals)]})
-		self.write(cr,uid,ids,res)
+		if obj.state in ('draft','confirmed'):
+			serviceindent_line_obj = self.pool.get('kg.service.indent.line')
+			issue_line_obj = self.pool.get('kg.department.issue.line')
+			move_obj = self.pool.get('stock.move')
+			prod_obj = self.pool.get('product.product')
+			dep_obj = self.pool.get('kg.depmaster')
+			line_ids = []			   
+			res={}
+			line_ids = []
+			res['move_lines'] = []
+			if obj.issue_line_ids:
+				issue_lines = map(lambda x:x.id,obj.issue_line_ids)
+				move_obj.unlink(cr,uid,issue_lines)
+			
+			dep_rec = dep_obj.browse(cr, uid, obj.user_id.dep_name.id)
+			issue_dep_id = obj.department_id.id
+			obj.write({'state': 'confirmed'})
+			obj.write({'products_flag': True})
+			if obj.kg_service_indent_line:
+				serviceindent_line_ids = map(lambda x:x.id,obj.kg_service_indent_line)
+				serviceindent_line_browse = serviceindent_line_obj.browse(cr,uid,serviceindent_line_ids)
+				serviceindent_line_browse = sorted(serviceindent_line_browse, key=lambda k: k.product_id.id)
+				groups = []
+				for key, group in groupby(serviceindent_line_browse, lambda x: x.product_id.id):
+					groups.append(map(lambda r:r,group))
+				for key,group in enumerate(groups):
+					qty = sum(map(lambda x:float(x.issue_pending_qty),group)) #TODO: qty
+					depindent_line_ids = map(lambda x:x.id,group)
+					prod_browse = group[0].product_id
+					brand_id = group[0].brand_id.id				
+					uom =False
+					indent = group[0].service_id
+					dep = indent.dep_name.id
+					uom = group[0].uom.id or False
+					serviceindent_obj = self.pool.get('kg.service.indent').browse(cr, uid, indent.id)
+					dep_stock_location = serviceindent_obj.dep_name.stock_location.id
+					main_location = serviceindent_obj.dep_name.main_location.id
+										
+					vals = {
+					
+						'product_id':prod_browse.id,
+						'brand_id':brand_id,
+						'uom_id':uom,
+						'issue_qty':qty,
+						'indent_qty':qty,
+						'name':prod_browse.name,
+						'location_id':main_location,
+						'location_dest_id':dep_stock_location,
+						'state' : 'confirmed',
+						'service_indent_line_id' : group[0].id,
+						'issue_type':'service'
+						}
+					if ids:
+						self.write(cr,uid,ids[0],{'issue_line_ids':[(0,0,vals)]})
+			self.write(cr,uid,ids,res)
 		return True
 		
 	def entry_confirm(self, cr, uid, ids, context=None):
-		
 		obj_rec = self.browse(cr, uid, ids[0])
 		if obj_rec.state == 'confirmed':	
 			lot_obj = self.pool.get('stock.production.lot')
@@ -329,6 +335,8 @@ class kg_department_issue(osv.osv):
 				raise osv.except_osv(_('Item Line Empty!'),_('You cannot process Issue without Item Line.'))
 			else:
 				for item in obj_rec.issue_line_ids:
+					if item.issue_qty > 0:
+						self.pool.get('kg.department.issue.line').write(cr,uid,item.id,{'state':'confirmed'})
 					dep_issue_line_rec = dep_issue_line_obj.browse(cr, uid, item.id)
 					product_id = dep_issue_line_rec.product_id.id
 					product_uom = dep_issue_line_rec.uom_id.id		
@@ -706,9 +714,16 @@ class kg_department_issue_line(osv.osv):
 
 	_columns = {
 		
+		## Basic Info
+		
 		#~ 'issue_date':fields.date('PO GRN Date'),
 		'issue_id':fields.many2one('kg.department.issue','Issue No'),
 		'name': fields.related('issue_id','name', type='char', string='Issue No'),
+		'state': fields.selection([('draft', 'Draft'), ('confirmed', 'Confirmed'),('done', 'Done'), ('cancel', 'Cancelled')], 'Status',readonly=True),
+		'remarks': fields.text('Remarks'),
+		
+		## Module Requirement Fields
+		
 		'issue_date': fields.related('issue_id','issue_date', type='date', string='Issue Date',store=True),
 		'product_id':fields.many2one('product.product','Product Name',required=True,domain="[('state','not in',('reject','cancel')),('purchase_ok','=',True)]"),
 		'uom_id':fields.many2one('product.uom','UOM',readonly=True),
@@ -730,9 +745,6 @@ class kg_department_issue_line(osv.osv):
 					domain="[('product_id','=',product_id),'&',('grn_type','=',issue_type),'&', ('reserved_qty','>',0), '&', ('lot_type','!=','out')]",
 					),
 		#'kg_grn_moves': fields.many2many('stock.production.lot','kg_department_issue_details','grn_id','lot_id', 'GRN Entry'),
-		'kg_itemwise_issue_line':fields.one2many('kg.item.wise.dept.issue','issue_line_id','Item wise Department Issue',readonly=True),
-		'state': fields.selection([('draft', 'Draft'), ('confirmed', 'Confirmed'),('done', 'Done'), ('cancel', 'Cancelled')], 'Status',readonly=True),
-		'remarks': fields.text('Remarks'),
 		'brand_id':fields.many2one('kg.brand.master','Brand Name',domain="[('product_ids','in',(product_id)),('state','in',('draft','confirmed','approved'))]"),
 		'issue_return_line':fields.boolean('Excess Return Flag'),
 		'excess_return_qty':fields.float('Excess Return Qty'),
@@ -743,6 +755,17 @@ class kg_department_issue_line(osv.osv):
 		'confirm_qty': fields.float('Confirmed Qty'),
 		'w_order_line_id': fields.many2one('ch.work.order.details','WO No'),
 		'ms_bot_id': fields.many2one('kg.machine.shop', 'MS Item Name'),
+		'traceability_no': fields.char('Traceability No'),
+		'wo_id': fields.related('w_order_line_id','header_id', type='many2one',relation='kg.work.order', string='WO No.',store=True),
+		'wo_delivery_date': fields.related('wo_id','delivery_date', type='date', string='Delivery Date',store=True),
+		'wo_pump_model_id': fields.related('w_order_line_id','pump_model_id', type='many2one',relation='kg.pumpmodel.master', string='Pump Model',store=True),
+		'wo_moc_id': fields.related('indent_line_id','moc_id', type='many2one',relation='kg.moc.master', string='MOC',store=True),
+		'wo_position_id': fields.related('indent_line_id','position_id', type='many2one',relation='kg.position.number', string='Position No.',store=True),
+		'order_priority': fields.related('wo_id','order_priority', type='selection', selection=ORDER_PRIORITY, string='Priority', store=True),
+		
+		## Child Tables Declaration
+		
+		'kg_itemwise_issue_line':fields.one2many('kg.item.wise.dept.issue','issue_line_id','Item wise Department Issue',readonly=True),
 		
 	}
 	
@@ -757,14 +780,14 @@ class kg_department_issue_line(osv.osv):
 		print"contextcontextcontext",context
 		
 		return context
-			
+		
 	def onchange_product_id(self, cr, uid, ids, product_id,context=None):
 		value = {'uom_id': ''}
 		if product_id:
 			prod = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
 			value = {'uom_id': prod.uom_id.id}
 		return {'value': value}
-		
+	
 	def onchange_issue_qty_2(self, cr, uid, ids, issue_qty,context=None):
 		value = {'issue_qty_2': 0}
 		if issue_qty:
@@ -870,7 +893,12 @@ class kg_item_wise_dept_issue(osv.osv):
 
 	_columns = {
 		
+		## Basic Info
+		
 		'issue_line_id':fields.many2one('kg.department.issue.line','Department Issue Line Entry'),
+		
+		## Module Requirement Fields
+		
 		'product_id':fields.many2one('product.product','Product Name',required=True),
 		'uom_id':fields.many2one('product.uom','UOM',readonly=True),
 		'grn_qty':fields.integer('GRN Quantity',required=True),
