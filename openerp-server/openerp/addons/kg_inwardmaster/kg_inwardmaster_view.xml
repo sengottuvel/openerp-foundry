@@ -75,7 +75,6 @@
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'draft';red:state == 'confirmed'
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" string="Inward Master">
-					<field name="code"/>
 					<field name="name"/>
 					<field name="state"/>
 				</tree>
@@ -122,7 +121,7 @@
         
 		<!-- Audit Log Xml Data End-->
     
-	<!--<menuitem action="inwardmaster_action_form" id="menu_kg_brandmaster_action_form" parent="kg_depmaster.kg_depmaster_parent_menu" sequence="4"/>
-    -->
+		<menuitem action="inwardmaster_action_form" name="Inward" id="mam_inward_master" parent="kg_menus.mpm_store_master" sequence="2"/>
+	
 </data>
 	</openerp>

@@ -33,7 +33,10 @@ related requisition. This new object will regroup and will allow you to easily
 keep track and order all your purchase orders.
 """,
     'depends' : ['base', 'product', 'stock','purchase'],
-    'data': ['kg_depmaster_view.xml'],
+    'data': [
+    'kg_depmaster_view.xml',
+    #~ 'dep_data.xml'
+    ],
     'auto_install': False,
     'installable': True,
 }

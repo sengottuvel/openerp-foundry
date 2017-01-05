@@ -337,11 +337,10 @@
 			ref('kg_menus.iam_pruchase_indent'),
 			
 			ref('kg_menus.mpm_store_master'),
-			ref('kg_menus.menu_depmaster_action_form'),
-			ref('kg_menus.mam_inward_master'),
-			ref('kg_menus.mam_outward_master'),
+			ref('kg_depmaster.mam_depmaster_action'),
+			ref('kg_inwardmaster.mam_inward_master'),
+			ref('kg_outwardmaster.mam_outward_master'),
 			ref('kg_menus.mam_inventory_master'),
-			
 			
 			ref('kg_menus.gpm_grn_issue_menu'),
 			ref('kg_menus.gam_general_grn'),
@@ -393,9 +392,9 @@
 			ref('stock.menu_stock_root'),
 			
 			ref('kg_menus.mpm_store_master'),
-			ref('kg_menus.menu_depmaster_action_form'),
-			ref('kg_menus.mam_inward_master'),
-			ref('kg_menus.mam_outward_master'),
+			ref('kg_depmaster.mam_depmaster_action'),
+			ref('kg_inwardmaster.mam_inward_master'),
+			ref('kg_outwardmaster.mam_outward_master'),
 			ref('kg_menus.mam_inventory_master'),
 			
             ])]" name="menu_access"/>

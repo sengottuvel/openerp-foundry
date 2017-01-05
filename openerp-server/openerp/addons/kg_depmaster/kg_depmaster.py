@@ -4,10 +4,6 @@ import time
 import re
 from operator import itemgetter
 from itertools import groupby
-
-a = datetime.now()
-dt_time = a.strftime('%m/%d/%Y %H:%M:%S')
-
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
 from openerp import netsvc
@@ -35,7 +31,7 @@ class kg_depmaster(osv.osv):
 				#~ res[h.id] = 'yes'
 		#~ print"eeeeeeeeeeeeeeee",res
 		#~ return res
-		
+	
 	def _get_modify(self, cr, uid, ids, field_name, arg,  context=None):
 		res={}
 		if field_name == 'modify':
@@ -91,13 +87,13 @@ class kg_depmaster(osv.osv):
 		
 		'active': fields.boolean("Active"),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
-		'creation_date':fields.datetime('Creation Date',readonly=True),
+		'creation_date':fields.datetime('Created Date',readonly=True),
 		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
 		'approve_date': fields.datetime('Approved Date', readonly=True),
-		'app_user_id': fields.many2one('res.users', 'Apprved By', readonly=True),
-		'confirm_date': fields.datetime('Confirm Date', readonly=True),
+		'app_user_id': fields.many2one('res.users', 'Approved By', readonly=True),
+		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
 		'conf_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
-		'reject_date': fields.datetime('Reject Date', readonly=True),
+		'reject_date': fields.datetime('Rejected Date', readonly=True),
 		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
@@ -121,6 +117,7 @@ class kg_depmaster(osv.osv):
 	
 	_sql_constraints = [
 		('name_uniq', 'unique(dep_name)', 'Department name must be unique !'),
+		('code_uniq', 'unique(name)', 'Department Code must be unique !'),
 	]
 	
 	def create(self, cr, uid, vals, context=None):
@@ -150,61 +147,104 @@ class kg_depmaster(osv.osv):
 		return order
 	
 	def entry_confirm(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'confirmed','conf_user_id': uid, 'confirm_date': dt_time})
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'draft':
+			self.write(cr, uid, ids, {'state': 'confirmed','conf_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		
-		if rec.item_request == True:
-			dup_obj = self.pool.get('stock.location').search(cr,uid,[('name','=',rec.dep_name)])
-			if dup_obj:
-				pass
-			else:
-				stock_location_id = self.pool.get('stock.location').create(cr,uid,{'name':rec.dep_name,'usage':'internal','location_type':'sub','custom':True,'entry_mode':'auto','state':'approved'})
-				self.write(cr,uid,ids,{'stock_location':stock_location_id})
-				stock_obj = self.pool.get('stock.location').search(cr,uid,[('location_type','=','main')])
-				if stock_obj:
-					stock_rec = self.pool.get('stock.location').browse(cr,uid,stock_obj[0])
-					self.write(cr,uid,ids,{'main_location':stock_rec.id})
-				con_stock_obj = self.pool.get('stock.location').search(cr,uid,[('usage','=','consumption')])
-				if con_stock_obj:
-					con_stock_rec = self.pool.get('stock.location').browse(cr,uid,con_stock_obj[0])
-					self.write(cr,uid,ids,{'used_location':con_stock_rec.id})
-		self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': dt_time})
+		if rec.state == 'confirmed':
+			if rec.item_request == True:
+				dup_obj = self.pool.get('stock.location').search(cr,uid,[('name','=',rec.dep_name)])
+				if dup_obj:
+					pass
+				else:
+					stock_location_id = self.pool.get('stock.location').create(cr,uid,{'name':rec.dep_name,'usage':'internal','location_type':'sub','custom':True,'entry_mode':'auto','state':'approved'})
+					self.write(cr,uid,ids,{'stock_location':stock_location_id})
+					stock_obj = self.pool.get('stock.location').search(cr,uid,[('location_type','=','main')])
+					if stock_obj:
+						stock_rec = self.pool.get('stock.location').browse(cr,uid,stock_obj[0])
+						self.write(cr,uid,ids,{'main_location':stock_rec.id})
+					con_stock_obj = self.pool.get('stock.location').search(cr,uid,[('usage','=','consumption')])
+					if con_stock_obj:
+						con_stock_rec = self.pool.get('stock.location').browse(cr,uid,con_stock_obj[0])
+						self.write(cr,uid,ids,{'used_location':con_stock_rec.id})
+			self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 	
 	def entry_draft(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'draft'})
+		if rec.state == 'approved':
+			self.write(cr, uid, ids, {'state': 'draft'})
 		return True
 		
 	def entry_reject(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.remark:
-			self.write(cr, uid, ids, {'state': 'reject','rej_user_id': uid, 'reject_date': dt_time})
-		else:
-			raise osv.except_osv(_('Rejection remark is must !!'),
-				_('Enter rejection remark in remark field !!'))
+		if rec.state == 'confirmed':
+			if rec.remark:
+				self.write(cr, uid, ids, {'state': 'reject','rej_user_id': uid, 'reject_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			else:
+				raise osv.except_osv(_('Rejection remark is must !!'),
+					_('Enter rejection remark in remark field !!'))
 		return True
 	
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.cancel_remark:
-			self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': dt_time})
-		else:
-			raise osv.except_osv(_('Cancel remark is must !!'),
-				_('Enter the remarks in Cancel remarks field !!'))
+		if rec.state == 'approved':
+			if rec.cancel_remark:
+				self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			else:
+				raise osv.except_osv(_('Cancel remark is must !!'),
+					_('Enter the remarks in Cancel remarks field !!'))
 		return True
 			
 	def write(self, cr, uid, ids, vals, context=None):	  
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_depmaster, self).write(cr, uid, ids, vals, context)
 	
-	def unlink(self,cr,uid,ids,context=None):
-		raise osv.except_osv(_('Warning!'),
-				_('You can not delete Entry !!'))		
+	def _Validation(self, cr, uid, ids, context=None):
+		flds = self.browse(cr , uid , ids[0])
+		name_special_char = ''.join( c for c in flds.dep_name if  c in '!@#$%^~*{}?+/=' )		
+		if name_special_char:
+			return False		
+		return True	
+		
+	def _CodeValidation(self, cr, uid, ids, context=None):
+		flds = self.browse(cr , uid , ids[0])	
+		if flds.name:		
+			code_special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )		
+			if code_special_char:
+				return False
+		return True		
+		
+	def _name_dup_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.name:
+			division_name = rec.dep_name
+			name=division_name.upper()			
+			cr.execute(""" select upper(dep_name) from kg_depmaster where upper(dep_name)  = '%s' """ %(name))
+			data = cr.dictfetchall()			
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res
+			
+	def _code_dup_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.name:
+			division_code = rec.name
+			code=division_code.upper()			
+			cr.execute(""" select upper(name) from kg_depmaster where upper(name)  = '%s' """ %(code))
+			data = cr.dictfetchall()			
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res	
 						
-	"""	
 	def unlink(self,cr,uid,ids,context=None):
 		unlink_ids = []		
 		for rec in self.browse(cr,uid,ids):	
@@ -214,12 +254,22 @@ class kg_depmaster(osv.osv):
 			else:
 				unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
-	"""
+		
+	_constraints = [
+	
+		(_Validation, 'Special Character Not Allowed!', ['Check Name']),
+		(_CodeValidation, 'Special Character Not Allowed!', ['Check Code']),
+		(_name_dup_validate, 'Division name must be unique!', ['name']),		
+		(_code_dup_validate, 'Division code must be unique!', ['code']),		
+		
+	]
+
 
 kg_depmaster()
 
 
 class custom_sequence_generate_det(osv.osv):
+	
 	_name = 'custom.sequence.generate.det'
 	_order = 'name'
 	_columns = {
@@ -231,4 +281,5 @@ class custom_sequence_generate_det(osv.osv):
 		'fiscal_year_code' : fields.char('Fiscal Year Code',size=64),
 		'fiscal_year_id' : fields.integer('Fiscal Year ID'),
 	}
+	
 custom_sequence_generate_det()
