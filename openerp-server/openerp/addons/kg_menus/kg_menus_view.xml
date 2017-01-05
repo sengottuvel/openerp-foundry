@@ -265,11 +265,6 @@
 				<!-- Purchase Invoice -->
 				<menuitem id="ppm_purchase_invoice_menu" name="Invoice" parent="stock.menu_stock_root" sequence="3"/>
                 
-                <!-- Purchase Invoice Transaction Menu -->
-                
-				<menuitem action="kg_purchase_invoice.tma_kg_purchase_invoice_action_form" id="pam_purchase_invoice" name="Purchase Invoice" parent="ppm_purchase_invoice_menu" sequence="1"/>
-				
-				
 				<!-- Inward -->
 				<menuitem id="cpm_contractor_inward_menu" name="Inward" parent="stock.menu_stock_root" sequence="4"/>
                 
