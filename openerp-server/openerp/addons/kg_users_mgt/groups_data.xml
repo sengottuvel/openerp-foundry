@@ -346,7 +346,7 @@
 			ref('kg_menus.gpm_grn_issue_menu'),
 			ref('kg_menus.gam_general_grn'),
 			ref('kg_po_grn.gam_po_grn'),
-			ref('kg_menus.gam_dept_issue'),
+			ref('kg_department_issue.gam_dept_issue'),
 			ref('kg_menus.gam_bot_issue'),
 			ref('kg_menus.iam_issue_return'),
 			
