@@ -74,7 +74,7 @@ class kg_rfq_vendor_selection(osv.osv):
 
 	def _quotedate_validation(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
-		if rec.state != 'comparison_approved':
+		if rec.state not in ('compared','comparison_approved'):
 			today = date.today()
 			today = str(today)
 			today = datetime.strptime(today, '%Y-%m-%d')
@@ -86,7 +86,7 @@ class kg_rfq_vendor_selection(osv.osv):
 	
 	def _past_date_check(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.state != 'comparison_approved':
+		if rec.state not in ('compared','comparison_approved'):
 			today = date.today()
 			today = str(today)
 			today = datetime.strptime(today, '%Y-%m-%d')
