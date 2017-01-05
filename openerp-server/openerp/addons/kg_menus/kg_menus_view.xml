@@ -185,18 +185,9 @@
 				<!-- Item Quality Master  --> 
 				<menuitem action="kg_item_quality_master.mma_item_quality_master" name="General Term" id="mam_item_quality_master" parent="ppm_master_menu" sequence="16"/>
 				
-                <!-- Quotations Menu -->
+				<!-- Quotations Menu -->
 				<menuitem id="qpm_quotations_menu" name="Quotations" parent="base.menu_purchase_root" sequence="1"/>
 				
-				<!-- RFQ Vendor Selection Transaction -->
-				<menuitem action="kg_quotation.kg_rfq_vendor_selection_action" id="qam_quotation" name="RFQ Vendor Selection" parent="qpm_quotations_menu" sequence="1"/>
-			        
-				<!-- Quotation Submit Transaction -->
-				<menuitem action="kg_quotation.kg_quotation_requisition_header_action" id="qam_quotation_submit" name="Quotation Submit" parent="qpm_quotations_menu" sequence="2"/>
-			      
-			    <!-- Quotation Comparison Transaction -->
-				<menuitem action="kg_quotation.kg_quotation_entry_header_action" id="qam_quotation_comp" parent="qpm_quotations_menu" sequence="3"/>
-			         
                 <!-- Service Order Menu -->
 				<menuitem id="spm_service_order_menu" name="Service" parent="base.menu_purchase_root" sequence="2"/>
 				

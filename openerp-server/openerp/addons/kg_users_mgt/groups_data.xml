@@ -243,9 +243,9 @@
 			ref('kg_menus.mam_item_quality_master'),
 			
 			ref('kg_menus.qpm_quotations_menu'),
-			ref('kg_menus.qam_quotation'),
-			ref('kg_menus.qam_quotation_submit'),
-			ref('kg_menus.qam_quotation_comp'),
+			ref('kg_quotation.qam_quotation'),
+			ref('kg_quotation.qam_quotation_submit'),
+			ref('kg_quotation.qam_quotation_comp'),
 			
 			ref('kg_purchase_order.pam_purchase_order'),
 			ref('kg_purchase_order.pam_purchase_order_spl_approvals'),
@@ -309,7 +309,7 @@
 			
 			ref('kg_quotation.menu_kg_vendor_quote_parent'), 
 			ref('kg_quotation.menu_kg_vendor_quote_header'), 
-			ref('kg_quotation.kg_rfq_vendor_quote_menu'),        
+			ref('kg_quotation.kg_rfq_vendor_quote_menu'),       
 			ref('account.menu_action_invoice_tree2'),
 			
 			])]" name="menu_access"/>

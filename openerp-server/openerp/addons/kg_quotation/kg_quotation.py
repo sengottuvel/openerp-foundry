@@ -74,7 +74,7 @@ class kg_rfq_vendor_selection(osv.osv):
 
 	def _quotedate_validation(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
-		if rec.state not in ('compared','comparison_approved'):
+		if rec.state != 'comparison_approved':
 			today = date.today()
 			today = str(today)
 			today = datetime.strptime(today, '%Y-%m-%d')
@@ -86,7 +86,7 @@ class kg_rfq_vendor_selection(osv.osv):
 	
 	def _past_date_check(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.state not in ('compared','comparison_approved'):
+		if rec.state != 'comparison_approved':
 			today = date.today()
 			today = str(today)
 			today = datetime.strptime(today, '%Y-%m-%d')
@@ -281,13 +281,14 @@ class kg_rfq_vendor_selection_line(osv.osv):
 		'due_date': fields.date('Due Date'),
 		'remarks': fields.text('Remarks'),
 		'brand_id': fields.many2one('kg.brand.master','Brand'),
-		
+		'revised_flag': fields.boolean('Revised Button Flag'),
 		
 	}
 	
 	_defaults = {
 		'name': '/',
 		'state': 'draft',
+		'revised_flag': False,
 		
 	}	
 	
@@ -312,7 +313,6 @@ class kg_quotation_requisition_header(osv.osv):
 		
 	}
 	_defaults = {
-		
 		'user_id': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).id ,
 		'quotation_date': lambda *a: time.strftime('%Y-%m-%d'),
 		'state': 'draft',

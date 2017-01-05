@@ -147,6 +147,7 @@
 						<group>
 							<field name="rfq_no_id" readonly="1"/>
 							<field name="active"/>
+							<field name="revised_flag" invisible="1"/>
 						</group>
 						<group>
 							<field name="quotation_date" required="1"/>
@@ -172,7 +173,6 @@
 					<button name="create_revision1" string="Create Revision" type="object" attrs="{'invisible': [('state','not in',['approved']),('revised_flag','=',True)]}"/>
 					</group>
 					<group colspan="2" col="2">
-						<field name="revised_flag" invisible="1"/>
 					</group>
 					</group>								
 					
@@ -203,43 +203,20 @@
 					<field name="rfq_no_id" readonly="1"/>
 					<field name="quotation_date"/>
 					<field name="state"/>
-					<field name="revised_flag" invisible="1"/>
                 </tree>
             </field>
         </record>
-       
-       <record id="quotation_group_view" model="ir.ui.view">
-            <field name="name">Quotation</field>
-            <field name="model">kg.quotation.requisition.header</field>
-            <field name="arch" type="xml">
-                <search string="Quotation Form">
-				<!--	<field name="name" string="Forms" filter_domain="['|',('name','ilike',self),
-									('buyer_id','ilike',self)"/> 		-->
-					<field name="rfq_no_id" string="Comparison No" filter_domain="[('rfq_no_id','ilike',self)]" />
-					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
-					<filter icon="terp-check" name="approved" string="Approved" domain="[('state','=','approved')]"/>
-					<filter icon="terp-check" name="reject" string="Rejected" domain="[('state','=','reject')]"/>
-					<separator/>
-                    <group expand="0" string="Group By...">
-                        <filter string="Comparison No" name="group_quote" icon="terp-personal" domain="[]" context="{'group_by':'rfq_no_id'}"/>
-                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
-                       
-					</group>
-                </search>
-			</field>
-		</record>
-		 
+        
         <record id="kg_quotation_requisition_header_action" model="ir.actions.act_window">
             <field name="name">Quotation Submit</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">kg.quotation.requisition.header</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
-			<field name="context">{'search_default_draft':1,'search_default_approved':1,'search_default_reject':1}</field>
-			<field name="search_view_id" ref="quotation_group_view"/>
 <!--
-            <field name="context">{}</field>
+            <field name="context">{"search_default_state":'draft'}</field>
 -->
+            <field name="context">{}</field>
         </record>
         
 		<record model="ir.ui.view" id="kg_quotation_entry_header_form">
@@ -645,8 +622,8 @@
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
 		</record>
-		
         
+<!--
         <menuitem id="menu_kg_quotation_parent" name="Quotation" sequence="6" />
 		<menuitem id="menu_kg_quotation_header" parent="menu_kg_quotation_parent" name="Quotation" sequence="6" />
 		<menuitem action="kg_rfq_vendor_selection_action" id="kg_rfq_vendor_selection_menu" parent="menu_kg_quotation_header" sequence="1" />
@@ -655,6 +632,16 @@
 		<menuitem id="menu_kg_vendor_quote_parent" name="Vendor Quote" sequence="6" />
 		<menuitem id="menu_kg_vendor_quote_header" parent="menu_kg_vendor_quote_parent" name="Vendor Quote" sequence="6" />
 		<menuitem action="kg_quotation_requisition_line_action" id="kg_rfq_vendor_quote_menu" parent="menu_kg_vendor_quote_header" sequence="1" />
+-->
+		<!-- RFQ Vendor Selection Transaction -->
+		<menuitem action="kg_rfq_vendor_selection_action" id="qam_quotation" name="RFQ Vendor Selection" parent="kg_menus.qpm_quotations_menu" sequence="1"/>
+			
+		<!-- Quotation Submit Transaction -->
+		<menuitem action="kg_quotation_requisition_header_action" id="qam_quotation_submit" name="Quotation Submit" parent="kg_menus.qpm_quotations_menu" sequence="2"/>
+		  
+		<!-- Quotation Comparison Transaction -->
+		<menuitem action="kg_quotation_entry_header_action" id="qam_quotation_comp" parent="kg_menus.qpm_quotations_menu" sequence="3"/>
+		
 	</data>
 </openerp>
 
