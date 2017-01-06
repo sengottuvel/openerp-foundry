@@ -14,7 +14,9 @@
 						<page string="Filters" name="filters">										
 							<field name="as_on_date"/>							
 							<field name="pattern_id" widget="many2many_tags"/>
+<!--
 							<field name="schedule_id" widget="many2many_tags"/>		
+-->
 						    <field name="moc_id" widget="many2many_tags"/>					     
 						    <field name="category"/>					    			     
 						</page>	    
