@@ -63,6 +63,7 @@ class kg_pumpmodel_master(osv.osv):
 		'line_ids_b':fields.one2many('ch.delivery.pipe', 'header_id', "Delivery Pipe"),
 		
 		'alias_name': fields.char('Alias Name', size=128),
+		'bom': fields.char('BOM', size=128),
 		'make_by': fields.char('Make By', size=128),
 		'delivery_lead': fields.integer('Delivery Lead Time(Weeks)', size=128),
 		'type': fields.selection([('vertical','Vertical'),('horizontal','Horizontal'),('others','Others')],'Type'),
@@ -127,6 +128,7 @@ class kg_pumpmodel_master(osv.osv):
 		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'delivery_lead':10,	
 		'modify': 'no',
+		'bom':'No',
 		
 	}
 	

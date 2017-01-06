@@ -430,11 +430,20 @@ class kg_bom(osv.osv):
 	
 	def entry_approve(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.state == 'confirmed':		
+		if rec.state == 'confirmed':
+			cr.execute(""" select count(pump_model_id) from kg_bom where pump_model_id = %s	 """ %(rec.pump_model_id.id))
+			data = cr.dictfetchone()							
+			pump_ids = self.pool.get('kg.pumpmodel.master').search(cr,uid,[('id','=',rec.pump_model_id.id)])
+			pump_rec = self.pool.get('kg.pumpmodel.master').browse(cr, uid, pump_ids[0])			
+			count = data['count']
+			bom = 'Yes '
+			bom_count = bom+str(count)			
+			self.pool.get('kg.pumpmodel.master').write(cr, uid, pump_rec.id, {'bom': bom_count})		
 			old_ids = self.search(cr,uid,[('state','=','approved'),('name','=',rec.name)])	  
 			if old_ids:		 
 				self.write(cr, uid, old_ids[0], {'state': 'expire','expire_user_id': uid, 'expire_date': time.strftime('%Y-%m-%d %H:%M:%S')})		   
 			self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+					   
 		return True
 
 	def entry_reject(self,cr,uid,ids,context=None):
