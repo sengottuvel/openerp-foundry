@@ -144,12 +144,8 @@
             ref('kg_menus.rpm_reports'),
             ref('kg_menus.rpm_planning_reports'),
             ref('kg_menus.kg_dash_board'),
-            ref('kg_menus.ram_schedule_register'),
-            ref('kg_menus.ram_planning_register'),
-            ref('kg_menus.ram_qc_register'),
-            ref('kg_menus.ram_production_register'),
-            ref('kg_menus.ram_allotted_components'),
-            ref('kg_menus.ram_stock_statement'),
+            ref('kg_reports.kg_pouring_pending_reports'),
+            
             
             
             ref('kg_sale_invoice.menu_kg_sale_root'),

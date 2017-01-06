@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<openerp>
+    <data>
+        
+        <record id="r_form_v_pouring_pending" model="ir.ui.view">
+            <field name="name">kg.pouring.pending.form</field>
+            <field name="model">kg.pouring.pending.print</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Pouring Pending Statement">
+                   <group col="4" fill="0" height="500">	
+						<notebook tabpos="up" colspan="4">
+						<page string="Filters" name="filters">										
+							<field name="as_on_date"/>							
+							<field name="pattern_id" widget="many2many_tags"/>
+							<field name="schedule_id" widget="many2many_tags"/>		
+						    <field name="moc_id" widget="many2many_tags"/>					     
+						    <field name="category"/>					    			     
+						</page>	    
+                                                                         
+                    </notebook>     
+                     <separator colspan="4"/>
+						<group col="4" colspan="4">
+							<button name="create_report" string="Generate" type="object" icon="gtk-ok"/>
+						</group>
+						</group>
+                </form>
+            </field>
+        </record>
+        
+        
+        
+        <report string="Pouring Pending Statement"
+		model="kg.pouring.pending.print"
+		auto="True"
+		name="jasper_pouring_pending_report"
+		rml="kg_reports/planning/report/kg_pouring_pending_list.jrxml"
+		id="pouringpendingreport" 
+		menu="False"
+		/>
+		
+       <record id="rma_pouring_pending" model="ir.actions.act_window">  
+            <field name="name">Pouring Pending</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">kg.pouring.pending.print</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+            
+	<menuitem name="Pouring Pending" parent="kg_menus.rpm_planning_reports" action="rma_pouring_pending" id="kg_pouring_pending_reports" sequence="0"/>	
+      
+
+    </data>
+</openerp>
