@@ -109,7 +109,7 @@ class kg_gate_pass(osv.osv):
 												
 	def confirm_entry(self, cr, uid, ids, context=None):	
 		entry = self.browse(cr,uid,ids[0])
-		if rec.state == 'draft':
+		if entry.state == 'draft':
 			#~ if entry.name == '':
 				#~ pass_no = self.pool.get('ir.sequence').get(cr, uid, 'kg.gate.pass') or ''
 			seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.gate.pass')])
