@@ -344,26 +344,7 @@
 				<!-- Dashboard Menu -->
 				<menuitem name="Dashboard" parent="rpm_planning_reports" action="board.open_board_my_dash_action" id="kg_dash_board" sequence="0"/>
 				
-				<!-- Weekly Schedule -->
-				<menuitem action="kg_reports.rma_schedule_register" id="ram_schedule_register" parent="rpm_planning_reports" sequence="1"/>
 				
-				<!-- Planning Register -->
-				<menuitem action="kg_reports.rma_planning_register" id="ram_planning_register" parent="rpm_planning_reports" sequence="2"/>
-				
-				<!-- QC Register -->
-				<menuitem action="kg_reports.rma_qc_register" id="ram_qc_register" parent="rpm_planning_reports" sequence="3"/>
-				
-				<!-- Production Register -->
-				<menuitem action="kg_reports.rma_production_register" id="ram_production_register" parent="rpm_planning_reports" sequence="4"/>
-				
-				<!-- Allotted Components Statement -->
-				<menuitem action="kg_reports.rma_allotted_components" id="ram_allotted_components" parent="rpm_planning_reports" sequence="5"/>
-				
-				<!-- Stock Statement Report-->
-				<menuitem action="kg_reports.rma_stock_statement" id="ram_stock_statement" parent="rpm_planning_reports" sequence="6"/>
-				
-				<!-- Stock Inspection Report
-				<menuitem action="kg_reports.rma_stock_inspection" id="ram_stock_inspection" parent="rpm_planning_reports" sequence="7"/>-->
 			
 			<!-- Purchase Reports Menu -->
             <menuitem name="Purchase" id="rpm_purchase_reports" parent = "rpm_reports" sequence="1"/>
