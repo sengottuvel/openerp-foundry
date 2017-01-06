@@ -526,26 +526,28 @@ class kg_ms_operations(osv.osv):
 						raise osv.except_osv(_('Warning!'),
 								_('System not allow to save negative. Check the actual value !!'))
 					
-					if entry_rec.op1_process_result != 'reject':			
-						
-						if dim_item.actual_val == 0:
-							raise osv.except_osv(_('Warning!'),
-									_('System not allow to save zero values. Check the actual value !!'))
+					#~ if entry_rec.op1_process_result != 'reject':			
+						#~ 
+						#~ if dim_item.actual_val == 0:
+							#~ raise osv.except_osv(_('Warning!'),
+									#~ _('System not allow to save zero values. Check the actual value !!'))
 									
 						#### Min and Max Tolerance Checking ####
 						
-						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
-						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
-								
-						if dim_item.actual_val < (dim_item.min_val - min_tol_value):
-							print ""
-							#~ raise osv.except_osv(_('Warning!'),
-									#~ _('Actual value should greater or equal to Minimum value !!'))
+						if dim_item.pos_dimension_id != None:
+						
+							min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
+							max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 									
-						if dim_item.actual_val > (dim_item.max_val + max_tol_value):
-							print ""
-							#~ raise osv.except_osv(_('Warning!'),
-									#~ _('Actual value should lesser or equal to Maximum value !!'))
+							if dim_item.actual_val < (dim_item.min_val - min_tol_value):
+								print ""
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should greater or equal to Minimum value !!'))
+										
+							if dim_item.actual_val > (dim_item.max_val + max_tol_value):
+								print ""
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should lesser or equal to Maximum value !!'))
 								
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
@@ -969,6 +971,7 @@ class kg_ms_operations(osv.osv):
 								#~ 'cutting_qty':ms_raw_rec.temp_qty,
 								'ms_bot_id':entry_rec.ms_id.id,
 								'fns_item_name':entry_rec.item_name,
+								'position_id': entry_rec.position_id.id
 								}
 								
 								indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
@@ -1175,26 +1178,28 @@ class kg_ms_operations(osv.osv):
 						raise osv.except_osv(_('Warning!'),
 								_('System not allow to save negative. Check the actual value !!'))
 					
-					if entry_rec.op2_process_result != 'reject':			
-						
-						if dim_item.actual_val == 0:
-							raise osv.except_osv(_('Warning!'),
-									_('System not allow to save zero values. Check the actual value !!'))
+					#~ if entry_rec.op2_process_result != 'reject':			
+						#~ 
+						#~ if dim_item.actual_val == 0:
+							#~ raise osv.except_osv(_('Warning!'),
+									#~ _('System not allow to save zero values. Check the actual value !!'))
 									
 						#### Min and Max Tolerance Checking ####
 						
-						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
-						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
-								
-						if dim_item.actual_val < (dim_item.min_val - min_tol_value):
-							print ""
-							#~ raise osv.except_osv(_('Warning!'),
-									#~ _('Actual value should greater or equal to Minimum value !!'))
+						if dim_item.pos_dimension_id != None:
+						
+							min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
+							max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 									
-						if dim_item.actual_val > (dim_item.max_val + max_tol_value):
-							print ""
-							#~ raise osv.except_osv(_('Warning!'),
-									#~ _('Actual value should lesser or equal to Maximum value !!'))
+							if dim_item.actual_val < (dim_item.min_val - min_tol_value):
+								print ""
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should greater or equal to Minimum value !!'))
+										
+							if dim_item.actual_val > (dim_item.max_val + max_tol_value):
+								print ""
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should lesser or equal to Maximum value !!'))
 				
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
@@ -1616,6 +1621,7 @@ class kg_ms_operations(osv.osv):
 								#~ 'cutting_qty':ms_raw_rec.temp_qty,
 								'ms_bot_id':entry_rec.ms_id.id,
 								'fns_item_name':entry_rec.item_name,
+								'position_id': entry_rec.position_id.id
 								}
 								indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
 								
@@ -1815,24 +1821,26 @@ class kg_ms_operations(osv.osv):
 						raise osv.except_osv(_('Warning!'),
 								_('System not allow to save negative. Check the actual value !!'))
 					
-					if entry_rec.op3_process_result != 'reject':			
-						
-						if dim_item.actual_val == 0:
-							raise osv.except_osv(_('Warning!'),
-									_('System not allow to save zero values. Check the actual value !!'))
+					#~ if entry_rec.op3_process_result != 'reject':			
+						#~ 
+						#~ if dim_item.actual_val == 0:
+							#~ raise osv.except_osv(_('Warning!'),
+									#~ _('System not allow to save zero values. Check the actual value !!'))
 									
 						#### Min and Max Tolerance Checking ####
 						
-						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
-						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
-								
-						if dim_item.actual_val < (dim_item.min_val - min_tol_value):
-							raise osv.except_osv(_('Warning!'),
-									_('Actual value should greater or equal to Minimum value !!'))
+						if dim_item.pos_dimension_id != None:
+						
+							min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
+							max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 									
-						if dim_item.actual_val > (dim_item.max_val + max_tol_value):
-							raise osv.except_osv(_('Warning!'),
-									_('Actual value should lesser or equal to Maximum value !!'))
+							if dim_item.actual_val < (dim_item.min_val - min_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should greater or equal to Minimum value !!'))
+										
+							if dim_item.actual_val > (dim_item.max_val + max_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should lesser or equal to Maximum value !!'))
 								
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
@@ -2253,6 +2261,7 @@ class kg_ms_operations(osv.osv):
 								#~ 'cutting_qty':ms_raw_rec.temp_qty,
 								'ms_bot_id':entry_rec.ms_id.id,
 								'fns_item_name':entry_rec.item_name,
+								'position_id': entry_rec.position_id.id
 								}
 								
 								indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
@@ -2455,24 +2464,26 @@ class kg_ms_operations(osv.osv):
 						raise osv.except_osv(_('Warning!'),
 								_('System not allow to save negative. Check the actual value !!'))
 					
-					if entry_rec.op4_process_result != 'reject':			
-						
-						if dim_item.actual_val == 0:
-							raise osv.except_osv(_('Warning!'),
-									_('System not allow to save zero values. Check the actual value !!'))
+					#~ if entry_rec.op4_process_result != 'reject':			
+						#~ 
+						#~ if dim_item.actual_val == 0:
+							#~ raise osv.except_osv(_('Warning!'),
+									#~ _('System not allow to save zero values. Check the actual value !!'))
 									
 						#### Min and Max Tolerance Checking ####
 						
-						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
-						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
-								
-						if dim_item.actual_val < (dim_item.min_val - min_tol_value):
-							raise osv.except_osv(_('Warning!'),
-									_('Actual value should greater or equal to Minimum value !!'))
+						if dim_item.pos_dimension_id != None:
+						
+							min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
+							max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 									
-						if dim_item.actual_val > (dim_item.max_val + max_tol_value):
-							raise osv.except_osv(_('Warning!'),
-									_('Actual value should lesser or equal to Maximum value !!'))
+							if dim_item.actual_val < (dim_item.min_val - min_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should greater or equal to Minimum value !!'))
+										
+							if dim_item.actual_val > (dim_item.max_val + max_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should lesser or equal to Maximum value !!'))
 								
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
@@ -2893,6 +2904,7 @@ class kg_ms_operations(osv.osv):
 								#~ 'cutting_qty':ms_raw_rec.temp_qty,
 								'ms_bot_id':entry_rec.ms_id.id,
 								'fns_item_name':entry_rec.item_name,
+								'position_id': entry_rec.position_id.id
 								}
 								
 								indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
@@ -3095,24 +3107,26 @@ class kg_ms_operations(osv.osv):
 						raise osv.except_osv(_('Warning!'),
 								_('System not allow to save negative. Check the actual value !!'))
 					
-					if entry_rec.op5_process_result != 'reject':			
-						
-						if dim_item.actual_val == 0:
-							raise osv.except_osv(_('Warning!'),
-									_('System not allow to save zero values. Check the actual value !!'))
+					#~ if entry_rec.op5_process_result != 'reject':			
+						#~ 
+						#~ if dim_item.actual_val == 0:
+							#~ raise osv.except_osv(_('Warning!'),
+									#~ _('System not allow to save zero values. Check the actual value !!'))
 									
 						#### Min and Max Tolerance Checking ####
 						
-						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
-						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
-								
-						if dim_item.actual_val < (dim_item.min_val - min_tol_value):
-							raise osv.except_osv(_('Warning!'),
-									_('Actual value should greater or equal to Minimum value !!'))
+						if dim_item.pos_dimension_id != None:
+						
+							min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
+							max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 									
-						if dim_item.actual_val > (dim_item.max_val + max_tol_value):
-							raise osv.except_osv(_('Warning!'),
-									_('Actual value should lesser or equal to Maximum value !!'))
+							if dim_item.actual_val < (dim_item.min_val - min_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should greater or equal to Minimum value !!'))
+										
+							if dim_item.actual_val > (dim_item.max_val + max_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should lesser or equal to Maximum value !!'))
 								
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
@@ -3533,6 +3547,7 @@ class kg_ms_operations(osv.osv):
 								#~ 'cutting_qty':ms_raw_rec.temp_qty,
 								'ms_bot_id':entry_rec.ms_id.id,
 								'fns_item_name':entry_rec.item_name,
+								'position_id': entry_rec.position_id.id
 								}
 								
 								indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
@@ -3734,24 +3749,26 @@ class kg_ms_operations(osv.osv):
 						raise osv.except_osv(_('Warning!'),
 								_('System not allow to save negative. Check the actual value !!'))
 					
-					if entry_rec.op6_process_result != 'reject':			
-						
-						if dim_item.actual_val == 0:
-							raise osv.except_osv(_('Warning!'),
-									_('System not allow to save zero values. Check the actual value !!'))
+					#~ if entry_rec.op6_process_result != 'reject':			
+						#~ 
+						#~ if dim_item.actual_val == 0:
+							#~ raise osv.except_osv(_('Warning!'),
+									#~ _('System not allow to save zero values. Check the actual value !!'))
 									
 						#### Min and Max Tolerance Checking ####
 						
-						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
-						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
-								
-						if dim_item.actual_val < (dim_item.min_val - min_tol_value):
-							raise osv.except_osv(_('Warning!'),
-									_('Actual value should greater or equal to Minimum value !!'))
+						if dim_item.pos_dimension_id != None:
+						
+							min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
+							max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 									
-						if dim_item.actual_val > (dim_item.max_val + max_tol_value):
-							raise osv.except_osv(_('Warning!'),
-									_('Actual value should lesser or equal to Maximum value !!'))
+							if dim_item.actual_val < (dim_item.min_val - min_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should greater or equal to Minimum value !!'))
+										
+							if dim_item.actual_val > (dim_item.max_val + max_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should lesser or equal to Maximum value !!'))
 								
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
@@ -4172,6 +4189,7 @@ class kg_ms_operations(osv.osv):
 								#~ 'cutting_qty':ms_raw_rec.temp_qty,
 								'ms_bot_id':entry_rec.ms_id.id,
 								'fns_item_name':entry_rec.item_name,
+								'position_id': entry_rec.position_id.id
 								}
 								
 								indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
@@ -4373,24 +4391,26 @@ class kg_ms_operations(osv.osv):
 						raise osv.except_osv(_('Warning!'),
 								_('System not allow to save negative. Check the actual value !!'))
 					
-					if entry_rec.op7_process_result != 'reject':			
-						
-						if dim_item.actual_val == 0:
-							raise osv.except_osv(_('Warning!'),
-									_('System not allow to save zero values. Check the actual value !!'))
+					#~ if entry_rec.op7_process_result != 'reject':			
+						#~ 
+						#~ if dim_item.actual_val == 0:
+							#~ raise osv.except_osv(_('Warning!'),
+									#~ _('System not allow to save zero values. Check the actual value !!'))
 									
 						#### Min and Max Tolerance Checking ####
 						
-						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
-						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
-								
-						if dim_item.actual_val < (dim_item.min_val - min_tol_value):
-							raise osv.except_osv(_('Warning!'),
-									_('Actual value should greater or equal to Minimum value !!'))
+						if dim_item.pos_dimension_id != None:
+						
+							min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
+							max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 									
-						if dim_item.actual_val > (dim_item.max_val + max_tol_value):
-							raise osv.except_osv(_('Warning!'),
-									_('Actual value should lesser or equal to Maximum value !!'))
+							if dim_item.actual_val < (dim_item.min_val - min_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should greater or equal to Minimum value !!'))
+										
+							if dim_item.actual_val > (dim_item.max_val + max_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should lesser or equal to Maximum value !!'))
 								
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
@@ -4811,6 +4831,7 @@ class kg_ms_operations(osv.osv):
 								#~ 'cutting_qty':ms_raw_rec.temp_qty,
 								'ms_bot_id':entry_rec.ms_id.id,
 								'fns_item_name':entry_rec.item_name,
+								'position_id': entry_rec.position_id.id
 								}
 								
 								indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
@@ -5012,24 +5033,26 @@ class kg_ms_operations(osv.osv):
 						raise osv.except_osv(_('Warning!'),
 								_('System not allow to save negative. Check the actual value !!'))
 					
-					if entry_rec.op8_process_result != 'reject':			
-						
-						if dim_item.actual_val == 0:
-							raise osv.except_osv(_('Warning!'),
-									_('System not allow to save zero values. Check the actual value !!'))
+					#~ if entry_rec.op8_process_result != 'reject':			
+						#~ 
+						#~ if dim_item.actual_val == 0:
+							#~ raise osv.except_osv(_('Warning!'),
+									#~ _('System not allow to save zero values. Check the actual value !!'))
 									
 						#### Min and Max Tolerance Checking ####
 						
-						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
-						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
-								
-						if dim_item.actual_val < (dim_item.min_val - min_tol_value):
-							raise osv.except_osv(_('Warning!'),
-									_('Actual value should greater or equal to Minimum value !!'))
+						if dim_item.pos_dimension_id != None:
+						
+							min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
+							max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 									
-						if dim_item.actual_val > (dim_item.max_val + max_tol_value):
-							raise osv.except_osv(_('Warning!'),
-									_('Actual value should lesser or equal to Maximum value !!'))
+							if dim_item.actual_val < (dim_item.min_val - min_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should greater or equal to Minimum value !!'))
+										
+							if dim_item.actual_val > (dim_item.max_val + max_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should lesser or equal to Maximum value !!'))
 								
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
@@ -5450,6 +5473,7 @@ class kg_ms_operations(osv.osv):
 								#~ 'cutting_qty':ms_raw_rec.temp_qty,
 								'ms_bot_id':entry_rec.ms_id.id,
 								'fns_item_name':entry_rec.item_name,
+								'position_id': entry_rec.position_id.id
 								}
 								
 								indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
@@ -5651,24 +5675,26 @@ class kg_ms_operations(osv.osv):
 						raise osv.except_osv(_('Warning!'),
 								_('System not allow to save negative. Check the actual value !!'))
 					
-					if entry_rec.op9_process_result != 'reject':			
-						
-						if dim_item.actual_val == 0:
-							raise osv.except_osv(_('Warning!'),
-									_('System not allow to save zero values. Check the actual value !!'))
+					#~ if entry_rec.op9_process_result != 'reject':			
+						#~ 
+						#~ if dim_item.actual_val == 0:
+							#~ raise osv.except_osv(_('Warning!'),
+									#~ _('System not allow to save zero values. Check the actual value !!'))
 									
 						#### Min and Max Tolerance Checking ####
 						
-						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
-						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
-								
-						if dim_item.actual_val < (dim_item.min_val - min_tol_value):
-							raise osv.except_osv(_('Warning!'),
-									_('Actual value should greater or equal to Minimum value !!'))
+						if dim_item.pos_dimension_id != None:
+						
+							min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
+							max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 									
-						if dim_item.actual_val > (dim_item.max_val + max_tol_value):
-							raise osv.except_osv(_('Warning!'),
-									_('Actual value should lesser or equal to Maximum value !!'))
+							if dim_item.actual_val < (dim_item.min_val - min_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should greater or equal to Minimum value !!'))
+										
+							if dim_item.actual_val > (dim_item.max_val + max_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should lesser or equal to Maximum value !!'))
 								
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
@@ -6089,6 +6115,7 @@ class kg_ms_operations(osv.osv):
 								#~ 'cutting_qty':ms_raw_rec.temp_qty,
 								'ms_bot_id':entry_rec.ms_id.id,
 								'fns_item_name':entry_rec.item_name,
+								'position_id': entry_rec.position_id.id
 								}
 								
 								indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
@@ -6290,24 +6317,26 @@ class kg_ms_operations(osv.osv):
 						raise osv.except_osv(_('Warning!'),
 								_('System not allow to save negative. Check the actual value !!'))
 					
-					if entry_rec.op10_process_result != 'reject':			
-						
-						if dim_item.actual_val == 0:
-							raise osv.except_osv(_('Warning!'),
-									_('System not allow to save zero values. Check the actual value !!'))
+					#~ if entry_rec.op10_process_result != 'reject':			
+						#~ 
+						#~ if dim_item.actual_val == 0:
+							#~ raise osv.except_osv(_('Warning!'),
+									#~ _('System not allow to save zero values. Check the actual value !!'))
 									
 						#### Min and Max Tolerance Checking ####
 						
-						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
-						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
-								
-						if dim_item.actual_val < (dim_item.min_val - min_tol_value):
-							raise osv.except_osv(_('Warning!'),
-									_('Actual value should greater or equal to Minimum value !!'))
+						if dim_item.pos_dimension_id != None:
+						
+							min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
+							max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 									
-						if dim_item.actual_val > (dim_item.max_val + max_tol_value):
-							raise osv.except_osv(_('Warning!'),
-									_('Actual value should lesser or equal to Maximum value !!'))
+							if dim_item.actual_val < (dim_item.min_val - min_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should greater or equal to Minimum value !!'))
+										
+							if dim_item.actual_val > (dim_item.max_val + max_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should lesser or equal to Maximum value !!'))
 								
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
@@ -6728,6 +6757,7 @@ class kg_ms_operations(osv.osv):
 								#~ 'cutting_qty':ms_raw_rec.temp_qty,
 								'ms_bot_id':entry_rec.ms_id.id,
 								'fns_item_name':entry_rec.item_name,
+								'position_id': entry_rec.position_id.id
 								}
 								
 								indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
@@ -6929,24 +6959,26 @@ class kg_ms_operations(osv.osv):
 						raise osv.except_osv(_('Warning!'),
 								_('System not allow to save negative. Check the actual value !!'))
 					
-					if entry_rec.op11_process_result != 'reject':			
-						
-						if dim_item.actual_val == 0:
-							raise osv.except_osv(_('Warning!'),
-									_('System not allow to save zero values. Check the actual value !!'))
+					#~ if entry_rec.op11_process_result != 'reject':			
+						#~ 
+						#~ if dim_item.actual_val == 0:
+							#~ raise osv.except_osv(_('Warning!'),
+									#~ _('System not allow to save zero values. Check the actual value !!'))
 									
 						#### Min and Max Tolerance Checking ####
 						
-						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
-						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
-								
-						if dim_item.actual_val < (dim_item.min_val - min_tol_value):
-							raise osv.except_osv(_('Warning!'),
-									_('Actual value should greater or equal to Minimum value !!'))
+						if dim_item.pos_dimension_id != None:
+						
+							min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
+							max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 									
-						if dim_item.actual_val > (dim_item.max_val + max_tol_value):
-							raise osv.except_osv(_('Warning!'),
-									_('Actual value should lesser or equal to Maximum value !!'))
+							if dim_item.actual_val < (dim_item.min_val - min_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should greater or equal to Minimum value !!'))
+										
+							if dim_item.actual_val > (dim_item.max_val + max_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should lesser or equal to Maximum value !!'))
 								
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
@@ -7367,6 +7399,7 @@ class kg_ms_operations(osv.osv):
 								#~ 'cutting_qty':ms_raw_rec.temp_qty,
 								'ms_bot_id':entry_rec.ms_id.id,
 								'fns_item_name':entry_rec.item_name,
+								'position_id': entry_rec.position_id.id
 								}
 								
 								indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
@@ -7568,24 +7601,26 @@ class kg_ms_operations(osv.osv):
 						raise osv.except_osv(_('Warning!'),
 								_('System not allow to save negative. Check the actual value !!'))
 					
-					if entry_rec.op12_process_result != 'reject':			
-						
-						if dim_item.actual_val == 0:
-							raise osv.except_osv(_('Warning!'),
-									_('System not allow to save zero values. Check the actual value !!'))
+					#~ if entry_rec.op12_process_result != 'reject':			
+						#~ 
+						#~ if dim_item.actual_val == 0:
+							#~ raise osv.except_osv(_('Warning!'),
+									#~ _('System not allow to save zero values. Check the actual value !!'))
 									
 						#### Min and Max Tolerance Checking ####
 						
-						min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
-						max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
-								
-						if dim_item.actual_val < (dim_item.min_val - min_tol_value):
-							raise osv.except_osv(_('Warning!'),
-									_('Actual value should greater or equal to Minimum value !!'))
+						if dim_item.pos_dimension_id != None:
+						
+							min_tol_value = (dim_item.min_val * dim_item.pos_dimension_id.min_tolerance) / 100
+							max_tol_value = (dim_item.max_val * dim_item.pos_dimension_id.max_tolerance) / 100
 									
-						if dim_item.actual_val > (dim_item.max_val + max_tol_value):
-							raise osv.except_osv(_('Warning!'),
-									_('Actual value should lesser or equal to Maximum value !!'))
+							if dim_item.actual_val < (dim_item.min_val - min_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should greater or equal to Minimum value !!'))
+										
+							if dim_item.actual_val > (dim_item.max_val + max_tol_value):
+								raise osv.except_osv(_('Warning!'),
+										_('Actual value should lesser or equal to Maximum value !!'))
 								
 				### Last Operation Check ###
 				cr.execute(""" select id from ch_kg_position_number 
@@ -8006,6 +8041,7 @@ class kg_ms_operations(osv.osv):
 								#~ 'cutting_qty':ms_raw_rec.temp_qty,
 								'ms_bot_id':entry_rec.ms_id.id,
 								'fns_item_name':entry_rec.item_name,
+								'position_id': entry_rec.position_id.id
 								}
 								
 								indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
