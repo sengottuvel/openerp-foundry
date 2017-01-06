@@ -7,7 +7,7 @@
     'author': 'Karthikeyan',
     'maintainer': 'Karthikeyan',
     'website': 'http://www.openerp.com',
-    'depends': ['base','kg_pumpmodel_master','purchase','stock'],
+    'depends': ['base','kg_pumpmodel_master','purchase','stock','kg_schedule'],
     'data': [		
 		'planning/wizard/kg_pouring_pending_print_view.xml',
 		'purchase/excel/kg_excel_po_register_view.xml',

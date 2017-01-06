@@ -26,7 +26,7 @@ class kg_pouring_pending_print(osv.osv_memory):
 		
 		## If any filter it should be many2many only. Don't use many2one filter unless it's must	
 		'pattern_id': fields.many2many('kg.pattern.master', 'm2m_pattern_master_details', 'pour_wiz_id', 'pattern_id','Pattern No', domain="[('active','=','t')]"),
-		#~ 'schedule_id': fields.many2many('kg.schedule', 'm2m_schedule_detail', 'sche_wiz_id', 'schedule_id','Schedule No', domain="[('state','=','confirmed')]"),
+		'schedule_id': fields.many2many('kg.schedule', 'm2m_schedule_details', 'sche_wiz_id', 'schedule_id','Schedule No', domain="[('state','=','confirmed')]"),
 		'moc_id': fields.many2many('kg.moc.master', 'm2m_moc_master_details', 'pour_wiz_id', 'moc_id','MOC', domain="[('active','=','t')]"),
 		'category': fields.selection([('1','MS NC'),('2','NC'),('3','Service'),('4','Emergency'),('5','Spare'),('6','Normal')],'Category'),
 	}
