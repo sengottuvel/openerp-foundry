@@ -25,6 +25,10 @@
 								<field name="revision" readonly="1"/>
 								<field name="note"/>
 								<field name="purpose" readonly="1"/>
+<!--
+								<field name="revision_remarks" attrs="{'invisible':[('state','not in',('moved_to_offer','wo_created','revised'))],'readonly':[('state','=','revised')]}"/>
+-->
+								<field name="revision_remarks" attrs="{'invisible':[('revision','=',0)],'readonly':[('state','=','revised')],'required':[('revision','!=',0)]}"/>
 								<field name="wo_flag" invisible="1"/>
 							</group>											
 							<group>
@@ -529,9 +533,9 @@
 				<tree colors="blue:state == 'draft';black:state == 'moved_to_offer';gray:state == 'call'" 
 								toolbar="True" string="Enquiry Entry Tree"  create="false" delete="false">					
 					<field name="name"/>
+					<field name="revision"/>
 					<field name="enquiry_date"/>
 					<field name="enquiry_no"/>
-					<field name="revision"/>
 					<field name="customer_id"/>	
 					<field name="state"/>
 					<field name="wo_flag" invisible="1"/>

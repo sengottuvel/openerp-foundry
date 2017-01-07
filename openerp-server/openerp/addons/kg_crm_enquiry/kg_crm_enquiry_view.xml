@@ -35,6 +35,7 @@
 								<field name="purpose" attrs="{'invisible': [('call_type','=','service')],'required': [('call_type','!=','service')]}"/>
 								
 								<!--<field name="order_type" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>-->		
+								<field name="revision_remarks" attrs="{'invisible': [('state','not in',('moved_to_offer','revised'))],'readonly':[('state','=','revised')]}"/>
 								<field name="scope_of_supply" invisible="1"/>						
 							</group>											
 							<group>
@@ -172,11 +173,11 @@
 				<tree colors="blue:state == 'draft';black:state == 'moved_to_offer';gray:state == 'call'" 
 								toolbar="True" string="Enquiry Entry Tree">					
 					<field name="name"/>
+					<field name="revision"/>
 					<field name="enquiry_date"/>
 					<field name="customer_id"/>	
 					<button name="send_to_dms" type="object" string="DMS" icon="terp-folder-blue"/>							
 					<field name="state"/>
-					<field name="revision" invisible="1"/>
 				</tree>
 			</field>
 		</record>
@@ -222,7 +223,7 @@
 						<group string="Item Details">
 							<group>
 								<field name="equipment_no" />																
-								<field name="quantity_in_no" />																
+								<field name="quantity_in_no" invisible="1"/>																
 							</group>											
 							<group>
 								<field name="description" />													
@@ -240,6 +241,7 @@
 							</group>											
 							<group>
 								<field name="temperature_in_c" />
+								<field name="solid_concen_vol"/>
 								<field name="specific_gravity" />
 								<field name="max_particle_size_mm" />
 								<field name="density" />

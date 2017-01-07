@@ -39,6 +39,7 @@ class kg_crm_enquiry(osv.osv):
 		'service_det': fields.char('Service Details'),
 		'remarks': fields.text('Remarks'),
 		'cancel_remark': fields.text('Cancel Remarks'),
+		'revision_remarks': fields.text('Revision Remarks'),
 		'state': fields.selection(STATE_SELECTION,'Status', readonly=True),
 		'line_ids': fields.one2many('ch.kg.crm.enquiry', 'header_id', "Child Enquiry"),
 		'ch_line_ids': fields.one2many('ch.kg.crm.pumpmodel', 'header_id', "Pump/Spare Details",readonly=True, states={'draft':[('readonly',False)]}),
@@ -283,6 +284,9 @@ class kg_crm_enquiry(osv.osv):
 	def entry_revision(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'moved_to_offer':
+			if not entry.revision_remarks:
+				raise osv.except_osv(_('Warning!'),
+					_('System should not accept without revision remarks'))
 			revision = 0
 			if entry.wo_flag == False:
 				del_sql = """ delete from kg_crm_offer where enquiry_id = %s """ %(entry.id)
@@ -509,6 +513,7 @@ class kg_crm_enquiry(osv.osv):
 									per_access_prime_cost = primecost_vals / item.qty
 								else:
 									per_access_prime_cost = 0
+								self.pool.get('ch.kg.crm.accessories').write(cr,uid,item_1.id,{'prime_cost':primecost_vals})
 								access_id = self.pool.get('ch.accessories.offer').create(cr,uid,{
 																			'header_id': offer_id,
 																			'access_id': item_1.access_id.id,
@@ -975,7 +980,8 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'description': fields.char('Description'),
 		
 		# Liquid Specifications
-		'solid_concen': fields.float('Solid Concentration in %'),
+		'solid_concen': fields.float('Solid Concentration by weight %'),
+		'solid_concen_vol': fields.float('Solid Concentration by Volume %'),
 		'max_particle_size_mm': fields.float('Max Particle Size-mm'),
 		'fluid_id': fields.many2one('kg.fluid.master','Liquid',domain="[('state','not in',('reject','cancel'))]"),
 		'temperature_in_c': fields.char('Temperature in C'),
@@ -2025,38 +2031,21 @@ class ch_kg_crm_accessories(osv.osv):
 	_name = "ch.kg.crm.accessories"
 	_description = "Ch KG CRM Accessories"
 	
-	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
-		res = {}
-		prime_cost = fou_tot = ms_tot = bot_tot = 0.00
-		for order in self.browse(cr, uid, ids, context=context):
-			res[order.id] = {
-				'prime_cost': 0.0,
-			}
-			val = val1 = val3 = line_total = 0.0
-	
-			#~ for line in order.line_ids:
-				#~ per_to_amt = (line.rec_qty * line.price_unit) * line.kg_discount_per / 100.00
-				#~ tot_discount = line.discount + per_to_amt
-				#~ val1 += line.price_subtotal
-				#~ line_total += line.rec_qty * line.price_unit
-				#~ val += self._amount_line_tax(cr, uid, line, context=context)
-				#~ val3 += tot_discount
-			#~ 
-			#~ if order.expense_line_ids:
-				#~ other_charges = (round(sum(map(lambda c:c.price_subtotal,order.expense_line_ids))))
-			#~ else:
-				#~ other_charges = 0.00
-			#~ 
-			#~ for line in order.advance_line_ids:
-				#~ advance_net_amt += line.current_adv_amt
-				
-			fou_tot = sum(line.prime_cost for line in order.line_ids)
-			ms_tot = sum(line.prime_cost for line in order.line_ids_a)
-			bot_tot = sum(line.prime_cost for line in order.line_ids_b)
-			
-			res[order.id]['prime_cost'] = prime_cost
-			
-		return res
+	#~ def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
+		#~ res = {}
+		#~ prime_cost = fou_tot = ms_tot = bot_tot = 0.00
+		#~ for order in self.browse(cr, uid, ids, context=context):
+			#~ res[order.id] = {
+				#~ 'prime_cost': 0.0,
+			#~ }
+#~ 
+			#~ fou_tot = sum(line.prime_cost for line in order.line_ids)
+			#~ ms_tot = sum(line.prime_cost for line in order.line_ids_a)
+			#~ bot_tot = sum(line.prime_cost for line in order.line_ids_b)
+			#~ prime_cost = fou_tot + ms_tot + bot_tot
+			#~ res[order.id]['prime_cost'] = prime_cost
+		#~ print"res[order.id]['prime_cost']res[order.id]['prime_cost']****************",res[order.id]['prime_cost']
+		#~ return res
 		
 	_columns = {
 		
@@ -2073,8 +2062,9 @@ class ch_kg_crm_accessories(osv.osv):
 		'qty': fields.float('Qty'),
 		'oth_spec': fields.char('Other Specification'),
 		'load_access': fields.boolean('Load BOM'),
-		'prime_cost': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Prime Cost',
-			 multi="sums", help="The amount without tax", track_visibility='always',store=True),
+		#~ 'prime_cost': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Prime Cost',
+			 #~ multi="sums", help="The amount without tax", track_visibility='always',store=True),
+		'prime_cost': fields.float('Prime Cost'),
 		
 		'line_ids': fields.one2many('ch.crm.access.fou', 'header_id', 'Access FOU'),
 		'line_ids_a': fields.one2many('ch.crm.access.ms', 'header_id', 'Access MS'),
