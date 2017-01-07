@@ -724,12 +724,15 @@ class kg_crm_enquiry(osv.osv):
 									else:
 										self.pool.get('ch.kg.crm.machineshop.item').write(cr,uid,ms_line.id,{'prime_cost': tot_price * ms_line.qty})
 								elif catg == 'acc':
+									print"ms_line.id",ms_line.id
+									print"ms_line.id",type(ms_line.id)
 									print"tot_price",tot_price
 									print"tot_price",type(tot_price)
 									print"tot_price",ms_line.qty
 									print"tot_price",type(ms_line.qty)
 									ss= tot_price * ms_line.qty
 									print"ssssssssssssssssssssssssssssssS",ss
+									#~ self.pool.get('ch.crm.access.ms').write(cr,uid,ms_line.id,{'prime_cost': tot_price * ms_line.qty})
 									self.pool.get('ch.crm.access.ms').write(cr,uid,ms_line.id,{'prime_cost': tot_price * ms_line.qty})
 								else:
 									pass
