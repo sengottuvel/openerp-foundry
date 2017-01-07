@@ -734,6 +734,7 @@ class kg_crm_enquiry(osv.osv):
 									print"ssssssssssssssssssssssssssssssS",ss
 									#~ self.pool.get('ch.crm.access.ms').write(cr,uid,ms_line.id,{'prime_cost': tot_price * ms_line.qty})
 									self.pool.get('ch.crm.access.ms').write(cr,uid,ms_line.id,{'prime_cost': tot_price * ms_line.qty})
+									print"ssssssssssssssssssssssssssssssS",ss
 								else:
 									pass
 						if bom == 'ms':
