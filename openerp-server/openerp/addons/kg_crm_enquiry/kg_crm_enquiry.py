@@ -724,6 +724,12 @@ class kg_crm_enquiry(osv.osv):
 									else:
 										self.pool.get('ch.kg.crm.machineshop.item').write(cr,uid,ms_line.id,{'prime_cost': tot_price * ms_line.qty})
 								elif catg == 'acc':
+									print"tot_price",tot_price
+									print"tot_price",type(tot_price)
+									print"tot_price",ms_line.qty
+									print"tot_price",type(ms_line.qty)
+									ss= tot_price * ms_line.qty
+									print"ssssssssssssssssssssssssssssssS",ss
 									self.pool.get('ch.crm.access.ms').write(cr,uid,ms_line.id,{'prime_cost': tot_price * ms_line.qty})
 								else:
 									pass
@@ -1878,7 +1884,7 @@ class ch_kg_crm_machineshop_item(osv.osv):
 		### machineshop Item Details ####
 		'header_id':fields.many2one('ch.kg.crm.pumpmodel', 'Pump Model Id', ondelete='cascade'),
 		'enquiry_id':fields.many2one('kg.crm.enquiry', 'Enquiry'),
-		'pos_no': fields.related('position_id','name', type='integer', string='Position No.', store=True),
+		'pos_no': fields.related('position_id','name', type='char', string='Position No.', store=True),
 		'position_id': fields.many2one('kg.position.number','Position No.'),
 		'csd_no': fields.char('CSD No.'),
 		'bom_id': fields.many2one('kg.bom','BOM'),
@@ -2185,7 +2191,7 @@ class ch_crm_access_ms(osv.osv):
 		### machineshop Item Details ####
 		'header_id':fields.many2one('ch.kg.crm.accessories', 'Access Id', ondelete='cascade'),
 		'enquiry_id':fields.many2one('kg.crm.enquiry', 'Enquiry'),
-		'pos_no': fields.related('position_id','name', type='integer', string='Position No.', store=True),
+		'pos_no': fields.related('position_id','name', type='char', string='Position No.', store=True),
 		'position_id': fields.many2one('kg.position.number','Position No.'),
 		'csd_no': fields.char('CSD No.'),
 		'bom_id': fields.many2one('kg.bom','BOM'),
