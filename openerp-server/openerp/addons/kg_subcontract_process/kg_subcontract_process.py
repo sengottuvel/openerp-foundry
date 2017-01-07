@@ -240,10 +240,7 @@ class kg_subcontract_wo(osv.osv):
 						oper_id_rec = self.pool.get('ch.kg.position.number').browse(cr,uid,op_line.operation_id.id)
 						print"moc_rec.....",moc_rec.moc_cate_id.id
 						print"position_id.....",op_line.position_id.id
-						print"operation_id.....",oper_id_rec.operation_id.id
-						if moc_rec.moc_cate_id.id is False:
-							raise osv.except_osv(_('Warning!'),
-								_('System not allow to MOC Master MS MOC Category fields!!')) 					
+						print"operation_id.....",oper_id_rec.operation_id.id					
 						cr.execute('''select line.rate from ch_kg_position_number as header
 										left join ch_moccategory_mapping line on line.header_id = header.id
 										where header.header_id = %s and header.operation_id = %s and line.moc_cate_id = %s
@@ -421,20 +418,28 @@ class kg_subcontract_wo(osv.osv):
 		today = datetime.strptime(today, '%Y-%m-%d')
 		entry_date = rec.entry_date
 		entry_date = str(entry_date)
-		entry_date = datetime.strptime(entry_date, '%Y-%m-%d')
+		entry_date = datetime.strptime(entry_date, '%Y-%m-%d')		
+		if entry_date > today:
+			return False		
+		return True
+		
+	def _future_delivery_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		today = datetime.strptime(today, '%Y-%m-%d')		
 		delivery_date = rec.delivery_date
 		delivery_date = str(delivery_date)
-		delivery_date = datetime.strptime(delivery_date, '%Y-%m-%d')
-		if entry_date > today:
-			return False
-		if delivery_date > today:
+		delivery_date = datetime.strptime(delivery_date, '%Y-%m-%d')		
+		if delivery_date < today:
 			return False
 		return True
 		
 	_constraints = [		
 			  
 		
-		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['Entry Date']),
+		(_future_delivery_date_check, 'System not allow to save with Past date. !!',['Expected Delivery Date']),
 		
 	   ]
 	
