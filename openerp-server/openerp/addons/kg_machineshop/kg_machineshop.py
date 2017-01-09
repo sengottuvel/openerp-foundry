@@ -121,6 +121,7 @@ class kg_machineshop(osv.osv):
 		'each_weight': fields.function(_get_each_weight, string='Each Weight(Kgs)', method=True, store=True, type='float'),
 		'total_weight': fields.function(_get_total_weight, string='Total Weight(Kgs)', method=True, store=True, type='float'),
 		'state': fields.selection([('waiting','Waiting for Accept'),('raw_pending','Pending'),('accept','Accepted')],'Status', readonly=True),
+		'accept_date': fields.date('Accepted Date',required=True),
 		
 		### MS Inward Schedule List ###
 		'ms_sch_qty': fields.integer('Schedule Qty', required=True),
@@ -169,7 +170,8 @@ class kg_machineshop(osv.osv):
 		'active': True,
 		'division_id':_get_default_division,
 		### MS Inward ###
-		'inward_accept_user_id':lambda obj, cr, uid, context: uid,
+		#~ 'inward_accept_user_id':lambda obj, cr, uid, context: uid,
+		'accept_date': lambda * a: time.strftime('%Y-%m-%d'),
 		
 		
 	}
@@ -180,6 +182,17 @@ class kg_machineshop(osv.osv):
 		production_obj = self.pool.get('kg.production')
 		
 		if entry_rec.state == 'waiting':
+			
+			today = date.today()
+			today = str(today)
+			today = datetime.strptime(today, '%Y-%m-%d')
+			accept_date = entry_rec.accept_date
+			accept_date = str(accept_date)
+			accept_date = datetime.strptime(accept_date, '%Y-%m-%d')
+			if accept_date > today:
+				raise osv.except_osv(_('Warning!'),
+						_('Accepted date should be less than or equal to current date !!'))
+						
 			if entry_rec.inward_accept_qty < 0:
 				raise osv.except_osv(_('Warning!'),
 							_('System not allow to save negative values !!'))
@@ -267,6 +280,28 @@ class kg_machineshop(osv.osv):
 		else:
 			pass
 		return True
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		entry_rec = self.browse(cr,uid, ids[0])
+		if vals.get('inward_accept_qty'):
+			if (vals.get('inward_accept_qty') + entry_rec.inward_reject_qty) > entry_rec.fettling_qty:
+				raise osv.except_osv(_('Warning!'),
+							_('Accept and Reject qty should not exceed Schedule Qty !!'))
+							
+			if (vals.get('inward_accept_qty') + entry_rec.inward_reject_qty) < entry_rec.fettling_qty:
+				raise osv.except_osv(_('Warning!'),
+							_('Accept and Reject qty should be equal to Schedule Qty !!'))
+		if vals.get('inward_reject_qty'):
+			if (entry_rec.inward_accept_qty + vals.get('inward_reject_qty')) > entry_rec.fettling_qty:
+				raise osv.except_osv(_('Warning!'),
+							_('Accept and Reject qty should not exceed Schedule Qty !!'))
+							
+			if (entry_rec.inward_accept_qty + vals.get('inward_reject_qty')) < entry_rec.fettling_qty:
+				raise osv.except_osv(_('Warning!'),
+							_('Accept and Reject qty should be equal to Schedule Qty !!'))
+
+		
+		return super(kg_machineshop, self).write(cr, uid, ids, vals, context)
 	
 kg_machineshop()
 

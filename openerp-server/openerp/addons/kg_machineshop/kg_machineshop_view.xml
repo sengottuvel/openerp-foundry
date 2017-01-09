@@ -5,10 +5,10 @@
 	<!-- Form View Start -->
 
 		<record id="t_form_v_ms_inward" model="ir.ui.view">
-			<field name="name">MS Inward Form</field>
+			<field name="name">MS Foundry Inward Form</field>
 			<field name="model">kg.machineshop</field>
 			<field name="arch" type="xml">
-				<form string="MS Inward" version="7.0" create="false">
+				<form string="MS Foundry Inward" version="7.0" create="false">
 					<header>
 						<button name="ms_accept" type="object" string="Update" class="oe_highlight"
 						attrs="{'invisible': [('state','in',['accept'])]}"/>
@@ -18,13 +18,14 @@
 						<group>
 							<field name="name"/>
 							<field name="inward_accept_qty" required="1" attrs="{'readonly': [('state','in',['accept'])]}"/>
+							<field name="accept_date" required="1" attrs="{'readonly': [('state','in',['accept'])]}"/>
 							<field name="inward_accept_user_id" string="QC by" attrs="{'readonly': [('state','in',['accept'])]}"/>
 							<field name="state" invisible="1"/>
 							<field name="stage_id" widget="selection" invisible="1"/>
 							<field name="stage_name" invisible="1"/>
 						</group>											
 						<group>
-							<field name="entry_date" attrs="{'readonly': [('state','in',['accept'])]}"/>
+							<field name="entry_date" readonly="1"/>
 							<field name="inward_reject_qty" attrs="{'readonly': [('state','in',['accept'])]}"/>
 							<field name="inward_reject_remarks_id" attrs="{'readonly': [('state','in',['accept'])]}"/>
 							<field name="inward_remarks" attrs="{'readonly': [('state','in',['accept'])]}"/>
@@ -78,11 +79,11 @@
 	<!-- Tree View Start -->
 		
 		<record id="t_tree_v_ms_inward" model="ir.ui.view">
-			<field name="name">MS Inward Tree</field>
+			<field name="name">MS Foundry Inward Tree</field>
 			<field name="model">kg.machineshop</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<tree toolbar="True" string="MS Inward Entry Tree" create="false">					
+				<tree toolbar="True" string="MS Foundry Inward Entry Tree" create="false">					
 					<field name="name" invisible="1"/>
 					<field name="order_no"/>
 					<field name="order_delivery_date"/>
@@ -109,10 +110,10 @@
 	<!-- Search View Start -->
 
 		<record id="t_search_v_ms_inward" model="ir.ui.view">
-            <field name="name">MS Inward Entry Search</field>
+            <field name="name">MS Foundry Inward Entry Search</field>
             <field name="model">kg.machineshop</field>
             <field name="arch" type="xml">
-                <search string="MS Inward Entry Search">
+                <search string="MS Foundry Inward Entry Search">
 					
 					<field name="pattern_id" string="Pattern Number"  filter_domain="[('pattern_id','ilike',self)]" />
 					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
@@ -144,7 +145,7 @@
 		
 		
 		<record id="tma_ms_inward" model="ir.actions.act_window">
-			<field name="name">MS Inward</field>
+			<field name="name">MS Foundry Inward</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.machineshop</field>
 			<field name="view_type">form</field>
