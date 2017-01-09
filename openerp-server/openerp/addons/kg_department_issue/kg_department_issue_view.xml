@@ -337,7 +337,7 @@
 		<record forcecreate="1" id="store_issue_id" model="ir.sequence">
 		  <field name="name">Store Issue</field>
 		  <field name="code">kg.department.issue</field>
-		  <field name="padding" eval="3"/>
+		  <field name="padding" eval="4"/>
 		  <field name="prefix">SIS/%(year)s/</field>
 		  <field name="reset_sequence">fiscal_reset</field>
 		</record>
