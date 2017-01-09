@@ -99,7 +99,9 @@ class kg_ms_operations(osv.osv):
 		'op1_flag_sc': fields.boolean('Assign to Subcontract'),
 		'op1_contractor_id': fields.many2one('res.partner','Subcontractor'),
 		'op1_button_status': fields.selection([('visible','Visible'),('invisible','Invisible')],'Button Status'),
-		'op1_clamping_area': fields.char('Clamping Area'), 
+		'op1_clamping_area': fields.char('Clamping Area'),
+		'op1_start_date': fields.date('Start Date'),
+		'op1_end_date': fields.date('End Date'),
 		
 		 
 		### Operation 2 ###
@@ -129,7 +131,9 @@ class kg_ms_operations(osv.osv):
 		'op2_flag_sc': fields.boolean('Assign to Subcontract'),
 		'op2_contractor_id': fields.many2one('res.partner','Subcontractor'),
 		'op2_button_status': fields.selection([('visible','Visible'),('invisible','Invisible')],'Button Status'),
-		'op2_clamping_area': fields.char('Clamping Area'), 
+		'op2_clamping_area': fields.char('Clamping Area'),
+		'op2_start_date': fields.date('Start Date'),
+		'op2_end_date': fields.date('End Date'),
 		
 		### Operation 3 ###
 		'op3_stage_id': fields.many2one('kg.stage.master','Stage'),
@@ -158,7 +162,9 @@ class kg_ms_operations(osv.osv):
 		'op3_flag_sc': fields.boolean('Assign to Subcontract'),
 		'op3_contractor_id': fields.many2one('res.partner','Subcontractor'),
 		'op3_button_status': fields.selection([('visible','Visible'),('invisible','Invisible')],'Button Status'),
-		'op3_clamping_area': fields.char('Clamping Area'), 
+		'op3_clamping_area': fields.char('Clamping Area'),
+		'op3_start_date': fields.date('Start Date'),
+		'op3_end_date': fields.date('End Date'),
 		
 		### Operation 4 ###
 		'op4_stage_id': fields.many2one('kg.stage.master','Stage'),
@@ -188,6 +194,8 @@ class kg_ms_operations(osv.osv):
 		'op4_contractor_id': fields.many2one('res.partner','Subcontractor'),
 		'op4_button_status': fields.selection([('visible','Visible'),('invisible','Invisible')],'Button Status'),
 		'op4_clamping_area': fields.char('Clamping Area'), 
+		'op4_start_date': fields.date('Start Date'),
+		'op4_end_date': fields.date('End Date'),
 		
 		### Operation 5 ###
 		'op5_stage_id': fields.many2one('kg.stage.master','Stage'),
@@ -216,7 +224,9 @@ class kg_ms_operations(osv.osv):
 		'op5_flag_sc': fields.boolean('Assign to Subcontract'),
 		'op5_contractor_id': fields.many2one('res.partner','Subcontractor'),
 		'op5_button_status': fields.selection([('visible','Visible'),('invisible','Invisible')],'Button Status'),
-		'op5_clamping_area': fields.char('Clamping Area'), 
+		'op5_clamping_area': fields.char('Clamping Area'),
+		'op5_start_date': fields.date('Start Date'),
+		'op5_end_date': fields.date('End Date'), 
 		
 		### Operation 6 ###
 		'op6_stage_id': fields.many2one('kg.stage.master','Stage'),
@@ -245,7 +255,9 @@ class kg_ms_operations(osv.osv):
 		'op6_flag_sc': fields.boolean('Assign to Subcontract'),
 		'op6_contractor_id': fields.many2one('res.partner','Subcontractor'),
 		'op6_button_status': fields.selection([('visible','Visible'),('invisible','Invisible')],'Button Status'),
-		'op6_clamping_area': fields.char('Clamping Area'), 
+		'op6_clamping_area': fields.char('Clamping Area'),
+		'op6_start_date': fields.date('Start Date'),
+		'op6_end_date': fields.date('End Date'), 
 		
 		### Operation 7 ###
 		'op7_stage_id': fields.many2one('kg.stage.master','Stage'),
@@ -274,7 +286,9 @@ class kg_ms_operations(osv.osv):
 		'op7_flag_sc': fields.boolean('Assign to Subcontract'),
 		'op7_contractor_id': fields.many2one('res.partner','Subcontractor'),
 		'op7_button_status': fields.selection([('visible','Visible'),('invisible','Invisible')],'Button Status'),
-		'op7_clamping_area': fields.char('Clamping Area'), 
+		'op7_clamping_area': fields.char('Clamping Area'),
+		'op7_start_date': fields.date('Start Date'),
+		'op7_end_date': fields.date('End Date'), 
 		
 		### Operation 8 ###
 		'op8_stage_id': fields.many2one('kg.stage.master','Stage'),
@@ -303,7 +317,9 @@ class kg_ms_operations(osv.osv):
 		'op8_flag_sc': fields.boolean('Assign to Subcontract'),
 		'op8_contractor_id': fields.many2one('res.partner','Subcontractor'),
 		'op8_button_status': fields.selection([('visible','Visible'),('invisible','Invisible')],'Button Status'),
-		'op8_clamping_area': fields.char('Clamping Area'), 
+		'op8_clamping_area': fields.char('Clamping Area'),
+		'op8_start_date': fields.date('Start Date'),
+		'op8_end_date': fields.date('End Date'),
 		
 		### Operation 9 ###
 		'op9_stage_id': fields.many2one('kg.stage.master','Stage'),
@@ -333,6 +349,8 @@ class kg_ms_operations(osv.osv):
 		'op9_contractor_id': fields.many2one('res.partner','Subcontractor'),
 		'op9_button_status': fields.selection([('visible','Visible'),('invisible','Invisible')],'Button Status'),
 		'op9_clamping_area': fields.char('Clamping Area'),
+		'op9_start_date': fields.date('Start Date',required=True),
+		'op9_end_date': fields.date('End Date',required=True),
 		 
 		### Operation 10 ###
 		'op10_stage_id': fields.many2one('kg.stage.master','Stage'),
@@ -361,7 +379,9 @@ class kg_ms_operations(osv.osv):
 		'op10_flag_sc': fields.boolean('Assign to Subcontract'),
 		'op10_contractor_id': fields.many2one('res.partner','Subcontractor'),
 		'op10_button_status': fields.selection([('visible','Visible'),('invisible','Invisible')],'Button Status'),
-		'op10_clamping_area': fields.char('Clamping Area'), 
+		'op10_clamping_area': fields.char('Clamping Area'),
+		'op10_start_date': fields.date('Start Date'),
+		'op10_end_date': fields.date('End Date'),
 		
 		### Operation 11 ###
 		'op11_stage_id': fields.many2one('kg.stage.master','Stage'),
@@ -390,7 +410,9 @@ class kg_ms_operations(osv.osv):
 		'op11_flag_sc': fields.boolean('Assign to Subcontract'),
 		'op11_contractor_id': fields.many2one('res.partner','Subcontractor'),
 		'op11_button_status': fields.selection([('visible','Visible'),('invisible','Invisible')],'Button Status'),
-		'op11_clamping_area': fields.char('Clamping Area'), 
+		'op11_clamping_area': fields.char('Clamping Area'),
+		'op11_start_date': fields.date('Start Date'),
+		'op11_end_date': fields.date('End Date'),
 		
 		### Operation 12 ###
 		'op12_stage_id': fields.many2one('kg.stage.master','Stage'),
@@ -419,7 +441,9 @@ class kg_ms_operations(osv.osv):
 		'op12_flag_sc': fields.boolean('Assign to Subcontract'),
 		'op12_contractor_id': fields.many2one('res.partner','Subcontractor'),
 		'op12_button_status': fields.selection([('visible','Visible'),('invisible','Invisible')],'Button Status'),
-		'op12_clamping_area': fields.char('Clamping Area'), 
+		'op12_clamping_area': fields.char('Clamping Area'),
+		'op12_start_date': fields.date('Start Date'),
+		'op12_end_date': fields.date('End Date'),
 		
 		
 		### Entry Info ####
@@ -444,39 +468,63 @@ class kg_ms_operations(osv.osv):
 		### Operation 1 ###
 		'op1_sc_status':'inhouse',
 		'op1_button_status': 'visible',
+		'op1_start_date': lambda * a: time.strftime('%Y-%m-%d'),
+		'op1_end_date': lambda * a: time.strftime('%Y-%m-%d'),
 		### Operation 2 ###
 		'op2_sc_status':'inhouse',
 		'op2_button_status': 'visible',
+		'op2_start_date': lambda * a: time.strftime('%Y-%m-%d'),
+		'op2_end_date': lambda * a: time.strftime('%Y-%m-%d'),
 		### Operation 3 ###
 		'op3_sc_status':'inhouse',
 		'op3_button_status': 'visible',
+		'op3_start_date': lambda * a: time.strftime('%Y-%m-%d'),
+		'op3_end_date': lambda * a: time.strftime('%Y-%m-%d'),
 		### Operation 4 ###
 		'op4_sc_status':'inhouse',
 		'op4_button_status': 'visible',
+		'op4_start_date': lambda * a: time.strftime('%Y-%m-%d'),
+		'op4_end_date': lambda * a: time.strftime('%Y-%m-%d'),
 		### Operation 5 ###
 		'op5_sc_status':'inhouse',
 		'op5_button_status': 'visible',
+		'op5_start_date': lambda * a: time.strftime('%Y-%m-%d'),
+		'op5_end_date': lambda * a: time.strftime('%Y-%m-%d'),
 		### Operation 6 ###
 		'op6_sc_status':'inhouse',
 		'op6_button_status': 'visible',
+		'op6_start_date': lambda * a: time.strftime('%Y-%m-%d'),
+		'op6_end_date': lambda * a: time.strftime('%Y-%m-%d'),
 		### Operation 7 ###
 		'op7_sc_status':'inhouse',
 		'op7_button_status': 'visible',
+		'op7_start_date': lambda * a: time.strftime('%Y-%m-%d'),
+		'op7_end_date': lambda * a: time.strftime('%Y-%m-%d'),
 		### Operation 8 ###
 		'op8_sc_status':'inhouse',
 		'op8_button_status': 'visible',
+		'op8_start_date': lambda * a: time.strftime('%Y-%m-%d'),
+		'op8_end_date': lambda * a: time.strftime('%Y-%m-%d'),
 		### Operation 9 ###
 		'op9_sc_status':'inhouse',
 		'op9_button_status': 'visible',
+		'op9_start_date': lambda * a: time.strftime('%Y-%m-%d'),
+		'op9_end_date': lambda * a: time.strftime('%Y-%m-%d'),
 		### Operation 10 ###
 		'op10_sc_status':'inhouse',
 		'op10_button_status': 'visible',
+		'op10_start_date': lambda * a: time.strftime('%Y-%m-%d'),
+		'op10_end_date': lambda * a: time.strftime('%Y-%m-%d'),
 		### Operation 11 ###
 		'op11_sc_status':'inhouse',
 		'op11_button_status': 'visible',
+		'op11_start_date': lambda * a: time.strftime('%Y-%m-%d'),
+		'op11_end_date': lambda * a: time.strftime('%Y-%m-%d'),
 		### Operation 12 ###
 		'op12_sc_status':'inhouse',
 		'op12_button_status': 'visible',
+		'op12_start_date': lambda * a: time.strftime('%Y-%m-%d'),
+		'op12_end_date': lambda * a: time.strftime('%Y-%m-%d'),
 		
 		'state': 'active',
 		
@@ -521,6 +569,19 @@ class kg_ms_operations(osv.osv):
 			if entry_rec.op1_flag_sc != True:
 			
 				for dim_item in entry_rec.op1_line_ids:
+					
+					today = date.today()
+					today = str(today)
+					today = datetime.strptime(today, '%Y-%m-%d')
+					start_date = entry_rec.op1_start_date
+					start_date = str(start_date)
+					start_date = datetime.strptime(start_date, '%Y-%m-%d')
+					end_date = entry_rec.op1_end_date
+					end_date = str(end_date)
+					end_date = datetime.strptime(end_date, '%Y-%m-%d')
+					if start_date > today or end_date > today:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End date should be less than or equal to current date !!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -969,7 +1030,7 @@ class kg_ms_operations(osv.osv):
 								'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 								'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 								#~ 'cutting_qty':ms_raw_rec.temp_qty,
-								'ms_bot_id':entry_rec.ms_id.id,
+								'ms_bot_id':entry_rec.ms_id.ms_id.id,
 								'fns_item_name':entry_rec.item_name,
 								'position_id': entry_rec.position_id.id
 								}
@@ -1173,6 +1234,19 @@ class kg_ms_operations(osv.osv):
 			if entry_rec.op2_flag_sc != True:
 			
 				for dim_item in entry_rec.op2_line_ids:
+					
+					today = date.today()
+					today = str(today)
+					today = datetime.strptime(today, '%Y-%m-%d')
+					start_date = entry_rec.op2_start_date
+					start_date = str(start_date)
+					start_date = datetime.strptime(start_date, '%Y-%m-%d')
+					end_date = entry_rec.op2_end_date
+					end_date = str(end_date)
+					end_date = datetime.strptime(end_date, '%Y-%m-%d')
+					if start_date > today or end_date > today:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End date should be less than or equal to current date !!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -1619,7 +1693,7 @@ class kg_ms_operations(osv.osv):
 								'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 								'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 								#~ 'cutting_qty':ms_raw_rec.temp_qty,
-								'ms_bot_id':entry_rec.ms_id.id,
+								'ms_bot_id':entry_rec.ms_id.ms_id.id,
 								'fns_item_name':entry_rec.item_name,
 								'position_id': entry_rec.position_id.id
 								}
@@ -1816,6 +1890,19 @@ class kg_ms_operations(osv.osv):
 			if entry_rec.op3_flag_sc != True:
 			
 				for dim_item in entry_rec.op3_line_ids:
+					
+					today = date.today()
+					today = str(today)
+					today = datetime.strptime(today, '%Y-%m-%d')
+					start_date = entry_rec.op3_start_date
+					start_date = str(start_date)
+					start_date = datetime.strptime(start_date, '%Y-%m-%d')
+					end_date = entry_rec.op3_end_date
+					end_date = str(end_date)
+					end_date = datetime.strptime(end_date, '%Y-%m-%d')
+					if start_date > today or end_date > today:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End date should be less than or equal to current date!!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -2259,7 +2346,7 @@ class kg_ms_operations(osv.osv):
 								'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 								'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 								#~ 'cutting_qty':ms_raw_rec.temp_qty,
-								'ms_bot_id':entry_rec.ms_id.id,
+								'ms_bot_id':entry_rec.ms_id.ms_id.id,
 								'fns_item_name':entry_rec.item_name,
 								'position_id': entry_rec.position_id.id
 								}
@@ -2459,6 +2546,19 @@ class kg_ms_operations(osv.osv):
 			if entry_rec.op4_flag_sc != True:
 			
 				for dim_item in entry_rec.op4_line_ids:
+					
+					today = date.today()
+					today = str(today)
+					today = datetime.strptime(today, '%Y-%m-%d')
+					start_date = entry_rec.op4_start_date
+					start_date = str(start_date)
+					start_date = datetime.strptime(start_date, '%Y-%m-%d')
+					end_date = entry_rec.op4_end_date
+					end_date = str(end_date)
+					end_date = datetime.strptime(end_date, '%Y-%m-%d')
+					if start_date > today or end_date > today:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End date should be less than or equal to current date!!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -2902,7 +3002,7 @@ class kg_ms_operations(osv.osv):
 								'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 								'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 								#~ 'cutting_qty':ms_raw_rec.temp_qty,
-								'ms_bot_id':entry_rec.ms_id.id,
+								'ms_bot_id':entry_rec.ms_id.ms_id.id,
 								'fns_item_name':entry_rec.item_name,
 								'position_id': entry_rec.position_id.id
 								}
@@ -3102,6 +3202,19 @@ class kg_ms_operations(osv.osv):
 			if entry_rec.op5_flag_sc != True:
 			
 				for dim_item in entry_rec.op5_line_ids:
+					
+					today = date.today()
+					today = str(today)
+					today = datetime.strptime(today, '%Y-%m-%d')
+					start_date = entry_rec.op5_start_date
+					start_date = str(start_date)
+					start_date = datetime.strptime(start_date, '%Y-%m-%d')
+					end_date = entry_rec.op5_end_date
+					end_date = str(end_date)
+					end_date = datetime.strptime(end_date, '%Y-%m-%d')
+					if start_date > today or end_date > today:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End date should be less than or equal to current date!!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -3545,7 +3658,7 @@ class kg_ms_operations(osv.osv):
 								'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 								'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 								#~ 'cutting_qty':ms_raw_rec.temp_qty,
-								'ms_bot_id':entry_rec.ms_id.id,
+								'ms_bot_id':entry_rec.ms_id.ms_id.id,
 								'fns_item_name':entry_rec.item_name,
 								'position_id': entry_rec.position_id.id
 								}
@@ -3744,6 +3857,19 @@ class kg_ms_operations(osv.osv):
 			if entry_rec.op6_flag_sc != True:
 			
 				for dim_item in entry_rec.op6_line_ids:
+					
+					today = date.today()
+					today = str(today)
+					today = datetime.strptime(today, '%Y-%m-%d')
+					start_date = entry_rec.op6_start_date
+					start_date = str(start_date)
+					start_date = datetime.strptime(start_date, '%Y-%m-%d')
+					end_date = entry_rec.op6_end_date
+					end_date = str(end_date)
+					end_date = datetime.strptime(end_date, '%Y-%m-%d')
+					if start_date > today or end_date > today:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End date should be less than or equal to current date!!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -4187,7 +4313,7 @@ class kg_ms_operations(osv.osv):
 								'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 								'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 								#~ 'cutting_qty':ms_raw_rec.temp_qty,
-								'ms_bot_id':entry_rec.ms_id.id,
+								'ms_bot_id':entry_rec.ms_id.ms_id.id,
 								'fns_item_name':entry_rec.item_name,
 								'position_id': entry_rec.position_id.id
 								}
@@ -4386,6 +4512,19 @@ class kg_ms_operations(osv.osv):
 			if entry_rec.op7_flag_sc != True:
 			
 				for dim_item in entry_rec.op7_line_ids:
+					
+					today = date.today()
+					today = str(today)
+					today = datetime.strptime(today, '%Y-%m-%d')
+					start_date = entry_rec.op7_start_date
+					start_date = str(start_date)
+					start_date = datetime.strptime(start_date, '%Y-%m-%d')
+					end_date = entry_rec.op7_end_date
+					end_date = str(end_date)
+					end_date = datetime.strptime(end_date, '%Y-%m-%d')
+					if start_date > today or end_date > today:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End date should be less than or equal to current date!!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -4829,7 +4968,7 @@ class kg_ms_operations(osv.osv):
 								'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 								'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 								#~ 'cutting_qty':ms_raw_rec.temp_qty,
-								'ms_bot_id':entry_rec.ms_id.id,
+								'ms_bot_id':entry_rec.ms_id.ms_id.id,
 								'fns_item_name':entry_rec.item_name,
 								'position_id': entry_rec.position_id.id
 								}
@@ -5028,6 +5167,19 @@ class kg_ms_operations(osv.osv):
 			if entry_rec.op8_flag_sc != True:
 			
 				for dim_item in entry_rec.op8_line_ids:
+					
+					today = date.today()
+					today = str(today)
+					today = datetime.strptime(today, '%Y-%m-%d')
+					start_date = entry_rec.op8_start_date
+					start_date = str(start_date)
+					start_date = datetime.strptime(start_date, '%Y-%m-%d')
+					end_date = entry_rec.op8_end_date
+					end_date = str(end_date)
+					end_date = datetime.strptime(end_date, '%Y-%m-%d')
+					if start_date > today or end_date > today:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End date should be less than or equal to current date!!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -5471,7 +5623,7 @@ class kg_ms_operations(osv.osv):
 								'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 								'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 								#~ 'cutting_qty':ms_raw_rec.temp_qty,
-								'ms_bot_id':entry_rec.ms_id.id,
+								'ms_bot_id':entry_rec.ms_id.ms_id.id,
 								'fns_item_name':entry_rec.item_name,
 								'position_id': entry_rec.position_id.id
 								}
@@ -5670,6 +5822,19 @@ class kg_ms_operations(osv.osv):
 			if entry_rec.op9_flag_sc != True:
 			
 				for dim_item in entry_rec.op9_line_ids:
+					
+					today = date.today()
+					today = str(today)
+					today = datetime.strptime(today, '%Y-%m-%d')
+					start_date = entry_rec.op9_start_date
+					start_date = str(start_date)
+					start_date = datetime.strptime(start_date, '%Y-%m-%d')
+					end_date = entry_rec.op9_end_date
+					end_date = str(end_date)
+					end_date = datetime.strptime(end_date, '%Y-%m-%d')
+					if start_date > today or end_date > today:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End date should be less than or equal to current date!!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -6113,7 +6278,7 @@ class kg_ms_operations(osv.osv):
 								'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 								'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 								#~ 'cutting_qty':ms_raw_rec.temp_qty,
-								'ms_bot_id':entry_rec.ms_id.id,
+								'ms_bot_id':entry_rec.ms_id.ms_id.id,
 								'fns_item_name':entry_rec.item_name,
 								'position_id': entry_rec.position_id.id
 								}
@@ -6312,6 +6477,19 @@ class kg_ms_operations(osv.osv):
 			if entry_rec.op10_flag_sc != True:
 			
 				for dim_item in entry_rec.op10_line_ids:
+					
+					today = date.today()
+					today = str(today)
+					today = datetime.strptime(today, '%Y-%m-%d')
+					start_date = entry_rec.op10_start_date
+					start_date = str(start_date)
+					start_date = datetime.strptime(start_date, '%Y-%m-%d')
+					end_date = entry_rec.op10_end_date
+					end_date = str(end_date)
+					end_date = datetime.strptime(end_date, '%Y-%m-%d')
+					if start_date > today or end_date > today:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End date should be less than or equal to current date!!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -6755,7 +6933,7 @@ class kg_ms_operations(osv.osv):
 								'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 								'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 								#~ 'cutting_qty':ms_raw_rec.temp_qty,
-								'ms_bot_id':entry_rec.ms_id.id,
+								'ms_bot_id':entry_rec.ms_id.ms_id.id,
 								'fns_item_name':entry_rec.item_name,
 								'position_id': entry_rec.position_id.id
 								}
@@ -6954,6 +7132,19 @@ class kg_ms_operations(osv.osv):
 			if entry_rec.op11_flag_sc != True:
 			
 				for dim_item in entry_rec.op11_line_ids:
+					
+					today = date.today()
+					today = str(today)
+					today = datetime.strptime(today, '%Y-%m-%d')
+					start_date = entry_rec.op11_start_date
+					start_date = str(start_date)
+					start_date = datetime.strptime(start_date, '%Y-%m-%d')
+					end_date = entry_rec.op11_end_date
+					end_date = str(end_date)
+					end_date = datetime.strptime(end_date, '%Y-%m-%d')
+					if start_date > today or end_date > today:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End date should be less than or equal to current date!!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -7397,7 +7588,7 @@ class kg_ms_operations(osv.osv):
 								'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 								'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 								#~ 'cutting_qty':ms_raw_rec.temp_qty,
-								'ms_bot_id':entry_rec.ms_id.id,
+								'ms_bot_id':entry_rec.ms_id.ms_id.id,
 								'fns_item_name':entry_rec.item_name,
 								'position_id': entry_rec.position_id.id
 								}
@@ -7596,6 +7787,19 @@ class kg_ms_operations(osv.osv):
 			if entry_rec.op12_flag_sc != True:
 			
 				for dim_item in entry_rec.op12_line_ids:
+					
+					today = date.today()
+					today = str(today)
+					today = datetime.strptime(today, '%Y-%m-%d')
+					start_date = entry_rec.op12_start_date
+					start_date = str(start_date)
+					start_date = datetime.strptime(start_date, '%Y-%m-%d')
+					end_date = entry_rec.op12_end_date
+					end_date = str(end_date)
+					end_date = datetime.strptime(end_date, '%Y-%m-%d')
+					if start_date > today or end_date > today:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End date should be less than or equal to current date!!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -8039,7 +8243,7 @@ class kg_ms_operations(osv.osv):
 								'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 								'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
 								#~ 'cutting_qty':ms_raw_rec.temp_qty,
-								'ms_bot_id':entry_rec.ms_id.id,
+								'ms_bot_id':entry_rec.ms_id.ms_id.id,
 								'fns_item_name':entry_rec.item_name,
 								'position_id': entry_rec.position_id.id
 								}

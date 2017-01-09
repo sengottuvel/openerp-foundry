@@ -293,7 +293,7 @@ order by ref_order_priority,order_date,order_no,pattern_no]]>
 			</staticText>
 			<image>
 				<reportElement x="138" y="0" width="56" height="31"/>
-				<imageExpression><![CDATA["/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
 			</image>
 		</band>
 	</title>

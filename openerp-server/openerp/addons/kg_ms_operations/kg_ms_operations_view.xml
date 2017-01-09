@@ -17,6 +17,7 @@
 					</header>
 					<group string="Operation Details">
 						<group>
+							<field name="op1_start_date" attrs="{'readonly': [('op1_button_status','=','invisible')]}"/>
 							<field name="position_id" required="1"/>
 							<field name="op1_clamping_area" readonly="1"/>
 							<field name="op1_machine_id" attrs="{'readonly': [('op1_button_status','=','invisible')]}"/>
@@ -45,6 +46,7 @@
 							
 						</group>											
 						<group>
+							<field name="op1_end_date" attrs="{'readonly': [('op1_button_status','=','invisible')]}"/>
 							<field name="op1_stage_id" required="1" readonly="1"/>
 							<field name="op1_shift_id" attrs="{'readonly': [('op1_button_status','=','invisible')]}"/>
 							<field name="op1_operator" attrs="{'readonly': [('op1_button_status','=','invisible')]}"/>
@@ -89,7 +91,7 @@
 							   <field name="description" required="1" readonly="1"/>
 							   <field name="min_val" required="1" readonly="1"/>
 							   <field name="max_val" required="1" readonly="1"/>
-							   <field name="actual_val" required="1"/>
+							   <field name="actual_val" required="0"/>
 							   <field name="remark"/>
 							</tree>
 						</field>
@@ -216,6 +218,7 @@
 					</header>
 					<group string="Operation Details">
 						<group>
+							<field name="op2_start_date" attrs="{'readonly': [('op2_button_status','=','invisible')]}"/>
 							<field name="position_id" required="1"/>
 							<field name="op2_clamping_area" readonly="1"/>
 							<field name="op2_machine_id"  attrs="{'readonly': [('op2_button_status','=','invisible')]}"/>
@@ -243,6 +246,7 @@
 							
 						</group>											
 						<group>
+							<field name="op2_end_date" attrs="{'readonly': [('op2_button_status','=','invisible')]}"/>
 							<field name="op2_stage_id" readonly="1"/>
 							<field name="op2_shift_id" attrs="{'readonly': [('op2_button_status','=','invisible')]}"/>
 							<field name="op2_operator"  attrs="{'readonly': [('op2_button_status','=','invisible')]}"/>
@@ -287,7 +291,7 @@
 							   <field name="description" required="1" readonly="1"/>
 							   <field name="min_val" required="1" readonly="1"/>
 							   <field name="max_val" required="1" readonly="1"/>
-							   <field name="actual_val" required="1"/>
+							   <field name="actual_val" required="0"/>
 							   <field name="remark"/>
 							</tree>
 						</field>
@@ -414,6 +418,7 @@
 					</header>
 					<group string="Operation Details">
 						<group>
+							<field name="op3_start_date" attrs="{'readonly': [('op3_button_status','=','invisible')]}"/>
 							<field name="position_id" required="1"/>
 							<field name="op3_clamping_area" readonly="1"/>
 							<field name="op3_machine_id"  attrs="{'readonly': [('op3_button_status','=','invisible')]}"/>
@@ -441,6 +446,7 @@
 							
 						</group>											
 						<group>
+							<field name="op3_end_date" attrs="{'readonly': [('op3_button_status','=','invisible')]}"/>
 							<field name="op3_stage_id" readonly="1"/>
 							<field name="op3_shift_id" attrs="{'readonly': [('op3_button_status','=','invisible')]}"/>
 							<field name="op3_operator"  attrs="{'readonly': [('op3_button_status','=','invisible')]}"/>
@@ -485,7 +491,7 @@
 							   <field name="description" required="1" readonly="1"/>
 							   <field name="min_val" required="1" readonly="1"/>
 							   <field name="max_val" required="1" readonly="1"/>
-							   <field name="actual_val" required="1"/>
+							   <field name="actual_val" required="0"/>
 							   <field name="remark"/>
 							</tree>
 						</field>
@@ -614,6 +620,7 @@
 					</header>
 					<group string="Operation Details">
 						<group>
+							<field name="op4_start_date" attrs="{'readonly': [('op4_button_status','=','invisible')]}"/>
 							<field name="position_id" required="1"/>
 							<field name="op4_clamping_area" readonly="1"/>
 							<field name="op4_machine_id"  attrs="{'readonly': [('op4_button_status','=','invisible')]}"/>
@@ -641,6 +648,7 @@
 							
 						</group>											
 						<group>
+							<field name="op4_end_date" attrs="{'readonly': [('op4_button_status','=','invisible')]}"/>
 							<field name="op4_stage_id" readonly="1"/>
 							<field name="op4_shift_id" attrs="{'readonly': [('op4_button_status','=','invisible')]}"/>
 							<field name="op4_operator"  attrs="{'readonly': [('op4_button_status','=','invisible')]}"/>
@@ -685,7 +693,7 @@
 							   <field name="description" required="1" readonly="1"/>
 							   <field name="min_val" required="1" readonly="1"/>
 							   <field name="max_val" required="1" readonly="1"/>
-							   <field name="actual_val" required="1"/>
+							   <field name="actual_val" required="0"/>
 							   <field name="remark"/>
 							</tree>
 						</field>
@@ -814,6 +822,7 @@
 					</header>
 					<group string="Operation Details">
 						<group>
+							<field name="op5_start_date" attrs="{'readonly': [('op5_button_status','=','invisible')]}"/>
 							<field name="position_id" required="1"/>
 							<field name="op5_clamping_area" readonly="1"/>
 							<field name="op5_machine_id"  attrs="{'readonly': [('op5_button_status','=','invisible')]}"/>
@@ -841,6 +850,7 @@
 							
 						</group>											
 						<group>
+							<field name="op5_end_date" attrs="{'readonly': [('op5_button_status','=','invisible')]}"/>
 							<field name="op5_stage_id" readonly="1"/>
 							<field name="op5_shift_id" attrs="{'readonly': [('op5_button_status','=','invisible')]}"/>
 							<field name="op5_operator"  attrs="{'readonly': [('op5_button_status','=','invisible')]}"/>
@@ -885,7 +895,7 @@
 							   <field name="description" required="1" readonly="1"/>
 							   <field name="min_val" required="1" readonly="1"/>
 							   <field name="max_val" required="1" readonly="1"/>
-							   <field name="actual_val" required="1"/>
+							   <field name="actual_val" required="0"/>
 							   <field name="remark"/>
 							</tree>
 						</field>
@@ -1014,6 +1024,7 @@
 					</header>
 					<group string="Operation Details">
 						<group>
+							<field name="op6_start_date" attrs="{'readonly': [('op6_button_status','=','invisible')]}"/>
 							<field name="position_id" required="1"/>
 							<field name="op6_clamping_area" readonly="1"/>
 							<field name="op6_machine_id"  attrs="{'readonly': [('op6_button_status','=','invisible')]}"/>
@@ -1041,6 +1052,7 @@
 							
 						</group>											
 						<group>
+							<field name="op6_end_date" attrs="{'readonly': [('op6_button_status','=','invisible')]}"/>
 							<field name="op6_stage_id" readonly="1"/>
 							<field name="op6_shift_id" attrs="{'readonly': [('op6_button_status','=','invisible')]}"/>
 							<field name="op6_operator"  attrs="{'readonly': [('op6_button_status','=','invisible')]}"/>
@@ -1085,7 +1097,7 @@
 							   <field name="description" required="1" readonly="1"/>
 							   <field name="min_val" required="1" readonly="1"/>
 							   <field name="max_val" required="1" readonly="1"/>
-							   <field name="actual_val" required="1"/>
+							   <field name="actual_val" required="0"/>
 							   <field name="remark"/>
 							</tree>
 						</field>
@@ -1214,6 +1226,7 @@
 					</header>
 					<group string="Operation Details">
 						<group>
+							<field name="op7_start_date" attrs="{'readonly': [('op7_button_status','=','invisible')]}"/>
 							<field name="position_id" required="1"/>
 							<field name="op7_clamping_area" readonly="1"/>
 							<field name="op7_machine_id"  attrs="{'readonly': [('op7_button_status','=','invisible')]}"/>
@@ -1241,6 +1254,7 @@
 							
 						</group>											
 						<group>
+							<field name="op7_end_date" attrs="{'readonly': [('op7_button_status','=','invisible')]}"/>
 							<field name="op7_stage_id" readonly="1"/>
 							<field name="op7_shift_id" attrs="{'readonly': [('op7_button_status','=','invisible')]}"/>
 							<field name="op7_operator"  attrs="{'readonly': [('op7_button_status','=','invisible')]}"/>
@@ -1285,7 +1299,7 @@
 							   <field name="description" required="1" readonly="1"/>
 							   <field name="min_val" required="1" readonly="1"/>
 							   <field name="max_val" required="1" readonly="1"/>
-							   <field name="actual_val" required="1"/>
+							   <field name="actual_val" required="0"/>
 							   <field name="remark"/>
 							</tree>
 						</field>
@@ -1414,6 +1428,7 @@
 					</header>
 					<group string="Operation Details">
 						<group>
+							<field name="op8_start_date" attrs="{'readonly': [('op8_button_status','=','invisible')]}"/>
 							<field name="position_id" required="1"/>
 							<field name="op8_clamping_area" readonly="1"/>
 							<field name="op8_machine_id"  attrs="{'readonly': [('op8_button_status','=','invisible')]}"/>
@@ -1441,6 +1456,7 @@
 							
 						</group>											
 						<group>
+							<field name="op8_end_date" attrs="{'readonly': [('op8_button_status','=','invisible')]}"/>
 							<field name="op8_stage_id" readonly="1"/>
 							<field name="op8_shift_id" attrs="{'readonly': [('op8_button_status','=','invisible')]}"/>
 							<field name="op8_operator"  attrs="{'readonly': [('op8_button_status','=','invisible')]}"/>
@@ -1485,7 +1501,7 @@
 							   <field name="description" required="1" readonly="1"/>
 							   <field name="min_val" required="1" readonly="1"/>
 							   <field name="max_val" required="1" readonly="1"/>
-							   <field name="actual_val" required="1"/>
+							   <field name="actual_val" required="0"/>
 							   <field name="remark"/>
 							</tree>
 						</field>
@@ -1614,6 +1630,7 @@
 					</header>
 					<group string="Operation Details">
 						<group>
+							<field name="op9_start_date" attrs="{'readonly': [('op9_button_status','=','invisible')]}"/>
 							<field name="position_id" required="1"/>
 							<field name="op9_clamping_area" readonly="1"/>
 							<field name="op9_machine_id"  attrs="{'readonly': [('op9_button_status','=','invisible')]}"/>
@@ -1641,6 +1658,7 @@
 							
 						</group>											
 						<group>
+							<field name="op9_end_date" attrs="{'readonly': [('op9_button_status','=','invisible')]}"/>
 							<field name="op9_stage_id" readonly="1"/>
 							<field name="op9_shift_id" attrs="{'readonly': [('op9_button_status','=','invisible')]}"/>
 							<field name="op9_operator"  attrs="{'readonly': [('op9_button_status','=','invisible')]}"/>
@@ -1685,7 +1703,7 @@
 							   <field name="description" required="1" readonly="1"/>
 							   <field name="min_val" required="1" readonly="1"/>
 							   <field name="max_val" required="1" readonly="1"/>
-							   <field name="actual_val" required="1"/>
+							   <field name="actual_val" required="0"/>
 							   <field name="remark"/>
 							</tree>
 						</field>
@@ -1814,6 +1832,7 @@
 					</header>
 					<group string="Operation Details">
 						<group>
+							<field name="op10_start_date" attrs="{'readonly': [('op10_button_status','=','invisible')]}"/>
 							<field name="position_id" required="1"/>
 							<field name="op10_clamping_area" readonly="1"/>
 							<field name="op10_machine_id"  attrs="{'readonly': [('op10_button_status','=','invisible')]}"/>
@@ -1841,6 +1860,7 @@
 							
 						</group>											
 						<group>
+							<field name="op10_end_date" attrs="{'readonly': [('op10_button_status','=','invisible')]}"/>
 							<field name="op10_stage_id" readonly="1"/>
 							<field name="op10_shift_id" attrs="{'readonly': [('op10_button_status','=','invisible')]}"/>
 							<field name="op10_operator"  attrs="{'readonly': [('op10_button_status','=','invisible')]}"/>
@@ -1885,7 +1905,7 @@
 							   <field name="description" required="1" readonly="1"/>
 							   <field name="min_val" required="1" readonly="1"/>
 							   <field name="max_val" required="1" readonly="1"/>
-							   <field name="actual_val" required="1"/>
+							   <field name="actual_val" required="0"/>
 							   <field name="remark"/>
 							</tree>
 						</field>
@@ -2014,6 +2034,7 @@
 					</header>
 					<group string="Operation Details">
 						<group>
+							<field name="op11_start_date" attrs="{'readonly': [('op11_button_status','=','invisible')]}"/>
 							<field name="position_id" required="1"/>
 							<field name="op11_clamping_area" readonly="1"/>
 							<field name="op11_machine_id"  attrs="{'readonly': [('op11_button_status','=','invisible')]}"/>
@@ -2041,6 +2062,7 @@
 							
 						</group>											
 						<group>
+							<field name="op11_end_date" attrs="{'readonly': [('op11_button_status','=','invisible')]}"/>
 							<field name="op11_stage_id" readonly="1"/>
 							<field name="op11_shift_id" attrs="{'readonly': [('op11_button_status','=','invisible')]}"/>
 							<field name="op11_operator"  attrs="{'readonly': [('op11_button_status','=','invisible')]}"/>
@@ -2085,7 +2107,7 @@
 							   <field name="description" required="1" readonly="1"/>
 							   <field name="min_val" required="1" readonly="1"/>
 							   <field name="max_val" required="1" readonly="1"/>
-							   <field name="actual_val" required="1"/>
+							   <field name="actual_val" required="0"/>
 							   <field name="remark"/>
 							</tree>
 						</field>
@@ -2214,6 +2236,7 @@
 					</header>
 					<group string="Operation Details">
 						<group>
+							<field name="op12_start_date" attrs="{'readonly': [('op12_button_status','=','invisible')]}"/>
 							<field name="position_id" required="1"/>
 							<field name="op12_clamping_area" readonly="1"/>
 							<field name="op12_machine_id"  attrs="{'readonly': [('op12_button_status','=','invisible')]}"/>
@@ -2241,6 +2264,7 @@
 							
 						</group>											
 						<group>
+							<field name="op12_end_date" attrs="{'readonly': [('op12_button_status','=','invisible')]}"/>
 							<field name="op12_stage_id" readonly="1"/>
 							<field name="op12_shift_id" attrs="{'readonly': [('op12_button_status','=','invisible')]}"/>
 							<field name="op12_operator"  attrs="{'readonly': [('op12_button_status','=','invisible')]}"/>
@@ -2285,7 +2309,7 @@
 							   <field name="description" required="1" readonly="1"/>
 							   <field name="min_val" required="1" readonly="1"/>
 							   <field name="max_val" required="1" readonly="1"/>
-							   <field name="actual_val" required="1"/>
+							   <field name="actual_val" required="0"/>
 							   <field name="remark"/>
 							</tree>
 						</field>
