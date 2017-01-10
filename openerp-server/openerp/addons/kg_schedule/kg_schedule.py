@@ -91,8 +91,8 @@ class kg_schedule(osv.osv):
 	}
 	
 	#~ _sql_constraints = [
-        #~ ('name_uniq', 'unique(name)', 'Schedule No. must be unique !!'),
-    #~ ]
+		#~ ('name_uniq', 'unique(name)', 'Schedule No. must be unique !!'),
+	#~ ]
 	
 	
 	def _future_entry_date_check(self,cr,uid,ids,context=None):
@@ -495,8 +495,8 @@ class kg_schedule(osv.osv):
 										'order_line_id': schedule_item.order_line_id.id,
 										'pump_model_id': schedule_item.order_line_id.pump_model_id.id,
 										'qty' : qc_qty,
-										'stock_qty': qc_qty,                   
-										'allocated_qty':qc_qty,                 
+										'stock_qty': qc_qty,				   
+										'allocated_qty':qc_qty,				 
 										'state' : 'draft',
 										'order_category':schedule_item.order_id.order_category,
 										'order_priority':priority,
@@ -1111,8 +1111,8 @@ class kg_schedule(osv.osv):
 								'order_id': schedule_item.order_id.id,
 								'order_line_id': schedule_item.order_line_id.id,
 								'order_bomline_id': schedule_item.order_bomline_id.id,
-								'qty' : schedule_qty,              
-								'schedule_qty' : schedule_qty,              
+								'qty' : schedule_qty,			  
+								'schedule_qty' : schedule_qty,			  
 								'state' : 'issue_pending',
 								'order_category':schedule_item.order_id.order_category,
 								'order_priority':priority,
@@ -1169,8 +1169,8 @@ class kg_schedule(osv.osv):
 								'order_id': schedule_item.order_id.id,
 								'order_line_id': schedule_item.order_line_id.id,
 								'order_bomline_id': schedule_item.order_bomline_id.id,
-								'qty' : schedule_qty,              
-								'schedule_qty' : schedule_qty,              
+								'qty' : schedule_qty,			  
+								'schedule_qty' : schedule_qty,			  
 								'state' : 'issue_done',
 								'order_category':schedule_item.order_id.order_category,
 								'order_priority':priority,
@@ -1369,12 +1369,12 @@ class kg_schedule(osv.osv):
 							indent_id = dep_indent_obj.create(cr, uid, foundry_dep_indent_vals)
 						
 							cr.execute("""
-								select type,order_line_id,product_id,pump_model_id,pattern_id,sum(indent_qty) as indent_qty from 
+								select type,order_line_id,product_id,pump_model_id,pattern_id,position_id,moc_id,sum(indent_qty) as indent_qty from 
 
 									(
 
 									select (raw.qty * order_bom.qty) as indent_qty,raw.product_id,wo_line.pump_model_id,order_bom.pattern_id,
-									order_bom.header_id as order_line_id,'foun' as type
+									order_bom.header_id as order_line_id,order_bom.position_id as position_id,order_bom.moc_id as moc_id,'foun' as type
 									from ch_moc_raw_material as raw
 									left join ch_order_bom_details order_bom on raw.header_id = order_bom.moc_id
 									left join ch_work_order_details wo_line on order_bom.header_id = wo_line.id
@@ -1385,7 +1385,7 @@ class kg_schedule(osv.osv):
 									union
 
 									select (raw.qty * acc_order_bom.qty) as indent_qty,raw.product_id,wo_line.pump_model_id,acc_order_bom.pattern_id,
-									wo_acc_line.header_id as order_line_id,'acc' as type
+									wo_acc_line.header_id as order_line_id,acc_order_bom.position_id as position_id,acc_order_bom.moc_id as moc_id,'acc' as type
 									from ch_moc_raw_material as raw
 									left join ch_wo_accessories_foundry acc_order_bom on raw.header_id = acc_order_bom.moc_id
 									left join ch_wo_accessories wo_acc_line on acc_order_bom.header_id = wo_acc_line.id
@@ -1399,7 +1399,7 @@ class kg_schedule(osv.osv):
 									as sub_query
 									where pump_model_id = %s  and
 									order_line_id = %s
-									group by type,order_line_id,product_id,pump_model_id,pattern_id """%(entry.id,entry.id,foundry_pm_item['pump_model_id'],order_line_rec.id))
+									group by type,order_line_id,product_id,pump_model_id,pattern_id,position_id,moc_id """%(entry.id,entry.id,foundry_pm_item['pump_model_id'],order_line_rec.id))
 							foundry_product_details = cr.dictfetchall();
 							
 							for foundry_indent_item in foundry_product_details:
@@ -1423,6 +1423,8 @@ class kg_schedule(osv.osv):
 									'pending_qty': indent_qty,
 									'issue_pending_qty': indent_qty,
 									'fns_item_name':pattern_rec.pattern_name,
+									'position_id': foundry_indent_item['position_id'],
+									'moc_id': foundry_indent_item['moc_id'],
 								}
 								
 								indent_line_id = dep_indent_line_obj.create(cr, uid, foundry_dep_indent_line_vals)
@@ -1440,7 +1442,7 @@ class kg_schedule(osv.osv):
 						left join ch_order_machineshop_details order_ms on raw.header_id = order_ms.ms_id
 						left join ch_work_order_details wo_line on order_ms.header_id = wo_line.id
 						where order_ms.flag_applicable = 't' and order_ms.header_id in (select distinct order_line_id 
-						from ch_schedule_details  where header_id = %s and qty > 0
+						from ch_schedule_details  where header_id = %s
 						) 
 						
 						union
@@ -1452,7 +1454,7 @@ class kg_schedule(osv.osv):
 						left join ch_wo_accessories wo_acc_line on acc_order_ms.header_id = wo_acc_line.id
 						left join ch_work_order_details wo_line on wo_acc_line.header_id = wo_line.id
 						where acc_order_ms.is_applicable = 't' and wo_acc_line.header_id in (select distinct order_line_id 
-						from ch_schedule_details  where header_id = %s and qty > 0
+						from ch_schedule_details  where header_id = %s
 						)
 						
 						
@@ -1501,28 +1503,30 @@ class kg_schedule(osv.osv):
 								indent_id = dep_indent_obj.create(cr, uid, ms_dep_indent_vals)
 								
 								cr.execute("""
-									select type,pump_model_id,ms_item,product_id,uom,order_line_id,order_ms_id,sum(indent_qty) as indent_qty from 
+									select type,pump_model_id,ms_item,product_id,uom,order_line_id,order_ms_id,position_id,moc_id,sum(indent_qty) as indent_qty from 
 
 										(
 										select (raw.qty * order_ms.qty) as indent_qty,raw.product_id,raw.uom,wo_line.pump_model_id,
-										order_ms.header_id as order_line_id, raw.id as ms_item, order_ms.id as order_ms_id,'foun' as type
+										order_ms.header_id as order_line_id, raw.id as ms_item, order_ms.id as order_ms_id,
+										order_ms.position_id as position_id,order_ms.moc_id as moc_id,'foun' as type
 										from ch_ms_raw_material as raw
 										left join ch_order_machineshop_details order_ms on raw.header_id = order_ms.ms_id
 										left join ch_work_order_details wo_line on order_ms.header_id = wo_line.id
 										where order_ms.flag_applicable = 't' and order_ms.header_id in (select distinct order_line_id 
-										from ch_schedule_details  where header_id = %s and qty > 0
+										from ch_schedule_details  where header_id = %s
 										)
 										
 										union
 
 										select (raw.qty * acc_order_ms.qty) as indent_qty,raw.product_id,raw.uom,wo_line.pump_model_id,
-										wo_acc_line.header_id as order_line_id, raw.id as ms_item, acc_order_ms.id as order_ms_id,'acc' as type
+										wo_acc_line.header_id as order_line_id, raw.id as ms_item, acc_order_ms.id as order_ms_id,
+										acc_order_ms.position_id as position_id,acc_order_ms.moc_id as moc_id,'acc' as type
 										from ch_ms_raw_material as raw
 										left join ch_wo_accessories_ms acc_order_ms on raw.header_id = acc_order_ms.ms_id
 										left join ch_wo_accessories wo_acc_line on acc_order_ms.header_id = wo_acc_line.id
 										left join ch_work_order_details wo_line on wo_acc_line.header_id = wo_line.id
 										where acc_order_ms.is_applicable = 't' and wo_acc_line.header_id in (select distinct order_line_id 
-										from ch_schedule_details  where header_id = %s and qty > 0
+										from ch_schedule_details  where header_id = %s
 										)
 										
 										
@@ -1530,7 +1534,7 @@ class kg_schedule(osv.osv):
 
 										as sub_query
 										where pump_model_id = %s and order_line_id = %s
-										group by type,order_line_id,pump_model_id,ms_item,product_id,uom,order_ms_id """%(entry.id,entry.id,ms_pm_item['pump_model_id'],order_line_rec.id))
+										group by type,order_line_id,pump_model_id,ms_item,product_id,uom,order_ms_id,position_id,moc_id """%(entry.id,entry.id,ms_pm_item['pump_model_id'],order_line_rec.id))
 								ms_product_details = cr.dictfetchall();
 								
 								for ms_indent_item in ms_product_details:
@@ -1561,10 +1565,10 @@ class kg_schedule(osv.osv):
 												indent_qty = 0
 											else:
 												indent_qty = ms_indent_item['indent_qty']
-											cutting_qty = ms_indent_item['indent_qty']
+											cutting_qty = 0
 									else:
 										indent_qty = ms_indent_item['indent_qty']
-										cutting_qty = ms_indent_item['indent_qty']
+										cutting_qty = 0
 									
 									if indent_qty > 0:
 										ms_dep_indent_line_vals = {
@@ -1574,10 +1578,12 @@ class kg_schedule(osv.osv):
 											'qty':indent_qty/order_line_rec.qty,
 											'pending_qty':indent_qty/order_line_rec.qty,
 											'issue_pending_qty':indent_qty/order_line_rec.qty,
-											'cutting_qty':ms_raw_rec.temp_qty * order_line_rec.qty,
+											'cutting_qty': cutting_qty,
 											'ms_bot_id':ms_order_rec.ms_id.id,
 											'fns_item_name':ms_order_rec.ms_id.code,
-											'note': 'Each Item' + str(ms_raw_rec.length)
+											'note': 'Each Item ' + str(ms_raw_rec.length),
+											'position_id': ms_indent_item['position_id'],
+											'moc_id': ms_indent_item['moc_id']
 										}
 										
 										indent_line_id = dep_indent_line_obj.create(cr, uid, ms_dep_indent_line_vals)
@@ -1595,7 +1601,7 @@ class kg_schedule(osv.osv):
 						left join ch_order_bot_details order_bot on raw.header_id = order_bot.bot_id
 						left join ch_work_order_details wo_line on order_bot.header_id = wo_line.id
 						where order_bot.flag_applicable = 't' and order_bot.header_id in (select distinct order_line_id 
-						from ch_schedule_details  where header_id = %s and qty > 0
+						from ch_schedule_details  where header_id = %s 
 						)
 						
 						union
@@ -1608,7 +1614,7 @@ class kg_schedule(osv.osv):
 						left join ch_wo_accessories wo_acc_line on acc_order_bot.header_id = wo_acc_line.id
 						left join ch_work_order_details wo_line on wo_acc_line.header_id = wo_line.id
 						where acc_order_bot.is_applicable = 't' and wo_acc_line.header_id in (select distinct order_line_id 
-						from ch_schedule_details  where header_id = %s and qty > 0
+						from ch_schedule_details  where header_id = %s
 						)
 
 						)
@@ -1655,38 +1661,38 @@ class kg_schedule(osv.osv):
 							indent_id = dep_indent_obj.create(cr, uid, bot_dep_indent_vals)
 							
 							cr.execute("""
-								select type,order_bot_id,order_line_id,pump_model_id,bot_item,product_id,uom,sum(indent_qty) as indent_qty from 
+								select type,order_bot_id,order_line_id,pump_model_id,bot_item,product_id,uom,moc_id,sum(indent_qty) as indent_qty from 
 
 									(
 
 									select (raw.qty * order_bot.qty) as indent_qty,raw.product_id,raw.uom,
 									order_bot.header_id as order_line_id,wo_line.pump_model_id,order_bot.id as order_bot_id,
-									raw.id as bot_item,'foun' as type
+									raw.id as bot_item,order_bot.moc_id as moc_id,'foun' as type
 									from ch_ms_raw_material as raw
 									left join ch_order_bot_details order_bot on raw.header_id = order_bot.bot_id
 									left join ch_work_order_details wo_line on order_bot.header_id = wo_line.id
 									where order_bot.flag_applicable = 't' and order_bot.header_id in (select distinct order_line_id 
-									from ch_schedule_details  where header_id = %s and qty > 0
+									from ch_schedule_details  where header_id = %s
 									)
 									
 									union
 
 									select (raw.qty * acc_order_bot.qty) as indent_qty,raw.product_id,raw.uom,
 									wo_acc_line.header_id as order_line_id,wo_line.pump_model_id,acc_order_bot.id as order_bot_id,
-									raw.id as bot_item,'acc' as type
+									raw.id as bot_item,acc_order_bot.moc_id as moc_id,'acc' as type
 									from ch_ms_raw_material as raw
 									left join ch_wo_accessories_bot acc_order_bot on raw.header_id = acc_order_bot.ms_id
 									left join ch_wo_accessories wo_acc_line on acc_order_bot.header_id = wo_acc_line.id
 									left join ch_work_order_details wo_line on wo_acc_line.header_id = wo_line.id
 									where acc_order_bot.is_applicable = 't' and wo_acc_line.header_id in (select distinct order_line_id 
-									from ch_schedule_details  where header_id = %s and qty > 0
+									from ch_schedule_details  where header_id = %s
 									)
 
 									)
 
 									as sub_query
 									where pump_model_id = %s and order_line_id = %s
-									group by type,order_bot_id,order_line_id,pump_model_id,bot_item,product_id,uom
+									group by type,order_bot_id,order_line_id,pump_model_id,bot_item,product_id,uom,moc_id
 									 """%(entry.id,entry.id,bot_pm_item['pump_model_id'],order_line_rec.id))
 							bot_product_details = cr.dictfetchall();
 							
@@ -1714,6 +1720,8 @@ class kg_schedule(osv.osv):
 									'issue_pending_qty': indent_qty,
 									'ms_bot_id':bot_order_rec.bot_id.id,
 									'fns_item_name':bot_order_rec.bot_id.code,
+									'brand_id':bot_order_rec.brand_id.id,
+									'moc_id': bot_indent_item['moc_id']
 								}
 								
 								indent_line_id = dep_indent_line_obj.create(cr, uid, bot_dep_indent_line_vals)
