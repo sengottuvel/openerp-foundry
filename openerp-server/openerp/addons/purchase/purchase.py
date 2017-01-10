@@ -156,7 +156,7 @@ class purchase_order(osv.osv):
 	STATE_SELECTION = [
 		('draft', 'Draft PO'),
 		('sent', 'RFQ Sent'),
-		('confirmed', 'Waiting for Approval'),
+		('confirmed', 'WFA'),
 		('approved', 'Approved'),
 		('except_picking', 'Shipping Exception'),
 		('except_invoice', 'Invoice Exception'),
@@ -187,7 +187,7 @@ class purchase_order(osv.osv):
 				"Otherwise, keep empty to deliver to your own company."
 		),
 		'warehouse_id': fields.many2one('stock.warehouse', 'Destination Warehouse'),
-		'location_id': fields.many2one('stock.location', 'Destination', required=True, domain=[('usage','<>','view')], states={'approved':[('readonly',True)],'done':[('readonly',True)]} ),
+		'location_id': fields.many2one('stock.location', 'Destination', domain=[('usage','<>','view')], states={'approved':[('readonly',True)],'done':[('readonly',True)]} ),
 		'pricelist_id':fields.many2one('product.pricelist', 'Pricelist', required=True, states={'approved':[('readonly',True)],'done':[('readonly',True)]}, help="The pricelist sets the currency used for this purchase order. It also computes the supplier price for the selected products/quantities."),
 		'currency_id': fields.related('pricelist_id', 'currency_id', type="many2one", relation="res.currency", string="Currency",readonly=True),
 		'state': fields.selection(STATE_SELECTION, 'Status', readonly=True, help="The status of the purchase order or the quotation request. A quotation is a purchase order in a 'Draft' status. Then the order has to be confirmed by the user, the status switch to 'Confirmed'. Then the supplier must confirm the order to change the status to 'Approved'. When the purchase order is paid and received, the status becomes 'Done'. If a cancel action occurs in the invoice or in the reception of goods, the status becomes in exception.", select=True),
@@ -232,11 +232,13 @@ class purchase_order(osv.osv):
 		'approval_flag': fields.boolean('Approval Flag'),
 		'can_remark': fields.text('Cancel Remarks'),
 		'reject_remark': fields.text('Reject Remarks'),
-		
+		'delivery_date': fields.date('Delivery Date',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		
 	}
 	_defaults = {
-		'date_order': fields.date.context_today,
+		
+		'date_order': lambda * a: time.strftime('%Y-%m-%d'),
+		'delivery_date': lambda * a: time.strftime('%Y-%m-%d'),
 		'state': 'draft',
 		#'name': lambda obj, cr, uid, context: '/',
 		'shipped': 0,
@@ -878,6 +880,7 @@ class purchase_order_line(osv.osv):
 		return res
 
 	_columns = {
+		
 		'name': fields.text('Description',required=True),
 		'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure'), required=True),
 		'date_planned': fields.date('Scheduled Date', required=True, select=True),
@@ -899,19 +902,27 @@ class purchase_order_line(osv.osv):
 		'invoice_lines': fields.many2many('account.invoice.line', 'purchase_order_line_invoice_rel', 'order_line_id', 'invoice_id', 'Invoice Lines', readonly=True),
 		'invoiced': fields.boolean('Invoiced', readonly=True),
 		'partner_id': fields.related('order_id','partner_id',string='Partner',readonly=True,type="many2one", relation="res.partner", store=True),
-		'date_order': fields.related('order_id','date_order',string='Order Date',readonly=True,type="date")
-
+		'date_order': fields.related('order_id','date_order',string='Order Date',readonly=True,type="date"),
+		'delivery_date': fields.date('Delivery Date'),
+		
 	}
 	_defaults = {
+		
 		'product_qty': lambda *a: 1.0,
 		'state': lambda *args: 'draft',
 		'invoiced': lambda *a: 0,
 		'name':'PO'
+		
 	}
 	_table = 'purchase_order_line'
 	_name = 'purchase.order.line'
 	_description = 'Purchase Order Line'
-
+	
+	def default_get(self, cr, uid, fields, context=None):
+		print"contextcontextco********ntext",context
+		
+		return context
+		
 	def copy_data(self, cr, uid, id, default=None, context=None):
 		if not default:
 			default = {}
@@ -976,13 +987,7 @@ class purchase_order_line(osv.osv):
 		product_pricelist = self.pool.get('product.pricelist')
 		account_fiscal_position = self.pool.get('account.fiscal.position')
 		account_tax = self.pool.get('account.tax')
-
-		# - check for the presence of partner_id and pricelist_id
-		#if not partner_id:
-		#	raise osv.except_osv(_('No Partner!'), _('Select a partner in purchase order to choose a product.'))
-		#if not pricelist_id:
-		#	raise osv.except_osv(_('No Pricelist !'), _('Select a price list in the purchase order form before choosing a product.'))
-
+		
 		# - determine name and notes based on product in partner lang.
 		context_partner = context.copy()
 		if partner_id:
@@ -1037,39 +1042,14 @@ class purchase_order_line(osv.osv):
 			price = product_pricelist.price_get(cr, uid, [pricelist_id],
 					product.id, qty or 1.0, partner_id or False, {'uom': uom_id, 'date': date_order})[pricelist_id]
 		else:
-			price = po_price
-		
-		#~ max_sql = """ select max(line.price_unit),min(line.price_unit) from purchase_order_line line 
-						#~ left join purchase_order po on (po.id=line.order_id)
-						#~ where po.state = 'approved' and line.product_id=%s """%(product_id)
-		#~ cr.execute(max_sql)		
-		#~ max_data = cr.dictfetchall()
-		#~ recent_sql = """ select line.price_unit from purchase_order_line line 
-						#~ left join purchase_order po on (po.id=line.order_id)
-						#~ where po.state = 'approved' and line.product_id = %s 
-						#~ order by po.date_order desc limit 1 """%(product_id)
-		#~ cr.execute(recent_sql)		
-		#~ recent_data = cr.dictfetchall()
-		#~ 
-		#~ if max_data:
-			#~ max_val = max_data[0]['max']
-			#~ #max_val = max_val.values()[0]
-			#~ min_val = max_data[0]['min']
-		#~ else:
-			#~ max_val = 0
-			#~ min_val = 0
-		#~ 
-		#~ if recent_data:
-			#~ recent_val = recent_data[0]['price_unit']
-		#~ else:
-			#~ recent_val = 0
-		#~ res['value'].update({'high_price': max_val or 0,'least_price': min_val or 0,'recent_price':recent_val or 0})		
+			price = po_price	
 		res['value'].update({'uom_conversation_factor': product.uom_conversation_factor})		
 		
 		taxes = account_tax.browse(cr, uid, map(lambda x: x.id, product.supplier_taxes_id))
 		fpos = fiscal_position_id and account_fiscal_position.browse(cr, uid, fiscal_position_id, context=context) or False
 		taxes_ids = account_fiscal_position.map_tax(cr, uid, fpos, taxes)
 		res['value'].update({'price_unit': price, 'taxes_id': taxes_ids})
+		res['value'].update({'brand_id': '', 'moc_id_temp':'', 'moc_id':''})
 
 		return res
 

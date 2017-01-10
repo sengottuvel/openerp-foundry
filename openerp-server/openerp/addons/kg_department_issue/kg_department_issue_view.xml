@@ -48,7 +48,7 @@
 						</group>
 					</group>
 					<notebook>
-					<page string="Products" attrs="{'invisible': [('products_flag','=',False)]}" >
+						<page string="Products" attrs="{'invisible': [('products_flag','=',False)]}" >
 						<field name="issue_line_ids" colspan="4" nolabel="1" context="{'issue_type':issue_type,'dep_issue_type':dep_issue_type,'wo_state':'accept','state':'draft'}">
 							<form string="Entry Tree">					
 								<group string="Product Details" colspan="4">
@@ -143,31 +143,31 @@
 						<button name="update_serviceindent_to_issue" type='object' states="draft,confirmed" string="Save Record"/>
 					</page>
 					<page string="Entry Info">
-					<group>
-						<field name="company_id"/>
-					</group>
-					<group>
-						<field name="active"/>
-					</group>
-					<group>
 						<group>
-							<field name="created_by"/>
-							<field name="confirmed_by" attrs="{'invisible':[('state','in',['draft','confirmed'])]}"/>
-							<field name="rej_user_id" attrs="{'invisible':[('state','not in',['reject'])]}"/>
-							<field name="approved_by" attrs="{'invisible':[('state','in',['draft','confirmed','approve'])]}"/>
-							<field name="cancel_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
-							<field name="update_user_id"/>
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
+								<field name="created_by"/>
+								<field name="confirmed_by" attrs="{'invisible':[('state','in',['draft','confirmed'])]}"/>
+								<field name="rej_user_id" attrs="{'invisible':[('state','not in',['reject'])]}"/>
+								<field name="approved_by" attrs="{'invisible':[('state','in',['draft','confirmed','approve'])]}"/>
+								<field name="cancel_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+								<field name="update_user_id"/>
+							</group>
+							<group>
+								<field name="creation_date"/>
+								<field name="confirmed_date" attrs="{'invisible':[('state','in',['draft','confirmed'])]}"/>
+								<field name="reject_date" attrs="{'invisible':[('state','not in',['reject'])]}"/>
+								<field name="approved_date" attrs="{'invisible':[('state','in',['draft','confirmed','approve'])]}"/>
+								<field name="cancel_date" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+								<field name="update_date"/>
+							</group>
 						</group>
-						<group>
-							<field name="creation_date"/>
-							<field name="confirmed_date" attrs="{'invisible':[('state','in',['draft','confirmed'])]}"/>
-							<field name="reject_date" attrs="{'invisible':[('state','not in',['reject'])]}"/>
-							<field name="approved_date" attrs="{'invisible':[('state','in',['draft','confirmed','approve'])]}"/>
-							<field name="cancel_date" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
-							<field name="update_date"/>
-						</group>
-					</group>
-				</page>
+					</page>
 				</notebook>
 				<group>
 				<field name="notes" placeholder="Notes..."/>

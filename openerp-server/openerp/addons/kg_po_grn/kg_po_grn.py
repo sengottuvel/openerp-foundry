@@ -662,8 +662,8 @@ class kg_po_grn(osv.osv):
 								d = product_qty - po_grn_qty
 								if line.po_grn_qty <= d:
 									pass
-								#~ else:
-									#~ raise osv.except_osv(_('Warning!'), _('GRN Qty should not be greater than PO Qty for %s !!' %(line.product_id.name)))
+								else:
+									raise osv.except_osv(_('Warning!'), _('GRN Qty should not be greater than PO Qty for %s !!' %(line.product_id.name)))
 							#~ else:
 								#~ raise osv.except_osv(_('Warning!'), _('GRN Qty should not be greater than PO Qty for %s !!' %(line.product_id.name)))
 						else:
@@ -694,9 +694,8 @@ class kg_po_grn(osv.osv):
 					if exp_grn_qty < line.po_grn_qty:
 						raise osv.except_osv(_('Please Check!'), _('Quantity specified in Batch Details should not less than GRN Quantity for %s!!'%(line.product_id.name)))
 				if line.po_grn_qty == 0:
-						raise osv.except_osv(
-						_('Item Qty can not Zero!'),
-						_('You cannot process GRN with Item Line Qty Zero for Product %s.' %(line.product_id.name)))
+						raise osv.except_osv(_('Item Qty can not Zero!'),
+							_('You cannot process GRN with Item Line Qty Zero for Product %s.' %(line.product_id.name)))
 				#Write a tax amount in line
 				product_tax_amt = self._amount_line_tax(cr, uid, line, context=context)
 				cr.execute("""update po_grn_line set product_tax_amt = %s where id = %s"""%(product_tax_amt,line.id))
@@ -857,8 +856,8 @@ class kg_po_grn(osv.osv):
 							
 							if line.po_grn_qty <= d:
 								pass
-							#~ else:
-								#~ raise osv.except_osv(_('Warning!'), _('GRN Qty should not be greater than PO Qty for %s !!' %(line.product_id.name)))
+							else:
+								raise osv.except_osv(_('Warning!'), _('GRN Qty should not be greater than PO Qty for %s !!' %(line.product_id.name)))
 							if line.price_type == 'per_kg':
 								if line.product_id.uom_conversation_factor == 'two_dimension':
 									rec_qty =(po_grn_qty / (float(line.length) * float(line.breadth) * float(line.product_id.po_uom_in_kgs)))

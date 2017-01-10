@@ -149,15 +149,6 @@
 				<!-- Units of Measure Master  -->
 				<menuitem action="product.product_uom_form_action" name="Units of Measure" id="mam_uom_master" parent="ppm_master_menu" sequence="5"/>
 				
-				<!-- Payment Master  --> 
-				<menuitem action="kg_po_masters.payment_master_action_form" name="Payment Terms" id="mam_payment_master" parent="ppm_master_menu" sequence="5"/>
-				
-				<!-- Delivery Master  --> 
-				<menuitem action="kg_po_masters.delivery_master_action_form" name="Delivery Term" id="mam_delivery_master" parent="ppm_master_menu" sequence="7"/>
-			
-				<!-- Brand Master  --> 
-				<menuitem action="kg_po_masters.brand_master_action_form" name="Brand Master" id="mam_po_master" parent="ppm_master_menu" sequence="8"/>
-				
 				<!-- Country -->
 				<menuitem id="kg_country_master" parent="ppm_master_menu" name="Country" action="base.action_country" sequence="9"/>
 				
@@ -169,10 +160,7 @@
 				 
 				<!-- Transport Master  --> 
 				<menuitem action="kg_transport.transport_action_form" name="Transport" id="mam_transport_master" parent="ppm_master_menu" sequence="12"/>
-				
-				<!-- Expense Master  --> 
-				<menuitem action="kg_expense_master.mma_expense_master" name="Expense Master" id="mam_expense_master" parent="ppm_master_menu" sequence="14"/>
-				 
+			
 				<!-- Dispatch Master  --> 
 				<menuitem action="kg_dispatch_master.mma_dispatch_master" name="Mode Of Dispatch" id="mam_dispatch_master" parent="ppm_master_menu" sequence="15"/>
 				 

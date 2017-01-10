@@ -364,7 +364,7 @@ class kg_department_issue(osv.osv):
 								uom = lot_rec.product_uom.name
 							if stock_tot < dep_issue_line_rec.issue_qty:
 								raise osv.except_osv(_('Stock not available !!'),
-									_('Associated GRN have less Qty compare to issue Qty.'))
+									_('Associated GRN have less Qty compare to issue Qty for Product %s.'%(item.product_id.name)))
 							
 							sql = """ select lot_id from kg_department_issue_details where grn_id=%s""" %(item.id)
 							cr.execute(sql)
@@ -519,7 +519,7 @@ class kg_department_issue(osv.osv):
 						tot += lot_rec.pending_qty
 					if tot < line_ids.issue_qty:
 						raise osv.except_osv(_('Stock not available !!'),
-							_('Associated GRN have less Qty compare to issue Qty.'))
+							_('Associated GRN have less Qty compare to issue Qty for Product %s.'%(line_ids.product_id.name)))
 					else:
 						pass
 					### Updation Issue Pending Qty in Department Issue ###

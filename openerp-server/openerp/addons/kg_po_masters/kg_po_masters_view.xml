@@ -4,7 +4,7 @@
 	
 	<!-- Payment Masters -->
 	
-	<record id="kg_payment_master_form_view" model="ir.ui.view">
+		<record id="kg_payment_master_form_view" model="ir.ui.view">
 			<field name="name">kg.payment.master.form</field>
 			<field name="model">kg.payment.master</field>
 			<field name="arch" type="xml">
@@ -20,12 +20,11 @@
 					<group>
 						<group>
 							<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							<field name="term_category" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="notes" widget="char" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>		
 							<field name="modify" invisible="1"/>
 						</group>
 						<group>
-							<field name="code"/>
+							<field name="term_category" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="state" style="width: 30%%" class="att_state_change"/>
 						</group>						
 					</group>	
@@ -87,14 +86,16 @@
             <field name="model">kg.payment.master</field>
             <field name="arch" type="xml">
                 <search string="Payment Master Template">
-					<field name="name" string="Payment Name"  filter_domain="[('name','ilike',self)" />
+					<field name="name" string="Payment Name"  filter_domain="[('name','ilike',self)]" />
 					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
 					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>				
 					<filter icon="terp-check" name="approve" string="Approved" domain="[('state','=','approved')]"/>				
 					<filter icon="terp-check" name="reject" string="Rejected" domain="[('state','=','reject')]"/>				
 					<separator/>
                     <group expand="0" string="Group By...">
+<!--
                         <filter string="Payment Name" icon="terp-personal" domain="[]" context="{'group_by':'name'}"/> 
+-->
                         <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
 					</group>
                 </search>
@@ -120,9 +121,10 @@
         
 		<!-- Audit Log Xml Data End-->
 		
-		
+		<!-- Payment Master  --> 
+		<menuitem action="payment_master_action_form" name="Payment Terms" id="mam_payment_master" parent="kg_menus.ppm_master_menu" sequence="5"/>
+				
 		<!-- Delivery Masters -->
-	
 	
 		<record id="kg_delivery_master_form_view" model="ir.ui.view">
 			<field name="name">kg.delivery.master.form</field>
@@ -237,9 +239,11 @@
         
 		<!-- Audit Log Xml Data End-->
 		
+		<!-- Delivery Master  --> 
+		<menuitem action="delivery_master_action_form" name="Delivery Term" id="mam_delivery_master" parent="kg_menus.ppm_master_menu" sequence="7"/>
+		
 		<!-- Brand Master -->
-		
-		
+			
 		<record id="kg_brand_master_form_view" model="ir.ui.view">
 			<field name="name">kg.brand.master.form</field>
 			<field name="model">kg.brand.master</field>
@@ -321,7 +325,7 @@
             <field name="model">kg.brand.master</field>
             <field name="arch" type="xml">
                 <search string="Brand Master Template">
-					<field name="name" string="Brand Name"  filter_domain="[('name','ilike',self)]" />
+					<field name="name" string="Name"  filter_domain="[('name','ilike',self)]" />
 					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
 					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>				
 					<filter icon="terp-check" name="approve" string="Approved" domain="[('state','=','approved')]"/>				
@@ -354,5 +358,8 @@
         
 		<!-- Audit Log Xml Data End-->
         
-</data>
-	</openerp>
+        <!-- Brand Master  --> 
+		<menuitem action="brand_master_action_form" name="Brand" id="mam_po_master" parent="kg_menus.ppm_master_menu" sequence="8"/>
+		
+	</data>
+</openerp>

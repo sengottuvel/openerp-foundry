@@ -69,10 +69,13 @@ class kg_purchase_order(osv.osv):
 		discount_per_value = 0
 		for order in self.browse(cr, uid, ids, context=context):
 			res[order.id] = {
+				'total_amount': 0.0,
+				'discount': 0.0,
 				'amount_untaxed': 0.0,
 				'amount_tax': 0.0,
+				'grand_total': 0.0,
+				'round_off': 0.0,
 				'amount_total': 0.0,
-				'discount' : 0.0,
 				'other_charge': 0.0,
 			}
 			val = val1 = val3 = 0.0
@@ -92,11 +95,15 @@ class kg_purchase_order(osv.osv):
 				val1 += line.price_subtotal
 				val += self._amount_line_tax(cr, uid, line, context=context)
 				val3 += tot_discount
-			res[order.id]['other_charge']= other_charges_amt or 0
-			res[order.id]['amount_tax']=(round(val,0))
-			res[order.id]['amount_untaxed']=(round(val1,0)) - (round(val,0)) + (round(val3,0))
-			res[order.id]['discount']=(round(val3,0))
-			res[order.id]['amount_total']=res[order.id]['amount_untaxed'] - res[order.id]['discount'] + res[order.id]['amount_tax'] + res[order.id]['other_charge']
+			res[order.id]['total_amount'] = (val1 + val3) - val
+			print"res[order.id]['total_amount']",res[order.id]['total_amount']
+			res[order.id]['other_charge'] = other_charges_amt or 0
+			res[order.id]['amount_tax'] = val
+			res[order.id]['amount_untaxed'] = val1 - val 
+			res[order.id]['discount'] = val3
+			res[order.id]['grand_total'] = val1
+			res[order.id]['round_off'] = order.round_off
+			res[order.id]['amount_total'] = val1 + order.round_off or 0.00
 			
 		return res
 		
@@ -113,7 +120,8 @@ class kg_purchase_order(osv.osv):
 
 	_columns = {
 		
-		'po_type': fields.selection([('direct', 'Direct'),('frompi', 'From PI'),('fromquote', 'From Quote')], 'PO Type',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)],'cancel':[('readonly',True)]}),
+		#~ 'po_type': fields.selection([('direct', 'Direct'),('frompi', 'From PI'),('fromquote', 'From Quote')], 'PO Type',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)],'cancel':[('readonly',True)]}),
+		'po_type': fields.selection([('direct', 'Direct'),('frompi', 'From PI')], 'PO Type',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'bill_type': fields.selection([('cash','Cash'),('credit','Credit'),('advance','Advance')], 'Payment Mode',states={'approved':[('readonly',True)],'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'po_expenses_type1': fields.selection([('freight','Freight Charges'),('others','Others')], 'Expenses Type1', readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		'po_expenses_type2': fields.selection([('freight','Freight Charges'),('others','Others')], 'Expenses Type2', readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
@@ -131,9 +139,10 @@ class kg_purchase_order(osv.osv):
 		'partner_address':fields.char('Supplier Address', size=128,readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		'email':fields.char('Contact Email', size=128,readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		'contact_person':fields.char('Contact Person', size=128),
+		'round_off': fields.float('Round off',size=5,readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		'other_charge': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Other Charges(+)',
 			 multi="sums", help="The amount without tax", track_visibility='always',store=True),		
-		'discount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Discount(-)',
+		'discount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Discount(-)',
 			store={
 				'purchase.order': (lambda self, cr, uid, ids, c={}: ids, ['order_line'], 10),
 				'purchase.order.line': (_get_order, ['price_unit', 'tax_id', 'kg_discount', 'product_qty'], 10),
@@ -145,11 +154,15 @@ class kg_purchase_order(osv.osv):
 			}, multi="sums", help="The amount without tax", track_visibility='always'),
 		'amount_tax': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Taxes',
 			store=True, multi="sums", help="The tax amount"),
-		'amount_total': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Amount',
-			 multi="sums", store=True, help="The amount without tax", track_visibility='always'),		
+		'amount_total': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',
+			 multi="sums", store=True, help="The amount without tax", track_visibility='always'),
+		'total_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Amount',
+			 multi="sums", store=True, help="The amount without tax", track_visibility='always'),
+		'grand_total': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Grand Total',
+			 multi="sums", store=True, help="The amount without tax", track_visibility='always'),
 		'po_flag': fields.boolean('PO Flag'),
 		'grn_flag': fields.boolean('GRN'),
-		'name': fields.char('PO NO', size=64, select=True,readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
+		'name': fields.char('PO No.', size=64, select=True,readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		'bill_flag':fields.boolean('PO Bill'),
 		'amend_flag': fields.boolean('Amendment', select=True),
 		'add_text': fields.text('Address',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)],'cancel':[('readonly',True)]}),
@@ -181,7 +194,8 @@ class kg_purchase_order(osv.osv):
 		
 		# Entry Info
 		
-		'creation_date':fields.datetime('Creation Date',readonly=True),
+		'active': fields.boolean('Active'),
+		'creation_date':fields.datetime('Created Date',readonly=True),
 		'user_id': fields.many2one('res.users', 'Created by',readonly=True),
 		'confirmed_by':fields.many2one('res.users','Confirmed By',readonly=True),
 		'confirmed_date':fields.datetime('Confirmed Date',readonly=True),
@@ -189,7 +203,7 @@ class kg_purchase_order(osv.osv):
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'approved_by':fields.many2one('res.users','Approved By',readonly=True),
 		'approved_date':fields.datetime('Approved Date',readonly=True),
-		'reject_date': fields.datetime('Reject Date', readonly=True),
+		'reject_date': fields.datetime('Rejected Date', readonly=True),
 		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
 		'update_date' : fields.datetime('Last Updated Date',readonly=True),
 		'update_user_id' : fields.many2one('res.users','Last Updated By',readonly=True),
@@ -198,19 +212,20 @@ class kg_purchase_order(osv.osv):
 	
 	_defaults = {
 	
-		'bill_type' :'credit',
+		'bill_type': 'credit',
 		'date_order': lambda * a: time.strftime('%Y-%m-%d'),
-		'po_type': 'frompi',
+		'po_type': 'direct',
 		'name': lambda self, cr, uid, c: self.pool.get('purchase.order').browse(cr, uid, id, c).id,
 		'user_id': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).id,
-		'creation_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
-		'frieght_flag':False,
-		'version':'00',
+		'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
+		'frieght_flag': False,
+		'version': '00',
 		'pricelist_id': 2,
 		'type_flag': False,
 		'insurance': 'na',
 		'sent_mail_flag': False,
 		'adv_flag': False,
+		'active': True,
 		
 	}
 	
@@ -219,11 +234,14 @@ class kg_purchase_order(osv.osv):
 		return order
 	
 	def onchange_type_flag(self, cr, uid, ids, po_type):
-		value = {'type_flag':False}
+		value = {'type_flag':False,'po_flag':True}
 		if po_type == 'direct':
-			value = {'type_flag': True}
+			value = {'type_flag': True,'pi_flag': False,'po_flag': False}
 		else:
-			value = {'pi_flag': True}
+			value = {'pi_flag': True,'type_flag': False,'po_flag': False}
+		if po_type == 'frompi':
+			value = {'po_flag': False,'type_flag':False,'pi_flag': True}
+		print"valuevaluevalue",value
 		return {'value': value}
 	
 	def onchange_company(self, cr, uid, ids, company_id,delivery_address):
@@ -253,9 +271,11 @@ class kg_purchase_order(osv.osv):
 			backk_date = bkk_date.strftime('%Y-%m-%d')
 			back_list.append(backk_date)
 		if date_order <= back_date:
-			raise osv.except_osv(
-				_('Warning'),
-				_('PO Entry is not allowed!'))
+			raise osv.except_osv(_('Warning'),
+				_('PO date should not be accept past date!'))
+		if date_order > today_date:
+			raise osv.except_osv(_('Warning'),
+				_('PO date should not be accept future date!'))
 		return True
 		
 	def onchange_frieght_flag(self, cr, uid, ids, term_freight):
@@ -283,10 +303,9 @@ class kg_purchase_order(osv.osv):
 			}}
 	
 	def confirm_po(self,cr,uid,ids, context=None):
-		back_list = []
 		obj = self.browse(cr,uid,ids[0])
-		
 		if obj.state == 'draft':
+			back_list = []
 			approval = ''
 			
 			user_obj = self.pool.get('res.users').search(cr,uid,[('id','=',uid)])
@@ -483,15 +502,14 @@ class kg_purchase_order(osv.osv):
 					qty = item.product_qty
 				self.pool.get('purchase.order.line').write(cr,uid,item.id,{'quantity':qty})	
 			
-			if obj.bill_type == 'advance':
-				self.advance_creation(cr,uid,obj)
+			#~ if obj.bill_type == 'advance':
+				#~ self.advance_creation(cr,uid,obj)
 			
 			if obj.payment_mode.term_category == 'advance':
 				cr.execute("""select * from kg_supplier_advance where state='confirmed' and po_id = %s"""  %(str(ids[0])))
 				data = cr.dictfetchall()
 				if not data:
-					raise osv.except_osv(
-						_('Warning'),
+					raise osv.except_osv(_('Warning'),
 						_('Advance is mandate for this PO'))
 				else:
 					pass		
@@ -652,16 +670,15 @@ class kg_purchase_order(osv.osv):
 	def action_cancel(self, cr, uid, ids, context=None):
 		logger.info('[KG OpenERP] Class: kg_purchase_order, Method: action_cancel called...')
 		wf_service = netsvc.LocalService("workflow")
-		product_obj = self.pool.get('product.product')
-		pi_line_obj = self.pool.get('purchase.requisition.line')
-		po_grn_obj = self.pool.get('kg.po.grn')
-	
+		
 		purchase = self.browse(cr, uid, ids[0], context=context)
 		if purchase.state == 'approved':
+			product_obj = self.pool.get('product.product')
+			pi_line_obj = self.pool.get('purchase.requisition.line')
+			po_grn_obj = self.pool.get('kg.po.grn')
 			if not purchase.can_remark:
-				raise osv.except_osv(
-							_('Remarks Needed !!'),
-							_('Enter Remark in Remarks Tab....'))
+				raise osv.except_osv(_('Remarks Needed !!'),
+					_('Enter Remark in Remarks Tab....'))
 							
 			if purchase.po_type == 'frompi':
 				if purchase.state in ('draft','confirmed'):
@@ -676,8 +693,7 @@ class kg_purchase_order(osv.osv):
 						for pick in multi_po:
 							pick = po_grn_obj.browse(cr, uid, pick['grn_id'])
 							if pick.state not in ('draft','cancel'):
-								raise osv.except_osv(
-									_('Unable to cancel this purchase order.'),
+								raise osv.except_osv(_('Unable to cancel this purchase order.'),
 									_('First cancel all GRN related to this purchase order.'))
 					for line in purchase.order_line:
 						if line.pi_line_id and line.group_flag == False:
@@ -729,14 +745,13 @@ class kg_purchase_order(osv.osv):
 		return True			
 	
 	def entry_reject(self, cr, uid, ids, context=None):
-		pi_line_obj = self.pool.get('purchase.requisition.line')
 		purchase = self.browse(cr, uid, ids[0], context=context)
 		if purchase.state == 'confirmed':
+			pi_line_obj = self.pool.get('purchase.requisition.line')
 			for line in purchase.order_line:
 				pi_line_obj.write(cr,uid,line.pi_line_id.id,{'line_state' : 'noprocess'})	
 			if not purchase.reject_remark:
-				raise osv.except_osv(
-					_('Remarks Needed !!'),
+				raise osv.except_osv(_('Remarks Needed !!'),
 					_('Enter Remark in Remarks Tab....'))
 			else:
 				self.write(cr,uid,ids,{'state':'draft','rej_user_id': uid,'reject_date':time.strftime('%Y-%m-%d %H:%M:%S')})
@@ -755,15 +770,21 @@ class kg_purchase_order(osv.osv):
 		
 	def _check_line(self, cr, uid, ids, context=None):
 		logger.info('[KG ERP] Class: kg_purchase_order, Method: _check_line called...')
-		for po in self.browse(cr,uid,ids):
-			if po.po_type == 'frompi': 
-				if po.kg_poindent_lines == []:
-					tot = 0.0
-					for line in po.order_line:
-						tot += line.price_subtotal
-					if tot <= 0.0 or po.amount_total <=0:			
-						return False
-				return True
+		rec = self.browse(cr,uid,ids[0])
+		if rec.po_type == 'direct':
+			if not rec.order_line:
+				raise osv.except_osv(_('Warning !'),
+					_('System sholud not accecpt with out Order Item Details!'))
+		#~ for po in self.browse(cr,uid,ids):
+		if rec.po_type == 'frompi' and rec.state != 'draft': 
+			if rec.kg_poindent_lines == []:
+				tot = 0.0
+				for line in rec.order_line:
+					tot += line.price_subtotal
+				if tot <= 0.0 or rec.amount_total <=0:		
+					return False
+					
+		return True
 	
 	def _check_advance(self, cr, uid, ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -777,11 +798,44 @@ class kg_purchase_order(osv.osv):
 			else:
 				pass
 		return True
+		
+	def _future_date(self, cr, uid, ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today_date = today.strftime('%Y-%m-%d')
+		back_list = []
+		today_new = today.date()
+		bk_date = date.today() - timedelta(days=2)
+		back_date = bk_date.strftime('%Y-%m-%d')
+		d1 = today_new
+		d2 = bk_date
+		delta = d1 - d2
+		for i in range(delta.days + 1):
+			bkk_date = d1 - timedelta(days=i)
+			backk_date = bkk_date.strftime('%Y-%m-%d')
+			back_list.append(backk_date)
+		#~ if rec.date_order <= back_date:
+			#~ raise osv.except_osv(_('Warning'),
+				#~ _('PO date should not be accept past date!'))
+		if rec.date_order > today_date:
+			raise osv.except_osv(_('Warning'),
+				_('PO date should not be accept future date!'))
+		if rec.delivery_date and rec.delivery_date < today_date:
+			raise osv.except_osv(_('Warning'),
+				_('Delivery date should not be accept past date!'))
+		if rec.quotation_date:
+			if rec.quotation_date <= back_date:
+				raise osv.except_osv(_('Warning'),
+					_('Quotation date should not be accept past date!'))
+			if rec.quotation_date > today_date:
+				raise osv.except_osv(_('Warning'),
+					_('Quotation date should not be accept future date!'))
+		return True
 	
 	_constraints = [
 	
-		#(_check_line,'You can not save this Purchase Order with out Line and Zero Qty !',['order_line']),
+		(_check_line,'You can not save this Purchase Order with out Line and Zero Qty !',['order_line']),
 		(_check_advance,'System sholud not be accecpt with out Advance !',['']),
+		(_future_date,'System sholud not be accecpt future date !',['']),
 	
 	]
 	
@@ -895,24 +949,26 @@ class kg_purchase_order_line(osv.osv):
 	'uom_conversation_factor': fields.related('product_id','uom_conversation_factor', type='selection',selection=UOM_CONVERSATION, string='UOM Conversation Factor',store=True,required=True),
 	'length': fields.float('Length',digits=(16,4)),
 	'breadth': fields.float('Breadth',digits=(16,4)),
-	'quantity': fields.float('Weight(KGs)'),
+	'quantity': fields.float("Weight(Kg's)"),
 	'rate_revise': fields.selection([('yes','Yes'),('no','No')],'Rate Revise'),
-	'approval_flag': fields.boolean('Spl Approval Flag'),
+	'approval_flag': fields.boolean('Spl Approval'),
+	'test_cert_flag': fields.boolean('Test Certificate'),
+	'test_certificate': fields.binary('Test Certificate Attach'),
 	
 	}
 	
 	_defaults = {
-	
-	'date_planned': lambda * a: time.strftime('%Y-%m-%d'),
-	'line_state': 'draft',
-	'name': 'PO',
-	'cancel_flag': False,
-	'price_type': 'po_uom',
-	'discount_flag': False,
-	'discount_per_flag': False,
-	'rate_revise': 'yes',
-	'approval_flag': False,
-	
+		
+		'date_planned': lambda * a: time.strftime('%Y-%m-%d'),
+		'line_state': 'draft',
+		'name': 'PO',
+		'cancel_flag': False,
+		'price_type': 'po_uom',
+		'discount_flag': False,
+		'discount_per_flag': False,
+		'rate_revise': 'yes',
+		'approval_flag': False,
+		'test_cert_flag': False,
 	}
 	
 	def create(self, cr, uid, vals,context=None):

@@ -32,20 +32,18 @@
 						</group>
 					</group>		
 					
-					
 					<group>
 						<group>						
 							<field name="product_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" on_change="onchange_product(product_id)"/>
 							<field name="uom_id" on_change="onchange_product_uom(product_id,uom_id)" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							<field name="latest_price" invisible="1"/>																				
-							<field name="name" invisible="1"/>																				
-							<field name="category_type" invisible="1"/>	
-							<field name="modify" invisible = "1"/>																			
+							<field name="latest_price"/>
+							<field name="name" invisible="1"/>
+							<field name="category_type" invisible="1"/>
+							<field name="modify" invisible = "1"/>
 							<field name="copy_flag" invisible="1"/>																				
-							<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+							<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 						</group>
 						<group>
-							
 							<field name="eff_date" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>														
 							<field name="state" style="width: 30%%" class="att_state_change"/>								
 						</group>
@@ -72,11 +70,13 @@
 							</field>																								
 						</page>
 						<page string="Entry Info">
+							<group>
 								<group>
 									<field name="company_id"/>
-									<field name="active"/>			
 								</group>
 								<group>
+									<field name="active"/>
+								</group>
 								<group>
 									<field name="user_id"/>
 									<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
@@ -111,7 +111,7 @@
 								toolbar="True" string="Brand Moc Rate Tree">				
 					<field name="product_id"/>
 					<field name="eff_date"/>
-					<field name="category_type"/>
+					<field name="category_type" invisible="1"/>
 					<field name="latest_price"/>
 					<field name="state"/>
 				</tree>
@@ -145,7 +145,6 @@
 
 		<!-- Menu Action Start-->
 		
-		
 		<record id="mma_brandmocrate_purchase_master" model="ir.actions.act_window">
 			<field name="name">Brand/Moc/Rate-Purchase</field>
 			<field name="type">ir.actions.act_window</field>
@@ -157,7 +156,6 @@
 			<field name="search_view_id" ref="m_search_v_brandmocrate"/>
 		</record>
 		
-		
 		 <record id="mma_brandmocrate_design_master" model="ir.actions.act_window">
 			<field name="name">Brand/Moc/Rate-Design</field>
 			<field name="type">ir.actions.act_window</field>
@@ -168,9 +166,7 @@
 			<field name="view_id" ref="m_tree_v_brandmocrate"/>
 			<field name="search_view_id" ref="m_search_v_brandmocrate"/>
 		</record>
-		
-		
-						
+			
 		<!-- Menu Action End-->
 		
 		 <!-- Audit Log Xml Data Start-->
@@ -181,7 +177,6 @@
             <field name="state">subscribed</field>              
         </record>
        
-		
         <record id="brandmocrate_details_model" model="audittrail.rule">
             <field name="name">Audit Log Brand Moc Rate Details Master</field>
             <field name="object_id" eval="ref('kg_brandmoc_rate.model_ch_brandmoc_rate_details')"/>       
@@ -198,8 +193,6 @@
 			<menuitem action="mma_brandmocrate_purchase_master" name="Brand/Moc/Rate-Purchase" id="mam_brandmocrate_purchase_master" parent="kg_menus.ppm_master_menu" sequence="13"/>
 				 
 		<!-- Menu Name End here --> 
-
-	
 
 	</data>
 </openerp>

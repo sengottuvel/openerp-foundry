@@ -9,7 +9,6 @@ import logging
 import openerp.addons.decimal_precision as dp
 logger = logging.getLogger('server')
 
-
 class kg_indent2_po(osv.osv):
 	
 	_name = "purchase.order"
@@ -17,7 +16,7 @@ class kg_indent2_po(osv.osv):
 
 	_columns = {
 	
-	'kg_poindent_lines':fields.many2many('purchase.requisition.line','kg_poindent_po_line' , 'po_order_id', 'piline_id','POIndent Lines',
+		'kg_poindent_lines':fields.many2many('purchase.requisition.line','kg_poindent_po_line' , 'po_order_id', 'piline_id','POIndent Lines',
 			domain="[('pending_qty','>','0'), '&',('line_state','=','process'), '&',('draft_flag','=', False)]", 
 			readonly=True, states={'draft': [('readonly', False)]}),
 			
@@ -47,8 +46,6 @@ class kg_indent2_po(osv.osv):
 			del_sql = """ delete from purchase_order_line where order_id=%s """ %(ids[0])
 			cr.execute(del_sql)
 			
-			
-			
 		if obj.kg_poindent_lines:
 			poindent_line_ids = map(lambda x:x.id,obj.kg_poindent_lines)
 			poindent_line_browse = poindent_line_obj.browse(cr,uid,poindent_line_ids)
@@ -67,15 +64,11 @@ class kg_indent2_po(osv.osv):
 				else:
 					flag = False
 					pi_qty = 0.0
-				print "poindent_line_ids~~~~~~~~~~~~~~~~~~~~~~~~~~", poindent_line_ids
-				print "group[0] ====================>>>", group[0]
 				prod_browse = group[0].product_id
 				brand_id = group[0].brand_id.id			
 				po_pi_id = group[0].id
 				po_uom = group[0].product_uom_id.id
 				remark = group[0].note
-				print"brand_idbrand_idbrand_idbrand_id",brand_id
-				print"group[0].moc_id_temp.idgroup[0].moc_id_temp.idgroup[0].moc_id_temp.id",group[0].moc_id_temp.id
 				max_sql = """ select max(line.price_unit),min(line.price_unit) from purchase_order_line line 
 								left join purchase_order po on (po.id=line.order_id)
 								join kg_brandmoc_rate rate on (rate.product_id=line.product_id)
@@ -159,39 +152,27 @@ class kg_indent2_po(osv.osv):
 		cr.execute(""" select piline_id from kg_poindent_po_line where po_order_id = %s """ %(str(ids[0])))
 		data = cr.dictfetchall()
 		val = [d['piline_id'] for d in data if 'piline_id' in d] 
-		print "val...............................",val
 		product_id = line.product_id.id
 		product_record = product_obj.browse(cr, uid, product_id)
-		print "product_id....................", product_id
 		list_line = pi_line_obj.search(cr,uid,[('id', 'in', val), ('product_id', '=', product_id)],context=context)
-		print "list_line....................>>>>>", list_line
 		pi_line_id=line.pi_line_id
 		po_qty = line.product_qty
 		for i in list_line:
-			print "IIIIIIIIIIIIIIIIIIIIIIII", i
 			bro_record = pi_line_obj.browse(cr, uid,i)
-			print "bro_record ;;;;;;;;;;;;;;;;;;;;;;;", bro_record
 			orig_pi_qty = bro_record.pending_qty
 			po_used_qty = po_qty
-			print "po_used_qty,,,,,,,,,,,,,,,,,,,,..................,,,,,,,,,,,", po_used_qty
-			print "orig_pi_qty,,,,,,,,,,,,,,,,,,,,...........===============>>", orig_pi_qty
 			if po_used_qty <= orig_pi_qty:
-				print "IFFFFFFFFFFFFFFFFFFFFF"
 				pi_pending_qty =  orig_pi_qty - po_used_qty
-				print "pending_po_depindent_qty ::::::::", pi_pending_qty
 				sql = """ update purchase_requisition_line set pending_qty=%s where id = %s"""%(pi_pending_qty,bro_record.id)
 				cr.execute(sql)
 				pi_line_obj.write(cr,uid, bro_record.id, {'line_state' : 'noprocess'})
 				break
 			
 			else:
-				print "eleleleleleleleleellellele"
 				pending_qty = bro_record.pending_qty
-				print "pending_qty]]][][][][][][][][]", pending_qty
 				remain_qty = po_used_qty - pending_qty
 				pi_pending_qty = 0.0
 				po_qty = remain_qty
-				print "po_qty ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", po_qty
 				sql = """ update purchase_requisition_line set pending_qty=%s where id = %s"""%(pi_pending_qty,bro_record.id)
 				cr.execute(sql)
 				pi_line_obj.write(cr,uid, bro_record.id, {'line_state' : 'noprocess'})
@@ -199,8 +180,5 @@ class kg_indent2_po(osv.osv):
 					break
 		
 		return True
-		
-			
-	
 		
 kg_indent2_po()

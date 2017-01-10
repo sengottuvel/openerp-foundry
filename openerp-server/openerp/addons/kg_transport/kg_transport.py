@@ -39,11 +39,8 @@ class kg_transport(osv.osv):
 		
 	_columns = {
 		
-		'created_by': fields.many2one('res.users', 'Created By', readonly=True),
-		'creation_date': fields.datetime('Creation Date', readonly=True),
 		'code': fields.char('Code',readonly=True),
-		'name': fields.char('Transport Name', size=128, required=True, select=True,readonly=True, states={'draft':[('readonly',False)]}),
-		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
+		'name': fields.char('Name', size=128, required=True, select=True,readonly=True, states={'draft':[('readonly',False)]}),
 		'contact_person': fields.char('Contact Person', size=128, required=True, readonly=True, states={'draft':[('readonly',False)]}, select=True),
 		'address': fields.char('Address', size=128),
 		'address1': fields.char('Address1', size=128),
@@ -55,19 +52,10 @@ class kg_transport(osv.osv):
 		'email': fields.char('Email', size=128),
 		'state_id': fields.many2one('res.country.state', 'State'),
 		'country_id': fields.many2one('res.country', 'Country'),
-		'active': fields.boolean('Active'),
 		'int_notes': fields.text('Internal Notes'),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
-		'confirm_by': fields.many2one('res.users','Confirmed By', readonly=True),
-		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
-		'approve_by': fields.many2one('res.users','Approved By', readonly=True),
-		'approve_date': fields.datetime('Approve Date', readonly=True),
-		'update_date': fields.datetime('Last Updated Date', readonly=True),
-		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
-		'reject_date': fields.datetime('Reject Date', readonly=True),
-		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
 		'transport_user_id': fields.many2one('res.users','Transport User'),
-		'rules': fields.text('Rules'),
+		'rules': fields.text('Notes'),
 		'line_id': fields.one2many('kg.transport.line','header_id', 'Transport Line'),
 		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
@@ -75,6 +63,21 @@ class kg_transport(osv.osv):
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel Remarks'),
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
+		
+		# Entry Info
+		
+		'active': fields.boolean('Active'),
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
+		'created_by': fields.many2one('res.users', 'Created By', readonly=True),
+		'creation_date': fields.datetime('Creatied Date', readonly=True),
+		'confirm_by': fields.many2one('res.users','Confirmed By', readonly=True),
+		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
+		'approve_by': fields.many2one('res.users','Approved By', readonly=True),
+		'approve_date': fields.datetime('Approved Date', readonly=True),
+		'update_date': fields.datetime('Last Updated Date', readonly=True),
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
+		'reject_date': fields.datetime('Rejected Date', readonly=True),
+		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
 		
 	}
 	
@@ -84,7 +87,7 @@ class kg_transport(osv.osv):
 		'active': True,
 		'state': 'draft',
 		'created_by': lambda obj, cr, uid, context: uid,
-		'creation_date' : fields.datetime.now,
+		'creation_date' : lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'modify': 'no',
 		
 	}
@@ -111,10 +114,8 @@ class kg_transport(osv.osv):
 	def _check_zip(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])
 		if rec.zip:
-			if len(str(rec.zip)) in (6,7,8):
+			if len(str(rec.zip)) in (6,7,8) and rec.zip.isdigit() == True:
 				return True
-			else:
-				return False
 		else:
 			return True
 		return False
@@ -141,38 +142,57 @@ class kg_transport(osv.osv):
 	def _check_mobile_no(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])
 		if rec.mobile:
-			if len(str(rec.mobile)) in (8,9,10,11,12,13,14,15) and rec.mobile.isdigit() == True:
+			if len(str(rec.mobile)) in (10,11,12) and rec.mobile.isdigit() == True:
 				return True
-		else:
-			return True
-		return False
-			
-	def _check_phone_no(self, cr, uid, ids, context=None):		
-		rec = self.browse(cr, uid, ids[0])
+			else:
+				raise osv.except_osv(_('Warning!'),
+					_('Mobile No. should contain 10-12 digit numerics. Else system not allow to save.!'))
 		if rec.phone:
-			if len(str(rec.phone)) in (10,11) and rec.phone.isdigit() == True:
+			if len(str(rec.phone)) in (10,11,12) and rec.phone.isdigit() == True:
 				return True
-		else:
-			return True
-		return False
-			
+			else:
+				raise osv.except_osv(_('Warning!'),
+					_('Phone No. should contain 10-12 digit numerics. Else system not allow to save.!'))
+		return True
+	
+	def _spl_name(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+		if rec.name:
+			name_special_char = ''.join(c for c in rec.name if c in '!@#$%^~*{}?+/=')
+			if name_special_char:
+				raise osv.except_osv(_('Warning!'),
+					_('Special Character Not Allowed in Name!'))
+		if rec.address:
+			address_special_char = ''.join(c for c in rec.address if c in '!@#$%^~*{}?+/=')
+			if address_special_char:
+				raise osv.except_osv(_('Warning!'),
+					_('Special Character Not Allowed in Address!'))
+		if rec.contact_person:
+			person_special_char = ''.join(c for c in rec.contact_person if c in '!@#$%^~*{}?+/=')
+			if person_special_char:
+				raise osv.except_osv(_('Warning!'),
+					_('Special Character Not Allowed in Contact Person!'))
+		
+		return True
+		
 	_constraints = [
 	
 		#~ (_code_validate, 'Code must be unique !!', ['Code']),		
 		(_check_zip,'ZIP should contain 6-8 digit numerics. Else system not allow to save.',['ZIP']),
 		(_validate_email,'Enter a correct Email !',['Email']),
 		(_check_website,'Enter a correct Website !',['Website']),
-		(_check_mobile_no,'Mobile No. should contain 8-15 digit numerics. Else system not allow to save.',['Mobile']),
-		(_check_phone_no,'Phone No. should contain 10-12 digit numerics. Else system not allow to save.',['Phone']),
+		(_check_mobile_no,'Mobile No. should contain 10-12 digit numerics. Else system not allow to save.',['']),
+		(_spl_name, 'Special Character Not Allowed!', ['']),
 		
 	]
 	
 	def onchange_zip(self,cr,uid,ids,zip,context=None):
+		print"fffffffffffffFFFF"
 		if len(str(zip)) in (6,7,8):
 			value = {'zip':zip}
 		else:
 			raise osv.except_osv(_('Check zip number !!'),
-				_('ZIP should contain 6-8 digit numerics. Else system not allow to save.!!'))
+				_('zip should contain 6-8 digit numerics. Else system not allow to save. !!'))
 		return {'value': value}
 	
 	def onchange_city(self, cr, uid, ids, city_id, context=None):
@@ -195,51 +215,59 @@ class kg_transport(osv.osv):
 		
 	def confirm_transport(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		cur_date = datetime.datetime.now()
-		if not rec.code:
-			seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.transport')])
-			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
-			cr.execute("""select generatesequenceno(%s,'%s',now()::date) """%(seq_id[0],seq_rec.code))
-			seq_name = cr.fetchone();
-			seq_code = seq_name[0]
-		else:
-			seq_code = rec.code
-		self.write(cr,uid,ids,{'state': 'confirmed','confirm_by': uid, 'confirm_date': cur_date,'code': seq_code})
+		if rec.state == 'draft':
+			if not rec.code:
+				seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.transport')])
+				seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+				cr.execute("""select generatesequenceno(%s,'%s',now()::date) """%(seq_id[0],seq_rec.code))
+				seq_name = cr.fetchone();
+				seq_code = seq_name[0]
+			else:
+				seq_code = rec.code
+			self.write(cr,uid,ids,{'state': 'confirmed','confirm_by': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),'code': seq_code})
 		return True
 		
 	def approve_transport(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		cur_date = datetime.datetime.now()
-		self.write(cr,uid,ids,{'state': 'approved','approve_by': uid, 'approve_date': cur_date})
+		if rec.state == 'confirmed':
+			self.write(cr,uid,ids,{'state': 'approved','approve_by': uid, 'approve_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 		
 	def entry_reject(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		cur_date = datetime.datetime.now()
-		if rec.remark:
-			self.write(cr, uid, ids, {'state': 'reject','rej_user_id': uid, 'reject_date': cur_date})
-		else:
-			raise osv.except_osv(_('Rejection remark is must !!'),
-				_('Enter rejection remark in remark field !!'))
+		if rec.state == 'confirmed':
+			if rec.remark:
+				self.write(cr, uid, ids, {'state': 'reject','rej_user_id': uid, 'reject_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			else:
+				raise osv.except_osv(_('Rejection remark is must !!'),
+					_('Enter rejection remark in remark field !!'))
 		return True
 	
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		cur_date = datetime.datetime.now()
-		if rec.cancel_remark:
-			self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': cur_date})
-		else:
-			raise osv.except_osv(_('Cancel remark is must !!'),
-				_('Enter the remarks in Cancel remarks field !!'))
+		if rec.state == 'approved':
+			if rec.cancel_remark:
+				self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			else:
+				raise osv.except_osv(_('Cancel remark is must !!'),
+					_('Enter the remarks in Cancel remarks field !!'))
 		return True
 	
 	def entry_draft(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'draft'})
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'approved':
+			self.write(cr, uid, ids, {'state': 'draft'})
 		return True
 				
 	def unlink(self,cr,uid,ids,context=None):
-		raise osv.except_osv(_('Warning!'),
-				_('You can not delete Entry !!'))		
+		unlink_ids = []		
+		for rec in self.browse(cr,uid,ids):	
+			if rec.state != 'draft':			
+				raise osv.except_osv(_('Warning!'),
+						_('You can not delete this entry !!'))
+			else:
+				unlink_ids.append(rec.id)
+		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
 		
 	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
@@ -275,12 +303,54 @@ class kg_transport_line(osv.osv):
 	_columns = {
 		
 		'header_id': fields.many2one('kg.transport','Transport'),
-		'name': fields.char('Contact Name', size=128),
+		'name': fields.char('Contact Name', size=128,required=True),
 		'position': fields.char('Job Position', size=128),
 		'branch': fields.char('Branch', size=128),
 		'phone': fields.char('Phone'),
-		'mobile': fields.char('Mobile'),
+		'mobile': fields.char('Mobile',required=True),
 		
 	}
-
+	
+	def _check_mobile_no(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+		if rec.mobile:
+			if len(str(rec.mobile)) in (12) and rec.mobile.isdigit() == True:
+				return True
+			else:
+				raise osv.except_osv(_('Warning!'),
+					_('Mobile No. should contain 10-12 digit numerics. Else system not allow to save.!'))
+		if rec.phone:
+			if len(str(rec.phone)) in (12) and rec.phone.isdigit() == True:
+				return True
+			else:
+				raise osv.except_osv(_('Warning!'),
+					_('Phone No. should contain 10-12 digit numerics. Else system not allow to save.!'))
+		return True
+		
+	def _spl_name(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+		if rec.name:
+			name_special_char = ''.join(c for c in rec.name if c in '!@#$%^~*{}?+/=')
+			if name_special_char:
+				raise osv.except_osv(_('Warning!'),
+					_('Special Character Not Allowed in Contact Name!'))
+		if rec.position:
+			position_special_char = ''.join(c for c in rec.position if c in '!@#$%^~*{}?+/=')
+			if position_special_char:
+				raise osv.except_osv(_('Warning!'),
+					_('Special Character Not Allowed in Job Position!'))
+		if rec.branch:
+			branch_special_char = ''.join(c for c in rec.branch if c in '!@#$%^~*{}?+/=')
+			if branch_special_char:
+				raise osv.except_osv(_('Warning!'),
+					_('Special Character Not Allowed in Branch!'))
+		return True
+	
+	_constraints = [
+		
+		(_check_mobile_no,'Mobile No. should contain 10-12 digit numerics. Else system not allow to save.',['']),
+		(_spl_name, 'Special Character Not Allowed!', ['']),
+		
+	]
+		
 kg_transport_line()

@@ -2,16 +2,15 @@
 <openerp>
 	<data>
 	
-	
 	<record id="kg_transport_form_view" model="ir.ui.view">
 			<field name="name">kg.transport</field>
 			<field name="model">kg.transport</field>
 			<field name="arch" type="xml">
 				<form string="Transport Master" version="7.0">	
 				<header>			
-				<button name="confirm_transport" states="draft" string="Confirm" type="object" class="oe_highlight"/>	
-				<button name="approve_transport" states="confirmed" string="Approve" type="object" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+				<button name="confirm_transport" states="draft" string="Confirm" type="object" class="oe_highlight"/>
 				<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+				<button name="approve_transport" states="confirmed" string="Approve" type="object" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 				<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes'),('state','in',('approved','cancel'))]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
 <!--			<button name="entry_cancel" type="object" string="Cancel" states="approved" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
 				<button name="entry_draft" type="object" string="Set To Draft" states="approved" class="oe_highlight" confirm="Are you sure to proceed ?"/>
@@ -20,22 +19,22 @@
 					<group>
 						<group>						
 							<field name="code"/>
-							<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="contact_person" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="mobile" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="phone" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="email" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="website" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							<field name="transport_user_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="transport_user_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" invisible="1"/>
 							<field name="rules" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="modify" invisible="1"/>
 						</group>
 						<group>
+							<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="address" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							<field name="address1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="address1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" invisible="1"/>
 							<field name="city_id" on_change="onchange_city(city_id)" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							<field name="state_id" on_change="onchange_state(state_id)" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							<field name="country_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="state_id" on_change="onchange_state(state_id)" readonly="1"/>
+							<field name="country_id" readonly="1"/>
 							<field name="zip" on_change="onchange_zip(zip)" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="state" style="width: 30%%" class="att_state_change"/>
 						</group>
@@ -87,7 +86,9 @@
 						</group>
 					</page>
 					</notebook>
+<!--
 					<field name="int_notes" placeholder="Internal Notes..."/>
+-->
 				</form>
 			</field> 
 		</record>
@@ -103,7 +104,7 @@
 					<field name="code"/>
 					<field name="name"/>
 					<field name="contact_person"/>
-					<field name="transport_user_id"/>
+					<field name="transport_user_id" invisible="1"/>
 					<field name="mobile"/>
 					<field name="city_id"/>
 					<field name="state_id"/>
@@ -118,7 +119,7 @@
             <field name="model">kg.transport</field>
             <field name="arch" type="xml">
                 <search string="Transport Filter">
-					<field name="name" string="Transport Name" filter_domain="[('name','ilike',self)]" />
+					<field name="name" string="Name" filter_domain="[('name','ilike',self)]" />
 					<field name="code" string="Code" filter_domain="[('code','ilike',self)]" />
 					<filter icon="terp-check" name="state" string="Draft" domain="[('state','=','draft')]"/>
 					<filter icon="terp-check" name="state" string="Confirmed" domain="[('state','=','confirmed')]"/>
@@ -156,5 +157,8 @@
 		  <field name="reset_sequence">fiscal_reset</field>
 		</record>
 		
-</data>
-	</openerp>
+		<!-- Transport Master  --> 
+		<menuitem action="transport_action_form" name="Transport" id="mam_transport_master" parent="kg_menus.ppm_master_menu" sequence="12"/>
+			
+	</data>
+</openerp>
