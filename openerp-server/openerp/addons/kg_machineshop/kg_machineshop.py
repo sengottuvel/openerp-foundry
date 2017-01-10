@@ -176,6 +176,20 @@ class kg_machineshop(osv.osv):
 		
 	}
 	
+	def _check_qty(self, cr, uid, ids, context=None):		
+		entry_rec = self.browse(cr, uid, ids[0])
+		if (entry_rec.inward_accept_qty + entry_rec.inward_reject_qty) > entry_rec.fettling_qty:
+			return False
+		if (entry_rec.inward_accept_qty + entry_rec.inward_reject_qty) < entry_rec.fettling_qty:
+			return False					
+		return True
+		
+	_constraints = [
+	
+		(_check_qty,'Accept and Reject qty should not exceed Schedule Qty !',['Accept and Reject Qty']),
+		
+		]
+	
 	def ms_accept(self,cr,uid,ids, context=None):
 		entry_rec = self.browse(cr, uid, ids[0])
 		reject_qty = entry_rec.fettling_qty - entry_rec.inward_accept_qty 
@@ -282,25 +296,6 @@ class kg_machineshop(osv.osv):
 		return True
 		
 	def write(self, cr, uid, ids, vals, context=None):
-		entry_rec = self.browse(cr,uid, ids[0])
-		if vals.get('inward_accept_qty'):
-			if (vals.get('inward_accept_qty') + entry_rec.inward_reject_qty) > entry_rec.fettling_qty:
-				raise osv.except_osv(_('Warning!'),
-							_('Accept and Reject qty should not exceed Schedule Qty !!'))
-							
-			if (vals.get('inward_accept_qty') + entry_rec.inward_reject_qty) < entry_rec.fettling_qty:
-				raise osv.except_osv(_('Warning!'),
-							_('Accept and Reject qty should be equal to Schedule Qty !!'))
-		if vals.get('inward_reject_qty'):
-			if (entry_rec.inward_accept_qty + vals.get('inward_reject_qty')) > entry_rec.fettling_qty:
-				raise osv.except_osv(_('Warning!'),
-							_('Accept and Reject qty should not exceed Schedule Qty !!'))
-							
-			if (entry_rec.inward_accept_qty + vals.get('inward_reject_qty')) < entry_rec.fettling_qty:
-				raise osv.except_osv(_('Warning!'),
-							_('Accept and Reject qty should be equal to Schedule Qty !!'))
-
-		
 		return super(kg_machineshop, self).write(cr, uid, ids, vals, context)
 	
 kg_machineshop()
