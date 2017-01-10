@@ -277,7 +277,7 @@
 			ref('kg_menus.mam_supplier_master'),
 			ref('kg_product.mam_product_master'),
 			ref('kg_product.kg_product_catg_master'),
-			ref('kg_menus.mam_uom_master'),
+			ref('kg_product.mam_uom_master'),
 			ref('kg_po_masters.mam_payment_master'),
 			ref('kg_po_masters.mam_delivery_master'),
 			ref('kg_po_masters.mam_po_master'),
