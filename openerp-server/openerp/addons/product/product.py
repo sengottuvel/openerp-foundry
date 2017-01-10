@@ -21,16 +21,12 @@
 
 import math
 import re
-
 from _common import rounding
-
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import time
 from operator import itemgetter
 from itertools import groupby
-a = datetime.now()
-dt_time = a.strftime('%m/%d/%Y %H:%M:%S')
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
 from openerp import netsvc
@@ -177,7 +173,7 @@ class product_uom(osv.osv):
 	_order = "name"
 	_columns = {
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
-		'name': fields.char('Unit of Measure', size=64, required=True, translate=True),
+		'name': fields.char('Name', size=64, required=True, translate=True),
 		'code': fields.char('Code'),
 		'category_id': fields.many2one('product.uom.categ', 'Category', ondelete='cascade',
 			help="Conversion between Units of Measure can only occur if they belong to the same category. The conversion will be made based on the ratios."),
@@ -198,26 +194,26 @@ class product_uom(osv.osv):
 									  ('smaller','Smaller than the reference Unit of Measure')],'Type'),
 		
 		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
-		'dummy_state': fields.selection([('draft','Draft'),('confirm','Waiting for approval'),('approved','Approved'),
+		'dummy_state': fields.selection([('draft','Draft'),('confirm','WFA'),('approved','Approved'),
 				('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'remark': fields.text('Remarks',readonly=False),
 		'cancel_remark': fields.text('Cancel Remarks'),
 		
 			### Entry Info ###
-		'crt_date': fields.datetime('Creation Date',readonly=True),
+		'crt_date': fields.datetime('Created Date',readonly=True),
 		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
 		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
 		'confirm_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
-		'ap_rej_date': fields.datetime('Approved/Reject Date', readonly=True),
-		'ap_rej_user_id': fields.many2one('res.users', 'Approved/Reject By', readonly=True),			
+		'ap_rej_date': fields.datetime('Approved/Rejected Date', readonly=True),
+		'ap_rej_user_id': fields.many2one('res.users', 'Approved/Rejected By', readonly=True),			
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
 		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'approve_date': fields.datetime('Approved Date', readonly=True),
-		'app_user_id': fields.many2one('res.users', 'Apprved By', readonly=True),
+		'app_user_id': fields.many2one('res.users', 'Approved By', readonly=True),
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
-		
+		'notes': fields.text('Notes'),
 	}
 
 	_defaults = {
@@ -239,17 +235,17 @@ class product_uom(osv.osv):
 	]
 
 	def entry_confirm(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'dummy_state': 'confirm','confirm_user_id': uid, 'confirm_date': dt_time})
+		self.write(cr, uid, ids, {'dummy_state': 'confirm','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'dummy_state': 'approved','app_user_id': uid, 'approve_date': dt_time})
+		self.write(cr, uid, ids, {'dummy_state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
 	def entry_reject(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.remark:
-			self.write(cr, uid, ids, {'dummy_state': 'reject','ap_rej_user_id': uid, 'ap_rej_date': dt_time})
+			self.write(cr, uid, ids, {'dummy_state': 'reject','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		else:
 			raise osv.except_osv(_('Rejection remark is must !!'),
 				_('Enter rejection remark in remark field !!'))
@@ -259,7 +255,7 @@ class product_uom(osv.osv):
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.cancel_remark:
-			self.write(cr, uid, ids, {'dummy_state': 'cancel','cancel_user_id': uid, 'cancel_date': dt_time})
+			self.write(cr, uid, ids, {'dummy_state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		else:
 			raise osv.except_osv(_('Cancel remark is must !!'),
 				_('Enter the remarks in Cancel remarks field !!'))
@@ -333,9 +329,18 @@ class product_uom(osv.osv):
 			vals['name'] = v_name.capitalize() 
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(product_uom, self).write(cr, uid, ids, vals, context=context)
-		
-		
 	
+	def _Validation(self, cr, uid, ids, context=None):
+		flds = self.browse(cr , uid , ids[0])
+		name_special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )		
+		if name_special_char:
+			return False		
+		return True		
+		
+	_constraints = [
+	
+		(_Validation, 'Special Character Not Allowed !!!', ['Check Name']),
+	]
 
 product_uom()
 
@@ -417,40 +422,43 @@ class product_category(osv.osv):
 		'parent_left': fields.integer('Left Parent', select=1),
 		'parent_right': fields.integer('Right Parent', select=1),
 		'category_code':fields.char('Code',size=20),
-		'active':fields.boolean('Active'),
-		'creation_date':fields.datetime('Creation Date',readonly=True),
-		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
-		'approve_date': fields.datetime('Approved Date', readonly=True),
-		'app_user_id': fields.many2one('res.users', 'Apprved By', readonly=True),
-		'confirm_date': fields.datetime('Confirm Date', readonly=True),
-		'conf_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
-		'reject_date': fields.datetime('Reject Date', readonly=True),
-		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
-		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
-		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
-		'update_date': fields.datetime('Last Updated Date', readonly=True),
-		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
-		'state': fields.selection([('draft','Draft'),('confirm','Waiting for approval'),('approved','Approved'),
+		'state': fields.selection([('draft','Draft'),('confirm','WFA'),('approved','Approved'),
 				('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
-		'remark': fields.text('Reject Remarks',readonly=False,states={'approved':[('readonly',True)]}),
+		'remark': fields.text('Approve/Reject Remarks',readonly=False,states={'approved':[('readonly',True)]}),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'flag_isparent': fields.boolean('Is Parent'),
 		'cancel_remark': fields.text('Cancel Remarks'),
 		'code': fields.char('Code'),
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
+		'notes':fields.text('Notes'),
+		
+		# Entry Info
+		
+		'active':fields.boolean('Active'),
+		'creation_date':fields.datetime('Created Date',readonly=True),
+		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
+		'approve_date': fields.datetime('Approved Date', readonly=True),
+		'app_user_id': fields.many2one('res.users', 'Approved By', readonly=True),
+		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
+		'conf_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
+		'reject_date': fields.datetime('Rejected Date', readonly=True),
+		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
+		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
+		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
+		'update_date': fields.datetime('Last Updated Date', readonly=True),
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
 		
 	}
 	
 	_sql_constraints = [
-		#('name', 'unique(name)', 'Category name must be unique!'),
+		('name', 'unique(name)', 'Category name must be unique!'),
 		
 	]
 
-
 	_defaults = {
 		
-		'type' : lambda *a : 'normal',
-		'active':True,
+		'type': lambda *a : 'normal',
+		'active': True,
 		'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
@@ -490,17 +498,17 @@ class product_category(osv.osv):
 		return result
 	"""
 	def entry_confirm(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'confirm','conf_user_id': uid, 'confirm_date': dt_time})
+		self.write(cr, uid, ids, {'state': 'confirm','conf_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': dt_time})
+		self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
 	def entry_reject(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.remark:
-			self.write(cr, uid, ids, {'state': 'reject','rej_user_id': uid, 'reject_date': dt_time})
+			self.write(cr, uid, ids, {'state': 'reject','rej_user_id': uid, 'reject_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		else:
 			raise osv.except_osv(_('Rejection remark is must !!'),
 				_('Enter rejection remark in remark field !!'))
@@ -509,7 +517,7 @@ class product_category(osv.osv):
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.cancel_remark:
-			self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': dt_time})
+			self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		else:
 			raise osv.except_osv(_('Cancel remark is must !!'),
 				_('Enter the remarks in Cancel remarks field !!'))
@@ -542,9 +550,27 @@ class product_category(osv.osv):
 				return False
 			level -= 1
 		return True
+		
+	def _Validation(self, cr, uid, ids, context=None):
+		flds = self.browse(cr , uid , ids[0])
+		name_special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+/=' )		
+		if name_special_char:
+			return False		
+		return True	
+		
+	def _Unique_name(self, cr, uid, ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		cr.execute(""" select name from product_category where name  = '%s' and id != %s """ %(rec.name,rec.id))
+		data = cr.dictfetchall()
+		print "----------------------------------------------------------------------------------------",data
+		if data:
+			return False
+		return True
 
 	_constraints = [
-		(_check_recursion, 'Error ! You cannot create recursive categories.', ['parent_id'])
+		(_check_recursion, 'Error ! You cannot create recursive categories.', ['parent_id']),
+		(_Validation, 'Special Character Not Allowed !!!', ['Check Name']),
+		(_Unique_name, 'This Category Name already exists !!!', ['Check Name']),
 	]
 	def child_get(self, cr, uid, ids):
 		return [ids]
@@ -562,7 +588,7 @@ class product_template(osv.osv):
 	_columns = {
 		'name': fields.char('Name', required=True, translate=True, select=True),
 		'product_manager': fields.many2one('res.users','Product Manager'),
-		'description': fields.text('Description',translate=True),
+		'description': fields.text('Notes',translate=True),
 		'description_purchase': fields.text('Purchase Description',translate=True),
 		'description_sale': fields.text('Sale Description',translate=True),
 		'type': fields.selection([('consu', 'Consumable'),('service','Service')], 'Product Type', required=False, help="Consumable are product where you don't manage stock, a service is a non-material product provided by a company or an individual."),
@@ -894,7 +920,7 @@ class product_product(osv.osv):
 		'seller_qty': fields.function(_calc_seller, type='float', string='Supplier Quantity', multi="seller_info", help="This is minimum quantity to purchase from Main Supplier."),
 		'seller_id': fields.function(_calc_seller, type='many2one', relation="res.partner", string='Main Supplier', help="Main Supplier who has highest priority in Supplier List.", multi="seller_info"),
 	    'product_status':fields.selection([('approve', 'Approved'), ('not_approve', 'Waiting For Approval')], 'Product Status', readonly=True),
-		'state': fields.selection([('draft','Draft'),('confirm','Waiting for approval'),('approved','Approved'),('cancel','Cancelled'),
+		'state': fields.selection([('draft','Draft'),('confirm','WFA'),('approved','Approved'),('cancel','Cancelled'),
 				('reject','Rejected')],'Status', readonly=True),
 				
 		'flag_qc_notreq': fields.boolean('QC Not Required'),
@@ -909,7 +935,8 @@ class product_product(osv.osv):
 		'is_accessories': fields.boolean('Is Accessories?'),
 		
 		#Entry Info
-		'crt_date': fields.datetime('Creation Date',readonly=True),
+		
+		'crt_date': fields.datetime('Created Date',readonly=True),
 		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
@@ -925,9 +952,9 @@ class product_product(osv.osv):
 	_defaults = {
 		
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'product.product', context=c),
-		'active':True,
+		'active': True,
 		'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
-		'product_status':'not_approve',
+		'product_status': 'not_approve',
 		'state': 'draft',
 		'modify': 'yes',
 		'is_accessories': False,
@@ -1007,16 +1034,21 @@ class product_product(osv.osv):
 		unlink_ids = []
 		unlink_product_tmpl_ids = []
 		for product in self.browse(cr, uid, ids, context=context):
-			tmpl_id = product.product_tmpl_id.id
-			# Check if the product is last product of this template
-			other_product_ids = self.search(cr, uid, [('product_tmpl_id', '=', tmpl_id), ('id', '!=', product.id)], context=context)
-			if not other_product_ids:
-				unlink_product_tmpl_ids.append(tmpl_id)
-			unlink_ids.append(product.id)
+			if product.state == 'draft':
+				tmpl_id = product.product_tmpl_id.id
+				# Check if the product is last product of this template
+				other_product_ids = self.search(cr, uid, [('product_tmpl_id', '=', tmpl_id), ('id', '!=', product.id)], context=context)
+				if not other_product_ids:
+					unlink_product_tmpl_ids.append(tmpl_id)
+				unlink_ids.append(product.id)
+			else:
+				raise osv.except_osv(_('Warning!'),
+					_('You can not delete this entry !!'))
 		res = super(product_product, self).unlink(cr, uid, unlink_ids, context=context)
 		# delete templates after calling super, as deleting template could lead to deleting
 		# products due to ondelete='cascade'
 		self.pool.get('product.template').unlink(cr, uid, unlink_product_tmpl_ids, context=context)
+			
 		return res
 
 	def onchange_uom(self, cursor, user, ids, uom_id, uom_po_id):
@@ -1047,8 +1079,8 @@ class product_product(osv.osv):
 			return True
 		return True	
 
-
 	_constraints = [
+	
 	(_check_ean_key, 'You provided an invalid "EAN13 Barcode" reference. You may use the "Internal Reference" field instead.', ['ean13']),
 	(_check_reorder_values, 'System not allow to save negative and zero values..!!',['Reorder Qty']),
 	(_check_min_values, 'System not allow to save negative and zero values..!!',['Minimum Qty']),
