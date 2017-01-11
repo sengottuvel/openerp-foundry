@@ -894,7 +894,7 @@ class purchase_order_line(osv.osv):
 		'order_id': fields.many2one('purchase.order', 'Order Reference', select=True, required=True, ondelete='cascade'),
 		'account_analytic_id':fields.many2one('account.analytic.account', 'Analytic Account',),
 		'company_id': fields.related('order_id','company_id',type='many2one',relation='res.company',string='Company', store=True, readonly=True),
-		'state': fields.selection([('draft', 'Draft'), ('confirmed', 'Confirmed'), ('done', 'Done'), ('cancel', 'Cancelled')], 'Status', required=True, readonly=True,
+		'state': fields.selection([('draft', 'Draft'), ('confirmed', 'Confirmed'), ('done', 'Done'), ('cancel', 'Cancelled')], 'Status', readonly=True,
 								  help=' * The \'Draft\' status is set automatically when purchase order in draft status. \
 									   \n* The \'Confirmed\' status is set automatically as confirm when purchase order in confirm status. \
 									   \n* The \'Done\' status is set automatically when purchase order is set as done. \
