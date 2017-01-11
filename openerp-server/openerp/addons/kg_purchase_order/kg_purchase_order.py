@@ -819,7 +819,7 @@ class kg_purchase_order(osv.osv):
 		if rec.date_order > today_date:
 			raise osv.except_osv(_('Warning'),
 				_('PO date should not be accept future date!'))
-		if rec.delivery_date and rec.delivery_date < today_date:
+		if rec.state in ('draft','confirmed') and rec.delivery_date and rec.delivery_date < today_date:
 			raise osv.except_osv(_('Warning'),
 				_('Delivery date should not be accept past date!'))
 		if rec.quotation_date:
