@@ -179,18 +179,18 @@ class kg_product(osv.osv):
 					   
 		return res 
 	
-	def _spl_name(self, cr, uid, ids, context=None):		
-		rec = self.browse(cr, uid, ids[0])
-		if rec.name:
-			name_special_char = ''.join(c for c in rec.name if c in '!@#$%^~*{}?+/=')
-			if name_special_char:
-				raise osv.except_osv(_('Warning!'),
-					_('Special Character Not Allowed in Name!'))
-			
-			return True
-		else:
-			return True
-		return False
+	#~ def _spl_name(self, cr, uid, ids, context=None):		
+		#~ rec = self.browse(cr, uid, ids[0])
+		#~ if rec.name:
+			#~ name_special_char = ''.join(c for c in rec.name if c in '!@#$%^~*{}?+/=')
+			#~ if name_special_char:
+				#~ raise osv.except_osv(_('Warning!'),
+					#~ _('Special Character Not Allowed in Name!'))
+			#~ 
+			#~ return True
+		#~ else:
+			#~ return True
+		#~ return False
 		
 	def _po_coeff(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])
@@ -208,7 +208,7 @@ class kg_product(osv.osv):
 	_constraints = [
 		
 		(_name_validate, 'product name must be unique !!', ['name']),
-		(_spl_name, 'Special Character Not Allowed!', ['']),
+		#~ (_spl_name, 'Special Character Not Allowed!', ['']),
 		(_po_coeff, 'System should not be accept zero value!', ['']),
 	   
 		#(fields_validation, 'Please Enter the valid Format',['Invalid Format']),
