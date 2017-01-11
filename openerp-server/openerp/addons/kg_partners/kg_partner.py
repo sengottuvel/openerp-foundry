@@ -68,18 +68,7 @@ class kg_partner(osv.osv):
 	'group_flag': fields.boolean('Is Group Company'),
 	'delivery_id': fields.many2one('kg.delivery.master','Delivery Type'),
 	#'child_ids': fields.one2many('res.partner', 'parent_id', 'Contacts', domain=[('active','=',True)]),
-	'creation_date': fields.datetime('Creation Date',readonly=True),
-	'created_by': fields.many2one('res.users', 'Created by',readonly=True),
-	'confirmed_date': fields.datetime('Confirmed Date',readonly=True),
-	'confirmed_by': fields.many2one('res.users','Confirmed By',readonly=True),
-	'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
-	'reject_date': fields.datetime('Reject Date', readonly=True),
-	'approved_date': fields.datetime('Approved Date',readonly=True),
-	'approved_by': fields.many2one('res.users','Approved By',readonly=True),
-	'cancel_date': fields.datetime('Cancelled Date', readonly=True),
-	'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
-	'updated_date': fields.datetime('Last Update Date',readonly=True),
-	'updated_by': fields.many2one('res.users','Last Updated By',readonly=True),
+	
 	'con_designation': fields.char('Designation'),
 	'con_whatsapp': fields.char('Whatsapp No'),
 	#~ 'acc_number': fields.char('Whatsapp No'),
@@ -100,18 +89,36 @@ class kg_partner(osv.osv):
 	'adhar_id': fields.char('Adhar ID'),
 	'contractor': fields.boolean('Contractor'),
 	'tin_flag': fields.boolean('TIN Flag'),
-	'mobile_2': fields.char('Mobile2'),
+	'mobile_2': fields.char('Mobile2',size=12),
+	'email_applicable': fields.selection([('yes','Yes'),('no','No')],'Email Applicable'),
+	'sms_applicable': fields.selection([('yes','Yes'),('no','No')],'SMS Applicable'),
+	
+	## Entry Info
+	
+	'creation_date': fields.datetime('Created Date',readonly=True),
+	'created_by': fields.many2one('res.users', 'Created by',readonly=True),
+	'confirmed_date': fields.datetime('Confirmed Date',readonly=True),
+	'confirmed_by': fields.many2one('res.users','Confirmed By',readonly=True),
+	'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
+	'reject_date': fields.datetime('Reject Date', readonly=True),
+	'approved_date': fields.datetime('Approved Date',readonly=True),
+	'approved_by': fields.many2one('res.users','Approved By',readonly=True),
+	'cancel_date': fields.datetime('Cancelled Date', readonly=True),
+	'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
+	'updated_date': fields.datetime('Last Updated Date',readonly=True),
+	'updated_by': fields.many2one('res.users','Last Updated By',readonly=True),
 	
 	}
 	
 	_defaults = {
 	  
 	  'is_company': True,
-	  'creation_date': fields.datetime.now,
+	  'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 	  'created_by': lambda obj, cr, uid, context: uid,
 	  'partner_state': 'draft',
 	  'modify': 'no',
 	  'tin_flag': False,
+	  'company_type': 'company',
 		 
 	}
 
@@ -149,37 +156,51 @@ class kg_partner(osv.osv):
 			
 	def confirm_partner(self, cr, uid, ids, context=None): 
 		rec = self.browse(cr, uid, ids[0])
-		self.write(cr, uid, ids, {'partner_state': 'confirm','confirmed_by':uid,'confirmed_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		
+		if rec.partner_state == 'draft':
+			self.write(cr, uid, ids, {'partner_state': 'confirm','confirmed_by':uid,'confirmed_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 		
 	def reject_partner(self, cr, uid, ids, context=None): 
 		rec = self.browse(cr, uid, ids[0])
-		if rec.remark:
-			self.write(cr, uid, ids, {'partner_state': 'reject','update_user_id':uid,'reject_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		else:
-			raise osv.except_osv(_('Rejection remark is must !!'),
-				_('Enter rejection remark in remark field !!'))
+		if rec.partner_state == 'confirm':
+			if rec.remark:
+				self.write(cr, uid, ids, {'partner_state': 'reject','update_user_id':uid,'reject_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			else:
+				raise osv.except_osv(_('Rejection remark is must !!'),
+					_('Enter rejection remark in remark field !!'))
 		return True
 		
 	def approve_partner(self, cr, uid, ids, context=None): 
 		rec = self.browse(cr, uid, ids[0])
-		self.write(cr, uid, ids, {'partner_state': 'approve','approved_by':uid,'approved_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		
+		if rec.partner_state == 'confirm':
+			self.write(cr, uid, ids, {'partner_state': 'approve','approved_by':uid,'approved_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
 	def entry_draft(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'partner_state': 'draft'})
+		rec = self.browse(cr, uid, ids[0])
+		if rec.partner_state == 'approve':
+			self.write(cr, uid, ids, {'partner_state': 'draft'})
 		return True
 		
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.cancel_remark:
-			self.write(cr, uid, ids, {'partner_state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		else:
-			raise osv.except_osv(_('Cancel remark is must !!'),
-				_('Enter the remarks in Cancel remarks field !!'))
+		if rec.partner_state == 'approve':
+			if rec.cancel_remark:
+				self.write(cr, uid, ids, {'partner_state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			else:
+				raise osv.except_osv(_('Cancel remark is must !!'),
+					_('Enter the remarks in Cancel remarks field !!'))
 		return True
+	
+	def unlink(self,cr,uid,ids,context=None):
+		unlink_ids = []		
+		for rec in self.browse(cr,uid,ids):	
+			if rec.partner_state != 'draft':			
+				raise osv.except_osv(_('Warning!'),
+						_('You can not delete this entry !!'))
+			else:
+				unlink_ids.append(rec.id)
+		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)	
 		
 	def write(self, cr, uid, ids, vals, context=None):
 		print"valsssssS",vals
@@ -236,6 +257,16 @@ class kg_partner(osv.osv):
 			return True
 		return False
 	
+	def _validate_email(self, cr, uid, ids, context=None):
+		rec = self.browse(cr,uid,ids[0]) 
+		if rec.email==False:
+			return True
+		else:
+			if re.match("^.+\\@(\\[?)[a-zA-Z0-9\\-\\.]+\\.([a-zA-Z]{2,3}|[0-9]{1,3})(\\]?)$", rec.email) != None:
+				return True
+			else:
+				raise osv.except_osv('Invalid Email', 'Please enter a valid email address')   
+				
 	def _check_website(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
 		if rec.website != False:
@@ -284,10 +315,10 @@ class kg_partner(osv.osv):
 	def _name_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
 		res = True
+		data=''
 		if rec.name:
 			partner_name = rec.name
 			name=partner_name.upper()
-			data=''
 			if rec.customer == True:
 				cr.execute(""" select upper(name) from res_partner where upper(name) = '%s' and customer = True """ %(name))
 				data = cr.dictfetchall()
@@ -302,25 +333,91 @@ class kg_partner(osv.osv):
 			else:
 				res = True
 		return res
-				
+	
+	def _unique_tin(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.tin_no:
+			tin_no = rec.tin_no
+			name = tin_no.upper()			
+			cr.execute(""" select tin_no from res_partner where tin_no = '%s' """ %(name))
+			data = cr.dictfetchall()	
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res
+	
+	def _spl_name(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+		if rec.name:
+			name_special_char = ''.join(c for c in rec.name if c in '!@#$%^~*{}?+/=')
+			if name_special_char:
+				raise osv.except_osv(_('Warning!'),
+					_('Special Character Not Allowed in Name!'))
+		if rec.adhar_id:
+			adhar_special_char = ''.join(c for c in rec.adhar_id if c in '!@#$%^~*{}?+/=')
+			if adhar_special_char:
+				raise osv.except_osv(_('Warning!'),
+					_('Special Character Not Allowed in Adhar ID!'))
+		if rec.pan_no:	
+			pan_special_char = ''.join(c for c in rec.pan_no if c in '!@#$%^~*{}?+/=')
+			if pan_special_char:
+				raise osv.except_osv(_('Warning!'),
+					_('Special Character Not Allowed in PAN!'))
+		if rec.gst_no:	
+			gst_special_char = ''.join(c for c in rec.gst_no if c in '!@#$%^~*{}?+/=')
+			if gst_special_char:
+				raise osv.except_osv(_('Warning!'),
+					_('Special Character Not Allowed in GST!'))
+		if rec.tan_no:
+			tan_special_char = ''.join(c for c in rec.tan_no if c in '!@#$%^~*{}?+/=')
+			if tan_special_char:
+				raise osv.except_osv(_('Warning!'),
+					_('Special Character Not Allowed in TAN!'))
+		if rec.cst_no:
+			cst_special_char = ''.join(c for c in rec.cst_no if c in '!@#$%^~*{}?+/=')
+			if cst_special_char:
+				raise osv.except_osv(_('Warning!'),
+					_('Special Character Not in CST!'))
+		if rec.vat_no:
+			vat_special_char = ''.join(c for c in rec.vat_no if c in '!@#$%^~*{}?+/=')
+			if vat_special_char:
+				raise osv.except_osv(_('Warning!'),
+					_('Special Character Not in VAT!'))
+		if rec.cheque_in_favour:
+			cheque_special_char = ''.join(c for c in rec.cheque_in_favour if c in '!@#$%^~*{}?+/=')
+			if cheque_special_char:
+				raise osv.except_osv(_('Warning!'),
+					_('Special Character Not in Cheque in Favour Of!'))
+		if rec.contact_person:
+			contact_special_char = ''.join(c for c in rec.contact_person if c in '!@#$%^~*{}?+/=')
+			if contact_special_char:
+				raise osv.except_osv(_('Warning!'),
+					_('Special Character Not in Contact Person!'))
+			return True
+		else:
+			return True
+		return False
+		
 	_constraints = [
 	
 		(_check_zip,'ZIP should contain 6-8 digit numerics. Else system not allow to save.',['ZIP']),
 		(_check_tin,'TIN No. should contain 11 digit numerics. Else system not allow to save.',['TIN']),
 		(_check_cst,'CST No. should contain 11 digit numerics. Else system not allow to save.',['CST']),
 		(_check_vat,'VAT No. should contain 15 letters. Else system not allow to save.',['VAT']),
+		(_validate_email,'Check Email !',['']),
 		(_check_website,'Check Website !',['Website']),
 		(_check_phone,'Phone No. should contain 8-15 digit numerics. Else system not allow to save.',['Phone']),
 		(_check_ifsc,'IFSC should contain 11 letters. Else system not allow to save.',['IFSC']),
 		(_check_acc_no,'A/C No. should contain 6-18 digit numerics. Else system not allow to save.',['A/C No.']),
 		(_check_mobile_no,'Mobile No. should contain 10-12 digit numerics. Else system not allow to save.',['Mobile']),
 		(_name_validate, 'Name must be unique !!', ['Name']),		
-		
+		(_unique_tin, 'TIN must be unique !!', ['TIN']),
+		(_spl_name, 'Special Character Not Allowed!', ['']),
 		]
 			
 kg_partner()
-
-
 
 class kg_delivery_address(osv.osv):
 
@@ -346,7 +443,7 @@ class kg_delivery_address(osv.osv):
 
 	_defaults = {
 
-	'date' : fields.date.context_today,
+	'date' : lambda * a: time.strftime('%Y-%m-%d'),
 
 	} 
 	
@@ -367,8 +464,8 @@ class kg_billing_address(osv.osv):
 	'city_id': fields.many2one('res.city', 'City',select=True),
 	'state_id': fields.many2one('res.country.state', 'State'),
 	'country_id': fields.many2one('res.country', 'Country'),	
-	'contact_no': fields.char('Contact No', size=128),
-	'zip': fields.char('ZIP', size=128),
+	'contact_no': fields.char('Contact No', size=12),
+	'zip': fields.char('ZIP', size=8),
 	'date': fields.date('Creation Date'),
 	'default': fields.boolean('Default'),
 	
@@ -376,12 +473,11 @@ class kg_billing_address(osv.osv):
 
 	_defaults = {
 
-	'date' : fields.date.context_today,
+	'date' : lambda * a: time.strftime('%Y-%m-%d'),
 
 	} 
 
 kg_billing_address()
-
 
 class kg_consultant_fee(osv.osv):
 
