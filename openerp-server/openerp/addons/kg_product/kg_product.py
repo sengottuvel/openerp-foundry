@@ -196,10 +196,10 @@ class kg_product(osv.osv):
 		rec = self.browse(cr, uid, ids[0])
 		if rec.uom_id != rec.uom_po_id and rec.po_uom_coeff == 0:
 			raise osv.except_osv(_('Warning!'),
-				_('%s Please check PO Coeff in this Item master !'%(rec.name)))
+				_('Please check and update PO Coeff for %s in product master !'%(rec.name)))
 		if rec.tolerance_applicable == True and rec.tolerance_plus <= 0:
 			raise osv.except_osv(_('Warning!'),
-				_('%s System should not accept without tolerance!'%(rec.name)))
+				_('Please check and update tolerance for %s in product master !'%(rec.name)))
 		return True
 			
 	#~ def write(self, cr, uid, ids, vals, context=None):
