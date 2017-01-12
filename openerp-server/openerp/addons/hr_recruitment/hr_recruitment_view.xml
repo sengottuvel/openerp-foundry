@@ -39,12 +39,7 @@
         <field name="name">Applicants</field>
         <field name="model">hr.applicant</field>
         <field name="arch" type="xml">
-<!--
             <tree string="Applicants" fonts="bold:message_unread==True" colors="grey:state in ('cancel','done');blue:state=='pending'">
--->
-			<tree colors="blue:status == 'draft';red:status == 'confirmed'
-						;black:status == 'approved';gray:status == 'reject';gray:status == 'cancel'" 
-								toolbar="True" string="Applicants">
                 <field name="message_unread" invisible="1"/>
                 <field name="create_date"/>
                 <field name="name" string="Subject"/>
@@ -76,21 +71,16 @@
             <header>
                 <button name="case_close_with_emp" string="Hire &amp; Create Employee" type="object"
                         class="oe_highlight"
-                        attrs="{'invisible':['|',('status','in',['draft','confirmed','cancel','reject']),('stage_id','=',5)]}"/>
-<!--
+                        attrs="{'invisible':['|', ('emp_id','!=',False), ('state','=','cancel')]}"/>
                 <button name="case_cancel" string="Refuse" type="object"
                         states="draft,open,pending" class="oe_highlight"/>
--->
-                <button name="case_cancel" string="Refuse" type="object"
-                        attrs="{'invisible':['|',('status','in',['draft','confirmed','cancel','reject']),('stage_id','in',(6,5))]}" class="oe_highlight"/>
                 <field name="stage_id" widget="statusbar" clickable="True"/>
                 <field name="emp_id" invisible="1"/>
-                <field name="status" invisible="1"/>
             </header>
             <sheet>
                 <div class="oe_right oe_button_box">
                     <button name="action_makeMeeting" type="object"
-                        string="Schedule Meeting" help="Schedule interview with this applicant" invisible="1"/>
+                        string="Schedule Meeting" help="Schedule interview with this applicant"/>
                     <button name="%(survey.action_view_survey_question_message)d" type="action"
                         string="Start Interview" help="Answer related job question"
                         context="{'survey_id': survey, 'response_id': [response], 'response_no':0 ,'active' : response, 'object' : 'hr.applicant'}"
@@ -100,14 +90,14 @@
                         attrs="{'invisible':[('survey','=',False)]}"/>
                 </div>
                 <div class="oe_title">
-                    <label for="name" class="oe_edit_only" invisible="1"/>
-                    <h1><field name="name" invisible="1"/></h1>
-                    <label for="partner_name" class="oe_edit_only" invisible="1"/>
+                    <label for="name" class="oe_edit_only"/>
+                    <h1><field name="name"/></h1>
+                    <label for="partner_name" class="oe_edit_only"/>
                     <h2>
-                        <field name="partner_name" class="oe_inline" invisible="1"/>
+                        <field name="partner_name" class="oe_inline"/>
                     </h2>
                 </div>
-                <group name="recruit">
+                <group>
                     <group>
                         <field name="partner_id"
                                 on_change="onchange_partner_id(partner_id)"/>
@@ -154,12 +144,12 @@
                     </group>
                 </group>
                 <group>
-                    <field name="categ_ids" widget="many2many_tags" invisible="1"/>
+                    <field name="categ_ids" widget="many2many_tags"/>
                 </group>
-                <separator string="Application Summary" invisible="1"/>
-                <field name="description" placeholder="Feedback of interviews..." invisible="1"/>
+                <separator string="Application Summary"/>
+                <field name="description" placeholder="Feedback of interviews..."/>
             </sheet>
-            <div class="oe_chatter" invisible="1">
+            <div class="oe_chatter">
                 <field name="message_follower_ids" widget="mail_followers"/>
                 <field name="message_ids" widget="mail_thread"/>
             </div>
@@ -184,32 +174,32 @@
         <field name="model">hr.applicant</field>
         <field name="arch" type="xml">
             <search string="Search Jobs">
-                <field name="partner_name" filter_domain="['|','|',('name','ilike',self),('partner_name','ilike',self),('email_from','ilike',self)]" string="Subject / Applicant" invisible="1"/>
-                <filter string="Unread Messages" name="message_unread" domain="[('message_unread','=',True)]" />
+                <field name="partner_name" filter_domain="['|','|',('name','ilike',self),('partner_name','ilike',self),('email_from','ilike',self)]" string="Subject / Applicant"/>
+                <filter string="Unread Messages" name="message_unread" domain="[('message_unread','=',True)]"/>
                 <separator/>
-                <filter string="New" domain="[('state','=','draft')]" help="All Initial Jobs" invisible="1"/>
-                <filter string="In Progress" domain="[('state','=','open')]" help="Open Jobs" invisible="1"/>
-                <filter string="Pending" domain="[('state','=','pending')]" help="Pending Jobs" invisible="1"/>
+                <filter string="New" domain="[('state','=','draft')]" help="All Initial Jobs"/>
+                <filter string="In Progress" domain="[('state','=','open')]" help="Open Jobs"/>
+                <filter string="Pending" domain="[('state','=','pending')]" help="Pending Jobs"/>
                 <separator/>
-                <filter string="Unassigned Recruitments" domain="[('user_id','=',False)]" help="Unassigned Recruitments" invisible="1"/>
+                <filter string="Unassigned Recruitments" domain="[('user_id','=',False)]" help="Unassigned Recruitments"/>
                 <separator/>
                 <filter string="Next Actions" context="{'invisible_next_action':False, 'invisible_next_date':False}"
-                    domain="[('date_action','&lt;&gt;',False)]" help="Filter and view on next actions and date" invisible="1"/>
-                <field name="job_id" invisible="1"/>
-                <field name="department_id" invisible="1"/>
-                <field name="user_id" invisible="1"/>
+                    domain="[('date_action','&lt;&gt;',False)]" help="Filter and view on next actions and date"/>
+                <field name="job_id"/>
+                <field name="department_id"/>
+                <field name="user_id"/>
                 <separator/>
-                <field name="categ_ids" invisible="1"/>
+                <field name="categ_ids"/>
                 <group expand="0" string="Group By...">
-                    <filter string="Responsible" domain="[]"  context="{'group_by':'user_id'}" invisible="1"/>
-                    <filter string="Department" domain="[]" context="{'group_by':'department_id'}" invisible="1"/>
-                    <filter string="Job" domain="[]" context="{'group_by':'job_id'}" />
-                    <filter string="Degree" domain="[]" context="{'group_by':'type_id'}" invisible="1"/>
-                    <filter string="Availability" domain="[]" context="{'group_by':'availability'}" invisible="1"/>
-                    <filter string="Appreciation" domain="[]" context="{'group_by':'priority'}" invisible="1"/>
+                    <filter string="Responsible" domain="[]"  context="{'group_by':'user_id'}"/>
+                    <filter string="Department" domain="[]" context="{'group_by':'department_id'}"/>
+                    <filter string="Job" domain="[]" context="{'group_by':'job_id'}"/>
+                    <filter string="Degree" domain="[]" context="{'group_by':'type_id'}"/>
+                    <filter string="Availability" domain="[]" context="{'group_by':'availability'}"/>
+                    <filter string="Appreciation" domain="[]" context="{'group_by':'priority'}"/>
                     <filter string="Stage" domain="[]" context="{'group_by':'stage_id'}"/>
-                    <filter string="Source" domain="[]" context="{'group_by':'source_id'}" invisible="1"/>
-                    <filter string="Creation Date" domain="[]" context="{'group_by':'create_date'}" invisible="1"/>
+                    <filter string="Source" domain="[]" context="{'group_by':'source_id'}"/>
+                    <filter string="Creation Date" domain="[]" context="{'group_by':'create_date'}"/>
                 </group>
            </search>
         </field>
@@ -312,23 +302,21 @@
         <field name="model">hr.job</field>
         <field name="inherit_id" ref="hr.view_hr_job_form"/>
         <field name="arch" type="xml">
-<!--
             <field name="expected_employees" version="7.0" position="after">
-                <label for="survey_id" groups="base.group_user" invisible="1"/>
+                <label for="survey_id" groups="base.group_user"/>
                 <div groups="base.group_user">
-                    <field name="survey_id" class="oe_inline" domain="[('type','=','Human Resources')]" invisible="1"/>
+                    <field name="survey_id" class="oe_inline" domain="[('type','=','Human Resources')]"/>
                     <button class="oe_inline"
                         string="Interview"
                         name="action_print_survey" type="object"
                         attrs="{'invisible':[('survey_id','=',False)]}"/>
                 </div>
             </field>
--->
             <xpath expr="//div[@class='oe_title']" version="7.0" position="after">
                 <div attrs="{'invisible': [('alias_domain', '=', False)]}">
                     <field name="alias_id" invisible="1" required="0"/>
-                    <label for="alias_name" class="oe_edit_only" invisible="1"/>
-                    <field name="alias_name" nolabel="1" class="oe_inline" attrs="{'required': [('alias_id', '!=', False)]}" invisible="1"/><field name="alias_domain" nolabel="1" class="oe_inline" invisible="1"/>
+                    <label for="alias_name" class="oe_edit_only"/>
+                    <field name="alias_name" nolabel="1" class="oe_inline" attrs="{'required': [('alias_id', '!=', False)]}"/>@<field name="alias_domain" nolabel="1" class="oe_inline"/>
                 </div>
             </xpath>
         </field>

@@ -186,7 +186,7 @@ class hr_applicant(base_stage, osv.Model):
         return res
 
     _columns = {
-        'name': fields.char('Subject', size=128, required=False),
+        'name': fields.char('Subject', size=128, required=True),
         'active': fields.boolean('Active', help="If the active field is set to false, it will allow you to hide the case without removing it."),
         'description': fields.text('Description'),
         'email_from': fields.char('Email', size=128, help="These people will receive email."),
@@ -236,7 +236,6 @@ class hr_applicant(base_stage, osv.Model):
         'color': fields.integer('Color Index'),
         'emp_id': fields.many2one('hr.employee', 'employee'),
         'user_email': fields.related('user_id', 'email', type='char', string='User Email', readonly=True),
-        'status': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
     }
 
     _defaults = {
@@ -247,7 +246,6 @@ class hr_applicant(base_stage, osv.Model):
         'department_id': lambda s, cr, uid, c: s._get_default_department_id(cr, uid, c),
         'company_id': lambda s, cr, uid, c: s.pool.get('res.company')._company_default_get(cr, uid, 'hr.applicant', context=c),
         'color': 0,
-        'status': 'draft',
     }
 
     _group_by_full = {
@@ -442,9 +440,7 @@ class hr_applicant(base_stage, osv.Model):
                 emp_id = hr_employee.create(cr,uid,{'name': applicant.partner_name or applicant.name,
                                                      'job_id': applicant.job_id.id,
                                                      'address_home_id': address_id,
-                                                     'department_id': applicant.department_id.id,
-                                                     'work_phone': applicant.partner_phone,
-                                                     'mobile_phone': applicant.partner_mobile
+                                                     'department_id': applicant.department_id.id
                                                      })
                 self.write(cr, uid, [applicant.id], {'emp_id': emp_id}, context=context)
                 self.case_close(cr, uid, [applicant.id], context)
