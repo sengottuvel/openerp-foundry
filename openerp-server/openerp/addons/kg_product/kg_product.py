@@ -195,7 +195,8 @@ class kg_product(osv.osv):
 	def _po_coeff(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])
 		if rec.uom_id != rec.uom_po_id and rec.po_uom_coeff == 0:
-			return False
+			raise osv.except_osv(_('Warning!'),
+				_('%s Please check PO Coeff in this Item master !'%(rec.name)))
 		if rec.tolerance_applicable == True and rec.tolerance_plus <= 0:
 			raise osv.except_osv(_('Warning!'),
 				_('System should not accept without tolerance!'))
