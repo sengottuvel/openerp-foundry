@@ -192,15 +192,15 @@ class kg_product(osv.osv):
 			#~ return True
 		#~ return False
 		
-	def _po_coeff(self, cr, uid, ids, context=None):		
-		rec = self.browse(cr, uid, ids[0])
-		if rec.uom_id != rec.uom_po_id and rec.po_uom_coeff == 0:
-			raise osv.except_osv(_('Warning!'),
-				_('Please check and update PO Coeff for %s in product master !'%(rec.name)))
-		if rec.tolerance_applicable == True and rec.tolerance_plus <= 0:
-			raise osv.except_osv(_('Warning!'),
-				_('Please check and update tolerance for %s in product master !'%(rec.name)))
-		return True
+	#~ def _po_coeff(self, cr, uid, ids, context=None):		
+		#~ rec = self.browse(cr, uid, ids[0])
+		#~ if rec.uom_id != rec.uom_po_id and rec.po_uom_coeff == 0:
+			#~ raise osv.except_osv(_('Warning!'),
+				#~ _('Please check and update PO Coeff for %s in product master !'%(rec.name)))
+		#~ if rec.tolerance_applicable == True and rec.tolerance_plus <= 0:
+			#~ raise osv.except_osv(_('Warning!'),
+				#~ _('Please check and update tolerance for %s in product master !'%(rec.name)))
+		#~ return True
 			
 	#~ def write(self, cr, uid, ids, vals, context=None):
 		#~ vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
@@ -210,7 +210,7 @@ class kg_product(osv.osv):
 		
 		(_name_validate, 'product name must be unique !!', ['name']),
 		#~ (_spl_name, 'Special Character Not Allowed!', ['']),
-		(_po_coeff, 'System should not be accept zero value!', ['']),
+		#~ (_po_coeff, 'System should not be accept zero value!', ['']),
 	   
 		#(fields_validation, 'Please Enter the valid Format',['Invalid Format']),
 	]	   
