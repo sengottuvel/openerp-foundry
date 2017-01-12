@@ -167,7 +167,7 @@ class hr_holidays(osv.osv):
         'double_validation': fields.related('holiday_status_id', 'double_validation', type='boolean', relation='hr.holidays.status', string='Apply Double Validation'),
     }
     _defaults = {
-        'employee_id': _employee_get,
+        #~ 'employee_id': _employee_get,
         'state': 'draft',
         'type': 'remove',
         'user_id': lambda obj, cr, uid, context: uid,
