@@ -350,6 +350,18 @@
 				
 				<!-- Scheduler Forms maill Menu -->
 				<menuitem id="spm_mail_form_sub_menu" name="Forms Scheduler" parent="spm_mail_menu" sequence="2" action="kg_scheduler.export_sch_action_form" />
-
+		
+		<!--HR menus-->
+			<menuitem name="HR Master" id="menu_hr_master" sequence="91"/>
+				<menuitem name="Contributions Masters" id="menu_contribution_menu" parent="menu_hr_master" sequence="0"/>
+					<menuitem action="kg_employee_contribution.action_employee_contribution" parent="menu_contribution_menu" id="menu_employee_contribution" sequence="1"/>
+					<menuitem action="kg_emp_contribution.action_employer_contribution" parent="menu_contribution_menu" id="menu_emp_contribution" sequence="3"/>
+			
+			<menuitem  name="General Masters" id="menu_masters_menu" parent="menu_hr_master" sequence="2"/>
+				<menuitem action="hr_payroll.action_salary_rule_form" id="menu_hr_master_ear_ded"  name="Earnings and Deduction Type" parent="menu_masters_menu" sequence="2"/>
+				<menuitem action="base.action_res_bank_form" id="menu_hr_master_bank" name = "Bank Master" parent="menu_masters_menu" sequence="3" />
+				<menuitem action="hr.open_module_tree_department" id="menu_hr_master_dep" parent="menu_masters_menu" sequence="9"/>
+				<menuitem action="hr.action_hr_job" id="menu_hr_jobs" parent="menu_masters_menu" sequence="10"/>	
+		
     </data>
 </openerp>
