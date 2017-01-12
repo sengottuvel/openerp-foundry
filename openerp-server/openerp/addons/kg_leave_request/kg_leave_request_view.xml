@@ -18,6 +18,7 @@
 						<button name="entry_draft" type="object"  string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('status','in',['draft','confirmed','approved','reject'])]}"/>
 					</button>
 					
+<!--
 					<xpath expr="//group[@name='leave_request']" position="replace">
 						<group>
 							<group>
@@ -66,6 +67,7 @@
 							</page>
 						</notebook>
 					</xpath>
+-->
 					
 						
 			</field> 
