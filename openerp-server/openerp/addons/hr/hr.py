@@ -116,6 +116,7 @@ class hr_job(osv.osv):
         'company_id': fields.many2one('res.company', 'Company'),
         'state': fields.selection([('open', 'No Recruitment'), ('recruit', 'Recruitement in Progress')], 'Status', readonly=True, required=True,
             help="By default 'In position', set it to 'In Recruitment' if recruitment process is going on for this job position."),
+        'status': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
     }
     _defaults = {
         'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'hr.job', context=c),
@@ -208,6 +209,8 @@ class hr_employee(osv.osv):
         'city': fields.related('address_id', 'city', type='char', string='City'),
         'login': fields.related('user_id', 'login', type='char', string='Login', readonly=1),
         'last_login': fields.related('user_id', 'date', type='datetime', string='Latest Connection', readonly=1),
+        'confirm_emp':fields.selection([('draft', 'Draft'),('confirm', 'Confirmed'),('approve','Approved')],'Status',readonly=True),
+        'status': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
     }
 
     _order='name_related'
@@ -260,12 +263,21 @@ class hr_employee(osv.osv):
     def _get_default_image(self, cr, uid, context=None):
         image_path = addons.get_module_resource('hr', 'static/src/img', 'default_image.png')
         return tools.image_resize_image_big(open(image_path, 'rb').read().encode('base64'))
-
+	
+	def confirm_entry(self,cr,uid,ids,context=None):
+		self.write(cr,uid,ids,{'confirm_emp':'confirm'})
+		return 	True
+	
+	def approve_entry(self,cr,uid,ids,context=None):
+		self.write(cr,uid,ids,{'confirm_emp':'approve'})
+		return True
+	
     _defaults = {
         'active': 1,
         'image': _get_default_image,
         'color': 0,
     }
+
 
     def _check_recursion(self, cr, uid, ids, context=None):
         level = 100

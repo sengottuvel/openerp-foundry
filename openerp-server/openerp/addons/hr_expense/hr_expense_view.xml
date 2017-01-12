@@ -90,7 +90,10 @@
                                 <form string="Expense Lines" version="7.0">
                                     <group>
                                         <group>
+                                            <field name="product_id" on_change="onchange_product_id(product_id)" />
+<!--
                                             <field name="product_id" on_change="onchange_product_id(product_id, context)" context="{'default_hr_expense_ok':1}"/>
+-->
                                             <field name="name"/>
                                             <field name="ref"/>
                                             <field domain="[('type','=','normal')]" name="analytic_account" groups="analytic.group_analytic_accounting"/>
@@ -108,7 +111,10 @@
                                 </form>
                                 <tree string="Expense Lines" editable="bottom">
                                     <field name="sequence" invisible="1"/>
+                                    <field name="product_id" on_change="onchange_product_id(product_id)" />
+<!--
                                     <field name="product_id" on_change="onchange_product_id(product_id, context)" context="{'default_hr_expense_ok':1}"/>
+-->
                                     <field name="date_value" string="Expense Date"/>
                                     <field name="name"/>
                                     <field name="ref"/>
@@ -191,6 +197,7 @@
         </record>
 
 
+<!--
         <record id="view_product_hr_expense_form" model="ir.ui.view">
             <field name="name">product.product.expense.form</field>
             <field name="model">product.product</field>
@@ -202,6 +209,7 @@
                 </div>
             </field>
         </record>
+-->
 
         <record id="hr_expense_product" model="ir.actions.act_window">
             <field name="name">Products</field>

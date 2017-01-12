@@ -63,7 +63,7 @@ class hr_contract(osv.osv):
     _name = 'hr.contract'
     _description = 'Contract'
     _columns = {
-        'name': fields.char('Contract Reference', size=64, required=True),
+        'name': fields.char('Contract Reference', size=64, required=False),
         'employee_id': fields.many2one('hr.employee', "Employee", required=True),
         'department_id': fields.related('employee_id','department_id', type='many2one', relation='hr.department', string="Department", readonly=True),
         'type_id': fields.many2one('hr.contract.type', "Contract Type", required=True),
@@ -79,7 +79,11 @@ class hr_contract(osv.osv):
         'permit_no': fields.char('Work Permit No', size=256, required=False, readonly=False),
         'visa_no': fields.char('Visa No', size=64, required=False, readonly=False),
         'visa_expire': fields.date('Visa Expire Date'),
+        'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
     }
+
+	
+
 
     def _get_type(self, cr, uid, context=None):
         type_ids = self.pool.get('hr.contract.type').search(cr, uid, [('name', '=', 'Employee')])
@@ -87,14 +91,22 @@ class hr_contract(osv.osv):
 
     _defaults = {
         'date_start': lambda *a: time.strftime("%Y-%m-%d"),
-        'type_id': _get_type
+        'type_id': _get_type,
+        'state':'draft',
     }
+    
+    def confirm_contract(self,cr,uid,ids,context=None):
+		self.write(cr,uid,ids,{'state':'waiting'})
+		return True
 
     def _check_dates(self, cr, uid, ids, context=None):
         for contract in self.read(cr, uid, ids, ['date_start', 'date_end'], context=context):
              if contract['date_start'] and contract['date_end'] and contract['date_start'] > contract['date_end']:
                  return False
         return True
+    def approve_contract(self,cr,uid,ids,context=None):
+		self.write(cr,uid,ids,{'state':'approve'})
+		return True
 
     _constraints = [
         (_check_dates, 'Error! Contract start-date must be less than contract end-date.', ['date_start', 'date_end'])
