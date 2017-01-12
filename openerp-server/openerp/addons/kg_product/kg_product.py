@@ -199,7 +199,7 @@ class kg_product(osv.osv):
 				_('%s Please check PO Coeff in this Item master !'%(rec.name)))
 		if rec.tolerance_applicable == True and rec.tolerance_plus <= 0:
 			raise osv.except_osv(_('Warning!'),
-				_('System should not accept without tolerance!'))
+				_('%s System should not accept without tolerance!'%(rec.name)))
 		return True
 			
 	#~ def write(self, cr, uid, ids, vals, context=None):
