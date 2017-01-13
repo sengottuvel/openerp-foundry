@@ -270,12 +270,12 @@ class kg_purchase_order(osv.osv):
 			bkk_date = d1 - timedelta(days=i)
 			backk_date = bkk_date.strftime('%Y-%m-%d')
 			back_list.append(backk_date)
-		if date_order <= back_date:
-			raise osv.except_osv(_('Warning'),
-				_('PO date should not be accept past date!'))
-		if date_order > today_date:
-			raise osv.except_osv(_('Warning'),
-				_('PO date should not be accept future date!'))
+		#~ if date_order <= back_date:
+			#~ raise osv.except_osv(_('Warning'),
+				#~ _('PO date should not be accept past date!'))
+		#~ if date_order > today_date:
+			#~ raise osv.except_osv(_('Warning'),
+				#~ _('PO date should not be accept future date!'))
 		return True
 		
 	def onchange_frieght_flag(self, cr, uid, ids, term_freight):
