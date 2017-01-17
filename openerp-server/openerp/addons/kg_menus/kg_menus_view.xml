@@ -132,24 +132,9 @@
 			<!-- Purchase Master Menu -->
 				<menuitem id="ppm_master_menu" name="Masters" parent="base.menu_purchase_root" sequence="0"/>
 				
-				<!--  Supplier Master  --> 
-				<menuitem action="base.action_partner_supplier_form" name="Supplier" id="mam_supplier_master" parent="ppm_master_menu" sequence="1"/>
-				
 				<!-- Product Master Design --> 
 				<menuitem action="kg_product.kg_action_product_form" name="Product Master-Design" id="mam_product_master_design" parent="kg_pumpmodel_master.mpm_planning_master" sequence="16"/>
 				
-				<!-- Country -->
-				<menuitem id="kg_country_master" parent="ppm_master_menu" name="Country" action="base.action_country" sequence="9"/>
-				
-				<!-- State -->
-				<menuitem id="kg_state_master" parent="ppm_master_menu" name="State" action="base.action_country_state" sequence="10"/>
-				
-				<!-- City Master  --> 
-				<menuitem action="base.action_city" name="City" id="mam_city_master" parent="ppm_master_menu" sequence="11"/>
-				 
-				<!-- Transport Master  --> 
-				<menuitem action="kg_transport.transport_action_form" name="Transport" id="mam_transport_master" parent="ppm_master_menu" sequence="12"/>
-			
 				<!-- Dispatch Master  --> 
 				<menuitem action="kg_dispatch_master.mma_dispatch_master" name="Mode Of Dispatch" id="mam_dispatch_master" parent="ppm_master_menu" sequence="15"/>
 				 
