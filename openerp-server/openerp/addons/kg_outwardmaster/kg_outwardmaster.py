@@ -52,7 +52,7 @@ class kg_outwardmaster(osv.osv):
 		'return': fields.boolean('Return Indication',readonly=False,states={'approved':[('readonly',True)]}),
 		'valid': fields.boolean('Valid Indication',readonly=False,states={'approved':[('readonly',True)]}),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
-		'notes': fields.text('Notes'),
+		'notes': fields.text('Notes',readonly=False,states={'approved':[('readonly',True)]}),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel Remarks'),
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
@@ -77,7 +77,7 @@ class kg_outwardmaster(osv.osv):
 	}
 	
 	_sql_constraints = [
-		('name', 'unique(name)', 'Outward Type must be unique!'),
+		('name', 'unique(name)', 'Name must be unique.!'),
 	]
 	
 	_defaults = {

@@ -39,7 +39,6 @@ class onscreen_gate_pass_report(JasperDataParser.JasperDataParser):
 	def generate_data_source(self, cr, uid, ids, data, context):
 		return 'records'
 
-
 	def generate_ids(self, cr, uid, ids, data, context):
 		return {}
 
@@ -49,6 +48,8 @@ class onscreen_gate_pass_report(JasperDataParser.JasperDataParser):
 	def generate_parameters(self, cr, uid, ids, data, context):
 		val={}
 		
+		user_rec = self.pool.get('res.users').browse(cr,uid,uid)
+		val['printed_by'] = user_rec.name
 		val['pass_id'] = ids[0]
 		return val
 

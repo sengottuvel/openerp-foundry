@@ -6,37 +6,52 @@ import openerp.addons.decimal_precision as dp
 from datetime import datetime
 import re
 import math
-dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
 class kg_industry_master(osv.osv):
 
 	_name = "kg.industry.master"
 	_description = "Industry Master"
 	
-	"""
-	def _get_modify(self, cr, uid, ids, field_name, arg, context=None):
+	def _get_modify(self, cr, uid, ids, field_name, arg,  context=None):
 		res={}
-		enq_obj = self.pool.get('kg.crm.enquiry')			
-		for item in self.browse(cr, uid, ids, context=None):
-			res[item.id] = 'no'
-			enq_ids = enq_obj.search(cr,uid,[('industery_id','=',item.id)])			
-			if enq_ids:
-				res[item.id] = 'yes'		
+		if field_name == 'modify':
+			for h in self.browse(cr, uid, ids, context=None):	
+				res[h.id] = 'no'
+				cr.execute(""" select * from
+				(SELECT tc.table_schema, tc.constraint_name, tc.table_name, kcu.column_name, ccu.table_name
+				AS foreign_table_name, ccu.column_name AS foreign_column_name
+				FROM information_schema.table_constraints tc
+				JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
+				JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = tc.constraint_name
+				WHERE constraint_type = 'FOREIGN KEY'
+				AND ccu.table_name='%s')
+				as sam  """ %('kg_industry_master'))
+				data = cr.dictfetchall()	
+				if data:
+					for var in data:
+						data = var
+						chk_sql = 'Select COALESCE(count(*),0) as cnt from '+str(data['table_name'])+' where '+data['column_name']+' = '+str(ids[0])
+						cr.execute(chk_sql)			
+						out_data = cr.dictfetchone()
+						if out_data:
+							if out_data['cnt'] > 0:
+								res[h.id] = 'yes'
 		return res
-	"""
+		
 	_columns = {
 			
 		'name': fields.char('Name', size=128, required=True, select=True),
-		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'code': fields.char('Code', size=128, required=True),
-		'active': fields.boolean('Active'),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
-		#'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
 		
 		### Entry Info ###
+		
+		'active': fields.boolean('Active'),
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'crt_date': fields.datetime('Creation Date',readonly=True),
 		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
 		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
@@ -56,8 +71,9 @@ class kg_industry_master(osv.osv):
 		'active': True,		
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
-		'crt_date':fields.datetime.now,	
-		#'modify': 'no',
+		'crt_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),	
+		'modify': 'no',
+		
 	}
 	
 	_sql_constraints = [
@@ -83,60 +99,72 @@ class kg_industry_master(osv.osv):
 		
 	def _name_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
-		res = True
 		if rec.name:
 			chemical_name = rec.name
 			name=chemical_name.upper()			
 			cr.execute(""" select upper(name) from kg_industry_master where upper(name)  = '%s' """ %(name))
 			data = cr.dictfetchall()			
 			if len(data) > 1:
-				res = False
-			else:
-				res = True				
-		return res
+				raise osv.except_osv(_('Warning!'),
+					_('Sector name must be unique!'))
+			name_special_char = ''.join(c for c in rec.name if c in '!@#$%^~*{}?+/=')
+			if name_special_char:
+				raise osv.except_osv(_('Warning!'),
+					_('Special Character Not in Name!'))
+		return True
 			
 	def _code_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
-		res = True
 		if rec.code:
 			industry_code = rec.code
 			code=industry_code.upper()			
 			cr.execute(""" select upper(code) from kg_industry_master where upper(code)  = '%s' """ %(code))
 			data = cr.dictfetchall()			
 			if len(data) > 1:
-				res = False
-			else:
-				res = True				
-		return res	
+				raise osv.except_osv(_('Warning!'),
+					_('Sector code must be unique!'))
+			code_special_char = ''.join(c for c in rec.code if c in '!@#$%^~*{}?+/=')
+			if code_special_char:
+				raise osv.except_osv(_('Warning!'),
+					_('Special Character Not in Code!'))
+		return True	
 	
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.cancel_remark:
-			self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		else:
-			raise osv.except_osv(_('Cancel remark is must !!'),
-				_('Enter the remarks in Cancel remarks field !!'))
+		if rec.state == 'approved':
+			if rec.cancel_remark:
+				self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			else:
+				raise osv.except_osv(_('Cancel remark is must !!'),
+					_('Enter the remarks in Cancel remarks field !!'))
 		return True
 
 	def entry_confirm(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'draft':
+			self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 		
 	def entry_draft(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'draft'})
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'approved':
+			self.write(cr, uid, ids, {'state': 'draft'})
 		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'confirmed':
+			self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
 	def entry_reject(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.remark:
-			self.write(cr, uid, ids, {'state': 'reject','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		else:
-			raise osv.except_osv(_('Rejection remark is must !!'),
-				_('Enter the remarks in rejection remark field !!'))
+		if rec.state == 'confirmed':
+			if rec.remark:
+				self.write(cr, uid, ids, {'state': 'reject','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			else:
+				raise osv.except_osv(_('Rejection remark is must !!'),
+					_('Enter the remarks in rejection remark field !!'))
 		return True
 		
 	def unlink(self,cr,uid,ids,context=None):
@@ -157,8 +185,8 @@ class kg_industry_master(osv.osv):
 	_constraints = [
 		#(_Validation, 'Special Character Not Allowed !!!', ['Check Name']),
 		#(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
-		(_name_validate, 'Chemical name must be unique !!', ['name']),		
-		(_code_validate, 'Chemical code must be unique !!', ['code']),		
+		(_name_validate, 'Sector name must be unique!', ['']),		
+		(_code_validate, 'Sector code must be unique!', ['']),		
 		
 	]
 	

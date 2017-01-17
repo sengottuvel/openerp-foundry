@@ -34,17 +34,8 @@
 			<!-- CRM Master Menu -->
 			<menuitem id="cpm_crm_master_menu" name="Masters" parent="cpm_crm" sequence="1"/>
 				
-				<!-- Customer Master -->
-				<menuitem action="kg_partners.kg_action_customer_form" id="cam_crm_customer_master" name="Customer" parent="cpm_crm_master_menu" sequence="1"/>
-
-				<!-- Dealer Master -->
-				<menuitem action="kg_partners.kg_action_dealer_form" id="cam_crm_dealer_master" name="Dealer" parent="cpm_crm_master_menu" sequence="2"/>
-				
 				<!-- Contractor Master  -->
 				<menuitem action="kg_partners.kg_action_contractor_form" name="Contractor" id="mam_contractor_master123" parent="kg_pumpmodel_master.mpm_planning_master" sequence="19"/>
-				
-				<!-- Group Master -->
-				<menuitem action="kg_partners.kg_action_group_form" id="cam_crm_group_master" name="Group" parent="cpm_crm_master_menu" sequence="3"/>
 				
 				<!-- Country -->
 <!--
@@ -64,9 +55,6 @@
 				<!-- Chemical Master  --> 
 				<menuitem action="kg_chemical_master.cma_chemical_master" name="Chemical" id="cam_crm_chemical_master" parent="cpm_crm_master_menu" sequence="7"/>
 				
-				<!-- Industry Master  --> 
-				<menuitem action="kg_industry_master.mma_industry_master" name="Sector" id="cam_crm_industry_master" parent="cpm_crm_master_menu" sequence="8"/>
-							
 			<!-- CRM Enquiry Menu -->
 			<menuitem id="cpm_crm_enquiry_menu" name="Enquiry" parent="cpm_crm" sequence="2"/>
 					
@@ -119,9 +107,6 @@
 				<!-- Product Master Design --> 
 				<menuitem action="kg_product.kg_action_product_form" name="Product Master-Design" id="mam_product_master_design" parent="kg_pumpmodel_master.mpm_planning_master" sequence="16"/>
 				
-				<!-- Dispatch Master  --> 
-				<menuitem action="kg_dispatch_master.mma_dispatch_master" name="Mode Of Dispatch" id="mam_dispatch_master" parent="ppm_master_menu" sequence="15"/>
-				 
 				<!-- Item Quality Master  --> 
 				<menuitem action="kg_item_quality_master.mma_item_quality_master" name="General Term" id="mam_item_quality_master" parent="ppm_master_menu" sequence="16"/>
 				

@@ -36,7 +36,7 @@
 					<group>
 						<group>						
 							<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
-							<field name="accessories_type" required="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
+							<field name="access_cate_id" required="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 							<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 						</group>
 						<group>
@@ -93,22 +93,6 @@
 								<field name="qty"/>
 								<field name="remark" widget="char"/>
 							</tree>
-<!--
-							<form string="Raw Materials" >
-								<group>
-									<group>
-										<field name="product_id" on_change="onchange_uom(product_id)"/>
-										<field name="brand_id"/>
-										<field name="uom_id" required ="1" readonly="1"/>
-										<field name="uom_conversation_factor" invisible="1"/>
-									</group>
-									<group>
-										<field name="qty"/>
-										<field name="remark"/>
-									</group>
-								</group>
-							</form>
--->
 							</field>
 						</page>
 			
@@ -152,7 +136,7 @@
 								toolbar="True" string="Accessories Master Tree">				
 					<field name="code"/>
 					<field name="name"/>
-					<field name="accessories_type"/>
+					<field name="access_cate_id"/>
 					<field name="state"/>
 					<field name="copy_flag" invisible="1"/>
 				</tree>

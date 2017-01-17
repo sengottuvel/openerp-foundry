@@ -242,7 +242,7 @@ class kg_subcontract_wo(osv.osv):
 			if entry.line_ids:
 				for line in entry.line_ids:					
 					if not line.line_ids:
-						raise osv.except_osv(_('Tab Name - Work Order Operation Details !!'),
+						raise osv.except_osv(_('Tab Name - Work Order Operation Details'),
 							_('Enter the Work Order Operation Details !!'))					
 					for op_line in line.line_ids:
 						moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,op_line.moc_id.id)

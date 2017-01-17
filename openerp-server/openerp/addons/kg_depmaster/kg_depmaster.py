@@ -60,8 +60,18 @@ class kg_depmaster(osv.osv):
 			
 	_columns = {
 		
-		'name': fields.char('Dep.Code', size=64, required=True,readonly=False,states={'approved':[('readonly',True)]}),
+		## Basic Info
+		
+		'name': fields.char('Dep.Code', size=4, required=True,readonly=False,states={'approved':[('readonly',True)]}),
 		'dep_name': fields.char('Dep.Name', size=64, required=True, translate=True,readonly=False,states={'approved':[('readonly',True)]}),
+		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
+		'notes': fields.text('Notes',readonly=False,states={'approved':[('readonly',True)]}),
+		'remark': fields.text('Approve/Reject'),
+		'cancel_remark': fields.text('Cancel Remarks'),
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
+		
+		## Module Requirement Info
+		
 		'consumerga': fields.many2one('account.account', 'Consumer GL/AC', size=64, translate=True, select=2),
 		'cost': fields.many2one('account.account','Cost Centre', size=64, translate=True, select=2),
 		'stock_location': fields.many2one('stock.location', 'Dep.Stock Location', size=64, translate=True, 
@@ -73,12 +83,7 @@ class kg_depmaster(osv.osv):
 		'product_id': fields.many2many('product.product', 'product_deparment', 'depmaster_id', 'product_depid', 'Product'),
 		'issue_period': fields.selection([('weekly','Weekly'), ('15th','15th Once'), ('monthly', 'Monthly')], 'Stock Issue Period'),
 		'issue_date': fields.float('Stock Issue Days'),
-		'sub_indent': fields.boolean("Sub.Store.Ind"),
-		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
-		'notes': fields.text('Notes'),
-		'remark': fields.text('Approve/Reject'),
-		'cancel_remark': fields.text('Cancel Remarks'),
-		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
+		'sub_indent': fields.boolean("Sub.Store.Ind"),		
 		'is_parent': fields.boolean('Is Parent',readonly=False,states={'approved':[('readonly',True)]}),
 		'parent_dept': fields.many2one('kg.depmaster','Parent Department',domain="[('is_parent','=',True)]",readonly=False,states={'approved':[('readonly',True)]}),
 		'item_request': fields.boolean('Item Request Applicable',readonly=False,states={'approved':[('readonly',True)]}),
@@ -264,9 +269,7 @@ class kg_depmaster(osv.osv):
 		
 	]
 
-
 kg_depmaster()
-
 
 class custom_sequence_generate_det(osv.osv):
 	

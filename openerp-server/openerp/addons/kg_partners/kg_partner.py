@@ -328,6 +328,9 @@ class kg_partner(osv.osv):
 			elif rec.dealer == True:
 				cr.execute(""" select upper(name) from res_partner where upper(name) = '%s' and dealer = True """ %(name))
 				data = cr.dictfetchall()
+			elif rec.contractor == True:
+				cr.execute(""" select upper(name) from res_partner where upper(name) = '%s' and contractor = True """ %(name))
+				data = cr.dictfetchall()
 			if len(data) > 1:
 				res = False
 			else:
