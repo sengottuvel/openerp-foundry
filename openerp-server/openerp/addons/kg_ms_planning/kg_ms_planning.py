@@ -1249,7 +1249,7 @@ class ch_ms_sc_qty_details(osv.osv):
 	_columns = {
 	
 		'header_id':fields.many2one('ch.ms.daily.planning.details', 'MS SC Details', ondelete='cascade',required=True),
-		'contractor_id': fields.many2one('res.partner','Subcontractor'),
+		'contractor_id': fields.many2one('res.partner','Subcontractor', domain="[('contractor','=','t')]"),
 		'sc_qty': fields.integer('Qty'),
 		'excess_qty': fields.integer('Excess Qty'),
 		
