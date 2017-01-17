@@ -152,11 +152,11 @@ class kg_subcontract_wo(osv.osv):
 		'division_id': fields.many2one('kg.division.master','Division'),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location'),
 		'active': fields.boolean('Active'),
-		'contractor_id': fields.many2one('res.partner','Subcontractor'),
+		'contractor_id': fields.many2one('res.partner','Subcontractor', domain="[('contractor','=','t')]"),
 		'contact_person': fields.char('Contact Person', size=128),
 		'phone': fields.char('Phone',size=64),
 		'delivery_date': fields.date('Expected Delivery Date'),
-		'wo_value': fields.function(_get_order_value, string='WO Value', method=True, store=True, type='float'),
+		'wo_value': fields.function(_get_order_value, string='Sub Contractor WO Value', method=True, store=True, type='float'),
 		'billing_type': fields.selection([('applicable','Applicable'),('not_applicable','Not Applicable')],'Billing Type'),
 		'sc_line_ids': fields.many2many('kg.subcontract.process','m2m_sc_details' , 'order_id', 'sc_id', 'SC Items',
 			domain="[('wo_state','in',('pending','partial')),('wo_process_state','=','allow'),('contractor_id','=',contractor_id)]"),
@@ -199,7 +199,12 @@ class kg_subcontract_wo(osv.osv):
 	def onchange_contractor(self, cr, uid, ids, contractor_id):
 		if contractor_id:
 			contractor_rec = self.pool.get('res.partner').browse(cr, uid, contractor_id)
-		return {'value': {'contact_person':contractor_rec.contact_person,'phone':contractor_rec.phone  }}
+			contact_person = contractor_rec.contact_person
+			phone = contractor_rec.phone
+		else:
+			contact_person = ''
+			phone = ''
+		return {'value': {'contact_person':contact_person,'phone':phone  }}
 	
 	def update_line_items(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
@@ -229,12 +234,16 @@ class kg_subcontract_wo(osv.osv):
 		
 		
 	def entry_confirm(self,cr,uid,ids,context=None):
-		entry = self.browse(cr,uid,ids[0])
+		entry = self.browse(cr,uid,ids[0])		
 		if entry.state == 'draft':
+			if not entry.line_ids:
+				raise osv.except_osv(_('Line Item Details !!'),
+				_('Enter the Work Order Details !!'))		
 			if entry.line_ids:
-				for line in entry.line_ids:
-					print"line",line
-					print"line",line.line_ids
+				for line in entry.line_ids:					
+					if not line.line_ids:
+						raise osv.except_osv(_('Tab Name - Work Order Operation Details !!'),
+							_('Enter the Work Order Operation Details !!'))					
 					for op_line in line.line_ids:
 						moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,op_line.moc_id.id)
 						oper_id_rec = self.pool.get('ch.kg.position.number').browse(cr,uid,op_line.operation_id.id)
