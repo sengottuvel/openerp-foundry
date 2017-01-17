@@ -12,79 +12,82 @@
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="entry_cancel" type="object" states="reject,approved" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes'),('state','in',('approved','cancel'))]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
+<!--					<button name="entry_cancel" type="object" states="reject,approved" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
-						<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
-					<sheet>
+					<group>
 						<group>
-							<group>
-								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="primemover_categ" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="frequency" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="pole" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="framesize" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="mounting" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="efficiency" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="power_hp" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="specification" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="price" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="shaft_dia" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="temprise_class" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="radiator_mtg" invisible="1"/>
-							</group>
-							<group>
-								<field name="manufacturer" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="effclass" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="series" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="terminal_box_loc" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="power_kw" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="speed" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="article_no" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="ambient_temp" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="gd2" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="space_heater" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="characteristics" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="noise_level" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-								<field name="active"/>
-								<field name="state" style="width: 30%%" class="att_state_change"/>
-								<field name="moc_id" invisible="1"/>
-							</group>
-						</group>						
-						<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
-							<group>	
-								<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							</group>
-							<group>												
-								<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','confirmed'])], 'readonly': [('state','in',['cancel'])]}"/>	
-							</group>
+							<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="primemover_categ" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="frequency" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="pole" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="framesize" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="mounting" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="efficiency" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="power_hp" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="specification" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="price" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="shaft_dia" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="temprise_class" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="product_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="radiator_mtg" invisible="1"/>
+							<field name="modify" invisible="1"/>
 						</group>
-						<notebook>
-							<page string="Entry Info">
-									<group>
-										<field name="company_id"/>
-									</group>
-									<group>
-									<group>
-										<field name="user_id"/>
-										<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
-										<field name="ap_rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>
-										<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
-										<field name="update_user_id"/>
-									</group>
-									<group>
-										<field name="crt_date"/>
-										<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
-										<field name="ap_rej_date" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>
-										<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
-										<field name="update_date"/>
-									</group>
+						<group>
+							<field name="manufacturer" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="effclass" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="series" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="terminal_box_loc" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="power_kw" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="speed" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="article_no" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="ambient_temp" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="gd2" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="space_heater" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="characteristics" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="noise_level" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="weight" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="state" style="width: 30%%" class="att_state_change"/>
+							<field name="moc_id" invisible="1"/>
+						</group>
+					</group>						
+					<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
+						<group>	
+							<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+						</group>
+						<group>												
+							<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','confirmed'])], 'readonly': [('state','in',['cancel'])]}"/>	
+						</group>
+					</group>
+					<notebook>
+						<page string="Entry Info">
+							<group>
+								<group>
+									<field name="company_id"/>
 								</group>
-							</page>
-						</notebook>															
-					</sheet>
+								<group>
+									<field name="active"/>
+								</group>
+								<group>
+									<field name="user_id"/>
+									<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="ap_rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>
+									<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="ap_rej_date" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>
+									<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>
 				</form>
 			</field> 
 		</record>
@@ -135,8 +138,8 @@
 
 		<!-- Menu Action Start-->
 		
-		 <record id="mma_primemover_master" model="ir.actions.act_window">
-			<field name="name">Primemover Master</field>
+		<record id="mma_primemover_master" model="ir.actions.act_window">
+			<field name="name">Prime Mover Master</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.primemover.master</field>
 			<field name="view_type">form</field>
@@ -147,7 +150,6 @@
 		
 		<!-- Menu Action End-->
 		
-		
 		 <!-- Audit Log Xml Data Start
 		
         <record id="primemover_model" model="audittrail.rule">
@@ -157,7 +159,9 @@
         </record> -->
         
         <!-- Audit Log Xml Data End-->
-		
+        
+		<!--Primemover Master Menu -->
+		<menuitem name="Prime Mover" parent="kg_menus.cpm_crm_master_menu" action="mma_primemover_master" id="mam_primemover_master_menu" sequence="10"/>
 
 	</data>
 </openerp>

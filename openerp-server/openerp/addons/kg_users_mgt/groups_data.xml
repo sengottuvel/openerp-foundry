@@ -431,7 +431,11 @@
 			ref('kg_menus.cam_crm_dealer_master'),			
 			ref('kg_menus.cam_crm_chemical_master'),
 			ref('kg_menus.cam_crm_industry_master'),
-			ref('kg_menus.mam_defect_master_menu'),
+			ref('kg_fluid_master.mam_fluid_master_menu'),
+			ref('kg_primemover_master.mam_primemover_master_menu'),
+			ref('kg_pumpseries_master.mam_pumpseries_master_menu'),
+			ref('kg_flange_master.mam_flange_master_menu'),
+			ref('kg_defect_master.mam_defect_master_menu'),
 			
 			ref('kg_menus.cpm_crm_enquiry_menu'),
 			ref('kg_crm_enquiry.tma_crm_enquiry_service'),

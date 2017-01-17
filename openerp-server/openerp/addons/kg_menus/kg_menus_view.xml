@@ -66,23 +66,7 @@
 				
 				<!-- Industry Master  --> 
 				<menuitem action="kg_industry_master.mma_industry_master" name="Sector" id="cam_crm_industry_master" parent="cpm_crm_master_menu" sequence="8"/>
-				
-				<!--Liquid Master Menu -->
-				<menuitem name="Liquid" parent="cpm_crm_master_menu" action="kg_fluid_master.mma_fluid_master" id="mam_fluid_master_menu" sequence="9"/>
-				
-				<!--Primemover Master Menu -->
-				<menuitem name="Primemover" parent="cpm_crm_master_menu" action="kg_primemover_master.mma_primemover_master" id="mam_primemover_master_menu" sequence="10"/>
-				
-				<!--Pumpseries Master Menu -->
-				<menuitem name="Pump Series" parent="cpm_crm_master_menu" action="kg_pumpseries_master.mma_pumpseries_master" id="mam_pumpseries_master_menu" sequence="11"/>
-			
-				<!--Flange Master Menu -->
-				<menuitem name="Flange" parent="cpm_crm_master_menu" action="kg_flange_master.mma_flange_master" id="mam_flange_master_menu" sequence="12"/>
-				
-				
-				<!--Defect Master Menu -->
-				<menuitem name="Defect" parent="cpm_crm_master_menu" action="kg_defect_master.mma_defect_master" id="mam_defect_master_menu" sequence="14"/>
-		
+							
 			<!-- CRM Enquiry Menu -->
 			<menuitem id="cpm_crm_enquiry_menu" name="Enquiry" parent="cpm_crm" sequence="2"/>
 					
