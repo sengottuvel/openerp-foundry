@@ -1344,6 +1344,20 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
+		<!-- Accessories Category start-->
+		
+		<record id="m_foundry_accessories_category" model="ir.model.access">
+			<field name="model_id" ref="kg_accessories_category.model_kg_accessories_category"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Accessories Category</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Accessories Category End-->
+		
 		
     </data>
 </openerp>
