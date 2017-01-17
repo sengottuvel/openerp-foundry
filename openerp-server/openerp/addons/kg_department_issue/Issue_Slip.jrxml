@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Issue_Slip" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Issue_Slip" pageWidth="595" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="48"/>
+	<property name="ireport.y" value="0"/>
 	<subDataset name="New Dataset 1">
 		<parameter name="issue_id" class="java.lang.Integer"/>
 		<queryString>
 			<![CDATA[select
-
 issue_line.product_id as product_id,
 pro_temp.name ||
 		(CASE 	WHEN brand.name!=''
@@ -21,24 +20,15 @@ CASE WHEN indent_line.issue_pending_qty != Null THEN indent_line.issue_pending_q
 
             ELSE 0
        END as pending_req_qty,
-((select sum(product_qty) from stock_move where product_id = issue_line.product_id and move_type='in' and state='done') -
-(select sum(product_qty) from stock_move where product_id = issue_line.product_id and move_type='out' and state='done')) as balance_stock_qty
-
-
+((select round(sum(product_qty)::numeric,2) from stock_move where product_id = issue_line.product_id and move_type='in' and state='done') -
+(select round(sum(product_qty)::numeric,2) from stock_move where product_id = issue_line.product_id and move_type='out' and state='done')) as balance_stock_qty
 
 from kg_department_issue_line issue_line
 
-
-
 left join product_template pro_temp on (pro_temp.id = issue_line.product_id)
-
 left join product_uom pro_uom on (pro_uom.id = issue_line.uom_id)
-
 left join kg_depindent_line indent_line on (indent_line.id = issue_line.indent_line_id)
-
 left join kg_brand_master brand on (issue_line.brand_id = brand.id)
-
-
 
 where issue_line.issue_id = $P{issue_id}]]>
 		</queryString>
@@ -52,9 +42,9 @@ where issue_line.issue_id = $P{issue_id}]]>
 	</subDataset>
 	<subDataset name="dataset1"/>
 	<parameter name="issue_id" class="java.lang.Integer"/>
+	<parameter name="printed_by" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[select
-
 issue.id as issue_id,
 comp.name as company_name,
 part.street as street1,
@@ -64,35 +54,25 @@ comp_state.name as state,
 comp_country.name as country,
 part.zip as zip,
 part.phone as phone,
-part.fax as fax,
+(CASE WHEN part.fax is null
+THEN  '- '
+ELSE part.fax
+END ) as fax,
 part.email as email,
 issue.name as issue_no,
 to_char(issue.issue_date::date,'dd-mm-YYYY')  as issue_date,
-to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS New_Date,
-users.login as username,
-issue.project as project,
-issue.building as building
-
+to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS New_Date
 
 from kg_department_issue issue
 
 left join res_users users on (users.id = issue.created_by)
-
 left join res_company comp on (comp.id = issue.company_id)
-
 left join res_partner part on (part.id = comp.partner_id)
+left join res_city comp_city on (comp_city.id = part.city_id)
+left join res_country_state comp_state on (comp_state.id = part.state_id)
+left join res_country comp_country on (comp_country.id = part.country_id)
 
-
-left join res_city comp_city on (comp_city.id = comp.city)
-
-
-left join res_country_state comp_state on (comp_state.id = comp.state_id)
-
-
-left join res_country comp_country on (comp_country.id = comp.country_id)
-
-
-where issue.id = $P{issue_id}]]>
+where issue.id = $P{issue_id} and issue.state = 'done']]>
 	</queryString>
 	<field name="issue_id" class="java.lang.Integer"/>
 	<field name="company_name" class="java.lang.String"/>
@@ -108,9 +88,6 @@ where issue.id = $P{issue_id}]]>
 	<field name="issue_no" class="java.lang.String"/>
 	<field name="issue_date" class="java.lang.String"/>
 	<field name="new_date" class="java.lang.String"/>
-	<field name="username" class="java.lang.String"/>
-	<field name="project" class="java.lang.String"/>
-	<field name="building" class="java.lang.String"/>
 	<group name="GRN Line Group">
 		<groupExpression><![CDATA[]]></groupExpression>
 		<groupHeader>
@@ -200,14 +177,14 @@ where issue.id = $P{issue_id}]]>
 		<band splitType="Stretch"/>
 	</background>
 	<pageHeader>
-		<band height="66" splitType="Stretch">
+		<band height="64" splitType="Stretch">
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement x="0" y="20" width="555" height="16" isRemoveLineWhenBlank="true"/>
 				<box bottomPadding="2">
 					<bottomPen lineWidth="0.0"/>
 				</box>
 				<textElement/>
-				<textFieldExpression><![CDATA[$F{street1}+","+$F{street2}+","+$F{city}+"-"+$F{zip}+"."]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{street1}+$F{street2}+$F{city}+"-"+$F{zip}+"."]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="555" height="20" isRemoveLineWhenBlank="true"/>
@@ -275,14 +252,6 @@ where issue.id = $P{issue_id}]]>
 				<text><![CDATA[STORES ISSUE SLIP]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="1" y="20" width="101" height="25"/>
-				<box topPadding="2" leftPadding="0" bottomPadding="2"/>
-				<textElement verticalAlignment="Middle">
-					<font size="10" isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA["Project"]]></textFieldExpression>
-			</textField>
-			<textField>
 				<reportElement x="1" y="130" width="25" height="26"/>
 				<box leftPadding="2" rightPadding="0">
 					<topPen lineWidth="0.25"/>
@@ -332,15 +301,7 @@ where issue.id = $P{issue_id}]]>
 				<textFieldExpression><![CDATA["Requested Qty"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1" y="45" width="101" height="25"/>
-				<box topPadding="2" leftPadding="0" bottomPadding="2"/>
-				<textElement verticalAlignment="Middle">
-					<font size="10" isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA["Building"]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="1" y="70" width="101" height="25"/>
+				<reportElement x="1" y="20" width="101" height="25"/>
 				<box topPadding="2" leftPadding="0" bottomPadding="2"/>
 				<textElement verticalAlignment="Middle">
 					<font size="10" isBold="false"/>
@@ -348,7 +309,7 @@ where issue.id = $P{issue_id}]]>
 				<textFieldExpression><![CDATA["Issue No"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1" y="95" width="101" height="25"/>
+				<reportElement x="1" y="45" width="101" height="25"/>
 				<box topPadding="2" leftPadding="0" bottomPadding="2"/>
 				<textElement verticalAlignment="Middle">
 					<font size="10" isBold="false"/>
@@ -356,23 +317,7 @@ where issue.id = $P{issue_id}]]>
 				<textFieldExpression><![CDATA["Issue Request No"]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="115" y="20" width="88" height="25"/>
-				<box topPadding="2" leftPadding="0" bottomPadding="2"/>
-				<textElement verticalAlignment="Middle">
-					<font size="10"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{project}]]></textFieldExpression>
-			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="115" y="45" width="88" height="25"/>
-				<box topPadding="2" leftPadding="0" bottomPadding="2"/>
-				<textElement verticalAlignment="Middle">
-					<font size="10"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{building}]]></textFieldExpression>
-			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="102" y="70" width="141" height="25"/>
+				<reportElement x="102" y="20" width="141" height="25"/>
 				<box topPadding="2" leftPadding="0" bottomPadding="2"/>
 				<textElement verticalAlignment="Middle">
 					<font size="10"/>
@@ -380,7 +325,7 @@ where issue.id = $P{issue_id}]]>
 				<textFieldExpression><![CDATA[":"+"   "+$F{issue_no}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="102" y="95" width="141" height="25"/>
+				<reportElement x="102" y="45" width="141" height="25"/>
 				<box topPadding="2" leftPadding="0" bottomPadding="2"/>
 				<textElement verticalAlignment="Middle">
 					<font size="10"/>
@@ -388,7 +333,7 @@ where issue.id = $P{issue_id}]]>
 				<textFieldExpression><![CDATA[":"+"   "]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="402" y="45" width="101" height="25"/>
+				<reportElement x="411" y="20" width="101" height="25"/>
 				<box topPadding="2" leftPadding="0" bottomPadding="2"/>
 				<textElement verticalAlignment="Middle">
 					<font size="10"/>
@@ -396,31 +341,15 @@ where issue.id = $P{issue_id}]]>
 				<textFieldExpression><![CDATA[":"+"   "+"Purchase"]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="402" y="70" width="141" height="25"/>
+				<reportElement x="411" y="45" width="141" height="25"/>
 				<box topPadding="2" leftPadding="0" bottomPadding="2"/>
 				<textElement verticalAlignment="Middle">
 					<font size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[":"+"   "+$F{issue_date}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="301" y="20" width="101" height="25"/>
-				<box topPadding="2" leftPadding="0" bottomPadding="2"/>
-				<textElement verticalAlignment="Middle">
-					<font size="10" isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA["Purpose"]]></textFieldExpression>
-			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="402" y="20" width="101" height="25"/>
-				<box topPadding="2" leftPadding="0" bottomPadding="2"/>
-				<textElement verticalAlignment="Middle">
-					<font size="10"/>
-				</textElement>
-				<textFieldExpression><![CDATA[":"+"   "+"Project"]]></textFieldExpression>
-			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="402" y="95" width="141" height="25"/>
+				<reportElement x="102" y="70" width="141" height="25"/>
 				<box topPadding="2" leftPadding="0" bottomPadding="2"/>
 				<textElement verticalAlignment="Middle">
 					<font size="10"/>
@@ -428,7 +357,7 @@ where issue.id = $P{issue_id}]]>
 				<textFieldExpression><![CDATA[":"+"   "]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="301" y="95" width="101" height="25"/>
+				<reportElement x="1" y="70" width="101" height="25"/>
 				<box topPadding="2" leftPadding="0" bottomPadding="2"/>
 				<textElement verticalAlignment="Middle">
 					<font size="10" isBold="false"/>
@@ -436,7 +365,7 @@ where issue.id = $P{issue_id}]]>
 				<textFieldExpression><![CDATA["Issue Request Date"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="301" y="70" width="101" height="25"/>
+				<reportElement x="310" y="45" width="101" height="25"/>
 				<box topPadding="2" leftPadding="0" bottomPadding="2"/>
 				<textElement verticalAlignment="Middle">
 					<font size="10" isBold="false"/>
@@ -444,7 +373,7 @@ where issue.id = $P{issue_id}]]>
 				<textFieldExpression><![CDATA["Issue Date"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="301" y="45" width="101" height="25"/>
+				<reportElement x="310" y="20" width="101" height="25"/>
 				<box topPadding="2" leftPadding="0" bottomPadding="2"/>
 				<textElement verticalAlignment="Middle">
 					<font size="10" isBold="false"/>
@@ -487,22 +416,6 @@ where issue.id = $P{issue_id}]]>
 				</textElement>
 				<textFieldExpression><![CDATA["Pending Req Qty"]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="102" y="20" width="13" height="25"/>
-				<box topPadding="2" leftPadding="0" bottomPadding="2"/>
-				<textElement verticalAlignment="Middle">
-					<font size="10"/>
-				</textElement>
-				<textFieldExpression><![CDATA[":"]]></textFieldExpression>
-			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="102" y="45" width="13" height="25"/>
-				<box topPadding="2" leftPadding="0" bottomPadding="2"/>
-				<textElement verticalAlignment="Middle">
-					<font size="10"/>
-				</textElement>
-				<textFieldExpression><![CDATA[":"]]></textFieldExpression>
-			</textField>
 		</band>
 	</columnHeader>
 	<pageFooter>
@@ -536,25 +449,19 @@ where issue.id = $P{issue_id}]]>
 				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement mode="Transparent" x="1" y="35" width="202" height="15">
-					<printWhenExpression><![CDATA[$F{username}+" / " +$F{new_date}]]></printWhenExpression>
-				</reportElement>
-				<box>
-					<pen lineWidth="0.75"/>
+				<reportElement x="2" y="35" width="201" height="15"/>
+				<box topPadding="2">
 					<topPen lineWidth="0.75"/>
-					<leftPen lineWidth="0.0"/>
-					<bottomPen lineWidth="0.0"/>
-					<rightPen lineWidth="0.0"/>
 				</box>
-				<textElement verticalAlignment="Middle">
+				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{username}+" / " +$F{new_date}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{printed_by}+"/"+$F{new_date}]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageFooter>
 	<summary>
-		<band height="278" splitType="Stretch">
+		<band height="276" splitType="Stretch">
 			<staticText>
 				<reportElement mode="Transparent" x="399" y="59" width="158" height="22"/>
 				<box>
@@ -587,4 +494,13 @@ where issue.id = $P{issue_id}]]>
 			</staticText>
 		</band>
 	</summary>
+	<noData>
+		<band height="50">
+			<staticText>
+				<reportElement x="192" y="17" width="311" height="20"/>
+				<textElement/>
+				<text><![CDATA[No Data. Only Issued can be printed]]></text>
+			</staticText>
+		</band>
+	</noData>
 </jasperReport>
