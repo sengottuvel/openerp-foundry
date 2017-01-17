@@ -567,13 +567,14 @@
 						<field name="name" attrs="{'readonly': [('state','=', 'approved')]}"/>
 						<field name="usage" string="Usage Type" attrs="{'readonly': [('state','=', 'approved')]}"/>
 						<field name="is_parent" attrs="{'readonly': [('state','=', 'approved')]}"/>
+						<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 						<field name="scrap_location" attrs="{'readonly': [('state','=', 'approved')]}" invisible="1"/>
 						<field name="entry_mode" invisible="1"/>
 						<field name="modify" invisible="1"/>
 						<field name="custom" invisible="1"/>
                     </group>
                     <group>
-						<field name="location_id" attrs="{'readonly': [('state','=', 'approved')]}"/>
+						<field name="location_id" attrs="{'readonly': [('state','=', 'approved')],'invisible':[('is_parent','=',True)]}"/>
 						<field name="location_type" string="Location Category" attrs="{'readonly': [('state','=', 'approved')]}"/>
 						<field name="state" style="width: 30%%" class="att_state_change"/>
                     </group>
