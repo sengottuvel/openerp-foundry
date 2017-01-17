@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="683" pageHeight="842" columnWidth="643" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="683" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="643" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="144"/>
+	<property name="ireport.y" value="0"/>
 	<subDataset name="dataset1">
 		<parameter name="grn_id" class="java.lang.Integer"/>
 		<queryString>
@@ -80,9 +80,9 @@ where grn_line.po_grn_id = $P{grn_id} order by grn_line.id]]>
 	</subDataset>
 	<parameter name="grn_id" class="java.lang.Integer"/>
 	<parameter name="user_id" class="java.lang.Integer"/>
+	<parameter name="printed_by" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[select
-
 grn.id as grn_id,
 comp.name as company_name,
 part.street as street1,
@@ -90,17 +90,15 @@ part.street2 as street2,
 comp_city.name as city,
 part.zip as zip,
 part.phone as phone,
-part.fax as fax,
+(CASE WHEN part.fax is null
+THEN  '- '
+ELSE part.fax
+END ) as fax,
 part.email as email,
-
-
-
 grn.name as grn_no,
 to_char(grn.grn_date::date,'dd-mm-YYYY') as grn_date,
-
 grn.dc_no as dc_no,
 to_char(grn.dc_date::date,'dd-mm-YYYY') as dc_date,
-
 partner.name as supplier_name,
 partner.street as sup_street1,
 partner.street2 as sup_street2,
@@ -111,39 +109,22 @@ partner.zip as sup_zip,
 CASE WHEN partner_city.name = null THEN ''
 ELSE partner_city.name
 END as sup_city,
-
 grn.po_so_remark as remarks,
-
-to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS New_Date,
-user_part.name as user_name
-
+to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS New_Date
 
 from kg_po_grn grn
 
 left join res_users users on (users.id = grn.created_by)
-
-
 left join res_partner user_part on (user_part.id = users.partner_id)
-
 left join res_company comp on (comp.id = grn.company_id)
-
 left join res_partner part on (part.id = comp.partner_id)
-
 left join res_partner partner on (partner.id = grn.supplier_id)
-
 left join res_city comp_city on (comp_city.id = partner.city_id)
-
 left join res_city partner_city on (partner_city.id = partner.city_id)
-
-
-
-
 left join purchase_order po on (grn.po_id = po.id)
-
 left join kg_service_order so on (grn.so_id = so.id)
 
-
-where grn.id in (select grn_id from tmp_kg_po_grn where user_id = $P{user_id}) and grn.state in ('confirmed','done','inv')]]>
+where grn.id in (select grn_id from tmp_kg_po_grn where user_id = $P{user_id}) and grn.state in ('done','inv')]]>
 	</queryString>
 	<field name="grn_id" class="java.lang.Integer"/>
 	<field name="company_name" class="java.lang.String"/>
@@ -168,7 +149,6 @@ where grn.id in (select grn_id from tmp_kg_po_grn where user_id = $P{user_id}) a
 	<field name="sup_city" class="java.lang.String"/>
 	<field name="remarks" class="java.lang.String"/>
 	<field name="new_date" class="java.lang.String"/>
-	<field name="user_name" class="java.lang.String"/>
 	<group name="GRN_Grup_Header" isStartNewPage="true">
 		<groupExpression><![CDATA[$F{grn_id}]]></groupExpression>
 		<groupHeader>
@@ -346,7 +326,7 @@ where grn.id in (select grn_id from tmp_kg_po_grn where user_id = $P{user_id}) a
 					<textElement>
 						<font size="8" isBold="false"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{user_name}+" "+"/"+" "+$F{new_date}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$P{printed_by}+"/"+$F{new_date}]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupFooter>
@@ -474,7 +454,7 @@ where grn.id in (select grn_id from tmp_kg_po_grn where user_id = $P{user_id}) a
 		<band splitType="Stretch"/>
 	</background>
 	<columnHeader>
-		<band height="202" splitType="Stretch">
+		<band height="210" splitType="Stretch">
 			<textField>
 				<reportElement x="0" y="40" width="643" height="20"/>
 				<box topPadding="3"/>
@@ -497,7 +477,7 @@ where grn.id in (select grn_id from tmp_kg_po_grn where user_id = $P{user_id}) a
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["DC No. :"+" "+$F{dc_no}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["DC No.    :"+" "+$F{dc_no}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="436" y="101" width="207" height="20"/>
@@ -527,7 +507,7 @@ where grn.id in (select grn_id from tmp_kg_po_grn where user_id = $P{user_id}) a
 				<reportElement x="55" y="142" width="381" height="14"/>
 				<box topPadding="3" leftPadding="2"/>
 				<textElement>
-					<font size="8" isBold="false"/>
+					<font size="9" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{supplier_name}]]></textFieldExpression>
 			</textField>
@@ -553,7 +533,7 @@ where grn.id in (select grn_id from tmp_kg_po_grn where user_id = $P{user_id}) a
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{sup_city}+"-"+$F{sup_zip}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{sup_city}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement mode="Transparent" x="0" y="24" width="643" height="16" isPrintWhenDetailOverflows="true"/>
@@ -561,7 +541,7 @@ where grn.id in (select grn_id from tmp_kg_po_grn where user_id = $P{user_id}) a
 					<bottomPen lineWidth="0.75"/>
 				</box>
 				<textElement/>
-				<textFieldExpression><![CDATA[$F{street1}+$F{street2}+$F{city}+"-"+$F{zip}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{street1}+$F{street2}+$F{city}+" - "+$F{zip}+"."]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="4" width="643" height="20" isPrintWhenDetailOverflows="true"/>
@@ -570,6 +550,14 @@ where grn.id in (select grn_id from tmp_kg_po_grn where user_id = $P{user_id}) a
 					<font size="14" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{company_name}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="55" y="198" width="246" height="12"/>
+				<box leftPadding="2" rightPadding="0"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{sup_zip}]]></textFieldExpression>
 			</textField>
 		</band>
 	</columnHeader>

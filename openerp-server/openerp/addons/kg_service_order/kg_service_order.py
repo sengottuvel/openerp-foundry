@@ -33,7 +33,7 @@ class kg_service_order(osv.osv):
 		tot_discount_per = amt_to_per + kg_discount_per
 		for c in self.pool.get('account.tax').compute_all(cr, uid, line.taxes_id,
 			line.price_unit * (1-(tot_discount_per or 0.0)/100.0), line.product_qty, line.product_id,
-			 line.service_id.partner_id)['taxes']:
+			line.service_id.partner_id)['taxes']:
 				 
 			val += c.get('amount', 0.0)
 		return val
@@ -94,6 +94,7 @@ class kg_service_order(osv.osv):
 		return result.keys()
 	
 	_columns = {
+		
 		'name': fields.char('SO No', size=64,readonly=True),
 		'dep_name': fields.many2one('kg.depmaster','Department Name', translate=True, select=True,readonly=True, 
 					domain="[('item_request','=',True),('state','in',('draft','confirmed','approved'))]", states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
@@ -104,7 +105,6 @@ class kg_service_order(osv.osv):
 		'partner_address':fields.char('Supplier Address', size=128, readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'service_order_line': fields.one2many('kg.service.order.line', 'service_id', 'Order Lines', 
 					readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
-		'active': fields.boolean('Active'),
 		'state': fields.selection([('draft', 'Draft'),('confirm','Waiting For Approval'),('approved','Approved'),('inv','Invoiced'),('cancel','Cancelled'),('reject','Rejected')], 'Status', track_visibility='onchange'),
 		'payment_mode': fields.many2one('kg.payment.master', 'Mode of Payment',readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		#~ 'delivery_type':fields.many2one('kg.deliverytype.master', 'Delivery Schedule', 
@@ -151,7 +151,6 @@ class kg_service_order(osv.osv):
 		'freight_charges':fields.selection([('Inclusive','Inclusive'),('Extra','Extra'),('To Pay','To Pay'),('Paid','Paid'),
 						  ('Extra at our Cost','Extra at our Cost')],'Freight Charges',readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'price':fields.selection([('inclusive','Inclusive of all Taxes and Duties'),('exclusive','Excluding All Taxes and Duties')],'Price',readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
-		'company_id': fields.many2one('res.company','Company',readonly=True),
 		'today_date':fields.date('Date'),
 		'text_amt':fields.text('Amount In Text'),
 		'quot_ref_no':fields.char('Quot.Ref',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
@@ -173,32 +172,34 @@ class kg_service_order(osv.osv):
 		
 		# Entry Info
 		
+		'active': fields.boolean('Active'),
+		'company_id': fields.many2one('res.company','Company',readonly=True),
 		'user_id' : fields.many2one('res.users', 'Created By', readonly=True),
-		'creation_date':fields.datetime('Creation Date',readonly=True),
-		'approved_by': fields.many2one('res.users', 'Approved By', readonly=True),
+		'creation_date':fields.datetime('Created Date',readonly=True),
 		'confirmed_by': fields.many2one('res.users', 'Confirmed By',readonly=True),
-		'approved_date': fields.datetime('Approved Date',readonly=True),
 		'confirmed_date': fields.datetime('Confirmed Date',readonly=True),
-		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
+		'approved_by': fields.many2one('res.users', 'Approved By', readonly=True),
+		'approved_date': fields.datetime('Approved Date',readonly=True),
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
-		'reject_date': fields.datetime('Cancelled Date', readonly=True),
-		'rej_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
-		'update_date' : fields.datetime('Last Updated Date',readonly=True),
+		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
+		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
+		'reject_date': fields.datetime('Rejected Date', readonly=True),
 		'update_user_id' : fields.many2one('res.users','Last Updated By',readonly=True),
+		'update_date' : fields.datetime('Last Updated Date',readonly=True),
 		
 	}
 	
 	_defaults = {
 		
-		'state' : 'draft',
-		'active' : 'True',
-		'button_flag' : False,
-		'date' : fields.date.context_today,
+		'state': 'draft',
+		'active': 'True',
+		'button_flag': False,
+		'date': lambda * a: time.strftime('%Y-%m-%d'),
 		'user_id': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).id ,
 		'currency_id': _get_currency,
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.service.order', context=c),
-		'creation_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
-		'version':'00',
+		'creation_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
+		'version': '00',
 		'pricelist_id': 2,
 		'adv_flag': False,
 		
@@ -207,7 +208,6 @@ class kg_service_order(osv.osv):
 	def onchange_type(self,cr,uid,ids,so_type,so_flag,context=None):
 		value = {'so_flag':'','so_reonly_flag':''}
 		if so_type == 'amc' or so_type == 'labor':
-			
 			value = {'so_flag': True}
 		else:
 			value = {'so_flag': False}
@@ -241,41 +241,38 @@ class kg_service_order(osv.osv):
 	def button_dummy(self, cr, uid, ids, context=None):
 		return True
 	
-	def draft_order(self, cr, uid, ids,context=None):		
-		self.write(cr,uid,ids,{'state':'draft'})
+	def draft_order(self, cr, uid, ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'cancel':
+			self.write(cr,uid,ids,{'state':'draft'})
 		return True
 		
 	def confirm_order(self, cr, uid, ids,context=None):
-		service_line_obj = self.pool.get('kg.service.order.line')
-		today_date = datetime.date(today)
 		rec = self.browse(cr,uid,ids[0])
 		if rec.state == 'draft':
+			service_line_obj = self.pool.get('kg.service.order.line')
+			today_date = datetime.date(today)
 			for t in self.browse(cr,uid,ids):
 				date_order = t.date
 				date_order1 = datetime.strptime(date_order, '%Y-%m-%d')
 				date_order1 = datetime.date(date_order1)
 				if date_order1 > today_date:
-					raise osv.except_osv(
-							_('Warning'),
-							_('SO Date should be less than or equal to current date!'))	
+					raise osv.except_osv(_('Warning'),
+						_('SO Date should be less than or equal to current date!'))	
 				if not t.service_order_line:
-					raise osv.except_osv(
-							_('Empty Service Order'),
-							_('You can not confirm an empty Service Order'))
+					raise osv.except_osv(_('Empty Service Order'),
+						_('You can not confirm an empty Service Order'))
 				for line in t.service_order_line:
 					if line.product_qty==0:
-						raise osv.except_osv(
-						_('Warning'),
-						_('Service Order quantity can not be zero'))
+						raise osv.except_osv(_('Warning'),
+							_('Service Order quantity can not be zero'))
 					if line.price_unit==0.00:
-						raise osv.except_osv(
-						_('Warning'),
-						_('You can not confirm Service Order with Zero Value'))
+						raise osv.except_osv(_('Warning'),
+							_('You can not confirm Service Order with Zero Value'))
 					if t.so_type == 'service':
 						if line.product_qty > line.soindent_qty:
-							raise osv.except_osv(
-							_('If Service Order From Service Indent'),
-							_('Service Order Qty can not greater than Service Indent Qty For Product --> %s'%(line.product_id.name)))
+							raise osv.except_osv(_('If Service Order From Service Indent'),
+								_('Service Order Qty can not greater than Service Indent Qty For Product --> %s'%(line.product_id.name)))
 					product_tax_amt = self._amount_line_tax(cr, uid, line, context=context)
 					cr.execute("""update kg_service_order_line set product_tax_amt = %s where id = %s"""%(product_tax_amt,line.id))	
 					service_line_obj.write(cr,uid,line.id,{'state':'confirm'})		
@@ -303,8 +300,7 @@ class kg_service_order(osv.osv):
 				cr.execute("""select * from kg_supplier_advance where state='confirmed' and so_id= %s"""  %(str(ids[0])))
 				data = cr.dictfetchall()
 				if not data:
-					raise osv.except_osv(
-						_('Warning'),
+					raise osv.except_osv(_('Warning'),
 						_('Advance is mandate for this SO'))
 				else:
 					pass
@@ -317,9 +313,8 @@ class kg_service_order(osv.osv):
 			val = [d['serindent_line_id'] for d in data if 'serindent_line_id' in d] # Get a values form list of dict if the dict have with empty values
 			so_lines = obj.service_order_line
 			if not so_lines:
-				raise osv.except_osv(
-						_('Empty Service Order'),
-						_('System not allow to approve without Service Order Line'))
+				raise osv.except_osv(_('Empty Service Order'),
+					_('System not allow to approve without Service Order Line'))
 			else:
 				for i in range(len(so_lines)):
 					self.pool.get('kg.service.order.line').write(cr, uid,so_lines[i].id,{'so_type_flag':'True','service_flag':'True','state':'approved'})
@@ -343,8 +338,7 @@ class kg_service_order(osv.osv):
 							sql2 = """ update kg_service_order_line set gp_line_id=(select id from kg_gate_pass_line where si_line_id = %s and gate_id = %s limit 1)"""%(soindent_line_id.id,obj.gp_id.id)
 							cr.execute(sql2)
 						else:
-							raise osv.except_osv(
-								_('Direct Service Order Not Allow'),
+							raise osv.except_osv(_('Direct Service Order Not Allow'),
 								_('System not allow to raise a Service Order with out Service Indent for %s' %(product)))
 					else:
 						rec.write({'button_flag':True})
@@ -383,20 +377,20 @@ class kg_service_order(osv.osv):
 			
 	def cancel_order(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr,uid,ids[0])
-		if not rec.remark:
-			raise osv.except_osv(
-				_('Remarks Needed !!'),
-				_('Enter Remark in Remarks Tab....'))
-		self.write(cr, uid,ids,{'state' : 'cancel','cancel_date':time.strftime('%Y-%m-%d %H:%M:%S'),'cancel_user_id':uid})
+		if rec.state == 'approved':
+			if not rec.remark:
+				raise osv.except_osv(_('Remarks Needed !!'),
+					_('Enter Remark in Remarks Tab....'))
+			self.write(cr, uid,ids,{'state' : 'cancel','cancel_date':time.strftime('%Y-%m-%d %H:%M:%S'),'cancel_user_id':uid})
 		return True
 			
 	def reject_order(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr,uid,ids[0])
-		if not rec.remark:
-			raise osv.except_osv(
-				_('Remarks Needed !!'),
-				_('Enter Remark in Remarks Tab....'))
-		self.write(cr, uid,ids,{'state' : 'cancel','reject_date':time.strftime('%Y-%m-%d %H:%M:%S'),'rej_user_id':uid})
+		if rec.state == 'confirm':
+			if not rec.remark:
+				raise osv.except_osv(_('Remarks Needed !!'),
+					_('Enter Remark in Remarks Tab....'))
+			self.write(cr, uid,ids,{'state' : 'cancel','reject_date':time.strftime('%Y-%m-%d %H:%M:%S'),'rej_user_id':uid})
 		return True
 			
 	def unlink(self, cr, uid, ids, context=None):
@@ -437,8 +431,6 @@ class kg_service_order(osv.osv):
 				groups.append(map(lambda r:r,group))
 			for key,group in enumerate(groups):
 				qty = sum(map(lambda x:float(x.qty),group)) #TODO: qty
-				print"qtyqtyqty",qty
-				print "indent_qty,,,,,,,,,,,,,,",qty
 				soindent_line_ids = map(lambda x:x.id,group)
 				prod_browse = group[0].product_id
 				serial_no = group[0].serial_no.id
@@ -522,9 +514,8 @@ class kg_service_order_line(osv.osv):
 	def onchange_discount_value_calc(self, cr, uid, ids, kg_discount_per, product_qty, price_unit):
 		discount_value = (product_qty * price_unit) * kg_discount_per / 100
 		return {'value': {'kg_discount_per_value': discount_value}}
-
+	
 	def onchange_product_id(self, cr, uid, ids, product_id, product_uom,context=None):
-			
 		value = {'product_uom': ''}
 		if product_id:
 			prod = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
@@ -566,6 +557,8 @@ class kg_service_order_line(osv.osv):
 	_columns = {
 
 	'service_id': fields.many2one('kg.service.order', 'Service.order.NO', required=True, ondelete='cascade'),
+	'so_date': fields.related('service_id','date', type='date', string='SO Date',store=True),
+	'partner_id': fields.related('service_id','partner_id', type='many2one',relation="res.partner", string='Supplier',store=True),
 	'price_subtotal': fields.function(_amount_line, string='Linetotal', digits_compute= dp.get_precision('Account')),
 	'product_id': fields.many2one('product.product', 'Product', domain="[('state','not in',('reject','cancel')),('purchase_ok','=',True)]"),
 	'product_uom': fields.many2one('product.uom', 'UOM'),
@@ -628,7 +621,7 @@ class kg_service_order_expense_track(osv.osv):
 	_defaults = {
 		
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.service.order.expense.entry', context=c),
-		'date' : fields.date.context_today,
+		'date' : lambda * a: time.strftime('%Y-%m-%d'),
 	
 		}
 	

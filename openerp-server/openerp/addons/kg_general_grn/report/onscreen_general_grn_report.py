@@ -49,7 +49,6 @@ class onscreen_general_grn_report(JasperDataParser.JasperDataParser):
 	def generate_data_source(self, cr, uid, ids, data, context):
 		return 'records'
 
-
 	def generate_ids(self, cr, uid, ids, data, context):
 		return {}
 
@@ -57,13 +56,13 @@ class onscreen_general_grn_report(JasperDataParser.JasperDataParser):
 		return val
 		
 	def generate_parameters(self, cr, uid, ids, data, context):
-		val={}		
+		val={}
+		user_rec = self.pool.get('res.users').browse(cr,uid,uid)
+		val['printed_by'] = user_rec.name
 		val['user_id'] = uid
 		print "val....................", val		
 		return val
 		
-		
-
 	def generate_records(self, cr, uid, ids, data, context):
 		pool= pooler.get_pool(cr.dbname)		
 		return {}

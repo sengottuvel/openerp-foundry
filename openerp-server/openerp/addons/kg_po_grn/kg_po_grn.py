@@ -43,13 +43,17 @@ class kg_po_grn(osv.osv):
 			qty = line.po_grn_qty
 		
 		#~ amt_to_per = (line.kg_discount / (qty * line.price_unit or 1.0 )) * 100
-		dis_amt = (line.kg_discount / line.po_qty) * qty
+		if line.po_qty == 0.0:
+			po_qty = 1.0
+		else:
+			po_qty = line.po_qty
+		dis_amt = (line.kg_discount / po_qty) * qty
 		print"dis_amt",dis_amt
-		amt_to_per = dis_amt / ((line.po_qty * line.price_unit) / 100)
+		amt_to_per = dis_amt / ((po_qty * line.price_unit) / 100)
 			
 		kg_discount_per = line.kg_discount_per
 		tot_discount_per = amt_to_per + kg_discount_per
-		price = line.price_unit - (line.kg_discount / line.po_qty)
+		price = line.price_unit - (line.kg_discount / po_qty)
 		print"priceprice",price
 		print"qtyqtyqty",qty
 		print"line.price_unitline.price_unit",line.price_unit
@@ -84,8 +88,12 @@ class kg_po_grn(osv.osv):
 				other_charges_amt = 0
 				
 			for line in order.line_ids:
+				if line.po_qty == 0:
+					qty = 1.0
+				else:
+					qty = line.po_qty
 				per_to_amt = (line.po_grn_qty * line.price_unit) * line.kg_discount_per / 100.00
-				tot_discount = ((line.kg_discount / line.po_qty) * line.po_grn_qty )+ per_to_amt
+				tot_discount = ((line.kg_discount / qty) * line.po_grn_qty )+ per_to_amt
 				val1 += line.price_subtotal
 				val += self._amount_line_tax(cr, uid, line, context=context)
 				val3 += tot_discount
