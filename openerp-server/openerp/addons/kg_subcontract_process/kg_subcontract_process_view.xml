@@ -195,9 +195,9 @@
 			<field name="arch" type="xml">
 				<form string="Subcontract WO" version="7.0">
 					<header>
-						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="approve_dc" type="object" string="Approve &amp; DC" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
+						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight"/>
+						<button name="approve_dc" type="object" string="Approve &amp; DC" states="confirmed" class="oe_highlight"/>
 					</header>
 					<group>
 						<group>
@@ -210,7 +210,7 @@
 							<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 							<field name="contact_person" readonly="1"/>
 							<field name="billing_type" invisible="1"/>
-							<field name="delivery_date" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="delivery_date" options="{'datepicker':{'maxDate': 185}}" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 							<field name="flag_order" invisible="1"/>
 							<field name="flag_spl_app" invisible="1"/>
 							<field name="flag_app" invisible="1"/>
@@ -382,7 +382,8 @@
 								<field colspan="4" name="line_ids" nolabel="1" context="{'position_id':position_id,'moc_id':moc_id}">
 									<tree string = "Work Order Operation Items" editable="bottom">
 										<field name="operation_id" on_change="onchange_operation_rate(operation_id,position_id,moc_id)"/>
-										<field name="op_rate"/>										
+										<field name="stage_id" readonly="1"/>
+										<field name="op_rate"/>																				
 										<field name="position_id" invisible="1"/>										
 										<field name="moc_id" invisible="1"/>										
 										<field name="remarks" widget="char"/>										
@@ -525,7 +526,7 @@
 			<field name="arch" type="xml">
 				<form string="Subcontract DC" version="7.0">
 					<header>
-						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 					</header>
 					<group>
 						<group>
@@ -634,6 +635,7 @@
 						toolbar="True" string="Subcontract DC Tree">								
 					<field name="name"/>
 					<field name="entry_date"/>					
+					<field name="sub_wo_no"/>					
 					<field name="contractor_id"/>					
 					<field name="transfer_type"/>					
 					<field name="state"/>
@@ -775,7 +777,7 @@
 			<field name="arch" type="xml">
 				<form string="Subcontract Inward" version="7.0">
 					<header>
-						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 					</header>
 					<group>
 						<group>

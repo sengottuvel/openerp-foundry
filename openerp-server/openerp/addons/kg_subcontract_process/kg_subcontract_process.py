@@ -46,7 +46,7 @@ class kg_subcontract_process(osv.osv):
 		'division_id': fields.many2one('kg.division.master','Division'),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location'),
 		'active': fields.boolean('Active'),
-		'contractor_id': fields.many2one('res.partner','Contractor Name',required=True),
+		'contractor_id': fields.many2one('res.partner','Contractor Name',required=True,domain="[('contractor','=','t')]"),
 		
 		'ms_plan_id': fields.many2one('kg.ms.daily.planning','Planning Id'),
 		'ms_plan_line_id': fields.many2one('ch.ms.daily.planning.details','Planning Line Id'),
@@ -247,9 +247,9 @@ class kg_subcontract_wo(osv.osv):
 					for op_line in line.line_ids:
 						moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,op_line.moc_id.id)
 						oper_id_rec = self.pool.get('ch.kg.position.number').browse(cr,uid,op_line.operation_id.id)
-						print"moc_rec.....",moc_rec.moc_cate_id.id
-						print"position_id.....",op_line.position_id.id
-						print"operation_id.....",oper_id_rec.operation_id.id					
+						if moc_rec.moc_cate_id.id == False:
+							raise osv.except_osv(_('MOC Master Configure!!'),
+							_('Please mapping in Moc Category in MOC Master!!'))											
 						cr.execute('''select line.rate from ch_kg_position_number as header
 										left join ch_moccategory_mapping line on line.header_id = header.id
 										where header.header_id = %s and header.operation_id = %s and line.moc_cate_id = %s
@@ -329,7 +329,7 @@ class kg_subcontract_wo(osv.osv):
 				if (line_item.sc_id.sc_wo_qty + line_item.qty) > line_item.sc_id.total_qty:
 					wo_state = 'done'
 					wo_process_state = 'not_allow'
-				self.pool.get('ch.subcontract.wo.line').write(cr,uid,line_item.id,{'pending_qty':line_item.qty})
+				self.pool.get('ch.subcontract.wo.line').write(cr,uid,line_item.id,{'pending_qty':line_item.qty,'app_flag':True})
 				sc_obj.write(cr, uid, line_item.sc_id.id, 
 					{'pending_qty':line_item.sc_id.pending_qty - line_item.qty,'sc_wo_qty': line_item.sc_id.sc_wo_qty + line_item.qty,'wo_state': wo_state,'wo_process_state':wo_process_state,'state':'wo_inprocess'})
 								
@@ -345,7 +345,7 @@ class kg_subcontract_wo(osv.osv):
 			sc_obj = self.pool.get('kg.subcontract.process')
 			dc_obj = self.pool.get('kg.subcontract.dc')
 			dc_obj_line = self.pool.get('ch.subcontract.dc.line')		
-			dc_id = dc_obj.create(cr,uid,{'transfer_type':'sub_contractor','contractor_id':entry.contractor_id.id,'flag_dc':True,'entry_mode': 'from_wo'})	
+			dc_id = dc_obj.create(cr,uid,{'sub_wo_no':entry.name,'transfer_type':'sub_contractor','contractor_id':entry.contractor_id.id,'flag_dc':True,'entry_mode': 'from_wo'})	
 			if entry.line_ids:
 				for line in entry.line_ids:				
 					for op_line in line.line_ids:
@@ -516,6 +516,7 @@ class ch_subcontract_wo_line(osv.osv):
 		'remarks': fields.text('Remarks'),		
 		'dc_state': fields.selection([('pending','Pending'),('partial','Partial'),('done','Done')], 'DC Status', readonly=True),
 		'dc_flag': fields.boolean('DC Flag'),
+		'app_flag': fields.boolean('Approve Flag'),
 		
 	}
 	
@@ -523,7 +524,8 @@ class ch_subcontract_wo_line(osv.osv):
 	_defaults = {
 		
 		'dc_state': 'pending',
-		'dc_flag': False
+		'dc_flag': False,
+		'app_flag': False,
 		
 	}
 	
@@ -567,16 +569,20 @@ class ch_wo_operation_details(osv.osv):
 		'header_id':fields.many2one('ch.subcontract.wo.line', 'WO line Details', required=True, ondelete='cascade'),		
 		'position_id': fields.many2one('kg.position.number','Position No'),
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
-		'operation_id': fields.many2one('ch.kg.position.number','Operation',required=True,domain="[('header_id','=',position_id)]"),			
+		'operation_id': fields.many2one('ch.kg.position.number','Operation',required=True,domain="[('header_id','=',position_id)]"),
+		'stage_id': fields.many2one('kg.stage.master','Stage',domain="[('state','not in',('reject','cancel'))]"), 			
 		'op_rate':fields.float('Rate(Rs)',required=True),			
 		'remarks':fields.text('Remarks'),		
 	}
 	def default_get(self, cr, uid, fields, context=None):
 		return context
+		
+	
 	
 	def onchange_operation_rate(self,cr, uid, ids, operation_id,position_id,moc_id, context=None):		
 		moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
-		oper_id_rec = self.pool.get('ch.kg.position.number').browse(cr,uid,operation_id)		
+		oper_id_rec = self.pool.get('ch.kg.position.number').browse(cr,uid,operation_id)	
+		print	
 		if moc_rec.moc_cate_id.id == False:
 			raise osv.except_osv(_('MOC Master Configure!!'),
 							_('Please mapping in Moc Category in MOC Master!!'))
@@ -593,7 +599,7 @@ class ch_wo_operation_details(osv.osv):
 		else:
 			operation_rate = 0.00			
 		
-		return {'value': {'op_rate': operation_rate}}
+		return {'value': {'op_rate': operation_rate,'stage_id':oper_id_rec.stage_id.id}}
 	
 	def _check_rate(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])			
@@ -638,14 +644,15 @@ class kg_subcontract_dc(osv.osv):
 		'to_division_id': fields.many2one('kg.division.master','To Division'),
 		'transfer_type': fields.selection([('internal','Internal'),('sub_contractor','Sub Contractor')],'Type'),
 		'active': fields.boolean('Active'),
-		'contractor_id': fields.many2one('res.partner','Subcontractor'),	
+		'contractor_id': fields.many2one('res.partner','Subcontractor',domain="[('contractor','=','t')]"),	
 		'phone': fields.char('Phone',size=64),
+		'sub_wo_no': fields.char('Sub WO No.'),
 		'contact_person': fields.char('Contact Person', size=128),		
 		
 		'dc_internal_line_ids': fields.many2many('kg.subcontract.process','m2m_dc_details' , 'order_id', 'sc_id', 'SC Items',
 			domain="[('wo_state','in',('pending','partial')),('wo_process_state','=','allow')]"),
 		'dc_sub_line_ids': fields.many2many('ch.subcontract.wo.line','m2m_dc_sub_details' , 'order_id', 'sc_id', 'SC Items',
-		 domain="[('dc_state','in',('pending','partial')),('contractor_id','=',contractor_id),('dc_flag','=',False)]"),  
+		 domain="[('dc_state','in',('pending','partial')),('contractor_id','=',contractor_id),('dc_flag','=',False),('app_flag','=',True)]"),  
 			
 		'line_ids': fields.one2many('ch.subcontract.dc.line','header_id','Subcontract DC Line'),   
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),
@@ -689,6 +696,7 @@ class kg_subcontract_dc(osv.osv):
 		entry = self.browse(cr,uid,ids[0])
 		wo_line_obj = self.pool.get('ch.subcontract.dc.line')
 		sc_obj = self.pool.get('kg.subcontract.process')
+		wo_obj=self.pool.get('kg.subcontract.wo')
 		
 		del_sql = """ delete from ch_subcontract_dc_line where header_id=%s """ %(ids[0])
 		cr.execute(del_sql)
@@ -720,7 +728,8 @@ class kg_subcontract_dc(osv.osv):
 			self.write(cr, uid, ids, {'flag_dc': True})
 			
 		if entry.dc_sub_line_ids:
-		
+			po_id = False
+			
 			for item in entry.dc_sub_line_ids:
 				
 				sc_qty = item.actual_qty 
@@ -734,18 +743,32 @@ class kg_subcontract_dc(osv.osv):
 					'actual_qty':sc_qty,					
 					'sc_dc_qty':item.qty - item.sc_dc_qty,					
 					'sc_wo_line_id': item.id,
+					'sub_wo_id': item.header_id.id,
 					'operation_id':[(6, 0, [x.id for x in item.operation_id])],
 					'entry_mode':'from_wo',
 							
 				}
 				
-				wo_line_id = wo_line_obj.create(cr, uid,vals)
-				
-				for line in item.line_ids:
-					
-					sql = """ insert into m2m_dc_operation_details (dc_operation_id,dc_sub_id) VALUES(%s,%s) """ %(wo_line_id,line.operation_id.id)
-					cr.execute(sql)			
-				
+				wo_line_id = wo_line_obj.create(cr, uid,vals)				
+				cr.execute(""" select distinct sub_wo_id from ch_subcontract_dc_line where header_id = %s """ %(entry.id))
+				wo_data = cr.dictfetchall()
+				wo_list = []				
+				for item in wo_data:
+					wo_id = item['sub_wo_id']
+					wo_record = wo_obj.browse(cr, uid, wo_id)
+					wo_list.append(wo_record.name)
+					wo_name = ",".join(wo_list)
+					print"wo_namewo_name",wo_name
+					self.write(cr,uid,ids[0],{
+							'sub_wo_no':wo_name,							
+							})		
+				print"entry.line_ids",entry.line_ids
+				for line in entry.line_ids:	
+					print"line.sc_wo_line_id.line_ids11111",line.sc_wo_line_id.line_ids
+					for line in line.sc_wo_line_id.line_ids:		
+						print"2222222222222",		
+						sql = """ insert into m2m_dc_operation_details (dc_operation_id,dc_sub_id) VALUES(%s,%s) """ %(wo_line_id,line.operation_id.id)
+						cr.execute(sql)							
 				
 			self.write(cr, uid, ids, {'flag_dc': True})
 			
@@ -942,6 +965,7 @@ class ch_subcontract_dc_line(osv.osv):
 	_columns = {
 		
 		'header_id': fields.many2one('kg.subcontract.dc','Header Id'),
+		'sub_wo_id': fields.many2one('kg.subcontract.wo','SUB Work Id'),
 		'contractor_id': fields.related('header_id','contractor_id', type='many2one', relation='res.partner', string='Contractor Name', store=True, readonly=True),
 		'sc_id': fields.many2one('kg.subcontract.process','Subcontractor List Id'),
 		'sc_wo_line_id': fields.many2one('ch.subcontract.wo.line','Subcontractor WO List Id'),
@@ -1016,7 +1040,7 @@ class kg_subcontract_inward(osv.osv):
 		'division_id': fields.many2one('kg.division.master','From Division'),
 		'to_division_id': fields.many2one('kg.division.master','To Division'),
 		'transfer_type': fields.selection([('internal','Internal'),('sub_contractor','Sub Contractor')],'Type'),
-		'contractor_id': fields.many2one('res.partner','Subcontractor'),
+		'contractor_id': fields.many2one('res.partner','Subcontractor',domain="[('contractor','=','t')]"),
 		'phone': fields.char('Phone',size=64),
 		'contact_person': fields.char('Contact Person', size=128),	
 		
