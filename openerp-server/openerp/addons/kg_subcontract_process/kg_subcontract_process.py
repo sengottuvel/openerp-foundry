@@ -644,7 +644,7 @@ class kg_subcontract_dc(osv.osv):
 		'to_division_id': fields.many2one('kg.division.master','To Division'),
 		'transfer_type': fields.selection([('internal','Internal'),('sub_contractor','Sub Contractor')],'Type'),
 		'active': fields.boolean('Active'),
-		'contractor_id': fields.many2one('res.partner','Subcontractor',domain="[('contractor','=','t')]"),	
+		'contractor_id': fields.many2one('res.partner','Subcontractor' , domain="[('contractor','=','t')]"),	
 		'phone': fields.char('Phone',size=64),
 		'sub_wo_no': fields.char('Sub WO No.'),
 		'contact_person': fields.char('Contact Person', size=128),		
