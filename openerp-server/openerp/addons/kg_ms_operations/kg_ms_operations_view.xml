@@ -12,7 +12,7 @@
 			<field name="arch" type="xml">
 				<form string="Operation 1" version="7.0" create="false">
 					<header>
-						<button name="operation1_update" type="object" string="Update" class="oe_highlight" confirm="Are you sure to proceed ?"
+						<button name="operation1_update" type="object" string="Update" class="oe_highlight" 
 						attrs="{'invisible': [('op1_button_status','=','invisible')]}"/>
 					</header>
 					<group string="Operation Details">
@@ -26,13 +26,13 @@
 							<div>
 								<div class="address_format">
 									<field name="op1_start_time"  widget="float_time" style="width: 40%%" attrs="{'readonly': [('op1_button_status','=','invisible')]}"/>
-									<field name="op1_start_time_type" style="width: 20%%" attrs="{'readonly': [('op1_button_status','=','invisible')]}"/>
+									<field name="op1_start_time_type" style="width: 20%%" invisible="1"/>
 								</div>
 							</div>
 							<label for="op1_setting_time" string="Setting Time"/>
 							<div>
 								<div class="address_format">
-									<field name="op1_setting_time"  widget="float_time" style="width: 40%%" on_change="onchange_operation1_time(op1_start_time,op1_end_time,op1_setting_time)" attrs="{'readonly': [('op1_button_status','=','invisible')]}"/>
+									<field name="op1_setting_time"  widget="float_time" style="width: 40%%" attrs="{'readonly': [('op1_button_status','=','invisible')]}"/>
 									<field name="op1_setting_time_type" invisible="1" style="width: 20%%" attrs="{'readonly': [('op1_button_status','=','invisible')]}"/>
 								</div>
 							</div>
@@ -53,8 +53,8 @@
 							<label for="op1_end_time" string="End Time"/>
 							<div>
 								<div class="address_format">
-									<field name="op1_end_time"  widget="float_time" style="width: 40%%" attrs="{'readonly': [('op1_button_status','=','invisible')]}"/>
-									<field name="op1_end_time_type" style="width: 20%%" attrs="{'readonly': [('op1_button_status','=','invisible')]}"/>
+									<field name="op1_end_time" on_change="onchange_operation1_time(op1_start_time,op1_end_time)"  widget="float_time" style="width: 40%%" attrs="{'readonly': [('op1_button_status','=','invisible')]}"/>
+									<field name="op1_end_time_type" style="width: 20%%" invisible="1"/>
 								</div>
 							</div>
 							
@@ -213,7 +213,7 @@
 			<field name="arch" type="xml">
 				<form string="Operation 2" version="7.0" create="false">
 					<header>
-						<button name="operation2_update" type="object" string="Update" class="oe_highlight" confirm="Are you sure to proceed ?"
+						<button name="operation2_update" type="object" string="Update" class="oe_highlight" 
 						attrs="{'invisible': [('op2_button_status','=','invisible')]}"/>
 					</header>
 					<group string="Operation Details">
@@ -226,13 +226,13 @@
 							<div>
 								<div class="address_format">
 									<field name="op2_start_time"  widget="float_time" style="width: 40%%"  attrs="{'readonly': [('op2_button_status','=','invisible')]}"/>
-									<field name="op2_start_time_type" style="width: 20%%"  attrs="{'readonly': [('op2_button_status','=','invisible')]}"/>
+									<field name="op2_start_time_type" style="width: 20%%"  invisible="1"/>
 								</div>
 							</div>
 							<label for="op2_setting_time" string="Setting Time"/>
 							<div>
 								<div class="address_format">
-									<field name="op2_setting_time"  widget="float_time" style="width: 40%%" on_change="onchange_operation2_time(op2_start_time,op2_end_time,op2_setting_time)"  attrs="{'readonly': [('op2_button_status','=','invisible')]}"/>
+									<field name="op2_setting_time"  widget="float_time" style="width: 40%%"   attrs="{'readonly': [('op2_button_status','=','invisible')]}"/>
 									<field name="op2_setting_time_type" style="width: 20%%" invisible="1"  attrs="{'readonly': [('op2_button_status','=','invisible')]}"/>
 								</div>
 							</div>
@@ -254,8 +254,8 @@
 							<label for="op2_end_time" string="End Time"/>
 							<div>
 								<div class="address_format">
-									<field name="op2_end_time"  widget="float_time" style="width: 40%%"  attrs="{'readonly': [('op2_button_status','=','invisible')]}"/>
-									<field name="op2_end_time_type" style="width: 20%%"  attrs="{'readonly': [('op2_button_status','=','invisible')]}"/>
+									<field name="op2_end_time" on_change="onchange_operation2_time(op2_start_time,op2_end_time)" widget="float_time" style="width: 40%%"  attrs="{'readonly': [('op2_button_status','=','invisible')]}"/>
+									<field name="op2_end_time_type" style="width: 20%%" invisible="1"/>
 								</div>
 							</div>
 							
@@ -413,7 +413,7 @@
 			<field name="arch" type="xml">
 				<form string="Operation 3" version="7.0" create="false">
 					<header>
-						<button name="operation3_update" type="object" string="Update" class="oe_highlight" confirm="Are you sure to proceed ?"
+						<button name="operation3_update" type="object" string="Update" class="oe_highlight" 
 						attrs="{'invisible': [('op3_button_status','=','invisible')]}"/>
 					</header>
 					<group string="Operation Details">
@@ -426,13 +426,13 @@
 							<div>
 								<div class="address_format">
 									<field name="op3_start_time"  widget="float_time" style="width: 40%%"  attrs="{ 'readonly': [('op3_button_status','=','invisible')]}"/>
-									<field name="op3_start_time_type" style="width: 20%%"  attrs="{ 'readonly': [('op3_button_status','=','invisible')]}"/>
+									<field name="op3_start_time_type" style="width: 20%%"  invisible="1"/>
 								</div>
 							</div>
 							<label for="op3_setting_time" string="Setting Time"/>
 							<div>
 								<div class="address_format">
-									<field name="op3_setting_time"  widget="float_time" style="width: 40%%" on_change="onchange_operation3_time(op3_start_time,op3_end_time,op3_setting_time)"  attrs="{'readonly': [('op3_button_status','=','invisible')]}"/>
+									<field name="op3_setting_time"  widget="float_time" style="width: 40%%"   attrs="{'readonly': [('op3_button_status','=','invisible')]}"/>
 									<field name="op3_setting_time_type" style="width: 20%%" invisible="1"  attrs="{'readonly': [('op3_button_status','=','invisible')]}"/>
 								</div>
 							</div>
@@ -454,8 +454,8 @@
 							<label for="op3_end_time" string="End Time"/>
 							<div>
 								<div class="address_format">
-									<field name="op3_end_time"  widget="float_time" style="width: 40%%"  attrs="{'readonly': [('op3_button_status','=','invisible')]}"/>
-									<field name="op3_end_time_type" style="width: 20%%"  attrs="{'readonly': [('op3_button_status','=','invisible')]}"/>
+									<field name="op3_end_time"  on_change="onchange_operation3_time(op3_start_time,op3_end_time)" widget="float_time" style="width: 40%%"  attrs="{'readonly': [('op3_button_status','=','invisible')]}"/>
+									<field name="op3_end_time_type" style="width: 20%%" invisible="1" />
 								</div>
 							</div>
 							
@@ -615,7 +615,7 @@
 			<field name="arch" type="xml">
 				<form string="Operation 4" version="7.0" create="false">
 					<header>
-						<button name="operation4_update" type="object" string="Update" class="oe_highlight" confirm="Are you sure to proceed ?"
+						<button name="operation4_update" type="object" string="Update" class="oe_highlight" 
 						attrs="{'invisible': [('op4_button_status','=','invisible')]}"/>
 					</header>
 					<group string="Operation Details">
@@ -628,13 +628,13 @@
 							<div>
 								<div class="address_format">
 									<field name="op4_start_time"  widget="float_time" style="width: 40%%"  attrs="{ 'readonly': [('op4_button_status','=','invisible')]}"/>
-									<field name="op4_start_time_type" style="width: 20%%"  attrs="{ 'readonly': [('op4_button_status','=','invisible')]}"/>
+									<field name="op4_start_time_type" style="width: 20%%" invisible="1" />
 								</div>
 							</div>
 							<label for="op4_setting_time" string="Setting Time"/>
 							<div>
 								<div class="address_format">
-									<field name="op4_setting_time"  widget="float_time" style="width: 40%%" on_change="onchange_operation4_time(op4_start_time,op4_end_time,op4_setting_time)"  attrs="{'readonly': [('op4_button_status','=','invisible')]}"/>
+									<field name="op4_setting_time"  widget="float_time" style="width: 40%%" attrs="{'readonly': [('op4_button_status','=','invisible')]}"/>
 									<field name="op4_setting_time_type" style="width: 20%%" invisible="1"  attrs="{'readonly': [('op4_button_status','=','invisible')]}"/>
 								</div>
 							</div>
@@ -656,8 +656,8 @@
 							<label for="op4_end_time" string="End Time"/>
 							<div>
 								<div class="address_format">
-									<field name="op4_end_time"  widget="float_time" style="width: 40%%"  attrs="{'readonly': [('op4_button_status','=','invisible')]}"/>
-									<field name="op4_end_time_type" style="width: 20%%"  attrs="{'readonly': [('op4_button_status','=','invisible')]}"/>
+									<field name="op4_end_time"  on_change="onchange_operation4_time(op4_start_time,op4_end_time)" widget="float_time" style="width: 40%%"  attrs="{'readonly': [('op4_button_status','=','invisible')]}"/>
+									<field name="op4_end_time_type" style="width: 20%%" invisible="1"/>
 								</div>
 							</div>
 							
@@ -817,7 +817,7 @@
 			<field name="arch" type="xml">
 				<form string="Operation 5" version="7.0" create="false">
 					<header>
-						<button name="operation5_update" type="object" string="Update" class="oe_highlight" confirm="Are you sure to proceed ?"
+						<button name="operation5_update" type="object" string="Update" class="oe_highlight" 
 						attrs="{'invisible': [('op5_button_status','=','invisible')]}"/>
 					</header>
 					<group string="Operation Details">
@@ -830,13 +830,13 @@
 							<div>
 								<div class="address_format">
 									<field name="op5_start_time"  widget="float_time" style="width: 40%%"  attrs="{ 'readonly': [('op5_button_status','=','invisible')]}"/>
-									<field name="op5_start_time_type" style="width: 20%%"  attrs="{ 'readonly': [('op5_button_status','=','invisible')]}"/>
+									<field name="op5_start_time_type" style="width: 20%%" invisible="1" />
 								</div>
 							</div>
 							<label for="op5_setting_time" string="Setting Time"/>
 							<div>
 								<div class="address_format">
-									<field name="op5_setting_time"  widget="float_time" style="width: 40%%" on_change="onchange_operation5_time(op5_start_time,op5_end_time,op5_setting_time)"  attrs="{'readonly': [('op5_button_status','=','invisible')]}"/>
+									<field name="op5_setting_time"  widget="float_time" style="width: 40%%"   attrs="{'readonly': [('op5_button_status','=','invisible')]}"/>
 									<field name="op5_setting_time_type" style="width: 20%%" invisible="1"  attrs="{'readonly': [('op5_button_status','=','invisible')]}"/>
 								</div>
 							</div>
@@ -858,8 +858,8 @@
 							<label for="op5_end_time" string="End Time"/>
 							<div>
 								<div class="address_format">
-									<field name="op5_end_time"  widget="float_time" style="width: 40%%"  attrs="{'readonly': [('op5_button_status','=','invisible')]}"/>
-									<field name="op5_end_time_type" style="width: 20%%"  attrs="{'readonly': [('op5_button_status','=','invisible')]}"/>
+									<field name="op5_end_time"  on_change="onchange_operation5_time(op5_start_time,op5_end_time)" widget="float_time" style="width: 40%%"  attrs="{'readonly': [('op5_button_status','=','invisible')]}"/>
+									<field name="op5_end_time_type" style="width: 20%%" invisible="1"/>
 								</div>
 							</div>
 							
@@ -1019,7 +1019,7 @@
 			<field name="arch" type="xml">
 				<form string="Operation 6" version="7.0" create="false">
 					<header>
-						<button name="operation6_update" type="object" string="Update" class="oe_highlight" confirm="Are you sure to proceed ?"
+						<button name="operation6_update" type="object" string="Update" class="oe_highlight" 
 						attrs="{'invisible': [('op6_button_status','=','invisible')]}"/>
 					</header>
 					<group string="Operation Details">
@@ -1032,13 +1032,13 @@
 							<div>
 								<div class="address_format">
 									<field name="op6_start_time"  widget="float_time" style="width: 40%%"  attrs="{ 'readonly': [('op6_button_status','=','invisible')]}"/>
-									<field name="op6_start_time_type" style="width: 20%%"  attrs="{ 'readonly': [('op6_button_status','=','invisible')]}"/>
+									<field name="op6_start_time_type" style="width: 20%%" invisible="1" />
 								</div>
 							</div>
 							<label for="op6_setting_time" string="Setting Time"/>
 							<div>
 								<div class="address_format">
-									<field name="op6_setting_time"  widget="float_time" style="width: 40%%" on_change="onchange_operation6_time(op6_start_time,op6_end_time,op6_setting_time)"  attrs="{'readonly': [('op6_button_status','=','invisible')]}"/>
+									<field name="op6_setting_time"  widget="float_time" style="width: 40%%"   attrs="{'readonly': [('op6_button_status','=','invisible')]}"/>
 									<field name="op6_setting_time_type" style="width: 20%%" invisible="1"  attrs="{'readonly': [('op6_button_status','=','invisible')]}"/>
 								</div>
 							</div>
@@ -1060,8 +1060,8 @@
 							<label for="op6_end_time" string="End Time"/>
 							<div>
 								<div class="address_format">
-									<field name="op6_end_time"  widget="float_time" style="width: 40%%"  attrs="{'readonly': [('op6_button_status','=','invisible')]}"/>
-									<field name="op6_end_time_type" style="width: 20%%"  attrs="{'readonly': [('op6_button_status','=','invisible')]}"/>
+									<field name="op6_end_time" on_change="onchange_operation6_time(op6_start_time,op6_end_time)" widget="float_time" style="width: 40%%"  attrs="{'readonly': [('op6_button_status','=','invisible')]}"/>
+									<field name="op6_end_time_type" style="width: 20%%" invisible="1" />
 								</div>
 							</div>
 							
@@ -1221,7 +1221,7 @@
 			<field name="arch" type="xml">
 				<form string="Operation 7" version="7.0" create="false">
 					<header>
-						<button name="operation7_update" type="object" string="Update" class="oe_highlight" confirm="Are you sure to proceed ?"
+						<button name="operation7_update" type="object" string="Update" class="oe_highlight" 
 						attrs="{'invisible': [('op7_button_status','=','invisible')]}"/>
 					</header>
 					<group string="Operation Details">
@@ -1234,13 +1234,13 @@
 							<div>
 								<div class="address_format">
 									<field name="op7_start_time"  widget="float_time" style="width: 40%%"  attrs="{ 'readonly': [('op7_button_status','=','invisible')]}"/>
-									<field name="op7_start_time_type" style="width: 20%%"  attrs="{ 'readonly': [('op7_button_status','=','invisible')]}"/>
+									<field name="op7_start_time_type" style="width: 20%%"  invisible="1"/>
 								</div>
 							</div>
 							<label for="op7_setting_time" string="Setting Time"/>
 							<div>
 								<div class="address_format">
-									<field name="op7_setting_time"  widget="float_time" style="width: 40%%" on_change="onchange_operation7_time(op7_start_time,op7_end_time,op7_setting_time)"  attrs="{'readonly': [('op7_button_status','=','invisible')]}"/>
+									<field name="op7_setting_time"  widget="float_time" style="width: 40%%"  attrs="{'readonly': [('op7_button_status','=','invisible')]}"/>
 									<field name="op7_setting_time_type" style="width: 20%%" invisible="1"  attrs="{'readonly': [('op7_button_status','=','invisible')]}"/>
 								</div>
 							</div>
@@ -1262,8 +1262,8 @@
 							<label for="op7_end_time" string="End Time"/>
 							<div>
 								<div class="address_format">
-									<field name="op7_end_time"  widget="float_time" style="width: 40%%"  attrs="{'readonly': [('op7_button_status','=','invisible')]}"/>
-									<field name="op7_end_time_type" style="width: 20%%"  attrs="{'readonly': [('op7_button_status','=','invisible')]}"/>
+									<field name="op7_end_time"  on_change="onchange_operation7_time(op7_start_time,op7_end_time)" widget="float_time" style="width: 40%%"  attrs="{'readonly': [('op7_button_status','=','invisible')]}"/>
+									<field name="op7_end_time_type" style="width: 20%%"  invisible="1"/>
 								</div>
 							</div>
 							
@@ -1423,7 +1423,7 @@
 			<field name="arch" type="xml">
 				<form string="Operation 8" version="7.0" create="false">
 					<header>
-						<button name="operation8_update" type="object" string="Update" class="oe_highlight" confirm="Are you sure to proceed ?"
+						<button name="operation8_update" type="object" string="Update" class="oe_highlight" 
 						attrs="{'invisible': [('op8_button_status','=','invisible')]}"/>
 					</header>
 					<group string="Operation Details">
@@ -1436,13 +1436,13 @@
 							<div>
 								<div class="address_format">
 									<field name="op8_start_time"  widget="float_time" style="width: 40%%"  attrs="{ 'readonly': [('op8_button_status','=','invisible')]}"/>
-									<field name="op8_start_time_type" style="width: 20%%"  attrs="{ 'readonly': [('op8_button_status','=','invisible')]}"/>
+									<field name="op8_start_time_type" style="width: 20%%" invisible="1" />
 								</div>
 							</div>
 							<label for="op8_setting_time" string="Setting Time"/>
 							<div>
 								<div class="address_format">
-									<field name="op8_setting_time"  widget="float_time" style="width: 40%%" on_change="onchange_operation8_time(op8_start_time,op8_end_time,op8_setting_time)"  attrs="{'readonly': [('op8_button_status','=','invisible')]}"/>
+									<field name="op8_setting_time"  widget="float_time" style="width: 40%%"  attrs="{'readonly': [('op8_button_status','=','invisible')]}"/>
 									<field name="op8_setting_time_type" style="width: 20%%" invisible="1"  attrs="{'readonly': [('op8_button_status','=','invisible')]}"/>
 								</div>
 							</div>
@@ -1464,8 +1464,8 @@
 							<label for="op8_end_time" string="End Time"/>
 							<div>
 								<div class="address_format">
-									<field name="op8_end_time"  widget="float_time" style="width: 40%%"  attrs="{'readonly': [('op8_button_status','=','invisible')]}"/>
-									<field name="op8_end_time_type" style="width: 20%%"  attrs="{'readonly': [('op8_button_status','=','invisible')]}"/>
+									<field name="op8_end_time" on_change="onchange_operation8_time(op8_start_time,op8_end_time)" widget="float_time" style="width: 40%%"  attrs="{'readonly': [('op8_button_status','=','invisible')]}"/>
+									<field name="op8_end_time_type" style="width: 20%%" invisible="1"/>
 								</div>
 							</div>
 							
@@ -1625,7 +1625,7 @@
 			<field name="arch" type="xml">
 				<form string="Operation 9" version="7.0" create="false">
 					<header>
-						<button name="operation9_update" type="object" string="Update" class="oe_highlight" confirm="Are you sure to proceed ?"
+						<button name="operation9_update" type="object" string="Update" class="oe_highlight" 
 						attrs="{'invisible': [('op9_button_status','=','invisible')]}"/>
 					</header>
 					<group string="Operation Details">
@@ -1638,13 +1638,13 @@
 							<div>
 								<div class="address_format">
 									<field name="op9_start_time"  widget="float_time" style="width: 40%%"  attrs="{ 'readonly': [('op9_button_status','=','invisible')]}"/>
-									<field name="op9_start_time_type" style="width: 20%%"  attrs="{ 'readonly': [('op9_button_status','=','invisible')]}"/>
+									<field name="op9_start_time_type" style="width: 20%%" invisible="1" />
 								</div>
 							</div>
 							<label for="op9_setting_time" string="Setting Time"/>
 							<div>
 								<div class="address_format">
-									<field name="op9_setting_time"  widget="float_time" style="width: 40%%" on_change="onchange_operation9_time(op9_start_time,op9_end_time,op9_setting_time)"  attrs="{'readonly': [('op9_button_status','=','invisible')]}"/>
+									<field name="op9_setting_time"  widget="float_time" style="width: 40%%"  attrs="{'readonly': [('op9_button_status','=','invisible')]}"/>
 									<field name="op9_setting_time_type" style="width: 20%%" invisible="1"  attrs="{'readonly': [('op9_button_status','=','invisible')]}"/>
 								</div>
 							</div>
@@ -1666,8 +1666,8 @@
 							<label for="op9_end_time" string="End Time"/>
 							<div>
 								<div class="address_format">
-									<field name="op9_end_time"  widget="float_time" style="width: 40%%"  attrs="{'readonly': [('op9_button_status','=','invisible')]}"/>
-									<field name="op9_end_time_type" style="width: 20%%"  attrs="{'readonly': [('op9_button_status','=','invisible')]}"/>
+									<field name="op9_end_time" on_change="onchange_operation9_time(op9_start_time,op9_end_time)" widget="float_time" style="width: 40%%"  attrs="{'readonly': [('op9_button_status','=','invisible')]}"/>
+									<field name="op9_end_time_type" style="width: 20%%"  invisible="1"/>
 								</div>
 							</div>
 							
@@ -1827,7 +1827,7 @@
 			<field name="arch" type="xml">
 				<form string="Operation 10" version="7.0" create="false">
 					<header>
-						<button name="operation10_update" type="object" string="Update" class="oe_highlight" confirm="Are you sure to proceed ?"
+						<button name="operation10_update" type="object" string="Update" class="oe_highlight" 
 						attrs="{'invisible': [('op10_button_status','=','invisible')]}"/>
 					</header>
 					<group string="Operation Details">
@@ -1840,13 +1840,13 @@
 							<div>
 								<div class="address_format">
 									<field name="op10_start_time"  widget="float_time" style="width: 40%%"  attrs="{ 'readonly': [('op10_button_status','=','invisible')]}"/>
-									<field name="op10_start_time_type" style="width: 20%%"  attrs="{ 'readonly': [('op10_button_status','=','invisible')]}"/>
+									<field name="op10_start_time_type" style="width: 20%%" invisible="1" />
 								</div>
 							</div>
 							<label for="op10_setting_time" string="Setting Time"/>
 							<div>
 								<div class="address_format">
-									<field name="op10_setting_time"  widget="float_time" style="width: 40%%" on_change="onchange_operation10_time(op10_start_time,op10_end_time,op10_setting_time)"  attrs="{'readonly': [('op10_button_status','=','invisible')]}"/>
+									<field name="op10_setting_time"  widget="float_time" style="width: 40%%"  attrs="{'readonly': [('op10_button_status','=','invisible')]}"/>
 									<field name="op10_setting_time_type" style="width: 20%%" invisible="1"  attrs="{'readonly': [('op10_button_status','=','invisible')]}"/>
 								</div>
 							</div>
@@ -1868,8 +1868,8 @@
 							<label for="op10_end_time" string="End Time"/>
 							<div>
 								<div class="address_format">
-									<field name="op10_end_time"  widget="float_time" style="width: 40%%"  attrs="{'readonly': [('op10_button_status','=','invisible')]}"/>
-									<field name="op10_end_time_type" style="width: 20%%"  attrs="{'readonly': [('op10_button_status','=','invisible')]}"/>
+									<field name="op10_end_time" on_change="onchange_operation10_time(op10_start_time,op10_end_time)" widget="float_time" style="width: 40%%"  attrs="{'readonly': [('op10_button_status','=','invisible')]}"/>
+									<field name="op10_end_time_type" style="width: 20%%" invisible="1"/>
 								</div>
 							</div>
 							
@@ -2029,7 +2029,7 @@
 			<field name="arch" type="xml">
 				<form string="Operation 11" version="7.0" create="false">
 					<header>
-						<button name="operation11_update" type="object" string="Update" class="oe_highlight" confirm="Are you sure to proceed ?"
+						<button name="operation11_update" type="object" string="Update" class="oe_highlight" 
 						attrs="{'invisible': [('op11_button_status','=','invisible')]}"/>
 					</header>
 					<group string="Operation Details">
@@ -2042,13 +2042,13 @@
 							<div>
 								<div class="address_format">
 									<field name="op11_start_time"  widget="float_time" style="width: 40%%"  attrs="{ 'readonly': [('op11_button_status','=','invisible')]}"/>
-									<field name="op11_start_time_type" style="width: 20%%"  attrs="{ 'readonly': [('op11_button_status','=','invisible')]}"/>
+									<field name="op11_start_time_type" style="width: 20%%"  invisible="1"/>
 								</div>
 							</div>
 							<label for="op11_setting_time" string="Setting Time"/>
 							<div>
 								<div class="address_format">
-									<field name="op11_setting_time"  widget="float_time" style="width: 40%%" on_change="onchange_operation11_time(op11_start_time,op11_end_time,op11_setting_time)"  attrs="{'readonly': [('op11_button_status','=','invisible')]}"/>
+									<field name="op11_setting_time"  widget="float_time" style="width: 40%%" attrs="{'readonly': [('op11_button_status','=','invisible')]}"/>
 									<field name="op11_setting_time_type" style="width: 20%%" invisible="1"  attrs="{'readonly': [('op11_button_status','=','invisible')]}"/>
 								</div>
 							</div>
@@ -2070,8 +2070,8 @@
 							<label for="op11_end_time" string="End Time"/>
 							<div>
 								<div class="address_format">
-									<field name="op11_end_time"  widget="float_time" style="width: 40%%"  attrs="{'readonly': [('op11_button_status','=','invisible')]}"/>
-									<field name="op11_end_time_type" style="width: 20%%"  attrs="{'readonly': [('op11_button_status','=','invisible')]}"/>
+									<field name="op11_end_time" on_change="onchange_operation11_time(op11_start_time,op11_end_time)"  widget="float_time" style="width: 40%%"  attrs="{'readonly': [('op11_button_status','=','invisible')]}"/>
+									<field name="op11_end_time_type" style="width: 20%%" invisible="1" />
 								</div>
 							</div>
 							
@@ -2231,7 +2231,7 @@
 			<field name="arch" type="xml">
 				<form string="Operation 12" version="7.0" create="false">
 					<header>
-						<button name="operation12_update" type="object" string="Update" class="oe_highlight" confirm="Are you sure to proceed ?"
+						<button name="operation12_update" type="object" string="Update" class="oe_highlight"
 						attrs="{'invisible': [('op12_button_status','=','invisible')]}"/>
 					</header>
 					<group string="Operation Details">
@@ -2244,13 +2244,13 @@
 							<div>
 								<div class="address_format">
 									<field name="op12_start_time"  widget="float_time" style="width: 40%%"  attrs="{ 'readonly': [('op12_button_status','=','invisible')]}"/>
-									<field name="op12_start_time_type" style="width: 20%%"  attrs="{ 'readonly': [('op12_button_status','=','invisible')]}"/>
+									<field name="op12_start_time_type" style="width: 20%%" invisible="1" />
 								</div>
 							</div>
 							<label for="op12_setting_time" string="Setting Time"/>
 							<div>
 								<div class="address_format">
-									<field name="op12_setting_time"  widget="float_time" style="width: 40%%" on_change="onchange_operation12_time(op12_start_time,op12_end_time,op12_setting_time)"  attrs="{'readonly': [('op12_button_status','=','invisible')]}"/>
+									<field name="op12_setting_time"  widget="float_time" style="width: 40%%" attrs="{'readonly': [('op12_button_status','=','invisible')]}"/>
 									<field name="op12_setting_time_type" style="width: 20%%" invisible="1"  attrs="{'readonly': [('op12_button_status','=','invisible')]}"/>
 								</div>
 							</div>
@@ -2272,8 +2272,8 @@
 							<label for="op12_end_time" string="End Time"/>
 							<div>
 								<div class="address_format">
-									<field name="op12_end_time"  widget="float_time" style="width: 40%%"  attrs="{'readonly': [('op12_button_status','=','invisible')]}"/>
-									<field name="op12_end_time_type" style="width: 20%%"  attrs="{'readonly': [('op12_button_status','=','invisible')]}"/>
+									<field name="op12_end_time" on_change="onchange_operation12_time(op12_start_time,op12_end_time)" widget="float_time" style="width: 40%%"  attrs="{'readonly': [('op12_button_status','=','invisible')]}"/>
+									<field name="op12_end_time_type" style="width: 20%%" invisible="1" />
 								</div>
 							</div>
 							

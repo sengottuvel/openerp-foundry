@@ -10,7 +10,7 @@
 			<field name="arch" type="xml">
 				<form string="Assembly Inward" version="7.0" create="false">
 					<header>
-						<button name="entry_approve" type="object" string="Update" states="waiting" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_approve" type="object" string="Update" states="waiting,re_process" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_reject" type="object" string="Reject" states="waiting" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
 					<group>
@@ -19,6 +19,7 @@
 							<field name="entry_date" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
 							<field name="qap_plan_id" readonly="1"/>
 							<field name="pump_serial_no" required="1" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+							<field name="time_taken" required="1" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
 							<field name="remarks" string="Remarks" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
 						</group>											
 						<group>
@@ -183,7 +184,7 @@
 			<field name="model">kg.assembly.inward</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<tree toolbar="True" string="Assembly Inward Entry Tree">					
+				<tree toolbar="True" string="Assembly Inward Entry Tree" create="false">					
 					<field name="name" invisible="1"/>
 					<field name="entry_date"/>
 					<field name="order_id"/>

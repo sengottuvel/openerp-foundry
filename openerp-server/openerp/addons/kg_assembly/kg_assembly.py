@@ -74,6 +74,7 @@ class kg_assembly_inward(osv.osv):
 		
 		'qap_plan_id': fields.many2one('kg.qap.plan', 'QAP Standard',readonly=True,required=True),
 		'pump_serial_no': fields.char('Pump Serial No.'),
+		'time_taken': fields.float('Time Taken'),
 		
 		'bed_assembly_state': fields.selection([('pending','Pending'),('completed','Completed')],'State', readonly=True),
 		'bed_assembly_date': fields.date('Date'),
@@ -157,6 +158,10 @@ class kg_assembly_inward(osv.osv):
 		entry_rec = self.browse(cr,uid,ids[0])
 		
 		if entry_rec.state in ('waiting','re_process'):
+			
+			if entry_rec.time_taken <= 0:
+				raise osv.except_osv(_('Warning!'),
+							_('Time Taken should be greater than zero!!'))
 		
 			cr.execute(''' select id from ch_assembly_bom_details where state = 're_process' and header_id=%s ''',[ids[0]])
 			bom_re_process = cr.fetchone()
@@ -231,6 +236,10 @@ class kg_assembly_inward(osv.osv):
 		schedule_line_obj = self.pool.get('ch.schedule.details')
 		entry_rec = self.browse(cr,uid,ids[0])
 		self.write(cr,uid,ids,{'state':'re_process'})
+		
+		if entry_rec.time_taken <= 0:
+				raise osv.except_osv(_('Warning!'),
+							_('Time Taken should be greater than zero!!'))
 		for bom_item in entry_rec.line_ids:
 			ass_bom_obj.write(cr,uid,bom_item.id,{'state':'re_process'})
 			
@@ -245,7 +254,9 @@ class kg_assembly_inward(osv.osv):
 				schedule_id =  False
 				schedule_line_id = False
 				schedule_date = False
-				
+			print "schedule_line_id",schedule_line_id
+			print "schedule_id",schedule_id
+			stop
 			#### Updation in QAP Process After rejection of Assembly ###
 			cr.execute(''' update kg_part_qap set db_state = 'completed', db_result = 'reject', hs_state = 'completed',
 				hs_result = 'reject' where assembly_id = %s and order_id = %s and order_line_id = %s ''',[ids[0],entry_rec.order_id.id,entry_rec.order_line_id.id])

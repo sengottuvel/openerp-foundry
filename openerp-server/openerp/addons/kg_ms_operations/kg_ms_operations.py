@@ -88,7 +88,7 @@ class kg_ms_operations(osv.osv):
 		'op1_idle_time_type': fields.selection([('am','AM'),('pm','PM')],'Idle Time Type'),
 		'op1_idle_reason': fields.char('Reason for Idle'),
 		'op1_comp_wgt': fields.float('Component weight'),
-		'op1_process_result': fields.selection([('accept','Accept'),('reject','Reject')],'Process Result'),
+		'op1_process_result': fields.selection([('accept','Accept'),('reject','Reject'),('rework','Rework')],'Process Result'),
 		'op1_cost_incurred': fields.float('Cost Incurred'),
 		'op1_state': fields.selection([('pending','Pending'),('partial','Partial'),('done','Done'),('reject','Reject')],'Status'),
 		'op1_date': fields.datetime('Operation1 Updated Date', readonly=True),
@@ -120,7 +120,7 @@ class kg_ms_operations(osv.osv):
 		'op2_idle_time_type': fields.selection([('am','AM'),('pm','PM')],'Idle Time Type'),
 		'op2_idle_reason': fields.char('Reason for Idle'),
 		'op2_comp_wgt': fields.float('Component weight'),
-		'op2_process_result': fields.selection([('accept','Accept'),('reject','Reject')],'Process Result'),
+		'op2_process_result': fields.selection([('accept','Accept'),('reject','Reject'),('rework','Rework')],'Process Result'),
 		'op2_cost_incurred': fields.float('Cost Incurred'),
 		'op2_state': fields.selection([('pending','Pending'),('partial','Partial'),('done','Done'),('reject','Reject')],'Status'),
 		'op2_date': fields.datetime('Operation1 Updated Date', readonly=True),
@@ -151,7 +151,7 @@ class kg_ms_operations(osv.osv):
 		'op3_idle_time_type': fields.selection([('am','AM'),('pm','PM')],'Idle Time Type'),
 		'op3_idle_reason': fields.char('Reason for Idle'),
 		'op3_comp_wgt': fields.float('Component weight'),
-		'op3_process_result': fields.selection([('accept','Accept'),('reject','Reject')],'Process Result'),
+		'op3_process_result': fields.selection([('accept','Accept'),('reject','Reject'),('rework','Rework')],'Process Result'),
 		'op3_cost_incurred': fields.float('Cost Incurred'),
 		'op3_state': fields.selection([('pending','Pending'),('partial','Partial'),('done','Done'),('reject','Reject')],'Status'),
 		'op3_date': fields.datetime('Operation1 Updated Date', readonly=True),
@@ -182,7 +182,7 @@ class kg_ms_operations(osv.osv):
 		'op4_idle_time_type': fields.selection([('am','AM'),('pm','PM')],'Idle Time Type'),
 		'op4_idle_reason': fields.char('Reason for Idle'),
 		'op4_comp_wgt': fields.float('Component weight'),
-		'op4_process_result': fields.selection([('accept','Accept'),('reject','Reject')],'Process Result'),
+		'op4_process_result': fields.selection([('accept','Accept'),('reject','Reject'),('rework','Rework')],'Process Result'),
 		'op4_cost_incurred': fields.float('Cost Incurred'),
 		'op4_state': fields.selection([('pending','Pending'),('partial','Partial'),('done','Done'),('reject','Reject')],'Status'),
 		'op4_date': fields.datetime('Operation1 Updated Date', readonly=True),
@@ -213,7 +213,7 @@ class kg_ms_operations(osv.osv):
 		'op5_idle_time_type': fields.selection([('am','AM'),('pm','PM')],'Idle Time Type'),
 		'op5_idle_reason': fields.char('Reason for Idle'),
 		'op5_comp_wgt': fields.float('Component weight'),
-		'op5_process_result': fields.selection([('accept','Accept'),('reject','Reject')],'Process Result'),
+		'op5_process_result': fields.selection([('accept','Accept'),('reject','Reject'),('rework','Rework')],'Process Result'),
 		'op5_cost_incurred': fields.float('Cost Incurred'),
 		'op5_state': fields.selection([('pending','Pending'),('partial','Partial'),('done','Done'),('reject','Reject')],'Status'),
 		'op5_date': fields.datetime('Operation1 Updated Date', readonly=True),
@@ -244,7 +244,7 @@ class kg_ms_operations(osv.osv):
 		'op6_idle_time_type': fields.selection([('am','AM'),('pm','PM')],'Idle Time Type'),
 		'op6_idle_reason': fields.char('Reason for Idle'),
 		'op6_comp_wgt': fields.float('Component weight'),
-		'op6_process_result': fields.selection([('accept','Accept'),('reject','Reject')],'Process Result'),
+		'op6_process_result': fields.selection([('accept','Accept'),('reject','Reject'),('rework','Rework')],'Process Result'),
 		'op6_cost_incurred': fields.float('Cost Incurred'),
 		'op6_state': fields.selection([('pending','Pending'),('partial','Partial'),('done','Done'),('reject','Reject')],'Status'),
 		'op6_date': fields.datetime('Operation1 Updated Date', readonly=True),
@@ -275,7 +275,7 @@ class kg_ms_operations(osv.osv):
 		'op7_idle_time_type': fields.selection([('am','AM'),('pm','PM')],'Idle Time Type'),
 		'op7_idle_reason': fields.char('Reason for Idle'),
 		'op7_comp_wgt': fields.float('Component weight'),
-		'op7_process_result': fields.selection([('accept','Accept'),('reject','Reject')],'Process Result'),
+		'op7_process_result': fields.selection([('accept','Accept'),('reject','Reject'),('rework','Rework')],'Process Result'),
 		'op7_cost_incurred': fields.float('Cost Incurred'),
 		'op7_state': fields.selection([('pending','Pending'),('partial','Partial'),('done','Done'),('reject','Reject')],'Status'),
 		'op7_date': fields.datetime('Operation1 Updated Date', readonly=True),
@@ -306,7 +306,7 @@ class kg_ms_operations(osv.osv):
 		'op8_idle_time_type': fields.selection([('am','AM'),('pm','PM')],'Idle Time Type'),
 		'op8_idle_reason': fields.char('Reason for Idle'),
 		'op8_comp_wgt': fields.float('Component weight'),
-		'op8_process_result': fields.selection([('accept','Accept'),('reject','Reject')],'Process Result'),
+		'op8_process_result': fields.selection([('accept','Accept'),('reject','Reject'),('rework','Rework')],'Process Result'),
 		'op8_cost_incurred': fields.float('Cost Incurred'),
 		'op8_state': fields.selection([('pending','Pending'),('partial','Partial'),('done','Done'),('reject','Reject')],'Status'),
 		'op8_date': fields.datetime('Operation1 Updated Date', readonly=True),
@@ -337,7 +337,7 @@ class kg_ms_operations(osv.osv):
 		'op9_idle_time_type': fields.selection([('am','AM'),('pm','PM')],'Idle Time Type'),
 		'op9_idle_reason': fields.char('Reason for Idle'),
 		'op9_comp_wgt': fields.float('Component weight'),
-		'op9_process_result': fields.selection([('accept','Accept'),('reject','Reject')],'Process Result'),
+		'op9_process_result': fields.selection([('accept','Accept'),('reject','Reject'),('rework','Rework')],'Process Result'),
 		'op9_cost_incurred': fields.float('Cost Incurred'),
 		'op9_state': fields.selection([('pending','Pending'),('partial','Partial'),('done','Done'),('reject','Reject')],'Status'),
 		'op9_date': fields.datetime('Operation1 Updated Date', readonly=True),
@@ -368,7 +368,7 @@ class kg_ms_operations(osv.osv):
 		'op10_idle_time_type': fields.selection([('am','AM'),('pm','PM')],'Idle Time Type'),
 		'op10_idle_reason': fields.char('Reason for Idle'),
 		'op10_comp_wgt': fields.float('Component weight'),
-		'op10_process_result': fields.selection([('accept','Accept'),('reject','Reject')],'Process Result'),
+		'op10_process_result': fields.selection([('accept','Accept'),('reject','Reject'),('rework','Rework')],'Process Result'),
 		'op10_cost_incurred': fields.float('Cost Incurred'),
 		'op10_state': fields.selection([('pending','Pending'),('partial','Partial'),('done','Done'),('reject','Reject')],'Status'),
 		'op10_date': fields.datetime('Operation1 Updated Date', readonly=True),
@@ -399,7 +399,7 @@ class kg_ms_operations(osv.osv):
 		'op11_idle_time_type': fields.selection([('am','AM'),('pm','PM')],'Idle Time Type'),
 		'op11_idle_reason': fields.char('Reason for Idle'),
 		'op11_comp_wgt': fields.float('Component weight'),
-		'op11_process_result': fields.selection([('accept','Accept'),('reject','Reject')],'Process Result'),
+		'op11_process_result': fields.selection([('accept','Accept'),('reject','Reject'),('rework','Rework')],'Process Result'),
 		'op11_cost_incurred': fields.float('Cost Incurred'),
 		'op11_state': fields.selection([('pending','Pending'),('partial','Partial'),('done','Done'),('reject','Reject')],'Status'),
 		'op11_date': fields.datetime('Operation1 Updated Date', readonly=True),
@@ -430,7 +430,7 @@ class kg_ms_operations(osv.osv):
 		'op12_idle_time_type': fields.selection([('am','AM'),('pm','PM')],'Idle Time Type'),
 		'op12_idle_reason': fields.char('Reason for Idle'),
 		'op12_comp_wgt': fields.float('Component weight'),
-		'op12_process_result': fields.selection([('accept','Accept'),('reject','Reject')],'Process Result'),
+		'op12_process_result': fields.selection([('accept','Accept'),('reject','Reject'),('rework','Rework')],'Process Result'),
 		'op12_cost_incurred': fields.float('Cost Incurred'),
 		'op12_state': fields.selection([('pending','Pending'),('partial','Partial'),('done','Done'),('reject','Reject')],'Status'),
 		'op12_date': fields.datetime('Operation1 Updated Date', readonly=True),
@@ -470,61 +470,121 @@ class kg_ms_operations(osv.osv):
 		'op1_button_status': 'visible',
 		'op1_start_date': lambda * a: time.strftime('%Y-%m-%d'),
 		'op1_end_date': lambda * a: time.strftime('%Y-%m-%d'),
+		'op1_start_time_type': 'am',
+		'op1_end_time_type': 'am',
+		'op1_setting_time_type': 'am',
+		'op1_idle_time_type': 'am',
+		'op1_process_result': 'accept',
 		### Operation 2 ###
 		'op2_sc_status':'inhouse',
 		'op2_button_status': 'visible',
 		'op2_start_date': lambda * a: time.strftime('%Y-%m-%d'),
 		'op2_end_date': lambda * a: time.strftime('%Y-%m-%d'),
+		'op2_start_time_type': 'am',
+		'op2_end_time_type': 'am',
+		'op2_setting_time_type': 'am',
+		'op2_idle_time_type': 'am',
+		'op2_process_result': 'accept',
 		### Operation 3 ###
 		'op3_sc_status':'inhouse',
 		'op3_button_status': 'visible',
 		'op3_start_date': lambda * a: time.strftime('%Y-%m-%d'),
 		'op3_end_date': lambda * a: time.strftime('%Y-%m-%d'),
+		'op3_start_time_type': 'am',
+		'op3_end_time_type': 'am',
+		'op3_setting_time_type': 'am',
+		'op3_idle_time_type': 'am',
+		'op3_process_result': 'accept',
 		### Operation 4 ###
 		'op4_sc_status':'inhouse',
 		'op4_button_status': 'visible',
 		'op4_start_date': lambda * a: time.strftime('%Y-%m-%d'),
 		'op4_end_date': lambda * a: time.strftime('%Y-%m-%d'),
+		'op4_start_time_type': 'am',
+		'op4_end_time_type': 'am',
+		'op4_setting_time_type': 'am',
+		'op4_idle_time_type': 'am',
+		'op4_process_result': 'accept',
 		### Operation 5 ###
 		'op5_sc_status':'inhouse',
 		'op5_button_status': 'visible',
 		'op5_start_date': lambda * a: time.strftime('%Y-%m-%d'),
 		'op5_end_date': lambda * a: time.strftime('%Y-%m-%d'),
+		'op5_start_time_type': 'am',
+		'op5_end_time_type': 'am',
+		'op5_setting_time_type': 'am',
+		'op5_idle_time_type': 'am',
+		'op5_process_result': 'accept',
 		### Operation 6 ###
 		'op6_sc_status':'inhouse',
 		'op6_button_status': 'visible',
 		'op6_start_date': lambda * a: time.strftime('%Y-%m-%d'),
 		'op6_end_date': lambda * a: time.strftime('%Y-%m-%d'),
+		'op6_start_time_type': 'am',
+		'op6_end_time_type': 'am',
+		'op6_setting_time_type': 'am',
+		'op6_idle_time_type': 'am',
+		'op6_process_result': 'accept',
 		### Operation 7 ###
 		'op7_sc_status':'inhouse',
 		'op7_button_status': 'visible',
 		'op7_start_date': lambda * a: time.strftime('%Y-%m-%d'),
 		'op7_end_date': lambda * a: time.strftime('%Y-%m-%d'),
+		'op7_start_time_type': 'am',
+		'op7_end_time_type': 'am',
+		'op7_setting_time_type': 'am',
+		'op7_idle_time_type': 'am',
+		'op7_process_result': 'accept',
 		### Operation 8 ###
 		'op8_sc_status':'inhouse',
 		'op8_button_status': 'visible',
 		'op8_start_date': lambda * a: time.strftime('%Y-%m-%d'),
 		'op8_end_date': lambda * a: time.strftime('%Y-%m-%d'),
+		'op8_start_time_type': 'am',
+		'op8_end_time_type': 'am',
+		'op8_setting_time_type': 'am',
+		'op8_idle_time_type': 'am',
+		'op8_process_result': 'accept',
 		### Operation 9 ###
 		'op9_sc_status':'inhouse',
 		'op9_button_status': 'visible',
 		'op9_start_date': lambda * a: time.strftime('%Y-%m-%d'),
 		'op9_end_date': lambda * a: time.strftime('%Y-%m-%d'),
+		'op9_start_time_type': 'am',
+		'op9_end_time_type': 'am',
+		'op9_setting_time_type': 'am',
+		'op9_idle_time_type': 'am',
+		'op9_process_result': 'accept',
 		### Operation 10 ###
 		'op10_sc_status':'inhouse',
 		'op10_button_status': 'visible',
 		'op10_start_date': lambda * a: time.strftime('%Y-%m-%d'),
 		'op10_end_date': lambda * a: time.strftime('%Y-%m-%d'),
+		'op10_start_time_type': 'am',
+		'op10_end_time_type': 'am',
+		'op10_setting_time_type': 'am',
+		'op10_idle_time_type': 'am',
+		'op10_process_result': 'accept',
 		### Operation 11 ###
 		'op11_sc_status':'inhouse',
 		'op11_button_status': 'visible',
 		'op11_start_date': lambda * a: time.strftime('%Y-%m-%d'),
 		'op11_end_date': lambda * a: time.strftime('%Y-%m-%d'),
+		'op11_start_time_type': 'am',
+		'op11_end_time_type': 'am',
+		'op11_setting_time_type': 'am',
+		'op11_idle_time_type': 'am',
+		'op11_process_result': 'accept',
 		### Operation 12 ###
 		'op12_sc_status':'inhouse',
 		'op12_button_status': 'visible',
 		'op12_start_date': lambda * a: time.strftime('%Y-%m-%d'),
 		'op12_end_date': lambda * a: time.strftime('%Y-%m-%d'),
+		'op12_start_time_type': 'am',
+		'op12_end_time_type': 'am',
+		'op12_setting_time_type': 'am',
+		'op12_idle_time_type': 'am',
+		'op12_process_result': 'accept',
 		
 		'state': 'active',
 		
@@ -538,11 +598,11 @@ class kg_ms_operations(osv.osv):
 			value = {'op1_sc_status': 'sc'}
 		return {'value': value}
 		
-	def onchange_operation1_time(self, cr, uid, ids,op1_start_time,op1_end_time,op1_setting_time, context=None):
+	def onchange_operation1_time(self, cr, uid, ids,op1_start_time,op1_end_time, context=None):
 		
 		value = {'op1_total_time': 0.00}
 		total_time = 0.00
-		total_time = ((op1_end_time - op1_start_time)+ op1_setting_time)
+		total_time = op1_end_time - op1_start_time
 		value = {'op1_total_time': total_time}
 		return {'value': value}
 		
@@ -582,7 +642,15 @@ class kg_ms_operations(osv.osv):
 					if start_date > today or end_date > today:
 						raise osv.except_osv(_('Warning!'),
 								_('Start and End date should be less than or equal to current date !!'))
-					
+				
+					if entry_rec.op1_start_time == entry_rec.op1_end_time:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End time should not be equal !!'))
+								
+					if entry_rec.op1_start_time > 24 or entry_rec.op1_end_time > 24:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End time should not exceed 24 hrs !!'))
+								
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
 								_('System not allow to save negative. Check the actual value !!'))
@@ -797,7 +865,10 @@ class kg_ms_operations(osv.osv):
 					if inhouse_cost[0] >= 0:
 						cost_incurred = entry_rec.op1_total_time * inhouse_cost[0]
 				
-				self.write(cr,uid, ids,{'op1_cost_incurred':cost_incurred,'op1_state': 'done','op1_button_status':'invisible'})
+				self.write(cr,uid, ids,{'op1_cost_incurred':cost_incurred})
+				if entry_rec.op1_process_result != 'rework':
+					self.write(cr,uid, ids,{'op1_state': 'done','op1_button_status':'invisible'})
+					
 				### Operation Completion ###
 				if last_operation_id:
 					print "pending_operation_id",pending_operation_id
@@ -1032,7 +1103,10 @@ class kg_ms_operations(osv.osv):
 								#~ 'cutting_qty':ms_raw_rec.temp_qty,
 								'ms_bot_id':entry_rec.ms_id.ms_id.id,
 								'fns_item_name':entry_rec.item_name,
-								'position_id': entry_rec.position_id.id
+								'position_id': entry_rec.position_id.id,
+								'moc_id': entry_rec.moc_id.id,
+								'length': indent_item.length,
+								'breadth': indent_item.breadth
 								}
 								
 								indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
@@ -1202,10 +1276,10 @@ class kg_ms_operations(osv.osv):
 			value = {'op2_sc_status': 'sc'}
 		return {'value': value}
 		
-	def onchange_operation2_time(self, cr, uid, ids,op2_start_time,op2_end_time,op2_setting_time, context=None):
+	def onchange_operation2_time(self, cr, uid, ids,op2_start_time,op2_end_time, context=None):
 		value = {'op2_total_time': 0.00}
 		total_time = 0.00
-		total_time = ((op2_end_time - op2_start_time)+ op2_setting_time)
+		total_time = op2_end_time - op2_start_time
 		value = {'op2_total_time': total_time}
 		return {'value': value}
 		
@@ -1247,6 +1321,14 @@ class kg_ms_operations(osv.osv):
 					if start_date > today or end_date > today:
 						raise osv.except_osv(_('Warning!'),
 								_('Start and End date should be less than or equal to current date !!'))
+								
+					if entry_rec.op2_start_time == entry_rec.op2_end_time:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End time should not be equal !!'))
+								
+					if entry_rec.op2_start_time > 24 or entry_rec.op2_end_time > 24:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End time should not exceed 24 hrs !!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -1462,7 +1544,9 @@ class kg_ms_operations(osv.osv):
 					if inhouse_cost[0] >= 0:
 						cost_incurred = entry_rec.op2_total_time * inhouse_cost[0]
 				
-				self.write(cr,uid, ids,{'op2_cost_incurred':cost_incurred,'op2_state': 'done','op2_button_status':'invisible'})
+				self.write(cr,uid, ids,{'op2_cost_incurred':cost_incurred})
+				if entry_rec.op2_process_result != 'rework':
+					self.write(cr,uid, ids,{'op2_state': 'done','op2_button_status':'invisible'})
 				### Operation Completion ###
 				if last_operation_id:
 					if pending_operation_id == None and last_operation_id[0] > 0:
@@ -1860,10 +1944,10 @@ class kg_ms_operations(osv.osv):
 			value = {'op3_sc_status': 'sc'}
 		return {'value': value}
 		
-	def onchange_operation3_time(self, cr, uid, ids,op3_start_time,op3_end_time,op3_setting_time, context=None):
+	def onchange_operation3_time(self, cr, uid, ids,op3_start_time,op3_end_time, context=None):
 		value = {'op3_total_time': 0.00}
 		total_time = 0.00
-		total_time = ((op3_end_time - op3_start_time)+ op3_setting_time)
+		total_time = op3_end_time - op3_start_time
 		value = {'op3_total_time': total_time}
 		return {'value': value}
 		
@@ -1903,6 +1987,14 @@ class kg_ms_operations(osv.osv):
 					if start_date > today or end_date > today:
 						raise osv.except_osv(_('Warning!'),
 								_('Start and End date should be less than or equal to current date!!'))
+								
+					if entry_rec.op3_start_time == entry_rec.op3_end_time:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End time should not be equal !!'))
+								
+					if entry_rec.op3_start_time > 24 or entry_rec.op3_end_time > 24:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End time should not exceed 24 hrs !!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -2116,7 +2208,9 @@ class kg_ms_operations(osv.osv):
 					if inhouse_cost[0] >= 0:
 						cost_incurred = entry_rec.op3_total_time * inhouse_cost[0]
 				
-				self.write(cr,uid, ids,{'op3_cost_incurred':cost_incurred,'op3_state': 'done','op3_button_status':'invisible'})
+				self.write(cr,uid, ids,{'op3_cost_incurred':cost_incurred})
+				if entry_rec.op3_process_result != 'rework':
+					self.write(cr,uid, ids,{'op3_state': 'done','op3_button_status':'invisible'})
 				### Operation Completion ###
 				if last_operation_id:
 					if pending_operation_id == None and last_operation_id[0] > 0:
@@ -2516,10 +2610,10 @@ class kg_ms_operations(osv.osv):
 			value = {'op4_sc_status': 'sc'}
 		return {'value': value}
 		
-	def onchange_operation4_time(self, cr, uid, ids,op4_start_time,op4_end_time,op4_setting_time, context=None):
+	def onchange_operation4_time(self, cr, uid, ids,op4_start_time,op4_end_time, context=None):
 		value = {'op4_total_time': 0.00}
 		total_time = 0.00
-		total_time = ((op4_end_time - op4_start_time)+ op4_setting_time)
+		total_time = op4_end_time - op4_start_time
 		value = {'op4_total_time': total_time}
 		return {'value': value}
 		
@@ -2559,6 +2653,14 @@ class kg_ms_operations(osv.osv):
 					if start_date > today or end_date > today:
 						raise osv.except_osv(_('Warning!'),
 								_('Start and End date should be less than or equal to current date!!'))
+								
+					if entry_rec.op4_start_time == entry_rec.op4_end_time:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End time should not be equal !!'))
+								
+					if entry_rec.op4_start_time > 24 or entry_rec.op4_end_time > 24:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End time should not exceed 24 hrs !!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -2772,7 +2874,9 @@ class kg_ms_operations(osv.osv):
 					if inhouse_cost[0] >= 0:
 						cost_incurred = entry_rec.op4_total_time * inhouse_cost[0]
 				
-				self.write(cr,uid, ids,{'op4_cost_incurred':cost_incurred,'op4_state': 'done','op4_button_status':'invisible'})
+				self.write(cr,uid, ids,{'op4_cost_incurred':cost_incurred})
+				if entry_rec.op4_process_result != 'rework':
+					self.write(cr,uid, ids,{'op4_state': 'done','op4_button_status':'invisible'})
 				### Operation Completion ###
 				if last_operation_id:
 					if pending_operation_id == None and last_operation_id[0] > 0:
@@ -3172,10 +3276,10 @@ class kg_ms_operations(osv.osv):
 			value = {'op5_sc_status': 'sc'}
 		return {'value': value}
 		
-	def onchange_operation5_time(self, cr, uid, ids,op5_start_time,op5_end_time,op5_setting_time, context=None):
+	def onchange_operation5_time(self, cr, uid, ids,op5_start_time,op5_end_time, context=None):
 		value = {'op5_total_time': 0.00}
 		total_time = 0.00
-		total_time = ((op5_end_time - op5_start_time)+ op5_setting_time)
+		total_time = op5_end_time - op5_start_time
 		value = {'op5_total_time': total_time}
 		return {'value': value}
 		
@@ -3215,6 +3319,14 @@ class kg_ms_operations(osv.osv):
 					if start_date > today or end_date > today:
 						raise osv.except_osv(_('Warning!'),
 								_('Start and End date should be less than or equal to current date!!'))
+								
+					if entry_rec.op5_start_time == entry_rec.op5_end_time:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End time should not be equal !!'))
+								
+					if entry_rec.op5_start_time > 24 or entry_rec.op5_end_time > 24:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End time should not exceed 24 hrs !!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -3428,7 +3540,9 @@ class kg_ms_operations(osv.osv):
 					if inhouse_cost[0] >= 0:
 						cost_incurred = entry_rec.op5_total_time * inhouse_cost[0]
 				
-				self.write(cr,uid, ids,{'op5_cost_incurred':cost_incurred,'op5_state': 'done','op5_button_status':'invisible'})
+				self.write(cr,uid, ids,{'op5_cost_incurred':cost_incurred})
+				if entry_rec.op5_process_result != 'rework':
+					self.write(cr,uid, ids,{'op5_state': 'done','op5_button_status':'invisible'})
 				### Operation Completion ###
 				if last_operation_id:
 					if pending_operation_id == None and last_operation_id[0] > 0:
@@ -3827,10 +3941,10 @@ class kg_ms_operations(osv.osv):
 			value = {'op6_sc_status': 'sc'}
 		return {'value': value}
 		
-	def onchange_operation6_time(self, cr, uid, ids,op6_start_time,op6_end_time,op6_setting_time, context=None):
+	def onchange_operation6_time(self, cr, uid, ids,op6_start_time,op6_end_time, context=None):
 		value = {'op6_total_time': 0.00}
 		total_time = 0.00
-		total_time = ((op6_end_time - op6_start_time)+ op6_setting_time)
+		total_time = op6_end_time - op6_start_time
 		value = {'op6_total_time': total_time}
 		return {'value': value}
 		
@@ -3870,6 +3984,14 @@ class kg_ms_operations(osv.osv):
 					if start_date > today or end_date > today:
 						raise osv.except_osv(_('Warning!'),
 								_('Start and End date should be less than or equal to current date!!'))
+								
+					if entry_rec.op6_start_time == entry_rec.op6_end_time:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End time should not be equal !!'))
+								
+					if entry_rec.op6_start_time > 24 or entry_rec.op6_end_time > 24:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End time should not exceed 24 hrs !!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -4083,7 +4205,9 @@ class kg_ms_operations(osv.osv):
 					if inhouse_cost[0] >= 0:
 						cost_incurred = entry_rec.op6_total_time * inhouse_cost[0]
 				
-				self.write(cr,uid, ids,{'op6_cost_incurred':cost_incurred,'op6_state': 'done','op6_button_status':'invisible'})
+				self.write(cr,uid, ids,{'op6_cost_incurred':cost_incurred})
+				if entry_rec.op6_process_result != 'rework':
+					self.write(cr,uid, ids,{'op6_state': 'done','op6_button_status':'invisible'})
 				### Operation Completion ###
 				if last_operation_id:
 					if pending_operation_id == None and last_operation_id[0] > 0:
@@ -4482,10 +4606,10 @@ class kg_ms_operations(osv.osv):
 			value = {'op7_sc_status': 'sc'}
 		return {'value': value}
 		
-	def onchange_operation7_time(self, cr, uid, ids,op7_start_time,op7_end_time,op7_setting_time, context=None):
+	def onchange_operation7_time(self, cr, uid, ids,op7_start_time,op7_end_time, context=None):
 		value = {'op7_total_time': 0.00}
 		total_time = 0.00
-		total_time = ((op7_end_time - op7_start_time)+ op7_setting_time)
+		total_time = op7_end_time - op7_start_time
 		value = {'op7_total_time': total_time}
 		return {'value': value}
 		
@@ -4525,6 +4649,14 @@ class kg_ms_operations(osv.osv):
 					if start_date > today or end_date > today:
 						raise osv.except_osv(_('Warning!'),
 								_('Start and End date should be less than or equal to current date!!'))
+								
+					if entry_rec.op7_start_time == entry_rec.op7_end_time:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End time should not be equal !!'))
+								
+					if entry_rec.op7_start_time > 24 or entry_rec.op7_end_time > 24:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End time should not exceed 24 hrs !!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -4738,7 +4870,9 @@ class kg_ms_operations(osv.osv):
 					if inhouse_cost[0] >= 0:
 						cost_incurred = entry_rec.op7_total_time * inhouse_cost[0]
 				
-				self.write(cr,uid, ids,{'op7_cost_incurred':cost_incurred,'op7_state': 'done','op7_button_status':'invisible'})
+				self.write(cr,uid, ids,{'op7_cost_incurred':cost_incurred})
+				if entry_rec.op7_process_result != 'rework':
+					self.write(cr,uid, ids,{'op7_state': 'done','op7_button_status':'invisible'})
 				### Operation Completion ###
 				if last_operation_id:
 					if pending_operation_id == None and last_operation_id[0] > 0:
@@ -5137,10 +5271,10 @@ class kg_ms_operations(osv.osv):
 			value = {'op8_sc_status': 'sc'}
 		return {'value': value}
 		
-	def onchange_operation8_time(self, cr, uid, ids,op8_start_time,op8_end_time,op8_setting_time, context=None):
+	def onchange_operation8_time(self, cr, uid, ids,op8_start_time,op8_end_time, context=None):
 		value = {'op8_total_time': 0.00}
 		total_time = 0.00
-		total_time = ((op8_end_time - op8_start_time)+ op8_setting_time)
+		total_time = op8_end_time - op8_start_time
 		value = {'op8_total_time': total_time}
 		return {'value': value}
 		
@@ -5180,6 +5314,14 @@ class kg_ms_operations(osv.osv):
 					if start_date > today or end_date > today:
 						raise osv.except_osv(_('Warning!'),
 								_('Start and End date should be less than or equal to current date!!'))
+								
+					if entry_rec.op8_start_time == entry_rec.op8_end_time:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End time should not be equal !!'))
+								
+					if entry_rec.op8_start_time > 24 or entry_rec.op8_end_time > 24:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End time should not exceed 24 hrs !!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -5393,7 +5535,9 @@ class kg_ms_operations(osv.osv):
 					if inhouse_cost[0] >= 0:
 						cost_incurred = entry_rec.op8_total_time * inhouse_cost[0]
 				
-				self.write(cr,uid, ids,{'op8_cost_incurred':cost_incurred,'op8_state': 'done','op8_button_status':'invisible'})
+				self.write(cr,uid, ids,{'op8_cost_incurred':cost_incurred})
+				if entry_rec.op8_process_result != 'rework':
+					self.write(cr,uid, ids,{'op8_state': 'done','op8_button_status':'invisible'})
 				### Operation Completion ###
 				if last_operation_id:
 					if pending_operation_id == None and last_operation_id[0] > 0:
@@ -5792,10 +5936,10 @@ class kg_ms_operations(osv.osv):
 			value = {'op9_sc_status': 'sc'}
 		return {'value': value}
 		
-	def onchange_operation9_time(self, cr, uid, ids,op9_start_time,op9_end_time,op9_setting_time, context=None):
+	def onchange_operation9_time(self, cr, uid, ids,op9_start_time,op9_end_time, context=None):
 		value = {'op9_total_time': 0.00}
 		total_time = 0.00
-		total_time = ((op9_end_time - op9_start_time)+ op9_setting_time)
+		total_time = op9_end_time - op9_start_time
 		value = {'op9_total_time': total_time}
 		return {'value': value}
 		
@@ -5835,6 +5979,14 @@ class kg_ms_operations(osv.osv):
 					if start_date > today or end_date > today:
 						raise osv.except_osv(_('Warning!'),
 								_('Start and End date should be less than or equal to current date!!'))
+								
+					if entry_rec.op9_start_time == entry_rec.op9_end_time:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End time should not be equal !!'))
+								
+					if entry_rec.op9_start_time > 24 or entry_rec.op9_end_time > 24:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End time should not exceed 24 hrs !!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -6048,7 +6200,9 @@ class kg_ms_operations(osv.osv):
 					if inhouse_cost[0] >= 0:
 						cost_incurred = entry_rec.op9_total_time * inhouse_cost[0]
 				
-				self.write(cr,uid, ids,{'op9_cost_incurred':cost_incurred,'op9_state': 'done','op9_button_status':'invisible'})
+				self.write(cr,uid, ids,{'op9_cost_incurred':cost_incurred})
+				if entry_rec.op9_process_result != 'rework':
+					self.write(cr,uid, ids,{'op9_state': 'done','op9_button_status':'invisible'})
 				### Operation Completion ###
 				if last_operation_id:
 					if pending_operation_id == None and last_operation_id[0] > 0:
@@ -6447,10 +6601,10 @@ class kg_ms_operations(osv.osv):
 			value = {'op10_sc_status': 'sc'}
 		return {'value': value}
 		
-	def onchange_operation10_time(self, cr, uid, ids,op10_start_time,op10_end_time,op10_setting_time, context=None):
+	def onchange_operation10_time(self, cr, uid, ids,op10_start_time,op10_end_time, context=None):
 		value = {'op10_total_time': 0.00}
 		total_time = 0.00
-		total_time = ((op10_end_time - op10_start_time)+ op10_setting_time)
+		total_time = op10_end_time - op10_start_time
 		value = {'op10_total_time': total_time}
 		return {'value': value}
 		
@@ -6490,6 +6644,14 @@ class kg_ms_operations(osv.osv):
 					if start_date > today or end_date > today:
 						raise osv.except_osv(_('Warning!'),
 								_('Start and End date should be less than or equal to current date!!'))
+								
+					if entry_rec.op10_start_time == entry_rec.op10_end_time:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End time should not be equal !!'))
+								
+					if entry_rec.op10_start_time > 24 or entry_rec.op10_end_time > 24:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End time should not exceed 24 hrs !!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -6703,7 +6865,9 @@ class kg_ms_operations(osv.osv):
 					if inhouse_cost[0] >= 0:
 						cost_incurred = entry_rec.op10_total_time * inhouse_cost[0]
 				
-				self.write(cr,uid, ids,{'op10_cost_incurred':cost_incurred,'op10_state': 'done','op10_button_status':'invisible'})
+				self.write(cr,uid, ids,{'op10_cost_incurred':cost_incurred})
+				if entry_rec.op10_process_result != 'rework':
+					self.write(cr,uid, ids,{'op10_state': 'done','op10_button_status':'invisible'})
 				### Operation Completion ###
 				if last_operation_id:
 					if pending_operation_id == None and last_operation_id[0] > 0:
@@ -7102,10 +7266,10 @@ class kg_ms_operations(osv.osv):
 			value = {'op11_sc_status': 'sc'}
 		return {'value': value}
 		
-	def onchange_operation11_time(self, cr, uid, ids,op11_start_time,op11_end_time,op11_setting_time, context=None):
+	def onchange_operation11_time(self, cr, uid, ids,op11_start_time,op11_end_time, context=None):
 		value = {'op11_total_time': 0.00}
 		total_time = 0.00
-		total_time = ((op11_end_time - op11_start_time)+ op11_setting_time)
+		total_time = op11_end_time - op11_start_time
 		value = {'op11_total_time': total_time}
 		return {'value': value}
 		
@@ -7145,6 +7309,14 @@ class kg_ms_operations(osv.osv):
 					if start_date > today or end_date > today:
 						raise osv.except_osv(_('Warning!'),
 								_('Start and End date should be less than or equal to current date!!'))
+								
+					if entry_rec.op11_start_time == entry_rec.op11_end_time:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End time should not be equal !!'))
+								
+					if entry_rec.op11_start_time > 24 or entry_rec.op11_end_time > 24:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End time should not exceed 24 hrs !!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -7358,7 +7530,9 @@ class kg_ms_operations(osv.osv):
 					if inhouse_cost[0] >= 0:
 						cost_incurred = entry_rec.op11_total_time * inhouse_cost[0]
 				
-				self.write(cr,uid, ids,{'op11_cost_incurred':cost_incurred,'op11_state': 'done','op11_button_status':'invisible'})
+				self.write(cr,uid, ids,{'op11_cost_incurred':cost_incurred})
+				if entry_rec.op11_process_result != 'rework':
+					self.write(cr,uid, ids,{'op11_state': 'done','op11_button_status':'invisible'})
 				### Operation Completion ###
 				if last_operation_id:
 					if pending_operation_id == None and last_operation_id[0] > 0:
@@ -7757,10 +7931,10 @@ class kg_ms_operations(osv.osv):
 			value = {'op12_sc_status': 'sc'}
 		return {'value': value}
 		
-	def onchange_operation12_time(self, cr, uid, ids,op12_start_time,op12_end_time,op12_setting_time, context=None):
+	def onchange_operation12_time(self, cr, uid, ids,op12_start_time,op12_end_time, context=None):
 		value = {'op12_total_time': 0.00}
 		total_time = 0.00
-		total_time = ((op12_end_time - op12_start_time)+ op12_setting_time)
+		total_time = op12_end_time - op12_start_time
 		value = {'op12_total_time': total_time}
 		return {'value': value}
 		
@@ -7800,6 +7974,14 @@ class kg_ms_operations(osv.osv):
 					if start_date > today or end_date > today:
 						raise osv.except_osv(_('Warning!'),
 								_('Start and End date should be less than or equal to current date!!'))
+								
+					if entry_rec.op12_start_time == entry_rec.op12_end_time:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End time should not be equal !!'))
+								
+					if entry_rec.op12_start_time > 24 or entry_rec.op12_end_time > 24:
+						raise osv.except_osv(_('Warning!'),
+								_('Start and End time should not exceed 24 hrs !!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -8013,7 +8195,9 @@ class kg_ms_operations(osv.osv):
 					if inhouse_cost[0] >= 0:
 						cost_incurred = entry_rec.op12_total_time * inhouse_cost[0]
 				
-				self.write(cr,uid, ids,{'op12_cost_incurred':cost_incurred,'op12_state': 'done','op12_button_status':'invisible'})
+				self.write(cr,uid, ids,{'op12_cost_incurred':cost_incurred})
+				if entry_rec.op12_process_result != 'rework':
+					self.write(cr,uid, ids,{'op12_state': 'done','op12_button_status':'invisible'})
 				### Operation Completion ###
 				if last_operation_id:
 					if pending_operation_id == None and last_operation_id[0] > 0:
