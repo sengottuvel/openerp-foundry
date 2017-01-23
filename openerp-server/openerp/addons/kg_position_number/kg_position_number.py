@@ -448,7 +448,7 @@ class ch_kg_position_number(osv.osv):
 		
 		'header_id':fields.many2one('kg.position.number', 'Position No', required=True, ondelete='cascade'),  
 		'operation_id': fields.many2one('kg.operation.master','Operation', required=True,domain="[('state','not in',('reject','cancel'))]"), 	
-		'name': fields.related('operation_id','name', type='char', string='Operation Name', store=True, readonly=True),	
+		'name': fields.char('Operation Name'),	
 		'is_last_operation': fields.boolean('Is Last Operation'), 
 		'time_consumption':fields.float('Time Consumption(Hrs)'),
 		'in_house_cost': fields.float('In-house Cost/hr'),
@@ -466,6 +466,19 @@ class ch_kg_position_number(osv.osv):
 		total_cost = 0.00
 		total_cost = time_consumption * in_house_cost
 		value = {'total_cost': total_cost}
+		return {'value': value}
+		
+	def onchange_name(self, cr, uid, ids, operation_id,stage_id, context=None):
+		value = {'name': ''}
+		name = ''
+		if operation_id and stage_id:
+			operation_rec = self.pool.get('kg.operation.master').browse(cr,uid,operation_id)
+			stage_rec = self.pool.get('kg.stage.master').browse(cr,uid,stage_id)
+			name = operation_rec.name + '-' + stage_rec.name
+			print"name....................",name
+			print"operation_rec.name....................",operation_rec.name
+		value = {'name': name}
+		print"valuevalue....................",value
 		return {'value': value}
 		
 ch_kg_position_number()

@@ -383,7 +383,7 @@
 									<tree string = "Work Order Operation Items" editable="bottom">
 										<field name="operation_id" on_change="onchange_operation_rate(operation_id,position_id,moc_id)"/>
 										<field name="stage_id" readonly="1"/>
-										<field name="op_rate"/>																				
+										<field name="op_rate" widget="char"/>																				
 										<field name="position_id" invisible="1"/>										
 										<field name="moc_id" invisible="1"/>										
 										<field name="remarks" widget="char"/>										
@@ -807,7 +807,7 @@
 									<field name="moc_id" readonly="1"/>
 									<field name="qty" required="1"/>
 									<field name="operation_id" widget="many2many_tags" readonly="1"/>											
-									<field name="com_operation_id" readonly="1" widget="many2many_tags"/>											
+									<field name="com_operation_id" widget="many2many_tags"/>											
 									<field name="each_weight" readonly="1" />
 									<field name="com_weight" required="1" on_change="onchange_com_weight(com_weight,qty)"/>
 									<field name="totel_weight" readonly="1"/>										
@@ -949,23 +949,13 @@
 			<field name="name">Subcontract Inward</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.subcontract.inward</field>
-			<field name="view_type">form</field>
+			<field name="view_type">form</field>			
 			<field name="context">{}</field>
+			<field name="view_id" ref="t_form_v_sc_inward"/>
 			<field name="search_view_id" ref="t_search_v_sc_inward"/>
 		</record>
 		
-		 <record model="ir.actions.act_window.view" id="tma_sc_inward_tree_view">
-            <field name="sequence" eval="1"/>
-            <field name="view_mode">tree</field>
-            <field name="view_id" ref="t_tree_v_sc_inward"/>
-            <field name="act_window_id" ref="tma_sc_inward"/>
-        </record>
-        <record model="ir.actions.act_window.view" id="tma_sc_inward_form_view">
-            <field name="sequence" eval="2"/>
-            <field name="view_mode">form</field>
-            <field name="view_id" ref="t_form_v_sc_inward"/>
-            <field name="act_window_id" ref="tma_sc_inward"/>
-        </record>
+		 
 		
 	<!-- Menu Action End-->
 

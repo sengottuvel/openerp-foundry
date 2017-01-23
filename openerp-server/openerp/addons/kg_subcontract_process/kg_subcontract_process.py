@@ -556,8 +556,6 @@ class ch_subcontract_wo_line(osv.osv):
 		return {'value': {'rate': sc_cost,'amount':amount}}
 ch_subcontract_wo_line()
 
-
-
 class ch_wo_operation_details(osv.osv):
 	
 	_name = "ch.wo.operation.details"
@@ -644,7 +642,7 @@ class kg_subcontract_dc(osv.osv):
 		'to_division_id': fields.many2one('kg.division.master','To Division'),
 		'transfer_type': fields.selection([('internal','Internal'),('sub_contractor','Sub Contractor')],'Type'),
 		'active': fields.boolean('Active'),
-		'contractor_id': fields.many2one('res.partner','Subcontractor' , domain="[('contractor','=','t')]"),	
+		'contractor_id': fields.many2one('res.partner','Subcontractor',domain="[('contractor','=','t')]"),	
 		'phone': fields.char('Phone',size=64),
 		'sub_wo_no': fields.char('Sub WO No.'),
 		'contact_person': fields.char('Contact Person', size=128),		
@@ -1224,73 +1222,73 @@ class kg_subcontract_inward(osv.osv):
 							position_id = self.pool.get('kg.position.number').browse(cr,uid,ele['position_id'])
 							for pos_line_item in position_id.line_ids:
 								
-								if pos_line_item.operation_id.name == 'Operation 1':
+								if pos_line_item.operation_id.name == '10':
 									op1_status = 'pending'
 									op1_id = pos_line_item.operation_id.id
 									op1_stage_id = pos_line_item.stage_id.id
 									op1_clamping_area = pos_line_item.clamping_area
 									
-								if pos_line_item.operation_id.name == 'Operation 2':
+								if pos_line_item.operation_id.name == '20':
 									op2_status = 'pending'
 									op2_id = pos_line_item.operation_id.id
 									op2_stage_id = pos_line_item.stage_id.id
 									op2_clamping_area = pos_line_item.clamping_area
 									
-								if pos_line_item.operation_id.name == 'Operation 3':
+								if pos_line_item.operation_id.name == '30':
 									op3_status = 'pending'
 									op3_id = pos_line_item.operation_id.id
 									op3_stage_id = pos_line_item.stage_id.id
 									op3_clamping_area = pos_line_item.clamping_area
 									
-								if pos_line_item.operation_id.name == 'Operation 4':
+								if pos_line_item.operation_id.name == '40':
 									op4_status = 'pending'
 									op4_id = pos_line_item.operation_id.id
 									op4_stage_id = pos_line_item.stage_id.id
 									op4_clamping_area = pos_line_item.clamping_area
 									
-								if pos_line_item.operation_id.name == 'Operation 5':
+								if pos_line_item.operation_id.name == '50':
 									op5_status = 'pending'
 									op5_id = pos_line_item.operation_id.id
 									op5_stage_id = pos_line_item.stage_id.id
 									op5_clamping_area = pos_line_item.clamping_area
 									
-								if pos_line_item.operation_id.name == 'Operation 6':
+								if pos_line_item.operation_id.name == '60':
 									op6_status = 'pending'
 									op6_id = pos_line_item.operation_id.id
 									op6_stage_id = pos_line_item.stage_id.id
 									op6_clamping_area = pos_line_item.clamping_area
 									
-								if pos_line_item.operation_id.name == 'Operation 7':
+								if pos_line_item.operation_id.name == '70':
 									op7_status = 'pending'
 									op7_id = pos_line_item.operation_id.id
 									op7_stage_id = pos_line_item.stage_id.id
 									op7_clamping_area = pos_line_item.clamping_area
 									
-								if pos_line_item.operation_id.name == 'Operation 8':
+								if pos_line_item.operation_id.name == '80':
 									op8_status = 'pending'
 									op8_id = pos_line_item.operation_id.id
 									op8_stage_id = pos_line_item.stage_id.id
 									op8_clamping_area = pos_line_item.clamping_area
 									
-								if pos_line_item.operation_id.name == 'Operation 9':
+								if pos_line_item.operation_id.name == '90':
 									op9_status = 'pending'
 									op9_id = pos_line_item.operation_id.id
 									op9_stage_id = pos_line_item.stage_id.id
 									op9_clamping_area = pos_line_item.clamping_area
 									
-								if pos_line_item.operation_id.name == 'Operation 10':
+								if pos_line_item.operation_id.name == '100':
 									op10_status = 'pending'
 									op10_id = pos_line_item.operation_id.id
 									op10_stage_id = pos_line_item.stage_id.id
 									op10_clamping_area = pos_line_item.clamping_area
 									
-								if pos_line_item.operation_id.name == 'Operation 11':
+								if pos_line_item.operation_id.name == '110':
 									op11_status = 'pending'
 									op11_id = pos_line_item.operation_id.id
 									op11_stage_id = pos_line_item.stage_id.id
 									op11_clamping_area = pos_line_item.clamping_area
 									
-								if pos_line_item.operation_id.name == 'Operation 12':
+								if pos_line_item.operation_id.name == '120':
 									op12_status = 'pending'
 									op12_id = pos_line_item.operation_id.id
 									op12_stage_id = pos_line_item.stage_id.id
@@ -1303,7 +1301,9 @@ class kg_subcontract_inward(osv.osv):
 								operation_vals = {
 									'ms_id': line_item.ms_id.id,													
 									'ms_plan_id': line_item.sc_id.ms_plan_id.id,													
-									'ms_plan_line_id': line_item.sc_id.ms_plan_line_id.id,																		
+									'ms_plan_line_id': line_item.sc_id.ms_plan_line_id.id,	
+									'order_id': line_item.order_id.id,
+									'order_line_id': line_item.order_line_id.id,																	
 									'inhouse_qty': 1,
 									'op1_stage_id': op1_stage_id,
 									'op1_clamping_area': op1_clamping_area,
@@ -1367,7 +1367,7 @@ class kg_subcontract_inward(osv.osv):
 									for pos_line_item in position_id.line_ids:
 										
 										
-										if pos_line_item.operation_id.name == 'Operation 1':
+										if pos_line_item.operation_id.name == '10':
 											
 											for op1_dimen_item in pos_line_item.line_ids:
 												op1_dimen_vals = {
@@ -1390,7 +1390,7 @@ class kg_subcontract_inward(osv.osv):
 												op1_ms_dimension_id = ms_dimension_obj.create(cr, uid,op1_dimen_vals)
 												
 										
-										if pos_line_item.operation_id.name == 'Operation 2':
+										if pos_line_item.operation_id.name == '20':
 											
 											for op2_dimen_item in pos_line_item.line_ids:
 												
@@ -1414,7 +1414,7 @@ class kg_subcontract_inward(osv.osv):
 												op2_ms_dimension_id = ms_dimension_obj.create(cr, uid,op2_dimen_vals)
 												
 												
-										if pos_line_item.operation_id.name == 'Operation 3':
+										if pos_line_item.operation_id.name == '30':
 											
 											for op3_dimen_item in pos_line_item.line_ids:
 												
@@ -1438,7 +1438,7 @@ class kg_subcontract_inward(osv.osv):
 												op3_ms_dimension_id = ms_dimension_obj.create(cr, uid,op3_dimen_vals)
 												
 												
-										if pos_line_item.operation_id.name == 'Operation 4':
+										if pos_line_item.operation_id.name == '40':
 											
 											for op4_dimen_item in pos_line_item.line_ids:
 												
@@ -1462,7 +1462,7 @@ class kg_subcontract_inward(osv.osv):
 												op4_ms_dimension_id = ms_dimension_obj.create(cr, uid,op4_dimen_vals)
 												
 												
-										if pos_line_item.operation_id.name == 'Operation 5':
+										if pos_line_item.operation_id.name == '50':
 											
 											for op5_dimen_item in pos_line_item.line_ids:
 												
@@ -1486,7 +1486,7 @@ class kg_subcontract_inward(osv.osv):
 												op5_ms_dimension_id = ms_dimension_obj.create(cr, uid,op5_dimen_vals)
 												
 												
-										if pos_line_item.operation_id.name == 'Operation 6':
+										if pos_line_item.operation_id.name == '60':
 											
 											for op6_dimen_item in pos_line_item.line_ids:
 												
@@ -1510,7 +1510,7 @@ class kg_subcontract_inward(osv.osv):
 												op6_ms_dimension_id = ms_dimension_obj.create(cr, uid,op6_dimen_vals)
 												
 												
-										if pos_line_item.operation_id.name == 'Operation 7':
+										if pos_line_item.operation_id.name == '70':
 											
 											for op7_dimen_item in pos_line_item.line_ids:
 												
@@ -1534,7 +1534,7 @@ class kg_subcontract_inward(osv.osv):
 												op7_ms_dimension_id = ms_dimension_obj.create(cr, uid,op7_dimen_vals)
 												
 												
-										if pos_line_item.operation_id.name == 'Operation 8':
+										if pos_line_item.operation_id.name == '80':
 											
 											for op8_dimen_item in pos_line_item.line_ids:
 												
@@ -1558,7 +1558,7 @@ class kg_subcontract_inward(osv.osv):
 												op8_ms_dimension_id = ms_dimension_obj.create(cr, uid,op8_dimen_vals)
 												
 												
-										if pos_line_item.operation_id.name == 'Operation 9':
+										if pos_line_item.operation_id.name == '90':
 											
 											for op9_dimen_item in pos_line_item.line_ids:
 												
@@ -1582,7 +1582,7 @@ class kg_subcontract_inward(osv.osv):
 												op9_ms_dimension_id = ms_dimension_obj.create(cr, uid,op9_dimen_vals)
 												
 												
-										if pos_line_item.operation_id.name == 'Operation 10':
+										if pos_line_item.operation_id.name == '100':
 											
 											for op10_dimen_item in pos_line_item.line_ids:
 												
@@ -1606,7 +1606,7 @@ class kg_subcontract_inward(osv.osv):
 												op10_ms_dimension_id = ms_dimension_obj.create(cr, uid,op10_dimen_vals)
 												
 												
-										if pos_line_item.operation_id.name == 'Operation 11':
+										if pos_line_item.operation_id.name == '110':
 											
 											for op11_dimen_item in pos_line_item.line_ids:
 												
@@ -1630,7 +1630,7 @@ class kg_subcontract_inward(osv.osv):
 												op11_ms_dimension_id = ms_dimension_obj.create(cr, uid,op11_dimen_vals)
 												
 												
-										if pos_line_item.operation_id.name == 'Operation 12':
+										if pos_line_item.operation_id.name == '120':
 											
 											for op12_dimen_item in pos_line_item.line_ids:
 												
@@ -1670,43 +1670,61 @@ class kg_subcontract_inward(osv.osv):
 										#~ ms_op_id= list[ms_operation_id]
 										print"ms_op_id",ms_op_id
 										
-										if op_name == 'Operation 1':
+										if op_name == '10':
 												self.pool.get('kg.ms.operations').operation1_update(cr, uid, ms_op_id)	
-										if op_name == 'Operation 2':
+										if op_name == '20':
 												self.pool.get('kg.ms.operations').operation2_update(cr, uid, ms_op_id)	
-										if op_name == 'Operation 3':
+										if op_name == '30':
 												self.pool.get('kg.ms.operations').operation3_update(cr, uid, ms_op_id)
-										if op_name == 'Operation 4':
+										if op_name == '40':
 												self.pool.get('kg.ms.operations').operation4_update(cr, uid, ms_op_id)
-										if op_name == 'Operation 5':
+										if op_name == '50':
 												self.pool.get('kg.ms.operations').operation5_update(cr, uid, ms_op_id)
-										if op_name == 'Operation 6':
+										if op_name == '60':
 												self.pool.get('kg.ms.operations').operation6_update(cr, uid, ms_op_id)											
-										if op_name == 'Operation 7':
+										if op_name == '70':
 												self.pool.get('kg.ms.operations').operation7_update(cr, uid, ms_op_id)
-										if op_name == 'Operation 8':
+										if op_name == '80':
 												self.pool.get('kg.ms.operations').operation8_update(cr, uid, ms_op_id)
-										if op_name == 'Operation 9':
+										if op_name == '90':
 												self.pool.get('kg.ms.operations').operation9_update(cr, uid, ms_op_id)
-										if op_name == 'Operation 10':
+										if op_name == '100':
 												self.pool.get('kg.ms.operations').operation10_update(cr, uid, ms_op_id)
-										if op_name == 'Operation 11':
+										if op_name == '110':
 												self.pool.get('kg.ms.operations').operation11_update(cr, uid, ms_op_id)
-										if op_name == 'Operation 12':
+										if op_name == '120':
 												self.pool.get('kg.ms.operations').operation12_update(cr, uid, ms_op_id)											
 												
-					if total > 0:							
-						for operation in range(total):								
-							ms_store_vals = {
-								'operation_id': 170,
-								'production_id': line_item.production_id.id,
-								'foundry_assembly_id': line_item.production_id.assembly_id,
-								'foundry_assembly_line_id': line_item.production_id.assembly_line_id,
-								'ms_assembly_id': line_item.ms_id.assembly_id,
-								'ms_assembly_line_id': line_item.ms_id.assembly_line_id,
-								'qty': 1,
-							}
-							ms_store_id = self.pool.get('kg.ms.stores').create(cr, uid, ms_store_vals)
+					if total > 0:						
+							
+						### Stock Inward Creation ###
+						inward_obj = self.pool.get('kg.stock.inward')
+						inward_line_obj = self.pool.get('ch.stock.inward.details')						
+						print"line_item.order_id.location",line_item.order_id.location
+						
+						inward_vals = {
+							'location': line_item.order_id.location
+						}
+						
+						inward_id = inward_obj.create(cr, uid, inward_vals)
+						
+						inward_line_vals = {
+							'header_id': inward_id,
+							'location': line_item.order_id.location,
+							'stock_type': 'pattern',
+							'pump_model_id': line_item.pump_model_id.id,
+							'pattern_id': line_item.pattern_id.id,
+							'pattern_name': line_item.pattern_name,
+							'moc_id': line_item.moc_id.id,							
+							'qty': total,
+							'available_qty': total,
+							'stock_mode': 'excess',
+							'ms_stock_state': 'operation_inprogress',
+							'stock_item': 'ms_item'
+							
+						}
+						
+						inward_line_id = inward_line_obj.create(cr, uid, inward_line_vals)
 		
 			for line_item in entry.line_ids:				
 				if line_item.qty < 0:
@@ -1825,8 +1843,8 @@ class ch_subcontract_inward_line(osv.osv):
 		'operation_id': fields.many2many('ch.kg.position.number', 'm2m_inward_operation_details', 'in_operation_id', 'in_sub_id','Operation', domain="[('header_id','=',position_id)]"),
 		'com_operation_id': fields.many2many('ch.kg.position.number', 'm2m_in_com_operation_details', 'in_com_operation_id', 'in_com_sub_id','Completed Operation', domain="[('header_id','=',position_id)]"),
 		'actual_qty': fields.integer('Actual Qty',readonly=True),
-		'qty': fields.integer('Quantity'),
-		'sc_dc_qty': fields.integer('Quantity'),
+		'qty': fields.integer('Received Qty'),
+		'sc_dc_qty': fields.integer('SC WO Qty'),
 		'pending_qty': fields.integer('Pending Qty'),
 		'sc_invoice_qty': fields.integer('Invoice Qty'),
 		

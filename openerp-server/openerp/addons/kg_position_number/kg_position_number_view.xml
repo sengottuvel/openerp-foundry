@@ -190,9 +190,10 @@
 				<form string="Operation Details Entry Form">
 					<group>
 						<group>
-							<field name="operation_id"/>
-							<field name="stage_id"/>
+							<field name="operation_id" on_change="onchange_name(operation_id,stage_id)"/>
+							<field name="stage_id" on_change="onchange_name(operation_id,stage_id)"/>
 							<field name="is_last_operation"/>
+							<field name="name" invisible="1"/>
 							<field name="total_cost" readonly="1"/>
 							<field name="remark"/>
 						</group>
