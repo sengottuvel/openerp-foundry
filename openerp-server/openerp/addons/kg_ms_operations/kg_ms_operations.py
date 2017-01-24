@@ -642,14 +642,15 @@ class kg_ms_operations(osv.osv):
 					if start_date > today or end_date > today:
 						raise osv.except_osv(_('Warning!'),
 								_('Start and End date should be less than or equal to current date !!'))
-				
-					if entry_rec.op1_start_time == entry_rec.op1_end_time:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End time should not be equal !!'))
-								
-					if entry_rec.op1_start_time > 24 or entry_rec.op1_end_time > 24:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End time should not exceed 24 hrs !!'))
+					
+					if entry_rec.op1_start_time > 0 and entry_rec.op1_end_time > 0:
+						if entry_rec.op1_start_time == entry_rec.op1_end_time:
+							raise osv.except_osv(_('Warning!'),
+									_('Start and End time should not be equal !!'))
+									
+						if entry_rec.op1_start_time > 24 or entry_rec.op1_end_time > 24:
+							raise osv.except_osv(_('Warning!'),
+									_('Start and End time should not exceed 24 hrs !!'))
 								
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -1321,14 +1322,15 @@ class kg_ms_operations(osv.osv):
 					if start_date > today or end_date > today:
 						raise osv.except_osv(_('Warning!'),
 								_('Start and End date should be less than or equal to current date !!'))
-								
-					if entry_rec.op2_start_time == entry_rec.op2_end_time:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End time should not be equal !!'))
-								
-					if entry_rec.op2_start_time > 24 or entry_rec.op2_end_time > 24:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End time should not exceed 24 hrs !!'))
+					
+					if entry_rec.op2_start_time > 0 and entry_rec.op2_end_time > 0:			
+						if entry_rec.op2_start_time == entry_rec.op2_end_time:
+							raise osv.except_osv(_('Warning!'),
+									_('Start and End time should not be equal !!'))
+									
+						if entry_rec.op2_start_time > 24 or entry_rec.op2_end_time > 24:
+							raise osv.except_osv(_('Warning!'),
+									_('Start and End time should not exceed 24 hrs !!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -1987,14 +1989,16 @@ class kg_ms_operations(osv.osv):
 					if start_date > today or end_date > today:
 						raise osv.except_osv(_('Warning!'),
 								_('Start and End date should be less than or equal to current date!!'))
-								
-					if entry_rec.op3_start_time == entry_rec.op3_end_time:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End time should not be equal !!'))
-								
-					if entry_rec.op3_start_time > 24 or entry_rec.op3_end_time > 24:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End time should not exceed 24 hrs !!'))
+					
+					
+					if entry_rec.op3_start_time > 0 and entry_rec.op3_end_time > 0:				
+						if entry_rec.op3_start_time == entry_rec.op3_end_time:
+							raise osv.except_osv(_('Warning!'),
+									_('Start and End time should not be equal !!'))
+									
+						if entry_rec.op3_start_time > 24 or entry_rec.op3_end_time > 24:
+							raise osv.except_osv(_('Warning!'),
+									_('Start and End time should not exceed 24 hrs !!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -2653,14 +2657,16 @@ class kg_ms_operations(osv.osv):
 					if start_date > today or end_date > today:
 						raise osv.except_osv(_('Warning!'),
 								_('Start and End date should be less than or equal to current date!!'))
-								
-					if entry_rec.op4_start_time == entry_rec.op4_end_time:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End time should not be equal !!'))
-								
-					if entry_rec.op4_start_time > 24 or entry_rec.op4_end_time > 24:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End time should not exceed 24 hrs !!'))
+					
+					
+					if entry_rec.op4_start_time > 0 and entry_rec.op4_end_time > 0:		
+						if entry_rec.op4_start_time == entry_rec.op4_end_time:
+							raise osv.except_osv(_('Warning!'),
+									_('Start and End time should not be equal !!'))
+									
+						if entry_rec.op4_start_time > 24 or entry_rec.op4_end_time > 24:
+							raise osv.except_osv(_('Warning!'),
+									_('Start and End time should not exceed 24 hrs !!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -3319,14 +3325,15 @@ class kg_ms_operations(osv.osv):
 					if start_date > today or end_date > today:
 						raise osv.except_osv(_('Warning!'),
 								_('Start and End date should be less than or equal to current date!!'))
-								
-					if entry_rec.op5_start_time == entry_rec.op5_end_time:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End time should not be equal !!'))
-								
-					if entry_rec.op5_start_time > 24 or entry_rec.op5_end_time > 24:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End time should not exceed 24 hrs !!'))
+					
+					if entry_rec.op5_start_time > 0 and entry_rec.op5_end_time > 0:	
+						if entry_rec.op5_start_time == entry_rec.op5_end_time:
+							raise osv.except_osv(_('Warning!'),
+									_('Start and End time should not be equal !!'))
+									
+						if entry_rec.op5_start_time > 24 or entry_rec.op5_end_time > 24:
+							raise osv.except_osv(_('Warning!'),
+									_('Start and End time should not exceed 24 hrs !!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -3984,14 +3991,15 @@ class kg_ms_operations(osv.osv):
 					if start_date > today or end_date > today:
 						raise osv.except_osv(_('Warning!'),
 								_('Start and End date should be less than or equal to current date!!'))
-								
-					if entry_rec.op6_start_time == entry_rec.op6_end_time:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End time should not be equal !!'))
-								
-					if entry_rec.op6_start_time > 24 or entry_rec.op6_end_time > 24:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End time should not exceed 24 hrs !!'))
+					
+					if entry_rec.op6_start_time > 0 and entry_rec.op6_end_time > 0:		
+						if entry_rec.op6_start_time == entry_rec.op6_end_time:
+							raise osv.except_osv(_('Warning!'),
+									_('Start and End time should not be equal !!'))
+									
+						if entry_rec.op6_start_time > 24 or entry_rec.op6_end_time > 24:
+							raise osv.except_osv(_('Warning!'),
+									_('Start and End time should not exceed 24 hrs !!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -4649,14 +4657,15 @@ class kg_ms_operations(osv.osv):
 					if start_date > today or end_date > today:
 						raise osv.except_osv(_('Warning!'),
 								_('Start and End date should be less than or equal to current date!!'))
-								
-					if entry_rec.op7_start_time == entry_rec.op7_end_time:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End time should not be equal !!'))
-								
-					if entry_rec.op7_start_time > 24 or entry_rec.op7_end_time > 24:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End time should not exceed 24 hrs !!'))
+					
+					if entry_rec.op7_start_time > 0 and entry_rec.op7_end_time > 0:			
+						if entry_rec.op7_start_time == entry_rec.op7_end_time:
+							raise osv.except_osv(_('Warning!'),
+									_('Start and End time should not be equal !!'))
+									
+						if entry_rec.op7_start_time > 24 or entry_rec.op7_end_time > 24:
+							raise osv.except_osv(_('Warning!'),
+									_('Start and End time should not exceed 24 hrs !!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -5314,14 +5323,15 @@ class kg_ms_operations(osv.osv):
 					if start_date > today or end_date > today:
 						raise osv.except_osv(_('Warning!'),
 								_('Start and End date should be less than or equal to current date!!'))
-								
-					if entry_rec.op8_start_time == entry_rec.op8_end_time:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End time should not be equal !!'))
-								
-					if entry_rec.op8_start_time > 24 or entry_rec.op8_end_time > 24:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End time should not exceed 24 hrs !!'))
+					
+					if entry_rec.op8_start_time > 0 and entry_rec.op8_end_time > 0:				
+						if entry_rec.op8_start_time == entry_rec.op8_end_time:
+							raise osv.except_osv(_('Warning!'),
+									_('Start and End time should not be equal !!'))
+									
+						if entry_rec.op8_start_time > 24 or entry_rec.op8_end_time > 24:
+							raise osv.except_osv(_('Warning!'),
+									_('Start and End time should not exceed 24 hrs !!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -5979,14 +5989,15 @@ class kg_ms_operations(osv.osv):
 					if start_date > today or end_date > today:
 						raise osv.except_osv(_('Warning!'),
 								_('Start and End date should be less than or equal to current date!!'))
-								
-					if entry_rec.op9_start_time == entry_rec.op9_end_time:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End time should not be equal !!'))
-								
-					if entry_rec.op9_start_time > 24 or entry_rec.op9_end_time > 24:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End time should not exceed 24 hrs !!'))
+					
+					if entry_rec.op9_start_time > 0 and entry_rec.op9_end_time > 0:				
+						if entry_rec.op9_start_time == entry_rec.op9_end_time:
+							raise osv.except_osv(_('Warning!'),
+									_('Start and End time should not be equal !!'))
+									
+						if entry_rec.op9_start_time > 24 or entry_rec.op9_end_time > 24:
+							raise osv.except_osv(_('Warning!'),
+									_('Start and End time should not exceed 24 hrs !!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -6644,14 +6655,17 @@ class kg_ms_operations(osv.osv):
 					if start_date > today or end_date > today:
 						raise osv.except_osv(_('Warning!'),
 								_('Start and End date should be less than or equal to current date!!'))
+					
+					
+					if entry_rec.op10_start_time > 0 and entry_rec.op10_end_time > 0:
 								
-					if entry_rec.op10_start_time == entry_rec.op10_end_time:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End time should not be equal !!'))
-								
-					if entry_rec.op10_start_time > 24 or entry_rec.op10_end_time > 24:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End time should not exceed 24 hrs !!'))
+						if entry_rec.op10_start_time == entry_rec.op10_end_time:
+							raise osv.except_osv(_('Warning!'),
+									_('Start and End time should not be equal !!'))
+									
+						if entry_rec.op10_start_time > 24 or entry_rec.op10_end_time > 24:
+							raise osv.except_osv(_('Warning!'),
+									_('Start and End time should not exceed 24 hrs !!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -7309,14 +7323,15 @@ class kg_ms_operations(osv.osv):
 					if start_date > today or end_date > today:
 						raise osv.except_osv(_('Warning!'),
 								_('Start and End date should be less than or equal to current date!!'))
-								
-					if entry_rec.op11_start_time == entry_rec.op11_end_time:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End time should not be equal !!'))
-								
-					if entry_rec.op11_start_time > 24 or entry_rec.op11_end_time > 24:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End time should not exceed 24 hrs !!'))
+					
+					if entry_rec.op11_start_time > 0 and entry_rec.op11_end_time > 0:			
+						if entry_rec.op11_start_time == entry_rec.op11_end_time:
+							raise osv.except_osv(_('Warning!'),
+									_('Start and End time should not be equal !!'))
+									
+						if entry_rec.op11_start_time > 24 or entry_rec.op11_end_time > 24:
+							raise osv.except_osv(_('Warning!'),
+									_('Start and End time should not exceed 24 hrs !!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
@@ -7974,14 +7989,16 @@ class kg_ms_operations(osv.osv):
 					if start_date > today or end_date > today:
 						raise osv.except_osv(_('Warning!'),
 								_('Start and End date should be less than or equal to current date!!'))
-								
-					if entry_rec.op12_start_time == entry_rec.op12_end_time:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End time should not be equal !!'))
-								
-					if entry_rec.op12_start_time > 24 or entry_rec.op12_end_time > 24:
-						raise osv.except_osv(_('Warning!'),
-								_('Start and End time should not exceed 24 hrs !!'))
+					
+					
+					if entry_rec.op12_start_time > 0 and entry_rec.op12_end_time > 0:			
+						if entry_rec.op12_start_time == entry_rec.op12_end_time:
+							raise osv.except_osv(_('Warning!'),
+									_('Start and End time should not be equal !!'))
+									
+						if entry_rec.op12_start_time > 24 or entry_rec.op12_end_time > 24:
+							raise osv.except_osv(_('Warning!'),
+									_('Start and End time should not exceed 24 hrs !!'))
 					
 					if dim_item.actual_val < 0:
 						raise osv.except_osv(_('Warning!'),
