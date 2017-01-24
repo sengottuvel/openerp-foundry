@@ -1201,99 +1201,99 @@ class kg_schedule(osv.osv):
 					
 						production_id = production_obj.create(cr, uid, production_vals)
 						
-						if ms_no == 1:
-							### Machine shop Item Creation ####
-							cr.execute("""
-								select order_ms.id as order_ms_line_id,order_ms.qty as sch_qty,order_ms.ms_id as ms_id,order_ms.name as item_name,
-								order_ms.bom_id as ms_bom_id,order_ms.ms_line_id as ms_bom_line_id ,order_ms.position_id,
-								order_ms.moc_id,'pump' as purpose,wo_line.order_no as order_no,wo_line.id as order_line_id,
-								wo_line.header_id as order_id,wo_line.delivery_date,wo.order_category,
-								wo_line.pump_model_id,wo.entry_date as order_date
+					if ms_no == 1:
+						### Machine shop Item Creation ####
+						cr.execute("""
+							select order_ms.id as order_ms_line_id,order_ms.qty as sch_qty,order_ms.ms_id as ms_id,order_ms.name as item_name,
+							order_ms.bom_id as ms_bom_id,order_ms.ms_line_id as ms_bom_line_id ,order_ms.position_id,
+							order_ms.moc_id,'pump' as purpose,wo_line.order_no as order_no,wo_line.id as order_line_id,
+							wo_line.header_id as order_id,wo_line.delivery_date,wo.order_category,
+							wo_line.pump_model_id,wo.entry_date as order_date
 
-								from ch_order_machineshop_details order_ms
-								left join ch_work_order_details wo_line on order_ms.header_id = wo_line.id
-								left join kg_work_order wo on wo_line.header_id = wo.id
-								where order_ms.flag_applicable = 't' and order_ms.header_id in 
-								(select order_line_id from ch_schedule_details where header_id = %s
-								)
+							from ch_order_machineshop_details order_ms
+							left join ch_work_order_details wo_line on order_ms.header_id = wo_line.id
+							left join kg_work_order wo on wo_line.header_id = wo.id
+							where order_ms.flag_applicable = 't' and order_ms.header_id in 
+							(select order_line_id from ch_schedule_details where header_id = %s
+							)
 
-								union 
+							union 
 
-								select acc_order_ms.id as order_ms_line_id,acc_order_ms.qty as sch_qty,acc_order_ms.ms_id as ms_id,
-								acc_order_ms.name as item_name,
-								acc_order_ms.bom_id as ms_bom_id,0 as ms_bom_line_id ,acc_order_ms.position_id,
-								acc_order_ms.moc_id,'acc' as purpose,wo_line.order_no as order_no,wo_line.id as order_line_id,
-								wo_line.header_id as order_id,wo_line.delivery_date,wo.order_category,
-								wo_line.pump_model_id,wo.entry_date as order_date
-								from ch_wo_accessories_ms as acc_order_ms
-								left join ch_wo_accessories wo_acc_line on acc_order_ms.header_id = wo_acc_line.id
-								left join ch_work_order_details wo_line on wo_acc_line.header_id = wo_line.id
-								left join kg_work_order wo on wo_line.header_id = wo.id
-								where acc_order_ms.is_applicable = 't' and wo_acc_line.header_id in 
-								(select order_line_id from ch_schedule_details where header_id = %s
-								) """%(entry.id,entry.id))
-							order_ms_details = cr.dictfetchall();
-							
-							if order_ms_details:
-							
-								for ms_item in order_ms_details:
+							select acc_order_ms.id as order_ms_line_id,acc_order_ms.qty as sch_qty,acc_order_ms.ms_id as ms_id,
+							acc_order_ms.name as item_name,
+							acc_order_ms.bom_id as ms_bom_id,0 as ms_bom_line_id ,acc_order_ms.position_id,
+							acc_order_ms.moc_id,'acc' as purpose,wo_line.order_no as order_no,wo_line.id as order_line_id,
+							wo_line.header_id as order_id,wo_line.delivery_date,wo.order_category,
+							wo_line.pump_model_id,wo.entry_date as order_date
+							from ch_wo_accessories_ms as acc_order_ms
+							left join ch_wo_accessories wo_acc_line on acc_order_ms.header_id = wo_acc_line.id
+							left join ch_work_order_details wo_line on wo_acc_line.header_id = wo_line.id
+							left join kg_work_order wo on wo_line.header_id = wo.id
+							where acc_order_ms.is_applicable = 't' and wo_acc_line.header_id in 
+							(select order_line_id from ch_schedule_details where header_id = %s
+							) """%(entry.id,entry.id))
+						order_ms_details = cr.dictfetchall();
+						
+						if order_ms_details:
+						
+							for ms_item in order_ms_details:
+								
+								if ms_item['purpose'] == 'pump':
+									order_ms_line_id = ms_item['order_ms_line_id']
+									acc_ms_line_id = False
+									ms_bom_line_id = ms_item['ms_bom_line_id']
+								if ms_item['purpose'] == 'acc':
+									order_ms_line_id = False
+									acc_ms_line_id = ms_item['order_ms_line_id']
+									ms_bom_line_id = False
 									
-									if ms_item['purpose'] == 'pump':
-										order_ms_line_id = ms_item['order_ms_line_id']
-										acc_ms_line_id = False
-										ms_bom_line_id = ms_item['ms_bom_line_id']
-									if ms_item['purpose'] == 'acc':
-										order_ms_line_id = False
-										acc_ms_line_id = ms_item['order_ms_line_id']
-										ms_bom_line_id = False
-										
-									ms_obj = self.pool.get('kg.machineshop')
-									ms_master_obj = self.pool.get('kg.machine.shop')
-									ms_rec = ms_master_obj.browse(cr, uid, ms_item['ms_id'])
-									
-									### Sequence Number Generation ###
-									ms_name = ''	
-									ms_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.ms.inward')])
-									seq_rec = self.pool.get('ir.sequence').browse(cr,uid,ms_seq_id[0])
-									cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(ms_seq_id[0],seq_rec.code))
-									ms_name = cr.fetchone();
-									
-									ms_vals = {
-									
-									'order_ms_line_id': order_ms_line_id,
-									'acc_ms_line_id': acc_ms_line_id,
-									'name': ms_name[0],
-									'location': entry.location,
-									'schedule_id': entry.id,
-									'schedule_date': entry.entry_date,
-									'schedule_line_id': schedule_item.id,
-									'order_id': ms_item['order_id'],
-									'order_line_id':ms_item['order_line_id'],
-									'order_no': ms_item['order_no'],
-									'order_delivery_date': ms_item['delivery_date'],
-									'order_date': ms_item['order_date'],
-									'order_category': ms_item['order_category'],
-									'order_priority': priority,
-									'pump_model_id':ms_item['pump_model_id'],
-									'moc_id':ms_item['moc_id'],
-									'schedule_qty':ms_item['sch_qty'],
-									'ms_sch_qty':ms_item['sch_qty'],
-									'ms_type': 'ms_item',
-									'ms_state': 'in_plan',
-									'state':'raw_pending',
-									'ms_id': ms_item['ms_id'],
-									'ms_bom_id': ms_item['ms_bom_id'],
-									'ms_bom_line_id': ms_bom_line_id,
-									'position_id': ms_item['position_id'],
-									'item_code': ms_rec.code,
-									'item_name': ms_item['item_name' ],
-									
-									}
-									
-									print "ms_vals",ms_vals
-									
-									ms_no = ms_no + 1
-									ms_id = ms_obj.create(cr, uid, ms_vals)
+								ms_obj = self.pool.get('kg.machineshop')
+								ms_master_obj = self.pool.get('kg.machine.shop')
+								ms_rec = ms_master_obj.browse(cr, uid, ms_item['ms_id'])
+								
+								### Sequence Number Generation ###
+								ms_name = ''	
+								ms_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.ms.inward')])
+								seq_rec = self.pool.get('ir.sequence').browse(cr,uid,ms_seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(ms_seq_id[0],seq_rec.code))
+								ms_name = cr.fetchone();
+								
+								ms_vals = {
+								
+								'order_ms_line_id': order_ms_line_id,
+								'acc_ms_line_id': acc_ms_line_id,
+								'name': ms_name[0],
+								'location': entry.location,
+								'schedule_id': entry.id,
+								'schedule_date': entry.entry_date,
+								'schedule_line_id': schedule_item.id,
+								'order_id': ms_item['order_id'],
+								'order_line_id':ms_item['order_line_id'],
+								'order_no': ms_item['order_no'],
+								'order_delivery_date': ms_item['delivery_date'],
+								'order_date': ms_item['order_date'],
+								'order_category': ms_item['order_category'],
+								'order_priority': priority,
+								'pump_model_id':ms_item['pump_model_id'],
+								'moc_id':ms_item['moc_id'],
+								'schedule_qty':ms_item['sch_qty'],
+								'ms_sch_qty':ms_item['sch_qty'],
+								'ms_type': 'ms_item',
+								'ms_state': 'in_plan',
+								'state':'raw_pending',
+								'ms_id': ms_item['ms_id'],
+								'ms_bom_id': ms_item['ms_bom_id'],
+								'ms_bom_line_id': ms_bom_line_id,
+								'position_id': ms_item['position_id'],
+								'item_code': ms_rec.code,
+								'item_name': ms_item['item_name' ],
+								
+								}
+								
+								print "ms_vals",ms_vals
+								
+								ms_no = ms_no + 1
+								ms_id = ms_obj.create(cr, uid, ms_vals)
 				
 					
 				#### Department Indent Creation for MOC Raw materials  ###

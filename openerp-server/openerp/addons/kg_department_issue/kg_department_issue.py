@@ -211,10 +211,12 @@ class kg_department_issue(osv.osv):
 				depindent_line_browse = depindent_line_obj.browse(cr,uid,depindent_line_ids)
 				depindent_line_browse = sorted(depindent_line_browse, key=lambda k: k.product_id.id)
 				groups = []
-				for key, group in groupby(depindent_line_browse, lambda x: x.product_id.id):
+				for key, group in groupby(depindent_line_browse, lambda x: x.id):
+				#~ for key, group in groupby(depindent_line_browse, lambda x: x.product_id.id):
 					groups.append(map(lambda r:r,group))
 				for key,group in enumerate(groups):
-					qty = sum(map(lambda x:float(x.issue_pending_qty),group)) #TODO: qty
+					#~ qty = sum(map(lambda x:float(x.issue_pending_qty),group)) #TODO: qty
+					qty = map(lambda x:float(x.issue_pending_qty),group)[0]
 					depindent_line_ids = map(lambda x:x.id,group)
 					prod_browse = group[0].product_id
 					ms_bot_id = group[0].ms_bot_id.id
@@ -224,14 +226,18 @@ class kg_department_issue(osv.osv):
 					dep = indent.dep_name.id
 					uom = group[0].uom.id or False
 					depindent_obj = self.pool.get('kg.depindent').browse(cr, uid, indent.id)
+					if depindent_obj.order_line_id:
+						wo_id = depindent_obj.order_line_id.header_id.id
+					else:
+						wo_id = False
 					dep_stock_location = depindent_obj.dest_location_id.id
 					main_location = depindent_obj.src_location_id.id
 										
 					vals = {
 					
 						'indent_id':depindent_obj.id,
-						'w_order_line_id':depindent_obj.order_line_id.id,
-						'wo_id':depindent_obj.order_line_id.header_id.id,
+						'w_order_line_id':depindent_obj.order_line_id.id or False,
+						'wo_id':wo_id,
 						'ms_bot_id':ms_bot_id,
 						'product_id':prod_browse.id,
 						'brand_id':brand_id,
@@ -253,6 +259,7 @@ class kg_department_issue(osv.osv):
 					if ids:
 						self.write(cr,uid,ids[0],{'issue_line_ids':[(0,0,vals)]})
 			self.write(cr,uid,ids,res)
+		
 		return True
 		
 	def update_serviceindent_to_issue(self,cr,uid,ids,context=None):
@@ -280,10 +287,12 @@ class kg_department_issue(osv.osv):
 				serviceindent_line_browse = serviceindent_line_obj.browse(cr,uid,serviceindent_line_ids)
 				serviceindent_line_browse = sorted(serviceindent_line_browse, key=lambda k: k.product_id.id)
 				groups = []
-				for key, group in groupby(serviceindent_line_browse, lambda x: x.product_id.id):
+				for key, group in groupby(depindent_line_browse, lambda x: x.id):
+				#~ for key, group in groupby(serviceindent_line_browse, lambda x: x.product_id.id):
 					groups.append(map(lambda r:r,group))
 				for key,group in enumerate(groups):
-					qty = sum(map(lambda x:float(x.issue_pending_qty),group)) #TODO: qty
+					qty = map(lambda x:float(x.issue_pending_qty),group)[0]
+					#~ qty = sum(map(lambda x:float(x.issue_pending_qty),group)) #TODO: qty
 					depindent_line_ids = map(lambda x:x.id,group)
 					prod_browse = group[0].product_id
 					brand_id = group[0].brand_id.id				
@@ -301,6 +310,7 @@ class kg_department_issue(osv.osv):
 						'brand_id':brand_id,
 						'uom_id':uom,
 						'issue_qty':qty,
+						'issue_qty_2':qty,
 						'indent_qty':qty,
 						'name':prod_browse.name,
 						'location_id':main_location,
@@ -808,6 +818,15 @@ class kg_department_issue_line(osv.osv):
 		if issue_record.state == 'confirmed':
 			self.pool.get('kg.department.issue').issue_item_approval(cr,uid,issue_line_id)
 			
+			if issue_record.issue_qty > 0:
+				self.write(cr,uid,issue_record.id,{'state':'done'})
+				if issue_record.issue_id.department_id.name == 'DP2':
+					ms_obj = self.pool.get('kg.machineshop').search(cr,uid,[('order_line_id','=',issue_record.w_order_line_id.id),('ms_id','=',issue_record.ms_bot_id.id),('state','=','raw_pending')])
+					if ms_obj:
+						ms_rec = self.pool.get('kg.machineshop').browse(cr,uid,ms_obj[0])
+						self.pool.get('kg.machineshop').write(cr,uid,ms_rec.id,{'state':'accept'})
+				
+				
 			line_sql = """ select line.issue_qty,line.id from kg_department_issue_line line 
 							left join kg_department_issue issue on(issue.id=line.issue_id)
 							where line.issue_id = %s and issue.state = 'approve' """ %(issue_record.issue_id.id)
