@@ -545,7 +545,9 @@
 	
 	<menuitem name="Assembly" id="tpm_assembly_process" parent="kg_operation_master.mpm_crm" sequence="6"/>
 			
+<!--
 		<menuitem action="wma_allotted_components" id="wam_assembly_inward" parent="tpm_assembly_process" sequence="1" />
+-->
 		
 		<menuitem action="tma_assembly_inward" id="tam_assembly_inward" parent="tpm_assembly_process" sequence="2" />
 		
