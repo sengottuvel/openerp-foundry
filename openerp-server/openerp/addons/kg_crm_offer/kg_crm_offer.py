@@ -1396,18 +1396,20 @@ class kg_crm_offer(osv.osv):
 				access_sql = """
 							select 
 							acc.name as access_name,
+							categ.name as access_cate_name,
 							access_offer.net_amount as net_amount
 							
 							from ch_accessories_offer access_offer
 							left join kg_accessories_master acc on(acc.id=access_offer.access_id)
+							left join kg_accessories_category categ on(categ.id=acc.access_cate_id)
 							where access_offer.header_id = """+ str(rec.id) +""" and access_offer.pump_id = """+ str(item['pump_id']) + """ order by access_offer.pump_id """
 				cr.execute(access_sql)		
 				access_data = cr.dictfetchall()
 				print"access_data",access_data
 				if access_data:
 					for item_1 in access_data:
-						if item_1['net_amount'] or item_1['access_name']:
-							sheet1.write(row_no+1,0,item_1['access_name'],style8)
+						if item_1['net_amount'] or item_1['access_cate_name']:
+							sheet1.write(row_no+1,0,item_1['access_cate_name'],style8)
 							sheet1.write(row_no+1,em_col,item_1['net_amount'] or "-",style8)
 							row_no = row_no+1
 					em_col = em_col + 1

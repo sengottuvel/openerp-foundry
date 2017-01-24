@@ -2055,22 +2055,23 @@ class ch_kg_crm_accessories(osv.osv):
 		
 	_columns = {
 		
+		## Basic Info
+		
 		'header_id':fields.many2one('ch.kg.crm.pumpmodel', 'Header Id', ondelete='cascade'),
-		#~ 'base_plate':fields.selection([('yes','YES'),('no','NO')],'Base Plate'),
-		#~ 'base_plate_item':fields.selection([('ms','MS'),('ss','SS')],'Item Details'),
-		#~ 'coupling_guard':fields.selection([('yes','YES'),('no','NO')],'Coupling Guard'),
-		#~ 'coupling_guard_item':fields.selection([('ms','MS'),('ss','SS')],'Item Details'),
-		#~ 'fou_bolts':fields.selection([('yes','YES'),('no','NO')],'Foundation Bolts'),
-		#~ 'fou_bolts_item':fields.selection([('ms','MS'),('ss','SS')],'Item Details'),
-		#~ 'product_id': fields.many2one('product.product','Coupling', domain="[('product_type','=','coupling')]"),
-		'access_id': fields.many2one('kg.accessories.master','Accessories',domain="[('state','not in',('reject','cancal'))]"),
-		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','not in',('reject','cancal'))]"),
+		
+		## Module Requirement Fields
+		
+		'access_categ_id': fields.many2one('kg.accessories.category','Accessories Categ',domain="[('state','not in',('reject','cancel'))]"),
+		'access_id': fields.many2one('kg.accessories.master','Accessories',domain="[('state','not in',('reject','cancel')),('access_cate_id','=',access_categ_id)]"),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','not in',('reject','cancel'))]"),
 		'qty': fields.float('Qty'),
 		'oth_spec': fields.char('Other Specification'),
 		'load_access': fields.boolean('Load BOM'),
 		#~ 'prime_cost': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Prime Cost',
 			 #~ multi="sums", help="The amount without tax", track_visibility='always',store=True),
 		'prime_cost': fields.float('Prime Cost'),
+		
+		## Child Tables Declaration
 		
 		'line_ids': fields.one2many('ch.crm.access.fou', 'header_id', 'Access FOU'),
 		'line_ids_a': fields.one2many('ch.crm.access.ms', 'header_id', 'Access MS'),
@@ -2089,6 +2090,15 @@ class ch_kg_crm_accessories(osv.osv):
 		#~ (_check_qty,'You cannot save with zero qty !',['Qty']),
 		
 		]
+	
+	def onchange_access_id(self, cr, uid, ids, access_categ_id,access_id):
+		value = {'access_id':access_id}
+		if access_categ_id:
+			value = {'access_id':''}
+		else:
+			raise osv.except_osv(_('Warning!'),
+				_('System should allow without accessories category!'))
+		return {'value': value}
 		
 	def onchange_load_access(self,cr,uid,ids,load_access,access_id,moc_id,qty):
 		fou_vals=[]

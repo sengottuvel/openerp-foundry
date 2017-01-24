@@ -510,6 +510,7 @@
 				<page string="Accessories">
 					<field name="line_ids_access_a">
 						<tree string="Accessories Entry Tree">
+							<field name="access_categ_id" required="1"/>
 							<field name="access_id" required="1"/>
 							<field name="moc_id" required="1"/>
 							<field name="qty" required="1"/>
@@ -519,7 +520,8 @@
 						<form string="Accessories Entry Form">
 							<group colspan="4">
 								<group>
-									<field name="access_id" required="1" attrs="{'readonly':[('load_access','=',True)]}"/>
+									<field name="access_categ_id" on_change="onchange_access_id(access_categ_id,access_id)" required="1" attrs="{'readonly':[('load_access','=',True)]}"/>
+									<field name="access_id" required="1" attrs="{'readonly':[('load_access','=',True),('access_categ_id','=',False)]}"/>
 									<field name="moc_id" required="1" attrs="{'readonly':[('load_access','=',True)]}"/>
 								</group>
 								<group>
