@@ -20,7 +20,7 @@ import calendar
 today = datetime.now()
 
 UOM_CONVERSATION = [
-    ('one_dimension','One Dimension'),('two_dimension','Two Dimension')
+	('one_dimension','One Dimension'),('two_dimension','Two Dimension')
 ]
 
 class kg_po_grn(osv.osv):
@@ -126,7 +126,7 @@ class kg_po_grn(osv.osv):
 		
 		'name': fields.char('GRN NO',required=True,readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'grn_date':fields.date('Date',required=True,readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
-		'state': fields.selection([('item_load','Draft'),('draft', 'Waiting for Confirmation'), ('confirmed', 'Waiting for Approval'), ('done', 'Done'), ('inv', 'Invoiced'), ('cancel', 'Cancelled'),('reject','Rejected')], 'Status',readonly=True),
+		'state': fields.selection([('item_load','Draft'),('draft', 'Draft'), ('confirmed', 'WFA'), ('done', 'Approved'), ('inv', 'Invoiced'), ('cancel', 'Cancelled'),('reject','Rejected')], 'Status',readonly=True),
 		'can_remark':fields.text('Cancel Remarks'),
 		'reject_remark':fields.text('Reject Remarks', readonly=True, states={'confirmed':[('readonly',False)]}),
 		'remark':fields.text('Remarks'),
@@ -208,6 +208,8 @@ class kg_po_grn(osv.osv):
 		'payment_type': fields.selection([('cash', 'Cash'), ('credit', 'Credit')], 'Payment Type', readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'sup_invoice_no':fields.char('Supplier Invoice No',size=200, readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'sup_invoice_date':fields.date('Supplier Invoice Date', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
+		'vehicle_details':fields.char('Vehicle Details', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
+		'insp_ref_no':fields.char('Insp.Ref.No.', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		
 		## Child Tables Declaration
 		
@@ -267,7 +269,14 @@ class kg_po_grn(osv.osv):
 	def write(self, cr, uid, ids, vals, context=None):		
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_po_grn, self).write(cr, uid, ids, vals, context)
-		
+	
+	def onchange_created_by(self, cr, uid, ids, created_by, context=None):
+		value = {'department_id': ''}
+		if created_by:
+			user = self.pool.get('res.users').browse(cr, uid, created_by, context=context)
+			value = {'department_id': user.dep_name.id}
+		return {'value': value}	
+			
 	def onchange_grn_date(self, cr, uid, ids, grn_date):
 		today_date = today.strftime('%Y-%m-%d')
 		back_list = []
@@ -324,15 +333,16 @@ class kg_po_grn(osv.osv):
 		rec = self.browse(cr, uid, ids[0])
 		po_id = self.pool.get('purchase.order')
 		so_id = self.pool.get('kg.service.order')
-		if rec.state != 'draft':
+		if rec.state not in ('draft','item_load'):
 			raise osv.except_osv(_('Invalid action !'), _('System not allow to delete Confirmed and Done state GRN !!'))
 		else:
-			for line in rec.line_ids:
-				if rec.grn_type == 'from_po':
-					po_id.write(cr, uid, line.po_line_id.order_id.id, {'grn_flag' : False})
-				if rec.grn_type == 'from_so':
-					so_id.write(cr, uid, line.so_line_id.service_id.id, {'grn_flag' : False})   
-			unlink_ids.append(grn.id)
+			if rec.line_ids:
+				for line in rec.line_ids:
+					if rec.grn_type == 'from_po':
+						po_id.write(cr, uid, line.po_line_id.order_id.id, {'grn_flag' : False})
+					if rec.grn_type == 'from_so':
+						so_id.write(cr, uid, line.so_line_id.service_id.id, {'grn_flag' : False})   
+			unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
 		
 	# GRN LINE Creation #
@@ -468,7 +478,7 @@ class kg_po_grn(osv.osv):
 					date_order = datetime.strptime(date_order, '%Y-%m-%d')
 					date_order = date_order.strftime('%d/%m/%Y')
 					sodate_list.append(date_order)
-					soremark_list.append(so_record.origin or 'Nil')
+					soremark_list.append('--')
 					so_name = ",".join(so_list)
 					so_date = ",".join(sodate_list)
 					so_remark = ",".join(soremark_list)
@@ -689,10 +699,10 @@ class kg_po_grn(osv.osv):
 						raise osv.except_osv(_('Warning!'), _('You should specify expiry date and batch no for %s !!' %(line.product_id.name)))
 				if line.po_exp_id:
 					for exp_line in line.po_exp_id:
-						if line.po_grn_date > exp_line.exp_date:
-							raise osv.except_osv(
-									_('Expiry Date Should Not Be Less Than Current Date!'),
-									_('Change the product expity date to greater than current date for Product %s' %(line.product_id.name)))
+						if exp_line.exp_date:
+							if line.po_grn_date > exp_line.exp_date:
+								raise osv.except_osv(_('Expiry Date Should Not Be Less Than Current Date!'),
+										_('Change the product expity date to greater than current date for Product %s' %(line.product_id.name)))
 					cr.execute(""" select sum(product_qty) from kg_po_exp_batch where po_grn_line_id = %s """ %(line.id))
 					exp_data = cr.dictfetchone()
 					exp_grn_qty = exp_data['sum']
@@ -1390,7 +1400,6 @@ class kg_po_grn(osv.osv):
 		}
 		return {'type': 'ir.actions.report.xml', 'report_name': 'grn.print', 'datas': datas, 'nodestroy': True,'name': 'GRN'}	  
 	
-	
 kg_po_grn()
 
 class po_grn_line(osv.osv):
@@ -1446,13 +1455,13 @@ class po_grn_line(osv.osv):
 		
 	_columns = {
 		
-		### Basic Info
+		## Basic Info
 		
 		'po_grn_id':fields.many2one('kg.po.grn','PO GRN Entry'),
 		'state': fields.selection([('draft', 'Draft'), ('confirmed', 'Confirmed'),('done', 'Done'), ('cancel', 'Cancelled')], 'Status',readonly=True),
 		'remark':fields.text('Notes'),
 		
-		### Module Requirement Fields
+		## Module Requirement Fields
 		
 		'po_grn_date':fields.date('PO GRN Date'),
 		'name':fields.char('Product'),
@@ -1537,17 +1546,17 @@ class po_grn_line(osv.osv):
 po_grn_line()
 
 class kg_po_exp_batch(osv.osv):
-
+	
 	_name = "kg.po.exp.batch"
 	_description = "Expiry Date and Batch NO"
-
+	
 	_columns = {
 		
-		### Basic Info
+		## Basic Info
 		
 		'po_grn_line_id':fields.many2one('po.grn.line','PO GRN Entry Line'),
 		
-		### Module Requirement Fields
+		## Module Requirement Fields
 		
 		'exp_date':fields.date('Expiry Date'),
 		'batch_no':fields.char('Batch No'),
@@ -1569,11 +1578,11 @@ class kg_po_grn_expense_track(osv.osv):
 	
 	_columns = {
 		
-		### Basic Info
+		## Basic Info
 		
 		'expense_id': fields.many2one('kg.po.grn', 'Expense Track'),
 		
-		### Module Requirement Fields
+		## Module Requirement Fields
 		
 		'name': fields.char('Number', size=128, select=True,readonly=False),
 		'date': fields.date('Creation Date'),
@@ -1599,11 +1608,11 @@ class ch_po_grn_wo(osv.osv):
 	
 	_columns = {
 		
-		### Basic Info
+		## Basic Info
 		
 		'header_id': fields.many2one('po.grn.line', 'PO Line'),
 		
-		### Module Requirement Fields
+		## Module Requirement Fields
 		
 		'wo_id': fields.char('WO No.'),
 		'w_order_id': fields.many2one('kg.work.order','WO',domain="[('state','=','confirmed')]"),
@@ -1631,5 +1640,5 @@ class ch_po_grn_wo(osv.osv):
 		(_check_qty,'You cannot save with zero qty !',['Qty']),
 		
 		]
-		
+	
 ch_po_grn_wo()

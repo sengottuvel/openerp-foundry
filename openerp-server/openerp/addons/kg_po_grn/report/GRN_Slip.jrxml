@@ -110,7 +110,13 @@ CASE WHEN partner_city.name = null THEN ''
 ELSE partner_city.name
 END as sup_city,
 grn.po_so_remark as remarks,
-to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS New_Date
+to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS New_Date,
+(CASE WHEN grn.vehicle_details is null
+THEN  '- '
+ELSE vehicle_details END ) as vehicle_details,
+(CASE WHEN grn.insp_ref_no is null
+THEN  '- '
+ELSE grn.insp_ref_no END ) as insp_ref_no
 
 from kg_po_grn grn
 
@@ -149,6 +155,8 @@ where grn.id in (select grn_id from tmp_kg_po_grn where user_id = $P{user_id}) a
 	<field name="sup_city" class="java.lang.String"/>
 	<field name="remarks" class="java.lang.String"/>
 	<field name="new_date" class="java.lang.String"/>
+	<field name="vehicle_details" class="java.lang.String"/>
+	<field name="insp_ref_no" class="java.lang.String"/>
 	<group name="GRN_Grup_Header" isStartNewPage="true">
 		<groupExpression><![CDATA[$F{grn_id}]]></groupExpression>
 		<groupHeader>
@@ -464,7 +472,7 @@ where grn.id in (select grn_id from tmp_kg_po_grn where user_id = $P{user_id}) a
 				<textFieldExpression><![CDATA["Goods Receipts Note "]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="81" width="212" height="20"/>
+				<reportElement x="0" y="61" width="212" height="20"/>
 				<box leftPadding="2"/>
 				<textElement>
 					<font size="8" isBold="false"/>
@@ -472,7 +480,7 @@ where grn.id in (select grn_id from tmp_kg_po_grn where user_id = $P{user_id}) a
 				<textFieldExpression><![CDATA["GRN No. :"+" "+$F{grn_no}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="101" width="212" height="20"/>
+				<reportElement x="0" y="81" width="212" height="20"/>
 				<box leftPadding="2"/>
 				<textElement>
 					<font size="8" isBold="false"/>
@@ -480,7 +488,7 @@ where grn.id in (select grn_id from tmp_kg_po_grn where user_id = $P{user_id}) a
 				<textFieldExpression><![CDATA["DC No.    :"+" "+$F{dc_no}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="436" y="101" width="207" height="20"/>
+				<reportElement x="437" y="81" width="207" height="20"/>
 				<box leftPadding="2"/>
 				<textElement textAlignment="Right">
 					<font size="8" isBold="false"/>
@@ -488,7 +496,7 @@ where grn.id in (select grn_id from tmp_kg_po_grn where user_id = $P{user_id}) a
 				<textFieldExpression><![CDATA["DC Date  :"+" "+$F{dc_date}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="436" y="81" width="207" height="20"/>
+				<reportElement x="437" y="61" width="207" height="20"/>
 				<box leftPadding="2"/>
 				<textElement textAlignment="Right">
 					<font size="8" isBold="false"/>
@@ -558,6 +566,22 @@ where grn.id in (select grn_id from tmp_kg_po_grn where user_id = $P{user_id}) a
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{sup_zip}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="101" width="212" height="20"/>
+				<box leftPadding="2"/>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Insp.Ref.No. :"+" "+$F{insp_ref_no}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="436" y="101" width="207" height="20"/>
+				<box leftPadding="2"/>
+				<textElement textAlignment="Right">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Vehicle Details:"+" "+$F{vehicle_details}]]></textFieldExpression>
 			</textField>
 		</band>
 	</columnHeader>

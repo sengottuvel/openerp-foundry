@@ -14,10 +14,10 @@
             <field name="arch" type="xml">
             <form string="General GRN" version="7.0">
 				<header>
-					<button name="entry_confirm" string="Confirm" type="object" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+					<button name="entry_confirm" string="Confirm" type="object" states="draft" class="oe_highlight"/>
 					<button name="entry_approve" string="Approve" type="object" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-					<button name="entry_cancel" string="Cancel" type="object" states="done" class="oe_highlight"/>
-					<button name="entry_reject" string="Reject" type="object" states="confirmed" class="oe_highlight"/>
+					<button name="entry_cancel" string="Cancel" type="object" states="done" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+					<button name="entry_reject" string="Reject" type="object" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					<!--	
 					<button name="grn_reject" string="Reject" type="object" states="confirmed" 
 						class="oe_highlight" confirm="Are you sure to proceed ?"/>	
@@ -40,6 +40,8 @@
 						<field name="dc_date"/>
 						<field name="sup_invoice_date"  attrs="{'invisible': [('grn_dc','!=','dc_invoice')],'required': [('grn_dc','=','dc_invoice')]}"/>
 						<field name="inward_type"/>
+						<field name="vehicle_details"/>
+						<field name="insp_ref_no"/>
 						<field name="state" style="width: 30%%" class="att_state_change"/>
                     </group>
                 </group>
@@ -55,7 +57,7 @@
 					<page string="Products">
 						<field name="grn_line" nolabel="1" context="{'inward_type':inward_type,'state':'draft','price_type': 'po_uom',}"/>
 					</page>
-					<page string="Additonal Charges">
+					<page string="Additonal Charges" invisible="1">
 						<field colspan="4" mode="tree" name="expense_line_id" nolabel="1" widget="one2many_list" >
 							<tree string="Expense Lines" editable="bottom"> 
 							<field name="description" required="1"/>
@@ -177,7 +179,7 @@
 						<field name="exp_batch_id" nolabel="1">
 							<tree editable="bottom">
 								<field name="product_qty" required="1"/>
-								<field name="exp_date" required="1"/>               
+								<field name="exp_date"/>               
 								<field name="batch_no" string="S/N" required="1"/>
 							</tree>
 						</field>
@@ -220,8 +222,8 @@
 					<field name="name" string="GRN No" filter_domain="[('name','ilike',self)]" />
 					<field name="supplier_id" string="Supplier" filter_domain="[('supplier_id','ilike',self)]" />
 					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
-					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>					
-					<filter icon="terp-check" name="done" string="Done" domain="[('state','=','done')]"/>					
+					<filter icon="terp-check" name="confirmed" string="WFA" domain="[('state','=','confirmed')]"/>					
+					<filter icon="terp-check" name="done" string="Approved" domain="[('state','=','done')]"/>					
 					<separator/>
                     <group expand="0" string="Group By...">
 						<filter string="Supplier" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'supplier_id'}"/>

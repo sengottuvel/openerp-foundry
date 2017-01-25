@@ -27,8 +27,12 @@ class kg_general_grn(osv.osv):
 	_order = "grn_date desc,name desc"
 
 	def _amount_line_tax(self, cr, uid, line, context=None):
-		val = 0.0
-		new_amt_to_per = line.kg_discount or 0.0 / line.grn_qty
+		grn_qty = val = 0.0
+		if line.grn_qty == 0:
+			grn_qty = 1
+		else:
+			grn_qty = line.grn_qty
+		new_amt_to_per = line.kg_discount or 0.0 / grn_qty
 		amt_to_per = (line.kg_discount / (line.grn_qty * line.price_unit or 1.0 )) * 100
 		kg_discount_per = line.kg_discount_per
 		tot_discount_per = amt_to_per + kg_discount_per
@@ -98,27 +102,30 @@ class kg_general_grn(osv.osv):
 
 	_columns = {
 		
+		## Basic Info
+		
 		'name': fields.char('GRN NO',readonly=True),
 		'grn_date':fields.date('GRN Date',required=True,readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
+		'state': fields.selection([('draft', 'Draft'), ('confirmed', 'WFA'), ('done', 'Approved'), ('cancel', 'Cancelled'),('inv','Invoiced'),('reject','Rejected')], 'Status',readonly=True),
+		'remark':fields.text('Remarks'),
+		'notes':fields.text('Notes'),
+		'can_remark':fields.text('Cancel Remarks'),
+		'reject_remark':fields.text('Reject Remarks'),
+		
+		## Module Requirement Info
+		
 		'supplier_id':fields.many2one('res.partner','Supplier',domain=[('supplier','=',True)],readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'dc_no': fields.char('DC NO', required=True,readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'dc_date':fields.date('DC Date',required=True, readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'bill': fields.selection([
 			('applicable', 'Applicable'),
 			('not_applicable', 'Not Applicable')], 'Bill',required=True,readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
-		'grn_line':fields.one2many('kg.general.grn.line','grn_id','Line Entry',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'other_charge': fields.float('Other Charges',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'amount_total': fields.float('Total Amount',readonly=True),
 		'sub_total': fields.float('Line Total',readonly=True),
-		'state': fields.selection([('draft', 'Draft'), ('confirmed', 'Confirmed'), ('done', 'Done'), ('cancel', 'Cancelled'),('inv','Invoiced'),('reject','Reject')], 'Status',readonly=True),
 		'expiry_flag':fields.boolean('Expiry Flag'),
 		'dep_name': fields.many2one('kg.depmaster','Department',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
-		'remark':fields.text('Remarks'),
-		'notes':fields.text('Notes'),
-		'can_remark':fields.text('Cancel Remarks'),
-		'reject_remark':fields.text('Reject Remarks'),
 		'inward_type': fields.many2one('kg.inwardmaster', 'Inward Type',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
-
 		'other_charge': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Other Charges(+)',
 			 multi="sums", help="The amount without tax", track_visibility='always'),
 		'discount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Discount(-)',
@@ -160,9 +167,15 @@ class kg_general_grn(osv.osv):
 		'grn_dc': fields.selection([('only_grn','Only grn')], 'GRN Type',required=True),
 		'sup_invoice_no':fields.char('Supplier Invoice No',size=200, readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'sup_invoice_date':fields.date('Supplier Invoice Date', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
+		'vehicle_details':fields.char('Vehicle Details', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
+		'insp_ref_no':fields.char('Insp.Ref.No.', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
+		
+		## Child Tables Declaration
+		
+		'grn_line':fields.one2many('kg.general.grn.line','grn_id','Line Entry',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'expense_line_id': fields.one2many('kg.gen.grn.expense.track','expense_id','Expense Track',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		
-		# Entry Info
+		## Entry Info
 		
 		'active': fields.boolean('Active'),
 		'company_id':fields.many2one('res.company','Company',readonly=True),
@@ -188,9 +201,6 @@ class kg_general_grn(osv.osv):
 						print "name,,,,,,,,,,,,",vals['name']
 		grn =  super(kg_general_grn, self).create(cr, uid, vals, context=context)
 		return grn"""
-
-
-	### Back Entry Date ###
 
 	def write(self, cr, uid, ids, vals, context=None):		
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
@@ -224,7 +234,6 @@ class kg_general_grn(osv.osv):
 		return True
 
 	def onchange_user_id(self, cr, uid, ids, user_id, context=None):
-
 		value = {'dep_name': ''}
 		if user_id:
 			user = self.pool.get('res.users').browse(cr, uid, user_id, context=context)
@@ -793,14 +802,18 @@ class kg_general_grn_line(osv.osv):
 		return res
 
 	_columns = {
-
+		
+		## Basic Info
+		
 		'grn_id':fields.many2one('kg.general.grn','GRN Entry'),
+		
+		## Module Requirement Fields
+		
 		'product_id':fields.many2one('product.product','Item Name',required=True,readonly=False, states={'done':[('readonly',True)],'calcel':[('readonly',True)]}, domain="[('state','=','approved'),('purchase_ok','=',True)]"),
 		'uom_id':fields.many2one('product.uom','UOM',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'grn_qty':fields.float('GRN Quantity',required=True,readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'price_unit':fields.float('Unit Price',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'price_subtotal': fields.function(_amount_line, string='Line Total', digits_compute= dp.get_precision('Account'),store=True),
-		'exp_batch_id':fields.one2many('kg.exp.batch','grn_line_id','Exp Batch No',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'state': fields.selection([('draft', 'Draft'), ('confirmed', 'Confirmed'),('done', 'Done'), ('cancel', 'Cancelled')], 'Status',readonly=True),
 		'cancel_remark':fields.text('Cancel Remarks'),
 		'kg_discount_per': fields.float('Discount (%)', digits_compute= dp.get_precision('Discount')),
@@ -812,6 +825,10 @@ class kg_general_grn_line(osv.osv):
 		'price_type': fields.selection([('po_uom','PO UOM'),('per_kg','Per Kg')],'Price Type'),
 		'weight': fields.float('Weight',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		
+		## Child Tables Declaration
+		
+		'exp_batch_id':fields.one2many('kg.exp.batch','grn_line_id','Exp Batch No',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
+
 	}
 
 	_defaults = {
@@ -870,8 +887,13 @@ class kg_exp_batch(osv.osv):
 	_description = "Expiry Date and Batch NO"
 
 	_columns = {
-
+		
+		## Basic Info
+		
 		'grn_line_id':fields.many2one('kg.general.grn.line','GRN Entry Line'),
+		
+		## Module Requirement Fields
+		
 		'exp_date':fields.date('Expiry Date'),
 		'batch_no':fields.char('Batch No'),
 		'product_qty':fields.integer('Product Qty'),
@@ -893,7 +915,12 @@ class kg_gen_grn_expense_track(osv.osv):
 	
 	_columns = {
 		
+		## Basic Info
+		
 		'expense_id': fields.many2one('kg.general.grn', 'Expense Track'),
+		
+		## Module Requirement Fields
+		
 		'name': fields.char('Number', size=128, select=True,readonly=False),
 		'date': fields.date('Creation Date'),
 		'company_id': fields.many2one('res.company', 'Company Name'),
