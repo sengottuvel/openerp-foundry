@@ -805,7 +805,7 @@
 									<field name="item_name" readonly="1"/>
 									<field name="position_id" readonly="1"/>
 									<field name="moc_id" readonly="1"/>
-									<field name="sc_dc_qty" readonly="1"/>
+									<field name="sc_wo_qty" readonly="1"/>
 									<field name="qty" required="1"/>
 									<field name="operation_id" widget="many2many_tags" readonly="1"/>											
 									<field name="com_operation_id" widget="many2many_tags" required="1"/>											
