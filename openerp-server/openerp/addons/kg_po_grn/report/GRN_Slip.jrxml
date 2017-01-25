@@ -113,7 +113,7 @@ grn.po_so_remark as remarks,
 to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS New_Date,
 (CASE WHEN grn.vehicle_details is null
 THEN  '- '
-ELSE vehicle_details END ) as vehicle_details,
+ELSE grn.vehicle_details END ) as vehicle_details,
 (CASE WHEN grn.insp_ref_no is null
 THEN  '- '
 ELSE grn.insp_ref_no END ) as insp_ref_no

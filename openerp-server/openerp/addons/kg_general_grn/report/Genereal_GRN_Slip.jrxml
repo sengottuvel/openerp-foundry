@@ -89,7 +89,7 @@ user_part.name as user_name,
 grn.remark as remarks,
 (CASE WHEN grn.vehicle_details is null
 THEN  '- '
-ELSE vehicle_details END ) as vehicle_details,
+ELSE grn.vehicle_details END ) as vehicle_details,
 (CASE WHEN grn.insp_ref_no is null
 THEN  '- '
 ELSE grn.insp_ref_no END ) as insp_ref_no
