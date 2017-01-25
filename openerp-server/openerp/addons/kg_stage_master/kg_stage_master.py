@@ -215,7 +215,7 @@ class ch_stage_fettling(osv.osv):
 		'moc_cate_id': fields.many2one('kg.moc.category','Fettling MOC category', required=True,domain="[('state','not in',('reject','cancel')),('type_moc_cate','=','fettling')]"),	
 		'min_val':fields.float('Min Value(KG.)',required=True),
 		'max_val':fields.float('Max Value(KG.)',required=True),
-		'rate':fields.float('Rate',required=True),
+		'rate':fields.float('Rate',required=True,digits=(16,3)),
 		'remarks':fields.text('Remarks'),		
 		
 	}
