@@ -1073,7 +1073,7 @@ class kg_subcontract_inward(osv.osv):
 		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'active': True,
 		'flag_inward': False,
-		'transfer_type': 'internal',				
+		'transfer_type': 'sub_contractor',				
 		'state': 'draft',		
 	}
 	
@@ -1711,13 +1711,16 @@ class kg_subcontract_inward(osv.osv):
 						inward_line_vals = {
 							'header_id': inward_id,
 							'location': line_item.order_id.location,
-							'stock_type': 'pattern',
+							'stock_type': 'pump',
 							'pump_model_id': line_item.pump_model_id.id,
 							'pattern_id': line_item.pattern_id.id,
 							'pattern_name': line_item.pattern_name,
 							'moc_id': line_item.moc_id.id,							
 							'qty': total,
 							'available_qty': total,
+							'each_wgt': 0,
+							'total_weight': 0,
+							'unit_price': 0,
 							'stock_mode': 'excess',
 							'ms_stock_state': 'operation_inprogress',
 							'stock_item': 'ms_item'
