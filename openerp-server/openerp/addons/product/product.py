@@ -958,6 +958,8 @@ class product_product(osv.osv):
 		'state': 'draft',
 		'modify': 'yes',
 		'is_accessories': False,
+		'tolerance_applicable': True,
+		'tolerance_plus': 5,
 		
 	   }
 	
