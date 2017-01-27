@@ -53,27 +53,27 @@
                     <field name="remark"/>	
                     </group>
                     <group>
-                    <field name="date" required="1" attrs = "{'readonly':[('state','!=','amend')]}"/>
-					<field name="division_amend" attrs="{'required': [('state','!=','amend')]}"/>
-					<field name="po_date_amend"/>
-					<field name="quotation_date_amend"/>
-					<field name="quot_ref_no_amend"/>
-                    <field name="partner_id_amend" attrs="{'required': [('state','!=','amend')]}" on_change="onchange_partner_id(partner_id_amend,add_text_amend)"/>
-                    <field name="add_text_amend"/>
-                    <field name="price_amend"/>
+                    <field name="date" required="1" attrs = "{'readonly':[('state','!=','amend')],'invisible': [('state','=','amend')]}"/>
+					<field name="division_amend" attrs="{'required': [('state','!=','amend')],'invisible': [('state','=','amend')]}"/>
+					<field name="po_date_amend" attrs="{'invisible': [('state','=','amend')]}"/>
+					<field name="quotation_date_amend" attrs="{'invisible': [('state','=','amend')]}"/>
+					<field name="quot_ref_no_amend" attrs="{'invisible': [('state','=','amend')]}"/>
+                    <field name="partner_id_amend" attrs="{'required': [('state','!=','amend')],'invisible': [('state','=','amend')]}" on_change="onchange_partner_id(partner_id_amend,add_text_amend)"/>
+                    <field name="add_text_amend" attrs="{'invisible': [('state','=','amend')]}"/>
+                    <field name="price_amend" attrs="{'invisible': [('state','=','amend')]}"/>
                     <field name="delivery_address_amend" invisible="1"/>
-                    <field name="bill_type_amend" attrs="{'required': [('state','!=','amend')]}"/>
-                    <field name="payment_mode_amend" attrs="{'required': [('bill_type_amend','=','credit')]}"/>
+                    <field name="bill_type_amend" attrs="{'required': [('state','!=','amend')],'invisible': [('state','=','amend')]}"/>
+                    <field name="payment_mode_amend" attrs="{'required': [('bill_type_amend','=','credit')],'invisible': [('state','=','amend')]}"/>
                     <field name="advance_amt_amend" attrs="{'required': [('bill_type_amend','=','advance')],'invisible': [('bill_type_amend','!=','advance')]}"/>
-                    <field name="delivery_mode_amend" attrs="{'required': [('state','!=','amend')]}"/>
-                    <field name="term_warranty_amend"/>
-                    <field name="term_freight_amend"/>
-                    <field name="item_quality_term_id_amend" widget="many2many_tags"/>
-                    <field name="mode_of_dispatch_amend"/>
-                    <field name="po_type_amend" attrs="{'required': [('state','!=','amend')]}"/>
-                    <field name="insurance_amend"/>
-                    <field name="purpose_amend" attrs="{'required': [('state','!=','amend')]}"/>
-                    <field name="excise_duty_amend"/>
+                    <field name="delivery_mode_amend" attrs="{'required': [('state','!=','amend')],'invisible': [('state','=','amend')]}"/>
+                    <field name="term_warranty_amend" attrs="{'invisible': [('state','=','amend')]}"/>
+                    <field name="term_freight_amend" attrs="{'invisible': [('state','=','amend')]}"/>
+                    <field name="item_quality_term_id_amend" widget="many2many_tags" attrs="{'invisible': [('state','=','amend')]}"/>
+                    <field name="mode_of_dispatch_amend" attrs="{'invisible': [('state','=','amend')]}"/>
+                    <field name="po_type_amend" attrs="{'required': [('state','!=','amend')],'invisible': [('state','=','amend')]}"/>
+                    <field name="insurance_amend" attrs="{'invisible': [('state','=','amend')]}"/>
+                    <field name="purpose_amend" attrs="{'required': [('state','!=','amend')],'invisible': [('state','=','amend')]}"/>
+                    <field name="excise_duty_amend" attrs="{'invisible': [('state','=','amend')]}"/>
                     <field name="po_expenses_type1_amend" invisible="1"/>
                     <field name="value1_amend" invisible="1"/>
 					<field name="po_expenses_type2_amend" invisible="1"/>

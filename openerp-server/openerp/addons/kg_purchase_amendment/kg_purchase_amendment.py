@@ -456,8 +456,8 @@ class kg_purchase_amendment(osv.osv):
 							'term_warranty_amend':po_order.term_warranty,
 							'term_freight':po_order.term_freight,
 							'term_freight_amend':po_order.term_freight,
-							'mode_of_dispatch':po_order.mode_of_dispatch,
-							'mode_of_dispatch_amend':po_order.mode_of_dispatch,
+							'mode_of_dispatch':po_order.mode_of_dispatch.id,
+							'mode_of_dispatch_amend':po_order.mode_of_dispatch.id,
 							'insurance':po_order.insurance,
 							'insurance_amend':po_order.insurance,
 							'purpose':po_order.purpose,
@@ -853,7 +853,7 @@ class kg_purchase_amendment(osv.osv):
 							qty = amend_line.product_qty_amend
 					else:
 						qty = amend_line.product_qty_amend
-					self.pool.get('kg.purchase.amendment.line').write(cr,uid,item.id,{'quantity_amend':qty})	
+					self.pool.get('kg.purchase.amendment.line').write(cr,uid,amend_line.id,{'quantity_amend':qty})	
 					
 				else:
 					

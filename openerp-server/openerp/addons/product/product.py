@@ -959,7 +959,7 @@ class product_product(osv.osv):
 		'modify': 'yes',
 		'is_accessories': False,
 		'tolerance_applicable': True,
-		'tolerance_plus': 5,
+		'tolerance_plus': 10,
 		
 	   }
 	
