@@ -672,10 +672,6 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Inventory Admin')]"/>
 		</record>
 		
-		
-		
-		
-		
 <!--
 		<record id="t_inventory_scheduler_mail_settings_kg_mail" model="ir.model.access">
 			<field name="model_id" ref="kg_mail_settings.model_kg_mail_settings"/>
@@ -697,8 +693,6 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'kg_scheduler_admin')]"/>
 		</record>
 -->
-		
-	<!-- Added by Karthikeyan -->
 	
 		<record id="t_inventory_po_supplier_adv" model="ir.model.access">
 			<field name="model_id" ref="kg_supplier_advance.model_kg_supplier_advance"/>
@@ -720,6 +714,25 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Inventory Admin')]"/>
 		</record>	
 		
+		<record id="t_inventory_debit_note" model="ir.model.access">
+			<field name="model_id" ref="kg_debit_note.model_kg_debit_note"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Debit Note</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Inventory Admin')]"/>
+		</record>
+		
+		<record id="t_inventory_ch_debit_note" model="ir.model.access">
+			<field name="model_id" ref="kg_debit_note.model_ch_debit_note"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch Debit Note</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Inventory Admin')]"/>
+		</record>
 		
 </data>
 </openerp>

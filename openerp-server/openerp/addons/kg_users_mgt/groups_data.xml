@@ -355,6 +355,7 @@
 			
 			ref('kg_menus.ppm_purchase_invoice_menu'),
 			ref('kg_purchase_invoice.pam_purchase_invoice'),
+			ref('kg_debit_note.tam_debit_note'),
 			
 			ref('kg_menus.cpm_contractor_inward_menu'),
 			ref('kg_menus.cam_contractor'),
