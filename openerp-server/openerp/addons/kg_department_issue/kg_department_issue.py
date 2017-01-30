@@ -740,6 +740,7 @@ class kg_department_issue_line(osv.osv):
 		'issue_qty':fields.float('Issue Qty',required=True,readonly=False,states={'done':[('readonly',True)]}),
 		'issue_qty_2':fields.float('Issue Qty 2',required=True),
 		'indent_qty':fields.float('Indent Quantity'),
+		'reject_qty':fields.float('Reject Qty'),
 		'price_unit':fields.float('Unit Price'),
 		'kg_discount_per': fields.float('Discount (%)', digits_compute= dp.get_precision('Discount')),
 		'kg_discount': fields.float('Discount Amount'),
@@ -772,6 +773,8 @@ class kg_department_issue_line(osv.osv):
 		'wo_moc_id': fields.related('indent_line_id','moc_id', type='many2one',relation='kg.moc.master', string='MOC',store=True),
 		'wo_position_id': fields.related('indent_line_id','position_id', type='many2one',relation='kg.position.number', string='Position No.',store=True),
 		'order_priority': fields.related('wo_id','order_priority', type='selection', selection=ORDER_PRIORITY, string='Priority', store=True),
+		'accept_date':fields.date('Accepted Date'),
+		'remark_id':fields.many2one('kg.rejection.master','Rejection Remarks'),
 		
 		## Child Tables Declaration
 		
@@ -783,6 +786,7 @@ class kg_department_issue_line(osv.osv):
 	
 		'state': 'draft',
 		'wo_state': 'accept',
+		'accept_date': lambda * a: time.strftime('%Y-%m-%d'),
 		
 	}
 
@@ -802,6 +806,12 @@ class kg_department_issue_line(osv.osv):
 		value = {'issue_qty_2': 0}
 		if issue_qty:
 			value = {'issue_qty_2': issue_qty}
+		return {'value': value}
+	
+	def onchange_reject_qty(self, cr, uid, ids,issue_qty_2,issue_qty,context=None):
+		value = {'reject_qty': 0}
+		if issue_qty_2 > issue_qty:
+			value = {'reject_qty': issue_qty_2 - issue_qty}
 		return {'value': value}
 	
 	def line_action_process(self, cr, uid, ids, context=None):
