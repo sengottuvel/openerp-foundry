@@ -53,8 +53,8 @@
 								<field name="pattern_id" on_change="onchange_pattern_name(pattern_id)"/>
 								<field name="pattern_name"/>					   
 								<field name="moc_id"/>					   
-								<field name="min_weight"/>					   
-								<field name="max_weight"/>
+								<field name="min_weight" string="Min Pressure"/>					   
+								<field name="max_weight" string="Max Pressure"/>
 								<field name="remarks" widget="char"/>					
 							</tree>
 						</field>

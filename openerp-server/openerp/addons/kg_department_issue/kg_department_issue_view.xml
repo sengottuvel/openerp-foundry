@@ -609,7 +609,7 @@
         </record>
         
         <!-- Store Issue Transaction Menu -->
-		<menuitem action="action_kg_department_issue" id="gam_dept_issue" name="Store Issue" parent="kg_menus.gpm_grn_issue_menu" sequence="4"/>
+		<menuitem action="action_kg_department_issue" id="gam_dept_issue" name="Store Issue" parent="kg_menus.gpm_grn_issue_menu" sequence="5"/>
         
         <!-- MS Store Inward Transaction Menu -->
 		<menuitem action="tma_ms_issue_line" id="tam_ms_issue_line" name="MS Store Inward" parent="kg_machineshop.tpm_ms_process" sequence="19"/>

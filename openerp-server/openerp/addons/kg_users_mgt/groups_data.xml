@@ -334,13 +334,16 @@
 			
 			ref('kg_menus.mpm_store_master'),
 			ref('kg_depmaster.mam_depmaster_action'),
+			ref('kg_product.mam_fou_product'),
 			ref('kg_inwardmaster.mam_inward_master'),
 			ref('kg_outwardmaster.mam_outward_master'),
 			ref('kg_menus.mam_inventory_master'),
 			
 			ref('kg_menus.gpm_grn_issue_menu'),
 			ref('kg_general_grn.gam_general_grn'),
+			ref('kg_general_grn.tam_general_grn_qc'),
 			ref('kg_po_grn.gam_po_grn'),
+			ref('kg_po_grn.tam_po_grn_qc'),
 			ref('kg_department_issue.gam_dept_issue'),
 			ref('kg_menus.gam_bot_issue'),
 			ref('kg_menus.iam_issue_return'),
@@ -377,7 +380,24 @@
 -->
             <field name="users" eval="[(4, ref('base.user_root'))]"/>
     </record>
-     
+    
+    <!--  Inventory GRN Groups  -->
+    
+    <record id="group_inventory_department" model="res.groups">
+        <field name="name">Inventory Department Wise</field>
+        <field name="category_id" ref="base.module_category_warehouse_management"/>
+        <field name="custom_group">True</field>       
+        <field name="implied_ids" eval="[(4, ref('stock.group_stock_user'))]"/>
+        <field eval="[(6,0,[
+			  
+			ref('kg_general_grn.gam_general_grn'),
+			ref('kg_po_grn.gam_po_grn'),
+			  
+            ])]" name="menu_access"/>
+            
+            <field name="users" eval="[(4, ref('base.user_root'))]"/>
+    </record>
+    
     <record id="group_inventory_master_admin" model="res.groups">
         <field name="name">Inventory Master Admin</field>
         <field name="implied_ids" eval="[(4, ref('stock.group_stock_user'))]"/>
@@ -389,6 +409,7 @@
 			
 			ref('kg_menus.mpm_store_master'),
 			ref('kg_depmaster.mam_depmaster_action'),
+			ref('kg_product.mam_fou_product'),
 			ref('kg_inwardmaster.mam_inward_master'),
 			ref('kg_outwardmaster.mam_outward_master'),
 			ref('kg_menus.mam_inventory_master'),
