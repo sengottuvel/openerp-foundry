@@ -2162,7 +2162,7 @@ class ch_wo_accessories_ms(osv.osv):
 		### machineshop Item Details ####
 		'header_id':fields.many2one('ch.wo.accessories', 'Header Id', ondelete='cascade'),
 		
-		'pos_no': fields.related('position_id','name', type='integer', string='Position No', store=True),
+		'pos_no': fields.related('position_id','name', type='char', string='Position No', store=True),
 		'position_id': fields.many2one('kg.position.number','Position No'),
 		'csd_no': fields.char('CSD No.'),
 		'bom_id': fields.many2one('kg.bom','BOM'),
