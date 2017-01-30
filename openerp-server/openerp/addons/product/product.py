@@ -288,6 +288,10 @@ class product_uom(osv.osv):
 	def _compute_qty_obj(self, cr, uid, from_unit, qty, to_unit, context=None):
 		if context is None:
 			context = {}
+		print"from_unit.category_id.id",from_unit.category_id.id
+		print"from_unit.category_id",from_unit.category_id
+		print"from_unit",from_unit
+		print"to_unit",to_unit
 		if from_unit.category_id.id <> to_unit.category_id.id:
 			if context.get('raise-exception', True):
 				raise osv.except_osv(_('Error!'), _('Conversion from Product UoM %s to Default UoM %s is not possible as they both belong to different Category!.') % (from_unit.name,to_unit.name,))
