@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+		<report string="Debit Note Copy"
+				model="kg.debit.note"
+				auto="True"
+				name="onscreen_debit_note_report"
+				rml="kg_debit_note/report/debit_note.jrxml"
+				id="debit_jasper_report_menu" 
+				menu="True"
+				header="False"
+        />
+	
+    </data>
+</openerp>

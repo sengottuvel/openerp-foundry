@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Gate_Pass" pageWidth="595" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="96"/>
+	<property name="ireport.y" value="0"/>
 	<subDataset name="New Dataset 1">
 		<parameter name="pass_id" class="java.lang.Integer"/>
 		<queryString>
@@ -340,18 +340,18 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 				<textFieldExpression><![CDATA[$F{phone}+ " Fax : "+$F{fax}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="372" y="21" width="53" height="13"/>
+				<reportElement stretchType="RelativeToBandHeight" x="372" y="21" width="42" height="13"/>
 				<box topPadding="1">
 					<topPen lineWidth="0.0"/>
 				</box>
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[" TIN      : "]]></textFieldExpression>
+				<textFieldExpression><![CDATA[" TIN      :"]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="425" y="21" width="129" height="13"/>
-				<box topPadding="1" leftPadding="2" rightPadding="0">
+				<reportElement x="414" y="21" width="140" height="13"/>
+				<box topPadding="1" leftPadding="4" rightPadding="0">
 					<topPen lineWidth="0.0"/>
 				</box>
 				<textElement>
@@ -360,16 +360,16 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 				<textFieldExpression><![CDATA[$F{tin_no}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="372" y="34" width="53" height="12"/>
+				<reportElement stretchType="RelativeToBandHeight" x="372" y="34" width="42" height="12"/>
 				<box topPadding="1"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[" CST No: "]]></textFieldExpression>
+				<textFieldExpression><![CDATA[" CST No:"]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="427" y="34" width="127" height="12"/>
-				<box topPadding="1"/>
+				<reportElement x="414" y="34" width="140" height="12"/>
+				<box topPadding="1" leftPadding="4"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
@@ -381,10 +381,10 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[" CODE   : "]]></textFieldExpression>
+				<textFieldExpression><![CDATA[" CODE   :   "]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="414" y="46" width="11" height="12"/>
+				<reportElement x="420" y="45" width="11" height="12"/>
 				<box topPadding="1">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -397,20 +397,20 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 				<textFieldExpression><![CDATA["1"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="425" y="46" width="13" height="12"/>
+				<reportElement x="431" y="45" width="13" height="12"/>
 				<box topPadding="1">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
 					<bottomPen lineWidth="0.5"/>
 					<rightPen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center">
+				<textElement>
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="438" y="46" width="13" height="12"/>
+				<reportElement x="444" y="45" width="13" height="12"/>
 				<box topPadding="1">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -589,7 +589,7 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[ "Vehicle Details:"+" "+$F{vehicle_details}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Vehicle Details:"+" "+$F{vehicle_details}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="283" y="30" width="271" height="13"/>

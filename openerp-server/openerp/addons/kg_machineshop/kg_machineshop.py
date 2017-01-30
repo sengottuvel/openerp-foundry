@@ -171,7 +171,7 @@ class kg_machineshop(osv.osv):
 		'division_id':_get_default_division,
 		### MS Inward ###
 		#~ 'inward_accept_user_id':lambda obj, cr, uid, context: uid,
-		'accept_date': lambda * a: time.strftime('%Y-%m-%d'),
+		
 		
 		
 	}
