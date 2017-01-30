@@ -121,7 +121,7 @@ class kg_machineshop(osv.osv):
 		'each_weight': fields.function(_get_each_weight, string='Each Weight(Kgs)', method=True, store=True, type='float'),
 		'total_weight': fields.function(_get_total_weight, string='Total Weight(Kgs)', method=True, store=True, type='float'),
 		'state': fields.selection([('waiting','Waiting for Accept'),('raw_pending','Pending'),('accept','Accepted')],'Status', readonly=True),
-		'accept_date': fields.date('Accepted Date',required=True),
+		'accept_date': fields.date('Accepted Date'),
 		
 		### MS Inward Schedule List ###
 		'ms_sch_qty': fields.integer('Schedule Qty', required=True),
