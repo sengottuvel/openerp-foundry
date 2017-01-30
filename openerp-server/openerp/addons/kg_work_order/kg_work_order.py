@@ -1797,7 +1797,7 @@ class ch_order_bom_details(osv.osv):
 		#~ 'pcs_weight': fields.related('pattern_id','pcs_weight', type='float', string='SS Weight(kgs)', store=True),
 		#~ 'ci_weight': fields.related('pattern_id','ci_weight', type='float', string='CI Weight(kgs)', store=True),
 		#~ 'nonferous_weight': fields.related('pattern_id','nonferous_weight', type='float', string='Non-Ferrous Weight(kgs)', store=True),
-		'pos_no': fields.related('bom_line_id','pos_no', type='integer', string='Position No', store=True),
+		'pos_no': fields.related('bom_line_id','pos_no', type='char', string='Position No', store=True),
 		'position_id': fields.many2one('kg.position.number', string='Position No'),
 		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),
 		'qty': fields.integer('Qty'),
