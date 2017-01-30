@@ -1797,7 +1797,7 @@ class ch_order_bom_details(osv.osv):
 		#~ 'pcs_weight': fields.related('pattern_id','pcs_weight', type='float', string='SS Weight(kgs)', store=True),
 		#~ 'ci_weight': fields.related('pattern_id','ci_weight', type='float', string='CI Weight(kgs)', store=True),
 		#~ 'nonferous_weight': fields.related('pattern_id','nonferous_weight', type='float', string='Non-Ferrous Weight(kgs)', store=True),
-		'pos_no': fields.related('bom_line_id','pos_no', type='char', string='Position No', store=True),
+		'pos_no': fields.related('bom_line_id','pos_no', type='integer', string='Position No', store=True),
 		'position_id': fields.many2one('kg.position.number', string='Position No'),
 		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),
 		'qty': fields.integer('Qty'),
@@ -1907,7 +1907,7 @@ class ch_order_machineshop_details(osv.osv):
 	
 		'header_id':fields.many2one('ch.work.order.details', 'Work Order Detail', required=1, ondelete='cascade'),
 		'ms_line_id':fields.many2one('ch.machineshop.details', 'Machine Shop Id'),
-		'pos_no': fields.related('ms_line_id','pos_no', type='char', string='Position No', store=True),
+		'pos_no': fields.related('ms_line_id','pos_no', type='integer', string='Position No', store=True),
 		'position_id': fields.many2one('kg.position.number','Position No'),
 		'bom_id': fields.many2one('kg.bom','BOM'),
 		'ms_id':fields.many2one('kg.machine.shop', 'Item Code',domain = [('type','=','ms')], ondelete='cascade',required=True),
@@ -2162,7 +2162,7 @@ class ch_wo_accessories_ms(osv.osv):
 		### machineshop Item Details ####
 		'header_id':fields.many2one('ch.wo.accessories', 'Header Id', ondelete='cascade'),
 		
-		'pos_no': fields.related('position_id','name', type='char', string='Position No', store=True),
+		'pos_no': fields.related('position_id','name', type='integer', string='Position No', store=True),
 		'position_id': fields.many2one('kg.position.number','Position No'),
 		'csd_no': fields.char('CSD No.'),
 		'bom_id': fields.many2one('kg.bom','BOM'),
