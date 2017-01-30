@@ -200,12 +200,6 @@ class kg_machineshop(osv.osv):
 			today = date.today()
 			today = str(today)
 			today = datetime.strptime(today, '%Y-%m-%d')
-			accept_date = entry_rec.accept_date
-			accept_date = str(accept_date)
-			accept_date = datetime.strptime(accept_date, '%Y-%m-%d')
-			if accept_date > today:
-				raise osv.except_osv(_('Warning!'),
-						_('Accepted date should be less than or equal to current date !!'))
 						
 			if entry_rec.inward_accept_qty < 0:
 				raise osv.except_osv(_('Warning!'),
