@@ -1907,7 +1907,7 @@ class ch_order_machineshop_details(osv.osv):
 	
 		'header_id':fields.many2one('ch.work.order.details', 'Work Order Detail', required=1, ondelete='cascade'),
 		'ms_line_id':fields.many2one('ch.machineshop.details', 'Machine Shop Id'),
-		'pos_no': fields.related('ms_line_id','pos_no', type='integer', string='Position No', store=True),
+		'pos_no': fields.related('ms_line_id','pos_no', type='char', string='Position No', store=True),
 		'position_id': fields.many2one('kg.position.number','Position No'),
 		'bom_id': fields.many2one('kg.bom','BOM'),
 		'ms_id':fields.many2one('kg.machine.shop', 'Item Code',domain = [('type','=','ms')], ondelete='cascade',required=True),
