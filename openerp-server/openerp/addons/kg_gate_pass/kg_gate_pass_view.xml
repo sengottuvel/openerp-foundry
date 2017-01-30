@@ -6,7 +6,6 @@
           Form view
           =====================
         -->
-
 		<record id="view_gate_pass_form" model="ir.ui.view">
             <field name="name">view.gate.pass.form</field>
             <field name="model">kg.gate.pass</field>
@@ -20,7 +19,6 @@
 					<button name="cancel_entry" string="Cancel" type="object" states="done" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					<!--<button name="gate_pass_print" string="Print Gate Pass" states="done" type="object" class="oe_highlight"/>-->
 					</header>
-					
 					<group>
 						<group>
 							<field name="name"/>
@@ -56,7 +54,7 @@
 								<field name="qty" required="1" on_change="onchange_pending_qty(qty,grn_pending_qty,so_pending_qty)"/>
 								<field name="serial_no" attrs="{'readonly':[('mode','in',['frm_indent'])]}"/>
 								<field name="ser_no" attrs="{'readonly':[('mode','in',['frm_indent'])]}"/>
-								<field name="note"/>
+								<field name="remark_id"/>
 								<field name="mode" invisible="1"/>
 								<field name="so_flag" invisible="1"/>
 								<field name="grn_pending_qty" invisible="1"/>
@@ -68,7 +66,7 @@
 								<field name="serial_no" attrs="{'readonly':[('mode','in',['frm_indent'])]}"/>
 								<field name="ser_no" attrs="{'readonly':[('mode','in',['frm_indent'])]}"/>
 								<field name="uom" attrs="{'readonly':[('mode','in',['frm_indent'])]}" required="1"/>
-								<field name="note"/>
+								<field name="remark_id"/>
 								<field name="qty" required="1" on_change="onchange_pending_qty(qty,grn_pending_qty,so_pending_qty)"/>
 								<field name="so_flag" invisible="1"/>
 								<field name="mode" invisible="1"/>
@@ -186,14 +184,14 @@
         =====================
         Form Action
         ===================== -->
-
+		
 		<record id="action_gate_pass" model="ir.actions.act_window">
-				<field name="name">Gate Pass</field>
-				<field name="type">ir.actions.act_window</field>
-				<field name="res_model">kg.gate.pass</field>
-				<field name="view_type">form</field>
-				<field name="view_id" ref="gate_pass_tree_view"/>
-				<field name="search_view_id" ref="kg_gate_pass_search_view"/>
+			<field name="name">Gate Pass</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.gate.pass</field>
+			<field name="view_type">form</field>
+			<field name="view_id" ref="gate_pass_tree_view"/>
+			<field name="search_view_id" ref="kg_gate_pass_search_view"/>
 		</record>
 		
 		<record forcecreate="1" id="seq_gate_pass" model="ir.sequence.type">	

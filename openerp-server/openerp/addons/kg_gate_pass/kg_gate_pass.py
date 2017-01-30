@@ -97,7 +97,7 @@ class kg_gate_pass(osv.osv):
 	def _check_lineitems(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.entry_mode == 'manual' and entry.mode == 'direct' or entry.indent_flag == True:
-			if not entry.line_ids:
+			if not entry.gate_line:
 				return False
 		return True
 		
@@ -357,6 +357,7 @@ class kg_gate_pass_line(osv.osv):
 		'so_flag':fields.boolean('SO Flag'),
 		'serial_no':fields.many2one('stock.production.lot','Serial No',domain="[('product_id','=',product_id)]"),	
 		'mode': fields.selection([('direct', 'Direct'), ('frm_indent', 'From Indent')], 'Mode'),
+		'remark_id': fields.many2one('kg.rejection.master','Remarks')
 		
 	}
 	

@@ -11,7 +11,7 @@ pass_line.product_id as product_id,
 pro_temp.name as product_name,
 pro_uom.name as product_uom,
 pass_line.qty as qty,
-out.name as remarks,
+rej.name as remarks,
 brand.name as brand_name,
 pass_line.serial_no as serial_no
 
@@ -22,6 +22,7 @@ left join product_uom pro_uom on (pro_uom.id = pass_line.uom)
 left join kg_gate_pass pass on (pass.id = pass_line.gate_id)
 left join kg_outwardmaster out on (out.id = pass.out_type)
 left join kg_brand_master brand on (pass_line.brand_id = brand.id)
+left join kg_rejection_master rej on (rej.id = pass_line.remark_id)
 
 where pass_line.gate_id = $P{pass_id} order by pass_line.id]]>
 		</queryString>
@@ -177,7 +178,7 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 								<textFieldExpression><![CDATA[$F{product_name}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="372" y="0" width="77" height="34"/>
+								<reportElement stretchType="RelativeToTallestObject" x="477" y="0" width="78" height="34"/>
 								<box topPadding="2">
 									<bottomPen lineWidth="0.25"/>
 								</box>
@@ -187,17 +188,17 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 								<textFieldExpression><![CDATA[$F{remarks}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="449" y="0" width="39" height="34"/>
+								<reportElement stretchType="RelativeToTallestObject" x="372" y="0" width="39" height="34"/>
 								<box topPadding="2">
 									<bottomPen lineWidth="0.25"/>
 								</box>
-								<textElement>
+								<textElement textAlignment="Justified">
 									<font size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{qty}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="488" y="0" width="66" height="34"/>
+								<reportElement stretchType="RelativeToTallestObject" x="411" y="0" width="66" height="34"/>
 								<box topPadding="2">
 									<bottomPen lineWidth="0.25"/>
 								</box>
@@ -404,7 +405,7 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 					<bottomPen lineWidth="0.5"/>
 					<rightPen lineWidth="0.5"/>
 				</box>
-				<textElement>
+				<textElement textAlignment="Center">
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
@@ -491,7 +492,7 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 				<text><![CDATA[Please allow the following To]]></text>
 			</staticText>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="449" y="129" width="39" height="15"/>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="372" y="129" width="39" height="15"/>
 				<box leftPadding="2">
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.0"/>
@@ -504,7 +505,7 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 				<textFieldExpression><![CDATA["QTY"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="488" y="129" width="67" height="15"/>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="411" y="129" width="67" height="15"/>
 				<box leftPadding="2">
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.0"/>
@@ -543,7 +544,7 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 				<textFieldExpression><![CDATA["S.No. "]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="372" y="129" width="77" height="15"/>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="477" y="129" width="78" height="15"/>
 				<box leftPadding="2">
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.0"/>
