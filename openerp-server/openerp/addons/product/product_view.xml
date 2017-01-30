@@ -8,7 +8,7 @@
             <field name="model">product.product</field>
             <field name="arch" type="xml">
                 <search string="Product">
-                   <field name="name" string="Product" filter_domain="[('name','ilike',self)]"/>
+                   <field name="name" string="Product" filter_domain="['|',('name','ilike',self),('default_code','ilike',self)]"/>
                    <filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
 				   <filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirm')]"/>
 				   <filter icon="terp-check" name="approve" string="Approved" domain="[('state','=','approved')]"/>
