@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Gate_Pass" pageWidth="595" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.y" value="96"/>
 	<subDataset name="New Dataset 1">
 		<parameter name="pass_id" class="java.lang.Integer"/>
 		<queryString>
@@ -40,6 +40,8 @@ where pass_line.gate_id = $P{pass_id} order by pass_line.id]]>
 		<![CDATA[select
 pass.id as pass_id,
 comp.name as company_name,
+compart.tin_no as tin_no,
+compart.cst_no as cst_no,
 part.street as street1,
 part.street2 as street2,
 comp_city.name as city,
@@ -54,7 +56,7 @@ END ) as fax,
 part.email as email,
 pass.name as pass_name,
 pass.division as division,
-pass.transport as transport,
+trans.name as transport,
 pass.taken_by as taken_by,
 pass.received_by as received_by,
 pass.note as notes,
@@ -85,13 +87,18 @@ END ) as sup_country,
 THEN  ' '
 ELSE partner.zip
 END ) as sup_zip,
-to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS New_Date
+to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS New_Date,
+(CASE WHEN pass.vehicle_details is null
+THEN  '- '
+ELSE pass.vehicle_details END ) as vehicle_details
 
 from kg_gate_pass pass
 
+left join kg_transport trans on (trans.id = pass.transport_id)
 left join res_users users on (users.id = pass.user_id)
 left join res_company comp on (comp.id = users.company_id)
 left join res_partner part on (part.id = comp.partner_id)
+left join res_partner compart on (compart.id = comp.partner_id)
 left join res_city comp_city on (comp_city.id = part.city_id)
 left join res_country_state comp_state on (comp_state.id = part.state_id)
 left join res_country comp_country on (comp_country.id = part.country_id)
@@ -104,6 +111,8 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 	</queryString>
 	<field name="pass_id" class="java.lang.Integer"/>
 	<field name="company_name" class="java.lang.String"/>
+	<field name="tin_no" class="java.lang.String"/>
+	<field name="cst_no" class="java.lang.String"/>
 	<field name="street1" class="java.lang.String"/>
 	<field name="street2" class="java.lang.String"/>
 	<field name="city" class="java.lang.String"/>
@@ -132,6 +141,7 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 	<field name="sup_country" class="java.lang.String"/>
 	<field name="sup_zip" class="java.lang.String"/>
 	<field name="new_date" class="java.lang.String"/>
+	<field name="vehicle_details" class="java.lang.String"/>
 	<group name="Gate Pass Line Group">
 		<groupExpression><![CDATA[$F{pass_id}]]></groupExpression>
 		<groupHeader>
@@ -271,14 +281,14 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 	<pageHeader>
 		<band height="77" splitType="Stretch">
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="2" y="1" width="553" height="20" isRemoveLineWhenBlank="true"/>
+				<reportElement stretchType="RelativeToTallestObject" x="2" y="1" width="370" height="20" isRemoveLineWhenBlank="true"/>
 				<textElement>
 					<font size="14" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{company_name}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="43" y="51" width="511" height="14" isPrintWhenDetailOverflows="true"/>
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="43" y="51" width="329" height="14" isPrintWhenDetailOverflows="true"/>
 				<box topPadding="0" leftPadding="2">
 					<bottomPen lineWidth="0.75"/>
 				</box>
@@ -304,7 +314,7 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 				<text><![CDATA[Email]]></text>
 			</staticText>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement x="2" y="21" width="552" height="16" isRemoveLineWhenBlank="true"/>
+				<reportElement x="2" y="21" width="370" height="16" isRemoveLineWhenBlank="true"/>
 				<box bottomPadding="2">
 					<bottomPen lineWidth="0.0"/>
 				</box>
@@ -324,10 +334,101 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 				<text><![CDATA[Phone]]></text>
 			</staticText>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="43" y="37" width="314" height="14" isPrintWhenDetailOverflows="true"/>
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="43" y="37" width="329" height="14" isPrintWhenDetailOverflows="true"/>
 				<box leftPadding="2"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[$F{phone}+ " Fax : "+$F{fax}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="372" y="21" width="53" height="13"/>
+				<box topPadding="1">
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" TIN      : "]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="425" y="21" width="129" height="13"/>
+				<box topPadding="1" leftPadding="2" rightPadding="0">
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tin_no}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="372" y="34" width="53" height="12"/>
+				<box topPadding="1"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" CST No: "]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="427" y="34" width="127" height="12"/>
+				<box topPadding="1"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cst_no}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="372" y="46" width="42" height="12"/>
+				<box topPadding="1"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" CODE   : "]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="414" y="46" width="11" height="12"/>
+				<box topPadding="1">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["1"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="425" y="46" width="13" height="12"/>
+				<box topPadding="1">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="438" y="46" width="13" height="12"/>
+				<box topPadding="1">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["8"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="372" y="57" width="182" height="8"/>
+				<box>
+					<bottomPen lineWidth="0.75"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageHeader>
@@ -343,7 +444,7 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 			<textField isBlankWhenNull="true">
 				<reportElement x="283" y="15" width="273" height="15"/>
 				<box>
-					<bottomPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.0"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="8"/>
@@ -351,7 +452,7 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 				<textFieldExpression><![CDATA["Date     :   "+$F{pass_date}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="RelativeToTallestObject" x="372" y="48" width="167" height="67"/>
+				<reportElement stretchType="RelativeToTallestObject" x="372" y="62" width="167" height="67"/>
 				<box topPadding="2"/>
 				<textElement verticalAlignment="Top">
 					<font size="8"/>
@@ -368,7 +469,7 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 			<textField isBlankWhenNull="true">
 				<reportElement x="1" y="15" width="282" height="15"/>
 				<box topPadding="0" leftPadding="2">
-					<bottomPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.0"/>
 				</box>
 				<textElement verticalAlignment="Middle">
 					<font size="8"/>
@@ -479,6 +580,24 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Serial No"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1" y="30" width="283" height="13"/>
+				<box leftPadding="4">
+					<bottomPen lineWidth="0.25"/>
+				</box>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[ "Vehicle Details:"+" "+$F{vehicle_details}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="283" y="30" width="271" height="13"/>
+				<box>
+					<bottomPen lineWidth="0.25"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
 			</textField>
 		</band>
 	</columnHeader>

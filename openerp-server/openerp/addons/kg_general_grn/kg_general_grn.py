@@ -304,6 +304,8 @@ class kg_general_grn(osv.osv):
 	def entry_approve(self, cr, uid, ids,context=None):
 		grn_entry = self.browse(cr, uid, ids[0])
 		if grn_entry.state == 'confirmed':
+			gate_obj = self.pool.get('kg.gate.pass')
+			gp_line_obj = self.pool.get('kg.gate.pass.line')
 			user_id = self.pool.get('res.users').browse(cr, uid, uid)
 			lot_obj = self.pool.get('stock.production.lot')
 			self.write(cr,uid,ids[0],{'state':'done','approved_by':uid,'approved_date':time.strftime('%Y-%m-%d %H:%M:%S')})
@@ -339,6 +341,28 @@ class kg_general_grn(osv.osv):
 				cr.execute(sql1)
 
 			line_tot = 0
+			
+			### Gate Pass Creation Process
+			if grn_entry.grn_line:
+				reject_qty_data = [x.id for x in grn_entry.grn_line if x.reject_qty > 0]
+				if reject_qty_data:
+					gate_pass_id = gate_obj.create(cr,uid,{'partner_id': grn_entry.supplier_id.id,
+														   'outward_type': 'in_reject',
+														   'return_date': time.strftime("%Y-%m-%d"),
+														   'entry_mode': 'auto',
+															})
+					if gate_pass_id:
+						for g_line in reject_qty_data:
+							grn_line_rec = self.pool.get('kg.general.grn.line').browse(cr,uid,g_line)
+							gate_pass_line_id = gp_line_obj.create(cr,uid,{'gate_id': gate_pass_id,
+																		   'product_id': grn_line_rec.product_id.id,
+																		   'brand_id': grn_line_rec.brand_id.id,
+																		   'uom': grn_line_rec.uom_id.id,
+																		   'qty': grn_line_rec.reject_qty,
+																		   'grn_pending_qty': grn_line_rec.reject_qty,
+																		   'mode': 'direct',
+																		   })
+			
 			for line in grn_entry.grn_line:
 				# This code will create General GRN to Stock Move
 				brand = []
@@ -812,6 +836,8 @@ class kg_general_grn_line(osv.osv):
 		'product_id':fields.many2one('product.product','Item Name',required=True,readonly=False, states={'done':[('readonly',True)],'calcel':[('readonly',True)]}, domain="[('state','=','approved'),('purchase_ok','=',True)]"),
 		'uom_id':fields.many2one('product.uom','UOM',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'grn_qty':fields.float('GRN Quantity',required=True,readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
+		'recvd_qty':fields.float('Received Qty'),
+		'reject_qty':fields.float('Rejected Qty'),
 		'price_unit':fields.float('Unit Price',readonly=True, states={'confirmed':[('readonly',False)],'draft':[('readonly',False)]}),
 		'price_subtotal': fields.function(_amount_line, string='Line Total', digits_compute= dp.get_precision('Account'),store=True),
 		'state': fields.selection([('draft', 'Draft'), ('confirmed', 'Confirmed'),('done', 'Done'), ('cancel', 'Cancelled')], 'Status',readonly=True),
@@ -854,6 +880,17 @@ class kg_general_grn_line(osv.osv):
 		print"contextcontextcontext",context
 		
 		return context
+	
+	def onchange_qty(self,cr,uid,ids, grn_qty, recvd_qty, reject_qty, context=None):
+		value = {'recvd_qty': 0,'reject_qty': 0}
+		if grn_qty and recvd_qty == 0:
+			value = {'recvd_qty': grn_qty,'reject_qty': 0}
+		elif grn_qty and recvd_qty >= 0:
+			if grn_qty > recvd_qty:
+				raise osv.except_osv(_('Warning!'),
+					_('Accepted qty should not be greater than Received qty!'))
+			value = {'recvd_qty': recvd_qty,'reject_qty': recvd_qty - grn_qty}
+		return {'value': value}
 		
 	def onchange_uom_id(self, cr, uid, ids, product_id, context=None):
 		value = {'uom_id': ''}

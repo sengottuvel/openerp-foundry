@@ -186,11 +186,24 @@
 		-->
 	</record>
 	
+	<record id="mma_fou_product_master" model="ir.actions.act_window">
+		<field name="name">Foundry Items</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="res_model">product.product</field>
+		<field name="view_type">form</field>
+		<field name="view_mode">tree,form</field>
+		<field name="context">{'default_product_type': 'raw',}</field>
+		<field name="domain">[('product_type','in',('raw','consu')),]</field>
+	</record>
+	
 	<!-- Product Master Purchase --> 
 	<menuitem action="product.product_normal_action" name="Product Master-Purchase" id="mam_product_master" parent="kg_menus.ppm_master_menu" sequence="2"/>
 	
 	<!-- Product Master Design --> 
 	<menuitem action="kg_action_product_form" name="Product Master-Design" id="mam_product_master_design" parent="kg_pumpmodel_master.mpm_planning_master" sequence="16"/>
+	
+	<!-- Foundry Product Master --> 
+	<menuitem action="mma_fou_product_master" name="Foundry Items" id="mam_fou_product" parent="kg_menus.mpm_store_master" sequence="2"/>
 	
 	<!-- Product Category Master -->
 	<menuitem id="kg_product_catg_master" parent="kg_menus.ppm_master_menu"

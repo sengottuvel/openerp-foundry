@@ -122,7 +122,7 @@
         
 		<!-- Audit Log Xml Data End-->
     
-		<menuitem action="inwardmaster_action_form" name="Inward" id="mam_inward_master" parent="kg_menus.mpm_store_master" sequence="2"/>
+		<menuitem action="inwardmaster_action_form" name="Inward" id="mam_inward_master" parent="kg_menus.mpm_store_master" sequence="3"/>
 	
 </data>
 	</openerp>

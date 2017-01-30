@@ -763,9 +763,8 @@ class kg_po_grn(osv.osv):
 					wo_data = cr.dictfetchall()
 					for wo in wo_data:
 						if wo['wo_tot'] > 1:
-							raise osv.except_osv(
-							_('Warning!'),
-							_('%s This WO No. repeated'%(wo['wo_name'])))
+							raise osv.except_osv(_('Warning!'),
+								_('%s This WO No. repeated'%(wo['wo_name'])))
 						else:
 							pass
 							
@@ -805,6 +804,28 @@ class kg_po_grn(osv.osv):
 						})
 				sql1 = """ insert into purchase_invoice_grn_ids(invoice_id,grn_id) values(%s,%s)"""%(invoice_no,grn_entry.id)
 				cr.execute(sql1)
+				
+			### Gate Pass Creation Process
+			if grn_entry.line_ids:
+				reject_qty_data = [x.id for x in grn_entry.line_ids if x.reject_qty > 0]
+				if reject_qty_data:
+					gate_pass_id = gate_obj.create(cr,uid,{'partner_id': grn_entry.supplier_id.id,
+														   'outward_type': 'in_reject',
+														   'return_date': time.strftime("%Y-%m-%d"),
+														   'entry_mode': 'auto',
+															})
+					if gate_pass_id:
+						for grn_line in reject_qty_data:
+							grn_line_rec = self.pool.get('po.grn.line').browse(cr,uid,grn_line)
+							gate_pass_line_id = gp_line_obj.create(cr,uid,{'gate_id': gate_pass_id,
+																		   'product_id': grn_line_rec.product_id.id,
+																		   'brand_id': grn_line_rec.brand_id.id,
+																		   'uom': grn_line_rec.uom_id.id,
+																		   'qty': grn_line_rec.reject_qty,
+																		   'grn_pending_qty': grn_line_rec.reject_qty,
+																		   'mode': 'direct',
+																		   })
+			
 			for line in grn_entry.line_ids:
 				
 				line_id = line.id
@@ -829,6 +850,7 @@ class kg_po_grn(osv.osv):
 					del_sql1 = """delete from stock_production_lot where lot_type='in' """+ brand +""" and product_id="""+str(line.product_id.id)+""" and grn_no='"""+str(line.po_grn_id.name)+"""'"""
 					cr.execute(del_sql1)
 				print data1
+								
 				if grn_entry.grn_type == 'from_po':
 					#po_obj.write(cr,uid,po_id, {'grn_flag':False})
 					if line.po_line_id.order_id:
@@ -1468,6 +1490,8 @@ class po_grn_line(osv.osv):
 		'product_id':fields.many2one('product.product','Product Name',required=True, domain="[('state','=','approved'),('purchase_ok','=',True)]"),
 		'uom_id':fields.many2one('product.uom','UOM',required=True),
 		'po_grn_qty':fields.float('Qty',required=True),
+		'recvd_qty':fields.float('Received Qty'),
+		'reject_qty':fields.float('Rejected Qty'),
 		'po_qty':fields.float('PO Qty'),
 		'so_qty':fields.float('SO Qty'),
 		'gp_qty':fields.float('GP Qty'),
@@ -1514,13 +1538,22 @@ class po_grn_line(osv.osv):
 		
 	}
 	
-	def onchange_product_id(self, cr, uid, ids, product_id, uom_id,context=None):
-			
+	def onchange_qty(self,cr,uid,ids, po_grn_qty, recvd_qty, reject_qty, context=None):
+		value = {'recvd_qty': 0,'reject_qty': 0}
+		if po_grn_qty and recvd_qty == 0:
+			value = {'recvd_qty': po_grn_qty,'reject_qty': 0}
+		elif po_grn_qty and recvd_qty >= 0:
+			if po_grn_qty > recvd_qty:
+				raise osv.except_osv(_('Warning!'),
+					_('Accepted qty should not be greater than Received qty!'))
+			value = {'recvd_qty': recvd_qty,'reject_qty': recvd_qty - po_grn_qty}
+		return {'value': value}
+	
+	def onchange_product_id(self,cr,uid,ids, product_id, uom_id,context=None):
 		value = {'uom_id': ''}
 		if product_id:
 			prod = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
 			value = {'uom_id': prod.uom_id.id}
-
 		return {'value': value}
 	
 	_defaults = {
