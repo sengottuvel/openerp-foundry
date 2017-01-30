@@ -18,7 +18,7 @@
 						<group>
 							<field name="name"/>
 							<field name="inward_accept_qty" required="1" attrs="{'readonly': [('state','in',['accept'])]}"/>
-							<field name="accept_date" required="1" attrs="{'readonly': [('state','in',['accept'])]}"/>
+							<field name="accept_date" required="1" readonly="1"/>
 							<field name="inward_accept_user_id" string="QC by" attrs="{'readonly': [('state','in',['accept'])]}"/>
 							<field name="state" invisible="1"/>
 							<field name="stage_id" widget="selection" invisible="1"/>
@@ -548,7 +548,7 @@
 		<menuitem action="tma_ms_inward" id="tam_ms_inward" parent="tpm_ms_process" sequence="2" />
 		<menuitem action="tma_ms_sch_list" id="tam_ms_sch_list" parent="tpm_ms_process" sequence="3" />
 		
-	<menuitem name="Batch Entries" id="tpm_ms_batch" parent="kg_operation_master.mpm_crm" sequence="3"/>
+	<menuitem name="Batch Entries" id="tpm_ms_batch" parent="kg_operation_master.mpm_crm" sequence="4"/>
 	
 		<menuitem action="tma_batch_ms_accept" id="tam_batch_ms_accept" parent="tpm_ms_batch" sequence="1" />
 	

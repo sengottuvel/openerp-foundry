@@ -290,7 +290,8 @@ class kg_machineshop(osv.osv):
 				}
 				production_id = production_obj.create(cr, uid, production_vals) 
 			
-			self.write(cr,uid, ids,{'state':'accept','ms_state':'in_plan','ms_sch_qty':entry_rec.inward_accept_qty,'inward_reject_qty':reject_qty})
+			self.write(cr,uid, ids,{'state':'accept','ms_state':'in_plan','ms_sch_qty':entry_rec.inward_accept_qty,'inward_reject_qty':reject_qty,
+			'accept_date':today})
 		else:
 			pass
 		return True

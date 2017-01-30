@@ -2561,19 +2561,21 @@
 	
 	<!-- Menu Item Start -->
 	
+	<menuitem name="Inhouse process" id="tpm_ms_operations" parent="kg_operation_master.mpm_crm" sequence="3"/>
+	
 		<!-- Schedule -->
-		<menuitem action="tma_ms_operation1" id="tam_ms_operation1" parent="kg_machineshop.tpm_ms_process" sequence="4"/>
-		<menuitem action="tma_ms_operation2" id="tam_ms_operation2" parent="kg_machineshop.tpm_ms_process" sequence="5"/>
-		<menuitem action="tma_ms_operation3" id="tam_ms_operation3" parent="kg_machineshop.tpm_ms_process" sequence="6"/>
-		<menuitem action="tma_ms_operation4" id="tam_ms_operation4" parent="kg_machineshop.tpm_ms_process" sequence="7"/>
-		<menuitem action="tma_ms_operation5" id="tam_ms_operation5" parent="kg_machineshop.tpm_ms_process" sequence="8"/>
-		<menuitem action="tma_ms_operation6" id="tam_ms_operation6" parent="kg_machineshop.tpm_ms_process" sequence="9"/>
-		<menuitem action="tma_ms_operation7" id="tam_ms_operation7" parent="kg_machineshop.tpm_ms_process" sequence="10"/>
-		<menuitem action="tma_ms_operation8" id="tam_ms_operation8" parent="kg_machineshop.tpm_ms_process" sequence="11"/>
-		<menuitem action="tma_ms_operation9" id="tam_ms_operation9" parent="kg_machineshop.tpm_ms_process" sequence="12"/>
-		<menuitem action="tma_ms_operation10" id="tam_ms_operation10" parent="kg_machineshop.tpm_ms_process" sequence="13"/>
-		<menuitem action="tma_ms_operation11" id="tam_ms_operation11" parent="kg_machineshop.tpm_ms_process" sequence="14"/>
-		<menuitem action="tma_ms_operation12" id="tam_ms_operation12" parent="kg_machineshop.tpm_ms_process" sequence="15"/>
+		<menuitem action="tma_ms_operation1" id="tam_ms_operation1" parent="tpm_ms_operations" sequence="1"/>
+		<menuitem action="tma_ms_operation2" id="tam_ms_operation2" parent="tpm_ms_operations" sequence="2"/>
+		<menuitem action="tma_ms_operation3" id="tam_ms_operation3" parent="tpm_ms_operations" sequence="3"/>
+		<menuitem action="tma_ms_operation4" id="tam_ms_operation4" parent="tpm_ms_operations" sequence="4"/>
+		<menuitem action="tma_ms_operation5" id="tam_ms_operation5" parent="tpm_ms_operations" sequence="5"/>
+		<menuitem action="tma_ms_operation6" id="tam_ms_operation6" parent="tpm_ms_operations" sequence="6"/>
+		<menuitem action="tma_ms_operation7" id="tam_ms_operation7" parent="tpm_ms_operations" sequence="7"/>
+		<menuitem action="tma_ms_operation8" id="tam_ms_operation8" parent="tpm_ms_operations" sequence="8"/>
+		<menuitem action="tma_ms_operation9" id="tam_ms_operation9" parent="tpm_ms_operations" sequence="9"/>
+		<menuitem action="tma_ms_operation10" id="tam_ms_operation10" parent="tpm_ms_operations" sequence="10"/>
+		<menuitem action="tma_ms_operation11" id="tam_ms_operation11" parent="tpm_ms_operations" sequence="11"/>
+		<menuitem action="tma_ms_operation12" id="tam_ms_operation12" parent="tpm_ms_operations" sequence="12"/>
 		<menuitem action="tma_ms_rejection_list" id="tam_ms_rejection_list" parent="kg_machineshop.tpm_ms_process" sequence="16"/>
 	
 	<!-- Menu Item End -->
