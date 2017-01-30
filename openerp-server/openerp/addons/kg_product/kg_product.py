@@ -183,9 +183,9 @@ class kg_product(osv.osv):
 		rec = self.browse(cr, uid, ids[0])
 		if rec.name:
 			name_special_char = ''.join(c for c in rec.name if c in '!@#$%^~*{}?+/=')
-			if name_special_char:
-				raise osv.except_osv(_('Warning!'),
-					_('Special Character Not Allowed in Name!'))
+			#~ if name_special_char:
+				#~ raise osv.except_osv(_('Warning!'),
+					#~ _('Special Character Not Allowed in Name!'))
 			
 			return True
 		else:

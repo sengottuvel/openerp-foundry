@@ -144,7 +144,7 @@ class kg_po_grn(osv.osv):
 		'po_id':fields.many2one('purchase.order', 'PO NO',
 					domain="[('state','=','approved'), '&', ('order_line.pending_qty','>','0'), '&', ('grn_flag','=',False), '&', ('partner_id','=',supplier_id), '&', ('order_line.line_state','!=','cancel')]"), 
 		'po_ids':fields.many2many('purchase.order', 'multiple_po', 'grn_id', 'po_id', 'PO Nos',
-					domain="[('state','=','approved'), ('order_line.pending_qty','>','0'), ('grn_flag','=',False), ('partner_id','=',supplier_id), ('order_line.line_state','!=','cancel')]",
+					domain="[('state','=','approved'),('order_line.pending_qty','>','0'),('grn_flag','=',False),('partner_id','=',supplier_id),('order_line.line_state','!=','cancel'),('division','=',division)]",
 					readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}), 
 		'po_name': fields.char('PO NO',readonly=True),
 		'order_no': fields.char('No',readonly=True),
@@ -210,6 +210,7 @@ class kg_po_grn(osv.osv):
 		'sup_invoice_date':fields.date('Supplier Invoice Date', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'vehicle_details':fields.char('Vehicle Details', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'insp_ref_no':fields.char('Insp.Ref.No.', readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
+		'division': fields.selection([('ppd','PPD'),('ipd','IPD'),('foundry','Foundry')],'Division',readonly=False, states={'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		
 		## Child Tables Declaration
 		

@@ -39,6 +39,7 @@
                 <group>
 					<group string="Type">
 						<field name="grn_type" />
+						<field name="division" attrs="{'required': [('grn_type','=','from_po')],'invisible': [('grn_type','!=','from_po')]}"/>
 						<field name="grn_dc" readonly="1"/>
                     </group>
                     <group string="Supplier">
@@ -322,6 +323,7 @@
                 <group>
 					<group string="Type">
 						<field name="grn_type" />
+						<field name="division" attrs="{'required': [('grn_type','=','from_po')],'invisible': [('grn_type','!=','from_po')]}"/>
 						<field name="grn_dc" readonly="1"/>
                     </group>
                     <group string="Supplier">
