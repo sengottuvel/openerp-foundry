@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>	
+
+	<!-- Form View Start -->
+	
+		<record id="m_form_v_kg_employee" model="ir.ui.view">
+			<field name="name">HR Master Form</field>
+			<field name="model">hr.employee</field>
+			<field name="inherit_id" ref="hr.view_employee_form"/>
+			<field name="arch" type="xml">
+			
+					<button name="confirm_entry" string="Confirm" type='object' class="oe_highlight" position="replace">
+						<button name="entry_reject" type="object" string="Reject"  class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('status','in',['draft','approved','cancel','reject'])]}"/>
+						<button name="entry_approve" type="object" string="Approve"  class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('status','in',['draft','approved','cancel','reject'])]}"/>
+						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_confirm" type="object" string="Confirm"  class="oe_highlight" attrs="{'invisible':[('status','in',['approved','confirmed','cancel','reject'])]}"/>
+						<button name="entry_draft" type="object"  string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('status','in',['draft','confirmed','approved','reject'])]}"/>
+						<field name="status" widget="statusbar" statusbar_visible="draft,approved,confirmed,cancel,reject" statusbar_colors='{"draft":"blue","approved":"blue","confirmed":"red","cancel":"red","reject":"red"}' readonly="1"/>
+					</button>
+					
+					<field name="name" position="replace">
+						<field name="modify" invisible = "1"/>
+					</field>
+					
+					<field name="notes" position="replace">
+						<group>
+							<group>
+								<field name="name" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+							</group>
+							<group>
+								<field name="code" string="Code" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+							</group>
+						</group>
+						<group string='Remarks' attrs="{'invisible':[('status','=','draft')]}">
+							<group>	
+								<field name="remark" attrs="{'invisible':[('status','=','draft')], 'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+							</group>
+							<group>												
+								<field name="cancel_remark" attrs="{'invisible':[('status','in',['draft','confirmed'])], 'readonly': [('status','in',['cancel'])]}"/>		
+							</group>
+						</group>	
+					</field>
+					
+					<field name="category_ids" position="replace">
+						<field name="category_ids" widget="many2many_tags" placeholder="e.g. Part Time" groups="base.group_hr_user" invisible="1"/>
+					</field>
+					
+<!--
+					<field name="address_id" position="replace">
+						<field name="address_id" readonly="1" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+					</field>
+-->
+					
+<!--
+					<field name="address_id" position="before">
+						<field name="join_date" required="1" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+					</field>
+-->
+					
+					<field name="work_email" position="replace">
+						<field name="work_email" invisible="1"/>
+					</field>
+					
+					<field name="user_id" position="replace">
+						<field name="user_id" invisible="1"/>
+					</field>
+
+					<field name="parent_id" position="replace" >
+						<field name="releaving_date" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+						<field name="releaving_reason" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+					</field>
+					
+					<field name="job_id" position="replace">
+						<field name="job_id" string="Designation" required="1" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+					</field>
+					
+					<field name="coach_id" position="replace">
+						<field name="coach_id" string="Trainer" invisible="1"/>
+					</field>
+					
+					<field name="country_id" position="replace">
+						<field name="country_id" string="Nationality" required="1" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+					</field>
+					
+					<field name="country_id" options='{"no_open": True}' position="before">
+						<field name="father_name"  attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+						<field name="mother_name"  attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+						<field name="father_occ"  attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+						<field name="mother_occ"  attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+					</field>
+					
+					<field name="identification_id" position="replace">
+						<field name="identification_id" string="Adhar ID" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+					</field>
+					
+					<field name="address_home_id" context="{'show_address': 1}" options='{"always_reload": True, "highlight_first_line": True}' position="replace">	 
+						<field name="pre_add" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+						<field name="pre_city" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+						<field name="pre_state_id" options='{"no_open": True}' attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+						<field name="pre_country_id" options='{"no_open": True}' attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+						<field name="pre_pin_code" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+						<field name="pre_phone_no" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+						<field name="same_pre_add" on_change = "onchange_address(same_pre_add,pre_add,pre_city,pre_state_id,pre_country_id,pre_pin_code,pre_phone_no)" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+						<field name="permanent_add" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+						<field name="city" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+						<field name="state_id" options='{"no_open": True}' attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+						<field name="country_id" options='{"no_open": True}' attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+						<field name="pin_code" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+						<field name="phone_no" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>					
+					</field>
+					
+					<field name="marital" position="after">
+						<field name="ann_date" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+						<field name="wife_hus_name" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+					</field>
+					
+					<field name="work_phone" position="replace">
+						<field name="work_phone" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+					</field>
+					<field name="mobile_phone" position="replace">
+						<field name="mobile_phone" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+					</field>
+					<field name="work_location" position="replace">
+						<field name="work_location" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+					</field>
+					<field name="department_id" position="replace">
+						<field name="department_id" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+					</field>
+					<field name="notes" position="replace">
+						<field name="notes" placeholder="Notes" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+					</field>
+					<field name="passport_id" position="replace">
+						<field name="passport_id" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+					</field>
+					<field name="bank_account_id" position="replace">
+						<field name="bank_account_id" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+					</field>
+					<field name="otherid" position="replace">
+						<field name="otherid" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+					</field>
+					<field name="gender" position="replace">
+						<field name="gender" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+					</field>
+					<field name="marital" position="replace">
+						<field name="marital" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+					</field>
+					<field name="birthday" position="replace">
+						<field name="birthday" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+					</field>
+
+					<xpath expr = "//page[@string='Personal Information']" position="after">
+						<page string="Reference Details" >
+							<group string="Contact">
+								<field name="line_id_ref" nolabel="1" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+							</group>
+							<group string="Education">
+								<field name="line_id_ref_edu" nolabel="1" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+							</group>
+							<group string="Employment">
+								<field name="line_id_ref_emp" nolabel="1" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+							</group>
+						</page>
+					</xpath>
+					
+					<xpath expr="//group[@name='active_group']" position="before">
+						<group string="Payslips">
+							<label for="payslip"/>
+							<div>
+								<field name="payslip" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+							</div>
+						</group>
+					</xpath>
+					
+					<xpath expr = "//page[@string='HR Settings']" position="after">
+						<page string="Entry Info">
+							<group>
+								<group>
+									<field name="create_user_id"/>
+									<field name="confirm_user_id" attrs="{'invisible':[('status','in',['draft'])]}"/>
+									<field name="ap_rej_user_id" attrs="{'invisible':[('status','in',['draft', 'confirmed'])]}"/>
+									<field name="cancel_user_id" attrs="{'invisible':[('status','in',['draft', 'confirmed','reject','approved'])]}"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('status','in',['draft'])]}"/>
+									<field name="ap_rej_date" attrs="{'invisible':[('status','in',['draft', 'confirmed'])]}"/>
+									<field name="cancel_date" attrs="{'invisible':[('status','in',['draft', 'confirmed','reject','approved'])]}"/>
+									<field name="update_date"/>
+									<field name="active"/>
+								</group>
+							</group>
+						</page>
+					</xpath>
+					
+					<xpath expr="//group[@name='cont_info']" position="replace">
+						<group >
+							<field name="address_id" readonly="1" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+							
+						</group>
+						<group >
+							<field name="join_date" required="1" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+						</group>
+					</xpath>													
+			</field> 
+		</record>
+		
+		<!--Tree View Starts-->
+		
+		<record model="ir.ui.view" id="m_tree_v_kg_employee">
+				<field name="name">Employees</field>
+				<field name="model">hr.employee</field>
+				<field name="inherit_id" ref="hr.view_employee_tree"/>
+				<field name="arch" type="xml">
+					
+					<field name="name" position="after">
+						<field name="code" />
+					</field>					
+					<field name="work_phone" position="replace">
+						<field name="work_phone" invisible="1"/>
+					</field>					
+					<field name="work_email" position="replace">
+						<field name="work_email" invisible="1"/>
+					</field>					
+					<field name="job_id" position="replace">					
+						<field name="join_date"/>
+						<field name="status"/>
+					</field>
+				</field>
+		</record>
+		
+		<!--Tree View Ends-->
+		
+		<!-- Search View Starts -->
+
+		<record id="m_search_v_kg_employee" model="ir.ui.view">
+            <field name="name">Employee Search</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr.view_employee_filter"/>
+            <field name="arch" type="xml">
+					<field name="name" position="replace">
+						<field name="name" string="Employees"  filter_domain="['|', ('name','ilike',self), ('code','ilike',self)]" />
+						<filter icon="terp-check" name="draft" string="Draft" domain="[('status','=','draft')]"/>
+						<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('status','=','confirmed')]"/>				
+						<filter icon="terp-check" name="approve" string="Approved" domain="[('status','=','approved')]"/>				
+						<filter icon="terp-check" name="reject" string="Rejected" domain="[('status','=','reject')]"/>
+					</field>
+                    <group expand="0" string="Group By...">
+						<field name="department_id" position ="replace">
+							<filter string="Department" icon="terp-personal" domain="[]" context="{'group_by':'department_id'}"/>
+							<filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'status'}"/> 
+						</field>
+						<field name="parent_id" position ="replace">
+							<field name="parent_id" invisible="1"/>
+						</field>
+						<field name="coach_id" position ="replace">
+							<field name="coach_id" invisible="1"/>
+						</field>
+						<field name="job_id" position ="replace">
+							<field name="job_id" invisible="1"/>
+						</field>
+						<field name="company_id" position ="replace">
+							<field name="company_id" invisible="1"/>
+						</field>
+					</group>
+			</field>
+		</record>
+		
+		<!-- Search View Ends-->
+		
+		<!--Reference Details Tree View Starts -->
+		
+		<record model="ir.ui.view" id="m_tree_v_ch_kg_employee_ref">
+				<field name="name">Reference Details</field>
+				<field name="model">ch.kg.employee.ref</field>
+				<field name="type">tree</field>
+				<field name="arch" type="xml">
+					<tree string="Reference Details" editable="bottom">
+						<field name="name"/>
+						<field name="contact_no"/>
+						<field name="relation_ship"/>
+						<field name="designation"/>
+						<field name="address"/>
+					</tree>
+				</field>
+		</record>
+		
+		<!--Reference Details Tree View Ends -->
+		
+		<!--Education Reference Details Tree View Starts -->
+		
+		<record model="ir.ui.view" id="m_tree_v_ch_kg_employee_ref_edu">
+				<field name="name">Education Reference Details</field>
+				<field name="model">ch.kg.employee.ref.edu</field>
+				<field name="type">tree</field>
+				<field name="arch" type="xml">
+					<tree string="Education Reference Details" editable="bottom">
+						<field name="ug_degree"/>
+						<field name="ug_study"/>
+						<field name="ug_grade"/>
+						<field name="ug_institute"/>
+						<field name="ug_uni"/>
+						<field name="ug_date"/>
+					</tree>
+				</field>
+		</record>
+		
+		<!--Education Reference Details Tree View Ends -->
+		
+		<!--Employment Reference Details Tree View Starts -->
+		
+		<record model="ir.ui.view" id="m_tree_v_ch_kg_employee_ref_emp">
+				<field name="name">Employment Reference Details</field>
+				<field name="model">ch.kg.employee.ref.emp</field>
+				<field name="type">tree</field>
+				<field name="arch" type="xml">
+					<tree string="Employment Reference Details" editable="bottom">
+						<field name="cmp_name"/>
+						<field name="position"/>
+						<field name="spec"/>
+						<field name="work_exp"/>
+						<field name="from_date"/>
+						<field name="to_date"/>
+					</tree>
+				</field>
+		</record>
+		
+		<!--Employment Reference Details Tree View Ends -->
+
+	</data>
+</openerp>

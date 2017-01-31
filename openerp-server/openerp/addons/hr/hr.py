@@ -124,7 +124,7 @@ class hr_job(osv.osv):
     }
 
     _sql_constraints = [
-        ('name_company_uniq', 'unique(name, company_id)', 'The name of the job position must be unique per company!'),
+        ('name_company_uniq', 'unique(name, company_id)', 'The name of the Designation must be unique per company!'),
     ]
 
 
@@ -166,16 +166,16 @@ class hr_employee(osv.osv):
         'birthday': fields.date("Date of Birth"),
         'ssnid': fields.char('SSN No', size=32, help='Social Security Number'),
         'sinid': fields.char('SIN No', size=32, help="Social Insurance Number"),
-        'identification_id': fields.char('Identification No', size=32),
+        'identification_id': fields.char('Identification No', size=16),
         'otherid': fields.char('Other Id', size=64),
         'gender': fields.selection([('male', 'Male'),('female', 'Female')], 'Gender'),
         'marital': fields.selection([('single', 'Single'), ('married', 'Married'), ('widower', 'Widower'), ('divorced', 'Divorced')], 'Marital Status'),
         'department_id':fields.many2one('hr.department', 'Department'),
-        'address_id': fields.many2one('res.partner', 'Working Address'),
+        'address_id': fields.many2one('res.company', 'Working Address'),
         'address_home_id': fields.many2one('res.partner', 'Home Address'),
         'bank_account_id':fields.many2one('res.partner.bank', 'Bank Account Number', domain="[('partner_id','=',address_home_id)]", help="Employee bank salary account"),
-        'work_phone': fields.char('Work Phone', size=32, readonly=False),
-        'mobile_phone': fields.char('Work Mobile', size=32, readonly=False),
+        'work_phone': fields.char('Work Phone', size=15, readonly=False),
+        'mobile_phone': fields.char('Work Mobile', size=15, readonly=False),
         'work_email': fields.char('Work Email', size=240),
         'work_location': fields.char('Office Location', size=32),
         'notes': fields.text('Notes'),
@@ -204,7 +204,7 @@ class hr_employee(osv.osv):
             help="Small-sized photo of the employee. It is automatically "\
                  "resized as a 64x64px image, with aspect ratio preserved. "\
                  "Use this field anywhere a small image is required."),
-        'passport_id':fields.char('Passport No', size=64),
+        'passport_id':fields.char('Passport No', size=12),
         'color': fields.integer('Color Index'),
         'city': fields.related('address_id', 'city', type='char', string='City'),
         'login': fields.related('user_id', 'login', type='char', string='Login', readonly=1),
@@ -276,6 +276,8 @@ class hr_employee(osv.osv):
         'active': 1,
         'image': _get_default_image,
         'color': 0,
+        'address_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'hr.employee', context=c),
+        'country_id':105
     }
 
 

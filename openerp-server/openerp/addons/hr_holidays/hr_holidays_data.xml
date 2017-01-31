@@ -19,31 +19,39 @@
 
 
         <!-- Casual leave -->
+<!--
         <record model="hr.holidays.status" id="holiday_status_cl">
             <field name="name" eval="'Legal Leaves '+time.strftime('%Y')"/>
             <field name="color_name">black</field>
         </record>
+-->
 
         <!-- Sick leave -->
+<!--
         <record model="hr.holidays.status" id="holiday_status_sl">
             <field name="name">Sick Leaves</field>
             <field name="limit">True</field>
             <field name="color_name">red</field>
         </record>
+-->
 
         <!-- Compensatory Days -->
+<!--
         <record model="hr.holidays.status" id="holiday_status_comp">
             <field name="name">Compensatory Days</field>
             <field name="limit">True</field>
             <field name="color_name">lavender</field>
         </record>
+-->
 
         <!--Unpaid Leave -->
+<!--
         <record model="hr.holidays.status" id="holiday_status_unpaid">
             <field name="name">Unpaid</field>
             <field name="limit">True</field>
             <field name="color_name">brown</field>
         </record>
+-->
 
         <!-- Holidays-related subtypes for messaging / Chatter -->
         <record id="mt_holidays_confirmed" model="mail.message.subtype">

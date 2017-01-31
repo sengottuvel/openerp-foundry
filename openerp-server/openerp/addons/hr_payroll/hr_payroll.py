@@ -773,7 +773,7 @@ class hr_salary_rule(osv.osv):
     _name = 'hr.salary.rule'
     _columns = {
         'name':fields.char('Name', size=256, required=True, readonly=False),
-        'code':fields.char('Code', size=64, required=True, help="The code of salary rules can be used as reference in computation of other rules. In that case, it is case sensitive."),
+        'code':fields.char('Code', size=4, required=True, help="The code of salary rules can be used as reference in computation of other rules. In that case, it is case sensitive."),
         'sequence': fields.integer('Sequence', required=True, help='Use to arrange calculation sequence', select=True),
         'quantity': fields.char('Quantity', size=256, help="It is used in computation for percentage and fixed amount.For e.g. A rule for Meal Voucher having fixed amount of 1€ per worked day can have its quantity defined in expression like worked_days.WORK100.number_of_days."),
         'category_id':fields.many2one('hr.salary.rule.category', 'Category', required=True),
@@ -799,6 +799,8 @@ class hr_salary_rule(osv.osv):
         'register_id':fields.many2one('hr.contribution.register', 'Contribution Register', help="Eventual third party involved in the salary payment of the employees."),
         'input_ids': fields.one2many('hr.rule.input', 'input_id', 'Inputs'),
         'note':fields.text('Description'),
+        
+        'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
      }
     _defaults = {
         'amount_python_compute': '''
@@ -842,6 +844,7 @@ result = rules.NET > categories.NET * 0.10''',
         'amount_fix': 0.0,
         'amount_percentage': 0.0,
         'quantity': '1.0',
+        'state': 'draft',
      }
 
     def _recursive_search_of_rules(self, cr, uid, rule_ids, context=None):
@@ -903,6 +906,9 @@ result = rules.NET > categories.NET * 0.10''',
                 return 'result' in localdict and localdict['result'] or False
             except:
                 raise osv.except_osv(_('Error!'), _('Wrong python condition defined for salary rule %s (%s).')% (rule.name, rule.code))
+                
+    def dummy_button(self,cr,uid,ids,context=None):
+		return True
 
 hr_salary_rule()
 

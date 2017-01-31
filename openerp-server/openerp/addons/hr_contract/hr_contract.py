@@ -73,7 +73,7 @@ class hr_contract(osv.osv):
         'trial_date_start': fields.date('Trial Start Date'),
         'trial_date_end': fields.date('Trial End Date'),
         'working_hours': fields.many2one('resource.calendar','Working Schedule'),
-        'wage': fields.float('Wage', digits=(16,2), required=True, help="Basic Salary of the employee"),
+        'wage': fields.float('Wage', digits=(16,2), required=False, help="Basic Salary of the employee"),
         'advantages': fields.text('Advantages'),
         'notes': fields.text('Notes'),
         'permit_no': fields.char('Work Permit No', size=256, required=False, readonly=False),

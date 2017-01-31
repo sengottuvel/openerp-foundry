@@ -86,10 +86,12 @@ class hr_holidays_status(osv.osv):
         'leaves_taken': fields.function(_user_left_days, string='Leaves Already Taken', help='This value is given by the sum of all holidays requests with a negative value.', multi='user_left_days'),
         'remaining_leaves': fields.function(_user_left_days, string='Remaining Leaves', help='Maximum Leaves Allowed - Leaves Already Taken', multi='user_left_days'),
         'double_validation': fields.boolean('Apply Double Validation', help="When selected, the Allocation/Leave Requests for this type require a second validation to be approved."),
+        'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
     }
     _defaults = {
         'color_name': 'red',
         'active': True,
+        'state': 'draft',
     }
 
     def name_get(self, cr, uid, ids, context=None):
@@ -99,9 +101,12 @@ class hr_holidays_status(osv.osv):
         for record in self.browse(cr, uid, ids, context=context):
             name = record.name
             if not record.limit:
-                name = name + ('  (%d/%d)' % (record.leaves_taken or 0.0, record.max_leaves or 0.0))
+                name = name
             res.append((record.id, name))
         return res
+        
+    def dummy_button(self,cr,uid,ids,context=None):
+		return True
 
 
 class hr_holidays(osv.osv):
@@ -165,13 +170,18 @@ class hr_holidays(osv.osv):
         'holiday_type': fields.selection([('employee','By Employee'),('category','By Employee Tag')], 'Allocation Mode', readonly=True, states={'draft':[('readonly',False)], 'confirm':[('readonly',False)]}, help='By Employee: Allocation/Request for individual Employee, By Employee Tag: Allocation/Request for group of employees in category', required=True),
         'manager_id2': fields.many2one('hr.employee', 'Second Approval', readonly=True, help='This area is automaticly filled by the user who validate the leave with second level (If Leave type need second validation)'),
         'double_validation': fields.related('holiday_status_id', 'double_validation', type='boolean', relation='hr.holidays.status', string='Apply Double Validation'),
+        
+		'status': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
+
     }
     _defaults = {
         #~ 'employee_id': _employee_get,
         'state': 'draft',
         'type': 'remove',
         'user_id': lambda obj, cr, uid, context: uid,
-        'holiday_type': 'employee'
+        'holiday_type': 'employee',
+        'status': 'draft',
+
     }
     _constraints = [
         (_check_date, 'You can not have 2 leaves that overlaps on same day!', ['date_from','date_to']),
@@ -389,10 +399,10 @@ class hr_holidays(osv.osv):
         return True
 
     def holidays_confirm(self, cr, uid, ids, context=None):
-        self.check_holidays(cr, uid, ids, context=context)
-        for record in self.browse(cr, uid, ids, context=context):
-            if record.employee_id and record.employee_id.parent_id and record.employee_id.parent_id.user_id:
-                self.message_subscribe_users(cr, uid, [record.id], user_ids=[record.employee_id.parent_id.user_id.id], context=context)
+        #~ self.check_holidays(cr, uid, ids, context=context)
+        #~ for record in self.browse(cr, uid, ids, context=context):
+            #~ if record.employee_id and record.employee_id.parent_id and record.employee_id.parent_id.user_id:
+                #~ self.message_subscribe_users(cr, uid, [record.id], user_ids=[record.employee_id.parent_id.user_id.id], context=context)
         return self.write(cr, uid, ids, {'state': 'confirm'})
 
     def holidays_refuse(self, cr, uid, ids, context=None):
@@ -421,16 +431,18 @@ class hr_holidays(osv.osv):
 
         self._remove_resource_leave(cr, uid, ids, context=context)
         return True
+        
+      #commented by sujith
 
-    def check_holidays(self, cr, uid, ids, context=None):
-        holi_status_obj = self.pool.get('hr.holidays.status')
-        for record in self.browse(cr, uid, ids):
-            if record.holiday_type == 'employee' and record.type == 'remove':
-                if record.employee_id and not record.holiday_status_id.limit:
-                    leaves_rest = holi_status_obj.get_days( cr, uid, [record.holiday_status_id.id], record.employee_id.id, False)[record.holiday_status_id.id]['remaining_leaves']
-                    if leaves_rest < record.number_of_days_temp:
-                        raise osv.except_osv(_('Warning!'), _('There are not enough %s allocated for employee %s; please create an allocation request for this leave type.') % (record.holiday_status_id.name, record.employee_id.name))
-        return True
+    #~ def check_holidays(self, cr, uid, ids, context=None):
+        #~ holi_status_obj = self.pool.get('hr.holidays.status')
+        #~ for record in self.browse(cr, uid, ids):
+            #~ if record.holiday_type == 'employee' and record.type == 'remove':
+                #~ if record.employee_id and not record.holiday_status_id.limit:
+                    #~ leaves_rest = holi_status_obj.get_days( cr, uid, [record.holiday_status_id.id], record.employee_id.id, False)[record.holiday_status_id.id]['remaining_leaves']
+                    #~ if leaves_rest < record.number_of_days_temp:
+                        #~ raise osv.except_osv(_('Warning!'), _('There are not enough %s allocated for employee %s; please create an allocation request for this leave type.') % (record.holiday_status_id.name, record.employee_id.name))
+        #~ return True
 
     # -----------------------------
     # OpenChatter and notifications

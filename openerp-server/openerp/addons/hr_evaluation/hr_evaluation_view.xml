@@ -139,13 +139,13 @@
             <field name="inherit_id" ref="hr.view_employee_form"/>
             <field name="arch" type="xml">
             <xpath expr="//group[@name='active_group']" position="before">
-                <group string="Appraisals">
+                <group string="Appraisals" invisible="1">
                     <field name="evaluation_plan_id"/>
                     <field name="evaluation_date"/>
                 </group>
             </xpath>
             <xpath expr="//div[@name='button_box']" position="inside">
-                <button name="%(act_hr_employee_2_hr__evaluation_interview)d" string="Appraisal Interviews" type="action"/>
+                <button name="%(act_hr_employee_2_hr__evaluation_interview)d" string="Appraisal Interviews" type="action" invisible="1"/>
             </xpath>
             </field>
         </record>
