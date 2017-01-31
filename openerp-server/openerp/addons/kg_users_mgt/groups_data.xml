@@ -491,9 +491,9 @@
 			ref('kg_daily_attendance.mam_kg_daily_att_view'),
 			
 			ref('base.menu_crm_case_job_req_main'),
-			ref('kg_allowance_detection.mpm_kg_allow_ded'),
-			ref('kg_allowance_detection.mam_kg_allow_ded'),
-			ref('kg_advance_detection.mam_kg_adv_det'),
+			ref('kg_allowance_deduction.mpm_kg_allow_ded_1'),
+			ref('kg_allowance_deduction.mam_kg_allow_ded'),
+			ref('kg_advance_deduction.mam_kg_adv_det_1'),
 			ref('hr_expense.next_id_49'),
 			ref('hr_expense.menu_expense_all'),
 			ref('hr_holidays.menu_open_ask_holidays_new'),
