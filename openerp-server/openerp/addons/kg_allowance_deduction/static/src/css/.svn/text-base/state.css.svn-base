@@ -1,7 +1,0 @@
-.att_state_change {
-    color: green;
-    top: 255px;
-    left: 45px
-}
-
-
