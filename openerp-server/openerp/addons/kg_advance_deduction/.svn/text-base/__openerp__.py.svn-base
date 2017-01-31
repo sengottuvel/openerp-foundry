@@ -1,6 +1,8 @@
+# This Module for KG Cumulative Advance Deduction Module. 
+#This will be used while preparing payslip for the employee
 
 {
-    'name': 'KG Daily Attendance',
+    'name': 'KG Advance Deduction',
     'version': '0.1',
     'author': 'sengottuvelu',
     'category': 'HRM',
@@ -15,7 +17,7 @@ related requisition. This new object will regroup and will allow you to easily
 keep track and order all your purchase orders.
 """,
     'depends' : ['base','hr'],
-    'data': ['kg_daily_attendance_view.xml'],
+    'data': ['kg_advance_deduction_view.xml'],
     'auto_install': False,
     'installable': True,
 }

@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/sam_turbo_dev/!svn/ver/2770/openerp-server/openerp/addons/kg_designation
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/sam_turbo_dev/!svn/ver/2722/openerp-server/openerp/addons/kg_designation/__init__.py
+END
+__openerp__.py
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/sam_turbo_dev/!svn/ver/2722/openerp-server/openerp/addons/kg_designation/__openerp__.py
+END
+kg_designation.py
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/sam_turbo_dev/!svn/ver/2722/openerp-server/openerp/addons/kg_designation/kg_designation.py
+END
+kg_designation_view.xml
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svn/sam_turbo_dev/!svn/ver/2770/openerp-server/openerp/addons/kg_designation/kg_designation_view.xml
+END
