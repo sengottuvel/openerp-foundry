@@ -687,7 +687,9 @@
 		<menuitem action="tma_po_grn" id="gam_po_grn" name="GRN" parent="kg_menus.gpm_grn_issue_menu" sequence="3"/>
         
 		<!-- GRN QC Transaction Menu -->
+<!--
 		<menuitem action="tma_grn_qc" id="tam_po_grn_qc" name="GRN QC" parent="kg_menus.gpm_grn_issue_menu" sequence="4"/>
+-->
         
     </data>
 </openerp>

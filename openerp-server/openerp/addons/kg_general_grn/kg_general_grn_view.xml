@@ -486,7 +486,9 @@
 		<menuitem action="action_kg_general_grn" id="gam_general_grn" name="General GRN" parent="kg_menus.gpm_grn_issue_menu" sequence="1"/>
 		
 		<!-- General GRN QC Menu -->
-		<menuitem action="tma_general_grn_qc" id="tam_general_grn_qc" name="General GRN QC" parent="kg_menus.gpm_grn_issue_menu" sequence="2"/>
+<!--
+		<menuitem action="tma_general_grn_qc" id="tam_general_grn_qc" name="General GRN QC" parent="kg_menus.gpm_grn_issue_menu" sequence="2" groups="kg_users_mgt.group_inventory_admin"/>
+-->
 		
     </data>
 </openerp>
