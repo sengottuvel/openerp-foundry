@@ -390,8 +390,8 @@
         <field name="implied_ids" eval="[(4, ref('stock.group_stock_user'))]"/>
         <field eval="[(6,0,[
 			  
-			ref('kg_general_grn.tam_general_grn_qc'),
-			ref('kg_po_grn.tam_po_grn_qc'),
+			ref('kg_general_grn.gam_general_grn'),
+			ref('kg_po_grn.gam_po_grn'),
 			  
             ])]" name="menu_access"/>
             
