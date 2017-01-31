@@ -520,6 +520,7 @@
 			ref('kg_menus.menu_hr_jobs'),
 			
 			ref('kg_menus.mam_kg_emp_categ'),
+			ref('kg_menus.mam_shift_master_1'),
 			
 			
        

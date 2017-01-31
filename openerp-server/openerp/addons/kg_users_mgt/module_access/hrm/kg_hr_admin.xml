@@ -466,6 +466,16 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
 		</record>
 		
+		<record id="kg_hr_kg_shift_master" model="ir.model.access">
+			<field name="model_id" ref="kg_shift_master.model_kg_shift_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Shift Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
 		
 		
 		
