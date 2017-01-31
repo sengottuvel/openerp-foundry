@@ -342,9 +342,7 @@
 			
 			ref('kg_menus.gpm_grn_issue_menu'),
 			ref('kg_general_grn.gam_general_grn'),
-			ref('kg_general_grn.tam_general_grn_qc'),
 			ref('kg_po_grn.gam_po_grn'),
-			ref('kg_po_grn.tam_po_grn_qc'),
 			ref('kg_department_issue.gam_dept_issue'),
 			ref('kg_menus.gam_bot_issue'),
 			ref('kg_menus.iam_issue_return'),
@@ -392,8 +390,8 @@
         <field name="implied_ids" eval="[(4, ref('stock.group_stock_user'))]"/>
         <field eval="[(6,0,[
 			  
-			ref('kg_general_grn.gam_general_grn'),
-			ref('kg_po_grn.gam_po_grn'),
+			ref('kg_general_grn.tam_general_grn_qc'),
+			ref('kg_po_grn.tam_po_grn_qc'),
 			  
             ])]" name="menu_access"/>
             

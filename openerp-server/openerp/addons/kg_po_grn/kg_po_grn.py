@@ -717,7 +717,7 @@ class kg_po_grn(osv.osv):
 							_('You cannot process GRN with Item Line Qty Zero for Product %s.' %(line.product_id.name)))
 				#Write a tax amount in line
 				product_tax_amt = self._amount_line_tax(cr, uid, line, context=context)
-				cr.execute("""update po_grn_line set product_tax_amt = %s where id = %s"""%(product_tax_amt,line.id))
+				cr.execute("""update po_grn_line set product_tax_amt = %s, line_state='confirmed' where id = %s"""%(product_tax_amt,line.id))
 			self.write(cr,uid,ids[0],{'state':'confirmed',
 									  'confirm_flag':'False',
 									  'confirmed_by':uid,
@@ -1391,7 +1391,7 @@ class kg_po_grn(osv.osv):
 						})
 				#Write a tax amount in line
 				product_tax_amt = self._amount_line_tax(cr, uid, line, context=context)
-				cr.execute("""update po_grn_line set product_tax_amt = %s where id = %s"""%(product_tax_amt,line.id))
+				cr.execute("""update po_grn_line set product_tax_amt = %s, line_state = 'done' where id = %s"""%(product_tax_amt,line.id))
 				
 			self.write(cr,uid,ids[0],{'state':'done',
 									  'approve_flag':'True',
@@ -1482,6 +1482,7 @@ class po_grn_line(osv.osv):
 		
 		'po_grn_id':fields.many2one('kg.po.grn','PO GRN Entry'),
 		'state': fields.selection([('draft', 'Draft'), ('confirmed', 'Confirmed'),('done', 'Done'), ('cancel', 'Cancelled')], 'Status',readonly=True),
+		'line_state': fields.selection([('draft', 'Draft'),('confirmed', 'Confirmed'),('done', 'Done')], 'Status',readonly=True),
 		'remark':fields.text('Notes'),
 		
 		## Module Requirement Fields
@@ -1560,6 +1561,7 @@ class po_grn_line(osv.osv):
 	_defaults = {
 		
 		'state': 'draft',
+		'line_state': 'draft',
 		'billing_type': 'free',
 		'price_type': 'po_uom',
 		
