@@ -499,7 +499,7 @@
 			ref('hr_holidays.menu_open_ask_holidays_new'),
 			ref('hr.menu_open_view_attendance_reason_config'),
 			
-			ref('hr_holidays.menu_open_allocation_holidays'),
+			
 			ref('hr_evaluation.menu_eval_hr'),
 			ref('hr_evaluation.menu_open_hr_evaluation_interview_requests'),
 			ref('hr_payroll.menu_hr_root_payroll'),
