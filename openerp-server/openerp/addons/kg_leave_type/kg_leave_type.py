@@ -161,7 +161,7 @@ class kg_leave_type(osv.osv):
 		return True
 		
 	_constraints = [	
-		(val_negative, 'Negative Values are not allowed for Settlement Amount  !!', ['settle_amt']),		
+		#~ (val_negative, 'Negative Values are not allowed for Settlement Amount  !!', ['settle_amt']),		
 		
 	]
 		
