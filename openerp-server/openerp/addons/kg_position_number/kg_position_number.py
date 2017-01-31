@@ -474,12 +474,8 @@ class ch_kg_position_number(osv.osv):
 		if operation_id and stage_id:
 			operation_rec = self.pool.get('kg.operation.master').browse(cr,uid,operation_id)
 			stage_rec = self.pool.get('kg.stage.master').browse(cr,uid,stage_id)
-			name = operation_rec.name + '-' + stage_rec.name
-			print"name....................",name
-			print"operation_rec.name....................",operation_rec.name
-		value = {'name': name}
-		print"valuevalue....................",value
-		return {'value': value}
+			name = str(operation_rec.name) + '-' + str(stage_rec.name)			
+		return {'value': {'name': name}}
 		
 ch_kg_position_number()
 

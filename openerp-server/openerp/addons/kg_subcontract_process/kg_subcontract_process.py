@@ -1143,595 +1143,640 @@ class kg_subcontract_inward(osv.osv):
 			sc_obj = self.pool.get('kg.subcontract.process')
 			ms_operation_obj = self.pool.get('kg.ms.operations')
 			ms_dimension_obj = self.pool.get('ch.ms.dimension.details')
-			ms_obj = self.pool.get('kg.machineshop')			
-			sql_check = """select sc_id,actual_qty,position_id from ch_subcontract_inward_line where header_id = %s group by sc_id,actual_qty,position_id""" %(entry.id)
-			cr.execute(sql_check)
-			data = cr.dictfetchall()
-			print"datadata",data
+			ms_obj = self.pool.get('kg.machineshop')				
 			if len(entry.line_ids) == 0:
 				raise osv.except_osv(_('Warning!'),
 								_('System not allow to without line items !!'))
 			for line in entry.line_ids:			
 				if line.com_weight <= 0.00:
 					raise osv.except_osv(_('Warning!'),
-								_('System not allow to save Zero and Negative values in Completed weight field !!'))
-			if data:
-				for ele in data:
-					sql_id = """select id from ch_subcontract_inward_line where sc_id = %s limit 1""" %(ele['sc_id'])
-					cr.execute(sql_id)
-					data_id = cr.dictfetchone()				
-					sc_in_qty = """select sc_inward_qty from kg_subcontract_process where id = %s""" %(ele['sc_id'])
-					cr.execute(sc_in_qty)
-					sc_inward_qty = cr.dictfetchone()	
-					print"sc_inward_qty",sc_inward_qty				
-					line_item = self.pool.get('ch.subcontract.inward.line').browse(cr,uid,data_id['id'])				
-					sql_qty = """ select sum(qty) from ch_subcontract_inward_line where sc_id = %s """ %(ele['sc_id'])
-					cr.execute(sql_qty)
-					data_qty = cr.dictfetchone()				
-					total_qty = data_qty['sum'] - ele['actual_qty']
-					total = total_qty - sc_inward_qty['sc_inward_qty']
-					print"totaltotal",total							
-					
-					op1_status = ''
-					op2_status = ''
-					op3_status = ''
-					op4_status = ''
-					op5_status = ''
-					op6_status = ''
-					op7_status = ''
-					op8_status = ''
-					op9_status = ''
-					op10_status = ''
-					op11_status = ''
-					op12_status = ''
-					op1_id = False
-					op2_id = False
-					op3_id = False
-					op4_id = False
-					op5_id = False
-					op6_id = False
-					op7_id = False
-					op8_id = False
-					op9_id = False
-					op10_id = False
-					op11_id = False
-					op12_id = False
-					op1_stage_id = False
-					op2_stage_id = False
-					op3_stage_id = False
-					op4_stage_id = False
-					op5_stage_id = False
-					op6_stage_id = False
-					op7_stage_id = False
-					op8_stage_id = False
-					op9_stage_id = False
-					op10_stage_id = False
-					op11_stage_id = False
-					op12_stage_id = False
-					op1_clamping_area = ''
-					op2_clamping_area = ''
-					op3_clamping_area = ''
-					op4_clamping_area = ''
-					op5_clamping_area = ''
-					op6_clamping_area = ''
-					op7_clamping_area = ''
-					op8_clamping_area = ''
-					op9_clamping_area = ''
-					op10_clamping_area = ''
-					op11_clamping_area = ''
-					op12_clamping_area = ''
-					### MS Operation Creation ###
-					if ele['actual_qty'] > 0:
-						if ele['position_id'] != False:
-							position_id = self.pool.get('kg.position.number').browse(cr,uid,ele['position_id'])
-							for pos_line_item in position_id.line_ids:
+								_('System not allow to save Zero and Negative values in Completed weight field !!'))								
+			if entry.line_ids:
+				for item in entry.line_ids:
+					## from Operation ##
+					if item.sc_id.ms_op_id.id > 0:
+						print "FROM Operation>>>>>>>>>>>>>>>>>>>>@@@@@@@@@@@@@@@@@@@@@@"
+						for i in entry.line_ids:
+							s = [(6, 0, [x.id for x in i.com_operation_id])]
+							ss = [x.id for x in i.com_operation_id]
+							print"ssssssssssssssss",s
+							print"ssssssssssssssss",ss
+							for x in ss:
+								print"xxxxxxxxxxxx",x
+								op_rec = self.pool.get('ch.kg.position.number').browse(cr,uid,x)
+								op_name = op_rec.operation_id.name
+								print"op_nameop_nameop_nameop_name",op_name								
+								ms_op_id =item.sc_id.ms_op_id.id
 								
-								if pos_line_item.operation_id.name == '10':
-									op1_status = 'pending'
-									op1_id = pos_line_item.operation_id.id
-									op1_stage_id = pos_line_item.stage_id.id
-									op1_clamping_area = pos_line_item.clamping_area
+								if op_name == '10':
+									self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op1_state':'done'})
+									self.pool.get('kg.ms.operations').operation1_update(cr, uid, [ms_op_id])	
+								if op_name == '20':
+									self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op2_state':'done'})
+									self.pool.get('kg.ms.operations').operation2_update(cr, uid, [ms_op_id])	
+								if op_name == '30':									
+									self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op3_state':'done'})
+									self.pool.get('kg.ms.operations').operation3_update(cr, uid, [ms_op_id])
+								if op_name == '40':
+									self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op4_state':'done'})
+									self.pool.get('kg.ms.operations').operation4_update(cr, uid, [ms_op_id])
+								if op_name == '50':
+									self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op5_state':'done'})
+									self.pool.get('kg.ms.operations').operation5_update(cr, uid, [ms_op_id])
+								if op_name == '60':
+									self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op6_state':'done'})
+									self.pool.get('kg.ms.operations').operation6_update(cr, uid, [ms_op_id])											
+								if op_name == '70':
+									self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op7_state':'done'})
+									self.pool.get('kg.ms.operations').operation7_update(cr, uid, [ms_op_id])
+								if op_name == '80':
+									self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op8_state':'done'})
+									self.pool.get('kg.ms.operations').operation8_update(cr, uid, [ms_op_id])
+								if op_name == '90':
+									self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op9_state':'done'})
+									self.pool.get('kg.ms.operations').operation9_update(cr, uid, [ms_op_id])
+								if op_name == '100':
+									self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op10_state':'done'})
+									self.pool.get('kg.ms.operations').operation10_update(cr, uid, [ms_op_id])
+								if op_name == '110':
+									self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op11_state':'done'})
+									self.pool.get('kg.ms.operations').operation11_update(cr, uid, [ms_op_id])
+								if op_name == '120':
+									self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op12_state':'done'})
+									self.pool.get('kg.ms.operations').operation12_update(cr, uid, [ms_op_id])	
 									
-								if pos_line_item.operation_id.name == '20':
-									op2_status = 'pending'
-									op2_id = pos_line_item.operation_id.id
-									op2_stage_id = pos_line_item.stage_id.id
-									op2_clamping_area = pos_line_item.clamping_area
+					else:
+						## Daily Planing Operation Creation Process ###			
+						print "FROM DAILY Planning>>>>>>>>>>>>>>>>>>>>@@@@@@@@@@@@@@@@@@@@@@"
+						op1_status = ''
+						op2_status = ''
+						op3_status = ''
+						op4_status = ''
+						op5_status = ''
+						op6_status = ''
+						op7_status = ''
+						op8_status = ''
+						op9_status = ''
+						op10_status = ''
+						op11_status = ''
+						op12_status = ''
+						op1_id = False
+						op2_id = False
+						op3_id = False
+						op4_id = False
+						op5_id = False
+						op6_id = False
+						op7_id = False
+						op8_id = False
+						op9_id = False
+						op10_id = False
+						op11_id = False
+						op12_id = False
+						op1_stage_id = False
+						op2_stage_id = False
+						op3_stage_id = False
+						op4_stage_id = False
+						op5_stage_id = False
+						op6_stage_id = False
+						op7_stage_id = False
+						op8_stage_id = False
+						op9_stage_id = False
+						op10_stage_id = False
+						op11_stage_id = False
+						op12_stage_id = False
+						op1_clamping_area = ''
+						op2_clamping_area = ''
+						op3_clamping_area = ''
+						op4_clamping_area = ''
+						op5_clamping_area = ''
+						op6_clamping_area = ''
+						op7_clamping_area = ''
+						op8_clamping_area = ''
+						op9_clamping_area = ''
+						op10_clamping_area = ''
+						op11_clamping_area = ''
+						op12_clamping_area = ''
+						### MS Operation Creation ###
+						if item.sc_id.actual_qty > 0:
+							if item.position_id.id != False:
+								position_id = self.pool.get('kg.position.number').browse(cr,uid,item.position_id.id)
+								for pos_line_item in position_id.line_ids:
 									
-								if pos_line_item.operation_id.name == '30':
-									op3_status = 'pending'
-									op3_id = pos_line_item.operation_id.id
-									op3_stage_id = pos_line_item.stage_id.id
-									op3_clamping_area = pos_line_item.clamping_area
-									
-								if pos_line_item.operation_id.name == '40':
-									op4_status = 'pending'
-									op4_id = pos_line_item.operation_id.id
-									op4_stage_id = pos_line_item.stage_id.id
-									op4_clamping_area = pos_line_item.clamping_area
-									
-								if pos_line_item.operation_id.name == '50':
-									op5_status = 'pending'
-									op5_id = pos_line_item.operation_id.id
-									op5_stage_id = pos_line_item.stage_id.id
-									op5_clamping_area = pos_line_item.clamping_area
-									
-								if pos_line_item.operation_id.name == '60':
-									op6_status = 'pending'
-									op6_id = pos_line_item.operation_id.id
-									op6_stage_id = pos_line_item.stage_id.id
-									op6_clamping_area = pos_line_item.clamping_area
-									
-								if pos_line_item.operation_id.name == '70':
-									op7_status = 'pending'
-									op7_id = pos_line_item.operation_id.id
-									op7_stage_id = pos_line_item.stage_id.id
-									op7_clamping_area = pos_line_item.clamping_area
-									
-								if pos_line_item.operation_id.name == '80':
-									op8_status = 'pending'
-									op8_id = pos_line_item.operation_id.id
-									op8_stage_id = pos_line_item.stage_id.id
-									op8_clamping_area = pos_line_item.clamping_area
-									
-								if pos_line_item.operation_id.name == '90':
-									op9_status = 'pending'
-									op9_id = pos_line_item.operation_id.id
-									op9_stage_id = pos_line_item.stage_id.id
-									op9_clamping_area = pos_line_item.clamping_area
-									
-								if pos_line_item.operation_id.name == '100':
-									op10_status = 'pending'
-									op10_id = pos_line_item.operation_id.id
-									op10_stage_id = pos_line_item.stage_id.id
-									op10_clamping_area = pos_line_item.clamping_area
-									
-								if pos_line_item.operation_id.name == '110':
-									op11_status = 'pending'
-									op11_id = pos_line_item.operation_id.id
-									op11_stage_id = pos_line_item.stage_id.id
-									op11_clamping_area = pos_line_item.clamping_area
-									
-								if pos_line_item.operation_id.name == '120':
-									op12_status = 'pending'
-									op12_id = pos_line_item.operation_id.id
-									op12_stage_id = pos_line_item.stage_id.id
-									op12_clamping_area = pos_line_item.clamping_area
-							
-							### Operation Creation ###
-							
-							for operation in range(ele['actual_qty']):
-															
-								operation_vals = {
-									'ms_id': line_item.ms_id.id,													
-									'ms_plan_id': line_item.sc_id.ms_plan_id.id,													
-									'ms_plan_line_id': line_item.sc_id.ms_plan_line_id.id,	
-									'order_id': line_item.order_id.id,
-									'order_line_id': line_item.order_line_id.id,																	
-									'inhouse_qty': 1,
-									'op1_stage_id': op1_stage_id,
-									'op1_clamping_area': op1_clamping_area,
-									'op1_id': op1_id,
-									'op1_state':op1_status,
-									'op2_stage_id': op2_stage_id,
-									'op2_clamping_area': op2_clamping_area,
-									'op2_id': op2_id,
-									'op2_state': op2_status,
-									'op3_stage_id': op3_stage_id,
-									'op3_clamping_area': op3_clamping_area,
-									'op3_id': op3_id,
-									'op3_state': op3_status,
-									'op4_stage_id': op4_stage_id,
-									'op4_clamping_area': op4_clamping_area,
-									'op4_id': op4_id,
-									'op4_state': op4_status,
-									'op5_stage_id': op5_stage_id,
-									'op5_clamping_area': op5_clamping_area,
-									'op5_id': op5_id,
-									'op5_state': op5_status,
-									'op6_stage_id': op6_stage_id,
-									'op6_clamping_area': op6_clamping_area,
-									'op6_id': op6_id,
-									'op6_state': op6_status,
-									'op7_stage_id': op7_stage_id,
-									'op7_clamping_area': op7_clamping_area,
-									'op7_id': op7_id,
-									'op7_state': op7_status,
-									'op8_stage_id': op8_stage_id,
-									'op8_clamping_area': op8_clamping_area,
-									'op8_id': op8_id,
-									'op8_state': op8_status,
-									'op9_stage_id': op9_stage_id,
-									'op9_clamping_area': op9_clamping_area,
-									'op9_id': op9_id,
-									'op9_state': op9_status,
-									'op10_stage_id': op10_stage_id,
-									'op10_clamping_area': op10_clamping_area,
-									'op10_id': op10_id,
-									'op10_state': op10_status,
-									'op11_stage_id': op11_stage_id,
-									'op11_clamping_area': op11_clamping_area,
-									'op11_id': op11_id,
-									'op11_state': op11_status,
-									'op12_stage_id': op12_stage_id,
-									'op12_clamping_area': op12_clamping_area,
-									'op12_id': op12_id,
-									'op12_state': op12_status,
-									
-								}
-								
-								ms_operation_id = ms_operation_obj.create(cr, uid, operation_vals)
-								
-								ms_operation_obj.write(cr, uid, ms_operation_id, {'last_operation_check_id':ms_operation_id})
-								
-								### Creating Dimension Details ###
-								
-								if ele['position_id'] != False:
-									position_id = self.pool.get('kg.position.number').browse(cr,uid,ele['position_id'])
-									for pos_line_item in position_id.line_ids:
+									if pos_line_item.operation_id.name == '10':
+										op1_status = 'pending'
+										op1_id = pos_line_item.operation_id.id
+										op1_stage_id = pos_line_item.stage_id.id
+										op1_clamping_area = pos_line_item.clamping_area
 										
+									if pos_line_item.operation_id.name == '20':
+										op2_status = 'pending'
+										op2_id = pos_line_item.operation_id.id
+										op2_stage_id = pos_line_item.stage_id.id
+										op2_clamping_area = pos_line_item.clamping_area
 										
-										if pos_line_item.operation_id.name == '10':
-											
-											for op1_dimen_item in pos_line_item.line_ids:
-												op1_dimen_vals = {
-													
-													'header_id': ms_operation_id,
-													'position_id': pos_line_item.header_id.id,
-													'operation_id': pos_line_item.operation_id.id,
-													'operation_name': pos_line_item.operation_id.name,
-													'position_line': op1_dimen_item.header_id.id,
-													'pos_dimension_id': op1_dimen_item.id,
-													'dimension_id': op1_dimen_item.dimension_id.id,
-													#~ 'clamping_area': op1_dimen_item.clamping_area,
-													'description': op1_dimen_item.description,
-													'min_val': op1_dimen_item.min_val,
-													'max_val': op1_dimen_item.max_val,
-													'remark': op1_dimen_item.remark,
-													
-													}
-												
-												op1_ms_dimension_id = ms_dimension_obj.create(cr, uid,op1_dimen_vals)
-												
+									if pos_line_item.operation_id.name == '30':
+										op3_status = 'pending'
+										op3_id = pos_line_item.operation_id.id
+										op3_stage_id = pos_line_item.stage_id.id
+										op3_clamping_area = pos_line_item.clamping_area
 										
-										if pos_line_item.operation_id.name == '20':
-											
-											for op2_dimen_item in pos_line_item.line_ids:
-												
-												op2_dimen_vals = {
-													
-													'header_id': ms_operation_id,
-													'position_id': pos_line_item.header_id.id,
-													'operation_id': pos_line_item.operation_id.id,
-													'operation_name': pos_line_item.operation_id.name,
-													'position_line': op2_dimen_item.header_id.id,
-													'pos_dimension_id': op2_dimen_item.id,
-													'dimension_id': op2_dimen_item.dimension_id.id,
-													#~ 'clamping_area': op2_dimen_item.clamping_area,
-													'description': op2_dimen_item.description,
-													'min_val': op2_dimen_item.min_val,
-													'max_val': op2_dimen_item.max_val,
-													'remark': op2_dimen_item.remark,
-													
-													}
-												
-												op2_ms_dimension_id = ms_dimension_obj.create(cr, uid,op2_dimen_vals)
-												
-												
-										if pos_line_item.operation_id.name == '30':
-											
-											for op3_dimen_item in pos_line_item.line_ids:
-												
-												op3_dimen_vals = {
-													
-													'header_id': ms_operation_id,
-													'position_id': pos_line_item.header_id.id,
-													'operation_id': pos_line_item.operation_id.id,
-													'operation_name': pos_line_item.operation_id.name,
-													'position_line': op3_dimen_item.header_id.id,
-													'pos_dimension_id': op3_dimen_item.id,
-													'dimension_id': op3_dimen_item.dimension_id.id,
-													#~ 'clamping_area': op2_dimen_item.clamping_area,
-													'description': op3_dimen_item.description,
-													'min_val': op3_dimen_item.min_val,
-													'max_val': op3_dimen_item.max_val,
-													'remark': op3_dimen_item.remark,
-													
-													}
-												
-												op3_ms_dimension_id = ms_dimension_obj.create(cr, uid,op3_dimen_vals)
-												
-												
-										if pos_line_item.operation_id.name == '40':
-											
-											for op4_dimen_item in pos_line_item.line_ids:
-												
-												op4_dimen_vals = {
-													
-													'header_id': ms_operation_id,
-													'position_id': pos_line_item.header_id.id,
-													'operation_id': pos_line_item.operation_id.id,
-													'operation_name': pos_line_item.operation_id.name,
-													'position_line': op4_dimen_item.header_id.id,
-													'pos_dimension_id': op4_dimen_item.id,
-													'dimension_id': op4_dimen_item.dimension_id.id,
-													#~ 'clamping_area': op2_dimen_item.clamping_area,
-													'description': op4_dimen_item.description,
-													'min_val': op4_dimen_item.min_val,
-													'max_val': op4_dimen_item.max_val,
-													'remark': op4_dimen_item.remark,
-													
-													}
-												
-												op4_ms_dimension_id = ms_dimension_obj.create(cr, uid,op4_dimen_vals)
-												
-												
-										if pos_line_item.operation_id.name == '50':
-											
-											for op5_dimen_item in pos_line_item.line_ids:
-												
-												op5_dimen_vals = {
-													
-													'header_id': ms_operation_id,
-													'position_id': pos_line_item.header_id.id,
-													'operation_id': pos_line_item.operation_id.id,
-													'operation_name': pos_line_item.operation_id.name,
-													'position_line': op5_dimen_item.header_id.id,
-													'pos_dimension_id': op5_dimen_item.id,
-													'dimension_id': op5_dimen_item.dimension_id.id,
-													#~ 'clamping_area': op2_dimen_item.clamping_area,
-													'description': op5_dimen_item.description,
-													'min_val': op5_dimen_item.min_val,
-													'max_val': op5_dimen_item.max_val,
-													'remark': op5_dimen_item.remark,
-													
-													}
-												
-												op5_ms_dimension_id = ms_dimension_obj.create(cr, uid,op5_dimen_vals)
-												
-												
-										if pos_line_item.operation_id.name == '60':
-											
-											for op6_dimen_item in pos_line_item.line_ids:
-												
-												op6_dimen_vals = {
-													
-													'header_id': ms_operation_id,
-													'position_id': pos_line_item.header_id.id,
-													'operation_id': pos_line_item.operation_id.id,
-													'operation_name': pos_line_item.operation_id.name,
-													'position_line': op6_dimen_item.header_id.id,
-													'pos_dimension_id': op6_dimen_item.id,
-													'dimension_id': op6_dimen_item.dimension_id.id,
-													#~ 'clamping_area': op2_dimen_item.clamping_area,
-													'description': op6_dimen_item.description,
-													'min_val': op6_dimen_item.min_val,
-													'max_val': op6_dimen_item.max_val,
-													'remark': op6_dimen_item.remark,
-													
-													}
-												
-												op6_ms_dimension_id = ms_dimension_obj.create(cr, uid,op6_dimen_vals)
-												
-												
-										if pos_line_item.operation_id.name == '70':
-											
-											for op7_dimen_item in pos_line_item.line_ids:
-												
-												op7_dimen_vals = {
-													
-													'header_id': ms_operation_id,
-													'position_id': pos_line_item.header_id.id,
-													'operation_id': pos_line_item.operation_id.id,
-													'operation_name': pos_line_item.operation_id.name,
-													'position_line': op7_dimen_item.header_id.id,
-													'pos_dimension_id': op7_dimen_item.id,
-													'dimension_id': op7_dimen_item.dimension_id.id,
-													#~ 'clamping_area': op2_dimen_item.clamping_area,
-													'description': op7_dimen_item.description,
-													'min_val': op7_dimen_item.min_val,
-													'max_val': op7_dimen_item.max_val,
-													'remark': op7_dimen_item.remark,
-													
-													}
-												
-												op7_ms_dimension_id = ms_dimension_obj.create(cr, uid,op7_dimen_vals)
-												
-												
-										if pos_line_item.operation_id.name == '80':
-											
-											for op8_dimen_item in pos_line_item.line_ids:
-												
-												op8_dimen_vals = {
-													
-													'header_id': ms_operation_id,
-													'position_id': pos_line_item.header_id.id,
-													'operation_id': pos_line_item.operation_id.id,
-													'operation_name': pos_line_item.operation_id.name,
-													'position_line': op8_dimen_item.header_id.id,
-													'pos_dimension_id': op8_dimen_item.id,
-													'dimension_id': op8_dimen_item.dimension_id.id,
-													#~ 'clamping_area': op2_dimen_item.clamping_area,
-													'description': op8_dimen_item.description,
-													'min_val': op8_dimen_item.min_val,
-													'max_val': op8_dimen_item.max_val,
-													'remark': op8_dimen_item.remark,
-													
-													}
-												
-												op8_ms_dimension_id = ms_dimension_obj.create(cr, uid,op8_dimen_vals)
-												
-												
-										if pos_line_item.operation_id.name == '90':
-											
-											for op9_dimen_item in pos_line_item.line_ids:
-												
-												op9_dimen_vals = {
-													
-													'header_id': ms_operation_id,
-													'position_id': pos_line_item.header_id.id,
-													'operation_id': pos_line_item.operation_id.id,
-													'operation_name': pos_line_item.operation_id.name,
-													'position_line': op9_dimen_item.header_id.id,
-													'pos_dimension_id': op9_dimen_item.id,
-													'dimension_id': op9_dimen_item.dimension_id.id,
-													#~ 'clamping_area': op2_dimen_item.clamping_area,
-													'description': op9_dimen_item.description,
-													'min_val': op9_dimen_item.min_val,
-													'max_val': op9_dimen_item.max_val,
-													'remark': op9_dimen_item.remark,
-													
-													}
-												
-												op9_ms_dimension_id = ms_dimension_obj.create(cr, uid,op9_dimen_vals)
-												
-												
-										if pos_line_item.operation_id.name == '100':
-											
-											for op10_dimen_item in pos_line_item.line_ids:
-												
-												op10_dimen_vals = {
-													
-													'header_id': ms_operation_id,
-													'position_id': pos_line_item.header_id.id,
-													'operation_id': pos_line_item.operation_id.id,
-													'operation_name': pos_line_item.operation_id.name,
-													'position_line': op10_dimen_item.header_id.id,
-													'pos_dimension_id': op10_dimen_item.id,
-													'dimension_id': op10_dimen_item.dimension_id.id,
-													#~ 'clamping_area': op2_dimen_item.clamping_area,
-													'description': op10_dimen_item.description,
-													'min_val': op10_dimen_item.min_val,
-													'max_val': op10_dimen_item.max_val,
-													'remark': op10_dimen_item.remark,
-													
-													}
-												
-												op10_ms_dimension_id = ms_dimension_obj.create(cr, uid,op10_dimen_vals)
-												
-												
-										if pos_line_item.operation_id.name == '110':
-											
-											for op11_dimen_item in pos_line_item.line_ids:
-												
-												op11_dimen_vals = {
-													
-													'header_id': ms_operation_id,
-													'position_id': pos_line_item.header_id.id,
-													'operation_id': pos_line_item.operation_id.id,
-													'operation_name': pos_line_item.operation_id.name,
-													'position_line': op11_dimen_item.header_id.id,
-													'pos_dimension_id': op11_dimen_item.id,
-													'dimension_id': op11_dimen_item.dimension_id.id,
-													#~ 'clamping_area': op2_dimen_item.clamping_area,
-													'description': op11_dimen_item.description,
-													'min_val': op11_dimen_item.min_val,
-													'max_val': op11_dimen_item.max_val,
-													'remark': op11_dimen_item.remark,
-													
-													}
-												
-												op11_ms_dimension_id = ms_dimension_obj.create(cr, uid,op11_dimen_vals)
-												
-												
-										if pos_line_item.operation_id.name == '120':
-											
-											for op12_dimen_item in pos_line_item.line_ids:
-												
-												op12_dimen_vals = {
-													
-													'header_id': ms_operation_id,
-													'position_id': pos_line_item.header_id.id,
-													'operation_id': pos_line_item.operation_id.id,
-													'operation_name': pos_line_item.operation_id.name,
-													'position_line': op12_dimen_item.header_id.id,
-													'pos_dimension_id': op12_dimen_item.id,
-													'dimension_id': op12_dimen_item.dimension_id.id,
-													#~ 'clamping_area': op2_dimen_item.clamping_area,
-													'description': op12_dimen_item.description,
-													'min_val': op12_dimen_item.min_val,
-													'max_val': op12_dimen_item.max_val,
-													'remark': op12_dimen_item.remark,
-													
-													}
-												
-												op12_ms_dimension_id = ms_dimension_obj.create(cr, uid,op12_dimen_vals)
+									if pos_line_item.operation_id.name == '40':
+										op4_status = 'pending'
+										op4_id = pos_line_item.operation_id.id
+										op4_stage_id = pos_line_item.stage_id.id
+										op4_clamping_area = pos_line_item.clamping_area
+										
+									if pos_line_item.operation_id.name == '50':
+										op5_status = 'pending'
+										op5_id = pos_line_item.operation_id.id
+										op5_stage_id = pos_line_item.stage_id.id
+										op5_clamping_area = pos_line_item.clamping_area
+										
+									if pos_line_item.operation_id.name == '60':
+										op6_status = 'pending'
+										op6_id = pos_line_item.operation_id.id
+										op6_stage_id = pos_line_item.stage_id.id
+										op6_clamping_area = pos_line_item.clamping_area
+										
+									if pos_line_item.operation_id.name == '70':
+										op7_status = 'pending'
+										op7_id = pos_line_item.operation_id.id
+										op7_stage_id = pos_line_item.stage_id.id
+										op7_clamping_area = pos_line_item.clamping_area
+										
+									if pos_line_item.operation_id.name == '80':
+										op8_status = 'pending'
+										op8_id = pos_line_item.operation_id.id
+										op8_stage_id = pos_line_item.stage_id.id
+										op8_clamping_area = pos_line_item.clamping_area
+										
+									if pos_line_item.operation_id.name == '90':
+										op9_status = 'pending'
+										op9_id = pos_line_item.operation_id.id
+										op9_stage_id = pos_line_item.stage_id.id
+										op9_clamping_area = pos_line_item.clamping_area
+										
+									if pos_line_item.operation_id.name == '100':
+										op10_status = 'pending'
+										op10_id = pos_line_item.operation_id.id
+										op10_stage_id = pos_line_item.stage_id.id
+										op10_clamping_area = pos_line_item.clamping_area
+										
+									if pos_line_item.operation_id.name == '110':
+										op11_status = 'pending'
+										op11_id = pos_line_item.operation_id.id
+										op11_stage_id = pos_line_item.stage_id.id
+										op11_clamping_area = pos_line_item.clamping_area
+										
+									if pos_line_item.operation_id.name == '120':
+										op12_status = 'pending'
+										op12_id = pos_line_item.operation_id.id
+										op12_stage_id = pos_line_item.stage_id.id
+										op12_clamping_area = pos_line_item.clamping_area
 								
-								for i in entry.line_ids:
-									
-									s = [(6, 0, [x.id for x in i.com_operation_id])]
-									ss = [x.id for x in i.com_operation_id]
-									print"ssssssssssssssss",s
-									print"ssssssssssssssss",ss
-									for x in ss:
-										print"xxxxxxxxxxxx",x
-										op_rec = self.pool.get('ch.kg.position.number').browse(cr,uid,x)
-										op_name = op_rec.name
-										print"op_nameop_nameop_nameop_name",op_name
-										print"ms_operation_idms_operation_id",ms_operation_id
-										ms_op_id = []
-										ms_op_id.append(ms_operation_id);
-										#~ ms_op_id= list[ms_operation_id]
-										print"ms_op_id",ms_op_id
+								### Operation Creation ###
+								
+								for operation in range(item.qty):
+																
+									operation_vals = {
+										'ms_id': item.ms_id.id,													
+										'ms_plan_id': item.sc_id.ms_plan_id.id,													
+										'ms_plan_line_id': item.sc_id.ms_plan_line_id.id,	
+										'order_id': item.order_id.id,
+										'order_line_id': item.order_line_id.id,																	
+										'inhouse_qty': 1,
+										'op1_stage_id': op1_stage_id,
+										'op1_clamping_area': op1_clamping_area,
+										'op1_id': op1_id,
+										'op1_state':op1_status,
+										'op2_stage_id': op2_stage_id,
+										'op2_clamping_area': op2_clamping_area,
+										'op2_id': op2_id,
+										'op2_state': op2_status,
+										'op3_stage_id': op3_stage_id,
+										'op3_clamping_area': op3_clamping_area,
+										'op3_id': op3_id,
+										'op3_state': op3_status,
+										'op4_stage_id': op4_stage_id,
+										'op4_clamping_area': op4_clamping_area,
+										'op4_id': op4_id,
+										'op4_state': op4_status,
+										'op5_stage_id': op5_stage_id,
+										'op5_clamping_area': op5_clamping_area,
+										'op5_id': op5_id,
+										'op5_state': op5_status,
+										'op6_stage_id': op6_stage_id,
+										'op6_clamping_area': op6_clamping_area,
+										'op6_id': op6_id,
+										'op6_state': op6_status,
+										'op7_stage_id': op7_stage_id,
+										'op7_clamping_area': op7_clamping_area,
+										'op7_id': op7_id,
+										'op7_state': op7_status,
+										'op8_stage_id': op8_stage_id,
+										'op8_clamping_area': op8_clamping_area,
+										'op8_id': op8_id,
+										'op8_state': op8_status,
+										'op9_stage_id': op9_stage_id,
+										'op9_clamping_area': op9_clamping_area,
+										'op9_id': op9_id,
+										'op9_state': op9_status,
+										'op10_stage_id': op10_stage_id,
+										'op10_clamping_area': op10_clamping_area,
+										'op10_id': op10_id,
+										'op10_state': op10_status,
+										'op11_stage_id': op11_stage_id,
+										'op11_clamping_area': op11_clamping_area,
+										'op11_id': op11_id,
+										'op11_state': op11_status,
+										'op12_stage_id': op12_stage_id,
+										'op12_clamping_area': op12_clamping_area,
+										'op12_id': op12_id,
+										'op12_state': op12_status,
 										
-										if op_name == '10':
-												self.pool.get('kg.ms.operations').operation1_update(cr, uid, ms_op_id)	
-										if op_name == '20':
-												self.pool.get('kg.ms.operations').operation2_update(cr, uid, ms_op_id)	
-										if op_name == '30':
-												self.pool.get('kg.ms.operations').operation3_update(cr, uid, ms_op_id)
-										if op_name == '40':
-												self.pool.get('kg.ms.operations').operation4_update(cr, uid, ms_op_id)
-										if op_name == '50':
-												self.pool.get('kg.ms.operations').operation5_update(cr, uid, ms_op_id)
-										if op_name == '60':
-												self.pool.get('kg.ms.operations').operation6_update(cr, uid, ms_op_id)											
-										if op_name == '70':
-												self.pool.get('kg.ms.operations').operation7_update(cr, uid, ms_op_id)
-										if op_name == '80':
-												self.pool.get('kg.ms.operations').operation8_update(cr, uid, ms_op_id)
-										if op_name == '90':
-												self.pool.get('kg.ms.operations').operation9_update(cr, uid, ms_op_id)
-										if op_name == '100':
-												self.pool.get('kg.ms.operations').operation10_update(cr, uid, ms_op_id)
-										if op_name == '110':
-												self.pool.get('kg.ms.operations').operation11_update(cr, uid, ms_op_id)
-										if op_name == '120':
-												self.pool.get('kg.ms.operations').operation12_update(cr, uid, ms_op_id)											
+									}
+									
+									ms_operation_id = ms_operation_obj.create(cr, uid, operation_vals)
+									
+									ms_operation_obj.write(cr, uid, ms_operation_id, {'last_operation_check_id':ms_operation_id})
+									
+									### Creating Dimension Details ###
+									
+									if item.position_id.id != False:
+										position_id = self.pool.get('kg.position.number').browse(cr,uid,item.position_id.id)
+										for pos_line_item in position_id.line_ids:
+											
+											
+											if pos_line_item.operation_id.name == '10':
 												
-					if total > 0:						
-							
-						### Stock Inward Creation ###
-						inward_obj = self.pool.get('kg.stock.inward')
-						inward_line_obj = self.pool.get('ch.stock.inward.details')						
-						print"line_item.order_id.location",line_item.order_id.location
-						
-						inward_vals = {
-							'location': line_item.order_id.location
-						}
-						
-						inward_id = inward_obj.create(cr, uid, inward_vals)
-						
-						inward_line_vals = {
-							'header_id': inward_id,
-							'location': line_item.order_id.location,
-							'stock_type': 'pump',
-							'pump_model_id': line_item.pump_model_id.id,
-							'pattern_id': line_item.pattern_id.id,
-							'pattern_name': line_item.pattern_name,
-							'moc_id': line_item.moc_id.id,							
-							'qty': total,
-							'available_qty': total,
-							'each_wgt': 0,
-							'total_weight': 0,
-							'unit_price': 0,
-							'stock_mode': 'excess',
-							'ms_stock_state': 'operation_inprogress',
-							'stock_item': 'ms_item'
-							
-						}
-						
-						inward_line_id = inward_line_obj.create(cr, uid, inward_line_vals)
+												for op1_dimen_item in pos_line_item.line_ids:
+													op1_dimen_vals = {
+														
+														'header_id': ms_operation_id,
+														'position_id': pos_line_item.header_id.id,
+														'operation_id': pos_line_item.operation_id.id,
+														'operation_name': pos_line_item.operation_id.name,
+														'position_line': op1_dimen_item.header_id.id,
+														'pos_dimension_id': op1_dimen_item.id,
+														'dimension_id': op1_dimen_item.dimension_id.id,
+														#~ 'clamping_area': op1_dimen_item.clamping_area,
+														'description': op1_dimen_item.description,
+														'min_val': op1_dimen_item.min_val,
+														'max_val': op1_dimen_item.max_val,
+														'remark': op1_dimen_item.remark,
+														
+														}
+													
+													op1_ms_dimension_id = ms_dimension_obj.create(cr, uid,op1_dimen_vals)
+													
+											
+											if pos_line_item.operation_id.name == '20':
+												
+												for op2_dimen_item in pos_line_item.line_ids:
+													
+													op2_dimen_vals = {
+														
+														'header_id': ms_operation_id,
+														'position_id': pos_line_item.header_id.id,
+														'operation_id': pos_line_item.operation_id.id,
+														'operation_name': pos_line_item.operation_id.name,
+														'position_line': op2_dimen_item.header_id.id,
+														'pos_dimension_id': op2_dimen_item.id,
+														'dimension_id': op2_dimen_item.dimension_id.id,
+														#~ 'clamping_area': op2_dimen_item.clamping_area,
+														'description': op2_dimen_item.description,
+														'min_val': op2_dimen_item.min_val,
+														'max_val': op2_dimen_item.max_val,
+														'remark': op2_dimen_item.remark,
+														
+														}
+													
+													op2_ms_dimension_id = ms_dimension_obj.create(cr, uid,op2_dimen_vals)
+													
+													
+											if pos_line_item.operation_id.name == '30':
+												
+												for op3_dimen_item in pos_line_item.line_ids:
+													
+													op3_dimen_vals = {
+														
+														'header_id': ms_operation_id,
+														'position_id': pos_line_item.header_id.id,
+														'operation_id': pos_line_item.operation_id.id,
+														'operation_name': pos_line_item.operation_id.name,
+														'position_line': op3_dimen_item.header_id.id,
+														'pos_dimension_id': op3_dimen_item.id,
+														'dimension_id': op3_dimen_item.dimension_id.id,
+														#~ 'clamping_area': op2_dimen_item.clamping_area,
+														'description': op3_dimen_item.description,
+														'min_val': op3_dimen_item.min_val,
+														'max_val': op3_dimen_item.max_val,
+														'remark': op3_dimen_item.remark,
+														
+														}
+													
+													op3_ms_dimension_id = ms_dimension_obj.create(cr, uid,op3_dimen_vals)
+													
+													
+											if pos_line_item.operation_id.name == '40':
+												
+												for op4_dimen_item in pos_line_item.line_ids:
+													
+													op4_dimen_vals = {
+														
+														'header_id': ms_operation_id,
+														'position_id': pos_line_item.header_id.id,
+														'operation_id': pos_line_item.operation_id.id,
+														'operation_name': pos_line_item.operation_id.name,
+														'position_line': op4_dimen_item.header_id.id,
+														'pos_dimension_id': op4_dimen_item.id,
+														'dimension_id': op4_dimen_item.dimension_id.id,
+														#~ 'clamping_area': op2_dimen_item.clamping_area,
+														'description': op4_dimen_item.description,
+														'min_val': op4_dimen_item.min_val,
+														'max_val': op4_dimen_item.max_val,
+														'remark': op4_dimen_item.remark,
+														
+														}
+													
+													op4_ms_dimension_id = ms_dimension_obj.create(cr, uid,op4_dimen_vals)
+													
+													
+											if pos_line_item.operation_id.name == '50':
+												
+												for op5_dimen_item in pos_line_item.line_ids:
+													
+													op5_dimen_vals = {
+														
+														'header_id': ms_operation_id,
+														'position_id': pos_line_item.header_id.id,
+														'operation_id': pos_line_item.operation_id.id,
+														'operation_name': pos_line_item.operation_id.name,
+														'position_line': op5_dimen_item.header_id.id,
+														'pos_dimension_id': op5_dimen_item.id,
+														'dimension_id': op5_dimen_item.dimension_id.id,
+														#~ 'clamping_area': op2_dimen_item.clamping_area,
+														'description': op5_dimen_item.description,
+														'min_val': op5_dimen_item.min_val,
+														'max_val': op5_dimen_item.max_val,
+														'remark': op5_dimen_item.remark,
+														
+														}
+													
+													op5_ms_dimension_id = ms_dimension_obj.create(cr, uid,op5_dimen_vals)
+													
+													
+											if pos_line_item.operation_id.name == '60':
+												
+												for op6_dimen_item in pos_line_item.line_ids:
+													
+													op6_dimen_vals = {
+														
+														'header_id': ms_operation_id,
+														'position_id': pos_line_item.header_id.id,
+														'operation_id': pos_line_item.operation_id.id,
+														'operation_name': pos_line_item.operation_id.name,
+														'position_line': op6_dimen_item.header_id.id,
+														'pos_dimension_id': op6_dimen_item.id,
+														'dimension_id': op6_dimen_item.dimension_id.id,
+														#~ 'clamping_area': op2_dimen_item.clamping_area,
+														'description': op6_dimen_item.description,
+														'min_val': op6_dimen_item.min_val,
+														'max_val': op6_dimen_item.max_val,
+														'remark': op6_dimen_item.remark,
+														
+														}
+													
+													op6_ms_dimension_id = ms_dimension_obj.create(cr, uid,op6_dimen_vals)
+													
+													
+											if pos_line_item.operation_id.name == '70':
+												
+												for op7_dimen_item in pos_line_item.line_ids:
+													
+													op7_dimen_vals = {
+														
+														'header_id': ms_operation_id,
+														'position_id': pos_line_item.header_id.id,
+														'operation_id': pos_line_item.operation_id.id,
+														'operation_name': pos_line_item.operation_id.name,
+														'position_line': op7_dimen_item.header_id.id,
+														'pos_dimension_id': op7_dimen_item.id,
+														'dimension_id': op7_dimen_item.dimension_id.id,
+														#~ 'clamping_area': op2_dimen_item.clamping_area,
+														'description': op7_dimen_item.description,
+														'min_val': op7_dimen_item.min_val,
+														'max_val': op7_dimen_item.max_val,
+														'remark': op7_dimen_item.remark,
+														
+														}
+													
+													op7_ms_dimension_id = ms_dimension_obj.create(cr, uid,op7_dimen_vals)
+													
+													
+											if pos_line_item.operation_id.name == '80':
+												
+												for op8_dimen_item in pos_line_item.line_ids:
+													
+													op8_dimen_vals = {
+														
+														'header_id': ms_operation_id,
+														'position_id': pos_line_item.header_id.id,
+														'operation_id': pos_line_item.operation_id.id,
+														'operation_name': pos_line_item.operation_id.name,
+														'position_line': op8_dimen_item.header_id.id,
+														'pos_dimension_id': op8_dimen_item.id,
+														'dimension_id': op8_dimen_item.dimension_id.id,
+														#~ 'clamping_area': op2_dimen_item.clamping_area,
+														'description': op8_dimen_item.description,
+														'min_val': op8_dimen_item.min_val,
+														'max_val': op8_dimen_item.max_val,
+														'remark': op8_dimen_item.remark,
+														
+														}
+													
+													op8_ms_dimension_id = ms_dimension_obj.create(cr, uid,op8_dimen_vals)
+													
+													
+											if pos_line_item.operation_id.name == '90':
+												
+												for op9_dimen_item in pos_line_item.line_ids:
+													
+													op9_dimen_vals = {
+														
+														'header_id': ms_operation_id,
+														'position_id': pos_line_item.header_id.id,
+														'operation_id': pos_line_item.operation_id.id,
+														'operation_name': pos_line_item.operation_id.name,
+														'position_line': op9_dimen_item.header_id.id,
+														'pos_dimension_id': op9_dimen_item.id,
+														'dimension_id': op9_dimen_item.dimension_id.id,
+														#~ 'clamping_area': op2_dimen_item.clamping_area,
+														'description': op9_dimen_item.description,
+														'min_val': op9_dimen_item.min_val,
+														'max_val': op9_dimen_item.max_val,
+														'remark': op9_dimen_item.remark,
+														
+														}
+													
+													op9_ms_dimension_id = ms_dimension_obj.create(cr, uid,op9_dimen_vals)
+													
+													
+											if pos_line_item.operation_id.name == '100':
+												
+												for op10_dimen_item in pos_line_item.line_ids:
+													
+													op10_dimen_vals = {
+														
+														'header_id': ms_operation_id,
+														'position_id': pos_line_item.header_id.id,
+														'operation_id': pos_line_item.operation_id.id,
+														'operation_name': pos_line_item.operation_id.name,
+														'position_line': op10_dimen_item.header_id.id,
+														'pos_dimension_id': op10_dimen_item.id,
+														'dimension_id': op10_dimen_item.dimension_id.id,
+														#~ 'clamping_area': op2_dimen_item.clamping_area,
+														'description': op10_dimen_item.description,
+														'min_val': op10_dimen_item.min_val,
+														'max_val': op10_dimen_item.max_val,
+														'remark': op10_dimen_item.remark,
+														
+														}
+													
+													op10_ms_dimension_id = ms_dimension_obj.create(cr, uid,op10_dimen_vals)
+													
+													
+											if pos_line_item.operation_id.name == '110':
+												
+												for op11_dimen_item in pos_line_item.line_ids:
+													
+													op11_dimen_vals = {
+														
+														'header_id': ms_operation_id,
+														'position_id': pos_line_item.header_id.id,
+														'operation_id': pos_line_item.operation_id.id,
+														'operation_name': pos_line_item.operation_id.name,
+														'position_line': op11_dimen_item.header_id.id,
+														'pos_dimension_id': op11_dimen_item.id,
+														'dimension_id': op11_dimen_item.dimension_id.id,
+														#~ 'clamping_area': op2_dimen_item.clamping_area,
+														'description': op11_dimen_item.description,
+														'min_val': op11_dimen_item.min_val,
+														'max_val': op11_dimen_item.max_val,
+														'remark': op11_dimen_item.remark,
+														
+														}
+													
+													op11_ms_dimension_id = ms_dimension_obj.create(cr, uid,op11_dimen_vals)
+													
+													
+											if pos_line_item.operation_id.name == '120':
+												
+												for op12_dimen_item in pos_line_item.line_ids:
+													
+													op12_dimen_vals = {
+														
+														'header_id': ms_operation_id,
+														'position_id': pos_line_item.header_id.id,
+														'operation_id': pos_line_item.operation_id.id,
+														'operation_name': pos_line_item.operation_id.name,
+														'position_line': op12_dimen_item.header_id.id,
+														'pos_dimension_id': op12_dimen_item.id,
+														'dimension_id': op12_dimen_item.dimension_id.id,
+														#~ 'clamping_area': op2_dimen_item.clamping_area,
+														'description': op12_dimen_item.description,
+														'min_val': op12_dimen_item.min_val,
+														'max_val': op12_dimen_item.max_val,
+														'remark': op12_dimen_item.remark,
+														
+														}
+													
+													op12_ms_dimension_id = ms_dimension_obj.create(cr, uid,op12_dimen_vals)
+								
+									for i in entry.line_ids:										
+										s = [(6, 0, [x.id for x in i.com_operation_id])]
+										ss = [x.id for x in i.com_operation_id]
+										print"ssssssssssssssss",s
+										print"ssssssssssssssss",ss
+										for x in ss:
+											print"xxxxxxxxxxxx",x
+											op_rec = self.pool.get('ch.kg.position.number').browse(cr,uid,x)
+											op_name = op_rec.operation_id.name
+											print"op_nameop_nameop_nameop_name",op_name
+											print"ms_operation_idms_operation_id",ms_operation_id
+											print"op_nameop_nameop_nameop_name",op_name								
+											ms_op_id = ms_operation_id
+											
+											if op_name == '10':
+												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op1_state':'done'})
+												self.pool.get('kg.ms.operations').operation1_update(cr, uid, [ms_op_id])	
+											if op_name == '20':
+												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op2_state':'done'})
+												self.pool.get('kg.ms.operations').operation2_update(cr, uid, [ms_op_id])	
+											if op_name == '30':												
+												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op3_state':'done'})
+												self.pool.get('kg.ms.operations').operation3_update(cr, uid, [ms_op_id])
+											if op_name == '40':
+												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op4_state':'done'})
+												self.pool.get('kg.ms.operations').operation4_update(cr, uid, [ms_op_id])
+											if op_name == '50':
+												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op5_state':'done'})
+												self.pool.get('kg.ms.operations').operation5_update(cr, uid, [ms_op_id])
+											if op_name == '60':
+												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op6_state':'done'})
+												self.pool.get('kg.ms.operations').operation6_update(cr, uid, [ms_op_id])											
+											if op_name == '70':
+												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op7_state':'done'})
+												self.pool.get('kg.ms.operations').operation7_update(cr, uid, [ms_op_id])
+											if op_name == '80':
+												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op8_state':'done'})
+												self.pool.get('kg.ms.operations').operation8_update(cr, uid, [ms_op_id])
+											if op_name == '90':
+												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op9_state':'done'})
+												self.pool.get('kg.ms.operations').operation9_update(cr, uid, [ms_op_id])
+											if op_name == '100':
+												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op10_state':'done'})
+												self.pool.get('kg.ms.operations').operation10_update(cr, uid, [ms_op_id])
+											if op_name == '110':
+												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op11_state':'done'})
+												self.pool.get('kg.ms.operations').operation11_update(cr, uid, [ms_op_id])
+											if op_name == '120':
+												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op12_state':'done'})
+												self.pool.get('kg.ms.operations').operation12_update(cr, uid, [ms_op_id])										
+												
+					#~ if total > 0:						
+							#~ 
+						#~ ### Stock Inward Creation ###
+						#~ inward_obj = self.pool.get('kg.stock.inward')
+						#~ inward_line_obj = self.pool.get('ch.stock.inward.details')						
+						#~ print"line_item.order_id.location",line_item.order_id.location
+						#~ 
+						#~ inward_vals = {
+							#~ 'location': line_item.order_id.location
+						#~ }
+						#~ 
+						#~ inward_id = inward_obj.create(cr, uid, inward_vals)
+						#~ 
+						#~ inward_line_vals = {
+							#~ 'header_id': inward_id,
+							#~ 'location': line_item.order_id.location,
+							#~ 'stock_type': 'pump',
+							#~ 'pump_model_id': line_item.pump_model_id.id,
+							#~ 'pattern_id': line_item.pattern_id.id,
+							#~ 'pattern_name': line_item.pattern_name,
+							#~ 'moc_id': line_item.moc_id.id,							
+							#~ 'qty': total,
+							#~ 'available_qty': total,
+							#~ 'each_wgt': 0,
+							#~ 'total_weight': 0,
+							#~ 'unit_price': 0,
+							#~ 'stock_mode': 'excess',
+							#~ 'ms_stock_state': 'operation_inprogress',
+							#~ 'stock_item': 'ms_item'
+							#~ 
+						#~ }
+						#~ 
+						#~ inward_line_id = inward_line_obj.create(cr, uid, inward_line_vals)
 		
 			for line_item in entry.line_ids:				
 				if line_item.qty < 0:
