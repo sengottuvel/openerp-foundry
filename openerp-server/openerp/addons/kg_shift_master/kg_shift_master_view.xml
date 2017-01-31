@@ -18,14 +18,19 @@
 					</header>
 					<group>
 						<group>						
-							<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>		
+							<field name="name" class="aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>		
 							<field name="start_time" widget="float_time" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 							<field name="modify" invisible = "1"/>	
+							<field name="grace_period" required="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
+							<field name="min_ot_hours" widget="float_time" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="sequence" attrs="{'required':[('rotation','in',True)],'invisible':[('rotation','in',False)],'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
 							<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 						</group>
 						<group>
-							<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							<field name="end_time" widget="float_time" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="code" class="aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="end_time" on_change="onchange_end_time(start_time,end_time)" widget="float_time" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="shift_hours" required="1" readonly="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="rotation" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="state" style="width: 30%%" class="att_state_change"/>								
 						</group>
 					</group>						
@@ -80,6 +85,7 @@
 					<field name="name"/>
 					<field name="start_time" widget="float_time"/>
 					<field name="end_time" widget="float_time"/>
+					<field name="shift_hours" widget="float_time"/>
 					<field name="state"/>
 				</tree>
 			</field>

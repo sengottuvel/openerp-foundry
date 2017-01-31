@@ -69,7 +69,15 @@ class kg_shift_master(osv.osv):
 		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
-		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),		
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),	
+		
+		## Module Requirement Info		
+		
+		'grace_period': fields.integer('Grace Period(minutes)', required=False),
+		'rotation': fields.boolean('Rotation'),
+		'sequence': fields.selection([('1','1'),('2','2'),('3','3')],'Sequence',),
+		'shift_hours': fields.float('Shift Hours'),
+		'min_ot_hours': fields.float('Minimum OT Hours'),
 				
 	}
 	
@@ -89,35 +97,6 @@ class kg_shift_master(osv.osv):
 		('name', 'unique(name)', 'Name must be unique per Company !!'),
 		('code', 'unique(code)', 'Code must be unique per Company !!'),
 	]
-	
-			
-	def _name_validate(self, cr, uid,ids, context=None):
-		rec = self.browse(cr,uid,ids[0])
-		res = True
-		if rec.name:
-			shift_name = rec.name
-			name=shift_name.upper()			
-			cr.execute(""" select upper(name) from kg_shift_master where upper(name)  = '%s' """ %(name))
-			data = cr.dictfetchall()			
-			if len(data) > 1:
-				res = False
-			else:
-				res = True				
-		return res
-			
-	def _code_validate(self, cr, uid,ids, context=None):
-		rec = self.browse(cr,uid,ids[0])
-		res = True
-		if rec.code:
-			shift_code = rec.code
-			code=shift_code.upper()			
-			cr.execute(""" select upper(code) from kg_shift_master where upper(code)  = '%s' """ %(code))
-			data = cr.dictfetchall()			
-			if len(data) > 1:
-				res = False
-			else:
-				res = True				
-		return res	
 	
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -165,11 +144,56 @@ class kg_shift_master(osv.osv):
 	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_shift_master, self).write(cr, uid, ids, vals, context)
-		
 	
+	def onchange_end_time(self, cr, uid, ids, start_time,end_time, context=None):
+		value = {'start_time':'','end_time':'','shift_hours':''}
+		shf_tme = end_time - start_time
+		value = {
+				'shift_hours': shf_tme,
+				}
+		return {'value': value}
+		 
+		
+	###Validations
+		
+	def val_negative(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.start_time <= 0:
+			raise osv.except_osv(_('Warning!'),
+						_('Negative Values and Zeros are not allowed in Start Time !!'))
+		if rec.start_time > 24.00:
+			raise osv.except_osv(_('Warning!'),
+						_('Start Time Should not Exceed 24 Hours !!'))
+		if rec.end_time <= 0:
+			raise osv.except_osv(_('Warning!'),
+						_('Negative Values are not allowed in End Time !!'))
+		if rec.end_time > 24.00:
+			raise osv.except_osv(_('Warning!'),
+						_('End Time Should not Exceed 24 Hours !!'))
+		if rec.grace_period < 0:
+			raise osv.except_osv(_('Warning!'),
+						_('Negative Values are not allowed in Grace Period !!'))
+		if rec.grace_period > 30:
+			raise osv.except_osv(_('Warning!'),
+						_('Grace Period should not exceed 30 Minutes !!'))
+		if rec.end_time < rec.start_time:
+			raise osv.except_osv(_('Warning!'),
+						_('End Time should not be less than Start Time !!'))
+		if rec.end_time == rec.start_time:
+			raise osv.except_osv(_('Warning!'),
+						_('End Time and Start Time should not be same !!'))
+		
+		if rec.sequence:
+				add_ids = self.pool.get('kg.shift.master').search(cr,uid,[('sequence','=',rec.sequence)])
+				if len(add_ids) > 1:
+					raise osv.except_osv(_('Warning!'),
+						_('This Sequence is assigned to other Shift !!'))
+					return False
+
+		return True
+		
 	_constraints = [	
-		(_name_validate, 'Shift name must be unique !!', ['name']),		
-		(_code_validate, 'Shift code must be unique !!', ['code']),		
+		(val_negative, 'Shift name must be unique !!', ['name']),		
 		
 	]
 	
