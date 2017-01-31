@@ -315,7 +315,8 @@
 				<menuitem action="hr.action_hr_job" id="menu_hr_jobs" parent="menu_masters_menu" sequence="10"/>
 				<menuitem action="kg_shift_master.mma_shift_master" name="Shift" id="mam_shift_master_1" parent="menu_masters_menu" sequence="17"/>
 				<menuitem parent="menu_masters_menu" id="mam_depmaster_action_1"  action="kg_depmaster.kg_depmaster_action_form" sequence="10" name="Department"/>
-				<menuitem action="kg_employee_category.mma_kg_emp_categ" name="Employee Category" id="mam_kg_emp_categ" parent="menu_masters_menu" sequence="9"/>	
+				<menuitem action="kg_employee_category.mma_kg_emp_categ" name="Employee Category" id="mam_kg_emp_categ" parent="menu_masters_menu" sequence="9"/>
+				<menuitem name="Leaves Types" action="hr_holidays.open_view_holiday_status" id="menu_open_view_holiday_status_1" parent="menu_masters_menu" sequence="10"/>	
 		
     </data>
 </openerp>
