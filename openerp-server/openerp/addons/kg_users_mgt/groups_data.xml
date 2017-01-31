@@ -489,7 +489,7 @@
 			ref('kg_monthly_attendance.mpm_kg_mon_att'),
 			ref('kg_monthly_attendance.mam_kg_mon_att'),
 			ref('kg_daily_attendance.mam_kg_daily_att_view'),
-			ref('kg_job_request.mcm_kg_job_request'),
+			
 			ref('base.menu_crm_case_job_req_main'),
 			ref('kg_allowance_detection.mpm_kg_allow_ded'),
 			ref('kg_allowance_detection.mam_kg_allow_ded'),
