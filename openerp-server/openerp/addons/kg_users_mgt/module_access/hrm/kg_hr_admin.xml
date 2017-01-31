@@ -417,6 +417,56 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
 		</record>
 		
+		<record id="kg_hr_kg_employee_category" model="ir.model.access">
+			<field name="model_id" ref="kg_employee_category.model_kg_employee_category"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Employee Category Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
+		<record id="kg_hr_ch_special_incentive_policy" model="ir.model.access">
+			<field name="model_id" ref="kg_employee_category.model_ch_special_incentive_policy"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Special incentive Policy</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
+		<record id="kg_hr_ch_bonus_policy" model="ir.model.access">
+			<field name="model_id" ref="kg_employee_category.model_ch_bonus_policy"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Bonus Policy</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
+		<record id="kg_hr_ch_salary_policy" model="ir.model.access">
+			<field name="model_id" ref="kg_employee_category.model_ch_salary_policy"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Salary Policy</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
+		<record id="kg_hr_ch_leave_policy" model="ir.model.access">
+			<field name="model_id" ref="kg_employee_category.model_ch_leave_policy"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Leave Policy</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
 		
 		
 		

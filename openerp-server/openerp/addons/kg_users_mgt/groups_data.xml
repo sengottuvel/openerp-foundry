@@ -519,6 +519,9 @@
 			ref('kg_menus.menu_hr_master_dep'),
 			ref('kg_menus.menu_hr_jobs'),
 			
+			ref('kg_menus.mam_kg_emp_categ'),
+			ref('kg_attendance_device_info.mam_kg_att_dev_info'),
+			
 			
        
             ])]"  name="menu_access"/>
