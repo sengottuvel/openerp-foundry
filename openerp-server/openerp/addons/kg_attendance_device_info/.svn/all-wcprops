@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/sam_turbo_dev/!svn/ver/2810/openerp-server/openerp/addons/kg_attendance_device_info
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/sam_turbo_dev/!svn/ver/2647/openerp-server/openerp/addons/kg_attendance_device_info/__init__.py
+END
+kg_attendance_device_info.py
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/svn/sam_turbo_dev/!svn/ver/2810/openerp-server/openerp/addons/kg_attendance_device_info/kg_attendance_device_info.py
+END
+kg_attendance_device_info_view.xml
+K 25
+svn:wc:ra_dav:version-url
+V 123
+/svn/sam_turbo_dev/!svn/ver/2783/openerp-server/openerp/addons/kg_attendance_device_info/kg_attendance_device_info_view.xml
+END
+__openerp__.py
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/sam_turbo_dev/!svn/ver/2647/openerp-server/openerp/addons/kg_attendance_device_info/__openerp__.py
+END

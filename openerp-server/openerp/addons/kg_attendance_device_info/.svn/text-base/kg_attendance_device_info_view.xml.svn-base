@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+	
+	<!-- Form View Start -->
+	
+	<record id="m_form_v_kg_att_dev_info" model="ir.ui.view">
+			<field name="name">Attendance Device Info</field>
+			<field name="model">kg.attendance.device.info</field>
+			<field name="arch" type="xml">
+				<form string="Attendance Device Info" version="7.0">
+					<header>
+						<button name="attendance_entry_move" type="object" string="Load"/>
+					</header>
+					<group>
+						<group>
+							<field name="machine_no" invisible="0"/>	
+							<field name="date"/>							
+							<field name="punch_date"/>							
+						</group>
+						<group>
+							<field name="punch_time"/>
+							<field name="att_code"/>
+						</group>
+					</group>
+					<notebook>
+						<page string="Notes">
+							<field name="notes"  placeholder="Add notes for your reference"/>				
+						</page>
+						<page string="Entry Info">
+							<group>
+								<group>
+									<field name="company_id"/>
+									<field name="update_date"/>
+								</group>
+								<group>
+									<field name="active"/>
+									<field name="update_user_id"/>
+								</group>
+							</group>
+						</page>
+					</notebook>
+				</form>
+			</field> 	  
+	</record>
+	
+	<!-- Form View End -->
+	
+	<!-- Tree View Start -->	
+		
+	<record id="m_tree_v_kg_att_dev_info" model="ir.ui.view">
+		<field name="name">Attendance Device Info Tree</field>
+		<field name="model">kg.attendance.device.info</field>
+		<field name="arch" type="xml">
+			<tree toolbar="True" string="Attendance Device Info">				
+				<field name="machine_no" />
+				<field name="date" />
+				<field name="punch_date" />
+				<field name="punch_time"/>
+				<field name="att_code"/>
+			</tree>
+		</field>
+	</record>
+	
+	<!-- Tree View End -->
+	
+	<!-- Search View Start -->
+	
+	<record id="m_search_v_kg_att_dev_info" model="ir.ui.view">
+            <field name="name">KG Attendance Device Info Search</field>
+            <field name="model">kg.attendance.device.info</field>
+            <field name="arch" type="xml">
+                <search string="Attendance Device Info">
+                    <group expand="0" string="Group By...">
+                        <filter string="punch_date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'punch_date'}"/>
+                        <filter string="att_code" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'att_code'}"/>
+					</group>
+                </search>
+			</field>
+	</record>
+	
+	<!-- Search View End -->		
+		
+	<!-- Menu Action Start-->
+
+	<record id="mma_standard_kg_att_dev_info" model="ir.actions.act_window">
+		<field name="name">Attendance Device Info</field>
+		<field name="res_model">kg.attendance.device.info</field>
+		<field name="view_id" ref="m_tree_v_kg_att_dev_info"/>
+		<field name="view_mode">form,tree</field>                         
+	</record>
+	
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start -->
+		
+	<record id="division_model_kg_att_dev_info_audit" model="audittrail.rule">
+		<field name="name">KG Attendance Device Info Audit Log Master</field>
+		<field name="object_id" eval="ref('kg_attendance_device_info.model_kg_attendance_device_info')"/>       
+		<field name="state">subscribed</field>              
+	</record>
+        
+	<!-- Audit Log Xml Data End-->
+        
+	<!-- Menu Name Start here --> 
+
+	<menuitem action="mma_standard_kg_att_dev_info" name="Device Info" id="mam_kg_att_dev_info" parent="kg_monthly_attendance.mpm_kg_mon_att" sequence="0"/>
+	
+	<!-- Menu Name End here --> 
+
+</data>
+	</openerp>
