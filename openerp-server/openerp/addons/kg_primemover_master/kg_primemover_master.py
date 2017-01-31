@@ -56,7 +56,7 @@ class kg_primemover_master(osv.osv):
 		'effclass': fields.char('Effclass',required=True),
 		'pole': fields.integer('Pole',required=True),
 		'series': fields.char('Series',required=True),
-		'framesize': fields.integer('Framesize',required=True),
+		'framesize': fields.char('Framesize',required=True),
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
 		'mounting': fields.char('Mounting',required=True),
 		'terminal_box_loc': fields.selection([('front','FRONT'),('top','TOP'),('behind','BEHIND')],'Terminal Box Location',required=True),
@@ -145,11 +145,6 @@ class kg_primemover_master(osv.osv):
 	def _check_pole(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])
 		if rec.pole <= 0:
-			return False					
-		return True	
-	def _check_framesize(self, cr, uid, ids, context=None):		
-		rec = self.browse(cr, uid, ids[0])
-		if rec.framesize <= 0:
 			return False					
 		return True	
 	def _check_power_kw(self, cr, uid, ids, context=None):		
@@ -249,7 +244,6 @@ class kg_primemover_master(osv.osv):
 		#(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
 		(_name_validate, 'Primemover name must be unique !!', ['name']),		
 		(_check_pole,'You can not save this Pole with Zero value !',['Pole']),
-		(_check_framesize,'You can not save this Framesize with Zero value !',['Framesize']),
 		(_check_power_kw,'You can not save this Power KW with Zero value !',['Power KW']),
 		(_check_efficiency,'You can not save this Efficiency with Zero value !',['Efficiency']),
 		(_check_speed,'You can not save this Speed with Zero value !',['Speed']),
