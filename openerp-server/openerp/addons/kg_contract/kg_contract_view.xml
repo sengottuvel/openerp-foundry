@@ -16,11 +16,10 @@
 						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 						<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<field name="state" widget="statusbar" statusbar_visible="draft,approved,confirmed,cancel,reject" statusbar_colors='{"draft":"blue","approved":"blue","confirmed":"red","cancel":"red","reject":"red"}' readonly="1"/>
 					</button>
 					
 					<field name="employee_id" position="replace">
-						<field name="employee_id" on_change="onchange_employee_code(employee_id,code)" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
+						<field name="employee_id" on_change="onchange_employee_code(employee_id,code)" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}" readonly="1"/>
 					</field>
 					
 					<xpath expr="//group[@name='emp_det']" position="after">
@@ -35,12 +34,20 @@
 					</xpath>
 					
 					<field name="employee_id" position="after">
-						<field name="department_id" readonly="1" />
+						<field name="department_id" readonly="1" invisible="1"/>
+						<field name="dep_id" readonly="1" />
+						<field name="emp_categ_id" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}" readonly="1" />
+						<field name="shift_id" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
 					</field>
 					
 					<field name="type_id" position="after">
 						<field name="code" readonly="1" />
+<!--
 						<field name="designation" readonly="1"/>
+-->
+						<field name="job_id" readonly="1"/>
+						<field name="rotation"  attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
+						<field name="state" style="width: 30%%" class="att_state_change"/>
 					</field>
 					
 					<field name="type_id" position="replace">
@@ -62,35 +69,42 @@
 								<separator  string="Salary Details"/>
 								</group>
 								<group>
-									<field name="gross_salary" required='1'/>
-									<field name="mobile_allow" required='1'/>
+									<field name="gross_salary" required='1' attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
+									<field name="mobile_allow" invisible='1'/>
 								</group>
 								<group >
-									<field name="increament_type" required='1'/>
-									<field name="increament_amt" required='1'/>
+									<field name="increament_type" invisible='1'/>
+									<field name="increament_amt" invisible='1'/>
 								</group>
 								<group colspan="5">
-									<field name = "line_id_salary" nolabel="1" />
+									<field name = "line_id_salary" nolabel="1" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
 								</group>
 								<group string="Pay Mode" >
-									<field name="payment_mode" required="1" />
+									<field name="payment_mode" required="1" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
 									<field name="bank_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'required':[('payment_mode','=','bank')]}"/>
-									<field name="sal_acc_no" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'required':[('payment_mode','=','bank')]}"/>
+									<field name="sal_acc_no" class="numberonly" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'required':[('payment_mode','=','bank')]}"/>
 								</group>
-								<group string="General">
-									<field name="ot_status" />
-									<field name="pt_status" />	
-									<field name="pan_no" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'required':[('payment_mode','=','bank')]}"/>
+<!--
+								<group string="General" invisible="1">
+									<field name="pan_no" class="numberonly" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'required':[('payment_mode','=','bank')]}"/>
+								</group>
+-->
+								<group string="Validations">
+									<field name="bonus_applicable" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
+									<field name="special_incentive" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
+									<field name="ot_status" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
+									<field name="pt_status" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>						
+									<field name="driver_bata_app" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>						
 								</group>
 								<group string="PF">
-									<field name="pf_status" />
+									<field name="pf_status" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
 									<field name="pf_eff_date" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'required':[('pf_status','=',True)],'invisible':[('pf_status','!=',True)]}"/>							
-									<field name="pf_acc_no" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'required':[('pf_status','=',True)],'invisible':[('pf_status','!=',True)]}"/>
+									<field name="pf_acc_no" class="numberonly" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'required':[('pf_status','=',True)],'invisible':[('pf_status','!=',True)]}"/>
 								</group>
 								<group string="ESI">
-									<field name="esi_status" />
+									<field name="esi_status" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
 									<field name="esi_eff_date" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'required':[('esi_status','=',True)],'invisible':[('esi_status','!=',True)]}"/>
-									<field name="esi_acc_no" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'required':[('esi_status','=',True)],'invisible':[('esi_status','!=',True)]}"/>	
+									<field name="esi_acc_no" class="numberonly" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'required':[('esi_status','=',True)],'invisible':[('esi_status','!=',True)]}"/>	
 								</group>
 							</group>							
 						</page>
@@ -151,7 +165,8 @@
 						<field name="code"/>
 					</field>
 					<field name="job_id" position="replace">
-						<field name="designation" />
+						<field name="job_id" />
+						<field name="dep_id" />
 					</field> 
 					<field name="date_start" position="replace">
 						<field name="date_start" invisible="1"/>
@@ -212,7 +227,8 @@
 					</field>
                     <group expand="0" string="Group By...">
 						<field name="employee_id" position ="replace">
-							<filter string="Designation" icon="terp-personal" domain="[]" context="{'group_by':'designation'}"/>
+							<filter string="Designation" icon="terp-personal" domain="[]" context="{'group_by':'job_id'}"/>
+							<filter string="Department" icon="terp-personal" domain="[]" context="{'group_by':'dep_id'}"/>
 							<filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/> 
 						</field>
 					</group>

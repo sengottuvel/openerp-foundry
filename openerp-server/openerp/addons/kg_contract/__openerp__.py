@@ -21,7 +21,7 @@ related requisition. This new object will regroup and will allow you to easily
 keep track and order all your purchase orders.
 """,
 
-    'depends' : ['base', 'hr_contract','hr_payroll'],
+    'depends' : ['base', 'hr_contract','hr_payroll','kg_employee_category','kg_depmaster'],
     'data': ['kg_contract_view.xml'],
     'auto_install': False,
     'installable': True,

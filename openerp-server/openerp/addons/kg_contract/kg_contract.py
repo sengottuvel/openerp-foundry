@@ -4,6 +4,7 @@ from openerp.tools.translate import _
 import time
 import openerp.addons.decimal_precision as dp
 from datetime import datetime
+from datetime import date
 import re
 import math
 dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
@@ -84,15 +85,23 @@ class kg_contract(osv.osv):
 		'payment_mode': fields.selection([('cheque','CHEQUE'),('bank','BANK'),('cash','CASH')], 'Payment Mode'),
 		'bank_id': fields.many2one('res.bank','Bank Name'),
 		'sal_acc_no': fields.char('Salary Account No', size=32),
-		'ot_status': fields.boolean('OT Applicable'),
+		'ot_status': fields.boolean('OT Eligible'),
 		'pt_status': fields.boolean('PT Applicable'),
 		'pan_no': fields.char('PAN NO', size=32),
 		'pf_status': fields.boolean('PF Applicable', size=32),
 		'esi_status': fields.boolean('ESI Applicable', size=32),
 		'pf_eff_date': fields.date('PF Effective From'),
 		'esi_eff_date': fields.date('ESI Effective From'),
-		'pf_acc_no': fields.char('PF NO', size=32),
-		'esi_acc_no': fields.char('ESI NO', size=32),
+		'pf_acc_no': fields.char('PF NO', size=7),
+		'esi_acc_no': fields.char('ESI NO', size=17),
+		'job_id': fields.many2one('hr.job', 'Designation', readonly=True),
+		'bonus_applicable': fields.boolean('Bonus Applicable'),
+		'special_incentive': fields.boolean('Special Incentive'),
+		'emp_categ_id': fields.many2one('kg.employee.category', 'Employee Category'),
+		'rotation':fields.boolean('Rotation Shift Applicable'),
+		'driver_bata_app':fields.boolean('Driver Bata Applicable'),
+		'shift_id': fields.many2one('kg.shift.master', 'Shift'),
+		'dep_id':fields.many2one('kg.depmaster','Department'),
 			
 		
 		## Child Tables Declaration		
@@ -123,30 +132,37 @@ class kg_contract(osv.osv):
 	
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.cancel_remark:
-			self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		else:
-			raise osv.except_osv(_('Cancel remark is must !!'),
-				_('Enter the remarks in Cancel remarks field !!'))
+		if rec.state =='approved':
+			if rec.cancel_remark:
+				self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			else:
+				raise osv.except_osv(_('Cancel remark is must !!'),
+					_('Enter the remarks in Cancel remarks field !!'))
 		return True
 
 	def entry_confirm(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state =='draft':
+			self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 		
 	def entry_draft(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'draft'})
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state =='cancel':
+			self.write(cr, uid, ids, {'state': 'draft'})
 		return True
 
 	
 
 	def entry_reject(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.remark:
-			self.write(cr, uid, ids, {'state': 'reject','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		else:
-			raise osv.except_osv(_('Rejection remark is must !!'),
-				_('Enter the remarks in rejection remark field !!'))
+		if rec.state =='confirmed':
+			if rec.state =='approved':
+				if rec.remark:
+					self.write(cr, uid, ids, {'state': 'reject','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+				else:
+					raise osv.except_osv(_('Rejection remark is must !!'),
+						_('Enter the remarks in rejection remark field !!'))
 		return True
 		
 	def unlink(self,cr,uid,ids,context=None):
@@ -172,12 +188,40 @@ class kg_contract(osv.osv):
 		return super(kg_contract, self).write(cr, uid, ids, vals, context)
 	
 	###Validations###
-
-	def _gross_salary_check(self, cr, uid, ids, context=None):
-		rec = self.browse(cr, uid, ids[0])
-		if rec.gross_salary <= 0:
-			return False
+	
+	def _salary_brk_validation(self,cr,uid,ids,context = None):
+		rec = self.browse(cr,uid,ids[0])
+		amt = 0.00
+		per = 0.00
+		if rec.line_id_salary:
+			for line in rec.line_id_salary:
+				if line.amt_type == 'percentage':
+					per += line.salary_amt 
+				if line.amt_type == 'fixed':
+					amt += line.salary_amt 
+			if amt > rec.gross_salary:
+				raise osv.except_osv(_('Warning!'),
+						_('Salary Break ups are mismatching with Gross Salary !!'))
+			if per < 100:
+				raise osv.except_osv(_('Warning!'),
+						_('Total Percentage Break ups should 100 !!'))
+				return False
 		return True
+
+		
+	def child_dups_val(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.line_id_salary:
+			line_salary_type = [ line.salary_type for line in rec.line_id_salary ]
+			a= [line_salary_type.count(i) for i in line_salary_type ]
+			for j in a:
+				if j > 1:
+					raise osv.except_osv(_('Warning!'),
+								_('Duplicate Salary Types are not allowed !!'))
+					return False
+		return True	
+		
+	
 	
 	def _contract_duplicate(self, cr, uid, ids, context=None):
 		obj = self.pool.get('hr.contract')
@@ -187,40 +231,7 @@ class kg_contract(osv.osv):
 		if len(dup_ids) > 1:
 			return False
 		return True
-	
-	def _sal_acc_no_validation(self, cr, uid, ids, context=None):
-		flds = self.browse(cr , uid , ids[0])
-		if flds.sal_acc_no:
-			name_special_char = ''.join( c for c in flds.sal_acc_no if  c in '!@#$%^~*{}?+/=' )		
-			if name_special_char:
-				return False	
-		return True
 		
-	def _pan_no_validation(self, cr, uid, ids, context=None):
-		flds = self.browse(cr , uid , ids[0])
-		if flds.pan_no:
-			name_special_char = ''.join( c for c in flds.pan_no if  c in '!@#$%^~*{}?+/=' )		
-			if name_special_char:
-				return False		
-		return True	
-		
-	def _pf_acc_no_validation(self, cr, uid, ids, context=None):
-		flds = self.browse(cr , uid , ids[0])
-		if flds.pf_acc_no:
-			name_special_char = ''.join( c for c in flds.pf_acc_no if  c in '!@#$%^~*{}?+/=' )		
-			if name_special_char:
-				return False		
-		return True		
-	
-	def _esi_acc_no_validation(self, cr, uid, ids, context=None):
-		flds = self.browse(cr , uid , ids[0])
-		if flds.esi_acc_no:
-			name_special_char = ''.join( c for c in flds.esi_acc_no if  c in '!@#$%^~*{}?+/=' )		
-			if name_special_char:
-				return False		
-		return True
-		
-	
 	
 	## Module Requirement
 	
@@ -231,31 +242,66 @@ class kg_contract(osv.osv):
 			value = {'code': emp.code,
 					'department_id':emp.department_id.id,
 					'join_date': emp.join_date,
-					'designation': emp.job_id.name,
+					'job_id': emp.job_id.id,
 					}
 		return {'value': value}
 		
 	def entry_approve(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		timein = datetime.today()
-		timein = timein.strftime('%Y-%m-%d')
-		gross_amt = 0.00
-		self.pool.get('ch.kg.contract.pre.salary').create(cr,uid,
-						{
-							'header_id_pre_salary':rec.id,
-							'gross_salary':rec.gross_salary,
-							'updated_by':uid,
-							'updated_date':timein,
-							'increament_amt':rec.increament_amt,
-							'mob_allowance':rec.mobile_allow
-						},context = None)
-		
-		if rec.increament_amt > 0.00:
-			gross_amt = rec.gross_salary + rec.increament_amt
-		else:
-			gross_amt = rec.gross_salary
 
-		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S'),'gross_salary':gross_amt,'increament_amt':0})
+		if rec.gross_salary <= 0:
+			raise osv.except_osv(_('Warning!'),
+						_('System will not allow to process with zero or Negative Values gross salary !!!'))
+		else:
+			
+			leave_alloc_obj = self.pool.get('kg.leave.allocation')
+			emp_categ_obj = self.pool.get('kg.employee.category')
+			emp_categ_line = self.pool.get('ch.leave.policy')
+			
+			if rec.state =='confirmed':
+				timein = datetime.today()
+				timein = timein.strftime('%Y-%m-%d')
+				gross_amt = 0.00
+				self.pool.get('ch.kg.contract.pre.salary').create(cr,uid,
+								{
+									'header_id_pre_salary':rec.id,
+									'gross_salary':rec.gross_salary,
+									'updated_by':uid,
+									'updated_date':timein,
+									'increament_amt':rec.increament_amt,
+									'mob_allowance':rec.mobile_allow
+								},context = None)
+				
+				if rec.increament_amt > 0.00:
+					gross_amt = rec.gross_salary + rec.increament_amt
+				else:
+					gross_amt = rec.gross_salary
+					
+				self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S'),'gross_salary':gross_amt,'increament_amt':0})
+				
+				leave_alloc_vals={
+								'employee_id':rec.employee_id.id,
+								'emp_code':rec.code,
+								'emp_categ_id':rec.emp_categ_id.id,
+								'valid_from':rec.ap_rej_date,
+								'valid_to':date(date.today().year, 12, 31),
+								}
+				leave_alloc_header = leave_alloc_obj.create(cr,uid,leave_alloc_vals)				
+				leave_alloc_obj_1 = self.pool.get('kg.leave.allocation')
+				leave_alloc_obj_line = self.pool.get('ch.leave.allocation')
+				emp_categ_line_1 = emp_categ_obj.browse(cr,uid,rec.emp_categ_id.id)
+				emp_leave_1 = leave_alloc_obj_1.search(cr,uid,[('employee_id','=',rec.employee_id.id)])
+				for i in emp_categ_line_1.line_id_4:
+					leave_allo_vals = {
+
+						'header_id_1': emp_leave_1[0],
+						'leave_type_id':i.leave_type_id.id,
+						'no_of_days':i.no_of_days,
+						'balc_days':i.no_of_days,
+
+					}
+					leave_allocation = leave_alloc_obj_line.create(cr,uid,leave_allo_vals)
+		
 		return True
 		
 	def _gross_salary(self,cr,uid,ids,context = None):
@@ -279,12 +325,10 @@ class kg_contract(osv.osv):
 			
 	_constraints = [
 	
-		(_sal_acc_no_validation, 'Special Characters are not allowed for Salary Account No !!!', [' ']),
-		(_pan_no_validation, 'Special Characters are not allowed for PAN No !!!', [' ']),
-		(_pf_acc_no_validation, 'Special Characters are not allowed for PF Acc No !!!', ['  ']),		
-		(_esi_acc_no_validation, 'Special Characters are not allowed for ESI Acc No !!!', ['  ']),		
 		(_gross_salary, 'The break ups are not matching the gross salary !!!', ['  ']),		
-		(_gross_salary_check, 'System will not allow to process with zero gross salary !!!', ['  ']),		
+		(child_dups_val, 'The break ups are not matching the gross salary !!!', ['  ']),		
+		(_salary_brk_validation, 'The break ups are not matching the gross salary !!!', ['  ']),		
+		#~ (_gross_salary_check, 'System will not allow to process with zero or Negative Values gross salary !!!', ['  ']),		
 
 	]
 		
@@ -297,12 +341,31 @@ class ch_kg_contract_salary(osv.osv):
 	_columns = {
 		'header_id_salary':fields.many2one('hr.contract','Header Id Salary',invisible= True),
 		'salary_type':fields.many2one('hr.salary.rule','Salary'),
-		'amt_type':fields.selection([('fixed_amt','Fixed Amount'),('percent','Percentage')],'Type'),
+		'amt_type':fields.selection([('fixed','Fixed Amount'),('percentage','Percentage')],'Type'),
 		'salary_amt':fields.float('Amount')
 				}
 	_defaults = {
-				'amt_type':'fixed_amt',
+				
 				}
+	
+	###Validations
+	
+	def _neg_validation(self,cr,uid,ids,context = None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.salary_amt <0:
+			raise osv.except_osv(_('Warning!'),
+						_('Negative Values are not allowed in Salary Amount !!'))
+		if rec.amt_type =='percentage':
+			if rec.salary_amt > 100:
+				raise osv.except_osv(_('Warning!'),
+							_('Percentage per Salary type should not exceed 100 !!'))
+		return True
+	
+	_constraints = [
+	
+		(_neg_validation, '!!!', ['  ']),		
+
+	]
 	
 ch_kg_contract_salary()
 
