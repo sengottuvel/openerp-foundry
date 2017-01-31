@@ -16,7 +16,8 @@
 						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_confirm" type="object" string="Confirm"  class="oe_highlight" attrs="{'invisible':[('status','in',['approved','confirmed','cancel','reject'])]}"/>
 						<button name="entry_draft" type="object"  string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('status','in',['draft','confirmed','approved','reject'])]}"/>
-						<field name="status" widget="statusbar" statusbar_visible="draft,approved,confirmed,cancel,reject" statusbar_colors='{"draft":"blue","approved":"blue","confirmed":"red","cancel":"red","reject":"red"}' readonly="1"/>
+						<button name="emp_relieve" type="object"  string="Relieve" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('status','in',['draft','confirmed','cancel','reject','resigned'])]}"/>
+						<button name="emp_resigned" type="object"  string="Resign" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('status','in',['draft','confirmed','cancel','reject','approved'])]}"/>
 					</button>
 					
 					<field name="name" position="replace">
@@ -26,18 +27,26 @@
 					<field name="notes" position="replace">
 						<group>
 							<group>
-								<field name="name" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+								<field name="join_mode" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1" readonly="1"/>
+								<field name="name" class="lettersOnly" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+								<field name="mode_of_att" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+								
+								<field name="notes" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
 							</group>
 							<group>
-								<field name="code" string="Code" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+								<field name="join_date" required="1" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+								<field name="code" class="aplhanum_expect" string="Code" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+								<field name="att_code" class="aplhanum_expect" attrs="{'required':[('mode_of_att','in',('electronic','both'))],'invisible':[('mode_of_att','not in',('electronic','both'))],'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+								<field name="emp_categ_id" required="1"/>
+								<field name="status" style="width: 30%%" class="att_state_change"/>
 							</group>
 						</group>
 						<group string='Remarks' attrs="{'invisible':[('status','=','draft')]}">
 							<group>	
-								<field name="remark" attrs="{'invisible':[('status','=','draft')], 'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+								<field name="remark" class="aplhanum_expect" attrs="{'invisible':[('status','=','draft')], 'readonly': [('status','in',['approved','reject','cancel'])]}"/>
 							</group>
 							<group>												
-								<field name="cancel_remark" attrs="{'invisible':[('status','in',['draft','confirmed'])], 'readonly': [('status','in',['cancel'])]}"/>
+								<field name="cancel_remark" class="aplhanum_expect" attrs="{'invisible':[('status','in',['draft','confirmed'])], 'readonly': [('status','in',['cancel'])]}"/>
 							</group>
 						</group>	
 					</field>
@@ -46,12 +55,8 @@
 						<field name="category_ids" widget="many2many_tags" placeholder="e.g. Part Time" groups="base.group_hr_user" invisible="1"/>
 					</field>
 					
-					<field name="address_id" position="before">
-						<field name="join_date" required="1" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
-					</field>
-					
 					<field name="work_email" position="replace">
-						<field name="work_email" invisible="1"/>
+						<field name="work_email" class="email_validation" invisible="0"/>
 					</field>
 					
 					<field name="user_id" position="replace">
@@ -59,8 +64,11 @@
 					</field>
 
 					<field name="parent_id" position="replace" >
-						<field name="releaving_date" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
-						<field name="releaving_reason" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+						<field name="releaving_date" attrs="{'invisible': [('status','in',['draft','confirmed','reject','cancel'])]}"/>
+						<field name="releaving_reason" class="aplhanum_expect" attrs="{'invisible': [('status','in',['draft','confirmed','reject','cancel'])]}"/>
+						
+						
+						
 					</field>
 					
 					<field name="job_id" position="replace">
@@ -72,61 +80,70 @@
 					</field>
 					
 					<field name="country_id" position="replace">
-						<field name="country_id" string="Nationality" required="1" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+						<field name="country_id" string="Nationality" required="0" invisible="1" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
 					</field>
 					
 					<field name="country_id" options='{"no_open": True}' position="before">
-						<field name="father_name"  attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
-						<field name="mother_name"  attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
-						<field name="father_occ"  attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
-						<field name="mother_occ"  attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+						<field name="father_name" class="aplhanum_expect"  attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+						<field name="mother_name" class="aplhanum_expect"  attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+						<field name="father_occ"  class="aplhanum_expect" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+						<field name="mother_occ" class="aplhanum_expect"  attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+						<field  name="nationality" readonly="1"/>
 					</field>
 					
 					<field name="identification_id" position="replace">
 						<field name="identification_id" string="Adhar ID" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+						<field name="pan_no" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
 					</field>
 					
 					<field name="address_home_id" context="{'show_address': 1}" options='{"always_reload": True, "highlight_first_line": True}' position="replace">	 
 						<field name="pre_add" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
-						<field name="pre_city" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+						<field name="pre_city" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" on_change = "onchange_city(pre_city)" required="1"/>
 						<field name="pre_state_id" options='{"no_open": True}' attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
-						<field name="pre_country_id" options='{"no_open": True}' attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+						<field name="country_id" options='{"no_open": True}' attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
 						<field name="pre_pin_code" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
 						<field name="pre_phone_no" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
-						<field name="same_pre_add" on_change = "onchange_address(same_pre_add,pre_add,pre_city,pre_state_id,pre_country_id,pre_pin_code,pre_phone_no)" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+						<field name="personal_email" class="email_validation" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+						<field name="same_pre_add" on_change = "onchange_address(same_pre_add,pre_add,pre_city,pre_state_id,country_id,pre_pin_code,pre_phone_no)" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
 						<field name="permanent_add" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
 						<field name="city_id" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
 						<field name="state_id" options='{"no_open": True}' attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
-						<field name="country_id" options='{"no_open": True}' attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+						<field name="pre_country_id" options='{"no_open": True}' attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
 						<field name="pin_code" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
 						<field name="phone_no" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>					
 					</field>
 					
 					<field name="marital" position="after">
-						<field name="ann_date" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
-						<field name="wife_hus_name" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+						<field name="ann_date" attrs="{'invisible': [('marital','in',['  ','single'])],'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+						<field name="wife_hus_name" class="aplhanum_expect" attrs="{'invisible': [('marital','in',['  ','single'])],'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+						<field name="children_1" attrs="{'invisible': [('marital','in',['  ','single'])],'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+					</field>
+					
+					<field name="address_id" position="replace">
+						<field name="wrk_address" string="Working Address" readonly="1"/>
 					</field>
 					
 					<field name="work_phone" position="replace">
 						<field name="work_phone" string="Phone" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
 					</field>
 					<field name="mobile_phone" position="replace">
-						<field name="mobile_phone" string="Mobile" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+						<field name="mobile_phone" string="Mobile" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
 					</field>
 					<field name="work_location" position="replace">
-						<field name="work_location" string="Location" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+						<field name="work_location" class="aplhanum_expect" string="Location" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
 					</field>
 					<field name="department_id" position="replace">
-						<field name="department_id" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+						<field name="department_id" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="0" invisible="1"/>
+						<field name="dep_id" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1" />
 					</field>
 					<field name="notes" position="replace">
-						<field name="notes" placeholder="Other Information ..." attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+						<field name="notes" class="aplhanum_expect" placeholder="Other Information ..." attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
 					</field>
 					<field name="passport_id" position="replace">
 						<field name="passport_id" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
 					</field>
 					<field name="bank_account_id" position="replace">
-						<field name="bank_account_id" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+						<field name="bank_acc_no" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
 					</field>
 					<field name="otherid" position="replace">
 						<field name="otherid" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
@@ -210,11 +227,14 @@
 					<field name="name" position="after">
 						<field name="code" />
 					</field>					
+					<field name="department_id" position="replace">
+						<field name="dep_id" />
+					</field>					
 					<field name="work_phone" position="replace">
 						<field name="work_phone" invisible="1"/>
 					</field>					
 					<field name="work_email" position="replace">
-						<field name="work_email" invisible="1"/>
+						<field name="work_email" invisible="0"/>
 					</field>					
 					<field name="job_id" position="replace">					
 						<field name="join_date" invisible="1"/>
@@ -312,9 +332,9 @@
 						<field name="cmp_name"/>
 						<field name="position"/>
 						<field name="spec"/>
-						<field name="work_exp"/>
+						<field name="work_exp" readonly="1"/>
 						<field name="from_date"/>
-						<field name="to_date"/>
+						<field name="to_date" on_change = "onchange_to_date(from_date,to_date)" />
 					</tree>
 				</field>
 		</record>
