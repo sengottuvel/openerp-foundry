@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="683" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="643" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.y" value="49"/>
 	<import value="org.apache.commons.codec.binary.Base64"/>
 	<subDataset name="dataset1">
 		<parameter name="grn_id" class="java.lang.Integer"/>
@@ -249,7 +249,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 					<textElement textAlignment="Center">
 						<font size="10" isBold="false"/>
 					</textElement>
-					<textFieldExpression><![CDATA["Received By "]]></textFieldExpression>
+					<textFieldExpression><![CDATA["Prepared By "]]></textFieldExpression>
 				</textField>
 				<textField>
 					<reportElement x="212" y="51" width="197" height="20"/>
@@ -257,7 +257,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 					<textElement textAlignment="Center">
 						<font size="10" isBold="false"/>
 					</textElement>
-					<textFieldExpression><![CDATA["Purchase Manager"]]></textFieldExpression>
+					<textFieldExpression><![CDATA["Inspected By"]]></textFieldExpression>
 				</textField>
 				<textField>
 					<reportElement x="409" y="51" width="234" height="20"/>
@@ -265,10 +265,10 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 					<textElement textAlignment="Center">
 						<font size="10" isBold="false"/>
 					</textElement>
-					<textFieldExpression><![CDATA["Inspected By"]]></textFieldExpression>
+					<textFieldExpression><![CDATA["Store Officer"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="374" y="91" width="62" height="20"/>
+					<reportElement x="0" y="95" width="62" height="20"/>
 					<box topPadding="2" leftPadding="2"/>
 					<textElement textAlignment="Right">
 						<font size="8" isBold="true"/>
@@ -276,7 +276,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 					<textFieldExpression><![CDATA["REMARKS :"]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement x="436" y="91" width="207" height="20"/>
+					<reportElement x="62" y="95" width="207" height="20"/>
 					<box topPadding="2" leftPadding="2"/>
 					<textElement>
 						<font size="8" isBold="false"/>
@@ -449,36 +449,36 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 				<textFieldExpression><![CDATA["Goods Receipts Note "]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="56" width="212" height="20"/>
+				<reportElement x="0" y="56" width="67" height="20"/>
 				<box leftPadding="2"/>
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["GRN No. :"+" "+$F{grn_no}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["GRN No."]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="76" width="212" height="20"/>
+				<reportElement x="0" y="76" width="67" height="20"/>
 				<box leftPadding="2"/>
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["DC No.    :"+" "+$F{dc_no}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["DC No."]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="436" y="76" width="207" height="20"/>
+				<reportElement x="434" y="76" width="93" height="20"/>
 				<box leftPadding="2"/>
-				<textElement textAlignment="Right">
+				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["DC Date  :"+" "+$F{dc_date}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["DC Date"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="436" y="56" width="207" height="20"/>
+				<reportElement x="434" y="56" width="93" height="20"/>
 				<box leftPadding="2"/>
-				<textElement textAlignment="Right">
+				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["GRN Date  :"+" "+$F{grn_date}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["GRN Date"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="1" y="119" width="116" height="20"/>
@@ -545,20 +545,68 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 				<textFieldExpression><![CDATA[$F{sup_zip}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="96" width="212" height="20"/>
+				<reportElement x="0" y="96" width="67" height="20"/>
 				<box leftPadding="2"/>
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Insp.Ref.No. :"+" "+$F{insp_ref_no}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Insp.Ref.No."]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="436" y="96" width="207" height="20"/>
+				<reportElement x="434" y="96" width="93" height="20"/>
 				<box leftPadding="2"/>
-				<textElement textAlignment="Right">
+				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Vehicle Details:"+" "+$F{vehicle_details}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Vehicle Details"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="527" y="56" width="116" height="20"/>
+				<box leftPadding="2"/>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[":"+"   "+$F{grn_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="527" y="76" width="116" height="20"/>
+				<box leftPadding="2"/>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[":"+"   "+$F{dc_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="527" y="96" width="116" height="20"/>
+				<box leftPadding="2"/>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[":"+"   "+$F{vehicle_details}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="67" y="56" width="157" height="20"/>
+				<box leftPadding="2"/>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[":"+"   "+$F{grn_no}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="67" y="76" width="157" height="20"/>
+				<box leftPadding="2"/>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[":"+"   "+$F{dc_no}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="67" y="96" width="157" height="20"/>
+				<box leftPadding="2"/>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[":"+"   "+$F{insp_ref_no}]]></textFieldExpression>
 			</textField>
 		</band>
 	</columnHeader>

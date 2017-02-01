@@ -828,7 +828,9 @@ class kg_po_grn(osv.osv):
 																		   })
 			
 			for line in grn_entry.line_ids:
-				
+				if line.po_grn_qty > line.recvd_qty:
+					raise osv.except_osv(_('Warning!'),
+						_('Accepted qty should not be greater than Received qty!'))
 				line_id = line.id
 				brand = []
 				if line.brand_id:

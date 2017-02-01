@@ -369,7 +369,7 @@ class ch_foundry_invoice_line_details(osv.osv):
 					if in_id:						
 						is_rate = self.pool.get('ch.stage.fettling').browse(cr,uid,in_id[0])										
 						rate = is_rate.rate							
-						total_value = 	entry.qty * is_rate.rate			
+						total_value = 	entry.qty * entry.each_weight* is_rate.rate			
 			result[entry.id]['rate'] = rate						
 			result[entry.id]['total_weight'] = total_weight						
 			result[entry.id]['total_value'] = total_value
@@ -461,7 +461,7 @@ class ch_foundry_invoice_line_summary(osv.osv):
 					if in_id:						
 						is_rate = self.pool.get('ch.stage.fettling').browse(cr,uid,in_id[0])										
 						rate = is_rate.rate							
-						total_value = 	entry.qty * is_rate.rate			
+						total_value = 	entry.qty * entry.each_weight* is_rate.rate			
 			result[entry.id]['rate'] = rate						
 			result[entry.id]['total_weight'] = total_weight						
 			result[entry.id]['total_value'] = total_value

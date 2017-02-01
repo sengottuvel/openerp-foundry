@@ -364,6 +364,9 @@ class kg_general_grn(osv.osv):
 																		   })
 			
 			for line in grn_entry.grn_line:
+				if line.grn_qty > line.recvd_qty:
+					raise osv.except_osv(_('Warning!'),
+						_('Accepted qty should not be greater than Received qty!'))
 				# This code will create General GRN to Stock Move
 				brand = []
 				if line.brand_id:
