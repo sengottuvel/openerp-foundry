@@ -33,7 +33,7 @@ class purchase_requisition(osv.osv):
 	_description="Purchase Requisition"
 	_inherit = ['mail.thread', 'ir.needaction_mixin']
 	_columns = {
-		'name': fields.char('Indent.NO', size=32,required=True),
+		'name': fields.char('Indent.NO', size=32),
 		'origin': fields.char('Source Document', size=32),
 		'date_start': fields.datetime('Requisition Date'),
 		'date_end': fields.datetime('Requisition Deadline'),
@@ -42,18 +42,20 @@ class purchase_requisition(osv.osv):
 		'description': fields.text('Description'),
 		'company_id': fields.many2one('res.company', 'Company', required=True),
 		'purchase_ids' : fields.one2many('purchase.order','requisition_id','Purchase Orders',states={'done': [('readonly', True)]}),
-		'line_ids' : fields.one2many('purchase.requisition.line','requisition_id','Products to Purchase',states={'done': [('readonly', True)]}),
+		'line_ids' : fields.one2many('purchase.requisition.line','requisition_id','Products to Purchase',readonly=True, states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
 		'warehouse_id': fields.many2one('stock.warehouse', 'Warehouse'),		
-		'state': fields.selection([('draft','New'),('in_progress','Sent to Suppliers'),('cancel','Cancelled'),('done','Purchase Done')],
+		'state': fields.selection([('draft','Draft'),('in_progress','WFA'),('cancel','Cancelled'),('done','Purchase Done')],
 			'Status', track_visibility='onchange', required=True)
 	}
 	_defaults = {
+		
 		'date_start': lambda *args: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'state': 'draft',
 		'exclusive': 'multiple',
 		'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'purchase.requisition', context=c),
 		'user_id': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).id ,
 		'name': lambda obj, cr, uid, context: obj.pool.get('ir.sequence').get(cr, uid, 'purchase.order.requisition'),
+		
 	}
 
 	def copy(self, cr, uid, id, default=None, context=None):
@@ -177,6 +179,7 @@ class purchase_requisition_line(osv.osv):
 	_rec_name = 'product_id'
 
 	_columns = {
+		
 		'product_id': fields.many2one('product.product', 'Product',domain="[('state','not in',('reject','cancel')),('purchase_ok','=',True)]"),
 		'product_uom_id': fields.many2one('product.uom', 'Product Unit of Measure'),
 		'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
@@ -191,6 +194,8 @@ class purchase_requisition_line(osv.osv):
 		'pending_qty': fields.float('Pending Qty'),
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
 		'moc_id_temp': fields.many2one('ch.brandmoc.rate.details','MOC',domain="[('brand_id','=',brand_id),('header_id.product_id','=',product_id),('header_id.state','in',('draft','confirmed','approved'))]"),
+		'line_date':fields.datetime('Indent Date'),
+		
 	}
 
 	def onchange_product_id(self, cr, uid, ids, product_id, product_uom_id, context=None):
@@ -215,10 +220,9 @@ class purchase_requisition_line(osv.osv):
 		
 	_defaults = {
 		'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'purchase.requisition.line', context=c),
+		'line_date': lambda *a: time.strftime('%Y-%m-%d %H:%M:%S'),
 	}
 purchase_requisition_line()
-
-
 
 class ch_purchase_indent_wo(osv.osv):
 	

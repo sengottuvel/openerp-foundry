@@ -24,6 +24,8 @@ import pytz
 from openerp import SUPERUSER_ID
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from datetime import date
+from datetime import timedelta
 
 from openerp.osv import fields, osv
 from openerp import netsvc
@@ -154,7 +156,7 @@ class purchase_order(osv.osv):
 		return res and res[0] or False  
 
 	STATE_SELECTION = [
-		('draft', 'Draft PO'),
+		('draft', 'Draft'),
 		('sent', 'RFQ Sent'),
 		('confirmed', 'WFA'),
 		('approved', 'Approved'),
@@ -904,6 +906,7 @@ class purchase_order_line(osv.osv):
 		'partner_id': fields.related('order_id','partner_id',string='Partner',readonly=True,type="many2one", relation="res.partner", store=True),
 		'date_order': fields.related('order_id','date_order',string='Order Date',readonly=True,type="date"),
 		'delivery_date': fields.date('Delivery Date'),
+		'po_type': fields.selection([('direct', 'Direct'),('frompi', 'From PI')], 'PO Type'),
 		
 	}
 	_defaults = {
@@ -1045,11 +1048,24 @@ class purchase_order_line(osv.osv):
 			price = po_price	
 		res['value'].update({'uom_conversation_factor': product.uom_conversation_factor})		
 		
+		# Delivery Date based on product
+		pro_seller = [x.delay for x in product.pro_seller_ids if x.name.id == partner_id]
+		fmt_del_date = ''
+		crnt_date = date.today()
+		crnt_date_fmt = datetime.strptime(str(crnt_date),"%Y-%m-%d")
+		if pro_seller:
+			del_date = crnt_date_fmt + timedelta(days = pro_seller[0])
+			fmt_del_date = del_date.date()
+		if not fmt_del_date:
+			del_date = crnt_date_fmt + timedelta(days = 15)
+			fmt_del_date = del_date.date()
+		
 		taxes = account_tax.browse(cr, uid, map(lambda x: x.id, product.supplier_taxes_id))
 		fpos = fiscal_position_id and account_fiscal_position.browse(cr, uid, fiscal_position_id, context=context) or False
 		taxes_ids = account_fiscal_position.map_tax(cr, uid, fpos, taxes)
 		res['value'].update({'price_unit': price, 'taxes_id': taxes_ids})
 		res['value'].update({'brand_id': '', 'moc_id_temp':'', 'moc_id':''})
+		res['value'].update({'delivery_date': str(fmt_del_date)})
 
 		return res
 

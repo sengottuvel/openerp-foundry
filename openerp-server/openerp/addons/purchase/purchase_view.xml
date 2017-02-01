@@ -164,7 +164,7 @@
             <field name="name">purchase.order.form</field>
             <field name="model">purchase.order</field>
             <field name="arch" type="xml">
-                <form string="Purchase Order" version="7.0" create='false'>
+                <form string="Purchase Order" version="7.0" >
                 <header>
                     <button name="wkf_send_rfq" states="draft" string="Send by Email" type="object" context="{'send_rfq':True}" class="oe_highlight"/>
                     <button name="wkf_send_rfq" states="sent" string="Send by Email" type="object" context="{'send_rfq':True}"/>
@@ -215,8 +215,8 @@
 				</group>
 				<notebook>
 					<page string="Order Item Details" attrs="{'invisible': [('type_flag', '=', False),('po_flag', '=', False)]}">
-						<field name="order_line" context="{'delivery_date':delivery_date,'product_qty':1,'state':'draft','invoiced':0,'name':'PO',
-							'date_planned':delivery_date,'line_state':'draft','cancel_flag':False,'price_type':'po_uom',
+						<field name="order_line" context="{'po_type':po_type,'product_qty':1,'state':'draft','invoiced':0,'name':'PO',
+							'date_planned':date_order,'line_state':'draft','cancel_flag':False,'price_type':'po_uom',
 							'discount_flag':False,'discount_per_flag':False,'rate_revise':'yes','approval_flag':False,'test_cert_flag':False}">
 							<tree string="Purchase Order Lines" >
 								<field name="product_id" on_change="onchange_product_id(parent.pricelist_id,product_id,0,product_uom,parent.partner_id, parent.date_order,parent.fiscal_position,date_planned,name,price_unit,context)"/>
@@ -420,7 +420,7 @@
             <field name="name">Approved POS</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">purchase.order</field>
-            <field name="view_mode">tree,form,graph,calendar</field>
+            <field name="view_mode">tree,form</field>
             <field name="context">{}</field>
             <field name="domain">[('state','=','approved')]</field>
             <field name="search_view_id" ref="view_purchase_order_filter"/>

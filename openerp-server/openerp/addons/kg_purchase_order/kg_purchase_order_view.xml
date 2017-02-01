@@ -62,8 +62,8 @@
 		<button name="wkf_send_rfq" states="approved" string="Send by Email" type="object" context="{'send_rfq':True}" invisible="1"/>
 		</button>
 		<button name="purchase_confirm" states="draft" string="Confirm Order" position="replace">
-			<button name="purchase_confirm" states="confirmed" string="Approve" confirm="Are you sure to proceed ?" />
 			<button name="entry_reject" string="Reject" confirm="Are you sure to proceed ?" type="object" states="confirmed" />
+			<button name="purchase_confirm" states="confirmed" string="Approve" confirm="Are you sure to proceed ?" />
 			<button name="action_cancel" string="Cancel" confirm="Are you sure to proceed ?" type="object" states="approved"/>
 			<button name="action_set_to_draft" string="Set To Draft" type="object" states="reject"/>
 		</button>
@@ -79,7 +79,7 @@
 		<field name="bill_type" position="replace">
 			 <field name="date_order" required="1"  on_change="onchange_date_order(date_order)"/>
 			 <field name="quotation_date" />
-			 <field name="delivery_date" />
+			 <field name="delivery_date"/>
 			 <field name="quot_ref_no" />
 			 <field name="delivery_address"/>
 			 <field name="bill_type" required="1"/>
@@ -135,7 +135,7 @@
 		<field name="date_planned" position="replace">
 		</field>
 		<field name="price_unit" position="after">
-		<field name="kg_discount"/>
+		<field name="kg_discount" invisible="1"/>
 		<field name="kg_discount_per"/>
 		<field name="approval_flag"/>
 		
@@ -145,6 +145,7 @@
 		</field>
 		<field name="product_qty" on_change="onchange_product_id(parent.pricelist_id,product_id,product_qty,product_uom,parent.partner_id,parent.date_order,parent.fiscal_position,date_planned,name,price_unit,context)" position="before">
 			<field name="brand_id"/>
+			<field name="moc_id_temp"/>
 		</field>
 		<field name="price_subtotal" position="after">		
 		<field name="name" string="Remarks" invisible="1"/>
@@ -264,11 +265,11 @@
 			</field>
                 <field name="taxes_id" position="replace" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}">
 				<field name="pending_qty" invisible="1" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}"/>
-				<field name="pi_qty" readonly="1"/>
+				<field name="pi_qty" readonly="1" attrs="{'invisible': [('po_type','!=','frompi')]}"/>
 				<field name="rate_revise" attrs="{'required': [('approval_flag','=', True)],'invisible': [('approval_flag','=', False)]}"/>
-                <field name="kg_discount" attrs="{'readonly': ['|','|',('cancel_flag','=', True),('line_flag', '=', True),('discount_flag', '=', True)]}" on_change="onchange_disc_amt(kg_discount,product_qty,price_unit,kg_disc_amt_per)" />
+                <field name="kg_discount" attrs="{'readonly': ['|','|',('cancel_flag','=', True),('line_flag', '=', True),('discount_flag', '=', True)],'invisible': [('po_type','=','frompi')]}" on_change="onchange_disc_amt(kg_discount,product_qty,price_unit,kg_disc_amt_per)" />
                 <field name="kg_disc_amt_per" invisible="1" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}"/>
-                <field name="kg_discount_per" attrs="{'readonly': ['|','|',('cancel_flag','=', True),('line_flag', '=', True),('discount_per_flag', '=', True)]}" on_change="onchange_discount_value_calc(kg_discount_per, product_qty, price_unit)"/> 
+                <field name="kg_discount_per" attrs="{'readonly': ['|','|',('cancel_flag','=', True),('line_flag', '=', True),('discount_per_flag', '=', True)],'invisible': [('po_type','=','frompi')]}" on_change="onchange_discount_value_calc(kg_discount_per, product_qty, price_unit)"/> 
                 <field name="kg_discount_per_value" invisible="1"/>
                 <field name="discount_flag" invisible="1"/>
 				<field name="discount_per_flag" invisible="1"/>
@@ -284,12 +285,13 @@
 				<field name="price_unit" attrs="{'readonly': [('cancel_flag','=', True),'|',('line_flag', '=', True)]}" position="after">
                 <field name="cancel_qty" readonly="1" attrs="{'invisible': [('cancel_qty','=',0)]}"/>				
 				<field name="received_qty" readonly="1"	attrs="{'invisible': [('received_qty','=',0)]}" />
-				<field name = "quantity" readonly="1"/>
-				<field name = "price_type" on_change="onchange_price_type(product_qty,uom_conversation_factor,length,breadth,price_type,product_id)" required="1"/>
+				<field name="quantity" readonly="1"/>
+				<field name="price_type" on_change="onchange_price_type(product_qty,uom_conversation_factor,length,breadth,price_type,product_id)" required="1"/>
                 </field>
 				<field name="product_uom" position="after">
 				<field name = "cancel_flag" invisible="1"/>
 				<field name="delivery_date"/>
+				<field name="po_type" invisible="1"/>
 				<field name="test_cert_flag"/>
 				<field name="test_certificate" attrs="{'invisible': [('test_cert_flag','!=', True)]}"/>
 				<group string="Price History">
@@ -429,6 +431,7 @@
 			<tree string="PO Line Tree View" create="false" delete="false">					
 				<field name="order_id" string="PO No"/>
 				<field name="date_planned" string="PO Date"/>
+				<field name="delivery_date"/>
 				<field name="partner_id" string="Supplier"/>
 				<field name="product_id"/>
 				<field name="product_uom"/>
@@ -450,7 +453,9 @@
 			<separator/> 
 			<group expand="0" string="Group By...">
 				<filter string="PO No" name="group_order_id"  icon="terp-personal" domain="[]" context="{'group_by':'order_id'}"/>
+				<filter string="Supplier" icon="terp-personal" domain="[]" context="{'group_by':'partner_id'}"/>
 				<filter string="PO Date" icon="terp-personal" domain="[]" context="{'group_by':'date_planned'}"/>
+				<filter string="Delivery Date" icon="terp-personal" domain="[]" context="{'group_by':'delivery_date'}"/>
 				<filter string="Product" name="group_product_id" icon="terp-personal" domain="[]" context="{'group_by':'product_id'}"/>
 				<filter string="Brand" icon="terp-personal" domain="[]" context="{'group_by':'brand_id'}"/>
 			</group>                   

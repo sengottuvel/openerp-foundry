@@ -115,7 +115,18 @@ class kg_indent2_po(osv.osv):
 				'group_qty':pi_qty,
 				'pi_line_id':po_pi_id,
 				'price_unit' : 0.0,
-				'group_flag': flag,
+				'state':'draft',
+				'invoiced':0,
+				'date_planned':obj.date_order,
+				'line_state':'draft',
+				'cancel_flag':False,
+				'price_type':'po_uom',
+				'discount_flag':False,
+				'discount_per_flag':False,
+				'rate_revise':'yes',
+				'approval_flag':False,
+				'test_cert_flag':False,
+				'group_flag':flag,
 				'name':'PO',
 				'line_flag':True,
 				'least_price': min_val or 0,
@@ -124,6 +135,8 @@ class kg_indent2_po(osv.osv):
 				'moc_id': group[0].moc_id.id,
 				'moc_id_temp': group[0].moc_id_temp.id,
 				'uom_conversation_factor':prod_browse.uom_conversation_factor,
+				'delivery_date': obj.delivery_date,
+				'po_type': obj.po_type,
 				
 				}
 				poindent_line_obj.write(cr,uid,po_pi_id,{'line_state' : 'process','draft_flag':True})

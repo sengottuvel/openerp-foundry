@@ -250,7 +250,7 @@ class kg_purchase_order(osv.osv):
 		com_rec = self.pool.get('res.company').browse(cr,uid,com_obj[0])
 		part_obj = self.pool.get('res.partner').search(cr,uid,([('id','=',com_rec.partner_id.id)]))
 		part_rec = self.pool.get('res.company').browse(cr,uid,part_obj[0])
-		address = part_rec.street+''+ part_rec.street2+''+part_rec.city+','+part_rec.state_id.name+','+part_rec.country_id.name+','+part_rec.zip
+		address = part_rec.street or ' '+''+ part_rec.street2 or ' '+''+part_rec.city or ' '+','+part_rec.state_id.name or ' '+','+part_rec.country_id.name or ' '+','+part_rec.zip or ' '
 		value = {'delivery_address': address}
 		
 		return {'value': value}	
@@ -258,6 +258,7 @@ class kg_purchase_order(osv.osv):
 	### Back Entry Date #####	
 		
 	def onchange_date_order(self, cr, uid, ids, date_order):
+		#~ today_date = time.strftime('%Y-%m-%d')
 		today_date = today.strftime('%Y-%m-%d')
 		back_list = []
 		today_new = today.date()
@@ -270,9 +271,9 @@ class kg_purchase_order(osv.osv):
 			bkk_date = d1 - timedelta(days=i)
 			backk_date = bkk_date.strftime('%Y-%m-%d')
 			back_list.append(backk_date)
-		#~ if date_order <= back_date:
-			#~ raise osv.except_osv(_('Warning'),
-				#~ _('PO date should not be accept past date!'))
+		if date_order <= back_date:
+			raise osv.except_osv(_('Warning'),
+				_('PO date should not be accept past date!'))
 		#~ if date_order > today_date:
 			#~ raise osv.except_osv(_('Warning'),
 				#~ _('PO date should not be accept future date!'))
@@ -836,7 +837,7 @@ class kg_purchase_order(osv.osv):
 		(_check_line,'You can not save this Purchase Order with out Line and Zero Qty !',['order_line']),
 		(_check_advance,'System sholud not be accecpt with out Advance !',['']),
 		(_future_date,'System sholud not be accecpt future date !',['']),
-	
+		
 	]
 	
 kg_purchase_order()
