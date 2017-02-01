@@ -148,7 +148,7 @@ class kg_subcontract_invoice(osv.osv):
 			
 				'header_id': entry.id,
 				'sc_id':item.sc_id.id,
-				'qty':item.actual_qty,								
+				'qty':item.qty,								
 				'actual_qty':item.actual_qty,		
 				'wo_line_id':item.wo_line_id.id,		
 				'com_weight':item.com_weight,					
@@ -256,7 +256,7 @@ class ch_subcontract_invoice_line(osv.osv):
 			for line in entry.wo_op_id:
 				print"entry.qty",entry.qty
 				print"line.op_rate",line.op_rate
-				total_value= entry.qty * line.op_rate				
+				total_value= entry.qty * line.op_rate * entry.com_weight			
 				value += total_value
 			print"total_value",value
 			result[entry.id] = value
