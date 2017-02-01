@@ -1379,7 +1379,7 @@ class kg_ms_operations(osv.osv):
 						where operation_id = %s
 						and header_id = %s and is_last_operation = 't')) 
 
-						and  op2_state in ('pending','partial')  and  op2_sc_status = 'inhouse' and last_operation_check_id = %s
+						and  op1_state in ('pending','partial')  and  op1_sc_status = 'inhouse' and last_operation_check_id = %s
 						
 						or
 						
