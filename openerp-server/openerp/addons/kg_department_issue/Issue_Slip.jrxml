@@ -277,7 +277,7 @@ where issue.id = $P{issue_id} and issue.state = 'done']]>
 				<textElement verticalAlignment="Middle">
 					<font size="10" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Product"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Product[Partname]"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="203" y="130" width="40" height="26"/>
