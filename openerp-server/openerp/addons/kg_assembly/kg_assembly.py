@@ -183,15 +183,13 @@ class kg_assembly_inward(osv.osv):
 				
 				### Checking Test process Remaining ###
 				cr.execute(''' select id from kg_part_qap where assembly_id = %s and order_id=%s and order_line_id =%s
-					and db_state = 'pending' or hs_state='pending' ''',[ids[0],entry_rec.order_id.id,entry_rec.order_line_id.id])
+					and db_state = 'pending' and db_flag='t' ''',[ids[0],entry_rec.order_id.id,entry_rec.order_line_id.id])
 				db_test_process_rem = cr.fetchone()
 				
 				cr.execute(''' select id from kg_part_qap where assembly_id = %s and order_id=%s and order_line_id =%s
-					and hs_state='pending' ''',[ids[0],entry_rec.order_id.id,entry_rec.order_line_id.id])
+					and hs_state='pending' and hs_flag='t' ''',[ids[0],entry_rec.order_id.id,entry_rec.order_line_id.id])
 				hs_test_process_rem = cr.fetchone()
-				print "ids[0],entry_rec.order_id.id,entry_rec.order_line_id.id",ids[0],entry_rec.order_id.id,entry_rec.order_line_id.id
-				print "db_test_process_rem",db_test_process_rem
-				print "hs_test_process_rem",hs_test_process_rem
+				
 				if db_test_process_rem == None and hs_test_process_rem == None:
 					### Dimensional Inspection Creation ###
 					pump_qap_header_vals = {
