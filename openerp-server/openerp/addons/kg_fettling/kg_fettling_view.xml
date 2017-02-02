@@ -4456,15 +4456,15 @@
 	
 	<!-- Batch Arc Cutting End Here -->
 	
-	<!-- Batch - Heat Treatment Starts Here -->
+	<!-- Batch - Heat Treatment1 Starts Here -->
 	
 	<!-- Form View Start -->
 
 		<record id="t_form_v_batch_heat_treatment" model="ir.ui.view">
-			<field name="name">Batch Heat Treatment Form</field>
+			<field name="name">Batch Heat Treatment1 Form</field>
 			<field name="model">kg.batch.heat.treatment</field>
 			<field name="arch" type="xml">
-				<form string="Batch Entry - Heat Treatment" version="7.0"  delete="false">
+				<form string="Batch Entry - Heat Treatment1" version="7.0"  delete="false">
 					<header>
 						<button name="entry_confirm" type="object" string="Update" states="draft" class="oe_highlight"/>
 					</header>
@@ -4567,7 +4567,7 @@
 	<!-- Tree View Start -->
 		
 		<record id="t_tree_v_batch_heat_treatment" model="ir.ui.view">
-			<field name="name">Batch Heat Treatment Tree</field>
+			<field name="name">Batch Heat Treatment1 Tree</field>
 			<field name="model">kg.batch.heat.treatment</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">	
@@ -4584,10 +4584,10 @@
 	<!-- Search View Start -->
 
 		<record id="t_search_v_batch_heat_treatment" model="ir.ui.view">
-            <field name="name">Batch Heat Treatment Search</field>
+            <field name="name">Batch Heat Treatment1 Search</field>
             <field name="model">kg.batch.heat.treatment</field>
             <field name="arch" type="xml">
-                <search string="Batch Heat Treatment Search">
+                <search string="Batch Heat Treatment1 Search">
 					<field name="name" string="Batch No."  filter_domain="[('name','ilike',self)]" />
 					<separator/>
                     <group expand="0" string="Group By...">
@@ -4605,7 +4605,7 @@
 	<!-- Menu Action Start-->	
 		
 		<record id="tma_batch_heat_treatment" model="ir.actions.act_window">
-			<field name="name">Heat Treatment</field>
+			<field name="name">Heat Treatment1</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.batch.heat.treatment</field>
 			<field name="view_type">form</field>
@@ -4620,13 +4620,13 @@
 	<!-- Audit Log Xml Data Start -->
 		
         <record id="audit_batch_heat_treatment" model="audittrail.rule">
-            <field name="name">Audit Log Heat Treatment</field>
+            <field name="name">Audit Log Heat Treatment1</field>
             <field name="object_id" eval="ref('kg_fettling.model_kg_batch_heat_treatment')"/>       
             <field name="state">subscribed</field>              
         </record>
 		
         <record id="audit_batch_heat_treatment_line" model="audittrail.rule">
-            <field name="name">Audit Log Batch Heat Treatment Line</field>
+            <field name="name">Audit Log Batch Heat Treatment1 Line</field>
             <field name="object_id" eval="ref('kg_fettling.model_ch_batch_heat_treatment_line')"/>       
             <field name="state">subscribed</field>              
         </record>
@@ -4636,12 +4636,12 @@
     <!-- Sequence Number Setting Starts Here -->
 	
 	<record forcecreate="1" id="seq_type_batch_heat_treatment" model="ir.sequence.type">	
-		<field name="name">KG Batch Heat Treatment</field>
+		<field name="name">KG Batch Heat Treatment1</field>
 		<field name="code">kg.batch.heat.treatment</field>
 	</record>
 
 	<record forcecreate="1" id="seq_batch_heat_treatment" model="ir.sequence">
-	  <field name="name">KG Batch Heat Treatment</field>
+	  <field name="name">KG Batch Heat Treatment1</field>
 	  <field name="code">kg.batch.heat.treatment</field>
 	  <field name="padding" eval="3"/>
 	  <field name="prefix">HTB/%(year)s/%(month)s/</field>
@@ -4650,7 +4650,399 @@
 	
 	<!-- Sequence Number Setting Ends Here -->
 	
-	<!-- Batch Heat Treatment End Here -->
+	<!-- Batch Heat Treatment1 End Here -->
+	
+	<!-- Batch - Heat Treatment2 Starts Here -->
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_batch_heat_treatment2" model="ir.ui.view">
+			<field name="name">Batch Heat Treatment2 Form</field>
+			<field name="model">kg.batch.heat2.treatment</field>
+			<field name="arch" type="xml">
+				<form string="Batch Entry - Heat Treatment2" version="7.0"  delete="false">
+					<header>
+						<button name="entry_confirm" type="object" string="Update" states="draft" class="oe_highlight"/>
+					</header>
+					<group>
+						<group>
+							<field name="name" readonly="1"/>
+							<field name="heat_cycle_no" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_specification" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_fc_off_time" widget="float_time" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_treatment_type" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_set_temp" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_socking_hr" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_quenc_time" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_quencing_after_temp" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="each_weight" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')],'invisible':[('done_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')],'invisible':[('done_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
+							<field name="flag_batchline" invisible="1"/>
+						</group>											
+						<group>
+							<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_treatment_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_fc_temp" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_furnace_on_time" widget="float_time" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_cooling_type" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_set_temp_time" widget="float_time" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_socking_comp_time" widget="float_time" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_quencing_before_temp" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_chloride_content" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="done_by" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+						</group>					
+					</group>
+					<notebook>
+						<page string="Heat Treatment2 Items" attrs="{'invisible':[('flag_batchline','=',False)]}">
+							<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
+								<tree string="Heat Treatment2 Line Items" editable="top" create="false" delete="false">	
+									<field name="heat_cycle_no" required="1"/>
+									<field name="date" required="1"/>
+									<field name="heat_specification" required="1"/>
+									<field name="order_no" invisible="1"/>
+									<field name="pattern_id" invisible="0"/>
+									<field name="pattern_name" invisible="0"/>
+									<field name="moc_id" invisible="1"/>
+									<field name="done_by" required="1"/>
+									<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')]}"/>
+									<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')]}"/>
+									<field name="qty" string="Production Qty" required="1"/>
+									<field name="accept_qty" required="1"/>
+									<field name="reject_qty"/>
+									<field name="each_weight" required="1"/>
+									<field name="accept_user_id"/>
+									<field name="reject_remarks_id" attrs="{'required':[('reject_qty','>',0)]}"/>
+									<field name="remarks" widget="char"/>
+								</tree>
+							</field>
+						</page>
+						<page string="Select Heat Treatment2 Items">
+							<field name="heat_treatment_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
+								context="{'tree_view_ref' : 't_tree_v_common_batch_tree'}">
+								<tree string = "Heat Treatment Batch Items" create="false" edit="false">
+									<field name="order_no"/>
+									<field name="pump_model_id"/>
+									<field name="pattern_id"/>
+									<field name="pattern_name"/>
+									<field name="moc_id"/>
+								</tree>
+							</field>
+							<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
+						</page>
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
+								<group>
+									<field name="user_id"/>
+									<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>										
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>									
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_batch_heat_treatment2" model="ir.ui.view">
+			<field name="name">Batch Heat Treatment2 Tree</field>
+			<field name="model">kg.batch.heat2.treatment</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">	
+			<tree toolbar="True" string="Batch Heat Treatment2 Tree">									
+					<field name="name"/>
+					<field name="entry_date"/>					
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_batch_heat_treatment2" model="ir.ui.view">
+            <field name="name">Batch Heat Treatment2 Search</field>
+            <field name="model">kg.batch.heat2.treatment</field>
+            <field name="arch" type="xml">
+                <search string="Batch Heat Treatment2 Search">
+					<field name="name" string="Batch No."  filter_domain="[('name','ilike',self)]" />
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+                       
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+	
+	
+	
+	<!-- Menu Action Start-->	
+		
+		<record id="tma_batch_heat_treatment2" model="ir.actions.act_window">
+			<field name="name">Heat Treatment2</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.batch.heat2.treatment</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_batch_heat_treatment2"/>
+			<field name="search_view_id" ref="t_search_v_batch_heat_treatment2"/>
+			<field name="context">{"search_default_open":1}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start -->
+		
+        <record id="audit_batch_heat_treatment2" model="audittrail.rule">
+            <field name="name">Audit Log Heat Treatment2</field>
+            <field name="object_id" eval="ref('kg_fettling.model_kg_batch_heat2_treatment')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+		
+        <record id="audit_batch_heat_treatment2_line" model="audittrail.rule">
+            <field name="name">Audit Log Batch Heat Treatment2 Line</field>
+            <field name="object_id" eval="ref('kg_fettling.model_ch_batch_heat2_treatment_line')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->
+    
+    <!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_batch_heat_treatment2" model="ir.sequence.type">	
+		<field name="name">KG Batch Heat Treatment2</field>
+		<field name="code">kg.batch.heat2.treatment</field>
+	</record>
+
+	<record forcecreate="1" id="seq_batch_heat_treatment2" model="ir.sequence">
+	  <field name="name">KG Batch Heat Treatment2</field>
+	  <field name="code">kg.batch.heat2.treatment</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">HTB/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	<!-- Batch Heat Treatment2 End Here -->
+	
+	<!-- Batch - Heat Treatment3 Starts Here -->
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_batch_heat_treatment3" model="ir.ui.view">
+			<field name="name">Batch Heat Treatment3 Form</field>
+			<field name="model">kg.batch.heat3.treatment</field>
+			<field name="arch" type="xml">
+				<form string="Batch Entry - Heat Treatment3" version="7.0"  delete="false">
+					<header>
+						<button name="entry_confirm" type="object" string="Update" states="draft" class="oe_highlight"/>
+					</header>
+					<group>
+						<group>
+							<field name="name" readonly="1"/>
+							<field name="heat_cycle_no" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_specification" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_fc_off_time" widget="float_time" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_treatment_type" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_set_temp" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_socking_hr" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_quenc_time" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_quencing_after_temp" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="each_weight" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')],'invisible':[('done_by','!=','contractor')],'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')],'invisible':[('done_by','!=','comp_employee')],'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
+							<field name="flag_batchline" invisible="1"/>
+						</group>											
+						<group>
+							<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_treatment_date" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_fc_temp" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_furnace_on_time" widget="float_time" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_cooling_type" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_set_temp_time" widget="float_time" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_socking_comp_time" widget="float_time" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_quencing_before_temp" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="heat_chloride_content" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="done_by" required="1" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+						</group>					
+					</group>
+					<notebook>
+						<page string="Heat Treatment3 Items" attrs="{'invisible':[('flag_batchline','=',False)]}">
+							<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
+								<tree string="Heat Treatment3 Line Items" editable="top" create="false" delete="false">	
+									<field name="heat_cycle_no" required="1"/>
+									<field name="date" required="1"/>
+									<field name="heat_specification" required="1"/>
+									<field name="order_no" invisible="1"/>
+									<field name="pattern_id" invisible="0"/>
+									<field name="pattern_name" invisible="0"/>
+									<field name="moc_id" invisible="1"/>
+									<field name="done_by" required="1"/>
+									<field name="contractor_id" attrs="{'required':[('done_by','=','contractor')]}"/>
+									<field name="employee_name" attrs="{'required':[('done_by','=','comp_employee')]}"/>
+									<field name="qty" string="Production Qty" required="1"/>
+									<field name="accept_qty" required="1"/>
+									<field name="reject_qty"/>
+									<field name="each_weight" required="1"/>
+									<field name="accept_user_id"/>
+									<field name="reject_remarks_id" attrs="{'required':[('reject_qty','>',0)]}"/>
+									<field name="remarks" widget="char"/>
+								</tree>
+							</field>
+						</page>
+						<page string="Select Heat Treatment3 Items">
+							<field name="heat_treatment_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
+								context="{'tree_view_ref' : 't_tree_v_common_batch_tree'}">
+								<tree string = "Heat Treatment Batch Items" create="false" edit="false">
+									<field name="order_no"/>
+									<field name="pump_model_id"/>
+									<field name="pattern_id"/>
+									<field name="pattern_name"/>
+									<field name="moc_id"/>
+								</tree>
+							</field>
+							<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
+						</page>
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
+								<group>
+									<field name="user_id"/>
+									<field name="confirm_user_id" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>										
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','not in',['confirmed'])]}"/>									
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_batch_heat_treatment3" model="ir.ui.view">
+			<field name="name">Batch Heat Treatment3 Tree</field>
+			<field name="model">kg.batch.heat3.treatment</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">	
+			<tree toolbar="True" string="Batch Heat Treatment3 Tree">									
+					<field name="name"/>
+					<field name="entry_date"/>					
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_batch_heat_treatment3" model="ir.ui.view">
+            <field name="name">Batch Heat Treatment3 Search</field>
+            <field name="model">kg.batch.heat3.treatment</field>
+            <field name="arch" type="xml">
+                <search string="Batch Heat Treatment3 Search">
+					<field name="name" string="Batch No."  filter_domain="[('name','ilike',self)]" />
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+                       
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+	
+	
+	
+	<!-- Menu Action Start-->	
+		
+		<record id="tma_batch_heat_treatment3" model="ir.actions.act_window">
+			<field name="name">Heat Treatment3</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.batch.heat3.treatment</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_batch_heat_treatment3"/>
+			<field name="search_view_id" ref="t_search_v_batch_heat_treatment3"/>
+			<field name="context">{"search_default_open":1}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start -->
+		
+        <record id="audit_batch_heat_treatment3" model="audittrail.rule">
+            <field name="name">Audit Log Heat Treatment3</field>
+            <field name="object_id" eval="ref('kg_fettling.model_kg_batch_heat3_treatment')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+		
+        <record id="audit_batch_heat_treatment3_line" model="audittrail.rule">
+            <field name="name">Audit Log Batch Heat Treatment3 Line</field>
+            <field name="object_id" eval="ref('kg_fettling.model_ch_batch_heat3_treatment_line')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->
+    
+    <!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_batch_heat_treatment3" model="ir.sequence.type">	
+		<field name="name">KG Batch Heat Treatment3</field>
+		<field name="code">kg.batch.heat3.treatment</field>
+	</record>
+
+	<record forcecreate="1" id="seq_batch_heat_treatment3" model="ir.sequence">
+	  <field name="name">KG Batch Heat Treatment3</field>
+	  <field name="code">kg.batch.heat3.treatment</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">HTB/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->
+	
+	<!-- Batch Heat Treatment3 End Here -->
 	
 	<!-- Batch - Rough Grinding Starts Here -->
 	
@@ -5487,10 +5879,12 @@
 		<menuitem action="tma_batch_gas_cutting" id="tam_batch_gas_cutting" parent="tpm_fettling_batch_process" sequence="7"/>
 		<menuitem action="tma_batch_arc_cutting" id="tam_batch_arc_cutting" parent="tpm_fettling_batch_process" sequence="8"/>
 		<menuitem action="tma_batch_heat_treatment" id="tam_batch_heat_treatment" parent="tpm_fettling_batch_process" sequence="9"/>
-		<menuitem action="tma_batch_rough_grinding" id="tam_batch_rough_grinding" parent="tpm_fettling_batch_process" sequence="10"/>
-		<menuitem action="tma_batch_welding" id="tam_batch_welding" parent="tpm_fettling_batch_process" sequence="11"/>
-		<menuitem action="tma_batch_finish_grinding" id="tam_batch_finish_grinding" parent="tpm_fettling_batch_process" sequence="12"/>
-		<menuitem action="tma_batch_reshot_blasting" id="tam_batch_reshot_blasting" parent="tpm_fettling_batch_process" sequence="13"/>
+		<menuitem action="tma_batch_heat_treatment2" id="tam_batch_heat_treatment2" parent="tpm_fettling_batch_process" sequence="10"/>
+		<menuitem action="tma_batch_heat_treatment3" id="tam_batch_heat_treatment3" parent="tpm_fettling_batch_process" sequence="11"/>
+		<menuitem action="tma_batch_rough_grinding" id="tam_batch_rough_grinding" parent="tpm_fettling_batch_process" sequence="12"/>
+		<menuitem action="tma_batch_welding" id="tam_batch_welding" parent="tpm_fettling_batch_process" sequence="13"/>
+		<menuitem action="tma_batch_finish_grinding" id="tam_batch_finish_grinding" parent="tpm_fettling_batch_process" sequence="14"/>
+		<menuitem action="tma_batch_reshot_blasting" id="tam_batch_reshot_blasting" parent="tpm_fettling_batch_process" sequence="15"/>
 		
 		
 	<!-- Fettling Process Menu Items Ends Here -->

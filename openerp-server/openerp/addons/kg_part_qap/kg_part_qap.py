@@ -80,7 +80,7 @@ class kg_part_qap(osv.osv):
 		'moc_id': fields.many2one('kg.moc.master','MOC', readonly=True,required=True),
 		'assembly_id': fields.many2one('kg.assembly.inward','Assembly', readonly=True,required=True),
 		'assembly_foundry_id': fields.many2one('ch.assembly.bom.details','Assembly Foundry', readonly=True,required=True),
-		
+		'pump_serial_no': fields.char('Pump Serial No.'),
 	
 		
 		## Dynamic Balancing ##

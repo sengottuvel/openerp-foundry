@@ -160,6 +160,7 @@
 							<field name="motor_power"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
 							<field name="delivery_pipe_size"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
 							<field name="bush_bearing"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
+							<field name="flange_standard"  readonly="0"/>
 							<field name="bp" invisible="1"/>
 							<field name="m_power" attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
 							<field name="unit_price"  attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
@@ -182,6 +183,7 @@
 							<field name="shaft_sealing"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
 							<field name="lubrication"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
 							<field name="shaft_ext" invisible="1"/>
+							<field name="trimming_dia"/>
 							<field name="delivery_date" on_change="onchange_delivery_date(delivery_date)"  attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
 							<field name="note" string="Remarks"  attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
 						</group>

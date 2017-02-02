@@ -6921,6 +6921,592 @@ class ch_batch_heat_treatment_line(osv.osv):
 	
 ch_batch_heat_treatment_line()
 
+class kg_batch_heat2_treatment(osv.osv):
+
+	_name = "kg.batch.heat2.treatment"
+	_description = "Heat Treatment2 Batch"
+	
+	
+	_columns = {
+	
+		### Header Details ####
+		'name': fields.char('Batch No.', size=128,select=True),
+		'entry_date': fields.date('Batch Date',required=True),
+		'remarks': fields.text('Remarks'),
+		'cancel_remark': fields.text('Cancel Remarks'),
+		'active': fields.boolean('Active'),
+		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed')],'Status', readonly=True),
+
+		'heat_treatment_ids':fields.many2many('kg.fettling','m2m_heat2_treatment_details' , 'batch_id', 'heat2_treatment_id', 'Heat Treatment2 Items',
+			domain="[('stage_name','=','HEAT TREATMENT2'),('state','=','accept')]"),
+			
+		'line_ids': fields.one2many('ch.batch.heat2.treatment.line', 'header_id', "Batch Line Details"),
+		
+		'flag_batchline':fields.boolean('Batch Line Created'),
+		
+		'heat_cycle_no':fields.char('Heat Cycle No.', size=128),
+		'heat_treatment_date': fields.date('Date',required=True),
+		'heat_specification':fields.char('Specification', size=128),
+		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'employee_name': fields.char('Employee',size=128),
+		'each_weight':fields.integer('Each Weight(kgs)'),
+		
+		
+		'heat_fc_temp':fields.char('F/c initial temperature', size=128),
+		'heat_fc_off_time': fields.float('F/c switch off at'),
+		'heat_furnace_on_time': fields.float('Furnace switched on time'),
+		'heat_treatment_type':fields.char('Treatment type', size=128),
+		'heat_cooling_type':fields.char('Cooling type', size=128),
+		'heat_set_temp':fields.char('Set temperature', size=128),
+		'heat_set_temp_time':fields.float('Set temperature reached on (hrs.)'),
+		'heat_socking_hr':fields.char('Socking hours(hrs.)', size=128),
+		'heat_socking_comp_time':fields.float('Socking completed at(hrs.)'),
+		'heat_quenc_time':fields.integer('Quenching time(Sec.)'),
+		'heat_quencing_before_temp':fields.char('Quenching temp Before', size=128),
+		'heat_quencing_after_temp':fields.char('Quenching temp After', size=128),
+		'heat_chloride_content':fields.char('Chloride Content', size=128),
+		
+		### Entry Info ####
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
+		
+		'crt_date': fields.datetime('Creation Date',readonly=True),
+		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
+		
+		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
+		'confirm_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),  
+		
+		'update_date': fields.datetime('Last Updated Date', readonly=True),
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),   
+		
+	}
+	
+	_defaults = {
+	
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_batch_heat2_treatment', context=c),
+		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'heat_treatment_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'user_id': lambda obj, cr, uid, context: uid,
+		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
+		'active': True,
+		'state':'draft'
+		
+		
+	}
+	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		entry_date = str(rec.entry_date)
+		heat_treatment_date = str(rec.heat_treatment_date)
+		if entry_date > today:
+			return False
+		if heat_treatment_date > today:
+			return False
+		return True
+		
+	_constraints = [		
+			  
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
+  
+	   ]	
+
+	def update_line_items(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])  
+		fettling_obj = self.pool.get('kg.fettling')
+		line_obj = self.pool.get('ch.batch.heat2.treatment.line')
+		
+		del_sql = """ delete from ch_batch_heat2_treatment_line where header_id=%s """ %(ids[0])
+		cr.execute(del_sql)
+		
+		
+		if entry.heat_treatment_ids:
+		
+			for item in entry.heat_treatment_ids:
+				
+				
+				vals = {
+				
+					'header_id': entry.id,
+					'heat_treatment_id':item.id,
+					'qty': item.heat2_total_qty,
+					'accept_qty': item.heat2_total_qty,
+					'date': entry.heat_treatment_date,
+					'done_by': entry.done_by,
+					'contractor_id': entry.contractor_id.id,
+					'employee_name': entry.employee_name,
+					'each_weight': entry.each_weight,
+					'remarks':  entry.remarks,
+					'heat_cycle_no': entry.heat_cycle_no,
+					'heat_specification': entry.heat_specification,
+					'heat_fc_temp':entry.heat_fc_temp,
+					'heat_fc_off_time': entry.heat_fc_off_time,
+					'heat_furnace_on_time': entry.heat_furnace_on_time,
+					'heat_treatment_type': entry.heat_treatment_type,
+					'heat_cooling_type': entry.heat_cooling_type,
+					'heat_set_temp': entry.heat_set_temp,
+					'heat_set_temp_time': entry.heat_set_temp_time,
+					'heat_socking_hr': entry.heat_socking_hr,
+					'heat_socking_comp_time': entry.heat_socking_comp_time,
+					'heat_quenc_time': entry.heat_quenc_time,
+					'heat_quencing_before_temp': entry.heat_quencing_before_temp,
+					'heat_quencing_after_temp': entry.heat_quencing_after_temp,
+					'heat_chloride_content': entry.heat_chloride_content,
+				}
+				
+				
+				
+				line_id = line_obj.create(cr, uid,vals)
+				
+			self.write(cr, uid, ids, {'flag_batchline': True})
+			
+		return True
+		
+	def entry_confirm(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
+		if entry.state == 'draft':
+			fettling_obj = self.pool.get('kg.fettling')  
+			if not entry.line_ids:
+				raise osv.except_osv(_('Warning!'),
+							_('System not allow to confirm without Line Items !!'))
+							
+							
+			### Updation against Bactch Heat Treatment ###
+			for item in entry.line_ids:
+				#~ reject_qty = item.qty - item.accept_qty
+				#~ if item.reject_qty > 0 and item.reject_remarks_id.id == False:
+					#~ raise osv.except_osv(_('Warning!'),
+					#~ _('Remarks is must for Rejection !!'))
+				
+				fettling_obj.write(cr, uid,item.heat_treatment_id.id,{
+				'heat2_remarks':item.remarks,
+				'heat2_qty': item.accept_qty,
+				'heat2_reject_qty': item.reject_qty,
+				'heat2_reject_remarks_id': item.reject_remarks_id.id,
+				'heat2_date': item.date,
+				'heat2_contractor': item.contractor_id.id,
+				'heat2_employee': item.employee_name,
+				'heat2_by': item.done_by,
+				'heat2_each_weight': item.each_weight,
+				'heat2_cycle_no': item.heat_cycle_no,
+				'heat2_specification': item.heat_specification,
+				'heat2_fc_temp':item.heat_fc_temp,
+				'heat2_fc_off_time': item.heat_fc_off_time,
+				'heat2_furnace_on_time': item.heat_furnace_on_time,
+				'heat2_treatment_type': item.heat_treatment_type,
+				'heat2_cooling_type': item.heat_cooling_type,
+				'heat2_set_temp': item.heat_set_temp,
+				'heat2_set_temp_time': item.heat_set_temp_time,
+				'heat2_socking_hr': item.heat_socking_hr,
+				'heat2_socking_comp_time': item.heat_socking_comp_time,
+				'heat2_quenc_time': item.heat_quenc_time,
+				'heat2_quencing_before_temp': item.heat_quencing_before_temp,
+				'heat2_quencing_after_temp': item.heat_quencing_after_temp,
+				'heat2_chloride_content': item.heat_chloride_content,
+				})
+				fettling_obj.heat_treatment2_update(cr, uid, [item.heat_treatment_id.id])
+				
+			### Sequence Number Generation  ###
+			batch_name = '' 
+			batch_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.batch.heat2.treatment')])
+			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,batch_seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(batch_seq_id[0],seq_rec.code,entry.entry_date))
+			batch_name = cr.fetchone();
+			self.write(cr, uid, ids, {'name':batch_name[0],'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		else:
+			pass
+		return True
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(kg_batch_heat2_treatment, self).write(cr, uid, ids, vals, context)
+		
+	def unlink(self,cr,uid,ids,context=None):
+		unlink_ids = []  
+		for rec in self.browse(cr,uid,ids):
+			if rec.state != 'draft':
+				raise osv.except_osv(_('Warning!'),
+						_('You can not delete this entry !!'))
+		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
+	
+kg_batch_heat2_treatment()
+
+
+class ch_batch_heat2_treatment_line(osv.osv):
+
+	_name = "ch.batch.heat2.treatment.line"
+	_description = "Heat2 Treatment Batch Line"
+	
+	_columns = {
+	
+		'header_id':fields.many2one('kg.batch.heat2.treatment', 'Header', required=1, ondelete='cascade'),	 
+		'heat_treatment_id':fields.many2one('kg.fettling', 'Fettling'),
+		'order_no': fields.related('heat_treatment_id','order_no', type='char', string='WO No.', store=True, readonly=True),
+		'pattern_id': fields.related('heat_treatment_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern Number', store=True, readonly=True),
+		'pattern_name': fields.related('heat_treatment_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
+		'moc_id': fields.related('heat_treatment_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
+		'date': fields.date('Date', store=True, required=True),
+		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'qty': fields.integer('Total Qty'),
+		'accept_qty': fields.integer('Accepted Qty'),
+		'reject_qty': fields.integer('Rejected Qty'),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'each_weight':fields.integer('Each Weight(kgs)'),
+		'remarks': fields.text('Remarks'),
+		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
+		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'employee_name': fields.char('Employee',size=128),
+		'heat_cycle_no':fields.char('Heat Cycle No.', size=128),
+		'heat_specification':fields.char('Specification', size=128),
+		
+		'heat_fc_temp':fields.char('F/c initial temperature', size=128),
+		'heat_fc_off_time': fields.float('F/c switch off at'),
+		'heat_furnace_on_time': fields.float('Furnace switched on time'),
+		'heat_treatment_type':fields.char('Treatment type', size=128),
+		'heat_cooling_type':fields.char('Cooling type', size=128),
+		'heat_set_temp':fields.char('Set temperature', size=128),
+		'heat_set_temp_time':fields.float('Set temperature reached on (hrs.)'),
+		'heat_socking_hr':fields.char('Socking hours(hrs.)', size=128),
+		'heat_socking_comp_time':fields.float('Socking completed at(hrs.)'),
+		'heat_quenc_time':fields.integer('Quenching time(Sec.)'),
+		'heat_quencing_before_temp':fields.char('Quenching temp Before', size=128),
+		'heat_quencing_after_temp':fields.char('Quenching temp After', size=128),
+		'heat_chloride_content':fields.char('Chloride Content', size=128),
+			
+		
+		
+	}
+	
+	_defaults = {
+		
+		'date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'accept_user_id':lambda obj, cr, uid, context: uid,
+		
+	}
+	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		entry_date = str(rec.date)
+		if entry_date > today:
+			return False
+		return True
+		
+	_constraints = [		
+			  
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['Line Items']),
+  
+	   ]
+	
+	
+	def create(self, cr, uid, vals, context=None):
+		return super(ch_batch_heat2_treatment_line, self).create(cr, uid, vals, context=context)
+		
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		return super(ch_batch_heat2_treatment_line, self).write(cr, uid, ids, vals, context)
+		
+		
+	
+ch_batch_heat2_treatment_line()
+
+class kg_batch_heat3_treatment(osv.osv):
+
+	_name = "kg.batch.heat3.treatment"
+	_description = "Heat Treatment3 Batch"
+	
+	
+	_columns = {
+	
+		### Header Details ####
+		'name': fields.char('Batch No.', size=128,select=True),
+		'entry_date': fields.date('Batch Date',required=True),
+		'remarks': fields.text('Remarks'),
+		'cancel_remark': fields.text('Cancel Remarks'),
+		'active': fields.boolean('Active'),
+		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed')],'Status', readonly=True),
+
+		'heat_treatment_ids':fields.many2many('kg.fettling','m2m_heat3_treatment_details' , 'batch_id', 'heat3_treatment_id', 'Heat Treatment3 Items',
+			domain="[('stage_name','=','HEAT TREATMENT3'),('state','=','accept')]"),
+			
+		'line_ids': fields.one2many('ch.batch.heat3.treatment.line', 'header_id', "Batch Line Details"),
+		
+		'flag_batchline':fields.boolean('Batch Line Created'),
+		
+		'heat_cycle_no':fields.char('Heat Cycle No.', size=128),
+		'heat_treatment_date': fields.date('Date',required=True),
+		'heat_specification':fields.char('Specification', size=128),
+		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'employee_name': fields.char('Employee',size=128),
+		'each_weight':fields.integer('Each Weight(kgs)'),
+		
+		
+		'heat_fc_temp':fields.char('F/c initial temperature', size=128),
+		'heat_fc_off_time': fields.float('F/c switch off at'),
+		'heat_furnace_on_time': fields.float('Furnace switched on time'),
+		'heat_treatment_type':fields.char('Treatment type', size=128),
+		'heat_cooling_type':fields.char('Cooling type', size=128),
+		'heat_set_temp':fields.char('Set temperature', size=128),
+		'heat_set_temp_time':fields.float('Set temperature reached on (hrs.)'),
+		'heat_socking_hr':fields.char('Socking hours(hrs.)', size=128),
+		'heat_socking_comp_time':fields.float('Socking completed at(hrs.)'),
+		'heat_quenc_time':fields.integer('Quenching time(Sec.)'),
+		'heat_quencing_before_temp':fields.char('Quenching temp Before', size=128),
+		'heat_quencing_after_temp':fields.char('Quenching temp After', size=128),
+		'heat_chloride_content':fields.char('Chloride Content', size=128),
+		
+		### Entry Info ####
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
+		
+		'crt_date': fields.datetime('Creation Date',readonly=True),
+		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
+		
+		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
+		'confirm_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),  
+		
+		'update_date': fields.datetime('Last Updated Date', readonly=True),
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),   
+		
+	}
+	
+	_defaults = {
+	
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_batch_heat3_treatment', context=c),
+		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'heat_treatment_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'user_id': lambda obj, cr, uid, context: uid,
+		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
+		'active': True,
+		'state':'draft'
+		
+		
+	}
+	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		entry_date = str(rec.entry_date)
+		heat_treatment_date = str(rec.heat_treatment_date)
+		if entry_date > today:
+			return False
+		if heat_treatment_date > today:
+			return False
+		return True
+		
+	_constraints = [		
+			  
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
+  
+	   ]	
+
+	def update_line_items(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])  
+		fettling_obj = self.pool.get('kg.fettling')
+		line_obj = self.pool.get('ch.batch.heat3.treatment.line')
+		
+		del_sql = """ delete from ch_batch_heat3_treatment_line where header_id=%s """ %(ids[0])
+		cr.execute(del_sql)
+		
+		
+		if entry.heat_treatment_ids:
+		
+			for item in entry.heat_treatment_ids:
+				
+				
+				vals = {
+				
+					'header_id': entry.id,
+					'heat_treatment_id':item.id,
+					'qty': item.heat3_total_qty,
+					'accept_qty': item.heat3_total_qty,
+					'date': entry.heat_treatment_date,
+					'done_by': entry.done_by,
+					'contractor_id': entry.contractor_id.id,
+					'employee_name': entry.employee_name,
+					'each_weight': entry.each_weight,
+					'remarks':  entry.remarks,
+					'heat_cycle_no': entry.heat_cycle_no,
+					'heat_specification': entry.heat_specification,
+					'heat_fc_temp':entry.heat_fc_temp,
+					'heat_fc_off_time': entry.heat_fc_off_time,
+					'heat_furnace_on_time': entry.heat_furnace_on_time,
+					'heat_treatment_type': entry.heat_treatment_type,
+					'heat_cooling_type': entry.heat_cooling_type,
+					'heat_set_temp': entry.heat_set_temp,
+					'heat_set_temp_time': entry.heat_set_temp_time,
+					'heat_socking_hr': entry.heat_socking_hr,
+					'heat_socking_comp_time': entry.heat_socking_comp_time,
+					'heat_quenc_time': entry.heat_quenc_time,
+					'heat_quencing_before_temp': entry.heat_quencing_before_temp,
+					'heat_quencing_after_temp': entry.heat_quencing_after_temp,
+					'heat_chloride_content': entry.heat_chloride_content,
+				}
+				
+				
+				
+				line_id = line_obj.create(cr, uid,vals)
+				
+			self.write(cr, uid, ids, {'flag_batchline': True})
+			
+		return True
+		
+	def entry_confirm(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
+		if entry.state == 'draft':
+			fettling_obj = self.pool.get('kg.fettling')  
+			if not entry.line_ids:
+				raise osv.except_osv(_('Warning!'),
+							_('System not allow to confirm without Line Items !!'))
+							
+							
+			### Updation against Bactch Heat Treatment ###
+			for item in entry.line_ids:
+				#~ reject_qty = item.qty - item.accept_qty
+				#~ if item.reject_qty > 0 and item.reject_remarks_id.id == False:
+					#~ raise osv.except_osv(_('Warning!'),
+					#~ _('Remarks is must for Rejection !!'))
+				
+				fettling_obj.write(cr, uid,item.heat_treatment_id.id,{
+				'heat3_remarks':item.remarks,
+				'heat3_qty': item.accept_qty,
+				'heat3_reject_qty': item.reject_qty,
+				'heat3_reject_remarks_id': item.reject_remarks_id.id,
+				'heat3_date': item.date,
+				'heat3_contractor': item.contractor_id.id,
+				'heat3_employee': item.employee_name,
+				'heat3_by': item.done_by,
+				'heat3_each_weight': item.each_weight,
+				'heat3_cycle_no': item.heat_cycle_no,
+				'heat3_specification': item.heat_specification,
+				'heat3_fc_temp':item.heat_fc_temp,
+				'heat3_fc_off_time': item.heat_fc_off_time,
+				'heat3_furnace_on_time': item.heat_furnace_on_time,
+				'heat3_treatment_type': item.heat_treatment_type,
+				'heat3_cooling_type': item.heat_cooling_type,
+				'heat3_set_temp': item.heat_set_temp,
+				'heat3_set_temp_time': item.heat_set_temp_time,
+				'heat3_socking_hr': item.heat_socking_hr,
+				'heat3_socking_comp_time': item.heat_socking_comp_time,
+				'heat3_quenc_time': item.heat_quenc_time,
+				'heat3_quencing_before_temp': item.heat_quencing_before_temp,
+				'heat3_quencing_after_temp': item.heat_quencing_after_temp,
+				'heat3_chloride_content': item.heat_chloride_content,
+				})
+				fettling_obj.heat_treatment3_update(cr, uid, [item.heat_treatment_id.id])
+				
+			### Sequence Number Generation  ###
+			batch_name = '' 
+			batch_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.batch.heat3.treatment')])
+			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,batch_seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(batch_seq_id[0],seq_rec.code,entry.entry_date))
+			batch_name = cr.fetchone();
+			self.write(cr, uid, ids, {'name':batch_name[0],'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		else:
+			pass
+		return True
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(kg_batch_heat3_treatment, self).write(cr, uid, ids, vals, context)
+		
+	def unlink(self,cr,uid,ids,context=None):
+		unlink_ids = []  
+		for rec in self.browse(cr,uid,ids):
+			if rec.state != 'draft':
+				raise osv.except_osv(_('Warning!'),
+						_('You can not delete this entry !!'))
+		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
+	
+kg_batch_heat3_treatment()
+
+
+class ch_batch_heat3_treatment_line(osv.osv):
+
+	_name = "ch.batch.heat3.treatment.line"
+	_description = "Heat3 Treatment Batch Line"
+	
+	_columns = {
+	
+		'header_id':fields.many2one('kg.batch.heat3.treatment', 'Header', required=1, ondelete='cascade'),	 
+		'heat_treatment_id':fields.many2one('kg.fettling', 'Fettling'),
+		'order_no': fields.related('heat_treatment_id','order_no', type='char', string='WO No.', store=True, readonly=True),
+		'pattern_id': fields.related('heat_treatment_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern Number', store=True, readonly=True),
+		'pattern_name': fields.related('heat_treatment_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
+		'moc_id': fields.related('heat_treatment_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
+		'date': fields.date('Date', store=True, required=True),
+		'contractor_id':fields.many2one('res.partner','Contractor'),
+		'qty': fields.integer('Total Qty'),
+		'accept_qty': fields.integer('Accepted Qty'),
+		'reject_qty': fields.integer('Rejected Qty'),
+		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'each_weight':fields.integer('Each Weight(kgs)'),
+		'remarks': fields.text('Remarks'),
+		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
+		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'employee_name': fields.char('Employee',size=128),
+		'heat_cycle_no':fields.char('Heat Cycle No.', size=128),
+		'heat_specification':fields.char('Specification', size=128),
+		
+		'heat_fc_temp':fields.char('F/c initial temperature', size=128),
+		'heat_fc_off_time': fields.float('F/c switch off at'),
+		'heat_furnace_on_time': fields.float('Furnace switched on time'),
+		'heat_treatment_type':fields.char('Treatment type', size=128),
+		'heat_cooling_type':fields.char('Cooling type', size=128),
+		'heat_set_temp':fields.char('Set temperature', size=128),
+		'heat_set_temp_time':fields.float('Set temperature reached on (hrs.)'),
+		'heat_socking_hr':fields.char('Socking hours(hrs.)', size=128),
+		'heat_socking_comp_time':fields.float('Socking completed at(hrs.)'),
+		'heat_quenc_time':fields.integer('Quenching time(Sec.)'),
+		'heat_quencing_before_temp':fields.char('Quenching temp Before', size=128),
+		'heat_quencing_after_temp':fields.char('Quenching temp After', size=128),
+		'heat_chloride_content':fields.char('Chloride Content', size=128),
+			
+		
+		
+	}
+	
+	_defaults = {
+		
+		'date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'accept_user_id':lambda obj, cr, uid, context: uid,
+		
+	}
+	
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		entry_date = str(rec.date)
+		if entry_date > today:
+			return False
+		return True
+		
+	_constraints = [		
+			  
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['Line Items']),
+  
+	   ]
+	
+	
+	def create(self, cr, uid, vals, context=None):
+		return super(ch_batch_heat3_treatment_line, self).create(cr, uid, vals, context=context)
+		
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		return super(ch_batch_heat3_treatment_line, self).write(cr, uid, ids, vals, context)
+		
+		
+	
+ch_batch_heat3_treatment_line()
+
 
 class kg_batch_rough_grinding(osv.osv):
 

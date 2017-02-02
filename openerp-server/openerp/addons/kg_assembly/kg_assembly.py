@@ -192,6 +192,8 @@ class kg_assembly_inward(osv.osv):
 				print "db_test_process_rem",db_test_process_rem
 				print "hs_test_process_rem",hs_test_process_rem
 				if db_test_process_rem == None and hs_test_process_rem == None:
+					#### Updating pump serial number in Part qap ###
+					cr.execute(''' update kg_part_qap set pump_serial_no = %s where assembly_id = %s ''',[entry_rec.pump_serial_no,ids[0]])
 					### Dimensional Inspection Creation ###
 					pump_qap_header_vals = {
 					

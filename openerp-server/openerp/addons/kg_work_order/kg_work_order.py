@@ -611,6 +611,8 @@ class ch_work_order_details(osv.osv):
 		'line_ids_d': fields.one2many('ch.wo.accessories', 'header_id', "Accessories"),
 		## QAP ##
 		'qap_plan_id': fields.many2one('kg.qap.plan', 'QAP Standard',required=True),
+		'flange_standard': fields.many2one('ch.pumpseries.flange','Flange Standard',),
+		'trimming_dia': fields.char('Trimming Dia'),
 		
 	}
 	

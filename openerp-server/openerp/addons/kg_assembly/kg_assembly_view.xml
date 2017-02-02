@@ -49,7 +49,7 @@
 							<field name="runout_test_shift_id" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
 							<field name="runout_test_done_by" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
 						</group>					
-						<group string="Mechanical Assembly">
+						<group string="Mech.Seal Assembly">
 							<field name="mech_assembly_state" required="1" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
 							<field name="mech_assembly_date" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
 							<field name="mech_assembly_shift_id" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
