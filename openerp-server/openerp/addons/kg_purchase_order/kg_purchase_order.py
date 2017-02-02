@@ -923,6 +923,7 @@ class kg_purchase_order_line(osv.osv):
 	'product_uom': fields.many2one('product.uom', 'UOM', readonly=True),
 	'name': fields.text('Description'),
 	'date_planned': fields.date('Scheduled Date', select=True),
+	'po_date': fields.related('order_id','date_order',type='date',string="PO Date",store=True),
 	'note': fields.text('Remarks'),
 	'pi_line_id':fields.many2one('purchase.requisition.line','PI Line'),
 	'po_order':fields.one2many('kg.po.line','line_id','PO order Line'),

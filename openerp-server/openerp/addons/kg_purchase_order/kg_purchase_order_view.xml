@@ -430,7 +430,7 @@
 		<field name="arch" type="xml">
 			<tree string="PO Line Tree View" create="false" delete="false">					
 				<field name="order_id" string="PO No"/>
-				<field name="date_planned" string="PO Date"/>
+				<field name="po_date"/>
 				<field name="delivery_date"/>
 				<field name="partner_id" string="Supplier"/>
 				<field name="product_id"/>

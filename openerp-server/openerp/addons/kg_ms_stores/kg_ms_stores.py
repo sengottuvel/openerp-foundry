@@ -519,7 +519,7 @@ class kg_ms_stores(osv.osv):
 								
 							db_flag = False
 							hs_flag = False
-							if order_bom_rec.pattern_id.dynamic_length == True:
+							if order_bom_rec.pattern_id.need_dynamic_balancing == True:
 								db_flag = True
 							if order_bom_rec.pattern_id.need_hydro_test == True:
 								hs_flag = True
