@@ -517,33 +517,43 @@ class kg_ms_stores(osv.osv):
 							else:
 								hs_pressure = 0.00
 								
-							
-							part_qap_vals = {
+							db_flag = False
+							hs_flag = False
+							if order_bom_rec.pattern_id.dynamic_length == True:
+								db_flag = True
+							if order_bom_rec.pattern_id.need_hydro_test == True:
+								hs_flag = True
 								
-								'qap_plan_id': order_line_rec.qap_plan_id.id,
-								'order_id': assembly_item['order_id'],
-								'order_line_id': assembly_item['order_line_id'],
-								'order_no': order_line_rec.order_no,
-								'order_category': order_line_rec.order_category,
-								'pattern_id': order_bom_rec.pattern_id.id,
-								'pattern_name': order_bom_rec.pattern_id.pattern_name,
-								'item_code': order_bom_rec.pattern_id.name,
-								'item_name': order_bom_rec.pattern_id.pattern_name,
-								'moc_id': order_bom_rec.moc_id.id,
-								'db_min_weight': min_weight,
-								'db_max_weight': max_weight,
-								'assembly_id': ass_foundry_id,
-								'assembly_foundry_id': assembly_foundry_id,
-								'order_bom_id': assembly_item['order_bom_id'],
-								'hs_pressure': hs_pressure,
-								
-								
-							}
-							print "part_qap_vals",part_qap_vals
+							if not db_flag == False and hs_flag == False:
 							
-							for pattern in range(order_bom_qty):
-							
-								part_qap_id = self.pool.get('kg.part.qap').create(cr, uid, part_qap_vals)
+								part_qap_vals = {
+									
+									'qap_plan_id': order_line_rec.qap_plan_id.id,
+									'order_id': assembly_item['order_id'],
+									'order_line_id': assembly_item['order_line_id'],
+									'order_no': order_line_rec.order_no,
+									'order_category': order_line_rec.order_category,
+									'pattern_id': order_bom_rec.pattern_id.id,
+									'pattern_name': order_bom_rec.pattern_id.pattern_name,
+									'item_code': order_bom_rec.pattern_id.name,
+									'item_name': order_bom_rec.pattern_id.pattern_name,
+									'moc_id': order_bom_rec.moc_id.id,
+									'db_min_weight': min_weight,
+									'db_max_weight': max_weight,
+									'assembly_id': ass_foundry_id,
+									'assembly_foundry_id': assembly_foundry_id,
+									'order_bom_id': assembly_item['order_bom_id'],
+									'hs_pressure': hs_pressure,
+									'db_flag':db_flag,
+									'hs_flag':hs_flag,
+									
+									
+								}
+								print "part_qap_vals",part_qap_vals
+								
+								for pattern in range(order_bom_qty):
+								
+									part_qap_id = self.pool.get('kg.part.qap').create(cr, uid, part_qap_vals)
 							
 		
 					### Creating Machine Shop Items ###

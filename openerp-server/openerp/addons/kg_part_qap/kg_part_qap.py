@@ -98,6 +98,7 @@ class kg_part_qap(osv.osv):
 		'db_remarks': fields.text('Remarks'),
 		'flag_db_customer_specific': fields.boolean('Customer Specific'),
 		'db_state': fields.selection([('pending','Pending'),('completed','Completed')],'DB State'),
+		'db_flag': fields.boolean('DB Staus in Pattern'),
 		
 		## Hydro Static Test ##
 		
@@ -117,6 +118,7 @@ class kg_part_qap(osv.osv):
 		'hs_remarks': fields.text('Remarks'),
 		'flag_hs_customer_specific': fields.boolean('Customer Specific'),
 		'hs_state': fields.selection([('pending','Pending'),('completed','Completed')],'HS State'),
+		'hs_flag': fields.boolean('HS Staus in Pattern'),
 	
 				
 	}
@@ -137,6 +139,8 @@ class kg_part_qap(osv.osv):
 		'db_state':  'pending',
 		'hs_date':  lambda * a: time.strftime('%Y-%m-%d'),
 		'hs_state':  'pending',
+		'db_flag':  False,
+		'hs_flag':  False,
 		
 	}
 	
