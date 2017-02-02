@@ -103,8 +103,8 @@ class kg_part_qap(osv.osv):
 		## Hydro Static Test ##
 		
 		'hs_date': fields.date('Date',required=True),   
-		'hs_pressure': fields.float('Hydro static test pressure' ),
-		'hs_testing_time': fields.selection([('0.30','0.30'),('0.45','0.45'),('1','1'),('1.15','1.15'),('1.30','1.30'),('1.45','1.45'),('2','2')],
+		'hs_pressure': fields.float('Hydro static test pressure (Kg/cm2)'),
+		'hs_testing_time': fields.selection([('0.30','0.5'),('0.45','0.75'),('1','1'),('1.15','1.15'),('1.30','1.30'),('1.45','1.45'),('2','2')],
 						'Testing time (Hrs)'),
 		'hs_actual_unbal_weight': fields.float('Actual Un Balanced Weight in (gms)' ),
 		'hs_machinery_id': fields.many2one('kg.machinery.master','Machinery'),
