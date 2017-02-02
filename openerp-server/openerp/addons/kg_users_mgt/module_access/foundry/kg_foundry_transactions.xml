@@ -849,7 +849,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
@@ -865,11 +865,74 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
 		<!-- Batch Heat Treatment Line End -->
+		
+		
+		<!-- Batch Heat Treatment2 Batch Start --> 
+		
+		<record id="t_foundry_batch_heat_treatment2" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_kg_batch_heat2_treatment"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Heat Treatment2 Batch</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Batch Heat Treatment2 End -->
+		
+		
+		<!-- Batch Heat Treatment2 Line Start --> 
+		
+		<record id="t_foundry_batch_heat_treatment2_line" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_ch_batch_heat2_treatment_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Heat Treatment2 Batch Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Batch Heat Treatment2 Line End -->
+		
+		<!-- Batch Heat Treatment3 Batch Start --> 
+		
+		<record id="t_foundry_batch_heat_treatment3" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_kg_batch_heat3_treatment"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Heat Treatment3 Batch</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Batch Heat Treatment3 End -->
+		
+		
+		<!-- Batch Heat Treatment3 Line Start --> 
+		
+		<record id="t_foundry_batch_heat_treatment3_line" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_ch_batch_heat3_treatment_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Heat Treatment3 Batch Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Batch Heat Treatment3 Line End -->
 		
 		<!-- Batch Re Shot Blasting Batch Start --> 
 		

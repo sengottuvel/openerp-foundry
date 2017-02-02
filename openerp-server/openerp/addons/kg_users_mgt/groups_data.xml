@@ -94,6 +94,8 @@
             ref('kg_fettling.tam_batch_gas_cutting'),
             ref('kg_fettling.tam_batch_arc_cutting'),
             ref('kg_fettling.tam_batch_heat_treatment'),
+            ref('kg_fettling.tam_batch_heat_treatment2'),
+            ref('kg_fettling.tam_batch_heat_treatment3'),
             ref('kg_fettling.tam_batch_rough_grinding'),
             ref('kg_fettling.tam_batch_welding'),
             ref('kg_fettling.tam_batch_finish_grinding'),
