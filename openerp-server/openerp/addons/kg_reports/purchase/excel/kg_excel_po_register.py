@@ -281,7 +281,7 @@ class kg_excel_po_register(osv.osv):
 					name = tax.name
 					tax_name.append(name)
 					a = (', '.join('"' + item + '"' for item in tax_name))
-					tax = [ item.encode('ascii') for item in ast.literal_eval(str(a)) ]
+					tax = [ item.encode('ascii') for item in ast.literal_eval(a) ]
 					po_tax = ', '.join(tax)
 					item1['tax'] = po_tax
 			else:
