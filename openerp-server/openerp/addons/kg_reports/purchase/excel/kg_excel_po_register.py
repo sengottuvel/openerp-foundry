@@ -14,7 +14,8 @@ from dateutil import relativedelta
 import datetime
 import calendar
 from datetime import datetime
-	
+import ast
+
 logger = logging.getLogger('server')
 
 class kg_excel_po_register(osv.osv):
