@@ -274,6 +274,7 @@ class kg_excel_po_register(osv.osv):
 			item1['pending_days'] = daysDiff
 			pol_rec = pol_obj.browse(cr, uid,item1['pol_id'])
 			taxes = pol_rec.taxes_id
+			ast = ''
 			if taxes and len(taxes) !=1:				
 				tax_name = []
 				for tax in taxes:
