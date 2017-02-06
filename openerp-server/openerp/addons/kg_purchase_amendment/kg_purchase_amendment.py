@@ -1078,10 +1078,10 @@ class kg_purchase_amendment_line(osv.osv):
 			# Qty Calculation
 			qty = 0.00
 			if line.price_type_amend == 'per_kg':
-				if line.product_id_amend.uom_conversation_factor_amend == 'two_dimension':
+				if line.product_id_amend.uom_conversation_factor == 'two_dimension':
 					if line.product_id_amend.po_uom_in_kgs > 0:
 						qty = line.product_qty_amend * line.product_id_amend.po_uom_in_kgs * line.length_amend * line.breadth_amend
-				elif line.product_id_amend.uom_conversation_factor_amend == 'one_dimension':
+				elif line.product_id_amend.uom_conversation_factor == 'one_dimension':
 					if line.product_id_amend.po_uom_in_kgs > 0:
 						qty = line.product_qty_amend * line.product_id_amend.po_uom_in_kgs
 					else:
