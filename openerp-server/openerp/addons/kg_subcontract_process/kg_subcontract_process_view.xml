@@ -337,6 +337,7 @@
 					<field name="order_priority" string="Category"/>
 					<field name="pump_model_id"/>					
 					<field name="item_code" />
+					<field name="read_flag" invisible="1"/>	
 					<field name="item_name"/>
 					<field name="moc_id"/>					
 					<field name="qty" sum="Total SC Qty"/>
@@ -365,7 +366,8 @@
 								<field name="order_priority"/>
 								<field name="item_code"/>
 								<field name="moc_id"/>
-								<field name="qty" required="1"/>
+								<field name="read_flag" invisible="1"/>	
+								<field name="qty" required="1" attrs="{'readonly': [('read_flag','=',True)]}"/>
 								<field name="remarks"/>
 								
 																
@@ -379,13 +381,13 @@
 						</group>
 						<notebook>						
 							<page string="Work Order Operation Details" >
-								<field colspan="4" name="line_ids" nolabel="1" context="{'position_id':position_id,'moc_id':moc_id}">
+								<field colspan="4" name="line_ids" nolabel="1" context="{'position_id':position_id,'moc_id':moc_id}"  attrs="{'readonly': [('read_flag','=',True)]}">
 									<tree string = "Work Order Operation Items" editable="bottom">
 										<field name="operation_id" on_change="onchange_operation_rate(operation_id,position_id,moc_id)"/>
 										<field name="stage_id" readonly="1"/>
 										<field name="op_rate" widget="char"/>																				
 										<field name="position_id" invisible="1"/>										
-										<field name="moc_id" invisible="1"/>										
+										<field name="moc_id" invisible="1"/>																
 										<field name="remarks" widget="char"/>										
 									</tree>
 								</field>
@@ -808,7 +810,7 @@
 									<field name="sc_wo_qty" readonly="1"/>
 									<field name="qty" required="1"/>
 									<field name="operation_id" widget="many2many_tags" readonly="1"/>											
-									<field name="com_operation_id" widget="many2many_tags" required="1"/>											
+									<field name="com_operation_id" widget="many2many_tags" />											
 									<field name="each_weight" readonly="1" />
 									<field name="com_weight" required="1" on_change="onchange_com_weight(com_weight,qty)"/>
 									<field name="totel_weight" readonly="1"/>										
