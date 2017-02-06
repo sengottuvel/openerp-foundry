@@ -39,7 +39,7 @@ class kg_crm_offer(osv.osv):
 			
 			}
 			
-			cur = order.customer_id.property_product_pricelist_purchase.currency_id
+			#~ cur = order.customer_id.property_product_pricelist_purchase.currency_id
 			
 			for line in order.line_pump_ids:
 				pump_net_amount += line.net_amount
@@ -65,18 +65,24 @@ class kg_crm_offer(osv.osv):
 	_order = "enquiry_date desc"
 
 	_columns = {
-	
-		### Header Details ####
+		
+		## Basic Info
+		
 		'name': fields.char('Offer No', size=128,select=True),
-		'enquiry_id': fields.many2one('kg.crm.enquiry','Enquiry No.'),
-		'schedule_no': fields.char('Schedule No', size=128,select=True),
-		'enquiry_date': fields.date('Enquiry Date',required=True),
-		'offer_date': fields.date('Offer Date',required=True),
 		'note': fields.char('Notes'),
-		'service_det': fields.char('Service Details'),
+		'offer_date': fields.date('Offer Date',required=True),
 		'remarks': fields.text('Remarks'),
 		'cancel_remark': fields.text('Cancel Remarks'),
 		'state': fields.selection(STATE_SELECTION,'Status', readonly=True),
+		
+		## Module Requirement Info
+		
+		'enquiry_id': fields.many2one('kg.crm.enquiry','Enquiry No.'),
+		'enquiry_no': fields.related('enquiry_id','name', type='char', string='Enquiry No.', store=True),
+		'schedule_no': fields.char('Schedule No', size=128,select=True),
+		'enquiry_date': fields.related('enquiry_id','offer_date', type='date', string='Enquiry Date', store=True,required=True),
+		'customer_id': fields.related('enquiry_id','customer_id', type='many2one', relation="res.partner", string='Customer Name', store=True),
+		'service_det': fields.char('Service Details'),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD'),('export','Export')],'Location'),
 		'offer_copy': fields.char('Offer Copy'),
 		'revision': fields.integer('Revision'),
@@ -94,7 +100,6 @@ class kg_crm_offer(osv.osv):
 		'market_division': fields.selection(MARKET_SELECTION,'Marketing Division', required=True),
 		'ref_no': fields.char('Reference Number'),
 		'segment': fields.selection([('dom','Domestic'),('exp','Export')],'Segment', required=True),
-		'customer_id': fields.many2one('res.partner','Customer Name',domain=[('customer','=',True),('contact','=',False)]),
 		'dealer_id': fields.many2one('res.partner','Dealer Name',domain=[('dealer','=',True),('contact','=',False)]),
 		'industry_id': fields.many2one('kg.industry.master','Sector'),
 		'expected_value': fields.float('Expected Value'),
@@ -106,7 +111,6 @@ class kg_crm_offer(osv.osv):
 		'wo_no': fields.char('WO Number'),
 		'requirements': fields.text('Requirements'),
 		
-		'enquiry_no': fields.char('Enquiry No.', size=128,select=True),
 		'scope_of_supply': fields.selection([('bare_pump','Bare Pump'),('pump_with_acces','Pump With Accessories'),('pump_with_acces_motor','Pump With Accessories And Motor')],'Scope of Supply'),
 		'pump': fields.selection([('gld_packing','Gland Packing'),('mc_seal','M/C Seal'),('dynamic_seal','Dynamic seal')],'Shaft Sealing', required=True),
 		'drive': fields.selection([('motor','Motor'),('vfd','VFD'),('engine','Engine')],'Drive'),
@@ -184,6 +188,7 @@ class kg_crm_offer(osv.osv):
 	#	'division_id':_get_default_division,
 		'due_date': lambda * a: time.strftime('%Y-%m-%d'),
 		'revision': 0,
+		
 	}
 	
 	def unlink(self,cr,uid,ids,context=None):
@@ -415,7 +420,8 @@ class kg_crm_offer(osv.osv):
 		pump_vals = {
 			
 			'header_id': wo_id,
-			'pump_model_id': item.spare_pump_id.id,
+			'pump_model_id': pump_id,
+			'flange_standard': item.flange_standard.id,
 			'order_category': purpose,
 			'moc_construction_id': moc_const_id,
 			'unit_price': 1,
@@ -431,6 +437,7 @@ class kg_crm_offer(osv.osv):
 			'shaft_sealing': shaft_sealing,
 			'lubrication_type': lubrication_type,
 			'rpm': rpm,
+			'flag_offer':True
 			
 			}
 			
@@ -459,6 +466,7 @@ class kg_crm_offer(osv.osv):
 																							'pattern_id': ele.pattern_id.id,
 																							'pattern_name': ele.pattern_name,
 																							'unit_price': ele.prime_cost,
+																							'mar_prime_cost': ele.prime_cost,
 																							'moc_id': ele.moc_id.id,
 																							'entry_mode': 'auto',
 																							'spare_offer_line_id': of_li_id,
@@ -482,6 +490,7 @@ class kg_crm_offer(osv.osv):
 																							'position_id': ele.position_id.id,
 																							'ms_id': ele.ms_id.id,
 																							'unit_price': ele.prime_cost,
+																							'mar_prime_cost': ele.prime_cost,
 																							'moc_id': ele.moc_id.id,
 																							'entry_mode': 'auto',
 																							'spare_offer_line_id': of_li_id,
@@ -505,6 +514,7 @@ class kg_crm_offer(osv.osv):
 																							'position_id': ele.position_id.id,
 																							'bot_id': ele.ms_id.id,
 																							'unit_price': ele.prime_cost,
+																							'mar_prime_cost': ele.prime_cost,
 																							'moc_id': ele.moc_id.id,
 																							'entry_mode': 'auto',
 																							'spare_offer_line_id': of_li_id,
@@ -516,6 +526,7 @@ class kg_crm_offer(osv.osv):
 						else:
 							if purpose == 'spare':
 								of_li_id = 0
+				self.pool.get('ch.work.order.details').write(cr,uid,wo_line_id,{'mar_prime_cost':prime_cost})
 				prime_cost = 0.00
 				if item.purpose_categ == 'pump':
 					self.pool.get('ch.work.order.details').write(cr,uid,wo_line_id,{'unit_price':off_line_id.net_amount})
@@ -586,6 +597,7 @@ class kg_crm_offer(osv.osv):
 																										#~ 'access_offer_line_id': off_line_id,
 																										})
 										prime_cost += ele.prime_cost
+							self.pool.get('ch.wo.accessories').write(cr,uid,wo_access_id,{'mar_prime_cost':prime_cost})
 							prime_cost = 0.00
 							off_access_obj = self.pool.get('ch.accessories.offer').search(cr,uid,[('enquiry_line_id','=',item.id),('pump_id','=',item.pump_id.id)])
 							if off_access_obj:
@@ -1470,7 +1482,6 @@ kg_crm_offer()
 
 class ch_pump_offer(osv.osv):
 	
-
 	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
 		res = {}
 		cur_obj=self.pool.get('res.currency')
@@ -1540,9 +1551,13 @@ class ch_pump_offer(osv.osv):
 	_description = "Ch Pump Offer"
 	
 	_columns = {
-	
-		### Pump Details ####
+		
+		## Basic Info
+		
 		'header_id':fields.many2one('kg.crm.offer', 'Offer', ondelete='cascade'),
+		
+		## Module Requirement Fields
+		
 		'offer_id':fields.many2one('kg.crm.offer', 'Offer'),
 		'qty':fields.integer('Quantity'),
 		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Type'),
@@ -1571,6 +1586,8 @@ class ch_pump_offer(osv.osv):
 		'insurance_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),	
 		'pump_price_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Pump Price',multi="sums",store=True),	
 		'net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),	
+		
+		## Child Tables Declaration
 		
 		'enquiry_line_id': fields.many2one('ch.kg.crm.pumpmodel','Enquiry Line'),
 		'off_fou_id': fields.related('enquiry_line_id','line_ids', type='one2many', relation='ch.kg.crm.foundry.item', string='Foundry Items'),
@@ -1661,9 +1678,13 @@ class ch_spare_offer(osv.osv):
 	_description = "Ch Spare Offer"
 	
 	_columns = {
-	
-		### Pump Details ####
+		
+		## Basic Info
+		
 		'header_id':fields.many2one('kg.crm.offer', 'Offer', ondelete='cascade'),
+		
+		## Module Requirement Fields
+		
 		'offer_id':fields.many2one('kg.crm.offer', 'Offer'),
 		'qty':fields.integer('Quantity'),
 		'item_code': fields.char('Item Code'),
@@ -1697,6 +1718,8 @@ class ch_spare_offer(osv.osv):
 		'insurance_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),	
 		'pump_price_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Pump Price',multi="sums",store=True),	
 		'net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),	
+		
+		## Child Tables Declaration
 		
 		'enquiry_line_id': fields.many2one('ch.kg.crm.pumpmodel','Enquiry Line'),
 		'off_fou_id': fields.related('enquiry_line_id','line_ids', type='one2many', relation='ch.kg.crm.foundry.item', string='Foundry Items'),
@@ -1779,9 +1802,13 @@ class ch_accessories_offer(osv.osv):
 	_description = "Ch Accessories Offer"
 	
 	_columns = {
-	
-		### Spare Details ####
+		
+		## Basic Info
+		
 		'header_id':fields.many2one('kg.crm.offer', 'Offer', ondelete='cascade'),
+		
+		## Module Requirement Fields
+		
 		'offer_id':fields.many2one('kg.crm.offer', 'Offer'),
 		'enquiry_line_id': fields.many2one('ch.kg.crm.pumpmodel','Enquiry Line'),
 		'access_id':fields.many2one('kg.accessories.master', 'Item Name'),
@@ -1812,6 +1839,8 @@ class ch_accessories_offer(osv.osv):
 		'insurance_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Insurance',multi="sums",store=True),	
 		'pump_price_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Pump Price',multi="sums",store=True),	
 		'net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),	
+		
+		## Child Tables Declaration
 		
 		'enquiry_line_access_id': fields.many2one('ch.kg.crm.accessories','Enquiry Line'),
 		'off_fou_id': fields.related('enquiry_line_access_id','line_ids', type='one2many', relation='ch.crm.access.fou', string='Foundry Items'),

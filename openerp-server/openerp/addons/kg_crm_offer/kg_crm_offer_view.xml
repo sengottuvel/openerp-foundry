@@ -53,14 +53,15 @@
 									<field name="qty" sum="qty"/>
 									<field name="per_pump_prime_cost" sum="per_pump_prime_cost"/>
 									<field name="prime_cost" sum="prime_cost"/>
-									<field name="sam_ratio" sum="sam_ratio"/>
-									<field name="dealer_discount" sum="dealer_discount"/>
-									<field name="customer_discount" sum="customer_discount"/>
-									<field name="special_discount" sum="special_discount"/>
-									<field name="tax" sum="tax"/>
-									<field name="p_f" sum="p_f"/>
-									<field name="freight" sum="freight"/>
-									<field name="insurance" sum="insurance"/>
+									<field name="sam_ratio"/>
+									<field name="sam_ratio_tot" string="Works Value"/>
+									<field name="dealer_discount"/>
+									<field name="special_discount"/>
+									<field name="p_f"/>
+									<field name="freight"/>
+									<field name="insurance"/>
+									<field name="customer_discount"/>
+									<field name="tax"/>
 									<field name="tot_price" sum="total_price"/>
 									<field name="net_amount" sum="net_amount"/>
 								</tree>
@@ -96,14 +97,15 @@
 									<field name="moc_id"/>
 									<field name="qty" sum="qty"/>
 									<field name="prime_cost" sum="prime_cost"/>
-									<field name="sam_ratio" sum="sam_ratio"/>
-									<field name="dealer_discount" sum="dealer_discount"/>
-									<field name="customer_discount" sum="customer_discount"/>
-									<field name="special_discount" sum="special_discount"/>
-									<field name="tax" sum="tax"/>
-									<field name="p_f" sum="p_f"/>
-									<field name="freight" sum="freight"/>
-									<field name="insurance" sum="insurance"/>
+									<field name="sam_ratio"/>
+									<field name="sam_ratio_tot" string="Works Value"/>
+									<field name="dealer_discount"/>
+									<field name="special_discount"/>
+									<field name="p_f"/>
+									<field name="freight"/>
+									<field name="insurance"/>
+									<field name="customer_discount"/>
+									<field name="tax"/>
 									<field name="tot_price" sum="total_price"/>
 									<field name="net_amount" sum="net_amount"/>
 								</tree>
@@ -139,14 +141,15 @@
 									<field name="qty" sum="qty"/>
 									<field name="per_access_prime_cost" sum="per_access_prime_cost" readonly="1"/>
 									<field name="prime_cost" sum="prime_cost" readonly="1"/>
-									<field name="sam_ratio" sum="sam_ratio"/>
-									<field name="dealer_discount" sum="dealer_discount"/>
-									<field name="customer_discount" sum="customer_discount"/>
-									<field name="special_discount" sum="special_discount"/>
-									<field name="tax" sum="tax"/>
-									<field name="p_f" sum="p_f"/>
-									<field name="freight" sum="freight"/>
-									<field name="insurance" sum="insurance"/>
+									<field name="sam_ratio"/>
+									<field name="sam_ratio_tot" string="Works Value"/>
+									<field name="dealer_discount"/>
+									<field name="special_discount"/>
+									<field name="p_f"/>
+									<field name="freight"/>
+									<field name="insurance"/>
+									<field name="customer_discount"/>
+									<field name="tax"/>
 									<field name="tot_price" sum="total_price"/>
 									<field name="net_amount" sum="net_amount"/>
 								</tree>
