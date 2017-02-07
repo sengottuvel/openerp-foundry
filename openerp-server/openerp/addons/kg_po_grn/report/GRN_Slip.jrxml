@@ -32,11 +32,13 @@ WHEN grn_line.gp_qty > 0 THEN round((grn_line.gp_qty - grn_line.gp_pending_qty):
 ELSE round((grn_line.so_qty - grn_line.so_pending_qty)::numeric,2)
 END as already_received,
 round((grn_line.po_grn_qty)::numeric,2) as current_received,
+
 CASE WHEN grn_line.po_qty > 0 THEN round((grn_line.po_pending_qty - grn_line.po_grn_qty)::numeric,2)
 WHEN grn_line.gp_qty > 0 THEN round((grn_line.gp_pending_qty - grn_line.po_grn_qty)::numeric,2)
 ELSE round((grn_line.so_pending_qty - grn_line.po_grn_qty)::numeric,2)
 END as pending,
-STRING_AGG(wo.wo_id, ', ' ORDER BY wo.wo_id) wo_no
+STRING_AGG(wo.wo_id, ', ' ORDER BY wo.wo_id) wo_no,
+round((grn_line.reject_qty)::numeric,2) as reject_qty
 
 from po_grn_line grn_line
 
@@ -69,6 +71,7 @@ group by 1,3,4,5,6,7,8,9,10,11,12,13]]>
 		<field name="current_received" class="java.math.BigDecimal"/>
 		<field name="pending" class="java.math.BigDecimal"/>
 		<field name="wo_no" class="java.lang.String"/>
+		<field name="reject_qty" class="java.math.BigDecimal"/>
 	</subDataset>
 	<parameter name="grn_id" class="java.lang.Integer"/>
 	<parameter name="user_id" class="java.lang.Integer"/>
@@ -215,7 +218,7 @@ where grn.id in (select grn_id from tmp_kg_po_grn where user_id = $P{user_id}) a
 					<textFieldExpression><![CDATA["Inward Type"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="283" y="20" width="64" height="21"/>
+					<reportElement x="283" y="20" width="53" height="21"/>
 					<box topPadding="2" leftPadding="0">
 						<topPen lineWidth="0.5"/>
 					</box>
@@ -225,7 +228,7 @@ where grn.id in (select grn_id from tmp_kg_po_grn where user_id = $P{user_id}) a
 					<textFieldExpression><![CDATA["Requested"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="347" y="20" width="75" height="21"/>
+					<reportElement x="336" y="20" width="53" height="21"/>
 					<box topPadding="2" leftPadding="0">
 						<topPen lineWidth="0.5"/>
 					</box>
@@ -235,7 +238,7 @@ where grn.id in (select grn_id from tmp_kg_po_grn where user_id = $P{user_id}) a
 					<textFieldExpression><![CDATA["Already"+"\n"+"Received"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="422" y="20" width="75" height="21"/>
+					<reportElement x="389" y="20" width="67" height="21"/>
 					<box topPadding="2" leftPadding="0">
 						<topPen lineWidth="0.5"/>
 					</box>
@@ -245,7 +248,7 @@ where grn.id in (select grn_id from tmp_kg_po_grn where user_id = $P{user_id}) a
 					<textFieldExpression><![CDATA["Current"+"\n"+"Received"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="497" y="20" width="64" height="21"/>
+					<reportElement x="456" y="20" width="55" height="21"/>
 					<box topPadding="2" leftPadding="0">
 						<topPen lineWidth="0.5"/>
 					</box>
@@ -263,6 +266,16 @@ where grn.id in (select grn_id from tmp_kg_po_grn where user_id = $P{user_id}) a
 						<font size="8" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Wo.No."]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="511" y="20" width="50" height="21"/>
+					<box topPadding="2" leftPadding="0">
+						<topPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="8" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Rejected"]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupHeader>
@@ -400,7 +413,7 @@ where grn.id in (select grn_id from tmp_kg_po_grn where user_id = $P{user_id}) a
 								<textFieldExpression><![CDATA[$F{uom}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="346" y="0" width="75" height="20" isPrintWhenDetailOverflows="true"/>
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="336" y="0" width="53" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="2">
 									<topPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -411,7 +424,7 @@ where grn.id in (select grn_id from tmp_kg_po_grn where user_id = $P{user_id}) a
 								<textFieldExpression><![CDATA[$F{already_received}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="282" y="0" width="64" height="20" isPrintWhenDetailOverflows="true"/>
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="282" y="0" width="54" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="2">
 									<topPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -422,7 +435,7 @@ where grn.id in (select grn_id from tmp_kg_po_grn where user_id = $P{user_id}) a
 								<textFieldExpression><![CDATA[$F{requested}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="421" y="0" width="75" height="20" isPrintWhenDetailOverflows="true"/>
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="389" y="0" width="67" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="2">
 									<topPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -433,7 +446,7 @@ where grn.id in (select grn_id from tmp_kg_po_grn where user_id = $P{user_id}) a
 								<textFieldExpression><![CDATA[$F{current_received}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="496" y="0" width="64" height="20" isPrintWhenDetailOverflows="true"/>
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="456" y="0" width="55" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="2">
 									<topPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -464,6 +477,17 @@ where grn.id in (select grn_id from tmp_kg_po_grn where user_id = $P{user_id}) a
 									<font size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{wo_no}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="511" y="0" width="49" height="20" isPrintWhenDetailOverflows="true"/>
+								<box topPadding="2">
+									<topPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{reject_qty}]]></textFieldExpression>
 							</textField>
 						</jr:listContents>
 					</jr:list>
