@@ -150,11 +150,11 @@
 				<form string="Work Order Details Entry Form">
 					<group>
 						<group>
-							<field name="order_no" readonly="1"/>
+							<field name="order_no" required="1"/>
 							<field name="pump_model_id" attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
 							<field name="order_ref_no" invisible="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="moc_construction_id" on_change="onchange_moccons_name(moc_construction_id)" required="1"  attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
-							<field name="qap_plan_id" attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
+							<field name="qap_plan_id"/>
 							<field name="rpm"   attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
 							<field name="bed_length"  invisible="1"/>
 							<field name="motor_power"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
@@ -185,7 +185,7 @@
 							<field name="shaft_ext" invisible="1"/>
 							<field name="trimming_dia"/>
 							<field name="cc_drill"/>
-							<field name="delivery_date" on_change="onchange_delivery_date(delivery_date)"  attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
+							<field name="delivery_date" on_change="onchange_delivery_date(delivery_date)"/>
 							<field name="note" string="Remarks"  attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
 						</group>
 					</group>
