@@ -6,10 +6,10 @@
 	<!-- Form View Start -->
 
 		<record id="t_form_v_ms_stores_list" model="ir.ui.view">
-			<field name="name">MS Stores List Form</field>
+			<field name="name">Finished part stores List Form</field>
 			<field name="model">kg.ms.stores</field>
 			<field name="arch" type="xml">
-				<form string="MS Stores List" version="7.0" create="false">
+				<form string="Finished part stores List" version="7.0" create="false">
 					<header>
 						<button name="assembly_update" string="Assembly Update" type="object"/>
 					</header>					
@@ -75,7 +75,7 @@
 			<field name="model">kg.ms.stores</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<tree toolbar="True" string="MS Stores List Tree" create="false">					
+				<tree toolbar="True" string="Finished part stores List Tree" create="false">					
 					<field name="name" invisible="1"/>
 					<field name="order_no"/>
 					<field name="order_category" invisible="1"/>
@@ -97,10 +97,10 @@
 	<!-- Search View Start -->
 
 		<record id="t_search_v_ms_stores_list" model="ir.ui.view">
-            <field name="name">MS Stores List Search</field>
+            <field name="name">Finished part stores List Search</field>
             <field name="model">kg.ms.stores</field>
             <field name="arch" type="xml">
-                <search string="MS Stores List Search">
+                <search string="Finished part stores List Search">
 					
 					<field name="item_code" string="Item Code"  filter_domain="[('item_code','ilike',self)]" />
 					<field name="item_name" string="Item Name"  filter_domain="[('item_name','ilike',self)]" />
@@ -130,7 +130,7 @@
 		
 		
 		<record id="tma_ms_stores_list" model="ir.actions.act_window">
-			<field name="name">MS Stores List</field>
+			<field name="name">Finished part stores List</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.ms.stores</field>
 			<field name="view_type">form</field>
@@ -188,7 +188,7 @@
 	
 	<!-- Menu Item Starts Here -->
 	
-	<menuitem name="MS Store Process" id="tpm_ms_store_process" parent="kg_operation_master.mpm_crm" sequence="5"/>
+	<menuitem name="Finished part stores process" id="tpm_ms_store_process" parent="kg_operation_master.mpm_crm" sequence="5"/>
 			
 		<menuitem action="tma_ms_stores_list" id="tam_ms_stores_list" parent="tpm_ms_store_process" sequence="1" />
 		
