@@ -524,7 +524,10 @@ class kg_ms_stores(osv.osv):
 							if order_bom_rec.pattern_id.need_hydro_test == True:
 								hs_flag = True
 								
-							if not db_flag == False and hs_flag == False:
+							print "db_flag",db_flag
+							print "hs_flag",hs_flag
+								
+							if db_flag == True or hs_flag == True:
 							
 								part_qap_vals = {
 									
