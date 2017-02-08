@@ -848,7 +848,7 @@ class kg_part_qap(osv.osv):
 		if actual_weight == None:
 			raise osv.except_osv(_('Warning !!'),
 				_('Actual weight should be with in Min and Max weight. !!'))
-		if rec.db_actual_unbal_weight <= 0:
+		if rec.db_actual_unbal_weight < 0:
 			raise osv.except_osv(_('Warning !!'),
 				_('Actual weight should be greater than zero. !!'))
 		if rec.db_state == 'pending':
@@ -873,7 +873,7 @@ class kg_part_qap(osv.osv):
 		### Validations  ###
 		### Actual weight checking ###	
 		
-		if rec.hs_actual_unbal_weight <= 0.00:
+		if rec.hs_actual_unbal_weight < 0.00:
 			raise osv.except_osv(_('Warning !!'),
 				_('Actual weight should be greater than zero. !!'))
 				

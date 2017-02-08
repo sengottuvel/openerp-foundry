@@ -91,7 +91,7 @@ class kg_assembly_inward(osv.osv):
 		'runout_test_shift_id': fields.many2one('kg.shift.master','Shift'),
 		'runout_test_done_by': fields.many2one('hr.employee','Done By'),
 		
-		'mech_assembly_state': fields.selection([('pending','Pending'),('completed','Completed')],'State', readonly=True),
+		'mech_assembly_state': fields.selection([('pending','Pending'),('completed','Completed'),('nill','NILL')],'State', readonly=True),
 		'mech_assembly_date': fields.date('Date'),
 		'mech_assembly_shift_id': fields.many2one('kg.shift.master','Shift'),
 		'mech_assembly_done_by': fields.many2one('hr.employee','Done By'),
