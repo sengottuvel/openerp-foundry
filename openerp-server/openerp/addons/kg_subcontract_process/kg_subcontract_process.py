@@ -424,7 +424,7 @@ class kg_subcontract_wo(osv.osv):
 			for line_item in entry.line_ids:
 				print"line_itemline_itemline_item",line_item.line_ids		
 						
-				dc_line = dc_obj_line.create(cr,uid,{'header_id':dc_id,'sc_id':line_item.sc_id.id,'qty':line_item.qty,'sc_dc_qty':line_item.qty,		
+				dc_line = dc_obj_line.create(cr,uid,{'header_id':dc_id,'sc_id':line_item.sc_id.id,'qty':line_item.qty,'sc_dc_qty':line_item.qty,'sc_wo_qty':line_item.qty,		
 				'actual_qty':line_item.actual_qty,'sc_wo_line_id': line_item.id,'entry_mode': 'from_wo','pending_qty':line_item.qty})		
 				for line in line_item.line_ids:	
 					print"line.operation_id.id",line.operation_id.id
