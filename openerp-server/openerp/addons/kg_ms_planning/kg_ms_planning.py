@@ -143,9 +143,9 @@ class kg_ms_daily_planning(osv.osv):
 						raise osv.except_osv(_('Warning!'),
 									_('System not allow to save Zero values !!'))
 							
-				#~ if (line_item.inhouse_qty + line_item.sc_qty) > line_item.schedule_qty:
-					#~ raise osv.except_osv(_('Warning!'),
-								#~ _('In house qty and sc qty should not be more than Required Qty !!! '))
+				if (line_item.inhouse_qty + line_item.sc_qty) > line_item.schedule_qty:
+					raise osv.except_osv(_('Warning!'),
+								_('In house qty and sc qty should not be more than Required Qty !!! '))
 								
 				ms_obj.write(cr, uid, line_item.ms_id.id,{'ms_plan_qty':line_item.ms_id.ms_plan_qty + (line_item.inhouse_qty + line_item.sc_qty)})
 				

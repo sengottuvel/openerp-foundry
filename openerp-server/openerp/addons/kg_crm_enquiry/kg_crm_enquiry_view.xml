@@ -10,7 +10,8 @@
 			<field name="arch" type="xml">
 				<form string="CRM Enquiry" version="7.0">
 					<header>
-						<button name="entry_confirm" type="object" string="Process Offer" states="draft" class="oe_highlight"/>
+						<button name="entry_confirm" type="object" string="Process Offer" states="draft" class="oe_highlight" invisible="1"/>
+						<button name="prime_cost_update" type="object" string="Process Offer" states="draft" class="oe_highlight"/>
 						<button name="entry_call_back" type="object" string="Call Back" states="draft" class="oe_highlight"/>
 						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
 						<button name="entry_revision" type="object" string="Create Revision" attrs="{'invisible': [('state','not in',('moved_to_offer'))]}" class="oe_highlight"/>
@@ -85,7 +86,7 @@
 						</group>
 						
 						<group string="Pump/Spare Details">
-							<field name="ch_line_ids" colspan="4" nolabel="1" context="{'market_division':market_division,'purpose_categ':purpose,'temperature': 'normal','flange_type': 'standard','load_bom':False,}">
+							<field name="ch_line_ids" colspan="4" nolabel="1" context="{'market_division':market_division,'purpose_categ':purpose,'temperature': 'normal','flange_type': 'standard','load_bom':False,}" widget="one2many_selectable">
 								<tree string="Pump History">
 									<field name="equipment_no" required="1"/>
 									<field name="description" required="1"/>
@@ -270,6 +271,7 @@
 								<field name="pump_id" on_change="onchange_pumpmodel(pump_id,market_division,suction_pressure_kg,discharge_pressure_kg,purpose_categ)" attrs="{'required':[('purpose_categ','in',('pump'))],'readonly':[('load_bom','=',True)]}"/>
 								<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 								<field name="pumpseries_id" on_change="onchange_pumpseries(pumpseries_id,flange_standard,flange_type)" attrs="{'required':[('purpose_categ','in',('pump'))],'readonly':[('load_bom','=',True)]}"/>
+								<field name="qap_plan_id"/>
 								<field name="del_pipe_size"/>
 								<field name="pre_suppliy_ref"/>
 								<field name="shaft_sealing"/>
@@ -425,6 +427,7 @@
 					<field name="wo_no" attrs="{'required':[('purpose_categ','=','spare')],'readonly':[('spare_load_bom','=',True)],'invisible':[('purpose_categ','!=','spare')]}" on_change = "onchange_wo(wo_no)"/>
 					<field name="spare_pump_id" on_change="onchange_spare_pump_id(spare_pump_id,purpose_categ)" attrs="{'readonly':[('spare_load_bom','=',True)],'required':[('purpose_categ','in',('spare','access'))]}"/>
 					<field name="spare_pumpseries_id" on_change="onchange_spare_pumpseries_id(spare_pumpseries_id,purpose_categ)" attrs="{'readonly':[('spare_load_bom','=',True)],'required':[('purpose_categ','in',('spare','access'))]}"/>
+					<field name="spare_qap_plan_id"/>
 				</group>
 				<group>
 					<!--<field name="wo_line_id" domain="[('partner_id','=',parent.customer_id),('order_category','=','spare'),('state','=','confirmed')]"/>-->
@@ -521,7 +524,7 @@
 							<group colspan="4">
 								<group>
 									<field name="access_categ_id" on_change="onchange_access_id(access_categ_id,access_id)" required="1" attrs="{'readonly':[('load_access','=',True)]}"/>
-									<field name="access_id" required="1" attrs="{'readonly':[('load_access','=',True),('access_categ_id','=',False)]}"/>
+									<field name="access_id" required="1" attrs="{'readonly':['|',('load_access','=',True),('access_categ_id','=',False)]}"/>
 									<field name="moc_id" required="1" attrs="{'readonly':[('load_access','=',True)]}"/>
 								</group>
 								<group>

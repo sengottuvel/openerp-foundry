@@ -10,7 +10,8 @@
 			<field name="arch" type="xml">
 				<form string="Primecost View" version="7.0" delete="false">
 					<header>
-						<button name="entry_update" type="object" string="Update" states="draft" class="oe_highlight"/>
+						<button name="entry_update" type="object" string="Update" states="draft" class="oe_highlight" invisible="1"/>
+						<button name="prime_cost_update" type="object" string="Update" class="oe_highlight"/>
 <!--					<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>-->
 					</header>
 						<group>

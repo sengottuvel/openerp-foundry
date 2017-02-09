@@ -1053,7 +1053,46 @@ class kg_primecost_view(osv.osv):
 							#~ 'moc_id': moc_id,
 										
 		return {'value': {'line_ids': fou_vals,'line_ids_a': ms_vals,'line_ids_b': bot_vals}}
-		
+	
+	def prime_cost_update(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
+		if entry.state == 'draft':
+			prime_cost = 0.0
+			crm_obj = self.pool.get('kg.crm.enquiry')
+			if entry.line_ids:
+				prime_cost = 0
+				for foundry_item in entry.line_ids:
+					if foundry_item.is_applicable == True:
+						fou_prime_cost = crm_obj._prime_cost_calculation(cr,uid,'foundry',foundry_item.pattern_id.id,
+						0,0,entry.moc_const_id.id,foundry_item.moc_id.id,0)
+						self.pool.get('ch.primecost.view.fou').write(cr,uid,foundry_item.id,{'prime_cost':fou_prime_cost * foundry_item.qty })
+						prime_cost += fou_prime_cost * foundry_item.qty
+			
+			if entry.line_ids_a:
+				prime_cost = 0
+				for ms_item in entry.line_ids_a:
+					if ms_item.is_applicable == True:
+						ms_prime_cost = crm_obj._prime_cost_calculation(cr,uid,'ms',0,
+						ms_item.ms_id.id,0,entry.moc_const_id.id,ms_item.moc_id.id,0)
+						self.pool.get('ch.primecost.view.ms').write(cr,uid,ms_item.id,{'prime_cost':ms_prime_cost * ms_item.qty})
+						prime_cost += ms_prime_cost * ms_item.qty
+						
+			if entry.line_ids_b:
+				prime_cost = 0
+				for bot_item in entry.line_ids_b:
+					if bot_item.is_applicable == True:
+						if bot_item.flag_is_bearing == True:
+							if not bot_item.brand_id:
+								raise osv.except_osv(_('Warning!'),
+									_('%s You cannot save without Brand'%(bot_item.bot_id.code)))
+						bot_prime_cost = crm_obj._prime_cost_calculation(cr,uid,'bot',0,
+						0,bot_item.bot_id.id,entry.moc_const_id.id,bot_item.moc_id.id,0)
+						self.pool.get('ch.primecost.view.bot').write(cr,uid,bot_item.id,{'prime_cost':bot_prime_cost * bot_item.qty})
+						prime_cost += bot_prime_cost * bot_item.qty
+				
+			self.write(cr, uid, ids, {'confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		return True
+			
 	def entry_update(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'draft':
