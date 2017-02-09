@@ -13,9 +13,9 @@
 					<button name="approve_contract" string="Approve" type="object" class="oe_highlight" position="replace">
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
-						<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</button>
 					
 					<field name="employee_id" position="replace">

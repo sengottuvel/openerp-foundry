@@ -24,6 +24,7 @@
 								<field name="monthly_per_hrs" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"  required="1"/>
 								<field name="attnd_intensive" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"  required="1"/>
 								<field name="bonus_categ" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"  required="1"/>
+								<field name="no_of_days_wage" attrs="{'invisible':[('bonus_categ','!=','attendance')],'required':[('bonus_categ','=','attendance')],'readonly': [('state','in',['approved','reject','cancel'])]}"  required="1"/>
 							</group>
 							<group>
 								<field name="code" class="aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>

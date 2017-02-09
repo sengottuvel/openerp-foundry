@@ -86,8 +86,8 @@ class kg_employee_category(osv.osv):
 		'max_late_count':fields.integer('Maximum Late in Count'),	
 		'attnd_intensive':fields.float('100% Attn. Incentive'),	
 		'driver_batta':fields.float('Driver Batta(Per Day)'),	
-		'bonus_categ': fields.selection([('turn_over','Turn Over'),('fixed','Fixed'),('based_on_attnd','Based On Attendance'),('yrs_of_service','Year Of Service'),('not_applicable','Not Applicable')],'Bonus Category'),
-		
+		'bonus_categ': fields.selection([('turn_over','Turn Over'),('attendance','Attendance'),('yrs_of_service','Year Of Service'),('not_applicable','Not Applicable')],'Bonus Category'),
+		'no_of_days_wage':fields.integer('No Of Days Wages'),	
 		## Child Tables Declaration		
 		
 		'line_id_1': fields.one2many('ch.special.incentive.policy', 'header_id_1','Special Incentive Policy'),
@@ -183,6 +183,9 @@ class kg_employee_category(osv.osv):
 		if rec.driver_batta < 0:
 			raise osv.except_osv(_('Warning!'),
 						_('Negative Values are not allowed in Driver Batta(Per Day)	 !!'))
+		if rec.no_of_days_wage <= 0 :
+			raise osv.except_osv(_('Warning!'),
+						_('No of Days Wages should not be zero!!'))
 												
 		amt = 0.00
 		if rec.line_id_3:
@@ -263,7 +266,7 @@ class ch_special_incentive_policy(osv.osv):
 		'header_id_1': fields.many2one('kg.employee.category','Header_id_1'),
 		'start_value': fields.float('Starting Value(In Lakhs)'),	
 		'end_value': fields.float('Ending Value(In Lakhs)'),	
-		'type': fields.selection([('fixed','Fixed'),('percentage','Percentage')],'Type'),	
+		'type': fields.selection([('fixed','Fixed'),('per_lhk_fixed','Per Lakh - Fixed'),('percentage','Percentage')],'Type'),	
 		'incentive_value': fields.float('Value'),	
 		'leave_consider': fields.integer('Leave Consideration(days)'),	
 		}	

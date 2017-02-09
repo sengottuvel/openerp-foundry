@@ -52,7 +52,7 @@ class kg_contract(osv.osv):
 	
 		### Basic Info
 
-		'code': fields.char('Code', size=4, required=True),		
+		'code': fields.char('Code', size=10, required=True),		
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
@@ -148,7 +148,7 @@ class kg_contract(osv.osv):
 		
 	def entry_draft(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.state =='cancel':
+		if rec.state =='approved':
 			self.write(cr, uid, ids, {'state': 'draft'})
 		return True
 
@@ -194,18 +194,49 @@ class kg_contract(osv.osv):
 		amt = 0.00
 		per = 0.00
 		if rec.line_id_salary:
-			for line in rec.line_id_salary:
-				if line.amt_type == 'percentage':
-					per += line.salary_amt 
-				if line.amt_type == 'fixed':
-					amt += line.salary_amt 
-			if amt > rec.gross_salary:
-				raise osv.except_osv(_('Warning!'),
-						_('Salary Break ups are mismatching with Gross Salary !!'))
-			if per < 100:
-				raise osv.except_osv(_('Warning!'),
+			cr.execute('''select sum(salary_amt) from ch_kg_contract_salary where header_id_salary = %s and amt_type = 'percentage' '''%(rec.id))
+			data = cr.dictfetchall()
+			print "*************************************",data[0]['sum']
+			if data[0]['sum'] != None:
+				if data[0]['sum'] != 100.0:
+					raise osv.except_osv(_('Warning!'),
 						_('Total Percentage Break ups should 100 !!'))
-				return False
+					
+					
+			cr.execute('''select sum(ch.salary_amt)
+					from
+					hr_contract cont
+					left join ch_kg_contract_salary ch on (ch.header_id_salary=cont.id)
+					where cont.id = %s and ch.amt_type = 'fixed' '''%(rec.id))
+			data_1 = cr.dictfetchall()
+			print"data_1data_1data_1",data_1
+			print"data_1data_1data_1",type(data_1[0]['sum'])
+			print"data_1data_1data_1",type(rec.gross_salary)
+			if data_1[0]['sum'] != None:
+				print"data_1[0]['sum'] -------------",data_1[0]['sum'] ,type(data_1[0]['sum'] )
+				print"rec.gross_salary -------------",rec.gross_salary,type(rec.gross_salary)
+				if data_1[0]['sum'] == rec.gross_salary:
+					print"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+					pass
+				elif data_1[0]['sum'] != rec.gross_salary:
+					print"bbbbbbbbbbbbbbbbbbbb"
+					raise osv.except_osv(_('Warning!'),
+						_('Salary Break ups are mismatching with Gross Salary !!'))
+						
+			#~ for line in rec.line_id_salary:
+				#~ if line.amt_type == 'percentage':
+					#~ amt += line.salary_amt 
+				#~ if line.amt_type == 'fixed':
+					#~ amt += line.salary_amt
+			#~ if amt != 100 :
+				#~ print "*************************************",per
+				#~ raise osv.except_osv(_('Warning!'),
+						#~ _('Total Percentage Break ups should 100 !!'))
+			#~ if amt != rec.gross_salary:
+				#~ raise osv.except_osv(_('Warning!'),
+						#~ _('Salary Break ups are mismatching with Gross Salary !!'))
+		
+				#~ return False
 		return True
 
 		
@@ -279,28 +310,32 @@ class kg_contract(osv.osv):
 					
 				self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S'),'gross_salary':gross_amt,'increament_amt':0})
 				
-				leave_alloc_vals={
-								'employee_id':rec.employee_id.id,
-								'emp_code':rec.code,
-								'emp_categ_id':rec.emp_categ_id.id,
-								'valid_from':rec.ap_rej_date,
-								'valid_to':date(date.today().year, 12, 31),
-								}
-				leave_alloc_header = leave_alloc_obj.create(cr,uid,leave_alloc_vals)				
-				leave_alloc_obj_1 = self.pool.get('kg.leave.allocation')
-				leave_alloc_obj_line = self.pool.get('ch.leave.allocation')
-				emp_categ_line_1 = emp_categ_obj.browse(cr,uid,rec.emp_categ_id.id)
-				emp_leave_1 = leave_alloc_obj_1.search(cr,uid,[('employee_id','=',rec.employee_id.id)])
-				for i in emp_categ_line_1.line_id_4:
-					leave_allo_vals = {
+				leave_alloc_ids = leave_alloc_obj.search(cr,uid,[('employee_id','=',rec.employee_id.id)])
+				if leave_alloc_ids:
+					pass
+				else:
+					leave_alloc_vals={
+									'employee_id':rec.employee_id.id,
+									'emp_code':rec.code,
+									'emp_categ_id':rec.emp_categ_id.id,
+									'valid_from':time.strftime('%Y-%m-%d'),
+									'valid_to':date(date.today().year, 12, 31),
+									}
+					leave_alloc_header = leave_alloc_obj.create(cr,uid,leave_alloc_vals)				
+					leave_alloc_obj_1 = self.pool.get('kg.leave.allocation')
+					leave_alloc_obj_line = self.pool.get('ch.leave.allocation')
+					emp_categ_line_1 = emp_categ_obj.browse(cr,uid,rec.emp_categ_id.id)
+					emp_leave_1 = leave_alloc_obj_1.search(cr,uid,[('employee_id','=',rec.employee_id.id)])
+					for i in emp_categ_line_1.line_id_4:
+						leave_allo_vals = {
 
-						'header_id_1': emp_leave_1[0],
-						'leave_type_id':i.leave_type_id.id,
-						'no_of_days':i.no_of_days,
-						'balc_days':i.no_of_days,
+							'header_id_1': emp_leave_1[0],
+							'leave_type_id':i.leave_type_id.id,
+							'no_of_days':i.no_of_days,
+							'balc_days':i.no_of_days,
 
-					}
-					leave_allocation = leave_alloc_obj_line.create(cr,uid,leave_allo_vals)
+						}
+						leave_allocation = leave_alloc_obj_line.create(cr,uid,leave_allo_vals)
 		
 		return True
 		
@@ -325,7 +360,7 @@ class kg_contract(osv.osv):
 			
 	_constraints = [
 	
-		(_gross_salary, 'The break ups are not matching the gross salary !!!', ['  ']),		
+		#~ (_gross_salary, 'The break ups are not matching the gross salary !!!', ['  ']),		
 		(child_dups_val, 'The break ups are not matching the gross salary !!!', ['  ']),		
 		(_salary_brk_validation, 'The break ups are not matching the gross salary !!!', ['  ']),		
 		#~ (_gross_salary_check, 'System will not allow to process with zero or Negative Values gross salary !!!', ['  ']),		
