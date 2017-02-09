@@ -14,7 +14,6 @@
 						<button name="wo_creation" type="object" string="WO Creation" states="moved_to_offer" class="oe_highlight"/>
 						<button name="entry_revision" type="object" string="Create Revision" states="moved_to_offer,wo_created" class="oe_highlight"/>
 						<button name="offer_copy" type="object" states="moved_to_offer,wo_created" string="Offer Copy" class="oe_highlight"/>
-						<button name="term_copy" type="object" string="Terms Copy" class="oe_highlight"/>
 					</header>
 						<group>
 							<group>
@@ -40,7 +39,6 @@
 								<field name="location" required="1"/>	
 								<field name="state" style="width: 30%%" class="att_state_change" readonly="1"/>
 								<field name="rep_data" readonly="1" width="100" filename="offer_copy"/>
-								<field name="term_data" readonly="1" width="100" filename="term_copy"/>
 							</group>	
 						</group>
 						<group class="oe_subtotal_footer oe_right">
@@ -182,21 +180,6 @@
 								<field name="access_net_amount" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
 							</group>
 -->
-						</group>
-						<group>
-							<group>
-								<field name="load_term" on_change="onchange_term(load_term,line_term_ids)"/>
-							</group>
-							<group>
-							</group>
-						</group>
-						<group string="Terms">
-							<field name="line_term_ids" colspan="4" nolabel="1" attrs="{'readonly':[('state','!=','draft')]}">
-								<tree string="Term History" editable="top">
-									<field name="term_id" required="1" on_change="onchange_term(term_id)"/>
-									<field name="term" required="1"/>
-								</tree>
-							</field>
 						</group>
 				</form>
 			</field>

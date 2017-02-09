@@ -85,11 +85,13 @@ class kg_crm_offer(osv.osv):
 		'service_det': fields.char('Service Details'),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD'),('export','Export')],'Location'),
 		'offer_copy': fields.char('Offer Copy'),
-		'term_copy': fields.char('Terms Copy'),
 		'revision': fields.integer('Revision'),
 		'wo_flag': fields.boolean('WO Flag'),
-		'load_term': fields.boolean('Terms Applicable'),
 		'revision_remarks': fields.text('Revision Remarks'),
+		
+		'line_pump_ids': fields.one2many('ch.pump.offer', 'header_id', "Pump Offer"),
+		'line_spare_ids': fields.one2many('ch.spare.offer', 'header_id', "Spare Offer"),
+		'line_accessories_ids': fields.one2many('ch.accessories.offer', 'header_id', "Accessories Offer"),
 		
 		#~ 'ch_line_ids': fields.one2many('ch.kg.crm.pumpmodel', 'header_id', "Pump/Spare Details"),
 		'due_date': fields.date('Due Date',required=True),
@@ -150,13 +152,6 @@ class kg_crm_offer(osv.osv):
 		
 		'offer_net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Offer Amount',multi="sums",store=True),
 		
-		## Child Tables Declaration
-		
-		'line_pump_ids': fields.one2many('ch.pump.offer', 'header_id', "Pump Offer"),
-		'line_spare_ids': fields.one2many('ch.spare.offer', 'header_id', "Spare Offer"),
-		'line_accessories_ids': fields.one2many('ch.accessories.offer', 'header_id', "Accessories Offer"),
-		'line_term_ids': fields.one2many('ch.term.offer', 'header_id', "Term Offer"),
-		
 		### Entry Info ####
 		
 		'active': fields.boolean('Active'),
@@ -173,7 +168,6 @@ class kg_crm_offer(osv.osv):
 		# Offer Copy 
 		
 		'rep_data':fields.binary("Offer Copy",readonly=True),
-		'term_data':fields.binary("Terms Copy",readonly=True),
 		
 	}
 	
@@ -283,7 +277,6 @@ class kg_crm_offer(osv.osv):
 		if entry.state == 'moved_to_offer':
 			wo_id = self.pool.get('kg.work.order').create(cr,uid,{'order_category': entry.purpose,
 																  'name': '',
-																  'order_priority': '',
 																  'offer_no': entry.name,
 																  'location': entry.location,
 																  'entry_mode': 'auto',
@@ -377,19 +370,19 @@ class kg_crm_offer(osv.osv):
 			#~ }			
 			#~ 
 		#~ return pump_vals
-		
+			
 	def _prepare_pump_details(self,cr,uid,wo_id,entry,enquiry_line_id,off_line_id,purpose,context=None):	
 		print"iteiteitieiteitieit",enquiry_line_id
 		item = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,enquiry_line_id)
 		#~ purpose = item.purpose_categ
 		qty = 1
 		moc_const_id = m_power = setting_height = 0
-		pump_model_type = speed_in_rpm = bush_bearing = shaft_sealing = lubrication_type = rpm = qap_plan_id = ''
-		pump_model_type = item.pump_model_type
+		pump_model_type = speed_in_rpm = bush_bearing = shaft_sealing = lubrication_type = rpm = ''
 		if purpose == 'pump':
 			qty = item.qty
 			moc_const_id = item.moc_const_id.id
 			pump_id = item.pump_id.id
+			pump_model_type = item.pump_model_type
 			speed_in_rpm = item.speed_in_rpm
 			if item.push_bearing == 'grease_bronze':
 				 bush_bearing = 'grease'
@@ -399,7 +392,6 @@ class kg_crm_offer(osv.osv):
 				 bush_bearing = 'cut_less_rubber'
 			m_power = item.mototr_output_power_rated
 			setting_height = float(item.setting_height)
-			qap_plan_id = item.qap_plan_id.id
 			if item.shaft_sealing == 'gld_packing_tiga':
 				 shaft_sealing = 'g_p'
 			elif item.shaft_sealing == 'mc_seal':
@@ -417,7 +409,6 @@ class kg_crm_offer(osv.osv):
 			purpose == 'spare'
 			moc_const_id = item.spare_moc_const_id.id
 			pump_id = item.spare_pump_id.id
-			qap_plan_id = item.spare_qap_plan_id.id
 		elif purpose == 'access':
 			purpose == 'access'
 			if item.purpose_categ == 'pump':
@@ -431,7 +422,6 @@ class kg_crm_offer(osv.osv):
 			'header_id': wo_id,
 			'pump_model_id': pump_id,
 			'flange_standard': item.flange_standard.id,
-			'qap_plan_id': qap_plan_id,
 			'order_category': purpose,
 			'moc_construction_id': moc_const_id,
 			'unit_price': 1,
@@ -711,12 +701,12 @@ class kg_crm_offer(osv.osv):
 		style8 = xlwt.easyxf('font: height 200,color_index black;' 'align: wrap on, vert centre, horiz centre;''borders: left thin, right thin, top thin, bottom thin') 
 		
 		
-		img = Image.open('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.png')
+		img = Image.open('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.png')
 		r, g, b, a = img.split()
 		img = Image.merge("RGB", (r, g, b))
-		img.save('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp')
-		img = Image.open('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.png')
-		img.save('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp')
+		img.save('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp')
+		img = Image.open('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.png')
+		img.save('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp')
 		
 		#~ r, g, b, a = img.split()
 		#~ img = Image.merge("RGB", (r, g, b))
@@ -805,8 +795,8 @@ class kg_crm_offer(osv.osv):
 				logo_size = 120
 			elif len_col >= 4:
 				logo_size = 100
-			sheet1.insert_bitmap('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
-			sheet1.insert_bitmap('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp',0,len_col,logo_size)
+			sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
+			sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp',0,len_col,logo_size)
 			#~ print"col_1",col_1
 			#~ sheet1.write(s1,col_no,str(col_1),style1)
 			col_no = col_no + 1
@@ -1485,76 +1475,7 @@ class kg_crm_offer(osv.osv):
 		report_name = 'Offer Copy' + '.' + 'xls'
 		
 		return self.write(cr, uid, ids, {'rep_data':out,'offer_copy':report_name},context=context)
-	
-	def onchange_term(self, cr, uid, ids, load_term,line_term_ids):
-		term_vals=[]
-		if line_term_ids:
-			cr.execute('''delete from ch_term_offer where header_id = %s '''%(line_term_ids[0][0]))
-		if load_term == True:
-			term_ids = self.pool.get('kg.offer.term').search(cr, uid, [('state','=','approved')])
-			if term_ids:
-				for item in term_ids:
-					term_rec = self.pool.get('kg.offer.term').browse(cr, uid, item)
-					term_vals.append({
-									'term_id': term_rec.id,
-									'term': term_rec.term,
-									})
-		return {'value': {'line_term_ids': term_vals}}
-	
-	def term_copy(self, cr, uid, ids, context={}):
-		import StringIO
-		import base64
-		try:
-			import xlwt
-		except:
-		   raise osv.except_osv('Warning !','Please download python xlwt module from\nhttp://pypi.python.org/packages/source/x/xlwt/xlwt-0.7.2.tar.gz\nand install it')
-		   
-		rec =self.browse(cr,uid,ids[0])
 		
-		record={}
-		sno=0
-		wbk = xlwt.Workbook()
-		style1 = xlwt.easyxf('font: bold on,height 240,color_index 0X36;' 'align: horiz center;''borders: left thin, right thin, top thin') 
-		style2 = xlwt.easyxf('font: height 200,color_index black;' 'align: wrap on, vert centre, horiz left;''borders: left thin, right thin, top thin, bottom thin') 
-		style3 = xlwt.easyxf('font: height 200,color_index black;' 'align: wrap on, vert centre, horiz right;') 
-		
-		s1=0
-		"""adding a worksheet along with name"""
-		sheet1 = wbk.add_sheet('Terms Copy')
-		s2=4
-		sheet1.col(0).width = 1500
-		sheet1.col(1).width = 8000
-		sheet1.col(2).width = 13000
-		
-		""" writing field headings """
-		sheet1.write_merge(s1, 0, 0, 2,"SAM Header",style1)
-		sheet1.row(0).height = 400
-		sheet1.write_merge(1,1,0,1,"Offer No: ",style2)
-		sheet1.write_merge(1,1,2,2,"Offer Date: ",style2)
-		sheet1.write_merge(2,2,0,2,"Customer Name: ",style2)
-		sheet1.write_merge(3,3,0,2,"TERMS & CONDITIONS",style1)
-		sheet1.row(3).height = 300
-		"""writing data according to query and filteration in worksheet"""
-		sno=1
-		
-		if rec.line_term_ids:
-			for item in rec.line_term_ids:
-				sheet1.write_merge(s2,s2,0,0,str(sno),style2)
-				sheet1.write_merge(s2,s2,1,1,str(item.term_id.name),style2)
-				sheet1.write_merge(s2,s2,2,2,str(item.term),style2)
-				s2+=1
-				sno = sno + 1
-		s2 = s2 + 2
-		sheet1.write_merge(s2,s2,2,2,"Authorised Signatory",style3)
-		"""Parsing data as string """
-		file_data=StringIO.StringIO()
-		o=wbk.save(file_data)		
-		"""string encode of data in wksheet"""		
-		out=base64.encodestring(file_data.getvalue())
-		"""returning the output xls as binary"""
-		report_name = 'Terms Copy' + '.' + 'xls'
-		
-		return self.write(cr, uid, ids, {'term_data':out, 'term_copy':report_name},context=context)
 		
 kg_crm_offer()
 
@@ -1929,33 +1850,3 @@ class ch_accessories_offer(osv.osv):
 	}
 	
 ch_accessories_offer()
-
-class ch_term_offer(osv.osv):
-	
-	_name = "ch.term.offer"
-	_description = "Ch Term Offer"
-	
-	_columns = {
-		
-		## Basic Info
-		
-		'header_id':fields.many2one('kg.crm.offer', 'Offer', ondelete='cascade'),
-		
-		## Module Requirement Fields
-		
-		'term_id': fields.many2one('kg.offer.term','Name'),
-		'term': fields.text('Terms'),
-		
-	}
-	
-	def onchange_term(self, cr, uid, ids, term_id, context=None):
-		value = {'term':''}
-		if term_id:
-			term_obj = self.pool.get('kg.offer.term').search(cr,uid,[('id','=',term_id)])
-			if term_obj:
-				term_rec = self.pool.get('kg.offer.term').browse(cr,uid,term_obj[0])
-				value = {'term': term_rec.term}
-		return {'value': value}
-	
-		
-ch_term_offer()
