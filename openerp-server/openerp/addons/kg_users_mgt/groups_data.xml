@@ -333,7 +333,7 @@
 			ref('kg_menus.ipm_service_indent_menu'),
 			ref('kg_menus.iam_service_indent'),
 			ref('kg_menus.ipm_purchase_indent_menu'),
-			ref('kg_menus.iam_pruchase_indent'),
+			ref('kg_purchase_indent.iam_pruchase_indent'),
 			
 			ref('kg_menus.mpm_store_master'),
 			ref('kg_depmaster.mam_depmaster_action'),
