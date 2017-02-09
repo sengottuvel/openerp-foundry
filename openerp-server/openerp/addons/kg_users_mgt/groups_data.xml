@@ -220,9 +220,9 @@
 			ref('kg_menus.ipm_service_indent_menu'),
 			ref('kg_menus.iam_service_indent'),
 			ref('kg_menus.ipm_purchase_indent_menu'),
-			ref('kg_menus.iam_pruchase_indent'),
+			ref('kg_purchase_indent.iam_pruchase_indent'),
 			ref('kg_depindent.iam_depindent_line'),
-			ref('kg_menus.iam_pruchase_indent_line'),
+			ref('kg_purchase_indent.iam_pruchase_indent_line'),
 			
 			ref('kg_menus.ppm_master_menu'),
 			ref('kg_partners.mam_supplier_master'),
