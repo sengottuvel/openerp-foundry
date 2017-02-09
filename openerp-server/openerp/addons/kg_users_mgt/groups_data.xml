@@ -461,6 +461,7 @@
 			ref('kg_pumpseries_master.mam_pumpseries_master_menu'),
 			ref('kg_flange_master.mam_flange_master_menu'),
 			ref('kg_defect_master.mam_defect_master_menu'),
+			ref('kg_offer_term.mam_offer_term'),
 			
 			ref('kg_menus.cpm_crm_enquiry_menu'),
 			ref('kg_crm_enquiry.tma_crm_enquiry_service'),
