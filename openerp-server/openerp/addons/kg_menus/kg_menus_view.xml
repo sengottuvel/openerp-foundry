@@ -299,8 +299,10 @@
 		<!--HR menus-->
 			<menuitem name="HR Master" id="menu_hr_master" sequence="91"/>
 				<menuitem name="Contributions Masters" id="menu_contribution_menu" parent="menu_hr_master" sequence="0"/>
+<!--
 					<menuitem action="kg_employee_contribution.action_employee_contribution" parent="menu_contribution_menu" id="menu_employee_contribution" sequence="1"/>
 					<menuitem action="kg_emp_contribution.action_employer_contribution" parent="menu_contribution_menu" id="menu_emp_contribution" sequence="3"/>
+-->
 			
 			<menuitem  name="General Masters" id="menu_masters_menu" parent="menu_hr_master" sequence="2"/>
 				<menuitem action="hr_payroll.action_salary_rule_form" id="menu_hr_master_ear_ded"  name="Earnings and Deduction Type" parent="menu_masters_menu" sequence="2"/>

@@ -376,46 +376,6 @@
 		</record>
 -->
 		
-		<record id="kg_hr_kg_employee_con" model="ir.model.access">
-			<field name="model_id" ref="kg_employee_contribution.model_kg_employee_contribution"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">Employee Contribution</field>
-			<field eval="0" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
-		</record>
-		
-		<record id="kg_hr_kg_employee_con_line" model="ir.model.access">
-			<field name="model_id" ref="kg_employee_contribution.model_kg_employee_contribution_line"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">Employee Contribution LIne</field>
-			<field eval="0" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
-		</record>
-		
-		<record id="kg_hr_kg_employer_con" model="ir.model.access">
-			<field name="model_id" ref="kg_emp_contribution.model_kg_emp_contribution"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">Employer Contribution</field>
-			<field eval="0" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
-		</record>
-		
-		<record id="kg_hr_kg_employer_con_line" model="ir.model.access">
-			<field name="model_id" ref="kg_emp_contribution.model_kg_emp_contribution_line"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">Employer Contribution Line</field>
-			<field eval="0" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
-		</record>
-		
 		<record id="kg_hr_kg_employee_category" model="ir.model.access">
 			<field name="model_id" ref="kg_employee_category.model_kg_employee_category"/>
 			<field eval="1" name="perm_read"/>
