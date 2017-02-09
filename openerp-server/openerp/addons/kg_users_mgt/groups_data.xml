@@ -122,6 +122,7 @@
             ref('kg_assembly.tam_assembly_inward'),
             ref('kg_assembly.tam_performance_testing'),
             ref('kg_department_issue.tam_ms_issue_line'),
+            ref('kg_department_issue.tam_bot_issue_line'),
             
             ref('kg_part_qap.tpm_qap'),
             ref('kg_part_qap.tam_dynamic_balancing'),
