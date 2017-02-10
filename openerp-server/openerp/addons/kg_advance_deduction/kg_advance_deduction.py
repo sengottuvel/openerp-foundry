@@ -54,7 +54,7 @@ class kg_advance_deduction(osv.osv):
 	
 		### Basic Info
 			
-		'code': fields.char('Code', size=4, required=True),		
+		'code': fields.char('Code', size=10, required=True),		
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
@@ -80,9 +80,9 @@ class kg_advance_deduction(osv.osv):
 		## Module Requirement Info
 		
 		'employee_id': fields.many2one('hr.employee','Employee', required=True,readonly=True),
-		'ded_type': fields.selection([('advance', 'ADVANCE'),('loan', 'Loan'),('insurance', 'Insurance'),
+		'ded_type': fields.selection([('advance', 'Advance'),('loan', 'Loan'),('insurance', 'Insurance'),
 						('tax', 'Tax'),('others','Others')], 
-						'Cumulative Deduction'),
+						'Deduction Type'),
 		'tot_amt': fields.float('Total Amount',),	
 		'allow': fields.boolean('Applicable This Month'),
 		'period': fields.integer('Repay Period'),
@@ -192,14 +192,15 @@ class kg_advance_deduction(osv.osv):
 		return {'value': value}
 		
 	def onchange_repay_amount(self,cr,uid,ids ,tot_amt, period,context = None):
-		value = {'pay_amt' : (tot_amt/period)}
+		value = {'pay_amt' : (tot_amt/period),
+						'bal_amt' : tot_amt,}
 		return {'value' : value}
 		
-	def onchange_amount(self, cr, uid,ids,tot_amt,amt_paid, context=None):
-		value = {'amt_paid': ''}
-		if tot_amt:
-			value = {'amt_paid': tot_amt}
-		return {'value': value}
+	#~ def onchange_amount(self, cr, uid,ids,tot_amt,amt_paid, context=None):
+		#~ value = {'amt_paid': ''}
+		#~ if tot_amt:
+			#~ value = {'amt_paid': tot_amt}
+		#~ return {'value': value}
 	
 	###Validations###
 	

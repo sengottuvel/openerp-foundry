@@ -15,7 +15,6 @@
 						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?" />
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 						<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<field name="state" widget="statusbar" statusbar_visible="draft,approved,confirmed,cancel,reject" statusbar_colors='{"draft":"blue","approved":"blue","confirmed":"red","cancel":"red","reject":"red"}' readonly="1"/>
 					</header>
 						<group>
 							<group>						
@@ -29,6 +28,9 @@
 								<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" readonly="1"/>
 								<field name="period" on_change="onchange_repay_amount(tot_amt,period)" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1"/>																
 								<field name="pay_amt" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1" readonly="1"/>
+								<field name="amt_paid" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1" readonly="1"/>
+								<field name="bal_amt" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1" readonly="1"/>
+								<field name="state" style="width: 30%%" class="att_state_change"/>	
 							</group>
 						</group>						
 						<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
@@ -85,6 +87,7 @@
 								toolbar="True" string="Master">				
 					<field name="employee_id"/>
 					<field name="code"/>
+					<field name="ded_type"/>
 					<field name="state"/>
 				</tree>
 			</field>
