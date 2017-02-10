@@ -47,6 +47,9 @@
 				id="grn_jasper_register_id"
 				menu="False"
 		/>
-	
+		
+		<!-- GRN Register Report-->
+		<menuitem name="GRN Register" parent="kg_menus.rpm_warehouse_reports" action="r_action_grn_reg" id="ram_grn_register_reports" sequence="1"/>
+		
     </data>
 </openerp>
