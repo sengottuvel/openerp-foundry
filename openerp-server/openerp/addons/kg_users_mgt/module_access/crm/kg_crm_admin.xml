@@ -951,6 +951,15 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
 		</record>
 		
+		<record id="t_crm_admin_kg_qap_plan" model="ir.model.access">
+			<field name="model_id" ref="kg_qap_plan.model_kg_qap_plan"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">QAP Plan</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'CRM Admin')]"/>
+		</record>
 		
     </data>
 </openerp>
