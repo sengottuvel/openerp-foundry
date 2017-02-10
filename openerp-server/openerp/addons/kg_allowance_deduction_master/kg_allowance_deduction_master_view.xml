@@ -32,14 +32,16 @@
 						<group>
 							<group>
 								<field name="name" class="aplhanum_expect" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
-								<field name="category_id" required="1" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
+								<field name="categ_type" required="1" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
 								<field name="appears_on_payslip" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
+								<field name="app_esi" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
 								
 								<field name="notes" placeholder="Add Notes for internal reference" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
 							</group>
 							<group>
 								<field name="code" required="1" class="aplhanum_expect" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
 								<field name="sequence" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
+								<field name="app_pf" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
 								<field name="state" style="width: 30%%" class="att_state_change"/>	
 							</group>
 							<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">

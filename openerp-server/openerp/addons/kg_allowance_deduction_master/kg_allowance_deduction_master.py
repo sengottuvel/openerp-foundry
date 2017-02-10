@@ -82,6 +82,9 @@ class kg_allowance_deduction_master(osv.osv):
 		
 	
 		## Module Requirement Info
+		'categ_type':fields.selection([('ALW','Allowance'),('DED','Deduction')], 'Type'),
+		'app_pf': fields.boolean('Applicable For PF'),
+		'app_esi': fields.boolean('Applicable For ESI'),
 		
 		## Child Tables Declaration
 		
