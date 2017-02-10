@@ -71,7 +71,7 @@
 	<!-- Tree View Start -->
 		
 		<record id="t_tree_v_ms_stores_list" model="ir.ui.view">
-			<field name="name">MS Stores List Tree</field>
+			<field name="name">Finished part stores List Tree</field>
 			<field name="model">kg.ms.stores</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">

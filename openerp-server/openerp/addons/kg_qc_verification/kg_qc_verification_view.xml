@@ -42,15 +42,17 @@
 					<group string="QC Updates">
 						<group>
 							<field name="stock_qty" readonly="1"/>
-							<field name="qty" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="qty" on_change="onchange_reallocate_qty(allocated_qty,qty,reject_qty)" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="reallocate_qty" readonly="1"/>
 							
 							<field name="diameter" invisible="1"/>
 							<field name="reject_remarks_id" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							
 							<field name="serial_no" readonly="1" attrs="{'invisible': [('stock_type','!=','pump')]}"/>
 						</group>											
 						<group>
 							<field name="allocated_qty" readonly="1"/>
-							<field name="reject_qty" readonly="1"/>
+							<field name="reject_qty" on_change="onchange_reallocate_qty(allocated_qty,qty,reject_qty)" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 							<field name="stock_location_id" readonly="1"/>
 							<field name="sent_to" attrs="{'invisible': [('stock_type','!=','pump')],'readonly': [('state','not in',['draft'])],'required': [('stock_type','=','pump'),('qty','!=',0)]}"/>
 							<field name="rework_qty" invisible="1"/>

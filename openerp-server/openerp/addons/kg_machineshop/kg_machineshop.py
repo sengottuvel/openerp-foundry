@@ -134,6 +134,7 @@ class kg_machineshop(osv.osv):
 		'position_id': fields.many2one('kg.position.number','Position No',domain="[('active','=','t')]"),
 		'ms_state': fields.selection([
 		('in_plan','Planning In Progress'),
+		('sent_to_sc','Sent to SC'),
 		('op_progress','Operation In Progress'),
 		('op_completed','Operations Completed'),
 		('op_rejected','Operations Rejected'),
@@ -147,6 +148,7 @@ class kg_machineshop(osv.osv):
 		'ms_plan_qty': fields.integer('Planning Completed Qty'),
 		'assembly_id': fields.integer('Assembly Inward', readonly=True),
 		'assembly_line_id': fields.integer('Assembly Inward Line', readonly=True),
+		'flag_planning': fields.boolean('Selected in planning'),
 		
 
 		### Entry Info ####
@@ -169,6 +171,7 @@ class kg_machineshop(osv.osv):
 		'crt_date':time.strftime('%Y-%m-%d %H:%M:%S'),
 		'active': True,
 		'division_id':_get_default_division,
+		'flag_planning': False
 		### MS Inward ###
 		#~ 'inward_accept_user_id':lambda obj, cr, uid, context: uid,
 		

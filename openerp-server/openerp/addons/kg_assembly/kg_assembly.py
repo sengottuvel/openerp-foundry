@@ -162,6 +162,8 @@ class kg_assembly_inward(osv.osv):
 			if entry_rec.time_taken <= 0:
 				raise osv.except_osv(_('Warning!'),
 							_('Time Taken should be greater than zero!!'))
+							
+			
 		
 			cr.execute(''' select id from ch_assembly_bom_details where state = 're_process' and header_id=%s ''',[ids[0]])
 			bom_re_process = cr.fetchone()
@@ -189,6 +191,7 @@ class kg_assembly_inward(osv.osv):
 				cr.execute(''' select id from kg_part_qap where assembly_id = %s and order_id=%s and order_line_id =%s
 					and hs_state='pending' and hs_flag='t' ''',[ids[0],entry_rec.order_id.id,entry_rec.order_line_id.id])
 				hs_test_process_rem = cr.fetchone()
+				print "ids[0],entry_rec.order_id.id,entry_rec.order_line_id.id",ids[0],entry_rec.order_id.id,entry_rec.order_line_id.id
 				print "db_test_process_rem",db_test_process_rem
 				print "hs_test_process_rem",hs_test_process_rem
 				if db_test_process_rem == None and hs_test_process_rem == None:

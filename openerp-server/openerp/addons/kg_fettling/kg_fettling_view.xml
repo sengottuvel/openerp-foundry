@@ -5865,7 +5865,8 @@
 		<menuitem action="tma_reshot_blasting" id="tam_reshot_blasting" parent="tpm_fettling_process" sequence="16"/>
 		<menuitem action="tma_knock_out_sa" id="tam_knock_out_sa" parent="tpm_fettling_process" sequence="17"/>
 		<menuitem action="tma_finish_grinding_sa" id="tam_finish_grinding_sa" parent="tpm_fettling_process" sequence="18"/>
-		<menuitem action="tma_foundry_rejection_list" id="tam_foundry_rejection_list" parent="tpm_fettling_process" sequence="19"/>
+		<menuitem action="kg_stock_inward.tma_stk_items" id="tam_stk_items" parent="tpm_fettling_process" sequence="19"/>
+		<menuitem action="tma_foundry_rejection_list" id="tam_foundry_rejection_list" parent="tpm_fettling_process" sequence="20"/>
 		
 			
 	<menuitem name="Batch Entries" id="tpm_fettling_batch_process" parent="kg_stock_inward.tpm_transactions" sequence="3"/>

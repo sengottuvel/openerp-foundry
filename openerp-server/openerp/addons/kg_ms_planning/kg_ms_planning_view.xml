@@ -10,7 +10,7 @@
 			<field name="arch" type="xml">
 				<form string="Daily Planning" version="7.0">
 					<header>
-						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 					</header>
 					<group>
 						<group>

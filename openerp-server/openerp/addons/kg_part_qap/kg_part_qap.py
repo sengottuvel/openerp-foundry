@@ -47,6 +47,7 @@ class kg_part_qap(osv.osv):
 		'flag_sms': fields.boolean('SMS Notification'),
 		'flag_email': fields.boolean('Email Notification'),
 		'flag_spl_approve': fields.boolean('Special Approval'),
+		'pump_serial_no': fields.char('Pump Serial No.'),
 		
 		### Entry Info ####
 			
@@ -80,7 +81,7 @@ class kg_part_qap(osv.osv):
 		'moc_id': fields.many2one('kg.moc.master','MOC', readonly=True,required=True),
 		'assembly_id': fields.many2one('kg.assembly.inward','Assembly', readonly=True,required=True),
 		'assembly_foundry_id': fields.many2one('ch.assembly.bom.details','Assembly Foundry', readonly=True,required=True),
-		'pump_serial_no': fields.char('Pump Serial No.'),
+		
 	
 		
 		## Dynamic Balancing ##
@@ -103,7 +104,7 @@ class kg_part_qap(osv.osv):
 		## Hydro Static Test ##
 		
 		'hs_date': fields.date('Date',required=True),   
-		'hs_pressure': fields.float('Hydro static test pressure (Kg/cm2)'),
+		'hs_pressure': fields.float('Hydro static test pressure (Kg/cm2)' ),
 		'hs_testing_time': fields.selection([('0.30','0.5'),('0.45','0.75'),('1','1'),('1.15','1.15'),('1.30','1.30'),('1.45','1.45'),('2','2')],
 						'Testing time (Hrs)'),
 		'hs_actual_unbal_weight': fields.float('Actual Un Balanced Weight in (gms)' ),
@@ -176,98 +177,90 @@ class kg_part_qap(osv.osv):
 			
 				### Checking in Stock Inward for Ready for MS ###
 				
-				cr.execute(""" select sum(available_qty) as stock_qty
+				cr.execute(""" select id,available_qty as stock_qty,stock_location_id 
 					from ch_stock_inward_details  
 					where pattern_id = %s and moc_id = %s
 					and  foundry_stock_state = 'ready_for_ms' and available_qty > 0 and stock_type = 'pattern'  """%(entry.pattern_id.id,entry.moc_id.id))
-				stock_inward_qty = cr.fetchone();
+				stock_inward_items = cr.dictfetchall();
 				
-				if stock_inward_qty:
-					if stock_inward_qty[0] != None:
-						reject_rem_qty =  reject_qty - stock_inward_qty[0]
-						
-						if reject_rem_qty <= 0:
-							reject_rem_qty = 0
-							qc_qty = reject_qty
-						else:
-							reject_rem_qty = reject_rem_qty
-							qc_qty = stock_inward_qty[0]
-							
-						
-						### Creating QC Verification ###
-						
-						qc_obj = self.pool.get('kg.qc.verification')
-						
-						### QC Sequence Number Generation  ###
-						qc_name = ''	
-						qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.qc.verification')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.entry_date))
-						qc_name = cr.fetchone();
-						
-						### Order Priority ###
-											
-						if entry.order_id.order_category in ('pump','pump_spare','project'):
-							if entry.order_id.order_priority == 'normal':
-								priority = '6'
-							if entry.order_id.order_priority == 'emergency':
-								priority = '4'
-						if entry.order_id.order_category == 'service':
-							priority = '3'
-						if entry.order_id.order_category == 'spare':
-							priority = '5'
-						qc_vals = {
+				if stock_inward_items:
+					print "reject_rem_qty",reject_rem_qty
+					if reject_rem_qty > 0:
+						for stock_item in  stock_inward_items:
+							if reject_rem_qty > 0:
+								if stock_item['stock_qty'] != None:
+									allocate_qty =  reject_rem_qty - stock_item['stock_qty']
+									
+									if allocate_qty <= 0:
+										qc_qty = reject_rem_qty
+										reject_rem_qty = 0
+									else:
+										reject_rem_qty = allocate_qty
+										qc_qty = stock_item['stock_qty']
+										
+									
+									### Creating QC Verification ###
+									
+									qc_obj = self.pool.get('kg.qc.verification')
+									
+									### QC Sequence Number Generation  ###
+									qc_name = ''	
+									qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.qc.verification')])
+									rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
+									cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.entry_date))
+									qc_name = cr.fetchone();
+									
+									### Order Priority ###
 														
-							'name': qc_name[0],
-							'division_id': entry.order_id.division_id.id,
-							'location' : entry.order_id.location,
-							'order_id': entry.order_id.id,
-							'order_line_id': entry.order_line_id.id,
-							'pump_model_id': entry.pump_model_id.id,
-							'qty' : qc_qty,
-							'stock_qty':qc_qty,		  
-							'allocated_qty':qc_qty,		
-							'state' : 'draft',
-							'order_category':entry.order_category,
-							'order_priority':priority,
-							'pattern_id' : entry.pattern_id.id,
-							'pattern_name' : entry.pattern_id.pattern_name, 
-							'moc_id' : entry.moc_id.id,
-							'stock_type': 'pattern',
-							'order_bomline_id': entry.assembly_foundry_id.order_bom_id.id
+									if entry.order_id.order_category in ('pump','pump_spare','project'):
+										if entry.order_id.order_priority == 'normal':
+											priority = '6'
+										if entry.order_id.order_priority == 'emergency':
+											priority = '4'
+									if entry.order_id.order_category == 'service':
+										priority = '3'
+									if entry.order_id.order_category == 'spare':
+										priority = '5'
+									qc_vals = {
+																	
+										'name': qc_name[0],
+										'division_id': entry.order_id.division_id.id,
+										'location' : entry.order_id.location,
+										'order_id': entry.order_id.id,
+										'order_line_id': entry.order_line_id.id,
+										'pump_model_id': entry.pump_model_id.id,
+										'qty' : qc_qty,
+										'stock_qty':qc_qty,		  
+										'allocated_qty':qc_qty,		
+										'state' : 'draft',
+										'order_category':entry.order_category,
+										'order_priority':priority,
+										'pattern_id' : entry.pattern_id.id,
+										'pattern_name' : entry.pattern_id.pattern_name, 
+										'moc_id' : entry.moc_id.id,
+										'stock_type': 'pattern',
+										'order_bomline_id': entry.assembly_foundry_id.order_bom_id.id,
+										'stock_location_id': stock_item['stock_location_id'],
+										'stock_inward_id': stock_item['id']
+												
+										}
 									
-							}
-						
-						qc_id = qc_obj.create(cr, uid, qc_vals)
-						
-						### Qty Updation in Stock Inward ###
-						
-						inward_line_obj = self.pool.get('ch.stock.inward.details')
-						
-						cr.execute(""" select id,available_qty
-							from ch_stock_inward_details  
-							where pattern_id = %s and moc_id = %s
-							and  foundry_stock_state = 'ready_for_ms' 
-							and available_qty > 0 and stock_type = 'pattern' """%(entry.pattern_id.id,entry.moc_id.id))
-							
-						stock_inward_items = cr.dictfetchall();
-						
-						stock_updation_qty = qc_qty
-						
-						for stock_inward_item in stock_inward_items:
-							if stock_updation_qty > 0:
-								
-								if stock_inward_item['available_qty'] <= stock_updation_qty:
-									stock_avail_qty = 0
-									inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty,'foundry_stock_state':'reject'})
-								if stock_inward_item['available_qty'] > stock_updation_qty:
-									stock_avail_qty = stock_inward_item['available_qty'] - stock_updation_qty
-									inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
+									qc_id = qc_obj.create(cr, uid, qc_vals)
 									
-								if stock_inward_item['available_qty'] <= stock_updation_qty:
-									stock_updation_qty = stock_updation_qty - stock_inward_item['available_qty']
-								elif stock_inward_item['available_qty'] > stock_updation_qty:
-									stock_updation_qty = 0
+									### Qty Updation in Stock Inward ###
+											
+									inward_line_obj = self.pool.get('ch.stock.inward.details')
+									
+									stock_updation_qty = qc_qty
+									
+									if stock_updation_qty > 0:
+										
+										if stock_item['stock_qty'] <= stock_updation_qty:
+											stock_avail_qty = 0
+											inward_line_obj.write(cr, uid, [stock_item['id']],{'available_qty': stock_avail_qty})
+										if stock_item['stock_qty'] > stock_updation_qty:
+											stock_avail_qty = stock_item['stock_qty'] - stock_updation_qty
+											inward_line_obj.write(cr, uid, [stock_item['id']],{'available_qty': stock_avail_qty})
 										
 							
 						
@@ -314,7 +307,7 @@ class kg_part_qap(osv.osv):
 										
 										if stock_inward_item['available_qty'] <= stock_updation_qty:
 											stock_avail_qty = 0
-											inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty,'foundry_stock_state':'reject'})
+											inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
 										if stock_inward_item['available_qty'] > stock_updation_qty:
 											stock_avail_qty = stock_inward_item['available_qty'] - stock_updation_qty
 											inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
@@ -820,7 +813,7 @@ class kg_part_qap(osv.osv):
 						
 						if stock_inward_item['available_qty'] <= stock_updation_qty:
 							stock_avail_qty = 0
-							inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty,'foundry_stock_state':'reject'})
+							inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
 						if stock_inward_item['available_qty'] > stock_updation_qty:
 							stock_avail_qty = stock_inward_item['available_qty'] - stock_updation_qty
 							inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
@@ -848,7 +841,7 @@ class kg_part_qap(osv.osv):
 		if actual_weight == None:
 			raise osv.except_osv(_('Warning !!'),
 				_('Actual weight should be with in Min and Max weight. !!'))
-		if rec.db_actual_unbal_weight < 0:
+		if rec.db_actual_unbal_weight <= 0:
 			raise osv.except_osv(_('Warning !!'),
 				_('Actual weight should be greater than zero. !!'))
 		if rec.db_state == 'pending':
@@ -873,7 +866,7 @@ class kg_part_qap(osv.osv):
 		### Validations  ###
 		### Actual weight checking ###	
 		
-		if rec.hs_actual_unbal_weight < 0.00:
+		if rec.hs_actual_unbal_weight <= 0.00:
 			raise osv.except_osv(_('Warning !!'),
 				_('Actual weight should be greater than zero. !!'))
 				

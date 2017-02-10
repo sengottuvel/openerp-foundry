@@ -47,7 +47,7 @@ class kg_ms_daily_planning(osv.osv):
 		'line_ids': fields.one2many('ch.ms.daily.planning.details', 'header_id', "Planning Details"),
 		
 		'ms_line_ids':fields.many2many('kg.machineshop','m2m_ms_planning_details' , 'planning_id', 'ms_id', 'MS Details',
-			domain="[('state','=','accept'),'&',('ms_state','=','in_plan')]"),
+			domain="[('state','=','accept'),'&',('ms_state','=','in_plan'),'&',('flag_planning','=', False)]"),
 		'flag_planning': fields.boolean('Schedule'),
 		'flag_cancel': fields.boolean('Cancellation Flag'),
 		'cancel_remark': fields.text('Cancel Remarks'),
@@ -110,6 +110,7 @@ class kg_ms_daily_planning(osv.osv):
 				}
 				
 				line_id = line_obj.create(cr, uid,vals)
+				ms_obj.write(cr, uid, item.id, {'flag_planning': True})
 				
 			self.write(cr, uid, ids, {'flag_planning': True})
 			
@@ -142,10 +143,11 @@ class kg_ms_daily_planning(osv.osv):
 					if line_item.inhouse_qty == 0 and line_item.sc_qty == 0:
 						raise osv.except_osv(_('Warning!'),
 									_('System not allow to save Zero values !!'))
-							
+												
 				if (line_item.inhouse_qty + line_item.sc_qty) > line_item.schedule_qty:
 					raise osv.except_osv(_('Warning!'),
 								_('In house qty and sc qty should not be more than Required Qty !!! '))
+								
 								
 				ms_obj.write(cr, uid, line_item.ms_id.id,{'ms_plan_qty':line_item.ms_id.ms_plan_qty + (line_item.inhouse_qty + line_item.sc_qty)})
 				
@@ -1058,6 +1060,8 @@ class kg_ms_daily_planning(osv.osv):
 							_('Kindly give SC Qty Split Ups !!'))
 							
 					if line_item.line_ids:
+						
+						ms_obj.write(cr, uid, line_item.ms_id.id,{'ms_state':'sent_to_sc'})
 						
 						pending_sc_qty = 0.00
 						sc_actual_qty = 0.00

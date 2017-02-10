@@ -402,6 +402,7 @@ class kg_fettling(osv.osv):
 		'allocation_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		
 		'ms_state': fields.selection([('created','Created'),('not_created','Not Created')],'MS Status'),
+
 		
 	
 		### Entry Info ####
@@ -496,7 +497,8 @@ class kg_fettling(osv.osv):
 		### Stock Allocation ###
 		'flag_allocated': False,
 		'allocation_user_id':lambda obj, cr, uid, context: uid,
-		'ms_state': 'not_created'
+		'ms_state': 'not_created',
+		
 		
 		
 	}
@@ -791,34 +793,14 @@ class kg_fettling(osv.osv):
 						if entry.order_id.flag_for_stock == False:
 							self.ms_inward_update(cr, uid, [entry.id],entry.inward_accept_qty,'not_created')
 						else:
-							### Stock Inward Creation ###
+							### Updation in Stock Inward ###
 							inward_obj = self.pool.get('kg.stock.inward')
 							inward_line_obj = self.pool.get('ch.stock.inward.details')
 							
-							inward_vals = {
-								'location': entry.location
-							}
+							inward_line_id = inward_line_obj.search(cr, uid, [('fettling_id','=',entry.id)])
 							
-							inward_id = inward_obj.create(cr, uid, inward_vals)
-							
-							inward_line_vals = {
-								'header_id': inward_id,
-								'location': entry.location,
-								'stock_type': 'pattern',
-								'pump_model_id': entry.pump_model_id.id,
-								'pattern_id': entry.pattern_id.id,
-								'pattern_name': entry.pattern_name,
-								'moc_id': entry.moc_id.id,
-								'stage_id': entry.stage_id.id,
-								'qty': rem_qty,
-								'available_qty': rem_qty,
-								'each_wgt': entry.production_id.each_weight,
-								'total_weight': entry.production_id.total_weight,
-								'stock_mode': 'excess',
-								'stock_state': 'ready_for_ms'
-							}
-							
-							inward_line_id = inward_line_obj.create(cr, uid, inward_line_vals)
+							if inward_line_id:
+								inward_line_obj.write(cr,uid, inward_line_id[0],{'foundry_stock_state':'ready_for_ms','state':'confirmed'})
 							
 							self.write(cr,uid, ids,{'state':'complete'})
 						
@@ -830,94 +812,82 @@ class kg_fettling(osv.osv):
 					
 					### Checking in Stock Inward for Ready for MS ###
 					
-					cr.execute(""" select sum(available_qty) as stock_qty
+					cr.execute(""" select id,available_qty as stock_qty,stock_location_id
 						from ch_stock_inward_details  
 						where pattern_id = %s and moc_id = %s
 						and foundry_stock_state = 'ready_for_ms' and available_qty > 0 and stock_type = 'pattern'  """%(entry.pattern_id.id,entry.moc_id.id))
-					stock_inward_qty = cr.fetchone();
+					stock_inward_items = cr.dictfetchall();
 					
 					
-					if stock_inward_qty:
-						if stock_inward_qty[0] != None:
-							reject_rem_qty =  entry.inward_reject_qty - stock_inward_qty[0]
+					if stock_inward_items:
+						if reject_rem_qty > 0:
+							for stock_item in  stock_inward_items:
+								if reject_rem_qty > 0:
+									if stock_item['stock_qty'] != None:
+										allocate_qty =  reject_rem_qty - stock_item['stock_qty']
 							
-							if reject_rem_qty <= 0:
-								reject_rem_qty = 0
-								qc_qty = entry.inward_reject_qty
-							else:
-								reject_rem_qty = reject_rem_qty
-								qc_qty = stock_inward_qty[0]
-								
-							
-							### Creating QC Verification ###
-							
-							qc_obj = self.pool.get('kg.qc.verification')
-							
-							### QC Sequence Number Generation  ###
-							qc_name = ''	
-							qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.qc.verification')])
-							rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
-							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.entry_date))
-							qc_name = cr.fetchone();
-						
-							qc_vals = {
-															
-								'name': qc_name[0],
-								'schedule_id': entry.schedule_id.id,
-								'schedule_date': entry.schedule_date,
-								'division_id': entry.division_id.id,
-								'location' : entry.location,
-								'schedule_line_id': entry.schedule_line_id.id,
-								'order_id': entry.order_id.id,
-								'order_line_id': entry.order_line_id.id,
-								'pump_model_id': entry.pump_model_id.id,
-								'qty' : qc_qty,
-								'stock_qty':qc_qty,			 
-								'allocated_qty':qc_qty,		   
-								'state' : 'draft',
-								'order_category':entry.order_category,
-								'order_priority':entry.order_priority,
-								'pattern_id' : entry.pattern_id.id,
-								'pattern_name' : entry.pattern_id.pattern_name, 
-								'moc_id' : entry.moc_id.id,
-								'stock_type': 'pattern',
-								'order_bomline_id': entry.order_bomline_id.id
+										if allocate_qty <= 0:
+											qc_qty = reject_rem_qty
+											reject_rem_qty = 0
+										else:
+											reject_rem_qty = allocate_qty
+											qc_qty = stock_item['stock_qty']
+											
 										
-								}
-							
-							qc_id = qc_obj.create(cr, uid, qc_vals)
-							
-							
-							
-							### Qty Updation in Stock Inward ###
-							
-							inward_line_obj = self.pool.get('ch.stock.inward.details')
-							
-							cr.execute(""" select id,available_qty
-								from ch_stock_inward_details  
-								where pattern_id = %s and moc_id = %s
-								and  foundry_stock_state = 'ready_for_ms' 
-								and available_qty > 0 and stock_type = 'pattern' """%(entry.pattern_id.id,entry.moc_id.id))
-								
-							stock_inward_items = cr.dictfetchall();
-							
-							stock_updation_qty = qc_qty
-							
-							
-							for stock_inward_item in stock_inward_items:
-								if stock_updation_qty > 0:
+										### Creating QC Verification ###
+										
+										qc_obj = self.pool.get('kg.qc.verification')
+										
+										### QC Sequence Number Generation  ###
+										qc_name = ''	
+										qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.qc.verification')])
+										rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
+										cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.entry_date))
+										qc_name = cr.fetchone();
 									
-									if stock_inward_item['available_qty'] <= stock_updation_qty:
-										stock_avail_qty = 0
-										inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty,'foundry_stock_state':'reject'})
-									if stock_inward_item['available_qty'] > stock_updation_qty:
-										stock_avail_qty = stock_inward_item['available_qty'] - stock_updation_qty
-										inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
+										qc_vals = {
+																		
+											'name': qc_name[0],
+											'schedule_id': entry.schedule_id.id,
+											'schedule_date': entry.schedule_date,
+											'division_id': entry.division_id.id,
+											'location' : entry.location,
+											'schedule_line_id': entry.schedule_line_id.id,
+											'order_id': entry.order_id.id,
+											'order_line_id': entry.order_line_id.id,
+											'pump_model_id': entry.pump_model_id.id,
+											'qty' : qc_qty,
+											'stock_qty':qc_qty,			 
+											'allocated_qty':qc_qty,		   
+											'state' : 'draft',
+											'order_category':entry.order_category,
+											'order_priority':entry.order_priority,
+											'pattern_id' : entry.pattern_id.id,
+											'pattern_name' : entry.pattern_id.pattern_name, 
+											'moc_id' : entry.moc_id.id,
+											'stock_type': 'pattern',
+											'order_bomline_id': entry.order_bomline_id.id,
+											'stock_location_id': stock_item['stock_location_id'],
+											'stock_inward_id': stock_item['id']
+													
+											}
 										
-									if stock_inward_item['available_qty'] <= stock_updation_qty:
-										stock_updation_qty = stock_updation_qty - stock_inward_item['available_qty']
-									elif stock_inward_item['available_qty'] > stock_updation_qty:
-										stock_updation_qty = 0
+										qc_id = qc_obj.create(cr, uid, qc_vals)
+										
+										### Qty Updation in Stock Inward ###
+										
+										inward_line_obj = self.pool.get('ch.stock.inward.details')
+										
+										stock_updation_qty = qc_qty
+										
+										if stock_updation_qty > 0:
+											
+											if stock_item['stock_qty'] <= stock_updation_qty:
+												stock_avail_qty = 0
+												inward_line_obj.write(cr, uid, [stock_item['id']],{'available_qty': stock_avail_qty})
+											if stock_item['stock_qty'] > stock_updation_qty:
+												stock_avail_qty = stock_item['stock_qty'] - stock_updation_qty
+												inward_line_obj.write(cr, uid, [stock_item['id']],{'available_qty': stock_avail_qty})
 												
 								
 			 
@@ -965,7 +935,7 @@ class kg_fettling(osv.osv):
 											
 											if stock_inward_item['available_qty'] <= stock_updation_qty:
 												stock_avail_qty = 0
-												inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty,'foundry_stock_state':'reject'})
+												inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
 											if stock_inward_item['available_qty'] > stock_updation_qty:
 												stock_avail_qty = stock_inward_item['available_qty'] - stock_updation_qty
 												inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
@@ -1471,33 +1441,49 @@ class kg_fettling(osv.osv):
 						
 				else:
 					
-					### Qty Updation in Stock Inward ###
-							
+					### Updation in Stock Inward ###
+					
 					inward_line_obj = self.pool.get('ch.stock.inward.details')
 					
-					cr.execute(""" select id,available_qty
-						from ch_stock_inward_details  
-						where pattern_id = %s and moc_id = %s
-						and  foundry_stock_state = 'foundry_inprogress'
-						and available_qty > 0 and stock_type = 'pattern' """%(entry.pattern_id.id,entry.moc_id.id))
-						
-					stock_inward_items = cr.dictfetchall();
+					inward_line_id = inward_line_obj.search(cr, uid, [('fettling_id','=',entry.id)])
 					stock_updation_qty = entry.inward_reject_qty
 					
-					for stock_inward_item in stock_inward_items:
-						if stock_updation_qty > 0:
+					if inward_line_id:
+						inward_line_rec = inward_line_obj.browse(cr, uid, inward_line_id[0])
+						if inward_line_rec.available_qty <= stock_updation_qty:
+							stock_avail_qty = 0
+							inward_line_obj.write(cr, uid, inward_line_rec.id,{'available_qty': stock_avail_qty})
+						if inward_line_rec.available_qty > stock_updation_qty:
+							stock_avail_qty = inward_line_rec.available_qty - stock_updation_qty
+							inward_line_obj.write(cr, uid,  inward_line_rec.id,{'available_qty': stock_avail_qty})
 							
-							if stock_inward_item['available_qty'] <= stock_updation_qty:
-								stock_avail_qty = 0
-								inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty,'foundry_stock_state':'reject'})
-							if stock_inward_item['available_qty'] > stock_updation_qty:
-								stock_avail_qty = stock_inward_item['available_qty'] - stock_updation_qty
-								inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
+					else:
+					
+						### Qty Updation in Stock Inward ###
+						
+						cr.execute(""" select id,available_qty
+							from ch_stock_inward_details  
+							where pattern_id = %s and moc_id = %s
+							and  foundry_stock_state = 'foundry_inprogress'
+							and available_qty > 0 and stock_type = 'pattern' """%(entry.pattern_id.id,entry.moc_id.id))
+							
+						stock_inward_items = cr.dictfetchall();
+						stock_updation_qty = entry.inward_reject_qty
+						
+						for stock_inward_item in stock_inward_items:
+							if stock_updation_qty > 0:
 								
-							if stock_inward_item['available_qty'] <= stock_updation_qty:
-								stock_updation_qty = stock_updation_qty - stock_inward_item['available_qty']
-							elif stock_inward_item['available_qty'] > stock_updation_qty:
-								stock_updation_qty = 0
+								if stock_inward_item['available_qty'] <= stock_updation_qty:
+									stock_avail_qty = 0
+									inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
+								if stock_inward_item['available_qty'] > stock_updation_qty:
+									stock_avail_qty = stock_inward_item['available_qty'] - stock_updation_qty
+									inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
+									
+								if stock_inward_item['available_qty'] <= stock_updation_qty:
+									stock_updation_qty = stock_updation_qty - stock_inward_item['available_qty']
+								elif stock_inward_item['available_qty'] > stock_updation_qty:
+									stock_updation_qty = 0
 												
 						
 					
@@ -1681,39 +1667,22 @@ class kg_fettling(osv.osv):
 					
 			else:
 				### MS Inward Process Creation ###
+				
 				if entry.order_id.flag_for_stock == False:
 					self.ms_inward_update(cr, uid, [entry.id],fettling_accept_qty,'not_created')
+				
 				else:
-					### Stock Inward Creation ###
+					### Updation in Stock Inward ###
 					inward_obj = self.pool.get('kg.stock.inward')
 					inward_line_obj = self.pool.get('ch.stock.inward.details')
 					
-					inward_vals = {
-						'location': entry.location
-					}
+					inward_line_id = inward_line_obj.search(cr, uid, [('fettling_id','=',entry.id)])
 					
-					inward_id = inward_obj.create(cr, uid, inward_vals)
-					
-					inward_line_vals = {
-						'header_id': inward_id,
-						'location': entry.location,
-						'stock_type': 'pattern',
-						'pump_model_id': entry.pump_model_id.id,
-						'pattern_id': entry.pattern_id.id,
-						'pattern_name': entry.pattern_name,
-						'moc_id': entry.moc_id.id,
-						'stage_id': entry.stage_id.id,
-						'qty': fettling_accept_qty,
-						'available_qty': fettling_accept_qty,
-						'each_wgt': fettling_weight,
-						'total_weight': fettling_accept_qty * fettling_weight,
-						'stock_mode': 'excess',
-						'stock_state': 'ready_for_ms'
-					}
-					
-					inward_line_id = inward_line_obj.create(cr, uid, inward_line_vals)
+					if inward_line_id:
+						inward_line_obj.write(cr,uid, inward_line_id[0],{'foundry_stock_state':'ready_for_ms','state':'confirmed'})
 					
 					self.write(cr,uid, ids,{'state':'complete'})
+					
 		return True
 		
 	def fettling_reject_process(self,cr,uid,ids,fettling_qty,fettling_reject_qty,fettling_weight,fettling_date,fettling_reject_remarks_id,context=None):
@@ -1727,90 +1696,82 @@ class kg_fettling(osv.osv):
 			
 				### Checking in Stock Inward for Ready for MS ###
 				
-				cr.execute(""" select sum(available_qty) as stock_qty
+				cr.execute(""" select id,available_qty as stock_qty,stock_location_id 
 					from ch_stock_inward_details  
 					where pattern_id = %s and moc_id = %s
 					and  foundry_stock_state = 'ready_for_ms' and available_qty > 0 and stock_type = 'pattern'  """%(entry.pattern_id.id,entry.moc_id.id))
-				stock_inward_qty = cr.fetchone();
+				stock_inward_items = cr.dictfetchall();
 				
-				if stock_inward_qty:
-					if stock_inward_qty[0] != None:
-						reject_rem_qty =  fettling_reject_qty - stock_inward_qty[0]
-						
-						if reject_rem_qty <= 0:
-							reject_rem_qty = 0
-							qc_qty = fettling_reject_qty
-						else:
-							reject_rem_qty = reject_rem_qty
-							qc_qty = stock_inward_qty[0]
-							
-						
-						### Creating QC Verification ###
-						
-						qc_obj = self.pool.get('kg.qc.verification')
-						
-						### QC Sequence Number Generation  ###
-						qc_name = ''	
-						qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.qc.verification')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.entry_date))
-						qc_name = cr.fetchone();
-					
-						qc_vals = {
-														
-							'name': qc_name[0],
-							'schedule_id': entry.schedule_id.id,
-							'schedule_date': entry.schedule_date,
-							'division_id': entry.division_id.id,
-							'location' : entry.location,
-							'schedule_line_id': entry.schedule_line_id.id,
-							'order_id': entry.order_id.id,
-							'order_line_id': entry.order_line_id.id,
-							'pump_model_id': entry.pump_model_id.id,
-							'qty' : qc_qty,
-							'stock_qty':qc_qty,			 
-							'allocated_qty':qc_qty,		   
-							'state' : 'draft',
-							'order_category':entry.order_category,
-							'order_priority':entry.order_priority,
-							'pattern_id' : entry.pattern_id.id,
-							'pattern_name' : entry.pattern_id.pattern_name, 
-							'moc_id' : entry.moc_id.id,
-							'stock_type': 'pattern',
-							'order_bomline_id': entry.order_bomline_id.id
+				if stock_inward_items:
+					print "reject_rem_qty",reject_rem_qty
+					if reject_rem_qty > 0:
+						for stock_item in  stock_inward_items:
+							if reject_rem_qty > 0:
+								if stock_item['stock_qty'] != None:
+									allocate_qty =  reject_rem_qty - stock_item['stock_qty']
 									
-							}
-						
-						qc_id = qc_obj.create(cr, uid, qc_vals)
-						
-						### Qty Updation in Stock Inward ###
-						
-						inward_line_obj = self.pool.get('ch.stock.inward.details')
-						
-						cr.execute(""" select id,available_qty
-							from ch_stock_inward_details  
-							where pattern_id = %s and moc_id = %s
-							and  foundry_stock_state = 'ready_for_ms' 
-							and available_qty > 0 and stock_type = 'pattern' """%(entry.pattern_id.id,entry.moc_id.id))
-							
-						stock_inward_items = cr.dictfetchall();
-						
-						stock_updation_qty = qc_qty
-						
-						for stock_inward_item in stock_inward_items:
-							if stock_updation_qty > 0:
+									if allocate_qty <= 0:
+										qc_qty = reject_rem_qty
+										reject_rem_qty = 0
+									else:
+										reject_rem_qty = stock_item['stock_qty']
+										qc_qty =  stock_item['stock_qty']
+										
+									
+									### Creating QC Verification ###
+									
+									qc_obj = self.pool.get('kg.qc.verification')
+									
+									### QC Sequence Number Generation  ###
+									qc_name = ''	
+									qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.qc.verification')])
+									rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
+									cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.entry_date))
+									qc_name = cr.fetchone();
 								
-								if stock_inward_item['available_qty'] <= stock_updation_qty:
-									stock_avail_qty = 0
-									inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty,'foundry_stock_state':'reject'})
-								if stock_inward_item['available_qty'] > stock_updation_qty:
-									stock_avail_qty = stock_inward_item['available_qty'] - stock_updation_qty
-									inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
+									qc_vals = {
+																	
+										'name': qc_name[0],
+										'schedule_id': entry.schedule_id.id,
+										'schedule_date': entry.schedule_date,
+										'division_id': entry.division_id.id,
+										'location' : entry.location,
+										'schedule_line_id': entry.schedule_line_id.id,
+										'order_id': entry.order_id.id,
+										'order_line_id': entry.order_line_id.id,
+										'pump_model_id': entry.pump_model_id.id,
+										'qty' : qc_qty,
+										'stock_qty':qc_qty,			 
+										'allocated_qty':qc_qty,		   
+										'state' : 'draft',
+										'order_category':entry.order_category,
+										'order_priority':entry.order_priority,
+										'pattern_id' : entry.pattern_id.id,
+										'pattern_name' : entry.pattern_id.pattern_name, 
+										'moc_id' : entry.moc_id.id,
+										'stock_type': 'pattern',
+										'order_bomline_id': entry.order_bomline_id.id,
+										'stock_location_id': stock_item['stock_location_id'],
+										'stock_inward_id': stock_item['id']
+												
+										}
 									
-								if stock_inward_item['available_qty'] <= stock_updation_qty:
-									stock_updation_qty = stock_updation_qty - stock_inward_item['available_qty']
-								elif stock_inward_item['available_qty'] > stock_updation_qty:
-									stock_updation_qty = 0
+									qc_id = qc_obj.create(cr, uid, qc_vals)
+									
+									### Qty Updation in Stock Inward ###
+											
+									inward_line_obj = self.pool.get('ch.stock.inward.details')
+									
+									stock_updation_qty = qc_qty
+									
+									if stock_updation_qty > 0:
+										
+										if stock_item['stock_qty'] <= stock_updation_qty:
+											stock_avail_qty = 0
+											inward_line_obj.write(cr, uid, [stock_item['id']],{'available_qty': stock_avail_qty})
+										if stock_item['stock_qty'] > stock_updation_qty:
+											stock_avail_qty = stock_item['stock_qty'] - stock_updation_qty
+											inward_line_obj.write(cr, uid, [stock_item['id']],{'available_qty': stock_avail_qty})
 										
 							
 						
@@ -1857,7 +1818,7 @@ class kg_fettling(osv.osv):
 										
 										if stock_inward_item['available_qty'] <= stock_updation_qty:
 											stock_avail_qty = 0
-											inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty,'foundry_stock_state':'reject'})
+											inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
 										if stock_inward_item['available_qty'] > stock_updation_qty:
 											stock_avail_qty = stock_inward_item['available_qty'] - stock_updation_qty
 											inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
@@ -2358,33 +2319,50 @@ class kg_fettling(osv.osv):
 	
 			else:
 				
-				### Qty Updation in Stock Inward ###
-						
+				### Updation in Stock Inward ###
+				
 				inward_line_obj = self.pool.get('ch.stock.inward.details')
 				
-				cr.execute(""" select id,available_qty
-					from ch_stock_inward_details  
-					where pattern_id = %s and moc_id = %s
-					and  foundry_stock_state = 'foundry_inprogress'
-					and available_qty > 0 and stock_type = 'pattern' """%(entry.pattern_id.id,entry.moc_id.id))
-					
-				stock_inward_items = cr.dictfetchall();
-				stock_updation_qty = fettling_reject_qty
+				inward_line_id = inward_line_obj.search(cr, uid, [('fettling_id','=',entry.id)])
+				stock_updation_qty = entry.inward_reject_qty
 				
-				for stock_inward_item in stock_inward_items:
-					if stock_updation_qty > 0:
+				if inward_line_id:
+					inward_line_rec = inward_line_obj.browse(cr, uid, inward_line_id[0])
+					if inward_line_rec.available_qty <= stock_updation_qty:
+						stock_avail_qty = 0
+						inward_line_obj.write(cr, uid, inward_line_rec.id,{'available_qty': stock_avail_qty})
+					if inward_line_rec.available_qty > stock_updation_qty:
+						stock_avail_qty = inward_line_rec.available_qty - stock_updation_qty
+						inward_line_obj.write(cr, uid,  inward_line_rec.id,{'available_qty': stock_avail_qty})
 						
-						if stock_inward_item['available_qty'] <= stock_updation_qty:
-							stock_avail_qty = 0
-							inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty,'foundry_stock_state':'reject'})
-						if stock_inward_item['available_qty'] > stock_updation_qty:
-							stock_avail_qty = stock_inward_item['available_qty'] - stock_updation_qty
-							inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
+				else:
+					### Qty Updation in Stock Inward ###
 							
-						if stock_inward_item['available_qty'] <= stock_updation_qty:
-							stock_updation_qty = stock_updation_qty - stock_inward_item['available_qty']
-						elif stock_inward_item['available_qty'] > stock_updation_qty:
-							stock_updation_qty = 0
+					inward_line_obj = self.pool.get('ch.stock.inward.details')
+					
+					cr.execute(""" select id,available_qty
+						from ch_stock_inward_details  
+						where pattern_id = %s and moc_id = %s
+						and  foundry_stock_state = 'foundry_inprogress'
+						and available_qty > 0 and stock_type = 'pattern' """%(entry.pattern_id.id,entry.moc_id.id))
+						
+					stock_inward_items = cr.dictfetchall();
+					stock_updation_qty = fettling_reject_qty
+					
+					for stock_inward_item in stock_inward_items:
+						if stock_updation_qty > 0:
+							
+							if stock_inward_item['available_qty'] <= stock_updation_qty:
+								stock_avail_qty = 0
+								inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
+							if stock_inward_item['available_qty'] > stock_updation_qty:
+								stock_avail_qty = stock_inward_item['available_qty'] - stock_updation_qty
+								inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
+								
+							if stock_inward_item['available_qty'] <= stock_updation_qty:
+								stock_updation_qty = stock_updation_qty - stock_inward_item['available_qty']
+							elif stock_inward_item['available_qty'] > stock_updation_qty:
+								stock_updation_qty = 0
 										
 	
 		if fettling_reject_qty > 0:
@@ -3153,90 +3131,82 @@ class kg_fettling(osv.osv):
 				
 					### Checking in Stock Inward for Ready for MS ###
 					
-					cr.execute(""" select sum(available_qty) as stock_qty
+					cr.execute(""" select id,available_qty as stock_qty,stock_location_id 
 						from ch_stock_inward_details  
 						where pattern_id = %s and moc_id = %s
 						and  foundry_stock_state = 'ready_for_ms' and available_qty > 0 and stock_type = 'pattern'  """%(entry.pattern_id.id,entry.moc_id.id))
-					stock_inward_qty = cr.fetchone();
+					stock_inward_items = cr.dictfetchall();
 					
-					if stock_inward_qty:
-						if stock_inward_qty[0] != None:
-							reject_rem_qty =  entry.welding_reject_qty - stock_inward_qty[0]
-							
-							if reject_rem_qty <= 0:
-								reject_rem_qty = 0
-								qc_qty = entry.welding_reject_qty
-							else:
-								reject_rem_qty = reject_rem_qty
-								qc_qty = stock_inward_qty[0]
-								
-							
-							### Creating QC Verification ###
-							
-							qc_obj = self.pool.get('kg.qc.verification')
-							
-							### QC Sequence Number Generation  ###
-							qc_name = ''	
-							qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.qc.verification')])
-							rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
-							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.entry_date))
-							qc_name = cr.fetchone();
-						
-							qc_vals = {
-															
-								'name': qc_name[0],
-								'schedule_id': entry.schedule_id.id,
-								'schedule_date': entry.schedule_date,
-								'division_id': entry.division_id.id,
-								'location' : entry.location,
-								'schedule_line_id': entry.schedule_line_id.id,
-								'order_id': entry.order_id.id,
-								'order_line_id': entry.order_line_id.id,
-								'pump_model_id': entry.pump_model_id.id,
-								'qty' : qc_qty,
-								'stock_qty':qc_qty,			 
-								'allocated_qty':qc_qty,		   
-								'state' : 'draft',
-								'order_category':entry.order_category,
-								'order_priority':entry.order_priority,
-								'pattern_id' : entry.pattern_id.id,
-								'pattern_name' : entry.pattern_id.pattern_name, 
-								'moc_id' : entry.moc_id.id,
-								'stock_type': 'pattern',
-								'order_bomline_id': entry.order_bomline_id.id
+					if stock_inward_items:
+						print "reject_rem_qty",reject_rem_qty
+						if reject_rem_qty > 0:
+							for stock_item in  stock_inward_items:
+								if reject_rem_qty > 0:
+									if stock_item['stock_qty'] != None:
+										allocate_qty =  reject_rem_qty - stock_item['stock_qty']
 										
-								}
-							
-							qc_id = qc_obj.create(cr, uid, qc_vals)
-							
-							### Qty Updation in Stock Inward ###
-							
-							inward_line_obj = self.pool.get('ch.stock.inward.details')
-							
-							cr.execute(""" select id,available_qty
-								from ch_stock_inward_details  
-								where pattern_id = %s and moc_id = %s
-								and  foundry_stock_state = 'ready_for_ms' 
-								and available_qty > 0 and stock_type = 'pattern' """%(entry.pattern_id.id,entry.moc_id.id))
-								
-							stock_inward_items = cr.dictfetchall();
-							
-							stock_updation_qty = qc_qty
-							
-							for stock_inward_item in stock_inward_items:
-								if stock_updation_qty > 0:
+										if allocate_qty <= 0:
+											qc_qty = reject_rem_qty
+											reject_rem_qty = 0
+										else:
+											reject_rem_qty = allocate_qty
+											qc_qty = stock_item['stock_qty']
+											
+										
+										### Creating QC Verification ###
+										
+										qc_obj = self.pool.get('kg.qc.verification')
+										
+										### QC Sequence Number Generation  ###
+										qc_name = ''	
+										qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.qc.verification')])
+										rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
+										cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.entry_date))
+										qc_name = cr.fetchone();
 									
-									if stock_inward_item['available_qty'] <= stock_updation_qty:
-										stock_avail_qty = 0
-										inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty,'foundry_stock_state':'reject'})
-									if stock_inward_item['available_qty'] > stock_updation_qty:
-										stock_avail_qty = stock_inward_item['available_qty'] - stock_updation_qty
-										inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
+										qc_vals = {
+																		
+											'name': qc_name[0],
+											'schedule_id': entry.schedule_id.id,
+											'schedule_date': entry.schedule_date,
+											'division_id': entry.division_id.id,
+											'location' : entry.location,
+											'schedule_line_id': entry.schedule_line_id.id,
+											'order_id': entry.order_id.id,
+											'order_line_id': entry.order_line_id.id,
+											'pump_model_id': entry.pump_model_id.id,
+											'qty' : qc_qty,
+											'stock_qty':qc_qty,			 
+											'allocated_qty':qc_qty,		   
+											'state' : 'draft',
+											'order_category':entry.order_category,
+											'order_priority':entry.order_priority,
+											'pattern_id' : entry.pattern_id.id,
+											'pattern_name' : entry.pattern_id.pattern_name, 
+											'moc_id' : entry.moc_id.id,
+											'stock_type': 'pattern',
+											'order_bomline_id': entry.order_bomline_id.id,
+											'stock_location_id': stock_item['stock_location_id'],
+											'stock_inward_id': stock_item['id']
+													
+											}
 										
-									if stock_inward_item['available_qty'] <= stock_updation_qty:
-										stock_updation_qty = stock_updation_qty - stock_inward_item['available_qty']
-									elif stock_inward_item['available_qty'] > stock_updation_qty:
-										stock_updation_qty = 0
+										qc_id = qc_obj.create(cr, uid, qc_vals)
+										
+										### Qty Updation in Stock Inward ###
+											
+										inward_line_obj = self.pool.get('ch.stock.inward.details')
+										
+										stock_updation_qty = qc_qty
+										
+										if stock_updation_qty > 0:
+											
+											if stock_item['stock_qty'] <= stock_updation_qty:
+												stock_avail_qty = 0
+												inward_line_obj.write(cr, uid, [stock_item['id']],{'available_qty': stock_avail_qty})
+											if stock_item['stock_qty'] > stock_updation_qty:
+												stock_avail_qty = stock_item['stock_qty'] - stock_updation_qty
+												inward_line_obj.write(cr, uid, [stock_item['id']],{'available_qty': stock_avail_qty})
 								
 							
 					### Checking in Stock Inward for Foundry In Progress ###
@@ -3284,7 +3254,7 @@ class kg_fettling(osv.osv):
 											
 											if stock_inward_item['available_qty'] <= stock_updation_qty:
 												stock_avail_qty = 0
-												inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty,'foundry_stock_state':'reject'})
+												inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
 											if stock_inward_item['available_qty'] > stock_updation_qty:
 												stock_avail_qty = stock_inward_item['available_qty'] - stock_updation_qty
 												inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
@@ -3799,7 +3769,7 @@ class kg_fettling(osv.osv):
 							
 							if stock_inward_item['available_qty'] <= stock_updation_qty:
 								stock_avail_qty = 0
-								inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty,'foundry_stock_state':'reject'})
+								inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
 							if stock_inward_item['available_qty'] > stock_updation_qty:
 								stock_avail_qty = stock_inward_item['available_qty'] - stock_updation_qty
 								inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
@@ -4115,89 +4085,95 @@ class kg_fettling(osv.osv):
 				
 				### Checking in Stock Inward for Ready for MS ###
 				
-				cr.execute(""" select sum(available_qty) as stock_qty
+				cr.execute(""" select id,available_qty as stock_qty,stock_location_id 
 					from ch_stock_inward_details  
 					where pattern_id = %s and moc_id = %s
 					and  foundry_stock_state = 'ready_for_ms' and available_qty > 0 and stock_type = 'pattern'  """%(entry.pattern_id.id,entry.moc_id.id))
-				stock_inward_qty = cr.fetchone();
+				stock_inward_items = cr.dictfetchall();
 				
-				if stock_inward_qty:
-					if stock_inward_qty[0] != None:
-						reject_rem_qty =  entry.reshot_blasting_reject_qty - stock_inward_qty[0]
-						
-						if reject_rem_qty <= 0:
-							reject_rem_qty = 0
-							qc_qty = entry.reshot_blasting_reject_qty
-						else:
-							reject_rem_qty = reject_rem_qty
-							qc_qty = stock_inward_qty[0]
-						
-						### Creating QC Verification ###
-						
-						qc_obj = self.pool.get('kg.qc.verification')
-						
-						### QC Sequence Number Generation  ###
-						qc_name = ''	
-						qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.qc.verification')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.entry_date))
-						qc_name = cr.fetchone();
-					
-						qc_vals = {
-														
-							'name': qc_name[0],
-							'schedule_id': entry.schedule_id.id,
-							'schedule_date': entry.schedule_date,
-							'division_id': entry.division_id.id,
-							'location' : entry.location,
-							'schedule_line_id': entry.schedule_line_id.id,
-							'order_id': entry.order_id.id,
-							'order_line_id': entry.order_line_id.id,
-							'pump_model_id': entry.pump_model_id.id,
-							'qty' : qc_qty,
-							'stock_qty':qc_qty,			 
-							'allocated_qty':qc_qty,		   
-							'state' : 'draft',
-							'order_category':entry.order_category,
-							'order_priority':entry.order_priority,
-							'pattern_id' : entry.pattern_id.id,
-							'pattern_name' : entry.pattern_id.pattern_name, 
-							'moc_id' : entry.moc_id.id,
-							'stock_type': 'pattern',
-							'order_bomline_id': entry.order_bomline_id.id
+				if stock_inward_items:
+					print "reject_rem_qty",reject_rem_qty
+					if reject_rem_qty > 0:
+						for stock_item in  stock_inward_items:
+							if reject_rem_qty > 0:
+								if stock_item['stock_qty'] != None:
+									allocate_qty =  reject_rem_qty - stock_item['stock_qty']
 									
-							}
-						
-						qc_id = qc_obj.create(cr, uid, qc_vals)
-						
-						### Qty Updation in Stock Inward ###
-						
-						inward_line_obj = self.pool.get('ch.stock.inward.details')
-						
-						cr.execute(""" select id,available_qty
-							from ch_stock_inward_details  
-							where pattern_id = %s and moc_id = %s
-							and  foundry_stock_state = 'ready_for_ms' 
-							and available_qty > 0 and stock_type = 'pattern' """%(entry.pattern_id.id,entry.moc_id.id))
-							
-						stock_inward_items = cr.dictfetchall();
-						
-						stock_updation_qty = qc_qty
-						
-						for stock_inward_item in stock_inward_items:
-							if stock_updation_qty > 0:
+									if allocate_qty <= 0:
+										qc_qty = reject_rem_qty
+										reject_rem_qty = 0
+									else:
+										reject_rem_qty = allocate_qty
+										qc_qty = stock_item['stock_qty']
+									
+									### Creating QC Verification ###
+									
+									qc_obj = self.pool.get('kg.qc.verification')
+									
+									### QC Sequence Number Generation  ###
+									qc_name = ''	
+									qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.qc.verification')])
+									rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
+									cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.entry_date))
+									qc_name = cr.fetchone();
 								
-								if stock_inward_item['available_qty'] <= stock_updation_qty:
-									stock_avail_qty = 0
-									inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty,'foundry_stock_state':'reject'})
-								if stock_inward_item['available_qty'] > stock_updation_qty:
-									stock_avail_qty = stock_inward_item['available_qty'] - stock_updation_qty
-									inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
+									qc_vals = {
+																	
+										'name': qc_name[0],
+										'schedule_id': entry.schedule_id.id,
+										'schedule_date': entry.schedule_date,
+										'division_id': entry.division_id.id,
+										'location' : entry.location,
+										'schedule_line_id': entry.schedule_line_id.id,
+										'order_id': entry.order_id.id,
+										'order_line_id': entry.order_line_id.id,
+										'pump_model_id': entry.pump_model_id.id,
+										'qty' : qc_qty,
+										'stock_qty':qc_qty,			 
+										'allocated_qty':qc_qty,		   
+										'state' : 'draft',
+										'order_category':entry.order_category,
+										'order_priority':entry.order_priority,
+										'pattern_id' : entry.pattern_id.id,
+										'pattern_name' : entry.pattern_id.pattern_name, 
+										'moc_id' : entry.moc_id.id,
+										'stock_type': 'pattern',
+										'order_bomline_id': entry.order_bomline_id.id,
+										'stock_location_id': stock_item['stock_location_id'],
+										'stock_inward_id': stock_item['id']
+												
+										}
 									
-								if stock_inward_item['available_qty'] <= stock_updation_qty:
-									stock_updation_qty = stock_updation_qty - stock_inward_item['available_qty']
-								elif stock_inward_item['available_qty'] > stock_updation_qty:
-									stock_updation_qty = 0
+									qc_id = qc_obj.create(cr, uid, qc_vals)
+									
+									### Qty Updation in Stock Inward ###
+									
+									inward_line_obj = self.pool.get('ch.stock.inward.details')
+									
+									cr.execute(""" select id,available_qty
+										from ch_stock_inward_details  
+										where pattern_id = %s and moc_id = %s
+										and  foundry_stock_state = 'ready_for_ms' 
+										and available_qty > 0 and stock_type = 'pattern' """%(entry.pattern_id.id,entry.moc_id.id))
+										
+									stock_inward_items = cr.dictfetchall();
+									
+									stock_updation_qty = qc_qty
+									
+									for stock_inward_item in stock_inward_items:
+										if stock_updation_qty > 0:
+											
+											if stock_inward_item['available_qty'] <= stock_updation_qty:
+												stock_avail_qty = 0
+												inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
+											if stock_inward_item['available_qty'] > stock_updation_qty:
+												stock_avail_qty = stock_inward_item['available_qty'] - stock_updation_qty
+												inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
+												
+											if stock_inward_item['available_qty'] <= stock_updation_qty:
+												stock_updation_qty = stock_updation_qty - stock_inward_item['available_qty']
+											elif stock_inward_item['available_qty'] > stock_updation_qty:
+												stock_updation_qty = 0
 						
 				### Checking in Stock Inward for Foundry In Progress ###
 			
@@ -4245,7 +4221,7 @@ class kg_fettling(osv.osv):
 										
 										if stock_inward_item['available_qty'] <= stock_updation_qty:
 											stock_avail_qty = 0
-											inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty,'foundry_stock_state':'reject'})
+											inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})
 										if stock_inward_item['available_qty'] > stock_updation_qty:
 											stock_avail_qty = stock_inward_item['available_qty'] - stock_updation_qty
 											inward_line_obj.write(cr, uid, [stock_inward_item['id']],{'available_qty': stock_avail_qty})

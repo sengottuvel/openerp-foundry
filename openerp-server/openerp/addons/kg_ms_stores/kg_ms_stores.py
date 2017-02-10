@@ -516,7 +516,7 @@ class kg_ms_stores(osv.osv):
 									hs_pressure = 0.00
 							else:
 								hs_pressure = 0.00
-								
+							
 							db_flag = False
 							hs_flag = False
 							if order_bom_rec.pattern_id.need_dynamic_balancing == True:
@@ -528,7 +528,7 @@ class kg_ms_stores(osv.osv):
 							print "hs_flag",hs_flag
 								
 							if db_flag == True or hs_flag == True:
-							
+								
 								part_qap_vals = {
 									
 									'qap_plan_id': order_line_rec.qap_plan_id.id,

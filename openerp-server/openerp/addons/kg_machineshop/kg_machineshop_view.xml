@@ -18,7 +18,7 @@
 						<group>
 							<field name="name"/>
 							<field name="inward_accept_qty" required="1" attrs="{'readonly': [('state','in',['accept'])]}"/>
-							<field name="accept_date" readonly="1"/>
+							<field name="accept_date" readonly="1" />
 							<field name="inward_accept_user_id" string="QC by" attrs="{'readonly': [('state','in',['accept'])]}"/>
 							<field name="state" invisible="1"/>
 							<field name="stage_id" widget="selection" invisible="1"/>

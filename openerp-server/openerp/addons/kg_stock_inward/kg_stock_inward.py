@@ -195,7 +195,7 @@ class ch_stock_inward_details(osv.osv):
 		'each_wgt': fields.float('Each Weight'),
 		'total_wgt': fields.float('Total Weight'),
 		'total_value': fields.float('Total Value'),
-		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status'),
+		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('approve','Approved'),('cancel','Cancelled')],'Status'),
 		'active': fields.boolean('Active'),
 		'cancel_remark': fields.text('Cancel Remarks'),
 		'serial_no': fields.char('Serial No', size=128),
@@ -208,7 +208,8 @@ class ch_stock_inward_details(osv.osv):
 		'ms_stock_state': fields.selection([('operation_inprogress','Operation In Progress'),('ready_for_ass','Ready for Assembly'),('reject','Rejected')],'Status'),
 		'item_code': fields.char('Item Code', size=128),
 		'item_name': fields.char('Item Name', size=128),
-		'stock_location_id': fields.many2one('stock.location','Stock Location',domain="[('usage','=','production')]")
+		'stock_location_id': fields.many2one('stock.location','Stock Location',domain="[('usage','=','production')]"),
+		'fettling_id': fields.integer('Fettling ID'),
 	
 	}
 	
@@ -252,6 +253,11 @@ class ch_stock_inward_details(osv.osv):
 		
 		}
 		return {'value': value}
+		
+	def entry_approve(self, cr, uid, ids, context=None):
+		entry = self.browse(cr,uid,ids[0])
+		self.write(cr, uid, ids, {'state':'approve','foundry_stock_state':'ready_for_ms'})
+		return True
 		
 	
 	def _check_values(self, cr, uid, ids, context=None):

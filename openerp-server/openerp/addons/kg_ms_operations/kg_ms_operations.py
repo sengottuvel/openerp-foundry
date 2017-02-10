@@ -1259,6 +1259,7 @@ class kg_ms_operations(osv.osv):
 						'actual_qty': sc_actual_qty,
 						'ms_op_id': entry_rec.id,
 						'contractor_id': entry_rec.op1_contractor_id.id,
+						'operation_id': entry_rec.op1_id.id,
 					}
 					sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
@@ -1930,6 +1931,7 @@ class kg_ms_operations(osv.osv):
 						'actual_qty': sc_actual_qty,
 						'ms_op_id': entry_rec.id,
 						'contractor_id': entry_rec.op2_contractor_id.id,
+						'operation_id': entry_rec.op2_id.id,
 					}
 					sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
@@ -2596,6 +2598,7 @@ class kg_ms_operations(osv.osv):
 						'actual_qty': sc_actual_qty,
 						'ms_op_id': entry_rec.id,
 						'contractor_id': entry_rec.op3_contractor_id.id,
+						'operation_id': entry_rec.op3_id.id,
 					}
 					sc_id = sc_obj.create(cr, uid,sc_vals)
 				
@@ -3265,6 +3268,7 @@ class kg_ms_operations(osv.osv):
 						'actual_qty': sc_actual_qty,
 						'ms_op_id': entry_rec.id,
 						'contractor_id': entry_rec.op4_contractor_id.id,
+						'operation_id': entry_rec.op4_id.id,
 					}
 					sc_id = sc_obj.create(cr, uid,sc_vals)
 				
@@ -3932,6 +3936,7 @@ class kg_ms_operations(osv.osv):
 						'actual_qty': sc_actual_qty,
 						'ms_op_id': entry_rec.id,
 						'contractor_id': entry_rec.op5_contractor_id.id,
+						'operation_id': entry_rec.op5_id.id,
 					}
 					sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
@@ -4598,6 +4603,7 @@ class kg_ms_operations(osv.osv):
 						'actual_qty': sc_actual_qty,
 						'ms_op_id': entry_rec.id,
 						'contractor_id': entry_rec.op6_contractor_id.id,
+						'operation_id': entry_rec.op6_id.id,
 					}
 					sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
@@ -5264,6 +5270,7 @@ class kg_ms_operations(osv.osv):
 						'actual_qty': sc_actual_qty,
 						'ms_op_id': entry_rec.id,
 						'contractor_id': entry_rec.op7_contractor_id.id,
+						'operation_id': entry_rec.op7_id.id,
 					}
 					sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
@@ -5930,6 +5937,7 @@ class kg_ms_operations(osv.osv):
 						'actual_qty': sc_actual_qty,
 						'ms_op_id': entry_rec.id,
 						'contractor_id': entry_rec.op8_contractor_id.id,
+						'operation_id': entry_rec.op8_id.id,
 					}
 					sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
@@ -6596,6 +6604,7 @@ class kg_ms_operations(osv.osv):
 						'actual_qty': sc_actual_qty,
 						'ms_op_id': entry_rec.id,
 						'contractor_id': entry_rec.op9_contractor_id.id,
+						'operation_id': entry_rec.op9_id.id,
 					}
 					sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
@@ -7264,6 +7273,7 @@ class kg_ms_operations(osv.osv):
 						'actual_qty': sc_actual_qty,
 						'ms_op_id': entry_rec.id,
 						'contractor_id': entry_rec.op10_contractor_id.id,
+						'operation_id': entry_rec.op10_id.id,
 					}
 					sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
@@ -7930,6 +7940,7 @@ class kg_ms_operations(osv.osv):
 						'actual_qty': sc_actual_qty,
 						'ms_op_id': entry_rec.id,
 						'contractor_id': entry_rec.op11_contractor_id.id,
+						'operation_id': entry_rec.op11_id.id,
 					}
 					sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
@@ -8597,6 +8608,7 @@ class kg_ms_operations(osv.osv):
 						'actual_qty': sc_actual_qty,
 						'ms_op_id': entry_rec.id,
 						'contractor_id': entry_rec.op12_contractor_id.id,
+						'operation_id': entry_rec.op12_id.id,
 					}
 					sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
