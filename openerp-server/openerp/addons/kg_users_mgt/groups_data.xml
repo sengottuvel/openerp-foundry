@@ -444,7 +444,7 @@
     
       <!-- CRM Admin Group-->
     
-	 <record id="group_kg_crm_admin1" model="res.groups">
+	 <record id="group_crm_admin" model="res.groups">
         <field name="name">CRM Admin</field>
         <field name="custom_group">True</field> 
         <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
