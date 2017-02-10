@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+		
+        <record id="r_form_v_grn_reg" model="ir.ui.view">
+            <field name="name">GRN Register</field>
+            <field name="model">kg.grn.register.wiz</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+             <form string="GRN Register">
+				 <group string="Filters">
+					<group>
+						<field name="from_date" required="1"/>
+						<field name="supplier_id" widget="many2many_tags"/>
+						<field name="division"/>
+					</group>
+					<group >
+						<field name="to_date" required="1"/>
+						<field name="product_id" string="Product" widget="many2many_tags"/>
+						<field name="status"/>
+						<field name="print_date" invisible="1"/>
+						<field name="printed_by" invisible="1"/>
+					</group>
+				</group>
+				<separator colspan="4"/>
+					<group col="4" colspan="4">
+						<button icon="gtk-print" name="create_report" string="Generate" type="object" colspan="2" default_focus="1" />
+					</group>
+                </form>
+            </field>
+        </record>
+
+        <record id="r_action_grn_reg" model="ir.actions.act_window">  
+            <field name="name">GRN Register</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">kg.grn.register.wiz</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+        
+        <report string="GRN Register"
+				model="kg.grn.register.wiz"
+				auto="True"
+				name="jasper_kg_grn_register"
+				rml="kg_reports/warehouse/report/kg_grn_register.jrxml"
+				id="grn_jasper_register_id"
+				menu="False"
+		/>
+	
+    </data>
+</openerp>

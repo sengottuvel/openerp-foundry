@@ -16,6 +16,7 @@
 		'warehouse/wizard/main_closing_stock_wizard.xml',
 		'warehouse/wizard/grn_register_report_wizard.xml',
 		'warehouse/wizard/dep_issue_register_wizard.xml',
+		'warehouse/wizard/kg_grn_register_wiz_view.xml',
 		],
     'installable': True,
     'auto_install': True,

@@ -849,6 +849,8 @@ class kg_general_grn_line(osv.osv):
 		'kg_discount': fields.float('Discount Amount'),
 		'grn_tax_ids': fields.many2many('account.tax', 'po_gen_grn_tax', 'order_id', 'taxes_id', 'Taxes'),
 		'brand_id':fields.many2one('kg.brand.master','Brand'),
+		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'moc_id_temp': fields.many2one('ch.brandmoc.rate.details','MOC',domain="[('brand_id','=',brand_id),('header_id.product_id','=',product_id),('header_id.state','in',('draft','confirmed','approved'))]"),
 		'inward_type': fields.many2one('kg.inwardmaster', 'Inward Type'),
 		'product_tax_amt':fields.float('Tax Amount'),
 		'price_type': fields.selection([('po_uom','PO UOM'),('per_kg','Per Kg')],'Price Type'),
@@ -884,6 +886,13 @@ class kg_general_grn_line(osv.osv):
 		
 		return context
 	
+	def onchange_moc(self, cr, uid, ids, moc_id_temp):
+		value = {'moc_id':''}
+		if moc_id_temp:
+			rate_rec = self.pool.get('ch.brandmoc.rate.details').browse(cr,uid,moc_id_temp)
+			value = {'moc_id': rate_rec.moc_id.id}
+		return {'value': value}
+		
 	def onchange_qty(self,cr,uid,ids, grn_qty, recvd_qty, reject_qty, context=None):
 		value = {'recvd_qty': 0,'reject_qty': 0}
 		if grn_qty and recvd_qty == 0:

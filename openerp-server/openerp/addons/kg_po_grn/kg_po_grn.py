@@ -413,6 +413,8 @@ class kg_po_grn(osv.osv):
 								'name': order_line.product_id.name or '/',
 								'product_id': order_line.product_id.id,
 								'brand_id':order_line.brand_id.id,
+								'moc_id':order_line.moc_id.id,
+								'moc_id_temp':order_line.moc_id_temp.id,
 								'po_grn_qty': order_line.pending_qty,
 								'recvd_qty': order_line.pending_qty,
 								'po_qty':order_line.product_qty,
@@ -643,9 +645,8 @@ class kg_po_grn(osv.osv):
 					wo_data = cr.dictfetchall()
 					for wo in wo_data:
 						if wo['wo_tot'] > 1:
-							raise osv.except_osv(
-							_('Warning!'),
-							_('%s This WO No. repeated'%(wo['wo_name'])))
+							raise osv.except_osv(_('Warning!'),
+								_('%s This WO No. repeated'%(wo['wo_name'])))
 						else:
 							pass
 							
@@ -1519,7 +1520,7 @@ class po_grn_line(osv.osv):
 		'si_line_id':fields.many2one('kg.service.indent.line','SI Line'),
 		'price_subtotal': fields.function(_amount_line, string='Line Total', digits_compute= dp.get_precision('Account'),store=True),
 		#'price_subtotal': fields.function(_amount_line, string='Line Total', digits_compute= dp.get_precision('Account')),
-		'brand_id':fields.many2one('kg.brand.master','Brand'),
+		'brand_id':fields.many2one('kg.brand.master','Brand',domain="[('product_ids','in',(product_id)),('state','in',('draft','confirmed','approved'))]"),
 		'so_flag':fields.boolean('SO Flag'),
 		'po_flag':fields.boolean('PO Flag'),
 		'gp_flag':fields.boolean('PO Flag'),
@@ -1535,7 +1536,9 @@ class po_grn_line(osv.osv):
 		'length': fields.float('Length'),
 		'breadth': fields.float('Breadth'),
 		'weight': fields.float('Weight'),
-		
+		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'moc_id_temp': fields.many2one('ch.brandmoc.rate.details','MOC',domain="[('brand_id','=',brand_id),('header_id.product_id','=',product_id),('header_id.state','in',('draft','confirmed','approved'))]"),
+	
 		## Child Tables Declaration
 		
 		'po_exp_id':fields.one2many('kg.po.exp.batch','po_grn_line_id','Expiry Line'),
@@ -1563,6 +1566,13 @@ class po_grn_line(osv.osv):
 		if product_id:
 			prod = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
 			value = {'uom_id': prod.uom_id.id}
+		return {'value': value}
+	
+	def onchange_moc(self, cr, uid, ids, moc_id_temp):
+		value = {'moc_id':''}
+		if moc_id_temp:
+			rate_rec = self.pool.get('ch.brandmoc.rate.details').browse(cr,uid,moc_id_temp)
+			value = {'moc_id': rate_rec.moc_id.id}
 		return {'value': value}
 	
 	_defaults = {

@@ -355,7 +355,7 @@ class kg_department_issue(osv.osv):
 					cr.execute(lot_sql)
 					lot_data = cr.dictfetchall()
 					if not lot_data:
-						raise osv.except_osv(_('No GRN Entry !!'),_('There is no GRN reference for this Issue. You must associate GRN entries '))
+						raise osv.except_osv(_('No GRN Entry!'), _('There is no GRN reference for this Issue. You must associate GRN entries %s !!' %(item.product_id.name)))
 					else:
 						#~ if item.wo_state == 'accept':
 						if item.issue_qty > 0:
@@ -519,8 +519,7 @@ class kg_department_issue(osv.osv):
 				cr.execute(lot_sql)
 				lot_data = cr.dictfetchall()
 				if not lot_data:
-					raise osv.except_osv(_('No GRN Entry !!'),
-						_('There is no GRN reference for this Issue. You must associate GRN entries '))
+					raise osv.except_osv(_('No GRN Entry!'), _('There is no GRN reference for this Issue. You must associate GRN entries %s !!' %(line_ids.product_id.name)))
 				else:
 					val = [d['lot_id'] for d in lot_data if 'lot_id' in d]
 					tot = 0.0

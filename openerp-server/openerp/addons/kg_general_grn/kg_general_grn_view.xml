@@ -67,6 +67,8 @@
 								<group>
 									<field name="product_id" on_change="onchange_uom_id(product_id)"/>
 									<field name="brand_id"/>
+									<field name="moc_id" invisible="1"/>
+									<field name="moc_id_temp" on_change="onchange_moc(moc_id_temp)"/>
 									<field name="uom_id" readonly = "1"/>
 									<field name="price_type" required="1"/>
 								</group> 
@@ -268,7 +270,9 @@
 								<group>
 									<field name="product_id" on_change="onchange_uom_id(product_id)"/>
 									<field name="brand_id"/>
-									<field name="uom_id" readonly = "1"/>
+									<field name="uom_id" readonly="1"/>
+									<field name="moc_id" invisible="1"/>
+									<field name="moc_id_temp" on_change="onchange_moc(moc_id_temp)"/>
 									<field name="price_type" required="1"/>
 								</group> 
 								<group>

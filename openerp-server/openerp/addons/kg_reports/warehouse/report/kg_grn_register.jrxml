@@ -1,0 +1,848 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="kg_grn_register" language="groovy" pageWidth="792" pageHeight="612" orientation="Landscape" whenNoDataType="NoDataSection" columnWidth="752" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.2100000000000006"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<subDataset name="dataset1">
+		<queryString>
+			<![CDATA[(SELECT
+			  po_grn.id AS grn_id,
+			  to_char(po_grn.grn_date,'dd/mm/yyyy') AS grn_date,
+			  po_grn.grn_date AS grn_datee,
+			  po_grn.name AS grn_number,
+			  po_grn.po_so_remark AS remarks,
+			  po_grn.amount_total As grn_total,
+			  po_grn.dc_no AS dc_no,
+			  to_char(po_grn.dc_date,'dd/mm/yyyy') AS dc_date,
+			  po_grn.created_by AS created_by,
+			  part.name AS part_name,
+			  part.street as str1,
+			  ct.name as city,
+			  part.zip as zip,
+			  st.name as state,
+			  coun.name as country,
+			  prd.name_template AS product_name,
+			  grn_line.po_grn_qty AS qty,
+			  uom.name AS uom,
+			  grn_line.id AS line_id,
+			  grn_line.price_unit As cost_price,
+			  grn_line.kg_discount_per as discount,
+			  inw.name AS inward_type,
+			  po_grn.amount_total as grn_total,
+			  res_cmp.name as comp_name
+
+			  FROM  kg_po_grn po_grn
+
+			  left JOIN res_partner part ON (part.id=po_grn.supplier_id)
+			  left join res_country_state st on(st.id=part.state_id)
+			  left join res_city ct on(ct.id=part.city_id)
+			  left join res_country as coun on(coun.id=part.country_id)
+			  left JOIN po_grn_line grn_line ON (grn_line.po_grn_id=po_grn.id)
+			  left JOIN kg_inwardmaster inw ON (inw.id = grn_line.inward_type)
+			  left JOIN product_uom uom ON (uom.id=grn_line.uom_id)
+			  left JOIN product_product prd ON (prd.id=grn_line.product_id)
+			left join res_company res_cmp on (res_cmp.id=po_grn.company_id)
+
+			  where po_grn.type = 'in' and po_grn.state in ('done') and po_grn.grn_date >='2016-01-01' and po_grn.grn_date <='2016-11-01'
+			  order by po_grn.name)
+
+			   UNION
+
+			   (SELECT
+				  gen_grn.id AS grn_id,
+				  to_char(gen_grn.grn_date,'dd/mm/yyyy') AS grn_date,
+				  gen_grn.grn_date AS grn_datee,
+				  gen_grn.name AS grn_number,
+				  gen_grn.remark AS remarks,
+				  gen_grn.amount_total As grn_total,
+				  gen_grn.dc_no AS dc_no,
+				  to_char(gen_grn.dc_date,'dd/mm/yyyy') AS dc_date,
+				  gen_grn.user_id AS created_by,
+				  part.name AS part_name,
+				  part.street as str1,
+				  ct.name as city,
+				  part.zip as zip,
+				  st.name as state,
+				  coun.name as country,
+				  prd.name_template AS product_name,
+				  grn_line.grn_qty AS qty,
+				  uom.name AS uom,
+				  grn_line.id AS line_id,
+				  grn_line.price_unit As cost_price,
+				  grn_line.kg_discount_per as discount,
+				  inw.name AS inward_type,
+				  gen_grn.amount_total as grn_total,
+				  res_cmp.name as comp_name
+
+				  FROM  kg_general_grn gen_grn
+
+				  left JOIN res_partner part ON (part.id=gen_grn.supplier_id)
+				  left join res_country_state st on(st.id=part.state_id)
+				  left join res_city ct on(ct.id=part.city_id)
+				  left join res_country as coun on(coun.id=part.country_id)
+				  left JOIN kg_general_grn_line grn_line ON (grn_line.grn_id=gen_grn.id)
+				  left JOIN kg_inwardmaster inw ON (inw.id = grn_line.inward_type)
+				  left JOIN product_uom uom ON (uom.id=grn_line.uom_id)
+				  left JOIN product_product prd ON (prd.id=grn_line.product_id)
+left join res_company res_cmp on (res_cmp.id=gen_grn.company_id)
+
+				  where gen_grn.type = 'in' and gen_grn.state in ('done') and gen_grn.grn_date >='2016-01-01' and gen_grn.grn_date <='2016-11-01'
+				  order by gen_grn.name)]]>
+		</queryString>
+		<field name="grn_id" class="java.lang.Integer"/>
+		<field name="grn_date" class="java.lang.String"/>
+		<field name="grn_datee" class="java.sql.Date"/>
+		<field name="grn_number" class="java.lang.String"/>
+		<field name="remarks" class="java.lang.String"/>
+		<field name="grn_total" class="java.math.BigDecimal"/>
+		<field name="dc_no" class="java.lang.String"/>
+		<field name="dc_date" class="java.lang.String"/>
+		<field name="created_by" class="java.lang.Integer"/>
+		<field name="part_name" class="java.lang.String"/>
+		<field name="str1" class="java.lang.String"/>
+		<field name="city" class="java.lang.String"/>
+		<field name="zip" class="java.lang.String"/>
+		<field name="state" class="java.lang.String"/>
+		<field name="country" class="java.lang.String"/>
+		<field name="product_name" class="java.lang.String"/>
+		<field name="qty" class="java.lang.Double"/>
+		<field name="uom" class="java.lang.String"/>
+		<field name="line_id" class="java.lang.Integer"/>
+		<field name="cost_price" class="java.lang.Double"/>
+		<field name="discount" class="java.math.BigDecimal"/>
+		<field name="inward_type" class="java.lang.String"/>
+		<field name="comp_name" class="java.lang.String"/>
+	</subDataset>
+	<parameter name="from_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="to_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="po_partner" class="java.lang.String"/>
+	<parameter name="gen_partner" class="java.lang.String"/>
+	<parameter name="wiz_id" class="java.lang.Integer"/>
+	<parameter name="status" class="java.lang.String"/>
+	<parameter name="print_date" class="java.lang.String"/>
+	<parameter name="printed_by" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select trim(TO_CHAR((sum(a.grn_total) OVER (PARTITION BY dummy))::float, '999G999G99G999G99G99G990D99')) as grand_total,ROW_NUMBER() Over (Partition by a.division) as num,*
+from ((SELECT
+po_grn.id AS grn_id,
+to_char(po_grn.grn_date,'dd/mm/yyyy') AS grn_date,
+po_grn.grn_date AS grn_datee,
+po_grn.name AS grn_number,
+po_grn.po_so_remark AS remarks,
+grn_line.price_subtotal As grn_total,
+(CASE WHEN po_grn.division = 'ppd'
+THEN 'PPD'
+WHEN po_grn.division = 'ipd'
+THEN 'IPD'
+WHEN po_grn.division = 'foundry'
+THEN 'FOU'
+ELSE ''
+end ) as division,
+case when (invoice_ids.name) is null then po_grn.dc_no else
+(po_grn.dc_no||' , '||invoice_ids.name) end AS dc_no,
+case when (invoice_ids.invoice_date) is null then to_char(po_grn.dc_date,'dd/mm/yyyy') else
+(to_char(po_grn.dc_date,'dd/mm/yyyy')||','||to_char(invoice_ids.invoice_date,'dd/mm/yyyy')) end AS dc_date,
+po_grn.created_by AS created_by,
+part.name AS part_name,
+part.street as str1,
+ct.name as city,
+part.zip as zip,
+st.name as state,
+coun.name as country,
+prd.name_template AS product_name,
+moc.name AS moc,
+grn_line.po_grn_qty AS qty,
+uom.name AS uom,
+grn_line.id AS line_id,
+grn_line.price_unit As cost_price,
+grn_line.kg_discount_per as discount,
+inw.name AS inward_type,
+to_char((grn_line.price_subtotal)::float, '999G999G99G999G99G99G990D99') as grn_totals,
+res_cmp.name as comp_name,
+grn_line.order_no as order_no,
+to_char(grn_line.order_date::date,'dd/mm/yyyy') AS order_date,
+1 as dummy,
+(select to_char(from_date,'dd-mm-yyyy') from kg_grn_register_wiz where id =$P{wiz_id} ) as from_date,
+(select to_char(to_date,'dd-mm-yyyy') from kg_grn_register_wiz where id =$P{wiz_id} ) as to_date,
+case when (select status from kg_grn_register_wiz where id =$P{wiz_id}) is null then 'All'
+else (select status from kg_grn_register_wiz where id =$P{wiz_id}) end as status,
+users.login as printed_by,
+(select to_char(print_date + interval '5.30 hour','dd-mm-YYYY HH:MM:SS') from kg_grn_register_wiz where id =$P{wiz_id}) as print_date
+
+FROM  kg_po_grn po_grn
+
+left JOIN res_partner part ON (part.id=po_grn.supplier_id)
+left join res_country_state st on(st.id=part.state_id)
+left join res_city ct on(ct.id=part.city_id)
+left join res_country as coun on(coun.id=part.country_id)
+left JOIN po_grn_line grn_line ON (grn_line.po_grn_id=po_grn.id)
+left JOIN ch_brandmoc_rate_details moc_temp ON (moc_temp.id=grn_line.moc_id_temp)
+left JOIN kg_moc_master moc ON (moc.id=moc_temp.moc_id)
+left JOIN kg_inwardmaster inw ON (inw.id = grn_line.inward_type)
+left JOIN product_uom uom ON (uom.id=grn_line.uom_id)
+left JOIN product_product prd ON (prd.id=grn_line.product_id)
+left join res_company res_cmp on (res_cmp.id=po_grn.company_id)
+left join purchase_invoice_grn_ids grn_invoice_ids on (grn_invoice_ids.grn_id=po_grn.id)
+left join kg_purchase_invoice invoice_ids on (invoice_ids.id=grn_invoice_ids.invoice_id)
+left join res_users users on (users.id=(select user_id from kg_grn_register_wiz where id =$P{wiz_id}))
+
+where
+
+CASE
+WHEN (select product_id from kg_grn_wiz_pro where order_id = $P{wiz_id} limit 1) > 0 THEN grn_line.product_id in
+(select product_id from kg_grn_wiz_pro where order_id = $P{wiz_id})
+ELSE
+grn_line.product_id in (select id
+from product_product)
+end and
+
+CASE
+WHEN (select supplier_id from kg_grn_wiz_sup where order_id = $P{wiz_id} limit 1) > 0 THEN po_grn.supplier_id in
+(select supplier_id from kg_grn_wiz_sup where order_id = $P{wiz_id})
+ELSE
+po_grn.supplier_id in (select id
+from res_partner)
+end and
+
+
+CASE
+WHEN (select division from kg_grn_register_wiz where id = $P{wiz_id} limit 1) is not null THEN po_grn.division in
+(select division from kg_grn_register_wiz where id = $P{wiz_id})
+ELSE
+po_grn.division in ('ppd','ipd','foundry')
+end and
+
+
+po_grn.type = 'in'
+
+and
+case
+when (select status from kg_grn_register_wiz where id = $P{wiz_id}) is not null then po_grn.state in (select status from kg_grn_register_wiz where id = $P{wiz_id})
+else
+po_grn.state !='draft' end
+
+and po_grn.grn_date >=to_date($P{from_date},'YYYY-MM-DD') or $P{from_date} = '' and po_grn.grn_date <= to_date($P{to_date},'YYYY-MM-DD') or $P{to_date} = ''
+order by po_grn.name)
+
+UNION
+
+(SELECT
+gen_grn.id AS grn_id,
+to_char(gen_grn.grn_date,'dd/mm/yyyy') AS grn_date,
+gen_grn.grn_date AS grn_datee,
+gen_grn.name AS grn_number,
+gen_grn.remark AS remarks,
+gen_grn.sub_total As grn_total,
+' ' as division,
+case when (invoice_idss.name) is null then gen_grn.dc_no else
+(gen_grn.dc_no||','||invoice_idss.name) end AS dc_no,
+case when (invoice_idss.invoice_date) is null then to_char(gen_grn.dc_date,'dd/mm/yyyy') else
+(to_char(gen_grn.dc_date,'dd/mm/yyyy')||' , '||to_char(invoice_idss.invoice_date,'dd/mm/yyyy')) end AS dc_date,
+gen_grn.user_id AS created_by,
+part.name AS part_name,
+part.street as str1,
+ct.name as city,
+part.zip as zip,
+st.name as state,
+coun.name as country,
+prd.name_template AS product_name,
+moc.name AS moc,
+grn_line.grn_qty AS qty,
+uom.name AS uom,
+grn_line.id AS line_id,
+grn_line.price_unit As cost_price,
+grn_line.kg_discount_per as discount,
+inw.name AS inward_type,
+to_char((grn_line.price_subtotal)::float, '999G999G99G999G99G99G990D99') as grn_totals,
+res_cmp.name as comp_name,
+'-----------'::text as order_no,
+'-----------'::text as order_date,
+1 as dummy,
+(select to_char(from_date,'dd-mm-yyyy') from kg_grn_register_wiz where id =$P{wiz_id} ) as from_date,
+(select to_char(to_date,'dd-mm-yyyy') from kg_grn_register_wiz where id =$P{wiz_id} ) as to_date,
+case when (select status from kg_grn_register_wiz where id =$P{wiz_id}) is null then 'All'
+else (select status from kg_grn_register_wiz where id =$P{wiz_id}) end as status,
+users.login as printed_by,
+(select to_char(print_date + interval '5.30 hour','dd-mm-YYYY HH:MM:SS') from kg_grn_register_wiz where id =$P{wiz_id}) as print_date
+
+FROM  kg_general_grn gen_grn
+
+left JOIN res_partner part ON (part.id=gen_grn.supplier_id)
+left join res_country_state st on(st.id=part.state_id)
+left join res_city ct on(ct.id=part.city_id)
+left join res_country as coun on(coun.id=part.country_id)
+left JOIN kg_general_grn_line grn_line ON (grn_line.grn_id=gen_grn.id)
+left JOIN ch_brandmoc_rate_details moc_temp ON (moc_temp.id=grn_line.moc_id_temp)
+left JOIN kg_moc_master moc ON (moc.id=moc_temp.moc_id)
+left JOIN kg_inwardmaster inw ON (inw.id = grn_line.inward_type)
+left JOIN product_uom uom ON (uom.id=grn_line.uom_id)
+left JOIN product_product prd ON (prd.id=grn_line.product_id)
+left join res_company res_cmp on (res_cmp.id=gen_grn.company_id)
+left join purchase_invoice_general_grn_ids gen_invoice_ids on (gen_invoice_ids.grn_id=gen_grn.id)
+left join kg_purchase_invoice invoice_idss on (invoice_idss.id=gen_invoice_ids.invoice_id)
+left join res_users users on (users.id=(select user_id from kg_grn_register_wiz where id =$P{wiz_id}))
+
+where
+CASE
+WHEN (select product_id from kg_grn_wiz_pro where order_id = $P{wiz_id} limit 1) > 0 THEN grn_line.product_id in
+(select product_id from kg_grn_wiz_pro where order_id = $P{wiz_id})
+ELSE
+grn_line.product_id in (select id
+from product_product)
+end and
+
+CASE
+WHEN (select supplier_id from kg_grn_wiz_sup where order_id = $P{wiz_id} limit 1) > 0 THEN gen_grn.supplier_id in
+(select supplier_id from kg_grn_wiz_sup where order_id = $P{wiz_id})
+ELSE
+gen_grn.supplier_id in (select id
+from res_partner)
+end and
+gen_grn.type = 'in' and
+
+case
+when (select status from kg_grn_register_wiz where id = $P{wiz_id}) is not null then gen_grn.state in (select status from kg_grn_register_wiz where id = $P{wiz_id})
+else
+gen_grn.state !='draft' end
+
+and gen_grn.grn_date >= to_date($P{from_date},'YYYY-MM-DD') or $P{from_date} = '' and gen_grn.grn_date <=to_date($P{to_date},'YYYY-MM-DD') or $P{to_date} = ''
+order by gen_grn.name)) as a]]>
+	</queryString>
+	<field name="grand_total" class="java.lang.String"/>
+	<field name="num" class="java.lang.Long"/>
+	<field name="grn_id" class="java.lang.Integer"/>
+	<field name="grn_date" class="java.lang.String"/>
+	<field name="grn_datee" class="java.sql.Date"/>
+	<field name="grn_number" class="java.lang.String"/>
+	<field name="remarks" class="java.lang.String"/>
+	<field name="grn_total" class="java.lang.Double"/>
+	<field name="division" class="java.lang.String"/>
+	<field name="dc_no" class="java.lang.String"/>
+	<field name="dc_date" class="java.lang.String"/>
+	<field name="created_by" class="java.lang.Integer"/>
+	<field name="part_name" class="java.lang.String"/>
+	<field name="str1" class="java.lang.String"/>
+	<field name="city" class="java.lang.String"/>
+	<field name="zip" class="java.lang.String"/>
+	<field name="state" class="java.lang.String"/>
+	<field name="country" class="java.lang.String"/>
+	<field name="product_name" class="java.lang.String"/>
+	<field name="moc" class="java.lang.String"/>
+	<field name="qty" class="java.lang.Double"/>
+	<field name="uom" class="java.lang.String"/>
+	<field name="line_id" class="java.lang.Integer"/>
+	<field name="cost_price" class="java.lang.Double"/>
+	<field name="discount" class="java.math.BigDecimal"/>
+	<field name="inward_type" class="java.lang.String"/>
+	<field name="grn_totals" class="java.lang.String"/>
+	<field name="comp_name" class="java.lang.String"/>
+	<field name="order_no" class="java.lang.String"/>
+	<field name="order_date" class="java.lang.String"/>
+	<field name="dummy" class="java.lang.Integer"/>
+	<field name="from_date" class="java.lang.String"/>
+	<field name="to_date" class="java.lang.String"/>
+	<field name="status" class="java.lang.String"/>
+	<field name="printed_by" class="java.lang.String"/>
+	<field name="print_date" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="45" splitType="Stretch">
+			<textField>
+				<reportElement x="230" y="0" width="308" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{comp_name}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="538" y="33" width="63" height="10"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Date Range:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="331" y="20" width="100" height="12"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[GRN Register]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="601" y="33" width="43" height="10"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{from_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="643" y="33" width="14" height="10"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["to"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="656" y="33" width="49" height="10"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{to_date}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="33" width="40" height="12"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Status :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="40" y="33" width="100" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{status}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="25" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="-1" width="752" height="1"/>
+			</line>
+			<staticText>
+				<reportElement x="0" y="14" width="30" height="10"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[S.No]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="29" y="14" width="47" height="10"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[No]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="255" y="-1" width="32" height="25"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[UOM]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="75" y="-1" width="45" height="25"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="119" y="0" width="74" height="24"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Product]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="286" y="-1" width="46" height="25"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Rate]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="331" y="0" width="52" height="24"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Value]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="222" y="-1" width="34" height="25"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Qty]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="382" y="14" width="51" height="10"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[No]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="432" y="14" width="52" height="10"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="640" y="14" width="51" height="10"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="558" y="14" width="83" height="10"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[No]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="690" y="0" width="62" height="24"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Remarks]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="76" height="13"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[GRN]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="382" y="0" width="102" height="13"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Order]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="483" y="-1" width="76" height="25"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Vendor]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="558" y="-1" width="133" height="14"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[DC/INV]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="193" y="-1" width="30" height="25"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[MOC]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="37" splitType="Stretch">
+			<textField>
+				<reportElement x="30" y="15" width="47" height="22"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{grn_number}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="76" y="15" width="45" height="22"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{grn_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="120" y="14" width="73" height="23"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{product_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="223" y="14" width="34" height="23"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{qty}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="256" y="14" width="32" height="23"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{uom}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="287" y="14" width="46" height="23"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cost_price}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="332" y="14" width="52" height="23"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{grn_totals}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="383" y="14" width="51" height="23"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{order_no}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="433" y="14" width="52" height="23"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{order_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="484" y="14" width="76" height="23"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{part_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="559" y="14" width="83" height="23"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{dc_no}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="641" y="14" width="51" height="23"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{dc_date}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="691" y="14" width="62" height="23"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{remarks}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1" y="15" width="30" height="22"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{num}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="100" height="15" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[new Boolean($F{num}.intValue() == 1)]]></printWhenExpression>
+				</reportElement>
+				<box topPadding="2"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{division}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="193" y="14" width="30" height="23"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{moc}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="298" height="20"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{printed_by}+"/"+$F{print_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="298" y="0" width="80" height="20"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="378" y="0" width="374" height="20"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="41" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="247" height="20"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7" isBold="true" isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Grand Total]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="248" y="0" width="135" height="20"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{grand_total}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="383" y="0" width="369" height="20"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+	<noData>
+		<band height="21">
+			<staticText>
+				<reportElement x="295" y="0" width="165" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[No Records Found]]></text>
+			</staticText>
+		</band>
+	</noData>
+</jasperReport>

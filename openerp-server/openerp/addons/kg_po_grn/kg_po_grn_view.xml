@@ -116,7 +116,9 @@
 									<group>
 										<field name="product_id" on_change="onchange_product_id(product_id,uom_id)" readonly="1"/>
 										<!--<field name="product_id" on_change="onchange_product_id(product_id,uom_id)" attrs="{'readonly': [('billing_type','=','cost')]}"/> -->
-										<field name="brand_id" attrs="{'readonly': [('billing_type','=','cost')]}"/>      
+										<field name="brand_id" attrs="{'readonly': [('billing_type','=','cost')]}"/>
+										<field name="moc_id" invisible="1" readonly="1"/>
+										<field name="moc_id_temp" on_change="onchange_moc(moc_id_temp)" readonly="1"/>
 										<field name="uom_id" attrs="{'readonly': [('billing_type','=','cost')]}"/>
 										<field name="price_type" readonly="1" invisible="1"/>
 									</group> 
@@ -411,7 +413,9 @@
 									<group>
 										<field name="product_id" on_change="onchange_product_id(product_id,uom_id)" readonly="1"/>
 										<!--<field name="product_id" on_change="onchange_product_id(product_id,uom_id)" attrs="{'readonly': [('billing_type','=','cost')]}"/> -->
-										<field name="brand_id" attrs="{'readonly': [('billing_type','=','cost')]}"/>      
+										<field name="brand_id" attrs="{'readonly': [('billing_type','=','cost')]}"/>    
+										<field name="moc_id" invisible="1" readonly="1"/>
+										<field name="moc_id_temp" on_change="onchange_moc(moc_id_temp)" readonly="1"/>
 										<field name="uom_id" attrs="{'readonly': [('billing_type','=','cost')]}"/>
 										<field name="price_type" readonly="1" invisible="1"/>
 									</group> 
