@@ -12,7 +12,7 @@
 					<header>
 						
 						<button name="mkt_approve" type="object" string="WFMKT Approval" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"
-							groups="kg_users_mgt.group_kg_crm_admin1"/>
+							/>
 						<button name="design_approve" type="object" string="WFD Approval" states="mkt_approved" class="oe_highlight" confirm="Are you sure to proceed ?"
 							groups="kg_users_mgt.group_planning_admin"/>
 						<button name="special_approve" type="object" string="Special Approval" class="oe_highlight" confirm="Are you sure to proceed ?"
