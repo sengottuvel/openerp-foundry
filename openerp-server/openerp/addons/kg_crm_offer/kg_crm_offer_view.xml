@@ -191,7 +191,7 @@
 							</group>
 						</group>
 						<group string="Terms">
-							<field name="line_term_ids" colspan="4" nolabel="1" attrs="{'readonly':[('state','!=','draft')]}">
+							<field name="line_term_ids" colspan="4" nolabel="1" attrs="{'readonly':[('state','!=','draft')],'readonly':[('load_term','=',False)]}">
 								<tree string="Term History" editable="top">
 									<field name="term_id" required="1" on_change="onchange_term(term_id)"/>
 									<field name="term" required="1"/>

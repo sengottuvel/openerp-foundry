@@ -1491,7 +1491,7 @@ class kg_crm_offer(osv.osv):
 		if line_term_ids:
 			cr.execute('''delete from ch_term_offer where header_id = %s '''%(line_term_ids[0][0]))
 		if load_term == True:
-			term_ids = self.pool.get('kg.offer.term').search(cr, uid, [('state','=','approved')])
+			term_ids = self.pool.get('kg.offer.term').search(cr, uid, [('state','not in',('reject','cancel'))])
 			if term_ids:
 				for item in term_ids:
 					term_rec = self.pool.get('kg.offer.term').browse(cr, uid, item)
@@ -1948,7 +1948,7 @@ class ch_term_offer(osv.osv):
 		
 		## Module Requirement Fields
 		
-		'term_id': fields.many2one('kg.offer.term','Name'),
+		'term_id': fields.many2one('kg.offer.term','Name',domain="[('state','not in',('reject','cancel'))]"),
 		'term': fields.text('Terms'),
 		
 	}
