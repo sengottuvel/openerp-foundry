@@ -144,7 +144,12 @@ class kg_ms_daily_planning(osv.osv):
 						raise osv.except_osv(_('Warning!'),
 									_('System not allow to save Zero values !!'))
 												
-				if (line_item.inhouse_qty + line_item.sc_qty) > line_item.schedule_qty:
+				if total_sc_qty[0] > 0:
+					total_sc_qty = total_sc_qty[0]
+				else:
+					total_sc_qty = 0
+				
+				if (line_item.inhouse_qty + total_sc_qty) > line_item.schedule_qty:
 					raise osv.except_osv(_('Warning!'),
 								_('In house qty and sc qty should not be more than Required Qty !!! '))
 								
@@ -1049,7 +1054,7 @@ class kg_ms_daily_planning(osv.osv):
 												op12_ms_dimension_id = ms_dimension_obj.create(cr, uid,op12_dimen_vals)
 											
 											
-				header_sc_qty = total_sc_qty[0]
+				header_sc_qty = total_sc_qty
 				if header_sc_qty > 0:
 					
 					
