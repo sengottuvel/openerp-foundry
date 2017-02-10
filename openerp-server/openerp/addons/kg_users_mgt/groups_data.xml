@@ -374,8 +374,8 @@
 			ref('kg_menus.ram_closing_stock'),
 			
 			ref('kg_menus.rpm_warehouse_reports'),
-			ref('kg_menus.ram_grn_register_reports'),
 			ref('kg_menus.ram_issue_register_reports'),
+			ref('kg_reports.ram_grn_register_reports'),
 			
             ])]" name="menu_access"/>
 <!--

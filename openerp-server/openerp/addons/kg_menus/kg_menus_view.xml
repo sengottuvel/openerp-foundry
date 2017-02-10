@@ -277,9 +277,6 @@
 			<!-- Warehouse Reports Menu -->
             <menuitem name="Warehouse" id="rpm_warehouse_reports" parent = "rpm_reports" sequence="3"/>
 				
-				<!-- GRN Register Report-->
-				<menuitem name="GRN Register" parent="rpm_warehouse_reports" action="kg_reports.action_grn_report" id="ram_grn_register_reports" sequence="1"/>
-				
 				<!-- Issue Register Report-->
 				<menuitem name="Issue Register" parent="rpm_warehouse_reports" action="kg_reports.action_dep_issue_register11" id="ram_issue_register_reports" sequence="2"/>
 				
