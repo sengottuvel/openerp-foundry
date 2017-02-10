@@ -88,7 +88,7 @@ class kg_crm_offer(osv.osv):
 		'term_copy': fields.char('Terms Copy'),
 		'revision': fields.integer('Revision'),
 		'wo_flag': fields.boolean('WO Flag'),
-		'load_term': fields.boolean('Terms Applicable'),
+		'load_term': fields.boolean('Terms Applicable',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
 		'revision_remarks': fields.text('Revision Remarks'),
 		
 		#~ 'ch_line_ids': fields.one2many('ch.kg.crm.pumpmodel', 'header_id', "Pump/Spare Details"),
@@ -1516,24 +1516,28 @@ class kg_crm_offer(osv.osv):
 		wbk = xlwt.Workbook()
 		style1 = xlwt.easyxf('font: bold on,height 240,color_index 0X36;' 'align: horiz center;''borders: left thin, right thin, top thin') 
 		style2 = xlwt.easyxf('font: height 200,color_index black;' 'align: wrap on, vert centre, horiz left;''borders: left thin, right thin, top thin, bottom thin') 
+		style4 = xlwt.easyxf('font: height 200,color_index black;' 'align: wrap on, vert centre, horiz center;''borders: left thin, right thin, top thin, bottom thin') 
 		style3 = xlwt.easyxf('font: height 200,color_index black;' 'align: wrap on, vert centre, horiz right;') 
 		
 		s1=0
 		"""adding a worksheet along with name"""
 		sheet1 = wbk.add_sheet('Terms Copy')
-		s2=4
+		s2=6
 		sheet1.col(0).width = 1500
 		sheet1.col(1).width = 8000
 		sheet1.col(2).width = 13000
 		
 		""" writing field headings """
-		sheet1.write_merge(s1, 0, 0, 2,"SAM Header",style1)
+		sheet1.write_merge(s1, 0, 0, 2,"SAM TURBO INDUSTRY PRIVATE LIMITED",style1)
 		sheet1.row(0).height = 400
-		sheet1.write_merge(1,1,0,1,"Offer No: ",style2)
-		sheet1.write_merge(1,1,2,2,"Offer Date: ",style2)
-		sheet1.write_merge(2,2,0,2,"Customer Name: ",style2)
-		sheet1.write_merge(3,3,0,2,"TERMS & CONDITIONS",style1)
-		sheet1.row(3).height = 300
+		sheet1.write_merge(1, 1, 0, 2,"Avinashi Road, Neelambur, Coimbatore - 641062",style4)
+		sheet1.write_merge(2, 2, 0, 2,"Tel:3053555, 3053556,Fax : 0422-3053535",style4)
+		
+		sheet1.write_merge(3,3,0,1,'Offer No: '+str(rec.name),style2)
+		sheet1.write_merge(3,3,2,2,'Offer Date: '+str(rec.offer_date),style2)
+		sheet1.write_merge(4,4,0,2,'Customer Name: '+str(rec.customer_id.name),style2)
+		sheet1.write_merge(5,5,0,2,"TERMS & CONDITIONS",style1)
+		sheet1.row(3).height = 350
 		"""writing data according to query and filteration in worksheet"""
 		sno=1
 		

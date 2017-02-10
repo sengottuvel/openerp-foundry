@@ -14,7 +14,7 @@
 						<button name="wo_creation" type="object" string="WO Creation" states="moved_to_offer" class="oe_highlight"/>
 						<button name="entry_revision" type="object" string="Create Revision" states="moved_to_offer,wo_created" class="oe_highlight"/>
 						<button name="offer_copy" type="object" states="moved_to_offer,wo_created" string="Offer Copy" class="oe_highlight"/>
-						<button name="term_copy" type="object" string="Terms Copy" class="oe_highlight"/>
+						<button name="term_copy" type="object" states="moved_to_offer,wo_created" string="Terms Copy" class="oe_highlight"/>
 					</header>
 						<group>
 							<group>
