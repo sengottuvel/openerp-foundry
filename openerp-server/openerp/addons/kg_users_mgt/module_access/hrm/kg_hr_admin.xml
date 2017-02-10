@@ -476,6 +476,16 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
 		</record>
 		
+		<record id="kg_hr_kg_turn_over" model="ir.model.access">
+			<field name="model_id" ref="kg_turn_over.model_kg_turn_over"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Turn Over</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
 		
 		
 		

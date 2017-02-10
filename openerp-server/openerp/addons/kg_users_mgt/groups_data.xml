@@ -527,6 +527,7 @@
 			ref('kg_menus.mam_kg_emp_categ'),
 			ref('kg_menus.mam_shift_master_1'),
 			ref('kg_leave_allocation.mam_standard_kg_leave_alloc'),
+			ref('kg_turn_over.mam_kg_turn_over'),
 			
 			
        
