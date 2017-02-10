@@ -242,15 +242,15 @@ class kg_work_order(osv.osv):
 				raise osv.except_osv(_('Warning!'),
 							_('Delivery Date should not be less than current date for Order !!'))
 							
-			number = 1
+			#~ number = 1
 			for item in entry.line_ids:
 				
 				### Work Order Number Generation in Line Details
-				cr.execute(''' select to_char(%s, 'FMRN') ''',[number])	  
-				roman = cr.fetchone()
-				order_name = entry.name + '-' + str(roman[0])
-				line_obj.write(cr, uid, item.id, {'order_no': order_name})
-				number = number + 1
+				#~ cr.execute(''' select to_char(%s, 'FMRN') ''',[number])	  
+				#~ roman = cr.fetchone()
+				#~ order_name = entry.name + '-' + str(roman[0])
+				#~ line_obj.write(cr, uid, item.id, {'order_no': order_name})
+				#~ number = number + 1
 				
 				order_line_ids.append(item.id)
 				line_delivery_date = str(item.delivery_date)
