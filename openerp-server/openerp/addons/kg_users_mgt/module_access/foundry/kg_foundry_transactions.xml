@@ -15,7 +15,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		<!-- Stock Inward End -->
@@ -29,7 +29,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		<!-- Stock Inward Child Class End-->
@@ -43,7 +43,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		<!-- Work Order End-->
@@ -57,21 +57,21 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		<!-- Work Order (Child Class) End-->
 		
 		<!-- Work Order BOM Child Class Start --> 
 		
-		<record id="t_foundry_orderbom_details" model="ir.model.access">
+		<record id="t_foundry_wo_orderbom_details" model="ir.model.access">
 			<field name="model_id" ref="kg_work_order.model_ch_order_bom_details"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">Order BOM Details</field>
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		<!-- Work Order BOM Child Class End --> 
@@ -86,23 +86,60 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		<!-- Work Order Machine Shop Items End -->
 		
 		<!-- Work Order BOT Start --> 
 		
-		<record id="t_foundry_sch_bot" model="ir.model.access">
+		<record id="t_foundry_wo_sch_bot" model="ir.model.access">
 			<field name="model_id" ref="kg_work_order.model_ch_order_bot_details"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">Work Order BOT Items</field>
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
+		<record id="t_foundry_ch_order_consu_details_sch_bot" model="ir.model.access">
+			<field name="model_id" ref="kg_work_order.model_ch_order_consu_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Work Order cons Items</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_foundry_ch_wo_accessories_sch_bot" model="ir.model.access">
+			<field name="model_id" ref="kg_work_order.model_ch_wo_accessories"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Work Order Accessories Items</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		<record id="t_foundry_ch_wo_accessories_ms_sch_bot" model="ir.model.access">
+			<field name="model_id" ref="kg_work_order.model_ch_wo_accessories_ms"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Work Order MS Items</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		<record id="t_foundry_ch_wo_accessories_bot_sch_bot" model="ir.model.access">
+			<field name="model_id" ref="kg_work_order.model_ch_wo_accessories_bot"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Work Order BOT Items</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
 		<!-- Work Order BOT End --> 
 		
 		<!-- Schedule Start -->
@@ -114,7 +151,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		<!-- Schedule End -->
@@ -128,7 +165,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		<!-- Schedule Child Class End -->
@@ -142,7 +179,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		<!-- Schedule (Allocation Details) End -->
@@ -156,7 +193,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		<!-- QC Verification End -->
@@ -171,7 +208,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		<!-- Production End -->
@@ -185,7 +222,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		<!-- Melting End -->
@@ -200,7 +237,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		<!-- Pouring Log End-->
@@ -214,7 +251,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		<!-- Pouring Child Class End-->
@@ -229,7 +266,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		<!-- Pattern Batch Issue End --> 
@@ -243,7 +280,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		<!-- Pattern Batch Issue Line End --> 
@@ -257,7 +294,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		<!-- Core Batch Ends--> 
@@ -271,7 +308,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		<!-- Core Batch Ends--> 
@@ -285,7 +322,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		<!-- Mould Batch Ends--> 
@@ -299,25 +336,11 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		<!-- Core Batch Ends-->
 		
-		<!-- Foundry Stock Start -->
-		
-		<record id="t_foundry_foundry_stock" model="ir.model.access">
-			<field name="model_id" ref="kg_foundry_stock.model_kg_foundry_stock"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">Foundry Stock</field>
-			<field eval="1" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
-		</record>
-		
-		
-		<!-- Foundry Stock End -->
 		
 		
 		<!-- Fettling Inward Start --> 
@@ -329,7 +352,17 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_kg_foundry_rejection_list" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_kg_foundry_rejection_list"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Foundry Rejection List</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		<!-- Fettling Inward End-->
@@ -344,7 +377,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
@@ -360,7 +393,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
@@ -375,7 +408,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
@@ -391,7 +424,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
@@ -406,7 +439,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
@@ -422,7 +455,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
@@ -437,7 +470,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
@@ -453,7 +486,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
@@ -469,7 +502,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
@@ -485,7 +518,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
@@ -500,7 +533,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
@@ -516,7 +549,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
@@ -531,7 +564,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
@@ -547,7 +580,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
@@ -562,7 +595,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
@@ -578,7 +611,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
@@ -593,7 +626,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
@@ -609,7 +642,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
@@ -624,27 +657,27 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
 		<!-- Batch Finish Grinding End -->
 		
-		<!-- Batch Finish Grinding Batch Line Start --> 
 		
-		<record id="t_foundry_finish_grinding_line_update" model="ir.model.access">
-			<field name="model_id" ref="kg_fettling.model_ch_batch_finish_grinding_line"/>
+		<!-- Batch Rough Grinding Line Start --> 
+		
+		<record id="t_foundry_batch_rough_grinding_line" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling.model_ch_batch_rough_grinding_line"/>
 			<field eval="1" name="perm_read"/>
-			<field name="name">Finish Grinding Batch Line update</field>
+			<field name="name">Rough Grinding Batch Line</field>
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
-		<!-- Batch Finish Grinding Line End -->
-		
+		<!-- Batch Rough Grinding Line End -->
 		
 		<!-- Melting Log Charge Details Line Start --> 
 		
@@ -655,7 +688,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
@@ -670,71 +703,11 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
 		<!-- Melting Log Chemistry Details Line End -->
-		
-		
-		<!-- Department Indent Start --> 
-		
-		<record id="t_foundry_dep_indent" model="ir.model.access">
-			<field name="model_id" ref="kg_depindent.model_kg_depindent"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">Dep Indent</field>
-			<field eval="1" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
-		</record>
-		
-		
-		<!-- Department Indent End -->
-		
-		<!-- Department Indent Line Start --> 
-		
-		<record id="t_foundry_dep_indent_line" model="ir.model.access">
-			<field name="model_id" ref="kg_depindent.model_kg_depindent_line"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">Dep Indent Line</field>
-			<field eval="1" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
-		</record>
-		
-		
-		<!-- Department Indent LINE End -->
-		
-		<!-- Department Indent WO Line Start --> 
-		
-		<record id="t_foundry_dep_indent_wo_line" model="ir.model.access">
-			<field name="model_id" ref="kg_depindent.model_ch_depindent_wo"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">Dep Indent WO Line</field>
-			<field eval="1" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
-		</record>
-		
-		
-		<!-- Department Indent WO LINE End -->
-		
-		<!-- Mechanical Properties Start -->
-		
-		<record id="m_ch_mech_properties_access" model="ir.model.access">
-			<field name="model_id" ref="kg_melting.model_ch_mechanical_properties"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">Mechanical Properties</field>
-			<field eval="0" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
-		</record>
-		
-		<!-- Mechanical Properties END -->
 		
 		<!-- WO Amendment Start --> 
 		
@@ -745,7 +718,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
@@ -761,21 +734,21 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		<!-- Work Order Amendment  (Child Class) End-->
 		
 		<!-- Work Order Amendment  BOM Child Class Start --> 
 		
-		<record id="t_foundry_order_amd_bom_details" model="ir.model.access">
+		<record id="t_foundry_orderbom_details" model="ir.model.access">
 			<field name="model_id" ref="kg_wo_amendment.model_ch_amend_order_bom_details"/>
 			<field eval="1" name="perm_read"/>
-			<field name="name">BOM Details Amendment</field>
+			<field name="name">Order BOM Details</field>
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		<!-- Work Order Amendment  BOM Child Class End --> 
@@ -783,28 +756,28 @@
 		
 		<!-- Work Order Amendment  Machine Shop Items Start --> 
 		
-		<record id="t_foundry_order_amd_machineshop_item" model="ir.model.access">
+		<record id="t_foundry_wo_order_machineshop_item" model="ir.model.access">
 			<field name="model_id" ref="kg_wo_amendment.model_ch_amend_order_machineshop_details"/>
 			<field eval="1" name="perm_read"/>
-			<field name="name">Work Order Amendment Machine Shop Items</field>
+			<field name="name">Work Order Machine Shop Items</field>
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		<!-- Work Order Amendment  Machine Shop Items End -->
 		
 		<!-- Work Order Amendment  BOT Start --> 
 		
-		<record id="t_foundry_amd_sch_bot" model="ir.model.access">
+		<record id="t_foundry_sch_bot" model="ir.model.access">
 			<field name="model_id" ref="kg_wo_amendment.model_ch_amend_order_bot_details"/>
 			<field eval="1" name="perm_read"/>
-			<field name="name">Work Order Amendment BOT Items</field>
+			<field name="name">Work Order BOT Items</field>
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		<!-- Work Order Amendment  BOT End --> 
@@ -818,7 +791,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
@@ -834,7 +807,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
@@ -934,6 +907,7 @@
 		
 		<!-- Batch Heat Treatment3 Line End -->
 		
+		
 		<!-- Batch Re Shot Blasting Batch Start --> 
 		
 		<record id="t_foundry_batch_reshot_blasting" model="ir.model.access">
@@ -943,7 +917,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
@@ -959,82 +933,50 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
 		<!-- Batch Re Shot Blasting Line End -->
 		
-		<!-- Foundry Rejection List Start --> 
 		
-		<record id="t_foundry_foundry_rejection_list" model="ir.model.access">
-			<field name="model_id" ref="kg_fettling.model_kg_foundry_rejection_list"/>
+		
+		<!-- Foundry Invoice Process Start here --> 
+		
+		<record id="t_foundry_kg_foundry_invoice" model="ir.model.access">
+			<field name="model_id" ref="kg_foundry_invoice.model_kg_foundry_invoice"/>
 			<field eval="1" name="perm_read"/>
-			<field name="name">Foundry Rejection List</field>
+			<field name="name">Foundry Invoice Process</field>
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
 		
-		<!-- Foundry Rejection List End -->
-		
-		<!-- Work Order Accessories Start-->
-		
-		<record id="t_foundry_work_order_accessories" model="ir.model.access">
-			<field name="model_id" ref="kg_work_order.model_ch_wo_accessories"/>
+		<record id="t_foundry_ch_foundry_invoice_line_details" model="ir.model.access">
+			<field name="model_id" ref="kg_foundry_invoice.model_ch_foundry_invoice_line_details"/>
 			<field eval="1" name="perm_read"/>
-			<field name="name">Work Order Accessories</field>
+			<field name="name">Foundry Invoice Line Details</field>
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
-		<!-- Work Order Accessories End-->
 		
-		<!-- Work Order Accessories Foundry Start-->
-		
-		<record id="t_foundry_work_order_accessories_foundry" model="ir.model.access">
-			<field name="model_id" ref="kg_work_order.model_ch_wo_accessories_foundry"/>
+		<record id="t_foundry_ch_foundry_invoice_line_summary" model="ir.model.access">
+			<field name="model_id" ref="kg_foundry_invoice.model_ch_foundry_invoice_line_summary"/>
 			<field eval="1" name="perm_read"/>
-			<field name="name">WO Accessories Foundry</field>
+			<field name="name">Foundry Invoice Line Summary</field>
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
-		<!-- Work Order Accessories Foundry End-->
 		
-		<!-- Work Order Accessories MS Start-->
-		
-		<record id="t_foundry_work_order_accessories_ms" model="ir.model.access">
-			<field name="model_id" ref="kg_work_order.model_ch_wo_accessories_ms"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">WO Accessories MS</field>
-			<field eval="1" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
-		</record>
-		
-		<!-- Work Order Accessories MS End-->
-		
-		<!-- Work Order Accessories BOT Start-->
-		
-		<record id="t_foundry_work_order_accessories_bot" model="ir.model.access">
-			<field name="model_id" ref="kg_work_order.model_ch_wo_accessories_bot"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">WO Accessories BOT</field>
-			<field eval="1" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning_Admin')]"/>
-		</record>
-		
-		<!-- Work Order Accessories BOT End-->
+		<!-- Foundry Invoice Process End -->
 		
 		<!-- MS Store Inward Start --> 
 		
@@ -1077,44 +1019,6 @@
 		</record>
 		
 		<!-- MS Store Inward End -->
-		
-		
-		<!-- Foundry Invoice Process Start here --> 
-		
-		<record id="t_foundry_kg_foundry_invoice" model="ir.model.access">
-			<field name="model_id" ref="kg_foundry_invoice.model_kg_foundry_invoice"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">Foundry Invoice Process</field>
-			<field eval="1" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
-		</record>
-		
-		
-		<record id="t_foundry_ch_foundry_invoice_line_details" model="ir.model.access">
-			<field name="model_id" ref="kg_foundry_invoice.model_ch_foundry_invoice_line_details"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">Foundry Invoice Line Details</field>
-			<field eval="1" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
-		</record>
-		
-		
-		<record id="t_foundry_ch_foundry_invoice_line_summary" model="ir.model.access">
-			<field name="model_id" ref="kg_foundry_invoice.model_ch_foundry_invoice_line_summary"/>
-			<field eval="1" name="perm_read"/>
-			<field name="name">Foundry Invoice Line Summary</field>
-			<field eval="1" name="perm_unlink"/>
-			<field eval="1" name="perm_write"/>
-			<field eval="1" name="perm_create"/>
-			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
-		</record>
-		
-		
-		<!-- Foundry Invoice Process End -->
 		
     </data>
 </openerp>

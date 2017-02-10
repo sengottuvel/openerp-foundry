@@ -42,6 +42,7 @@
           
             ref('kg_stock_inward.tam_stock_inward_details'),
             ref('kg_work_order.tam_work_order'),
+             ref('kg_work_order.tam_wo_special_approval'),
             ref('kg_work_order.tam_unscheduled_work_order'),
             ref('kg_schedule.tam_schedule'),
             ref('kg_qc_verification.tam_qc_verification'),
@@ -474,6 +475,8 @@
 			ref('kg_site_visit_plan.tam_ch_site_visit_plan'),
 			ref('kg_service_inward.tam_service_inward'),
 			ref('kg_primecost_view.tam_primecost_view'),
+			
+			ref('kg_work_order.tam_crm_work_order'),
 			
             ])]" name="menu_access"/>
             <field name="users" eval="[(4, ref('base.user_root'))]"/>
