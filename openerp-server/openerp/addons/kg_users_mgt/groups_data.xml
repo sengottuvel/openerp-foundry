@@ -149,6 +149,7 @@
             ref('kg_menus.rpm_planning_reports'),
             ref('kg_menus.kg_dash_board'),
             ref('kg_reports.kg_pouring_pending_reports'),
+            ref('kg_reports.kg_casting_list_reports'),   
             
             
             
