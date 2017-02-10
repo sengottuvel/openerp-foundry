@@ -77,7 +77,7 @@
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" 
 								toolbar="True" string="Master">				
 					<field name="name"/>
-					<field name="code"/>
+					<field name="term"/>
 					<field name="state"/>
 				</tree>
 			</field>
