@@ -83,6 +83,7 @@ class kg_machine_shop(osv.osv):
 		'source_item': fields.many2one('kg.machine.shop', 'Source Item',domain="[('type','=',type),('active','=','t')]"),
 		'copy_flag':fields.boolean('Copy Flag'),
 		'list_moc_flag':fields.boolean('List MOC Flag'),
+		'flag_heat_no': fields.boolean('Heat No. Required'),		
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Created Date',readonly=True),
@@ -107,6 +108,7 @@ class kg_machine_shop(osv.osv):
 		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),	
 		'modify': 'no',
 		'copy_flag' : False,
+		'flag_heat_no' : False,
 		'ms_type':'new_item', 
 		
 	}

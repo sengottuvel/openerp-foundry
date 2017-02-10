@@ -57,7 +57,8 @@
 							<field name="making_cost"/>																		
 							<field name="dynamic_length"/>									
 							<field name="length_type" attrs="{'required': [('dynamic_length','=',True)],'invisible': [('dynamic_length','=',False)]}"/>									
-							<field name="need_hydro_test"/>															
+							<field name="need_hydro_test"/>	
+							<field name="flag_heat_no"/>																
 							<field name="pattern_state" style="width: 50%%" class="att_state_change"/>							
 							<field name="state" style="width: 30%%" class="att_state_change"/>							
 						</group>

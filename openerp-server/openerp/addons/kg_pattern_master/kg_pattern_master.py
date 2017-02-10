@@ -106,6 +106,7 @@ class kg_pattern_master(osv.osv):
 		'list_moc_flag': fields.boolean('List MOC Flag'),	
 		'need_dynamic_balancing': fields.boolean('Need Dynamic Balancing '),	
 		'need_hydro_test': fields.boolean('Need Hydro Test'),	
+		'flag_heat_no': fields.boolean('Heat No. Required'),
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Created Date',readonly=True),
@@ -136,6 +137,7 @@ class kg_pattern_master(osv.osv):
 		'copy_flag' : False,
 		'tolerance_flag' : False,
 		'pattern_type':'new_pattern',
+		'flag_heat_no' : False,
 	}
 	
 	def _Validation(self, cr, uid, ids, context=None):
