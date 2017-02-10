@@ -223,8 +223,8 @@ class ch_dynamic_balancing(osv.osv):
 		'header_id':fields.many2one('kg.qap.plan', 'QAP Name', required=True, ondelete='cascade'), 		
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern No', required=True,domain="[('active','=','t')]"),		
 		'pattern_name': fields.char('Pattern Name', readonly=True),		
-		'min_weight': fields.float('Min Weight' ,required=True),
-		'max_weight': fields.float('Max Weight' ,required=True),
+		'min_weight': fields.float('Min Weight(Gms)' ,required=True),
+		'max_weight': fields.float('Max Weight(Gms)' ,required=True),
 		'remarks':fields.text('Remarks'),		
 		
 	}	

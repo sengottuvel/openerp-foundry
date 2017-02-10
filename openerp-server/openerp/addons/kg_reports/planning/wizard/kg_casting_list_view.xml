@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<openerp>
+    <data>
+        
+        <record id="r_form_v_casting_list" model="ir.ui.view">
+            <field name="name">kg.casting.list.form</field>
+            <field name="model">kg.casting.list</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Casting List Statement">
+                   <group col="4" fill="0" height="500">	
+						<notebook tabpos="up" colspan="4">
+						<page string="Filters" name="filters">	
+						<group>										
+												   				     
+							<field name="order_id" widget="many2many_tags" required = "1" />						   				     
+							
+						</group>					   				     
+						</page>	                                                                           
+                    </notebook>     
+                     <separator colspan="4"/>
+						<group col="4" colspan="4">
+							<button name="create_report" string="Generate" type="object" icon="gtk-ok"/>
+						</group>
+						</group>
+                </form>
+            </field>
+        </record>
+        
+        
+        
+        <report string="Casting List Statement"
+		model="kg.casting.list"
+		auto="True"
+		name="jasper_casting_list_report"
+		rml="kg_reports/planning/report/kg_casting_list.jrxml"
+		id="castinglistreport" 
+		menu="False"
+		/>
+		
+       <record id="rma_casting_list" model="ir.actions.act_window">  
+            <field name="name">Casting List</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">kg.casting.list</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+            
+	<menuitem name="Casting List" parent="kg_menus.rpm_planning_reports" action="rma_casting_list" id="kg_casting_list_reports" sequence="4"/>	
+      
+
+    </data>
+</openerp>

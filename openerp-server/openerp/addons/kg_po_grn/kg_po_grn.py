@@ -414,6 +414,7 @@ class kg_po_grn(osv.osv):
 								'product_id': order_line.product_id.id,
 								'brand_id':order_line.brand_id.id,
 								'po_grn_qty': order_line.pending_qty,
+								'recvd_qty': order_line.pending_qty,
 								'po_qty':order_line.product_qty,
 								'po_pending_qty':order_line.pending_qty,
 								'uom_id': order_line.product_uom.id,
@@ -1542,15 +1543,19 @@ class po_grn_line(osv.osv):
 		
 	}
 	
-	def onchange_qty(self,cr,uid,ids, po_grn_qty, recvd_qty, reject_qty, context=None):
+	def onchange_qty(self,cr,uid,ids, po_grn_qty, recvd_qty, reject_qty,line_state, context=None):
 		value = {'recvd_qty': 0,'reject_qty': 0}
-		if po_grn_qty and recvd_qty == 0:
+		if line_state == 'draft':
 			value = {'recvd_qty': po_grn_qty,'reject_qty': 0}
-		elif po_grn_qty and recvd_qty >= 0:
-			if po_grn_qty > recvd_qty:
-				raise osv.except_osv(_('Warning!'),
-					_('Accepted qty should not be greater than Received qty!'))
-			value = {'recvd_qty': recvd_qty,'reject_qty': recvd_qty - po_grn_qty}
+		elif line_state == 'confirmed':
+			if po_grn_qty and recvd_qty == 0:
+				value = {'recvd_qty': po_grn_qty,'reject_qty': 0}
+			elif po_grn_qty and recvd_qty >= 0:
+				if po_grn_qty > recvd_qty:
+					raise osv.except_osv(_('Warning!'),
+						_('Accepted qty should not be greater than Received qty!'))
+				value = {'recvd_qty': recvd_qty,'reject_qty': recvd_qty - po_grn_qty}
+			
 		return {'value': value}
 	
 	def onchange_product_id(self,cr,uid,ids, product_id, uom_id,context=None):
