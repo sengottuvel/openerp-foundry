@@ -1534,10 +1534,11 @@ class kg_crm_offer(osv.osv):
 		sheet1.write_merge(2, 2, 0, 2,"Tel:3053555, 3053556,Fax : 0422-3053535",style4)
 		
 		sheet1.write_merge(3,3,0,1,'Offer No: '+str(rec.name),style2)
-		sheet1.write_merge(3,3,2,2,'Offer Date: '+str(rec.offer_date),style2)
+		offer_date = datetime.strptime(rec.offer_date, '%Y-%m-%d').strftime('%d/%m/%Y')
+		sheet1.write_merge(3,3,2,2,'Offer Date: '+str(offer_date),style2)
 		sheet1.write_merge(4,4,0,2,'Customer Name: '+str(rec.customer_id.name),style2)
 		sheet1.write_merge(5,5,0,2,"TERMS & CONDITIONS",style1)
-		sheet1.row(3).height = 350
+		sheet1.row(5).height = 350
 		"""writing data according to query and filteration in worksheet"""
 		sno=1
 		
