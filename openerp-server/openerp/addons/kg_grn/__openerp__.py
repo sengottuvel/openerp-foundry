@@ -18,7 +18,7 @@ When a purchase order is created, you now have the opportunity to save the
 related requisition. This new object will regroup and will allow you to easily
 keep track and order all your purchase orders.
 """,
-    'depends' : ['base','purchase','stock','kg_depindent','kg_inwardmaster'],
+    'depends' : ['base','purchase','stock','kg_depindent','kg_inwardmaster','kg_po_grn','kg_general_grn','kg_service_order','kg_po_masters'],
     'data': [
 		'kg_grn_view.xml',
 		'kg_stock_partial_picking_view.xml',
