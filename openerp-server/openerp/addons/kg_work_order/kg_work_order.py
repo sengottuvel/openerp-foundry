@@ -329,7 +329,9 @@ class kg_work_order(osv.osv):
 							
 			#~ number = 1
 			print "entry.line_ids",entry.line_ids
+			
 			for item in entry.line_ids:
+				qc_created = 'no'
 				print "item",item
 				
 				### Work Order Number Generation in Line Details
@@ -339,7 +341,7 @@ class kg_work_order(osv.osv):
 				#~ line_obj.write(cr, uid, item.id, {'order_no': order_name})
 				#~ number = number + 1
 				
-				order_line_ids.append(item.id)
+				
 				
 								
 	
@@ -361,6 +363,7 @@ class kg_work_order(osv.osv):
 							and foundry_stock_state = 'ready_for_ms' and available_qty > 0 and stock_type = 'pump' and stock_mode = 'manual' 
 							order by serial_no """%(item.pump_model_id.id))
 						stock_inward_items = cr.dictfetchall();
+						print "stock_inward_items",stock_inward_items
 						
 						if stock_inward_items:
 							
@@ -429,6 +432,7 @@ class kg_work_order(osv.osv):
 										print "qc_vals",qc_vals	
 										
 										qc_id = qc_obj.create(cr, uid, qc_vals)
+										qc_created = 'yes'
 										
 										### Qty Updation in Stock Inward ###
 										
@@ -444,7 +448,11 @@ class kg_work_order(osv.osv):
 								
 				line_obj.write(cr, uid, item.id, {'pump_rem_qty':rem_qty})
 				
-					
+				print "qc_created",qc_created
+				if qc_created == 'no': 
+					order_line_ids.append(item.id)
+				
+				print "order_line_ids",order_line_ids
 				#~ if entry.order_priority == 'normal' and entry.order_category in ('spare','service'):
 				#~ 
 					#~ ### Schedule Creation ###
@@ -473,6 +481,7 @@ class kg_work_order(osv.osv):
 					#~ ### Schedule Confirmation ###
 					#~ 
 					#~ schedule_obj.entry_confirm(cr, uid, [schedule_id])
+					
 			
 			if entry.order_priority == 'emergency' and entry.order_category in ('pump','spare','pump_spare','service'):
 				

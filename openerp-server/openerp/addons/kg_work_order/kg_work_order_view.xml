@@ -12,7 +12,7 @@
 					<header>
 						
 						<button name="mkt_approve" type="object" string="WFMKT Approval" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"
-							groups="kg_users_mgt.group_kg_crm_admin1"/>
+							groups="kg_users_mgt.group_crm_admin"/>
 						<button name="design_approve" type="object" string="WFD Approval" states="mkt_approved" class="oe_highlight" confirm="Are you sure to proceed ?"
 							groups="kg_users_mgt.group_planning_admin"/>
 						<button name="special_approve" type="object" string="Special Approval" class="oe_highlight" confirm="Are you sure to proceed ?"
@@ -131,7 +131,7 @@
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
 				<tree string="Work Order Details Entry Tree" 
-					colors="blue:state == 'mkt_approved';violet:state == 'design_approved';gray:state == 'cancel';black:state == 'confirmed'" toolbar="1">	
+					colors="blue:state == 'draft';red:state == 'mkt_approved';violet:state == 'design_approved';gray:state == 'cancel';black:state == 'confirmed'" toolbar="1">	
 									
 					<field name="order_no"/>
 					<field name="order_date"/>

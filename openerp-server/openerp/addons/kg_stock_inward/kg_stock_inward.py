@@ -210,6 +210,7 @@ class ch_stock_inward_details(osv.osv):
 		'item_name': fields.char('Item Name', size=128),
 		'stock_location_id': fields.many2one('stock.location','Stock Location',domain="[('usage','=','production')]"),
 		'fettling_id': fields.integer('Fettling ID'),
+		'order_id': fields.integer('Work Order No.'),
 	
 	}
 	

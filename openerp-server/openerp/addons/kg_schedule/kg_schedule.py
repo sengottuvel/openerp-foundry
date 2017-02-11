@@ -1732,8 +1732,8 @@ class kg_schedule(osv.osv):
 								
 								indent_line_id = dep_indent_line_obj.create(cr, uid, bot_dep_indent_line_vals)
 							
-			else:
-				raise osv.except_osv(_('Warning !'), _('System not allow to confirm an entry without Schedule details!!'))
+			#~ else:
+				#~ raise osv.except_osv(_('Warning !'), _('System not allow to confirm an entry without Schedule details!!'))
 				
 			
 			if entry.entry_mode == 'auto':
