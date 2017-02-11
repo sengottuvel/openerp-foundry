@@ -1565,7 +1565,20 @@ class kg_stock_move(osv.osv):
     'kg_discount': fields.float('Discount Amount'),
     'exp_line_id':fields.one2many('kg.grn.exp.batch', 'grn_line_id','Expiry Batch Line'),
     
-        
+    # General GRN Line
+    
+    'general_grn_id':fields.many2one('kg.general.grn.line', 'General GRN Line Id'),
+    
+     # PO GRN Line
+    
+    'po_grn_line_id':fields.many2one('po.grn.line','PO GRN Entry Line'),
+	'po_grn_id':fields.many2one('kg.po.grn','PO GRN Entry'),
+	'po_id':fields.many2one('purchase.order','Purchase Order'),
+	'so_id':fields.many2one('kg.service.order','Service Order'),
+	'so_line_id':fields.many2one('kg.service.order.line','Service Order Line'),
+	'billing_type': fields.selection([('free', 'Free'), ('cost', 'Cost')], 'Billing Type'),
+	'brand_id':fields.many2one('kg.brand.master','Brand Name'),
+	
     }
     
     _defaults = {
