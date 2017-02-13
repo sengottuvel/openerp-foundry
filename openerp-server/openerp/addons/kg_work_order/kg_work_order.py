@@ -600,8 +600,8 @@ class kg_work_order(osv.osv):
 								print "acc_ms_item.qty",acc_ms_item.qty, type(acc_ms_item.qty)
 								print "acc_ms_prime_cost * acc_ms_item.qty",acc_ms_prime_cost * acc_ms_item.qty
 								print "acc_ms_prime_cost * acc_ms_item.qty",acc_ms_item.id
-								dummy_prime = acc_ms_prime_cost * acc_ms_item.qty
-								self.pool.get('ch.wo.accessories.ms').write(cr,uid,acc_ms_item.id,{'wo_prime_cost':dummy_prime})
+								
+								self.pool.get('ch.wo.accessories.ms').write(cr,uid,acc_ms_item.id,{'wo_prime_cost':acc_ms_prime_cost * float(acc_ms_item.qty)})
 								acc_primecost = acc_ms_prime_cost * acc_ms_item.qty
 								acc_total_primecost += acc_primecost 
 						for acc_bot_item in acc_item.line_ids_b:
