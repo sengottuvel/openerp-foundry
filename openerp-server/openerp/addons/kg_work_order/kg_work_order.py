@@ -596,6 +596,8 @@ class kg_work_order(osv.osv):
 							if acc_ms_item.is_applicable == True:
 								acc_ms_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'ms',0,
 								acc_ms_item.ms_id.id,0,order_item.moc_construction_id.id,acc_ms_item.moc_id.id,0)
+								print "acc_ms_prime_cost",acc_ms_prime_cost
+								print "acc_ms_item.qty",acc_ms_item.qty
 								self.pool.get('ch.wo.accessories.ms').write(cr,uid,acc_ms_item.id,{'wo_prime_cost':acc_ms_prime_cost * acc_ms_item.qty})
 								acc_primecost = acc_ms_prime_cost * acc_ms_item.qty
 								acc_total_primecost += acc_primecost 
