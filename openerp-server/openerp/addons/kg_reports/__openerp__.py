@@ -11,6 +11,7 @@
     'data': [		
 		'planning/wizard/kg_pouring_pending_print_view.xml',
 		'planning/wizard/kg_casting_list_view.xml',	
+		'planning/wizard/kg_machine_list_print_view.xml',		
 		'purchase/excel/kg_excel_po_register_view.xml',
 		'purchase/wizard/kg_po_register_wiz.xml',
 		'warehouse/wizard/main_closing_stock_wizard.xml',

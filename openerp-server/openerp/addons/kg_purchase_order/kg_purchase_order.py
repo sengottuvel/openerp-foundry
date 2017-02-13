@@ -458,7 +458,7 @@ class kg_purchase_order(osv.osv):
 							left join purchase_order po on (po.id = line.order_id)
 							where line.product_id = %s and line.order_id != %s 
 							and po.state in ('approved')
-							order by line.price_unit desc limit 1"""%(item.product_id.id,obj.id)
+							order by line.id desc limit 1"""%(item.product_id.id,obj.id)
 				cr.execute(price_sql)		
 				price_data = cr.dictfetchall()
 				if price_data:
