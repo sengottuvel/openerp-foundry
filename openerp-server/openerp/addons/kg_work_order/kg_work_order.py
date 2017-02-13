@@ -596,11 +596,7 @@ class kg_work_order(osv.osv):
 							if acc_ms_item.is_applicable == True:
 								acc_ms_prime_cost = self.pool.get('kg.crm.enquiry')._prime_cost_calculation(cr,uid,'ms',0,
 								acc_ms_item.ms_id.id,0,order_item.moc_construction_id.id,acc_ms_item.moc_id.id,0)
-								print "acc_ms_prime_cost",acc_ms_prime_cost, type(acc_ms_prime_cost)
-								print "acc_ms_item.qty",acc_ms_item.qty, type(acc_ms_item.qty)
-								print "acc_ms_prime_cost * acc_ms_item.qty",acc_ms_prime_cost * acc_ms_item.qty
-								print "acc_ms_prime_cost * acc_ms_item.qty",acc_ms_item.id
-								cr.execute(''' update ch_wo_accessories_ms set wo_prime_cost = %s where id = %s ''',[acc_ms_prime_cost * acc_ms_item.qty,acc_ms_item.id])
+								self.pool.get('ch.wo.accessories.ms').write(cr,uid,acc_ms_item.id,{'wo_prime_cost':acc_ms_prime_cost * acc_ms_item.qty})
 								acc_primecost = acc_ms_prime_cost * acc_ms_item.qty
 								acc_total_primecost += acc_primecost 
 						for acc_bot_item in acc_item.line_ids_b:
@@ -757,6 +753,7 @@ class ch_work_order_details(osv.osv):
 		'flag_for_stock': fields.boolean('For Stock'),
 		### Offer Details ###
 		'pump_offer_line_id': fields.integer('Pump Offer'),
+		'enquiry_line_id': fields.integer('Enquiry Line Id'),
 		'line_ids_d': fields.one2many('ch.wo.accessories', 'header_id', "Accessories"),
 		## QAP ##
 		'qap_plan_id': fields.many2one('kg.qap.plan', 'QAP Standard',required=True),
@@ -2344,7 +2341,7 @@ class ch_wo_accessories_ms(osv.osv):
 		### machineshop Item Details ####
 		'header_id':fields.many2one('ch.wo.accessories', 'Header Id', ondelete='cascade'),
 		
-		'pos_no': fields.related('position_id','name', type='integer', string='Position No', store=True),
+		'pos_no': fields.related('position_id','name', type='char', string='Position No', store=True),
 		'position_id': fields.many2one('kg.position.number','Position No'),
 		'csd_no': fields.char('CSD No.'),
 		'bom_id': fields.many2one('kg.bom','BOM'),

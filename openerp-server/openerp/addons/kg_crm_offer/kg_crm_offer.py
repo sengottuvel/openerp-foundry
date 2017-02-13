@@ -438,6 +438,7 @@ class kg_crm_offer(osv.osv):
 			'qty': qty,
 			'flag_load_bom': True,
 			'delivery_date': item.header_id.del_date,
+			'enquiry_line_id': enquiry_line_id,
 			'pump_offer_line_id': off_line_id,
 			'pump_model_type': pump_model_type,
 			'rpm': speed_in_rpm,
