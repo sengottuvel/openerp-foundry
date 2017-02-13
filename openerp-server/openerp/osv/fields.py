@@ -1119,7 +1119,9 @@ class function(_column):
                 result = get_nice_size(value)
             elif not context.get('bin_raw'):
                 result = sanitize_binary_value(value)
-
+		
+		print "field_type",field_type
+		print "value",value
         if field_type == "integer" and value > xmlrpclib.MAXINT:
             # integer/long values greater than 2^31-1 are not supported
             # in pure XMLRPC, so we have to pass them as floats :-(
