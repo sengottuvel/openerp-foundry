@@ -273,7 +273,9 @@ class kg_subcontract_wo(osv.osv):
 						'moc_id':item.moc_id.id ,
 						'operation_id':pos_rec.id,
 						'stage_id':pos_rec.stage_id.id,				
-						'op_rate':operation_rate,				
+						'op_rate':operation_rate,	
+						'flag_read':True,			
+								
 										
 									
 					}	
@@ -338,7 +340,7 @@ class kg_subcontract_wo(osv.osv):
 		
 	def entry_approve(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.state == 'confirmed':
+		if entry.state == 'confirmed':			
 			sc_obj = self.pool.get('kg.subcontract.process')
 			if entry.line_ids:
 				for line in entry.line_ids:				
@@ -395,7 +397,7 @@ class kg_subcontract_wo(osv.osv):
 		
 	def approve_dc(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.state == 'confirmed':
+		if entry.state == 'confirmed':			
 			sc_obj = self.pool.get('kg.subcontract.process')
 			dc_obj = self.pool.get('kg.subcontract.dc')
 			dc_obj_line = self.pool.get('ch.subcontract.dc.line')		
@@ -624,10 +626,17 @@ class ch_wo_operation_details(osv.osv):
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
 		'operation_id': fields.many2one('ch.kg.position.number','Operation',required=True,domain="[('header_id','=',position_id)]"),
 		'stage_id': fields.many2one('kg.stage.master','Stage',domain="[('state','not in',('reject','cancel'))]"), 			
-		'op_rate':fields.float('Rate(Rs)',required=True),					
+		'op_rate':fields.float('Rate(Rs)',required=True),
+		'flag_read': fields.boolean('Read Flag'),					
 		'remarks':fields.text('Remarks'),		
 	}
 	
+	_defaults = {
+		
+		
+		'flag_read': False,
+		
+	}
 	
 	
 	def default_get(self, cr, uid, fields, context=None):

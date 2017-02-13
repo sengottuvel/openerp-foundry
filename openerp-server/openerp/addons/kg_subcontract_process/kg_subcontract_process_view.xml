@@ -381,14 +381,15 @@
 						</group>
 						<notebook>						
 							<page string="Work Order Operation Details" >
-								<field colspan="4" name="line_ids" nolabel="1" context="{'position_id':position_id,'moc_id':moc_id}"  attrs="{'readonly': [('read_flag','=',True)]}">
+								<field colspan="4" name="line_ids" nolabel="1" context="{'position_id':position_id,'moc_id':moc_id,'flag_read':read_flag}" >
 									<tree string = "Work Order Operation Items" editable="bottom">
-										<field name="operation_id" on_change="onchange_operation_rate(operation_id,position_id,moc_id)"/>
+										<field name="operation_id" on_change="onchange_operation_rate(operation_id,position_id,moc_id)" attrs="{'readonly': [('flag_read','=',True)]}"/>
 										<field name="stage_id" readonly="1"/>
-										<field name="op_rate" widget="char"/>																				
+										<field name="op_rate" widget="char" />																				
 										<field name="position_id" invisible="1"/>										
+										<field name="flag_read" invisible="1"/>										
 										<field name="moc_id" invisible="1"/>																
-										<field name="remarks" widget="char"/>										
+										<field name="remarks" widget="char" attrs="{'readonly': [('flag_read','=',True)]}"/>										
 									</tree>
 								</field>
 							</page>
