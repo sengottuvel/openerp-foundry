@@ -828,12 +828,12 @@ class kg_subcontract_dc(osv.osv):
 							'sub_wo_no':wo_name,							
 							})		
 				print"entry.line_ids",entry.line_ids
-				for line in entry.line_ids:	
-					print"line.sc_wo_line_id.line_ids11111",line.sc_wo_line_id.line_ids
-					for line in line.sc_wo_line_id.line_ids:		
-						print"2222222222222",		
-						sql = """ insert into m2m_dc_operation_details (dc_operation_id,dc_sub_id) VALUES(%s,%s) """ %(wo_line_id,line.operation_id.id)
-						cr.execute(sql)							
+			for line in entry.line_ids:	
+				print"line.sc_wo_line_id.line_ids11111",line.sc_wo_line_id.line_ids
+				for line in line.sc_wo_line_id.line_ids:		
+					print"2222222222222",		
+					sql = """ insert into m2m_dc_operation_details (dc_operation_id,dc_sub_id) VALUES(%s,%s) """ %(wo_line_id,line.operation_id.id)
+					cr.execute(sql)							
 				
 			self.write(cr, uid, ids, {'flag_dc': True})
 			
