@@ -814,7 +814,11 @@ class kg_subcontract_dc(osv.osv):
 							
 				}
 				
-				wo_line_id = wo_line_obj.create(cr, uid,vals)				
+				wo_line_id = wo_line_obj.create(cr, uid,vals)
+				dc_rec = self.pool.get('ch.subcontract.dc.line').browse(cr, uid, wo_line_id)		
+				for line_op in dc_rec.sc_wo_line_id.line_ids:								
+					sql = """ insert into m2m_dc_operation_details (dc_operation_id,dc_sub_id) VALUES(%s,%s) """ %(wo_line_id,line_op.operation_id.id)
+					cr.execute(sql)						
 				cr.execute(""" select distinct sub_wo_id from ch_subcontract_dc_line where header_id = %s """ %(entry.id))
 				wo_data = cr.dictfetchall()
 				wo_list = []				
@@ -827,13 +831,7 @@ class kg_subcontract_dc(osv.osv):
 					self.write(cr,uid,ids[0],{
 							'sub_wo_no':wo_name,							
 							})		
-				print"entry.line_ids",entry.line_ids
-				for line in entry.line_ids:	
-					print"line.sc_wo_line_id.line_ids11111",line.sc_wo_line_id.line_ids
-					for line in line.sc_wo_line_id.line_ids:		
-						print"2222222222222",		
-						sql = """ insert into m2m_dc_operation_details (dc_operation_id,dc_sub_id) VALUES(%s,%s) """ %(wo_line_id,line.operation_id.id)
-						cr.execute(sql)							
+										
 				
 			self.write(cr, uid, ids, {'flag_dc': True})
 			
