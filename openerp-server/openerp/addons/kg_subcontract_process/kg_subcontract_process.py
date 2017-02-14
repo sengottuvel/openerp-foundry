@@ -809,8 +809,7 @@ class kg_subcontract_dc(osv.osv):
 					'sc_wo_qty':item.qty,					
 					'sc_dc_qty':item.qty - item.sc_dc_qty,					
 					'sc_wo_line_id': item.id,
-					'sub_wo_id': item.header_id.id,
-					'operation_id':[(6, 0, [x.id for x in item.operation_id])],
+					'sub_wo_id': item.header_id.id,					
 					'entry_mode':'from_wo',
 							
 				}
