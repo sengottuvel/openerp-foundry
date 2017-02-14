@@ -98,6 +98,7 @@ class kg_work_order(osv.osv):
 		#~ 'enquiry_id': fields.many2one('kg.crm.enquiry','Enquiry No.'),
 		#~ 'offer_id': fields.many2one('kg.crm.offer','Offer No.'),
 		'wo_spc_app_flag': fields.boolean('WO Special Approval'),
+		'design_flag': fields.boolean('Design Flag'),
 		
 		
 		### Entry Info ####
@@ -135,6 +136,7 @@ class kg_work_order(osv.osv):
 		'flag_for_stock': False,
 		'invoice_flag': False,
 		'wo_spc_app_flag': False,
+		'design_flag': False,
 		
 	}
 	
@@ -233,7 +235,7 @@ class kg_work_order(osv.osv):
 	def mkt_approve(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'draft':
-			self.write(cr,uid,ids,{'state':'mkt_approved'})
+			self.write(cr,uid,ids,{'state':'mkt_approved','design_flag':True})
 		return True
 		
 	def design_approve(self,cr,uid,ids,context=None):
@@ -242,7 +244,7 @@ class kg_work_order(osv.osv):
 		today = str(today)
 		today = datetime.strptime(today, '%Y-%m-%d')
 		wo_spc_app_flag = False
-		if entry.state == 'mkt_approved':
+		if entry.state in ('draft','mkt_approved'):
 			delivery_date = str(entry.delivery_date)
 			delivery_date = datetime.strptime(delivery_date, '%Y-%m-%d')
 			print "delivery_date",delivery_date
@@ -680,6 +682,17 @@ class kg_work_order(osv.osv):
 					self.pool.get('kg.crm.enquiry').write(cr,uid,off_rec.enquiry_id.id,{'state': 'moved_to_offer','wo_flag': False})
 				unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
+		
+	def create(self, cr, uid, vals, context=None):
+
+		if vals.get('state') == 'draft' and vals.get('entry_mode') == 'manual':
+			design_flag = True
+		else:
+			design_flag = False
+		vals.update({
+		'design_flag': design_flag,
+		})
+		return super(kg_work_order, self).create(cr, uid, vals, context=context)
 		
 	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})

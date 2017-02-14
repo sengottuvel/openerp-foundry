@@ -155,6 +155,7 @@ class kg_production(osv.osv):
 		
 		### Pattern Return ###
 		'return_state': fields.selection([('pending','Pending'),('partial','Partial'),('received','Received')],'Status', readonly=True),
+		'flag_pattern_check': fields.boolean('Pattern Check'),
 		
 		### Core Log ###
 		'core_no': fields.char('Core Log No.', size=128,readonly=True),
@@ -245,7 +246,9 @@ class kg_production(osv.osv):
 		'core_date':time.strftime('%Y-%m-%d %H:%M:%S'),
 		'mould_date':time.strftime('%Y-%m-%d %H:%M:%S'),
 		'difference_qty': 0,
-		'pour_qty': 0
+		'pour_qty': 0,
+		'flag_pattern_check': False,
+		
 		
 	}
 	
@@ -290,6 +293,7 @@ class kg_production(osv.osv):
 			'core_remarks': entry_rec.order_bomline_id.add_spec,
 			'state' : 'issue_done',
 			'issue_state' : 'issued',
+			'flag_pattern_check' : False,
 			})
 		else:
 			pass

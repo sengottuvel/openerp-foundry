@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<openerp>
+    <data>
+        
+        <record id="r_form_v_workorder_print" model="ir.ui.view">
+            <field name="name">kg.workorder.report.form</field>
+            <field name="model">kg.workorder.report</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Workorder Report Statement">
+                   <group col="4" fill="0" height="500">	
+						<notebook tabpos="up" colspan="4">
+						<page string="Filters" name="filters">	
+						<group>										
+												   				     
+							<field name="order_id" widget="many2many_tags" required = "1" />						   				     
+							
+						</group>					   				     
+						</page>	                                                                           
+                    </notebook>     
+                     <separator colspan="4"/>
+						<group col="4" colspan="4">
+							<button name="create_report" string="Generate" type="object" icon="gtk-ok"/>
+						</group>
+						</group>
+                </form>
+            </field>
+        </record>
+        
+        
+        
+        <report string="Work Order Print Statement"
+		model="kg.workorder.report"
+		auto="True"
+		name="jasper_workorder_report"
+		rml="kg_reports/planning/report/kg_workoder_report.jrxml"
+		id="workorderreport" 
+		menu="False"
+		/>
+		
+       <record id="rma_workorder_print" model="ir.actions.act_window">  
+            <field name="name">Work Order Print</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">kg.workorder.report</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+            
+	<menuitem name="Work Order Print" parent="kg_menus.rpm_planning_reports" action="rma_workorder_print" id="kg_workorder_print_reports" sequence="4"/>	
+      
+
+    </data>
+</openerp>

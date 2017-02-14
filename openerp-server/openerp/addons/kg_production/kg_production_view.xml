@@ -85,6 +85,7 @@
 					<field name="qty" string="Schedule Qty" sum="Total Qty"/>
 					<field name="each_weight" sum="Total Each Weight"/>
 					<field name="total_weight" sum="Total Weight"/>
+					<field name="flag_pattern_check"/>
 					<field name="sch_remarks"/>
 					<field name="state"/>
 					<field name="name" invisible="1"/>

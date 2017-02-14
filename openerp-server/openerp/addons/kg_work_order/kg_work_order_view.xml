@@ -33,6 +33,7 @@
 							<field name="flag_cancel" invisible="1"/>
 							<field name="entry_mode" invisible="1"/>
 							<field name="wo_spc_app_flag" invisible="1"/>
+							<field name="design_flag" invisible="1"/>
 							
 							
 						</group>											
@@ -426,7 +427,7 @@
 			<field name="context">{}</field>
 			<field name="view_id" ref="t_tree_v_work_order"/>
 			<field name="search_view_id" ref="t_search_v_work_order"/>
-			<field name="domain">[('wo_spc_app_flag','!=','t'),('state','!=','draft')]</field>
+			<field name="domain">[('wo_spc_app_flag','!=','t'),('design_flag','=','t')]</field>
 			
 		</record>
 		
@@ -443,7 +444,7 @@
 			<field name="context">{}</field>
 			<field name="view_id" ref="t_tree_v_work_order"/>
 			<field name="search_view_id" ref="t_search_v_work_order"/>
-			<field name="domain">[('wo_spc_app_flag','!=','t'),('state','=','draft')]</field>
+			<field name="domain">[('wo_spc_app_flag','!=','t'),('state','=','draft'),('entry_mode','=','auto')]</field>
 			
 		</record>
 		

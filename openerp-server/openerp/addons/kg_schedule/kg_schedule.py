@@ -243,7 +243,11 @@ class kg_schedule(osv.osv):
 									flag_allocate = False
 									flag_manual = True
 									allocation_qty = 0
-								elif bom_item.flag_pattern_check == True or bom_item.pattern_id.pattern_state != 'active':
+								else:
+									flag_allocate = True
+									flag_manual = False
+									allocation_qty = alloc_qty
+								if bom_item.flag_pattern_check == True or bom_item.pattern_id.pattern_state != 'active':
 									flag_allocate = False
 									flag_manual = True
 									allocation_qty = 0
@@ -251,6 +255,7 @@ class kg_schedule(osv.osv):
 									flag_allocate = True
 									flag_manual = False
 									allocation_qty = alloc_qty
+								
 									
 								
 								allocation_item_vals = {
@@ -265,15 +270,18 @@ class kg_schedule(osv.osv):
 									'flag_manual' : flag_manual,			
 								}
 								
-								sch_qty = bom_item.qty - tot_stock
-								if sch_qty < 0:
-									sch_qty = 0
+								if flag_allocate == True:
+									sch_qty = bom_item.qty - tot_stock
+									if sch_qty < 0:
+										sch_qty = 0
+									else:
+										sch_qty = sch_qty
 								else:
-									sch_qty = sch_qty
+									sch_qty = bom_item.qty
 								schedule_line_obj.write(cr, uid, schedule_line_id, {'stock_qty':tot_stock,'line_status':line_status,'qty':sch_qty})
 								
 								allocation_id = allocation_line_obj.create(cr, uid, allocation_item_vals)
-		
+								print "allocation_item_vals",allocation_item_vals
 				### Creating Schedule items for Purpose Accessories ###
 				for acc_item in order_item.line_ids_d:
 					for acc_bom_item in acc_item.line_ids:
@@ -350,7 +358,11 @@ class kg_schedule(osv.osv):
 									flag_allocate = False
 									flag_manual = True
 									allocation_qty = 0
-								elif acc_bom_item.pattern_id.pattern_state != 'active':
+								else:
+									flag_allocate = True
+									flag_manual = False
+									allocation_qty = alloc_qty
+								if acc_bom_item.pattern_id.pattern_state != 'active':
 									flag_allocate = False
 									flag_manual = True
 									allocation_qty = 0
@@ -358,6 +370,7 @@ class kg_schedule(osv.osv):
 									flag_allocate = True
 									flag_manual = False
 									allocation_qty = alloc_qty
+								
 									
 								
 								allocation_item_vals = {
@@ -428,11 +441,12 @@ class kg_schedule(osv.osv):
 					
 					where
 					header_id = %s and
-					qty > 0
+					qty > 0 and
+					flag_allocate = 't'
 					
 					''',[schedule_item.id])
 					allocation_qty = cr.fetchone()
-					
+					print "allocation_qty",allocation_qty
 					if allocation_qty:
 						if allocation_qty[0] != None:
 							
@@ -1116,6 +1130,7 @@ class kg_schedule(osv.osv):
 								'issue_qty': 1,
 								'issue_state': issue_state,
 								'sch_remarks': schedule_item.order_bomline_id.add_spec,
+								'flag_pattern_check': True,
 								
 							}
 							

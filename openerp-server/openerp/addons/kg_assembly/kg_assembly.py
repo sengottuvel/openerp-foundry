@@ -163,8 +163,29 @@ class kg_assembly_inward(osv.osv):
 				raise osv.except_osv(_('Warning!'),
 							_('Time Taken should be greater than zero!!'))
 							
-			
-		
+			### Heat Details Checking ###
+			for foundry_line_item in entry_rec.line_ids:
+				if foundry_line_item.pattern_id.flag_heat_no == True:
+					if not foundry_line_item.line_ids:
+						raise osv.except_osv(_('Warning !'), _('Heat No. is required for Pattern %s !!')%(foundry_line_item.pattern_id.name))
+					if foundry_line_item.line_ids:
+						cr.execute(''' select qty from ch_assembly_foundry_heat_details where header_id=%s ''',[foundry_line_item.id])
+						foundry_heat_qty = cr.fetchone()
+						if foundry_heat_qty[0]:
+							if foundry_heat_qty[0] != foundry_line_item.order_bom_qty:
+								raise osv.except_osv(_('Warning !'), _('Kindly give correct heat qty for Pattern %s !!')%(foundry_line_item.pattern_id.name))
+			for ms_line_item in entry_rec.line_ids_a:
+				if ms_line_item.ms_id.flag_heat_no == True:
+					if not ms_line_item.line_ids:
+						raise osv.except_osv(_('Warning !'), _('Heat No. is required for MS Item %s !!')%(ms_line_item.ms_id.name))
+					if ms_line_item.line_ids:
+						cr.execute(''' select qty from ch_assembly_ms_heat_details where header_id=%s ''',[ms_line_item.id])
+						ms_heat_qty = cr.fetchone()
+						print "ms_heat_qty",ms_heat_qty
+						if ms_heat_qty[0]:
+							if ms_heat_qty[0] != ms_line_item.order_ms_qty:
+								raise osv.except_osv(_('Warning !'), _('Kindly give correct heat qty for MS Item %s !!')%(ms_line_item.ms_id.name))
+
 			cr.execute(''' select id from ch_assembly_bom_details where state = 're_process' and header_id=%s ''',[ids[0]])
 			bom_re_process = cr.fetchone()
 			cr.execute(''' select id from ch_assembly_machineshop_details where state = 're_process' and header_id=%s ''',[ids[0]])
@@ -452,6 +473,8 @@ class ch_assembly_bom_details(osv.osv):
 			],'Status', readonly=True),
 		'reject_remarks': fields.text('Rejection Remarks'),
 		
+		'line_ids': fields.one2many('ch.assembly.foundry.heat.details', 'header_id', "Heat Details"),
+		
 	
 	}
 	
@@ -603,6 +626,7 @@ class ch_assembly_machineshop_details(osv.osv):
 			('rejected','Assembly Rejected'),
 			],'Status', readonly=True),
 		'reject_remarks': fields.text('Rejection Remarks'),
+		'line_ids': fields.one2many('ch.assembly.ms.heat.details', 'header_id', "Heat Details"),
 		
 	}
 	
@@ -715,6 +739,50 @@ class ch_assembly_bot_details(osv.osv):
 	
 
 ch_assembly_bot_details()
+
+
+class ch_assembly_foundry_heat_details(osv.osv):
+	
+	_name = "ch.assembly.foundry.heat.details"
+	_description = "Assembly Foundry Heat Details"	
+	
+	_columns = {
+	
+		'header_id':fields.many2one('ch.assembly.bom.details', 'Assembly Foundry', required=1, ondelete='cascade'),
+		'moc_id': fields.related('header_id','moc_id', type='many2one',relation='kg.moc.master', string='MOC', store=True, readonly=True),
+		'melting_id': fields.many2one('kg.melting','Heat No.',domain="[('moc_id','=',moc_id)]"),
+		'qty': fields.float('Qty'),
+
+	
+	}
+	
+	def default_get(self, cr, uid, fields, context=None):
+		return context
+	
+
+ch_assembly_foundry_heat_details()
+
+class ch_assembly_ms_heat_details(osv.osv):
+	
+	_name = "ch.assembly.ms.heat.details"
+	_description = "Assembly MS Heat Details"	
+	
+	_columns = {
+	
+		'header_id':fields.many2one('ch.assembly.machineshop.details', 'Assembly MS', required=1, ondelete='cascade'),
+		'moc_id': fields.related('header_id','moc_id', type='many2one',relation='kg.moc.master', string='MOC', store=True, readonly=True),
+		'melting_id': fields.many2one('kg.melting','Heat No.',domain="[('moc_id','=',moc_id)]"),
+		'qty': fields.float('Qty'),
+
+	
+	}
+	
+	def default_get(self, cr, uid, fields, context=None):
+		return context
+	
+	
+
+ch_assembly_ms_heat_details()
 
 
 ### Manual Assembly Inward ###
