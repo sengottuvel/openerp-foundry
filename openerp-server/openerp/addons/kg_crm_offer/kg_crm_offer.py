@@ -29,13 +29,14 @@ class kg_crm_offer(osv.osv):
 	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
 		res = {}
 		cur_obj=self.pool.get('res.currency')
-		pump_net_amount = spare_net_amount = access_net_amount = offer_net_amount = 0.00
+		pump_net_amount = spare_net_amount = access_net_amount = offer_net_amount = supervision_amount = 0.00
 		for order in self.browse(cr, uid, ids, context=context):
 			res[order.id] = {
 				'pump_net_amount': 0.0,
 				'spare_net_amount': 0.0,
 				'access_net_amount': 0.0,
 				'offer_net_amount': 0.0,
+				'supervision_amount': 0.0,
 			
 			}
 			
@@ -43,20 +44,21 @@ class kg_crm_offer(osv.osv):
 			
 			for line in order.line_pump_ids:
 				pump_net_amount += line.net_amount
-				print"pump_net_amount",pump_net_amount	
-				
+				print"pump_net_amount",pump_net_amount
+				supervision_amount += line.supervision_amount
 			for line in order.line_spare_ids:
 				spare_net_amount += line.net_amount
-				print"spare_net_amount",spare_net_amount	
-				
+				print"spare_net_amount",spare_net_amount
+				supervision_amount += line.supervision_amount
 			for line in order.line_accessories_ids:
 				access_net_amount += line.net_amount
-				print"access_net_amount",access_net_amount	
-				
+				print"access_net_amount",access_net_amount
+				supervision_amount += line.supervision_amount
 			res[order.id]['pump_net_amount'] = pump_net_amount
 			res[order.id]['spare_net_amount'] = spare_net_amount
 			res[order.id]['access_net_amount'] = access_net_amount
 			res[order.id]['offer_net_amount'] = pump_net_amount + spare_net_amount + access_net_amount
+			res[order.id]['supervision_amount'] = supervision_amount
 			
 		return res
 		
@@ -82,6 +84,7 @@ class kg_crm_offer(osv.osv):
 		'schedule_no': fields.char('Schedule No', size=128,select=True),
 		'enquiry_date': fields.related('enquiry_id','offer_date', type='date', string='Enquiry Date', store=True,required=True),
 		'customer_id': fields.related('enquiry_id','customer_id', type='many2one', relation="res.partner", string='Customer Name', store=True),
+		'del_date': fields.related('enquiry_id','del_date', type='date',string='Expected Delivery Date', store=True),
 		'service_det': fields.char('Service Details'),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD'),('export','Export')],'Location'),
 		'offer_copy': fields.char('Offer Copy'),
@@ -149,6 +152,7 @@ class kg_crm_offer(osv.osv):
 		'access_net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',multi="sums",store=True),	
 		
 		'offer_net_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Offer Amount',multi="sums",store=True),
+		'supervision_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Supervision Charge',multi="sums",store=True),
 		
 		## Child Tables Declaration
 		
@@ -712,12 +716,12 @@ class kg_crm_offer(osv.osv):
 		style8 = xlwt.easyxf('font: height 200,color_index black;' 'align: wrap on, vert centre, horiz centre;''borders: left thin, right thin, top thin, bottom thin') 
 		
 		
-		img = Image.open('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.png')
+		img = Image.open('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.png')
 		r, g, b, a = img.split()
 		img = Image.merge("RGB", (r, g, b))
-		img.save('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp')
-		img = Image.open('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.png')
-		img.save('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp')
+		img.save('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp')
+		img = Image.open('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.png')
+		img.save('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp')
 		
 		#~ r, g, b, a = img.split()
 		#~ img = Image.merge("RGB", (r, g, b))
@@ -806,8 +810,8 @@ class kg_crm_offer(osv.osv):
 				logo_size = 120
 			elif len_col >= 4:
 				logo_size = 100
-			sheet1.insert_bitmap('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
-			sheet1.insert_bitmap('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp',0,len_col,logo_size)
+			sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
+			sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp',0,len_col,logo_size)
 			#~ print"col_1",col_1
 			#~ sheet1.write(s1,col_no,str(col_1),style1)
 			col_no = col_no + 1
@@ -1658,6 +1662,8 @@ class ch_pump_offer(osv.osv):
 		'p_f': fields.float('P&F(%)'),
 		'freight': fields.float('Freight(%)'),
 		'insurance': fields.float('Insurance(%)'),
+		'ed': fields.float('ED(%)'),
+		'supervision_amount': fields.float('Supervision(Rs.)'),
 		'total_price': fields.float('Total Price(%)'),
 		
 		'tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),	
@@ -1790,6 +1796,8 @@ class ch_spare_offer(osv.osv):
 		'p_f': fields.float('P&F(%)'),
 		'freight': fields.float('Freight(%)'),
 		'insurance': fields.float('Insurance(%)'),
+		'ed': fields.float('ED(%)'),
+		'supervision_amount': fields.float('Supervision(Rs.)'),
 		'total_price': fields.float('Total Price'),
 		
 		'tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),	
@@ -1910,6 +1918,8 @@ class ch_accessories_offer(osv.osv):
 		'p_f': fields.float('P&F(%)'),
 		'freight': fields.float('Freight(%)'),
 		'insurance': fields.float('Insurance(%)'),
+		'ed': fields.float('ED(%)'),
+		'supervision_amount': fields.float('Supervision(Rs.)'),
 		'pump_price': fields.float('Pump Price'),
 		'total_price': fields.float('Total Price'),
 		

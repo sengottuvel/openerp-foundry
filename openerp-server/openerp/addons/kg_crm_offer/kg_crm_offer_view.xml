@@ -36,6 +36,7 @@
 								<field name="enquiry_id" readonly="1" invisible="1"/>
 								<field name="enquiry_no" readonly="1"/>
 								<field name="enquiry_date" readonly="1"/>
+								<field name="del_date" readonly="1"/>
 								<field name="segment" readonly="1"/>	
 								<field name="location" required="1"/>	
 								<field name="state" style="width: 30%%" class="att_state_change" readonly="1"/>
@@ -45,6 +46,7 @@
 						</group>
 						<group class="oe_subtotal_footer oe_right">
 							<field name="offer_net_amount"/>
+							<field name="supervision_amount"/>
 						</group>
 						<group string="Pump Offer">
 							<field name="line_pump_ids" colspan="4" nolabel="1" attrs="{'readonly':[('state','!=','draft')]}">
@@ -64,6 +66,7 @@
 									<field name="insurance"/>
 									<field name="customer_discount"/>
 									<field name="tax"/>
+									<field name="supervision_amount" sum="supervision_amount"/>
 									<field name="tot_price" sum="total_price"/>
 									<field name="net_amount" sum="net_amount"/>
 								</tree>
@@ -108,6 +111,7 @@
 									<field name="insurance"/>
 									<field name="customer_discount"/>
 									<field name="tax"/>
+									<field name="supervision_amount" sum="supervision_amount"/>
 									<field name="tot_price" sum="total_price"/>
 									<field name="net_amount" sum="net_amount"/>
 								</tree>
@@ -152,6 +156,7 @@
 									<field name="insurance"/>
 									<field name="customer_discount"/>
 									<field name="tax"/>
+									<field name="supervision_amount" sum="supervision_amount"/>
 									<field name="tot_price" sum="total_price"/>
 									<field name="net_amount" sum="net_amount"/>
 								</tree>
@@ -226,6 +231,8 @@
 							<field name="p_f"/>
 							<field name="freight"/>
 							<field name="insurance"/>
+							<field name="ed"/>
+							<field name="supervision_amount"/>
 						</group>					
 					</group>
 					<notebook>
@@ -341,6 +348,8 @@
 							<field name="p_f"/>
 							<field name="freight"/>
 							<field name="insurance"/>
+							<field name="ed"/>
+							<field name="supervision_amount"/>
 						</group>					
 					</group>
 <!--
@@ -451,6 +460,8 @@
 						<field name="p_f"/>
 						<field name="freight"/>
 						<field name="insurance"/>
+						<field name="ed"/>
+						<field name="supervision_amount"/>
 <!--
 						<field name="pump_price" readonly="1"/>
 -->
