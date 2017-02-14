@@ -153,7 +153,7 @@
             ref('kg_reports.kg_casting_list_reports'),   
             ref('kg_reports.kg_machine_list_print_reports'),   
             ref('kg_reports.kg_workorder_print_reports'),
-            
+            ref('kg_reports.kg_spare_print_reports'),     
             
             
             ref('kg_sale_invoice.menu_kg_sale_root'),
