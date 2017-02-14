@@ -13,9 +13,9 @@
 						<notebook tabpos="up" colspan="4">
 						<page string="Filters" name="filters">	
 						<group>										
-												   				     
-							<field name="order_id" widget="many2many_tags" required = "1" />						   				     
-							<field name="order_category" />						   				     
+							
+							<field name="order_category" />					   				     
+							<field name="order_id" widget="many2many_tags" required = "1" />							   				     
 							
 						</group>					   				     
 						</page>	                                                                           
@@ -59,7 +59,7 @@
             <field name="target">new</field>
         </record>
             
-	<menuitem name="Machine List Print" parent="kg_menus.rpm_planning_reports" action="rma_machine_list_print" id="kg_machine_list_print_reports" sequence="6"/>	
+	<menuitem name="Machine List Print" parent="kg_menus.rpm_planning_reports" action="rma_machine_list_print" id="kg_machine_list_print_reports" sequence="3"/>	
       
 
     </data>

@@ -48,7 +48,7 @@
             <field name="target">new</field>
         </record>
             
-	<menuitem name="Casting List" parent="kg_menus.rpm_planning_reports" action="rma_casting_list" id="kg_casting_list_reports" sequence="4"/>	
+	<menuitem name="Casting List" parent="kg_menus.rpm_planning_reports" action="rma_casting_list" id="kg_casting_list_reports" sequence="2"/>	
       
 
     </data>

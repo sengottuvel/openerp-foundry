@@ -20,7 +20,7 @@ work_order.motor_power as moter_power,
 accessories.code as accessories_code,
 accessories.name as accessories_name,
 moc.name as moc_name,
-ch_access.qty as qty
+ch_access.qty::integer as qty
 
 FROM ch_work_order_details work_order
 
@@ -30,7 +30,12 @@ left join kg_pumpmodel_master pump_type on (pump_type.id = work_order.pump_model
 left join kg_moc_master moc on (moc.id = ch_access.moc_id)
 left join res_company company on (company.id = accessories.company_id)
 
-where case
+where
+ch_access.qty > 0
+
+and
+
+ case
 when (select order_id from m2m_work_order_machine_list_report_details where foundry_wiz_id =$P{wiz_id}  limit 1) is not null then
 work_order.id in (select order_id from m2m_work_order_machine_list_report_details where foundry_wiz_id = $P{wiz_id})
 else
@@ -46,7 +51,7 @@ work_order.id in (select id from ch_work_order_details) end]]>
 	<field name="accessories_code" class="java.lang.String"/>
 	<field name="accessories_name" class="java.lang.String"/>
 	<field name="moc_name" class="java.lang.String"/>
-	<field name="qty" class="java.lang.Double"/>
+	<field name="qty" class="java.lang.Integer"/>
 	<group name="ProjectGroup" isStartNewPage="true">
 		<groupExpression><![CDATA[]]></groupExpression>
 	</group>

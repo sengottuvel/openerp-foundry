@@ -61,7 +61,8 @@ class kg_machine_list_report(osv.osv_memory):
 		
 		
 		if rec.order_category == 'access':		
-										
+		
+					
 			data = self.read(cr,uid,ids,)[-1]		
 			print data,' create_report('
 			return {

@@ -27,8 +27,8 @@ pattern.name as pattern_no,
 ch_bom.pattern_name as pattern_name,
 moc.name as moc_name,
 ch_bom.qty as qty,
-ch_bom.weight as weight,
-(ch_bom.qty * ch_bom.weight) as total_weight,
+trim(TO_CHAR(ch_bom.weight::float, '999G999G99G999G99G99G990D99'))  as weight,
+trim(TO_CHAR((ch_bom.qty * ch_bom.weight)::float, '999G999G99G999G99G99G990D99'))  as total_weight,
 (CASE WHEN ch_bom.flag_pattern_check = 't'
 THEN 'Y'
 WHEN ch_bom.flag_pattern_check = 'f'
@@ -65,8 +65,8 @@ work_order.id in (select  id from kg_work_order) end order by ch_work.order_no]]
 	<field name="pattern_name" class="java.lang.String"/>
 	<field name="moc_name" class="java.lang.String"/>
 	<field name="qty" class="java.lang.Integer"/>
-	<field name="weight" class="java.lang.Double"/>
-	<field name="total_weight" class="java.lang.Double"/>
+	<field name="weight" class="java.lang.String"/>
+	<field name="total_weight" class="java.lang.String"/>
 	<field name="pat_ch" class="java.lang.String"/>
 	<group name="ProjectGroup" isStartNewPage="true">
 		<groupExpression><![CDATA[]]></groupExpression>
