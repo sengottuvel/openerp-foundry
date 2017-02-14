@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<openerp>
+    <data>
+        
+        <record id="r_form_v_spare_print" model="ir.ui.view">
+            <field name="name">kg.spare.print.form</field>
+            <field name="model">kg.spare.print</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Spare Report Statement">
+                   <group col="4" fill="0" height="500">	
+						<notebook tabpos="up" colspan="4">
+						<page string="Filters" name="filters">	
+						<group>										
+												   				     
+							<field name="order_id" widget="many2many_tags" required = "1" />						   				     
+							
+						</group>					   				     
+						</page>	                                                                           
+                    </notebook>     
+                     <separator colspan="4"/>
+						<group col="4" colspan="4">
+							<button name="create_report" string="Generate" type="object" icon="gtk-ok"/>
+						</group>
+						</group>
+                </form>
+            </field>
+        </record>
+        
+        
+        
+        <report string="Spare Print Statement"
+		model="kg.spare.print"
+		auto="True"
+		name="jasper_spare_report"
+		rml="kg_reports/planning/report/kg_spare_report.jrxml"
+		id="sparereport" 
+		menu="False"
+		/>
+		
+       <record id="rma_spare_print" model="ir.actions.act_window">  
+            <field name="name">Spare Print</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">kg.spare.print</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+            
+	<menuitem name="Spare Print" parent="kg_menus.rpm_planning_reports" action="rma_spare_print" id="kg_spare_print_reports" sequence="5"/>	
+      
+
+    </data>
+</openerp>
