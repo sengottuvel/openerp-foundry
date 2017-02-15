@@ -166,7 +166,7 @@ class ch_daily_attendance(osv.osv):
 		'wk_time': fields.char('Worked Hours'),
 		'punch_type': fields.selection([('IN','IN'),('OUT','OUT')], 'Punch Type'),
 		'status': fields.selection([('present','Present'),('absent','Absent'),('holiday','Holiday'),
-							('leave','Leave'),('weekoff','WeekOff'),('onduty','On-Duty'),('halfday','HalfDay')],'Status'),
+							('leave','Leave'),('compoff_half','CompOff-Half'),('compoff_full','CompOff-Full'),('weekoff','WeekOff'),('onduty','On-Duty'),('halfday','HalfDay')],'Status'),
 		'leavetype': fields.selection([('legal','Legal Leaves'),('comp','Compensatory Days'),
 								('sl','Sick Leave'),('unpaid','Unpaid'),('cl','Casual Leave')],'Leave Type'),
 

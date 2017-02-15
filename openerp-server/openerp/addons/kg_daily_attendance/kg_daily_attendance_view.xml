@@ -28,6 +28,9 @@
 							<field name="employee_id" invisible="1"/>
 							<field name="date"/>
 							<field name="cur_day"/>
+<!--
+							<field name="employee_id"/>
+-->
 							<field name="wk_time"/>
 							<field name="ot_hrs"/>
 							<field name="tot_hrs" invisible="1"/>
