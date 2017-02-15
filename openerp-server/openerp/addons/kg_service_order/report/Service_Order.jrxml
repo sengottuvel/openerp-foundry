@@ -2,13 +2,12 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Service_Order" language="groovy" pageWidth="594" pageHeight="842" columnWidth="554" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="240"/>
+	<property name="ireport.y" value="0"/>
 	<subDataset name="dataset1"/>
 	<subDataset name="New Dataset 1">
 		<parameter name="order_id" class="java.lang.Integer"/>
 		<queryString>
 			<![CDATA[select
-
 so_line.product_id as product_id,
 pro_temp.name ||
 		(CASE 	WHEN brand.name!=''
@@ -19,27 +18,17 @@ pro_uom.name as product_uom,
 so_line.product_qty as so_qty,
 trim(TO_CHAR(so_line.price_unit::float, '999G999G99G999G99G99G990D99'))  as so_rate,
 trim(TO_CHAR((so_line.product_qty * so_line.price_unit)::float, '999G999G99G999G99G99G990D99'))  as value,
-
 so_line.kg_discount_per as discount,
 case when so_line.id is not null then
 (SELECT CAST(string_agg(description, ',') AS text)
 FROM account_tax where id in (select service_order_line_id from service_order_tax where tax_id=so_line.id))
 end as tax_name
 
-
 from kg_service_order_line so_line
 
-
-
 left join product_template pro_temp on (pro_temp.id = so_line.product_id)
-
 left join product_uom pro_uom on (pro_uom.id = so_line.product_uom)
-
 left join kg_brand_master brand on (brand.id = so_line.brand_id)
-
-
-
-
 
 where so_line.service_id = $P{order_id} order by so_line.id]]>
 		</queryString>
@@ -49,14 +38,13 @@ where so_line.service_id = $P{order_id} order by so_line.id]]>
 		<field name="so_qty" class="java.lang.Double"/>
 		<field name="so_rate" class="java.lang.String"/>
 		<field name="value" class="java.lang.String"/>
-		<field name="tax_name" class="java.lang.String"/>
 		<field name="discount" class="java.math.BigDecimal"/>
+		<field name="tax_name" class="java.lang.String"/>
 	</subDataset>
 	<subDataset name="dataset2"/>
 	<parameter name="so_id" class="java.lang.Integer"/>
 	<queryString>
 		<![CDATA[select
-
 so.id as id,
 comp.name as company_name,
 part.street as street1,
@@ -69,23 +57,15 @@ part.phone as phone,
 part.fax as fax,
 part.email as email,
 part.website as website,
-
-CASE WHEN comp.cin_no != '' THEN 'CIN NO :'
-ELSE ''
-END as cin_label,
-CASE WHEN comp.tin_no != '' THEN 'TIN NO :'
+CASE WHEN part.tin_no != '' THEN 'TIN NO :'
 ELSE ''
 END as tin_label,
-comp.cin_no as cin_no,
-comp.tin_no as tin_no,
-
+part.tin_no as tin_no,
 CASE WHEN comp.rml_header1 = null THEN null
 ELSE comp.rml_header1
 END as tagline,
-
 so.name as so_name,
 to_char(so.date::date,'dd-mm-YYYY') as so_date,
-
 partner.name as supplier_name,
 partner.street as sup_street1,
 partner.street2 as sup_street2,
@@ -98,7 +78,6 @@ partner_state.name as sup_state,
 partner_country.name as sup_country,
 partner.zip as sup_zip,
 partner.mobile as sup_mobile,
-
 so.quot_ref_no as quot_ref_no,
 so.version as version,
 trim(TO_CHAR(so.amount_untaxed::float, '999G999G99G999G99G99G990D99'))  as total_amt,
@@ -106,12 +85,9 @@ trim(TO_CHAR(so.discount::float, '999G999G99G999G99G99G990D99'))  as discount,
 trim(TO_CHAR(so.amount_tax::float, '999G999G99G999G99G99G990D99')) as tax,
 trim(TO_CHAR(so.amount_total::float, '999G999G99G999G99G99G990D99'))   as so_amt,
 trim(TO_CHAR((so.value1 + so.value2)::float, '999G999G99G999G99G99G990D99'))  as other_charge,
-
 payment.name as payment,
 delivery.name as delivery,
-
 so.freight_charges as frieght,
-
 CASE WHEN so.price='inclusive' THEN 'Inclusive of all taxes and duties'
 ELSE 'Exclusive of all taxes and duties'
 END as price,
@@ -122,31 +98,19 @@ so.warranty as warranty,
 so.quot_ref_no as quot_ref_no,
 so.state as status
 
-
 from kg_service_order so
 
 left join res_company comp on (comp.id = so.company_id)
-
 left join res_partner part on (part.id = comp.partner_id)
-
 left join res_partner partner on (partner.id = so.partner_id)
-
-left join res_city comp_city on (comp_city.id = comp.city)
-
-left join res_city partner_city on (partner_city.id = partner.city)
-
-left join res_country_state comp_state on (comp_state.id = comp.state_id)
-
+left join res_city comp_city on (comp_city.id = part.city_id)
+left join res_city partner_city on (partner_city.id = partner.city_id)
+left join res_country_state comp_state on (comp_state.id = part.state_id)
 left join res_country_state partner_state on (partner_state.id = partner.state_id)
-
-left join res_country comp_country on (comp_country.id = comp.country_id)
-
+left join res_country comp_country on (comp_country.id = part.country_id)
 left join res_country partner_country on (partner_country.id = partner.country_id)
-
 left join kg_payment_master payment on (payment.id = so.payment_mode)
-
 left join kg_delivery_master delivery on (delivery.id = so.delivery_mode)
-
 
 where so.id = $P{so_id}]]>
 	</queryString>
@@ -162,9 +126,7 @@ where so.id = $P{so_id}]]>
 	<field name="fax" class="java.lang.String"/>
 	<field name="email" class="java.lang.String"/>
 	<field name="website" class="java.lang.String"/>
-	<field name="cin_label" class="java.lang.String"/>
 	<field name="tin_label" class="java.lang.String"/>
-	<field name="cin_no" class="java.lang.String"/>
 	<field name="tin_no" class="java.lang.String"/>
 	<field name="tagline" class="java.lang.String"/>
 	<field name="so_name" class="java.lang.String"/>
@@ -691,7 +653,7 @@ where so.id = $P{so_id}]]>
 					<textElement>
 						<font size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{specification} ]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{specification}]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupHeader>
@@ -721,7 +683,7 @@ where so.id = $P{so_id}]]>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
-					<text><![CDATA[S.Jeyalatha]]></text>
+					<text><![CDATA[]]></text>
 				</staticText>
 				<staticText>
 					<reportElement mode="Transparent" x="4" y="269" width="158" height="10"/>
@@ -763,17 +725,6 @@ where so.id = $P{so_id}]]>
 					</textElement>
 					<text><![CDATA[Checked By]]></text>
 				</staticText>
-				<image>
-					<reportElement x="50" y="218" width="185" height="34"/>
-					<imageExpression><![CDATA["/home/openerp/Manjula/svn_project/Trust/openerp-server/openerp/addons/kg_purchase_order/images/mam_sign.jpg"]]></imageExpression>
-				</image>
-				<image>
-					<reportElement x="461" y="218" width="67" height="34"/>
-					<graphicElement>
-						<pen lineWidth="0.0"/>
-					</graphicElement>
-					<imageExpression><![CDATA["/home/openerp/Manjula/svn_project/Trust/openerp-server/openerp/addons/kg_purchase_order/images/signature_sample.JPG"]]></imageExpression>
-				</image>
 				<textField isStretchWithOverflow="true">
 					<reportElement isPrintRepeatedValues="false" x="-1" y="112" width="555" height="15" isPrintWhenDetailOverflows="true"/>
 					<box topPadding="2" leftPadding="2" rightPadding="2">
@@ -951,7 +902,7 @@ where so.id = $P{so_id}]]>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
-					<text><![CDATA[P.Devaraj]]></text>
+					<text><![CDATA[]]></text>
 				</staticText>
 			</band>
 		</groupHeader>
@@ -967,7 +918,7 @@ where so.id = $P{so_id}]]>
 		</band>
 	</background>
 	<pageHeader>
-		<band height="98" splitType="Stretch">
+		<band height="94" splitType="Stretch">
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="2" width="471" height="20" isPrintWhenDetailOverflows="true"/>
 				<box leftPadding="2"/>
@@ -992,39 +943,6 @@ where so.id = $P{so_id}]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{tagline}]]></textFieldExpression>
 			</textField>
-			<frame>
-				<reportElement x="0" y="35" width="506" height="15" isRemoveLineWhenBlank="true">
-					<printWhenExpression><![CDATA[$F{cin_no}!=null]]></printWhenExpression>
-				</reportElement>
-				<textField>
-					<reportElement x="1" y="1" width="54" height="14" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[$F{cin_no}!=null]]></printWhenExpression>
-					</reportElement>
-					<textElement/>
-					<textFieldExpression><![CDATA[$F{cin_label}]]></textFieldExpression>
-				</textField>
-				<textField isBlankWhenNull="true">
-					<reportElement x="55" y="1" width="113" height="14" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[$F{cin_no}!=null]]></printWhenExpression>
-					</reportElement>
-					<textElement/>
-					<textFieldExpression><![CDATA[$F{cin_no}]]></textFieldExpression>
-				</textField>
-				<textField>
-					<reportElement x="167" y="2" width="49" height="13" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[$F{tin_no}!=null]]></printWhenExpression>
-					</reportElement>
-					<textElement/>
-					<textFieldExpression><![CDATA[$F{tin_label}]]></textFieldExpression>
-				</textField>
-				<textField>
-					<reportElement x="216" y="1" width="116" height="14" isRemoveLineWhenBlank="true">
-						<printWhenExpression><![CDATA[$F{tin_no}!=null]]></printWhenExpression>
-					</reportElement>
-					<textElement/>
-					<textFieldExpression><![CDATA[$F{tin_no}]]></textFieldExpression>
-				</textField>
-			</frame>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement mode="Transparent" x="1" y="50" width="429" height="16" isPrintWhenDetailOverflows="true"/>
 				<box leftPadding="1"/>
@@ -1119,6 +1037,16 @@ where so.id = $P{so_id}]]>
 				<textElement textAlignment="Center"/>
 				<text><![CDATA[:]]></text>
 			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="2" y="35" width="35" height="15"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{tin_label}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="37" y="35" width="165" height="15"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{tin_no}]]></textFieldExpression>
+			</textField>
 		</band>
 	</pageHeader>
 	<columnHeader>

@@ -29,13 +29,7 @@
 								<field name="supplier" domain="[('supplier','=',True)]"/>
 							</group>
                         </page>
-                        
-                        <page string="Delivery Type" name="delivery_id">
-                            <group colspan="2" col="2">
-								<separator string="Delivery Type" colspan="2" col="2" />
-								<field name="delivery_id"/>
-							</group>
-                        </page>
+                      
                                                                          
                     </notebook>                
                     <separator colspan="4"/>
@@ -57,6 +51,7 @@
         </record>
         
            
+<!--
 		<menuitem
             icon="STOCK_PRINT"
             name="Service Order Report"
@@ -64,6 +59,7 @@
             action="action_so_report"
             id="kg_so_report001"
             />
+-->
 
     </data>
 </openerp>

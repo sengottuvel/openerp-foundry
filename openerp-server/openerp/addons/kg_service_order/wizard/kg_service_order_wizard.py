@@ -20,7 +20,7 @@ class kg_service_order_wizard(osv.osv_memory):
 		'filter': fields.selection([('filter_no', 'No Filters'), ('filter_date', 'Date')], "Filter by", required=True),
 		'date_from': fields.date("Start Date"),
 		'date_to': fields.date("End Date"),
-		'delivery_id': fields.many2one('kg.deliverytype.master','Delivery Type'),
+		#~ 'delivery_id': fields.many2one('kg.deliverytype.master','Delivery Type'),
 		
 	}
 	
