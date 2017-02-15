@@ -10,11 +10,11 @@
 			<field name="inherit_id" ref="hr_holidays.edit_holiday_new"/>
 			<field name="arch" type="xml">
 				
-					<button string="Approve" name="validate" position = "after">
+					<button string="Approve" name="validate" type="workflow" groups="base.group_hr_user" class="oe_highlight" position="replace">
 						<button name="entry_reject" type="object" string="Reject"  class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('status','in',['draft','approved','cancel','reject'])]}"/>
 						<button name="entry_approve" type="object" string="Approve"  class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('status','in',['draft','approved','cancel','reject'])]}"/>
-						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
-						<button name="entry_confirm" type="object" string="Confirm"  class="oe_highlight" attrs="{'invisible':[('status','in',['approved','confirmed','cancel','reject'])]}" invisible="1"/>
+						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="0"/>
+						<button name="entry_confirm" type="object" string="Confirm"  class="oe_highlight" attrs="{'invisible':[('status','in',['approved','confirmed','cancel','reject'])]}" invisible="0"/>
 						<button name="entry_draft" type="object"  string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('status','in',['draft','confirmed','approved','reject'])]}"/>
 					</button>
 					
@@ -22,21 +22,34 @@
 						<group>
 							<group>
 								<field name="employee_id" required="1" on_change="onchange_employee_id(employee_id,code)"/>
-								<field name="holiday_status_id" required="1"/>
-								<field name="date_from" required="1" string="From"/>
-								<field name="number_of_days_temp" required="1" string="No of Days"/>
+								<field name="holiday_status_id" required="1" on_change="onchange_leave_type(holiday_status_id)" />
+								<field name="in_time" widget="float_time" attrs="{'required':[('holiday_status_name','=','On Duty')],'invisible':[('holiday_status_name','!=','On Duty')],'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="from_date" required="1" string="From" options="{'datepicker':{'maxDate': null,'minDate':-5}}"/>
 								<field name="number_of_days" required="1" string="No of Days" invisible="1"/>
-								
+								<field name="modify" invisible="1"/>
 							</group>
 							<group>
 								<field name="code" readonly="1"/>
-								<field name="holiday_type" string="Mode"/>
-								<field name="date_to" required="1" string="To"/>
-								<field name="status" style="width: 30%%" class="att_state_change" invisible="1"/>
+								<field name="holiday_type" string="Mode" invisible="1"/>
+								<field name="holiday_status_name" invisible="1"/>
+								<field name="permission_hrs" attrs="{'required':[('holiday_status_name','=','Permission')],'invisible':[('holiday_status_name','!=','Permission')],'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="number_of_days_temp" required="1" string="No of Days" readonly="1"/>
+								<field name="out_time" widget="float_time" attrs="{'required':[('holiday_status_name','=','On Duty')],'invisible':[('holiday_status_name','!=','On Duty')],'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="to_date" required="1" string="To" on_change = "onchange_to_date(to_date,from_date)" options="{'datepicker':{'maxDate': null,'minDate':-5}}"/>
+								<field name="approved_by" required="1"/>
+								<field name="status" style="width: 30%%" class="att_state_change" />
 							</group>
 						</group>
 						<label for="description" class="oe_edit_only"/>
 						<field name="description"  required="1"/>
+						<field colspan="4" mode="tree" name="line_id_1" nolabel="1" widget="one2many_list" readonly="1" string="Allocated Leaves">
+							<tree string="Leave Allocation" editable="bottom"> 
+								<field name="leave_type_id" required="1"/>
+								<field name="no_of_days" required="1" on_change = "onchange_no_of_days(no_of_days,balc_days)"/>
+								<field name="used_days" required="1"  readonly="1"/>
+								<field name="balc_days" required="1"  readonly="1"/>
+							</tree>	
+						</field>
 						<notebook>
 							<page string="Entry Info">
 								<group>
@@ -75,32 +88,50 @@
 
 		<!-- Tree View Start -->
 		
+		<record model="ir.ui.view" id="m_tree_v_kg_leave_request">
+				<field name="name">Leave Request</field>
+				<field name="model">hr.holidays</field>
+				<field name="inherit_id" ref="hr_holidays.view_holiday"/>
+				<field name="arch" type="xml">
+					<field name="date_from" position="replace">
+						<field name="from_date" invisible="0"/>
+					</field>
+					<field name="date_to" position="replace">
+						<field name="to_date"/>
+					</field>
+					<field name="number_of_days_temp" position="after">
+						<field name="status"/>
+					</field>
+				</field>
+			</record>
+		
 		
 		<!-- Tree View End -->
 
 		<!-- Search View Start -->
 
-<!--
+
 		<record id="m_search_v_kg_leave_req" model="ir.ui.view">
             <field name="name">Leave Request Search</field>
             <field name="model">hr.holidays</field>
-            <field name="inherit">hr.holidays</field>
+            <field name="inherit_id" ref="hr_holidays.view_hr_holidays_filter"/>
             <field name="arch" type="xml">
-                <search string="Master Template">
-					<field name="name" string="Master"  filter_domain="['|', ('name','ilike',self), ('code','ilike',self)]" />
+				<field name="employee_id" position="replace">
+					<field name="employee_id" string="Leave Requests"  filter_domain="['|', ('employee_id','ilike',self), ('code','ilike',self)]" />
 					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
 					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>				
 					<filter icon="terp-check" name="approve" string="Approved" domain="[('state','=','approved')]"/>				
-					<filter icon="terp-check" name="reject" string="Rejected" domain="[('state','=','reject')]"/>				
-					<separator/>
-                    <group expand="0" string="Group By...">
-                        <filter string="Name" icon="terp-personal" domain="[]" context="{'group_by':'name'}"/> 
-                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
-					</group>
-                </search>
+					<filter icon="terp-check" name="reject" string="Rejected" domain="[('state','=','reject')]"/>
+				</field>
+				<separator/>
+				<group expand="0" string="Group By...">
+					<field name="employee_id" position="after">
+						<filter string="Status" icon="terp-personal" domain="[]" context="{'group_by':'state'}"/> 
+					</field>
+				</group>
 			</field>
 		</record>
--->
+
 		
 		<!-- Search View End -->
 
