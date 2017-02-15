@@ -22,8 +22,8 @@
 								<field name="name" class="aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>																
 								<field name="modify" invisible = "1"/>
 								<field name="monthly_per_hrs" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"  required="1"/>
-								<field name="attnd_insentive_male" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"  required="1"/>
-								<field name="attnd_insentive_female" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"  required="1"/>
+								<field name="attnd_insentive_male" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"  required="0"/>
+								<field name="attnd_insentive_female" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"  required="0"/>
 								<field name="bonus_categ" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"  required="1"/>
 								<field name="no_of_days_wage" attrs="{'invisible':[('bonus_categ','!=','attendance')],'required':[('bonus_categ','=','attendance')],'readonly': [('state','in',['approved','reject','cancel'])]}"  required="1"/>
 							</group>

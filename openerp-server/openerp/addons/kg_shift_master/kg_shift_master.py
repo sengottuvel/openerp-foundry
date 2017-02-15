@@ -148,6 +148,8 @@ class kg_shift_master(osv.osv):
 	def onchange_end_time(self, cr, uid, ids, start_time,end_time, context=None):
 		value = {'start_time':'','end_time':'','shift_hours':''}
 		shf_tme = end_time - start_time
+		if shf_tme < 0:
+			shf_tme = -(shf_tme)
 		value = {
 				'shift_hours': shf_tme,
 				}
@@ -176,9 +178,9 @@ class kg_shift_master(osv.osv):
 		if rec.grace_period > 30:
 			raise osv.except_osv(_('Warning!'),
 						_('Grace Period should not exceed 30 Minutes !!'))
-		if rec.end_time < rec.start_time:
-			raise osv.except_osv(_('Warning!'),
-						_('End Time should not be less than Start Time !!'))
+		#~ if rec.end_time < rec.start_time:
+			#~ raise osv.except_osv(_('Warning!'),
+						#~ _('End Time should not be less than Start Time !!'))
 		if rec.end_time == rec.start_time:
 			raise osv.except_osv(_('Warning!'),
 						_('End Time and Start Time should not be same !!'))
