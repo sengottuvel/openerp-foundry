@@ -11,16 +11,17 @@
 				<form string="Attendance Device Info" version="7.0">
 					<header>
 						<button name="attendance_entry_move" type="object" string="Load"/>
+						<button name="data_upload" type="object" string="Data Upload"/>
 					</header>
 					<group>
 						<group>
-							<field name="machine_no" invisible="0"/>	
-							<field name="date"/>							
-							<field name="punch_date"/>							
+							<field name="machine_no" invisible="0" readonly="1"/>	
+							<field name="date" readonly="1"/>							
+							<field name="punch_date" readonly="1"/>							
 						</group>
 						<group>
-							<field name="punch_time"/>
-							<field name="att_code"/>
+							<field name="punch_time" readonly="1"/>
+							<field name="att_code" readonly="1"/>
 						</group>
 					</group>
 					<notebook>

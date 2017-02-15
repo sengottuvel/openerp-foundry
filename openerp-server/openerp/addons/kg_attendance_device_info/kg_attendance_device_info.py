@@ -11,6 +11,14 @@ import calendar
 from datetime import date, datetime, timedelta
 from datetime import date, timedelta as td
 
+# To import file
+import csv
+import psycopg2
+
+
+# To delete file
+import os, sys
+
 class kg_attendance_device_info(osv.osv):
 
 	_name = "kg.attendance.device.info"
@@ -94,6 +102,48 @@ class kg_attendance_device_info(osv.osv):
 		return super(kg_attendance_device_info, self).write(cr, uid, ids, vals, context)
 
 	## Module Requirement
+	
+	def data_upload(self,cr,uid,ids=0,context=None):
+		
+		# To import file
+
+		conn_string = "dbname='sam_phaseI' user='sujith' password='kgisl@123'"
+
+		conn = psycopg2.connect(conn_string)
+		cursor = conn.cursor()
+		
+		#~ wb = xlrd.open_workbook('/home/sujith/SVN_Projects/sam_turbo_dev/openerp-server/openerp/Exports.xls')
+		#~ sh = wb.sheet_by_name('Sheet1')
+		#~ your_csv_file = open('/home/sujith/SVN_Projects/sam_turbo_dev/openerp-server/openerp/Exports.csv', 'wb')
+		#~ wr = csv.writer(your_csv_file, quoting=csv.QUOTE_ALL)
+#~ 
+		#~ for rownum in xrange(sh.nrows):
+			#~ wr.writerow(sh.row_values(rownum))
+#~ 
+		#~ your_csv_file.close()
+
+		reader = csv.reader(open('/home/sujith/SVN_Projects/sam_turbo_dev/openerp-server/openerp/Exports.csv','rb'),delimiter=';')
+		print reader
+		statement = ''
+		i = 0;
+		for row in reader:
+			print "_________________________________________________________________________________",row[0]
+			print "_________________________________________________________________________________",row[1]
+			print "_________________________________________________________________________________",row[2]
+			print "_________________________________________________________________________________",row[3]
+			print "_________________________________________________________________________________",row[4]
+			
+			if i!=0:
+				statement = "INSERT INTO kg_attendance_device_info (machine_no,date,punch_date,punch_time,att_code,active) VALUES ('"+str(row[0])+"','"+row[1]+"','"+row[2]+"','"+str(row[3])+"','"+str(row[4])+"','t') RETURNING id"
+				cursor.execute(statement)
+			conn.commit()
+			i=1;
+		
+		# To delete file
+
+		#~ os.remove("/home/sujith/SVN_Projects/sam_turbo_dev/openerp-server/openerp/Exports.csv")
+		
+		return True
 
 	def attendance_entry_move(self,cr,uid,ids=0,context=None):
 		print "function caught---------------------------------------------------------------------------"
@@ -107,7 +157,7 @@ class kg_attendance_device_info(osv.osv):
 		cur_month = yesterday.strftime('%B')
 		cur_year = yesterday.year
 		day_name = yesterday.strftime('%A')
-		rmks=''
+		
 		#~ month_id = month_obj.search(cr,uid,[('code','=',cur_month)])
 		#~ print "_------------------------------",cur_month
 		#~ stop
@@ -342,10 +392,6 @@ class kg_attendance_device_info(osv.osv):
 						### OT hours calculation ###
 						rmks=' '
 						if  wk_hrs_f >= check_shift.shift_hours and  float(line_in1_f) <= check_shift.start_time + check_shift.grace_period:
-							start_date = datetime(today.year, today.month, 1)
-							end_date = datetime(today.year, today.month, calendar.mdays[today.month])
-							
-							check_lev_updt = self.pool.get('ch.daily.attendance').search(cr,uid,[('date','>=',start_date),('date','<=',end_date),('employee_id','=',emp_id),('in_time1','>',check_shift.start_time + check_shift.grace_period)])
 							if check_con_1.ot_status is True:
 								print "tot_hrstot_hrstot_hrstot_hrstot_hrstot_hrs",wk_hrs
 								print "check_shift.shift_hourscheck_shift.shift_hours",check_shift.shift_hours
@@ -359,9 +405,6 @@ class kg_attendance_device_info(osv.osv):
 								else:
 									ot_hrs = '0.00'
 									status = 'present'
-							elif (len(check_lev_updt) > check_emp_categ.max_late_count):
-								ot_hrs = '0.00'
-								status = 'absent'
 							else:
 								ot_hrs = '0.00'
 								status = 'present'
@@ -421,67 +464,89 @@ class kg_attendance_device_info(osv.osv):
 
 						line_id = line_obj.create(cr,uid,line_vals)
 					else:
-						#~ if day_name =='Sunday':
-							#~ status = 'weekoff'
-						#~ else:
+						if day_name =='Sunday':
+							status = 'weekoff'
+						else:
 							#~ status = 'absent'
+							
 							
 							##### Checking the leave request and updating the daily attendance status as leave ######
 							
-						start_date = datetime(today.year, today.month, 1)
-						end_date = datetime(today.year, today.month, calendar.mdays[today.month])
+							start_date = datetime(today.year, today.month, 1)
+							end_date = datetime(today.year, today.month, calendar.mdays[today.month])
+							print "***************************************",start_date
+							print "***************************************",end_date
 
-						lev_req= self.pool.get('hr.holidays').search(cr,uid,[('employee_id','=',emp_id),('from_date','>=',start_date),('to_date','<=',end_date),('status','=','approved')])
-						print "Leave request for current month",lev_req
-						if lev_req:								
-							for ii in lev_req:
-								holi_rec = self.pool.get('hr.holidays').browse(cr,uid,ii)
-								print "Leave type",holi_rec.holiday_status_id.name
-								print "from_date",holi_rec.from_date
-								print "to_date",holi_rec.to_date
-								d1 = datetime.strptime(holi_rec.from_date, "%Y-%m-%d")
-								d2 = datetime.strptime(holi_rec.to_date, "%Y-%m-%d")
-								delta = d2 - d1
-								print "delta -----------------------",delta
-								
-								for i in range(delta.days + 1):
-									betw_days = d1 + td(days=i)
-									d3 = datetime.strftime(yesterday, "%Y-%m-%d %H:%M:%S")
-									print "*******d3d3d3d3d3******",d3
-									print "***********betw_daysbetw_daysbetw_days**************",betw_days
-									print "*******yesterdayyesterday******************",yesterday
-									if str(d3) == str(betw_days):
-										if holi_rec.holiday_status_id == 25:
-											status = 'onduty'
-											rmks = holi_rec.holiday_status_id.name
-											print "Updated++++++++++++++++++++++++++++++++++++++++++++++"
+							lev_req= self.pool.get('hr.holidays').search(cr,uid,[('employee_id','=',emp_id),('from_date','>=',start_date),('to_date','<=',end_date),('status','=','approved')])
+							print "emp_idemp_idemp_idemp_idemp_id",emp_id
+							print "Leave request for current month",lev_req
+							if lev_req:								
+								for ii in lev_req:
+									holi_rec = self.pool.get('hr.holidays').browse(cr,uid,ii)
+									print "Leave type",holi_rec.holiday_status_id.name
+									print "from_date",holi_rec.from_date
+									print "to_date",holi_rec.to_date
+									d1 = datetime.strptime(holi_rec.from_date, "%Y-%m-%d")
+									d2 = datetime.strptime(holi_rec.to_date, "%Y-%m-%d")
+									delta = d2 - d1
+									print "delta -----------------------",delta
+									
+									for i in range(delta.days + 1):
+										betw_days = d1 + td(days=i)
+										d3 = datetime.strftime(yesterday, "%Y-%m-%d %H:%M:%S")
+										print "*******d3d3d3d3d3******",d3
+										print "***********betw_daysbetw_daysbetw_days**************",betw_days
+										print "*******yesterdayyesterday******************",yesterday
+										if str(d3) == str(betw_days):
+											print "Updated++++++++%%%%%%%%%%%%%%%%%%%%%++++++++"
+											if holi_rec.holiday_status_id.id == 25:
+												status = 'onduty'
+												rmks = holi_rec.holiday_status_id.name
+											elif holi_rec.holiday_status_id.id == 31:
+												status = 'absent'
+												rmks = holi_rec.holiday_status_id.name
+												print "Updated++++++++++++++++++++++++++++++++++++++++++++++"
+											else:
+												status = 'leave'
+												rmks = holi_rec.holiday_status_id.name
+											break;
 										else:
-											status = 'leave'
-											rmks = holi_rec.holiday_status_id.name
-										break;
-									else:
-										status = 'absent'
-										rmks = '-'
-										
-						##### Checking the leave request and updating the daily attendance status as leave ######
-						
-						else:
-							status = 'absent'
-							rmks = '-'
-						#~ 
-						
-					line_vals = {
-								'employee_id':emp_id,
-								'date': yesterday,
-								'cur_day':day_name,
-								'tot_hrs': 0,
-								'wk_time':'00:00',
-								'header_id':ele,
-								'status': status,
-								'ot_hrs':'00:00',
-								'remarks':rmks,
-								}
-					ab_line_id = line_obj.create(cr,uid,line_vals)
+											status = 'absent'
+											rmks = '-'
+											
+							##### Checking the leave request and updating the daily attendance status as leave ######
+							
+							else:
+								status = 'absent'
+								rmks = '-'
+							
+								#~ holidays =  self.pool.get('kg.holiday.master')
+								#~ holiday_line =  self.pool.get('ch.holiday.master')
+								#~ holidays_ids =  holidays.search(cr,uid,[('active','=',True)])
+								#~ if holidays_ids:
+									#~ holidays_line_ids = holiday_line.search(cr,uid,[('header_id','=',holidays_ids[0])])
+									#~ for idsss in holidays_line_ids:
+										#~ holiday_line_rec = holiday_line.browse(cr,uid,idsss)
+										#~ if holiday_line_rec.leave_date == yesterday:
+											#~ print "Holidays are caught---------------------------------------------------------->>>>>>>>>>>>"
+											#~ print "Holidays are caught---------------------------------------------------------->>>>>>>>>>>>",holiday_line_rec.leave_date
+											#~ status='holiday'
+											#~ rmks = holiday_line_rec.note
+									
+							#~ 
+							
+						line_vals = {
+									'employee_id':emp_id,
+									'date': yesterday,
+									'cur_day':day_name,
+									'tot_hrs': 0,
+									'wk_time':'00:00',
+									'header_id':ele,
+									'status': status,
+									'ot_hrs':'00:00',
+									'remarks':rmks,
+									}
+						ab_line_id = line_obj.create(cr,uid,line_vals)
 				else:
 					print "DATA UPDATED ALREADY !!!!!!!!!!"					
 
