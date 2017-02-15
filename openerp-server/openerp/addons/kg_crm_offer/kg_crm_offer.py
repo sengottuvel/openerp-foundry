@@ -85,6 +85,7 @@ class kg_crm_offer(osv.osv):
 		'enquiry_date': fields.related('enquiry_id','offer_date', type='date', string='Enquiry Date', store=True,required=True),
 		'customer_id': fields.related('enquiry_id','customer_id', type='many2one', relation="res.partner", string='Customer Name', store=True),
 		'del_date': fields.related('enquiry_id','del_date', type='date',string='Expected Delivery Date', store=True),
+		'due_date': fields.related('enquiry_id','due_date', type='date',string='Due Date', store=True),
 		'service_det': fields.char('Service Details'),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD'),('export','Export')],'Location'),
 		'offer_copy': fields.char('Offer Copy'),

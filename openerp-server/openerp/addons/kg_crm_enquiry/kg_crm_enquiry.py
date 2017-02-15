@@ -712,6 +712,7 @@ class kg_crm_enquiry(osv.osv):
 																	'enquiry_id': entry.id,
 																	'enquiry_no': off_no,
 																	'enquiry_date': entry.offer_date,
+																	'del_date': entry.del_date,
 																	'customer_id': entry.customer_id.id,
 																	'ref_mode': entry.ref_mode,
 																	'market_division': entry.market_division,

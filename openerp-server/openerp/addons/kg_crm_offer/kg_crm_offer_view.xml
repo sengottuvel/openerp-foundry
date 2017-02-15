@@ -36,6 +36,7 @@
 								<field name="enquiry_id" readonly="1" invisible="1"/>
 								<field name="enquiry_no" readonly="1"/>
 								<field name="enquiry_date" readonly="1"/>
+								<field name="due_date" readonly="1"/>
 								<field name="del_date" readonly="1"/>
 								<field name="segment" readonly="1"/>	
 								<field name="location" required="1"/>	
