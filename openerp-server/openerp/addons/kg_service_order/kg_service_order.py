@@ -427,7 +427,7 @@ class kg_service_order(osv.osv):
 			soindent_line_browse = soindent_line_obj.browse(cr,uid,soindent_line_ids)
 			soindent_line_browse = sorted(soindent_line_browse, key=lambda k: k.product_id.id)
 			groups = []
-			for key, group in groupby(soindent_line_browse, lambda x: x.product_id.id and x.ser_no):
+			for key, group in groupby(soindent_line_browse, lambda x: x.product_id.id):
 				groups.append(map(lambda r:r,group))
 			for key,group in enumerate(groups):
 				qty = sum(map(lambda x:float(x.qty),group)) #TODO: qty
