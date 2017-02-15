@@ -14,7 +14,7 @@
 						<page string="Filters" name="filters">	
 						<group>										
 												   				     
-							<field name="order_id" widget="many2many_tags" required = "1" />						   				     
+							<field name="order_id" required = "1" />						   				     
 							
 						</group>					   				     
 						</page>	                                                                           
