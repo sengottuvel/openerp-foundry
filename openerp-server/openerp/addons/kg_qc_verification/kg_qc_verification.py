@@ -82,7 +82,7 @@ class kg_qc_verification(osv.osv):
 		'bom_id': fields.related('schedule_line_id','bom_id', type='many2one', relation='kg.bom', string='BOM Id', store=True, readonly=True),
 		'bom_line_id': fields.related('schedule_line_id','bom_line_id', type='many2one', relation='ch.bom.line', string='BOM Line Id', store=True, readonly=True),
 		'order_bomline_id': fields.many2one('ch.order.bom.details', 'Schedule BOM Line Id', readonly=True),
-		
+		'oth_spec': fields.related('order_bomline_id','add_spec',type='text',string='WO Remarks',store=True,readonly=True),
 		'order_no': fields.related('order_line_id','order_no', type='char', string='WO No.', store=True, readonly=True),
 		'order_priority': fields.selection(ORDER_PRIORITY, string='Priority', readonly=True),
 		'order_category': fields.related('order_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
@@ -1065,6 +1065,7 @@ class kg_qc_verification(osv.osv):
 						'item_code': entry.pattern_id.name,
 						'item_name': entry.pattern_name,
 						'position_id': entry.order_bomline_id.position_id.id,
+						'oth_spec': entry.oth_spec
 					
 					}
 					

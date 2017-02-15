@@ -81,7 +81,7 @@ class kg_part_qap(osv.osv):
 		'moc_id': fields.many2one('kg.moc.master','MOC', readonly=True,required=True),
 		'assembly_id': fields.many2one('kg.assembly.inward','Assembly', readonly=True,required=True),
 		'assembly_foundry_id': fields.many2one('ch.assembly.bom.details','Assembly Foundry', readonly=True,required=True),
-		
+		'oth_spec': fields.related('assembly_foundry_id','add_spec', type='text', string='WO Remarks', store=True, readonly=True),
 	
 		
 		## Dynamic Balancing ##
@@ -105,8 +105,8 @@ class kg_part_qap(osv.osv):
 		
 		'hs_date': fields.date('Date',required=True),   
 		'hs_pressure': fields.float('Hydro static test pressure (Kg/cm2)' ),
-		'hs_testing_time':fields.selection([('15','15'),('30','30'),('45','45'),('60','60'),('75','75'),('90','90'),('105','105'),('120','120')],
-					'Testing time (Mins)'),
+		'hs_testing_time': fields.selection([('15','15'),('30','30'),('45','45'),('60','60'),('75','75'),('90','90'),('105','105'),('120','120')],
+						'Testing time (Mins)'),
 		'hs_actual_unbal_weight': fields.float('Actual Un Balanced Weight in (gms)' ),
 		'hs_machinery_id': fields.many2one('kg.machinery.master','Machinery'),
 		'hs_shift_id': fields.many2one('kg.shift.master','Shift'),

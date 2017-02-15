@@ -54,7 +54,7 @@ class kg_ms_stores(osv.osv):
 		'order_id': fields.related('operation_id','order_id', type='many2one', relation='kg.work.order', string='Work Order', store=True, readonly=True),
 		'order_line_id': fields.related('operation_id','order_line_id', type='many2one', relation='ch.work.order.details', string='Order Line', store=True, readonly=True),
 		'order_no': fields.related('operation_id','order_no', type='char', string='WO No.', store=True, readonly=True),
-		
+		'oth_spec': fields.related('ms_id','oth_spec', type='text', string='WO Remarks', store=True, readonly=True),
 		'order_category': fields.related('operation_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'order_priority': fields.related('operation_id','order_priority', type='selection', selection=ORDER_PRIORITY, string='Priority', store=True, readonly=True),
 		'pump_model_id': fields.related('operation_id','pump_model_id', type='many2one', relation='kg.pumpmodel.master', string='Pump Model', store=True, readonly=True),

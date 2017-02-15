@@ -15,7 +15,7 @@
 							<field name="division_id" invisible="1" readonly="1"/>
 							<field name="order_no" readonly="1"/>
 							<field name="order_priority" string="Category" readonly="1"/>
-							<field name="sch_remarks" readonly="1"/>
+							<field name="sch_remarks" readonly="1" string="Others Specification"/>
 						</group>											
 						<group>
 							<field name="entry_date" invisible="1"/>
@@ -266,6 +266,7 @@
 					<field name="moc_id"/>
 					<field name="location"/>
 					<field name="issue_qty" sum="Total Qty"/>
+					<field name="sch_remarks"/>
 					<field name="issue_state"/>
 				</tree>
 			</field>
@@ -637,6 +638,7 @@
 					<field name="each_weight" sum="Total Each Weight"/>
 					<field name="total_weight" sum="Total Weight"/>
 					<field name="core_rem_qty" string="Remaining Qty"/>
+					<field name="sch_remarks"/>
 					<field name="core_remarks"/>
 					<field name="core_state"/>
 				</tree>
@@ -1036,6 +1038,7 @@
 					<field name="each_weight" sum="Total Each Weight"/>
 					<field name="total_weight" sum="Total Weight"/>
 					<field name="mould_rem_qty" string="Remaining Qty"/>
+					<field name="sch_remarks"/>
 					<field name="mould_remarks"/>
 					<field name="mould_state"/>
 				</tree>
@@ -1362,6 +1365,7 @@
 					<field name="total_mould_qty" string="Mould Qty" sum="Total Mould Qty"/>
 					<field name="difference_qty" string="Difference Qty" sum="Total Difference Qty"/>
 					<field name="allocated_wo"/>
+					<field name="sch_remarks"/>
 				</tree>
 			</field>
 		</record>
@@ -1599,6 +1603,7 @@
 				<field name="order_category" invisible="1"/>
 				<field name="pump_model_id" invisible="1"/>
 				<field name="location" invisible="1"/>
+				<field name="sch_remarks"/>
 			</tree>
 		</field>
 	</record>
@@ -1625,6 +1630,7 @@
 				<field name="mould_qty" string="Mould Completed Qty" sum="Qty"/>
 				<field name="pour_qty" string="Pouring Completed Qty" sum="Qty"/>
 				<field name="pour_pending_qty" string="Pouring Pending Qty" sum="Pending Qty"/>
+				<field name="sch_remarks"/>
 			</tree>
 		</field>
 	</record>
@@ -1826,6 +1832,7 @@
 					<field name="order_category" invisible="1"/>
 					<field name="pump_model_id" invisible="1"/>
 					<field name="location" invisible="1"/>
+					<field name="sch_remarks"/>
 				</tree>
 			</field>
 		</record>

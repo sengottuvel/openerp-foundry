@@ -84,7 +84,8 @@ class kg_employee_category(osv.osv):
 		'shift_id':fields.many2one('kg.shift.master','Shift'),
 		'monthly_per_hrs':fields.float('Monthly Permission hours'),	
 		'max_late_count':fields.integer('Maximum Late in Count'),	
-		'attnd_intensive':fields.float('100% Attn. Incentive'),	
+		'attnd_insentive_male':fields.float('100% Attn. Incentive (Male)'),	
+		'attnd_insentive_female':fields.float('100% Attn. Incentive (Female)'),	
 		'driver_batta':fields.float('Driver Batta(Per Day)'),	
 		'bonus_categ': fields.selection([('turn_over','Turn Over'),('attendance','Attendance'),('yrs_of_service','Year Of Service'),('not_applicable','Not Applicable')],'Bonus Category'),
 		'no_of_days_wage':fields.integer('No Of Days Wages'),	
@@ -94,6 +95,7 @@ class kg_employee_category(osv.osv):
 		'line_id_2': fields.one2many('ch.bonus.policy', 'header_id_2','Bonus Policy'),
 		'line_id_3': fields.one2many('ch.salary.policy', 'header_id_3','Salary Policy'),
 		'line_id_4': fields.one2many('ch.leave.policy', 'header_id_4','Leave Policy'),
+		'line_id_5': fields.one2many('ch.incentive.policy', 'header_id_5','Incentive Policy'),
 				
 	}
 	
@@ -168,9 +170,12 @@ class kg_employee_category(osv.osv):
 		if rec.monthly_per_hrs <= 0:
 			raise osv.except_osv(_('Warning!'),
 						_('Negative Values and Zeros are not allowed in Monthly Permission Hours !!'))
-		if rec.attnd_intensive <= 0:
+		if rec.attnd_insentive_male <= 0:
 			raise osv.except_osv(_('Warning!'),
-						_('Negative Values and Zeros are not allowed in 100% Attn. Incentive  !!'))
+						_('Negative Values and Zeros are not allowed in 100% Attn. Incentive Male !!'))
+		if rec.attnd_insentive_female <= 0:
+			raise osv.except_osv(_('Warning!'),
+						_('Negative Values and Zeros are not allowed in 100% Attn. Incentive Female !!'))
 		if rec.max_late_count <= 0:
 			raise osv.except_osv(_('Warning!'),
 						_('Negative Values and Zeros are not allowed in Maximum Late in Count !!'))
@@ -183,9 +188,10 @@ class kg_employee_category(osv.osv):
 		if rec.driver_batta < 0:
 			raise osv.except_osv(_('Warning!'),
 						_('Negative Values are not allowed in Driver Batta(Per Day)	 !!'))
-		if rec.no_of_days_wage <= 0 :
-			raise osv.except_osv(_('Warning!'),
-						_('No of Days Wages should not be zero!!'))
+		if rec.bonus_categ == 'attendance':
+			if rec.no_of_days_wage <= 0 :
+				raise osv.except_osv(_('Warning!'),
+							_('No of Days Wages should not be zero!!'))
 												
 		amt = 0.00
 		if rec.line_id_3:
@@ -264,9 +270,9 @@ class ch_special_incentive_policy(osv.osv):
 	_columns = {
 		
 		'header_id_1': fields.many2one('kg.employee.category','Header_id_1'),
-		'start_value': fields.float('Starting Value(In Lakhs)'),	
-		'end_value': fields.float('Ending Value(In Lakhs)'),	
-		'type': fields.selection([('fixed','Fixed'),('per_lhk_fixed','Per Lakh - Fixed'),('percentage','Percentage')],'Type'),	
+		'start_value': fields.float('Starting Value(In Crores)'),	
+		'end_value': fields.float('Ending Value(In Crores)'),	
+		'type': fields.selection([('fixed','Fixed'),('per_cr_fixed','Per Crore - Fixed'),('percentage','Percentage')],'Type'),	
 		'incentive_value': fields.float('Value'),	
 		'leave_consider': fields.integer('Leave Consideration(days)'),	
 		}	
@@ -283,7 +289,7 @@ class ch_special_incentive_policy(osv.osv):
 						_('Negative Values and Zeros are not allowed in Ending Value in Special incentive  !!'))
 		if rec.incentive_value <= 0:
 			raise osv.except_osv(_('Warning!'),
-						_('Negative Values and Zeros are not allowed in Incentive Value !!'))
+						_('Negative Values and Zeros are not allowed in Special Incentive Value !!'))
 		if rec.leave_consider < 0:
 			raise osv.except_osv(_('Warning!'),
 						_('Negative Values are not allowed in Leave Consideration in Special incentive !!'))
@@ -298,6 +304,62 @@ class ch_special_incentive_policy(osv.osv):
 			if rec.incentive_value > 100:
 				raise osv.except_osv(_('Warning!'),
 							_('Value of the Special Incentive should not exceed 100 % !!'))
+
+		return True
+
+		
+	## Module Requirement
+	
+	_constraints = [
+
+		(val_negative, 'Negative Values are not allowed!!', [' ']),		
+		
+	]
+		
+ch_special_incentive_policy()
+
+class ch_incentive_policy(osv.osv):
+	
+	_name='ch.incentive.policy'
+	_description = "Incentive Policy"
+	
+	_columns = {
+		
+		'header_id_5': fields.many2one('kg.employee.category','Header_id_1'),
+		'start_value': fields.float('Starting Value(In Lakhs)'),	
+		'end_value': fields.float('Ending Value(In Lakhs)'),	
+		'type': fields.selection([('fixed','Fixed'),('per_lhk_fixed','Per Lakh - Fixed'),('percentage','Percentage')],'Type'),	
+		'incentive_value': fields.float('Value'),	
+		'leave_consider': fields.integer('Leave Consideration(days)'),	
+		}	
+		
+	## Module Requirement
+		
+	def val_negative(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.start_value <= 0:
+			raise osv.except_osv(_('Warning!'),
+						_('Negative Values are and Zeros not allowed in Starting Value in incentive !!'))
+		if rec.end_value <= 0:
+			raise osv.except_osv(_('Warning!'),
+						_('Negative Values and Zeros are not allowed in Ending Value in incentive  !!'))
+		if rec.incentive_value <= 0:
+			raise osv.except_osv(_('Warning!'),
+						_('Negative Values and Zeros are not allowed in Incentive Value !!'))
+		if rec.leave_consider < 0:
+			raise osv.except_osv(_('Warning!'),
+						_('Negative Values are not allowed in Leave Consideration in incentive !!'))
+		if rec.end_value <= rec.start_value :
+			raise osv.except_osv(_('Warning!'),
+						_('End Value should be greater than Start Value in Incentive!!'))
+		if rec.leave_consider > 12 :
+			raise osv.except_osv(_('Warning!'),
+						_('Leave Consideration in Incentive should not exceed 12 days!!'))
+						
+		if rec.type == 'percentage' :
+			if rec.incentive_value > 100:
+				raise osv.except_osv(_('Warning!'),
+							_('Value of the Incentive should not exceed 100 % !!'))
 
 		return True
 

@@ -53,6 +53,7 @@
 										<field name="stock_qty" string="Stock Qty"/>
 										<field name="qty" string="Sch Qty"/>
 										<field name="state" invisible="1"/>
+										<field name="remarks"/>
 									</tree>
 								</field>
 							</group>

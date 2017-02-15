@@ -95,7 +95,7 @@ class kg_machineshop(osv.osv):
 		'order_date': fields.related('order_id','entry_date', type='date', string='Order Date', store=True, readonly=True),
 		'order_category': fields.related('order_line_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'order_priority': fields.selection(ORDER_PRIORITY, string='Priority', store=True, readonly=True),
-		
+		'oth_spec': fields.text('WO Remarks',readonly=True),
 		'pump_model_id': fields.related('order_line_id','pump_model_id', type='many2one', relation='kg.pumpmodel.master', string='Pump Model', store=True, readonly=True),
 		#~ 'pattern_id': fields.related('schedule_line_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern Number', store=True, readonly=True),
 		'pattern_id':fields.many2one('kg.pattern.master','Pattern Number', readonly=True),

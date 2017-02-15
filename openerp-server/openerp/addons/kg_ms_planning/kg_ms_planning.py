@@ -143,7 +143,7 @@ class kg_ms_daily_planning(osv.osv):
 					if line_item.inhouse_qty == 0 and line_item.sc_qty == 0:
 						raise osv.except_osv(_('Warning!'),
 									_('System not allow to save Zero values !!'))
-												
+				
 				if total_sc_qty[0] > 0:
 					total_sc_qty = total_sc_qty[0]
 				else:
@@ -1053,7 +1053,7 @@ class kg_ms_daily_planning(osv.osv):
 												
 												op12_ms_dimension_id = ms_dimension_obj.create(cr, uid,op12_dimen_vals)
 											
-											
+				print "total_sc_qty",total_sc_qty		
 				header_sc_qty = total_sc_qty
 				if header_sc_qty > 0:
 					
@@ -1240,7 +1240,8 @@ class ch_ms_daily_planning_details(osv.osv):
 		'inhouse_qty': fields.integer('In-house Qty'),
 		'sc_qty': fields.integer('SC Qty'),
 		'ms_type': fields.related('ms_id','ms_type', type='selection', selection=[('foundry_item','Foundry Item'),('ms_item','MS Item')], string='Item Type', store=True, readonly=True),
-		'specification': fields.text('Other Specification'),
+		'oth_spec': fields.related('ms_id','oth_spec', type='text', string='WO Remarks', store=True, readonly=True),
+		'remarks': fields.text('Remarks'),
 		'line_ids': fields.one2many('ch.ms.sc.qty.details','header_id', 'MS PLAN SC Line'),
 	
 	} 

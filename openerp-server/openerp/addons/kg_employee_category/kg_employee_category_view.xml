@@ -22,7 +22,8 @@
 								<field name="name" class="aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>																
 								<field name="modify" invisible = "1"/>
 								<field name="monthly_per_hrs" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"  required="1"/>
-								<field name="attnd_intensive" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"  required="1"/>
+								<field name="attnd_insentive_male" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"  required="1"/>
+								<field name="attnd_insentive_female" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"  required="1"/>
 								<field name="bonus_categ" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"  required="1"/>
 								<field name="no_of_days_wage" attrs="{'invisible':[('bonus_categ','!=','attendance')],'required':[('bonus_categ','=','attendance')],'readonly': [('state','in',['approved','reject','cancel'])]}"  required="1"/>
 							</group>
@@ -41,6 +42,17 @@
 							<group>												
 								<field name="cancel_remark" class="aplhanum_expect" attrs="{'invisible':[('state','in',['draft','confirmed'])], 'readonly': [('state','in',['cancel'])]}"/>		
 							</group>
+						</group>
+						<group string='Incentive Policy'>
+							<field colspan="4" mode="tree" name="line_id_5" nolabel="1" widget="one2many_list" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">
+							   <tree string="Incentive Policy" editable="bottom"> 
+									<field name="start_value" required="1" />
+									<field name="end_value" required="1"/>
+									<field name="type" required="1"/>
+									<field name="incentive_value" required="1"/>
+									<field name="leave_consider" required="1"/>
+								</tree>					
+							</field>
 						</group>
 						<group string='Special Incentive Policy'>
 							<field colspan="4" mode="tree" name="line_id_1" nolabel="1" widget="one2many_list" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">

@@ -1194,13 +1194,13 @@ class kg_schedule(osv.osv):
 								'core_qty': schedule_qty,
 								'core_rem_qty': schedule_qty,
 								'core_state': 'pending',
-								'core_remarks': schedule_item.order_bomline_id.add_spec,
+								
 								'mould_no': mould_name[0],
 								'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
 								'mould_qty': schedule_qty,
 								'mould_rem_qty': schedule_qty,
 								'mould_state': 'pending',
-								'mould_remarks': schedule_item.order_bomline_id.add_spec,	
+								
 							}
 							
 							
@@ -1257,6 +1257,12 @@ class kg_schedule(osv.osv):
 								ms_master_obj = self.pool.get('kg.machine.shop')
 								ms_rec = ms_master_obj.browse(cr, uid, ms_item['ms_id'])
 								
+								if order_ms_line_id != False:
+									order_ms_rec = self.pool.get('ch.order.machineshop.details').browse(cr, uid, order_ms_line_id)
+									oth_spec = order_ms_rec.remarks
+								else:
+									oth_spec = ''
+								
 								### Sequence Number Generation ###
 								ms_name = ''	
 								ms_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.ms.inward')])
@@ -1293,6 +1299,7 @@ class kg_schedule(osv.osv):
 								'position_id': ms_item['position_id'],
 								'item_code': ms_rec.code,
 								'item_name': ms_item['item_name' ],
+								'oth_spec': oth_spec
 								
 								}
 								
@@ -1865,7 +1872,7 @@ class ch_schedule_details(osv.osv):
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),
 		'note': fields.text('Notes'),
 		'cancel_remark': fields.text('Cancel Remarks'),
-		'remarks': fields.text('Remarks'),
+		'remarks': fields.related('order_bomline_id','add_spec',type='text',string='WO Remarks',store=True,readonly=True),
 		'active': fields.boolean('Active'),
 		'acc_bomline_id': fields.many2one('ch.wo.accessories.foundry','Acc Foundry Item'),
 		

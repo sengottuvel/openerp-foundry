@@ -46,6 +46,7 @@
 								<field name="order_category"/>
 								<field name="item_name"/>
 								<field name="pump_serial_no" readonly="1"/>
+								<field name="oth_spec"/>
 							</group>					
 						</group>
 						<notebook>
@@ -104,6 +105,7 @@
 					<field name="item_code"/>
 					<field name="item_name"/>
 					<field name="moc_id"/>
+					<field name="oth_spec"/>
 					<field name="db_result"/>
 				</tree>
 			</field>
@@ -213,6 +215,7 @@
 								<field name="order_category"/>
 								<field name="item_name"/>
 								<field name="pump_serial_no" readonly="1"/>
+								<field name="oth_spec"/>
 							</group>					
 						</group>
 						<notebook>
@@ -271,6 +274,7 @@
 					<field name="item_code"/>
 					<field name="item_name"/>
 					<field name="moc_id"/>
+					<field name="oth_spec"/>
 					<field name="hs_result"/>
 				</tree>
 			</field>

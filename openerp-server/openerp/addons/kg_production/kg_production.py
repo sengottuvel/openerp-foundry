@@ -101,8 +101,8 @@ class kg_production(osv.osv):
 		'schedule_id': fields.many2one('kg.schedule','Schedule No.'),
 		'schedule_date': fields.related('schedule_id','entry_date', type='date', string='Schedule Date', store=True, readonly=True),
 		'schedule_line_id': fields.many2one('ch.schedule.details','Schedule Line Item'),
-		'sch_remarks': fields.text('Remarks'),
-		
+		'sch_remarks': fields.related('order_bomline_id','add_spec',type='text',string='WO Remarks',store=True,readonly=True),
+
 		### Work Order Details ###
 		'order_bomline_id': fields.many2one('ch.order.bom.details','Order BOM Line Id',readonly=True),
 		'order_id': fields.many2one('kg.work.order','Work Order'),
@@ -114,7 +114,6 @@ class kg_production(osv.osv):
 		'order_category': fields.related('order_line_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'order_priority': fields.selection(ORDER_PRIORITY, string='Priority', store=True, readonly=True),
 		'order_value': fields.related('order_id','order_value', type='float', string='WO Value', store=True, readonly=True),
-
 		
 		'pump_model_id': fields.related('order_line_id','pump_model_id', type='many2one', relation='kg.pumpmodel.master', string='Pump Model', store=True, readonly=True),
 		'pattern_id': fields.many2one('kg.pattern.master', 'Pattern Number', readonly=True),

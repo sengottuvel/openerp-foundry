@@ -37,6 +37,7 @@
 							<field name="pump_model_id" readonly="1"/>
 							<field name="pattern_name" invisible="1"/>
 							<field name="item_name" readonly="1"/>
+							<field name="oth_spec"/>
 							
 						</group>					
 					</group>
@@ -87,6 +88,7 @@
 					<field name="item_name"/>
 					<field name="moc_id"/>
 					<field name="qty" sum="Total Qty"/>
+					<field name="oth_spec"/>
 					
 				</tree>
 			</field>

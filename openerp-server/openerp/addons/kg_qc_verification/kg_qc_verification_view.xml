@@ -25,6 +25,7 @@
 							<field name="moc_construction_id" readonly="1" attrs="{'invisible': [('stock_type','=','pattern')]}"/>
 							<field name="moc_id" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
 							<field name="total_weight" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
+							<field name="oth_spec"/>
 							<field name="stage_id" invisible="1"/>
 							<field name="stock_type" invisible="1"/>
 						</group>											
@@ -123,6 +124,7 @@
 					<field name="qty" sum="Total Qty"/>
 					<field name="each_weight"/>
 					<field name="total_weight"/>
+					<field name="oth_spec"/>
 					<field name="remark"/>
 					<field name="state"/>
 				</tree>

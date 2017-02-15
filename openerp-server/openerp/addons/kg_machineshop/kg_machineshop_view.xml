@@ -46,6 +46,7 @@
 							<field name="pattern_name" readonly="1"/>
 							<field name="melting_id" readonly="1"/>
 							<field name="each_weight" readonly="1"/>
+							<field name="oth_spec"/>
 						</group>					
 					</group>
 					<notebook>
@@ -100,6 +101,7 @@
 					<field name="each_weight" sum="Total Each Weight"/>
 					<field name="total_weight" sum="Total Weight"/>
 					<field name="stage_id" invisible="1"/>
+					<field name="oth_spec"/>
 					<field name="state"/>
 				</tree>
 			</field>
@@ -235,6 +237,7 @@
 							<field name="pattern_name" invisible="1"/>
 							<field name="item_name" readonly="1"/>
 							<field name="each_weight" invisible="1"/>
+							<field name="oth_spec"/>
 						</group>					
 					</group>
 					<notebook>
@@ -286,7 +289,9 @@
 					<field name="moc_id"/>
 					<field name="location" invisible="1"/>
 					<field name="ms_sch_qty" sum="Total Schedule Qty"/>
+					<field name="oth_spec"/>
 					<field name="ms_state"/>
+					
 				</tree>
 			</field>
 		</record>

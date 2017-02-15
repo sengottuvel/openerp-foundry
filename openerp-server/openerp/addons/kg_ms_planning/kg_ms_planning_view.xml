@@ -37,7 +37,8 @@
 										<field name="schedule_qty" readonly="1"/>
 										<field name="inhouse_qty" required="1"/>
 										<field name="sc_qty" required="1"/>
-										<field name="specification" widget="char"/>
+										<field name="remarks"/>
+										<field name="oth_spec" widget="char"/>
 									</tree>
 									<form string="Planning Details Form">
 										<group>
@@ -47,13 +48,14 @@
 												<field name="csd_no"/>
 												<field name="schedule_qty" readonly="1"/>
 												<field name="sc_qty" required="1" readonly="1"/>
+												<field name="oth_spec" widget="char"/>
 											</group>
 											<group>
 												<field name="position_id"/>
 												<field name="item_name"/>
 												<field name="moc_id" />
 												<field name="inhouse_qty" required="1"/>
-												<field name="specification"/>
+												<field name="remarks"/>
 											</group>
 										</group>
 										<newline/>

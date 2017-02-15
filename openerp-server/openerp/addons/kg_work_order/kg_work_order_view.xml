@@ -12,9 +12,9 @@
 					<header>
 						
 						<button name="mkt_approve" type="object" string="WFMKT Approval" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"
-							groups="kg_users_mgt.group_kg_crm_admin1"/>
+							/>
 						<button name="design_approve" type="object" string="WFD Approval" states="mkt_approved" class="oe_highlight" confirm="Are you sure to proceed ?"
-							groups="kg_users_mgt.group_planning_admin"/>
+							/>
 						<button name="special_approve" type="object" string="Special Approval" class="oe_highlight" confirm="Are you sure to proceed ?"
 							attrs="{'invisible': ['|',('state','!=','design_approved'),('wo_spc_app_flag','=',False)]}" groups="kg_users_mgt.group_planning_admin"/>
 						<button name="entry_confirm" type="object" string="WFMD Approval" class="oe_highlight" confirm="Are you sure to proceed ?"
@@ -26,6 +26,7 @@
 						<group>
 							<field name="name" attrs="{'readonly': [('state','in',['confirmed','cancel'])],'required': [('state','!=','draft')]}"/>
 							<field name="offer_no" readonly="1"/>
+							<field name="enquiry_no" readonly="1"/>
 							<field name="division_id"/>
 							<field name="order_category" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="partner_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
@@ -107,6 +108,8 @@
 				<tree colors="blue:state == 'draft';black:state == 'confirmed';gray:state == 'cancel'" 
 								toolbar="True" string="Work Order Entry Tree">					
 					<field name="name"/>
+					<field name="enquiry_no"/>
+					<field name="offer_no"/>
 					<field name="entry_date"/>
 					<field name="version" string="Revision"/>
 					<field name="division_id" invisible="1"/>
@@ -260,7 +263,7 @@
 									<field name="length"/>
 									
 									<field name="moc_id" attrs="{'required': [('flag_applicable','!=',False)]}"/>
-									<field name="remarks" widget="char"/>
+									<field name="remarks" widget="char" string="Other Specification"/>
 									<field name="flag_standard" invisible="1"/>
 									<field name="entry_mode" invisible="1"/>
 									
@@ -281,7 +284,7 @@
 									<field name="flag_is_bearing" invisible="1"/>
 									<field name="moc_id" attrs="{'required': [('flag_applicable','!=',False)]}"/>
 									<field name="brand_id" attrs="{'required': [('flag_is_bearing','!=',False)]}"/>
-									<field name="remarks" widget="char"/>
+									<field name="remarks" widget="char" string="Other Specification"/>
 									<field name="flag_standard" invisible="1"/>
 									<field name="entry_mode" invisible="1"/>
 								</tree>
@@ -334,7 +337,7 @@
 													<field name="prime_cost" readonly="1" invisible="0"/>
 													<field name="wo_prime_cost" readonly="1"/>
 													
-													<field name="remarks" />
+													<field name="remarks" string="Other Specification"/>
 													<field name="load_bom" invisible="1"/>
 												</tree>
 											</field>								
@@ -353,7 +356,7 @@
 													<field name="prime_cost" readonly="1" invisible="0"/>
 													<field name="wo_prime_cost" readonly="1"/>
 													
-													<field name="remarks"/>
+													<field name="remarks" string="Other Specification"/>
 													<field name="load_bom" invisible="1"/>
 												</tree>
 											</field>								
@@ -372,7 +375,7 @@
 													<field name="prime_cost" readonly="1" invisible="0"/>
 													<field name="wo_prime_cost" readonly="1"/>
 													
-													<field name="remarks"/>
+													<field name="remarks" string="Other Specification"/>
 													<field name="load_bom" invisible="1"/>
 												</tree>
 											</field>								

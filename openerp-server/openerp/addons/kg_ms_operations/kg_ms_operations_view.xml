@@ -82,6 +82,7 @@
 						<group>
 							<field name="order_priority" string="Order Category"/>
 							<field name="item_name"/>
+							<field name="oth_spec"/>
 						</group>
 					</group>
 					<group string="Dimension Details">
@@ -141,6 +142,7 @@
 					<field name="position_id"/>
 					<field name="op1_stage_id"/>
 					<field name="op1_process_result"/>
+					<field name="oth_spec"/>
 					<field name="op1_state"/>
 				</tree>
 			</field>
@@ -282,6 +284,7 @@
 						<group>
 							<field name="order_priority" string="Order Category"/>
 							<field name="item_name"/>
+							<field name="oth_spec"/>
 						</group>
 					</group>
 					<group string="Dimension Details">
@@ -341,6 +344,7 @@
 					<field name="position_id"/>
 					<field name="op2_stage_id"/>
 					<field name="op2_process_result"/>
+					<field name="oth_spec"/>
 					<field name="op2_state"/>
 				</tree>
 			</field>
@@ -482,6 +486,7 @@
 						<group>
 							<field name="order_priority" string="Order Category"/>
 							<field name="item_name"/>
+							<field name="oth_spec"/>
 						</group>
 					</group>
 					<group string="Dimension Details">
@@ -541,6 +546,7 @@
 					<field name="position_id"/>
 					<field name="op3_stage_id"/>
 					<field name="op3_process_result"/>
+					<field name="oth_spec"/>
 					<field name="op3_state"/>
 				</tree>
 			</field>
@@ -684,6 +690,7 @@
 						<group>
 							<field name="order_priority" string="Order Category"/>
 							<field name="item_name"/>
+							<field name="oth_spec"/>
 						</group>
 					</group>
 					<group string="Dimension Details">
@@ -743,6 +750,7 @@
 					<field name="position_id"/>
 					<field name="op4_stage_id"/>
 					<field name="op4_process_result"/>
+					<field name="oth_spec"/>
 					<field name="op4_state"/>
 				</tree>
 			</field>
@@ -886,6 +894,7 @@
 						<group>
 							<field name="order_priority" string="Order Category"/>
 							<field name="item_name"/>
+							<field name="oth_spec"/>
 						</group>
 					</group>
 					<group string="Dimension Details">
@@ -945,6 +954,7 @@
 					<field name="position_id"/>
 					<field name="op5_stage_id"/>
 					<field name="op5_process_result"/>
+					<field name="oth_spec"/>
 					<field name="op5_state"/>
 				</tree>
 			</field>
@@ -1088,6 +1098,7 @@
 						<group>
 							<field name="order_priority" string="Order Category"/>
 							<field name="item_name"/>
+							<field name="oth_spec"/>
 						</group>
 					</group>
 					<group string="Dimension Details">
@@ -1147,6 +1158,7 @@
 					<field name="position_id"/>
 					<field name="op6_stage_id"/>
 					<field name="op6_process_result"/>
+					<field name="oth_spec"/>
 					<field name="op6_state"/>
 				</tree>
 			</field>
@@ -1290,6 +1302,7 @@
 						<group>
 							<field name="order_priority" string="Order Category"/>
 							<field name="item_name"/>
+							<field name="oth_spec"/>
 						</group>
 					</group>
 					<group string="Dimension Details">
@@ -1349,6 +1362,7 @@
 					<field name="position_id"/>
 					<field name="op7_stage_id"/>
 					<field name="op7_process_result"/>
+					<field name="oth_spec"/>
 					<field name="op7_state"/>
 				</tree>
 			</field>
@@ -1492,6 +1506,7 @@
 						<group>
 							<field name="order_priority" string="Order Category"/>
 							<field name="item_name"/>
+							<field name="oth_spec"/>
 						</group>
 					</group>
 					<group string="Dimension Details">
@@ -1551,6 +1566,7 @@
 					<field name="position_id"/>
 					<field name="op8_stage_id"/>
 					<field name="op8_process_result"/>
+					<field name="oth_spec"/>
 					<field name="op8_state"/>
 				</tree>
 			</field>
@@ -1694,6 +1710,7 @@
 						<group>
 							<field name="order_priority" string="Order Category"/>
 							<field name="item_name"/>
+							<field name="oth_spec"/>
 						</group>
 					</group>
 					<group string="Dimension Details">
@@ -1753,6 +1770,7 @@
 					<field name="position_id"/>
 					<field name="op9_stage_id"/>
 					<field name="op9_process_result"/>
+					<field name="oth_spec"/>
 					<field name="op9_state"/>
 				</tree>
 			</field>
@@ -1896,6 +1914,7 @@
 						<group>
 							<field name="order_priority" string="Order Category"/>
 							<field name="item_name"/>
+							<field name="oth_spec"/>
 						</group>
 					</group>
 					<group string="Dimension Details">
@@ -1955,6 +1974,7 @@
 					<field name="position_id"/>
 					<field name="op10_stage_id"/>
 					<field name="op10_process_result"/>
+					<field name="oth_spec"/>
 					<field name="op10_state"/>
 				</tree>
 			</field>
@@ -2098,6 +2118,7 @@
 						<group>
 							<field name="order_priority" string="Order Category"/>
 							<field name="item_name"/>
+							<field name="oth_spec"/>
 						</group>
 					</group>
 					<group string="Dimension Details">
@@ -2157,6 +2178,7 @@
 					<field name="position_id"/>
 					<field name="op11_stage_id"/>
 					<field name="op11_process_result"/>
+					<field name="oth_spec"/>
 					<field name="op11_state"/>
 				</tree>
 			</field>
@@ -2300,6 +2322,7 @@
 						<group>
 							<field name="order_priority" string="Order Category"/>
 							<field name="item_name"/>
+							<field name="oth_spec"/>
 						</group>
 					</group>
 					<group string="Dimension Details">
@@ -2359,6 +2382,7 @@
 					<field name="position_id"/>
 					<field name="op12_stage_id"/>
 					<field name="op12_process_result"/>
+					<field name="oth_spec"/>
 					<field name="op12_state"/>
 				</tree>
 			</field>
@@ -2483,6 +2507,7 @@
 					<field name="item_name"/>
 					<field name="moc_id"/>
 					<field name="position_id"/>
+					<field name="oth_spec"/>
 				</tree>
 			</field>
 		</record>

@@ -100,6 +100,7 @@
 					<field name="location"/>
 					<field name="pour_qty" sum="Total Qty"/>
 					<field name="stage_id"/>
+					<field name="oth_spec"/>
 					<field name="state"/>
 				</tree>
 			</field>
@@ -223,6 +224,7 @@
 					<field name="pour_qty" sum="Total Qty"/>
 					<field name="inward_accept_qty" string="Fettling Accepted Qty" sum="Total Accepted Qty"/>
 					<field name="stage_id"/>
+					<field name="oth_spec"/>
 					<field name="state"/>
 				</tree>
 			</field>
@@ -360,6 +362,7 @@
 					<field name="knockout_qty" string="Production Qty" sum="Knock Out Qty"/>
 					<field name="knockout_accept_qty" string="Completed/Accepted Qty" sum="Accepted Qty"/>
 					<field name="knockout_reject_qty" sum="Rejected Qty"/>
+					<field name="oth_spec"/>
 				</tree>
 			</field>
 		</record>
@@ -539,6 +542,7 @@
 					<field name="decoring_qty" string="Production Qty" sum="Decoring Qty"/>
 					<field name="decoring_accept_qty" string="Completed/Accepted Qty" sum="Accepted Qty"/>
 					<field name="decoring_reject_qty" sum="Rejected Qty"/>
+					<field name="oth_spec"/>
 				</tree>
 			</field>
 		</record>
@@ -715,6 +719,7 @@
 					<field name="shot_blast_qty" string="Production Qty" sum="Shot Blast Qty"/>
 					<field name="shot_blast_accept_qty" string="Completed/Accepted Qty" sum="Accepted Qty"/>
 					<field name="shot_blast_reject_qty" sum="Rejected Qty"/>
+					<field name="oth_spec"/>
 				</tree>
 			</field>
 		</record>
@@ -893,6 +898,7 @@
 					<field name="hammering_qty" string="Production Qty" sum="Hammering Qty"/>
 					<field name="hammering_accept_qty" string="Completed/Accepted Qty" sum="Accepted Qty"/>
 					<field name="hammering_reject_qty" sum="Rejected Qty"/>
+					<field name="oth_spec"/>
 				</tree>
 			</field>
 		</record>
@@ -1072,6 +1078,7 @@
 					<field name="wheel_cutting_qty" string="Production Qty" sum="Wheel Cutting Qty"/>
 					<field name="wheel_cutting_accept_qty" string="Completed/Accepted Qty" sum="Accepted Qty"/>
 					<field name="wheel_cutting_reject_qty" sum="Rejected Qty"/>
+					<field name="oth_spec"/>
 				</tree>
 			</field>
 		</record>
@@ -1251,6 +1258,7 @@
 					<field name="gas_cutting_qty" string="Production Qty" sum="Gas Cutting Qty"/>
 					<field name="gas_cutting_accept_qty" string="Completed/Accepted Qty" sum="Accepted Qty"/>
 					<field name="gas_cutting_reject_qty" sum="Rejected Qty"/>
+					<field name="oth_spec"/>
 				</tree>
 			</field>
 		</record>
@@ -1430,6 +1438,7 @@
 					<field name="arc_cutting_qty" string="Production Qty" sum="ARC Cutting Qty"/>
 					<field name="arc_cutting_accept_qty" string="Completed/Accepted Qty" sum="Accepted Qty"/>
 					<field name="arc_cutting_reject_qty" sum="Rejected Qty"/>
+					<field name="oth_spec"/>
 				</tree>
 			</field>
 		</record>
@@ -1619,6 +1628,7 @@
 					<field name="moc_id"/>
 					<field name="location"/>
 					<field name="heat_qty" sum="Heat Qty"/>
+					<field name="oth_spec"/>
 				</tree>
 			</field>
 		</record>
@@ -1790,6 +1800,7 @@
 					<field name="moc_id"/>
 					<field name="location"/>
 					<field name="heat2_qty" sum="Heat Qty"/>
+					<field name="oth_spec"/>
 				</tree>
 			</field>
 		</record>
@@ -1961,6 +1972,7 @@
 					<field name="moc_id"/>
 					<field name="location"/>
 					<field name="heat3_qty" sum="Heat Qty"/>
+					<field name="oth_spec"/>
 				</tree>
 			</field>
 		</record>
@@ -2124,6 +2136,7 @@
 					<field name="rough_grinding_qty" string="Production Qty" sum="Qty"/>
 					<field name="rough_grinding_accept_qty" string="Completed/Accepted Qty" sum="Accepted Qty"/>
 					<field name="rough_grinding_reject_qty" sum="Rejected Qty"/>
+					<field name="oth_spec"/>
 				</tree>
 			</field>
 		</record>
@@ -2304,6 +2317,7 @@
 					<field name="welding_qty" string="Production Qty" sum="Qty"/>
 					<field name="welding_accept_qty" string="Completed/Accepted Qty" sum="Accepted Qty"/>
 					<field name="welding_reject_qty" sum="Rejected Qty"/>
+					<field name="oth_spec"/>
 				</tree>
 			</field>
 		</record>
@@ -2484,6 +2498,7 @@
 					<field name="finish_grinding_qty" string="Production Qty" sum="Qty"/>
 					<field name="finish_grinding_accept_qty" string="Completed/Accepted Qty" sum="Accepted Qty"/>
 					<field name="finish_grinding_reject_qty" sum="Rejected Qty"/>
+					<field name="oth_spec"/>
 				</tree>
 			</field>
 		</record>
@@ -2663,6 +2678,7 @@
 					<field name="reshot_blasting_qty" string="Production Qty" sum="Qty"/>
 					<field name="reshot_blasting_accept_qty" string="Completed/Accepted Qty" sum="Accepted Qty"/>
 					<field name="reshot_blasting_reject_qty" sum="Rejected Qty"/>
+					<field name="oth_spec"/>
 				</tree>
 			</field>
 		</record>
@@ -2820,6 +2836,7 @@
 					<field name="stage_name" readonly="1"/> 
 					<field name="allocated_qty" readonly="1"/>
 					<field name="allocation_state" readonly="1"/>
+					<field name="oth_spec"/>
 				</tree>
 			</field>
 		</record>
@@ -2909,7 +2926,8 @@
 					<field name="each_weight" sum="Each Weight"/> 
 					<field name="total_weight" sum="Total Weight"/> 
 					<field name="stage_name"/> 
-					<field name="reject_remarks_id"/> 
+					<field name="reject_remarks_id"/>
+					
 				</tree>
 			</field>
 		</record>
@@ -2982,6 +3000,7 @@
 					<field name="pattern_name"/>
 					<field name="moc_id"/>
 					<field name="location"/>
+					
 				</tree>
 			</field>
 		</record>

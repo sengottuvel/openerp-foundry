@@ -71,6 +71,7 @@ class kg_ms_operations(osv.osv):
 		'parent_id': fields.integer('Parent Id'),
 		'last_operation_check_id': fields.integer('Last Operation Check Id'),
 		'state': fields.selection([('active','Active'),('reject','Reject')],'Status'),
+		'oth_spec': fields.related('ms_id','oth_spec', type='text', string='WO Remarks', store=True, readonly=True),
 		
 		### Operation 1 ###
 		'op1_stage_id': fields.many2one('kg.stage.master','Stage'),
@@ -1048,7 +1049,8 @@ class kg_ms_operations(osv.osv):
 									'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
 									'ms_assembly_id': entry_rec.ms_id.assembly_id,
 									'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
-									'qty': entry_rec.inhouse_qty
+									'qty': entry_rec.inhouse_qty,
+									'oth_spec': entry_rec.oth_spec
 								}
 								ms_store_id = self.pool.get('kg.ms.stores').create(cr, uid, ms_store_vals)
 							if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
@@ -1726,7 +1728,8 @@ class kg_ms_operations(osv.osv):
 									'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
 									'ms_assembly_id': entry_rec.ms_id.assembly_id,
 									'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
-									'qty': entry_rec.inhouse_qty
+									'qty': entry_rec.inhouse_qty,
+									'oth_spec': entry_rec.oth_spec
 								}
 								ms_store_id = self.pool.get('kg.ms.stores').create(cr, uid, ms_store_vals)
 							if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
@@ -2392,7 +2395,8 @@ class kg_ms_operations(osv.osv):
 									'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
 									'ms_assembly_id': entry_rec.ms_id.assembly_id,
 									'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
-									'qty': entry_rec.inhouse_qty
+									'qty': entry_rec.inhouse_qty,
+									'oth_spec': entry_rec.oth_spec
 								}
 								ms_store_id = self.pool.get('kg.ms.stores').create(cr, uid, ms_store_vals)
 							if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
@@ -3061,7 +3065,8 @@ class kg_ms_operations(osv.osv):
 									'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
 									'ms_assembly_id': entry_rec.ms_id.assembly_id,
 									'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
-									'qty': entry_rec.inhouse_qty
+									'qty': entry_rec.inhouse_qty,
+									'oth_spec': entry_rec.oth_spec
 								}
 								ms_store_id = self.pool.get('kg.ms.stores').create(cr, uid, ms_store_vals)
 							if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
@@ -3729,7 +3734,8 @@ class kg_ms_operations(osv.osv):
 									'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
 									'ms_assembly_id': entry_rec.ms_id.assembly_id,
 									'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
-									'qty': entry_rec.inhouse_qty
+									'qty': entry_rec.inhouse_qty,
+									'oth_spec': entry_rec.oth_spec
 								}
 								ms_store_id = self.pool.get('kg.ms.stores').create(cr, uid, ms_store_vals)
 							if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
@@ -4396,7 +4402,8 @@ class kg_ms_operations(osv.osv):
 									'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
 									'ms_assembly_id': entry_rec.ms_id.assembly_id,
 									'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
-									'qty': entry_rec.inhouse_qty
+									'qty': entry_rec.inhouse_qty,
+									'oth_spec': entry_rec.oth_spec
 								}
 								ms_store_id = self.pool.get('kg.ms.stores').create(cr, uid, ms_store_vals)
 							if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
@@ -5063,7 +5070,8 @@ class kg_ms_operations(osv.osv):
 									'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
 									'ms_assembly_id': entry_rec.ms_id.assembly_id,
 									'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
-									'qty': entry_rec.inhouse_qty
+									'qty': entry_rec.inhouse_qty,
+									'oth_spec': entry_rec.oth_spec
 								}
 								ms_store_id = self.pool.get('kg.ms.stores').create(cr, uid, ms_store_vals)
 							if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
@@ -5730,7 +5738,8 @@ class kg_ms_operations(osv.osv):
 									'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
 									'ms_assembly_id': entry_rec.ms_id.assembly_id,
 									'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
-									'qty': entry_rec.inhouse_qty
+									'qty': entry_rec.inhouse_qty,
+									'oth_spec': entry_rec.oth_spec
 								}
 								ms_store_id = self.pool.get('kg.ms.stores').create(cr, uid, ms_store_vals)
 							if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
@@ -6397,7 +6406,8 @@ class kg_ms_operations(osv.osv):
 									'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
 									'ms_assembly_id': entry_rec.ms_id.assembly_id,
 									'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
-									'qty': entry_rec.inhouse_qty
+									'qty': entry_rec.inhouse_qty,
+									'oth_spec': entry_rec.oth_spec
 								}
 								ms_store_id = self.pool.get('kg.ms.stores').create(cr, uid, ms_store_vals)
 							if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
@@ -7066,7 +7076,8 @@ class kg_ms_operations(osv.osv):
 									'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
 									'ms_assembly_id': entry_rec.ms_id.assembly_id,
 									'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
-									'qty': entry_rec.inhouse_qty
+									'qty': entry_rec.inhouse_qty,
+									'oth_spec': entry_rec.oth_spec
 								}
 								ms_store_id = self.pool.get('kg.ms.stores').create(cr, uid, ms_store_vals)
 							if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
@@ -7733,7 +7744,8 @@ class kg_ms_operations(osv.osv):
 									'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
 									'ms_assembly_id': entry_rec.ms_id.assembly_id,
 									'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
-									'qty': entry_rec.inhouse_qty
+									'qty': entry_rec.inhouse_qty,
+									'oth_spec': entry_rec.oth_spec
 								}
 								ms_store_id = self.pool.get('kg.ms.stores').create(cr, uid, ms_store_vals)
 							if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
@@ -8401,7 +8413,8 @@ class kg_ms_operations(osv.osv):
 									'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
 									'ms_assembly_id': entry_rec.ms_id.assembly_id,
 									'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
-									'qty': entry_rec.inhouse_qty
+									'qty': entry_rec.inhouse_qty,
+									'oth_spec': entry_rec.oth_spec
 								}
 								ms_store_id = self.pool.get('kg.ms.stores').create(cr, uid, ms_store_vals)
 							if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
