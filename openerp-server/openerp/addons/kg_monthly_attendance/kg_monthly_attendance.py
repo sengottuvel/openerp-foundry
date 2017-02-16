@@ -320,12 +320,12 @@ class kg_monthly_attendance(osv.osv):
 		if (rec.working_days < check_wrk_days) or (rec.working_days > check_wrk_days):
 			raise osv.except_osv(_('Warning!'),
 						_('Entered days should not exceed or less than the total working days!!'))
-			return False
+			#~ return False
 		return  True
 		
 	_constraints = [
 		
-		(_check_number_of_days, 'Attendance entry already available for this employee in this month !!',['']),		
+		#~ (_check_number_of_days, 'Attendance entry already available for this employee in this month !!',['']),		
 		] 
 	
 		
