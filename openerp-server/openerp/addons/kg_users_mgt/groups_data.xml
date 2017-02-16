@@ -532,6 +532,7 @@
 			ref('kg_turn_over.mam_kg_turn_over'),
 			ref('kg_compensation.mam_kg_comp'),
 			ref('kg_attendance_device_info.mam_kg_att_dev_info'),
+			ref('kg_menus.mam_kg_job_nature'),
 			
 			
        

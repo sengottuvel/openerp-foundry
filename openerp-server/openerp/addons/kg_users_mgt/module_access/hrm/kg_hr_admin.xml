@@ -536,6 +536,25 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
 		</record>
 		
+		<record id="kg_hr_kg_job_nature" model="ir.model.access">
+			<field name="model_id" ref="kg_job_nature.model_kg_job_nature"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Nature of job</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
+		<record id="kg_hr_ch_job_nature" model="ir.model.access">
+			<field name="model_id" ref="kg_job_nature.model_ch_job_nature"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Nature of job Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
 		
 		
 		
