@@ -36,7 +36,7 @@ class hr_payslip(osv.osv):
 
     _columns = {
         'period_id': fields.many2one('account.period', 'Force Period',states={'draft': [('readonly', False)]}, readonly=True, domain=[('state','<>','done')], help="Keep empty to use the period of the validation(Payslip) date."),
-        'journal_id': fields.many2one('account.journal', 'Salary Journal',states={'draft': [('readonly', False)]}, readonly=True, required=True),
+        'journal_id': fields.many2one('account.journal', 'Salary Journal',states={'draft': [('readonly', False)]}, readonly=True, required=False),
         'move_id': fields.many2one('account.move', 'Accounting Entry', readonly=True),
     }
 

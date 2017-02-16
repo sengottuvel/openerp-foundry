@@ -220,20 +220,24 @@
                     <button string="Cancel Payslip" name="cancel_sheet" states="draft,hr_check,confirm,verify"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirm"/>
                 </header>
-                <sheet>
                     <div class="oe_right oe_button_box">
                         <button name="%(act_payslip_lines)d" string="Payslip Computation Details" type="action"/>
                     </div>
                     <div class="oe_title">
                         <label for="employee_id" class="oe_edit_only"/>
                         <h1><field name="employee_id" on_change="onchange_employee_id(date_from, date_to, employee_id, contract_id)"/></h1>
+<!--
                         <label for="date_from" class="oe_edit_only" string="Period"/>
                         <h2>
                             From <field name="date_from" on_change="onchange_employee_id(date_from, date_to, employee_id, contract_id)"/>
                             to <field name="date_to"/>
                         </h2>
+-->
                     </div>
                     <group col="4">
+						<field name="date_from" on_change="onchange_employee_id(date_from, date_to, employee_id, contract_id)"
+										style="width: 30%%" class="att_month_change"/>
+						<field name="date_to" style="width: 30%%" class="att_month_change"/>
                         <field name="contract_id" domain="[('employee_id','=',employee_id),('date_start','&lt;=',date_to),'|',('date_end','&gt;=',date_from),('date_end','=',False)]" on_change="onchange_contract_id(date_from, date_to, employee_id, contract_id)" context="{'default_employee_id': employee_id}"/>
                         <field name="number"/>
                         <field name="struct_id" attrs="{'required':[('contract_id','&lt;&gt;',False)]}"/>
@@ -241,8 +245,37 @@
                         <field name="credit_note"/>
                     </group>
                     <notebook>
-                        <page string="Worked Days &amp; Inputs">
+						<page string="Salary Computation" >
+                            <field name="line_ids" colspan="4" nolabel="1">
+                                <tree string="Salary Structure" editable="bottom" colors="blue:total == 0">
+                                    <field name="name"/>
+                                    <field name="code"/>
+                                    <field name="category_id"/>
+                                    <field name="sequence" invisible="1"/>
+                                    <field name="quantity"/>
+                                    <field name="rate" invisible="1"/>
+                                    <field name="amount"/>
+                                    <field name="total" invisible="1"/>
+                                </tree>
+                                <form string="Payslip Line">
+                                    <group col="4">
+                                        <field name="name"/>
+                                        <field name="code"/>
+                                        <field name="category_id"/>
+                                        <field name="sequence"/>
+                                        <field name="quantity"/>
+                                        <field name="rate"/>
+                                        <field name="amount"/>
+                                        <field name="total"/>
+                                        <field name="salary_rule_id"/>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="Worked Days &amp; Inputs" invisible="1">
+<!--
                             <separator string="Worked Days"/>
+-->
                             <field name="worked_days_line_ids">
                                 <tree string="Worked Days" editable="bottom">
                                     <field name="name"/>
@@ -285,34 +318,8 @@
                                 </form>
                             </field>
                         </page>
-                        <page string="Salary Computation" >
-                            <field name="line_ids" colspan="4" nolabel="1">
-                                <tree string="Salary Structure" editable="bottom" colors="blue:total == 0">
-                                    <field name="name"/>
-                                    <field name="code"/>
-                                    <field name="category_id"/>
-                                    <field name="sequence" invisible="1"/>
-                                    <field name="quantity"/>
-                                    <field name="rate"/>
-                                    <field name="amount"/>
-                                    <field name="total"/>
-                                </tree>
-                                <form string="Payslip Line">
-                                    <group col="4">
-                                        <field name="name"/>
-                                        <field name="code"/>
-                                        <field name="category_id"/>
-                                        <field name="sequence"/>
-                                        <field name="quantity"/>
-                                        <field name="rate"/>
-                                        <field name="amount"/>
-                                        <field name="total"/>
-                                        <field name="salary_rule_id"/>
-                                    </group>
-                                </form>
-                            </field>
-                        </page>
-                        <page string="Details By Salary Rule Category">
+                        
+                        <page string="Details By Salary Rule Category" invisible="1">
                             <field name="details_by_salary_rule_category" context="{'group_by':'category_id'}" domain="[('appears_on_payslip', '=', True)]">
                                 <tree string="Payslip Lines" colors="blue:total == 0">
                                     <field name="category_id"/>
@@ -322,7 +329,7 @@
                                 </tree>
                             </field>
                        </page>
-                       <page string="Other Information">
+                       <page string="Other Information" invisible="1">
                             <group>
                                 <group string="Miscellaneous">
                                     <field name="company_id" groups="base.group_multi_company"/>
@@ -337,7 +344,6 @@
                             </div>
                        </page>
                     </notebook>
-                    </sheet>
                 </form>
             </field>
         </record>
@@ -387,9 +393,11 @@
             <field name="inherit_id" ref="hr.view_employee_form"/>
             <field name="arch" type="xml">
                 <data>
+<!--
                     <xpath expr="//div[@name='button_box']" position="inside">
                         <button name="%(act_hr_employee_payslip_list)d" string="Payslips" type="action" groups="base.group_hr_user" invisible="1"/>
                     </xpath>
+-->
                 </data>
             </field>
         </record>
@@ -696,23 +704,23 @@
                     <button string="Set to Draft" name="draft_payslip_run" type="object" states="close" />
                     <field name="state" widget="statusbar"/>
                 </header>
-                <sheet>
                     <label for="name" class="oe_edit_only"/>
                     <h1>
                         <field name="name"/>
                     </h1>
+<!--
                     <h2>
                         Period from 
                         <field name="date_start"/> 
                         to 
                         <field name="date_end"/>
                     </h2>
+-->
                     <group col="4">
                         <field name="credit_note"/>
                     </group>
                     <separator string="Payslips"/>
                     <field name="slip_ids"/>
-                </sheet>
                 </form>
             </field>
         </record>
