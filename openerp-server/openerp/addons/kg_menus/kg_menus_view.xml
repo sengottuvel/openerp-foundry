@@ -297,7 +297,7 @@
 			<menuitem name="HR Master" id="menu_hr_master" sequence="91"/>
 				
 			<menuitem  name="General Masters" id="menu_masters_menu" parent="menu_hr_master" sequence="2"/>
-				<menuitem action="hr_payroll.action_salary_rule_form" id="menu_hr_master_ear_ded"  name="Earnings and Deduction Type" parent="menu_masters_menu" sequence="2"/>
+				<menuitem action="hr_payroll.action_salary_rule_form" id="menu_hr_master_ear_ded"  name="Allowance / Deduction" parent="menu_masters_menu" sequence="2"/>
 				<menuitem action="base.action_res_bank_form" id="menu_hr_master_bank" name = "Bank Master" parent="menu_masters_menu" sequence="3" />
 				<menuitem action="hr.open_module_tree_department" id="menu_hr_master_dep" parent="menu_masters_menu" sequence="9"/>
 				<menuitem action="hr.action_hr_job" id="menu_hr_jobs" parent="menu_masters_menu" sequence="10"/>

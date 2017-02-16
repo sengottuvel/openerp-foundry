@@ -516,6 +516,16 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
 		</record>
 		
+		<record id="kg_hr_kg_attendance_device_info" model="ir.model.access">
+			<field name="model_id" ref="kg_attendance_device_info.model_kg_attendance_device_info"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Attendance Device Info</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
 		
 		
 		
