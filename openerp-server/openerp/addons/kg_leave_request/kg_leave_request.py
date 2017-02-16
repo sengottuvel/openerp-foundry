@@ -313,17 +313,20 @@ class kg_leave_request(osv.osv):
 	def onchange_employee_id(self, cr, uid, ids, employee_id,code, context=None):
 		moc_const_vals=[]
 		le_all = self.pool.get('kg.leave.allocation').search(cr,uid,[('employee_id','=',employee_id)])
-		lev_rec_all = self.pool.get('kg.leave.allocation').browse(cr,uid,le_all[0])
-		
-		for ssss in lev_rec_all.line_id_1:
-			moc_const_vals.append({
-																
-								'leave_type_id':ssss.leave_type_id.id,
-								'no_of_days':ssss.no_of_days,
-								'used_days':ssss.used_days,
-								'balc_days':ssss.balc_days,
-						
-								})
+		if le_all:
+			lev_rec_all = self.pool.get('kg.leave.allocation').browse(cr,uid,le_all[0])
+			for ssss in lev_rec_all.line_id_1:
+				moc_const_vals.append({
+																	
+									'leave_type_id':ssss.leave_type_id.id,
+									'no_of_days':ssss.no_of_days,
+									'used_days':ssss.used_days,
+									'balc_days':ssss.balc_days,
+							
+									})
+		else:
+			raise osv.except_osv(_('Warning!'),
+						_('Leaves are not allocated !!'))
 			
 		if employee_id:
 			emp = self.pool.get('hr.employee').browse(cr,uid,employee_id)
