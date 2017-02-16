@@ -53,14 +53,23 @@ class kg_monthly_attendance(osv.osv):
 					res[h.id] = 'no'	
 		return res	
 		
-		
+	def _paid_amt(self, cr, uid, ids, field_name, arg, context=None):
+		res = {}
+		for rec in self.browse(cr, uid, ids, context=context):
+			res[rec.id] = {
+				'salary_days': 0.0,
+			}
+			#~ var = rec.ot_days+rec.od_days+rec.arrear_days+rec.leave_days+rec.worked_days 
+			var = rec.od_days+rec.arrear_days+rec.leave_days+rec.worked_days 
+			res[rec.id]['salary_days'] = var
+		return res	
 		
 	
 	_columns = {
 	
 		### Basic Info
 			
-		'code': fields.char('Code', size=4, required=True),		
+		'code': fields.char('Code', size=10, required=True),		
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
@@ -100,8 +109,9 @@ class kg_monthly_attendance(osv.osv):
 		'total_days':fields.float('Total Days of Month'),	
 		'leave_days':fields.float('Total Leave Days'),	
 		'working_days':fields.float('Total Working Days'),	
-		'salary_days':fields.float('Total Paid Days'),	
+		'salary_days': fields.function(_paid_amt, string='Total Paid Days',multi="sums",store=True),		
 		'late_days':fields.float('Late'),	
+		'month':fields.char('Month'),	
 		
 		## Child Tables Declaration		
 		
@@ -115,7 +125,7 @@ class kg_monthly_attendance(osv.osv):
 	
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.state == 'confirmed':
+		if rec.state == 'approved':
 			if rec.cancel_remark:
 				self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 			else:
@@ -137,7 +147,7 @@ class kg_monthly_attendance(osv.osv):
 		
 	def entry_draft(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.state == 'confirmed':
+		if rec.state == 'approved':
 			self.write(cr, uid, ids, {'state': 'draft'})
 		else:
 			raise osv.except_osv(_('Warning!!!'),
@@ -166,26 +176,20 @@ class kg_monthly_attendance(osv.osv):
 					_('Confirm the record to proceed further'))
 		return True
 		
-	def unlink(self,cr,uid,ids,context=None):
-		unlink_ids = []		
-		for rec in self.browse(cr,uid,ids):	
-			if rec.state not in ('draft','cancel'):				
-				raise osv.except_osv(_('Warning!'),
-						_('You can not delete this entry !!'))
-			else:
-				unlink_ids.append(rec.id)
-		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
+	#~ def unlink(self,cr,uid,ids,context=None):
+		#~ unlink_ids = []		
+		#~ for rec in self.browse(cr,uid,ids):	
+			#~ if rec.state not in ('draft','cancel'):				
+				#~ raise osv.except_osv(_('Warning!'),
+						#~ _('You can not delete this entry !!'))
+			#~ else:
+				#~ unlink_ids.append(rec.id)
+		#~ return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
 		
 	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_monthly_attendance, self).write(cr, uid, ids, vals, context)
 		
-	
-	_constraints = [
-	
-	
-		
-	]
 	
 	## Module Requirement
 	
@@ -226,15 +230,96 @@ class kg_monthly_attendance(osv.osv):
 		value = {'code': emp.code}
 		return {'value': value}
 		
+	def update_monthly_att(self,cr,uid,ids,context=None):
+		
+		today = datetime.date.today()
+		first = datetime.date(day=1, month=today.month, year=today.year)
+		mon = today.month - 1
+		if mon == 0:
+			mon = 12
+		else:
+			mon = mon
+		tot_days = calendar.monthrange(today.year,mon)[1]
+		test = first - datetime.timedelta(days=tot_days)
+		res_start = test.strftime('%Y-%m-%d')
+		last = first - datetime.timedelta(days=1)
+		res_end = last.strftime('%Y-%m-%d')
+
+		da_obj = self.pool.get('kg.daily.attendance')
+		da_line_obj = self.pool.get('ch.daily.attendance')
+		mon_att_obj = self.pool.get('kg.monthly.attendance')
+		today = date.today()
+		days_back = today - timedelta(today.day)		
+		last_month = days_back.strftime('%B')
+		cur_year = days_back.year
+		month_1 = str(last_month) + '-' + str(cur_year)
+		da_ids = da_obj.search(cr,uid,[('month','=',last_month),('year','=',cur_year)])
+		check_data = mon_att_obj.search(cr,uid,[('start_date','=',res_start),('end_date','=',res_end)])
+		print "-------------------------------------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",len(check_data)
+		if len(check_data) == 1:
+			 
+			for item in da_ids:
+				da_rec = da_obj.browse(cr,uid,item)
+				w_days = da_line_obj.search(cr,uid,[('header_id','=',item),
+								('status','not in',('weekoff','absent','halfday','compoff_half','compoff_full'))])
+				lev_days = da_line_obj.search(cr,uid,[('header_id','=',item),
+								('status','=','leave')])
+				od_days = da_line_obj.search(cr,uid,[('header_id','=',item),
+								('status','=','onduty')])
+				ab_days = da_line_obj.search(cr,uid,[('header_id','=',item),
+								('status','=','absent')])
+				ot_days = da_line_obj.search(cr,uid,[('header_id','=',item),
+								('ot_hrs','!=','00:00')])
+				half_days = da_line_obj.search(cr,uid,[('header_id','=',item),
+								('status','=','halfday')])
+				wrkg_days = da_line_obj.search(cr,uid,[('header_id','=',item),('status','not in',('weekoff','holiday'))])
+				
+				if half_days:
+					tot_hf_day = 0
+					for i in half_days:
+						tot_hf_day += .5
+					tot_half_days = len(w_days) + tot_hf_day
+				else:
+					tot_half_days = len(w_days)
+				
+				att_vals = {
+
+							'employee_id':da_rec.employee_id.id,
+							'code':da_rec.employee_id.code,
+							'worked_days':tot_half_days,
+							'working_days':len(wrkg_days),
+							#~ 'salary_days':len(w_days),
+							'salary_days':tot_half_days,
+							'leave_days':len(lev_days),
+							'od_days':len(od_days),
+							'absent_days':len(ab_days),
+							'ot_days':len(ot_days),
+							'month':month_1,
+			
+							'state':'draft',
+							
+						}
+				att_id = mon_att_obj.create(cr,uid,att_vals)
+		else:
+			raise osv.except_osv(_('Warning!'),
+					_('Monthly attendance already created for this month !!'))
+		return True
+		
+	
+		
 	###Validations###
 	def _check_number_of_days(self, cr, uid,ids,context=None):
 		rec = self.browse(cr, uid, ids[0])
 		mon_total_days = rec.total_days
 		all_days = rec.working_days + rec.worked_days + rec.arrear_days + rec.half_days + rec.ot_days + rec.od_days + rec.cas_lev_days 
-		+rec.fes_lev_days + rec.ear_lev_days + rec.absent_days + rec.total_days + rec.leave_days + rec.salary_days + rec.late_days
-		if all_days == mon_total_days:
+		+rec.fes_lev_days + rec.ear_lev_days + rec.absent_days + rec.total_days + rec.leave_days + rec.late_days + rec.salary_days or 0.00
+		if (all_days > mon_total_days) or (all_days < mon_total_days):
 			raise osv.except_osv(_('Warning!'),
-						_('Entered days are exceeding the total days in a month!!'))
+						_('Entered days should not exceed of less than the total days in a month!!'))
+		check_wrk_days = rec.leave_days + rec.salary_days + rec.worked_days + rec.ot_days + rec.od_days + rec.absent_days
+		if (rec.working_days < check_wrk_days) or (rec.working_days > check_wrk_days):
+			raise osv.except_osv(_('Warning!'),
+						_('Entered days should not exceed or less than the total working days!!'))
 			return False
 		return  True
 		

@@ -12,17 +12,17 @@
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?" />
+						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
-						<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<field name="state" widget="statusbar" statusbar_visible="draft,approved,confirmed,cancel,reject" statusbar_colors='{"draft":"blue","approved":"blue","confirmed":"red","cancel":"red","reject":"red"}' readonly="1"/>
+						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="update_monthly_att" type="object" string="Calculate" class="oe_highlight"/>
 					</header>
 						<group>
 							<group>
-								<field name="start_date" style="width: 30%%" class="att_start_end_date" required="1"/>	
+								<field name="start_date" style="width: 30%%" class="att_start_end_date" required="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
 							</group>
 							<group>
-								<field name="end_date" style="width: 30%%" class="att_start_end_date" required="1"/>	
+								<field name="end_date" style="width: 30%%" class="att_start_end_date" required="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
 							</group>
 							<group>
 								<field name="employee_id" on_change = "onchange_emp_id(employee_id,code)"  attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1"/>	
@@ -32,23 +32,21 @@
 							</group>
 							<group>
 								<field name="modify" invisible = "1"/>
-								<field name="total_days" required = "1"/>
-								<field name="working_days" required="1"/>	
-								<field name="leave_days" required="1"/>	
-								<field name="salary_days" required="1"/>	
-								<field name="worked_days" required = "1"/>
-								<field name="half_days" required = "1"/>
-								<field name="ot_days" required = "1"/>
+								<field name="total_days" required = "1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="working_days" required="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
+								<field name="leave_days" required="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
+								<field name="salary_days" required="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
+								<field name="worked_days" required = "1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								
 											
 							</group>
 							<group>
-								<field name="od_days" required = "1"/>
-								<field name="arrear_days" required="1"/>	
-								<field name="late_days" required = "1"/>
-								<field name="absent_days" required = "1"/>
-								<field name="cas_lev_days" required = "1"/>
-								<field name="fes_lev_days" required = "1"/>
-								<field name="ear_lev_days" required = "1"/>
+								<field name="ot_days" required = "1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="od_days" required = "1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="arrear_days" required="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
+								<field name="absent_days" required = "1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="state" style="width: 30%%" class="att_state_change"/>			
+								
 							</group>
 						</group>						
 						<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
@@ -102,10 +100,11 @@
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'draft';red:state == 'confirmed'
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" 
-								toolbar="True" string="Monthly Attendance">				
+								toolbar="True" string="Monthly Attendance">
+					<field name="month"/>
 					<field name="employee_id"/>
 					<field name="code"/>
-					<field name="state"/>
+					<field name="state" invisible="1"/>
 				</tree>
 			</field>
 		</record>
