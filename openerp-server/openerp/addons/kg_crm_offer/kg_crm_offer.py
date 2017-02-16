@@ -2053,8 +2053,10 @@ class kg_mail_compose_message(osv.osv):
 		
 		for res_id in res_ids:
 			attachments = []
-			attachments.append(('Term Copy.xls', base64.b64decode(off_rec.term_data)))
-			attachments.append(('Offer Copy.xls', base64.b64decode(off_rec.rep_data)))
+			if off_rec.term_data:
+				attachments.append(('Terms Copy.xls', base64.b64decode(off_rec.term_data)))
+			if off_rec.rep_data:
+				attachments.append(('Offer Copy.xls', base64.b64decode(off_rec.rep_data)))
 			
 			ir_mail_server = self.pool.get('ir.mail_server')
 			msg = ir_mail_server.build_email(
