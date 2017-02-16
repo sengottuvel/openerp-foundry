@@ -60,7 +60,7 @@
 					</field>
 					
 					<field name="user_id" position="replace">
-						<field name="user_id" invisible="1"/>
+						<field name="user_id" invisible="0"/>
 					</field>
 
 					<field name="parent_id" position="replace" >
