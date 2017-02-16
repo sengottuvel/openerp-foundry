@@ -11,14 +11,14 @@ from itertools import groupby
 from PIL import Image
 
 CALL_TYPE_SELECTION = [
-    ('service','Service'),
-    ('new_enquiry','New Enquiry')
+	('service','Service'),
+	('new_enquiry','New Enquiry')
 ]
 PURPOSE_SELECTION = [
-    ('pump','Pump'),('spare','Spare'),('prj','Project'),('pump_spare','Pump With Spare')
+	('pump','Pump'),('spare','Spare'),('prj','Project'),('pump_spare','Pump With Spare')
 ]
 STATE_SELECTION = [
-    ('draft','Draft'),('moved_to_offer','Moved To Offer'),('call','Call Back'),('quote','Quote Process'),('wo_created','WO Created'),('wo_released','WO Released'),('reject','Rejected'),('revised','Revised')
+	('draft','Draft'),('moved_to_offer','Moved To Offer'),('call','Call Back'),('quote','Quote Process'),('wo_created','WO Created'),('wo_released','WO Released'),('reject','Rejected'),('revised','Revised')
 ]
 MARKET_SELECTION = [
 	('cp','CP'),('ip','IP')
@@ -202,6 +202,41 @@ class kg_crm_offer(osv.osv):
 		
 	}
 	
+	def send_by_email(self, cr, uid, ids, context=None):
+		'''
+		This function opens a window to compose an email, with the edi purchase template message loaded by default
+		'''
+		ir_model_data = self.pool.get('ir.model.data')
+		try:
+			template_id = ir_model_data.get_object_reference(cr, uid, 'purchase', 'email_template_edi_purchase')[1]
+		except ValueError:
+			template_id = False
+		try:
+			compose_form_id = ir_model_data.get_object_reference(cr, uid, 'mail', 'email_compose_message_wizard_form')[1]
+		except ValueError:
+			compose_form_id = False 
+		ctx = dict(context)
+		print"template_idtemplate_id",template_id,type(template_id)
+		print"compose_form_idcompose_form_id",compose_form_id
+		
+		ctx.update({
+			'default_model': 'kg.crm.offer',
+			'default_res_id': ids[0],
+			'default_use_template': bool(8),
+			'default_template_id': 8,
+			'default_composition_mode': 'comment',
+		})
+		return {
+			'type': 'ir.actions.act_window',
+			'view_type': 'form',
+			'view_mode': 'form',
+			'res_model': 'mail.compose.message',
+			'views': [(compose_form_id, 'form')],
+			'view_id': compose_form_id,
+			'target': 'new',
+			'context': ctx,
+		}
+		
 	def unlink(self,cr,uid,ids,context=None):
 		unlink_ids = []	 
 		for rec in self.browse(cr,uid,ids): 
@@ -289,6 +324,7 @@ class kg_crm_offer(osv.osv):
 			wo_id = self.pool.get('kg.work.order').create(cr,uid,{'order_category': entry.purpose,
 																  'name': '',
 																  'order_priority': '',
+																  'enquiry_no': entry.enquiry_id.name,
 																  'offer_no': entry.name,
 																  'location': entry.location,
 																  'entry_mode': 'auto',
@@ -301,7 +337,6 @@ class kg_crm_offer(osv.osv):
 					#~ for item in entry.line_spare_ids:
 					for key, group in groupby(entry.line_pump_ids, lambda x: x.enquiry_line_id.id):
 						groups.append(map(lambda r:r,group))
-					print"ffffffffffffffffffff",groups
 					for key,group in enumerate(groups):
 						enquiry_line_id = group[0].enquiry_line_id.id
 						off_line_id = group[0]
@@ -315,12 +350,17 @@ class kg_crm_offer(osv.osv):
 								item = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,enquiry_line_id)
 								if item:
 									self.prepare_bom(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
+									## Accessories creation
+									acc_off_obj = self.pool.get('ch.accessories.offer').search(cr,uid,[('enquiry_line_id','=',enquiry_line_id)])
+									for li in acc_off_obj:
+										off_line_id = acc_off_obj
+									purpose='access'
+									self.prepare_bom(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
 				if entry.line_spare_ids:
 					groups = []
 					#~ for item in entry.line_spare_ids:
 					for key, group in groupby(entry.line_spare_ids, lambda x: x.pump_id.id):
 						groups.append(map(lambda r:r,group))
-					print"ffffffffffffffffffff",groups
 					for key,group in enumerate(groups):
 						enquiry_line_id = group[0].enquiry_line_id.id
 						off_line_id = group[0]
@@ -339,7 +379,12 @@ class kg_crm_offer(osv.osv):
 										print"liliii",li
 										off_line_id = spa_off_obj
 									self.prepare_bom(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
-				
+									## Accessories creation
+									acc_off_obj = self.pool.get('ch.accessories.offer').search(cr,uid,[('enquiry_line_id','=',enquiry_line_id)])
+									for li in acc_off_obj:
+										off_line_id = acc_off_obj
+									purpose='access'
+									self.prepare_bom(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
 				if entry.line_accessories_ids:
 					groups = []
 					for key, group in groupby(entry.line_accessories_ids, lambda x: x.pump_id.id):
@@ -347,25 +392,27 @@ class kg_crm_offer(osv.osv):
 					print"ffffffffffffffffffff",groups
 					for key,group in enumerate(groups):
 						enquiry_line_id = group[0].enquiry_line_id.id
-						off_line_id = group[0]
-						acc_off_obj = self.pool.get('ch.accessories.offer').search(cr,uid,[('enquiry_line_id','=',enquiry_line_id)])
 						print"enquiry_line_idenquiry_line_id",enquiry_line_id
-						purpose = 'access'
-						pump_vals = self._prepare_pump_details(cr,uid,wo_id,entry,enquiry_line_id,off_line_id,purpose)
-						if pump_vals:
-							wo_line_id = self.pool.get('ch.work.order.details').create(cr, uid, pump_vals, context=context)
-							if wo_line_id:
-								item = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,enquiry_line_id)
-								if item:
-									for li in acc_off_obj:
-										print"liliii",li
-										off_line_id = acc_off_obj
-									self.prepare_bom(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
+						if group[0].enquiry_line_id.purpose_categ == 'access':
+							off_line_id = group[0]
+							acc_off_obj = self.pool.get('ch.accessories.offer').search(cr,uid,[('enquiry_line_id','=',enquiry_line_id)])
+							purpose = 'access'
+							pump_vals = self._prepare_pump_details(cr,uid,wo_id,entry,enquiry_line_id,off_line_id,purpose)
+							if pump_vals:
+								wo_line_id = self.pool.get('ch.work.order.details').create(cr, uid, pump_vals, context=context)
+								if wo_line_id:
+									item = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,enquiry_line_id)
+									if item:
+										for li in acc_off_obj:
+											print"liliii",li
+											off_line_id = acc_off_obj
+										self.prepare_bom(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
 						
 			print"wo_idwo_idwo_id",wo_id
 			if wo_id:
 				self.write(cr, uid, ids, {'wo_flag': True,'state':'wo_created'})
 				self.pool.get('kg.crm.enquiry').write(cr,uid,entry.enquiry_id.id,{'wo_flag':True,'state':'wo_created'})
+		
 		return True
 	
 	#~ def _prepare_pump_details(self,cr,uid,wo_id,entry,item,context=None):		
@@ -1976,3 +2023,54 @@ class ch_term_offer(osv.osv):
 	
 		
 ch_term_offer()
+
+
+class kg_mail_compose_message(osv.osv):
+
+	_name = "mail.compose.message"
+	_inherit = "mail.compose.message"
+	_description = "Email composition wizard"
+	
+	_columns = {
+	
+	'cc_mail' : fields.char('Cc'),
+	
+	}
+	
+	def send_mail_offer(self, cr, uid, ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		offer_id = rec.res_id
+		to_mails = []
+		partner_ids = rec.partner_ids
+		for email in partner_ids:
+			to_mails.append(email.email)
+		cc_mails = [rec.cc_mail]
+		template = self.pool.get('email.template').browse(cr, uid,8)
+		ir_attachment_obj = self.pool.get('ir.attachment')
+		off_rec = self.pool.get('kg.crm.offer').browse(cr,uid,offer_id)
+		
+		res_ids = ids
+		
+		for res_id in res_ids:
+			attachments = []
+			attachments.append(('Term Copy.xls', base64.b64decode(off_rec.term_data)))
+			attachments.append(('Offer Copy.xls', base64.b64decode(off_rec.rep_data)))
+			
+			ir_mail_server = self.pool.get('ir.mail_server')
+			msg = ir_mail_server.build_email(
+					email_from = 'erpreport@kgcloud.org',
+					email_to = to_mails,
+					subject = rec.subject,
+					body = rec.body,
+					email_cc = cc_mails,
+					attachments = attachments,
+					object_id = res_id and ('%s-%s' % (res_id, 'kg.crm.offer')),
+					subtype = 'html',
+					subtype_alternative = 'plain')
+			
+			res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
+			print "Offer Copy and Term Copy Mail Seccessfully Sent TO ---->>> ::",to_mails 
+		
+		return True
+		
+kg_mail_compose_message()
