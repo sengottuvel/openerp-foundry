@@ -141,6 +141,8 @@ class kg_employee(osv.osv):
 		'wrk_address': fields.char('Working Address',),
 		'dep_id':fields.many2one('kg.depmaster','Department'),
 		'pan_no':fields.char('Pan No',size=12),
+		'division_id':fields.many2one('kg.division.master','Division'),
+		'nature_of_job_id':fields.many2one('kg.job.nature','Nature Of Job'),
 		
 		## Child Tables Declaration	
 			
@@ -203,7 +205,8 @@ class kg_employee(osv.osv):
 		return True
 		
 	def entry_draft(self,cr,uid,ids,context=None):
-		if rec.status == 'cancel':			
+		rec = self.browse(cr,uid,ids[0])
+		if rec.status == 'approved':			
 			self.write(cr, uid, ids, {'status': 'draft'})
 		return True
 
@@ -215,31 +218,34 @@ class kg_employee(osv.osv):
 			emp_categ_line = self.pool.get('ch.salary.policy')
 			contract_salary = self.pool.get('ch.kg.contract.salary')
 			emp_categ_line_1 = emp_categ_obj.browse(cr,uid,rec.emp_categ_id.id)
-					
-			emp_vals = {
+			emp_cntrct_ids = emp_obj_1.search(cr,uid,[('employee_id','=',rec.id)])
+			if emp_cntrct_ids:
+				pass
+			else:
+				emp_vals = {
 
-					'employee_id': rec.id,
-					'code':rec.code,
-					'dep_id':rec.dep_id.id,
-					'job_id':rec.job_id.id,
-					'emp_categ_id':rec.emp_categ_id.id,
-					'shift_id':emp_categ_line_1.shift_id.id,
+						'employee_id': rec.id,
+						'code':rec.code,
+						'dep_id':rec.dep_id.id,
+						'job_id':rec.job_id.id,
+						'emp_categ_id':rec.emp_categ_id.id,
+						'shift_id':emp_categ_line_1.shift_id.id,
 
-					}
-			att_id = emp_obj_1.create(cr,uid,emp_vals)
-			emp_obj = self.pool.get('hr.contract')
-			emp_con_1 = emp_obj.search(cr,uid,[('employee_id','=',rec.id)])
-			for i in emp_categ_line_1.line_id_3:
+						}
+				att_id = emp_obj_1.create(cr,uid,emp_vals)
+				emp_obj = self.pool.get('hr.contract')
+				emp_con_1 = emp_obj.search(cr,uid,[('employee_id','=',rec.id)])
+				for i in emp_categ_line_1.line_id_3:
 
-				emp_con_vals = {
+					emp_con_vals = {
 
-					'header_id_salary': emp_con_1[0],
-					'salary_type':i.allow_deduction_id.id,
-					'amt_type':i.type,
-					'salary_amt':i.value,
+						'header_id_salary': emp_con_1[0],
+						'salary_type':i.allow_deduction_id.id,
+						'amt_type':i.type,
+						'salary_amt':i.value,
 
-					}
-				salary_policy = contract_salary.create(cr,uid,emp_con_vals)
+						}
+					salary_policy = contract_salary.create(cr,uid,emp_con_vals)
 
 			self.write(cr, uid, ids, {'status': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
@@ -307,7 +313,7 @@ class kg_employee(osv.osv):
 	
 	_constraints = [
 
-		(_dob_validation, 'Future dates/Age less than 18 are not allowed for Date of Birth!!', [' ']),		
+		#~ (_dob_validation, 'Future dates/Age less than 18 are not allowed for Date of Birth!!', [' ']),		
 		(_joindate_validation, 'Future dates are not allowed for Date of Joining!!', [' ']),		
 		
 	]

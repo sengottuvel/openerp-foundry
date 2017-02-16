@@ -13,9 +13,9 @@
 					<button name="confirm_entry" string="Confirm" type='object' class="oe_highlight" position="replace">
 						<button name="entry_reject" type="object" string="Reject"  class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('status','in',['draft','approved','cancel','reject'])]}"/>
 						<button name="entry_approve" type="object" string="Approve"  class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('status','in',['draft','approved','cancel','reject'])]}"/>
-						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
 						<button name="entry_confirm" type="object" string="Confirm"  class="oe_highlight" attrs="{'invisible':[('status','in',['approved','confirmed','cancel','reject'])]}"/>
-						<button name="entry_draft" type="object"  string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('status','in',['draft','confirmed','approved','reject'])]}"/>
+						<button name="entry_draft" type="object"  string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('status','in',['draft','confirmed','reject'])]}"/>
 						<button name="emp_relieve" type="object"  string="Relieve" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('status','in',['draft','confirmed','cancel','reject','resigned'])]}"/>
 						<button name="emp_resigned" type="object"  string="Resign" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('status','in',['draft','confirmed','cancel','reject','approved'])]}"/>
 					</button>
@@ -30,6 +30,7 @@
 								<field name="join_mode" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1" readonly="1"/>
 								<field name="name" class="lettersOnly" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
 								<field name="mode_of_att" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+								<field name="division_id" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
 								
 								<field name="notes" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
 							</group>
@@ -38,6 +39,7 @@
 								<field name="code" class="aplhanum_expect" string="Code" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
 								<field name="att_code" class="aplhanum_expect" attrs="{'required':[('mode_of_att','in',('electronic','both'))],'invisible':[('mode_of_att','not in',('electronic','both'))],'readonly': [('status','in',['approved','reject','cancel'])]}"/>
 								<field name="emp_categ_id" required="1"/>
+								<field name="nature_of_job_id" required="1"/>
 								<field name="status" style="width: 30%%" class="att_state_change"/>
 							</group>
 						</group>

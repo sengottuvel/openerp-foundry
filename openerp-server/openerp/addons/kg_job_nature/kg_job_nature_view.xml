@@ -20,19 +20,13 @@
 							<group>						
 								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1" class="aplhanum_expect"/>																
 								<field name="modify" invisible = "1"/>
-									
+								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
 							</group>
 							<group>
 								<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1" class="aplhanum_expect"/>
 								<field name="state" style="width: 30%%" class="att_state_change"/>								
 							</group>
 						</group>
-						<field name="line_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}">
-							<tree name="Job Nature Line" editable="bottom">
-								<field name="employee_id" options="{'datepicker':{'maxDate': null}}"  required="1" />
-								<field name="note"/>
-							</tree>
-						</field>
 						<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
 							<group>	
 								<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject','cancel'])]}"/>
@@ -42,9 +36,6 @@
 							</group>
 						</group>
 						<notebook>
-							<page string="Internal Notes">
-								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>		
-							</page>
 							<page string="Entry Info">
 									<group>
 										<field name="company_id"/>

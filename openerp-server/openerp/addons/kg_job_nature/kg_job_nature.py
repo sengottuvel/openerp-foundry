@@ -83,10 +83,6 @@ class kg_job_nature(osv.osv):
 		'code':fields.char('Code'),
 		
 		
-		## Child Tables Declaration
-		
-		'line_id':fields.one2many('ch.job_nature','header_id','Line id',readonly=True, states={'draft':[('readonly',False)]}),
-		
 				
 	}
 	
@@ -102,24 +98,7 @@ class kg_job_nature(osv.osv):
 		
 	}
 	
-	####Validations####
-	def  _validations (self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])
-		if rec.line_id:
-			line_emp_det = [ line.employee_id for line in rec.line_id ]
-			a= [line_emp_det.count(i) for i in line_emp_det ]
-			for j in a:
-				if j > 1:
-					raise osv.except_osv(_('Warning!'),
-								_('Duplicate employees are not allowed !!'))
-					return False
-		return True
-								
-	_constraints = [
-
-		(_validations, 'validations', [' ']),		
-		
-	]
+	####Validations###
 	
 	## Basic Needs	
 	
@@ -211,18 +190,4 @@ class kg_job_nature(osv.osv):
 	
 kg_job_nature()
 
-class ch_job_nature(osv.osv):
-	
-	_name = "ch.job_nature"
-	_description = "Job Nature Line"
-	
-	_columns = {
-
-	'header_id':fields.many2one('kg.job.nature','Header id'),
-	'employee_id':fields.many2one('hr.employee', 'Employee'),
-	'note':fields.text('Description')
-	
-	}
-	
-ch_job_nature()	
 
