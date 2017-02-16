@@ -396,6 +396,16 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
 		</record>
 		
+		<record id="kg_hr_ch_incentive_policy" model="ir.model.access">
+			<field name="model_id" ref="kg_employee_category.model_ch_incentive_policy"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">incentive Policy</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
 		<record id="kg_hr_ch_bonus_policy" model="ir.model.access">
 			<field name="model_id" ref="kg_employee_category.model_ch_bonus_policy"/>
 			<field eval="1" name="perm_read"/>
