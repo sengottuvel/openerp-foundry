@@ -137,7 +137,7 @@ class kg_allowance_deduction_master(osv.osv):
 		
 		rec = self.browse(cr,uid,ids[0])
 		
-		if rec.state == 'cancel':			
+		if rec.state == 'approved':			
 			self.write(cr, uid, ids, {'state': 'draft'})
 		else:
 			pass

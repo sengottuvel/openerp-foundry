@@ -277,7 +277,7 @@ class kg_payslip(osv.osv):
 				val5 = [d['salary_days'] for d in data if 'salary_days' in d]
 				salary_days = val5[0]
 				####### OT Calculation if OT applicable for the employee in the contract########
-				con_src = con_obj.search(cr,uid,[('employee_id','=',emp_id)])
+				con_src = con_obj.search(cr,uid,[('employee_id','=',emp_id),('state','=','approved')])
 				con_rec = con_obj.browse(cr,uid,con_src[0])
 				if con_rec.ot_status:
 					salary_days = salary_days + ot_days
@@ -289,7 +289,7 @@ class kg_payslip(osv.osv):
 				
 				#### Creation of the Salary components Described in the Contract of the employee ####
 				
-				con_ids = con_obj.search(cr,uid,[('employee_id','=',emp_id)])
+				con_ids = con_obj.search(cr,uid,[('employee_id','=',emp_id),('state','=','approved')])
 				con_ids_1 = con_obj.browse(cr,uid,con_ids[0])
 				self.write(cr, uid, ids, {'con_cross_amt': con_ids_1.gross_salary})
 				amt_sal=0.00
@@ -298,6 +298,7 @@ class kg_payslip(osv.osv):
 				pf_stand_amt=0
 				esi_amt=0.00
 				esi_stand_amt=0
+				bns_att = 0.00
 				for con_line_ids in con_ids_1.line_id_salary:
 					print "********************************************",con_line_ids.salary_type.categ_type
 					print "********************************************",con_line_ids.salary_type.id
@@ -334,7 +335,7 @@ class kg_payslip(osv.osv):
 					if con_ids_1.esi_status and con_ids_1.esi_eff_date <= slip_rec.date_to and con_line_ids.salary_type.app_esi:
 						esi_amt_sal += mon_sal
 							
-									
+					bns_att += comp_amt				
 				#### Creation of the Salary components Described in the Contract of the employee ####
 				
 			#### PF calculation for each employee ####	
@@ -410,6 +411,50 @@ class kg_payslip(osv.osv):
 				
 				#### ESI calculation for each employee ####	
 				
+				#### VDA calculation for each employee ####
+				
+				#~ if con_ids_1.vda_status:
+					#~ emp_recs = emp_obj.browse(cr,uid,con_ids_1.employee_id.id)
+					#~ div_rec = self.pool.get('kg.division.master').browse(cr,uid,emp_recs.division_id.id)
+					#~ print "___________points from division master____________________",div_rec.da_ded_points
+					#~ today = lastdate.date.today()
+					#~ first = lastdate.date(day=1, month=today.month, year=today.year)
+					#~ last = first - lastdate.timedelta(days=1)
+					#~ res = last.strftime('%B')
+					#~ datetttt = slip_rec.date_from
+					#~ d1 = str(res)
+					#~ print "Special incentive called -----------------------------------------------------",d1[:3]
+					#~ turn_over_idss = self.pool.get('kg.turn.over').search(cr,uid,[('month','=',d1[:3]),('active','=',True)])
+					#~ if turn_over_idss:
+						#~ turn_over_recs = self.pool.get('kg.turn.over').browse(cr,uid,turn_over_idss[0])
+						#~ print "$$$$$$---------- Chamber in turn over -------$$$$$$$$$",turn_over_recs.da_chamber
+						#~ vda_value_1 = turn_over_recs.da_chamber - div_rec.da_ded_points)
+						#~ emp_cont_id = self.pool.get('kg.employee.contribution').search(cr,uid,[('active','=',True),('state','=','approved')])
+						#~ emp_contt_ids = self.pool.get('ch.employee.contribution').search(cr,uid,[('header_id','=',emp_cont_id.id),('cont_heads','=','vda')])
+						#~ if emp_contt_ids:
+							#~ emp_contt_rec = self.pool.get('ch.employee.contribution').browse(cr,uid,emp_contt_ids[0])
+							#~ print "*********vda value in paise*****************",emp_contt_rec.emplr_cont_value
+							#~ acc_vda_value = ((vda_value_1*emplr_cont_value)/working_days)*salary_days
+							#~ self.pool.get('hr.payslip.line').create(cr,uid,
+								#~ {
+									#~ 'name':'VDA',
+									#~ 'code':'VDA',
+									#~ 'category_id':2,
+									#~ 'quantity':1,
+									#~ 'amount':acc_vda_value,
+									#~ 'salary_rule_id':1,
+									#~ 'employee_id':emp_id,
+									#~ 'contract_id':con_ids[0],
+									#~ 'slip_id':slip_rec.id,
+								#~ },context = None)
+				#~ else:
+					#~ pass
+					
+					
+				
+				
+				#### VDA calculation for each employee ####
+				
 				#### Creation of the allowance or deduction per month for the employee ####
 				
 				all_ded_ids = all_ded_obj.search(cr,uid,[('start_date','=',slip_rec.date_from),('end_date','=',slip_rec.date_to),('state','=','approved')])
@@ -474,6 +519,7 @@ class kg_payslip(osv.osv):
 					print "Special incentive called -----------------------------------------------------",d1[:3]
 					turn_over_ids = self.pool.get('kg.turn.over').search(cr,uid,[('month','=',d1[:3]),('active','=',True)])
 					turn_over_amt = 0.00
+					turn_over_per = 0.00
 					incent_amt = 0.00
 					if turn_over_ids:
 						turn_over_rec = self.pool.get('kg.turn.over').browse(cr,uid,turn_over_ids[0])
@@ -498,12 +544,12 @@ class kg_payslip(osv.osv):
 											print "*********inc_ids.incentive_value************",inc_ids.incentive_value
 											print "*********working_days************",working_days
 											print "*********worked_days************",worked_days
-											incent_amt = ((turn_over_amt*inc_ids.incentive_value)/working_days)*worked_days
+											incent_amt = ((turn_over_amt*inc_ids.incentive_value)/working_days)*salary_days
 										elif inc_ids.type == 'percentage':
 											turn_over_per = (turn_over_amt*inc_ids.incentive_value)/100
-											incent_amt = ((turn_over_per)/working_days)*worked_days
+											incent_amt = ((turn_over_per)/working_days)*salary_days
 										else:
-											incent_amt = ((turn_over_per)/working_days)*worked_days
+											incent_amt = ((inc_ids.incentive_value)/working_days)*salary_days
 										self.pool.get('hr.payslip.line').create(cr,uid,
 												{
 													'name':'Incentive',
@@ -518,36 +564,39 @@ class kg_payslip(osv.osv):
 												},context = None)
 						######### Incentive Calculation ###########
 						######### Special Incentive Calculation ###########
-						turn_over_amt = turn_over_rec.amt 
-						spl_inc_ids = self.pool.get('ch.special.incentive.policy').search(cr,uid,[('header_id_1','=',emp_categ_rec.id),('start_value','<=',turn_over_amt)])
-						print "^^^^^^^^^^^^^^^^^^^",spl_inc_ids
-						if spl_inc_ids:
-							get_spl_inc = self.pool.get('hr.payslip.line').search(cr,uid,[('code','=','SPI'),('slip_id','=',slip_rec.id)])
-							if get_spl_inc:
-								get_spl_inc_rc = self.pool.get('hr.payslip.line').browse(cr,uid,get_spl_inc[0])
-							aaaa=0.00	
-							for special_inc_ids in spl_inc_ids:
-								splss_inc_ids = self.pool.get('ch.special.incentive.policy').browse(cr,uid,special_inc_ids)
-								#~ if turn_over_amt >= splss_inc_ids.start_value and turn_over_amt <= splss_inc_ids.end_value:
-								#~ if splss_inc_ids.start_value <= turn_over_amt :
-								
+						if emp_categ_ids:
+							emp_categ_rec = self.pool.get('kg.employee.category').browse(cr,uid,emp_categ_ids[0])
+							print "emp_categ_recemp_categ_recemp_categ_recemp_categ_rec",emp_categ_rec.id
+							turn_over_amt = turn_over_rec.amt 
+							spl_inc_ids = self.pool.get('ch.special.incentive.policy').search(cr,uid,[('header_id_1','=',emp_categ_rec.id),('start_value','<=',turn_over_amt)])
+							print "^^^^^^^^^^^^^^^^^^^",spl_inc_ids
+							if spl_inc_ids:
+								get_spl_inc = self.pool.get('hr.payslip.line').search(cr,uid,[('code','=','SPI'),('slip_id','=',slip_rec.id)])
 								if get_spl_inc:
-									if splss_inc_ids.type == 'per_cr_fixed':
-										print "*********inc_ids.incentive_value************",inc_ids.incentive_value
-										print "*********working_days************",working_days
-										print "*********worked_days************",worked_days
-										spl_incent_amt = ((turn_over_amt*splss_inc_ids.incentive_value)/working_days)*worked_days
-									if splss_inc_ids.type == 'percentage':
-										get_spl_inc_rec = self.pool.get('hr.payslip.line').browse(cr,uid,get_spl_inc[0])
-										aaaa += splss_inc_ids.incentive_value
-										spl_inc_amt = (get_spl_inc_rec.amount * aaaa)/100
-										spl_incent_amt = get_spl_inc_rec.amount + spl_inc_amt
-							if get_spl_inc:
-								self.pool.get('hr.payslip.line').write(cr,uid,get_spl_inc_rc.id,
-										{
-											
-											'amount':spl_incent_amt,
-										})
+									get_spl_inc_rc = self.pool.get('hr.payslip.line').browse(cr,uid,get_spl_inc[0])
+								aaaa=0.00	
+								for special_inc_ids in spl_inc_ids:
+									splss_inc_ids = self.pool.get('ch.special.incentive.policy').browse(cr,uid,special_inc_ids)
+									#~ if turn_over_amt >= splss_inc_ids.start_value and turn_over_amt <= splss_inc_ids.end_value:
+									#~ if splss_inc_ids.start_value <= turn_over_amt :
+									
+									if get_spl_inc:
+										if splss_inc_ids.type == 'per_cr_fixed':
+											print "*********inc_ids.incentive_value************",inc_ids.incentive_value
+											print "*********working_days************",working_days
+											print "*********worked_days************",worked_days
+											spl_incent_amt = ((turn_over_amt*splss_inc_ids.incentive_value)/working_days)*salary_days
+										if splss_inc_ids.type == 'percentage':
+											get_spl_inc_rec = self.pool.get('hr.payslip.line').browse(cr,uid,get_spl_inc[0])
+											aaaa += splss_inc_ids.incentive_value
+											spl_inc_amt = (get_spl_inc_rec.amount * aaaa)/100
+											spl_incent_amt = get_spl_inc_rec.amount + spl_inc_amt
+								if get_spl_inc:
+									self.pool.get('hr.payslip.line').write(cr,uid,get_spl_inc_rc.id,
+											{
+												
+												'amount':spl_incent_amt,
+											})
 								
 						######### Special Incentive Calculation ###########
 				
@@ -562,14 +611,14 @@ class kg_payslip(osv.osv):
 						if emp_categ_rec.bonus_categ == 'attendance':
 							print "absentabsentabsentabsentabsent",absent
 							print "leave_daysleave_daysleave_daysleave_days",leave_days
-							if (absent+leave_days) <= emp_categ_rec.no_of_days_wage:
+							if (absent+leave_days) <= 1.5:
 								self.pool.get('hr.payslip.line').create(cr,uid,
 									{
 										'name':'Attendance Bonus',
 										'code':'ATTB',
 										'category_id':8,
 										'quantity':1,
-										'amount':(comp_amt * emp_categ_rec.no_of_days_wage),
+										'amount':(bns_att * emp_categ_rec.no_of_days_wage),
 										'salary_rule_id':1,
 										'employee_id':emp_id,
 										'contract_id':con_ids[0],
@@ -599,6 +648,8 @@ class kg_payslip(osv.osv):
 									'contract_id':con_ids[0],
 									'slip_id':slip_rec.id,
 								},context = None)
+				else:
+					pass
 				#### Creation of attendance bonus ##########
 				
 				#### Creation of the Driver Batta per month for the employee ####	
