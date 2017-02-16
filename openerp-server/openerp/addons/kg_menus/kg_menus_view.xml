@@ -306,6 +306,7 @@
 				<menuitem action="kg_employee_category.mma_kg_emp_categ" name="Employee Category" id="mam_kg_emp_categ" parent="menu_masters_menu" sequence="9"/>
 				<menuitem name="Leaves Types" action="hr_holidays.open_view_holiday_status" id="menu_open_view_holiday_status_1" parent="menu_masters_menu" sequence="10"/>
 				<menuitem parent="menu_masters_menu" id="mam_kg_contribution"  action="kg_contribution.mma_kg_contribution" sequence="0" name="Contribution"/>	
+				<menuitem parent="menu_masters_menu" id="mam_kg_job_nature"  action="kg_job_nature.mma_standard_kg_job_nature" sequence="10" name="Nature of Job"/>
 		
     </data>
 </openerp>
