@@ -523,7 +523,6 @@
 			ref('kg_menus.menu_masters_menu'),
 			ref('kg_menus.menu_hr_master_ear_ded'),
 			ref('kg_menus.menu_hr_master_bank'),
-			ref('kg_menus.menu_hr_master_dep'),
 			ref('kg_menus.menu_hr_jobs'),
 			
 			ref('kg_menus.mam_kg_emp_categ'),
