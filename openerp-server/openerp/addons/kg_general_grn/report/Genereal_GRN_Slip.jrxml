@@ -2,13 +2,12 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="683" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="643" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="49"/>
+	<property name="ireport.y" value="0"/>
 	<import value="org.apache.commons.codec.binary.Base64"/>
 	<subDataset name="dataset1">
 		<parameter name="grn_id" class="java.lang.Integer"/>
 		<queryString>
 			<![CDATA[select
-
 grn_line.id as grn_line_id,
 grn_line.product_id as product_id,
 product.name_template ||
@@ -16,28 +15,19 @@ product.name_template ||
 			THEN  ' | ' || brand.name
 			ELSE ''
 		END ) as product_name,
-
-
 uom.name as uom,
 inward.name as inward_type,
-
 round((grn_line.grn_qty)::numeric,3) as requested,
-
-round((grn_line.grn_qty)::numeric,3) as current_received
+round((grn_line.grn_qty)::numeric,3) as current_received,
+round((grn_line.reject_qty)::numeric,2) as reject_qty
 
 from kg_general_grn_line grn_line
 
 left join kg_general_grn grn on (grn.id=grn_line.grn_id)
-
-
 left join product_product product on (grn_line.product_id=product.id)
-
 left join product_uom uom on (grn_line.uom_id=uom.id)
-
 left join kg_inwardmaster inward on (grn_line.inward_type=inward.id)
-
 left join kg_brand_master brand on (grn_line.brand_id=brand.id)
-
 
 where grn_line.grn_id = $P{grn_id} order by grn_line.id]]>
 		</queryString>
@@ -48,6 +38,7 @@ where grn_line.grn_id = $P{grn_id} order by grn_line.id]]>
 		<field name="inward_type" class="java.lang.String"/>
 		<field name="requested" class="java.math.BigDecimal"/>
 		<field name="current_received" class="java.math.BigDecimal"/>
+		<field name="reject_qty" class="java.math.BigDecimal"/>
 	</subDataset>
 	<parameter name="grn_id" class="java.lang.Integer"/>
 	<parameter name="user_id" class="java.lang.Integer">
@@ -200,7 +191,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 					<textFieldExpression><![CDATA["Inward Type"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="282" y="20" width="64" height="30"/>
+					<reportElement x="282" y="20" width="53" height="30"/>
 					<box topPadding="2" leftPadding="0">
 						<topPen lineWidth="0.5"/>
 					</box>
@@ -210,7 +201,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 					<textFieldExpression><![CDATA["Requested"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="346" y="20" width="75" height="30"/>
+					<reportElement x="335" y="20" width="63" height="30"/>
 					<box topPadding="2" leftPadding="0">
 						<topPen lineWidth="0.5"/>
 					</box>
@@ -220,7 +211,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 					<textFieldExpression><![CDATA["Already"+"\n"+"Received"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="421" y="20" width="75" height="30"/>
+					<reportElement x="398" y="20" width="79" height="30"/>
 					<box topPadding="2" leftPadding="0">
 						<topPen lineWidth="0.5"/>
 					</box>
@@ -230,14 +221,14 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 					<textFieldExpression><![CDATA["Current"+"\n"+"Received"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="496" y="20" width="64" height="30"/>
+					<reportElement x="477" y="20" width="83" height="30"/>
 					<box topPadding="2" leftPadding="0">
 						<topPen lineWidth="0.5"/>
 					</box>
 					<textElement textAlignment="Right">
 						<font size="8" isBold="false"/>
 					</textElement>
-					<textFieldExpression><![CDATA["Pending"]]></textFieldExpression>
+					<textFieldExpression><![CDATA["Rejected"]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupHeader>
@@ -375,7 +366,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 								<textFieldExpression><![CDATA[$F{uom}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="346" y="0" width="75" height="20"/>
+								<reportElement stretchType="RelativeToTallestObject" x="335" y="0" width="63" height="20"/>
 								<box topPadding="2" rightPadding="2">
 									<topPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -386,7 +377,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 								<textFieldExpression><![CDATA["0"]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="282" y="0" width="64" height="20"/>
+								<reportElement stretchType="RelativeToTallestObject" x="282" y="0" width="53" height="20"/>
 								<box topPadding="2">
 									<topPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -397,7 +388,7 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 								<textFieldExpression><![CDATA[$F{requested}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="421" y="0" width="75" height="20"/>
+								<reportElement stretchType="RelativeToTallestObject" x="398" y="0" width="79" height="20"/>
 								<box topPadding="2" rightPadding="2">
 									<topPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -406,17 +397,6 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 									<font size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{current_received}]]></textFieldExpression>
-							</textField>
-							<textField isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="496" y="0" width="64" height="20"/>
-								<box topPadding="2">
-									<topPen lineWidth="0.5"/>
-									<bottomPen lineWidth="0.5"/>
-								</box>
-								<textElement textAlignment="Right">
-									<font size="8"/>
-								</textElement>
-								<textFieldExpression><![CDATA["0"]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 								<reportElement stretchType="RelativeToTallestObject" x="560" y="0" width="83" height="20"/>
@@ -428,6 +408,17 @@ where grn.id in (select grn_id from tmp_kg_general_grn where user_id = $P{user_i
 									<font size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{inward_type}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="477" y="0" width="83" height="20" isPrintWhenDetailOverflows="true"/>
+								<box topPadding="2">
+									<topPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{reject_qty}]]></textFieldExpression>
 							</textField>
 						</jr:listContents>
 					</jr:list>
