@@ -221,9 +221,9 @@
 						<page string="Work Order Details" attrs="{'invisible': [('flag_order','!=',True)]}">
 							<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}" >
 								<tree string = "Work Order Items" >
-									<field name="order_no" readonly="1"/>
-									<field name="item_code" readonly="1"/>
-									<field name="item_name" readonly="1"/>
+									<field name="order_id" readonly="1"/>
+									<field name="item_code"/>
+									<field name="item_name"/>
 									<field name="position_id" readonly="1"/>
 									<field name="moc_id" readonly="1"/>
 									<field name="qty" required="1"/>										
@@ -332,7 +332,7 @@
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
 				<tree toolbar="True" string="Subcontract WO Line Tree">				
-					<field name="order_no"/>
+					<field name="order_id"/>
 					<field name="order_delivery_date"/>					
 					<field name="order_priority" string="Category"/>
 					<field name="pump_model_id"/>					
@@ -362,20 +362,19 @@
 						
 						<group>
 							<group>
-								<field name="order_no"/>
-								<field name="order_priority"/>
-								<field name="item_code"/>
-								<field name="moc_id"/>
+								<field name="order_id"/>								
+								<field name="moc_id" attrs="{'readonly': [('entry_type','=','direct')]}"/>
 								<field name="read_flag" invisible="1"/>	
+								<field name="entry_type" invisible="1"/>	
 								<field name="qty" required="1" attrs="{'readonly': [('read_flag','=',True)]}"/>
-								<field name="remarks"/>
-								
-																
+								<field name="remarks"/>																
 							</group>											
 							<group>
-								<field name="position_id"/>
-								<field name="pump_model_id"/>
-								<field name="item_name"/>
+								<field name="position_id" attrs="{'readonly': [('entry_type','=','direct')]}"/>
+								<field name="pattern_id" on_change="onchange_pattern(pattern_id)" attrs="{'readonly': [('entry_type','=','direct')],'required': [('entry_type','=','manual')]}"/>
+								<field name="item_code" invisible="1"/>								
+								<field name="item_name" invisible="1"/>								
+								<field name="pump_model_id" attrs="{'readonly': [('entry_type','=','direct')]}"/>								
 								<field name="amount" readonly="1"/>
 							</group>					
 						</group>
@@ -554,7 +553,7 @@
 						<page string="DC Details" attrs="{'invisible': [('flag_dc','!=',True)]}">
 							<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
 								<tree string = "Work Order Items" editable="bottom">
-									<field name="order_no" readonly="1"/>
+									<field name="order_id" readonly="1"/>
 									<field name="item_code" readonly="1"/>
 									<field name="item_name" readonly="1"/>
 									<field name="position_id" readonly="1"/>
@@ -574,9 +573,8 @@
 						<page string="Select Items" attrs="{'invisible': [('entry_mode','=','from_wo')]}">
 							<field name="dc_internal_line_ids" attrs="{'readonly': [('state','in',['confirmed'])],'invisible': [('transfer_type','=','sub_contractor')]}">
 								<tree string="SC Items" create="false">
-									<field name="order_no"/>
-									<field name="order_delivery_date"/>
-									<field name="order_priority" string="Category"/>
+									<field name="order_id"/>
+									<field name="order_delivery_date"/>									
 									<field name="pump_model_id"/>
 									<field name="item_code" />
 									<field name="item_name"/>
@@ -586,7 +584,7 @@
 							</field>
 							<field name="dc_sub_line_ids" attrs="{'readonly': [('state','in',['confirmed'])],'invisible': [('transfer_type','=','internal')]}">
 								<tree string="SC Items" create="false">
-									<field name="order_no"/>
+									<field name="order_id"/>
 									<field name="order_delivery_date"/>
 									<field name="order_priority" string="Category"/>
 									<field name="pump_model_id"/>
@@ -658,7 +656,7 @@
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
 				<tree toolbar="True" string="Subcontract DC Line Tree">				
-					<field name="order_no"/>
+					<field name="order_id"/>
 					<field name="order_delivery_date"/>					
 					<field name="order_priority" string="Category"/>
 					<field name="pump_model_id"/>					
@@ -803,7 +801,7 @@
 						<page string="Inward Details" attrs="{'invisible': [('flag_inward','!=',True)]}">
 							<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
 								<tree string = "Inward Items" editable="bottom">
-									<field name="order_no" readonly="1"/>
+									<field name="order_id" readonly="1"/>
 									<field name="item_code" readonly="1"/>
 									<field name="item_name" readonly="1"/>
 									<field name="position_id" readonly="1"/>
@@ -822,9 +820,8 @@
 						<page string="Select Items">
 							<field name="dc_line_ids" attrs="{'readonly': [('state','in',['confirmed'])],'invisible': [('transfer_type','=','sub_contractor')]}">
 								<tree string="SC Items" create="false">
-									<field name="order_no"/>
-									<field name="order_delivery_date"/>
-									<field name="order_priority" string="Category"/>
+									<field name="order_id"/>
+									<field name="order_delivery_date"/>									
 									<field name="pump_model_id"/>
 									<field name="item_code" />
 									<field name="item_name"/>
@@ -834,7 +831,7 @@
 							</field>
 							<field name="inward_sub_line_ids" attrs="{'readonly': [('state','in',['confirmed'])],'invisible': [('transfer_type','=','internal')]}">
 								<tree string="SC Items" create="false">
-									<field name="order_no"/>
+									<field name="order_id"/>
 									<field name="order_delivery_date"/>
 									<field name="order_priority" string="Category"/>
 									<field name="pump_model_id"/>
@@ -929,7 +926,7 @@
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
 				<tree toolbar="True" string="Subcontract Inward Line Tree">				
-					<field name="order_no"/>
+					<field name="order_id"/>
 					<field name="order_delivery_date"/>					
 					<field name="order_priority" string="Category"/>
 					<field name="pump_model_id"/>					
