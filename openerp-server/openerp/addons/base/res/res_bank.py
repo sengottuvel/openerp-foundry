@@ -204,7 +204,9 @@ class Bank(osv.osv):
         vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
         return super(Bank, self).write(cr, uid, ids, vals, context)    
         
-        
+    _sql_constraints = [
+		('name_uniq', 'unique(name)', 'Bank name must be unique !'),
+	]     
     
 
 Bank()
