@@ -68,7 +68,7 @@
      <!-- ALL JOBS REQUESTS -->
 
         <menuitem
-            name="Applications"
+            name="Resume Bank"
             parent="base.menu_crm_case_job_req_main"
             id="menu_crm_case_categ0_act_job" action="crm_case_categ0_act_job" sequence="1"/>
     
