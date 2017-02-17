@@ -7,6 +7,7 @@ import openerp.addons.decimal_precision as dp
 from datetime import datetime
 import base64
 from itertools import groupby
+import re
 
 from PIL import Image
 
@@ -90,6 +91,8 @@ class kg_crm_offer(osv.osv):
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD'),('export','Export')],'Location'),
 		'offer_copy': fields.char('Offer Copy'),
 		'term_copy': fields.char('Terms Copy'),
+		'customer_po_no': fields.char('Customer PO No.',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
+		'dealer_po_no': fields.char('Dealer PO No.',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
 		'revision': fields.integer('Revision'),
 		'wo_flag': fields.boolean('WO Flag'),
 		'load_term': fields.boolean('Terms Applicable',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
@@ -202,6 +205,24 @@ class kg_crm_offer(osv.osv):
 		
 	}
 	
+	def _spl_name(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+		if rec.customer_po_no:
+			customer_po_no = ''.join(c for c in rec.customer_po_no if c in '!@#$%^~*{}?+/=')
+			if customer_po_no:
+				raise osv.except_osv(_('Warning!'),
+					_('Special Character Not Allowed in Customer PO No.!'))
+		if rec.dealer_po_no:
+			dealer_po_no = ''.join(c for c in rec.dealer_po_no if c in '!@#$%^~*{}?+/=')
+			if dealer_po_no:
+				raise osv.except_osv(_('Warning!'),
+					_('Special Character Not Allowed in Dealer PO No.!'))
+		return True
+	
+	_constraints = [
+		(_spl_name, 'Special Character Not Allowed!', ['']),
+		]
+			
 	def send_by_email(self, cr, uid, ids, context=None):
 		'''
 		This function opens a window to compose an email, with the edi purchase template message loaded by default
@@ -321,6 +342,13 @@ class kg_crm_offer(osv.osv):
 	def wo_creation(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'moved_to_offer':
+			if not entry.customer_po_no:
+				raise osv.except_osv(_('Warning!'),
+					_('Update Customer PO No.'))
+			if entry.ref_mode == 'dealer':
+				if not entry.dealer_po_no:
+					raise osv.except_osv(_('Warning!'),
+						_('Update Dealer PO No.'))
 			wo_id = self.pool.get('kg.work.order').create(cr,uid,{'order_category': entry.purpose,
 																  'name': '',
 																  'order_priority': '',
@@ -391,9 +419,12 @@ class kg_crm_offer(osv.osv):
 						groups.append(map(lambda r:r,group))
 					print"ffffffffffffffffffff",groups
 					for key,group in enumerate(groups):
-						enquiry_line_id = group[0].enquiry_line_id.id
-						print"enquiry_line_idenquiry_line_id",enquiry_line_id
-						if group[0].enquiry_line_id.purpose_categ == 'access':
+						access_data = [x for x in group if x.enquiry_line_id.purpose_categ == 'access']
+						print"access_dataaccess_dataaccess_data",access_data
+						for ch_acc in access_data:
+							enquiry_line_id = ch_acc.enquiry_line_id.id
+							print"enquiry_line_idenquiry_line_id",enquiry_line_id
+							#~ if group[0].enquiry_line_id.purpose_categ == 'access':
 							off_line_id = group[0]
 							acc_off_obj = self.pool.get('ch.accessories.offer').search(cr,uid,[('enquiry_line_id','=',enquiry_line_id)])
 							purpose = 'access'
@@ -412,7 +443,6 @@ class kg_crm_offer(osv.osv):
 			if wo_id:
 				self.write(cr, uid, ids, {'wo_flag': True,'state':'wo_created'})
 				self.pool.get('kg.crm.enquiry').write(cr,uid,entry.enquiry_id.id,{'wo_flag':True,'state':'wo_created'})
-		
 		return True
 	
 	#~ def _prepare_pump_details(self,cr,uid,wo_id,entry,item,context=None):		
@@ -1273,7 +1303,10 @@ class kg_crm_offer(osv.osv):
 					for item_1 in mat_data:
 						if item_1['mat_name'] or item_1['moc']:
 							m_col_no = 0
-							sheet1.write(row_no,m_col_no,item_1['mat_name'],style4)
+							if em_col == 1:
+								sheet1.write(row_no,m_col_no,item_1['mat_name'],style4)
+							else:
+								pass
 							sheet1.write(row_no,em_col,item_1['moc'] or "-",style8)
 							row_no = row_no+1
 				else:
@@ -2041,18 +2074,30 @@ class kg_mail_compose_message(osv.osv):
 		rec = self.browse(cr,uid,ids[0])
 		offer_id = rec.res_id
 		to_mails = []
+		cc_mails = []
+		attachments = []
 		partner_ids = rec.partner_ids
 		for email in partner_ids:
 			to_mails.append(email.email)
-		cc_mails = [rec.cc_mail]
+		if rec.cc_mail:
+			if re.match("^.+\\@(\\[?)[a-zA-Z0-9\\-\\.]+\\.([a-zA-Z]{2,3}|[0-9]{1,3})(\\]?)$", rec.cc_mail) != None:
+				pass
+			else:
+				raise osv.except_osv('Invalid Email', 'Please enter a valid Cc mail address')
+			cc_mails = [rec.cc_mail]
 		template = self.pool.get('email.template').browse(cr, uid,8)
 		ir_attachment_obj = self.pool.get('ir.attachment')
+		attachment_ids = [attach.id for attach in rec.attachment_ids]
+		if attachment_ids:
+			for attach_id in attachment_ids:
+				attach_rec = ir_attachment_obj.browse(cr,uid,attach_id)
+				attachments.append((str(attach_rec.datas_fname), base64.b64decode(attach_rec.db_datas)))
+		
 		off_rec = self.pool.get('kg.crm.offer').browse(cr,uid,offer_id)
 		
 		res_ids = ids
 		
 		for res_id in res_ids:
-			attachments = []
 			if off_rec.term_data:
 				attachments.append(('Terms Copy.xls', base64.b64decode(off_rec.term_data)))
 			if off_rec.rep_data:

@@ -15,7 +15,7 @@
 						<button name="entry_revision" type="object" string="Create Revision" states="moved_to_offer,wo_created" class="oe_highlight"/>
 						<button name="offer_copy" type="object" states="moved_to_offer,wo_created" string="Offer Copy" class="oe_highlight"/>
 						<button name="term_copy" type="object" states="moved_to_offer,wo_created" string="Terms Copy" class="oe_highlight"/>
-						<button name="send_by_email" type="object" string="Send by Email" class="oe_highlight"/>
+						<button name="send_by_email" type="object" states="moved_to_offer,wo_created" string="Send by Email" class="oe_highlight"/>
 					</header>
 						<group>
 							<group>
@@ -23,6 +23,8 @@
 								<field name="offer_date" readonly="1"/>
 								<field name="customer_id" required="1" readonly="1"/>
 								<field name="ref_mode" readonly="1"/>
+								<field name="customer_po_no"/>
+								<field name="dealer_po_no"/>
 								<field name="market_division" readonly="1"/>
 								<field name="revision" readonly="1"/>
 								<field name="note"/>
@@ -629,13 +631,13 @@
 		
 		<menuitem action="tma_crm_offer" name="Offer" id="tam_crm_offer" parent="kg_menus.cpm_crm_enquiry_menu" sequence="3"/>
 		
-		<!--  Mail wizard part -->
 		
 		<record model="ir.ui.view" id="email_compose_message_wizard_form">
 			<field name="name">Mail Compose</field>
 			<field name="model">mail.compose.message</field>
 			<field name="inherit_id" ref="mail.email_compose_message_wizard_form"/>
 			<field name="arch" type="xml">	
+			
 				<field name="partner_ids" widget="many2many_tags_email" placeholder="Add contacts to notify..."
                                 context="{'force_email':True, 'show_email':True}" position="after">
 				<field name="cc_mail"/>
