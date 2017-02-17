@@ -147,7 +147,11 @@ class kg_shift_master(osv.osv):
 	
 	def onchange_end_time(self, cr, uid, ids, start_time,end_time, context=None):
 		value = {'start_time':'','end_time':'','shift_hours':''}
-		shf_tme = end_time - start_time
+		if end_time <= 13.00:
+			shf_tme = 24.00 - start_time + end_time
+		else:
+			shf_tme = end_time - start_time
+		print "*************************************",shf_tme
 		if shf_tme < 0:
 			shf_tme = -(shf_tme)
 		value = {
