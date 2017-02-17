@@ -69,7 +69,11 @@ class kg_division_master(osv.osv):
 		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
-		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),		
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
+		
+		### Newly added for HRMS ###
+		
+		'da_ded_points':fields.float('DA Deduction Points'),		
 				
 	}
 	

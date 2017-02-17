@@ -19,6 +19,7 @@
 					<group>
 						<group>						
 							<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>							
+							<field name="da_ded_points" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>							
 							<field name="modify" invisible = "1"/>
 							<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 						</group>

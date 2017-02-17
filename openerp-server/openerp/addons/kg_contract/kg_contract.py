@@ -102,6 +102,7 @@ class kg_contract(osv.osv):
 		'driver_bata_app':fields.boolean('Driver Bata Applicable'),
 		'shift_id': fields.many2one('kg.shift.master', 'Shift'),
 		'dep_id':fields.many2one('kg.depmaster','Department'),
+		'vda_status': fields.boolean('VDA Applicable'),
 			
 		
 		## Child Tables Declaration		

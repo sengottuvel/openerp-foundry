@@ -88,6 +88,7 @@ class kg_turn_over(osv.osv):
 		'year':fields.char('Year'),
 		'amt':fields.float('Amount In (Cr)'),
 		'expiry_date':fields.date('Amount In (Cr)'),
+		'da_chamber':fields.float('DA Chamber Points'),
 		
 		
 				
@@ -120,7 +121,9 @@ class kg_turn_over(osv.osv):
 		#~ start_date = datetime(rec.year, rec.month, 1)
 		
 		a = list(calendar.month_abbr).index(rec.month)
+		b = (calendar.month_abbr[a])
 		print "**************************************", a
+		print "**************************************", b
 		print "**************************************", today.month
 		if a > today.month:
 			print "mtdfasdfasdfasdfasdfadfasdf",type(rec.month)

@@ -95,6 +95,7 @@
 									<field name="ot_status" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
 									<field name="pt_status" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>						
 									<field name="driver_bata_app" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>						
+									<field name="vda_status" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>						
 								</group>
 								<group string="PF">
 									<field name="pf_status" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>

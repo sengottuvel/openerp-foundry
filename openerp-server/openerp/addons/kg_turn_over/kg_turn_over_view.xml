@@ -25,6 +25,7 @@
 							</group>
 							<group>
 								<field name="year" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" readonly="1"/>
+								<field name="da_chamber" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" readonly="0"/>
 								
 								<field name="state" style="width: 30%%" class="att_state_change"/>								
 							</group>

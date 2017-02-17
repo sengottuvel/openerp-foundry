@@ -130,20 +130,23 @@ class kg_contribution(osv.osv):
 								_('Duplicate Contribution Heads are not allowed !!'))
 					return False
 			for line in rec.line_id:
-				if line.cont_type == 'percent':
-					if line.emp_cont_value == 0.00 or line.emp_cont_value > 15:
-						raise osv.except_osv(_('Warning!'),
-								_('Employee Value should not be Zero or greater then 15 % !!'))
-					if line.emplr_cont_value == 0.00 or line.emplr_cont_value > 15:
-						raise osv.except_osv(_('Warning!'),
-								_('Employer Value should not be Zero or greater then 15 % !!'))
-				if line.cont_type == 'fixed_amt':
-					if line.emp_cont_value == 0.00 or line.emp_cont_value > 4000:
-						raise osv.except_osv(_('Warning!'),
-								_('Employee Value should not be Zero or greater then 4000 !!'))
-					if line.emplr_cont_value == 0.00 or line.emplr_cont_value > 4000:
-						raise osv.except_osv(_('Warning!'),
-								_('Employer Value should not be Zero or greater then 4000 !!'))
+				if line.cont_heads != 'vda':
+					if line.cont_type == 'percent':
+						if line.emp_cont_value == 0.00 or line.emp_cont_value > 15:
+							raise osv.except_osv(_('Warning!'),
+									_('Employee Value should not be Zero or greater then 15 % !!'))
+						if line.emplr_cont_value == 0.00 or line.emplr_cont_value > 15:
+							raise osv.except_osv(_('Warning!'),
+									_('Employer Value should not be Zero or greater then 15 % !!'))
+					if line.cont_type == 'fixed_amt':
+						if line.emp_cont_value == 0.00 or line.emp_cont_value > 4000:
+							raise osv.except_osv(_('Warning!'),
+									_('Employee Value should not be Zero or greater then 4000 !!'))
+						if line.emplr_cont_value == 0.00 or line.emplr_cont_value > 4000:
+							raise osv.except_osv(_('Warning!'),
+									_('Employer Value should not be Zero or greater then 4000 !!'))
+				else:
+					pass
 					
 		return True
 						
@@ -258,7 +261,7 @@ class ch_contribution(osv.osv):
 	_columns = {
 
 	'header_id':fields.many2one('kg.contribution','Header id'),
-	'cont_heads':fields.selection([('pf','PF'),('esi','ESI'),('insurance','Insurance')],'Contribution Heads',required = True),
+	'cont_heads':fields.selection([('pf','PF'),('esi','ESI'),('vda','VDA')],'Contribution Heads',required = True),
 	'cont_type':fields.selection([('fixed_amt','Fixed Amount'),('percent','Percentage')],'Type',required=True),
 	'emp_cont_value':fields.float('Employee Value',required=True),
 	'emplr_cont_value':fields.float('Employer Value',required=True),
