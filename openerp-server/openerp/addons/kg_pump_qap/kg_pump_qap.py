@@ -186,9 +186,9 @@ class kg_pump_qap(osv.osv):
 	def hs_update(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		### Actual weight checking ###
-		if rec.hs_actual_unbal_weight <= 0:
-			raise osv.except_osv(_('Warning !!'),
-				_('Actual weight should be greater than zero. !!'))	
+		#~ if rec.hs_actual_unbal_weight <= 0:
+			#~ raise osv.except_osv(_('Warning !!'),
+				#~ _('Actual weight should be greater than zero. !!'))	
 		if rec.hs_pressure <= 0:
 			raise osv.except_osv(_('Warning !!'),
 				_('Test Pressure should be greater than zero. !!'))	
