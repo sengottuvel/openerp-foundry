@@ -413,42 +413,44 @@ class kg_payslip(osv.osv):
 				
 				#### VDA calculation for each employee ####
 				
-				#~ if con_ids_1.vda_status:
-					#~ emp_recs = emp_obj.browse(cr,uid,con_ids_1.employee_id.id)
-					#~ div_rec = self.pool.get('kg.division.master').browse(cr,uid,emp_recs.division_id.id)
-					#~ print "___________points from division master____________________",div_rec.da_ded_points
-					#~ today = lastdate.date.today()
-					#~ first = lastdate.date(day=1, month=today.month, year=today.year)
-					#~ last = first - lastdate.timedelta(days=1)
-					#~ res = last.strftime('%B')
-					#~ datetttt = slip_rec.date_from
-					#~ d1 = str(res)
-					#~ print "Special incentive called -----------------------------------------------------",d1[:3]
-					#~ turn_over_idss = self.pool.get('kg.turn.over').search(cr,uid,[('month','=',d1[:3]),('active','=',True)])
-					#~ if turn_over_idss:
-						#~ turn_over_recs = self.pool.get('kg.turn.over').browse(cr,uid,turn_over_idss[0])
-						#~ print "$$$$$$---------- Chamber in turn over -------$$$$$$$$$",turn_over_recs.da_chamber
-						#~ vda_value_1 = turn_over_recs.da_chamber - div_rec.da_ded_points)
-						#~ emp_cont_id = self.pool.get('kg.employee.contribution').search(cr,uid,[('active','=',True),('state','=','approved')])
-						#~ emp_contt_ids = self.pool.get('ch.employee.contribution').search(cr,uid,[('header_id','=',emp_cont_id.id),('cont_heads','=','vda')])
-						#~ if emp_contt_ids:
-							#~ emp_contt_rec = self.pool.get('ch.employee.contribution').browse(cr,uid,emp_contt_ids[0])
-							#~ print "*********vda value in paise*****************",emp_contt_rec.emplr_cont_value
-							#~ acc_vda_value = ((vda_value_1*emplr_cont_value)/working_days)*salary_days
-							#~ self.pool.get('hr.payslip.line').create(cr,uid,
-								#~ {
-									#~ 'name':'VDA',
-									#~ 'code':'VDA',
-									#~ 'category_id':2,
-									#~ 'quantity':1,
-									#~ 'amount':acc_vda_value,
-									#~ 'salary_rule_id':1,
-									#~ 'employee_id':emp_id,
-									#~ 'contract_id':con_ids[0],
-									#~ 'slip_id':slip_rec.id,
-								#~ },context = None)
-				#~ else:
-					#~ pass
+				if con_ids_1.vda_status:
+					emp_recs = emp_obj.browse(cr,uid,con_ids_1.employee_id.id)
+					div_rec = self.pool.get('kg.division.master').browse(cr,uid,emp_recs.division_id.id)
+					print "___________points from division master____________________",div_rec.da_ded_points
+					today = lastdate.date.today()
+					first = lastdate.date(day=1, month=today.month, year=today.year)
+					last = first - lastdate.timedelta(days=1)
+					res = last.strftime('%B')
+					datetttt = slip_rec.date_from
+					d1 = str(res)
+					print "Special incentive called -----------------------------------------------------",d1[:3]
+					turn_over_idss = self.pool.get('kg.turn.over').search(cr,uid,[('month','=',d1[:3]),('active','=',True)])
+					if turn_over_idss:
+						turn_over_recs = self.pool.get('kg.turn.over').browse(cr,uid,turn_over_idss[0])
+						print "$$$$$$---------- Chamber in turn over -------$$$$$$$$$",turn_over_recs.da_chamber
+						vda_value_1 = (turn_over_recs.da_chamber - div_rec.da_ded_points)
+						emp_cont_id = self.pool.get('kg.contribution').search(cr,uid,[('active','=',True),('state','=','approved')])
+						print "^^^^^^^^^^^^^^^^^^^^^",emp_cont_id
+						#~ stop
+						emp_contt_ids = self.pool.get('ch.contribution').search(cr,uid,[('header_id','=',emp_cont_id),('cont_heads','=','vda')])
+						if emp_contt_ids:
+							emp_contt_rec = self.pool.get('ch.contribution').browse(cr,uid,emp_contt_ids[0])
+							print "*********vda value in paise*****************",emp_contt_rec.emplr_cont_value
+							acc_vda_value = ((vda_value_1*emp_contt_rec.emplr_cont_value)/working_days)*salary_days
+							self.pool.get('hr.payslip.line').create(cr,uid,
+								{
+									'name':'VDA',
+									'code':'VDA',
+									'category_id':2,
+									'quantity':1,
+									'amount':acc_vda_value,
+									'salary_rule_id':1,
+									'employee_id':emp_id,
+									'contract_id':con_ids[0],
+									'slip_id':slip_rec.id,
+								},context = None)
+				else:
+					pass
 					
 					
 				
