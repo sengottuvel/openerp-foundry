@@ -187,7 +187,7 @@
 							<group>
 								<field name="hs_date" attrs="{'readonly': [('hs_state','=','completed')]}"/>
 								<field name="hs_pressure" attrs="{'required': [('hs_result','!=','reject')],'readonly': [('hs_state','=','completed')]}"/>
-								<field name="hs_actual_unbal_weight" invisible="1" attrs="{'required': [('hs_result','!=','reject')],'readonly': [('hs_state','=','completed')]}"/>
+								<field name="hs_actual_unbal_weight" invisible="1" />
 								<field name="hs_shift_id" attrs="{'required': [('hs_result','!=','reject')],'readonly': [('hs_state','=','completed')]}"/>
 								<field name="hs_verified_by" attrs="{'required': [('hs_result','!=','reject')],'readonly': [('hs_state','=','completed')]}"/>
 								<field name="hs_reject_remarks_id" attrs="{'readonly': [('hs_state','=','completed')],'invisible':[('hs_result','!=','reject')],'required':[('hs_result','=','reject')]}"/>
