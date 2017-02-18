@@ -39,6 +39,18 @@ class kg_pouring_over(osv.osv_memory):
 		'printed_by': lambda obj, cr, uid, context: uid,		
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.pouring.over', context=c),
 	 }
+	 
+	def _entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])		
+		if rec.from_date > rec.to_date:
+			return False
+		return True
+	
+	_constraints = [		
+		
+		(_entry_date_check, 'To Date must be greater than From Date !!',['To Date']),   
+		
+	   ]
 	
 	
 	

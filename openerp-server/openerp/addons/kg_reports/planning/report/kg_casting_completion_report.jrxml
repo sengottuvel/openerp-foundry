@@ -7,6 +7,7 @@
 	<parameter name="printed_by" class="java.lang.String"/>
 	<parameter name="print_date" class="java.lang.String"/>
 	<parameter name="to_date" class="java.lang.String"/>
+	<parameter name="wiz_id" class="java.lang.Integer"/>
 	<queryString>
 		<![CDATA[select
 count(*) OVER (),
@@ -21,6 +22,8 @@ work_order.qty,
 trim(TO_CHAR(work_order.unit_price * work_order.qty::float, '999G999G99G999G99G99G990D99'))  as order_amount,
 trim(TO_CHAR((COALESCE((sum((work_order.unit_price * work_order.qty)) OVER ()),0.00) ), '999G999G99G999G99G99G990D99')) as total_amt,
 work_order.note as remarks,
+(select to_char(from_date,'dd-mm-yyyy') from kg_casting_completion where id =$P{wiz_id} ) as from_date,
+(select to_char(to_date,'dd-mm-yyyy') from kg_casting_completion where id =$P{wiz_id} ) as to_date,
 
 to_char((select max(entry_date) from kg_machineshop where order_line_id in (
 
@@ -123,6 +126,8 @@ where order_count = machine_count)]]>
 	<field name="order_amount" class="java.lang.String"/>
 	<field name="total_amt" class="java.lang.String"/>
 	<field name="remarks" class="java.lang.String"/>
+	<field name="from_date" class="java.lang.String"/>
+	<field name="to_date" class="java.lang.String"/>
 	<variable name="qty_1" class="java.lang.Integer" resetType="Page" calculation="Sum">
 		<variableExpression><![CDATA[$F{qty}]]></variableExpression>
 	</variable>
@@ -207,6 +212,35 @@ where order_count = machine_count)]]>
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{total_amt}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="126" y="51" width="57" height="20"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{to_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="111" y="51" width="15" height="20"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["to"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="55" y="51" width="56" height="20"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{from_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="51" width="55" height="20"/>
+				<box leftPadding="1"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Date Range : "]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>

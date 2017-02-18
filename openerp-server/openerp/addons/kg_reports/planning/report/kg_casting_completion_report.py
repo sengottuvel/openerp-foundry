@@ -52,6 +52,7 @@ class jasper_casting_completion_report_print(JasperDataParser.JasperDataParser):
 		val['print_date'] = p_date			
 		val['from_date'] = str(from_date)	
 		val['to_date'] = str(to_date)
+		val['wiz_id'] = data['form']['id']
 		
 		print"val['from_date']val['from_date']",val['from_date']			
 					

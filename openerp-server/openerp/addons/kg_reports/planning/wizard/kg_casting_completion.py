@@ -39,8 +39,19 @@ class kg_casting_completion(osv.osv_memory):
 		'printed_by': lambda obj, cr, uid, context: uid,		
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.casting.completion', context=c),
 	 }
+	 
+	 
+	def _entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])		
+		if rec.from_date > rec.to_date:
+			return False
+		return True
 	
-	
+	_constraints = [		
+		
+		(_entry_date_check, 'To Date must be greater than From Date !!',['To Date']),   
+		
+	   ]
 	
 	def create_report(self, cr, uid, ids, context={}):	
 	
