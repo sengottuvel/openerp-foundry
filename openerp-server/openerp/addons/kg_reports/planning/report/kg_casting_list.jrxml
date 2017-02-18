@@ -131,7 +131,7 @@ work_order.id in (select  id from kg_work_order) end order by ch_work.order_no]]
 	<pageHeader>
 		<band height="23">
 			<staticText>
-				<reportElement mode="Transparent" x="255" y="0" width="96" height="23" isRemoveLineWhenBlank="true"/>
+				<reportElement mode="Transparent" x="266" y="0" width="85" height="23" isRemoveLineWhenBlank="true"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
@@ -235,7 +235,7 @@ work_order.id in (select  id from kg_work_order) end order by ch_work.order_no]]
 				<text><![CDATA[ORDER NO]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Transparent" x="226" y="0" width="29" height="23" isRemoveLineWhenBlank="true"/>
+				<reportElement mode="Transparent" x="226" y="0" width="40" height="23" isRemoveLineWhenBlank="true"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
@@ -253,7 +253,7 @@ work_order.id in (select  id from kg_work_order) end order by ch_work.order_no]]
 		<band height="36">
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="426" y="0" width="39" height="16"/>
-				<box topPadding="2" bottomPadding="2">
+				<box topPadding="0" bottomPadding="0">
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
 					<bottomPen lineWidth="0.0"/>
@@ -265,8 +265,8 @@ work_order.id in (select  id from kg_work_order) end order by ch_work.order_no]]
 				<textFieldExpression><![CDATA[$F{qty}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="255" y="0" width="96" height="16"/>
-				<box topPadding="2" bottomPadding="2">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="266" y="0" width="85" height="16"/>
+				<box topPadding="0" bottomPadding="0">
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
 					<bottomPen lineWidth="0.0"/>
@@ -279,7 +279,7 @@ work_order.id in (select  id from kg_work_order) end order by ch_work.order_no]]
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="349" y="0" width="77" height="16"/>
-				<box topPadding="2" bottomPadding="2">
+				<box topPadding="0" bottomPadding="0">
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
 					<bottomPen lineWidth="0.0"/>
@@ -292,7 +292,7 @@ work_order.id in (select  id from kg_work_order) end order by ch_work.order_no]]
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="60" y="0" width="85" height="16"/>
-				<box topPadding="2" bottomPadding="2">
+				<box topPadding="0" bottomPadding="0">
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
 					<bottomPen lineWidth="0.0"/>
@@ -305,7 +305,7 @@ work_order.id in (select  id from kg_work_order) end order by ch_work.order_no]]
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="465" y="0" width="43" height="16"/>
-				<box topPadding="2" bottomPadding="2">
+				<box topPadding="0" bottomPadding="0">
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
 					<bottomPen lineWidth="0.0"/>
@@ -318,7 +318,7 @@ work_order.id in (select  id from kg_work_order) end order by ch_work.order_no]]
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="145" y="0" width="81" height="16"/>
-				<box topPadding="2" bottomPadding="2">
+				<box topPadding="0" bottomPadding="0">
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
 					<bottomPen lineWidth="0.0"/>
@@ -331,7 +331,7 @@ work_order.id in (select  id from kg_work_order) end order by ch_work.order_no]]
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="508" y="0" width="47" height="16"/>
-				<box topPadding="2" bottomPadding="2">
+				<box topPadding="0" bottomPadding="0">
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
 					<bottomPen lineWidth="0.0"/>
@@ -344,7 +344,7 @@ work_order.id in (select  id from kg_work_order) end order by ch_work.order_no]]
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="0" width="60" height="16"/>
-				<box topPadding="2" bottomPadding="2">
+				<box topPadding="0" bottomPadding="0">
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
 					<bottomPen lineWidth="0.0"/>
@@ -356,8 +356,8 @@ work_order.id in (select  id from kg_work_order) end order by ch_work.order_no]]
 				<textFieldExpression><![CDATA[$F{wo_no}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="226" y="0" width="29" height="16"/>
-				<box topPadding="2" bottomPadding="2">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="226" y="0" width="40" height="16"/>
+				<box topPadding="0" bottomPadding="0">
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
 					<bottomPen lineWidth="0.0"/>
