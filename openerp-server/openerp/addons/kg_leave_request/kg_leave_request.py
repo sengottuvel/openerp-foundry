@@ -166,6 +166,7 @@ class kg_leave_request(osv.osv):
 		
 		emp_leave_allo = leave_allocation.search(cr,uid,[('employee_id','=',rec.employee_id.id),
 						('valid_from','<=',rec.from_date),('valid_to','>=',rec.to_date),('state','=','approved')])
+		print "emp_leave_alloemp_leave_alloemp_leave_alloemp_leave_alloemp_leave_allo",emp_leave_allo
 		if emp_leave_allo:
 			leave_alloc = leave_allocation_line.search(cr,uid,[('header_id_1','=',emp_leave_allo[0])])
 			if leave_alloc:
