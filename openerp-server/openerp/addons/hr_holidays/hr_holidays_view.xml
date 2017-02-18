@@ -62,6 +62,7 @@
                     <button string="Reset to New" name="set_to_draft" states="refuse" type="object" groups="base.group_hr_user" invisible="1"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirm,validate" statusbar_colors='{"confirm":"blue","validate1":"blue","refuse":"red"}' invisible="1"/>
                 </header>
+                
                     <group name="leave_request">
                         <group>
                             <field name="name" attrs="{'readonly':[('state','!=','draft'),('state','!=','confirm')]}"/>
