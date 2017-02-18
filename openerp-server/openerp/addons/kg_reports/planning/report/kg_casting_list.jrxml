@@ -369,7 +369,7 @@ work_order.id in (select  id from kg_work_order) end order by ch_work.order_no]]
 				<textFieldExpression><![CDATA[$F{pat_ch}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="0" y="16" width="62" height="20">
+				<reportElement x="0" y="16" width="62" height="20" isRemoveLineWhenBlank="true">
 					<printWhenExpression><![CDATA[$F{brkneed} == 'stop']]></printWhenExpression>
 				</reportElement>
 				<box leftPadding="3"/>
@@ -379,7 +379,7 @@ work_order.id in (select  id from kg_work_order) end order by ch_work.order_no]]
 				<text><![CDATA[REMARKS:]]></text>
 			</staticText>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="62" y="16" width="493" height="20">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="62" y="16" width="493" height="20" isRemoveLineWhenBlank="true">
 					<printWhenExpression><![CDATA[$F{brkneed} == 'stop']]></printWhenExpression>
 				</reportElement>
 				<box leftPadding="2">
