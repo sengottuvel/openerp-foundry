@@ -179,7 +179,7 @@ class kg_leave_request(osv.osv):
 					else:
 						raise osv.except_osv(_('No of days are exceeding !! '),
 							_('Balance %s for this employee is %s!!')%(leave_rec.leave_type_id.name,leave_rec.balc_days))
-		elif rec.holiday_status_id.id == 25 or rec.holiday_status_id.id == 31:
+		elif rec.holiday_status_id.id == 8 or rec.holiday_status_id.id == 31:
 			pass
 		else:
 			raise osv.except_osv(_('Warning'),
@@ -227,14 +227,16 @@ class kg_leave_request(osv.osv):
 				for d_rec in daily_rec:
 					daily_rec_1 = self.pool.get('ch.daily.attendance').browse(cr,uid,d_rec)
 					wk_hrs_f = str(daily_rec_1.wk_time) .replace(':', '.')
-					if rec.holiday_status_id.id == 29:
+					if rec.holiday_status_id.id == 12:
 						tot_times = float(wk_hrs_f) + rec.permission_hrs
 						wk_hrs_s = str(tot_times) .replace('.', ';')
 						daily_rec_1.write({'wk_time':tot_times ,'remarks':rec.holiday_status_id.name +'='+str(rec.permission_hrs)})
-					elif rec.holiday_status_id.id == 25:
+					elif rec.holiday_status_id.id == 8:
 						daily_rec_1.write({'status': 'onduty','remarks':rec.holiday_status_id.name})
 					elif rec.holiday_status_id.id == 31:
 						daily_rec_1.write({'status': 'absent','remarks':rec.holiday_status_id.name})
+					elif rec.holiday_status_id.id == 17:
+						daily_rec_1.write({'status': 'halfday','remarks':rec.holiday_status_id.name})
 					else:
 						daily_rec_1.write({'status': 'leave','remarks':rec.holiday_status_id.name})
 		#~ stop
