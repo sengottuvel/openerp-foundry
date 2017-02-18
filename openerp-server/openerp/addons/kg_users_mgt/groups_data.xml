@@ -150,9 +150,12 @@
             ref('kg_menus.rpm_planning_reports'),
             ref('kg_menus.kg_dash_board'),
             ref('kg_reports.kg_pouring_pending_reports'),
-            ref('kg_reports.kg_casting_list_reports'),   
+            ref('kg_reports.kg_foundry_part_list_reports'),   
+            ref('kg_reports.kg_casting_list_reports'), 
             ref('kg_reports.kg_machine_list_print_reports'),   
-            ref('kg_reports.kg_workorder_print_reports'),
+            ref('kg_reports.kg_casting_completion_reports'),               
+            ref('kg_reports.kg_workorder_print_reports'),   
+            ref('kg_reports.kg_pouring_over_reports'),   
             ref('kg_reports.kg_spare_print_reports'),     
             
             
