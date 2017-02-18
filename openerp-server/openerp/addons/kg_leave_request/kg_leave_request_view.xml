@@ -31,7 +31,7 @@
 							<group>
 								<field name="code" readonly="1"/>
 								<field name="holiday_type" string="Mode" invisible="1"/>
-								<field name="holiday_status_name" invisible="1" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+								<field name="holiday_status_name" invisible="1"/>
 								<field name="permission_hrs" attrs="{'required':[('holiday_status_name','=','Permission')],'invisible':[('holiday_status_name','!=','Permission')],'readonly': [('status','in',['approved','reject','cancel'])]}"/>
 								<field name="number_of_days_temp" required="1" string="No of Days" readonly="1"/>
 								<field name="out_time" widget="float_time" attrs="{'required':[('holiday_status_name','=','On Duty')],'invisible':[('holiday_status_name','!=','On Duty')],'readonly': [('status','in',['approved','reject','cancel'])]}"/>
