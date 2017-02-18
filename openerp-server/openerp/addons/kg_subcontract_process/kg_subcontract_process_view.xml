@@ -534,6 +534,7 @@
 						<group>
 							<field name="name"/>
 							<field name="transfer_type" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="annexure_no" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="to_division_id" attrs="{'invisible': [('transfer_type','=','sub_contractor')],'required': [('transfer_type','=','internal')],'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="contractor_id" on_change="onchange_contractor(contractor_id)"  attrs="{'readonly': [('state','in',['confirmed','cancel'])], 'invisible': [('transfer_type','=','internal')],'required': [('transfer_type','=','sub_contractor')]}"/>	
 							<field name="phone" readonly="1" attrs="{'invisible': [('transfer_type','=','internal')]}"/>												
@@ -541,6 +542,7 @@
 						</group>											
 						<group>
 							<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>								
+							<field name="annexure_date" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>								
 							<field name="division_id" readonly="1"/>
 							<field name="contact_person" readonly="1" attrs="{'invisible': [('transfer_type','=','internal')]}"/>
 							<field name="vehicle_detail" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}" required="1"/>			

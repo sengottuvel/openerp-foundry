@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<openerp>
+    <data>
+        
+        <record id="r_form_v_foundry_partlist" model="ir.ui.view">
+            <field name="name">kg.foundry.partlist.form</field>
+            <field name="model">kg.foundry.partlist.print</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Foundry Part List Statement">
+                   <group col="4" fill="0" height="500">	
+						<notebook tabpos="up" colspan="4">
+						<page string="Filters" name="filters">	
+						<group>										
+							<field name="order_type"/>						   				     
+							<field name="order_id" widget="many2many_tags" attrs="{'required': [('order_type','=','wo_wise')],'invisible':[('order_type','=','schedule_wise')]}"/>						   				     
+							<field name="schedule_id" widget="many2many_tags" attrs="{'required': [('order_type','=','schedule_wise')],'invisible':[('order_type','=','wo_wise')]}"/>	
+						</group>					   				     
+						</page>	                                                                           
+                    </notebook>     
+                     <separator colspan="4"/>
+						<group col="4" colspan="4">
+							<button name="create_report" string="Generate" type="object" icon="gtk-ok"/>
+						</group>
+						</group>
+                </form>
+            </field>
+        </record>
+        
+        
+        
+        <report string="Foundry Part List Statement"
+		model="kg.foundry.partlist.print"
+		auto="True"
+		name="jasper_foundry_partlist_report"
+		rml="kg_reports/planning/report/kg_foundry_partlist.jrxml"
+		id="foundrypartlistreport" 
+		menu="False"
+		/>
+		
+       <record id="rma_foundry_partlist" model="ir.actions.act_window">  
+            <field name="name">Foundry Part List</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">kg.foundry.partlist.print</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+            
+	<menuitem name="Foundry Part List" parent="kg_menus.rpm_planning_reports" action="rma_foundry_partlist" id="kg_foundry_part_list_reports" sequence="1"/>	
+      
+
+    </data>
+</openerp>

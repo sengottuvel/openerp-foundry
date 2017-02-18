@@ -1,0 +1,449 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="casting_list_report" language="groovy" pageWidth="595" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="from_date" class="java.lang.String"/>
+	<parameter name="printed_by" class="java.lang.String"/>
+	<parameter name="print_date" class="java.lang.String"/>
+	<parameter name="to_date" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select
+count(*) OVER (),
+row_number() OVER (),
+row_number() OVER () as new_row_number,
+work_order.order_no as order_no,
+company.name as company_name,
+to_char(CURRENT_DATE::date,'dd-mm-YYYY') as date,
+pump.name as pump_model,
+work_order.qty,
+trim(TO_CHAR(work_order.unit_price * work_order.qty::float, '999G999G99G999G99G99G990D99'))  as order_value,
+work_order.note as remarks,
+division.name as division_name,
+order_de.order_category as category,
+to_char((select max(pour_date) from kg_production where order_line_id in (select order_line_id
+from
+(select
+distinct order_line_id,
+Sum(case when type = 'order' then order_count else 0 end) over(partition by order_line_id) as order_count,
+Sum(case when type = 'produc' then order_count else 0 end) over(partition by order_line_id) as produc_count,
+Sum(case when type = 'machine' then order_count else 0 end) over(partition by order_line_id) as machine_count
+from
+(select count(id) as order_count,header_id as order_line_id,'order' as type from ch_order_bom_details  where header_id in (
+select
+order_line_id
+from kg_production where
+state in ('pour_com','fettling_inprogress','moved_to_ms')
+and  pour_date >= $P{from_date}::date and pour_date <= $P{to_date}::date
+order by order_line_id)
+and flag_applicable = 't'
+group by header_id
+
+union
+
+select count(order_bomline_id) as produc_count,order_line_id,'produc' as type from kg_production  where order_line_id in (
+select order_line_id
+from kg_production where state in ('pour_com','fettling_inprogress')
+and  pour_date >= $P{from_date}::date and pour_date <= $P{to_date}::date
+order by order_line_id)
+group by order_line_id
+
+union
+
+select count(order_bomline_id) as machine_count,order_line_id,'machine' as type from kg_machineshop  where order_line_id in (
+select order_line_id
+from kg_production where state in ('pour_com','fettling_inprogress','moved_to_ms')
+and  pour_date >= $P{from_date}::date and pour_date <= $P{to_date}::date
+order by order_line_id)
+and order_line_id not in (select order_bomline_id
+from kg_production  where order_line_id in (
+select order_line_id
+from kg_production where state in ('pour_com','fettling_inprogress','moved_to_ms')
+and  pour_date >= $P{from_date}::date and pour_date <= $P{to_date}::date
+order by order_line_id)
+) group by order_line_id
+) as a
+) as b
+where order_count = (produc_count + machine_count)))::date,'dd-mm-YYYY') as pour_date
+
+
+from
+ch_work_order_details work_order
+left join kg_work_order order_de on (order_de.id = work_order.header_id)
+left join kg_division_master division on (division.id = order_de.division_id)
+
+left join kg_pumpmodel_master pump on (work_order.pump_model_id = pump.id)
+left join res_company company on (company.id = pump.company_id)
+
+ where work_order.id in (
+select order_line_id
+from
+(select
+distinct order_line_id,
+Sum(case when type = 'order' then order_count else 0 end) over(partition by order_line_id) as order_count,
+Sum(case when type = 'produc' then order_count else 0 end) over(partition by order_line_id) as produc_count,
+Sum(case when type = 'machine' then order_count else 0 end) over(partition by order_line_id) as machine_count
+from
+(select count(id) as order_count,header_id as order_line_id,'order' as type from ch_order_bom_details  where header_id in (
+select
+order_line_id
+from kg_production where
+state in ('pour_com','fettling_inprogress','moved_to_ms')
+and  pour_date >= $P{from_date}::date and pour_date <= $P{to_date}::date
+order by order_line_id)
+and flag_applicable = 't'
+group by header_id
+
+union
+
+select count(order_bomline_id) as produc_count,order_line_id,'produc' as type from kg_production  where order_line_id in (
+select order_line_id
+from kg_production where state in ('pour_com','fettling_inprogress')
+and  pour_date >= $P{from_date}::date and pour_date <= $P{to_date}::date
+order by order_line_id)
+group by order_line_id
+
+union
+
+select count(order_bomline_id) as machine_count,order_line_id,'machine' as type from kg_machineshop  where order_line_id in (
+select order_line_id
+from kg_production where state in ('pour_com','fettling_inprogress','moved_to_ms')
+and  pour_date >= $P{from_date}::date and pour_date <=$P{to_date}::date
+order by order_line_id)
+and order_line_id not in (select order_bomline_id
+from kg_production  where order_line_id in (
+select order_line_id
+from kg_production where state in ('pour_com','fettling_inprogress','moved_to_ms')
+and  pour_date >= $P{from_date}::date and pour_date <= $P{to_date}::date
+order by order_line_id)
+) group by order_line_id
+) as a
+) as b
+where order_count = (produc_count + machine_count))]]>
+	</queryString>
+	<field name="count" class="java.lang.Long"/>
+	<field name="row_number" class="java.lang.Long"/>
+	<field name="new_row_number" class="java.lang.Long"/>
+	<field name="order_no" class="java.lang.String"/>
+	<field name="company_name" class="java.lang.String"/>
+	<field name="date" class="java.lang.String"/>
+	<field name="pump_model" class="java.lang.String"/>
+	<field name="qty" class="java.lang.Integer"/>
+	<field name="order_value" class="java.lang.String"/>
+	<field name="remarks" class="java.lang.String"/>
+	<field name="division_name" class="java.lang.String"/>
+	<field name="category" class="java.lang.String"/>
+	<field name="pour_date" class="java.lang.String"/>
+	<group name="ProjectGroup" isStartNewPage="true">
+		<groupExpression><![CDATA[]]></groupExpression>
+	</group>
+	<group name="Table Heading">
+		<groupExpression><![CDATA[]]></groupExpression>
+	</group>
+	<group name="DesignationGroup" isStartNewPage="true">
+		<groupExpression><![CDATA[]]></groupExpression>
+	</group>
+	<group name="Label" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{company_name}]]></groupExpression>
+	</group>
+	<group name="work_order" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[]]></groupExpression>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="51">
+			<textField>
+				<reportElement mode="Transparent" x="1" y="0" width="554" height="31"/>
+				<box topPadding="13"/>
+				<textElement textAlignment="Center">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{company_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="482" y="31" width="73" height="20"/>
+				<box leftPadding="1"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{date}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="439" y="31" width="53" height="20"/>
+				<box leftPadding="3"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Date: ]]></text>
+			</staticText>
+			<image>
+				<reportElement x="126" y="0" width="69" height="31"/>
+				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
+			</image>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="23">
+			<staticText>
+				<reportElement mode="Transparent" x="330" y="0" width="68" height="23" isRemoveLineWhenBlank="true"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[CC date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="60" y="0" width="79" height="23" isRemoveLineWhenBlank="true"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[Order No.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="398" y="0" width="83" height="23" isRemoveLineWhenBlank="true"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[Order Value]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="139" y="0" width="100" height="23" isRemoveLineWhenBlank="true"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[Category]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="481" y="0" width="73" height="23" isRemoveLineWhenBlank="true"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[Remarks]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="0" y="0" width="60" height="23" isRemoveLineWhenBlank="true"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[Division]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="239" y="0" width="91" height="23" isRemoveLineWhenBlank="true"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[Pouring Over date]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="16">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="330" y="0" width="68" height="16"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="139" y="0" width="100" height="16"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{category}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="239" y="0" width="91" height="16"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{pour_date}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="60" y="0" width="79" height="16"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{order_no}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="398" y="0" width="83" height="16"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{order_value}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="482" y="0" width="73" height="16"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{remarks}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="0" width="60" height="16"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{division_name}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="42">
+			<textField>
+				<reportElement x="236" y="22" width="87" height="20"/>
+				<box topPadding="3">
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="323" y="22" width="48" height="20"/>
+				<box topPadding="3">
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1" y="22" width="235" height="20"/>
+				<box topPadding="3">
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{printed_by} + " "+ "/"  +" "+$P{print_date}]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="371" y="22" width="184" height="20"/>
+				<box topPadding="3">
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="0" width="127" height="22">
+					<printWhenExpression><![CDATA[$F{row_number} == $F{count}]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="3"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Prepared By]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="430" y="0" width="125" height="22">
+					<printWhenExpression><![CDATA[$F{row_number} == $F{count}]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="3"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Received By]]></text>
+			</staticText>
+		</band>
+	</pageFooter>
+	<noData>
+		<band height="20">
+			<staticText>
+				<reportElement mode="Transparent" x="1" y="0" width="554" height="20"/>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[No Records Found]]></text>
+			</staticText>
+		</band>
+	</noData>
+</jasperReport>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>     
+
+
+		<report string="DC Print Copy"
+        model="kg.subcontract.dc"
+        auto="True"
+        name="onscreen_dc_print_report"
+        rml="kg_subcontract_process/report/kg_sc_dc_onscreen_report.jrxml"
+        id="dc_jasper_report_menu" 
+        menu="True"
+        header="False"
+        />
+
+
+    </data>
+</openerp>

@@ -785,6 +785,8 @@ class kg_subcontract_dc(osv.osv):
 	
 		'name': fields.char('DC No.', size=128,select=True,readonly=True),
 		'entry_date': fields.date('DC Date',required=True),
+		'annexure_date': fields.date('Annexure Date'),
+		'annexure_no': fields.integer('Annexure 17 No.'),
 		'division_id': fields.many2one('kg.division.master','From Division'),
 		'to_division_id': fields.many2one('kg.division.master','To Division'),
 		'transfer_type': fields.selection([('internal','Internal'),('sub_contractor','Sub Contractor')],'Type'),
@@ -935,6 +937,10 @@ class kg_subcontract_dc(osv.osv):
 			print"entry.dc_sub_line_ids",entry.dc_sub_line_ids	
 			print"entry.dc_internal_line_ids",entry.dc_internal_line_ids
 			special_char = ''.join( c for c in entry.vehicle_detail if  c in '!@#$%^~*{}?+/=_-><?/`' )
+			if entry.annexure_no <= 0:
+				raise osv.except_osv(_('Warning!'),
+								_('System not allow to Annexure 17 No. Zero and negative values!!'))	
+			
 			if len(entry.line_ids) == 0:
 				raise osv.except_osv(_('Warning!'),
 								_('System not allow to without line items !!'))		
@@ -1035,7 +1041,9 @@ class kg_subcontract_dc(osv.osv):
 						raise osv.except_osv(_('Warning!'),
 									_('System not allow to save Zero values !!'))
 					direct_sc_dc_qty = 0.00	
-					dc_state = ''							
+					dc_state = ''	
+					wo_process_state = ''
+					wo_dc_state = ''						
 					if line_item.entry_type_stk == 'direct':								
 						if (line_item.sc_id.sc_dc_qty + line_item.qty) == line_item.sc_id.actual_qty:
 							dc_state = 'done'					
@@ -2604,39 +2612,39 @@ class kg_subcontract_inward(osv.osv):
 												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op12_state':'pending'})	
 						
 												
-					#~ if total > 0:						
-							#~ 
-						#~ ### Stock Inward Creation ###
-						#~ inward_obj = self.pool.get('kg.stock.inward')
-						#~ inward_line_obj = self.pool.get('ch.stock.inward.details')						
-						#~ print"line_item.order_id.location",line_item.order_id.location
-						#~ 
-						#~ inward_vals = {
-							#~ 'location': line_item.order_id.location
-						#~ }
-						#~ 
-						#~ inward_id = inward_obj.create(cr, uid, inward_vals)
-						#~ 
-						#~ inward_line_vals = {
-							#~ 'header_id': inward_id,
-							#~ 'location': line_item.order_id.location,
-							#~ 'stock_type': 'pump',
-							#~ 'pump_model_id': line_item.pump_model_id.id,
-							#~ 'pattern_id': line_item.pattern_id.id,
-							#~ 'pattern_name': line_item.pattern_name,
-							#~ 'moc_id': line_item.moc_id.id,							
-							#~ 'qty': total,
-							#~ 'available_qty': total,
-							#~ 'each_wgt': 0,
-							#~ 'total_weight': 0,
-							#~ 'unit_price': 0,
-							#~ 'stock_mode': 'excess',
-							#~ 'ms_stock_state': 'operation_inprogress',
-							#~ 'stock_item': 'ms_item'
-							#~ 
-						#~ }
-						#~ 
-						#~ inward_line_id = inward_line_obj.create(cr, uid, inward_line_vals)
+						if item.qty > 0:						
+								
+							### Stock Inward Creation ###
+							inward_obj = self.pool.get('kg.stock.inward')
+							inward_line_obj = self.pool.get('ch.stock.inward.details')						
+							print"line_item.order_id.location",item.order_id.location
+							
+							inward_vals = {
+								'location': item.order_id.location
+							}
+							
+							inward_id = inward_obj.create(cr, uid, inward_vals)
+							
+							inward_line_vals = {
+								'header_id': inward_id,
+								'location': item.order_id.location,
+								'stock_type': 'pump',
+								'pump_model_id': item.pump_model_id.id,
+								'pattern_id': item.pattern_id.id,
+								'pattern_name': item.pattern_name,
+								'moc_id': item.moc_id.id,							
+								'qty': item.qty,
+								'available_qty': item.qty,
+								'each_wgt': 0,
+								'total_weight': 0,
+								'unit_price': 0,
+								'stock_mode': 'excess',
+								'ms_stock_state': 'operation_inprogress',
+								'stock_item': 'ms_item'
+								
+							}
+							
+							inward_line_id = inward_line_obj.create(cr, uid, inward_line_vals)
 			direct_sc_inward_qty = 0.00
 			for line_item in entry.line_ids:				
 				if line_item.qty < 0:

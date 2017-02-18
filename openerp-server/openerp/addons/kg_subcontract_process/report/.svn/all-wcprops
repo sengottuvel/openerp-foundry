@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/sam_turbo_dev/!svn/ver/3138/openerp-server/openerp/addons/kg_subcontract_process/report
+END
+kg_sc_dc_onscreen_report.jrxml
+K 25
+svn:wc:ra_dav:version-url
+V 123
+/svn/sam_turbo_dev/!svn/ver/3138/openerp-server/openerp/addons/kg_subcontract_process/report/kg_sc_dc_onscreen_report.jrxml
+END
+onscreen_dc_print_report.py
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svn/sam_turbo_dev/!svn/ver/3138/openerp-server/openerp/addons/kg_subcontract_process/report/onscreen_dc_print_report.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svn/sam_turbo_dev/!svn/ver/3138/openerp-server/openerp/addons/kg_subcontract_process/report/__init__.py
+END
+kg_sc_dc_onscreen_report.jasper
+K 25
+svn:wc:ra_dav:version-url
+V 124
+/svn/sam_turbo_dev/!svn/ver/3138/openerp-server/openerp/addons/kg_subcontract_process/report/kg_sc_dc_onscreen_report.jasper
+END

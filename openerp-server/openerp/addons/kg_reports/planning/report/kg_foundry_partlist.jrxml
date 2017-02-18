@@ -1,0 +1,582 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="foundry_partlist_report" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="NoDataSection" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="wiz_id" class="java.lang.Integer"/>
+	<parameter name="printed_by" class="java.lang.String"/>
+	<parameter name="print_date" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select
+company.name as company_name,
+to_char(wo_order.entry_date::date,'dd-mm-YYYY') as wo_date,
+wo_order.name as wo_no,
+(CASE WHEN wo_order.order_priority = 'normal'
+THEN 'Normal'
+WHEN wo_order.order_priority = 'emergency'
+THEN 'Emergency'
+ELSE ''
+end ) as priority,
+order_details.order_no as order_no,
+pump.name as pump_name,
+pattern.name as pattern_no,
+pattern.pattern_name as pattern_name,
+moc.name as moc,
+(CASE WHEN foundry.flag_pattern_check = False
+THEN 'No'
+WHEN foundry.flag_pattern_check = True
+THEN 'Yes'
+ELSE ''
+end ) as pattern_check,
+foundry.add_spec as other_spec,
+foundry.qty as required_qty,
+sch.stock_qty as stock_qty,
+case when (foundry.qty - sch.stock_qty) < 0 then 0 else (foundry.qty - sch.stock_qty) end  as pouring_qty,
+(CASE WHEN moc.weight_type = 'ci'
+THEN pattern.ci_weight
+WHEN moc.weight_type = 'ss'
+THEN pattern.pcs_weight
+WHEN moc.weight_type = 'non_ferrous'
+THEN pattern.nonferous_weight
+ELSE '0.00'
+end ) as each_wight,
+(case when (foundry.qty - sch.stock_qty) < 0 then 0 else (foundry.qty - sch.stock_qty) end   * (CASE WHEN moc.weight_type = 'ci'
+THEN pattern.ci_weight
+WHEN moc.weight_type = 'ss'
+THEN pattern.pcs_weight
+WHEN moc.weight_type = 'non_ferrous'
+THEN pattern.nonferous_weight
+ELSE '0.00'
+end ) ) as total_weight,
+schedule.name as schedule_no
+
+from
+
+ch_schedule_details  sch
+left join kg_schedule schedule on (schedule.id = sch.header_id)
+left join kg_work_order wo_order on (wo_order.id = sch.order_id)
+left join ch_work_order_details order_details on (order_details.id = sch.order_line_id)
+left join ch_order_bom_details foundry on (foundry.id = sch.order_bomline_id)
+left join kg_pumpmodel_master pump on (pump.id = order_details.pump_model_id)
+left join kg_moc_master moc on (moc.id = foundry.moc_id)
+left join kg_pattern_master pattern on (pattern.id = sch.pattern_id)
+left join res_company company on (company.id = wo_order.company_id)
+
+where
+case
+when (select order_id from m2m_work_order_report_details where foundry_wiz_id =$P{wiz_id}  limit 1) is not null then sch.order_id in (select order_id from m2m_work_order_report_details where foundry_wiz_id = $P{wiz_id})
+else
+sch.order_id in (select distinct order_id from ch_schedule_details) end and
+
+case
+when (select schedule_id from m2m_schedule_report_details where sche_wiz_id =$P{wiz_id}  limit 1) is not null then sch.header_id in (select schedule_id from m2m_schedule_report_details where sche_wiz_id = $P{wiz_id})
+else
+sch.header_id in (select distinct header_id from ch_schedule_details) end]]>
+	</queryString>
+	<field name="company_name" class="java.lang.String"/>
+	<field name="wo_date" class="java.lang.String"/>
+	<field name="wo_no" class="java.lang.String"/>
+	<field name="priority" class="java.lang.String"/>
+	<field name="order_no" class="java.lang.String"/>
+	<field name="pump_name" class="java.lang.String"/>
+	<field name="pattern_no" class="java.lang.String"/>
+	<field name="pattern_name" class="java.lang.String"/>
+	<field name="moc" class="java.lang.String"/>
+	<field name="pattern_check" class="java.lang.String"/>
+	<field name="other_spec" class="java.lang.String"/>
+	<field name="required_qty" class="java.lang.Integer"/>
+	<field name="stock_qty" class="java.lang.Integer"/>
+	<field name="pouring_qty" class="java.lang.Integer"/>
+	<field name="each_wight" class="java.lang.Double"/>
+	<field name="total_weight" class="java.lang.Double"/>
+	<field name="schedule_no" class="java.lang.String"/>
+	<group name="ProjectGroup" isStartNewPage="true">
+		<groupExpression><![CDATA[]]></groupExpression>
+	</group>
+	<group name="Table Heading">
+		<groupExpression><![CDATA[]]></groupExpression>
+	</group>
+	<group name="DesignationGroup" isStartNewPage="true">
+		<groupExpression><![CDATA[]]></groupExpression>
+	</group>
+	<group name="Label" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{company_name}]]></groupExpression>
+	</group>
+	<group name="work_order" isStartNewPage="true">
+		<groupExpression><![CDATA[$F{wo_no}]]></groupExpression>
+		<groupHeader>
+			<band height="63">
+				<staticText>
+					<reportElement mode="Transparent" x="183" y="40" width="60" height="23" isRemoveLineWhenBlank="true"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Patten Number]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="315" y="40" width="56" height="23" isRemoveLineWhenBlank="true"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[MOC]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="61" y="40" width="61" height="23" isRemoveLineWhenBlank="true"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[WO. No]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="371" y="40" width="43" height="23" isRemoveLineWhenBlank="true"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Pattern Check]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="243" y="40" width="72" height="23" isRemoveLineWhenBlank="true"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Pattern Name]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="122" y="40" width="61" height="23" isRemoveLineWhenBlank="true"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Pump Model]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="414" y="40" width="56" height="23" isRemoveLineWhenBlank="true"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Other Spec]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="470" y="40" width="46" height="23" isRemoveLineWhenBlank="true"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Reqd. Qty]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="516" y="40" width="66" height="23" isRemoveLineWhenBlank="true"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Stock Allocated]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="625" y="40" width="76" height="23" isRemoveLineWhenBlank="true"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Each Weight]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="701" y="40" width="101" height="23" isRemoveLineWhenBlank="true"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Total Weight]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="582" y="40" width="43" height="23" isRemoveLineWhenBlank="true"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Pouring Qty]]></text>
+				</staticText>
+				<textField>
+					<reportElement x="43" y="0" width="73" height="20"/>
+					<box leftPadding="1"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{wo_no}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="0" y="0" width="53" height="20"/>
+					<box leftPadding="3"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[WO No : ]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="20" width="53" height="20"/>
+					<box leftPadding="3"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[WO Date :]]></text>
+				</staticText>
+				<textField>
+					<reportElement x="43" y="20" width="73" height="20"/>
+					<box leftPadding="3"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{wo_date}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="701" y="20" width="46" height="20"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Priority  :]]></text>
+				</staticText>
+				<textField>
+					<reportElement x="747" y="20" width="54" height="20"/>
+					<box leftPadding="2" rightPadding="0"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{priority}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement mode="Transparent" x="1" y="40" width="60" height="23" isRemoveLineWhenBlank="true"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Schedule No]]></text>
+				</staticText>
+			</band>
+		</groupHeader>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="46">
+			<textField>
+				<reportElement mode="Transparent" x="1" y="0" width="801" height="31"/>
+				<box topPadding="13"/>
+				<textElement textAlignment="Center">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{company_name}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement mode="Transparent" x="1" y="31" width="801" height="15"/>
+				<box topPadding="3">
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Foundry Part List - Work Order"]]></textFieldExpression>
+			</textField>
+			<image>
+				<reportElement x="274" y="0" width="54" height="31"/>
+				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
+			</image>
+		</band>
+	</title>
+	<detail>
+		<band height="16">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="315" y="0" width="56" height="16"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{moc}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="183" y="0" width="60" height="16"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{pattern_no}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="243" y="0" width="72" height="16"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{pattern_name}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="61" y="0" width="61" height="16"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{order_no}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="371" y="0" width="43" height="16"/>
+				<box rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{pattern_check}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="122" y="0" width="61" height="16"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{pump_name}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="414" y="0" width="56" height="16"/>
+				<box leftPadding="2" rightPadding="0">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{other_spec}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="470" y="0" width="46" height="16"/>
+				<box rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{required_qty}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="516" y="0" width="66" height="16"/>
+				<box leftPadding="0" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{stock_qty}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="701" y="0" width="101" height="16"/>
+				<box leftPadding="0" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{total_weight}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="625" y="0" width="76" height="16"/>
+				<box leftPadding="0" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{each_wight}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="582" y="0" width="43" height="16"/>
+				<box leftPadding="0" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{pouring_qty}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="1" y="0" width="60" height="16"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{schedule_no}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="20">
+			<textField>
+				<reportElement x="354" y="0" width="87" height="20"/>
+				<box topPadding="3">
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="441" y="0" width="48" height="20"/>
+				<box topPadding="3">
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1" y="0" width="353" height="20"/>
+				<box topPadding="3">
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{printed_by} + " "+ "/"  +" "+$P{print_date}]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="489" y="0" width="313" height="20"/>
+				<box topPadding="3">
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+			</textField>
+		</band>
+	</pageFooter>
+	<noData>
+		<band height="20">
+			<staticText>
+				<reportElement mode="Transparent" x="1" y="0" width="801" height="20"/>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[No Records Found]]></text>
+			</staticText>
+		</band>
+	</noData>
+</jasperReport>
