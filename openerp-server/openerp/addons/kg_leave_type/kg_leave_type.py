@@ -153,10 +153,10 @@ class kg_leave_type(osv.osv):
 		
 	def val_negative(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-
-		if rec.settle_amt <= 0:
-			raise osv.except_osv(_('Warning!'),
-						_('Negative Values and Zeros are are not allowed for Settlement Amount !!'))
+		if rec.bal_leave_adj == 'amt_settle':
+			if rec.settle_amt <= 0:
+				raise osv.except_osv(_('Warning!'),
+							_('Negative Values and Zeros are are not allowed for Settlement Amount !!'))
 
 		return True
 		
