@@ -456,11 +456,9 @@ class kg_purchase_order(osv.osv):
 							select line.price_unit
 							from purchase_order_line line
 							left join purchase_order po on (po.id = line.order_id)
-							join kg_brandmoc_rate rate on (rate.product_id=line.product_id)
-							join ch_brandmoc_rate_details det on (det.header_id=rate.id)
 							where line.product_id = %s and line.order_id != %s and line.brand_id = %s and line.moc_id = %s
 							and po.state in ('approved')
-							order by po.approved_date,line.id desc limit 1"""%(item.product_id.id,obj.id,item.brand_id.id,item.moc_id.id)
+							order by po.approved_date desc limit 1"""%(item.product_id.id,obj.id,item.brand_id.id,item.moc_id.id)
 				cr.execute(price_sql)		
 				price_data = cr.dictfetchall()
 				if price_data:
