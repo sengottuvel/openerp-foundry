@@ -277,7 +277,7 @@ class kg_payslip(osv.osv):
 				val5 = [d['salary_days'] for d in data if 'salary_days' in d]
 				salary_days = val5[0]
 				####### OT Calculation if OT applicable for the employee in the contract########
-				con_src = con_obj.search(cr,uid,[('employee_id','=',emp_id)])
+				con_src = con_obj.search(cr,uid,[('employee_id','=',emp_id),('state','=','approved')])
 				con_rec = con_obj.browse(cr,uid,con_src[0])
 				if con_rec.ot_status:
 					salary_days = salary_days + ot_days
@@ -337,81 +337,7 @@ class kg_payslip(osv.osv):
 							
 					bns_att += comp_amt				
 				#### Creation of the Salary components Described in the Contract of the employee ####
-				
-			#### PF calculation for each employee ####	
-
-				empr_pf_ids = employee_cont.search(cr , uid ,[('active','=',True),('state','=','approved')])
-				emp_pf_rec = employee_cont.browse(cr,uid,empr_pf_ids[0])
-				if amt_sal > emp_pf_rec.pf_max_amt:
-					pf_stand_amt = emp_pf_rec.pf_max_amt
-				else:
-					pf_stand_amt = amt_sal
-				if pf_stand_amt > 0:
-					empr_pf_line_ids = employee_cont_line.search(cr , uid ,[('cont_heads','=','pf'),('header_id','=',emp_pf_rec.id)])
-					emp_pf_line_rec = employee_cont_line.browse(cr,uid,empr_pf_line_ids[0])
-					if emp_pf_line_rec.cont_type == 'percent':
-						pf_emp_amt = (pf_stand_amt * emp_pf_line_rec.emp_cont_value)/100
-					else:
-						pf_emp_amt = emp_pf_line_rec.emp_cont_value
-				else:
-					pass
-				if con_ids_1.pf_status and pf_stand_amt > 0:		
-					self.pool.get('hr.payslip.line').create(cr,uid,
-							{
-								'name':'Employee - '+emp_pf_line_rec.cont_heads,
-								'code':'PF',
-								'category_id':4,
-								'quantity':1,
-								'amount':pf_emp_amt,
-								'salary_rule_id':1,
-								'employee_id':emp_id,
-								'contract_id':con_ids[0],
-								'slip_id':slip_rec.id,
-							},context = None)
-				
-			#### PF calculation for each employee ####	
-			
-			#### ESI calculation for each employee ####	
-				
-				empr_esi_ids = employee_cont.search(cr , uid ,[('active','=',True),('state','=','approved')])
-				emp_esi_rec = employee_cont.browse(cr,uid,empr_esi_ids[0])
-				if con_ids_1.gross_salary < emp_esi_rec.esi_slab:
-					esi_stand_amt = esi_amt_sal
-				else:
-					esi_stand_amt = 0
-				if esi_stand_amt > 0:
-					print "*********************************************************************************************",esi_stand_amt
-					empr_esi_line_ids = employee_cont_line.search(cr , uid ,[('cont_heads','=','esi'),('header_id','=',emp_esi_rec.id)])
-					emp_esi_line_rec = employee_cont_line.browse(cr,uid,empr_esi_line_ids[0])
-					if emp_esi_line_rec.cont_type == 'percent':
-						esi_emp_amt = (esi_stand_amt * emp_esi_line_rec.emp_cont_value)/100
-						esi_emplr_amt = (esi_stand_amt * emp_esi_line_rec.emplr_cont_value)/100
-						print "************emp_esi_line_rec.emp_cont_value*********************************",emp_esi_line_rec.emp_cont_value
-						print "************esi_stand_amtesi_stand_amtesi_stand_amtesi_stand_amt*********************************",esi_emp_amt
-					else:
-						esi_emp_amt = emp_esi_line_rec.emp_cont_value
-						esi_emplr_amt = emp_esi_line_rec.emplr_cont_value
-					if con_ids_1.esi_status and esi_stand_amt > 0:
-						self.pool.get('hr.payslip.line').create(cr,uid,
-								{
-									'name':'Employee - '+emp_esi_line_rec.cont_heads,
-									'code':'ESI',
-									'category_id':4,
-									'quantity':1,
-									'amount':esi_emp_amt,
-									'salary_rule_id':1,
-									'employee_id':emp_id,
-									'contract_id':con_ids[0],
-									'slip_id':slip_rec.id,
-								},context = None)
-				else:
-					pass
-				
-				
-				
-				#### ESI calculation for each employee ####	
-				
-				#### VDA calculation for each employee ####
+			#### VDA calculation for each employee ####
 				
 				if con_ids_1.vda_status:
 					emp_recs = emp_obj.browse(cr,uid,con_ids_1.employee_id.id)
@@ -456,6 +382,81 @@ class kg_payslip(osv.osv):
 				
 				
 				#### VDA calculation for each employee ####
+				
+			#### PF calculation for each employee ####	
+
+				empr_pf_ids = employee_cont.search(cr , uid ,[('active','=',True),('state','=','approved')])
+				emp_pf_rec = employee_cont.browse(cr,uid,empr_pf_ids[0])
+				if amt_sal + acc_vda_value > emp_pf_rec.pf_max_amt:
+					pf_stand_amt = emp_pf_rec.pf_max_amt
+				else:
+					pf_stand_amt = amt_sal + acc_vda_value
+				if pf_stand_amt > 0:
+					empr_pf_line_ids = employee_cont_line.search(cr , uid ,[('cont_heads','=','pf'),('header_id','=',emp_pf_rec.id)])
+					emp_pf_line_rec = employee_cont_line.browse(cr,uid,empr_pf_line_ids[0])
+					if emp_pf_line_rec.cont_type == 'percent':
+						pf_emp_amt = (pf_stand_amt * emp_pf_line_rec.emp_cont_value)/100
+					else:
+						pf_emp_amt = emp_pf_line_rec.emp_cont_value
+				else:
+					pass
+				if con_ids_1.pf_status and pf_stand_amt > 0:		
+					self.pool.get('hr.payslip.line').create(cr,uid,
+							{
+								'name':'Employee - '+emp_pf_line_rec.cont_heads,
+								'code':'PF',
+								'category_id':4,
+								'quantity':1,
+								'amount':pf_emp_amt,
+								'salary_rule_id':1,
+								'employee_id':emp_id,
+								'contract_id':con_ids[0],
+								'slip_id':slip_rec.id,
+							},context = None)
+				
+			#### PF calculation for each employee ####	
+			
+			#### ESI calculation for each employee ####	
+				
+				empr_esi_ids = employee_cont.search(cr , uid ,[('active','=',True),('state','=','approved')])
+				emp_esi_rec = employee_cont.browse(cr,uid,empr_esi_ids[0])
+				if con_ids_1.gross_salary < emp_esi_rec.esi_slab:
+					esi_stand_amt = esi_amt_sal + acc_vda_value
+				else:
+					esi_stand_amt = 0
+				if esi_stand_amt > 0:
+					print "*********************************************************************************************",esi_stand_amt
+					empr_esi_line_ids = employee_cont_line.search(cr , uid ,[('cont_heads','=','esi'),('header_id','=',emp_esi_rec.id)])
+					emp_esi_line_rec = employee_cont_line.browse(cr,uid,empr_esi_line_ids[0])
+					if emp_esi_line_rec.cont_type == 'percent':
+						esi_emp_amt = (esi_stand_amt * emp_esi_line_rec.emp_cont_value)/100
+						esi_emplr_amt = (esi_stand_amt * emp_esi_line_rec.emplr_cont_value)/100
+						print "************emp_esi_line_rec.emp_cont_value*********************************",emp_esi_line_rec.emp_cont_value
+						print "************esi_stand_amtesi_stand_amtesi_stand_amtesi_stand_amt*********************************",esi_emp_amt
+					else:
+						esi_emp_amt = emp_esi_line_rec.emp_cont_value
+						esi_emplr_amt = emp_esi_line_rec.emplr_cont_value
+					if con_ids_1.esi_status and esi_stand_amt > 0:
+						self.pool.get('hr.payslip.line').create(cr,uid,
+								{
+									'name':'Employee - '+emp_esi_line_rec.cont_heads,
+									'code':'ESI',
+									'category_id':4,
+									'quantity':1,
+									'amount':esi_emp_amt,
+									'salary_rule_id':1,
+									'employee_id':emp_id,
+									'contract_id':con_ids[0],
+									'slip_id':slip_rec.id,
+								},context = None)
+				else:
+					pass
+				
+				
+				
+				#### ESI calculation for each employee ####	
+				
+				
 				
 				#### Creation of the allowance or deduction per month for the employee ####
 				
@@ -629,29 +630,29 @@ class kg_payslip(osv.osv):
 							else:
 								pass
 								
-				if salary_days >= working_days:
-					emp_categ_ids = self.pool.get('kg.employee.category').search(cr,uid,[('id','=',con_ids_1.emp_categ_id.id),('state','=','approved')])
-					if emp_categ_ids:
-						emp_categ_rec = self.pool.get('kg.employee.category').browse(cr,uid,emp_categ_ids[0])
-						emplo = emp_obj.browse(cr,uid,emp_id)
-						if emplo.gender == 'male':
-							att_ins = emp_categ_rec.attnd_insentive_male
-						else:
-							att_ins = emp_categ_rec.attnd_insentive_female
-						self.pool.get('hr.payslip.line').create(cr,uid,
-								{
-									'name':'100% Attendance Bonus',
-									'code':'ATTB',
-									'category_id':8,
-									'quantity':1,
-									'amount':att_ins,
-									'salary_rule_id':1,
-									'employee_id':emp_id,
-									'contract_id':con_ids[0],
-									'slip_id':slip_rec.id,
-								},context = None)
-				else:
-					pass
+					if salary_days >= working_days:
+						emp_categ_ids = self.pool.get('kg.employee.category').search(cr,uid,[('id','=',con_ids_1.emp_categ_id.id),('state','=','approved')])
+						if emp_categ_ids:
+							emp_categ_rec = self.pool.get('kg.employee.category').browse(cr,uid,emp_categ_ids[0])
+							emplo = emp_obj.browse(cr,uid,emp_id)
+							if emplo.gender == 'male':
+								att_ins = emp_categ_rec.attnd_insentive_male
+							else:
+								att_ins = emp_categ_rec.attnd_insentive_female
+							self.pool.get('hr.payslip.line').create(cr,uid,
+									{
+										'name':'100% Attendance Bonus',
+										'code':'ATTB',
+										'category_id':8,
+										'quantity':1,
+										'amount':att_ins,
+										'salary_rule_id':1,
+										'employee_id':emp_id,
+										'contract_id':con_ids[0],
+										'slip_id':slip_rec.id,
+									},context = None)
+					else:
+						pass
 				#### Creation of attendance bonus ##########
 				
 				#### Creation of the Driver Batta per month for the employee ####	
