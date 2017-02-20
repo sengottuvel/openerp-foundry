@@ -463,6 +463,7 @@ class kg_payslip(osv.osv):
 				#### Creation of the allowance or deduction per month for the employee ####
 				
 				all_ded_ids = all_ded_obj.search(cr,uid,[('start_date','=',slip_rec.date_from),('end_date','=',slip_rec.date_to),('state','=','approved')])
+				print "allowance or deductionallowance or deductionallowance or deductionallowance or deductionallowance or deduction",all_ded_ids
 				if all_ded_ids:
 					all_ded_rec = all_ded_obj.browse(cr,uid,all_ded_ids[0])
 					all_ded_lines = all_ded_line_obj.search(cr,uid,[('header_id','=',all_ded_ids[0])])
