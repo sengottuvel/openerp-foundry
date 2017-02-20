@@ -142,6 +142,7 @@
             ref('kg_subcontract_process.tam_sc_inward'),         
             ref('kg_ms_stores.tpm_ms_store_process'),
             ref('kg_ms_stores.tam_ms_stores_list'),
+		    ref('kg_ms_stores.tam_bot_stores_list'),
             
             ref('kg_production.tam_pouring_pending_mc'),
                       
