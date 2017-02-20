@@ -340,7 +340,7 @@ class kg_payslip(osv.osv):
 			#### VDA calculation for each employee ####
 				
 				if con_ids_1.vda_status:
-					acc_vda_value = 0.00
+					
 					emp_recs = emp_obj.browse(cr,uid,con_ids_1.employee_id.id)
 					div_rec = self.pool.get('kg.division.master').browse(cr,uid,emp_recs.division_id.id)
 					print "___________points from division master____________________",div_rec.da_ded_points
@@ -377,6 +377,7 @@ class kg_payslip(osv.osv):
 									'slip_id':slip_rec.id,
 								},context = None)
 				else:
+					acc_vda_value = 0.00
 					pass
 					
 					
