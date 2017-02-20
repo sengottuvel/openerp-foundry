@@ -1416,7 +1416,7 @@ where off.id = $P{offer_id}]]>
 		<groupHeader>
 			<band height="14">
 				<componentElement>
-					<reportElement x="-12" y="0" width="825" height="14"/>
+					<reportElement x="-12" y="0" width="825" height="14" isRemoveLineWhenBlank="true"/>
 					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 						<datasetRun subDataset="dataset2">
 							<datasetParameter name="offer_id">
@@ -1673,7 +1673,7 @@ where off.id = $P{offer_id}]]>
 		<groupHeader>
 			<band height="14">
 				<componentElement>
-					<reportElement x="-12" y="0" width="825" height="14"/>
+					<reportElement x="-12" y="0" width="825" height="14" isRemoveLineWhenBlank="true"/>
 					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 						<datasetRun subDataset="dataset3">
 							<datasetParameter name="offer_id">
@@ -1946,7 +1946,7 @@ where off.id = $P{offer_id}]]>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{net_amount}]]></textFieldExpression>
 							</textField>
-							<textField>
+							<textField isBlankWhenNull="true">
 								<reportElement x="189" y="0" width="57" height="15"/>
 								<box topPadding="2">
 									<leftPen lineWidth="0.5"/>
@@ -2124,7 +2124,7 @@ where off.id = $P{offer_id}]]>
 						<rightPen lineWidth="0.5"/>
 					</box>
 					<textElement/>
-					<textFieldExpression><![CDATA["Descrip"]]></textFieldExpression>
+					<textFieldExpression><![CDATA["Description"]]></textFieldExpression>
 				</textField>
 				<textField>
 					<reportElement x="128" y="17" width="154" height="17"/>
@@ -2322,7 +2322,7 @@ where off.id = $P{offer_id}]]>
 		<groupHeader>
 			<band height="14">
 				<componentElement>
-					<reportElement x="-12" y="0" width="825" height="14"/>
+					<reportElement x="-12" y="0" width="825" height="14" isRemoveLineWhenBlank="true"/>
 					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 						<datasetRun subDataset="dataset6">
 							<datasetParameter name="offer_id">
@@ -2431,7 +2431,7 @@ where off.id = $P{offer_id}]]>
 		<groupHeader>
 			<band height="14">
 				<componentElement>
-					<reportElement x="-12" y="0" width="825" height="14"/>
+					<reportElement x="-12" y="0" width="825" height="14" isRemoveLineWhenBlank="true"/>
 					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 						<datasetRun subDataset="dataset7">
 							<datasetParameter name="offer_id">
@@ -2792,6 +2792,10 @@ where off.id = $P{offer_id}]]>
 				<textElement textAlignment="Center"/>
 				<textFieldExpression><![CDATA[$F{comp_street}+$F{comp_street2}+$F{comp_city}+$F{comp_state}+'-'+$F{comp_zip}]]></textFieldExpression>
 			</textField>
+			<image>
+				<reportElement x="-12" y="0" width="47" height="40"/>
+				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.png"]]></imageExpression>
+			</image>
 		</band>
 	</title>
 	<columnHeader>
@@ -2804,7 +2808,7 @@ where off.id = $P{offer_id}]]>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement/>
-				<textFieldExpression><![CDATA["Descrip"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Description"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="128" y="0" width="47" height="16" isPrintWhenDetailOverflows="true"/>
@@ -2814,7 +2818,7 @@ where off.id = $P{offer_id}]]>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement/>
-				<textFieldExpression><![CDATA["CPO Value - Total value"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["CPO value"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="340" y="0" width="55" height="16" isPrintWhenDetailOverflows="true"/>
@@ -2935,10 +2939,34 @@ where off.id = $P{offer_id}]]>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement/>
-				<textFieldExpression><![CDATA["Value considered for Dealer Discount 3 = (1 -  2 )"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Value considered for Dealer Discount"]]></textFieldExpression>
 			</textField>
 		</band>
 	</columnHeader>
+	<pageFooter>
+		<band height="13">
+			<textField evaluationTime="Report">
+				<reportElement x="370" y="0" width="129" height="13"/>
+				<box topPadding="2" leftPadding="0">
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="290" y="0" width="80" height="13"/>
+				<box topPadding="2" leftPadding="0">
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
 	<lastPageFooter>
 		<band height="39">
 			<textField>
@@ -2964,7 +2992,4 @@ where off.id = $P{offer_id}]]>
 			</textField>
 		</band>
 	</lastPageFooter>
-	<summary>
-		<band height="10" splitType="Stretch"/>
-	</summary>
 </jasperReport>
