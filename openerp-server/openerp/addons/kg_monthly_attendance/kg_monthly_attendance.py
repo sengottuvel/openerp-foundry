@@ -308,25 +308,25 @@ class kg_monthly_attendance(osv.osv):
 	
 		
 	###Validations###
-	def _check_number_of_days(self, cr, uid,ids,context=None):
-		rec = self.browse(cr, uid, ids[0])
-		mon_total_days = rec.total_days
-		all_days = rec.worked_days + rec.arrear_days + rec.ot_days + rec.od_days 
-		+ rec.absent_days+ rec.leave_days 
-		if (all_days > mon_total_days):
-			raise osv.except_osv(_('Warning!'),
-						_('Entered days should not exceed or less than the total days in a month!!'))
-		check_wrk_days = rec.leave_days + rec.worked_days + rec.ot_days + rec.od_days + rec.absent_days
-		if (rec.working_days < check_wrk_days) or (rec.working_days > check_wrk_days):
-			raise osv.except_osv(_('Warning!'),
-						_('Entered days should not exceed or less than the total working days!!'))
-			return False
-		return  True
-		
-	_constraints = [
-		
-		(_check_number_of_days, 'Attendance entry already available for this employee in this month !!',['']),		
-		] 
+	#~ def _check_number_of_days(self, cr, uid,ids,context=None):
+		#~ rec = self.browse(cr, uid, ids[0])
+		#~ mon_total_days = rec.total_days
+		#~ all_days = rec.worked_days + rec.arrear_days + rec.ot_days + rec.od_days 
+		#~ + rec.absent_days+ rec.leave_days 
+		#~ if (all_days > mon_total_days):
+			#~ raise osv.except_osv(_('Warning!'),
+						#~ _('Entered days should not exceed or less than the total days in a month!!'))
+		#~ check_wrk_days = rec.leave_days + rec.worked_days + rec.ot_days + rec.od_days + rec.absent_days
+		#~ if (rec.working_days < check_wrk_days) or (rec.working_days > check_wrk_days):
+			#~ raise osv.except_osv(_('Warning!'),
+						#~ _('Entered days should not exceed or less than the total working days!!'))
+			#~ return False
+		#~ return  True
+		#~ 
+	#~ _constraints = [
+		#~ 
+		#~ (_check_number_of_days, 'Attendance entry already available for this employee in this month !!',['']),		
+		#~ ] 
 	
 		
 	_defaults = {
