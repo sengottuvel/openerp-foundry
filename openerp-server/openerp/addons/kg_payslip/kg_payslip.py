@@ -608,6 +608,10 @@ class kg_payslip(osv.osv):
 				#### Creation of attendance bonus ##########
 				
 				if con_ids_1.bonus_applicable:
+					basic_amt = 0.00
+					fda_amt = 0.00
+					vda_amt = 0.00
+					tot_mon_amt = 0.00
 					emp_categ_ids = self.pool.get('kg.employee.category').search(cr,uid,[('id','=',con_ids_1.emp_categ_id.id),('state','=','approved')])
 					if emp_categ_ids:
 						emp_categ_rec = self.pool.get('kg.employee.category').browse(cr,uid,emp_categ_ids[0])
