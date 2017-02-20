@@ -11,13 +11,18 @@
 			<field name="arch" type="xml">
 				<form string="Finished part stores List" version="7.0" create="false">
 					<header>
+<!--
 						<button name="assembly_update" string="Assembly Update" type="object"/>
+-->
+						<button name="entry_accept" string="Accept" type="object"
+						 attrs="{'invisible': [('accept_state','in',('pending','received'))]}"/>
 					</header>					
 					<group string="MS Details">
 						<group>
 							<field name="name" invisible="1"/>
 							<field name="qty" readonly="1"/>
 							<field name="ms_type" invisible="1"/>
+							<field name="accept_state" invisible="1"/>
 						</group>											
 						<group>
 							<field name="entry_date" readonly="1" invisible="1"/>
@@ -89,6 +94,7 @@
 					<field name="moc_id"/>
 					<field name="qty" sum="Total Qty"/>
 					<field name="oth_spec"/>
+					<field name="accept_state"/>
 					
 				</tree>
 			</field>
@@ -119,6 +125,8 @@
 						<filter string="Item Code" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'item_code'}"/>
 						<filter string="Item Name" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'item_name'}"/>
 						<filter string="MOC" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_id'}"/>
+						<filter string="State" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'accept_state'}"/>
+						<filter name="group_state" string="State" icon="terp-partner" context="{'group_by':'accept_state'}"/>
 						
 					</group>
                 </search>
@@ -138,6 +146,8 @@
 			<field name="view_type">form</field>
 			<field name="context">{}</field>
 			<field name="search_view_id" ref="t_search_v_ms_stores_list"/>
+			<field name="context">{'search_default_group_state': 1}</field>
+			<field name="domain">[('ms_type','!=','bot_item')]</field>
 		</record>
 		
 		 <record model="ir.actions.act_window.view" id="tma_ms_stores_list_tree_view">
@@ -151,6 +161,35 @@
             <field name="view_mode">form</field>
             <field name="view_id" ref="t_form_v_ms_stores_list"/>
             <field name="act_window_id" ref="tma_ms_stores_list"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+		<!-- Menu Action Start -->
+		
+		
+		<record id="tma_bot_stores_list" model="ir.actions.act_window">
+			<field name="name">BOT Item List</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.ms.stores</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="search_view_id" ref="t_search_v_ms_stores_list"/>
+			<field name="context">{'search_default_group_state': 1}</field>
+			<field name="domain">[('ms_type','=','bot_item')]</field>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_bot_stores_list_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_ms_stores_list"/>
+            <field name="act_window_id" ref="tma_bot_stores_list"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_bot_stores_list_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_ms_stores_list"/>
+            <field name="act_window_id" ref="tma_bot_stores_list"/>
         </record>
 		
 	<!-- Menu Action End-->
@@ -193,6 +232,7 @@
 	<menuitem name="Finished part stores process" id="tpm_ms_store_process" parent="kg_operation_master.mpm_crm" sequence="5"/>
 			
 		<menuitem action="tma_ms_stores_list" id="tam_ms_stores_list" parent="tpm_ms_store_process" sequence="1" />
+		<menuitem action="tma_bot_stores_list" id="tam_bot_stores_list" parent="tpm_ms_store_process" sequence="2" />
 		
 	
 	

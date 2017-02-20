@@ -44,6 +44,7 @@
 							 <field name="pattern_name" readonly="1"/>
 							 <field name="melting_id" readonly="1"/>
 							 <field name="pour_qty" readonly="1"/>
+							 <field name="oth_spec"/>
 						</group>					
 					</group>
 					<notebook>
@@ -313,7 +314,8 @@
 							<field name="pump_model_id" readonly="1"/>
 							<field name="pattern_name" readonly="1"/>
 							<field name="melting_id" readonly="1"/>
-							<field name="pre_stage_date" readonly="1"/> 
+							<field name="pre_stage_date" readonly="1"/>
+							<field name="oth_spec"/>
 						</group>					
 					</group>
 					<notebook>
@@ -493,7 +495,8 @@
 							<field name="pump_model_id" readonly="1"/>
 							<field name="pattern_name" readonly="1"/>
 							<field name="melting_id" readonly="1"/>
-							<field name="pre_stage_date" readonly="1"/> 
+							<field name="pre_stage_date" readonly="1"/>
+							<field name="oth_spec"/>
 						</group>					
 					</group>
 					<notebook>
@@ -670,7 +673,8 @@
 							<field name="pump_model_id" readonly="1"/>
 							<field name="pattern_name" readonly="1"/>
 							<field name="melting_id" readonly="1"/>
-							<field name="pre_stage_date" readonly="1"/> 
+							<field name="pre_stage_date" readonly="1"/>
+							<field name="oth_spec"/> 
 						</group>					
 					</group>
 					<notebook>
@@ -849,7 +853,8 @@
 							<field name="pump_model_id" readonly="1"/>
 							<field name="pattern_name" readonly="1"/>
 							<field name="melting_id" readonly="1"/>
-							<field name="pre_stage_date" readonly="1"/> 
+							<field name="pre_stage_date" readonly="1"/>
+							<field name="oth_spec"/>
 						</group>					
 					</group>
 					<notebook>
@@ -1029,7 +1034,8 @@
 							<field name="pump_model_id" readonly="1"/>
 							<field name="pattern_name" readonly="1"/>
 							<field name="melting_id" readonly="1"/>
-							<field name="pre_stage_date" readonly="1"/> 
+							<field name="pre_stage_date" readonly="1"/>
+							<field name="oth_spec"/>
 						</group>					
 					</group>
 					<notebook>
@@ -1209,7 +1215,8 @@
 							<field name="pump_model_id" readonly="1"/>
 							<field name="pattern_name" readonly="1"/>
 							<field name="melting_id" readonly="1"/>
-							<field name="pre_stage_date" readonly="1"/> 
+							<field name="pre_stage_date" readonly="1"/>
+							<field name="oth_spec"/> 
 						</group>					
 					</group>
 					<notebook>
@@ -1389,7 +1396,8 @@
 							<field name="pump_model_id" readonly="1"/>
 							<field name="pattern_name" readonly="1"/>
 							<field name="melting_id" readonly="1"/>
-							<field name="pre_stage_date" readonly="1"/> 
+							<field name="pre_stage_date" readonly="1"/>
+							<field name="oth_spec"/>
 						</group>					
 					</group>
 					<notebook>
@@ -1584,7 +1592,8 @@
 							<field name="pump_model_id" readonly="1"/>
 							<field name="pattern_name" readonly="1"/>
 							<field name="melting_id" readonly="1"/>
-							<field name="pre_stage_date" readonly="1"/> 
+							<field name="pre_stage_date" readonly="1"/>
+							<field name="oth_spec"/>
 						</group>					
 					</group>
 					<notebook>
@@ -1756,7 +1765,8 @@
 							<field name="pump_model_id" readonly="1"/>
 							<field name="pattern_name" readonly="1"/>
 							<field name="melting_id" readonly="1"/>
-							<field name="pre_stage_date" readonly="1"/> 
+							<field name="pre_stage_date" readonly="1"/>
+							<field name="oth_spec"/>
 						</group>					
 					</group>
 					<notebook>
@@ -2087,7 +2097,8 @@
 							<field name="pump_model_id" readonly="1"/>
 							<field name="pattern_name" readonly="1"/>
 							<field name="melting_id" readonly="1"/>
-							<field name="pre_stage_date" readonly="1"/> 
+							<field name="pre_stage_date" readonly="1"/>
+							<field name="oth_spec"/>
 						</group>					
 					</group>
 					<notebook>
@@ -2268,7 +2279,8 @@
 							<field name="pump_model_id" readonly="1"/>
 							<field name="pattern_name" readonly="1"/>
 							<field name="melting_id" readonly="1"/>
-							<field name="pre_stage_date" readonly="1"/> 
+							<field name="pre_stage_date" readonly="1"/>
+							<field name="oth_spec"/>
 						</group>					
 					</group>
 					<notebook>
@@ -2449,7 +2461,8 @@
 							<field name="pump_model_id" readonly="1"/>
 							<field name="pattern_name" readonly="1"/>
 							<field name="melting_id" readonly="1"/>
-							<field name="pre_stage_date" readonly="1"/> 
+							<field name="pre_stage_date" readonly="1"/>
+							<field name="oth_spec"/>
 						</group>					
 					</group>
 					<notebook>
@@ -2629,7 +2642,8 @@
 							<field name="pump_model_id" readonly="1"/>
 							<field name="pattern_name" readonly="1"/>
 							<field name="melting_id" readonly="1"/>
-							<field name="pre_stage_date" readonly="1"/> 
+							<field name="pre_stage_date" readonly="1"/>
+							<field name="oth_spec"/>
 						</group>					
 					</group>
 					<notebook>
@@ -2794,6 +2808,7 @@
 							<field name="melting_id" readonly="1"/>
 							<field name="allocated_accepted_qty" required="1" attrs="{'readonly': [('allocation_state','not in',['waiting'])]}"/>
 							<field name="allocation_state" readonly="1"/>
+							<field name="oth_spec"/>
 						</group>					
 					</group>
 					<notebook>
@@ -2926,6 +2941,7 @@
 					<field name="each_weight" sum="Each Weight"/> 
 					<field name="total_weight" sum="Total Weight"/> 
 					<field name="stage_name"/> 
+					<field name="oth_spec"/>
 					<field name="reject_remarks_id"/>
 					
 				</tree>

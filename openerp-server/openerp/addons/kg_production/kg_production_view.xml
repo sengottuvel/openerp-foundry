@@ -15,7 +15,7 @@
 							<field name="division_id" invisible="1" readonly="1"/>
 							<field name="order_no" readonly="1"/>
 							<field name="order_priority" string="Category" readonly="1"/>
-							<field name="sch_remarks" readonly="1" string="Others Specification"/>
+							<field name="sch_remarks" readonly="1" string="WO Remarks"/>
 						</group>											
 						<group>
 							<field name="entry_date" invisible="1"/>
@@ -223,6 +223,7 @@
 						<group>
 							<field name="pattern_id" readonly="1"/>
 							<field name="moc_id" readonly="1"/>
+							<field name="sch_remarks" readonly="1" string="WO Remarks"/>
 						</group>					
 					</group>
 					<notebook>
@@ -592,6 +593,7 @@
 							<field name="moc_id" readonly="1"/>
 							<field name="total_weight" readonly="1"/>
 							<field name="core_rem_qty" string="Remaining Qty"/>
+							<field name="sch_remarks" readonly="1" string="WO Remarks"/>
 						</group>					
 					</group>
 					<notebook>
@@ -991,6 +993,7 @@
 							<field name="moc_id" readonly="1"/>
 							<field name="total_weight" readonly="1"/>
 							<field name="mould_rem_qty" string="Remaining Qty"/>
+							<field name="sch_remarks" readonly="1" string="WO Remarks"/>
 
 						</group>					
 					</group>
@@ -1479,6 +1482,7 @@
 							<field name="pattern_id" readonly="1"/>
 							<field name="moc_id" readonly="1"/>
 							<field name="total_weight" readonly="1"/>
+							<field name="sch_remarks"/>
 							
 						</group>					
 					</group>
@@ -1546,6 +1550,7 @@
 							<field name="pattern_id" readonly="1"/>
 							<field name="moc_id" readonly="1"/>
 							<field name="total_weight" readonly="1"/>
+							<field name="sch_remarks"/>
 							
 						</group>					
 					</group>
@@ -1771,6 +1776,8 @@
 							<field name="pattern_id" readonly="1"/>
 							<field name="moc_id" readonly="1"/>
 							<field name="total_weight" readonly="1"/>
+							<field name="sch_remarks" readonly="1"/>
+							
 							
 						</group>					
 					</group>

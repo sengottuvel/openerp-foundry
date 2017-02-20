@@ -236,16 +236,17 @@ class kg_assembly_inward(osv.osv):
 					pump_qap_id = self.pool.get('kg.pump.qap').create(cr, uid, pump_qap_header_vals)
 					
 					dim_inspection_id = self.pool.get('ch.dimentional.inspection').search(cr,uid,[('pump_model_id','=',entry_rec.pump_model_id.id)])
-					dim_inspection_rec = self.pool.get('ch.dimentional.inspection').browse(cr,uid,dim_inspection_id[0])
-					for dim_item in dim_inspection_rec.line_ids:
-						print "dim_item",dim_item
-						pump_dimension_vals = {
-							'header_id': pump_qap_id, 		
-							'dimentional_details': dim_item.dimentional_details,
-							'min_weight': dim_item.min_weight,
-							'max_weight': dim_item.max_weight,	
-						}
-						pump_dimension_id = self.pool.get('ch.pump.dimentional.details').create(cr, uid, pump_dimension_vals)
+					if dim_inspection_id:
+						dim_inspection_rec = self.pool.get('ch.dimentional.inspection').browse(cr,uid,dim_inspection_id[0])
+						for dim_item in dim_inspection_rec.line_ids:
+							print "dim_item",dim_item
+							pump_dimension_vals = {
+								'header_id': pump_qap_id, 		
+								'dimentional_details': dim_item.dimentional_details,
+								'min_weight': dim_item.min_weight,
+								'max_weight': dim_item.max_weight,	
+							}
+							pump_dimension_id = self.pool.get('ch.pump.dimentional.details').create(cr, uid, pump_dimension_vals)
 				else:
 					raise osv.except_osv(_('Warning !!'),
 					_('Test process remaining !!'))
@@ -792,8 +793,9 @@ class kg_manual_assembly_inward(osv.osv_memory):
 	_description = "Manual Assembly Inward"
 	
 	_columns = {
-		'order_line_id': fields.many2one('ch.work.order.details','WO No.', required=True),
-		'pump_model_id': fields.many2one('kg.pumpmodel.master', string='Pump Model', required=True),
+		'order_line_id': fields.many2one('ch.work.order.details','WO No.',),
+		'pump_model_id': fields.many2one('kg.pumpmodel.master', string='Pump Model'),
+		'remarks': fields.text('Remarks'),
 	   
 	}
 	
@@ -801,14 +803,7 @@ class kg_manual_assembly_inward(osv.osv_memory):
 		print "Create Assembly"
 		entry_rec = self.browse(cr, uid, ids[0])
 		ms_store_obj = self.pool.get('kg.ms.stores')
-		ms_store_id = ms_store_obj.search(cr, uid, [
-			('order_line_id','=',entry_rec.order_line_id.id),
-			('pump_model_id','=',entry_rec.pump_model_id.id),
-			('state','=','in_store'),
-			])
-		print "ms_store_id",ms_store_id
-		entry_mode = 'manual'
-		ms_store_obj.assembly_update(cr, uid, [ms_store_id[0]],entry_mode,entry_rec.order_line_id.id,entry_rec.pump_model_id.id,context=None)
+		ms_store_obj.assembly_update(cr, uid, [0],'auto',False,False,context=None)
 		return True
 
 kg_manual_assembly_inward()

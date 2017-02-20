@@ -765,7 +765,7 @@ class ch_work_order_details(osv.osv):
 		'bp':fields.float('BP',required=True),
 		'shaft_ext':fields.float('Shaft Ext',required=True),
 		'flag_for_stock': fields.boolean('For Stock'),
-		### Offer Details ###
+		### Offer Details ####
 		'pump_offer_line_id': fields.integer('Pump Offer'),
 		'enquiry_line_id': fields.integer('Enquiry Line Id'),
 		'line_ids_d': fields.one2many('ch.wo.accessories', 'header_id', "Accessories"),

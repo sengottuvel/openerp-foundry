@@ -48,7 +48,7 @@ class kg_ms_operations(osv.osv):
 		'production_id': fields.related('ms_id','production_id', type='many2one', relation='kg.production', string='Production No.', store=True, readonly=True),
 		'ms_plan_id': fields.many2one('kg.ms.daily.planning','Planning Id'),
 		'ms_plan_line_id': fields.many2one('ch.ms.daily.planning.details','Planning Line Id'),
-		'position_id': fields.related('ms_plan_line_id','position_id', type='many2one', relation='kg.position.number', string='Position No.', store=True, readonly=True),
+		#~ 'position_id': fields.related('ms_plan_line_id','position_id', type='many2one', relation='kg.position.number', string='Position No.', store=True, readonly=True),
 		#~ 'order_id': fields.related('ms_plan_line_id','order_id', type='many2one', relation='kg.work.order', string='Work Order', store=True, readonly=True),
 		#~ 'order_line_id': fields.related('ms_plan_line_id','order_line_id', type='many2one', relation='ch.work.order.details', string='Order Line', store=True, readonly=True),
 		
@@ -56,22 +56,27 @@ class kg_ms_operations(osv.osv):
 		'order_line_id': fields.many2one('ch.work.order.details','Order Line',readonly=True),
 		'order_no': fields.related('order_line_id','order_no', type='char', string='WO No.', store=True, readonly=True),
 		
-		'order_category': fields.related('ms_plan_line_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
-		'order_priority': fields.related('ms_plan_line_id','order_priority', type='selection', selection=ORDER_PRIORITY, string='Priority', store=True, readonly=True),
+		'order_category': fields.selection(ORDER_CATEGORY,'Category',readonly=True),
+		'order_priority': fields.selection(ORDER_PRIORITY,'Priority',readonly=True),
 		
-		'pump_model_id': fields.related('ms_plan_line_id','pump_model_id', type='many2one', relation='kg.pumpmodel.master', string='Pump Model', store=True, readonly=True),
-		'pattern_id': fields.related('ms_plan_line_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern Number', store=True, readonly=True),
-		'pattern_code': fields.related('ms_plan_line_id','pattern_code', type='char', string='Pattern Code', store=True, readonly=True),
-		'pattern_name': fields.related('ms_plan_line_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
-		'item_code': fields.related('ms_plan_line_id','item_code', type='char', string='Item Code', store=True, readonly=True),
-		'item_name': fields.related('ms_plan_line_id','item_name', type='char', string='Item Name', store=True, readonly=True),
-		'moc_id': fields.related('ms_plan_line_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
-		'ms_type': fields.related('ms_plan_line_id','ms_type', type='selection', selection=[('foundry_item','Foundry Item'),('ms_item','MS Item')], string='Item Type', store=True, readonly=True),
+		'position_id': fields.many2one('kg.position.number','Position No.', readonly=True),
+		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', readonly=True),
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern Number',readonly=True),
+		'pattern_code': fields.related('pattern_id','name', type='char', string='Pattern Code', store=True, readonly=True),
+		'pattern_name': fields.related('pattern_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
+		'item_code': fields.char('Item Code', readonly=True),
+		'item_name': fields.char('Item Name', readonly=True),
+		'moc_id': fields.many2one('kg.moc.master', 'MOC', readonly=True),
+		'ms_type': fields.selection([('foundry_item','Foundry Item'),('ms_item','MS Item')], 'Item Type', store=True, readonly=True),
+
+		
 		'inhouse_qty': fields.integer('In-house Qty'),
 		'parent_id': fields.integer('Parent Id'),
 		'last_operation_check_id': fields.integer('Last Operation Check Id'),
 		'state': fields.selection([('active','Active'),('reject','Reject')],'Status'),
 		'oth_spec': fields.related('ms_id','oth_spec', type='text', string='WO Remarks', store=True, readonly=True),
+		
+		
 		
 		### Operation 1 ###
 		'op1_stage_id': fields.many2one('kg.stage.master','Stage'),
@@ -591,6 +596,168 @@ class kg_ms_operations(osv.osv):
 		
 	}
 	
+	
+	def ms_store_creation(self,cr,uid,ids,context=None):
+		entry_rec = self.browse(cr,uid,ids[0])
+		### Checking Item is in MS Store ###
+		cr.execute("""select id from kg_ms_stores where order_line_id = %s and ms_type in ('foundry_item','ms_item') """%(entry_rec.order_line_id.id))
+		store_id = cr.fetchone();
+		print "store_id",store_id
+		if store_id:
+			if entry_rec.ms_type == 'foundry_item':
+				### Check for foundry Item ##
+				cr.execute(""" select id from kg_ms_stores where  
+				pattern_id = %s and moc_id = %s and ms_type = 'foundry_item' and accept_state = 'pending' 
+				and order_line_id = %s order by id asc """%(
+				entry_rec.pattern_id.id,entry_rec.moc_id.id,entry_rec.order_line_id.id))
+				foundry_store_id = cr.fetchone();
+				if foundry_store_id:
+					ms_store_vals = {
+						'operation_id': entry_rec.id,
+						'ms_id': entry_rec.ms_id.id,
+						'production_id': entry_rec.production_id.id,
+						'foundry_assembly_id': entry_rec.production_id.assembly_id,
+						'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
+						'ms_assembly_id': entry_rec.ms_id.assembly_id,
+						'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
+						'ms_plan_id': entry_rec.ms_plan_id.id,
+						'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+						'accept_state': 'waiting',
+						
+					}
+					self.pool.get('kg.ms.stores').write(cr, uid, foundry_store_id[0],ms_store_vals)
+			if entry_rec.ms_type == 'ms_item':
+				print "entry_rec.item_code",entry_rec.item_code,type(entry_rec.item_code),"'"+entry_rec.item_code+"'"
+				### Check for MS Item ##
+				cr.execute(""" select id from kg_ms_stores where  
+				item_code = %s and moc_id = %s and ms_type = 'ms_item' and accept_state = 'pending' 
+				and order_line_id = %s order by id asc """%
+				("'"+entry_rec.item_code+"'",entry_rec.moc_id.id,entry_rec.order_line_id.id))
+				ms_store_id = cr.fetchone();
+				if ms_store_id:
+					ms_store_vals = {
+						'operation_id': entry_rec.id,
+						'ms_id': entry_rec.ms_id.id,
+						'production_id': entry_rec.production_id.id,
+						'foundry_assembly_id': entry_rec.production_id.assembly_id,
+						'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
+						'ms_assembly_id': entry_rec.ms_id.assembly_id,
+						'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
+						'ms_plan_id': entry_rec.ms_plan_id.id,
+						'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+						'accept_state': 'waiting',
+						
+					}
+					self.pool.get('kg.ms.stores').write(cr, uid, ms_store_id[0],ms_store_vals)
+		
+		else:
+			### Creation of all items in MS Stores ###
+			### Foundry Items ###
+			cr.execute("""select id
+			 from ch_order_bom_details where  
+			 header_id = %s and flag_applicable = 't' order by id asc"""%(entry_rec.order_line_id.id))
+			foundry_items = cr.dictfetchall();
+			if foundry_items:
+				
+				for foun_item in foundry_items:
+					foun_rec = self.pool.get('ch.order.bom.details').browse(cr,uid,foun_item['id'])
+					for qty_item in range(foun_rec.qty):
+						ms_store_vals = {
+							'position_id': foun_rec.position_id.id,
+							'order_id': entry_rec.order_id.id,
+							'order_line_id': entry_rec.order_line_id.id,
+							'oth_spec': foun_rec.add_spec,
+							'order_category': entry_rec.order_category,
+							'order_priority': entry_rec.order_priority,
+							'pump_model_id': entry_rec.pump_model_id.id,
+							'pattern_id': foun_rec.pattern_id.id,
+							'item_code': foun_rec.pattern_id.name,
+							'item_name': foun_rec.pattern_id.pattern_name,
+							'moc_id': foun_rec.moc_id.id,
+							'ms_type': 'foundry_item',
+							'qty': 1,
+							'state': 'in_store',
+							'accept_state': 'pending',
+
+						}
+						ms_store_id = self.pool.get('kg.ms.stores').create(cr, uid, ms_store_vals)
+			
+			### MS Items ###
+			cr.execute("""select id
+			 from ch_order_machineshop_details where  
+			 header_id = %s and flag_applicable = 't' order by id asc"""%(entry_rec.order_line_id.id))
+			ms_items = cr.dictfetchall();
+			if ms_items:
+				
+				for ms_item in ms_items:
+					ms_rec = self.pool.get('ch.order.machineshop.details').browse(cr,uid,ms_item['id'])
+					for qty_item in range(ms_rec.qty):
+						ms_store_vals = {
+							'position_id': ms_rec.position_id.id,
+							'order_id': entry_rec.order_id.id,
+							'order_line_id': entry_rec.order_line_id.id,
+							'oth_spec': ms_rec.remarks,
+							'order_category': entry_rec.order_category,
+							'order_priority': entry_rec.order_priority,
+							'pump_model_id': entry_rec.pump_model_id.id,
+							'item_code': ms_rec.ms_id.code,
+							'item_name': ms_rec.name,
+							'moc_id': ms_rec.moc_id.id,
+							'ms_type': 'ms_item',
+							'qty': 1,
+							'state': 'in_store',
+							'accept_state': 'pending',
+
+						}
+						ms_store_id = self.pool.get('kg.ms.stores').create(cr, uid, ms_store_vals)
+						
+					### Updating values for current item ###
+					if entry_rec.ms_type == 'foundry_item':
+						cr.execute("""select id from kg_ms_stores where  
+						pattern_id = %s and moc_id = %s and ms_type = 'foundry_item' and accept_state = 'pending' 
+						and order_line_id = %s order by id asc"""%(
+						entry_rec.pattern_id.id,entry_rec.moc_id.id,entry_rec.order_line_id.id))
+						current_store_id = cr.fetchone();
+						if current_store_id:
+							ms_store_vals = {
+								'operation_id': entry_rec.id,
+								'ms_id': entry_rec.ms_id.id,
+								'production_id': entry_rec.production_id.id,
+								'foundry_assembly_id': entry_rec.production_id.assembly_id,
+								'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
+								'ms_assembly_id': entry_rec.ms_id.assembly_id,
+								'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
+								'ms_plan_id': entry_rec.ms_plan_id.id,
+								'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+								'accept_state': 'waiting',
+								
+							}
+							self.pool.get('kg.ms.stores').write(cr, uid, current_store_id[0],ms_store_vals)
+					if entry_rec.ms_type == 'ms_item':
+						cr.execute("""select id from kg_ms_stores where  
+						item_code = %s and moc_id = %s and ms_type = 'ms_item' and accept_state = 'pending' 
+						and order_line_id = %s order by id asc"""%(entry_rec.item_code,
+						entry_rec.moc_id.id,entry_rec.order_line_id.id))
+						ms_store_id = cr.fetchone();
+						if ms_store_id:
+							ms_store_vals = {
+								'operation_id': entry_rec.id,
+								'ms_id': entry_rec.ms_id.id,
+								'production_id': entry_rec.production_id.id,
+								'foundry_assembly_id': entry_rec.production_id.assembly_id,
+								'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
+								'ms_assembly_id': entry_rec.ms_id.assembly_id,
+								'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
+								'ms_plan_id': entry_rec.ms_plan_id.id,
+								'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+								'accept_state': 'waiting',
+								
+							}
+							self.pool.get('kg.ms.stores').write(cr, uid, ms_store_id[0],ms_store_vals)
+						
+		return True
+											
+	
 	### Operation 1 ###
 	
 	def onchange_operation1_sc(self, cr, uid, ids,op1_flag_sc, context=None):
@@ -1040,230 +1207,226 @@ class kg_ms_operations(osv.osv):
 						pending_operation = cr.fetchone()
 						print "pending_operation",pending_operation
 						if pending_operation == None:
-							if entry_rec.op1_process_result == 'accept':
-								ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
-								ms_store_vals = {
-									'operation_id': entry_rec.id,
-									'production_id': entry_rec.production_id.id,
-									'foundry_assembly_id': entry_rec.production_id.assembly_id,
-									'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
-									'ms_assembly_id': entry_rec.ms_id.assembly_id,
-									'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
-									'qty': entry_rec.inhouse_qty,
-									'oth_spec': entry_rec.oth_spec
-								}
-								ms_store_id = self.pool.get('kg.ms.stores').create(cr, uid, ms_store_vals)
-							if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-								ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+							if entry_rec.order_id.flag_for_stock == False:
+								if entry_rec.op1_process_result == 'accept':
+									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
+									### MS Store Operation ###
+									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
+									
+								if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
+									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
 				
 				if entry_rec.op1_process_result == 'reject':
 				
-					
-					### Department Indent Creation when process result is reject for ms item ###
-					if entry_rec.ms_type == 'ms_item':
-						
-						## Operation 1 Status Updation ###
-						if entry_rec.op1_state in ('pending','partial','done'):
-							self.write(cr, uid, ids, {'op1_state':'reject'})
-						self.write(cr, uid, ids, {'state':'reject'})
-						if entry_rec.ms_id.ms_id.line_ids:
+					## Operation 1 Status Updation ###
+					if entry_rec.op1_state in ('pending','partial','done'):
+						self.write(cr, uid, ids, {'op1_state':'reject'})
+					self.write(cr, uid, ids, {'state':'reject'})
+					if entry_rec.order_id.flag_for_stock == False:
+						### Department Indent Creation when process result is reject for ms item ###
+						if entry_rec.ms_type == 'ms_item':
 							
-							dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
 							
-							location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
 							
-							seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
-							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
-							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry_rec.entry_date))
-							seq_name = cr.fetchone();
+							if entry_rec.ms_id.ms_id.line_ids:
+								
+								dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
+								
+								location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
+								
+								seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
+								seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry_rec.entry_date))
+								seq_name = cr.fetchone();
 
-							dep_indent_obj = self.pool.get('kg.depindent')
-							dep_indent_vals = {
-								'name':'',
-								'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
-								'dep_name':1,
-								'entry_mode':'auto',
-								'state': 'approved',
-								'indent_type': 'production',
-								'name': seq_name[0],
-								'order_id': entry_rec.order_id.id,
-								'order_line_id': entry_rec.order_line_id.id,
-								'src_location_id': location.main_location.id,
-								'dest_location_id': location.stock_location.id
-								}
+								dep_indent_obj = self.pool.get('kg.depindent')
+								dep_indent_vals = {
+									'name':'',
+									'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+									'dep_name':1,
+									'entry_mode':'auto',
+									'state': 'approved',
+									'indent_type': 'production',
+									'name': seq_name[0],
+									'order_id': entry_rec.order_id.id,
+									'order_line_id': entry_rec.order_line_id.id,
+									'src_location_id': location.main_location.id,
+									'dest_location_id': location.stock_location.id
+									}
+									
+								indent_id = dep_indent_obj.create(cr, uid, dep_indent_vals)
+								for indent_item in entry_rec.ms_id.ms_id.line_ids:
+									dep_indent_line_obj = self.pool.get('kg.depindent.line')
+									product_rec = self.pool.get('product.product').browse(cr, uid, indent_item.product_id.id)
+									dep_indent_line_vals = {
+									'indent_id':indent_id,
+									'product_id': indent_item.product_id.id,
+									'uom': product_rec.uom_id.id,
+									'qty': indent_item.qty * entry_rec.inhouse_qty,
+									'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
+									'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
+									#~ 'cutting_qty':ms_raw_rec.temp_qty,
+									'ms_bot_id':entry_rec.ms_id.ms_id.id,
+									'fns_item_name':entry_rec.item_name,
+									'position_id': entry_rec.position_id.id,
+									'moc_id': entry_rec.moc_id.id,
+									'length': indent_item.length,
+									'breadth': indent_item.breadth
+									}
+									
+									indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
+									
+									indent_wo_line_obj = self.pool.get('ch.depindent.wo')
 								
-							indent_id = dep_indent_obj.create(cr, uid, dep_indent_vals)
-							for indent_item in entry_rec.ms_id.ms_id.line_ids:
-								dep_indent_line_obj = self.pool.get('kg.depindent.line')
-								product_rec = self.pool.get('product.product').browse(cr, uid, indent_item.product_id.id)
-								dep_indent_line_vals = {
-								'indent_id':indent_id,
-								'product_id': indent_item.product_id.id,
-								'uom': product_rec.uom_id.id,
-								'qty': indent_item.qty * entry_rec.inhouse_qty,
-								'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-								'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-								#~ 'cutting_qty':ms_raw_rec.temp_qty,
-								'ms_bot_id':entry_rec.ms_id.ms_id.id,
-								'fns_item_name':entry_rec.item_name,
-								'position_id': entry_rec.position_id.id,
-								'moc_id': entry_rec.moc_id.id,
-								'length': indent_item.length,
-								'breadth': indent_item.breadth
-								}
-								
-								indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
-								
-								indent_wo_line_obj = self.pool.get('ch.depindent.wo')
+									indent_wo_line_vals = {
+										'header_id':indent_line_id,
+										'wo_id':entry_rec.order_no,
+										'w_order_id':entry_rec.order_id.id,
+										'w_order_line_id':entry_rec.order_line_id.id,
+										'qty':indent_item.qty * entry_rec.inhouse_qty,
+									}
+									indent_wo_line_id = indent_wo_line_obj.create(cr, uid, indent_wo_line_vals)
 							
-								indent_wo_line_vals = {
-									'header_id':indent_line_id,
-									'wo_id':entry_rec.order_no,
-									'w_order_id':entry_rec.order_id.id,
-									'w_order_line_id':entry_rec.order_line_id.id,
-									'qty':indent_item.qty * entry_rec.inhouse_qty,
-								}
-								indent_wo_line_id = indent_wo_line_obj.create(cr, uid, indent_wo_line_vals)
-						
-						### New Entry Creation for same Operation ###
-						
-						op_vals = {
-							'ms_id': entry_rec.ms_id.id,
-							'ms_plan_id': entry_rec.ms_plan_id.id,
-							'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
-							'inhouse_qty': 1,
-							'op1_stage_id': entry_rec.op1_stage_id.id,
-							'op1_clamping_area': entry_rec.op1_clamping_area,
-							'op1_id': entry_rec.op1_id.id,
-							'parent_id' : ids[0],
-							'last_operation_check_id': entry_rec.last_operation_check_id,
-							'state': 'active',
-							'op1_state': 'pending',
-							'op1_process_result':'',
-							}			
-						copy_id = self.copy(cr, uid, entry_rec.id,op_vals, context)
-						
-						copy_rec = self.browse(cr, uid, copy_id)
-						
-						for dimen_item in copy_rec.op1_line_ids:
+							### New Entry Creation for same Operation ###
 							
-							dimen_vals = {
-								'actual_val': 0,
-								'remark': False,
+							op_vals = {
+								'ms_id': entry_rec.ms_id.id,
+								'ms_plan_id': entry_rec.ms_plan_id.id,
+								'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+								'inhouse_qty': 1,
+								'op1_stage_id': entry_rec.op1_stage_id.id,
+								'op1_clamping_area': entry_rec.op1_clamping_area,
+								'op1_id': entry_rec.op1_id.id,
+								'parent_id' : ids[0],
+								'last_operation_check_id': entry_rec.last_operation_check_id,
+								'state': 'active',
+								'op1_state': 'pending',
+								'op1_process_result':'',
+								}			
+							copy_id = self.copy(cr, uid, entry_rec.id,op_vals, context)
+							
+							copy_rec = self.browse(cr, uid, copy_id)
+							
+							for dimen_item in copy_rec.op1_line_ids:
+								
+								dimen_vals = {
+									'actual_val': 0,
+									'remark': False,
+								}
+								
+								dimension_obj = self.pool.get('ch.ms.dimension.details')
+								dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
+							
+						if entry_rec.ms_type == 'foundry_item':
+							
+							ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
+							
+							## Operation 1 Status Updation ###
+							if entry_rec.op1_state in ('pending','partial','done'):
+								self.write(cr, uid, ids, {'op1_state':'reject'})
+								
+							self.write(cr, uid, ids, {'state':'reject'})
+									
+							#### NC Creation for reject Qty ###
+							
+							### Production Number ###
+							produc_name = ''	
+							produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry_rec.entry_date))
+							produc_name = cr.fetchone();
+							
+							### Issue Number ###
+							issue_name = ''	
+							issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry_rec.entry_date))
+							issue_name = cr.fetchone();
+							
+							### Core Log Number ###
+							core_name = ''	
+							core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry_rec.entry_date))
+							core_name = cr.fetchone();
+							
+							### Mould Log Number ###
+							mould_name = ''	
+							mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry_rec.entry_date))
+							mould_name = cr.fetchone();
+							
+							production_vals = {
+													
+								'name': produc_name[0],
+								'schedule_id': entry_rec.ms_id.schedule_id.id,
+								'schedule_date': entry_rec.ms_id.schedule_date,
+								'division_id': entry_rec.ms_id.division_id.id,
+								'location' : entry_rec.ms_id.location,
+								'schedule_line_id': entry_rec.ms_id.schedule_line_id.id,
+								'order_id': entry_rec.ms_id.order_id.id,
+								'order_line_id': entry_rec.ms_id.order_line_id.id,
+								'order_bomline_id': entry_rec.ms_id.order_bomline_id.id,
+								'qty' : entry_rec.inhouse_qty,			  
+								'schedule_qty' : entry_rec.inhouse_qty,			  
+								'state' : 'issue_done',
+								'order_category':entry_rec.ms_id.order_category,
+								'order_priority': '1',
+								'pattern_id' : entry_rec.ms_id.pattern_id.id,
+								'pattern_name' : entry_rec.ms_id.pattern_id.pattern_name,	
+								'moc_id' : entry_rec.ms_id.moc_id.id,
+								'request_state': 'done',
+								'issue_no': issue_name[0],
+								'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'issue_qty': 1,
+								'issue_state': 'issued',
+								'core_no': core_name[0],
+								'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'core_qty': entry_rec.inhouse_qty,	
+								'core_rem_qty': entry_rec.inhouse_qty,	
+								'core_state': 'pending',
+								'mould_no': mould_name[0],
+								'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'mould_qty': entry_rec.inhouse_qty,	
+								'mould_rem_qty': entry_rec.inhouse_qty,	
+								'mould_state': 'pending',		
 							}
 							
-							dimension_obj = self.pool.get('ch.ms.dimension.details')
-							dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
-						
-					if entry_rec.ms_type == 'foundry_item':
-						
-						ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
-						
-						## Operation 1 Status Updation ###
-						if entry_rec.op1_state in ('pending','partial','done'):
-							self.write(cr, uid, ids, {'op1_state':'reject'})
-							
-						self.write(cr, uid, ids, {'state':'reject'})
-								
-						#### NC Creation for reject Qty ###
-						
-						### Production Number ###
-						produc_name = ''	
-						produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry_rec.entry_date))
-						produc_name = cr.fetchone();
-						
-						### Issue Number ###
-						issue_name = ''	
-						issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry_rec.entry_date))
-						issue_name = cr.fetchone();
-						
-						### Core Log Number ###
-						core_name = ''	
-						core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry_rec.entry_date))
-						core_name = cr.fetchone();
-						
-						### Mould Log Number ###
-						mould_name = ''	
-						mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry_rec.entry_date))
-						mould_name = cr.fetchone();
-						
-						production_vals = {
-												
-							'name': produc_name[0],
-							'schedule_id': entry_rec.ms_id.schedule_id.id,
-							'schedule_date': entry_rec.ms_id.schedule_date,
-							'division_id': entry_rec.ms_id.division_id.id,
-							'location' : entry_rec.ms_id.location,
-							'schedule_line_id': entry_rec.ms_id.schedule_line_id.id,
-							'order_id': entry_rec.ms_id.order_id.id,
-							'order_line_id': entry_rec.ms_id.order_line_id.id,
-							'order_bomline_id': entry_rec.ms_id.order_bomline_id.id,
-							'qty' : entry_rec.inhouse_qty,			  
-							'schedule_qty' : entry_rec.inhouse_qty,			  
-							'state' : 'issue_done',
-							'order_category':entry_rec.ms_id.order_category,
-							'order_priority': '1',
-							'pattern_id' : entry_rec.ms_id.pattern_id.id,
-							'pattern_name' : entry_rec.ms_id.pattern_id.pattern_name,	
-							'moc_id' : entry_rec.ms_id.moc_id.id,
-							'request_state': 'done',
-							'issue_no': issue_name[0],
-							'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'issue_qty': 1,
-							'issue_state': 'issued',
-							'core_no': core_name[0],
-							'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'core_qty': entry_rec.inhouse_qty,	
-							'core_rem_qty': entry_rec.inhouse_qty,	
-							'core_state': 'pending',
-							'mould_no': mould_name[0],
-							'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'mould_qty': entry_rec.inhouse_qty,	
-							'mould_rem_qty': entry_rec.inhouse_qty,	
-							'mould_state': 'pending',		
-						}
-						
-						production_id = self.pool.get('kg.production').create(cr, uid, production_vals)
+							production_id = self.pool.get('kg.production').create(cr, uid, production_vals)
 					
 			else:
-				if entry_rec.op1_button_status == 'visible':	
-					sc_obj = self.pool.get('kg.subcontract.process')
-				
-					self.write(cr, uid, ids, {'op1_sc_status': 'sc','op1_button_status': 'invisible'})	
-					sc_name = ''	
-					sc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.process')])
-					seq_rec = self.pool.get('ir.sequence').browse(cr,uid,sc_seq_id[0])
-					cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
-					sc_name = cr.fetchone();
+				if entry_rec.op1_button_status == 'visible':
+					if entry_rec.order_id.flag_for_stock == False:
+						sc_obj = self.pool.get('kg.subcontract.process')
 					
-					wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
-					if entry_rec.order_id.id == wo_id[0]:
-						sc_actual_qty = 0
-					else:
-						sc_actual_qty = entry_rec.inhouse_qty
-					
-					
-					sc_vals = {
-						'name': sc_name[0],
-						'ms_plan_id': entry_rec.ms_plan_id.id,
-						'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
-						'sc_qty': entry_rec.inhouse_qty,
-						'total_qty': entry_rec.inhouse_qty,
-						'pending_qty': entry_rec.inhouse_qty,
-						'actual_qty': sc_actual_qty,
-						'ms_op_id': entry_rec.id,
-						'contractor_id': entry_rec.op1_contractor_id.id,
-						'operation_id': entry_rec.op1_id.id,
-					}
-					sc_id = sc_obj.create(cr, uid,sc_vals)
+						self.write(cr, uid, ids, {'op1_sc_status': 'sc','op1_button_status': 'invisible'})	
+						sc_name = ''	
+						sc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.process')])
+						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,sc_seq_id[0])
+						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
+						sc_name = cr.fetchone();
+						
+						wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
+						if entry_rec.order_id.id == wo_id[0]:
+							sc_actual_qty = 0
+						else:
+							sc_actual_qty = entry_rec.inhouse_qty
+						
+						
+						sc_vals = {
+							'name': sc_name[0],
+							'ms_plan_id': entry_rec.ms_plan_id.id,
+							'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+							'sc_qty': entry_rec.inhouse_qty,
+							'total_qty': entry_rec.inhouse_qty,
+							'pending_qty': entry_rec.inhouse_qty,
+							'actual_qty': sc_actual_qty,
+							'ms_op_id': entry_rec.id,
+							'contractor_id': entry_rec.op1_contractor_id.id,
+							'operation_id': entry_rec.op1_id.id,
+						}
+						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
 			pass	
 		
@@ -1718,225 +1881,220 @@ class kg_ms_operations(osv.osv):
 							))
 						pending_operation = cr.fetchone()
 						if pending_operation == None:
-							if entry_rec.op2_process_result == 'accept':
-								print "entry_rec.ms_id.assembly_line_id",entry_rec.ms_id.assembly_line_id
-								ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
-								ms_store_vals = {
-									'operation_id': entry_rec.id,
-									'production_id': entry_rec.production_id.id,
-									'foundry_assembly_id': entry_rec.production_id.assembly_id,
-									'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
-									'ms_assembly_id': entry_rec.ms_id.assembly_id,
-									'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
-									'qty': entry_rec.inhouse_qty,
-									'oth_spec': entry_rec.oth_spec
-								}
-								ms_store_id = self.pool.get('kg.ms.stores').create(cr, uid, ms_store_vals)
-							if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-								ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+							if entry_rec.order_id.flag_for_stock == False:
+								if entry_rec.op2_process_result == 'accept':
+									
+									print "entry_rec.ms_id.assembly_line_id",entry_rec.ms_id.assembly_line_id
+									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
+									## MS Store Operation ###
+									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
+								if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
+									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
 				
 				if entry_rec.op2_process_result == 'reject':
 				
-					
-					### Department Indent Creation when process result is reject for ms item ###
-					if entry_rec.ms_type == 'ms_item':
-						
-						## Operation 2 Status Updation ###
-						if entry_rec.op2_state in ('pending','partial','done'):
-							self.write(cr, uid, ids, {'op2_state':'reject'})
-						self.write(cr, uid, ids, {'state':'reject'})
-						if entry_rec.ms_id.ms_id.line_ids:
+					## Operation 2 Status Updation ###
+					if entry_rec.op2_state in ('pending','partial','done'):
+						self.write(cr, uid, ids, {'op2_state':'reject'})
+					self.write(cr, uid, ids, {'state':'reject'})
+					if entry_rec.order_id.flag_for_stock == False:
+						### Department Indent Creation when process result is reject for ms item ###
+						if entry_rec.ms_type == 'ms_item':
 							
-							dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
 							
-							location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
-							
-							seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
-							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
-							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry_rec.entry_date))
-							seq_name = cr.fetchone();
+							if entry_rec.ms_id.ms_id.line_ids:
+								
+								dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
+								
+								location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
+								
+								seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
+								seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry_rec.entry_date))
+								seq_name = cr.fetchone();
 
-							dep_indent_obj = self.pool.get('kg.depindent')
-							dep_indent_vals = {
-								'name':'',
-								'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
-								'dep_name':1,
-								'entry_mode':'auto',
-								'state': 'approved',
-								'indent_type': 'production',
-								'name': seq_name[0],
-								'order_id': entry_rec.order_id.id,
-								'order_line_id': entry_rec.order_line_id.id,
-								'src_location_id': location.main_location.id,
-								'dest_location_id': location.stock_location.id
+								dep_indent_obj = self.pool.get('kg.depindent')
+								dep_indent_vals = {
+									'name':'',
+									'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+									'dep_name':1,
+									'entry_mode':'auto',
+									'state': 'approved',
+									'indent_type': 'production',
+									'name': seq_name[0],
+									'order_id': entry_rec.order_id.id,
+									'order_line_id': entry_rec.order_line_id.id,
+									'src_location_id': location.main_location.id,
+									'dest_location_id': location.stock_location.id
+									}
+									
+								indent_id = dep_indent_obj.create(cr, uid, dep_indent_vals)
+								for indent_item in entry_rec.ms_id.ms_id.line_ids:
+									dep_indent_line_obj = self.pool.get('kg.depindent.line')
+									product_rec = self.pool.get('product.product').browse(cr, uid, indent_item.product_id.id)
+									dep_indent_line_vals = {
+									'indent_id':indent_id,
+									'product_id': indent_item.product_id.id,
+									'uom': product_rec.uom_id.id,
+									'qty': indent_item.qty * entry_rec.inhouse_qty,
+									'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
+									'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
+									#~ 'cutting_qty':ms_raw_rec.temp_qty,
+									'ms_bot_id':entry_rec.ms_id.ms_id.id,
+									'fns_item_name':entry_rec.item_name,
+									'position_id': entry_rec.position_id.id
+									}
+									indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
+									
+									indent_wo_line_obj = self.pool.get('ch.depindent.wo')
+								
+									indent_wo_line_vals = {
+										'header_id':indent_line_id,
+										'wo_id':entry_rec.order_no,
+										'w_order_id':entry_rec.order_id.id,
+										'w_order_line_id':entry_rec.order_line_id.id,
+										'qty':indent_item.qty * entry_rec.inhouse_qty,
+									}
+									indent_wo_line_id = indent_wo_line_obj.create(cr, uid, indent_wo_line_vals)
+							
+							### New Entry Creation for same Operation ###
+							op_vals = {
+								'ms_id': entry_rec.ms_id.id,
+								'ms_plan_id': entry_rec.ms_plan_id.id,
+								'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+								'inhouse_qty': 1,
+								'op2_stage_id': entry_rec.op2_stage_id.id,
+								'op2_clamping_area': entry_rec.op2_clamping_area,
+								'op2_id': entry_rec.op2_id.id,
+								'parent_id' : ids[0],
+								'last_operation_check_id': entry_rec.last_operation_check_id,
+								'state': 'active',
+								'op2_state': 'pending',
+								'op2_process_result':'',
+								}			
+							copy_id = self.copy(cr, uid, entry_rec.id,op_vals, context)
+							
+							copy_rec = self.browse(cr, uid, copy_id)
+							
+							for dimen_item in copy_rec.op2_line_ids:
+								
+								dimen_vals = {
+									'actual_val': 0,
+									'remark': False,
 								}
 								
-							indent_id = dep_indent_obj.create(cr, uid, dep_indent_vals)
-							for indent_item in entry_rec.ms_id.ms_id.line_ids:
-								dep_indent_line_obj = self.pool.get('kg.depindent.line')
-								product_rec = self.pool.get('product.product').browse(cr, uid, indent_item.product_id.id)
-								dep_indent_line_vals = {
-								'indent_id':indent_id,
-								'product_id': indent_item.product_id.id,
-								'uom': product_rec.uom_id.id,
-								'qty': indent_item.qty * entry_rec.inhouse_qty,
-								'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-								'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-								#~ 'cutting_qty':ms_raw_rec.temp_qty,
-								'ms_bot_id':entry_rec.ms_id.ms_id.id,
-								'fns_item_name':entry_rec.item_name,
-								'position_id': entry_rec.position_id.id
-								}
-								indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
+								dimension_obj = self.pool.get('ch.ms.dimension.details')
+								dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
+							
+						if entry_rec.ms_type == 'foundry_item':
+							
+							ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
+							
+							## Operation 1 Status Updation ###
+							if entry_rec.op2_state in ('pending','partial','done'):
+								self.write(cr, uid, ids, {'op2_state':'reject'})
 								
-								indent_wo_line_obj = self.pool.get('ch.depindent.wo')
+							self.write(cr, uid, ids, {'state':'reject'})
+									
+							#### NC Creation for reject Qty ###
 							
-								indent_wo_line_vals = {
-									'header_id':indent_line_id,
-									'wo_id':entry_rec.order_no,
-									'w_order_id':entry_rec.order_id.id,
-									'w_order_line_id':entry_rec.order_line_id.id,
-									'qty':indent_item.qty * entry_rec.inhouse_qty,
-								}
-								indent_wo_line_id = indent_wo_line_obj.create(cr, uid, indent_wo_line_vals)
-						
-						### New Entry Creation for same Operation ###
-						op_vals = {
-							'ms_id': entry_rec.ms_id.id,
-							'ms_plan_id': entry_rec.ms_plan_id.id,
-							'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
-							'inhouse_qty': 1,
-							'op2_stage_id': entry_rec.op2_stage_id.id,
-							'op2_clamping_area': entry_rec.op2_clamping_area,
-							'op2_id': entry_rec.op2_id.id,
-							'parent_id' : ids[0],
-							'last_operation_check_id': entry_rec.last_operation_check_id,
-							'state': 'active',
-							'op2_state': 'pending',
-							'op2_process_result':'',
-							}			
-						copy_id = self.copy(cr, uid, entry_rec.id,op_vals, context)
-						
-						copy_rec = self.browse(cr, uid, copy_id)
-						
-						for dimen_item in copy_rec.op2_line_ids:
+							### Production Number ###
+							produc_name = ''	
+							produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry_rec.entry_date))
+							produc_name = cr.fetchone();
 							
-							dimen_vals = {
-								'actual_val': 0,
-								'remark': False,
+							### Issue Number ###
+							issue_name = ''	
+							issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry_rec.entry_date))
+							issue_name = cr.fetchone();
+							
+							### Core Log Number ###
+							core_name = ''	
+							core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry_rec.entry_date))
+							core_name = cr.fetchone();
+							
+							### Mould Log Number ###
+							mould_name = ''	
+							mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry_rec.entry_date))
+							mould_name = cr.fetchone();
+							
+							production_vals = {
+													
+								'name': produc_name[0],
+								'schedule_id': entry_rec.ms_id.schedule_id.id,
+								'schedule_date': entry_rec.ms_id.schedule_date,
+								'division_id': entry_rec.ms_id.division_id.id,
+								'location' : entry_rec.ms_id.location,
+								'schedule_line_id': entry_rec.ms_id.schedule_line_id.id,
+								'order_id': entry_rec.ms_id.order_id.id,
+								'order_line_id': entry_rec.ms_id.order_line_id.id,
+								'order_bomline_id': entry_rec.ms_id.order_bomline_id.id,
+								'qty' : entry_rec.inhouse_qty,			  
+								'schedule_qty' : entry_rec.inhouse_qty,			  
+								'state' : 'issue_done',
+								'order_category':entry_rec.ms_id.order_category,
+								'order_priority': '1',
+								'pattern_id' : entry_rec.ms_id.pattern_id.id,
+								'pattern_name' : entry_rec.ms_id.pattern_id.pattern_name,	
+								'moc_id' : entry_rec.ms_id.moc_id.id,
+								'request_state': 'done',
+								'issue_no': issue_name[0],
+								'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'issue_qty': 1,
+								'issue_state': 'issued',
+								'core_no': core_name[0],
+								'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'core_qty': entry_rec.inhouse_qty,	
+								'core_rem_qty': entry_rec.inhouse_qty,	
+								'core_state': 'pending',
+								'mould_no': mould_name[0],
+								'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'mould_qty': entry_rec.inhouse_qty,	
+								'mould_rem_qty': entry_rec.inhouse_qty,	
+								'mould_state': 'pending',		
 							}
 							
-							dimension_obj = self.pool.get('ch.ms.dimension.details')
-							dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
-						
-					if entry_rec.ms_type == 'foundry_item':
-						
-						ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
-						
-						## Operation 1 Status Updation ###
-						if entry_rec.op2_state in ('pending','partial','done'):
-							self.write(cr, uid, ids, {'op2_state':'reject'})
-							
-						self.write(cr, uid, ids, {'state':'reject'})
-								
-						#### NC Creation for reject Qty ###
-						
-						### Production Number ###
-						produc_name = ''	
-						produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry_rec.entry_date))
-						produc_name = cr.fetchone();
-						
-						### Issue Number ###
-						issue_name = ''	
-						issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry_rec.entry_date))
-						issue_name = cr.fetchone();
-						
-						### Core Log Number ###
-						core_name = ''	
-						core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry_rec.entry_date))
-						core_name = cr.fetchone();
-						
-						### Mould Log Number ###
-						mould_name = ''	
-						mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry_rec.entry_date))
-						mould_name = cr.fetchone();
-						
-						production_vals = {
-												
-							'name': produc_name[0],
-							'schedule_id': entry_rec.ms_id.schedule_id.id,
-							'schedule_date': entry_rec.ms_id.schedule_date,
-							'division_id': entry_rec.ms_id.division_id.id,
-							'location' : entry_rec.ms_id.location,
-							'schedule_line_id': entry_rec.ms_id.schedule_line_id.id,
-							'order_id': entry_rec.ms_id.order_id.id,
-							'order_line_id': entry_rec.ms_id.order_line_id.id,
-							'order_bomline_id': entry_rec.ms_id.order_bomline_id.id,
-							'qty' : entry_rec.inhouse_qty,			  
-							'schedule_qty' : entry_rec.inhouse_qty,			  
-							'state' : 'issue_done',
-							'order_category':entry_rec.ms_id.order_category,
-							'order_priority': '1',
-							'pattern_id' : entry_rec.ms_id.pattern_id.id,
-							'pattern_name' : entry_rec.ms_id.pattern_id.pattern_name,	
-							'moc_id' : entry_rec.ms_id.moc_id.id,
-							'request_state': 'done',
-							'issue_no': issue_name[0],
-							'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'issue_qty': 1,
-							'issue_state': 'issued',
-							'core_no': core_name[0],
-							'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'core_qty': entry_rec.inhouse_qty,	
-							'core_rem_qty': entry_rec.inhouse_qty,	
-							'core_state': 'pending',
-							'mould_no': mould_name[0],
-							'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'mould_qty': entry_rec.inhouse_qty,	
-							'mould_rem_qty': entry_rec.inhouse_qty,	
-							'mould_state': 'pending',		
-						}
-						
-						production_id = self.pool.get('kg.production').create(cr, uid, production_vals)
+							production_id = self.pool.get('kg.production').create(cr, uid, production_vals)
 					
 			else:
-				if entry_rec.op2_button_status == 'visible':	
-					sc_obj = self.pool.get('kg.subcontract.process')
-					
-					self.write(cr, uid, ids, {'op2_sc_status': 'sc','op2_button_status': 'invisible'})	
-					sc_name = ''	
-					sc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.process')])
-					seq_rec = self.pool.get('ir.sequence').browse(cr,uid,sc_seq_id[0])
-					cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
-					sc_name = cr.fetchone();
-					
-					wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
-					if entry_rec.order_id.id == wo_id[0]:
-						sc_actual_qty = 0
-					else:
-						sc_actual_qty = entry_rec.inhouse_qty
-					
-					sc_vals = {
-						'name': sc_name[0],
-						'ms_plan_id': entry_rec.ms_plan_id.id,
-						'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
-						'sc_qty': entry_rec.inhouse_qty,
-						'total_qty': entry_rec.inhouse_qty,
-						'pending_qty': entry_rec.inhouse_qty,
-						'actual_qty': sc_actual_qty,
-						'ms_op_id': entry_rec.id,
-						'contractor_id': entry_rec.op2_contractor_id.id,
-						'operation_id': entry_rec.op2_id.id,
-					}
-					sc_id = sc_obj.create(cr, uid,sc_vals)
+				if entry_rec.op2_button_status == 'visible':
+					if entry_rec.order_id.flag_for_stock == False:
+						sc_obj = self.pool.get('kg.subcontract.process')
+						
+						self.write(cr, uid, ids, {'op2_sc_status': 'sc','op2_button_status': 'invisible'})	
+						sc_name = ''	
+						sc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.process')])
+						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,sc_seq_id[0])
+						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
+						sc_name = cr.fetchone();
+						
+						wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
+						if entry_rec.order_id.id == wo_id[0]:
+							sc_actual_qty = 0
+						else:
+							sc_actual_qty = entry_rec.inhouse_qty
+						
+						sc_vals = {
+							'name': sc_name[0],
+							'ms_plan_id': entry_rec.ms_plan_id.id,
+							'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+							'sc_qty': entry_rec.inhouse_qty,
+							'total_qty': entry_rec.inhouse_qty,
+							'pending_qty': entry_rec.inhouse_qty,
+							'actual_qty': sc_actual_qty,
+							'ms_op_id': entry_rec.id,
+							'contractor_id': entry_rec.op2_contractor_id.id,
+							'operation_id': entry_rec.op2_id.id,
+						}
+						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
 			pass			
 				
@@ -2386,225 +2544,219 @@ class kg_ms_operations(osv.osv):
 							))
 						pending_operation = cr.fetchone()
 						if pending_operation == None:
-							if entry_rec.op3_process_result == 'accept':
-								ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
-								ms_store_vals = {
-									'operation_id': entry_rec.id,
-									'production_id': entry_rec.production_id.id,
-									'foundry_assembly_id': entry_rec.production_id.assembly_id,
-									'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
-									'ms_assembly_id': entry_rec.ms_id.assembly_id,
-									'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
-									'qty': entry_rec.inhouse_qty,
-									'oth_spec': entry_rec.oth_spec
-								}
-								ms_store_id = self.pool.get('kg.ms.stores').create(cr, uid, ms_store_vals)
-							if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-								ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+							if entry_rec.order_id.flag_for_stock == False:
+								if entry_rec.op3_process_result == 'accept':
+									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
+									## MS Store Operation ###
+									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
+								if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
+									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
 				
 				if entry_rec.op3_process_result == 'reject':
 				
-					
-					### Department Indent Creation when process result is reject for ms item ###
-					if entry_rec.ms_type == 'ms_item':
-						
-						## Operation 2 Status Updation ###
-						if entry_rec.op3_state in ('pending','partial','done'):
-							self.write(cr, uid, ids, {'op3_state':'reject'})
-						self.write(cr, uid, ids, {'state':'reject'})
-						if entry_rec.ms_id.ms_id.line_ids:
+					if entry_rec.op3_state in ('pending','partial','done'):
+						self.write(cr, uid, ids, {'op3_state':'reject'})
+					self.write(cr, uid, ids, {'state':'reject'})
+					if entry_rec.order_id.flag_for_stock == False:
+						### Department Indent Creation when process result is reject for ms item ###
+						if entry_rec.ms_type == 'ms_item':
 							
-							dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
+							## Operation 2 Status Updation ###
 							
-							location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
-							
-							seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
-							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
-							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry_rec.entry_date))
-							seq_name = cr.fetchone();
+							if entry_rec.ms_id.ms_id.line_ids:
+								
+								dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
+								
+								location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
+								
+								seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
+								seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry_rec.entry_date))
+								seq_name = cr.fetchone();
 
-							dep_indent_obj = self.pool.get('kg.depindent')
-							dep_indent_vals = {
-								'name':'',
-								'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
-								'dep_name':1,
-								'entry_mode':'auto',
-								'state': 'approved',
-								'indent_type': 'production',
-								'name': seq_name[0],
-								'order_id': entry_rec.order_id.id,
-								'order_line_id': entry_rec.order_line_id.id,
-								'src_location_id': location.main_location.id,
-								'dest_location_id': location.stock_location.id
-								}
+								dep_indent_obj = self.pool.get('kg.depindent')
+								dep_indent_vals = {
+									'name':'',
+									'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+									'dep_name':1,
+									'entry_mode':'auto',
+									'state': 'approved',
+									'indent_type': 'production',
+									'name': seq_name[0],
+									'order_id': entry_rec.order_id.id,
+									'order_line_id': entry_rec.order_line_id.id,
+									'src_location_id': location.main_location.id,
+									'dest_location_id': location.stock_location.id
+									}
+									
+								indent_id = dep_indent_obj.create(cr, uid, dep_indent_vals)
+								for indent_item in entry_rec.ms_id.ms_id.line_ids:
+									dep_indent_line_obj = self.pool.get('kg.depindent.line')
+									product_rec = self.pool.get('product.product').browse(cr, uid, indent_item.product_id.id)
+									dep_indent_line_vals = {
+									'indent_id':indent_id,
+									'product_id': indent_item.product_id.id,
+									'uom': product_rec.uom_id.id,
+									'qty': indent_item.qty * entry_rec.inhouse_qty,
+									'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
+									'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
+									#~ 'cutting_qty':ms_raw_rec.temp_qty,
+									'ms_bot_id':entry_rec.ms_id.ms_id.id,
+									'fns_item_name':entry_rec.item_name,
+									'position_id': entry_rec.position_id.id
+									}
+									
+									indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
+									
+									indent_wo_line_obj = self.pool.get('ch.depindent.wo')
 								
-							indent_id = dep_indent_obj.create(cr, uid, dep_indent_vals)
-							for indent_item in entry_rec.ms_id.ms_id.line_ids:
-								dep_indent_line_obj = self.pool.get('kg.depindent.line')
-								product_rec = self.pool.get('product.product').browse(cr, uid, indent_item.product_id.id)
-								dep_indent_line_vals = {
-								'indent_id':indent_id,
-								'product_id': indent_item.product_id.id,
-								'uom': product_rec.uom_id.id,
-								'qty': indent_item.qty * entry_rec.inhouse_qty,
-								'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-								'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-								#~ 'cutting_qty':ms_raw_rec.temp_qty,
-								'ms_bot_id':entry_rec.ms_id.ms_id.id,
-								'fns_item_name':entry_rec.item_name,
-								'position_id': entry_rec.position_id.id
-								}
-								
-								indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
-								
-								indent_wo_line_obj = self.pool.get('ch.depindent.wo')
+									indent_wo_line_vals = {
+										'header_id':indent_line_id,
+										'wo_id':entry_rec.order_no,
+										'w_order_id':entry_rec.order_id.id,
+										'w_order_line_id':entry_rec.order_line_id.id,
+										'qty':indent_item.qty * entry_rec.inhouse_qty,
+									}
+									indent_wo_line_id = indent_wo_line_obj.create(cr, uid, indent_wo_line_vals)
 							
-								indent_wo_line_vals = {
-									'header_id':indent_line_id,
-									'wo_id':entry_rec.order_no,
-									'w_order_id':entry_rec.order_id.id,
-									'w_order_line_id':entry_rec.order_line_id.id,
-									'qty':indent_item.qty * entry_rec.inhouse_qty,
-								}
-								indent_wo_line_id = indent_wo_line_obj.create(cr, uid, indent_wo_line_vals)
-						
-						### New Entry Creation for same Operation ###
-						op_vals = {
-							'ms_id': entry_rec.ms_id.id,
-							'ms_plan_id': entry_rec.ms_plan_id.id,
-							'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
-							'inhouse_qty': 1,
-							'op3_stage_id': entry_rec.op3_stage_id.id,
-							'op3_clamping_area': entry_rec.op3_clamping_area,
-							'op3_id': entry_rec.op3_id.id,
-							'parent_id' : ids[0],
-							'last_operation_check_id': entry_rec.last_operation_check_id,
-							'state': 'active',
-							'op3_state': 'pending',
-							'op3_process_result':'',
-							}			
-						copy_id = self.copy(cr, uid, entry_rec.id,op_vals, context)
-						
-						copy_rec = self.browse(cr, uid, copy_id)
-						
-						for dimen_item in copy_rec.op3_line_ids:
+							### New Entry Creation for same Operation ###
+							op_vals = {
+								'ms_id': entry_rec.ms_id.id,
+								'ms_plan_id': entry_rec.ms_plan_id.id,
+								'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+								'inhouse_qty': 1,
+								'op3_stage_id': entry_rec.op3_stage_id.id,
+								'op3_clamping_area': entry_rec.op3_clamping_area,
+								'op3_id': entry_rec.op3_id.id,
+								'parent_id' : ids[0],
+								'last_operation_check_id': entry_rec.last_operation_check_id,
+								'state': 'active',
+								'op3_state': 'pending',
+								'op3_process_result':'',
+								}			
+							copy_id = self.copy(cr, uid, entry_rec.id,op_vals, context)
 							
-							dimen_vals = {
-								'actual_val': 0,
-								'remark': False,
+							copy_rec = self.browse(cr, uid, copy_id)
+							
+							for dimen_item in copy_rec.op3_line_ids:
+								
+								dimen_vals = {
+									'actual_val': 0,
+									'remark': False,
+								}
+								
+								dimension_obj = self.pool.get('ch.ms.dimension.details')
+								dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
+							
+						if entry_rec.ms_type == 'foundry_item':
+							
+							ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
+							
+							## Operation 3 Status Updation ###
+							if entry_rec.op3_state in ('pending','partial','done'):
+								self.write(cr, uid, ids, {'op3_state':'reject'})
+								
+							self.write(cr, uid, ids, {'state':'reject'})
+									
+							#### NC Creation for reject Qty ###
+							
+							### Production Number ###
+							produc_name = ''	
+							produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry_rec.entry_date))
+							produc_name = cr.fetchone();
+							
+							### Issue Number ###
+							issue_name = ''	
+							issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry_rec.entry_date))
+							issue_name = cr.fetchone();
+							
+							### Core Log Number ###
+							core_name = ''	
+							core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry_rec.entry_date))
+							core_name = cr.fetchone();
+							
+							### Mould Log Number ###
+							mould_name = ''	
+							mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry_rec.entry_date))
+							mould_name = cr.fetchone();
+							
+							production_vals = {
+													
+								'name': produc_name[0],
+								'schedule_id': entry_rec.ms_id.schedule_id.id,
+								'schedule_date': entry_rec.ms_id.schedule_date,
+								'division_id': entry_rec.ms_id.division_id.id,
+								'location' : entry_rec.ms_id.location,
+								'schedule_line_id': entry_rec.ms_id.schedule_line_id.id,
+								'order_id': entry_rec.ms_id.order_id.id,
+								'order_line_id': entry_rec.ms_id.order_line_id.id,
+								'order_bomline_id': entry_rec.ms_id.order_bomline_id.id,
+								'qty' : entry_rec.inhouse_qty,			  
+								'schedule_qty' : entry_rec.inhouse_qty,			  
+								'state' : 'issue_done',
+								'order_category':entry_rec.ms_id.order_category,
+								'order_priority': '1',
+								'pattern_id' : entry_rec.ms_id.pattern_id.id,
+								'pattern_name' : entry_rec.ms_id.pattern_id.pattern_name,	
+								'moc_id' : entry_rec.ms_id.moc_id.id,
+								'request_state': 'done',
+								'issue_no': issue_name[0],
+								'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'issue_qty': 1,
+								'issue_state': 'issued',
+								'core_no': core_name[0],
+								'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'core_qty': entry_rec.inhouse_qty,	
+								'core_rem_qty': entry_rec.inhouse_qty,	
+								'core_state': 'pending',
+								'mould_no': mould_name[0],
+								'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'mould_qty': entry_rec.inhouse_qty,	
+								'mould_rem_qty': entry_rec.inhouse_qty,	
+								'mould_state': 'pending',		
 							}
 							
-							dimension_obj = self.pool.get('ch.ms.dimension.details')
-							dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
-						
-					if entry_rec.ms_type == 'foundry_item':
-						
-						ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
-						
-						## Operation 3 Status Updation ###
-						if entry_rec.op3_state in ('pending','partial','done'):
-							self.write(cr, uid, ids, {'op3_state':'reject'})
-							
-						self.write(cr, uid, ids, {'state':'reject'})
-								
-						#### NC Creation for reject Qty ###
-						
-						### Production Number ###
-						produc_name = ''	
-						produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry_rec.entry_date))
-						produc_name = cr.fetchone();
-						
-						### Issue Number ###
-						issue_name = ''	
-						issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry_rec.entry_date))
-						issue_name = cr.fetchone();
-						
-						### Core Log Number ###
-						core_name = ''	
-						core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry_rec.entry_date))
-						core_name = cr.fetchone();
-						
-						### Mould Log Number ###
-						mould_name = ''	
-						mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry_rec.entry_date))
-						mould_name = cr.fetchone();
-						
-						production_vals = {
-												
-							'name': produc_name[0],
-							'schedule_id': entry_rec.ms_id.schedule_id.id,
-							'schedule_date': entry_rec.ms_id.schedule_date,
-							'division_id': entry_rec.ms_id.division_id.id,
-							'location' : entry_rec.ms_id.location,
-							'schedule_line_id': entry_rec.ms_id.schedule_line_id.id,
-							'order_id': entry_rec.ms_id.order_id.id,
-							'order_line_id': entry_rec.ms_id.order_line_id.id,
-							'order_bomline_id': entry_rec.ms_id.order_bomline_id.id,
-							'qty' : entry_rec.inhouse_qty,			  
-							'schedule_qty' : entry_rec.inhouse_qty,			  
-							'state' : 'issue_done',
-							'order_category':entry_rec.ms_id.order_category,
-							'order_priority': '1',
-							'pattern_id' : entry_rec.ms_id.pattern_id.id,
-							'pattern_name' : entry_rec.ms_id.pattern_id.pattern_name,	
-							'moc_id' : entry_rec.ms_id.moc_id.id,
-							'request_state': 'done',
-							'issue_no': issue_name[0],
-							'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'issue_qty': 1,
-							'issue_state': 'issued',
-							'core_no': core_name[0],
-							'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'core_qty': entry_rec.inhouse_qty,	
-							'core_rem_qty': entry_rec.inhouse_qty,	
-							'core_state': 'pending',
-							'mould_no': mould_name[0],
-							'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'mould_qty': entry_rec.inhouse_qty,	
-							'mould_rem_qty': entry_rec.inhouse_qty,	
-							'mould_state': 'pending',		
-						}
-						
-						production_id = self.pool.get('kg.production').create(cr, uid, production_vals)
+							production_id = self.pool.get('kg.production').create(cr, uid, production_vals)
 					
 			else:
 				if entry_rec.op3_button_status == 'visible':
-					sc_obj = self.pool.get('kg.subcontract.process')
-					
-					self.write(cr, uid, ids, {'op3_sc_status': 'sc','op3_button_status': 'invisible'})	
-					sc_name = ''	
-					sc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.process')])
-					seq_rec = self.pool.get('ir.sequence').browse(cr,uid,sc_seq_id[0])
-					cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
-					sc_name = cr.fetchone();
-					
-					wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
-					if entry_rec.order_id.id == wo_id[0]:
-						sc_actual_qty = 0
-					else:
-						sc_actual_qty = entry_rec.inhouse_qty
-					
-					sc_vals = {
-						'name': sc_name[0],
-						'ms_plan_id': entry_rec.ms_plan_id.id,
-						'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
-						'sc_qty': entry_rec.inhouse_qty,
-						'total_qty': entry_rec.inhouse_qty,
-						'pending_qty': entry_rec.inhouse_qty,
-						'actual_qty': sc_actual_qty,
-						'ms_op_id': entry_rec.id,
-						'contractor_id': entry_rec.op3_contractor_id.id,
-						'operation_id': entry_rec.op3_id.id,
-					}
-					sc_id = sc_obj.create(cr, uid,sc_vals)
+					if entry_rec.order_id.flag_for_stock == False:
+						sc_obj = self.pool.get('kg.subcontract.process')
+						
+						self.write(cr, uid, ids, {'op3_sc_status': 'sc','op3_button_status': 'invisible'})	
+						sc_name = ''	
+						sc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.process')])
+						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,sc_seq_id[0])
+						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
+						sc_name = cr.fetchone();
+						
+						wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
+						if entry_rec.order_id.id == wo_id[0]:
+							sc_actual_qty = 0
+						else:
+							sc_actual_qty = entry_rec.inhouse_qty
+						
+						sc_vals = {
+							'name': sc_name[0],
+							'ms_plan_id': entry_rec.ms_plan_id.id,
+							'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+							'sc_qty': entry_rec.inhouse_qty,
+							'total_qty': entry_rec.inhouse_qty,
+							'pending_qty': entry_rec.inhouse_qty,
+							'actual_qty': sc_actual_qty,
+							'ms_op_id': entry_rec.id,
+							'contractor_id': entry_rec.op3_contractor_id.id,
+							'operation_id': entry_rec.op3_id.id,
+						}
+						sc_id = sc_obj.create(cr, uid,sc_vals)
 				
 		else:
 			pass
@@ -3056,226 +3208,220 @@ class kg_ms_operations(osv.osv):
 							))
 						pending_operation = cr.fetchone()
 						if pending_operation == None:
-							if entry_rec.op4_process_result == 'accept':
-								ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
-								ms_store_vals = {
-									'operation_id': entry_rec.id,
-									'production_id': entry_rec.production_id.id,
-									'foundry_assembly_id': entry_rec.production_id.assembly_id,
-									'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
-									'ms_assembly_id': entry_rec.ms_id.assembly_id,
-									'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
-									'qty': entry_rec.inhouse_qty,
-									'oth_spec': entry_rec.oth_spec
-								}
-								ms_store_id = self.pool.get('kg.ms.stores').create(cr, uid, ms_store_vals)
-							if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-								ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+							if entry_rec.order_id.flag_for_stock == False:
+								if entry_rec.op4_process_result == 'accept':
+									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
+									## MS Store Operation ###
+									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
+								if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
+									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
 				
 				if entry_rec.op4_process_result == 'reject':
-				
 					
-					### Department Indent Creation when process result is reject for ms item ###
-					if entry_rec.ms_type == 'ms_item':
-						
-						## Operation 4 Status Updation ###
-						if entry_rec.op4_state in ('pending','partial','done'):
-							self.write(cr, uid, ids, {'op4_state':'reject'})
-						self.write(cr, uid, ids, {'state':'reject'})
-						if entry_rec.ms_id.ms_id.line_ids:
+					## Operation 4 Status Updation ###
+					if entry_rec.op4_state in ('pending','partial','done'):
+						self.write(cr, uid, ids, {'op4_state':'reject'})
+					self.write(cr, uid, ids, {'state':'reject'})
+					if entry_rec.order_id.flag_for_stock == False:
+						### Department Indent Creation when process result is reject for ms item ###
+						if entry_rec.ms_type == 'ms_item':
 							
-							dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
 							
-							location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
-							
-							seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
-							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
-							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry_rec.entry_date))
-							seq_name = cr.fetchone();
+							if entry_rec.ms_id.ms_id.line_ids:
+								
+								dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
+								
+								location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
+								
+								seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
+								seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry_rec.entry_date))
+								seq_name = cr.fetchone();
 
-							dep_indent_obj = self.pool.get('kg.depindent')
-							dep_indent_vals = {
-								'name':'',
-								'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
-								'dep_name':1,
-								'entry_mode':'auto',
-								'state': 'approved',
-								'indent_type': 'production',
-								'name': seq_name[0],
-								'order_id': entry_rec.order_id.id,
-								'order_line_id': entry_rec.order_line_id.id,
-								'src_location_id': location.main_location.id,
-								'dest_location_id': location.stock_location.id
-								}
+								dep_indent_obj = self.pool.get('kg.depindent')
+								dep_indent_vals = {
+									'name':'',
+									'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+									'dep_name':1,
+									'entry_mode':'auto',
+									'state': 'approved',
+									'indent_type': 'production',
+									'name': seq_name[0],
+									'order_id': entry_rec.order_id.id,
+									'order_line_id': entry_rec.order_line_id.id,
+									'src_location_id': location.main_location.id,
+									'dest_location_id': location.stock_location.id
+									}
+									
+								indent_id = dep_indent_obj.create(cr, uid, dep_indent_vals)
+								for indent_item in entry_rec.ms_id.ms_id.line_ids:
+									dep_indent_line_obj = self.pool.get('kg.depindent.line')
+									product_rec = self.pool.get('product.product').browse(cr, uid, indent_item.product_id.id)
+									dep_indent_line_vals = {
+									'indent_id':indent_id,
+									'product_id': indent_item.product_id.id,
+									'uom': product_rec.uom_id.id,
+									'qty': indent_item.qty * entry_rec.inhouse_qty,
+									'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
+									'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
+									#~ 'cutting_qty':ms_raw_rec.temp_qty,
+									'ms_bot_id':entry_rec.ms_id.ms_id.id,
+									'fns_item_name':entry_rec.item_name,
+									'position_id': entry_rec.position_id.id
+									}
+									
+									indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
+									
+									indent_wo_line_obj = self.pool.get('ch.depindent.wo')
 								
-							indent_id = dep_indent_obj.create(cr, uid, dep_indent_vals)
-							for indent_item in entry_rec.ms_id.ms_id.line_ids:
-								dep_indent_line_obj = self.pool.get('kg.depindent.line')
-								product_rec = self.pool.get('product.product').browse(cr, uid, indent_item.product_id.id)
-								dep_indent_line_vals = {
-								'indent_id':indent_id,
-								'product_id': indent_item.product_id.id,
-								'uom': product_rec.uom_id.id,
-								'qty': indent_item.qty * entry_rec.inhouse_qty,
-								'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-								'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-								#~ 'cutting_qty':ms_raw_rec.temp_qty,
-								'ms_bot_id':entry_rec.ms_id.ms_id.id,
-								'fns_item_name':entry_rec.item_name,
-								'position_id': entry_rec.position_id.id
-								}
-								
-								indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
-								
-								indent_wo_line_obj = self.pool.get('ch.depindent.wo')
+									indent_wo_line_vals = {
+										'header_id':indent_line_id,
+										'wo_id':entry_rec.order_no,
+										'w_order_id':entry_rec.order_id.id,
+										'w_order_line_id':entry_rec.order_line_id.id,
+										'qty':indent_item.qty * entry_rec.inhouse_qty,
+									}
+									indent_wo_line_id = indent_wo_line_obj.create(cr, uid, indent_wo_line_vals)
 							
-								indent_wo_line_vals = {
-									'header_id':indent_line_id,
-									'wo_id':entry_rec.order_no,
-									'w_order_id':entry_rec.order_id.id,
-									'w_order_line_id':entry_rec.order_line_id.id,
-									'qty':indent_item.qty * entry_rec.inhouse_qty,
-								}
-								indent_wo_line_id = indent_wo_line_obj.create(cr, uid, indent_wo_line_vals)
-						
-						### New Entry Creation for same Operation ###
-						op_vals = {
-							'ms_id': entry_rec.ms_id.id,
-							'ms_plan_id': entry_rec.ms_plan_id.id,
-							'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
-							'inhouse_qty': 1,
-							'op4_stage_id': entry_rec.op4_stage_id.id,
-							'op4_clamping_area': entry_rec.op4_clamping_area,
-							'op4_id': entry_rec.op4_id.id,
-							'parent_id' : ids[0],
-							'last_operation_check_id': entry_rec.last_operation_check_id,
-							'state': 'active',
-							'op4_state': 'pending',
-							'op4_process_result':'',
-						
-						}			
-						copy_id = self.copy(cr, uid, entry_rec.id,op_vals, context)
-						
-						copy_rec = self.browse(cr, uid, copy_id)
-						
-						for dimen_item in copy_rec.op4_line_ids:
+							### New Entry Creation for same Operation ###
+							op_vals = {
+								'ms_id': entry_rec.ms_id.id,
+								'ms_plan_id': entry_rec.ms_plan_id.id,
+								'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+								'inhouse_qty': 1,
+								'op4_stage_id': entry_rec.op4_stage_id.id,
+								'op4_clamping_area': entry_rec.op4_clamping_area,
+								'op4_id': entry_rec.op4_id.id,
+								'parent_id' : ids[0],
+								'last_operation_check_id': entry_rec.last_operation_check_id,
+								'state': 'active',
+								'op4_state': 'pending',
+								'op4_process_result':'',
 							
-							dimen_vals = {
-								'actual_val': 0,
-								'remark': False,
+							}			
+							copy_id = self.copy(cr, uid, entry_rec.id,op_vals, context)
+							
+							copy_rec = self.browse(cr, uid, copy_id)
+							
+							for dimen_item in copy_rec.op4_line_ids:
+								
+								dimen_vals = {
+									'actual_val': 0,
+									'remark': False,
+								}
+								
+								dimension_obj = self.pool.get('ch.ms.dimension.details')
+								dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
+							
+						if entry_rec.ms_type == 'foundry_item':
+							
+							ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
+							
+							## Operation 4 Status Updation ###
+							if entry_rec.op4_state in ('pending','partial','done'):
+								self.write(cr, uid, ids, {'op4_state':'reject'})
+								
+							self.write(cr, uid, ids, {'state':'reject'})
+									
+							#### NC Creation for reject Qty ###
+							
+							### Production Number ###
+							produc_name = ''	
+							produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry_rec.entry_date))
+							produc_name = cr.fetchone();
+							
+							### Issue Number ###
+							issue_name = ''	
+							issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry_rec.entry_date))
+							issue_name = cr.fetchone();
+							
+							### Core Log Number ###
+							core_name = ''	
+							core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry_rec.entry_date))
+							core_name = cr.fetchone();
+							
+							### Mould Log Number ###
+							mould_name = ''	
+							mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry_rec.entry_date))
+							mould_name = cr.fetchone();
+							
+							production_vals = {
+													
+								'name': produc_name[0],
+								'schedule_id': entry_rec.ms_id.schedule_id.id,
+								'schedule_date': entry_rec.ms_id.schedule_date,
+								'division_id': entry_rec.ms_id.division_id.id,
+								'location' : entry_rec.ms_id.location,
+								'schedule_line_id': entry_rec.ms_id.schedule_line_id.id,
+								'order_id': entry_rec.ms_id.order_id.id,
+								'order_line_id': entry_rec.ms_id.order_line_id.id,
+								'order_bomline_id': entry_rec.ms_id.order_bomline_id.id,
+								'qty' : entry_rec.inhouse_qty,			  
+								'schedule_qty' : entry_rec.inhouse_qty,			  
+								'state' : 'issue_done',
+								'order_category':entry_rec.ms_id.order_category,
+								'order_priority': '1',
+								'pattern_id' : entry_rec.ms_id.pattern_id.id,
+								'pattern_name' : entry_rec.ms_id.pattern_id.pattern_name,	
+								'moc_id' : entry_rec.ms_id.moc_id.id,
+								'request_state': 'done',
+								'issue_no': issue_name[0],
+								'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'issue_qty': 1,
+								'issue_state': 'issued',
+								'core_no': core_name[0],
+								'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'core_qty': entry_rec.inhouse_qty,	
+								'core_rem_qty': entry_rec.inhouse_qty,	
+								'core_state': 'pending',
+								'mould_no': mould_name[0],
+								'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'mould_qty': entry_rec.inhouse_qty,	
+								'mould_rem_qty': entry_rec.inhouse_qty,	
+								'mould_state': 'pending',		
 							}
 							
-							dimension_obj = self.pool.get('ch.ms.dimension.details')
-							dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
-						
-					if entry_rec.ms_type == 'foundry_item':
-						
-						ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
-						
-						## Operation 4 Status Updation ###
-						if entry_rec.op4_state in ('pending','partial','done'):
-							self.write(cr, uid, ids, {'op4_state':'reject'})
-							
-						self.write(cr, uid, ids, {'state':'reject'})
-								
-						#### NC Creation for reject Qty ###
-						
-						### Production Number ###
-						produc_name = ''	
-						produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry_rec.entry_date))
-						produc_name = cr.fetchone();
-						
-						### Issue Number ###
-						issue_name = ''	
-						issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry_rec.entry_date))
-						issue_name = cr.fetchone();
-						
-						### Core Log Number ###
-						core_name = ''	
-						core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry_rec.entry_date))
-						core_name = cr.fetchone();
-						
-						### Mould Log Number ###
-						mould_name = ''	
-						mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry_rec.entry_date))
-						mould_name = cr.fetchone();
-						
-						production_vals = {
-												
-							'name': produc_name[0],
-							'schedule_id': entry_rec.ms_id.schedule_id.id,
-							'schedule_date': entry_rec.ms_id.schedule_date,
-							'division_id': entry_rec.ms_id.division_id.id,
-							'location' : entry_rec.ms_id.location,
-							'schedule_line_id': entry_rec.ms_id.schedule_line_id.id,
-							'order_id': entry_rec.ms_id.order_id.id,
-							'order_line_id': entry_rec.ms_id.order_line_id.id,
-							'order_bomline_id': entry_rec.ms_id.order_bomline_id.id,
-							'qty' : entry_rec.inhouse_qty,			  
-							'schedule_qty' : entry_rec.inhouse_qty,			  
-							'state' : 'issue_done',
-							'order_category':entry_rec.ms_id.order_category,
-							'order_priority': '1',
-							'pattern_id' : entry_rec.ms_id.pattern_id.id,
-							'pattern_name' : entry_rec.ms_id.pattern_id.pattern_name,	
-							'moc_id' : entry_rec.ms_id.moc_id.id,
-							'request_state': 'done',
-							'issue_no': issue_name[0],
-							'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'issue_qty': 1,
-							'issue_state': 'issued',
-							'core_no': core_name[0],
-							'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'core_qty': entry_rec.inhouse_qty,	
-							'core_rem_qty': entry_rec.inhouse_qty,	
-							'core_state': 'pending',
-							'mould_no': mould_name[0],
-							'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'mould_qty': entry_rec.inhouse_qty,	
-							'mould_rem_qty': entry_rec.inhouse_qty,	
-							'mould_state': 'pending',		
-						}
-						
-						production_id = self.pool.get('kg.production').create(cr, uid, production_vals)
+							production_id = self.pool.get('kg.production').create(cr, uid, production_vals)
 					
 			else:
 				if entry_rec.op4_button_status == 'visible':
-					sc_obj = self.pool.get('kg.subcontract.process')
-					
-					self.write(cr, uid, ids, {'op4_sc_status': 'sc','op4_button_status': 'invisible'})	
-					sc_name = ''	
-					sc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.process')])
-					seq_rec = self.pool.get('ir.sequence').browse(cr,uid,sc_seq_id[0])
-					cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
-					sc_name = cr.fetchone();
-					
-					wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
-					if entry_rec.order_id.id == wo_id[0]:
-						sc_actual_qty = 0
-					else:
-						sc_actual_qty = entry_rec.inhouse_qty
-					
-					sc_vals = {
-						'name': sc_name[0],
-						'ms_plan_id': entry_rec.ms_plan_id.id,
-						'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
-						'sc_qty': entry_rec.inhouse_qty,
-						'total_qty': entry_rec.inhouse_qty,
-						'pending_qty': entry_rec.inhouse_qty,
-						'actual_qty': sc_actual_qty,
-						'ms_op_id': entry_rec.id,
-						'contractor_id': entry_rec.op4_contractor_id.id,
-						'operation_id': entry_rec.op4_id.id,
-					}
-					sc_id = sc_obj.create(cr, uid,sc_vals)
+					if entry_rec.order_id.flag_for_stock == False:
+						sc_obj = self.pool.get('kg.subcontract.process')
+						
+						self.write(cr, uid, ids, {'op4_sc_status': 'sc','op4_button_status': 'invisible'})	
+						sc_name = ''	
+						sc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.process')])
+						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,sc_seq_id[0])
+						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
+						sc_name = cr.fetchone();
+						
+						wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
+						if entry_rec.order_id.id == wo_id[0]:
+							sc_actual_qty = 0
+						else:
+							sc_actual_qty = entry_rec.inhouse_qty
+						
+						sc_vals = {
+							'name': sc_name[0],
+							'ms_plan_id': entry_rec.ms_plan_id.id,
+							'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+							'sc_qty': entry_rec.inhouse_qty,
+							'total_qty': entry_rec.inhouse_qty,
+							'pending_qty': entry_rec.inhouse_qty,
+							'actual_qty': sc_actual_qty,
+							'ms_op_id': entry_rec.id,
+							'contractor_id': entry_rec.op4_contractor_id.id,
+							'operation_id': entry_rec.op4_id.id,
+						}
+						sc_id = sc_obj.create(cr, uid,sc_vals)
 				
 		else:
 			pass
@@ -3725,226 +3871,220 @@ class kg_ms_operations(osv.osv):
 							))
 						pending_operation = cr.fetchone()
 						if pending_operation == None:
-							if entry_rec.op5_process_result == 'accept':
-								ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
-								ms_store_vals = {
-									'operation_id': entry_rec.id,
-									'production_id': entry_rec.production_id.id,
-									'foundry_assembly_id': entry_rec.production_id.assembly_id,
-									'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
-									'ms_assembly_id': entry_rec.ms_id.assembly_id,
-									'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
-									'qty': entry_rec.inhouse_qty,
-									'oth_spec': entry_rec.oth_spec
-								}
-								ms_store_id = self.pool.get('kg.ms.stores').create(cr, uid, ms_store_vals)
-							if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-								ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+							if entry_rec.order_id.flag_for_stock == False:
+								if entry_rec.op5_process_result == 'accept':
+									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
+									## MS Store Operation ###
+									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
+								if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
+									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
 				
 				if entry_rec.op5_process_result == 'reject':
-				
 					
-					### Department Indent Creation when process result is reject for ms item ###
-					if entry_rec.ms_type == 'ms_item':
-						
-						## Operation 5 Status Updation ###
-						if entry_rec.op5_state in ('pending','partial','done'):
-							self.write(cr, uid, ids, {'op5_state':'reject'})
-						self.write(cr, uid, ids, {'state':'reject'})
-						if entry_rec.ms_id.ms_id.line_ids:
+					## Operation 5 Status Updation ###
+					if entry_rec.op5_state in ('pending','partial','done'):
+						self.write(cr, uid, ids, {'op5_state':'reject'})
+					self.write(cr, uid, ids, {'state':'reject'})
+					if entry_rec.order_id.flag_for_stock == False:
+						### Department Indent Creation when process result is reject for ms item ###
+						if entry_rec.ms_type == 'ms_item':
 							
-							dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
 							
-							location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
-							
-							seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
-							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
-							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry_rec.entry_date))
-							seq_name = cr.fetchone();
+							if entry_rec.ms_id.ms_id.line_ids:
+								
+								dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
+								
+								location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
+								
+								seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
+								seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry_rec.entry_date))
+								seq_name = cr.fetchone();
 
-							dep_indent_obj = self.pool.get('kg.depindent')
-							dep_indent_vals = {
-								'name':'',
-								'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
-								'dep_name':1,
-								'entry_mode':'auto',
-								'state': 'approved',
-								'indent_type': 'production',
-								'name': seq_name[0],
-								'order_id': entry_rec.order_id.id,
-								'order_line_id': entry_rec.order_line_id.id,
-								'src_location_id': location.main_location.id,
-								'dest_location_id': location.stock_location.id
-								}
+								dep_indent_obj = self.pool.get('kg.depindent')
+								dep_indent_vals = {
+									'name':'',
+									'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+									'dep_name':1,
+									'entry_mode':'auto',
+									'state': 'approved',
+									'indent_type': 'production',
+									'name': seq_name[0],
+									'order_id': entry_rec.order_id.id,
+									'order_line_id': entry_rec.order_line_id.id,
+									'src_location_id': location.main_location.id,
+									'dest_location_id': location.stock_location.id
+									}
+									
+								indent_id = dep_indent_obj.create(cr, uid, dep_indent_vals)
+								for indent_item in entry_rec.ms_id.ms_id.line_ids:
+									dep_indent_line_obj = self.pool.get('kg.depindent.line')
+									product_rec = self.pool.get('product.product').browse(cr, uid, indent_item.product_id.id)
+									dep_indent_line_vals = {
+									'indent_id':indent_id,
+									'product_id': indent_item.product_id.id,
+									'uom': product_rec.uom_id.id,
+									'qty': indent_item.qty * entry_rec.inhouse_qty,
+									'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
+									'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
+									#~ 'cutting_qty':ms_raw_rec.temp_qty,
+									'ms_bot_id':entry_rec.ms_id.ms_id.id,
+									'fns_item_name':entry_rec.item_name,
+									'position_id': entry_rec.position_id.id
+									}
+									
+									indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
+									
+									indent_wo_line_obj = self.pool.get('ch.depindent.wo')
 								
-							indent_id = dep_indent_obj.create(cr, uid, dep_indent_vals)
-							for indent_item in entry_rec.ms_id.ms_id.line_ids:
-								dep_indent_line_obj = self.pool.get('kg.depindent.line')
-								product_rec = self.pool.get('product.product').browse(cr, uid, indent_item.product_id.id)
-								dep_indent_line_vals = {
-								'indent_id':indent_id,
-								'product_id': indent_item.product_id.id,
-								'uom': product_rec.uom_id.id,
-								'qty': indent_item.qty * entry_rec.inhouse_qty,
-								'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-								'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-								#~ 'cutting_qty':ms_raw_rec.temp_qty,
-								'ms_bot_id':entry_rec.ms_id.ms_id.id,
-								'fns_item_name':entry_rec.item_name,
-								'position_id': entry_rec.position_id.id
-								}
-								
-								indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
-								
-								indent_wo_line_obj = self.pool.get('ch.depindent.wo')
+									indent_wo_line_vals = {
+										'header_id':indent_line_id,
+										'wo_id':entry_rec.order_no,
+										'w_order_id':entry_rec.order_id.id,
+										'w_order_line_id':entry_rec.order_line_id.id,
+										'qty':indent_item.qty * entry_rec.inhouse_qty,
+									}
+									indent_wo_line_id = indent_wo_line_obj.create(cr, uid, indent_wo_line_vals)
 							
-								indent_wo_line_vals = {
-									'header_id':indent_line_id,
-									'wo_id':entry_rec.order_no,
-									'w_order_id':entry_rec.order_id.id,
-									'w_order_line_id':entry_rec.order_line_id.id,
-									'qty':indent_item.qty * entry_rec.inhouse_qty,
-								}
-								indent_wo_line_id = indent_wo_line_obj.create(cr, uid, indent_wo_line_vals)
-						
-						### New Entry Creation for same Operation ###
-						op_vals = {
-							'ms_id': entry_rec.ms_id.id,
-							'ms_plan_id': entry_rec.ms_plan_id.id,
-							'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
-							'inhouse_qty': 1,
-							'op5_stage_id': entry_rec.op5_stage_id.id,
-							'op5_clamping_area': entry_rec.op5_clamping_area,
-							'op5_id': entry_rec.op5_id.id,
-							'parent_id' : ids[0],
-							'last_operation_check_id': entry_rec.last_operation_check_id,
-							'state': 'active',
-							'op5_state': 'pending',
-							'op5_process_result':'',
-						
-						}			
-						copy_id = self.copy(cr, uid, entry_rec.id,op_vals, context)
-						
-						copy_rec = self.browse(cr, uid, copy_id)
-						
-						for dimen_item in copy_rec.op5_line_ids:
+							### New Entry Creation for same Operation ###
+							op_vals = {
+								'ms_id': entry_rec.ms_id.id,
+								'ms_plan_id': entry_rec.ms_plan_id.id,
+								'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+								'inhouse_qty': 1,
+								'op5_stage_id': entry_rec.op5_stage_id.id,
+								'op5_clamping_area': entry_rec.op5_clamping_area,
+								'op5_id': entry_rec.op5_id.id,
+								'parent_id' : ids[0],
+								'last_operation_check_id': entry_rec.last_operation_check_id,
+								'state': 'active',
+								'op5_state': 'pending',
+								'op5_process_result':'',
 							
-							dimen_vals = {
-								'actual_val': 0,
-								'remark': False,
+							}			
+							copy_id = self.copy(cr, uid, entry_rec.id,op_vals, context)
+							
+							copy_rec = self.browse(cr, uid, copy_id)
+							
+							for dimen_item in copy_rec.op5_line_ids:
+								
+								dimen_vals = {
+									'actual_val': 0,
+									'remark': False,
+								}
+								
+								dimension_obj = self.pool.get('ch.ms.dimension.details')
+								dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
+							
+						if entry_rec.ms_type == 'foundry_item':
+							
+							ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
+							
+							## Operation 5 Status Updation ###
+							if entry_rec.op5_state in ('pending','partial','done'):
+								self.write(cr, uid, ids, {'op5_state':'reject'})
+								
+							self.write(cr, uid, ids, {'state':'reject'})
+									
+							#### NC Creation for reject Qty ###
+							
+							### Production Number ###
+							produc_name = ''	
+							produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry_rec.entry_date))
+							produc_name = cr.fetchone();
+							
+							### Issue Number ###
+							issue_name = ''	
+							issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry_rec.entry_date))
+							issue_name = cr.fetchone();
+							
+							### Core Log Number ###
+							core_name = ''	
+							core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry_rec.entry_date))
+							core_name = cr.fetchone();
+							
+							### Mould Log Number ###
+							mould_name = ''	
+							mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry_rec.entry_date))
+							mould_name = cr.fetchone();
+							
+							production_vals = {
+													
+								'name': produc_name[0],
+								'schedule_id': entry_rec.ms_id.schedule_id.id,
+								'schedule_date': entry_rec.ms_id.schedule_date,
+								'division_id': entry_rec.ms_id.division_id.id,
+								'location' : entry_rec.ms_id.location,
+								'schedule_line_id': entry_rec.ms_id.schedule_line_id.id,
+								'order_id': entry_rec.ms_id.order_id.id,
+								'order_line_id': entry_rec.ms_id.order_line_id.id,
+								'order_bomline_id': entry_rec.ms_id.order_bomline_id.id,
+								'qty' : entry_rec.inhouse_qty,			  
+								'schedule_qty' : entry_rec.inhouse_qty,			  
+								'state' : 'issue_done',
+								'order_category':entry_rec.ms_id.order_category,
+								'order_priority': '1',
+								'pattern_id' : entry_rec.ms_id.pattern_id.id,
+								'pattern_name' : entry_rec.ms_id.pattern_id.pattern_name,	
+								'moc_id' : entry_rec.ms_id.moc_id.id,
+								'request_state': 'done',
+								'issue_no': issue_name[0],
+								'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'issue_qty': 1,
+								'issue_state': 'issued',
+								'core_no': core_name[0],
+								'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'core_qty': entry_rec.inhouse_qty,	
+								'core_rem_qty': entry_rec.inhouse_qty,	
+								'core_state': 'pending',
+								'mould_no': mould_name[0],
+								'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'mould_qty': entry_rec.inhouse_qty,	
+								'mould_rem_qty': entry_rec.inhouse_qty,	
+								'mould_state': 'pending',		
 							}
 							
-							dimension_obj = self.pool.get('ch.ms.dimension.details')
-							dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
-						
-					if entry_rec.ms_type == 'foundry_item':
-						
-						ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
-						
-						## Operation 5 Status Updation ###
-						if entry_rec.op5_state in ('pending','partial','done'):
-							self.write(cr, uid, ids, {'op5_state':'reject'})
-							
-						self.write(cr, uid, ids, {'state':'reject'})
-								
-						#### NC Creation for reject Qty ###
-						
-						### Production Number ###
-						produc_name = ''	
-						produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry_rec.entry_date))
-						produc_name = cr.fetchone();
-						
-						### Issue Number ###
-						issue_name = ''	
-						issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry_rec.entry_date))
-						issue_name = cr.fetchone();
-						
-						### Core Log Number ###
-						core_name = ''	
-						core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry_rec.entry_date))
-						core_name = cr.fetchone();
-						
-						### Mould Log Number ###
-						mould_name = ''	
-						mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry_rec.entry_date))
-						mould_name = cr.fetchone();
-						
-						production_vals = {
-												
-							'name': produc_name[0],
-							'schedule_id': entry_rec.ms_id.schedule_id.id,
-							'schedule_date': entry_rec.ms_id.schedule_date,
-							'division_id': entry_rec.ms_id.division_id.id,
-							'location' : entry_rec.ms_id.location,
-							'schedule_line_id': entry_rec.ms_id.schedule_line_id.id,
-							'order_id': entry_rec.ms_id.order_id.id,
-							'order_line_id': entry_rec.ms_id.order_line_id.id,
-							'order_bomline_id': entry_rec.ms_id.order_bomline_id.id,
-							'qty' : entry_rec.inhouse_qty,			  
-							'schedule_qty' : entry_rec.inhouse_qty,			  
-							'state' : 'issue_done',
-							'order_category':entry_rec.ms_id.order_category,
-							'order_priority': '1',
-							'pattern_id' : entry_rec.ms_id.pattern_id.id,
-							'pattern_name' : entry_rec.ms_id.pattern_id.pattern_name,	
-							'moc_id' : entry_rec.ms_id.moc_id.id,
-							'request_state': 'done',
-							'issue_no': issue_name[0],
-							'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'issue_qty': 1,
-							'issue_state': 'issued',
-							'core_no': core_name[0],
-							'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'core_qty': entry_rec.inhouse_qty,	
-							'core_rem_qty': entry_rec.inhouse_qty,	
-							'core_state': 'pending',
-							'mould_no': mould_name[0],
-							'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'mould_qty': entry_rec.inhouse_qty,	
-							'mould_rem_qty': entry_rec.inhouse_qty,	
-							'mould_state': 'pending',		
-						}
-						
-						production_id = self.pool.get('kg.production').create(cr, uid, production_vals)
+							production_id = self.pool.get('kg.production').create(cr, uid, production_vals)
 					
 			else:
 				if entry_rec.op5_button_status == 'visible':
-					sc_obj = self.pool.get('kg.subcontract.process')
-					
-					self.write(cr, uid, ids, {'op5_sc_status': 'sc','op5_button_status': 'invisible'})	
-					sc_name = ''	
-					sc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.process')])
-					seq_rec = self.pool.get('ir.sequence').browse(cr,uid,sc_seq_id[0])
-					cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
-					sc_name = cr.fetchone();
-					
-					wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
-					if entry_rec.order_id.id == wo_id[0]:
-						sc_actual_qty = 0
-					else:
-						sc_actual_qty = entry_rec.inhouse_qty
-					
-					sc_vals = {
-						'name': sc_name[0],
-						'ms_plan_id': entry_rec.ms_plan_id.id,
-						'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
-						'sc_qty': entry_rec.inhouse_qty,
-						'total_qty': entry_rec.inhouse_qty,
-						'pending_qty': entry_rec.inhouse_qty,
-						'actual_qty': sc_actual_qty,
-						'ms_op_id': entry_rec.id,
-						'contractor_id': entry_rec.op5_contractor_id.id,
-						'operation_id': entry_rec.op5_id.id,
-					}
-					sc_id = sc_obj.create(cr, uid,sc_vals)
+					if entry_rec.order_id.flag_for_stock == False:
+						sc_obj = self.pool.get('kg.subcontract.process')
+						
+						self.write(cr, uid, ids, {'op5_sc_status': 'sc','op5_button_status': 'invisible'})	
+						sc_name = ''	
+						sc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.process')])
+						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,sc_seq_id[0])
+						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
+						sc_name = cr.fetchone();
+						
+						wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
+						if entry_rec.order_id.id == wo_id[0]:
+							sc_actual_qty = 0
+						else:
+							sc_actual_qty = entry_rec.inhouse_qty
+						
+						sc_vals = {
+							'name': sc_name[0],
+							'ms_plan_id': entry_rec.ms_plan_id.id,
+							'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+							'sc_qty': entry_rec.inhouse_qty,
+							'total_qty': entry_rec.inhouse_qty,
+							'pending_qty': entry_rec.inhouse_qty,
+							'actual_qty': sc_actual_qty,
+							'ms_op_id': entry_rec.id,
+							'contractor_id': entry_rec.op5_contractor_id.id,
+							'operation_id': entry_rec.op5_id.id,
+						}
+						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
 			pass
 						
@@ -4393,226 +4533,220 @@ class kg_ms_operations(osv.osv):
 							))
 						pending_operation = cr.fetchone()
 						if pending_operation == None:
-							if entry_rec.op6_process_result == 'accept':
-								ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
-								ms_store_vals = {
-									'operation_id': entry_rec.id,
-									'production_id': entry_rec.production_id.id,
-									'foundry_assembly_id': entry_rec.production_id.assembly_id,
-									'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
-									'ms_assembly_id': entry_rec.ms_id.assembly_id,
-									'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
-									'qty': entry_rec.inhouse_qty,
-									'oth_spec': entry_rec.oth_spec
-								}
-								ms_store_id = self.pool.get('kg.ms.stores').create(cr, uid, ms_store_vals)
-							if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-								ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+							if entry_rec.order_id.flag_for_stock == False:
+								if entry_rec.op6_process_result == 'accept':
+									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
+									## MS Store Operation ###
+									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
+								if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
+									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
 				
 				if entry_rec.op6_process_result == 'reject':
-				
 					
-					### Department Indent Creation when process result is reject for ms item ###
-					if entry_rec.ms_type == 'ms_item':
-						
-						## Operation 6 Status Updation ###
-						if entry_rec.op6_state in ('pending','partial','done'):
-							self.write(cr, uid, ids, {'op6_state':'reject'})
-						self.write(cr, uid, ids, {'state':'reject'})
-						if entry_rec.ms_id.ms_id.line_ids:
+					## Operation 6 Status Updation ###
+					if entry_rec.op6_state in ('pending','partial','done'):
+						self.write(cr, uid, ids, {'op6_state':'reject'})
+					self.write(cr, uid, ids, {'state':'reject'})
+					if entry_rec.order_id.flag_for_stock == False:
+						### Department Indent Creation when process result is reject for ms item ###
+						if entry_rec.ms_type == 'ms_item':
 							
-							dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
 							
-							location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
-							
-							seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
-							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
-							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry_rec.entry_date))
-							seq_name = cr.fetchone();
+							if entry_rec.ms_id.ms_id.line_ids:
+								
+								dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
+								
+								location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
+								
+								seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
+								seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry_rec.entry_date))
+								seq_name = cr.fetchone();
 
-							dep_indent_obj = self.pool.get('kg.depindent')
-							dep_indent_vals = {
-								'name':'',
-								'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
-								'dep_name':1,
-								'entry_mode':'auto',
-								'state': 'approved',
-								'indent_type': 'production',
-								'name': seq_name[0],
-								'order_id': entry_rec.order_id.id,
-								'order_line_id': entry_rec.order_line_id.id,
-								'src_location_id': location.main_location.id,
-								'dest_location_id': location.stock_location.id
-								}
+								dep_indent_obj = self.pool.get('kg.depindent')
+								dep_indent_vals = {
+									'name':'',
+									'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+									'dep_name':1,
+									'entry_mode':'auto',
+									'state': 'approved',
+									'indent_type': 'production',
+									'name': seq_name[0],
+									'order_id': entry_rec.order_id.id,
+									'order_line_id': entry_rec.order_line_id.id,
+									'src_location_id': location.main_location.id,
+									'dest_location_id': location.stock_location.id
+									}
+									
+								indent_id = dep_indent_obj.create(cr, uid, dep_indent_vals)
+								for indent_item in entry_rec.ms_id.ms_id.line_ids:
+									dep_indent_line_obj = self.pool.get('kg.depindent.line')
+									product_rec = self.pool.get('product.product').browse(cr, uid, indent_item.product_id.id)
+									dep_indent_line_vals = {
+									'indent_id':indent_id,
+									'product_id': indent_item.product_id.id,
+									'uom': product_rec.uom_id.id,
+									'qty': indent_item.qty * entry_rec.inhouse_qty,
+									'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
+									'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
+									#~ 'cutting_qty':ms_raw_rec.temp_qty,
+									'ms_bot_id':entry_rec.ms_id.ms_id.id,
+									'fns_item_name':entry_rec.item_name,
+									'position_id': entry_rec.position_id.id
+									}
+									
+									indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
+									
+									indent_wo_line_obj = self.pool.get('ch.depindent.wo')
 								
-							indent_id = dep_indent_obj.create(cr, uid, dep_indent_vals)
-							for indent_item in entry_rec.ms_id.ms_id.line_ids:
-								dep_indent_line_obj = self.pool.get('kg.depindent.line')
-								product_rec = self.pool.get('product.product').browse(cr, uid, indent_item.product_id.id)
-								dep_indent_line_vals = {
-								'indent_id':indent_id,
-								'product_id': indent_item.product_id.id,
-								'uom': product_rec.uom_id.id,
-								'qty': indent_item.qty * entry_rec.inhouse_qty,
-								'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-								'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-								#~ 'cutting_qty':ms_raw_rec.temp_qty,
-								'ms_bot_id':entry_rec.ms_id.ms_id.id,
-								'fns_item_name':entry_rec.item_name,
-								'position_id': entry_rec.position_id.id
-								}
-								
-								indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
-								
-								indent_wo_line_obj = self.pool.get('ch.depindent.wo')
+									indent_wo_line_vals = {
+										'header_id':indent_line_id,
+										'wo_id':entry_rec.order_no,
+										'w_order_id':entry_rec.order_id.id,
+										'w_order_line_id':entry_rec.order_line_id.id,
+										'qty':indent_item.qty * entry_rec.inhouse_qty,
+									}
+									indent_wo_line_id = indent_wo_line_obj.create(cr, uid, indent_wo_line_vals)
 							
-								indent_wo_line_vals = {
-									'header_id':indent_line_id,
-									'wo_id':entry_rec.order_no,
-									'w_order_id':entry_rec.order_id.id,
-									'w_order_line_id':entry_rec.order_line_id.id,
-									'qty':indent_item.qty * entry_rec.inhouse_qty,
-								}
-								indent_wo_line_id = indent_wo_line_obj.create(cr, uid, indent_wo_line_vals)
-						
-						### New Entry Creation for same Operation ###
-						op_vals = {
-							'ms_id': entry_rec.ms_id.id,
-							'ms_plan_id': entry_rec.ms_plan_id.id,
-							'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
-							'inhouse_qty': 1,
-							'op6_stage_id': entry_rec.op6_stage_id.id,
-							'op6_clamping_area': entry_rec.op6_clamping_area,
-							'op6_id': entry_rec.op6_id.id,
-							'parent_id' : ids[0],
-							'last_operation_check_id': entry_rec.last_operation_check_id,
-							'state': 'active',
-							'op6_state': 'pending',
-							'op6_process_result':'',
-						
-						}			
-						copy_id = self.copy(cr, uid, entry_rec.id,op_vals, context)
-						
-						copy_rec = self.browse(cr, uid, copy_id)
-						
-						for dimen_item in copy_rec.op6_line_ids:
+							### New Entry Creation for same Operation ###
+							op_vals = {
+								'ms_id': entry_rec.ms_id.id,
+								'ms_plan_id': entry_rec.ms_plan_id.id,
+								'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+								'inhouse_qty': 1,
+								'op6_stage_id': entry_rec.op6_stage_id.id,
+								'op6_clamping_area': entry_rec.op6_clamping_area,
+								'op6_id': entry_rec.op6_id.id,
+								'parent_id' : ids[0],
+								'last_operation_check_id': entry_rec.last_operation_check_id,
+								'state': 'active',
+								'op6_state': 'pending',
+								'op6_process_result':'',
 							
-							dimen_vals = {
-								'actual_val': 0,
-								'remark': False,
+							}			
+							copy_id = self.copy(cr, uid, entry_rec.id,op_vals, context)
+							
+							copy_rec = self.browse(cr, uid, copy_id)
+							
+							for dimen_item in copy_rec.op6_line_ids:
+								
+								dimen_vals = {
+									'actual_val': 0,
+									'remark': False,
+								}
+								
+								dimension_obj = self.pool.get('ch.ms.dimension.details')
+								dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
+							
+						if entry_rec.ms_type == 'foundry_item':
+							
+							ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
+							
+							## Operation 5 Status Updation ###
+							if entry_rec.op6_state in ('pending','partial','done'):
+								self.write(cr, uid, ids, {'op6_state':'reject'})
+								
+							self.write(cr, uid, ids, {'state':'reject'})
+									
+							#### NC Creation for reject Qty ###
+							
+							### Production Number ###
+							produc_name = ''	
+							produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry_rec.entry_date))
+							produc_name = cr.fetchone();
+							
+							### Issue Number ###
+							issue_name = ''	
+							issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry_rec.entry_date))
+							issue_name = cr.fetchone();
+							
+							### Core Log Number ###
+							core_name = ''	
+							core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry_rec.entry_date))
+							core_name = cr.fetchone();
+							
+							### Mould Log Number ###
+							mould_name = ''	
+							mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry_rec.entry_date))
+							mould_name = cr.fetchone();
+							
+							production_vals = {
+													
+								'name': produc_name[0],
+								'schedule_id': entry_rec.ms_id.schedule_id.id,
+								'schedule_date': entry_rec.ms_id.schedule_date,
+								'division_id': entry_rec.ms_id.division_id.id,
+								'location' : entry_rec.ms_id.location,
+								'schedule_line_id': entry_rec.ms_id.schedule_line_id.id,
+								'order_id': entry_rec.ms_id.order_id.id,
+								'order_line_id': entry_rec.ms_id.order_line_id.id,
+								'order_bomline_id': entry_rec.ms_id.order_bomline_id.id,
+								'qty' : entry_rec.inhouse_qty,			  
+								'schedule_qty' : entry_rec.inhouse_qty,			  
+								'state' : 'issue_done',
+								'order_category':entry_rec.ms_id.order_category,
+								'order_priority': '1',
+								'pattern_id' : entry_rec.ms_id.pattern_id.id,
+								'pattern_name' : entry_rec.ms_id.pattern_id.pattern_name,	
+								'moc_id' : entry_rec.ms_id.moc_id.id,
+								'request_state': 'done',
+								'issue_no': issue_name[0],
+								'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'issue_qty': 1,
+								'issue_state': 'issued',
+								'core_no': core_name[0],
+								'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'core_qty': entry_rec.inhouse_qty,	
+								'core_rem_qty': entry_rec.inhouse_qty,	
+								'core_state': 'pending',
+								'mould_no': mould_name[0],
+								'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'mould_qty': entry_rec.inhouse_qty,	
+								'mould_rem_qty': entry_rec.inhouse_qty,	
+								'mould_state': 'pending',		
 							}
 							
-							dimension_obj = self.pool.get('ch.ms.dimension.details')
-							dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
-						
-					if entry_rec.ms_type == 'foundry_item':
-						
-						ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
-						
-						## Operation 5 Status Updation ###
-						if entry_rec.op6_state in ('pending','partial','done'):
-							self.write(cr, uid, ids, {'op6_state':'reject'})
-							
-						self.write(cr, uid, ids, {'state':'reject'})
-								
-						#### NC Creation for reject Qty ###
-						
-						### Production Number ###
-						produc_name = ''	
-						produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry_rec.entry_date))
-						produc_name = cr.fetchone();
-						
-						### Issue Number ###
-						issue_name = ''	
-						issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry_rec.entry_date))
-						issue_name = cr.fetchone();
-						
-						### Core Log Number ###
-						core_name = ''	
-						core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry_rec.entry_date))
-						core_name = cr.fetchone();
-						
-						### Mould Log Number ###
-						mould_name = ''	
-						mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry_rec.entry_date))
-						mould_name = cr.fetchone();
-						
-						production_vals = {
-												
-							'name': produc_name[0],
-							'schedule_id': entry_rec.ms_id.schedule_id.id,
-							'schedule_date': entry_rec.ms_id.schedule_date,
-							'division_id': entry_rec.ms_id.division_id.id,
-							'location' : entry_rec.ms_id.location,
-							'schedule_line_id': entry_rec.ms_id.schedule_line_id.id,
-							'order_id': entry_rec.ms_id.order_id.id,
-							'order_line_id': entry_rec.ms_id.order_line_id.id,
-							'order_bomline_id': entry_rec.ms_id.order_bomline_id.id,
-							'qty' : entry_rec.inhouse_qty,			  
-							'schedule_qty' : entry_rec.inhouse_qty,			  
-							'state' : 'issue_done',
-							'order_category':entry_rec.ms_id.order_category,
-							'order_priority': '1',
-							'pattern_id' : entry_rec.ms_id.pattern_id.id,
-							'pattern_name' : entry_rec.ms_id.pattern_id.pattern_name,	
-							'moc_id' : entry_rec.ms_id.moc_id.id,
-							'request_state': 'done',
-							'issue_no': issue_name[0],
-							'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'issue_qty': 1,
-							'issue_state': 'issued',
-							'core_no': core_name[0],
-							'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'core_qty': entry_rec.inhouse_qty,	
-							'core_rem_qty': entry_rec.inhouse_qty,	
-							'core_state': 'pending',
-							'mould_no': mould_name[0],
-							'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'mould_qty': entry_rec.inhouse_qty,	
-							'mould_rem_qty': entry_rec.inhouse_qty,	
-							'mould_state': 'pending',		
-						}
-						
-						production_id = self.pool.get('kg.production').create(cr, uid, production_vals)
+							production_id = self.pool.get('kg.production').create(cr, uid, production_vals)
 					
 			else:
 				if entry_rec.op6_button_status == 'visible':
-					sc_obj = self.pool.get('kg.subcontract.process')
-					
-					self.write(cr, uid, ids, {'op6_sc_status': 'sc','op6_button_status': 'invisible'})	
-					sc_name = ''	
-					sc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.process')])
-					seq_rec = self.pool.get('ir.sequence').browse(cr,uid,sc_seq_id[0])
-					cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
-					sc_name = cr.fetchone();
-					
-					wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
-					if entry_rec.order_id.id == wo_id[0]:
-						sc_actual_qty = 0
-					else:
-						sc_actual_qty = entry_rec.inhouse_qty
-					
-					sc_vals = {
-						'name': sc_name[0],
-						'ms_plan_id': entry_rec.ms_plan_id.id,
-						'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
-						'sc_qty': entry_rec.inhouse_qty,
-						'total_qty': entry_rec.inhouse_qty,
-						'pending_qty': entry_rec.inhouse_qty,
-						'actual_qty': sc_actual_qty,
-						'ms_op_id': entry_rec.id,
-						'contractor_id': entry_rec.op6_contractor_id.id,
-						'operation_id': entry_rec.op6_id.id,
-					}
-					sc_id = sc_obj.create(cr, uid,sc_vals)
+					if entry_rec.order_id.flag_for_stock == False:
+						sc_obj = self.pool.get('kg.subcontract.process')
+						
+						self.write(cr, uid, ids, {'op6_sc_status': 'sc','op6_button_status': 'invisible'})	
+						sc_name = ''	
+						sc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.process')])
+						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,sc_seq_id[0])
+						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
+						sc_name = cr.fetchone();
+						
+						wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
+						if entry_rec.order_id.id == wo_id[0]:
+							sc_actual_qty = 0
+						else:
+							sc_actual_qty = entry_rec.inhouse_qty
+						
+						sc_vals = {
+							'name': sc_name[0],
+							'ms_plan_id': entry_rec.ms_plan_id.id,
+							'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+							'sc_qty': entry_rec.inhouse_qty,
+							'total_qty': entry_rec.inhouse_qty,
+							'pending_qty': entry_rec.inhouse_qty,
+							'actual_qty': sc_actual_qty,
+							'ms_op_id': entry_rec.id,
+							'contractor_id': entry_rec.op6_contractor_id.id,
+							'operation_id': entry_rec.op6_id.id,
+						}
+						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
 			pass
 						
@@ -5061,226 +5195,220 @@ class kg_ms_operations(osv.osv):
 							))
 						pending_operation = cr.fetchone()
 						if pending_operation == None:
-							if entry_rec.op7_process_result == 'accept':
-								ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
-								ms_store_vals = {
-									'operation_id': entry_rec.id,
-									'production_id': entry_rec.production_id.id,
-									'foundry_assembly_id': entry_rec.production_id.assembly_id,
-									'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
-									'ms_assembly_id': entry_rec.ms_id.assembly_id,
-									'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
-									'qty': entry_rec.inhouse_qty,
-									'oth_spec': entry_rec.oth_spec
-								}
-								ms_store_id = self.pool.get('kg.ms.stores').create(cr, uid, ms_store_vals)
-							if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-								ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+							if entry_rec.order_id.flag_for_stock == False:
+								if entry_rec.op7_process_result == 'accept':
+									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
+									## MS Store Operation ###
+									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
+								if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
+									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
 				
 				if entry_rec.op7_process_result == 'reject':
-				
 					
-					### Department Indent Creation when process result is reject for ms item ###
-					if entry_rec.ms_type == 'ms_item':
-						
-						## Operation 7 Status Updation ###
-						if entry_rec.op7_state in ('pending','partial','done'):
-							self.write(cr, uid, ids, {'op7_state':'reject'})
-						self.write(cr, uid, ids, {'state':'reject'})
-						if entry_rec.ms_id.ms_id.line_ids:
+					## Operation 7 Status Updation ###
+					if entry_rec.op7_state in ('pending','partial','done'):
+						self.write(cr, uid, ids, {'op7_state':'reject'})
+					self.write(cr, uid, ids, {'state':'reject'})
+					if entry_rec.order_id.flag_for_stock == False:
+						### Department Indent Creation when process result is reject for ms item ###
+						if entry_rec.ms_type == 'ms_item':
 							
-							dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
 							
-							location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
-							
-							seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
-							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
-							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry_rec.entry_date))
-							seq_name = cr.fetchone();
+							if entry_rec.ms_id.ms_id.line_ids:
+								
+								dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
+								
+								location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
+								
+								seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
+								seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry_rec.entry_date))
+								seq_name = cr.fetchone();
 
-							dep_indent_obj = self.pool.get('kg.depindent')
-							dep_indent_vals = {
-								'name':'',
-								'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
-								'dep_name':1,
-								'entry_mode':'auto',
-								'state': 'approved',
-								'indent_type': 'production',
-								'name': seq_name[0],
-								'order_id': entry_rec.order_id.id,
-								'order_line_id': entry_rec.order_line_id.id,
-								'src_location_id': location.main_location.id,
-								'dest_location_id': location.stock_location.id
-								}
+								dep_indent_obj = self.pool.get('kg.depindent')
+								dep_indent_vals = {
+									'name':'',
+									'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+									'dep_name':1,
+									'entry_mode':'auto',
+									'state': 'approved',
+									'indent_type': 'production',
+									'name': seq_name[0],
+									'order_id': entry_rec.order_id.id,
+									'order_line_id': entry_rec.order_line_id.id,
+									'src_location_id': location.main_location.id,
+									'dest_location_id': location.stock_location.id
+									}
+									
+								indent_id = dep_indent_obj.create(cr, uid, dep_indent_vals)
+								for indent_item in entry_rec.ms_id.ms_id.line_ids:
+									dep_indent_line_obj = self.pool.get('kg.depindent.line')
+									product_rec = self.pool.get('product.product').browse(cr, uid, indent_item.product_id.id)
+									dep_indent_line_vals = {
+									'indent_id':indent_id,
+									'product_id': indent_item.product_id.id,
+									'uom': product_rec.uom_id.id,
+									'qty': indent_item.qty * entry_rec.inhouse_qty,
+									'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
+									'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
+									#~ 'cutting_qty':ms_raw_rec.temp_qty,
+									'ms_bot_id':entry_rec.ms_id.ms_id.id,
+									'fns_item_name':entry_rec.item_name,
+									'position_id': entry_rec.position_id.id
+									}
+									
+									indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
+									
+									indent_wo_line_obj = self.pool.get('ch.depindent.wo')
 								
-							indent_id = dep_indent_obj.create(cr, uid, dep_indent_vals)
-							for indent_item in entry_rec.ms_id.ms_id.line_ids:
-								dep_indent_line_obj = self.pool.get('kg.depindent.line')
-								product_rec = self.pool.get('product.product').browse(cr, uid, indent_item.product_id.id)
-								dep_indent_line_vals = {
-								'indent_id':indent_id,
-								'product_id': indent_item.product_id.id,
-								'uom': product_rec.uom_id.id,
-								'qty': indent_item.qty * entry_rec.inhouse_qty,
-								'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-								'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-								#~ 'cutting_qty':ms_raw_rec.temp_qty,
-								'ms_bot_id':entry_rec.ms_id.ms_id.id,
-								'fns_item_name':entry_rec.item_name,
-								'position_id': entry_rec.position_id.id
-								}
-								
-								indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
-								
-								indent_wo_line_obj = self.pool.get('ch.depindent.wo')
+									indent_wo_line_vals = {
+										'header_id':indent_line_id,
+										'wo_id':entry_rec.order_no,
+										'w_order_id':entry_rec.order_id.id,
+										'w_order_line_id':entry_rec.order_line_id.id,
+										'qty':indent_item.qty * entry_rec.inhouse_qty,
+									}
+									indent_wo_line_id = indent_wo_line_obj.create(cr, uid, indent_wo_line_vals)
 							
-								indent_wo_line_vals = {
-									'header_id':indent_line_id,
-									'wo_id':entry_rec.order_no,
-									'w_order_id':entry_rec.order_id.id,
-									'w_order_line_id':entry_rec.order_line_id.id,
-									'qty':indent_item.qty * entry_rec.inhouse_qty,
-								}
-								indent_wo_line_id = indent_wo_line_obj.create(cr, uid, indent_wo_line_vals)
-						
-						### New Entry Creation for same Operation ###
-						op_vals = {
-							'ms_id': entry_rec.ms_id.id,
-							'ms_plan_id': entry_rec.ms_plan_id.id,
-							'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
-							'inhouse_qty': 1,
-							'op7_stage_id': entry_rec.op7_stage_id.id,
-							'op7_clamping_area': entry_rec.op7_clamping_area,
-							'op7_id': entry_rec.op7_id.id,
-							'parent_id' : ids[0],
-							'last_operation_check_id': entry_rec.last_operation_check_id,
-							'state': 'active',
-							'op7_state': 'pending',
-							'op7_process_result':'',
-						
-						}			
-						copy_id = self.copy(cr, uid, entry_rec.id,op_vals, context)
-						
-						copy_rec = self.browse(cr, uid, copy_id)
-						
-						for dimen_item in copy_rec.op7_line_ids:
+							### New Entry Creation for same Operation ###
+							op_vals = {
+								'ms_id': entry_rec.ms_id.id,
+								'ms_plan_id': entry_rec.ms_plan_id.id,
+								'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+								'inhouse_qty': 1,
+								'op7_stage_id': entry_rec.op7_stage_id.id,
+								'op7_clamping_area': entry_rec.op7_clamping_area,
+								'op7_id': entry_rec.op7_id.id,
+								'parent_id' : ids[0],
+								'last_operation_check_id': entry_rec.last_operation_check_id,
+								'state': 'active',
+								'op7_state': 'pending',
+								'op7_process_result':'',
 							
-							dimen_vals = {
-								'actual_val': 0,
-								'remark': False,
+							}			
+							copy_id = self.copy(cr, uid, entry_rec.id,op_vals, context)
+							
+							copy_rec = self.browse(cr, uid, copy_id)
+							
+							for dimen_item in copy_rec.op7_line_ids:
+								
+								dimen_vals = {
+									'actual_val': 0,
+									'remark': False,
+								}
+								
+								dimension_obj = self.pool.get('ch.ms.dimension.details')
+								dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
+							
+						if entry_rec.ms_type == 'foundry_item':
+							
+							ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
+							
+							## Operation 7 Status Updation ###
+							if entry_rec.op7_state in ('pending','partial','done'):
+								self.write(cr, uid, ids, {'op7_state':'reject'})
+								
+							self.write(cr, uid, ids, {'state':'reject'})
+									
+							#### NC Creation for reject Qty ###
+							
+							### Production Number ###
+							produc_name = ''	
+							produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry_rec.entry_date))
+							produc_name = cr.fetchone();
+							
+							### Issue Number ###
+							issue_name = ''	
+							issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry_rec.entry_date))
+							issue_name = cr.fetchone();
+							
+							### Core Log Number ###
+							core_name = ''	
+							core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry_rec.entry_date))
+							core_name = cr.fetchone();
+							
+							### Mould Log Number ###
+							mould_name = ''	
+							mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry_rec.entry_date))
+							mould_name = cr.fetchone();
+							
+							production_vals = {
+													
+								'name': produc_name[0],
+								'schedule_id': entry_rec.ms_id.schedule_id.id,
+								'schedule_date': entry_rec.ms_id.schedule_date,
+								'division_id': entry_rec.ms_id.division_id.id,
+								'location' : entry_rec.ms_id.location,
+								'schedule_line_id': entry_rec.ms_id.schedule_line_id.id,
+								'order_id': entry_rec.ms_id.order_id.id,
+								'order_line_id': entry_rec.ms_id.order_line_id.id,
+								'order_bomline_id': entry_rec.ms_id.order_bomline_id.id,
+								'qty' : entry_rec.inhouse_qty,			  
+								'schedule_qty' : entry_rec.inhouse_qty,			  
+								'state' : 'issue_done',
+								'order_category':entry_rec.ms_id.order_category,
+								'order_priority': '1',
+								'pattern_id' : entry_rec.ms_id.pattern_id.id,
+								'pattern_name' : entry_rec.ms_id.pattern_id.pattern_name,	
+								'moc_id' : entry_rec.ms_id.moc_id.id,
+								'request_state': 'done',
+								'issue_no': issue_name[0],
+								'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'issue_qty': 1,
+								'issue_state': 'issued',
+								'core_no': core_name[0],
+								'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'core_qty': entry_rec.inhouse_qty,	
+								'core_rem_qty': entry_rec.inhouse_qty,	
+								'core_state': 'pending',
+								'mould_no': mould_name[0],
+								'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'mould_qty': entry_rec.inhouse_qty,	
+								'mould_rem_qty': entry_rec.inhouse_qty,	
+								'mould_state': 'pending',		
 							}
 							
-							dimension_obj = self.pool.get('ch.ms.dimension.details')
-							dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
-						
-					if entry_rec.ms_type == 'foundry_item':
-						
-						ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
-						
-						## Operation 7 Status Updation ###
-						if entry_rec.op7_state in ('pending','partial','done'):
-							self.write(cr, uid, ids, {'op7_state':'reject'})
-							
-						self.write(cr, uid, ids, {'state':'reject'})
-								
-						#### NC Creation for reject Qty ###
-						
-						### Production Number ###
-						produc_name = ''	
-						produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry_rec.entry_date))
-						produc_name = cr.fetchone();
-						
-						### Issue Number ###
-						issue_name = ''	
-						issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry_rec.entry_date))
-						issue_name = cr.fetchone();
-						
-						### Core Log Number ###
-						core_name = ''	
-						core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry_rec.entry_date))
-						core_name = cr.fetchone();
-						
-						### Mould Log Number ###
-						mould_name = ''	
-						mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry_rec.entry_date))
-						mould_name = cr.fetchone();
-						
-						production_vals = {
-												
-							'name': produc_name[0],
-							'schedule_id': entry_rec.ms_id.schedule_id.id,
-							'schedule_date': entry_rec.ms_id.schedule_date,
-							'division_id': entry_rec.ms_id.division_id.id,
-							'location' : entry_rec.ms_id.location,
-							'schedule_line_id': entry_rec.ms_id.schedule_line_id.id,
-							'order_id': entry_rec.ms_id.order_id.id,
-							'order_line_id': entry_rec.ms_id.order_line_id.id,
-							'order_bomline_id': entry_rec.ms_id.order_bomline_id.id,
-							'qty' : entry_rec.inhouse_qty,			  
-							'schedule_qty' : entry_rec.inhouse_qty,			  
-							'state' : 'issue_done',
-							'order_category':entry_rec.ms_id.order_category,
-							'order_priority': '1',
-							'pattern_id' : entry_rec.ms_id.pattern_id.id,
-							'pattern_name' : entry_rec.ms_id.pattern_id.pattern_name,	
-							'moc_id' : entry_rec.ms_id.moc_id.id,
-							'request_state': 'done',
-							'issue_no': issue_name[0],
-							'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'issue_qty': 1,
-							'issue_state': 'issued',
-							'core_no': core_name[0],
-							'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'core_qty': entry_rec.inhouse_qty,	
-							'core_rem_qty': entry_rec.inhouse_qty,	
-							'core_state': 'pending',
-							'mould_no': mould_name[0],
-							'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'mould_qty': entry_rec.inhouse_qty,	
-							'mould_rem_qty': entry_rec.inhouse_qty,	
-							'mould_state': 'pending',		
-						}
-						
-						production_id = self.pool.get('kg.production').create(cr, uid, production_vals)
+							production_id = self.pool.get('kg.production').create(cr, uid, production_vals)
 					
 			else:
 				if entry_rec.op7_button_status == 'visible':
-					sc_obj = self.pool.get('kg.subcontract.process')
-					
-					self.write(cr, uid, ids, {'op7_sc_status': 'sc','op7_button_status': 'invisible'})	
-					sc_name = ''	
-					sc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.process')])
-					seq_rec = self.pool.get('ir.sequence').browse(cr,uid,sc_seq_id[0])
-					cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
-					sc_name = cr.fetchone();
-					
-					wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
-					if entry_rec.order_id.id == wo_id[0]:
-						sc_actual_qty = 0
-					else:
-						sc_actual_qty = entry_rec.inhouse_qty
-					
-					sc_vals = {
-						'name': sc_name[0],
-						'ms_plan_id': entry_rec.ms_plan_id.id,
-						'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
-						'sc_qty': entry_rec.inhouse_qty,
-						'total_qty': entry_rec.inhouse_qty,
-						'pending_qty': entry_rec.inhouse_qty,
-						'actual_qty': sc_actual_qty,
-						'ms_op_id': entry_rec.id,
-						'contractor_id': entry_rec.op7_contractor_id.id,
-						'operation_id': entry_rec.op7_id.id,
-					}
-					sc_id = sc_obj.create(cr, uid,sc_vals)
+					if entry_rec.order_id.flag_for_stock == False:
+						sc_obj = self.pool.get('kg.subcontract.process')
+						
+						self.write(cr, uid, ids, {'op7_sc_status': 'sc','op7_button_status': 'invisible'})	
+						sc_name = ''	
+						sc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.process')])
+						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,sc_seq_id[0])
+						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
+						sc_name = cr.fetchone();
+						
+						wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
+						if entry_rec.order_id.id == wo_id[0]:
+							sc_actual_qty = 0
+						else:
+							sc_actual_qty = entry_rec.inhouse_qty
+						
+						sc_vals = {
+							'name': sc_name[0],
+							'ms_plan_id': entry_rec.ms_plan_id.id,
+							'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+							'sc_qty': entry_rec.inhouse_qty,
+							'total_qty': entry_rec.inhouse_qty,
+							'pending_qty': entry_rec.inhouse_qty,
+							'actual_qty': sc_actual_qty,
+							'ms_op_id': entry_rec.id,
+							'contractor_id': entry_rec.op7_contractor_id.id,
+							'operation_id': entry_rec.op7_id.id,
+						}
+						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
 			pass
 						
@@ -5729,226 +5857,219 @@ class kg_ms_operations(osv.osv):
 							))
 						pending_operation = cr.fetchone()
 						if pending_operation == None:
-							if entry_rec.op8_process_result == 'accept':
-								ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
-								ms_store_vals = {
-									'operation_id': entry_rec.id,
-									'production_id': entry_rec.production_id.id,
-									'foundry_assembly_id': entry_rec.production_id.assembly_id,
-									'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
-									'ms_assembly_id': entry_rec.ms_id.assembly_id,
-									'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
-									'qty': entry_rec.inhouse_qty,
-									'oth_spec': entry_rec.oth_spec
-								}
-								ms_store_id = self.pool.get('kg.ms.stores').create(cr, uid, ms_store_vals)
-							if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-								ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+							if entry_rec.order_id.flag_for_stock == False:
+								if entry_rec.op8_process_result == 'accept':
+									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
+									## MS Store Operation ###
+									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
+								if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
+									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
 				
 				if entry_rec.op8_process_result == 'reject':
-				
 					
-					### Department Indent Creation when process result is reject for ms item ###
-					if entry_rec.ms_type == 'ms_item':
-						
-						## Operation 8 Status Updation ###
-						if entry_rec.op8_state in ('pending','partial','done'):
-							self.write(cr, uid, ids, {'op8_state':'reject'})
-						self.write(cr, uid, ids, {'state':'reject'})
-						if entry_rec.ms_id.ms_id.line_ids:
-							
-							dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
-							
-							location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
-							
-							seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
-							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
-							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry_rec.entry_date))
-							seq_name = cr.fetchone();
+					## Operation 8 Status Updation ###
+					if entry_rec.op8_state in ('pending','partial','done'):
+						self.write(cr, uid, ids, {'op8_state':'reject'})
+					self.write(cr, uid, ids, {'state':'reject'})
+					if entry_rec.order_id.flag_for_stock == False:
+						### Department Indent Creation when process result is reject for ms item ###
+						if entry_rec.ms_type == 'ms_item':
 
-							dep_indent_obj = self.pool.get('kg.depindent')
-							dep_indent_vals = {
-								'name':'',
-								'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
-								'dep_name':1,
-								'entry_mode':'auto',
-								'state': 'approved',
-								'indent_type': 'production',
-								'name': seq_name[0],
-								'order_id': entry_rec.order_id.id,
-								'order_line_id': entry_rec.order_line_id.id,
-								'src_location_id': location.main_location.id,
-								'dest_location_id': location.stock_location.id
+							if entry_rec.ms_id.ms_id.line_ids:
+								
+								dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
+								
+								location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
+								
+								seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
+								seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry_rec.entry_date))
+								seq_name = cr.fetchone();
+
+								dep_indent_obj = self.pool.get('kg.depindent')
+								dep_indent_vals = {
+									'name':'',
+									'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+									'dep_name':1,
+									'entry_mode':'auto',
+									'state': 'approved',
+									'indent_type': 'production',
+									'name': seq_name[0],
+									'order_id': entry_rec.order_id.id,
+									'order_line_id': entry_rec.order_line_id.id,
+									'src_location_id': location.main_location.id,
+									'dest_location_id': location.stock_location.id
+									}
+									
+								indent_id = dep_indent_obj.create(cr, uid, dep_indent_vals)
+								for indent_item in entry_rec.ms_id.ms_id.line_ids:
+									dep_indent_line_obj = self.pool.get('kg.depindent.line')
+									product_rec = self.pool.get('product.product').browse(cr, uid, indent_item.product_id.id)
+									dep_indent_line_vals = {
+									'indent_id':indent_id,
+									'product_id': indent_item.product_id.id,
+									'uom': product_rec.uom_id.id,
+									'qty': indent_item.qty * entry_rec.inhouse_qty,
+									'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
+									'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
+									#~ 'cutting_qty':ms_raw_rec.temp_qty,
+									'ms_bot_id':entry_rec.ms_id.ms_id.id,
+									'fns_item_name':entry_rec.item_name,
+									'position_id': entry_rec.position_id.id
+									}
+									
+									indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
+									
+									indent_wo_line_obj = self.pool.get('ch.depindent.wo')
+								
+									indent_wo_line_vals = {
+										'header_id':indent_line_id,
+										'wo_id':entry_rec.order_no,
+										'w_order_id':entry_rec.order_id.id,
+										'w_order_line_id':entry_rec.order_line_id.id,
+										'qty':indent_item.qty * entry_rec.inhouse_qty,
+									}
+									indent_wo_line_id = indent_wo_line_obj.create(cr, uid, indent_wo_line_vals)
+							
+							### New Entry Creation for same Operation ###
+							op_vals = {
+								'ms_id': entry_rec.ms_id.id,
+								'ms_plan_id': entry_rec.ms_plan_id.id,
+								'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+								'inhouse_qty': 1,
+								'op8_stage_id': entry_rec.op8_stage_id.id,
+								'op8_clamping_area': entry_rec.op8_clamping_area,
+								'op8_id': entry_rec.op8_id.id,
+								'parent_id' : ids[0],
+								'last_operation_check_id': entry_rec.last_operation_check_id,
+								'state': 'active',
+								'op8_state': 'pending',
+								'op8_process_result':'',
+								
+							}			
+							copy_id = self.copy(cr, uid, entry_rec.id,op_vals, context)
+							
+							copy_rec = self.browse(cr, uid, copy_id)
+							
+							for dimen_item in copy_rec.op8_line_ids:
+								
+								dimen_vals = {
+									'actual_val': 0,
+									'remark': False,
 								}
 								
-							indent_id = dep_indent_obj.create(cr, uid, dep_indent_vals)
-							for indent_item in entry_rec.ms_id.ms_id.line_ids:
-								dep_indent_line_obj = self.pool.get('kg.depindent.line')
-								product_rec = self.pool.get('product.product').browse(cr, uid, indent_item.product_id.id)
-								dep_indent_line_vals = {
-								'indent_id':indent_id,
-								'product_id': indent_item.product_id.id,
-								'uom': product_rec.uom_id.id,
-								'qty': indent_item.qty * entry_rec.inhouse_qty,
-								'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-								'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-								#~ 'cutting_qty':ms_raw_rec.temp_qty,
-								'ms_bot_id':entry_rec.ms_id.ms_id.id,
-								'fns_item_name':entry_rec.item_name,
-								'position_id': entry_rec.position_id.id
-								}
+								dimension_obj = self.pool.get('ch.ms.dimension.details')
+								dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
+							
+						if entry_rec.ms_type == 'foundry_item':
+							
+							ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
+							
+							## Operation 8 Status Updation ###
+							if entry_rec.op8_state in ('pending','partial','done'):
+								self.write(cr, uid, ids, {'op8_state':'reject'})
 								
-								indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
-								
-								indent_wo_line_obj = self.pool.get('ch.depindent.wo')
+							self.write(cr, uid, ids, {'state':'reject'})
+									
+							#### NC Creation for reject Qty ###
 							
-								indent_wo_line_vals = {
-									'header_id':indent_line_id,
-									'wo_id':entry_rec.order_no,
-									'w_order_id':entry_rec.order_id.id,
-									'w_order_line_id':entry_rec.order_line_id.id,
-									'qty':indent_item.qty * entry_rec.inhouse_qty,
-								}
-								indent_wo_line_id = indent_wo_line_obj.create(cr, uid, indent_wo_line_vals)
-						
-						### New Entry Creation for same Operation ###
-						op_vals = {
-							'ms_id': entry_rec.ms_id.id,
-							'ms_plan_id': entry_rec.ms_plan_id.id,
-							'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
-							'inhouse_qty': 1,
-							'op8_stage_id': entry_rec.op8_stage_id.id,
-							'op8_clamping_area': entry_rec.op8_clamping_area,
-							'op8_id': entry_rec.op8_id.id,
-							'parent_id' : ids[0],
-							'last_operation_check_id': entry_rec.last_operation_check_id,
-							'state': 'active',
-							'op8_state': 'pending',
-							'op8_process_result':'',
+							### Production Number ###
+							produc_name = ''	
+							produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry_rec.entry_date))
+							produc_name = cr.fetchone();
 							
-						}			
-						copy_id = self.copy(cr, uid, entry_rec.id,op_vals, context)
-						
-						copy_rec = self.browse(cr, uid, copy_id)
-						
-						for dimen_item in copy_rec.op8_line_ids:
+							### Issue Number ###
+							issue_name = ''	
+							issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry_rec.entry_date))
+							issue_name = cr.fetchone();
 							
-							dimen_vals = {
-								'actual_val': 0,
-								'remark': False,
+							### Core Log Number ###
+							core_name = ''	
+							core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry_rec.entry_date))
+							core_name = cr.fetchone();
+							
+							### Mould Log Number ###
+							mould_name = ''	
+							mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry_rec.entry_date))
+							mould_name = cr.fetchone();
+							
+							production_vals = {
+													
+								'name': produc_name[0],
+								'schedule_id': entry_rec.ms_id.schedule_id.id,
+								'schedule_date': entry_rec.ms_id.schedule_date,
+								'division_id': entry_rec.ms_id.division_id.id,
+								'location' : entry_rec.ms_id.location,
+								'schedule_line_id': entry_rec.ms_id.schedule_line_id.id,
+								'order_id': entry_rec.ms_id.order_id.id,
+								'order_line_id': entry_rec.ms_id.order_line_id.id,
+								'order_bomline_id': entry_rec.ms_id.order_bomline_id.id,
+								'qty' : entry_rec.inhouse_qty,			  
+								'schedule_qty' : entry_rec.inhouse_qty,			  
+								'state' : 'issue_done',
+								'order_category':entry_rec.ms_id.order_category,
+								'order_priority': '1',
+								'pattern_id' : entry_rec.ms_id.pattern_id.id,
+								'pattern_name' : entry_rec.ms_id.pattern_id.pattern_name,	
+								'moc_id' : entry_rec.ms_id.moc_id.id,
+								'request_state': 'done',
+								'issue_no': issue_name[0],
+								'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'issue_qty': 1,
+								'issue_state': 'issued',
+								'core_no': core_name[0],
+								'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'core_qty': entry_rec.inhouse_qty,	
+								'core_rem_qty': entry_rec.inhouse_qty,	
+								'core_state': 'pending',
+								'mould_no': mould_name[0],
+								'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'mould_qty': entry_rec.inhouse_qty,	
+								'mould_rem_qty': entry_rec.inhouse_qty,	
+								'mould_state': 'pending',		
 							}
 							
-							dimension_obj = self.pool.get('ch.ms.dimension.details')
-							dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
-						
-					if entry_rec.ms_type == 'foundry_item':
-						
-						ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
-						
-						## Operation 8 Status Updation ###
-						if entry_rec.op8_state in ('pending','partial','done'):
-							self.write(cr, uid, ids, {'op8_state':'reject'})
-							
-						self.write(cr, uid, ids, {'state':'reject'})
-								
-						#### NC Creation for reject Qty ###
-						
-						### Production Number ###
-						produc_name = ''	
-						produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry_rec.entry_date))
-						produc_name = cr.fetchone();
-						
-						### Issue Number ###
-						issue_name = ''	
-						issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry_rec.entry_date))
-						issue_name = cr.fetchone();
-						
-						### Core Log Number ###
-						core_name = ''	
-						core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry_rec.entry_date))
-						core_name = cr.fetchone();
-						
-						### Mould Log Number ###
-						mould_name = ''	
-						mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry_rec.entry_date))
-						mould_name = cr.fetchone();
-						
-						production_vals = {
-												
-							'name': produc_name[0],
-							'schedule_id': entry_rec.ms_id.schedule_id.id,
-							'schedule_date': entry_rec.ms_id.schedule_date,
-							'division_id': entry_rec.ms_id.division_id.id,
-							'location' : entry_rec.ms_id.location,
-							'schedule_line_id': entry_rec.ms_id.schedule_line_id.id,
-							'order_id': entry_rec.ms_id.order_id.id,
-							'order_line_id': entry_rec.ms_id.order_line_id.id,
-							'order_bomline_id': entry_rec.ms_id.order_bomline_id.id,
-							'qty' : entry_rec.inhouse_qty,			  
-							'schedule_qty' : entry_rec.inhouse_qty,			  
-							'state' : 'issue_done',
-							'order_category':entry_rec.ms_id.order_category,
-							'order_priority': '1',
-							'pattern_id' : entry_rec.ms_id.pattern_id.id,
-							'pattern_name' : entry_rec.ms_id.pattern_id.pattern_name,	
-							'moc_id' : entry_rec.ms_id.moc_id.id,
-							'request_state': 'done',
-							'issue_no': issue_name[0],
-							'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'issue_qty': 1,
-							'issue_state': 'issued',
-							'core_no': core_name[0],
-							'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'core_qty': entry_rec.inhouse_qty,	
-							'core_rem_qty': entry_rec.inhouse_qty,	
-							'core_state': 'pending',
-							'mould_no': mould_name[0],
-							'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'mould_qty': entry_rec.inhouse_qty,	
-							'mould_rem_qty': entry_rec.inhouse_qty,	
-							'mould_state': 'pending',		
-						}
-						
-						production_id = self.pool.get('kg.production').create(cr, uid, production_vals)
+							production_id = self.pool.get('kg.production').create(cr, uid, production_vals)
 					
 			else:
 				if entry_rec.op8_button_status == 'visible':
-					sc_obj = self.pool.get('kg.subcontract.process')
-					
-					self.write(cr, uid, ids, {'op8_sc_status': 'sc','op8_button_status': 'invisible'})	
-					sc_name = ''	
-					sc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.process')])
-					seq_rec = self.pool.get('ir.sequence').browse(cr,uid,sc_seq_id[0])
-					cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
-					sc_name = cr.fetchone();
-					
-					wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
-					if entry_rec.order_id.id == wo_id[0]:
-						sc_actual_qty = 0
-					else:
-						sc_actual_qty = entry_rec.inhouse_qty
-					
-					sc_vals = {
-						'name': sc_name[0],
-						'ms_plan_id': entry_rec.ms_plan_id.id,
-						'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
-						'sc_qty': entry_rec.inhouse_qty,
-						'total_qty': entry_rec.inhouse_qty,
-						'pending_qty': entry_rec.inhouse_qty,
-						'actual_qty': sc_actual_qty,
-						'ms_op_id': entry_rec.id,
-						'contractor_id': entry_rec.op8_contractor_id.id,
-						'operation_id': entry_rec.op8_id.id,
-					}
-					sc_id = sc_obj.create(cr, uid,sc_vals)
+					if entry_rec.order_id.flag_for_stock == False:
+						sc_obj = self.pool.get('kg.subcontract.process')
+						
+						self.write(cr, uid, ids, {'op8_sc_status': 'sc','op8_button_status': 'invisible'})	
+						sc_name = ''	
+						sc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.process')])
+						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,sc_seq_id[0])
+						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
+						sc_name = cr.fetchone();
+						
+						wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
+						if entry_rec.order_id.id == wo_id[0]:
+							sc_actual_qty = 0
+						else:
+							sc_actual_qty = entry_rec.inhouse_qty
+						
+						sc_vals = {
+							'name': sc_name[0],
+							'ms_plan_id': entry_rec.ms_plan_id.id,
+							'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+							'sc_qty': entry_rec.inhouse_qty,
+							'total_qty': entry_rec.inhouse_qty,
+							'pending_qty': entry_rec.inhouse_qty,
+							'actual_qty': sc_actual_qty,
+							'ms_op_id': entry_rec.id,
+							'contractor_id': entry_rec.op8_contractor_id.id,
+							'operation_id': entry_rec.op8_id.id,
+						}
+						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
 			pass
 						
@@ -6397,226 +6518,221 @@ class kg_ms_operations(osv.osv):
 							))
 						pending_operation = cr.fetchone()
 						if pending_operation == None:
-							if entry_rec.op9_process_result == 'accept':
-								ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
-								ms_store_vals = {
-									'operation_id': entry_rec.id,
-									'production_id': entry_rec.production_id.id,
-									'foundry_assembly_id': entry_rec.production_id.assembly_id,
-									'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
-									'ms_assembly_id': entry_rec.ms_id.assembly_id,
-									'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
-									'qty': entry_rec.inhouse_qty,
-									'oth_spec': entry_rec.oth_spec
-								}
-								ms_store_id = self.pool.get('kg.ms.stores').create(cr, uid, ms_store_vals)
-							if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-								ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+							if entry_rec.order_id.flag_for_stock == False:
+								if entry_rec.op9_process_result == 'accept':
+									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
+									## MS Store Operation ###
+									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
+								if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
+									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
 				
 				if entry_rec.op9_process_result == 'reject':
-				
 					
-					### Department Indent Creation when process result is reject for ms item ###
-					if entry_rec.ms_type == 'ms_item':
-						
-						## Operation 8 Status Updation ###
-						if entry_rec.op9_state in ('pending','partial','done'):
-							self.write(cr, uid, ids, {'op9_state':'reject'})
-						self.write(cr, uid, ids, {'state':'reject'})
-						if entry_rec.ms_id.ms_id.line_ids:
+					
+					## Operation 8 Status Updation ###
+					if entry_rec.op9_state in ('pending','partial','done'):
+						self.write(cr, uid, ids, {'op9_state':'reject'})
+					self.write(cr, uid, ids, {'state':'reject'})
+					if entry_rec.order_id.flag_for_stock == False:
+						### Department Indent Creation when process result is reject for ms item ###
+						if entry_rec.ms_type == 'ms_item':
 							
-							dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
 							
-							location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
-							
-							seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
-							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
-							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry_rec.entry_date))
-							seq_name = cr.fetchone();
+							if entry_rec.ms_id.ms_id.line_ids:
+								
+								dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
+								
+								location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
+								
+								seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
+								seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry_rec.entry_date))
+								seq_name = cr.fetchone();
 
-							dep_indent_obj = self.pool.get('kg.depindent')
-							dep_indent_vals = {
-								'name':'',
-								'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
-								'dep_name':1,
-								'entry_mode':'auto',
-								'state': 'approved',
-								'indent_type': 'production',
-								'name': seq_name[0],
-								'order_id': entry_rec.order_id.id,
-								'order_line_id': entry_rec.order_line_id.id,
-								'src_location_id': location.main_location.id,
-								'dest_location_id': location.stock_location.id
-								}
+								dep_indent_obj = self.pool.get('kg.depindent')
+								dep_indent_vals = {
+									'name':'',
+									'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+									'dep_name':1,
+									'entry_mode':'auto',
+									'state': 'approved',
+									'indent_type': 'production',
+									'name': seq_name[0],
+									'order_id': entry_rec.order_id.id,
+									'order_line_id': entry_rec.order_line_id.id,
+									'src_location_id': location.main_location.id,
+									'dest_location_id': location.stock_location.id
+									}
+									
+								indent_id = dep_indent_obj.create(cr, uid, dep_indent_vals)
+								for indent_item in entry_rec.ms_id.ms_id.line_ids:
+									dep_indent_line_obj = self.pool.get('kg.depindent.line')
+									product_rec = self.pool.get('product.product').browse(cr, uid, indent_item.product_id.id)
+									dep_indent_line_vals = {
+									'indent_id':indent_id,
+									'product_id': indent_item.product_id.id,
+									'uom': product_rec.uom_id.id,
+									'qty': indent_item.qty * entry_rec.inhouse_qty,
+									'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
+									'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
+									#~ 'cutting_qty':ms_raw_rec.temp_qty,
+									'ms_bot_id':entry_rec.ms_id.ms_id.id,
+									'fns_item_name':entry_rec.item_name,
+									'position_id': entry_rec.position_id.id
+									}
+									
+									indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
+									
+									indent_wo_line_obj = self.pool.get('ch.depindent.wo')
 								
-							indent_id = dep_indent_obj.create(cr, uid, dep_indent_vals)
-							for indent_item in entry_rec.ms_id.ms_id.line_ids:
-								dep_indent_line_obj = self.pool.get('kg.depindent.line')
-								product_rec = self.pool.get('product.product').browse(cr, uid, indent_item.product_id.id)
-								dep_indent_line_vals = {
-								'indent_id':indent_id,
-								'product_id': indent_item.product_id.id,
-								'uom': product_rec.uom_id.id,
-								'qty': indent_item.qty * entry_rec.inhouse_qty,
-								'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-								'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-								#~ 'cutting_qty':ms_raw_rec.temp_qty,
-								'ms_bot_id':entry_rec.ms_id.ms_id.id,
-								'fns_item_name':entry_rec.item_name,
-								'position_id': entry_rec.position_id.id
-								}
-								
-								indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
-								
-								indent_wo_line_obj = self.pool.get('ch.depindent.wo')
+									indent_wo_line_vals = {
+										'header_id':indent_line_id,
+										'wo_id':entry_rec.order_no,
+										'w_order_id':entry_rec.order_id.id,
+										'w_order_line_id':entry_rec.order_line_id.id,
+										'qty':indent_item.qty * entry_rec.inhouse_qty,
+									}
+									indent_wo_line_id = indent_wo_line_obj.create(cr, uid, indent_wo_line_vals)
 							
-								indent_wo_line_vals = {
-									'header_id':indent_line_id,
-									'wo_id':entry_rec.order_no,
-									'w_order_id':entry_rec.order_id.id,
-									'w_order_line_id':entry_rec.order_line_id.id,
-									'qty':indent_item.qty * entry_rec.inhouse_qty,
-								}
-								indent_wo_line_id = indent_wo_line_obj.create(cr, uid, indent_wo_line_vals)
-						
-						### New Entry Creation for same Operation ###
-						op_vals = {
-							'ms_id': entry_rec.ms_id.id,
-							'ms_plan_id': entry_rec.ms_plan_id.id,
-							'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
-							'inhouse_qty': 1,
-							'op9_stage_id': entry_rec.op9_stage_id.id,
-							'op9_clamping_area': entry_rec.op9_clamping_area,
-							'op9_id': entry_rec.op9_id.id,
-							'parent_id' : ids[0],
-							'last_operation_check_id': entry_rec.last_operation_check_id,
-							'state': 'active',
-							'op9_state': 'pending',
-							'op9_process_result':'',
-						
-						}			
-						copy_id = self.copy(cr, uid, entry_rec.id,op_vals, context)
-						
-						copy_rec = self.browse(cr, uid, copy_id)
-						
-						for dimen_item in copy_rec.op9_line_ids:
+							### New Entry Creation for same Operation ###
+							op_vals = {
+								'ms_id': entry_rec.ms_id.id,
+								'ms_plan_id': entry_rec.ms_plan_id.id,
+								'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+								'inhouse_qty': 1,
+								'op9_stage_id': entry_rec.op9_stage_id.id,
+								'op9_clamping_area': entry_rec.op9_clamping_area,
+								'op9_id': entry_rec.op9_id.id,
+								'parent_id' : ids[0],
+								'last_operation_check_id': entry_rec.last_operation_check_id,
+								'state': 'active',
+								'op9_state': 'pending',
+								'op9_process_result':'',
 							
-							dimen_vals = {
-								'actual_val': 0,
-								'remark': False,
+							}			
+							copy_id = self.copy(cr, uid, entry_rec.id,op_vals, context)
+							
+							copy_rec = self.browse(cr, uid, copy_id)
+							
+							for dimen_item in copy_rec.op9_line_ids:
+								
+								dimen_vals = {
+									'actual_val': 0,
+									'remark': False,
+								}
+								
+								dimension_obj = self.pool.get('ch.ms.dimension.details')
+								dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
+							
+						if entry_rec.ms_type == 'foundry_item':
+							
+							ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
+							
+							## Operation 9 Status Updation ###
+							if entry_rec.op9_state in ('pending','partial','done'):
+								self.write(cr, uid, ids, {'op9_state':'reject'})
+								
+							self.write(cr, uid, ids, {'state':'reject'})
+									
+							#### NC Creation for reject Qty ###
+							
+							### Production Number ###
+							produc_name = ''	
+							produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry_rec.entry_date))
+							produc_name = cr.fetchone();
+							
+							### Issue Number ###
+							issue_name = ''	
+							issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry_rec.entry_date))
+							issue_name = cr.fetchone();
+							
+							### Core Log Number ###
+							core_name = ''	
+							core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry_rec.entry_date))
+							core_name = cr.fetchone();
+							
+							### Mould Log Number ###
+							mould_name = ''	
+							mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry_rec.entry_date))
+							mould_name = cr.fetchone();
+							
+							production_vals = {
+													
+								'name': produc_name[0],
+								'schedule_id': entry_rec.ms_id.schedule_id.id,
+								'schedule_date': entry_rec.ms_id.schedule_date,
+								'division_id': entry_rec.ms_id.division_id.id,
+								'location' : entry_rec.ms_id.location,
+								'schedule_line_id': entry_rec.ms_id.schedule_line_id.id,
+								'order_id': entry_rec.ms_id.order_id.id,
+								'order_line_id': entry_rec.ms_id.order_line_id.id,
+								'order_bomline_id': entry_rec.ms_id.order_bomline_id.id,
+								'qty' : entry_rec.inhouse_qty,			  
+								'schedule_qty' : entry_rec.inhouse_qty,			  
+								'state' : 'issue_done',
+								'order_category':entry_rec.ms_id.order_category,
+								'order_priority': '1',
+								'pattern_id' : entry_rec.ms_id.pattern_id.id,
+								'pattern_name' : entry_rec.ms_id.pattern_id.pattern_name,	
+								'moc_id' : entry_rec.ms_id.moc_id.id,
+								'request_state': 'done',
+								'issue_no': issue_name[0],
+								'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'issue_qty': 1,
+								'issue_state': 'issued',
+								'core_no': core_name[0],
+								'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'core_qty': entry_rec.inhouse_qty,	
+								'core_rem_qty': entry_rec.inhouse_qty,	
+								'core_state': 'pending',
+								'mould_no': mould_name[0],
+								'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'mould_qty': entry_rec.inhouse_qty,	
+								'mould_rem_qty': entry_rec.inhouse_qty,	
+								'mould_state': 'pending',		
 							}
 							
-							dimension_obj = self.pool.get('ch.ms.dimension.details')
-							dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
-						
-					if entry_rec.ms_type == 'foundry_item':
-						
-						ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
-						
-						## Operation 9 Status Updation ###
-						if entry_rec.op9_state in ('pending','partial','done'):
-							self.write(cr, uid, ids, {'op9_state':'reject'})
-							
-						self.write(cr, uid, ids, {'state':'reject'})
-								
-						#### NC Creation for reject Qty ###
-						
-						### Production Number ###
-						produc_name = ''	
-						produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry_rec.entry_date))
-						produc_name = cr.fetchone();
-						
-						### Issue Number ###
-						issue_name = ''	
-						issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry_rec.entry_date))
-						issue_name = cr.fetchone();
-						
-						### Core Log Number ###
-						core_name = ''	
-						core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry_rec.entry_date))
-						core_name = cr.fetchone();
-						
-						### Mould Log Number ###
-						mould_name = ''	
-						mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry_rec.entry_date))
-						mould_name = cr.fetchone();
-						
-						production_vals = {
-												
-							'name': produc_name[0],
-							'schedule_id': entry_rec.ms_id.schedule_id.id,
-							'schedule_date': entry_rec.ms_id.schedule_date,
-							'division_id': entry_rec.ms_id.division_id.id,
-							'location' : entry_rec.ms_id.location,
-							'schedule_line_id': entry_rec.ms_id.schedule_line_id.id,
-							'order_id': entry_rec.ms_id.order_id.id,
-							'order_line_id': entry_rec.ms_id.order_line_id.id,
-							'order_bomline_id': entry_rec.ms_id.order_bomline_id.id,
-							'qty' : entry_rec.inhouse_qty,			  
-							'schedule_qty' : entry_rec.inhouse_qty,			  
-							'state' : 'issue_done',
-							'order_category':entry_rec.ms_id.order_category,
-							'order_priority': '1',
-							'pattern_id' : entry_rec.ms_id.pattern_id.id,
-							'pattern_name' : entry_rec.ms_id.pattern_id.pattern_name,	
-							'moc_id' : entry_rec.ms_id.moc_id.id,
-							'request_state': 'done',
-							'issue_no': issue_name[0],
-							'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'issue_qty': 1,
-							'issue_state': 'issued',
-							'core_no': core_name[0],
-							'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'core_qty': entry_rec.inhouse_qty,	
-							'core_rem_qty': entry_rec.inhouse_qty,	
-							'core_state': 'pending',
-							'mould_no': mould_name[0],
-							'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'mould_qty': entry_rec.inhouse_qty,	
-							'mould_rem_qty': entry_rec.inhouse_qty,	
-							'mould_state': 'pending',		
-						}
-						
-						production_id = self.pool.get('kg.production').create(cr, uid, production_vals)
+							production_id = self.pool.get('kg.production').create(cr, uid, production_vals)
 					
 			else:
 				if entry_rec.op9_button_status == 'visible':
-					sc_obj = self.pool.get('kg.subcontract.process')
-					
-					self.write(cr, uid, ids, {'op9_sc_status': 'sc','op9_button_status': 'invisible'})	
-					sc_name = ''	
-					sc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.process')])
-					seq_rec = self.pool.get('ir.sequence').browse(cr,uid,sc_seq_id[0])
-					cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
-					sc_name = cr.fetchone();
-					
-					wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
-					if entry_rec.order_id.id == wo_id[0]:
-						sc_actual_qty = 0
-					else:
-						sc_actual_qty = entry_rec.inhouse_qty
-					
-					sc_vals = {
-						'name': sc_name[0],
-						'ms_plan_id': entry_rec.ms_plan_id.id,
-						'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
-						'sc_qty': entry_rec.inhouse_qty,
-						'total_qty': entry_rec.inhouse_qty,
-						'pending_qty': entry_rec.inhouse_qty,
-						'actual_qty': sc_actual_qty,
-						'ms_op_id': entry_rec.id,
-						'contractor_id': entry_rec.op9_contractor_id.id,
-						'operation_id': entry_rec.op9_id.id,
-					}
-					sc_id = sc_obj.create(cr, uid,sc_vals)
+					if entry_rec.order_id.flag_for_stock == False:
+						sc_obj = self.pool.get('kg.subcontract.process')
+						
+						self.write(cr, uid, ids, {'op9_sc_status': 'sc','op9_button_status': 'invisible'})	
+						sc_name = ''	
+						sc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.process')])
+						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,sc_seq_id[0])
+						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
+						sc_name = cr.fetchone();
+						
+						wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
+						if entry_rec.order_id.id == wo_id[0]:
+							sc_actual_qty = 0
+						else:
+							sc_actual_qty = entry_rec.inhouse_qty
+						
+						sc_vals = {
+							'name': sc_name[0],
+							'ms_plan_id': entry_rec.ms_plan_id.id,
+							'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+							'sc_qty': entry_rec.inhouse_qty,
+							'total_qty': entry_rec.inhouse_qty,
+							'pending_qty': entry_rec.inhouse_qty,
+							'actual_qty': sc_actual_qty,
+							'ms_op_id': entry_rec.id,
+							'contractor_id': entry_rec.op9_contractor_id.id,
+							'operation_id': entry_rec.op9_id.id,
+						}
+						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
 			pass
 						
@@ -7067,226 +7183,221 @@ class kg_ms_operations(osv.osv):
 							))
 						pending_operation = cr.fetchone()
 						if pending_operation == None:
-							if entry_rec.op10_process_result == 'accept':
-								ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
-								ms_store_vals = {
-									'operation_id': entry_rec.id,
-									'production_id': entry_rec.production_id.id,
-									'foundry_assembly_id': entry_rec.production_id.assembly_id,
-									'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
-									'ms_assembly_id': entry_rec.ms_id.assembly_id,
-									'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
-									'qty': entry_rec.inhouse_qty,
-									'oth_spec': entry_rec.oth_spec
-								}
-								ms_store_id = self.pool.get('kg.ms.stores').create(cr, uid, ms_store_vals)
-							if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-								ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+							if entry_rec.order_id.flag_for_stock == False:
+								if entry_rec.op10_process_result == 'accept':
+									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
+									## MS Store Operation ###
+									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
+								if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
+									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
 				
 				if entry_rec.op10_process_result == 'reject':
-				
 					
-					### Department Indent Creation when process result is reject for ms item ###
-					if entry_rec.ms_type == 'ms_item':
+					## Operation 10 Status Updation ###
+					if entry_rec.op10_state in ('pending','partial','done'):
+						self.write(cr, uid, ids, {'op10_state':'reject'})
+					self.write(cr, uid, ids, {'state':'reject'})
+					if entry_rec.order_id.flag_for_stock == False:
 						
-						## Operation 10 Status Updation ###
-						if entry_rec.op10_state in ('pending','partial','done'):
-							self.write(cr, uid, ids, {'op10_state':'reject'})
-						self.write(cr, uid, ids, {'state':'reject'})
-						if entry_rec.ms_id.ms_id.line_ids:
+						### Department Indent Creation when process result is reject for ms item ###
+						if entry_rec.ms_type == 'ms_item':
 							
-							dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
 							
-							location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
-							
-							seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
-							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
-							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry_rec.entry_date))
-							seq_name = cr.fetchone();
+							if entry_rec.ms_id.ms_id.line_ids:
+								
+								dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
+								
+								location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
+								
+								seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
+								seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry_rec.entry_date))
+								seq_name = cr.fetchone();
 
-							dep_indent_obj = self.pool.get('kg.depindent')
-							dep_indent_vals = {
-								'name':'',
-								'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
-								'dep_name':1,
-								'entry_mode':'auto',
-								'state': 'approved',
-								'indent_type': 'production',
-								'name': seq_name[0],
-								'order_id': entry_rec.order_id.id,
-								'order_line_id': entry_rec.order_line_id.id,
-								'src_location_id': location.main_location.id,
-								'dest_location_id': location.stock_location.id
+								dep_indent_obj = self.pool.get('kg.depindent')
+								dep_indent_vals = {
+									'name':'',
+									'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+									'dep_name':1,
+									'entry_mode':'auto',
+									'state': 'approved',
+									'indent_type': 'production',
+									'name': seq_name[0],
+									'order_id': entry_rec.order_id.id,
+									'order_line_id': entry_rec.order_line_id.id,
+									'src_location_id': location.main_location.id,
+									'dest_location_id': location.stock_location.id
+									}
+									
+								indent_id = dep_indent_obj.create(cr, uid, dep_indent_vals)
+								for indent_item in entry_rec.ms_id.ms_id.line_ids:
+									dep_indent_line_obj = self.pool.get('kg.depindent.line')
+									product_rec = self.pool.get('product.product').browse(cr, uid, indent_item.product_id.id)
+									dep_indent_line_vals = {
+									'indent_id':indent_id,
+									'product_id': indent_item.product_id.id,
+									'uom': product_rec.uom_id.id,
+									'qty': indent_item.qty * entry_rec.inhouse_qty,
+									'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
+									'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
+									#~ 'cutting_qty':ms_raw_rec.temp_qty,
+									'ms_bot_id':entry_rec.ms_id.ms_id.id,
+									'fns_item_name':entry_rec.item_name,
+									'position_id': entry_rec.position_id.id
+									}
+									
+									indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
+									
+									indent_wo_line_obj = self.pool.get('ch.depindent.wo')
+								
+									indent_wo_line_vals = {
+										'header_id':indent_line_id,
+										'wo_id':entry_rec.order_no,
+										'w_order_id':entry_rec.order_id.id,
+										'w_order_line_id':entry_rec.order_line_id.id,
+										'qty':indent_item.qty * entry_rec.inhouse_qty,
+									}
+									indent_wo_line_id = indent_wo_line_obj.create(cr, uid, indent_wo_line_vals)
+							
+							### New Entry Creation for same Operation ###
+							op_vals = {
+								'ms_id': entry_rec.ms_id.id,
+								'ms_plan_id': entry_rec.ms_plan_id.id,
+								'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+								'inhouse_qty': 1,
+								'op10_stage_id': entry_rec.op10_stage_id.id,
+								'op10_clamping_area': entry_rec.op10_clamping_area,
+								'op10_id': entry_rec.op10_id.id,
+								'parent_id' : ids[0],
+								'last_operation_check_id': entry_rec.last_operation_check_id,
+								'state': 'active',
+								'op10_state': 'pending',
+								'op10_process_result':'',
+								
+							}			
+							copy_id = self.copy(cr, uid, entry_rec.id,op_vals, context)
+							
+							copy_rec = self.browse(cr, uid, copy_id)
+							
+							for dimen_item in copy_rec.op10_line_ids:
+								
+								dimen_vals = {
+									'actual_val': 0,
+									'remark': False,
 								}
 								
-							indent_id = dep_indent_obj.create(cr, uid, dep_indent_vals)
-							for indent_item in entry_rec.ms_id.ms_id.line_ids:
-								dep_indent_line_obj = self.pool.get('kg.depindent.line')
-								product_rec = self.pool.get('product.product').browse(cr, uid, indent_item.product_id.id)
-								dep_indent_line_vals = {
-								'indent_id':indent_id,
-								'product_id': indent_item.product_id.id,
-								'uom': product_rec.uom_id.id,
-								'qty': indent_item.qty * entry_rec.inhouse_qty,
-								'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-								'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-								#~ 'cutting_qty':ms_raw_rec.temp_qty,
-								'ms_bot_id':entry_rec.ms_id.ms_id.id,
-								'fns_item_name':entry_rec.item_name,
-								'position_id': entry_rec.position_id.id
-								}
+								dimension_obj = self.pool.get('ch.ms.dimension.details')
+								dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
+							
+						if entry_rec.ms_type == 'foundry_item':
+							
+							ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
+							
+							## Operation 10 Status Updation ###
+							if entry_rec.op10_state in ('pending','partial','done'):
+								self.write(cr, uid, ids, {'op10_state':'reject'})
 								
-								indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
-								
-								indent_wo_line_obj = self.pool.get('ch.depindent.wo')
+							self.write(cr, uid, ids, {'state':'reject'})
+									
+							#### NC Creation for reject Qty ###
 							
-								indent_wo_line_vals = {
-									'header_id':indent_line_id,
-									'wo_id':entry_rec.order_no,
-									'w_order_id':entry_rec.order_id.id,
-									'w_order_line_id':entry_rec.order_line_id.id,
-									'qty':indent_item.qty * entry_rec.inhouse_qty,
-								}
-								indent_wo_line_id = indent_wo_line_obj.create(cr, uid, indent_wo_line_vals)
-						
-						### New Entry Creation for same Operation ###
-						op_vals = {
-							'ms_id': entry_rec.ms_id.id,
-							'ms_plan_id': entry_rec.ms_plan_id.id,
-							'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
-							'inhouse_qty': 1,
-							'op10_stage_id': entry_rec.op10_stage_id.id,
-							'op10_clamping_area': entry_rec.op10_clamping_area,
-							'op10_id': entry_rec.op10_id.id,
-							'parent_id' : ids[0],
-							'last_operation_check_id': entry_rec.last_operation_check_id,
-							'state': 'active',
-							'op10_state': 'pending',
-							'op10_process_result':'',
+							### Production Number ###
+							produc_name = ''	
+							produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry_rec.entry_date))
+							produc_name = cr.fetchone();
 							
-						}			
-						copy_id = self.copy(cr, uid, entry_rec.id,op_vals, context)
-						
-						copy_rec = self.browse(cr, uid, copy_id)
-						
-						for dimen_item in copy_rec.op10_line_ids:
+							### Issue Number ###
+							issue_name = ''	
+							issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry_rec.entry_date))
+							issue_name = cr.fetchone();
 							
-							dimen_vals = {
-								'actual_val': 0,
-								'remark': False,
+							### Core Log Number ###
+							core_name = ''	
+							core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry_rec.entry_date))
+							core_name = cr.fetchone();
+							
+							### Mould Log Number ###
+							mould_name = ''	
+							mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry_rec.entry_date))
+							mould_name = cr.fetchone();
+							
+							production_vals = {
+													
+								'name': produc_name[0],
+								'schedule_id': entry_rec.ms_id.schedule_id.id,
+								'schedule_date': entry_rec.ms_id.schedule_date,
+								'division_id': entry_rec.ms_id.division_id.id,
+								'location' : entry_rec.ms_id.location,
+								'schedule_line_id': entry_rec.ms_id.schedule_line_id.id,
+								'order_id': entry_rec.ms_id.order_id.id,
+								'order_line_id': entry_rec.ms_id.order_line_id.id,
+								'order_bomline_id': entry_rec.ms_id.order_bomline_id.id,
+								'qty' : entry_rec.inhouse_qty,			  
+								'schedule_qty' : entry_rec.inhouse_qty,			  
+								'state' : 'issue_done',
+								'order_category':entry_rec.ms_id.order_category,
+								'order_priority': '1',
+								'pattern_id' : entry_rec.ms_id.pattern_id.id,
+								'pattern_name' : entry_rec.ms_id.pattern_id.pattern_name,	
+								'moc_id' : entry_rec.ms_id.moc_id.id,
+								'request_state': 'done',
+								'issue_no': issue_name[0],
+								'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'issue_qty': 1,
+								'issue_state': 'issued',
+								'core_no': core_name[0],
+								'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'core_qty': entry_rec.inhouse_qty,	
+								'core_rem_qty': entry_rec.inhouse_qty,	
+								'core_state': 'pending',
+								'mould_no': mould_name[0],
+								'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'mould_qty': entry_rec.inhouse_qty,	
+								'mould_rem_qty': entry_rec.inhouse_qty,	
+								'mould_state': 'pending',		
 							}
 							
-							dimension_obj = self.pool.get('ch.ms.dimension.details')
-							dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
-						
-					if entry_rec.ms_type == 'foundry_item':
-						
-						ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
-						
-						## Operation 10 Status Updation ###
-						if entry_rec.op10_state in ('pending','partial','done'):
-							self.write(cr, uid, ids, {'op10_state':'reject'})
-							
-						self.write(cr, uid, ids, {'state':'reject'})
-								
-						#### NC Creation for reject Qty ###
-						
-						### Production Number ###
-						produc_name = ''	
-						produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry_rec.entry_date))
-						produc_name = cr.fetchone();
-						
-						### Issue Number ###
-						issue_name = ''	
-						issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry_rec.entry_date))
-						issue_name = cr.fetchone();
-						
-						### Core Log Number ###
-						core_name = ''	
-						core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry_rec.entry_date))
-						core_name = cr.fetchone();
-						
-						### Mould Log Number ###
-						mould_name = ''	
-						mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry_rec.entry_date))
-						mould_name = cr.fetchone();
-						
-						production_vals = {
-												
-							'name': produc_name[0],
-							'schedule_id': entry_rec.ms_id.schedule_id.id,
-							'schedule_date': entry_rec.ms_id.schedule_date,
-							'division_id': entry_rec.ms_id.division_id.id,
-							'location' : entry_rec.ms_id.location,
-							'schedule_line_id': entry_rec.ms_id.schedule_line_id.id,
-							'order_id': entry_rec.ms_id.order_id.id,
-							'order_line_id': entry_rec.ms_id.order_line_id.id,
-							'order_bomline_id': entry_rec.ms_id.order_bomline_id.id,
-							'qty' : entry_rec.inhouse_qty,			  
-							'schedule_qty' : entry_rec.inhouse_qty,			  
-							'state' : 'issue_done',
-							'order_category':entry_rec.ms_id.order_category,
-							'order_priority': '1',
-							'pattern_id' : entry_rec.ms_id.pattern_id.id,
-							'pattern_name' : entry_rec.ms_id.pattern_id.pattern_name,	
-							'moc_id' : entry_rec.ms_id.moc_id.id,
-							'request_state': 'done',
-							'issue_no': issue_name[0],
-							'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'issue_qty': 1,
-							'issue_state': 'issued',
-							'core_no': core_name[0],
-							'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'core_qty': entry_rec.inhouse_qty,	
-							'core_rem_qty': entry_rec.inhouse_qty,	
-							'core_state': 'pending',
-							'mould_no': mould_name[0],
-							'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'mould_qty': entry_rec.inhouse_qty,	
-							'mould_rem_qty': entry_rec.inhouse_qty,	
-							'mould_state': 'pending',		
-						}
-						
-						production_id = self.pool.get('kg.production').create(cr, uid, production_vals)
+							production_id = self.pool.get('kg.production').create(cr, uid, production_vals)
 					
 			else:
 				if entry_rec.op10_button_status == 'visible':
-					sc_obj = self.pool.get('kg.subcontract.process')
-					
-					self.write(cr, uid, ids, {'op10_sc_status': 'sc','op10_button_status': 'invisible'})	
-					sc_name = ''	
-					sc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.process')])
-					seq_rec = self.pool.get('ir.sequence').browse(cr,uid,sc_seq_id[0])
-					cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
-					sc_name = cr.fetchone();
-					
-					wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
-					if entry_rec.order_id.id == wo_id[0]:
-						sc_actual_qty = 0
-					else:
-						sc_actual_qty = entry_rec.inhouse_qty
-					
-					sc_vals = {
-						'name': sc_name[0],
-						'ms_plan_id': entry_rec.ms_plan_id.id,
-						'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
-						'sc_qty': entry_rec.inhouse_qty,
-						'total_qty': entry_rec.inhouse_qty,
-						'pending_qty': entry_rec.inhouse_qty,
-						'actual_qty': sc_actual_qty,
-						'ms_op_id': entry_rec.id,
-						'contractor_id': entry_rec.op10_contractor_id.id,
-						'operation_id': entry_rec.op10_id.id,
-					}
-					sc_id = sc_obj.create(cr, uid,sc_vals)
+					if entry_rec.order_id.flag_for_stock == False:
+						sc_obj = self.pool.get('kg.subcontract.process')
+						
+						self.write(cr, uid, ids, {'op10_sc_status': 'sc','op10_button_status': 'invisible'})	
+						sc_name = ''	
+						sc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.process')])
+						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,sc_seq_id[0])
+						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
+						sc_name = cr.fetchone();
+						
+						wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
+						if entry_rec.order_id.id == wo_id[0]:
+							sc_actual_qty = 0
+						else:
+							sc_actual_qty = entry_rec.inhouse_qty
+						
+						sc_vals = {
+							'name': sc_name[0],
+							'ms_plan_id': entry_rec.ms_plan_id.id,
+							'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+							'sc_qty': entry_rec.inhouse_qty,
+							'total_qty': entry_rec.inhouse_qty,
+							'pending_qty': entry_rec.inhouse_qty,
+							'actual_qty': sc_actual_qty,
+							'ms_op_id': entry_rec.id,
+							'contractor_id': entry_rec.op10_contractor_id.id,
+							'operation_id': entry_rec.op10_id.id,
+						}
+						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
 			pass
 						
@@ -7735,226 +7846,219 @@ class kg_ms_operations(osv.osv):
 							))
 						pending_operation = cr.fetchone()
 						if pending_operation == None:
-							if entry_rec.op11_process_result == 'accept':
-								ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
-								ms_store_vals = {
-									'operation_id': entry_rec.id,
-									'production_id': entry_rec.production_id.id,
-									'foundry_assembly_id': entry_rec.production_id.assembly_id,
-									'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
-									'ms_assembly_id': entry_rec.ms_id.assembly_id,
-									'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
-									'qty': entry_rec.inhouse_qty,
-									'oth_spec': entry_rec.oth_spec
-								}
-								ms_store_id = self.pool.get('kg.ms.stores').create(cr, uid, ms_store_vals)
-							if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-								ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+							if entry_rec.order_id.flag_for_stock == False:
+								if entry_rec.op11_process_result == 'accept':
+									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
+									## MS Store Operation ###
+									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
+								if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
+									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
 				
 				if entry_rec.op11_process_result == 'reject':
-				
-					
-					### Department Indent Creation when process result is reject for ms item ###
-					if entry_rec.ms_type == 'ms_item':
-						
-						## Operation 11 Status Updation ###
-						if entry_rec.op11_state in ('pending','partial','done'):
-							self.write(cr, uid, ids, {'op11_state':'reject'})
-						self.write(cr, uid, ids, {'state':'reject'})
-						if entry_rec.ms_id.ms_id.line_ids:
+					## Operation 11 Status Updation ###
+					if entry_rec.op11_state in ('pending','partial','done'):
+						self.write(cr, uid, ids, {'op11_state':'reject'})
+					self.write(cr, uid, ids, {'state':'reject'})
+					if entry_rec.order_id.flag_for_stock == False:
+						### Department Indent Creation when process result is reject for ms item ###
+						if entry_rec.ms_type == 'ms_item':
 							
-							dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
 							
-							location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
-							
-							seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
-							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
-							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry_rec.entry_date))
-							seq_name = cr.fetchone();
+							if entry_rec.ms_id.ms_id.line_ids:
+								
+								dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
+								
+								location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
+								
+								seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
+								seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry_rec.entry_date))
+								seq_name = cr.fetchone();
 
-							dep_indent_obj = self.pool.get('kg.depindent')
-							dep_indent_vals = {
-								'name':'',
-								'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
-								'dep_name':1,
-								'entry_mode':'auto',
-								'state': 'approved',
-								'indent_type': 'production',
-								'name': seq_name[0],
-								'order_id': entry_rec.order_id.id,
-								'order_line_id': entry_rec.order_line_id.id,
-								'src_location_id': location.main_location.id,
-								'dest_location_id': location.stock_location.id
+								dep_indent_obj = self.pool.get('kg.depindent')
+								dep_indent_vals = {
+									'name':'',
+									'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+									'dep_name':1,
+									'entry_mode':'auto',
+									'state': 'approved',
+									'indent_type': 'production',
+									'name': seq_name[0],
+									'order_id': entry_rec.order_id.id,
+									'order_line_id': entry_rec.order_line_id.id,
+									'src_location_id': location.main_location.id,
+									'dest_location_id': location.stock_location.id
+									}
+									
+								indent_id = dep_indent_obj.create(cr, uid, dep_indent_vals)
+								for indent_item in entry_rec.ms_id.ms_id.line_ids:
+									dep_indent_line_obj = self.pool.get('kg.depindent.line')
+									product_rec = self.pool.get('product.product').browse(cr, uid, indent_item.product_id.id)
+									dep_indent_line_vals = {
+									'indent_id':indent_id,
+									'product_id': indent_item.product_id.id,
+									'uom': product_rec.uom_id.id,
+									'qty': indent_item.qty * entry_rec.inhouse_qty,
+									'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
+									'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
+									#~ 'cutting_qty':ms_raw_rec.temp_qty,
+									'ms_bot_id':entry_rec.ms_id.ms_id.id,
+									'fns_item_name':entry_rec.item_name,
+									'position_id': entry_rec.position_id.id
+									}
+									
+									indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
+									
+									indent_wo_line_obj = self.pool.get('ch.depindent.wo')
+								
+									indent_wo_line_vals = {
+										'header_id':indent_line_id,
+										'wo_id':entry_rec.order_no,
+										'w_order_id':entry_rec.order_id.id,
+										'w_order_line_id':entry_rec.order_line_id.id,
+										'qty':indent_item.qty * entry_rec.inhouse_qty,
+									}
+									indent_wo_line_id = indent_wo_line_obj.create(cr, uid, indent_wo_line_vals)
+							
+							### New Entry Creation for same Operation ###
+							op_vals = {
+								'ms_id': entry_rec.ms_id.id,
+								'ms_plan_id': entry_rec.ms_plan_id.id,
+								'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+								'inhouse_qty': 1,
+								'op11_stage_id': entry_rec.op11_stage_id.id,
+								'op11_clamping_area': entry_rec.op11_clamping_area,
+								'op11_id': entry_rec.op11_id.id,
+								'parent_id' : ids[0],
+								'last_operation_check_id': entry_rec.last_operation_check_id,
+								'state': 'active',
+								'op11_state': 'pending',
+								'op11_process_result':'',
+								
+							}			
+							copy_id = self.copy(cr, uid, entry_rec.id,op_vals, context)
+							
+							copy_rec = self.browse(cr, uid, copy_id)
+							
+							for dimen_item in copy_rec.op11_line_ids:
+								
+								dimen_vals = {
+									'actual_val': 0,
+									'remark': False,
 								}
 								
-							indent_id = dep_indent_obj.create(cr, uid, dep_indent_vals)
-							for indent_item in entry_rec.ms_id.ms_id.line_ids:
-								dep_indent_line_obj = self.pool.get('kg.depindent.line')
-								product_rec = self.pool.get('product.product').browse(cr, uid, indent_item.product_id.id)
-								dep_indent_line_vals = {
-								'indent_id':indent_id,
-								'product_id': indent_item.product_id.id,
-								'uom': product_rec.uom_id.id,
-								'qty': indent_item.qty * entry_rec.inhouse_qty,
-								'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-								'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-								#~ 'cutting_qty':ms_raw_rec.temp_qty,
-								'ms_bot_id':entry_rec.ms_id.ms_id.id,
-								'fns_item_name':entry_rec.item_name,
-								'position_id': entry_rec.position_id.id
-								}
+								dimension_obj = self.pool.get('ch.ms.dimension.details')
+								dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
+							
+						if entry_rec.ms_type == 'foundry_item':
+							
+							ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
+							
+							## Operation 11 Status Updation ###
+							if entry_rec.op11_state in ('pending','partial','done'):
+								self.write(cr, uid, ids, {'op11_state':'reject'})
 								
-								indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
-								
-								indent_wo_line_obj = self.pool.get('ch.depindent.wo')
+							self.write(cr, uid, ids, {'state':'reject'})
+									
+							#### NC Creation for reject Qty ###
 							
-								indent_wo_line_vals = {
-									'header_id':indent_line_id,
-									'wo_id':entry_rec.order_no,
-									'w_order_id':entry_rec.order_id.id,
-									'w_order_line_id':entry_rec.order_line_id.id,
-									'qty':indent_item.qty * entry_rec.inhouse_qty,
-								}
-								indent_wo_line_id = indent_wo_line_obj.create(cr, uid, indent_wo_line_vals)
-						
-						### New Entry Creation for same Operation ###
-						op_vals = {
-							'ms_id': entry_rec.ms_id.id,
-							'ms_plan_id': entry_rec.ms_plan_id.id,
-							'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
-							'inhouse_qty': 1,
-							'op11_stage_id': entry_rec.op11_stage_id.id,
-							'op11_clamping_area': entry_rec.op11_clamping_area,
-							'op11_id': entry_rec.op11_id.id,
-							'parent_id' : ids[0],
-							'last_operation_check_id': entry_rec.last_operation_check_id,
-							'state': 'active',
-							'op11_state': 'pending',
-							'op11_process_result':'',
+							### Production Number ###
+							produc_name = ''	
+							produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry_rec.entry_date))
+							produc_name = cr.fetchone();
 							
-						}			
-						copy_id = self.copy(cr, uid, entry_rec.id,op_vals, context)
-						
-						copy_rec = self.browse(cr, uid, copy_id)
-						
-						for dimen_item in copy_rec.op11_line_ids:
+							### Issue Number ###
+							issue_name = ''	
+							issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry_rec.entry_date))
+							issue_name = cr.fetchone();
 							
-							dimen_vals = {
-								'actual_val': 0,
-								'remark': False,
+							### Core Log Number ###
+							core_name = ''	
+							core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry_rec.entry_date))
+							core_name = cr.fetchone();
+							
+							### Mould Log Number ###
+							mould_name = ''	
+							mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry_rec.entry_date))
+							mould_name = cr.fetchone();
+							
+							production_vals = {
+													
+								'name': produc_name[0],
+								'schedule_id': entry_rec.ms_id.schedule_id.id,
+								'schedule_date': entry_rec.ms_id.schedule_date,
+								'division_id': entry_rec.ms_id.division_id.id,
+								'location' : entry_rec.ms_id.location,
+								'schedule_line_id': entry_rec.ms_id.schedule_line_id.id,
+								'order_id': entry_rec.ms_id.order_id.id,
+								'order_line_id': entry_rec.ms_id.order_line_id.id,
+								'order_bomline_id': entry_rec.ms_id.order_bomline_id.id,
+								'qty' : entry_rec.inhouse_qty,			  
+								'schedule_qty' : entry_rec.inhouse_qty,			  
+								'state' : 'issue_done',
+								'order_category':entry_rec.ms_id.order_category,
+								'order_priority': '1',
+								'pattern_id' : entry_rec.ms_id.pattern_id.id,
+								'pattern_name' : entry_rec.ms_id.pattern_id.pattern_name,	
+								'moc_id' : entry_rec.ms_id.moc_id.id,
+								'request_state': 'done',
+								'issue_no': issue_name[0],
+								'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'issue_qty': 1,
+								'issue_state': 'issued',
+								'core_no': core_name[0],
+								'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'core_qty': entry_rec.inhouse_qty,	
+								'core_rem_qty': entry_rec.inhouse_qty,	
+								'core_state': 'pending',
+								'mould_no': mould_name[0],
+								'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'mould_qty': entry_rec.inhouse_qty,	
+								'mould_rem_qty': entry_rec.inhouse_qty,	
+								'mould_state': 'pending',		
 							}
 							
-							dimension_obj = self.pool.get('ch.ms.dimension.details')
-							dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
-						
-					if entry_rec.ms_type == 'foundry_item':
-						
-						ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
-						
-						## Operation 11 Status Updation ###
-						if entry_rec.op11_state in ('pending','partial','done'):
-							self.write(cr, uid, ids, {'op11_state':'reject'})
-							
-						self.write(cr, uid, ids, {'state':'reject'})
-								
-						#### NC Creation for reject Qty ###
-						
-						### Production Number ###
-						produc_name = ''	
-						produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry_rec.entry_date))
-						produc_name = cr.fetchone();
-						
-						### Issue Number ###
-						issue_name = ''	
-						issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry_rec.entry_date))
-						issue_name = cr.fetchone();
-						
-						### Core Log Number ###
-						core_name = ''	
-						core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry_rec.entry_date))
-						core_name = cr.fetchone();
-						
-						### Mould Log Number ###
-						mould_name = ''	
-						mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry_rec.entry_date))
-						mould_name = cr.fetchone();
-						
-						production_vals = {
-												
-							'name': produc_name[0],
-							'schedule_id': entry_rec.ms_id.schedule_id.id,
-							'schedule_date': entry_rec.ms_id.schedule_date,
-							'division_id': entry_rec.ms_id.division_id.id,
-							'location' : entry_rec.ms_id.location,
-							'schedule_line_id': entry_rec.ms_id.schedule_line_id.id,
-							'order_id': entry_rec.ms_id.order_id.id,
-							'order_line_id': entry_rec.ms_id.order_line_id.id,
-							'order_bomline_id': entry_rec.ms_id.order_bomline_id.id,
-							'qty' : entry_rec.inhouse_qty,			  
-							'schedule_qty' : entry_rec.inhouse_qty,			  
-							'state' : 'issue_done',
-							'order_category':entry_rec.ms_id.order_category,
-							'order_priority': '1',
-							'pattern_id' : entry_rec.ms_id.pattern_id.id,
-							'pattern_name' : entry_rec.ms_id.pattern_id.pattern_name,	
-							'moc_id' : entry_rec.ms_id.moc_id.id,
-							'request_state': 'done',
-							'issue_no': issue_name[0],
-							'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'issue_qty': 1,
-							'issue_state': 'issued',
-							'core_no': core_name[0],
-							'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'core_qty': entry_rec.inhouse_qty,	
-							'core_rem_qty': entry_rec.inhouse_qty,	
-							'core_state': 'pending',
-							'mould_no': mould_name[0],
-							'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'mould_qty': entry_rec.inhouse_qty,	
-							'mould_rem_qty': entry_rec.inhouse_qty,	
-							'mould_state': 'pending',		
-						}
-						
-						production_id = self.pool.get('kg.production').create(cr, uid, production_vals)
+							production_id = self.pool.get('kg.production').create(cr, uid, production_vals)
 					
 			else:
 				if entry_rec.op11_button_status == 'visible':
-					sc_obj = self.pool.get('kg.subcontract.process')
-					
-					self.write(cr, uid, ids, {'op11_sc_status': 'sc','op11_button_status': 'invisible'})	
-					sc_name = ''	
-					sc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.process')])
-					seq_rec = self.pool.get('ir.sequence').browse(cr,uid,sc_seq_id[0])
-					cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
-					sc_name = cr.fetchone();
-					
-					wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
-					if entry_rec.order_id.id == wo_id[0]:
-						sc_actual_qty = 0
-					else:
-						sc_actual_qty = entry_rec.inhouse_qty
-					
-					sc_vals = {
-						'name': sc_name[0],
-						'ms_plan_id': entry_rec.ms_plan_id.id,
-						'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
-						'sc_qty': entry_rec.inhouse_qty,
-						'total_qty': entry_rec.inhouse_qty,
-						'pending_qty': entry_rec.inhouse_qty,
-						'actual_qty': sc_actual_qty,
-						'ms_op_id': entry_rec.id,
-						'contractor_id': entry_rec.op11_contractor_id.id,
-						'operation_id': entry_rec.op11_id.id,
-					}
-					sc_id = sc_obj.create(cr, uid,sc_vals)
+					if entry_rec.order_id.flag_for_stock == False:
+						sc_obj = self.pool.get('kg.subcontract.process')
+						
+						self.write(cr, uid, ids, {'op11_sc_status': 'sc','op11_button_status': 'invisible'})	
+						sc_name = ''	
+						sc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.process')])
+						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,sc_seq_id[0])
+						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
+						sc_name = cr.fetchone();
+						
+						wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
+						if entry_rec.order_id.id == wo_id[0]:
+							sc_actual_qty = 0
+						else:
+							sc_actual_qty = entry_rec.inhouse_qty
+						
+						sc_vals = {
+							'name': sc_name[0],
+							'ms_plan_id': entry_rec.ms_plan_id.id,
+							'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+							'sc_qty': entry_rec.inhouse_qty,
+							'total_qty': entry_rec.inhouse_qty,
+							'pending_qty': entry_rec.inhouse_qty,
+							'actual_qty': sc_actual_qty,
+							'ms_op_id': entry_rec.id,
+							'contractor_id': entry_rec.op11_contractor_id.id,
+							'operation_id': entry_rec.op11_id.id,
+						}
+						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
 			pass
 						
@@ -8404,226 +8508,219 @@ class kg_ms_operations(osv.osv):
 							))
 						pending_operation = cr.fetchone()
 						if pending_operation == None:
-							if entry_rec.op12_process_result == 'accept':
-								ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
-								ms_store_vals = {
-									'operation_id': entry_rec.id,
-									'production_id': entry_rec.production_id.id,
-									'foundry_assembly_id': entry_rec.production_id.assembly_id,
-									'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
-									'ms_assembly_id': entry_rec.ms_id.assembly_id,
-									'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
-									'qty': entry_rec.inhouse_qty,
-									'oth_spec': entry_rec.oth_spec
-								}
-								ms_store_id = self.pool.get('kg.ms.stores').create(cr, uid, ms_store_vals)
-							if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-								ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+							if entry_rec.order_id.flag_for_stock == False:
+								if entry_rec.op12_process_result == 'accept':
+									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
+									## MS Store Operation ###
+									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
+								if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
+									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
 				
 				if entry_rec.op12_process_result == 'reject':
-				
-					
-					### Department Indent Creation when process result is reject for ms item ###
-					if entry_rec.ms_type == 'ms_item':
-						
-						## Operation 12 Status Updation ###
-						if entry_rec.op12_state in ('pending','partial','done'):
-							self.write(cr, uid, ids, {'op12_state':'reject'})
-						self.write(cr, uid, ids, {'state':'reject'})
-						if entry_rec.ms_id.ms_id.line_ids:
+					## Operation 12 Status Updation ###
+					if entry_rec.op12_state in ('pending','partial','done'):
+						self.write(cr, uid, ids, {'op12_state':'reject'})
+					self.write(cr, uid, ids, {'state':'reject'})
+					if entry_rec.order_id.flag_for_stock == False:
+						### Department Indent Creation when process result is reject for ms item ###
+						if entry_rec.ms_type == 'ms_item':
 							
-							dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
 							
-							location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
-							
-							seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
-							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
-							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry_rec.entry_date))
-							seq_name = cr.fetchone();
+							if entry_rec.ms_id.ms_id.line_ids:
+								
+								dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
+								
+								location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
+								
+								seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.depindent')])
+								seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+								cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry_rec.entry_date))
+								seq_name = cr.fetchone();
 
-							dep_indent_obj = self.pool.get('kg.depindent')
-							dep_indent_vals = {
-								'name':'',
-								'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
-								'dep_name':1,
-								'entry_mode':'auto',
-								'state': 'approved',
-								'indent_type': 'production',
-								'name': seq_name[0],
-								'order_id': entry_rec.order_id.id,
-								'order_line_id': entry_rec.order_line_id.id,
-								'src_location_id': location.main_location.id,
-								'dest_location_id': location.stock_location.id
+								dep_indent_obj = self.pool.get('kg.depindent')
+								dep_indent_vals = {
+									'name':'',
+									'ind_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+									'dep_name':1,
+									'entry_mode':'auto',
+									'state': 'approved',
+									'indent_type': 'production',
+									'name': seq_name[0],
+									'order_id': entry_rec.order_id.id,
+									'order_line_id': entry_rec.order_line_id.id,
+									'src_location_id': location.main_location.id,
+									'dest_location_id': location.stock_location.id
+									}
+									
+								indent_id = dep_indent_obj.create(cr, uid, dep_indent_vals)
+								for indent_item in entry_rec.ms_id.ms_id.line_ids:
+									dep_indent_line_obj = self.pool.get('kg.depindent.line')
+									product_rec = self.pool.get('product.product').browse(cr, uid, indent_item.product_id.id)
+									dep_indent_line_vals = {
+									'indent_id':indent_id,
+									'product_id': indent_item.product_id.id,
+									'uom': product_rec.uom_id.id,
+									'qty': indent_item.qty * entry_rec.inhouse_qty,
+									'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
+									'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
+									#~ 'cutting_qty':ms_raw_rec.temp_qty,
+									'ms_bot_id':entry_rec.ms_id.ms_id.id,
+									'fns_item_name':entry_rec.item_name,
+									'position_id': entry_rec.position_id.id
+									}
+									
+									indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
+									
+									indent_wo_line_obj = self.pool.get('ch.depindent.wo')
+								
+									indent_wo_line_vals = {
+										'header_id':indent_line_id,
+										'wo_id':entry_rec.order_no,
+										'w_order_id':entry_rec.order_id.id,
+										'w_order_line_id':entry_rec.order_line_id.id,
+										'qty':indent_item.qty * entry_rec.inhouse_qty,
+									}
+									indent_wo_line_id = indent_wo_line_obj.create(cr, uid, indent_wo_line_vals)
+							
+							### New Entry Creation for same Operation ###
+							op_vals = {
+								'ms_id': entry_rec.ms_id.id,
+								'ms_plan_id': entry_rec.ms_plan_id.id,
+								'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+								'inhouse_qty': 1,
+								'op12_stage_id': entry_rec.op12_stage_id.id,
+								'op12_clamping_area': entry_rec.op12_clamping_area,
+								'op12_id': entry_rec.op12_id.id,
+								'parent_id' : ids[0],
+								'last_operation_check_id': entry_rec.last_operation_check_id,
+								'state': 'active',
+								'op12_state': 'pending',
+								'op12_process_result':'',
+								
+							}			
+							copy_id = self.copy(cr, uid, entry_rec.id,op_vals, context)
+							
+							copy_rec = self.browse(cr, uid, copy_id)
+							
+							for dimen_item in copy_rec.op12_line_ids:
+								
+								dimen_vals = {
+									'actual_val': 0,
+									'remark': False,
 								}
 								
-							indent_id = dep_indent_obj.create(cr, uid, dep_indent_vals)
-							for indent_item in entry_rec.ms_id.ms_id.line_ids:
-								dep_indent_line_obj = self.pool.get('kg.depindent.line')
-								product_rec = self.pool.get('product.product').browse(cr, uid, indent_item.product_id.id)
-								dep_indent_line_vals = {
-								'indent_id':indent_id,
-								'product_id': indent_item.product_id.id,
-								'uom': product_rec.uom_id.id,
-								'qty': indent_item.qty * entry_rec.inhouse_qty,
-								'pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-								'issue_pending_qty':indent_item.qty * entry_rec.inhouse_qty,
-								#~ 'cutting_qty':ms_raw_rec.temp_qty,
-								'ms_bot_id':entry_rec.ms_id.ms_id.id,
-								'fns_item_name':entry_rec.item_name,
-								'position_id': entry_rec.position_id.id
-								}
+								dimension_obj = self.pool.get('ch.ms.dimension.details')
+								dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
+							
+						if entry_rec.ms_type == 'foundry_item':
+							
+							ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
+							
+							## Operation 11 Status Updation ###
+							if entry_rec.op12_state in ('pending','partial','done'):
+								self.write(cr, uid, ids, {'op12_state':'reject'})
 								
-								indent_line_id = dep_indent_line_obj.create(cr, uid, dep_indent_line_vals)
-								
-								indent_wo_line_obj = self.pool.get('ch.depindent.wo')
+							self.write(cr, uid, ids, {'state':'reject'})
+									
+							#### NC Creation for reject Qty ###
 							
-								indent_wo_line_vals = {
-									'header_id':indent_line_id,
-									'wo_id':entry_rec.order_no,
-									'w_order_id':entry_rec.order_id.id,
-									'w_order_line_id':entry_rec.order_line_id.id,
-									'qty':indent_item.qty * entry_rec.inhouse_qty,
-								}
-								indent_wo_line_id = indent_wo_line_obj.create(cr, uid, indent_wo_line_vals)
-						
-						### New Entry Creation for same Operation ###
-						op_vals = {
-							'ms_id': entry_rec.ms_id.id,
-							'ms_plan_id': entry_rec.ms_plan_id.id,
-							'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
-							'inhouse_qty': 1,
-							'op12_stage_id': entry_rec.op12_stage_id.id,
-							'op12_clamping_area': entry_rec.op12_clamping_area,
-							'op12_id': entry_rec.op12_id.id,
-							'parent_id' : ids[0],
-							'last_operation_check_id': entry_rec.last_operation_check_id,
-							'state': 'active',
-							'op12_state': 'pending',
-							'op12_process_result':'',
+							### Production Number ###
+							produc_name = ''	
+							produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry_rec.entry_date))
+							produc_name = cr.fetchone();
 							
-						}			
-						copy_id = self.copy(cr, uid, entry_rec.id,op_vals, context)
-						
-						copy_rec = self.browse(cr, uid, copy_id)
-						
-						for dimen_item in copy_rec.op12_line_ids:
+							### Issue Number ###
+							issue_name = ''	
+							issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry_rec.entry_date))
+							issue_name = cr.fetchone();
 							
-							dimen_vals = {
-								'actual_val': 0,
-								'remark': False,
+							### Core Log Number ###
+							core_name = ''	
+							core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry_rec.entry_date))
+							core_name = cr.fetchone();
+							
+							### Mould Log Number ###
+							mould_name = ''	
+							mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
+							rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry_rec.entry_date))
+							mould_name = cr.fetchone();
+							
+							production_vals = {
+													
+								'name': produc_name[0],
+								'schedule_id': entry_rec.ms_id.schedule_id.id,
+								'schedule_date': entry_rec.ms_id.schedule_date,
+								'division_id': entry_rec.ms_id.division_id.id,
+								'location' : entry_rec.ms_id.location,
+								'schedule_line_id': entry_rec.ms_id.schedule_line_id.id,
+								'order_id': entry_rec.ms_id.order_id.id,
+								'order_line_id': entry_rec.ms_id.order_line_id.id,
+								'order_bomline_id': entry_rec.ms_id.order_bomline_id.id,
+								'qty' : entry_rec.inhouse_qty,			  
+								'schedule_qty' : entry_rec.inhouse_qty,			  
+								'state' : 'issue_done',
+								'order_category':entry_rec.ms_id.order_category,
+								'order_priority': '1',
+								'pattern_id' : entry_rec.ms_id.pattern_id.id,
+								'pattern_name' : entry_rec.ms_id.pattern_id.pattern_name,	
+								'moc_id' : entry_rec.ms_id.moc_id.id,
+								'request_state': 'done',
+								'issue_no': issue_name[0],
+								'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'issue_qty': 1,
+								'issue_state': 'issued',
+								'core_no': core_name[0],
+								'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'core_qty': entry_rec.inhouse_qty,	
+								'core_rem_qty': entry_rec.inhouse_qty,	
+								'core_state': 'pending',
+								'mould_no': mould_name[0],
+								'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
+								'mould_qty': entry_rec.inhouse_qty,	
+								'mould_rem_qty': entry_rec.inhouse_qty,	
+								'mould_state': 'pending',		
 							}
 							
-							dimension_obj = self.pool.get('ch.ms.dimension.details')
-							dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
-						
-					if entry_rec.ms_type == 'foundry_item':
-						
-						ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
-						
-						## Operation 11 Status Updation ###
-						if entry_rec.op12_state in ('pending','partial','done'):
-							self.write(cr, uid, ids, {'op12_state':'reject'})
-							
-						self.write(cr, uid, ids, {'state':'reject'})
-								
-						#### NC Creation for reject Qty ###
-						
-						### Production Number ###
-						produc_name = ''	
-						produc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.production')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,produc_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(produc_seq_id[0],rec.code,entry_rec.entry_date))
-						produc_name = cr.fetchone();
-						
-						### Issue Number ###
-						issue_name = ''	
-						issue_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.pattern.issue')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,issue_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(issue_seq_id[0],rec.code,entry_rec.entry_date))
-						issue_name = cr.fetchone();
-						
-						### Core Log Number ###
-						core_name = ''	
-						core_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.core.log')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,core_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(core_seq_id[0],rec.code,entry_rec.entry_date))
-						core_name = cr.fetchone();
-						
-						### Mould Log Number ###
-						mould_name = ''	
-						mould_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.mould.log')])
-						rec = self.pool.get('ir.sequence').browse(cr,uid,mould_seq_id[0])
-						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(mould_seq_id[0],rec.code,entry_rec.entry_date))
-						mould_name = cr.fetchone();
-						
-						production_vals = {
-												
-							'name': produc_name[0],
-							'schedule_id': entry_rec.ms_id.schedule_id.id,
-							'schedule_date': entry_rec.ms_id.schedule_date,
-							'division_id': entry_rec.ms_id.division_id.id,
-							'location' : entry_rec.ms_id.location,
-							'schedule_line_id': entry_rec.ms_id.schedule_line_id.id,
-							'order_id': entry_rec.ms_id.order_id.id,
-							'order_line_id': entry_rec.ms_id.order_line_id.id,
-							'order_bomline_id': entry_rec.ms_id.order_bomline_id.id,
-							'qty' : entry_rec.inhouse_qty,			  
-							'schedule_qty' : entry_rec.inhouse_qty,			  
-							'state' : 'issue_done',
-							'order_category':entry_rec.ms_id.order_category,
-							'order_priority': '1',
-							'pattern_id' : entry_rec.ms_id.pattern_id.id,
-							'pattern_name' : entry_rec.ms_id.pattern_id.pattern_name,	
-							'moc_id' : entry_rec.ms_id.moc_id.id,
-							'request_state': 'done',
-							'issue_no': issue_name[0],
-							'issue_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'issue_qty': 1,
-							'issue_state': 'issued',
-							'core_no': core_name[0],
-							'core_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'core_qty': entry_rec.inhouse_qty,	
-							'core_rem_qty': entry_rec.inhouse_qty,	
-							'core_state': 'pending',
-							'mould_no': mould_name[0],
-							'mould_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-							'mould_qty': entry_rec.inhouse_qty,	
-							'mould_rem_qty': entry_rec.inhouse_qty,	
-							'mould_state': 'pending',		
-						}
-						
-						production_id = self.pool.get('kg.production').create(cr, uid, production_vals)
+							production_id = self.pool.get('kg.production').create(cr, uid, production_vals)
 					
 			else:
 				if entry_rec.op12_button_status == 'visible':
-					sc_obj = self.pool.get('kg.subcontract.process')
-					
-					self.write(cr, uid, ids, {'op12_sc_status': 'sc','op12_button_status': 'invisible'})	
-					sc_name = ''	
-					sc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.process')])
-					seq_rec = self.pool.get('ir.sequence').browse(cr,uid,sc_seq_id[0])
-					cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
-					sc_name = cr.fetchone();
-					
-					wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
-					if entry_rec.order_id.id == wo_id[0]:
-						sc_actual_qty = 0
-					else:
-						sc_actual_qty = entry_rec.inhouse_qty
-					
-					sc_vals = {
-						'name': sc_name[0],
-						'ms_plan_id': entry_rec.ms_plan_id.id,
-						'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
-						'sc_qty': entry_rec.inhouse_qty,
-						'total_qty': entry_rec.inhouse_qty,
-						'pending_qty': entry_rec.inhouse_qty,
-						'actual_qty': sc_actual_qty,
-						'ms_op_id': entry_rec.id,
-						'contractor_id': entry_rec.op12_contractor_id.id,
-						'operation_id': entry_rec.op12_id.id,
-					}
-					sc_id = sc_obj.create(cr, uid,sc_vals)
+					if entry_rec.order_id.flag_for_stock == False:
+						sc_obj = self.pool.get('kg.subcontract.process')
+						
+						self.write(cr, uid, ids, {'op12_sc_status': 'sc','op12_button_status': 'invisible'})	
+						sc_name = ''	
+						sc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.process')])
+						seq_rec = self.pool.get('ir.sequence').browse(cr,uid,sc_seq_id[0])
+						cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(sc_seq_id[0],seq_rec.code))
+						sc_name = cr.fetchone();
+						
+						wo_id = self.pool.get('kg.work.order').search(cr, uid, [('flag_for_stock','=','t')])
+						if entry_rec.order_id.id == wo_id[0]:
+							sc_actual_qty = 0
+						else:
+							sc_actual_qty = entry_rec.inhouse_qty
+						
+						sc_vals = {
+							'name': sc_name[0],
+							'ms_plan_id': entry_rec.ms_plan_id.id,
+							'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+							'sc_qty': entry_rec.inhouse_qty,
+							'total_qty': entry_rec.inhouse_qty,
+							'pending_qty': entry_rec.inhouse_qty,
+							'actual_qty': sc_actual_qty,
+							'ms_op_id': entry_rec.id,
+							'contractor_id': entry_rec.op12_contractor_id.id,
+							'operation_id': entry_rec.op12_id.id,
+						}
+						sc_id = sc_obj.create(cr, uid,sc_vals)
 		else:
 			pass
 				

@@ -1257,11 +1257,18 @@ class kg_schedule(osv.osv):
 								ms_master_obj = self.pool.get('kg.machine.shop')
 								ms_rec = ms_master_obj.browse(cr, uid, ms_item['ms_id'])
 								
-								if order_ms_line_id != False:
-									order_ms_rec = self.pool.get('ch.order.machineshop.details').browse(cr, uid, order_ms_line_id)
-									oth_spec = order_ms_rec.remarks
-								else:
-									oth_spec = ''
+								if ms_item['purpose'] == 'pump':
+									if order_ms_line_id != False:
+										order_ms_rec = self.pool.get('ch.order.machineshop.details').browse(cr, uid, order_ms_line_id)
+										oth_spec = order_ms_rec.remarks
+									else:
+										oth_spec = ''
+								if ms_item['purpose'] == 'acc':
+									if order_ms_line_id != False:
+										order_ms_rec = self.pool.get('ch.wo.accessories.ms').browse(cr, uid, order_ms_line_id)
+										oth_spec = order_ms_rec.remarks
+									else:
+										oth_spec = ''
 								
 								### Sequence Number Generation ###
 								ms_name = ''	
@@ -1307,7 +1314,75 @@ class kg_schedule(osv.osv):
 								
 								ms_no = ms_no + 1
 								ms_id = ms_obj.create(cr, uid, ms_vals)
-				
+						### BOT Item Creation in Finished part list ###
+						
+						cr.execute("""
+							select order_bot.id as order_bot_line_id,order_bot.qty as bot_qty,order_bot.bot_id as bot_id,order_bot.item_name as item_name,
+							order_bot.moc_id,'pump' as purpose,wo_line.order_no as order_no,wo_line.id as order_line_id,
+							wo_line.header_id as order_id,wo_line.delivery_date,wo.order_category,
+							wo_line.pump_model_id,wo.entry_date as order_date
+
+							from ch_order_bot_details order_bot
+							left join ch_work_order_details wo_line on order_bot.header_id = wo_line.id
+							left join kg_work_order wo on wo_line.header_id = wo.id
+							where order_bot.flag_applicable = 't' and order_bot.header_id in 
+							(select order_line_id from ch_schedule_details where header_id = %s
+							)
+
+							union 
+
+							select acc_order_bot.id as order_bot_line_id,acc_order_bot.qty as bot_qty,acc_order_bot.ms_id as bot_id,
+							acc_order_bot.item_name as item_name,
+							acc_order_bot.moc_id,'acc' as purpose,wo_line.order_no as order_no,wo_line.id as order_line_id,
+							wo_line.header_id as order_id,wo_line.delivery_date,wo.order_category,
+							wo_line.pump_model_id,wo.entry_date as order_date
+							from ch_wo_accessories_bot as acc_order_bot
+							left join ch_wo_accessories wo_acc_line on acc_order_bot.header_id = wo_acc_line.id
+							left join ch_work_order_details wo_line on wo_acc_line.header_id = wo_line.id
+							left join kg_work_order wo on wo_line.header_id = wo.id
+							where acc_order_bot.is_applicable = 't' and wo_acc_line.header_id in 
+							(select order_line_id from ch_schedule_details where header_id = %s
+							) """%(entry.id,entry.id))
+						order_bot_details = cr.dictfetchall();
+						
+						for order_bot_item in order_bot_details:
+							
+							if order_bot_item['purpose'] == 'pump':
+								if order_bot_item['order_bot_line_id'] != False:
+									order_bot_rec = self.pool.get('ch.order.bot.details').browse(cr, uid, order_bot_item['order_bot_line_id'])
+									oth_spec = order_bot_rec.remarks
+								else:
+									oth_spec = ''
+							if order_bot_item['purpose'] == 'acc':
+								if order_bot_item['order_bot_line_id'] != False:
+									order_bot_rec = self.pool.get('ch.wo.accessories.bot').browse(cr, uid, order_bot_item['order_bot_line_id'])
+									oth_spec = order_bot_rec.remarks
+								else:
+									oth_spec = ''
+									
+							
+							bot_obj = self.pool.get('kg.machine.shop')
+							bot_rec = bot_obj.browse(cr, uid, order_bot_item['bot_id'])
+						
+							bot_store_vals = {
+								
+								'order_id': order_bot_item['order_id'],
+								'order_line_id': order_bot_item['order_line_id'],
+								'oth_spec': oth_spec,
+								'order_category': order_bot_item['order_category'],
+								'order_priority': priority,
+								'pump_model_id': order_bot_item['pump_model_id'],
+								'item_code': bot_rec.code,
+								'item_name': order_bot_item['item_name'],
+								'bot_id': bot_rec.id,
+								'moc_id': order_bot_item['moc_id'],
+								'ms_type': 'bot_item',
+								'qty': 1,
+								'state': 'in_store',
+								'accept_state': 'pending',
+
+							}
+							bot_store_id = self.pool.get('kg.ms.stores').create(cr, uid, bot_store_vals)
 					
 				#### Department Indent Creation for MOC Raw materials  ###
 				

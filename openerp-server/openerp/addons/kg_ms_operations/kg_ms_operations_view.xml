@@ -2464,6 +2464,7 @@
 						<field name="order_priority" string="Order Category"/>
 						<field name="item_name"/>
 						<field name="position_id"/>
+						<field name="oth_spec"/>
 					</group>
 				</group>
 				<notebook>

@@ -10,7 +10,6 @@
 			<field name="arch" type="xml">
 				<form string="Work Order" version="7.0">
 					<header>
-						
 						<button name="mkt_approve" type="object" string="WFMKT Approval" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"
 							/>
 						<button name="design_approve" type="object" string="WFD Approval" states="mkt_approved" class="oe_highlight" confirm="Are you sure to proceed ?"

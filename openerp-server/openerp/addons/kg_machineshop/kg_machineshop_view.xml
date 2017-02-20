@@ -544,11 +544,153 @@
 	<!-- Fettling Inward Batch End Here -->
 	
 	
+	<!--  ID Commitment Start Here Karthikeyan-->
+	
+	
+		<record id="t_form_v_id_commitment" model="ir.ui.view">
+			<field name="name">ID Commitment Process Form</field>
+			<field name="model">kg.id.commitment</field>
+			<field name="arch" type="xml">
+				<form string="ID Commitment Process" version="7.0"  delete="false" create="false">
+
+					<group>
+						<group>
+							<field name="order_id" readonly="1"/>
+							<field name="order_category"/>
+							<field name="schedule_id" />
+							<field name="location" />
+							<field name="pump_model_id" />
+							<field name="cc_date" />
+							<field name="ms_material_date" />
+							<field name="in_house_date" />
+							<field name="id_date" />
+							<field name="id_date" />
+							<field name="acc_material_status" />
+							<field name="acc_commit_date" />
+							<field name="rfd_date" />
+							<field name="note" />							
+						</group>											
+						<group>
+							<field name="entry_date"/>
+							<field name="pump_model_type" />
+							<field name="qty" />
+							<field name="order_value" />
+							<field name="pouring_date" />
+							<field name="ms_material_status" />
+							<field name="sub_con_date" />
+							<field name="accessories" />
+							<field name="id_commitment_date" />
+							<field name="despatch_date" />
+							
+							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+						</group>					
+					</group>
+					<notebook>						
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
+								<group>
+									<field name="user_id"/>
+									<field name="update_user_id"/>										
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="update_date" />									
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_id_commitment" model="ir.ui.view">
+			<field name="name">ID Commitment Process Tree</field>
+			<field name="model">kg.id.commitment</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">	
+			<tree toolbar="True" string="ID Commitment Process" create="false">									
+					<field name="order_id"/>
+					<field name="entry_date"/>					
+					<field name="order_category"/>
+					<field name="schedule_id"/>
+					<field name="location"/>
+					<field name="order_value"/>
+					<field name="order_category"/>
+					<field name="pump_model_type"/>
+					<field name="qty"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_id_commitment" model="ir.ui.view">
+            <field name="name">ID Commitment Process Search</field>
+            <field name="model">kg.id.commitment</field>
+            <field name="arch" type="xml">
+                <search string="ID Commitment Process">
+					<field name="order_id" string="Work Order No."  filter_domain="[('order_id','ilike',self)]" />
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+                       
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+	
+	
+	
+	<!-- Menu Action Start-->	
+		
+		<record id="tma_id_commitment" model="ir.actions.act_window">
+			<field name="name">ID Commitment</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.id.commitment</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_id_commitment"/>
+			<field name="search_view_id" ref="t_search_v_id_commitment"/>
+			<field name="context">{"search_default_open":1}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start -->
+		
+        <record id="audit_id_commitment" model="audittrail.rule">
+            <field name="name">Audit Log ID Commitment Process</field>
+            <field name="object_id" eval="ref('kg_machineshop.model_kg_id_commitment')"/>       
+            <field name="state">subscribed</field>              
+        </record>	
+       
+        
+    <!-- Audit Log Xml Data End-->	
+	
 	
 	<!-- Menu Item Starts Here -->
 	
 	<menuitem name="MS Process" id="tpm_ms_process" parent="kg_operation_master.mpm_crm" sequence="2"/>
 			
+		<menuitem action="tma_id_commitment" id="tam_ms_id_commitment" parent="tpm_ms_process" sequence="0" />
 		<menuitem action="kg_stock_inward.tma_ms_stock_details" id="tam_ms_stock_list" parent="tpm_ms_process" sequence="1" />
 		<menuitem action="tma_ms_inward" id="tam_ms_inward" parent="tpm_ms_process" sequence="2" />
 		<menuitem action="tma_ms_sch_list" id="tam_ms_sch_list" parent="tpm_ms_process" sequence="3" />

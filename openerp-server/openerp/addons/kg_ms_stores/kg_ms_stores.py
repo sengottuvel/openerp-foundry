@@ -46,25 +46,25 @@ class kg_ms_stores(osv.osv):
 		'active': fields.boolean('Active'),
 		
 		'operation_id': fields.many2one('kg.ms.operations','MS Operation Id'),
-		'ms_id': fields.related('operation_id','ms_id', type='many2one', relation='kg.machineshop', string='MS Id', store=True, readonly=True),
-		'production_id': fields.related('operation_id','production_id', type='many2one', relation='kg.production', string='Production No.', store=True, readonly=True),
-		'ms_plan_id': fields.related('operation_id','ms_plan_id', type='many2one', relation='kg.ms.daily.planning', string='Planning Id', store=True, readonly=True),
-		'ms_plan_line_id': fields.related('operation_id','ms_plan_line_id', type='many2one', relation='ch.ms.daily.planning.details', string='Planning Line Id', store=True, readonly=True),
-		'position_id': fields.related('operation_id','position_id', type='many2one', relation='kg.position.number', string='Position No.', store=True, readonly=True),
-		'order_id': fields.related('operation_id','order_id', type='many2one', relation='kg.work.order', string='Work Order', store=True, readonly=True),
-		'order_line_id': fields.related('operation_id','order_line_id', type='many2one', relation='ch.work.order.details', string='Order Line', store=True, readonly=True),
-		'order_no': fields.related('operation_id','order_no', type='char', string='WO No.', store=True, readonly=True),
-		'oth_spec': fields.related('ms_id','oth_spec', type='text', string='WO Remarks', store=True, readonly=True),
-		'order_category': fields.related('operation_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
-		'order_priority': fields.related('operation_id','order_priority', type='selection', selection=ORDER_PRIORITY, string='Priority', store=True, readonly=True),
-		'pump_model_id': fields.related('operation_id','pump_model_id', type='many2one', relation='kg.pumpmodel.master', string='Pump Model', store=True, readonly=True),
-		'pattern_id': fields.related('operation_id','pattern_id', type='many2one', relation='kg.pattern.master', string='Pattern Number', store=True, readonly=True),
-		'pattern_code': fields.related('operation_id','pattern_code', type='char', string='Pattern Code', store=True, readonly=True),
-		'pattern_name': fields.related('operation_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
-		'item_code': fields.related('operation_id','item_code', type='char', string='Item Code', store=True, readonly=True),
-		'item_name': fields.related('operation_id','item_name', type='char', string='Item Name', store=True, readonly=True),
-		'moc_id': fields.related('operation_id','moc_id', type='many2one', relation='kg.moc.master', string='MOC', store=True, readonly=True),
-		'ms_type': fields.related('operation_id','ms_type', type='selection', selection=[('foundry_item','Foundry Item'),('ms_item','MS Item')], string='Item Type', store=True, readonly=True),
+		'ms_id': fields.many2one('kg.machineshop','MS Id', readonly=True),
+		'production_id': fields.many2one('kg.production', 'Production No.', readonly=True),
+		'ms_plan_id': fields.many2one('kg.ms.daily.planning','Planning Id', readonly=True),
+		'ms_plan_line_id': fields.many2one('ch.ms.daily.planning.details','Planning Line Id',readonly=True),
+		'position_id': fields.many2one('kg.position.number', 'Position No.', readonly=True),
+		'order_id': fields.many2one('kg.work.order', 'Work Order', readonly=True),
+		'order_line_id': fields.many2one('ch.work.order.details','Order Line', readonly=True),
+		'order_no': fields.related('order_line_id','order_no', type='char', string='WO No.', store=True, readonly=True),
+		'oth_spec': fields.text('WO Remarks', readonly=True),
+		'order_category': fields.selection(ORDER_CATEGORY,'Category',readonly=True),
+		'order_priority': fields.selection(ORDER_PRIORITY,'Priority', readonly=True),
+		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', readonly=True),
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern Number',readonly=True),
+		'pattern_code': fields.related('pattern_id','name', type='char', string='Pattern Code', store=True, readonly=True),
+		'pattern_name': fields.related('pattern_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
+		'item_code': fields.char('Item Code', readonly=True),
+		'item_name': fields.char('Item Name', readonly=True),
+		'moc_id': fields.many2one('kg.moc.master', 'MOC', readonly=True),
+		'ms_type': fields.selection([('foundry_item','Foundry Item'),('ms_item','MS Item'),('bot_item','BOT Item')], 'Item Type', store=True, readonly=True),
 		'qty': fields.integer('Qty'),
 		'state': fields.selection([
 			('in_store','In Store'),
@@ -75,6 +75,14 @@ class kg_ms_stores(osv.osv):
 		'foundry_assembly_line_id': fields.related('production_id','assembly_line_id', type='integer', string='Assembly Inward Line', store=True, readonly=True),
 		'ms_assembly_id': fields.related('ms_id','assembly_id', type='integer', string='Assembly Inward', store=True, readonly=True),
 		'ms_assembly_line_id': fields.related('ms_id','assembly_line_id', type='integer', string='Assembly Inward Line', store=True, readonly=True),
+		'accept_state': fields.selection([
+			('pending','Pending'),
+			('waiting','Waiting for Acceptance'),
+			('received','Received'),
+			],'Status', readonly=True),
+			
+		'bot_id':fields.many2one('kg.machine.shop', 'Item Code',domain = [('type','=','bot')]),
+		'brand_id': fields.many2one('kg.brand.master','Brand'),	
 		
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
@@ -117,6 +125,12 @@ class kg_ms_stores(osv.osv):
 		#~ (_future_entry_date_check, 'System not allow to save with future date. !!',['']),   
 		
 	   ]
+	   
+	def entry_accept(self,cr,uid,ids,context=None):
+		entry_rec = self.browse(cr,uid,ids[0])
+		if entry_rec.accept_state == 'waiting':
+			self.write(cr,uid,ids,{'accept_state':'received'})
+		return True
 
 	def assembly_update(self,cr,uid,ids,entry_mode,order_line_id=False,pump_model_id=False,context=None):
 		
@@ -131,6 +145,7 @@ class kg_ms_stores(osv.osv):
 			entry_mode = 'auto'
 
 		if entry_mode == 'auto':
+			inward_list = []
 			assembly_list = []
 			completion_list = []
 			#~ ms_completion_list = {}
@@ -153,7 +168,7 @@ class kg_ms_stores(osv.osv):
 				left join ch_work_order_details order_line on order_line.id = ms_store.order_line_id
 				left join kg_machineshop ms_item on ms_item.id = ms_store.ms_id
 
-				where ms_store.ms_type = 'foundry_item' and ms_store.state = 'in_store'
+				where ms_store.ms_type = 'foundry_item' and ms_store.state = 'in_store' and ms_store.accept_state = 'received'
 				and ms_store.foundry_assembly_id > 0 and ms_store.foundry_assembly_line_id > 0
 
 				group by 1,2,3,4,5,6,7,8 ''')
@@ -176,8 +191,6 @@ class kg_ms_stores(osv.osv):
 						('header_id','=',reprocess_item['foundry_assembly_id']),
 						('id','=',reprocess_item['foundry_assembly_line_id'])
 						])
-					print "assembly_foundry_id",assembly_foundry_id
-					print "reprocess_item['ccccccccccccccccccccccccccc']",reprocess_item['ms_qty']
 					if assembly_foundry_id:
 						assembly_foundry_rec = assembly_foundry_obj.browse(cr, uid,assembly_foundry_id[0])
 						assembly_foundry_obj.write(cr,uid,reprocess_item['foundry_assembly_line_id'],{'state':'waiting'})
@@ -208,7 +221,7 @@ class kg_ms_stores(osv.osv):
 					left join ch_work_order_details order_line on order_line.id = ms_store.order_line_id
 					left join kg_machineshop ms_item on ms_item.id = ms_store.ms_id
 
-					where ms_store.ms_type = 'ms_item' and ms_store.state = 'in_store'
+					where ms_store.ms_type = 'ms_item' and ms_store.state = 'in_store' and ms_store.accept_state = 'received'
 					and ms_store.ms_assembly_id > 0 and ms_store.ms_assembly_line_id > 0
 
 					group by 1,2,3,4,5,6,7,8,9 ''')
@@ -262,7 +275,7 @@ class kg_ms_stores(osv.osv):
 				left join ch_work_order_details order_line on order_line.id = ms_store.order_line_id
 				left join kg_machineshop ms_item on ms_item.id = ms_store.ms_id
 
-				where ms_store.ms_type = 'foundry_item' and ms_store.state = 'in_store'
+				where ms_store.ms_type = 'foundry_item' and ms_store.state = 'in_store' and ms_store.accept_state = 'received'
 				and foundry_assembly_id = 0 and foundry_assembly_line_id = 0
 
 				group by 1,2,3,4,5,6 ''')
@@ -288,7 +301,7 @@ class kg_ms_stores(osv.osv):
 						left join ch_work_order_details order_line on order_line.id = ms_store.order_line_id
 						left join kg_machineshop ms_item on ms_item.id = ms_store.ms_id
 
-						where ms_store.ms_type = 'foundry_item' and ms_store.state = 'in_store'
+						where ms_store.ms_type = 'foundry_item' and ms_store.state = 'in_store' and ms_store.accept_state = 'received'
 						and foundry_assembly_id = 0 and foundry_assembly_line_id = 0
 
 						group by 1,2,3,4,5,6
@@ -341,7 +354,7 @@ class kg_ms_stores(osv.osv):
 					left join ch_work_order_details order_line on order_line.id = ms_store.order_line_id
 					left join kg_machineshop ms_item on ms_item.id = ms_store.ms_id
 
-					where ms_store.ms_type = 'ms_item' and ms_store.state = 'in_store'
+					where ms_store.ms_type = 'ms_item' and ms_store.state = 'in_store' and ms_store.accept_state = 'received'
 					and ms_store.ms_assembly_id = 0 and ms_store.ms_assembly_line_id = 0
 
 					group by 1,2,3,4,5,6,7
@@ -367,7 +380,7 @@ class kg_ms_stores(osv.osv):
 							left join ch_work_order_details order_line on order_line.id = ms_store.order_line_id
 							left join kg_machineshop ms_item on ms_item.id = ms_store.ms_id
 
-							where ms_store.ms_type = 'ms_item' and ms_store.state = 'in_store'
+							where ms_store.ms_type = 'ms_item' and ms_store.state = 'in_store' and ms_store.accept_state = 'received'
 							and ms_store.ms_assembly_id = 0 and ms_store.ms_assembly_line_id = 0
 
 							group by 1,2,3,4,5,6,7
@@ -431,7 +444,18 @@ class kg_ms_stores(osv.osv):
 						wo_line_rec = self.pool.get('ch.work.order.details').browse(cr, uid, ass_header_item['order_line_id'])
 						wo_order_qty = wo_line_rec.qty
 						if not assembly_id:
-							
+							assembly_create = 'no'
+							### Checking bot items are completed are not ### 
+							cr.execute(''' select count(id) from ch_order_bot_details where header_id = %s and flag_applicable = 't' ''',[ass_header_item['order_line_id']])
+							order_bot_items_count = cr.fetchone()
+							cr.execute(''' select count(id) from kg_ms_stores where order_line_id = %s and accept_state = 'received' and state = 'in_store' ''',[ass_header_item['order_line_id']])
+							store_bot_items_count = cr.fetchone()
+							if order_bot_items_count != []:
+								if order_bot_items_count[0] == store_bot_items_count[0]:
+									assembly_create = 'yes'
+								else:
+									assembly_create = 'no'
+							print "assembly_createassembly_create",assembly_create
 							for assembly in range(wo_order_qty):
 								ass_header_values = {
 								'name': '',
@@ -443,22 +467,26 @@ class kg_ms_stores(osv.osv):
 								'entry_mode': 'auto',
 								'qap_plan_id': wo_line_rec.qap_plan_id.id
 								}
-								assembly_id = assembly_obj.create(cr, uid, ass_header_values)
-								### Creating BOT Details ###
-								cr.execute(''' select id as order_bot_id,qty as order_bot_qty from ch_order_bot_details where header_id = %s and flag_applicable = 't' ''',[ass_header_item['order_line_id']])
-								order_bot_items = cr.dictfetchall()
-								if order_bot_items:
-									for bot_item in order_bot_items:
-										if bot_item['order_bot_qty'] == 1:
-											order_bot_qty = bot_item['order_bot_qty']
-										if bot_item['order_bot_qty'] > 1:
-											order_bot_qty = bot_item['order_bot_qty'] / wo_order_qty
-										ass_bot_vals = {
-										'header_id': assembly_id,
-										'order_bot_id': bot_item['order_bot_id'],
-										'order_bot_qty': order_bot_qty,
-										}
-										assembly_bot_id = assembly_bot_obj.create(cr, uid, ass_bot_vals)	
+								if assembly_create == 'yes':
+									assembly_id = assembly_obj.create(cr, uid, ass_header_values)
+									inward_list.append({'order_line_id':ass_header_item['order_line_id']})
+									### Creating BOT Details ###
+									cr.execute(''' select id as order_bot_id,qty as order_bot_qty from ch_order_bot_details where header_id = %s and flag_applicable = 't' ''',[ass_header_item['order_line_id']])
+									order_bot_items = cr.dictfetchall()
+									if order_bot_items:
+										for bot_item in order_bot_items:
+											if bot_item['order_bot_qty'] == 1:
+												order_bot_qty = bot_item['order_bot_qty']
+											if bot_item['order_bot_qty'] > 1:
+												order_bot_qty = bot_item['order_bot_qty'] / wo_order_qty
+											else:
+												pass
+											ass_bot_vals = {
+											'header_id': assembly_id,
+											'order_bot_id': bot_item['order_bot_id'],
+											'order_bot_qty': order_bot_qty,
+											}
+											assembly_bot_id = assembly_bot_obj.create(cr, uid, ass_bot_vals)	
 								
 						### State Updation in store ###
 						store_ids = self.search(cr,uid,[('order_line_id','=',ass_header_item['order_line_id']),('state','=','in_store')])
@@ -601,7 +629,7 @@ class kg_ms_stores(osv.osv):
 				left join ch_work_order_details order_line on order_line.id = ms_store.order_line_id
 				left join kg_machineshop ms_item on ms_item.id = ms_store.ms_id
 
-				where ms_store.ms_type = 'foundry_item' and ms_store.state = 'in_store'and 
+				where ms_store.ms_type = 'foundry_item' and ms_store.state = 'in_store' and ms_store.accept_state = 'received' and 
 				ms_store.order_line_id = %s and ms_store.pump_model_id = %s
 				and ms_store.foundry_assembly_id > 0 and ms_store.foundry_assembly_line_id > 0
 
@@ -657,7 +685,7 @@ class kg_ms_stores(osv.osv):
 					left join ch_work_order_details order_line on order_line.id = ms_store.order_line_id
 					left join kg_machineshop ms_item on ms_item.id = ms_store.ms_id
 
-					where ms_store.ms_type = 'ms_item' and ms_store.state = 'in_store'and 
+					where ms_store.ms_type = 'ms_item' and ms_store.state = 'in_store' and ms_store.accept_state = 'received' and 
 					ms_store.order_line_id = %s and ms_store.pump_model_id = %s
 					and ms_store.ms_assembly_id > 0 and ms_store.ms_assembly_line_id > 0
 
@@ -707,7 +735,7 @@ class kg_ms_stores(osv.osv):
 				left join ch_work_order_details order_line on order_line.id = ms_store.order_line_id
 				left join kg_machineshop ms_item on ms_item.id = ms_store.ms_id
 
-				where ms_store.ms_type = 'foundry_item' and ms_store.state = 'in_store' and 
+				where ms_store.ms_type = 'foundry_item' and ms_store.state = 'in_store' and ms_store.accept_state = 'received' and 
 				ms_store.order_line_id = %s and ms_store.pump_model_id = %s
 				and ms_store.foundry_assembly_id = 0 and ms_store.foundry_assembly_line_id = 0
 				
@@ -733,7 +761,7 @@ class kg_ms_stores(osv.osv):
 						left join ch_work_order_details order_line on order_line.id = ms_store.order_line_id
 						left join kg_machineshop ms_item on ms_item.id = ms_store.ms_id
 
-						where ms_store.ms_type = 'foundry_item' and ms_store.state = 'in_store' and
+						where ms_store.ms_type = 'foundry_item' and ms_store.state = 'in_store' and ms_store.accept_state = 'received' and
 						ms_store.order_line_id = %s and ms_store.pump_model_id = %s
 						and ms_store.foundry_assembly_id = 0 and ms_store.foundry_assembly_line_id = 0
 
@@ -782,7 +810,7 @@ class kg_ms_stores(osv.osv):
 					left join ch_work_order_details order_line on order_line.id = ms_store.order_line_id
 					left join kg_machineshop ms_item on ms_item.id = ms_store.ms_id
 
-					where ms_store.ms_type = 'ms_item' and ms_store.state = 'in_store' and
+					where ms_store.ms_type = 'ms_item' and ms_store.state = 'in_store' and ms_store.accept_state = 'received' and
 					ms_store.order_line_id = %s and ms_store.pump_model_id = %s
 					and ms_store.ms_assembly_id = 0 and ms_store.ms_assembly_line_id = 0
 
@@ -809,7 +837,7 @@ class kg_ms_stores(osv.osv):
 							left join ch_work_order_details order_line on order_line.id = ms_store.order_line_id
 							left join kg_machineshop ms_item on ms_item.id = ms_store.ms_id
 
-							where ms_store.ms_type = 'ms_item' and ms_store.state = 'in_store'and
+							where ms_store.ms_type = 'ms_item' and ms_store.state = 'in_store' and ms_store.accept_state = 'received' and
 							ms_store.order_line_id = %s and ms_store.pump_model_id = %s
 							and ms_store.ms_assembly_id = 0 and ms_store.ms_assembly_line_id = 0
 
@@ -953,7 +981,19 @@ class kg_ms_stores(osv.osv):
 								'entry_mode': 'manual'
 							}
 							assembly_ms_id = assembly_ms_obj.create(cr, uid, ass_ms_vals)
+							
 		
+		if inward_list:
+			groupby_orderid = {v['order_line_id']:v for v in inward_list}.values()
+			inward_list = groupby_orderid
+			order_items = []
+			for inward_item in inward_list:
+				order_rec = self.pool.get('ch.work.order.details').browse(cr, uid, inward_item['order_line_id'])
+				order_items.append(order_rec.order_no)
+			order_items =  map(str, order_items)
+			a = ( ", ".join( repr(e) for e in order_items ) )
+			
+			raise osv.except_osv(_(''), _(' Wo.No %s moved to assembly successfully !!')%(a))
 		return True
 	   
 		

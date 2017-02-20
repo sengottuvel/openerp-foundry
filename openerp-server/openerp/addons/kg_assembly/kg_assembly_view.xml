@@ -295,19 +295,20 @@
 			<form string="Manual Assembly Inward">
 			   <group>
 					<group>
+<!--
 						<field name="order_line_id"/>
+-->
 						<button name="assembly_update" string="Create Assembly" type="object" icon="gtk-ok"/>
 					</group>
-					<group>
-						<field name="pump_model_id"/>
-						
-					</group>
+					
+					<field name="remarks" nolabel="1" readonly="1"/>
+
 			   </group>
 			</form>
 		</field>
     </record>
  
-   <record id="wma_allotted_components" model="ir.actions.act_window">  
+   <record id="wma_manual_assembly" model="ir.actions.act_window">  
 		<field name="name">Manual Assembly Inward</field>
 		<field name="type">ir.actions.act_window</field>
 		<field name="res_model">kg.manual.assembly.inward</field>
@@ -558,10 +559,9 @@
 	<!-- Menu Item Start -->
 	
 	<menuitem name="Assembly" id="tpm_assembly_process" parent="kg_operation_master.mpm_crm" sequence="6"/>
-			
-<!--
-		<menuitem action="wma_allotted_components" id="wam_assembly_inward" parent="tpm_assembly_process" sequence="1" />
--->
+
+		<menuitem action="wma_manual_assembly" id="wam_assembly_inward" parent="tpm_assembly_process" sequence="1" />
+
 		
 		<menuitem action="tma_assembly_inward" id="tam_assembly_inward" parent="tpm_assembly_process" sequence="2" />
 		

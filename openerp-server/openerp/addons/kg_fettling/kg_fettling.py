@@ -1505,7 +1505,8 @@ class kg_fettling(osv.osv):
 					'stage_id':entry.stage_id.id,
 					'stage_name': 'Fettling Inward',
 					'qty': entry.inward_reject_qty,
-					'reject_remarks_id': entry.inward_reject_remarks_id.id
+					'reject_remarks_id': entry.inward_reject_remarks_id.id,
+					'oth_spec': entry.oth_spec
 				}
 				
 				foundry_rejection_id = foundry_rejection_obj.create(cr, uid, rejection_vals)
@@ -2384,7 +2385,8 @@ class kg_fettling(osv.osv):
 				'stage_name': entry.stage_name,
 				'qty': fettling_reject_qty,
 				'each_weight': fettling_weight,
-				'reject_remarks_id': fettling_reject_remarks_id
+				'reject_remarks_id': fettling_reject_remarks_id,
+				'oth_spec': entry.oth_spec
 			}
 			
 			foundry_rejection_id = foundry_rejection_obj.create(cr, uid, rejection_vals)
@@ -3798,7 +3800,8 @@ class kg_fettling(osv.osv):
 					'stage_name': entry.stage_name,
 					'qty': entry.welding_reject_qty,
 					'each_weight': entry.welding_weight,
-					'reject_remarks_id': entry.welding_reject_remarks_id.id
+					'reject_remarks_id': entry.welding_reject_remarks_id.id,
+					'oth_spec': entry.oth_spec
 				}
 				
 				foundry_rejection_id = foundry_rejection_obj.create(cr, uid, rejection_vals)
@@ -4744,7 +4747,8 @@ class kg_fettling(osv.osv):
 					'stage_id':entry.stage_id.id,
 					'stage_name': 'Stock Allocation',
 					'qty': reject_qty,
-					'reject_remarks_id': entry.allocation_reject_remarks_id.id
+					'reject_remarks_id': entry.allocation_reject_remarks_id.id,
+					'oth_spec': entry.oth_spec
 				}
 				
 				foundry_rejection_id = foundry_rejection_obj.create(cr, uid, rejection_vals)
@@ -8480,6 +8484,7 @@ class kg_foundry_rejection_list(osv.osv):
 		'each_weight': fields.float('Each Weight(Kgs)'),
 		'total_weight': fields.function(_get_total_weight, string='Total Weight(Kgs)', method=True, store=True, type='float'),
 		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
+		'oth_spec': fields.text('WO Remarks',readonly=True),
 		
 		
 	}

@@ -493,3 +493,81 @@ class ch_ms_batch_accept_line(osv.osv):
 		
 	
 ch_ms_batch_accept_line()
+
+
+
+class kg_id_commitment(osv.osv):
+
+	_name = "kg.id.commitment"
+	_description = "ID Commitment Process"
+	
+	_columns = {
+	
+			
+		'order_id':fields.many2one('ch.work.order.details', 'WORK ORDER NO.', required=True),
+		'order_category': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories')],'Order Category', required=True),		
+		'pump_model_type':fields.selection([('vertical','Vertical'),('horizontal','Horizontal'),('others','Others')], 'Type',required=True),
+		'qty': fields.integer('Qty', required=True),
+		'order_value': fields.integer('Value', required=True),
+		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Type', required=True,domain="[('active','=','t')]"),
+		'division_id': fields.many2one('kg.division.master','Division', required=True),
+		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location', required=True),
+		'schedule_id':fields.many2one('kg.schedule', 'Schedule No.', required=True),
+		
+		'pouring_date': fields.date('Pouring Over date'),
+		'cc_date': fields.date('CC Date'),
+		'ms_material_date': fields.date('MS Item Material Commitment'),
+		'sub_con_date': fields.date('SUB.CON Commitment'),
+		'in_house_date': fields.date('IN-HOUSE Commitment'),
+		'id_commitment_date': fields.date('ID Commitment'),
+		'id_date': fields.date('ID Date'),
+		'acc_commit_date': fields.date('ACC Commitment Date'),
+		'despatch_date': fields.date('Despatch Commitment Date'),
+		'rfd_date': fields.date('RFD Date'),
+		
+		'accessories': fields.selection([('yes','Yes'),('no','No')],'Accessories'),
+		'acc_material_status': fields.selection([('available','Available'),('pending','Pending')],'ACC Material Status'),
+		'ms_material_status': fields.selection([('available','Available'),('pending','Pending')],'MS Item Material Status'),
+		
+		'entry_date': fields.date('Entry Date',required=True),
+		'note': fields.text('Notes'),
+		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed')],'Status', readonly=True),
+		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode', readonly=True),
+		
+		### Entry Info ####
+		'active': fields.boolean('Active'),
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
+		
+		'crt_date': fields.datetime('Creation Date',readonly=True),
+		'user_id': fields.many2one('res.users', 'Created By', readonly=True),		
+		
+		'update_date': fields.datetime('Last Updated Date', readonly=True),
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
+		
+		
+	}
+	
+	_defaults = {
+	
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_work_order', context=c),
+		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'user_id': lambda obj, cr, uid, context: uid,
+		'crt_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+		'state': 'draft',
+		'active': True,
+		'entry_mode': 'manual',
+		
+	}
+	
+	
+	def create(self, cr, uid, vals, context=None):
+		return super(kg_id_commitment, self).create(cr, uid, vals, context=context)
+		
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(kg_id_commitment, self).write(cr, uid, ids, vals, context)
+		
+		
+	
+kg_id_commitment()

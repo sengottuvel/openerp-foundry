@@ -88,13 +88,15 @@ class kg_pump_qap(osv.osv):
 		'line_ids': fields.one2many('ch.pump.dimentional.details', 'header_id', "Dimention Details Line"),
 		'flag_di_customer_specific': fields.text('Customer Specific'),
 		'di_state': fields.selection([('pending','Pending'),('completed','Completed')],'DI State'),
+		'overall_dim': fields.selection([('pump_ass','Pump Assembly'),('casing','Casing'),
+				('casing_cover','Casing cover'),('impeller','Impeller'),('shaft','Shaft'),('sleeve','Sleeve')],'Over all dimension'),
 
 		
 		## Hydro Static Test (After Assembly) ##
 		
 		'hs_date': fields.date('Date',required=True),	
 		'hs_pressure': fields.float('Hydro static test pressure' ),
-		'hs_testing_time': fields.selection([('15','15'),('30','30'),('45','45'),('60','60'),('75','75'),('90','90'),('105','105'),('120','120')],
+		'hs_testing_time':fields.selection([('15','15'),('30','30'),('45','45'),('60','60'),('75','75'),('90','90'),('105','105'),('120','120')],
 					'Testing time (Mins)'),
 		'hs_actual_unbal_weight': fields.float('Actual Un Balanced Weight in (gms)'),
 		'hs_machinery_id': fields.many2one('kg.machinery.master','Machinery'),
@@ -143,7 +145,8 @@ class kg_pump_qap(osv.osv):
 		'entry_mode': 'manual',		
 		'flag_sms': False,		
 		'flag_email': False,		
-		'flag_spl_approve': False,		
+		'flag_spl_approve': False,
+		'overall_dim': 'pump_ass'	
 		
 	}
 	
@@ -186,9 +189,9 @@ class kg_pump_qap(osv.osv):
 	def hs_update(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		### Actual weight checking ###
-		#~ if rec.hs_actual_unbal_weight <= 0:
-			#~ raise osv.except_osv(_('Warning !!'),
-				#~ _('Actual weight should be greater than zero. !!'))	
+		if rec.hs_actual_unbal_weight <= 0:
+			raise osv.except_osv(_('Warning !!'),
+				_('Actual weight should be greater than zero. !!'))	
 		if rec.hs_pressure <= 0:
 			raise osv.except_osv(_('Warning !!'),
 				_('Test Pressure should be greater than zero. !!'))	

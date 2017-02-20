@@ -342,6 +342,18 @@ class kg_ms_daily_planning(osv.osv):
 									'order_id': wo_id[0],
 									'order_line_id': wo_line_id[0],
 									'order_no': wo_line_rec.order_no,
+									'order_category': line_item.ms_id.order_category,
+									'order_priority': line_item.ms_id.order_priority,
+									'position_id': line_item.ms_id.position_id.id,
+									'pump_model_id': line_item.ms_id.pump_model_id.id,
+									'pattern_id': line_item.ms_id.pattern_id.id,
+									'pattern_code': line_item.ms_id.pattern_code,
+									'pattern_name': line_item.ms_id.pattern_name,
+									'item_code': line_item.ms_id.item_code,
+									'item_name': line_item.ms_id.item_name,
+									'moc_id': line_item.ms_id.moc_id.id,
+									'ms_type': line_item.ms_id.ms_type,
+
 									'inhouse_qty': 1,
 									'op1_stage_id': op1_stage_id,
 									'op1_clamping_area': op1_clamping_area,
@@ -1243,7 +1255,6 @@ class ch_ms_daily_planning_details(osv.osv):
 		'oth_spec': fields.related('ms_id','oth_spec', type='text', string='WO Remarks', store=True, readonly=True),
 		'remarks': fields.text('Remarks'),
 		'line_ids': fields.one2many('ch.ms.sc.qty.details','header_id', 'MS PLAN SC Line'),
-	
 	} 
 	
 	
