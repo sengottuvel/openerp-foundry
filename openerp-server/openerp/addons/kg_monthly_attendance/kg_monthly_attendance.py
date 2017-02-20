@@ -105,13 +105,15 @@ class kg_monthly_attendance(osv.osv):
 		'cas_lev_days':fields.float('Casual Leave'),	
 		'fes_lev_days':fields.float('Festival Leave'),	
 		'ear_lev_days':fields.float('Earned Leave'),	
-		'absent_days':fields.float('Absent'),	
+		'absent_days':fields.float('LOP'),	
 		'total_days':fields.float('Total Days of Month'),	
 		'leave_days':fields.float('Total Leave Days'),	
 		'working_days':fields.float('Total Working Days'),	
 		'salary_days': fields.function(_paid_amt, string='Total Paid Days',multi="sums",store=True),		
 		'late_days':fields.float('Late'),	
-		'month':fields.char('Month'),	
+		'month':fields.char('Month'),
+		'sundays':fields.integer('Sundays'),	
+		'nat_fes_days':fields.integer('National/Festival Holidays'),	
 		
 		## Child Tables Declaration		
 		
@@ -256,6 +258,8 @@ class kg_monthly_attendance(osv.osv):
 		da_ids = da_obj.search(cr,uid,[('month','=',last_month),('year','=',cur_year)])
 		check_data = mon_att_obj.search(cr,uid,[('start_date','=',res_start),('end_date','=',res_end)])
 		print "-------------------------------------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",len(check_data)
+		ot_tot_days = 0.00
+		total_ot_mon = 0.00
 		if len(check_data) == 1:
 			 
 			for item in da_ids:
@@ -270,6 +274,27 @@ class kg_monthly_attendance(osv.osv):
 								('status','=','absent')])
 				ot_days = da_line_obj.search(cr,uid,[('header_id','=',item),
 								('ot_hrs','!=','00:00')])
+				
+				####### OT HOURS CALCULATIONS IN TERMS OF DAYS ######
+				if ot_days:
+					emp_rec = self.pool.get('hr.contract').search(cr,uid,[('employee_id','=',da_rec.employee_id.id)])
+					if emp_rec:
+						cont_rec = self.pool.get('hr.contract').browse(cr,uid,emp_rec[0])
+						shift_rec = self.pool.get('kg.shift.master').browse(cr,uid,cont_rec.shift_id.id)
+						for ot_hrsss in ot_days:
+							da_line_rec = da_line_obj.browse(cr,uid,ot_hrsss)
+							print "________________________________________________",da_line_rec.ot_hrs
+							ot_hrs_f = str(da_line_rec.ot_hrs) .replace(':', '.')
+							total_ot_mon += float(ot_hrs_f)
+							print "________________________________________________",total_ot_mon
+						ot_total = total_ot_mon / shift_rec.shift_hours
+						print "ot_totalot_totalot_totalot_totalot_total",ot_total
+						if ot_total >= 1.00:
+							ot_tot_days = ot_total
+						else:
+							ot_tot_days = 0.00
+				####### OT HOURS CALCULATIONS IN TERMS OF DAYS ######
+				
 				half_days = da_line_obj.search(cr,uid,[('header_id','=',item),
 								('status','=','halfday')])
 				wrkg_days = da_line_obj.search(cr,uid,[('header_id','=',item),('status','not in',('weekoff','holiday'))])
@@ -293,7 +318,8 @@ class kg_monthly_attendance(osv.osv):
 							'leave_days':len(lev_days),
 							'od_days':len(od_days),
 							'absent_days':len(ab_days),
-							'ot_days':len(ot_days),
+							#~ 'ot_days':len(ot_days),
+							'ot_days':ot_tot_days,
 							'month':month_1,
 			
 							'state':'draft',

@@ -614,6 +614,19 @@ class kg_payslip(osv.osv):
 						if emp_categ_rec.bonus_categ == 'attendance':
 							print "absentabsentabsentabsentabsent",absent
 							print "leave_daysleave_daysleave_daysleave_days",leave_days
+							pay_line_ids_bas = self.pool.get('hr.payslip.line').search(cr,uid,[('slip_id','=',slip_rec.id),('code','=','BASIC')])
+							pay_line_ids_fda = self.pool.get('hr.payslip.line').search(cr,uid,[('slip_id','=',slip_rec.id),('code','=','FDA')])
+							pay_line_ids_vda = self.pool.get('hr.payslip.line').search(cr,uid,[('slip_id','=',slip_rec.id),('code','=','VDA')])
+							if pay_line_ids_bas:
+								pay_line_rec_ba = self.pool.get('hr.payslip.line').browse(cr,uid,pay_line_ids_bas[0])
+								basic_amt = pay_line_rec_ba.amount
+							if pay_line_ids_fda:
+								pay_line_rec_fda = self.pool.get('hr.payslip.line').browse(cr,uid,pay_line_ids_fda[0])
+								fda_amt = pay_line_rec_fda.amount
+							if pay_line_ids_vda:
+								pay_line_rec_vda = self.pool.get('hr.payslip.line').browse(cr,uid,pay_line_ids_vda[0])
+								vda_amt = pay_line_rec_vda.amount
+							tot_mon_amt = (basic_amt + fda_amt + vda_amt)/working_days
 							if (absent+leave_days) <= 1.5:
 								self.pool.get('hr.payslip.line').create(cr,uid,
 									{
@@ -621,7 +634,7 @@ class kg_payslip(osv.osv):
 										'code':'ATTB',
 										'category_id':8,
 										'quantity':1,
-										'amount':(bns_att * emp_categ_rec.no_of_days_wage),
+										'amount':(tot_mon_amt * emp_categ_rec.no_of_days_wage),
 										'salary_rule_id':1,
 										'employee_id':emp_id,
 										'contract_id':con_ids[0],
@@ -639,7 +652,7 @@ class kg_payslip(osv.osv):
 								att_ins = emp_categ_rec.attnd_insentive_male
 							else:
 								att_ins = emp_categ_rec.attnd_insentive_female
-							if att_ins:
+							if att_ins != 0.00:
 								self.pool.get('hr.payslip.line').create(cr,uid,
 										{
 											'name':'100% Attendance Bonus',

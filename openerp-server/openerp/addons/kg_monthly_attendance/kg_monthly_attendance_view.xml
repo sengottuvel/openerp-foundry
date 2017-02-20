@@ -45,6 +45,8 @@
 								<field name="od_days" required = "1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="arrear_days" required="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
 								<field name="absent_days" required = "1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="sundays" required = "1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="nat_fes_days" required = "1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="state" style="width: 30%%" class="att_state_change"/>			
 								
 							</group>
