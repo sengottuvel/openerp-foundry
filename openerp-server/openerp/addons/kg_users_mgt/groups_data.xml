@@ -121,6 +121,7 @@
             ref('kg_ms_operations.tam_ms_operation12'),
             ref('kg_assembly.tpm_assembly_process'),
             ref('kg_assembly.tam_assembly_inward'),
+            ref('kg_assembly.wam_assembly_inward'),
             ref('kg_assembly.tam_performance_testing'),
             ref('kg_department_issue.tam_ms_issue_line'),
             ref('kg_department_issue.tam_bot_issue_line'),

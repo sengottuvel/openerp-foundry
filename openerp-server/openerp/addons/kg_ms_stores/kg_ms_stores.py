@@ -448,14 +448,16 @@ class kg_ms_stores(osv.osv):
 							### Checking bot items are completed are not ### 
 							cr.execute(''' select count(id) from ch_order_bot_details where header_id = %s and flag_applicable = 't' ''',[ass_header_item['order_line_id']])
 							order_bot_items_count = cr.fetchone()
-							cr.execute(''' select count(id) from kg_ms_stores where order_line_id = %s and accept_state = 'received' and state = 'in_store' ''',[ass_header_item['order_line_id']])
+							cr.execute(''' select count(id) from kg_ms_stores where order_line_id = %s and accept_state = 'received' and state = 'in_store' and ms_type = 'bot_item' ''',[ass_header_item['order_line_id']])
 							store_bot_items_count = cr.fetchone()
+							print "order_bot_items_count[0]",order_bot_items_count
+							print "store_bot_items_count[0]",store_bot_items_count
 							if order_bot_items_count != []:
 								if order_bot_items_count[0] == store_bot_items_count[0]:
 									assembly_create = 'yes'
 								else:
 									assembly_create = 'no'
-							print "assembly_createassembly_create",assembly_create
+							print "assembly_createassembly_create----------------------------------",assembly_create
 							for assembly in range(wo_order_qty):
 								ass_header_values = {
 								'name': '',
@@ -983,17 +985,17 @@ class kg_ms_stores(osv.osv):
 							assembly_ms_id = assembly_ms_obj.create(cr, uid, ass_ms_vals)
 							
 		
-		if inward_list:
-			groupby_orderid = {v['order_line_id']:v for v in inward_list}.values()
-			inward_list = groupby_orderid
-			order_items = []
-			for inward_item in inward_list:
-				order_rec = self.pool.get('ch.work.order.details').browse(cr, uid, inward_item['order_line_id'])
-				order_items.append(order_rec.order_no)
-			order_items =  map(str, order_items)
-			a = ( ", ".join( repr(e) for e in order_items ) )
-			
-			raise osv.except_osv(_(''), _(' Wo.No %s moved to assembly successfully !!')%(a))
+		#~ if inward_list:
+			#~ groupby_orderid = {v['order_line_id']:v for v in inward_list}.values()
+			#~ inward_list = groupby_orderid
+			#~ order_items = []
+			#~ for inward_item in inward_list:
+				#~ order_rec = self.pool.get('ch.work.order.details').browse(cr, uid, inward_item['order_line_id'])
+				#~ order_items.append(order_rec.order_no)
+			#~ order_items =  map(str, order_items)
+			#~ a = ( ", ".join( repr(e) for e in order_items ) )
+			#~ 
+			#~ raise osv.except_osv(_(''), _(' Wo.No %s moved to assembly successfully !!')%(a))
 		return True
 	   
 		
