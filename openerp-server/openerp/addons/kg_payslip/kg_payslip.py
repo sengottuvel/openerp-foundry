@@ -277,7 +277,7 @@ class kg_payslip(osv.osv):
 				val5 = [d['salary_days'] for d in data if 'salary_days' in d]
 				salary_days = val5[0]
 				####### OT Calculation if OT applicable for the employee in the contract########
-				con_src = con_obj.search(cr,uid,[('employee_id','=',emp_id),('state','=','approved')])
+				con_src = con_obj.search(cr,uid,[('employee_id','=',emp_id)])
 				con_rec = con_obj.browse(cr,uid,con_src[0])
 				if con_rec.ot_status:
 					salary_days = salary_days + ot_days
