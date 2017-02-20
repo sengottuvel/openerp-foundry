@@ -639,18 +639,21 @@ class kg_payslip(osv.osv):
 								att_ins = emp_categ_rec.attnd_insentive_male
 							else:
 								att_ins = emp_categ_rec.attnd_insentive_female
-							self.pool.get('hr.payslip.line').create(cr,uid,
-									{
-										'name':'100% Attendance Bonus',
-										'code':'ATTB',
-										'category_id':8,
-										'quantity':1,
-										'amount':att_ins,
-										'salary_rule_id':1,
-										'employee_id':emp_id,
-										'contract_id':con_ids[0],
-										'slip_id':slip_rec.id,
-									},context = None)
+							if att_ins:
+								self.pool.get('hr.payslip.line').create(cr,uid,
+										{
+											'name':'100% Attendance Bonus',
+											'code':'ATTB',
+											'category_id':8,
+											'quantity':1,
+											'amount':att_ins,
+											'salary_rule_id':1,
+											'employee_id':emp_id,
+											'contract_id':con_ids[0],
+											'slip_id':slip_rec.id,
+										},context = None)
+							else:
+								pass
 					else:
 						pass
 				#### Creation of attendance bonus ##########
