@@ -2,7 +2,7 @@
 <openerp>
 	<data>
 
-	<!-- Form View Start  -->
+	<!-- Form View Start -->
 
 		<record id="t_form_v_work_order" model="ir.ui.view">
 			<field name="name">Work Order Entry Form</field>
@@ -19,7 +19,6 @@
 						<button name="entry_confirm" type="object" string="WFMD Approval" class="oe_highlight" confirm="Are you sure to proceed ?"
 							attrs="{'invisible': ['|',('state','!=','design_approved'),('wo_spc_app_flag','=',True)]}"/>
 						<button name="send_to_dms" type="object" string="DMS" class="oe_highlight"/>
-
 					</header>
 					<group>
 						<group>
@@ -27,6 +26,8 @@
 							<field name="offer_no" readonly="1"/>
 							<field name="enquiry_no" readonly="1"/>
 							<field name="division_id"/>
+							<field name="drawing_approval" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="inspection" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}" />
 							<field name="order_category" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="partner_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="delivery_date" on_change="onchange_delivery_date(delivery_date)" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
@@ -34,29 +35,24 @@
 							<field name="entry_mode" invisible="1"/>
 							<field name="wo_spc_app_flag" invisible="1"/>
 							<field name="design_flag" invisible="1"/>
-							
-							
 						</group>											
 						<group>
 							<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="location" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="excise_duty" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="road_permit" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="l_d_clause" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 							<field name="order_priority" attrs="{'readonly': [('state','in',['confirmed','cancel'])],'required': [('state','!=','draft')]}"/>
 							<field name="order_value" string="WO Value" readonly="1"/>
-							<field name="state" style="width: 30%%" class="att_state_change"/>
+							<field name="state"  style="width: 30%%" class="att_state_change"/>
 							<field name="remarks" string="Remarks" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
 						</group>					
 					</group>
-					<!--
-					<group string="Remarks" attrs="{'invisible': [('flag_cancel','=',False)]}">
-						<group>
-							<field name="cancel_remark" attrs="{'invisible': [('flag_cancel','=',False)], 'readonly': [('state','in',['cancel'])]}"/>
-						</group>
-					</group>
-					-->
 					<notebook>
 						<page string="Work Order Details" >
 							<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}" widget="one2many_list"
-								context="{'order_category':order_category,'delivery_date':delivery_date,'line_ids': line_ids,'order_no':name}">
+								context="{'order_category':order_category,'delivery_date':delivery_date,'line_ids': line_ids,'order_no':name,
+								 'drawing_approval':drawing_approval,'inspection':inspection}">
 								<tree string = "Work Order Items">
 									<field name="order_no"/>
 									<field name="order_category" />
@@ -175,6 +171,9 @@
 							<field name="flange_standard"  readonly="0"/>
 							<field name="bp" invisible="1"/>
 							<field name="m_power" attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
+							<field name="drawing_approval" attrs="{'readonly': [('flag_load_bom','!=',False)],'invisible': [('order_category','=','access')]}"/>
+							<field name="inspection" attrs="{'readonly': [('flag_load_bom','!=',False)],'invisible': [('order_category','=','access')]}"/>
+							
 							<field name="unit_price"  attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
 							<field name="flag_standard"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
 							<field name="state" invisible="1"/>

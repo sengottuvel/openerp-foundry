@@ -62,7 +62,7 @@ class kg_work_order(osv.osv):
 
 	_columns = {
 	
-		### Header Details ####
+		### Header Details  ###########
 		'name': fields.char('WO No.', size=128,select=True),
 		'entry_date': fields.date('WO Date',required=True),
 		'division_id': fields.many2one('kg.division.master','Division',readonly=True,required=True,domain="[('active','=','t')]"),
@@ -100,6 +100,11 @@ class kg_work_order(osv.osv):
 		#~ 'offer_id': fields.many2one('kg.crm.offer','Offer No.'),
 		'wo_spc_app_flag': fields.boolean('WO Special Approval'),
 		'design_flag': fields.boolean('Design Flag'),
+		'excise_duty': fields.selection([('inclusive','Inclusive'),('extra','Extra'),('exemted','Exemted - Export'),('pac','PAC'),('sez','SEZ'),('ct1','CT1'),('ct3','CT3')],'EXCISE DUTY'),
+		'drawing_approval': fields.selection([('yes','Yes'),('no','No')],'Drawing approval'),
+		'road_permit': fields.selection([('yes','Yes'),('no','No')],'Road Permit'),
+		'inspection': fields.selection([('yes','Yes'),('no','No'),('tpi','TPI'),('customer','Customer'),('consultant','Consultant'),('stagewise','Stage wise')],'Inspection'),
+		'l_d_clause': fields.selection([('5_1','0.5 - 1.0% of total order value'),('1_10','1 to 10% of total order value'),('nill','Nill')],'L. D. CLAUSE / Penalty'),
 		
 		
 		### Entry Info ####
@@ -769,6 +774,10 @@ class ch_work_order_details(osv.osv):
 		'pump_offer_line_id': fields.integer('Pump Offer'),
 		'enquiry_line_id': fields.integer('Enquiry Line Id'),
 		'line_ids_d': fields.one2many('ch.wo.accessories', 'header_id', "Accessories"),
+		'drawing_approval': fields.selection([('yes','Yes'),('no','No')],'Drawing approval'),
+		'inspection': fields.selection([('yes','Yes'),('no','No'),('tpi','TPI'),('customer','Customer'),('consultant','Consultant'),('stagewise','Stage wise')],'Inspection'),
+		
+		
 		## QAP ##
 		'qap_plan_id': fields.many2one('kg.qap.plan', 'QAP Standard',required=True),
 		### Prime Cost ###

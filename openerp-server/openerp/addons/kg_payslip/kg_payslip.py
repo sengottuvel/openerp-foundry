@@ -470,6 +470,7 @@ class kg_payslip(osv.osv):
 					for line_ids in all_ded_lines:
 						all_ded_line_rec = all_ded_line_obj.browse(cr,uid,line_ids)
 						if all_ded_line_rec.employee_id.id == emp_id:
+							print "%%%%%%%%%%%%      allowance              & Deduction                          %%%%%%%%%%%%%%%",all_ded_line_rec.employee_id.id,all_ded_line_rec.amount
 							if all_ded_rec.allow_type == 'ALW':
 								categ_ids = 2
 							elif all_ded_rec.allow_type == 'DED':
