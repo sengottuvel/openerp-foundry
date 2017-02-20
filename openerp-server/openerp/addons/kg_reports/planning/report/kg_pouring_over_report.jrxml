@@ -9,66 +9,39 @@
 	<parameter name="to_date" class="java.lang.String"/>
 	<parameter name="wiz_id" class="java.lang.Integer"/>
 	<queryString>
-		<![CDATA[select
-count(*) OVER (),
-row_number() OVER (),
+		<![CDATA[select count,row_number,new_row_number,order_no,company_name,date,pump_model,qty,order_value,remarks,category,division_name,
+to_char((select max(pour_date) from kg_production where order_line_id  = line_id)::date,'dd-mm-YYYY') as pour_date,
+from_date,to_date
+from
+(
+
+select
+count(*) OVER () as count,
+row_number() OVER () as row_number,
 row_number() OVER () as new_row_number,
 work_order.order_no as order_no,
 company.name as company_name,
 to_char(CURRENT_DATE::date,'dd-mm-YYYY') as date,
 pump.name as pump_model,
-work_order.qty,
+work_order.qty as qty,
 trim(TO_CHAR(work_order.unit_price * work_order.qty::float, '999G999G99G999G99G99G990D99'))  as order_value,
 work_order.note as remarks,
-division.name as division_name,
-order_de.order_category as category,
+(CASE WHEN order_de.order_category = 'pump' THEN 'Pump'
+WHEN order_de.order_category = 'spare' THEN 'Spare'
+WHEN order_de.order_category = 'pump_spare' THEN 'Pump & Spare'
+WHEN order_de.order_category = 'service' THEN 'Service'
+WHEN order_de.order_category = 'project' THEN 'Project'
+WHEN order_de.order_category = 'access' THEN 'Accessories'
+ELSE ''
+end ) as category,
+work_order.id as line_id,
 (select to_char(from_date,'dd-mm-yyyy') from kg_pouring_over where id =$P{wiz_id} ) as from_date,
 (select to_char(to_date,'dd-mm-yyyy') from kg_pouring_over where id =$P{wiz_id} ) as to_date,
-to_char((select max(pour_date) from kg_production where order_line_id in (select order_line_id
-from
-(select
-distinct order_line_id,
-Sum(case when type = 'order' then order_count else 0 end) over(partition by order_line_id) as order_count,
-Sum(case when type = 'produc' then order_count else 0 end) over(partition by order_line_id) as produc_count,
-Sum(case when type = 'machine' then order_count else 0 end) over(partition by order_line_id) as machine_count
-from
-(select count(id) as order_count,header_id as order_line_id,'order' as type from ch_order_bom_details  where header_id in (
-select
-order_line_id
-from kg_production where
-state in ('pour_com','fettling_inprogress','moved_to_ms')
-and  pour_date >= $P{from_date}::date and pour_date <= $P{to_date}::date
-order by order_line_id)
-and flag_applicable = 't'
-group by header_id
-
-union
-
-select count(order_bomline_id) as produc_count,order_line_id,'produc' as type from kg_production  where order_line_id in (
-select order_line_id
-from kg_production where state in ('pour_com','fettling_inprogress')
-and  pour_date >= $P{from_date}::date and pour_date <= $P{to_date}::date
-order by order_line_id)
-group by order_line_id
-
-union
-
-select count(order_bomline_id) as machine_count,order_line_id,'machine' as type from kg_machineshop  where order_line_id in (
-select order_line_id
-from kg_production where state in ('pour_com','fettling_inprogress','moved_to_ms')
-and  pour_date >= $P{from_date}::date and pour_date <= $P{to_date}::date
-order by order_line_id)
-and order_line_id not in (select order_bomline_id
-from kg_production  where order_line_id in (
-select order_line_id
-from kg_production where state in ('pour_com','fettling_inprogress','moved_to_ms')
-and  pour_date >= $P{from_date}::date and pour_date <= $P{to_date}::date
-order by order_line_id)
-) group by order_line_id
-) as a
-) as b
-where order_count = (produc_count + machine_count)))::date,'dd-mm-YYYY') as pour_date
-
+(CASE WHEN order_de.location = 'ipd' THEN 'IPD'
+WHEN order_de.location = 'ppd' THEN 'PPD'
+WHEN order_de.location = 'export' THEN 'Export'
+ELSE ''
+end ) as division_name
 
 from
 ch_work_order_details work_order
@@ -92,7 +65,7 @@ select
 order_line_id
 from kg_production where
 state in ('pour_com','fettling_inprogress','moved_to_ms')
-and  pour_date >= $P{from_date}::date and pour_date <= $P{to_date}::date
+and  pour_date::date >= to_date($P{from_date},'YYYY-MM-DD') or $P{from_date} = '' and pour_date::date <= to_date($P{to_date},'YYYY-MM-DD') or $P{to_date} = ''
 order by order_line_id)
 and flag_applicable = 't'
 group by header_id
@@ -102,7 +75,7 @@ union
 select count(order_bomline_id) as produc_count,order_line_id,'produc' as type from kg_production  where order_line_id in (
 select order_line_id
 from kg_production where state in ('pour_com','fettling_inprogress')
-and  pour_date >= $P{from_date}::date and pour_date <= $P{to_date}::date
+and  pour_date::date >= to_date($P{from_date},'YYYY-MM-DD') or $P{from_date} = '' and pour_date::date <= to_date($P{to_date},'YYYY-MM-DD') or $P{to_date} = ''
 order by order_line_id)
 group by order_line_id
 
@@ -111,18 +84,18 @@ union
 select count(order_bomline_id) as machine_count,order_line_id,'machine' as type from kg_machineshop  where order_line_id in (
 select order_line_id
 from kg_production where state in ('pour_com','fettling_inprogress','moved_to_ms')
-and  pour_date >= $P{from_date}::date and pour_date <=$P{to_date}::date
+and  pour_date >= to_date($P{from_date},'YYYY-MM-DD') or $P{from_date} = '' and pour_date <=to_date($P{to_date},'YYYY-MM-DD') or $P{to_date} = ''
 order by order_line_id)
 and order_line_id not in (select order_bomline_id
 from kg_production  where order_line_id in (
 select order_line_id
 from kg_production where state in ('pour_com','fettling_inprogress','moved_to_ms')
-and  pour_date >= $P{from_date}::date and pour_date <= $P{to_date}::date
+and  pour_date::date >= to_date($P{from_date},'YYYY-MM-DD') or $P{from_date} = '' and pour_date::date <= to_date($P{to_date},'YYYY-MM-DD') or $P{to_date} = ''
 order by order_line_id)
 ) group by order_line_id
 ) as a
 ) as b
-where order_count = (produc_count + machine_count))]]>
+where order_count = (produc_count + machine_count)) ) as a]]>
 	</queryString>
 	<field name="count" class="java.lang.Long"/>
 	<field name="row_number" class="java.lang.Long"/>
@@ -134,11 +107,11 @@ where order_count = (produc_count + machine_count))]]>
 	<field name="qty" class="java.lang.Integer"/>
 	<field name="order_value" class="java.lang.String"/>
 	<field name="remarks" class="java.lang.String"/>
-	<field name="division_name" class="java.lang.String"/>
 	<field name="category" class="java.lang.String"/>
+	<field name="division_name" class="java.lang.String"/>
+	<field name="pour_date" class="java.lang.String"/>
 	<field name="from_date" class="java.lang.String"/>
 	<field name="to_date" class="java.lang.String"/>
-	<field name="pour_date" class="java.lang.String"/>
 	<group name="ProjectGroup" isStartNewPage="true">
 		<groupExpression><![CDATA[]]></groupExpression>
 	</group>
@@ -158,7 +131,7 @@ where order_count = (produc_count + machine_count))]]>
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="51">
+		<band height="74">
 			<textField>
 				<reportElement mode="Transparent" x="1" y="0" width="554" height="31"/>
 				<box topPadding="13"/>
@@ -188,7 +161,7 @@ where order_count = (produc_count + machine_count))]]>
 				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
 			</image>
 			<textField>
-				<reportElement x="1" y="31" width="59" height="20"/>
+				<reportElement x="1" y="54" width="66" height="20"/>
 				<box leftPadding="1"/>
 				<textElement verticalAlignment="Middle">
 					<font size="8" isBold="true"/>
@@ -196,32 +169,40 @@ where order_count = (produc_count + machine_count))]]>
 				<textFieldExpression><![CDATA["Date Range : "]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="131" y="31" width="57" height="20"/>
+				<reportElement x="138" y="54" width="57" height="20"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{to_date}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="116" y="31" width="15" height="20"/>
+				<reportElement x="123" y="54" width="15" height="20"/>
 				<textElement verticalAlignment="Middle">
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["to"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="60" y="31" width="56" height="20"/>
+				<reportElement x="67" y="54" width="56" height="20"/>
 				<textElement verticalAlignment="Middle">
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{from_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="195" y="31" width="244" height="20"/>
+				<box leftPadding="1"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Pouring Over List"]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>
 	<pageHeader>
 		<band height="23">
 			<staticText>
-				<reportElement mode="Transparent" x="330" y="0" width="68" height="23" isRemoveLineWhenBlank="true"/>
+				<reportElement mode="Transparent" x="371" y="0" width="50" height="23" isRemoveLineWhenBlank="true"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
@@ -234,7 +215,7 @@ where order_count = (produc_count + machine_count))]]>
 				<text><![CDATA[CC date]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Transparent" x="60" y="0" width="79" height="23" isRemoveLineWhenBlank="true"/>
+				<reportElement mode="Transparent" x="60" y="0" width="135" height="23" isRemoveLineWhenBlank="true"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
@@ -247,7 +228,7 @@ where order_count = (produc_count + machine_count))]]>
 				<text><![CDATA[Order No.]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Transparent" x="398" y="0" width="83" height="23" isRemoveLineWhenBlank="true"/>
+				<reportElement mode="Transparent" x="421" y="0" width="71" height="23" isRemoveLineWhenBlank="true"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
@@ -260,7 +241,7 @@ where order_count = (produc_count + machine_count))]]>
 				<text><![CDATA[Order Value]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Transparent" x="139" y="0" width="100" height="23" isRemoveLineWhenBlank="true"/>
+				<reportElement mode="Transparent" x="195" y="0" width="82" height="23" isRemoveLineWhenBlank="true"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
@@ -273,7 +254,7 @@ where order_count = (produc_count + machine_count))]]>
 				<text><![CDATA[Category]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Transparent" x="481" y="0" width="73" height="23" isRemoveLineWhenBlank="true"/>
+				<reportElement mode="Transparent" x="492" y="0" width="62" height="23" isRemoveLineWhenBlank="true"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
@@ -299,7 +280,7 @@ where order_count = (produc_count + machine_count))]]>
 				<text><![CDATA[Division]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Transparent" x="239" y="0" width="91" height="23" isRemoveLineWhenBlank="true"/>
+				<reportElement mode="Transparent" x="277" y="0" width="94" height="23" isRemoveLineWhenBlank="true"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
@@ -316,7 +297,7 @@ where order_count = (produc_count + machine_count))]]>
 	<detail>
 		<band height="16">
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="330" y="0" width="68" height="16"/>
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="371" y="0" width="50" height="16"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
@@ -329,7 +310,7 @@ where order_count = (produc_count + machine_count))]]>
 				<textFieldExpression><![CDATA[""]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="139" y="0" width="100" height="16"/>
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="195" y="0" width="82" height="16"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
@@ -342,7 +323,7 @@ where order_count = (produc_count + machine_count))]]>
 				<textFieldExpression><![CDATA[$F{category}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="239" y="0" width="91" height="16"/>
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="277" y="0" width="94" height="16"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
@@ -355,7 +336,7 @@ where order_count = (produc_count + machine_count))]]>
 				<textFieldExpression><![CDATA[$F{pour_date}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="60" y="0" width="79" height="16"/>
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="60" y="0" width="135" height="16"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
@@ -368,7 +349,7 @@ where order_count = (produc_count + machine_count))]]>
 				<textFieldExpression><![CDATA[$F{order_no}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="398" y="0" width="83" height="16"/>
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="421" y="0" width="71" height="16"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
@@ -381,7 +362,7 @@ where order_count = (produc_count + machine_count))]]>
 				<textFieldExpression><![CDATA[$F{order_value}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="482" y="0" width="73" height="16"/>
+				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="492" y="0" width="63" height="16"/>
 				<box>
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>

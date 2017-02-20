@@ -9,23 +9,19 @@
 	<parameter name="to_date" class="java.lang.String"/>
 	<parameter name="wiz_id" class="java.lang.Integer"/>
 	<queryString>
-		<![CDATA[select
-count(*) OVER (),
-row_number() OVER (),
-row_number() OVER () as new_row_number,
-work_order.order_no as order_no,
-company.name as company_name,
-to_char(CURRENT_DATE::date,'dd-mm-YYYY') as date,
-pump.name as pump_model,
-work_order.qty,
-'2017-02-16' as cc_date,
-trim(TO_CHAR(work_order.unit_price * work_order.qty::float, '999G999G99G999G99G99G990D99'))  as order_amount,
-trim(TO_CHAR((COALESCE((sum((work_order.unit_price * work_order.qty)) OVER ()),0.00) ), '999G999G99G999G99G99G990D99')) as total_amt,
-work_order.note as remarks,
-(select to_char(from_date,'dd-mm-yyyy') from kg_casting_completion where id =$P{wiz_id} ) as from_date,
-(select to_char(to_date,'dd-mm-yyyy') from kg_casting_completion where id =$P{wiz_id} ) as to_date,
+		<![CDATA[select count,row_number,new_row_number,order_no,company_name,date,pump_model,qty,order_amount,total_amt,remarks,
+from_date,to_date,
+to_char((select max(entry_date) from kg_machineshop where order_line_id = line_id)::date,'dd-mm-YYYY') as cc_date,
+(select
 
-to_char((select max(entry_date) from kg_machineshop where order_line_id in (
+trim(TO_CHAR((COALESCE((sum((work_order.unit_price * work_order.qty)) OVER ()),0.00) ), '999G999G99G999G99G99G990D99')) as cum_total_amt
+
+from
+ch_work_order_details work_order
+left join kg_pumpmodel_master pump on (work_order.pump_model_id = pump.id)
+left join res_company company on (company.id = pump.company_id)
+
+ where work_order.id in (
 
 select order_line_id from (
 
@@ -35,10 +31,7 @@ distinct order_line_id,
 Sum(case when type = 'order' then sum else 0 end) over(partition by order_line_id) as order_count,
 Sum(case when type = 'machine' then sum else 0 end) over(partition by order_line_id) as machine_count
 
-
-
 from (
-
 
 select count(order_bomline_id) as sum,order_line_id,'machine' as type from kg_machineshop  where order_bomline_id in (
 select id
@@ -46,7 +39,7 @@ select id
 from ch_order_bom_details where flag_applicable = 't'
 
 order by id)
-and entry_date >= $P{from_date}::date  and entry_date <= $P{to_date}::date
+and entry_date >= month_start::date  and entry_date <= month_end::date
 group by order_line_id
 
 union
@@ -60,12 +53,33 @@ select id
 from ch_order_bom_details where flag_applicable = 't'
 
 order by id)
-and entry_date >= $P{from_date}::date and entry_date <=$P{to_date}::date )
+and entry_date >= month_start::date and entry_date <=month_end::date )
 group by header_id,type
 ) as a
 order by order_line_id ) as b
 
-where order_count = machine_count))::date,'dd-mm-YYYY')  as cc_date
+where order_count = machine_count) limit 1 ) as cum_total_amt
+
+from (
+
+
+
+select
+count(*) OVER () as count,
+row_number() OVER () as row_number,
+row_number() OVER () as new_row_number,
+work_order.order_no as order_no,
+company.name as company_name,
+to_char(CURRENT_DATE::date,'dd-mm-YYYY') as date,
+pump.name as pump_model,
+work_order.qty as qty,
+trim(TO_CHAR(work_order.unit_price * work_order.qty::float, '999G999G99G999G99G99G990D99'))  as order_amount,
+trim(TO_CHAR((COALESCE((sum((work_order.unit_price * work_order.qty)) OVER ()),0.00) ), '999G999G99G999G99G99G990D99')) as total_amt,
+work_order.note as remarks,
+(select to_char(from_date,'dd-mm-yyyy') from kg_casting_completion where id =$P{wiz_id} ) as from_date,
+(select to_char(to_date,'dd-mm-yyyy') from kg_casting_completion where id =$P{wiz_id} ) as to_date,
+work_order.id as line_id,
+(select to_char((date_trunc('month', current_date))::date,'YYYY-mm-dd')) as month_start, (to_char((date_trunc('month', current_date)+'1month'::interval-'1day'::interval)::date,'YYYY-mm-dd')) as month_end
 
 from
 ch_work_order_details work_order
@@ -93,7 +107,7 @@ select id
 from ch_order_bom_details where flag_applicable = 't'
 
 order by id)
-and entry_date >= $P{from_date}::date  and entry_date <= $P{to_date}::date
+and entry_date >= $P{from_date}::date and entry_date <= $P{to_date}::date
 group by order_line_id
 
 union
@@ -107,12 +121,12 @@ select id
 from ch_order_bom_details where flag_applicable = 't'
 
 order by id)
-and entry_date >= $P{from_date}::date and entry_date <=$P{to_date}::date )
+and entry_date >=  $P{from_date}::date and entry_date <= $P{to_date} ::date)
 group by header_id,type
 ) as a
 order by order_line_id ) as b
 
-where order_count = machine_count)]]>
+where order_count = machine_count) ) as bb]]>
 	</queryString>
 	<field name="count" class="java.lang.Long"/>
 	<field name="row_number" class="java.lang.Long"/>
@@ -122,12 +136,13 @@ where order_count = machine_count)]]>
 	<field name="date" class="java.lang.String"/>
 	<field name="pump_model" class="java.lang.String"/>
 	<field name="qty" class="java.lang.Integer"/>
-	<field name="cc_date" class="java.lang.String"/>
 	<field name="order_amount" class="java.lang.String"/>
 	<field name="total_amt" class="java.lang.String"/>
 	<field name="remarks" class="java.lang.String"/>
 	<field name="from_date" class="java.lang.String"/>
 	<field name="to_date" class="java.lang.String"/>
+	<field name="cc_date" class="java.lang.String"/>
+	<field name="cum_total_amt" class="java.lang.String"/>
 	<variable name="qty_1" class="java.lang.Integer" resetType="Page" calculation="Sum">
 		<variableExpression><![CDATA[$F{qty}]]></variableExpression>
 	</variable>
@@ -211,36 +226,44 @@ where order_count = machine_count)]]>
 				<textElement verticalAlignment="Middle">
 					<font size="8" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{total_amt}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{cum_total_amt}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="126" y="51" width="57" height="20"/>
+				<reportElement x="134" y="51" width="57" height="20"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{to_date}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="111" y="51" width="15" height="20"/>
+				<reportElement x="119" y="51" width="15" height="20"/>
 				<textElement verticalAlignment="Middle">
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["to"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="55" y="51" width="56" height="20"/>
+				<reportElement x="63" y="51" width="56" height="20"/>
 				<textElement verticalAlignment="Middle">
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{from_date}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="51" width="55" height="20"/>
+				<reportElement x="0" y="51" width="63" height="20"/>
 				<box leftPadding="1"/>
 				<textElement verticalAlignment="Middle">
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Date Range : "]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="191" y="31" width="191" height="20"/>
+				<box leftPadding="1"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Casting Completion List"]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>

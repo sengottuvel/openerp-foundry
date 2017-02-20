@@ -1372,41 +1372,41 @@ class kg_subcontract_inward(osv.osv):
 										ms_op_id =item.sc_id.ms_op_id.id
 										
 										if op_name == '10':
-											self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op1_state':'done'})
-											self.pool.get('kg.ms.operations').operation1_update(cr, uid, [ms_op_id])	
+											self.pool.get('kg.ms.operations').operation1_update(cr, uid, [ms_op_id])
+											self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op1_state':'done'})												
 										if op_name == '20':
-											self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op2_state':'done'})
 											self.pool.get('kg.ms.operations').operation2_update(cr, uid, [ms_op_id])	
-										if op_name == '30':									
-											self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op3_state':'done'})
-											self.pool.get('kg.ms.operations').operation3_update(cr, uid, [ms_op_id])
+											self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op2_state':'done'})											
+										if op_name == '30':
+											self.pool.get('kg.ms.operations').operation3_update(cr, uid, [ms_op_id])									
+											self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op3_state':'done'})											
 										if op_name == '40':
-											self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op4_state':'done'})
 											self.pool.get('kg.ms.operations').operation4_update(cr, uid, [ms_op_id])
+											self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op4_state':'done'})											
 										if op_name == '50':
-											self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op5_state':'done'})
 											self.pool.get('kg.ms.operations').operation5_update(cr, uid, [ms_op_id])
+											self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op5_state':'done'})											
 										if op_name == '60':
-											self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op6_state':'done'})
-											self.pool.get('kg.ms.operations').operation6_update(cr, uid, [ms_op_id])											
+											self.pool.get('kg.ms.operations').operation6_update(cr, uid, [ms_op_id])
+											self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op6_state':'done'})																						
 										if op_name == '70':
-											self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op7_state':'done'})
 											self.pool.get('kg.ms.operations').operation7_update(cr, uid, [ms_op_id])
+											self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op7_state':'done'})											
 										if op_name == '80':
-											self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op8_state':'done'})
 											self.pool.get('kg.ms.operations').operation8_update(cr, uid, [ms_op_id])
+											self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op8_state':'done'})											
 										if op_name == '90':
-											self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op9_state':'done'})
 											self.pool.get('kg.ms.operations').operation9_update(cr, uid, [ms_op_id])
+											self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op9_state':'done'})											
 										if op_name == '100':
-											self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op10_state':'done'})
 											self.pool.get('kg.ms.operations').operation10_update(cr, uid, [ms_op_id])
+											self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op10_state':'done'})											
 										if op_name == '110':
-											self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op11_state':'done'})
 											self.pool.get('kg.ms.operations').operation11_update(cr, uid, [ms_op_id])
+											self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op11_state':'done'})											
 										if op_name == '120':
-											self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op12_state':'done'})
 											self.pool.get('kg.ms.operations').operation12_update(cr, uid, [ms_op_id])
+											self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op12_state':'done'})											
 									
 								else:
 									s = [(6, 0, [x.id for x in i.operation_id])]
@@ -1588,7 +1588,13 @@ class kg_subcontract_inward(osv.osv):
 										for operation in range(curent_qty):							
 																
 											operation_vals = {
-												'ms_id': item.ms_id.id,													
+												'ms_id': item.ms_id.id,
+												'position_id': item.position_id.id,		
+												'pump_model_id': item.pump_model_id.id,		
+												'pattern_id': item.pattern_id.id,		
+												'moc_id': item.moc_id.id,		
+												'item_code': item.item_code,		
+												'item_name': item.item_name,														
 												'ms_plan_id': item.sc_id.ms_plan_id.id,													
 												'ms_plan_line_id': item.sc_id.ms_plan_line_id.id,	
 												'order_id': item.order_id.id,
@@ -1958,41 +1964,41 @@ class kg_subcontract_inward(osv.osv):
 														ms_op_id = ms_operation_id
 														
 														if op_name == '10':
-															self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op1_state':'done'})
-															self.pool.get('kg.ms.operations').operation1_update(cr, uid, [ms_op_id])	
+															self.pool.get('kg.ms.operations').operation1_update(cr, uid, [ms_op_id])
+															self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op1_state':'done'})																
 														if op_name == '20':
-															self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op2_state':'done'})
-															self.pool.get('kg.ms.operations').operation2_update(cr, uid, [ms_op_id])	
-														if op_name == '30':												
-															self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op3_state':'done'})
-															self.pool.get('kg.ms.operations').operation3_update(cr, uid, [ms_op_id])
+															self.pool.get('kg.ms.operations').operation2_update(cr, uid, [ms_op_id])
+															self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op2_state':'done'})																
+														if op_name == '30':	
+															self.pool.get('kg.ms.operations').operation3_update(cr, uid, [ms_op_id])											
+															self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op3_state':'done'})															
 														if op_name == '40':
-															self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op4_state':'done'})
 															self.pool.get('kg.ms.operations').operation4_update(cr, uid, [ms_op_id])
+															self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op4_state':'done'})															
 														if op_name == '50':
-															self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op5_state':'done'})
 															self.pool.get('kg.ms.operations').operation5_update(cr, uid, [ms_op_id])
+															self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op5_state':'done'})															
 														if op_name == '60':
-															self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op6_state':'done'})
-															self.pool.get('kg.ms.operations').operation6_update(cr, uid, [ms_op_id])											
+															self.pool.get('kg.ms.operations').operation6_update(cr, uid, [ms_op_id])
+															self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op6_state':'done'})																										
 														if op_name == '70':
-															self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op7_state':'done'})
 															self.pool.get('kg.ms.operations').operation7_update(cr, uid, [ms_op_id])
+															self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op7_state':'done'})															
 														if op_name == '80':
-															self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op8_state':'done'})
 															self.pool.get('kg.ms.operations').operation8_update(cr, uid, [ms_op_id])
+															self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op8_state':'done'})															
 														if op_name == '90':
-															self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op9_state':'done'})
 															self.pool.get('kg.ms.operations').operation9_update(cr, uid, [ms_op_id])
+															self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op9_state':'done'})															
 														if op_name == '100':
-															self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op10_state':'done'})
 															self.pool.get('kg.ms.operations').operation10_update(cr, uid, [ms_op_id])
+															self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op10_state':'done'})															
 														if op_name == '110':
-															self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op11_state':'done'})
 															self.pool.get('kg.ms.operations').operation11_update(cr, uid, [ms_op_id])
+															self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op11_state':'done'})															
 														if op_name == '120':
-															self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op12_state':'done'})
 															self.pool.get('kg.ms.operations').operation12_update(cr, uid, [ms_op_id])
+															self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op12_state':'done'})															
 												else:												
 													pos_id = self.pool.get('ch.kg.position.number').search(cr, uid, [('header_id','=',item.position_id.id)])
 													print"pos_idpos_id",pos_id
@@ -2177,7 +2183,12 @@ class kg_subcontract_inward(osv.osv):
 															
 								operation_vals = {
 									'ms_id': item.ms_id.id,		
-									
+									'position_id': item.position_id.id,		
+									'pump_model_id': item.pump_model_id.id,		
+									'pattern_id': item.pattern_id.id,		
+									'moc_id': item.moc_id.id,		
+									'item_code': item.item_code,		
+									'item_name': item.item_name,									
 									'order_id': work_rec.id,
 									'order_line_id': work_rec.line_ids[0].id,																	
 									'inhouse_qty': 1,
@@ -2545,41 +2556,41 @@ class kg_subcontract_inward(osv.osv):
 											ms_op_id = ms_operation_id
 											
 											if op_name == '10':
-												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op1_state':'done'})
-												self.pool.get('kg.ms.operations').operation1_update(cr, uid, [ms_op_id])	
+												self.pool.get('kg.ms.operations').operation1_update(cr, uid, [ms_op_id])
+												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op1_state':'done'})													
 											if op_name == '20':
-												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op2_state':'done'})
-												self.pool.get('kg.ms.operations').operation2_update(cr, uid, [ms_op_id])	
-											if op_name == '30':												
-												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op3_state':'done'})
+												self.pool.get('kg.ms.operations').operation2_update(cr, uid, [ms_op_id])
+												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op2_state':'done'})													
+											if op_name == '30':		
 												self.pool.get('kg.ms.operations').operation3_update(cr, uid, [ms_op_id])
+												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op3_state':'done'})												
 											if op_name == '40':
-												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op4_state':'done'})
 												self.pool.get('kg.ms.operations').operation4_update(cr, uid, [ms_op_id])
+												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op4_state':'done'})												
 											if op_name == '50':
-												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op5_state':'done'})
 												self.pool.get('kg.ms.operations').operation5_update(cr, uid, [ms_op_id])
+												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op5_state':'done'})												
 											if op_name == '60':
-												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op6_state':'done'})
-												self.pool.get('kg.ms.operations').operation6_update(cr, uid, [ms_op_id])											
+												self.pool.get('kg.ms.operations').operation6_update(cr, uid, [ms_op_id])
+												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op6_state':'done'})																							
 											if op_name == '70':
-												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op7_state':'done'})
 												self.pool.get('kg.ms.operations').operation7_update(cr, uid, [ms_op_id])
+												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op7_state':'done'})												
 											if op_name == '80':
-												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op8_state':'done'})
 												self.pool.get('kg.ms.operations').operation8_update(cr, uid, [ms_op_id])
+												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op8_state':'done'})												
 											if op_name == '90':
 												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op9_state':'done'})
 												self.pool.get('kg.ms.operations').operation9_update(cr, uid, [ms_op_id])
 											if op_name == '100':
-												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op10_state':'done'})
 												self.pool.get('kg.ms.operations').operation10_update(cr, uid, [ms_op_id])
+												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op10_state':'done'})												
 											if op_name == '110':
-												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op11_state':'done'})
 												self.pool.get('kg.ms.operations').operation11_update(cr, uid, [ms_op_id])
+												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op11_state':'done'})												
 											if op_name == '120':
-												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op12_state':'done'})
 												self.pool.get('kg.ms.operations').operation12_update(cr, uid, [ms_op_id])
+												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op12_state':'done'})												
 									else:												
 										pos_id = self.pool.get('ch.kg.position.number').search(cr, uid, [('header_id','=',item.position_id.id)])
 										for pos in pos_id:													
