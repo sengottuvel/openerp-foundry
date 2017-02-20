@@ -474,7 +474,7 @@ class kg_payslip(osv.osv):
 								categ_ids = 2
 							elif all_ded_rec.allow_type == 'DED':
 								categ_ids = 4
-							if all_ded_rec.pay_type.id == 21:
+							if all_ded_rec.pay_type.id == 45:
 								amt_allo = all_ded_line_rec.amount * worked_days
 							else:
 								amt_allo = all_ded_line_rec.amount
