@@ -463,9 +463,10 @@ class kg_payslip(osv.osv):
 				#### Creation of the allowance or deduction per month for the employee ####
 				
 				all_ded_ids = all_ded_obj.search(cr,uid,[('start_date','=',slip_rec.date_from),('end_date','=',slip_rec.date_to),('state','=','approved')])
-				if all_ded_ids:
-					all_ded_rec = all_ded_obj.browse(cr,uid,all_ded_ids[0])
-					all_ded_lines = all_ded_line_obj.search(cr,uid,[('header_id','=',all_ded_ids[0])])
+				for iiii in all_ded_ids:
+					#~ if all_ded_ids:
+					all_ded_rec = all_ded_obj.browse(cr,uid,iiii)
+					all_ded_lines = all_ded_line_obj.search(cr,uid,[('header_id','=',iiii)])
 					for line_ids in all_ded_lines:
 						all_ded_line_rec = all_ded_line_obj.browse(cr,uid,line_ids)
 						if all_ded_line_rec.employee_id.id == emp_id:
@@ -473,13 +474,17 @@ class kg_payslip(osv.osv):
 								categ_ids = 2
 							elif all_ded_rec.allow_type == 'DED':
 								categ_ids = 4
+							if all_ded_rec.pay_type.id == 21:
+								amt_allo = all_ded_line_rec.amount * worked_days
+							else:
+								amt_allo = all_ded_line_rec.amount
 							self.pool.get('hr.payslip.line').create(cr,uid,
 								{
 									'name':all_ded_rec.pay_type.name,
 									'code':all_ded_rec.pay_type.code,
 									'category_id':categ_ids,
 									'quantity':1,
-									'amount':all_ded_line_rec.amount,
+									'amount':amt_allo,
 									'salary_rule_id':1,
 									'employee_id':emp_id,
 									'contract_id':con_ids[0],
