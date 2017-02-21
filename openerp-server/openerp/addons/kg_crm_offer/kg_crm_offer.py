@@ -81,12 +81,12 @@ class kg_crm_offer(osv.osv):
 		## Module Requirement Info
 		
 		'enquiry_id': fields.many2one('kg.crm.enquiry','Enquiry No.'),
-		'enquiry_no': fields.related('enquiry_id','name', type='char', string='Enquiry No.', store=True),
+		'enquiry_no': fields.char('Enquiry No.'),
 		'schedule_no': fields.char('Schedule No', size=128,select=True),
 		'enquiry_date': fields.related('enquiry_id','offer_date', type='date', string='Enquiry Date', store=True,required=True),
 		'customer_id': fields.related('enquiry_id','customer_id', type='many2one', relation="res.partner", string='Customer Name', store=True),
-		'del_date': fields.related('enquiry_id','del_date', type='date',string='Expected Delivery Date', store=True),
-		'due_date': fields.related('enquiry_id','due_date', type='date',string='Due Date', store=True),
+		'del_date': fields.date('Expected Delivery Date',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
+		'due_date': fields.date('Due Date',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
 		'service_det': fields.char('Service Details'),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD'),('export','Export')],'Location'),
 		'offer_copy': fields.char('Offer Copy'),
@@ -121,6 +121,11 @@ class kg_crm_offer(osv.osv):
 		'drive': fields.selection([('motor','Motor'),('vfd','VFD'),('engine','Engine')],'Drive'),
 		'transmision': fields.selection([('cpl','Coupling'),('belt','Belt Drive'),('fc','Fluid Coupling'),('gear_box','Gear Box'),('fc_gear_box','Fluid Coupling With Gear Box')],'Transmision', required=True),
 		'acces': fields.selection([('yes','Yes'),('no','No')],'Accessories'),
+		'excise_duty': fields.selection([('inclusive','Inclusive'),('extra','Extra'),('exemted','Exemted - Export'),('pac','PAC'),('sez','SEZ'),('ct1','CT1'),('ct3','CT3')],'EXCISE DUTY',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
+		'drawing_approval': fields.selection([('yes','Yes'),('no','No')],'Drawing approval',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
+		'road_permit': fields.selection([('yes','Yes'),('no','No')],'Road Permit',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
+		'inspection': fields.selection([('yes','Yes'),('no','No'),('tpi','TPI'),('customer','Customer'),('consultant','Consultant'),('stagewise','Stage wise')],'Inspection',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
+		'l_d_clause': fields.selection([('5_1','0.5 - 1.0% of total order value'),('1_10','1 to 10% of total order value'),('nill','Nill')],'L. D. CLAUSE / Penalty',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
 		
 		# Pump Offer Fields
 		'pump_tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),	
@@ -358,6 +363,11 @@ class kg_crm_offer(osv.osv):
 																  'entry_mode': 'auto',
 																  'partner_id': entry.customer_id.id,
 																  'order_value': entry.offer_net_amount,
+																  'excise_duty': entry.excise_duty,
+																  'drawing_approval': entry.drawing_approval,
+																  'road_permit': entry.road_permit,
+																  'inspection': entry.inspection,
+																  'l_d_clause': entry.l_d_clause,
 																	})
 			if wo_id:
 				if entry.line_pump_ids:
@@ -466,13 +476,15 @@ class kg_crm_offer(osv.osv):
 		#~ purpose = item.purpose_categ
 		qty = 1
 		moc_const_id = m_power = setting_height = 0
-		pump_model_type = speed_in_rpm = bush_bearing = shaft_sealing = lubrication_type = rpm = qap_plan_id = ''
+		pump_model_type = speed_in_rpm = bush_bearing = shaft_sealing = lubrication_type = rpm = qap_plan_id = drawing_approval = inspection = ''
 		pump_model_type = item.pump_model_type
 		if purpose == 'pump':
 			qty = item.qty
 			moc_const_id = item.moc_const_id.id
 			pump_id = item.pump_id.id
 			speed_in_rpm = item.speed_in_rpm
+			drawing_approval = off_line_id.drawing_approval
+			inspection = off_line_id.inspection
 			if item.push_bearing == 'grease_bronze':
 				 bush_bearing = 'grease'
 			elif item.push_bearing == 'cft':
@@ -500,6 +512,8 @@ class kg_crm_offer(osv.osv):
 			moc_const_id = item.spare_moc_const_id.id
 			pump_id = item.spare_pump_id.id
 			qap_plan_id = item.spare_qap_plan_id.id
+			drawing_approval = entry.drawing_approval
+			inspection = entry.inspection
 		elif purpose == 'access':
 			purpose == 'access'
 			if item.purpose_categ == 'pump':
@@ -530,7 +544,9 @@ class kg_crm_offer(osv.osv):
 			'shaft_sealing': shaft_sealing,
 			'lubrication_type': lubrication_type,
 			'rpm': rpm,
-			'flag_offer':True
+			'flag_offer': True,
+			'drawing_approval': drawing_approval,
+			'inspection': inspection,
 			
 			}
 			
@@ -1733,6 +1749,8 @@ class ch_pump_offer(osv.osv):
 		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Type'),
 		'pumpseries_id': fields.many2one('kg.pumpseries.master','Pump Series'),
 		'moc_const_id': fields.many2one('kg.moc.construction','MOC'),
+		'drawing_approval': fields.selection([('yes','Yes'),('no','No')],'Drawing approval'),
+		'inspection': fields.selection([('yes','Yes'),('no','No'),('tpi','TPI'),('customer','Customer'),('consultant','Consultant'),('stagewise','Stage wise')],'Inspection'),
 		'prime_cost': fields.float('Prime Cost'),
 		'per_pump_prime_cost': fields.float('Per Pump Prime Cost'),
 		'sam_ratio': fields.float('Sam Ratio'),

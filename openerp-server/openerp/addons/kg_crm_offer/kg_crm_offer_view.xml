@@ -26,12 +26,12 @@
 								<field name="customer_po_no"/>
 								<field name="dealer_po_no"/>
 								<field name="market_division" readonly="1"/>
+								<field name="road_permit"/>
+								<field name="inspection"/>
 								<field name="revision" readonly="1"/>
 								<field name="note"/>
 								<field name="purpose" readonly="1"/>
-<!--
-								<field name="revision_remarks" attrs="{'invisible':[('state','not in',('moved_to_offer','wo_created','revised'))],'readonly':[('state','=','revised')]}"/>
--->
+<!--							<field name="revision_remarks" attrs="{'invisible':[('state','not in',('moved_to_offer','wo_created','revised'))],'readonly':[('state','=','revised')]}"/>-->
 								<field name="revision_remarks" attrs="{'invisible':[('revision','=',0)],'readonly':[('state','=','revised')],'required':[('revision','!=',0)]}"/>
 								<field name="wo_flag" invisible="1"/>
 							</group>											
@@ -40,9 +40,12 @@
 								<field name="enquiry_no" readonly="1"/>
 								<field name="enquiry_date" readonly="1"/>
 								<field name="due_date" readonly="1"/>
-								<field name="del_date" readonly="1"/>
+								<field name="del_date"/>
 								<field name="segment" readonly="1"/>	
 								<field name="location" required="1"/>	
+								<field name="excise_duty"/>	
+								<field name="drawing_approval"/>	
+								<field name="l_d_clause"/>	
 								<field name="state" style="width: 30%%" class="att_state_change" readonly="1"/>
 								<field name="rep_data" readonly="1" width="100" filename="offer_copy"/>
 								<field name="term_data" readonly="1" width="100" filename="term_copy"/>
@@ -217,12 +220,13 @@
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
 				<form string="Pump Offer Details" version="7.0" create="false" delete="false">
-				
 					<group string="Pump Offer Details">
 						<group>
 							<field name="pumpseries_id" required="1" readonly="1"/>
 							<field name="pump_id" required="1"  readonly="1"/>
 							<field name="moc_const_id" readonly="1"/>
+							<field name="drawing_approval"/>
+							<field name="inspection"/>
 							<field name="qty" readonly="1"/>
 							<field name="prime_cost" readonly="1"/>
 							<field name="sam_ratio"/>

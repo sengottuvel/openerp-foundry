@@ -707,11 +707,12 @@ class kg_crm_enquiry(osv.osv):
 					pass
 			elif entry.name:
 				off_no = entry.name
-			
+			print"off_nooff_nooff_no",off_no
 			offer_id = self.pool.get('kg.crm.offer').create(cr,uid,{
 																	'enquiry_id': entry.id,
 																	'enquiry_no': off_no,
 																	'enquiry_date': entry.offer_date,
+																	'due_date': entry.due_date,
 																	'del_date': entry.del_date,
 																	'customer_id': entry.customer_id.id,
 																	'ref_mode': entry.ref_mode,
@@ -1448,7 +1449,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'acces': fields.selection([('yes','Yes'),('no','No')],'Accessories'),
 		'acces_type': fields.selection([('coupling','Coupling'),('coupling_guard','Coupling Guard'),('base_plate','Base Plate')],'Type'),
 		
-		'wo_line_id': fields.many2one('ch.work.order.details','WO'),
+		'wo_line_id': fields.many2one('ch.work.order.details','WO',domain="[('order_category','=',purpose_categ),('state','not in',('draft','cancel'))]"),
 		'wo_no': fields.char('WO Number'),
 		
 		'load_bom': fields.boolean('Load BOM'),
@@ -1613,13 +1614,143 @@ class ch_kg_crm_pumpmodel(osv.osv):
 				value = {'wo_line_id': wo_rec.id,'spare_moc_const_id':wo_rec.moc_construction_id.id}
 		return {'value': value}
 		
-	def onchange_wo_line(self, cr, uid, ids, wo_line_id, context=None):
-		value = {'spare_pump_id':'','spare_moc_const_id':'','wo_no':''}
+	def onchange_wo_line(self, cr, uid, ids, wo_line_id,purpose_categ, context=None):
+		if purpose_categ == 'spare':
+			value = {'spare_pump_id':'','spare_moc_const_id':'','wo_no':''}
+		elif purpose_categ == 'pump':
+			value = {'pump_id':'','moc_const_id':'','wo_no':'','pump_model_type':'',
+					 'qap_plan_id':'','suction_size':'','push_bearing':'',
+					 'flange_standard':'','suction_size':'','push_bearing':'',
+					 'motor_kw':'','qty':'','setting_height':'','shaft_sealing':'',
+					 'bush_bearing_lubrication':'','load_bom':'',
+					 }
 		if wo_line_id:
 			wo_obj = self.pool.get('ch.work.order.details').search(cr,uid,[('id','=',wo_line_id)])
 			if wo_obj:
 				wo_rec = self.pool.get('ch.work.order.details').browse(cr,uid,wo_obj[0])
-				value = {'spare_pump_id': wo_rec.pump_model_id.id,'spare_moc_const_id':wo_rec.moc_construction_id.id,'wo_no':wo_rec.order_no}
+				fou_vals=[]
+				ms_vals=[]
+				bot_vals=[]
+				if purpose_categ == 'spare':
+					#~ value = {'spare_pump_id': wo_rec.pump_model_id.id,'spare_moc_const_id':wo_rec.moc_construction_id.id,'wo_no':wo_rec.order_no}
+					for item in wo_rec.line_ids:
+						fou_vals.append({
+									'position_id': item.position_id.id,
+									'pattern_id': item.pattern_id.id,
+									'pattern_name': item.pattern_name,
+									'moc_id': item.moc_id.id,
+									'qty': item.qty,
+									'load_bom': True,
+									'is_applicable': item.flag_applicable,
+									'purpose_categ': purpose_categ,
+									#~ 'remarks': item.remarks,
+									})
+					for item in wo_rec.line_ids_a:
+						ms_vals.append({
+									'name': item.ms_id.name,
+									'position_id': item.position_id.id,							
+									'ms_id': item.ms_id.id,
+									'moc_id': item.moc_id.id,
+									'qty': item.qty,
+									'load_bom': True,
+									'is_applicable': item.flag_applicable,
+									'purpose_categ': purpose_categ,
+									})
+					for item in wo_rec.line_ids_b:
+						bot_vals.append({
+									'item_name': item.bot_id.name,
+									'ms_id': item.bot_id.id,
+									'moc_id': item.moc_id.id,
+									'qty': item.qty,
+									'load_bom': True,
+									'is_applicable': item.flag_applicable,
+									'flag_is_bearing': item.flag_is_bearing,
+									'brand_id': item.brand_id.id,
+									'purpose_categ': purpose_categ,
+									})
+					return {'value': {'line_ids': fou_vals,
+									  'line_ids_a': ms_vals,
+									  'line_ids_b': bot_vals,
+									  'spare_pump_id': wo_rec.pump_model_id.id,'spare_moc_const_id':wo_rec.moc_construction_id.id,
+									  'wo_no':wo_rec.order_no,'pump_model_type':wo_rec.pump_model_type,
+									  'qap_plan_id':wo_rec.qap_plan_id.id,'load_bom': wo_rec.flag_load_bom,
+									  
+										}}
+				elif purpose_categ == 'pump':
+					if wo_rec.bush_bearing == 'grease':
+						push_bearing = 'grease'
+					elif wo_rec.bush_bearing == 'cft_self':
+						push_bearing = 'cft'
+					elif wo_rec.bush_bearing == 'cut_less_rubber':
+						push_bearing = 'cut'
+					else:
+						push_bearing = ''
+					if wo_rec.shaft_sealing == 'g_p':
+						shaft_sealing = 'gld_packing_tiga'
+					elif wo_rec.shaft_sealing == 'm_s':
+						shaft_sealing = 'mc_seal'
+					elif wo_rec.shaft_sealing == 'f_s':
+						shaft_sealing = 'dynamic_seal'
+					else:
+						shaft_sealing = ''
+					if wo_rec.lubrication == 'grease':
+						bush_bearing_lubrication = 'grease'
+					elif wo_rec.lubrication == 'cft_ext':
+						bush_bearing_lubrication = 'external'
+					elif wo_rec.lubrication == 'cft_self':
+						bush_bearing_lubrication = 'self'
+					elif wo_rec.lubrication == 'cut_less_rubber':
+						bush_bearing_lubrication = 'ex_pressure'
+					else:
+						bush_bearing_lubrication = ''
+					for item in wo_rec.line_ids:
+						fou_vals.append({
+									'position_id': item.position_id.id,
+									'pattern_id': item.pattern_id.id,
+									'pattern_name': item.pattern_name,
+									'moc_id': item.moc_id.id,
+									'qty': item.qty,
+									'load_bom': True,
+									'is_applicable': item.flag_applicable,
+									'purpose_categ': purpose_categ,
+									#~ 'remarks': item.remarks,
+									})
+					for item in wo_rec.line_ids_a:
+						ms_vals.append({
+									'name': item.ms_id.name,
+									'position_id': item.position_id.id,							
+									'ms_id': item.ms_id.id,
+									'moc_id': item.moc_id.id,
+									'qty': item.qty,
+									'load_bom': True,
+									'is_applicable': item.flag_applicable,
+									'purpose_categ': purpose_categ,
+									})
+					for item in wo_rec.line_ids_b:
+						bot_vals.append({
+									'item_name': item.bot_id.name,
+									'ms_id': item.bot_id.id,
+									'moc_id': item.moc_id.id,
+									'qty': item.qty,
+									'load_bom': True,
+									'is_applicable': item.flag_applicable,
+									'flag_is_bearing': item.flag_is_bearing,
+									'brand_id': item.brand_id.id,
+									'purpose_categ': purpose_categ,
+									})
+					return {'value': {'line_ids': fou_vals,
+									  'line_ids_a': ms_vals,
+									  'line_ids_b': bot_vals,
+									  'pump_id': wo_rec.pump_model_id.id,'moc_const_id':wo_rec.moc_construction_id.id,
+									  'wo_no':wo_rec.order_no,'pump_model_type':wo_rec.pump_model_type,
+									  'qap_plan_id':wo_rec.qap_plan_id.id,'suction_size':wo_rec.delivery_pipe_size,
+									  'push_bearing':push_bearing,'flange_standard':wo_rec.flange_standard.id,
+									  'motor_kw':wo_rec.m_power,'qty':wo_rec.qty,
+									  'setting_height':wo_rec.setting_height,'shaft_sealing':shaft_sealing,
+									  'bush_bearing_lubrication':bush_bearing_lubrication,'load_bom': wo_rec.flag_load_bom,
+									  
+										}}
+		
 		return {'value': value}
 		
 	def onchange_moc(self, cr, uid, ids, moc_const_id,flag_standard,purpose_categ):

@@ -214,9 +214,11 @@
 						<group>
 							<group>
 								<field name="purpose_categ" on_change="onchange_purpose_categ(purpose_categ)" required="1" attrs="{'readonly':[('purpose_categ','in',('pump','spare','access'))]}"/>
+								<field name="wo_no" attrs="{'required':[('purpose_categ','=','spare')],'readonly':[('spare_load_bom','=',True)],'invisible':[('purpose_categ','=','access')]}" on_change = "onchange_wo(wo_no)"/>
 							</group>	
 							<group>
 								<field name="pump_model_type" required="1" attrs="{'readonly':['|',('load_bom','=',True),('spare_load_bom','=',True)]}"/>
+								<field name="wo_line_id" on_change="onchange_wo_line(wo_line_id,purpose_categ)" attrs="{'invisible':[('purpose_categ','=','access')],'readonly':[('spare_load_bom','=',True)]}"/>
 							</group>
 						</group>	
 		<notebook>
@@ -424,14 +426,12 @@
 		
 			<group string="Spare Details" attrs="{'invisible':[('purpose_categ','not in',('spare','access'))]}">
 				<group>
-					<field name="wo_no" attrs="{'required':[('purpose_categ','=','spare')],'readonly':[('spare_load_bom','=',True)],'invisible':[('purpose_categ','!=','spare')]}" on_change = "onchange_wo(wo_no)"/>
 					<field name="spare_pump_id" on_change="onchange_spare_pump_id(spare_pump_id,purpose_categ)" attrs="{'readonly':[('spare_load_bom','=',True)],'required':[('purpose_categ','in',('spare','access'))]}"/>
 					<field name="spare_pumpseries_id" on_change="onchange_spare_pumpseries_id(spare_pumpseries_id,purpose_categ)" attrs="{'readonly':[('spare_load_bom','=',True)],'required':[('purpose_categ','in',('spare','access'))]}"/>
 					<field name="spare_qap_plan_id"/>
 				</group>
 				<group>
 					<!--<field name="wo_line_id" domain="[('partner_id','=',parent.customer_id),('order_category','=','spare'),('state','=','confirmed')]"/>-->
-					<field name="wo_line_id" on_change="onchange_wo_line(wo_line_id)" attrs="{'invisible':[('purpose_categ','!=','spare')],'readonly':[('spare_load_bom','=',True)]}"/>
 					<field name="s_no" attrs="{'readonly':[('spare_load_bom','=',True)],'invisible':[('purpose_categ','!=','spare')]}"/>
 					<field name="spare_moc_const_id" attrs="{'required':[('purpose_categ','=','spare')],'invisible':[('purpose_categ','!=','spare')],'readonly':[('spare_load_bom','=',True)]}" on_change="onchange_spare_moc(spare_moc_const_id,purpose_categ)"/>
 				</group>
