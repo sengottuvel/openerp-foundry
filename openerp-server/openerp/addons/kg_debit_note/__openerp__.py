@@ -9,7 +9,7 @@
 This module allows you to track the stock movement activity.
 ===========================================================
 """,
-    'depends' : ['base', 'product','account'],
+    'depends' : ['base', 'product','account','kg_purchase_invoice'],
     'data': [
 			 'kg_debit_note_view.xml',
 			 'jasper_report.xml',
