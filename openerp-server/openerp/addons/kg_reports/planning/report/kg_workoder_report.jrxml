@@ -1432,7 +1432,7 @@ where foundry_wiz_id = $P{wiz_id}
 								<textElement textAlignment="Center">
 									<font size="8"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{add_spec}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{oth_spec}]]></textFieldExpression>
 							</textField>
 						</jr:listContents>
 					</jr:list>
