@@ -44,9 +44,11 @@ class kg_service_order(osv.osv):
 		other_charges_amt = 0
 		for order in self.browse(cr, uid, ids, context=context):
 			res[order.id] = {
+				'total_amount': 0.0,
 				'amount_untaxed': 0.0,
 				'amount_tax': 0.0,
 				'amount_total': 0.0,
+				'grand_total': 0.0,
 				'discount' : 0.0,
 				'other_charge': 0.0,
 			}
@@ -61,15 +63,20 @@ class kg_service_order(osv.osv):
 				other_charges_amt = 0
 				
 			for line in order.service_order_line:
-				tot_discount = line.kg_discount + line.kg_discount_per_value
+				discount_per_value = ((line.product_qty * line.price_unit) / 100.00) * line.kg_discount_per
+				tot_discount = line.kg_discount + discount_per_value
 				val1 += line.price_subtotal
 				val += self._amount_line_tax(cr, uid, line, context=context)
 				val3 += tot_discount
-			res[order.id]['other_charge']=(round(other_charges_amt,0))
-			res[order.id]['amount_tax']=(round(val,0))
-			res[order.id]['amount_untaxed']=(round(val1,0)) + (round(val3,0))
-			res[order.id]['amount_total']=res[order.id]['amount_untaxed'] + res[order.id]['amount_tax'] + res[order.id]['other_charge'] - val3
-			res[order.id]['discount']=(round(val3,0))
+			res[order.id]['total_amount'] = (val1 + val3) - val
+			res[order.id]['other_charge'] = (round(other_charges_amt,0))
+			res[order.id]['amount_tax'] = val
+			res[order.id]['amount_untaxed'] = val1 - val
+			res[order.id]['discount'] = val3
+			res[order.id]['grand_total'] = val1
+			res[order.id]['round_off'] = order.round_off
+			res[order.id]['amount_total'] = val1 + order.round_off or 0.00
+			
 		
 		return res
 		
@@ -95,17 +102,22 @@ class kg_service_order(osv.osv):
 	
 	_columns = {
 		
+		## Basic Info
+		
 		'name': fields.char('SO No', size=64,readonly=True),
+		'date': fields.date('SO Date', required=True,readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
+		'state': fields.selection([('draft', 'Draft'),('confirm','WFA'),('approved','Approved'),('inv','Invoiced'),('cancel','Cancelled'),('reject','Rejected')], 'Status', track_visibility='onchange'),
+		'note': fields.text('Remarks'),
+		'remark': fields.text('Remarks', readonly=True, states={'approved': [('readonly', False)],'done':[('readonly',False)]}),
+		
+		## Module Requirement Info
+		
 		'dep_name': fields.many2one('kg.depmaster','Department Name', translate=True, select=True,readonly=True, 
 					domain="[('item_request','=',True),('state','in',('draft','confirmed','approved'))]", states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
-		'date': fields.date('SO Date', required=True,readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'partner_id':fields.many2one('res.partner', 'Supplier', required=True,readonly=True, 
 					states={'draft':[('readonly',False)],'confirm':[('readonly',False)]},domain="[('supplier','=',True)]"),
 		'pricelist_id':fields.many2one('product.pricelist', 'Pricelist'),
 		'partner_address':fields.char('Supplier Address', size=128, readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
-		'service_order_line': fields.one2many('kg.service.order.line', 'service_id', 'Order Lines', 
-					readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
-		'state': fields.selection([('draft', 'Draft'),('confirm','Waiting For Approval'),('approved','Approved'),('inv','Invoiced'),('cancel','Cancelled'),('reject','Rejected')], 'Status', track_visibility='onchange'),
 		'payment_mode': fields.many2one('kg.payment.master', 'Mode of Payment',readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		#~ 'delivery_type':fields.many2one('kg.deliverytype.master', 'Delivery Schedule', 
 		             #~ required=False, readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
@@ -117,10 +129,13 @@ class kg_service_order(osv.osv):
 								readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'value1':fields.float('Value1', readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'value2':fields.float('Value2', readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
-		'note': fields.text('Remarks'),
+		'round_off': fields.float('Round off',size=5,readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'other_charge': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Other Charges(+)',
 			 multi="sums", help="The amount without tax", track_visibility='always'),		
-		
+		'total_amount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Amount',
+			 multi="sums", store=True, help="The amount without tax", track_visibility='always'),
+		'grand_total': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Grand Total',
+			 multi="sums", store=True, help="The amount without tax", track_visibility='always'),
 		'discount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Discount(-)',
 			store={
 				'kg.service.order': (lambda self, cr, uid, ids, c={}: ids, ['service_order_line'], 10),
@@ -136,7 +151,7 @@ class kg_service_order(osv.osv):
 				'kg.service.order': (lambda self, cr, uid, ids, c={}: ids, ['service_order_line'], 10),
 				'kg.service.order.line': (_get_order, ['price_unit', 'tax_id', 'kg_discount', 'product_qty'], 10),
 			}, multi="sums", help="The tax amount"),
-		'amount_total': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total',
+		'amount_total': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',
 			store=True, multi="sums",help="The total amount"),
 		'kg_serindent_lines':fields.many2many('kg.service.indent.line','kg_serindent_so_line' , 'so_id', 'serindent_line_id', 'ServiceIndent Lines',
 			domain="[('service_id.state','=','approved'), '&', ('pending_qty','>','0')]", 
@@ -144,7 +159,6 @@ class kg_service_order(osv.osv):
 		'so_flag': fields.boolean('SO Flag'),
 		'amend_flag': fields.boolean('Amend Flag'),
 		
-		'remark': fields.text('Remarks', readonly=True, states={'approved': [('readonly', False)],'done':[('readonly',False)]}),
 		'so_bill': fields.boolean('SO Bill', readonly=True),
 		'currency_id': fields.many2one('res.currency', 'Currency', readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'specification':fields.text('Specification'),
@@ -154,6 +168,7 @@ class kg_service_order(osv.osv):
 		'today_date':fields.date('Date'),
 		'text_amt':fields.text('Amount In Text'),
 		'quot_ref_no':fields.char('Quot.Ref',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
+		'quot_date':fields.date('Quot.Date',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'so_type': fields.selection([('amc','AMC'),('service', 'Service'),('labor', 'Labor Only')], 'Type',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'amc_from': fields.date('AMC From Date',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'amc_to': fields.date('AMC To Date',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
@@ -166,11 +181,18 @@ class kg_service_order(osv.osv):
 		'so_reonly_flag':fields.boolean('SO Flag'),
 		'payment_type': fields.selection([('cash', 'Cash'),('credit', 'Credit'),('advance','Advance')], 'Payment Mode',readonly=True,states={'draft':[('readonly',False)]}),
 		'version':fields.char('Version'),
-		'expense_line_id': fields.one2many('kg.service.order.expense.track','expense_id','Expense Track'),
 		'adv_flag': fields.boolean('Advance Flag'),
 		'advance_amt': fields.float('Advance(%)',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
+		'delivery_address': fields.text('Delivery Address',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
+		'mode_of_dispatch': fields.many2one('kg.dispatch.master','Mode of Dispatch',domain="[('state','not in',('cancel','reject'))]",readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		
-		# Entry Info
+		## Child Tables Declaration
+		
+		'service_order_line': fields.one2many('kg.service.order.line', 'service_id', 'Order Lines', 
+					readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
+		'expense_line_id': fields.one2many('kg.service.order.expense.track','expense_id','Expense Track'),
+		
+		## Entry Info
 		
 		'active': fields.boolean('Active'),
 		'company_id': fields.many2one('res.company','Company',readonly=True),
@@ -213,7 +235,7 @@ class kg_service_order(osv.osv):
 			value = {'so_flag': False}
 		return {'value':value}
 	
-	def onchange_partner_id(self, cr, uid, ids, partner_id):
+	def onchange_partner_id(self, cr, uid, ids, partner_id,company_id):
 		partner = self.pool.get('res.partner')
 		if not partner_id:
 			return {'value': {
@@ -228,10 +250,22 @@ class kg_service_order(osv.osv):
 		city = supplier.city_id.name or ''
 		zip_code = supplier.zip or ''
 		address = street+','+street2+','+landmark+','+city+','+zip_code or ''
-
+		
+		company_rec = self.pool.get('res.company').browse(cr,uid,company_id)
+		
+		supplier_address = partner.address_get(cr, uid, [company_rec.partner_id.id], ['default'])
+		company = partner.browse(cr, uid, company_rec.partner_id.id)
+		com_street = company.street or ''
+		com_street2 = company.street2 or ''
+		com_landmark = company.landmark or ''
+		com_city = company.city_id.name or ''
+		com_zip_code = company.zip or ''
+		delivery_address = com_street+','+com_street2+','+com_landmark+','+com_city+','+com_zip_code or ''
+		
 		return {'value': {
 			'pricelist_id': supplier.property_product_pricelist_purchase.id,
 			'partner_address' : address,
+			'delivery_address' : delivery_address,
 			}}
 	
 	def write(self, cr, uid, ids, vals, context=None):		
@@ -287,7 +321,7 @@ class kg_service_order(osv.osv):
 										'name': seq_name[0],
 										})
 				
-			return True
+		return True
 			
 	def approve_order(self, cr, uid, ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -425,6 +459,7 @@ class kg_service_order(osv.osv):
 		if obj.kg_serindent_lines:
 			soindent_line_ids = map(lambda x:x.id,obj.kg_serindent_lines)
 			soindent_line_browse = soindent_line_obj.browse(cr,uid,soindent_line_ids)
+			
 			soindent_line_browse = sorted(soindent_line_browse, key=lambda k: k.product_id.id)
 			groups = []
 			for key, group in groupby(soindent_line_browse, lambda x: x.product_id.id):
@@ -451,6 +486,7 @@ class kg_service_order(osv.osv):
 				'service_flag':'False',
 				'ser_no':ser_no,
 				'serial_no':serial_no,
+				'indent_flag':True,
 				}				
 				
 				if ids:
@@ -526,8 +562,7 @@ class kg_service_order_line(osv.osv):
 		value = {'pending_qty' : ''}
 		if service_flag == True:
 			if product_qty and product_qty > soindent_qty:
-				raise osv.except_osv(
-					_('If Service Order From Service Indent !'),
+				raise osv.except_osv(_('If Service Order From Service Indent !'),
 					_('Service Order Qty can not greater than Service Indent Qty !!'))
 				value = {'pending_qty' : 0.0}
 			else:
@@ -551,12 +586,18 @@ class kg_service_order_line(osv.osv):
 			price = line.price_unit * (1 - (tot_discount_per or 0.0) / 100.0)
 			taxes = tax_obj.compute_all(cr, uid, line.taxes_id, price, line.product_qty, line.product_id, line.service_id.partner_id)
 			cur = line.service_id.pricelist_id.currency_id
-			res[line.id] = cur_obj.round(cr, uid, cur, taxes['total'])
+			res[line.id] = cur_obj.round(cr, uid, cur, taxes['total_included'])
 		return res
 	
 	_columns = {
-
+	
+	## Basic Info
+	
 	'service_id': fields.many2one('kg.service.order', 'Service.order.NO', required=True, ondelete='cascade'),
+	'note': fields.text('Remarks'),
+	
+	## Module Requirement Fields
+	
 	'so_date': fields.related('service_id','date', type='date', string='SO Date',store=True),
 	'partner_id': fields.related('service_id','partner_id', type='many2one',relation="res.partner", string='Supplier',store=True),
 	'price_subtotal': fields.function(_amount_line, string='Linetotal', digits_compute= dp.get_precision('Account')),
@@ -573,11 +614,10 @@ class kg_service_order_line(osv.osv):
 	'price_unit': fields.float('Unit Price', digits_compute= dp.get_precision('Product Price')),
 	'kg_discount_per': fields.float('Discount (%)', digits_compute= dp.get_precision('Discount')),
 	'kg_discount_per_value': fields.float('Discount(%)Value', digits_compute= dp.get_precision('Discount')),
-	'note': fields.text('Remarks'),
 	'brand_id': fields.many2one('kg.brand.master','Brand'),
-	
 	'service_flag':fields.boolean('Service Flag'),
 	'so_type_flag':fields.boolean('Type Flag'),
+	'indent_flag':fields.boolean('Indent Flag'),
 	'ser_no':fields.char('Ser No', size=128, readonly=True),
 	'serial_no':fields.many2one('stock.production.lot','Serial No',domain="[('product_id','=',product_id)]", readonly=True),	
 	'state': fields.selection([('draft', 'Draft'),('confirm','Waiting For Approval'),('approved','Approved'),('inv','Invoiced'),('cancel','Cancel')], 'Status'),
@@ -610,12 +650,18 @@ class kg_service_order_expense_track(osv.osv):
 	
 	_columns = {
 		
+		## Basic Info
+		
 		'expense_id': fields.many2one('kg.service.order', 'Expense Track'),
+		
+		## Module Requirement Fields
+		
 		'name': fields.char('Number', size=128, select=True,readonly=False),
 		'date': fields.date('Creation Date'),
 		'company_id': fields.many2one('res.company', 'Company Name'),
 		'description': fields.char('Description'),
 		'expense_amt': fields.float('Amount'),
+		
 	}
 	
 	_defaults = {

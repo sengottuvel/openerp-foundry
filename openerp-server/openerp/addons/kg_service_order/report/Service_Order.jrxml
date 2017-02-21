@@ -873,7 +873,7 @@ where so.id = $P{so_id}]]>
 				<reportElement x="-1" y="135" width="556" height="472">
 					<printWhenExpression><![CDATA[new Boolean(($F{status}.equals("draft")))]]></printWhenExpression>
 				</reportElement>
-				<imageExpression><![CDATA["/OpenERP/KGTrust/openerp-server/openerp/addons/kg_purchase_order/images/Draft.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_order/images/Draft.jpg"]]></imageExpression>
 			</image>
 		</band>
 	</background>
