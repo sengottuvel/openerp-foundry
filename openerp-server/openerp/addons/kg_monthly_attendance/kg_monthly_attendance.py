@@ -60,7 +60,7 @@ class kg_monthly_attendance(osv.osv):
 				'salary_days': 0.0,
 			}
 			#~ var = rec.ot_days+rec.od_days+rec.arrear_days+rec.leave_days+rec.worked_days 
-			var = rec.od_days+rec.arrear_days+rec.leave_days+rec.worked_days 
+			var = rec.od_days+rec.arrear_days+rec.leave_days+rec.worked_days+rec.sundays+rec.nat_fes_days
 			res[rec.id]['salary_days'] = var
 		return res	
 		
