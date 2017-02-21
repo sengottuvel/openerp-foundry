@@ -65,7 +65,7 @@ select
 order_line_id
 from kg_production where
 state in ('pour_com','fettling_inprogress','moved_to_ms')
-and  pour_date::date >= to_date($P{from_date},'YYYY-MM-DD') and pour_date::date <= to_date($P{to_date},'YYYY-MM-DD')
+and  pour_date::date >= $P{from_date}::date and pour_date::date <= $P{to_date}::date
 order by order_line_id)
 and flag_applicable = 't'
 group by header_id
@@ -75,7 +75,7 @@ union
 select count(order_bomline_id) as produc_count,order_line_id,'produc' as type from kg_production  where order_line_id in (
 select order_line_id
 from kg_production where state in ('pour_com','fettling_inprogress')
-and  pour_date::date >= to_date($P{from_date},'YYYY-MM-DD') and pour_date::date <= to_date($P{to_date},'YYYY-MM-DD')
+and  pour_date::date >= $P{from_date}::date and pour_date::date <= $P{to_date}::date
 order by order_line_id)
 group by order_line_id
 
@@ -84,13 +84,13 @@ union
 select count(order_bomline_id) as machine_count,order_line_id,'machine' as type from kg_machineshop  where order_line_id in (
 select order_line_id
 from kg_production where state in ('pour_com','fettling_inprogress','moved_to_ms')
-and  pour_date >= to_date($P{from_date},'YYYY-MM-DD') and pour_date <= to_date($P{to_date},'YYYY-MM-DD')
+and  pour_date >= $P{from_date}::date and pour_date <= $P{to_date}::date
 order by order_line_id)
 and order_line_id not in (select order_bomline_id
 from kg_production  where order_line_id in (
 select order_line_id
 from kg_production where state in ('pour_com','fettling_inprogress','moved_to_ms')
-and  pour_date::date >= to_date($P{from_date},'YYYY-MM-DD') and pour_date::date <= to_date($P{to_date},'YYYY-MM-DD')
+and  pour_date::date >= $P{from_date}::date and pour_date::date <= $P{to_date}::date
 order by order_line_id)
 ) group by order_line_id
 ) as a

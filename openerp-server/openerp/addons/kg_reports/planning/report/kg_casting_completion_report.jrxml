@@ -107,7 +107,7 @@ select id
 from ch_order_bom_details where flag_applicable = 't'
 
 order by id)
-and entry_date >= to_date($P{from_date},'YYYY-MM-DD') and entry_date <= to_date($P{to_date},'YYYY-MM-DD')
+and entry_date >= $P{from_date}::date and entry_date <= $P{to_date}::date
 group by order_line_id
 
 union
@@ -121,7 +121,7 @@ select id
 from ch_order_bom_details where flag_applicable = 't'
 
 order by id)
-and entry_date >=  to_date($P{from_date},'YYYY-MM-DD') and entry_date <= to_date($P{to_date},'YYYY-MM-DD'))
+and entry_date::date >=  $P{from_date}::date and entry_date <= $P{to_date}::date)
 group by header_id,type
 ) as a
 order by order_line_id ) as b
