@@ -480,17 +480,13 @@ class kg_payslip(osv.osv):
 								categ_ids = 2
 							elif all_ded_rec.allow_type == 'DED':
 								categ_ids = 4
-							if all_ded_rec.pay_type.id == 21:
-								amt_allo = all_ded_line_rec.amount * worked_days
-							else:
-								amt_allo = all_ded_line_rec.amount
 							self.pool.get('hr.payslip.line').create(cr,uid,
 								{
 									'name':all_ded_rec.pay_type.name,
 									'code':all_ded_rec.pay_type.code,
 									'category_id':categ_ids,
 									'quantity':1,
-									'amount':amt_allo,
+									'amount':all_ded_line_rec.amount,
 									'salary_rule_id':1,
 									'employee_id':emp_id,
 									'contract_id':con_ids[0],
@@ -631,15 +627,15 @@ class kg_payslip(osv.osv):
 						if emp_categ_rec.bonus_categ == 'attendance':
 							print "absentabsentabsentabsentabsent",absent
 							print "leave_daysleave_daysleave_daysleave_days",leave_days
-							pay_line_ids_bas = self.pool.get('hr.payslip.line').search(cr,uid,[('slip_id','=',slip_rec.id),('code','=','BASIC')])
-							pay_line_ids_fda = self.pool.get('hr.payslip.line').search(cr,uid,[('slip_id','=',slip_rec.id),('code','=','FDA')])
+							pay_line_ids_bas = self.pool.get('ch.kg.contract.salary').search(cr,uid,[('header_id_salary','=',con_ids_1.id),('salary_type','=',1)])
+							pay_line_ids_fda = self.pool.get('ch.kg.contract.salary').search(cr,uid,[('header_id_salary','=',con_ids_1.id),('salary_type','=',8)])
 							pay_line_ids_vda = self.pool.get('hr.payslip.line').search(cr,uid,[('slip_id','=',slip_rec.id),('code','=','VDA')])
 							if pay_line_ids_bas:
-								pay_line_rec_ba = self.pool.get('hr.payslip.line').browse(cr,uid,pay_line_ids_bas[0])
-								basic_amt = pay_line_rec_ba.amount
+								pay_line_rec_ba = self.pool.get('ch.kg.contract.salary').browse(cr,uid,pay_line_ids_bas[0])
+								basic_amt = pay_line_rec_ba.salary_amt
 							if pay_line_ids_fda:
-								pay_line_rec_fda = self.pool.get('hr.payslip.line').browse(cr,uid,pay_line_ids_fda[0])
-								fda_amt = pay_line_rec_fda.amount
+								pay_line_rec_fda = self.pool.get('ch.kg.contract.salary').browse(cr,uid,pay_line_ids_fda[0])
+								fda_amt = pay_line_rec_fda.salary_amt
 							if pay_line_ids_vda:
 								pay_line_rec_vda = self.pool.get('hr.payslip.line').browse(cr,uid,pay_line_ids_vda[0])
 								vda_amt = pay_line_rec_vda.amount
@@ -691,24 +687,21 @@ class kg_payslip(osv.osv):
 				#### Creation of the Driver Batta per month for the employee ####	
 				
 				if con_ids_1.driver_bata_app:
-					print "Driver bataa called --------------------------------------------------"
-					emp_categ_ids = self.pool.get('kg.employee.category').search(cr,uid,[('id','=',con_ids_1.emp_categ_id.id),('state','=','approved')])
-					if emp_categ_ids:
-						emp_categ_rec = self.pool.get('kg.employee.category').browse(cr,uid,emp_categ_ids[0])
-						if emp_categ_rec.driver_batta > 0.00:
-							driv_bata = emp_categ_rec.driver_batta  * salary_days
-							self.pool.get('hr.payslip.line').create(cr,uid,
-									{
-										'name':'Driver Batta',
-										'code':'DRB',
-										'category_id':2,
-										'quantity':1,
-										'amount':driv_bata,
-										'salary_rule_id':1,
-										'employee_id':emp_id,
-										'contract_id':con_ids[0],
-										'slip_id':slip_rec.id,
-									},context = None)
+					print "Driver bataa called --------------------------------------------------",con_ids_1.driver_batta
+					if con_ids_1.driver_batta > 0.00:
+						driv_bata = con_ids_1.driver_batta  * (worked_days+ot_days)
+						self.pool.get('hr.payslip.line').create(cr,uid,
+								{
+									'name':'Driver Batta',
+									'code':'DRB',
+									'category_id':2,
+									'quantity':1,
+									'amount':driv_bata,
+									'salary_rule_id':1,
+									'employee_id':emp_id,
+									'contract_id':con_ids[0],
+									'slip_id':slip_rec.id,
+								},context = None)
 				#### Creation of the Driver Batta per month for the employee ####
 				
 				#### Creation of Coffee Allowance per month for the employee ####
