@@ -32,7 +32,7 @@
 								<field name="max_late_count" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"  required="1"/>
 								<field name="driver_batta" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"  required="1"/>
 								<field name="shift_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1"/>
-								<field name="sal_calc" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="0"/>
+								<field name="sal_calc" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1"/>
 								<field name="state" style="width: 30%%" class="att_state_change"/>								
 							</group>
 						</group>						
