@@ -510,7 +510,8 @@ class kg_payslip(osv.osv):
 									'category_id':4,
 									'quantity':1,
 									'amount':adv_ded_rec.pay_amt,
-									'salary_rule_id':adv_ded_rec.id,
+									'salary_rule_id':1,
+									'cum_ded_id':adv_ded_rec.id,
 									'employee_id':emp_id,
 									'contract_id':con_ids[0],
 									'slip_id':slip_rec.id,
@@ -821,7 +822,7 @@ class kg_payslip(osv.osv):
 		slip_line=self.pool.get('hr.payslip.line').search(cr,uid,[('slip_id','=',slip_rec.id),('code','=','ADV')])
 		for line_ids in slip_line:
 			slip_line_rec = self.pool.get('hr.payslip.line').browse(cr,uid,line_ids)
-			adv_rec = self.pool.get('kg.advance.deduction').browse(cr,uid,slip_line_rec.salary_rule_id.id)
+			adv_rec = self.pool.get('kg.advance.deduction').browse(cr,uid,slip_line_rec.cum_ded_id.id)
 			print "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$",adv_rec.id
 			self.pool.get('kg.advance.deduction').write(cr,uid,adv_rec.id,{'bal_amt':adv_rec.bal_amt+slip_line_rec.amount,'amt_paid':adv_rec.amt_paid-slip_line_rec.amount})
 		####### Reverting the advance amount of the employee for this month while cancelling ################
@@ -986,3 +987,14 @@ class kg_salary_structure(osv.osv):
 		return super(kg_batch_payslip, self).unlink(cr, uid, ids, context)
 	
 kg_salary_structure()
+
+class ch_salary_slip(osv.osv):
+	_name = 'hr.payslip.line'	
+	_inherit = 'hr.payslip.line'
+	
+	_columns = {
+	
+	'cum_ded_id': fields.many2one('kg.advance.deduction','Cumulative Deduction', readonly=True),
+		
+	}
+ch_salary_slip()
