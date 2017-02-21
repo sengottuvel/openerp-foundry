@@ -12,19 +12,55 @@
 pump.name as pump_model,
 foundry_line.pattern_name,
 foundry_line.qty,
-foundry_line.add_spec
+foundry_line.add_spec as oth_spec
 
 
 from ch_order_bom_details foundry_line
 
 left join kg_pumpmodel_master pump on pump.id = foundry_line.pump_model_id
 
-where foundry_line.header_id = $P{header_id} and foundry_line.order_category = 'spare' and foundry_line.flag_applicable = 't']]>
+where foundry_line.header_id = $P{header_id} and foundry_line.order_category = 'spare'  and foundry_line.flag_applicable = 't'
+
+union
+
+select
+
+pump.name as pump_model,
+ms_line.name,
+ms_line.qty,
+ms_line.remarks as oth_spec
+
+
+from ch_order_machineshop_details ms_line
+
+left join ch_work_order_details wo_line on wo_line.id = ms_line.header_id
+left join kg_pumpmodel_master pump on pump.id = wo_line.pump_model_id
+
+where ms_line.header_id = $P{header_id} and wo_line.order_category = 'spare'  
+and ms_line.flag_applicable = 't'
+
+union
+
+select
+
+pump.name as pump_model,
+bot_line.item_name,
+bot_line.qty,
+bot_line.remarks as oth_spec
+
+
+from ch_order_bot_details bot_line
+
+left join ch_work_order_details wo_line on wo_line.id = bot_line.header_id
+left join kg_pumpmodel_master pump on pump.id = wo_line.pump_model_id
+
+where bot_line.header_id = $P{header_id} and wo_line.order_category = 'spare'  
+and bot_line.flag_applicable = 't' ]]>
 		</queryString>
 		<field name="pump_model" class="java.lang.String"/>
 		<field name="pattern_name" class="java.lang.String"/>
 		<field name="qty" class="java.lang.Integer"/>
-		<field name="add_spec" class="java.lang.String"/>
+		<field name="oth_spec" class="java.lang.String"/>
 	</subDataset>
 	<subDataset name="Material dataset">
 		<parameter name="header_id" class="java.lang.Integer">
