@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Workorder_print" pageWidth="605" pageHeight="842" columnWidth="565" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.6105100000000008"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="1094"/>
+	<property name="ireport.y" value="0"/>
 	<subDataset name="dataset2">
 		<parameter name="header_id" class="java.lang.Integer"/>
 		<queryString>
@@ -119,6 +119,43 @@ where ch_machineshop.flag_applicable = True and
 
 work_order.id = $P{header_id}
 
+
+
+UNION
+
+SELECT
+
+company.name as company_name,
+to_char(CURRENT_DATE::date,'dd-mm-YYYY') as date,
+work_order.order_no as wo_no,
+pump_type.name as pump_type,
+work_order.trimming_dia as trimming_dia,
+flange.name as flange_name,
+'-' as position_no,
+machine.code as pattern_no,
+machine.name as pattern_name,
+moc.name as moc_name,
+
+'0.00' as weight_kg,
+
+ch_bot.qty as qty,
+'Nos' as uom,
+ch_bot.remarks as remarks
+
+FROM ch_work_order_details work_order
+
+left join ch_order_bot_details ch_bot on (ch_bot.header_id = work_order.id)
+left join kg_machine_shop machine on (machine.id = ch_bot.bot_id)
+left join ch_pumpseries_flange flange on (flange.id = work_order.flange_standard)
+left join kg_pumpmodel_master pump_type on (pump_type.id = work_order.pump_model_id)
+left join kg_moc_master moc on (moc.id = ch_bot.moc_id)
+left join res_company company on (company.id = machine.company_id)
+
+
+where ch_bot.flag_applicable = True and
+
+work_order.id = $P{header_id}
+
 order by wo_no]]>
 		</queryString>
 		<field name="company_name" class="java.lang.String"/>
@@ -221,14 +258,18 @@ to_char(wo_line.delivery_date::date,'dd-mm-YYYY') as due_date,
 to_char(wo.entry_date::date,'dd-mm-YYYY') as order_date,
 comp.name as company_name,
 wo_line.note as remarks,
-to_char(CURRENT_DATE::date,'dd-mm-YYYY') as date
+to_char(CURRENT_DATE::date,'dd-mm-YYYY') as date,
+pump_crm.s_no as serial_no,
+dealer.name as delear
 
 from ch_work_order_details wo_line
 left join kg_pumpmodel_master pump on pump.id = wo_line.pump_model_id
 left join ch_kg_crm_pumpmodel pump_crm on pump_crm.id = wo_line.enquiry_line_id
+left join kg_crm_enquiry crm_enquiry on crm_enquiry.id = pump_crm.header_id
 left join kg_fluid_master liquid on liquid.id = pump_crm.fluid_id
 left join kg_work_order wo on wo.id = wo_line.header_id
 left join res_partner cust on cust.id = wo.partner_id
+left join res_partner dealer on dealer.id = crm_enquiry.dealer_id
 left join res_company comp on comp.id = wo.company_id
 left join kg_brand_master brand on brand.id = pump_crm.mech_seal_make
 
@@ -276,6 +317,8 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 	<field name="company_name" class="java.lang.String"/>
 	<field name="remarks" class="java.lang.String"/>
 	<field name="date" class="java.lang.String"/>
+	<field name="serial_no" class="java.lang.String"/>
+	<field name="delear" class="java.lang.String"/>
 	<group name="WO Group">
 		<groupExpression><![CDATA[$F{id}]]></groupExpression>
 		<groupHeader>
@@ -354,7 +397,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<text><![CDATA[Customer :]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="243" y="52" width="156" height="21" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="243" y="52" width="154" height="21" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -1249,7 +1292,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{customer_name}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="399" y="52" width="166" height="21"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="397" y="52" width="168" height="21"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.0"/>
@@ -1259,7 +1302,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textElement verticalAlignment="Middle">
 						<font size="8" isBold="true"/>
 					</textElement>
-					<textFieldExpression><![CDATA["--"]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{delear}]]></textFieldExpression>
 				</textField>
 				<image>
 					<reportElement x="87" y="0" width="69" height="31"/>
@@ -1460,6 +1503,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textElement>
 						<font size="8"/>
 					</textElement>
+					<textFieldExpression><![CDATA[$F{serial_no}]]></textFieldExpression>
 				</textField>
 				<textField>
 					<reportElement x="439" y="0" width="126" height="20"/>
@@ -1476,7 +1520,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 		<groupHeader>
 			<band height="22">
 				<componentElement>
-					<reportElement x="0" y="0" width="565" height="22"/>
+					<reportElement mode="Transparent" x="0" y="0" width="565" height="22"/>
 					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 						<datasetRun subDataset="dataset3">
 							<datasetParameter name="header_id">
@@ -1486,56 +1530,56 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						</datasetRun>
 						<jr:listContents height="22" width="565">
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="1" y="0" width="73" height="20"/>
+								<reportElement stretchType="RelativeToTallestObject" x="1" y="0" width="73" height="20" isPrintWhenDetailOverflows="true"/>
 								<textElement textAlignment="Center">
 									<font size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{position_no}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="75" y="0" width="81" height="20"/>
+								<reportElement stretchType="RelativeToTallestObject" x="75" y="0" width="81" height="20"/>
 								<textElement textAlignment="Center">
 									<font size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{pattern_no}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="156" y="0" width="75" height="20"/>
+								<reportElement stretchType="RelativeToTallestObject" x="156" y="0" width="75" height="20" isPrintWhenDetailOverflows="true"/>
 								<textElement textAlignment="Center">
 									<font size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{pattern_name}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="231" y="0" width="92" height="20"/>
+								<reportElement stretchType="RelativeToTallestObject" x="231" y="0" width="92" height="20" isPrintWhenDetailOverflows="true"/>
 								<textElement textAlignment="Center">
 									<font size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{moc_name}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="323" y="0" width="58" height="20"/>
+								<reportElement stretchType="RelativeToTallestObject" x="323" y="0" width="58" height="20" isPrintWhenDetailOverflows="true"/>
 								<textElement textAlignment="Center">
 									<font size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{weight_kg}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="381" y="0" width="58" height="20"/>
+								<reportElement stretchType="RelativeToTallestObject" x="381" y="0" width="58" height="20" isPrintWhenDetailOverflows="true"/>
 								<textElement textAlignment="Center">
 									<font size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{qty}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="439" y="0" width="48" height="20"/>
+								<reportElement stretchType="RelativeToTallestObject" x="439" y="0" width="48" height="20"/>
 								<textElement textAlignment="Center">
 									<font size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{uom}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="487" y="0" width="78" height="20"/>
+								<reportElement stretchType="RelativeToTallestObject" x="487" y="0" width="78" height="20" isPrintWhenDetailOverflows="true"/>
 								<textElement textAlignment="Center">
 									<font size="8"/>
 								</textElement>
