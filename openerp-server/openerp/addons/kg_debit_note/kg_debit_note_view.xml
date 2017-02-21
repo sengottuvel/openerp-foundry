@@ -8,16 +8,17 @@
 			<field name='arch' type='xml'>
 			<form string='Debit Note' version='7.0' >					
 				<header>
-					<button name="entry_approve" type="object" string="Approve" attrs="{'invisible':[('state','!=','confirm')]}" class="oe_highlight"  confirm="Are you sure to proceed ?" />	
 					<button name="entry_reject" type="object" string="Reject" attrs="{'invisible':[('state','!=','confirm')]}" class="oe_highlight" confirm="Are you sure to proceed ?" />
-					<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','yes')]}" class="oe_highlight" confirm="Are you sure to proceed ?"/>			
+					<button name="entry_approve" type="object" string="Approve" attrs="{'invisible':[('state','!=','confirm')]}" class="oe_highlight"  confirm="Are you sure to proceed ?" />	
+					<button name="entry_cancel" type="object" string="Cancel" states="approved" class="oe_highlight" confirm="Are you sure to proceed ?"/>			
 					<button name="entry_confirm" type="object" string="Confirm" attrs="{'invisible':[('state','!=','draft')]}" class="oe_highlight"/>
 					<button name="entry_draft" type="object" string="Set To Draft" attrs="{'invisible':[('state','!=','cancel')]}" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 				</header>				
 					<group>
 						<group>								
 							<field name='name'/>
-							<field name='supplier_id' required="1"/>
+							<field name='supplier_id' required="1" attrs="{'readonly':[('supplier_id','!=',False)]}"/>
+							<field name='invoice_no' required="1" on_change="onchange_invoice_no(invoice_no)" attrs="{'invisible':[('supplier_id','=',False)]}"/>
 							<field name='modify' invisible="1"/>
 							<field name='supplier_invoice_no' required="1"/>
 						</group>
@@ -33,7 +34,7 @@
 							<field name="remark" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 						</group>
 						<group>
-							<field name="cancel_remark" attrs="{'readonly':[('modify','=','yes')]}"/>
+							<field name="cancel_remark" attrs="{'invisible':[('state','in',('draft','confirm','reject'))]}"/>
 						</group>
 					</group>
 					<notebook>
@@ -101,7 +102,7 @@
 			<field name='model'>kg.debit.note</field>
 			<field eval='8' name='priority'/>
 			<field name ='arch' type='xml'>
-				<tree colors="Blue:state=='draft';gray:state=='reject';black:state=='approved';red:state=='confirm'" toolbar="True" string="debit Note">
+				<tree colors="Blue:state=='draft';gray:state in ('reject','cancel');black:state=='approved';red:state=='confirm'" toolbar="True" string="debit Note">
 					<field name='name'/>
 					<field name='date'/>
 					<field name='supplier_id'/>

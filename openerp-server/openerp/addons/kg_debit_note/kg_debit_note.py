@@ -53,24 +53,24 @@ class kg_debit_note(osv.osv):
 			
 		return res
 	
-	def _get_modify(self, cr, uid, ids, field_name, arg,  context=None):
-		res={}
-		if field_name == 'modify':
-			for h in self.browse(cr, uid, ids, context=None):
-				res[h.id] = 'no'
-				if h.state == 'approved':
-					cr.execute(""" select count(*) as cnt from kg_purchase_invoice where id in (select header_id from ch_kg_debit_note where debit_id = %s) and state = 'approved'  """ %(ids[0]))
-					data = cr.dictfetchall()	
-					if data:
-						data = data[0]
-						if data['cnt'] > 0:
-							res[h.id] = 'yes'
-							return res
-						else:
-							res[h.id] = 'no'
-				else:
-					res[h.id] = 'yes'								   
-		return res	
+	#~ def _get_modify(self, cr, uid, ids, field_name, arg,  context=None):
+		#~ res={}
+		#~ if field_name == 'modify':
+			#~ for h in self.browse(cr, uid, ids, context=None):
+				#~ res[h.id] = 'no'
+				#~ if h.state == 'approved':
+					#~ cr.execute(""" select count(*) as cnt from kg_purchase_invoice where id in (select header_id from ch_kg_debit_note where debit_id = %s) and state = 'approved'  """ %(ids[0]))
+					#~ data = cr.dictfetchall()	
+					#~ if data:
+						#~ data = data[0]
+						#~ if data['cnt'] > 0:
+							#~ res[h.id] = 'yes'
+							#~ return res
+						#~ else:
+							#~ res[h.id] = 'no'
+				#~ else:
+					#~ res[h.id] = 'yes'								   
+		#~ return res	
 		
 	_name = 'kg.debit.note'
 	_description = "This form is to enter the debit note details"
@@ -80,22 +80,24 @@ class kg_debit_note(osv.osv):
 		
 		## Basic Info
 		
-		'name':fields.char('Debit Note No', readonly=True),
-		'date':fields.date('Debit Note Date'),
+		'name':fields.char('No', readonly=True),
+		'date':fields.date('Date'),
 		'state': fields.selection([('draft','Draft'),('confirm','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'remark':fields.text('Remarks',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
-		'cancel_remark':fields.text('Cancel Remarks'),	
+		'cancel_remark':fields.text('Cancel Remarks',readonly=True,states={'approved':[('readonly',False)]}),
 		
 		## Module Requirement Info
 		
 		'supplier_id':fields.many2one('res.partner','Supplier',domain = [('supplier','=',True)],readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
+		'invoice_no':fields.many2one('kg.purchase.invoice','Invoice No',domain = "[('supplier_id','=',supplier_id),('state','not in',('cancel','reject'))]",readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'supplier_invoice_no':fields.char('Supplier Invoice No',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'supplier_invoice_date':fields.date('Supplier Invoice Date',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'line_ids':fields.one2many('ch.debit.note','header_id','Debit Note',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),   
 		'amount_total': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount', multi="sums", store=True, track_visibility='always'),		
 		'tot_amount':fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Amount', multi="sums", store=True, track_visibility='always'),		
 		'tax_amount':fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Tax Amount', multi="sums", store=True, track_visibility='always'),
-		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
+		#~ 'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
+		'modify': fields.boolean('Modify'),
 		'reason': fields.selection([('item_terun','Item Return'),('price','Price Deviation'),('both','Both')],'Reason',readonly=True,states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		
 		## Entry Info
@@ -127,6 +129,13 @@ class kg_debit_note(osv.osv):
 		
 	}
 	
+	def onchange_invoice_no(self, cr, uid, ids, invoice_no,context=None):
+		value = {'supplier_invoice_no': '','supplier_invoice_date': ''}
+		if invoice_no:
+			inv = self.pool.get('kg.purchase.invoice').browse(cr, uid, invoice_no, context=context)
+			value = {'supplier_invoice_no': inv.sup_invoice_no,'supplier_invoice_date': inv.invoice_date}
+		return {'value': value}
+		
 	def entry_draft(self,cr,uid,ids,context=None):
 		entry = self.browse(cr, uid, ids[0])
 		if entry.state == 'cancel':
