@@ -195,6 +195,7 @@ class purchase_requisition_line(osv.osv):
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
 		'moc_id_temp': fields.many2one('ch.brandmoc.rate.details','MOC',domain="[('brand_id','=',brand_id),('header_id.product_id','=',product_id),('header_id.state','in',('draft','confirmed','approved'))]"),
 		'line_date':fields.datetime('Indent Date'),
+		'due_date': fields.date('Due Date'),
 		
 	}
 

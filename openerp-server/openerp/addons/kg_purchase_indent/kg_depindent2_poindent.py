@@ -108,6 +108,7 @@ class kg_depindent2_poindent(osv.osv):
 					'moc_id_temp': group[0].moc_id_temp.id,
 					'requisition_id': obj.id,
 					'indent_type': obj.indent_type,
+					'due_date': obj.due_date,
 					
 					}
 					print "vals :", vals

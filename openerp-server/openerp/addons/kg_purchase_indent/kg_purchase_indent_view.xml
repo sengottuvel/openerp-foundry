@@ -38,6 +38,7 @@
 			
 			<field name="date_start" position="replace">
 				<field name="date_start" required="1"/>
+				<field name="due_date" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
 				<field name="division"/>
 				<field name="state" style="width: 30%%" class="att_state_change" readonly="1"/>
 			</field>

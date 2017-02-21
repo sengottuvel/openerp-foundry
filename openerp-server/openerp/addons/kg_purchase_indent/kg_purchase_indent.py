@@ -32,13 +32,14 @@ class kg_purchase_indent(osv.osv):
 				
 		'kg_store': fields.selection([('sub','Sub Store'), ('main','Main Store')], 'Store', readonly=True, states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
 		'dep_name' : fields.many2one('kg.depmaster', 'Dep.Name', readonly=True, states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
-		'date_start':fields.date('Indent Date', readonly=True, states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
+		'date_start': fields.date('Indent Date', readonly=True, states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
 		'pi_type': fields.selection([('direct','Direct'),('fromdep','From Dep Indent')], 'Type'),
 		'pi_flag': fields.boolean('pi flag'),
 		#~ 'division':fields.many2one('kg.division.master','Division',readonly=True,states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
 		#~ 'expected_date':fields.date('Expected Date',required=True,readonly=True,states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
 		'indent_type': fields.selection([('fromdi','From Dept'),('direct','Direct')],'Indent Type',required=True,readonly=True,states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
 		'division': fields.selection([('ppd','PPD'),('ipd','IPD'),('foundry','Foundry')],'Division',readonly=True,states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
+		'due_date': fields.date('Due Date', readonly=True, states={'draft': [('readonly', False)],'in_progress':[('readonly',False)]}),
 		
 		# Entry Info
 		
@@ -59,7 +60,7 @@ class kg_purchase_indent(osv.osv):
 		}
 	
 	_defaults = {
-	
+		
 		'exclusive': 'exclusive',
 		'kg_store': 'main',
 		'name': '',
@@ -68,7 +69,7 @@ class kg_purchase_indent(osv.osv):
 		'active': True,
 		'entry_mode': 'manual',
 		'indent_type': 'direct',
-			
+		
 		}
 	
 	def onchange_entry_mode(self, cr, uid, ids, entry_mode, pi_flag, context=None):
@@ -277,19 +278,31 @@ class kg_purchase_indent(osv.osv):
 		return self.write(cr, uid, ids, {'state': 'reject','reject_date':time.strftime('%Y-%m-%d %H:%M:%S'),'rej_user_id':uid})
 	
 	def _check_line(self, cr, uid, ids, context=None):
+		tot = 0.0
 		for pi in self.browse(cr,uid,ids):
-			if pi.kg_depindent_lines==[]:
-				tot = 0.0
+			if not pi.kg_depindent_lines:
+				if not pi.line_ids:
+					raise osv.except_osv(_('Warning!'),
+						_('You can not save this Purchase Indent with out Item Details!'))
+				for line in pi.line_ids:
+					tot += line.product_qty
+				if tot <= 0.0:
+					raise osv.except_osv(_('Warning!'),
+						_('You can not save this Purchase Indent with Zero Qty!'))
+			elif pi.kg_depindent_lines and pi.state != 'draft':
+				if not pi.line_ids:
+					raise osv.except_osv(_('Warning!'),
+						_('You can not save this Purchase Indent with out Item Details!'))
 				for line in pi.line_ids:
 					tot += line.product_qty
 				if tot <= 0.0:			
-					return False
-			
+					raise osv.except_osv(_('Warning!'),
+						_('You can not save this Purchase Indent with Zero Qty!'))
 			return True
 			
 	_constraints = [
-	
-		(_check_line,'You can not save this Purchase Indent with out Line and Zero Qty !',['line_ids']),
+		
+		(_check_line,'You can not save this Purchase Indent with out Line and Zero Qty !',['']),
 	]   	   	
 	
 kg_purchase_indent()
@@ -328,7 +341,7 @@ class kg_purchase_indent_line(osv.osv):
 	'draft_flag': False,
 	'src_type': 'frompi',
 	
-	}		
+	}
 	
 	def onchange_product_id(self, cr, uid, ids, product_id, product_uom_id, context=None):
 		value = {'product_uom_id': '','stock_qty':'','brand_id':'','moc_id_temp':'','moc_id':''}

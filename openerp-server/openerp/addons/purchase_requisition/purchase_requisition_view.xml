@@ -177,6 +177,7 @@
 						<field name="product_id" required="1" on_change="onchange_product_id(product_id,product_uom_id)" attrs="{'readonly': [('indent_type', '=', 'fromdi')]}"/>
 						<field name="product_qty" required="1" on_change="onchange_qty(product_qty,pending_qty)"/>
 						<field name="product_uom_id" string="UOM" readonly="1"/>
+						<field name="due_date" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
 					</group>
 					<group>
 						<field name="brand_id" required="1"/>
