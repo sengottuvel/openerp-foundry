@@ -310,10 +310,14 @@ class kg_payslip(osv.osv):
 						categ_ids = 1
 					if con_line_ids.salary_type.code == 'BASIC':
 						categ_ids = 1
-					if con_line_ids.amt_type == 'percentage':
-						comp_amt = (((con_ids_1.gross_salary * con_line_ids.salary_amt)/100)/working_days)
+					if con_ids_1.emp_categ_id.sal_calc == 'cal_days':
+						calulation_days = total_days
 					else:
-						comp_amt = (con_line_ids.salary_amt/working_days)
+						calulation_days = working_days
+					if con_line_ids.amt_type == 'percentage':
+						comp_amt = (((con_ids_1.gross_salary * con_line_ids.salary_amt)/100)/calulation_days)
+					else:
+						comp_amt = (con_line_ids.salary_amt/calulation_days)
 						
 					mon_sal = (comp_amt*salary_days)
 						
@@ -363,7 +367,7 @@ class kg_payslip(osv.osv):
 						if emp_contt_ids:
 							emp_contt_rec = self.pool.get('ch.contribution').browse(cr,uid,emp_contt_ids[0])
 							print "*********vda value in paise*****************",emp_contt_rec.emplr_cont_value
-							acc_vda_value = ((vda_value_1*emp_contt_rec.emplr_cont_value)/working_days)*salary_days
+							acc_vda_value = ((vda_value_1*emp_contt_rec.emplr_cont_value)/calulation_days)*salary_days
 							self.pool.get('hr.payslip.line').create(cr,uid,
 								{
 									'name':'VDA',
@@ -554,14 +558,14 @@ class kg_payslip(osv.osv):
 									if turn_over_amt >= inc_ids.start_value and turn_over_amt <= inc_ids.end_value:
 										if inc_ids.type == 'per_lhk_fixed':
 											print "*********inc_ids.incentive_value************",inc_ids.incentive_value
-											print "*********working_days************",working_days
+											print "*********working_days************",calulation_days
 											print "*********worked_days************",worked_days
-											incent_amt = ((turn_over_amt*inc_ids.incentive_value)/working_days)*salary_days
+											incent_amt = ((turn_over_amt*inc_ids.incentive_value)/calulation_days)*salary_days
 										elif inc_ids.type == 'percentage':
 											turn_over_per = (turn_over_amt*inc_ids.incentive_value)/100
-											incent_amt = ((turn_over_per)/working_days)*salary_days
+											incent_amt = ((turn_over_per)/calulation_days)*salary_days
 										else:
-											incent_amt = ((inc_ids.incentive_value)/working_days)*salary_days
+											incent_amt = ((inc_ids.incentive_value)/calulation_days)*salary_days
 										self.pool.get('hr.payslip.line').create(cr,uid,
 												{
 													'name':'Incentive',
@@ -595,9 +599,9 @@ class kg_payslip(osv.osv):
 									if get_spl_inc:
 										if splss_inc_ids.type == 'per_cr_fixed':
 											print "*********inc_ids.incentive_value************",inc_ids.incentive_value
-											print "*********working_days************",working_days
+											print "*********working_days************",calulation_days
 											print "*********worked_days************",worked_days
-											spl_incent_amt = ((turn_over_amt*splss_inc_ids.incentive_value)/working_days)*salary_days
+											spl_incent_amt = ((turn_over_amt*splss_inc_ids.incentive_value)/calulation_days)*salary_days
 										if splss_inc_ids.type == 'percentage':
 											get_spl_inc_rec = self.pool.get('hr.payslip.line').browse(cr,uid,get_spl_inc[0])
 											aaaa += splss_inc_ids.incentive_value
@@ -639,7 +643,7 @@ class kg_payslip(osv.osv):
 							if pay_line_ids_vda:
 								pay_line_rec_vda = self.pool.get('hr.payslip.line').browse(cr,uid,pay_line_ids_vda[0])
 								vda_amt = pay_line_rec_vda.amount
-							tot_mon_amt = (basic_amt + fda_amt + vda_amt)/working_days
+							tot_mon_amt = (basic_amt + fda_amt + vda_amt)/calulation_days
 							if (absent+leave_days) <= 1.5:
 								self.pool.get('hr.payslip.line').create(cr,uid,
 									{
@@ -656,7 +660,7 @@ class kg_payslip(osv.osv):
 							else:
 								pass
 								
-					if salary_days >= working_days:
+					if salary_days >= calulation_days:
 						emp_categ_ids = self.pool.get('kg.employee.category').search(cr,uid,[('id','=',con_ids_1.emp_categ_id.id),('state','=','approved')])
 						if emp_categ_ids:
 							emp_categ_rec = self.pool.get('kg.employee.category').browse(cr,uid,emp_categ_ids[0])
@@ -709,22 +713,24 @@ class kg_payslip(osv.osv):
 				
 				#### Creation of Coffee Allowance per month for the employee ####
 				
-				#~ serc_coff_allow	= self.pool.get('hr.payslip.line').search(cr,uid,[('slip_id','='slip_rec.id),('code','=','COFFEE ALL')])
-				#~ serc_coff_allow_con	= self.pool.get('hr.contract').search(cr,uid,[('employee_id','='emp_id)])
-				#~ if serc_coff_allow_con:
-					#~ src_salry = self.pool.get('ch.kg.contract.salary').search(cr,uid,[('line_id_salary','=',serc_coff_allow_con[0]),('salary_type','=',22)])
-					#~ src_slary_rec = self.pool.get('ch.kg.contract.salary').browse(cr,uid,src_salry[0])
-					#~ if worked_days <= 13.00:
-						#~ coffe_allow = src_slary_rec.salary_amt / 2
-					#~ else:
-						#~ coffe_allow = src_slary_rec.salary_amt
-				#~ if serc_coff_allow:
-					#~ serc_coff_rec = self.pool.get('hr.payslip.line').browse(cr,uid,serc_coff_allow[0])
-					#~ self.pool.get('hr.payslip.line').write(cr,uid,serc_coff_rec.id,
-											#~ {
-												#~ 
-												#~ 'amount':coffe_allow,
-											#~ })
+				
+				serc_coff_allow_con	= self.pool.get('hr.contract').search(cr,uid,[('employee_id','=',emp_id)])
+				if serc_coff_allow_con:
+					src_salry = self.pool.get('ch.kg.contract.salary').search(cr,uid,[('header_id_salary','=',serc_coff_allow_con[0]),('salary_type','=',22)])
+					if src_salry:
+						src_slary_rec = self.pool.get('ch.kg.contract.salary').browse(cr,uid,src_salry[0])
+						if worked_days <= 13.00:
+							coffe_allow = src_slary_rec.salary_amt / 2
+						else:
+							coffe_allow = src_slary_rec.salary_amt
+				serc_coff_allow	= self.pool.get('hr.payslip.line').search(cr,uid,[('slip_id','=',slip_rec.id),('code','=','COFFEE ALL')])
+				if serc_coff_allow:
+					serc_coff_rec = self.pool.get('hr.payslip.line').browse(cr,uid,serc_coff_allow[0])
+					self.pool.get('hr.payslip.line').write(cr,uid,serc_coff_rec.id,
+											{
+												
+												'amount':coffe_allow,
+											})
 				
 				#### Creation of Coffee Allowance per month for the employee ####	
 				

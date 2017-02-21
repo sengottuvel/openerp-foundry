@@ -88,7 +88,8 @@ class kg_employee_category(osv.osv):
 		'attnd_insentive_female':fields.float('100% Attn. Incentive (Female)'),	
 		'driver_batta':fields.float('Driver Batta(Per Day)'),	
 		'bonus_categ': fields.selection([('turn_over','Turn Over'),('attendance','Attendance'),('yrs_of_service','Year Of Service'),('not_applicable','Not Applicable')],'Bonus Category'),
-		'no_of_days_wage':fields.integer('No Of Days Wages'),	
+		'no_of_days_wage':fields.integer('No Of Days Wages'),
+		'sal_calc': fields.selection([('cal_days','Calendar Days'),('working_days','Working Days')],'Salary Calculation Days'),	
 		## Child Tables Declaration		
 		
 		'line_id_1': fields.one2many('ch.special.incentive.policy', 'header_id_1','Special Incentive Policy'),
@@ -176,7 +177,7 @@ class kg_employee_category(osv.osv):
 		if rec.attnd_insentive_female < 0:
 			raise osv.except_osv(_('Warning!'),
 						_('Negative Values and Zeros are not allowed in 100% Attn. Incentive Female !!'))
-		if rec.max_late_count < 0:
+		if rec.max_late_count <= 0:
 			raise osv.except_osv(_('Warning!'),
 						_('Negative Values and Zeros are not allowed in Maximum Late in Count !!'))
 		if rec.max_late_count > 5:
