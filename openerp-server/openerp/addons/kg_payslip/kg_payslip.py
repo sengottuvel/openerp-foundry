@@ -389,7 +389,6 @@ class kg_payslip(osv.osv):
 
 				empr_pf_ids = employee_cont.search(cr , uid ,[('active','=',True),('state','=','approved')])
 				emp_pf_rec = employee_cont.browse(cr,uid,empr_pf_ids[0])
-				print "pfffffffffffffffamonttttttttttttttttttttttttttt",amt_sal + acc_vda_value
 				if amt_sal + acc_vda_value > emp_pf_rec.pf_max_amt:
 					pf_stand_amt = emp_pf_rec.pf_max_amt
 				else:
