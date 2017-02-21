@@ -177,7 +177,7 @@ class kg_employee_category(osv.osv):
 		if rec.attnd_insentive_female < 0:
 			raise osv.except_osv(_('Warning!'),
 						_('Negative Values and Zeros are not allowed in 100% Attn. Incentive Female !!'))
-		if rec.max_late_count <= 0:
+		if rec.max_late_count < 0:
 			raise osv.except_osv(_('Warning!'),
 						_('Negative Values and Zeros are not allowed in Maximum Late in Count !!'))
 		if rec.max_late_count > 5:
