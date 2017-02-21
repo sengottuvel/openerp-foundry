@@ -19,7 +19,7 @@ from ch_order_bom_details foundry_line
 
 left join kg_pumpmodel_master pump on pump.id = foundry_line.pump_model_id
 
-where foundry_line.header_id = $P{header_id} and foundry_line.order_category = 'spare']]>
+where foundry_line.header_id = $P{header_id} and foundry_line.order_category = 'spare' and foundry_line.flag_applicable = 't']]>
 		</queryString>
 		<field name="pump_model" class="java.lang.String"/>
 		<field name="pattern_name" class="java.lang.String"/>
