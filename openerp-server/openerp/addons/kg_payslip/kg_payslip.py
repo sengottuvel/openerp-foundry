@@ -367,6 +367,9 @@ class kg_payslip(osv.osv):
 						if emp_contt_ids:
 							emp_contt_rec = self.pool.get('ch.contribution').browse(cr,uid,emp_contt_ids[0])
 							print "*********vda value in paise*****************",emp_contt_rec.emplr_cont_value
+							
+							vda_for_att_bon = vda_value_1*emp_contt_rec.emplr_cont_value
+							print "*********vda value For Attendance Bonus*****************",vda_for_att_bon
 							acc_vda_value = ((vda_value_1*emp_contt_rec.emplr_cont_value)/calulation_days)*salary_days
 							self.pool.get('hr.payslip.line').create(cr,uid,
 								{
@@ -637,9 +640,13 @@ class kg_payslip(osv.osv):
 							if pay_line_ids_fda:
 								pay_line_rec_fda = self.pool.get('ch.kg.contract.salary').browse(cr,uid,pay_line_ids_fda[0])
 								fda_amt = pay_line_rec_fda.salary_amt
-							if pay_line_ids_vda:
-								pay_line_rec_vda = self.pool.get('hr.payslip.line').browse(cr,uid,pay_line_ids_vda[0])
-								vda_amt = pay_line_rec_vda.amount
+							#~ if pay_line_ids_vda:
+								#~ pay_line_rec_vda = self.pool.get('hr.payslip.line').browse(cr,uid,pay_line_ids_vda[0])
+							if vda_for_att_bon:
+								vda_amt = vda_for_att_bon
+								print "+++++++++++++++++++++++++++++++++++++",vda_amt
+								print "+++++++++++++++++++++++++++++++++++++",basic_amt
+								print "+++++++++++++++++++++++++++++++++++++",fda_amt
 							tot_mon_amt = (basic_amt + fda_amt + vda_amt)/calulation_days
 							if (absent+leave_days) <= 1.5:
 								self.pool.get('hr.payslip.line').create(cr,uid,
