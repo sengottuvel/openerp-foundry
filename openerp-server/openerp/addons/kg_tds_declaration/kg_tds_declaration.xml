@@ -94,7 +94,7 @@
     </record>
     
     <record model="ir.actions.act_window" id="action_kg_tax">
-        <field name="name">TDS Declaration</field>
+        <field name="name">IT Declaration</field>
         <field name="res_model">kg.tax</field>
         <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
@@ -104,8 +104,8 @@
     
    
       
-  <menuitem name="TDS" id="menu_tds" parent="hr.menu_hr_root" sequence="3"/>
-    <menuitem name="TDS Declaration" id="menu_kg_tax_item" parent="menu_tds" action="action_kg_tax"/>
+  <menuitem name="IT" id="menu_tds" parent="hr.menu_hr_root" sequence="3"/>
+    <menuitem name="IT Declaration" id="menu_kg_tax_item" parent="menu_tds" action="action_kg_tax"/>
     
   
       
