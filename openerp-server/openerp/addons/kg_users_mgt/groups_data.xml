@@ -105,6 +105,7 @@
             ref('kg_machineshop.tpm_ms_process'),
             ref('kg_machineshop.tam_ms_inward'),
             ref('kg_machineshop.tam_ms_stock_list'),
+            ref('kg_machineshop.tam_trimming_dia'),
             ref('kg_ms_planning.tam_ms_daily_planning'),
             ref('kg_ms_operations.tpm_ms_operations'),
             ref('kg_ms_operations.tam_ms_operation1'),

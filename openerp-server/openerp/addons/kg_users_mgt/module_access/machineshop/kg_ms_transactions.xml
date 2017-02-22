@@ -389,5 +389,15 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
+		<record id="t_ms_trimming_dia" model="ir.model.access">
+			<field name="model_id" ref="kg_machineshop.model_kg_trimming_dia"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Trimming Dia</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
     </data>
 </openerp>
