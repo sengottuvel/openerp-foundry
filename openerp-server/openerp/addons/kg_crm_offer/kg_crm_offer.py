@@ -126,6 +126,18 @@ class kg_crm_offer(osv.osv):
 		'road_permit': fields.selection([('yes','Yes'),('no','No')],'Road Permit',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
 		'inspection': fields.selection([('yes','Yes'),('no','No'),('tpi','TPI'),('customer','Customer'),('consultant','Consultant'),('stagewise','Stage wise')],'Inspection',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
 		'l_d_clause': fields.selection([('5_1','0.5 - 1.0% of total order value'),('1_10','1 to 10% of total order value'),('nill','Nill')],'L. D. CLAUSE / Penalty',readonly=True, states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
+		'pump_per_flag': fields.boolean('Pump',readonly=True, states={'draft':[('readonly',False)]}),
+		'spare_per_flag': fields.boolean('Spare',readonly=True, states={'draft':[('readonly',False)]}),
+		'access_per_flag': fields.boolean('Accessories',readonly=True, states={'draft':[('readonly',False)]}),
+		'super_per_flag': fields.boolean('Supervision',readonly=True, states={'draft':[('readonly',False)]}),
+		'o_sam_ratio': fields.float('Sam Ratio(%)',readonly=True, states={'draft':[('readonly',False)]}),
+		'o_dealer_discount': fields.float('Dealer Discount(%)',readonly=True, states={'draft':[('readonly',False)]}),
+		'o_special_discount': fields.float('Special Discount(%)',readonly=True, states={'draft':[('readonly',False)]}),
+		'o_p_f': fields.float('P&F(%)',readonly=True, states={'draft':[('readonly',False)]}),
+		'o_freight': fields.float('Freight(%)',readonly=True, states={'draft':[('readonly',False)]}),
+		'o_insurance': fields.float('Insurance(%)',readonly=True, states={'draft':[('readonly',False)]}),
+		'o_customer_discount': fields.float('Customer Discount(%)',readonly=True, states={'draft':[('readonly',False)]}),
+		'o_tax': fields.float('Tax(%)',readonly=True, states={'draft':[('readonly',False)]}),
 		
 		# Pump Offer Fields
 		'pump_tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),	
@@ -276,6 +288,40 @@ class kg_crm_offer(osv.osv):
 	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_crm_offer, self).write(cr, uid, ids, vals, context)
+	
+	def update_percentage(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
+		if entry.state in ('draft','moved_to_offer'):
+			if entry.pump_per_flag == True:
+				if entry.line_pump_ids:
+					obj = self.pool.get('ch.pump.offer')
+					line_ids = entry.line_pump_ids
+					self.update_to_all(cr,uid,entry,obj,line_ids)
+			if entry.spare_per_flag == True:
+				if entry.line_spare_ids:
+					obj = self.pool.get('ch.spare.offer')
+					line_ids = entry.line_spare_ids
+					self.update_to_all(cr,uid,entry,obj,line_ids)
+			if entry.access_per_flag == True:
+				if entry.line_accessories_ids:
+					obj = self.pool.get('ch.accessories.offer')
+					line_ids = entry.line_accessories_ids
+					self.update_to_all(cr,uid,entry,obj,line_ids)
+				
+		return True
+	
+	def update_to_all(self,cr,uid,entry,obj,line_ids,context=None):
+		for item in line_ids:
+			obj.write(cr,uid,item.id,{'sam_ratio':entry.o_sam_ratio,
+									  'dealer_discount':entry.o_dealer_discount,
+									  'special_discount':entry.o_special_discount,
+									  'p_f':entry.o_p_f,
+									  'freight':entry.o_freight,
+									  'insurance':entry.o_insurance,
+									  'customer_discount':entry.o_customer_discount,
+									  'tax':entry.o_tax,
+									  })
+		return True
 	
 	def entry_confirm(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
@@ -509,9 +555,9 @@ class kg_crm_offer(osv.osv):
 					rpm = '2900'
 		elif purpose == 'spare':
 			purpose == 'spare'
-			moc_const_id = item.spare_moc_const_id.id
-			pump_id = item.spare_pump_id.id
-			qap_plan_id = item.spare_qap_plan_id.id
+			moc_const_id = item.moc_const_id.id
+			pump_id = item.pump_id.id
+			qap_plan_id = item.qap_plan_id.id
 			drawing_approval = entry.drawing_approval
 			inspection = entry.inspection
 		elif purpose == 'access':
@@ -520,8 +566,8 @@ class kg_crm_offer(osv.osv):
 				moc_const_id = item.moc_const_id.id
 				pump_id = item.pump_id.id
 			elif item.purpose_categ in ('spare','access'):
-				moc_const_id = item.spare_moc_const_id.id
-				pump_id = item.spare_pump_id.id
+				moc_const_id = item.moc_const_id.id
+				pump_id = item.pump_id.id
 		pump_vals = {
 			
 			'header_id': wo_id,
@@ -640,7 +686,7 @@ class kg_crm_offer(osv.osv):
 				if item.purpose_categ == 'pump':
 					self.pool.get('ch.work.order.details').write(cr,uid,wo_line_id,{'unit_price':off_line_id.net_amount})
 				elif item.purpose_categ == 'spare':
-					off_spare_obj = self.pool.get('ch.spare.offer').search(cr,uid,[('enquiry_line_id','=',item.id),('pump_id','=',item.spare_pump_id.id)])
+					off_spare_obj = self.pool.get('ch.spare.offer').search(cr,uid,[('enquiry_line_id','=',item.id),('pump_id','=',item.pump_id.id)])
 					if off_spare_obj:
 						print"off_spare_obj",off_spare_obj
 						for line in off_spare_obj:
@@ -810,12 +856,12 @@ class kg_crm_offer(osv.osv):
 		style8 = xlwt.easyxf('font: height 200,color_index black;' 'align: wrap on, vert centre, horiz centre;''borders: left thin, right thin, top thin, bottom thin') 
 		
 		
-		img = Image.open('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.png')
+		img = Image.open('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.png')
 		r, g, b, a = img.split()
 		img = Image.merge("RGB", (r, g, b))
-		img.save('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp')
-		img = Image.open('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.png')
-		img.save('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp')
+		img.save('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp')
+		img = Image.open('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.png')
+		img.save('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp')
 		
 		#~ r, g, b, a = img.split()
 		#~ img = Image.merge("RGB", (r, g, b))
@@ -904,8 +950,8 @@ class kg_crm_offer(osv.osv):
 				logo_size = 120
 			elif len_col >= 4:
 				logo_size = 100
-			sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
-			sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp',0,len_col,logo_size)
+			sheet1.insert_bitmap('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
+			sheet1.insert_bitmap('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp',0,len_col,logo_size)
 			#~ print"col_1",col_1
 			#~ sheet1.write(s1,col_no,str(col_1),style1)
 			col_no = col_no + 1
@@ -1753,7 +1799,7 @@ class ch_pump_offer(osv.osv):
 		'inspection': fields.selection([('yes','Yes'),('no','No'),('tpi','TPI'),('customer','Customer'),('consultant','Consultant'),('stagewise','Stage wise')],'Inspection'),
 		'prime_cost': fields.float('Prime Cost'),
 		'per_pump_prime_cost': fields.float('Per Pump Prime Cost'),
-		'sam_ratio': fields.float('Sam Ratio'),
+		'sam_ratio': fields.float('Sam Ratio(%)'),
 		'dealer_discount': fields.float('Dealer Discount(%)'),
 		'customer_discount': fields.float('Customer Discount(%)'),
 		'special_discount': fields.float('Special Discount(%)'),
@@ -1887,7 +1933,7 @@ class ch_spare_offer(osv.osv):
 		'pumpseries_id': fields.many2one('kg.pumpseries.master','Pump Series'),
 		'moc_const_id': fields.many2one('kg.moc.construction','MOC'),
 		'prime_cost': fields.float('Prime Cost'),
-		'sam_ratio': fields.float('Sam Ratio'),
+		'sam_ratio': fields.float('Sam Ratio(%)'),
 		'dealer_discount': fields.float('Dealer Discount(%)'),
 		'customer_discount': fields.float('Customer Discount(%)'),
 		'special_discount': fields.float('Special Discount(%)'),
@@ -2009,7 +2055,7 @@ class ch_accessories_offer(osv.osv):
 		'qty':fields.integer('Quantity'),
 		'prime_cost': fields.float('Prime Cost'),
 		'per_access_prime_cost': fields.float('Per Access Prime Cost'),
-		'sam_ratio': fields.float('Sam Ratio'),
+		'sam_ratio': fields.float('Sam Ratio(%)'),
 		'dealer_discount': fields.float('Dealer Discount(%)'),
 		'customer_discount': fields.float('Customer Discount(%)'),
 		'special_discount': fields.float('Special Discount(%)'),

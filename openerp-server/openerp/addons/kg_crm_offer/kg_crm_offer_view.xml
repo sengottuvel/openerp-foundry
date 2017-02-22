@@ -39,8 +39,8 @@
 								<field name="enquiry_id" readonly="1" invisible="1"/>
 								<field name="enquiry_no" readonly="1"/>
 								<field name="enquiry_date" readonly="1"/>
-								<field name="due_date" readonly="1"/>
-								<field name="del_date"/>
+								<field name="due_date" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
+								<field name="del_date" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
 								<field name="segment" readonly="1"/>	
 								<field name="location" required="1"/>	
 								<field name="excise_duty"/>	
@@ -54,6 +54,25 @@
 						<group class="oe_subtotal_footer oe_right">
 							<field name="offer_net_amount"/>
 							<field name="supervision_amount"/>
+						</group>
+						<group string="Apply All">
+							<group>
+								<field name="pump_per_flag"/>
+								<field name="access_per_flag"/>
+								<field name="o_sam_ratio"/>
+								<field name="o_dealer_discount"/>
+								<field name="o_special_discount"/>
+								<field name="o_p_f"/>
+							</group>
+							<group>
+								<field name="spare_per_flag"/>
+								<field name="super_per_flag" invisible="1"/>
+								<field name="o_freight"/>
+								<field name="o_insurance"/>
+								<field name="o_customer_discount"/>
+								<field name="o_tax"/>
+							</group>
+							<button name="update_percentage" type="object" string="Update" states="draft" class="oe_highlight"/>
 						</group>
 						<group string="Pump Offer">
 							<field name="line_pump_ids" colspan="4" nolabel="1" attrs="{'readonly':[('state','!=','draft')]}">
