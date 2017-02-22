@@ -21,7 +21,7 @@
 								<field name="employee_id" on_change="onchange_employee_id(employee_id,code)" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>																
 								<field name="ded_type" string="Detection Type" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1"/>
 								<field name="tot_amt" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1"/>																
-								<field name="allow" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+								<field name="allow" attrs="{'readonly': [('state','in',['reject','cancel'])]}"/>
 								<field name="modify" invisible = "1"/>
 							</group>
 							<group>

@@ -81,7 +81,7 @@ class kg_advance_deduction(osv.osv):
 		
 		'employee_id': fields.many2one('hr.employee','Employee', required=True,readonly=True),
 		'ded_type': fields.selection([('advance', 'Advance'),('loan', 'Loan'),('insurance', 'Insurance'),
-						('tax', 'Tax'),('others','Others')], 
+						('tax', 'Tax'),('others','Others'),('cloth','Cloth')], 
 						'Deduction Type'),
 		'tot_amt': fields.float('Total Amount',),	
 		'allow': fields.boolean('Applicable This Month'),

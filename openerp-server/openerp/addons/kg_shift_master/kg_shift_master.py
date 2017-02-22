@@ -119,15 +119,17 @@ class kg_shift_master(osv.osv):
 		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])	
 		sql = """ select max(sequence) from kg_shift_master """
 		cr.execute(sql)
 		data = cr.dictfetchall()
 		print "@@@@@@@@@@@@@@@@@@@@",data[0]['max']
-		if data[0]['max'] is None:
-			sequence = 0
+		print"****************************************",rec.sequence
+		if rec.sequence == 0:
+			sequence = data[0]['max'] + 1
 		else:
-			sequence = data[0]['max']
-		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S'),'sequence':(sequence+1)})
+			sequence = rec.sequence
+		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S'),'sequence':(sequence)})
 		return True
 
 	def entry_reject(self,cr,uid,ids,context=None):
