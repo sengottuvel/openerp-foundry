@@ -373,7 +373,7 @@ class kg_contract(osv.osv):
 		#~ (_gross_salary, 'The break ups are not matching the gross salary !!!', ['  ']),		
 		(child_dups_val, 'The break ups are not matching the gross salary !!!', ['  ']),		
 		(_salary_brk_validation, 'The break ups are not matching the gross salary !!!', ['  ']),
-		(_check_driver_batta, 'Driver Batta checking !!!', ['  ']),		
+		#~ (_check_driver_batta, 'Driver Batta checking !!!', ['  ']),		
 		#~ (_gross_salary_check, 'System will not allow to process with zero or Negative Values gross salary !!!', ['  ']),		
 
 	]
