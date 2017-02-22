@@ -219,19 +219,16 @@ class kg_crm_enquiry(osv.osv):
 								applicable_b='yes'
 							else:
 								applicable_b='no'
-						print"rec.spare_pump_id.namerec.spare_pump_id.name",rec.spare_pump_id.name
 						print"rec.pump_id.namerec.pump_id.name",rec.pump_id.name
 						print"applicableapplicable",applicable		
 						print"applicableapplicable",applicable_a		
 						print"applicableapplicable",applicable_b	
 						if applicable == 'no' and applicable_a == 'no' and applicable_b == 'no':
 							if rec.purpose_categ == 'spare':
-								raise osv.except_osv(
-									_('Warning!'),
-									_('Spare %s You cannot save without Component'%(rec.spare_pump_id.name)))
+								raise osv.except_osv(_('Warning!'),
+									_('Spare %s You cannot save without Component'%(rec.pump_id.name)))
 							elif rec.purpose_categ == 'pump':
-								raise osv.except_osv(
-									_('Warning!'),
+								raise osv.except_osv(_('Warning!'),
 									_('Pump %s You cannot save without Component'%(rec.pump_id.name)))
 		return True
 		
@@ -272,20 +269,6 @@ class kg_crm_enquiry(osv.osv):
 		#(_check_name, 'Work Order No. must be Unique', ['']),
 		
 	   ]
-	   
-	"""   
-	def onchange_delivery_date(self, cr, uid, ids, delivery_date):
-		today = date.today()
-		today = str(today)
-		today = datetime.strptime(today, '%Y-%m-%d')
-		if delivery_date:
-			delivery_date = str(delivery_date)
-			delivery_date = datetime.strptime(delivery_date, '%Y-%m-%d')
-			if delivery_date < today:
-				raise osv.except_osv(_('Warning!'),
-						_('Delivery Date should not be less than current date!!'))
-		return True
-	  """
 	
 	def entry_revision(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
@@ -572,11 +555,8 @@ class kg_crm_enquiry(osv.osv):
 		
   	def access_creation(self,cr,uid,offer_id,order_item,item_type,context=None):
 		if order_item.line_ids_access_a:
-			if order_item.purpose_categ == 'pump':
-				pump_id = order_item.pump_id.id
-			else:
-				pump_id = order_item.spare_pump_id.id
-				
+			pump_id = order_item.pump_id.id
+			
 			prime_cost = 0
 			for foundry_item in order_item.line_ids_access_a:
 				prime_cost = 0
@@ -658,9 +638,9 @@ class kg_crm_enquiry(osv.osv):
 			qty = bom_item.qty
 			
 		spare_id = self.pool.get('ch.spare.offer').create(cr,uid,{'header_id': offer_id,
-																  'pumpseries_id': order_item.spare_pumpseries_id.id,
-																  'pump_id': order_item.spare_pump_id.id,
-																  'moc_const_id': order_item.spare_moc_const_id.id,
+																  'pumpseries_id': order_item.pumpseries_id.id,
+																  'pump_id': order_item.pump_id.id,
+																  'moc_const_id': order_item.moc_const_id.id,
 																  'prime_cost': prime_cost * qty,
 																  'enquiry_line_id': order_item.id,
 																  'item_code': item_code,
@@ -817,11 +797,10 @@ class kg_crm_enquiry(osv.osv):
 					if item.acces == 'yes':
 						ite = item
 						pump_id = ''
+						pump_id = item.pump_id.id
 						if item.purpose_categ == 'pump':
-							pump_id = item.pump_id.id
 							purpose_categ = 'pump'
 						elif item.purpose_categ == 'spare' or item.purpose_categ == 'access':
-							pump_id = item.spare_pump_id.id
 							purpose_categ = 'spare'
 						if item.line_ids_access_a:
 							for item_1 in item.line_ids_access_a:
@@ -931,7 +910,7 @@ class kg_crm_enquiry(osv.osv):
 								if item.purpose_categ == 'pump':
 									item_moc_const_id = item.moc_const_id.id
 								elif item.purpose_categ == 'spare':
-									item_moc_const_id = item.spare_moc_const_id.id
+									item_moc_const_id = item.moc_const_id.id
 							pat_line_obj = self.pool.get('ch.mocwise.rate').search(cr,uid,[('code','=',item_moc_const_id),('header_id','=',pattern_rec.id)])
 							if pat_line_obj:
 								pat_line_rec = self.pool.get('ch.mocwise.rate').browse(cr,uid,pat_line_obj[0])
@@ -971,9 +950,9 @@ class kg_crm_enquiry(osv.osv):
 				if item.purpose_categ == 'spare' and catg == 'non_acc':
 					spare_id = self.pool.get('ch.spare.offer').create(cr,uid,{
 													'header_id': offer_id,
-													'pumpseries_id': item.spare_pumpseries_id.id,
-													'pump_id': item.spare_pump_id.id,
-													'moc_const_id': item.spare_moc_const_id.id,
+													'pumpseries_id': item.pumpseries_id.id,
+													'pump_id': item.pump_id.id,
+													'moc_const_id': item.moc_const_id.id,
 													'prime_cost': design_rate * qty or 0,
 													'enquiry_line_id': item.id,
 													'item_code': fou_line.pattern_id.name,
@@ -1008,7 +987,7 @@ class kg_crm_enquiry(osv.osv):
 							if item.purpose_categ == 'pump':
 								item_moc_const_id = item.moc_const_id.code
 							elif item.purpose_categ == 'spare':
-								item_moc_const_id = item.spare_moc_const_id.code
+								item_moc_const_id = item.moc_const_id.code
 						ms_line_obj = self.pool.get('ch.machine.mocwise').search(cr,uid,[('code','=',item_moc_const_id),('header_id','=',ms_rec.id)])
 						if ms_line_obj:
 							ms_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,ms_line_obj[0])
@@ -1059,9 +1038,9 @@ class kg_crm_enquiry(osv.osv):
 							if item.purpose_categ == 'spare' and catg == 'non_acc':
 								spare_id = self.pool.get('ch.spare.offer').create(cr,uid,{
 																'header_id': offer_id,
-																'pumpseries_id': item.spare_pumpseries_id.id,
-																'pump_id': item.spare_pump_id.id,
-																'moc_const_id': item.spare_moc_const_id.id,
+																'pumpseries_id': item.pumpseries_id.id,
+																'pump_id': item.pump_id.id,
+																'moc_const_id': item.moc_const_id.id,
 																'prime_cost': tot_price * ms_line.qty,
 																'enquiry_line_id': item.id,
 																'item_code': ms_line.ms_id.code,
@@ -1113,7 +1092,7 @@ class kg_crm_enquiry(osv.osv):
 								if item.purpose_categ == 'pump':
 									item_moc_const_id = item.moc_const_id.code
 								elif item.purpose_categ == 'spare':
-									item_moc_const_id = item.spare_moc_const_id.code
+									item_moc_const_id = item.moc_const_id.code
 							ms_line_obj = self.pool.get('ch.machine.mocwise').search(cr,uid,[('code','=',item_moc_const_id),('header_id','=',ms_rec.id)])
 							if ms_line_obj:
 								ms_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,ms_line_obj[0])
@@ -1125,7 +1104,7 @@ class kg_crm_enquiry(osv.osv):
 							if item.purpose_categ == 'pump':
 								item_moc_const_id = item.moc_const_id.code
 							elif item.purpose_categ == 'spare':
-								item_moc_const_id = item.spare_moc_const_id.code
+								item_moc_const_id = item.moc_const_id.code
 							ms_line_obj = self.pool.get('ch.machine.mocwise').search(cr,uid,[('code','=',item_moc_const_id),('header_id','=',ms_rec.id)])
 							if ms_line_obj:
 								ms_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,ms_line_obj[0])
@@ -1173,9 +1152,9 @@ class kg_crm_enquiry(osv.osv):
 								if item.purpose_categ == 'spare' and catg == 'non_acc':
 									spare_id = self.pool.get('ch.spare.offer').create(cr,uid,{
 																'header_id': offer_id,
-																'pumpseries_id': item.spare_pumpseries_id.id,
-																'pump_id': item.spare_pump_id.id,
-																'moc_const_id': item.spare_moc_const_id.id,
+																'pumpseries_id': item.pumpseries_id.id,
+																'pump_id': item.pump_id.id,
+																'moc_const_id': item.moc_const_id.id,
 																'prime_cost': tot_price * bot_line.qty,
 																'enquiry_line_id': item.id,
 																'item_code': bot_line.ms_id.code,
@@ -1337,7 +1316,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'pump_type': fields.char('Pump Model'),		
 		'casing_design': fields.selection([('base','Base'),('center_line','Center Line')],'Casing Feet Location'),
 		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True),		
-		'spare_pump_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True),		
+		'spare_pump_id': fields.many2one('kg.pumpmodel.master','Pump Model'),		
 		'size_suctionx': fields.char('Size-SuctionX Delivery(mm)'),
 		'flange_standard': fields.many2one('ch.pumpseries.flange','Flange Standard',domain="[('flange_type','=',flange_type),('header_id','=',pumpseries_id)]"),
 		'efficiency_in': fields.float('Efficiency in % Wat'),
@@ -1521,12 +1500,9 @@ class ch_kg_crm_pumpmodel(osv.osv):
 	def _check_access(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
 		if rec.acces == 'yes' and not rec.line_ids_access_a:
-			if rec.purpose_categ == 'pump':
+			if rec.purpose_categ in ('pump','spare'):
 				raise osv.except_osv(_('Warning!'),
 					_('%s You cannot save without accessories'%(rec.pump_id.name)))
-			elif rec.purpose_categ == 'spare':
-				raise osv.except_osv(_('Warning!'),
-					_('%s You cannot save without accessories'%(rec.spare_pump_id.name)))
 		return True
 		
 	def _check_access_qty(self, cr, uid, ids, context=None):
@@ -1534,13 +1510,9 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		if rec.acces == 'yes' and rec.line_ids_access_a:
 			for item in rec.line_ids_access_a:
 				if item.qty == 0:
-					if rec.purpose_categ == 'pump':
+					if rec.purpose_categ in ('pump','spare'):
 						raise osv.except_osv(_('Warning!'),
 							_('%s %s You cannot save with zero qty'%(rec.pump_id.name,item.access_id.name)))
-					elif rec.purpose_categ == 'spare':
-						raise osv.except_osv(_('Warning!'),
-							_('%s %s You cannot save with zero qty'%(rec.spare_pump_id.name,item.access_id.name)))
-		
 		return True
 		
 	def _check_is_applicable(self, cr, uid, ids, context=None):
@@ -1603,27 +1575,24 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		if capacity_in_liquid or head_in_liquid:
 			value = {'capacity_in': capacity_in_liquid,'head_in':head_in_liquid}
 		return {'value': value}
-		
+	
 	def onchange_wo(self, cr, uid, ids, wo_no, context=None):
-		value = {'wo_line_id':'','spare_moc_const_id':''}
+		value = {'wo_line_id':'','moc_const_id':''}
 		if wo_no:
 			wo_obj = self.pool.get('ch.work.order.details').search(cr,uid,[('order_no','=',wo_no)])
 			if wo_obj:
 				wo_rec = self.pool.get('ch.work.order.details').browse(cr,uid,wo_obj[0])
 				print"wo_rec",wo_rec
-				value = {'wo_line_id': wo_rec.id,'spare_moc_const_id':wo_rec.moc_construction_id.id}
+				value = {'wo_line_id': wo_rec.id,'moc_const_id':wo_rec.moc_construction_id.id}
 		return {'value': value}
-		
+	
 	def onchange_wo_line(self, cr, uid, ids, wo_line_id,purpose_categ, context=None):
-		if purpose_categ == 'spare':
-			value = {'spare_pump_id':'','spare_moc_const_id':'','wo_no':''}
-		elif purpose_categ == 'pump':
-			value = {'pump_id':'','moc_const_id':'','wo_no':'','pump_model_type':'',
-					 'qap_plan_id':'','suction_size':'','push_bearing':'',
-					 'flange_standard':'','suction_size':'','push_bearing':'',
-					 'motor_kw':'','qty':'','setting_height':'','shaft_sealing':'',
-					 'bush_bearing_lubrication':'','load_bom':'',
-					 }
+		value = {'pump_id':'','moc_const_id':'','wo_no':'','pump_model_type':'',
+				 'qap_plan_id':'','suction_size':'','push_bearing':'',
+				 'flange_standard':'','suction_size':'','push_bearing':'',
+				 'motor_kw':'','qty':'','setting_height':'','shaft_sealing':'',
+				 'bush_bearing_lubrication':'','load_bom':'',
+				 }
 		if wo_line_id:
 			wo_obj = self.pool.get('ch.work.order.details').search(cr,uid,[('id','=',wo_line_id)])
 			if wo_obj:
@@ -1631,52 +1600,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 				fou_vals=[]
 				ms_vals=[]
 				bot_vals=[]
-				if purpose_categ == 'spare':
-					#~ value = {'spare_pump_id': wo_rec.pump_model_id.id,'spare_moc_const_id':wo_rec.moc_construction_id.id,'wo_no':wo_rec.order_no}
-					for item in wo_rec.line_ids:
-						fou_vals.append({
-									'position_id': item.position_id.id,
-									'pattern_id': item.pattern_id.id,
-									'pattern_name': item.pattern_name,
-									'moc_id': item.moc_id.id,
-									'qty': item.qty,
-									'load_bom': True,
-									'is_applicable': item.flag_applicable,
-									'purpose_categ': purpose_categ,
-									#~ 'remarks': item.remarks,
-									})
-					for item in wo_rec.line_ids_a:
-						ms_vals.append({
-									'name': item.ms_id.name,
-									'position_id': item.position_id.id,							
-									'ms_id': item.ms_id.id,
-									'moc_id': item.moc_id.id,
-									'qty': item.qty,
-									'load_bom': True,
-									'is_applicable': item.flag_applicable,
-									'purpose_categ': purpose_categ,
-									})
-					for item in wo_rec.line_ids_b:
-						bot_vals.append({
-									'item_name': item.bot_id.name,
-									'ms_id': item.bot_id.id,
-									'moc_id': item.moc_id.id,
-									'qty': item.qty,
-									'load_bom': True,
-									'is_applicable': item.flag_applicable,
-									'flag_is_bearing': item.flag_is_bearing,
-									'brand_id': item.brand_id.id,
-									'purpose_categ': purpose_categ,
-									})
-					return {'value': {'line_ids': fou_vals,
-									  'line_ids_a': ms_vals,
-									  'line_ids_b': bot_vals,
-									  'spare_pump_id': wo_rec.pump_model_id.id,'spare_moc_const_id':wo_rec.moc_construction_id.id,
-									  'wo_no':wo_rec.order_no,'pump_model_type':wo_rec.pump_model_type,
-									  'qap_plan_id':wo_rec.qap_plan_id.id,'load_bom': wo_rec.flag_load_bom,
-									  
-										}}
-				elif purpose_categ == 'pump':
+				if purpose_categ in ('pump','spare'):
 					if wo_rec.bush_bearing == 'grease':
 						push_bearing = 'grease'
 					elif wo_rec.bush_bearing == 'cft_self':
@@ -1750,19 +1674,28 @@ class ch_kg_crm_pumpmodel(osv.osv):
 									  'bush_bearing_lubrication':bush_bearing_lubrication,'load_bom': wo_rec.flag_load_bom,
 									  
 										}}
-		
+				return {'value': {'pump_id': wo_rec.pump_model_id.id,'moc_const_id':wo_rec.moc_construction_id.id,
+								  'wo_no':wo_rec.order_no,'pump_model_type':wo_rec.pump_model_type,
+								  'qap_plan_id':wo_rec.qap_plan_id.id,'suction_size':wo_rec.delivery_pipe_size,
+								  'push_bearing':push_bearing,'flange_standard':wo_rec.flange_standard.id,
+								  'motor_kw':wo_rec.m_power,'qty':wo_rec.qty,
+								  'setting_height':wo_rec.setting_height,'shaft_sealing':shaft_sealing,
+								  'bush_bearing_lubrication':bush_bearing_lubrication,'load_bom': wo_rec.flag_load_bom,
+									  
+										}}	
 		return {'value': value}
 		
 	def onchange_moc(self, cr, uid, ids, moc_const_id,flag_standard,purpose_categ):
 		moc_const_vals=[]
 		load_bom = ''
 		if moc_const_id != False:
-			if purpose_categ == 'pump':
+			if purpose_categ != 'pump':
+				return True
 				load_bom = True
 			moc_const_rec = self.pool.get('kg.moc.construction').browse(cr, uid, moc_const_id)
 			for item in moc_const_rec.line_ids:
 				moc_const_vals.append({
-																
+								
 								'moc_id': item.moc_id.id,
 								'offer_id': item.offer_id.id,
 								'remarks': item.remarks,
@@ -1771,15 +1704,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 								})
 		return {'value': {'line_ids_moc_a': moc_const_vals}}
 		
-	def onchange_spare_moc(self, cr, uid, ids, spare_moc_const_id,purpose_categ):
-		spare_load_bom = ''
-		if spare_moc_const_id != False:
-			if purpose_categ == 'spare':
-				spare_load_bom = False
-			
-		return {'value': {'spare_load_bom':spare_load_bom}}
-	
-	def onchange_load_bom(self, cr, uid, ids, load_bom,spare_load_bom,spare_pump_id,pump_id,wo_line_id,purpose_categ,spare_moc_const_id,moc_const_id,qty):
+	def onchange_load_bom(self, cr, uid, ids, load_bom,pump_id,wo_line_id,purpose_categ,moc_const_id,qty):
 		fou_vals=[]
 		ms_vals=[]
 		bot_vals=[]
@@ -1787,21 +1712,15 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		if not moc_const_id and purpose_categ == 'pump' and load_bom == True:
 			raise osv.except_osv(_('Warning!'),
 				_('System sholud not be accept without MOC Construction'))
-		if not spare_moc_const_id and purpose_categ == 'spare' and spare_load_bom == True:
-			raise osv.except_osv(_('Warning!'),
-				_('System sholud not be accept without MOC Construction'))
 		
-		print"spare_pump_id",spare_pump_id
 		print"pump_id",pump_id
 		print"load_bom",load_bom
-		print"spare_load_bom",spare_load_bom
 		if load_bom == True:
 			if purpose_categ == 'pump':
 				print"aaaaaaaaaa"
 				bom_obj = self.pool.get('kg.bom').search(cr, uid, [('pump_model_id','=',pump_id),('state','in',('draft','confirmed','approved'))])
 				if bom_obj:
 					data_rec = self.pool.get('kg.bom').browse(cr, uid, bom_obj[0])
-		elif spare_load_bom == True:
 			if purpose_categ == 'spare':
 				if wo_line_id:
 					print"wo_line_idwo_line_id",wo_line_id
@@ -1809,13 +1728,13 @@ class ch_kg_crm_pumpmodel(osv.osv):
 					if wo_obj:
 						data_rec = self.pool.get('ch.work.order.details').browse(cr, uid, wo_obj[0])
 				else:
-					bom_obj = self.pool.get('kg.bom').search(cr, uid, [('pump_model_id','=',spare_pump_id),('state','in',('draft','confirmed','approved'))])
+					bom_obj = self.pool.get('kg.bom').search(cr, uid, [('pump_model_id','=',pump_id),('state','in',('draft','confirmed','approved'))])
 					if bom_obj:
 						data_rec = self.pool.get('kg.bom').browse(cr, uid, bom_obj[0])
 		print"data_recdata_rec",data_rec
 		
 		if data_rec:
-			if purpose_categ == 'spare' and spare_pump_id:
+			if purpose_categ == 'spare' and pump_id:
 				print"-------------------------------"
 				if data_rec.line_ids:
 					for item in data_rec.line_ids:
@@ -1830,7 +1749,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 								pat_rec = self.pool.get('kg.pattern.master').browse(cr,uid,pat_obj[0])
 								if pat_rec.line_ids:
 									#~ for ele in pat_rec.line_ids:
-									pat_line_obj = self.pool.get('ch.mocwise.rate').search(cr,uid,[('code','=',spare_moc_const_id),('header_id','=',pat_rec.id)])
+									pat_line_obj = self.pool.get('ch.mocwise.rate').search(cr,uid,[('code','=',moc_const_id),('header_id','=',pat_rec.id)])
 									if pat_line_obj:
 										pat_line_rec = self.pool.get('ch.mocwise.rate').browse(cr,uid,pat_line_obj[0])
 										moc_id = pat_line_rec.moc_id.id
@@ -1860,7 +1779,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 								ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,ms_obj[0])
 								if ms_rec.line_ids_a:
 									#~ for ele in ms_rec.line_ids_a:
-									cons_rec = self.pool.get('kg.moc.construction').browse(cr,uid,spare_moc_const_id)
+									cons_rec = self.pool.get('kg.moc.construction').browse(cr,uid,moc_const_id)
 									ms_line_obj = self.pool.get('ch.machine.mocwise').search(cr,uid,[('code','=',cons_rec.code),('header_id','=',ms_rec.id)])
 									if ms_line_obj:
 										ms_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,ms_line_obj[0])
@@ -1893,7 +1812,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 								bot_rec = self.pool.get('kg.machine.shop').browse(cr,uid,bot_obj[0])
 								if bot_rec.line_ids_a:
 									#~ for ele in bot_rec.line_ids_a:
-									cons_rec = self.pool.get('kg.moc.construction').browse(cr,uid,spare_moc_const_id)
+									cons_rec = self.pool.get('kg.moc.construction').browse(cr,uid,moc_const_id)
 									bot_line_obj = self.pool.get('ch.machine.mocwise').search(cr,uid,[('code','=',cons_rec.code),('header_id','=',bot_rec.id)])
 									if bot_line_obj:
 										bot_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,bot_line_obj[0])
@@ -2129,7 +2048,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		value = {'impeller_type': '','impeller_number': '','impeller_dia_max': '','impeller_dia_min': '','maximum_allowable_soild': '',
 				'max_allowable_test': '','number_of_stages': '','crm_type': '','bearing_number_nde':'','bearing_qty_nde':'',
 				'pumpseries_id':'','crm_type':'','casing_design':'','sealing_water_capacity':'','size_suctionx':'','gd_sq_value':'',
-				'sealing_water_pressure':'','lubrication_type':'','spare_pump_id':'','del_pipe_size':''}
+				'sealing_water_pressure':'','lubrication_type':'','del_pipe_size':''}
 		total = 0.00
 		
 		if pump_id:
@@ -2145,47 +2064,26 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			'number_of_stages': pump_rec.number_of_stages,'crm_type': pump_rec.crm_type,'bearing_number_nde':pump_rec.bearing_no,'bearing_qty_nde':pump_rec.bearing_qty,
 			'pumpseries_id':pump_rec.series_id.id,'crm_type':pump_rec.crm_type,'casing_design':pump_rec.feet_location,
 			'sealing_water_capacity':pump_rec.sealing_water_capacity,'size_suctionx':pump_rec.pump_size,'gd_sq_value':pump_rec.gd_sq_value,
-			'sealing_water_pressure':total,'lubrication_type':pump_rec.lubrication_type,'spare_pump_id':pump_id,'del_pipe_size':pump_rec.delivery_pipe_size}
+			'sealing_water_pressure':total,'lubrication_type':pump_rec.lubrication_type,'del_pipe_size':pump_rec.delivery_pipe_size}
 		print"valuevaluevalue",value
 		return {'value': value}
-		
+	
 	def onchange_pumpseries(self, cr, uid, ids, pumpseries_id, flange_standard, flange_type, context=None):
-		
-		value = {'flange_standard': '','flange_type': '','spare_pumpseries_id':''}
+		value = {'flange_standard': '','flange_type': ''}
 		if pumpseries_id:
 			pumpseries_rec = self.pool.get('kg.pumpseries.master').browse(cr, uid, pumpseries_id, context=context)
 			for item in pumpseries_rec.line_ids:
 				if item.flange_type == 'standard':
-					value = {'flange_standard': item.id,'flange_type': item.flange_type,'spare_pumpseries_id':pumpseries_id}
+					value = {'flange_standard': item.id,'flange_type': item.flange_type}
 					return {'value': value}
-				
 		return True
 	
-	def onchange_spare_pump_id(self, cr, uid, ids, spare_pump_id,purpose_categ, context=None):
-		value = {'pump_id': '','spare_pumpseries_id':''}
-		series_id = ''
-		
-		if spare_pump_id:
-			pump_obj = self.pool.get('kg.pumpmodel.master').search(cr,uid,[('id','=',spare_pump_id)])
-			if pump_obj:
-				pump_rec = self.pool.get('kg.pumpmodel.master').browse(cr,uid,pump_obj[0])
-				series_id = pump_rec.series_id.id
-			value = {'pump_id': spare_pump_id,'spare_pumpseries_id': series_id}
-		return {'value': value}
-
-	def onchange_spare_pumpseries_id(self, cr, uid, ids, spare_pumpseries_id,purpose_categ, context=None):
-		value = {'primemover_categ': ''}
-		if spare_pumpseries_id:
-			value = {'pumpseries_id': spare_pumpseries_id}
-		return {'value': value}
-		
 	def onchange_scope_of_supply(self, cr, uid, ids, scope_of_supply, primemover_categ, context=None):
-		
 		value = {'primemover_categ': ''}
 		if scope_of_supply == 'pump_with_acces_motor':
 			value = {'primemover_categ': 'motor'}
 		return {'value': value}
-
+	
 	#~ def onchange_type_of_drive(self, cr, uid, ids, type_of_drive, bkw_liq, context=None):
 		#~ value = {'gear_box_loss_high_speed':''}
 		#~ total = 0.00

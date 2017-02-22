@@ -42,8 +42,8 @@
 							<group>
 								<field name="enquiry_no" required="1"/>
 								<field name="enquiry_date"/>
-								<field name="due_date" on_change="onchange_due_date(due_date)" required="1"/>
-								<field name="del_date" on_change="onchange_del_date(del_date)" required="1"/>
+								<field name="due_date" on_change="onchange_due_date(due_date)" required="1" options="{'datepicker':{'minDate': 1,'maxDate': null,}}"/>
+								<field name="del_date" on_change="onchange_del_date(del_date)" required="1" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
 								<field name="expected_value"/>								
 								<field name="segment" required="1"/>		
 								<field name="source" required="1" readonly="1" invisible="1"/>		
@@ -214,190 +214,191 @@
 						<group>
 							<group>
 								<field name="purpose_categ" on_change="onchange_purpose_categ(purpose_categ)" required="1" attrs="{'readonly':[('purpose_categ','in',('pump','spare','access'))]}"/>
-								<field name="wo_no" attrs="{'required':[('purpose_categ','=','spare')],'readonly':[('spare_load_bom','=',True)],'invisible':[('purpose_categ','=','access')]}" on_change = "onchange_wo(wo_no)"/>
+								<field name="wo_no" attrs="{'required':[('purpose_categ','=','spare')],'readonly':[('load_bom','=',True)],'invisible':[('purpose_categ','=','access')]}" on_change = "onchange_wo(wo_no)"/>
+								<field name="s_no" attrs="{'readonly':[('load_bom','=',True)],'invisible':[('purpose_categ','=','access')]}"/>
 							</group>	
 							<group>
-								<field name="pump_model_type" required="1" attrs="{'readonly':['|',('load_bom','=',True),('spare_load_bom','=',True)]}"/>
-								<field name="wo_line_id" on_change="onchange_wo_line(wo_line_id,purpose_categ)" attrs="{'invisible':[('purpose_categ','=','access')],'readonly':[('spare_load_bom','=',True)]}"/>
+								<field name="pump_model_type" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+								<field name="wo_line_id" on_change="onchange_wo_line(wo_line_id,purpose_categ)" attrs="{'invisible':[('purpose_categ','=','access')],'readonly':[('load_bom','=',True)]}"/>
 							</group>
 						</group>	
-		<notebook>
-			<page string="Pump Details"  attrs="{'invisible':[('purpose_categ','!=','pump')]}">
-						<group string="Item Details">
-							<group>
-								<field name="equipment_no" />																
-								<field name="quantity_in_no" invisible="1"/>																
-							</group>											
-							<group>
-								<field name="description" />													
-							</group>					
-						</group>
-					
-						<group string="Liquid Specifications">
-							<group>
-								<field name="fluid_id" on_change="onchange_liquid(fluid_id)"/>
-								<field name="solid_concen"/>
-								<field name="viscosity" />
-								<field name="npsh_avl" />
-								<field name="capacity_in_liquid" on_change="onchange_capacity_in_liquid(capacity_in_liquid,head_in_liquid)"/>
-								<field name="consistency" />
-							</group>											
-							<group>
-								<field name="temperature_in_c" />
-								<field name="solid_concen_vol"/>
-								<field name="specific_gravity" />
-								<field name="max_particle_size_mm" />
-								<field name="density" />
-								<field name="head_in_liquid" on_change="onchange_capacity_in_liquid(capacity_in_liquid,head_in_liquid)"/>
-							</group>					
-						</group>
-						<group string="Duty Parameters">
-							<group>
-								<field name="capacity_in" />
-								<field name="suction_pressure" />
-								<field name="slurry_correction_in" />
-								<field name="suction_pressure_kg" on_change="onchange_differential_pressure_kg(head_in,suction_pressure_kg,discharge_pressure_kg,sealing_water_pressure)"/>
-								<field name="viscosity_crt_factor" />
-							</group>
-							<group>
-								<field name="head_in" on_change="onchange_head_in(head_in,discharge_pressure_kg,sealing_water_pressure)"/>
-								<field name="differential_pressure_kg" />
-								<field name="suction_condition" />
-								<field name="discharge_pressure_kg" on_change="onchange_head_in(head_in,discharge_pressure_kg,sealing_water_pressure)"/>
-								<field name="temperature" />
-							</group>					
-						</group>
-					
-						<group string="Pump Specification">
-							<group>
-								<field name="pump_id" on_change="onchange_pumpmodel(pump_id,market_division,suction_pressure_kg,discharge_pressure_kg,purpose_categ)" attrs="{'required':[('purpose_categ','in',('pump'))],'readonly':[('load_bom','=',True)]}"/>
-								<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
-								<field name="pumpseries_id" on_change="onchange_pumpseries(pumpseries_id,flange_standard,flange_type)" attrs="{'required':[('purpose_categ','in',('pump'))],'readonly':[('load_bom','=',True)]}"/>
-								<field name="qap_plan_id"/>
-								<field name="del_pipe_size"/>
-								<field name="pre_suppliy_ref"/>
-								<field name="shaft_sealing"/>
-								<field name="scope_of_supply" on_change="onchange_scope_of_supply(scope_of_supply,primemover_categ)"/>
-								<field name="number_of_stages" />
-								<field name="impeller_type" />
-								<field name="impeller_dia_min" />																															
-								<field name="size_suctionx" />
-								<field name="flange_type" attrs="{'required':[('purpose_categ','in',('pump'))]}" on_change="onchange_flange_type(flange_type,flange_standard)"/>
-								<field name="flange_standard" />
-								<field name="efficiency_in" on_change="onchange_bkw_liq(bkw_water,bkw_liq,capacity_in,head_in,specific_gravity,efficiency_in,motor_margin)"/>
-								<field name="npsh_r_m" />
-								<field name="best_efficiency" />
-								<field name="bkw_water" />
-								<field name="bkw_liq" on_change="onchange_belt_loss_in_kw(belt_loss_in_kw,bkw_liq,motor_margin)"/>
-								<field name="impeller_dia_rated" on_change="onchange_impeller_tip_speed(impeller_tip_speed,impeller_dia_rated,full_load_rpm)"/>
-								<field name="impeller_tip_speed"/>
-								<field name="hydrostatic_test_pressure" />
-								<field name="setting_height" />
-								<field name="full_load_rpm" on_change="onchange_impeller_tip_speed(impeller_tip_speed,impeller_dia_rated,full_load_rpm)"/>
-								<field name="engine_make" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
-								<field name="engine_type" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
-								<field name="belt_loss_in_kw" on_change="onchange_belt_loss_in_kw(belt_loss_in_kw,bkw_liq)" attrs="{'invisible':[('type_of_drive','not in',['belt_drive'])]}"/>
-								<field name="frequency" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
-								<field name="motor_kw" on_change="onchange_motor_margin(motor_kw,bkw_liq)"  attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct','fc_gb'])]}"/>
-								<field name="motor_margin" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
+<!--	<notebook>
+			<page string="Pump Details"  attrs="{'invisible':[('purpose_categ','!=','pump')]}">-->
+				<group string="Item Details">
+					<group>
+						<field name="equipment_no" />																
+						<field name="quantity_in_no" invisible="1"/>																
+					</group>											
+					<group>
+						<field name="description" />													
+					</group>					
+				</group>
+			
+				<group string="Liquid Specifications">
+					<group>
+						<field name="fluid_id" on_change="onchange_liquid(fluid_id)"/>
+						<field name="solid_concen"/>
+						<field name="viscosity" />
+						<field name="npsh_avl" />
+						<field name="capacity_in_liquid" on_change="onchange_capacity_in_liquid(capacity_in_liquid,head_in_liquid)"/>
+						<field name="consistency" />
+					</group>											
+					<group>
+						<field name="temperature_in_c" />
+						<field name="solid_concen_vol"/>
+						<field name="specific_gravity" />
+						<field name="max_particle_size_mm" />
+						<field name="density" />
+						<field name="head_in_liquid" on_change="onchange_capacity_in_liquid(capacity_in_liquid,head_in_liquid)"/>
+					</group>					
+				</group>
+				<group string="Duty Parameters">
+					<group>
+						<field name="capacity_in" />
+						<field name="suction_pressure" />
+						<field name="slurry_correction_in" />
+						<field name="suction_pressure_kg" on_change="onchange_differential_pressure_kg(head_in,suction_pressure_kg,discharge_pressure_kg,sealing_water_pressure)"/>
+						<field name="viscosity_crt_factor" />
+					</group>
+					<group>
+						<field name="head_in" on_change="onchange_head_in(head_in,discharge_pressure_kg,sealing_water_pressure)"/>
+						<field name="differential_pressure_kg" />
+						<field name="suction_condition" />
+						<field name="discharge_pressure_kg" on_change="onchange_head_in(head_in,discharge_pressure_kg,sealing_water_pressure)"/>
+						<field name="temperature" />
+					</group>					
+				</group>
+			
+				<group string="Pump Specification">
+					<group>
+						<field name="pump_id" on_change="onchange_pumpmodel(pump_id,market_division,suction_pressure_kg,discharge_pressure_kg,purpose_categ)" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+						<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+						<field name="pumpseries_id" on_change="onchange_pumpseries(pumpseries_id,flange_standard,flange_type)" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+						<field name="qap_plan_id"/>
+						<field name="del_pipe_size"/>
+						<field name="pre_suppliy_ref"/>
+						<field name="shaft_sealing"/>
+						<field name="scope_of_supply" on_change="onchange_scope_of_supply(scope_of_supply,primemover_categ)"/>
+						<field name="number_of_stages" />
+						<field name="impeller_type" />
+						<field name="impeller_dia_min" />																															
+						<field name="size_suctionx" />
+						<field name="flange_type" required="1" on_change="onchange_flange_type(flange_type,flange_standard)"/>
+						<field name="flange_standard" />
+						<field name="efficiency_in" on_change="onchange_bkw_liq(bkw_water,bkw_liq,capacity_in,head_in,specific_gravity,efficiency_in,motor_margin)"/>
+						<field name="npsh_r_m" />
+						<field name="best_efficiency" />
+						<field name="bkw_water" />
+						<field name="bkw_liq" on_change="onchange_belt_loss_in_kw(belt_loss_in_kw,bkw_liq,motor_margin)"/>
+						<field name="impeller_dia_rated" on_change="onchange_impeller_tip_speed(impeller_tip_speed,impeller_dia_rated,full_load_rpm)"/>
+						<field name="impeller_tip_speed"/>
+						<field name="hydrostatic_test_pressure" />
+						<field name="setting_height" />
+						<field name="full_load_rpm" on_change="onchange_impeller_tip_speed(impeller_tip_speed,impeller_dia_rated,full_load_rpm)"/>
+						<field name="engine_make" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
+						<field name="engine_type" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
+						<field name="belt_loss_in_kw" on_change="onchange_belt_loss_in_kw(belt_loss_in_kw,bkw_liq)" attrs="{'invisible':[('type_of_drive','not in',['belt_drive'])]}"/>
+						<field name="frequency" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
+						<field name="motor_kw" on_change="onchange_motor_margin(motor_kw,bkw_liq)"  attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct','fc_gb'])]}"/>
+						<field name="motor_margin" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
 <!--
-								<field name="speed_in_pump" attrs="{'invisible':[('type_of_drive','in',['motor_direct','fc_gb'])]}"/>
+						<field name="speed_in_pump" attrs="{'invisible':[('type_of_drive','in',['motor_direct','fc_gb'])]}"/>
 -->
-								<field name="speed_in_motor" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct','fc_gb'])]}"/>
-								<field name="engine_rpm" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
-								<field name="end_of_the_curve" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
-								<field name="critical_speed"/>
-								<field name="engine_kw" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
-								<field name="gear_box_loss_rated" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="fluid_coupling_loss_rated" on_change="onchange_mototr_output_power_rated(gear_box_loss_rated,fluid_coupling_loss_rated,bkw_liq,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="mototr_output_power_rated" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="higher_speed_rpm" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="head_higher_speed" on_change="onchange_pump_input_higher_speed(capacity_in,head_higher_speed,specific_gravity,effy_high_speed,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="effy_high_speed" on_change="onchange_pump_input_higher_speed(capacity_in,head_higher_speed,specific_gravity,effy_high_speed,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="pump_input_higher_speed" on_change="onchange_motor_output_power_high_speed(pump_input_higher_speed,gear_box_loss_high_speed,fluid_coupling_loss,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="mech_seal_make"/>
-								<field name="seal_type"/>
-								<field name="face_combination"/>
-								<field name="drive" invisible="1"/>
-							</group>											
-							<group>
-								<field name="maximum_allowable_soild" />
-								<field name="impeller_number" />
-								<field name="impeller_dia_max" />
-								<field name="max_allowable_test" />
-								<field name="crm_type" />
-								<field name="bush_bearing_lubrication" attrs="{'invisible':[('pump_model_type','!=','vertical')]}"/>
-								<field name="push_bearing" />
-								<field name="suction_size" />
-								<field name="speed_in_rpm" />
-								<field name="casing_design" />
-								<field name="shut_off_head" on_change="onchange_shut_off_pressure(shut_off_head)"/>
-								<field name="shut_off_pressure" on_change="onchange_hydrostatic_test_pressure(shut_off_pressure,discharge_pressure_kg)"/>
-								<field name="minimum_contionuous" />
-								<field name="specific_speed" />
-								<field name="suction_specific_speed" />
-								<field name="sealing_water_pressure" on_change="onchange_differential_pressure_kg(head_in,suction_pressure_kg,discharge_pressure_kg,sealing_water_pressure)"/>
-								<field name="sealing_water_capacity" />
-								<field name="gd_sq_value" />
-								<field name="bearing_make" />
-								<field name="bearing_number_nde" />
-								<field name="bearing_qty_nde" />
-								<field name="lubrication_type" />
-								<field name="primemover_categ"/>
+						<field name="speed_in_motor" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct','fc_gb'])]}"/>
+						<field name="engine_rpm" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
+						<field name="end_of_the_curve" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
+						<field name="critical_speed"/>
+						<field name="engine_kw" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
+						<field name="gear_box_loss_rated" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+						<field name="fluid_coupling_loss_rated" on_change="onchange_mototr_output_power_rated(gear_box_loss_rated,fluid_coupling_loss_rated,bkw_liq,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+						<field name="mototr_output_power_rated" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+						<field name="higher_speed_rpm" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+						<field name="head_higher_speed" on_change="onchange_pump_input_higher_speed(capacity_in,head_higher_speed,specific_gravity,effy_high_speed,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+						<field name="effy_high_speed" on_change="onchange_pump_input_higher_speed(capacity_in,head_higher_speed,specific_gravity,effy_high_speed,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+						<field name="pump_input_higher_speed" on_change="onchange_motor_output_power_high_speed(pump_input_higher_speed,gear_box_loss_high_speed,fluid_coupling_loss,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+						<field name="mech_seal_make"/>
+						<field name="seal_type"/>
+						<field name="face_combination"/>
+						<field name="drive" invisible="1"/>
+					</group>											
+					<group>
+						<field name="maximum_allowable_soild" />
+						<field name="impeller_number" />
+						<field name="impeller_dia_max" />
+						<field name="max_allowable_test" />
+						<field name="crm_type" />
+						<field name="bush_bearing_lubrication" attrs="{'invisible':[('pump_model_type','!=','vertical')]}"/>
+						<field name="push_bearing" />
+						<field name="suction_size" />
+						<field name="speed_in_rpm" />
+						<field name="casing_design" />
+						<field name="shut_off_head" on_change="onchange_shut_off_pressure(shut_off_head)"/>
+						<field name="shut_off_pressure" on_change="onchange_hydrostatic_test_pressure(shut_off_pressure,discharge_pressure_kg)"/>
+						<field name="minimum_contionuous" />
+						<field name="specific_speed" />
+						<field name="suction_specific_speed" />
+						<field name="sealing_water_pressure" on_change="onchange_differential_pressure_kg(head_in,suction_pressure_kg,discharge_pressure_kg,sealing_water_pressure)"/>
+						<field name="sealing_water_capacity" />
+						<field name="gd_sq_value" />
+						<field name="bearing_make" />
+						<field name="bearing_number_nde" />
+						<field name="bearing_qty_nde" />
+						<field name="lubrication_type" />
+						<field name="primemover_categ"/>
 <!--
-								<field name="type_of_drive" on_change="onchange_type_of_drive(type_of_drive,bkw_liq)"/>
+						<field name="type_of_drive" on_change="onchange_type_of_drive(type_of_drive,bkw_liq)"/>
 -->
-								<field name="type_of_drive"/>
-								<field name="primemover_id" on_change="onchange_primemover(primemover_id)"/>
-								<field name="operation_range"/>
-								<field name="motor_make"/>
-								<field name="motor_type"/>
-								<field name="motor_mounting"/>
-								<field name="gear_box_loss_high_speed" on_change="onchange_motor_output_power_high_speed(pump_input_higher_speed,gear_box_loss_high_speed,fluid_coupling_loss,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="fluid_coupling_loss" on_change="onchange_motor_output_power_high_speed(pump_input_higher_speed,gear_box_loss_high_speed,fluid_coupling_loss,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="motor_output_power_high_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="lower_speed_rpm" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="head_lower_speed" on_change="onchange_pump_input_lower_speed(effy_lower_speed_point,specific_gravity,head_lower_speed,capacity_in,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="effy_lower_speed_point" on_change="onchange_pump_input_lower_speed(effy_lower_speed_point,specific_gravity,head_lower_speed,capacity_in,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="pump_input_lower_speed" on_change="onchange_motor_output_power_lower_speed(pump_input_lower_speed,gear_box_loss_lower_speed,fluid_coupling_loss_lower_speed,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="gear_box_loss_lower_speed" on_change="onchange_motor_output_power_lower_speed(pump_input_lower_speed,gear_box_loss_lower_speed,fluid_coupling_loss_lower_speed,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="fluid_coupling_loss_lower_speed" on_change="onchange_motor_output_power_lower_speed(pump_input_lower_speed,gear_box_loss_lower_speed,fluid_coupling_loss_lower_speed,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="motor_output_power_lower_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
-								<field name="gland_plate"/>
-								<field name="api_plan"/>
-								<field name="market_division" invisible="1"/>
-							</group>
-						</group>
+						<field name="type_of_drive"/>
+						<field name="primemover_id" on_change="onchange_primemover(primemover_id)"/>
+						<field name="operation_range"/>
+						<field name="motor_make"/>
+						<field name="motor_type"/>
+						<field name="motor_mounting"/>
+						<field name="gear_box_loss_high_speed" on_change="onchange_motor_output_power_high_speed(pump_input_higher_speed,gear_box_loss_high_speed,fluid_coupling_loss,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+						<field name="fluid_coupling_loss" on_change="onchange_motor_output_power_high_speed(pump_input_higher_speed,gear_box_loss_high_speed,fluid_coupling_loss,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+						<field name="motor_output_power_high_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+						<field name="lower_speed_rpm" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+						<field name="head_lower_speed" on_change="onchange_pump_input_lower_speed(effy_lower_speed_point,specific_gravity,head_lower_speed,capacity_in,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+						<field name="effy_lower_speed_point" on_change="onchange_pump_input_lower_speed(effy_lower_speed_point,specific_gravity,head_lower_speed,capacity_in,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+						<field name="pump_input_lower_speed" on_change="onchange_motor_output_power_lower_speed(pump_input_lower_speed,gear_box_loss_lower_speed,fluid_coupling_loss_lower_speed,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+						<field name="gear_box_loss_lower_speed" on_change="onchange_motor_output_power_lower_speed(pump_input_lower_speed,gear_box_loss_lower_speed,fluid_coupling_loss_lower_speed,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+						<field name="fluid_coupling_loss_lower_speed" on_change="onchange_motor_output_power_lower_speed(pump_input_lower_speed,gear_box_loss_lower_speed,fluid_coupling_loss_lower_speed,type_of_drive)" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+						<field name="motor_output_power_lower_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
+						<field name="gland_plate"/>
+						<field name="api_plan"/>
+						<field name="market_division" invisible="1"/>
+					</group>
+				</group>
+				
+				<group>
+					<group>
+						<field name="moc_const_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}" on_change="onchange_moc(moc_const_id,flag_standard,purpose_categ)"/>
+						<field name="flag_standard" on_change="onchange_moc(moc_const_id,flag_standard,purpose_categ)" attrs="{'invisible':[('purpose_categ','!=','pump')]}"/>
+					</group>
+					<goup>
+					</goup>
+				</group>
+				<notebook attrs="{'invisible':[('purpose_categ','!=','pump')]}">
+					<page string="Offer Material">
+						<field name="line_ids_moc_a" context="{'flag_standard':flag_standard}" readonly="1">
+							<tree string="Material of Construction Details Entry Tree" editable="top" >
+								<field name="offer_id" attrs="{'readonly': [('flag_standard','!=',True)]}"/>
+								<field name="moc_id" attrs="{'readonly': [('flag_standard','!=',True)]}"/>
+								<field name="remarks" widget="char" attrs="{'readonly': [('flag_standard','!=',True)]}"/>										
+								<field name="flag_standard" invisible="1"/>										
+							</tree>
+						</field>	
+					</page>							
+				</notebook>
+				<group>
+					<group>
+						<field name="load_bom" on_change="onchange_load_bom(load_bom,pump_id,wo_line_id,purpose_categ,moc_const_id,qty)" attrs="{'invisible':[('purpose_categ','=','access')]}"/>
+					</group>
+					<group>
+					</group>
+				</group>
 						
-						<group>
-							<group>
-								<field name="moc_const_id"  attrs="{'required':[('purpose_categ','in',('pump'))],'readonly':[('load_bom','=',True)]}" on_change="onchange_moc(moc_const_id,flag_standard,purpose_categ)"/>
-								<field name="flag_standard" on_change="onchange_moc(moc_const_id,flag_standard,purpose_categ)"/>
-							</group>
-							<goup>
-							</goup>
-						</group>
-						<notebook>
-							<page string="Offer Material">
-								<field name="line_ids_moc_a" context="{'flag_standard':flag_standard}" readonly="1">
-									<tree string="Material of Construction Details Entry Tree" editable="top" >
-										<field name="offer_id" attrs="{'readonly': [('flag_standard','!=',True)]}"/>
-										<field name="moc_id" attrs="{'readonly': [('flag_standard','!=',True)]}"/>
-										<field name="remarks" widget="char" attrs="{'readonly': [('flag_standard','!=',True)]}"/>										
-										<field name="flag_standard" invisible="1"/>										
-									</tree>
-								</field>	
-							</page>							
-						</notebook>
-						<group>
-							<group>
-								<field name="load_bom" on_change="onchange_load_bom(load_bom,spare_load_bom,spare_pump_id,pump_id,wo_line_id,purpose_categ,spare_moc_const_id,moc_const_id,qty)"/>
-							</group>
-							<group>
-							</group>
-						</group>
-						
-			</page>
+<!--		</page>-->
 <!--
 			<page string="Spare Details" attrs="{'invisible':[('purpose_categ','!=','spare')]}">
 				<group>
@@ -422,17 +423,17 @@
 				</group>
 			</page>
 -->
-		</notebook>
+<!--	</notebook>-->
 		
-			<group string="Spare Details" attrs="{'invisible':[('purpose_categ','not in',('spare','access'))]}">
+<!--		<group string="Spare Details" attrs="{'invisible':[('purpose_categ','not in',('spare','access'))]}">
 				<group>
 					<field name="spare_pump_id" on_change="onchange_spare_pump_id(spare_pump_id,purpose_categ)" attrs="{'readonly':[('spare_load_bom','=',True)],'required':[('purpose_categ','in',('spare','access'))]}"/>
 					<field name="spare_pumpseries_id" on_change="onchange_spare_pumpseries_id(spare_pumpseries_id,purpose_categ)" attrs="{'readonly':[('spare_load_bom','=',True)],'required':[('purpose_categ','in',('spare','access'))]}"/>
 					<field name="spare_qap_plan_id"/>
 				</group>
-				<group>
+				<group>-->
 					<!--<field name="wo_line_id" domain="[('partner_id','=',parent.customer_id),('order_category','=','spare'),('state','=','confirmed')]"/>-->
-					<field name="s_no" attrs="{'readonly':[('spare_load_bom','=',True)],'invisible':[('purpose_categ','!=','spare')]}"/>
+<!--				<field name="s_no" attrs="{'readonly':[('spare_load_bom','=',True)],'invisible':[('purpose_categ','!=','spare')]}"/>
 					<field name="spare_moc_const_id" attrs="{'required':[('purpose_categ','=','spare')],'invisible':[('purpose_categ','!=','spare')],'readonly':[('spare_load_bom','=',True)]}" on_change="onchange_spare_moc(spare_moc_const_id,purpose_categ)"/>
 				</group>
 				<group>
@@ -440,9 +441,7 @@
 				</group>
 				<group>
 				</group>
-				
-			</group>
-		
+			</group>-->
 		
 			<notebook attrs="{'invisible':[('purpose_categ','not in',('spare','pump'))]}">
 				<page string = "Foundry Items">
