@@ -549,7 +549,7 @@ class kg_packing(osv.osv):
 		'flag_customer_specific': fields.boolean('Customer Specific'),
 		'manual_book_attach': fields.binary('Manual Book'),
 		'photos_attach': fields.binary('Photos'),
-		'packing_state': fields.selection([('pending','Pending'),('completed','Completed')],'Packing State'),
+		'packing_state': fields.selection([('pending','Pending'),('completed','Completed')],'State'),
 	}
 		
 	

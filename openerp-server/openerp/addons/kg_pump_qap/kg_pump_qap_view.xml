@@ -697,7 +697,7 @@
 								<field name="wood_type" required="1" attrs="{'readonly': ['|',('flag_customer_specific','!=',True),('packing_state','=','completed')]}"/>
 								<field name="gross_weight" required="1"  on_change="onchange_pump_weight(gross_weight, net_weight)" attrs="{'readonly': [('packing_state','=','completed')]}"/>
 								<field name="remarks" attrs="{'readonly': [('packing_state','=','completed')]}"/>
-								<field name="packing_state" invisible="1"/>
+								<field name="packing_state" invisible="0"/>
 								
 							</group>											
 							<group>
@@ -781,6 +781,7 @@
 					<field name="pump_model_id"/>
 					<field name="pump_serial_no"/>
 					<field name="moc_construction_id"/>
+					<field name="packing_state"/>
 				</tree>
 			</field>
 		</record>
