@@ -230,7 +230,7 @@ class kg_employee(osv.osv):
 						'job_id':rec.job_id.id,
 						'emp_categ_id':rec.emp_categ_id.id,
 						'shift_id':emp_categ_line_1.shift_id.id,
-
+						'driver_batta':rec.emp_categ_id.driver_batta,
 						}
 				att_id = emp_obj_1.create(cr,uid,emp_vals)
 				emp_obj = self.pool.get('hr.contract')

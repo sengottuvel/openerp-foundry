@@ -74,6 +74,7 @@
 								</group>
 								<group >
 									<field name="increament_type" invisible='1'/>
+									<field name="driver_batta" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}" required="0"/>
 									<field name="increament_amt" invisible='1'/>
 								</group>
 								<group colspan="5">

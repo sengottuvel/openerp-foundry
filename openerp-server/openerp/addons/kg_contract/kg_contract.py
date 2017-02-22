@@ -103,6 +103,7 @@ class kg_contract(osv.osv):
 		'shift_id': fields.many2one('kg.shift.master', 'Shift'),
 		'dep_id':fields.many2one('kg.depmaster','Department'),
 		'vda_status': fields.boolean('VDA Applicable'),
+		'driver_batta': fields.float('Driver Batta(Per Day)'),
 			
 		
 		## Child Tables Declaration		
@@ -189,6 +190,14 @@ class kg_contract(osv.osv):
 		return super(kg_contract, self).write(cr, uid, ids, vals, context)
 	
 	###Validations###
+	def _check_driver_batta(self, cr, uid,ids,context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.driver_bata_app:
+			if rec.driver_batta <= 0.00:
+				raise osv.except_osv(_('Warning!'),
+							_('Driver Batta should not be zero or less than zero as driver batta is applicable !!'))
+				return False
+		return True
 	
 	def _salary_brk_validation(self,cr,uid,ids,context = None):
 		rec = self.browse(cr,uid,ids[0])
@@ -363,7 +372,8 @@ class kg_contract(osv.osv):
 	
 		#~ (_gross_salary, 'The break ups are not matching the gross salary !!!', ['  ']),		
 		(child_dups_val, 'The break ups are not matching the gross salary !!!', ['  ']),		
-		(_salary_brk_validation, 'The break ups are not matching the gross salary !!!', ['  ']),		
+		(_salary_brk_validation, 'The break ups are not matching the gross salary !!!', ['  ']),
+		(_check_driver_batta, 'Driver Batta checking !!!', ['  ']),		
 		#~ (_gross_salary_check, 'System will not allow to process with zero or Negative Values gross salary !!!', ['  ']),		
 
 	]
