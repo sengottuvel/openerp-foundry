@@ -361,7 +361,7 @@ class kg_work_order(osv.osv):
 							capacity_in = 0
 							head_in = 0
 							bkw_water = 0
-							speed_in_pump = 0
+							speed_in_rpm = 0
 							efficiency_in = 0
 							motor_kw = 0
 							old_ref = ''
