@@ -411,6 +411,7 @@ class kg_schedule(osv.osv):
 		today = str(today)
 		
 		if entry.state == 'draft':
+			
 		
 			if entry.line_ids:
 				
@@ -1847,6 +1848,32 @@ class kg_schedule(osv.osv):
 			self.write(cr, uid, ids, {'state': 'confirmed','flag_cancel':1,'confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')
 				})
 			cr.execute(''' update ch_schedule_details set state = 'confirmed' where header_id = %s ''',[ids[0]])
+			
+			### ID Commitment screen update ###
+			cr.execute("""select distinct(order_line_id) from ch_schedule_details where header_id = %s """%(entry.id))
+			order_ids = cr.fetchall();
+			if order_ids:
+				for order_item in order_ids:
+					order_line_rec = self.pool.get('ch.work.order.details').browse(cr,uid,order_item[0])
+					if order_line_rec.line_ids_d:
+						accessories = 'yes'
+					else:
+						accessories = 'no'
+					sch_vals = {
+						'order_id': order_line_rec.id,
+						'order_category': order_line_rec.order_category,		
+						'pump_model_type':order_line_rec.pump_model_type,
+						'qty': order_line_rec.qty,
+						'order_value': order_line_rec.unit_price * order_line_rec.qty,
+						'pump_model_id': order_line_rec.pump_model_id.id,
+						'division_id': order_line_rec.header_id.division_id.id,
+						'location': order_line_rec.header_id.location,
+						'schedule_id': entry.id,
+						'accessories': accessories
+					}
+					self.pool.get('kg.id.commitment').create(cr,uid,sch_vals)
+		
+			
 		else:
 			pass
 		

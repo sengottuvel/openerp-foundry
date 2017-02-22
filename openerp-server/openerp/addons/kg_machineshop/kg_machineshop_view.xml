@@ -683,6 +683,142 @@
         </record>	
        
         
+    <!-- Audit Log Xml Data End-->
+    
+    
+	<!-- Trimming Dia form view starts here -->
+	
+	
+		<record id="t_form_v_trimming_dia" model="ir.ui.view">
+			<field name="name">Trimming Dia Form</field>
+			<field name="model">kg.trimming.dia</field>
+			<field name="arch" type="xml">
+				<form string="Trimming Dia Process" version="7.0"  delete="false" create="false">
+					<header>
+						<button name="entry_confirm" string="Confirm" states="draft" type="object"/>
+					</header>
+					<group>
+						<group>
+							<field name="order_no" readonly="1"/>	
+							<field name="pattern_name" readonly="1"/>	
+							<field name="pump_model_id" readonly="1"/>	
+							<field name="capacity_in" readonly="1"/>	
+							<field name="speed_in_rpm" readonly="1"/>	
+							<field name="motor_kw" readonly="1"/>	
+							<field name="remarks" attrs="{'readonly': [('state','in',['confirmed'])]}"/>	
+						</group>											
+						<group>
+							<field name="pattern_id" readonly="1"/>
+							<field name="old_ref" readonly="1"/>
+							<field name="head_in" readonly="1"/>
+							<field name="bkw_water" readonly="1"/>
+							<field name="efficiency_in" readonly="1"/>
+							<field name="trimming_dia" attrs="{'readonly': [('state','in',['confirmed'])]}"/>
+							<field name="oth_spec"/>
+							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
+						</group>					
+					</group>
+					<notebook>						
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
+								<group>
+									<field name="user_id"/>
+									<field name="update_user_id"/>										
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="update_date" />									
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_trimming_dia" model="ir.ui.view">
+			<field name="name">Trimming Dia Tree</field>
+			<field name="model">kg.trimming.dia</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">	
+			<tree toolbar="True" string="Trimming Dia" create="false" colors="blue:state == 'draft';black:state == 'confirmed'" >									
+					<field name="order_no"/>
+					<field name="pattern_id"/>					
+					<field name="pattern_name"/>
+					<field name="pump_model_id"/>
+					<field name="trimming_dia"/>
+					<field name="oth_spec"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_trimming_dia" model="ir.ui.view">
+            <field name="name">Trimming Dia Search</field>
+            <field name="model">kg.trimming.dia</field>
+            <field name="arch" type="xml">
+                <search string="Trimming Dia Process">
+					<field name="order_no" string="Work Order No."  filter_domain="[('order_no','ilike',self)]" />
+					<field name="pattern_id" string="Pattern Code"  filter_domain="[('pattern_id','ilike',self)]" />
+					<field name="pattern_name" string="Pattern Name"  filter_domain="[('pattern_name','ilike',self)]" />
+					<separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_no'}"/>
+                        <filter string="Pattern Code" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_id'}"/>
+                        <filter string="Pattern Name" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pattern_name'}"/>
+                        <filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+                       
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+	
+	
+	
+	<!-- Menu Action Start-->	
+		
+		<record id="tma_trimming_dia" model="ir.actions.act_window">
+			<field name="name">Trimming Dia</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.trimming.dia</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_trimming_dia"/>
+			<field name="search_view_id" ref="t_search_v_trimming_dia"/>
+			<field name="context">{"search_default_open":1}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start -->
+		
+        <record id="audit_trimming_dia" model="audittrail.rule">
+            <field name="name">Audit Log Trimming Dia Process</field>
+            <field name="object_id" eval="ref('kg_machineshop.model_kg_trimming_dia')"/>       
+            <field name="state">subscribed</field>              
+        </record>	
+       
+        
     <!-- Audit Log Xml Data End-->	
 	
 	
@@ -691,9 +827,10 @@
 	<menuitem name="MS Process" id="tpm_ms_process" parent="kg_operation_master.mpm_crm" sequence="2"/>
 			
 		<menuitem action="tma_id_commitment" id="tam_ms_id_commitment" parent="tpm_ms_process" sequence="0" />
-		<menuitem action="kg_stock_inward.tma_ms_stock_details" id="tam_ms_stock_list" parent="tpm_ms_process" sequence="1" />
-		<menuitem action="tma_ms_inward" id="tam_ms_inward" parent="tpm_ms_process" sequence="2" />
-		<menuitem action="tma_ms_sch_list" id="tam_ms_sch_list" parent="tpm_ms_process" sequence="3" />
+		<menuitem action="tma_trimming_dia" id="tam_trimming_dia" parent="tpm_ms_process" sequence="1" />
+		<menuitem action="kg_stock_inward.tma_ms_stock_details" id="tam_ms_stock_list" parent="tpm_ms_process" sequence="2" />
+		<menuitem action="tma_ms_inward" id="tam_ms_inward" parent="tpm_ms_process" sequence="3" />
+		<menuitem action="tma_ms_sch_list" id="tam_ms_sch_list" parent="tpm_ms_process" sequence="4" />
 		
 	<menuitem name="Batch Entries" id="tpm_ms_batch" parent="kg_operation_master.mpm_crm" sequence="4"/>
 	

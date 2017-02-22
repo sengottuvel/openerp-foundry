@@ -149,6 +149,7 @@ class kg_machineshop(osv.osv):
 		'assembly_id': fields.integer('Assembly Inward', readonly=True),
 		'assembly_line_id': fields.integer('Assembly Inward Line', readonly=True),
 		'flag_planning': fields.boolean('Selected in planning'),
+		'flag_trimming_dia': fields.boolean('Trimming Dia'),
 		
 
 		### Entry Info ####
@@ -171,7 +172,8 @@ class kg_machineshop(osv.osv):
 		'crt_date':time.strftime('%Y-%m-%d %H:%M:%S'),
 		'active': True,
 		'division_id':_get_default_division,
-		'flag_planning': False
+		'flag_planning': False,
+		'flag_trimming_dia': False
 		### MS Inward ###
 		#~ 'inward_accept_user_id':lambda obj, cr, uid, context: uid,
 		
@@ -286,6 +288,15 @@ class kg_machineshop(osv.osv):
 					'mould_state': 'pending',		
 				}
 				production_id = production_obj.create(cr, uid, production_vals) 
+			
+			
+			### Updatation in MS Rejection List ###
+			if entry_rec.ms_type == 'foundry_item':
+			
+				cr.execute(""" update kg_ms_operations set reject_state = 'received' where id in (
+					select id from kg_ms_operations where state = 'reject' 
+					and order_line_id = %s and reject_state = 'not_received' and ms_type = 'foundry_item'
+					and pattern_id = %s and moc_id = %s limit 1) """%(entry_rec.order_line_id.id,entry_rec.pattern_id.id,entry_rec.moc_id.id))
 			
 			self.write(cr,uid, ids,{'state':'accept','ms_state':'in_plan','ms_sch_qty':entry_rec.inward_accept_qty,'inward_reject_qty':reject_qty,
 			'accept_date':today})
@@ -549,7 +560,7 @@ class kg_id_commitment(osv.osv):
 	
 	_defaults = {
 	
-		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_work_order', context=c),
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_id_commitment', context=c),
 		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':time.strftime('%Y-%m-%d %H:%M:%S'),
@@ -571,3 +582,89 @@ class kg_id_commitment(osv.osv):
 		
 	
 kg_id_commitment()
+
+class kg_trimming_dia(osv.osv):
+
+	_name = "kg.trimming.dia"
+	_description = "Trimming Dia process"
+	
+	_columns = {
+	
+			
+		'order_line_id':fields.many2one('ch.work.order.details', 'WORK ORDER NO.'),
+		'order_no': fields.related('order_line_id','order_no', type='char', string='WO No.', store=True, readonly=True),
+		'order_bomline_id':fields.many2one('ch.order.bom.details', 'Foundry Line'),
+		'order_category': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories')],'Order Category'),		
+		'pump_model_type':fields.selection([('vertical','Vertical'),('horizontal','Horizontal'),('others','Others')], 'Type'),
+		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Type',domain="[('active','=','t')]"),
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern Number',readonly=True),
+		'pattern_code': fields.related('pattern_id','name', type='char', string='Pattern Code', store=True, readonly=True),
+		'pattern_name': fields.related('pattern_id','pattern_name', type='char', string='Pattern Name', store=True, readonly=True),
+		'oth_spec': fields.related('order_bomline_id','add_spec', type='text', string='WO Remarks', store=True, readonly=True),
+		'capacity_in': fields.integer('Capacity in M3/hr(Water)',),
+		'head_in': fields.float('Total Head in Mlc(Water)'),
+		'bkw_water': fields.float('BKW Water'),
+		'speed_in_rpm': fields.float('Speed in RPM-Pump'),
+		'efficiency_in': fields.float('Efficiency in % Wat'),
+		'motor_kw': fields.float('Motor KW'),
+		'trimming_dia': fields.char('Trimming Dia'),
+		'old_ref': fields.char('Old reference'),
+		
+		'entry_date': fields.date('Entry Date',required=True),
+		'remarks': fields.text('Remarks'),
+		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed')],'Status', readonly=True),
+		
+		### Entry Info ####
+		'active': fields.boolean('Active'),
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
+		
+		'crt_date': fields.datetime('Creation Date',readonly=True),
+		'user_id': fields.many2one('res.users', 'Created By', readonly=True),		
+		
+		'update_date': fields.datetime('Last Updated Date', readonly=True),
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
+		
+		
+	}
+	
+	_defaults = {
+	
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_trimming_dia', context=c),
+		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'user_id': lambda obj, cr, uid, context: uid,
+		'crt_date':time.strftime('%Y-%m-%d %H:%M:%S'),
+		'state': 'draft',
+		'active': True,
+		
+	}
+	
+	def entry_confirm(self,cr,uid,ids,context=None):
+		entry_rec = self.browse(cr,uid,ids[0])
+		order_bomline_obj = self.pool.get('ch.order.bom.details')
+		###  Updating other specification in wo ##
+		if entry_rec.order_bomline_id.add_spec != False:
+			order_add_spec = entry_rec.order_bomline_id.add_spec
+		else:
+			order_add_spec = ''
+		order_bomline_obj.write(cr,uid,entry_rec.order_bomline_id.id,{'add_spec': str(order_add_spec) +' '+ str(entry_rec.trimming_dia),
+			'flag_trimming_dia':False})
+		self.write(cr,uid,ids,{'state':'confirmed'})
+		###  Updating other specification in ms ##
+		ms_id = self.pool.get('kg.machineshop').search(cr,uid,[('order_line_id','=',entry_rec.order_line_id.id),('order_bomline_id','=',entry_rec.order_bomline_id.id)])
+		if ms_id:
+			self.pool.get('kg.machineshop').write(cr,uid,ms_id[0],{'flag_trimming_dia':False,'oth_spec': str(order_add_spec) +' '+ str(entry_rec.trimming_dia)})
+		return True
+		
+	
+	
+	def create(self, cr, uid, vals, context=None):
+		return super(kg_trimming_dia, self).create(cr, uid, vals, context=context)
+		
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(kg_trimming_dia, self).write(cr, uid, ids, vals, context)
+		
+		
+	
+kg_trimming_dia()

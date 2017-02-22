@@ -596,7 +596,8 @@ class kg_fettling(osv.osv):
 			'item_code': entry_rec.pattern_code,
 			'item_name': entry_rec.pattern_name,
 			'position_id': entry_rec.order_bomline_id.position_id.id,
-			'oth_spec': entry_rec.order_bomline_id.add_spec
+			'oth_spec': entry_rec.order_bomline_id.add_spec,
+			'flag_trimming_dia': entry_rec.order_bomline_id.flag_trimming_dia
 			
 			}
 			
