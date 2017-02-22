@@ -155,7 +155,7 @@
 						<field name="voter_data" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
 					</field>
 					<field name="gender" position="replace">
-						<field name="gender" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+						<field name="gender" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="0"/>
 					</field>
 					<field name="marital" position="replace">
 						<field name="marital" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="0"/>
