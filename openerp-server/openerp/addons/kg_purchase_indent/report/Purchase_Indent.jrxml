@@ -225,7 +225,7 @@ where pr.id = $P{indent_id} and pr.state = 'approved']]>
 				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_indent/img/sam.png"]]></imageExpression>
 			</image>
 		</band>
-	</title>
+	</title> 
 	<columnHeader>
 		<band height="15" splitType="Stretch">
 			<textField>
