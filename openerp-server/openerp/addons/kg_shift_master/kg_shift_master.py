@@ -75,7 +75,7 @@ class kg_shift_master(osv.osv):
 		
 		'grace_period': fields.integer('Grace Period(minutes)', required=False),
 		'rotation': fields.boolean('Rotation'),
-		'sequence': fields.selection([('1','1'),('2','2'),('3','3')],'Sequence',),
+		'sequence': fields.integer('Sequence',),
 		'shift_hours': fields.float('Shift Hours'),
 		'min_ot_hours': fields.float('Minimum OT Hours'),
 				
@@ -119,7 +119,15 @@ class kg_shift_master(osv.osv):
 		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		sql = """ select max(sequence) from kg_shift_master """
+		cr.execute(sql)
+		data = cr.dictfetchall()
+		print "@@@@@@@@@@@@@@@@@@@@",data[0]['max']
+		if data[0]['max'] is None:
+			sequence = 0
+		else:
+			sequence = data[0]['max']
+		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S'),'sequence':(sequence+1)})
 		return True
 
 	def entry_reject(self,cr,uid,ids,context=None):
