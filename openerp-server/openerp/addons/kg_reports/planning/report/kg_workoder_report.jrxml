@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Workorder_print" pageWidth="605" pageHeight="842" columnWidth="565" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
-	<property name="ireport.zoom" value="1.5"/>
-	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.zoom" value="1.8150000000000004"/>
+	<property name="ireport.x" value="69"/>
+	<property name="ireport.y" value="59"/>
 	<subDataset name="Spare dataset">
 		<parameter name="header_id" class="java.lang.Integer"/>
 		<parameter name="category" class="java.lang.String"/>
@@ -36,7 +36,7 @@ from ch_order_machineshop_details ms_line
 left join ch_work_order_details wo_line on wo_line.id = ms_line.header_id
 left join kg_pumpmodel_master pump on pump.id = wo_line.pump_model_id
 
-where ms_line.header_id = $P{header_id} and wo_line.order_category = 'spare'  
+where ms_line.header_id = $P{header_id} and wo_line.order_category = 'spare'
 and ms_line.flag_applicable = 't'
 
 union
@@ -54,8 +54,8 @@ from ch_order_bot_details bot_line
 left join ch_work_order_details wo_line on wo_line.id = bot_line.header_id
 left join kg_pumpmodel_master pump on pump.id = wo_line.pump_model_id
 
-where bot_line.header_id = $P{header_id} and wo_line.order_category = 'spare'  
-and bot_line.flag_applicable = 't' ]]>
+where bot_line.header_id = $P{header_id} and wo_line.order_category = 'spare'
+and bot_line.flag_applicable = 't']]>
 		</queryString>
 		<field name="pump_model" class="java.lang.String"/>
 		<field name="pattern_name" class="java.lang.String"/>
@@ -121,6 +121,39 @@ where wo_access.header_id = $P{header_id}]]>
 		<![CDATA[select
 wo_line.id as id,
 wo.order_category as order_category,
+case
+when wo.drawing_approval = 'yes' then 'Yes'
+when wo.drawing_approval = 'no' then 'No'
+else '-' end as drawing_approval,
+
+case
+when wo.inspection = 'yes' then 'Yes'
+when wo.inspection = 'no' then 'No'
+when wo.inspection = 'tpi' then 'TPI'
+when wo.inspection = 'customer' then 'Customer'
+when wo.inspection = 'consultant' then 'Consultant'
+when wo.inspection = 'stagewise' then 'Stage wise'
+else '-' end as inspection,
+
+case
+when wo.road_permit = 'yes' then 'Yes'
+when wo.road_permit = 'no' then 'No'
+else '-' end as road_permit,
+case
+when wo.l_d_clause = '5_1' then '0.5 - 1.0% of total order value'
+when wo.l_d_clause = '1_10' then '1 to 10% of total order value'
+when wo.l_d_clause = 'nill' then 'Nill'
+else '-' end as l_d_clause,
+
+case
+when wo.excise_duty = 'inclusive' then 'Inclusive'
+when wo.excise_duty = 'extra' then 'Extra'
+when wo.excise_duty = 'exemted' then 'Exemted - Export'
+when wo.excise_duty = 'pac' then 'PAC'
+when wo.excise_duty = 'sez' then 'SEZ'
+when wo.excise_duty = 'ct1' then 'CT1'
+when wo.excise_duty = 'ct3' then 'CT3'
+else '-' end as excise_duty,
 case
 when wo_line.order_category = 'spare' and pump_crm.acces = 'yes' then 3
 when wo_line.order_category = 'spare' then 1
@@ -231,6 +264,11 @@ where foundry_wiz_id = $P{wiz_id}
 	</queryString>
 	<field name="id" class="java.lang.Integer"/>
 	<field name="order_category" class="java.lang.String"/>
+	<field name="drawing_approval" class="java.lang.String"/>
+	<field name="inspection" class="java.lang.String"/>
+	<field name="road_permit" class="java.lang.String"/>
+	<field name="l_d_clause" class="java.lang.String"/>
+	<field name="excise_duty" class="java.lang.String"/>
 	<field name="categ_type" class="java.lang.Integer"/>
 	<field name="line_order_category" class="java.lang.String"/>
 	<field name="order_priority" class="java.lang.String"/>
@@ -368,7 +406,7 @@ where foundry_wiz_id = $P{wiz_id}
 					<textElement verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA["" ]]></textFieldExpression>
+					<textFieldExpression><![CDATA[""]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="244" y="73" width="153" height="21"/>
@@ -423,7 +461,7 @@ where foundry_wiz_id = $P{wiz_id}
 					<textFieldExpression><![CDATA[$F{order_priority}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="243" y="137" width="322" height="18" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="243" y="137" width="75" height="18" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -433,10 +471,10 @@ where foundry_wiz_id = $P{wiz_id}
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font size="8" isBold="false" isItalic="false"/>
 					</textElement>
-					<text><![CDATA[ED Clearance: Inclusive /Extra / Exemted - (Export / PAC /SEZ / CT1 /CT3)]]></text>
+					<text><![CDATA[ED Clearance: ]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="243" y="116" width="156" height="21" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="243" y="116" width="53" height="21" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -446,7 +484,7 @@ where foundry_wiz_id = $P{wiz_id}
 					<textElement verticalAlignment="Middle">
 						<font size="8" isBold="false" isItalic="false"/>
 					</textElement>
-					<text><![CDATA[Inspection: Yes (TPI)]]></text>
+					<text><![CDATA[Inspection: ]]></text>
 				</staticText>
 				<staticText>
 					<reportElement mode="Transparent" x="0" y="176" width="565" height="15" isRemoveLineWhenBlank="true"/>
@@ -475,7 +513,7 @@ where foundry_wiz_id = $P{wiz_id}
 					<text><![CDATA[CPO Ref / Dealer Po Ref : --]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="116" width="243" height="21" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="116" width="50" height="21" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -485,10 +523,10 @@ where foundry_wiz_id = $P{wiz_id}
 					<textElement verticalAlignment="Middle">
 						<font size="8" isBold="true" isItalic="false"/>
 					</textElement>
-					<text><![CDATA[Penalty: Yes(0.5% - 5%) From 05.02.15]]></text>
+					<text><![CDATA[Penalty: ]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="137" width="243" height="18" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="137" width="63" height="18" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -498,10 +536,10 @@ where foundry_wiz_id = $P{wiz_id}
 					<textElement verticalAlignment="Middle">
 						<font size="8" isBold="false" isItalic="false"/>
 					</textElement>
-					<text><![CDATA[Road permit: Yes / No]]></text>
+					<text><![CDATA[Road permit: ]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="399" y="116" width="166" height="21" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="399" y="116" width="54" height="21" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -511,7 +549,7 @@ where foundry_wiz_id = $P{wiz_id}
 					<textElement verticalAlignment="Middle">
 						<font size="8" isBold="false" isItalic="false"/>
 					</textElement>
-					<text><![CDATA[Drg. Appr.: Yes / No]]></text>
+					<text><![CDATA[Drg. Appr.: ]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="190" width="258" height="17"/>
@@ -1204,6 +1242,71 @@ where foundry_wiz_id = $P{wiz_id}
 					<reportElement x="126" y="0" width="69" height="28"/>
 					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
 				</image>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="50" y="116" width="193" height="21"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{l_d_clause}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="296" y="116" width="103" height="21"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{inspection}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="453" y="116" width="112" height="21"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{drawing_approval}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="63" y="137" width="180" height="18"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{road_permit}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="318" y="137" width="247" height="18"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{excise_duty}]]></textFieldExpression>
+				</textField>
 			</band>
 		</groupHeader>
 	</group>

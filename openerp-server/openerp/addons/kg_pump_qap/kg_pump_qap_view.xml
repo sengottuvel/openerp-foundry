@@ -818,11 +818,12 @@
 	<!-- Menu Action Start-->
 		
 		<record id="tma_packing" model="ir.actions.act_window">
-			<field name="name">Packing</field>
+			<field name="name">Packing - Pending</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.packing</field>
 			<field name="view_type">form</field>
 			<field name="context">{}</field>
+			<field name="domain">[('packing_state','=','pending')]</field>
 			<field name="search_view_id" ref="t_search_v_packing"/>
 		</record>
 		
@@ -837,6 +838,33 @@
             <field name="view_mode">form</field>
             <field name="view_id" ref="t_form_v_packing"/>
             <field name="act_window_id" ref="tma_packing"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Menu Action Start-->
+		
+		<record id="tma_packing_com" model="ir.actions.act_window">
+			<field name="name">Packing - Completed</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.packing</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="domain">[('packing_state','=','completed')]</field>
+			<field name="search_view_id" ref="t_search_v_packing"/>
+		</record>
+		
+		<record model="ir.actions.act_window.view" id="tma_packing_com_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_packing"/>
+            <field name="act_window_id" ref="tma_packing_com"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_packing_com_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_packing"/>
+            <field name="act_window_id" ref="tma_packing_com"/>
         </record>
 		
 	<!-- Menu Action End-->
@@ -864,6 +892,7 @@
 		<menuitem action="tma_painting" id="tam_painting" parent="kg_part_qap.tpm_qap" sequence="6" />
 		
 		<menuitem action="tma_packing" id="tam_packing" parent="kg_part_qap.tpm_qap" sequence="7" />
+		<menuitem action="tma_packing_com" id="tam_packing_com" parent="kg_part_qap.tpm_qap" sequence="8" />
 	
 	<!-- Menu Item End -->
 	
