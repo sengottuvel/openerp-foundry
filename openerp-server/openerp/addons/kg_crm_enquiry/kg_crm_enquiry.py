@@ -470,6 +470,11 @@ class kg_crm_enquiry(osv.osv):
 				
 				offer_id = self.pool.get('kg.crm.offer').create(cr,uid,{
 																		'enquiry_id': entry.id,
+																		'enquiry_no': off_no,
+																		'enquiry_date': entry.offer_date,
+																		'due_date': entry.due_date,
+																		'del_date': entry.del_date,
+																		'customer_id': entry.customer_id.id,
 																		'ref_mode': entry.ref_mode,
 																		'market_division': entry.market_division,
 																		'purpose': entry.purpose,
