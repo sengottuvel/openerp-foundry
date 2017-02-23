@@ -35,6 +35,7 @@
 							<field name="pump_model_id" readonly="1"/>
 							<field name="pattern_name" invisible="1"/>
 							<field name="item_name" readonly="1"/>
+							<field name="oth_spec" widget="char"/>
 						</group>					
 					</group>
 					<notebook>
@@ -90,6 +91,7 @@
 					<field name="actual_qty" sum="Total SC Qty"/>
 					<field name="pending_qty" sum="Total SC Qty"/>
 					<field name="total_qty" sum="Total WO Qty"/>
+					<field name="oth_spec" widget="char"/>
 				</tree>
 			</field>
 		</record>
@@ -229,6 +231,7 @@
 									<field name="qty" required="1"/>										
 									<field name="amount" required="1" readonly="1"/>
 									<field name="remarks" widget="char"/>
+									<field name="oth_spec" widget="char"/>
 									<field name="dc_flag" invisible="1"/>
 								</tree>
 							</field>
@@ -244,6 +247,7 @@
 									<field name="item_name"/>
 									<field name="moc_id"/>
 									<field name="actual_qty"/>
+									<field name="oth_spec" widget="char"/>
 								</tree>
 							</field>
 							<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','not in',['draft'])]}"/>
@@ -367,7 +371,8 @@
 								<field name="read_flag" invisible="1"/>	
 								<field name="entry_type" invisible="1"/>	
 								<field name="qty" required="1" attrs="{'readonly': [('read_flag','=',True)]}"/>
-								<field name="remarks"/>																
+								<field name="remarks"/>		
+								<field name="oth_spec" widget="char"/>														
 							</group>											
 							<group>
 								<field name="position_id" attrs="{'readonly': [('entry_type','=','direct')]}"/>
@@ -568,6 +573,7 @@
 									<field name="entry_mode" invisible="1"/>
 									<field name="entry_type" invisible="1"/>
 									<field name="state" invisible="1"/>
+									<field name="oth_spec" widget="char"/>
 									
 									<field name="remarks" widget="char"/>
 								</tree>
@@ -583,6 +589,7 @@
 									<field name="item_name"/>
 									<field name="moc_id"/>
 									<field name="actual_qty"/>
+									<field name="oth_spec" widget="char"/>
 								</tree>
 							</field>
 							<field name="dc_sub_line_ids" attrs="{'readonly': [('state','in',['confirmed'])],'invisible': [('transfer_type','=','internal')]}">
@@ -595,6 +602,7 @@
 									<field name="item_name"/>
 									<field name="moc_id"/>
 									<field name="qty"/>
+									<field name="oth_spec" widget="char"/>
 								</tree>
 							</field>
 							
@@ -669,6 +677,7 @@
 					<field name="entry_type" invisible="1"/>					
 					<field name="actual_qty" sum="Total SC Qty"/>
 					<field name="pending_qty" sum="Total pending Qty"/>
+					<field name="oth_spec" widget="char"/>
 					
 				</tree>
 			</field>
@@ -817,6 +826,7 @@
 									<field name="com_weight" required="1" on_change="onchange_com_weight(com_weight,qty)"/>
 									<field name="totel_weight" readonly="1"/>										
 									<field name="remarks" widget="char"/>
+									<field name="oth_spec" widget="char"/>
 								</tree>
 							</field>
 						</page>
@@ -829,6 +839,7 @@
 									<field name="item_code" />
 									<field name="item_name"/>
 									<field name="moc_id"/>
+									<field name="oth_spec" widget="char"/>
 									
 								</tree>
 							</field>
@@ -841,6 +852,7 @@
 									<field name="item_code" />
 									<field name="item_name"/>
 									<field name="moc_id"/>
+									<field name="oth_spec" widget="char"/>
 									
 								</tree>
 							</field>							
@@ -938,6 +950,7 @@
 					<field name="moc_id"/>									
 					<field name="actual_qty" sum="Total SC Qty"/>
 					<field name="pending_qty" sum="Pending Qty"/>
+					<field name="oth_spec" widget="char"/>
 					
 				</tree>
 			</field>
