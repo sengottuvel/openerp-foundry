@@ -37,10 +37,10 @@ class kg_purchase_amendment(osv.osv):
 		val = 0.0
 		qty = 0
 		if line.price_type_amend == 'per_kg':
-			if line.product_id_amend.uom_conversation_factor_amend == 'two_dimension':
+			if line.product_id_amend.uom_conversation_factor == 'two_dimension':
 				if line.product_id_amend.po_uom_in_kgs > 0:
 					qty = line.product_qty_amend * line.product_id_amend.po_uom_in_kgs * line.length_amend * line.breadth_amend
-			elif line.product_id_amend.uom_conversation_factor_amend == 'one_dimension':
+			elif line.product_id_amend.uom_conversation_factor == 'one_dimension':
 				if line.product_id_amend.po_uom_in_kgs > 0:
 					qty = line.product_qty_amend * line.product_id_amend.po_uom_in_kgs
 				else:
@@ -597,10 +597,10 @@ class kg_purchase_amendment(osv.osv):
 								#~ _('If you want to change PO Product'),
 								#~ _('Select PI for this Product')) 
 				if amend_line.price_type == 'per_kg':
-					if amend_line.product_id_amend.uom_conversation_factor_amend == 'two_dimension':
+					if amend_line.product_id_amend.uom_conversation_factor == 'two_dimension':
 						if amend_line.product_id_amend.po_uom_in_kgs > 0:
 							qty = amend_line.product_qty_amend * amend_line.product_id_amend.po_uom_in_kgs * amend_line.length_amend * amend_line.breadth_amend
-					elif amend_line.product_id_amend.uom_conversation_factor_amend == 'one_dimension':
+					elif amend_line.product_id_amend.uom_conversation_factor == 'one_dimension':
 						if amend_line.product_id_amend.po_uom_in_kgs > 0:
 							qty = amend_line.product_qty_amend * amend_line.product_id_amend.po_uom_in_kgs
 						else:
@@ -841,10 +841,10 @@ class kg_purchase_amendment(osv.osv):
 						po_line_obj.write(cr,uid,po_line_id,{
 							'brand_id': amend_line.brand_id_amend.id})	
 					if amend_line.price_type_amend == 'per_kg':
-						if amend_line.product_id_amend.uom_conversation_factor_amend == 'two_dimension':
+						if amend_line.product_id_amend.uom_conversation_factor == 'two_dimension':
 							if amend_line.product_id_amend.po_uom_in_kgs > 0:
 								qty = amend_line.product_qty_amend * amend_line.product_id_amend.po_uom_in_kgs * amend_line.length_amend * amend_line.breadth_amend
-						elif amend_line.product_id_amend.uom_conversation_factor_amend == 'one_dimension':
+						elif amend_line.product_id_amend.uom_conversation_factor == 'one_dimension':
 							if amend_line.product_id_amend.po_uom_in_kgs > 0:
 								qty = amend_line.product_qty_amend * amend_line.product_id_amend.po_uom_in_kgs
 							else:
