@@ -1129,7 +1129,12 @@ end ) as comp_zip,
 
 partner.name as customer,
 to_char(off.offer_date, 'dd/mm/yyyy') as offer_date,
-to_char(off.del_date, 'dd/mm/yyyy') as del_date
+to_char(off.del_date, 'dd/mm/yyyy') as del_date,
+(CASE WHEN off.l_d_clause = '5_1' THEN '0.5 - 1.0% of total order value'
+WHEN off.l_d_clause = '1_10' THEN '1 - 10% of total order value'
+WHEN off.l_d_clause is null THEN ''
+ELSE off.l_d_clause
+end) as penality
 
 from kg_crm_offer off
 
@@ -1151,6 +1156,7 @@ where off.id = $P{offer_id}]]>
 	<field name="customer" class="java.lang.String"/>
 	<field name="offer_date" class="java.lang.String"/>
 	<field name="del_date" class="java.lang.String"/>
+	<field name="penality" class="java.lang.String"/>
 	<group name="Pump_detail">
 		<groupExpression><![CDATA[$P{offer_id}]]></groupExpression>
 		<groupHeader>
@@ -2725,7 +2731,7 @@ where off.id = $P{offer_id}]]>
 				<textFieldExpression><![CDATA["Delivery consider by SAM - 16 Weeks"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="550" y="72" width="263" height="16"/>
+				<reportElement x="550" y="72" width="66" height="16"/>
 				<box topPadding="2" leftPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -2735,7 +2741,7 @@ where off.id = $P{offer_id}]]>
 				<textElement>
 					<font isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Penalty - Yes (0.5% to 5%) Per Week"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Penalty"]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement x="70" y="56" width="346" height="16"/>
@@ -2794,8 +2800,22 @@ where off.id = $P{offer_id}]]>
 			</textField>
 			<image>
 				<reportElement x="-12" y="0" width="47" height="40"/>
-				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.png"]]></imageExpression>
+				<imageExpression><![CDATA["/home/opensource/SVN_Projects/sam/openerp-server/openerp/addons/kg_crm_offer/img/sam.png"]]></imageExpression>
 			</image>
+			<textField isBlankWhenNull="true">
+				<reportElement x="616" y="72" width="197" height="16"/>
+				<box topPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{penality}]]></textFieldExpression>
+			</textField>
 		</band>
 	</title>
 	<columnHeader>

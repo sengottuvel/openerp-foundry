@@ -317,10 +317,20 @@ class kg_subcontract_wo(osv.osv):
 				_('Enter the Work Order Details !!'))		
 			if entry.line_ids:
 				for line in entry.line_ids:	
+					if line.entry_type == 'manual':											
+						if line.pattern_id.id == False and line.ms_shop_id.id == False:
+							raise osv.except_osv(_('Pattern or MS item must required'),
+							_('Kindly verify Pattern Number and MS Item Name!!'))						
+						
 					if line.entry_type == 'direct':
 						print"line.sc_id.sc_wo_qty",line.sc_id.sc_wo_qty
 						print"line.qty",line.qty
-						print"line.qty",line.qty						
+						print"line.qty",line.qty												
+						
+						if (line.sc_id.sc_wo_qty + line.qty) > line.actual_qty:
+							raise osv.except_osv(_('Excess Qty Not Allowed'),
+							_('Kindly verify Excess Qty!!'))	
+												
 						if (line.sc_id.sc_wo_qty + line.qty) > line.actual_qty:
 							raise osv.except_osv(_('Excess Qty Not Allowed'),
 							_('Kindly verify Excess Qty!!'))					
@@ -370,7 +380,11 @@ class kg_subcontract_wo(osv.osv):
 		if entry.state == 'confirmed':			
 			sc_obj = self.pool.get('kg.subcontract.process')
 			if entry.line_ids:
-				for line in entry.line_ids:	
+				for line in entry.line_ids:
+					if line.entry_type == 'manual':											
+						if line.pattern_id.id == False and line.ms_shop_id.id == False:
+							raise osv.except_osv(_('Pattern or MS item must required'),
+							_('Kindly verify Pattern Number and MS Item Name!!'))	
 					if line.entry_type == 'direct':
 						if (line.sc_id.sc_wo_qty + line.qty) > line.qty:
 								raise osv.except_osv(_('Excess Qty Not Allowed'),
@@ -443,6 +457,10 @@ class kg_subcontract_wo(osv.osv):
 			dc_id = dc_obj.create(cr,uid,{'sub_wo_no':entry.name,'transfer_type':'sub_contractor','contractor_id':entry.contractor_id.id,'flag_dc':True,'entry_mode': 'from_wo'})	
 			if entry.line_ids:
 				for line in entry.line_ids:	
+					if line.entry_type == 'manual':											
+						if line.pattern_id.id == False and line.ms_shop_id.id == False:
+							raise osv.except_osv(_('Pattern or MS item must required'),
+							_('Kindly verify Pattern Number and MS Item Name!!'))
 					if line.entry_type == 'direct':
 						if (line.sc_id.sc_wo_qty + line.qty) > line.qty:
 								raise osv.except_osv(_('Excess Qty Not Allowed'),
@@ -602,6 +620,7 @@ class ch_subcontract_wo_line(osv.osv):
 		'position_id': fields.many2one('kg.position.number','Position No.', required=True),
 		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True),
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern Number'),
+		'ms_shop_id': fields.many2one('kg.machine.shop','MS Item Name', domain="[('type','=','ms')]"),
 		'pattern_code': fields.char('Pattern Code'),
 		'pattern_name': fields.char('Pattern Name'),
 		'item_code': fields.char('Item Code'),
@@ -663,6 +682,15 @@ class ch_subcontract_wo_line(osv.osv):
 			print"pattern_rec.codepattern_rec.code",pattern_rec.name
 			print"pattern_rec.pattern_namepattern_rec.pattern_name",pattern_rec.pattern_name
 			value = {'pattern_code':pattern_rec.name,'pattern_name': pattern_rec.pattern_name,'item_code': pattern_rec.name,'item_name':pattern_rec.pattern_name}
+		return {'value': value}
+		
+	def onchange_ms(self, cr, uid, ids,ms_shop_id, context=None):
+		value = {'item_code': '','item_name': ''}
+		if ms_shop_id:
+			print"sssssssssss",ms_shop_id
+			ms_rec = self.pool.get('kg.machine.shop').browse(cr,uid,ms_shop_id)
+			
+			value = {'item_code': ms_rec.code,'item_name':ms_rec.name}
 		return {'value': value}
 	
 	
