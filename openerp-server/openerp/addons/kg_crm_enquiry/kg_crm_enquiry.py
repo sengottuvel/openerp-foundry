@@ -523,7 +523,7 @@ class kg_crm_enquiry(osv.osv):
 											_('%s You cannot save without Brand'%(bot_item.ms_id.code)))
 								print "ffffffffffffffffffbotbotbotfffffffffffffffffffffffff"
 								bot_prime_cost = self._prime_cost_calculation(cr,uid,'bot',0,
-								0,bot_item.ms_id.id,order_item.moc_const_id.id,bot_item.moc_id.id,0)
+								0,bot_item.ms_id.id,order_item.moc_const_id.id,bot_item.moc_id.id,bot_item.brand_id.id)
 								print "bot_item.ms_id",bot_item.ms_id.name
 								self.pool.get('ch.kg.crm.bot').write(cr,uid,bot_item.id,{'prime_cost':bot_prime_cost * bot_item.qty})
 								print"bot_prime_costbot_prime_cost",bot_prime_cost
