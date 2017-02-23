@@ -2810,7 +2810,7 @@ where off.id = $P{offer_id}]]>
 					<leftPen lineWidth="0.5"/>
 					<bottomPen lineWidth="0.5"/>
 					<rightPen lineWidth="0.5"/>
-				</box>
+				</box> 
 				<textElement>
 					<font size="8"/>
 				</textElement>
