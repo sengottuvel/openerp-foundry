@@ -542,15 +542,21 @@ class kg_id_commitment(osv.osv):
 		
 		'entry_date': fields.date('Entry Date',required=True),
 		'note': fields.text('Notes'),
-		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed')],'Status', readonly=True),
+		'remark': fields.text('Approve/Reject'),
+		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected')],'Status', readonly=True),
 		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode', readonly=True),
 		
 		### Entry Info ####
 		'active': fields.boolean('Active'),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		
-		'crt_date': fields.datetime('Creation Date',readonly=True),
-		'user_id': fields.many2one('res.users', 'Created By', readonly=True),		
+		'crt_date': fields.datetime('Created Date',readonly=True),
+		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
+		
+		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
+		'confirm_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
+		'ap_rej_date': fields.datetime('Approved/Rejected Date', readonly=True),
+		'ap_rej_user_id': fields.many2one('res.users', 'Approved/Rejected By', readonly=True),		
 		
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
@@ -569,6 +575,40 @@ class kg_id_commitment(osv.osv):
 		'entry_mode': 'manual',
 		
 	}
+	
+	
+
+	def entry_confirm(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		return True
+	def entry_draft(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'draft'})
+		return True
+
+	def entry_approve(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		return True
+
+	def entry_reject(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.remark:
+			self.write(cr, uid, ids, {'state': 'reject','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		else:
+			raise osv.except_osv(_('Rejection remark is must !!'),
+				_('Enter the remarks in rejection remark field !!'))
+		return True
+		
+	def unlink(self,cr,uid,ids,context=None):
+		unlink_ids = []		
+		for rec in self.browse(cr,uid,ids):	
+			if rec.state not in ('draft','cancel'):				
+				raise osv.except_osv(_('Warning!'),
+						_('You can not delete this entry !!'))
+			else:
+				unlink_ids.append(rec.id)
+		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
+	
+	
 	
 	
 	def create(self, cr, uid, vals, context=None):

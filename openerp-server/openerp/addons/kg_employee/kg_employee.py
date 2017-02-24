@@ -246,6 +246,23 @@ class kg_employee(osv.osv):
 
 						}
 					salary_policy = contract_salary.create(cr,uid,emp_con_vals)
+				
+				if emp_categ_line_1.line_id_1:
+					for j in emp_categ_line_1.line_id_1:
+
+						inc_con_vals = {
+
+							'header_id_inc': emp_con_1[0],
+							'start_value':j.start_value,
+							'end_value':j.end_value,
+							'type':j.type,
+							'incentive_value':j.incentive_value,
+							'leave_consider':j.leave_consider,
+
+							}
+						inc_policy = contract_inc.create(cr,uid,inc_con_vals)
+				else:
+					pass
 
 			self.write(cr, uid, ids, {'status': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True

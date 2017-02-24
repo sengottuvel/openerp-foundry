@@ -111,7 +111,8 @@ class kg_contract(osv.osv):
 		'line_id_pre_salary':fields.one2many('ch.kg.contract.pre.salary','header_id_pre_salary','Line Id Pre Salary'),	
 		'line_id_his':fields.one2many('ch.kg.contract.his','header_id_his','Line Id contract History'),
 		'line_id_salary_his':fields.one2many('ch.kg.contract.salary.his','header_id_salary_his','Line Id Salary History'),	
-		'line_id_pre_salary_his':fields.one2many('ch.kg.contract.pre.salary.his','header_id_pre_salary_his','Line Id Pre Salary History'),		
+		'line_id_pre_salary_his':fields.one2many('ch.kg.contract.pre.salary.his','header_id_pre_salary_his','Line Id Pre Salary History'),
+		'line_id_inc':fields.one2many('ch.con.special.incentive.policy','header_id_inc','Line Id inc'),			
 				
 	}
 	
@@ -380,6 +381,62 @@ class kg_contract(osv.osv):
 		
 	
 kg_contract()
+
+class ch_con_special_incentive_policy(osv.osv):
+	
+	_name='ch.con.special.incentive.policy'
+	_description = "Special Incentive Policy"
+	
+	_columns = {
+		
+		'header_id_inc': fields.many2one('hr.contract','Header_id_inc'),
+		'start_value': fields.float('Starting Value(In Crores)'),	
+		'end_value': fields.float('Ending Value(In Crores)'),	
+		'type': fields.selection([('fixed','Fixed'),('per_cr_fixed','Per Crore - Fixed'),('percentage','Percentage')],'Type'),	
+		'incentive_value': fields.float('Value'),	
+		'leave_consider': fields.integer('Leave Consideration(days)'),	
+		}	
+		
+	## Module Requirement
+		
+	def val_negative(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.start_value <= 0:
+			raise osv.except_osv(_('Warning!'),
+						_('Negative Values are and Zeros not allowed in Starting Value in Special incentive !!'))
+		if rec.end_value <= 0:
+			raise osv.except_osv(_('Warning!'),
+						_('Negative Values and Zeros are not allowed in Ending Value in Special incentive  !!'))
+		if rec.incentive_value <= 0:
+			raise osv.except_osv(_('Warning!'),
+						_('Negative Values and Zeros are not allowed in Special Incentive Value !!'))
+		if rec.leave_consider < 0:
+			raise osv.except_osv(_('Warning!'),
+						_('Negative Values are not allowed in Leave Consideration in Special incentive !!'))
+		if rec.end_value <= rec.start_value :
+			raise osv.except_osv(_('Warning!'),
+						_('End Value should be greater than Start Value in Special Incentive!!'))
+		if rec.leave_consider > 12 :
+			raise osv.except_osv(_('Warning!'),
+						_('Leave Consideration in Special Incentive should not exceed 12 days!!'))
+						
+		if rec.type == 'percentage' :
+			if rec.incentive_value > 100:
+				raise osv.except_osv(_('Warning!'),
+							_('Value of the Special Incentive should not exceed 100 % !!'))
+
+		return True
+
+		
+	## Module Requirement
+	
+	_constraints = [
+
+		(val_negative, 'Negative Values are not allowed!!', [' ']),		
+		
+	]
+		
+ch_con_special_incentive_policy()
 
 class ch_kg_contract_salary(osv.osv):
 	

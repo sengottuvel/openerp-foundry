@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Workorder_print" pageWidth="605" pageHeight="842" columnWidth="565" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.6105100000000008"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.y" value="1074"/>
 	<subDataset name="dataset2">
 		<parameter name="header_id" class="java.lang.Integer"/>
 		<queryString>
@@ -188,6 +188,43 @@ case when (ROW_NUMBER()OVER(PARTITION By wo_line.id)=COUNT(wo_line.id)OVER(PARTI
 case when wo_line.order_category = 'spare' then 1
 when wo_line.order_category = 'access' then 2 end as categ_type,
 
+case
+when wo.drawing_approval = 'yes' then 'Yes'
+when wo.drawing_approval = 'no' then 'No'
+else '-' end as drawing_approval,
+
+case
+when wo.inspection = 'yes' then 'Yes'
+when wo.inspection = 'no' then 'No'
+when wo.inspection = 'tpi' then 'TPI'
+when wo.inspection = 'customer' then 'Customer'
+when wo.inspection = 'consultant' then 'Consultant'
+when wo.inspection = 'stagewise' then 'Stage wise'
+else '-' end as inspection,
+
+case
+when wo.road_permit = 'yes' then 'Yes'
+when wo.road_permit = 'no' then 'No'
+else '-' end as road_permit,
+case
+when wo.l_d_clause = '5_1' then '0.5 - 1.0% of total order value'
+when wo.l_d_clause = '1_10' then '1 to 10% of total order value'
+when wo.l_d_clause = 'nill' then 'Nill'
+else '-' end as l_d_clause,
+
+case
+when wo.excise_duty = 'inclusive' then 'Inclusive'
+when wo.excise_duty = 'extra' then 'Extra'
+when wo.excise_duty = 'exemted' then 'Exemted - Export'
+when wo.excise_duty = 'pac' then 'PAC'
+when wo.excise_duty = 'sez' then 'SEZ'
+when wo.excise_duty = 'ct1' then 'CT1'
+when wo.excise_duty = 'ct3' then 'CT3'
+else '-' end as excise_duty,
+
+
+
+
 wo_line.order_category as line_order_category,
 
 case when
@@ -259,6 +296,7 @@ to_char(wo.entry_date::date,'dd-mm-YYYY') as order_date,
 comp.name as company_name,
 wo_line.note as remarks,
 to_char(CURRENT_DATE::date,'dd-mm-YYYY') as date,
+to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS new_Date,
 pump_crm.s_no as serial_no,
 dealer.name as delear
 
@@ -283,6 +321,11 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 	<field name="order_category" class="java.lang.String"/>
 	<field name="brkneed" class="java.lang.String"/>
 	<field name="categ_type" class="java.lang.Integer"/>
+	<field name="drawing_approval" class="java.lang.String"/>
+	<field name="inspection" class="java.lang.String"/>
+	<field name="road_permit" class="java.lang.String"/>
+	<field name="l_d_clause" class="java.lang.String"/>
+	<field name="excise_duty" class="java.lang.String"/>
 	<field name="line_order_category" class="java.lang.String"/>
 	<field name="order_priority" class="java.lang.String"/>
 	<field name="wo_ref" class="java.lang.String"/>
@@ -317,6 +360,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 	<field name="company_name" class="java.lang.String"/>
 	<field name="remarks" class="java.lang.String"/>
 	<field name="date" class="java.lang.String"/>
+	<field name="new_date" class="java.lang.String"/>
 	<field name="serial_no" class="java.lang.String"/>
 	<field name="delear" class="java.lang.String"/>
 	<group name="WO Group">
@@ -409,24 +453,11 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					</textElement>
 					<text><![CDATA[Dealer :]]></text>
 				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="73" width="95" height="21" isRemoveLineWhenBlank="true"/>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="73" width="243" height="21"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.0"/>
-					</box>
-					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Mechanical Seal :]]></text>
-				</staticText>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="95" y="73" width="148" height="21"/>
-					<box leftPadding="2">
-						<topPen lineWidth="0.75"/>
-						<leftPen lineWidth="0.0"/>
 						<bottomPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
 					</box>
@@ -514,32 +545,6 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{order_priority}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="243" y="137" width="322" height="32" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="2">
-						<topPen lineWidth="0.75"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[ED Clearance: Inclusive /Extra / Exemted - (Export / PAC /SEZ / CT1 /CT3)]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="243" y="116" width="156" height="21" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="3">
-						<topPen lineWidth="0.75"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Inspection: Yes (TPI)]]></text>
-				</staticText>
-				<staticText>
 					<reportElement mode="Transparent" x="0" y="190" width="565" height="15" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
@@ -553,8 +558,8 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<text><![CDATA[TECHNICAL SPECIFICATION :]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="169" width="565" height="21" isRemoveLineWhenBlank="true"/>
-					<box>
+					<reportElement mode="Transparent" x="0" y="155" width="565" height="35" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
 						<bottomPen lineWidth="0.75"/>
@@ -564,45 +569,6 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<font size="8" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[CPO Ref / Dealer Po Ref : --]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="116" width="243" height="21" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="2">
-						<topPen lineWidth="0.75"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Penalty: Yes(0.5% - 5%) From 05.02.15]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="137" width="243" height="32" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="3">
-						<topPen lineWidth="0.75"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Road permit: Yes / No]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="399" y="116" width="166" height="21" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="3">
-						<topPen lineWidth="0.75"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Drg. Appr.: Yes / No]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="204" width="259" height="17"/>
@@ -942,7 +908,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 				</staticText>
 				<staticText>
 					<reportElement mode="Transparent" x="0" y="605" width="306" height="16" isRemoveLineWhenBlank="true"/>
-					<box>
+					<box leftPadding="2">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
 						<bottomPen lineWidth="0.75"/>
@@ -1308,6 +1274,136 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<reportElement x="87" y="0" width="69" height="31"/>
 					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
 				</image>
+				<staticText>
+					<reportElement mode="Transparent" x="241" y="116" width="53" height="21" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Inspection: ]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="61" y="137" width="180" height="18"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{road_permit}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="116" width="61" height="21" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Penalty: ]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="61" y="116" width="180" height="21"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{l_d_clause}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="454" y="116" width="111" height="21"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{drawing_approval}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="137" width="61" height="18" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Road permit: ]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="241" y="137" width="78" height="18" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Justified" verticalAlignment="Middle">
+						<font size="8" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[ED Clearance: ]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="319" y="137" width="246" height="18"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{excise_duty}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement mode="Transparent" x="397" y="116" width="57" height="21" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Drg. Appr.: ]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="294" y="116" width="103" height="21"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{inspection}]]></textFieldExpression>
+				</textField>
 			</band>
 		</groupHeader>
 	</group>
@@ -1332,14 +1428,13 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="0" width="259" height="28"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.0"/>
 						<bottomPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
 						<font size="10" isBold="true"/>
 					</textElement>
-					<textFieldExpression><![CDATA["Pump with Accessories, Mechanical Seal, Motor & Spares"]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupHeader>
@@ -1394,7 +1489,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 		<groupHeader>
 			<band height="100">
 				<textField>
-					<reportElement x="1" y="0" width="396" height="20"/>
+					<reportElement x="1" y="0" width="564" height="20"/>
 					<textElement textAlignment="Center">
 						<font size="8" isBold="true"/>
 					</textElement>
@@ -1429,7 +1524,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA["POSI NO"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="397" y="0" width="42" height="20"/>
+					<reportElement x="397" y="20" width="42" height="20"/>
 					<textElement>
 						<font size="8" isBold="true"/>
 					</textElement>
@@ -1506,7 +1601,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{serial_no}]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="439" y="0" width="126" height="20"/>
+					<reportElement x="439" y="20" width="126" height="20"/>
 					<textElement>
 						<font size="8" isBold="true"/>
 					</textElement>
@@ -1604,7 +1699,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{printed_by} + " "+ "/"  +" "+$P{print_date}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{printed_by} + " "+ "/"  +" "+$F{new_date}]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
 				<reportElement x="330" y="30" width="48" height="20"/>

@@ -80,6 +80,17 @@
 								<group colspan="5">
 									<field name = "line_id_salary" nolabel="1" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
 								</group>
+								<group colspan="5" string="Special Incentive">
+									<field name = "line_id_inc" nolabel="1" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}">
+										<tree string="Special Incentive" editable="bottom">
+											<field name="start_value"/>
+											<field name="end_value"/>
+											<field name="type"/>
+											<field name="incentive_value"/>
+											<field name="leave_consider"/>
+										</tree>
+									</field>
+								</group>
 								<group string="Pay Mode" >
 									<field name="payment_mode" required="1" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
 									<field name="bank_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'required':[('payment_mode','=','bank')]}"/>
