@@ -1632,7 +1632,12 @@ class ch_kg_crm_pumpmodel(osv.osv):
 						bush_bearing_lubrication = 'ex_pressure'
 					else:
 						bush_bearing_lubrication = ''
+					
 					for item in wo_rec.line_ids:
+						if purpose_categ == 'pump':
+							is_applicable = item.flag_applicable
+						else:
+							is_applicable = False
 						fou_vals.append({
 									'position_id': item.position_id.id,
 									'pattern_id': item.pattern_id.id,
@@ -1640,11 +1645,15 @@ class ch_kg_crm_pumpmodel(osv.osv):
 									'moc_id': item.moc_id.id,
 									'qty': item.qty,
 									'load_bom': True,
-									'is_applicable': item.flag_applicable,
+									'is_applicable': is_applicable,
 									'purpose_categ': purpose_categ,
 									#~ 'remarks': item.remarks,
 									})
 					for item in wo_rec.line_ids_a:
+						if purpose_categ == 'pump':
+							is_applicable = item.flag_applicable
+						else:
+							is_applicable = False
 						ms_vals.append({
 									'name': item.ms_id.name,
 									'position_id': item.position_id.id,							
@@ -1652,17 +1661,21 @@ class ch_kg_crm_pumpmodel(osv.osv):
 									'moc_id': item.moc_id.id,
 									'qty': item.qty,
 									'load_bom': True,
-									'is_applicable': item.flag_applicable,
+									'is_applicable': is_applicable,
 									'purpose_categ': purpose_categ,
 									})
 					for item in wo_rec.line_ids_b:
+						if purpose_categ == 'pump':
+							is_applicable = item.flag_applicable
+						else:
+							is_applicable = False
 						bot_vals.append({
 									'item_name': item.bot_id.name,
 									'ms_id': item.bot_id.id,
 									'moc_id': item.moc_id.id,
 									'qty': item.qty,
 									'load_bom': True,
-									'is_applicable': item.flag_applicable,
+									'is_applicable': is_applicable,
 									'flag_is_bearing': item.flag_is_bearing,
 									'brand_id': item.brand_id.id,
 									'purpose_categ': purpose_categ,
@@ -1809,12 +1822,14 @@ class ch_kg_crm_pumpmodel(osv.osv):
 						if wo_line_id:
 							moc_id = item.moc_id.id
 							item_name = item.item_name
+							is_bearing = item.flag_is_bearing
 						else:
 							item_name = item.name
 							bot_obj = self.pool.get('kg.machine.shop').search(cr,uid,[('id','=',item.bot_id.id)])
 							print"bot_objbot_obj",bot_obj
 							if bot_obj:
 								bot_rec = self.pool.get('kg.machine.shop').browse(cr,uid,bot_obj[0])
+								is_bearing = bot_rec.is_bearing
 								if bot_rec.line_ids_a:
 									#~ for ele in bot_rec.line_ids_a:
 									cons_rec = self.pool.get('kg.moc.construction').browse(cr,uid,moc_const_id)
@@ -1829,7 +1844,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 										'qty': item.qty,
 										'load_bom': True,
 										'is_applicable': False,
-										'flag_is_bearing': bot_rec.is_bearing,
+										'flag_is_bearing': is_bearing,
 										'purpose_categ': purpose_categ,
 										#~ 'position_id': item.position_id.id,
 										#~ 'remarks': item.remarks,
