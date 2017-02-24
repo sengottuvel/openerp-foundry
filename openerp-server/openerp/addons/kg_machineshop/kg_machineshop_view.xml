@@ -581,7 +581,7 @@
 							<field name="pouring_date" />
 							<field name="ms_material_status" />
 							<field name="sub_con_date" />
-							<field name="accessories" readonly="1"/>
+							<field name="accessories" />
 							<field name="id_commitment_date" />
 							<field name="despatch_date" />
 							<field name="acc_material_status" />							

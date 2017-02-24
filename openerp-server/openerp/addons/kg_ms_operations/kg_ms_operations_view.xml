@@ -2509,6 +2509,7 @@
 					<field name="moc_id"/>
 					<field name="position_id"/>
 					<field name="oth_spec"/>
+					<field name="reject_state"/>
 				</tree>
 			</field>
 		</record>

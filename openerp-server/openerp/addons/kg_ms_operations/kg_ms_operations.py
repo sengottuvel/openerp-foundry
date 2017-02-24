@@ -451,7 +451,9 @@ class kg_ms_operations(osv.osv):
 		'op12_start_date': fields.date('Start Date'),
 		'op12_end_date': fields.date('End Date'),
 		
-		
+		### MS Rejection List ###
+		'reject_state': fields.selection([('issued','Issued'),('not_issued','Not Issued'),('received','Received'),('not_received','Not Received')],'State'),
+
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		
@@ -711,49 +713,49 @@ class kg_ms_operations(osv.osv):
 						}
 						ms_store_id = self.pool.get('kg.ms.stores').create(cr, uid, ms_store_vals)
 						
-					### Updating values for current item ###
-					if entry_rec.ms_type == 'foundry_item':
-						cr.execute("""select id from kg_ms_stores where  
-						pattern_id = %s and moc_id = %s and ms_type = 'foundry_item' and accept_state = 'pending' 
-						and order_line_id = %s order by id asc"""%(
-						entry_rec.pattern_id.id,entry_rec.moc_id.id,entry_rec.order_line_id.id))
-						current_store_id = cr.fetchone();
-						if current_store_id:
-							ms_store_vals = {
-								'operation_id': entry_rec.id,
-								'ms_id': entry_rec.ms_id.id,
-								'production_id': entry_rec.production_id.id,
-								'foundry_assembly_id': entry_rec.production_id.assembly_id,
-								'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
-								'ms_assembly_id': entry_rec.ms_id.assembly_id,
-								'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
-								'ms_plan_id': entry_rec.ms_plan_id.id,
-								'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
-								'accept_state': 'waiting',
-								
-							}
-							self.pool.get('kg.ms.stores').write(cr, uid, current_store_id[0],ms_store_vals)
-					if entry_rec.ms_type == 'ms_item':
-						cr.execute("""select id from kg_ms_stores where  
-						item_code = %s and moc_id = %s and ms_type = 'ms_item' and accept_state = 'pending' 
-						and order_line_id = %s order by id asc"""%(entry_rec.item_code,
-						entry_rec.moc_id.id,entry_rec.order_line_id.id))
-						ms_store_id = cr.fetchone();
-						if ms_store_id:
-							ms_store_vals = {
-								'operation_id': entry_rec.id,
-								'ms_id': entry_rec.ms_id.id,
-								'production_id': entry_rec.production_id.id,
-								'foundry_assembly_id': entry_rec.production_id.assembly_id,
-								'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
-								'ms_assembly_id': entry_rec.ms_id.assembly_id,
-								'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
-								'ms_plan_id': entry_rec.ms_plan_id.id,
-								'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
-								'accept_state': 'waiting',
-								
-							}
-							self.pool.get('kg.ms.stores').write(cr, uid, ms_store_id[0],ms_store_vals)
+			### Updating values for current item ###
+			if entry_rec.ms_type == 'foundry_item':
+				cr.execute("""select id from kg_ms_stores where  
+				pattern_id = %s and moc_id = %s and ms_type = 'foundry_item' and accept_state = 'pending' 
+				and order_line_id = %s order by id asc"""%(
+				entry_rec.pattern_id.id,entry_rec.moc_id.id,entry_rec.order_line_id.id))
+				current_store_id = cr.fetchone();
+				if current_store_id:
+					ms_store_vals = {
+						'operation_id': entry_rec.id,
+						'ms_id': entry_rec.ms_id.id,
+						'production_id': entry_rec.production_id.id,
+						'foundry_assembly_id': entry_rec.production_id.assembly_id,
+						'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
+						'ms_assembly_id': entry_rec.ms_id.assembly_id,
+						'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
+						'ms_plan_id': entry_rec.ms_plan_id.id,
+						'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+						'accept_state': 'waiting',
+						
+					}
+					self.pool.get('kg.ms.stores').write(cr, uid, current_store_id[0],ms_store_vals)
+			if entry_rec.ms_type == 'ms_item':
+				cr.execute("""select id from kg_ms_stores where  
+				item_code = %s and moc_id = %s and ms_type = 'ms_item' and accept_state = 'pending' 
+				and order_line_id = %s order by id asc"""%(entry_rec.item_code,
+				entry_rec.moc_id.id,entry_rec.order_line_id.id))
+				ms_store_id = cr.fetchone();
+				if ms_store_id:
+					ms_store_vals = {
+						'operation_id': entry_rec.id,
+						'ms_id': entry_rec.ms_id.id,
+						'production_id': entry_rec.production_id.id,
+						'foundry_assembly_id': entry_rec.production_id.assembly_id,
+						'foundry_assembly_line_id': entry_rec.production_id.assembly_line_id,
+						'ms_assembly_id': entry_rec.ms_id.assembly_id,
+						'ms_assembly_line_id': entry_rec.ms_id.assembly_line_id,
+						'ms_plan_id': entry_rec.ms_plan_id.id,
+						'ms_plan_line_id': entry_rec.ms_plan_line_id.id,
+						'accept_state': 'waiting',
+						
+					}
+					self.pool.get('kg.ms.stores').write(cr, uid, ms_store_id[0],ms_store_vals)
 						
 		return True
 											
@@ -1225,9 +1227,8 @@ class kg_ms_operations(osv.osv):
 					if entry_rec.order_id.flag_for_stock == False:
 						### Department Indent Creation when process result is reject for ms item ###
 						if entry_rec.ms_type == 'ms_item':
-							
-							
-							
+							self.write(cr, uid, ids, {'reject_state':'not_issued','op1_button_status':'visible'})
+
 							if entry_rec.ms_id.ms_id.line_ids:
 								
 								dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
@@ -1318,6 +1319,8 @@ class kg_ms_operations(osv.osv):
 								dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
 							
 						if entry_rec.ms_type == 'foundry_item':
+							
+							self.write(cr, uid, ids, {'reject_state':'not_received'})
 							
 							ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
 							
@@ -1900,7 +1903,7 @@ class kg_ms_operations(osv.osv):
 					if entry_rec.order_id.flag_for_stock == False:
 						### Department Indent Creation when process result is reject for ms item ###
 						if entry_rec.ms_type == 'ms_item':
-							
+							self.write(cr, uid, ids, {'reject_state':'not_issued','op2_button_status':'visible'})
 							
 							if entry_rec.ms_id.ms_id.line_ids:
 								
@@ -1987,6 +1990,8 @@ class kg_ms_operations(osv.osv):
 								dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
 							
 						if entry_rec.ms_type == 'foundry_item':
+							
+							self.write(cr, uid, ids, {'reject_state':'not_received'})
 							
 							ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
 							
@@ -2560,7 +2565,7 @@ class kg_ms_operations(osv.osv):
 					if entry_rec.order_id.flag_for_stock == False:
 						### Department Indent Creation when process result is reject for ms item ###
 						if entry_rec.ms_type == 'ms_item':
-							
+							self.write(cr, uid, ids, {'reject_state':'not_issued','op3_button_status':'visible'})
 							## Operation 2 Status Updation ###
 							
 							if entry_rec.ms_id.ms_id.line_ids:
@@ -2649,6 +2654,8 @@ class kg_ms_operations(osv.osv):
 								dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
 							
 						if entry_rec.ms_type == 'foundry_item':
+							
+							self.write(cr, uid, ids, {'reject_state':'not_received'})
 							
 							ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
 							
@@ -3225,7 +3232,7 @@ class kg_ms_operations(osv.osv):
 					if entry_rec.order_id.flag_for_stock == False:
 						### Department Indent Creation when process result is reject for ms item ###
 						if entry_rec.ms_type == 'ms_item':
-							
+							self.write(cr, uid, ids, {'reject_state':'not_issued','op4_button_status':'visible'})
 							
 							if entry_rec.ms_id.ms_id.line_ids:
 								
@@ -3314,6 +3321,8 @@ class kg_ms_operations(osv.osv):
 								dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
 							
 						if entry_rec.ms_type == 'foundry_item':
+							
+							self.write(cr, uid, ids, {'reject_state':'not_received'})
 							
 							ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
 							
@@ -3888,7 +3897,7 @@ class kg_ms_operations(osv.osv):
 					if entry_rec.order_id.flag_for_stock == False:
 						### Department Indent Creation when process result is reject for ms item ###
 						if entry_rec.ms_type == 'ms_item':
-							
+							self.write(cr, uid, ids, {'reject_state':'not_issued','op5_button_status':'visible'})
 							
 							if entry_rec.ms_id.ms_id.line_ids:
 								
@@ -3977,6 +3986,8 @@ class kg_ms_operations(osv.osv):
 								dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
 							
 						if entry_rec.ms_type == 'foundry_item':
+							
+							self.write(cr, uid, ids, {'reject_state':'not_received'})
 							
 							ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
 							
@@ -4550,7 +4561,7 @@ class kg_ms_operations(osv.osv):
 					if entry_rec.order_id.flag_for_stock == False:
 						### Department Indent Creation when process result is reject for ms item ###
 						if entry_rec.ms_type == 'ms_item':
-							
+							self.write(cr, uid, ids, {'reject_state':'not_issued','op6_button_status':'visible'})
 							
 							if entry_rec.ms_id.ms_id.line_ids:
 								
@@ -4639,6 +4650,8 @@ class kg_ms_operations(osv.osv):
 								dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
 							
 						if entry_rec.ms_type == 'foundry_item':
+							
+							self.write(cr, uid, ids, {'reject_state':'not_received'})
 							
 							ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
 							
@@ -5212,7 +5225,7 @@ class kg_ms_operations(osv.osv):
 					if entry_rec.order_id.flag_for_stock == False:
 						### Department Indent Creation when process result is reject for ms item ###
 						if entry_rec.ms_type == 'ms_item':
-							
+							self.write(cr, uid, ids, {'reject_state':'not_issued','op7_button_status':'visible'})
 							
 							if entry_rec.ms_id.ms_id.line_ids:
 								
@@ -5301,6 +5314,8 @@ class kg_ms_operations(osv.osv):
 								dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
 							
 						if entry_rec.ms_type == 'foundry_item':
+							
+							self.write(cr, uid, ids, {'reject_state':'not_received'})
 							
 							ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
 							
@@ -5874,6 +5889,7 @@ class kg_ms_operations(osv.osv):
 					if entry_rec.order_id.flag_for_stock == False:
 						### Department Indent Creation when process result is reject for ms item ###
 						if entry_rec.ms_type == 'ms_item':
+							self.write(cr, uid, ids, {'reject_state':'not_issued','op8_button_status':'visible'})
 
 							if entry_rec.ms_id.ms_id.line_ids:
 								
@@ -5962,6 +5978,8 @@ class kg_ms_operations(osv.osv):
 								dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
 							
 						if entry_rec.ms_type == 'foundry_item':
+							
+							self.write(cr, uid, ids, {'reject_state':'not_received'})
 							
 							ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
 							
@@ -6536,6 +6554,7 @@ class kg_ms_operations(osv.osv):
 					if entry_rec.order_id.flag_for_stock == False:
 						### Department Indent Creation when process result is reject for ms item ###
 						if entry_rec.ms_type == 'ms_item':
+							self.write(cr, uid, ids, {'reject_state':'not_issued','op9_button_status':'visible'})
 							
 							
 							if entry_rec.ms_id.ms_id.line_ids:
@@ -6625,6 +6644,8 @@ class kg_ms_operations(osv.osv):
 								dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
 							
 						if entry_rec.ms_type == 'foundry_item':
+							
+							self.write(cr, uid, ids, {'reject_state':'not_received'})
 							
 							ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
 							
@@ -7201,7 +7222,7 @@ class kg_ms_operations(osv.osv):
 						
 						### Department Indent Creation when process result is reject for ms item ###
 						if entry_rec.ms_type == 'ms_item':
-							
+							self.write(cr, uid, ids, {'reject_state':'not_issued','op10_button_status':'visible'})
 							
 							if entry_rec.ms_id.ms_id.line_ids:
 								
@@ -7290,6 +7311,8 @@ class kg_ms_operations(osv.osv):
 								dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
 							
 						if entry_rec.ms_type == 'foundry_item':
+							
+							self.write(cr, uid, ids, {'reject_state':'not_received'})
 							
 							ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
 							
@@ -7863,6 +7886,8 @@ class kg_ms_operations(osv.osv):
 						### Department Indent Creation when process result is reject for ms item ###
 						if entry_rec.ms_type == 'ms_item':
 							
+							self.write(cr, uid, ids, {'reject_state':'not_issued','op11_button_status':'visible'})
+							
 							
 							if entry_rec.ms_id.ms_id.line_ids:
 								
@@ -7951,6 +7976,8 @@ class kg_ms_operations(osv.osv):
 								dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
 							
 						if entry_rec.ms_type == 'foundry_item':
+							
+							self.write(cr, uid, ids, {'reject_state':'not_received'})
 							
 							ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
 							
@@ -8525,6 +8552,8 @@ class kg_ms_operations(osv.osv):
 						### Department Indent Creation when process result is reject for ms item ###
 						if entry_rec.ms_type == 'ms_item':
 							
+							self.write(cr, uid, ids, {'reject_state':'not_issued','op12_button_status':'visible'})
+							
 							
 							if entry_rec.ms_id.ms_id.line_ids:
 								
@@ -8613,6 +8642,8 @@ class kg_ms_operations(osv.osv):
 								dimension_obj.write(cr, uid, dimen_item.id, dimen_vals, context)
 							
 						if entry_rec.ms_type == 'foundry_item':
+							
+							self.write(cr, uid, ids, {'reject_state':'not_received'})
 							
 							ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_rejected_qty': entry_rec.ms_id.ms_rejected_qty + entry_rec.inhouse_qty})
 							

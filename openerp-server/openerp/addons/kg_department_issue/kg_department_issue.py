@@ -493,7 +493,10 @@ class kg_department_issue(osv.osv):
 					if ms_obj:
 						ms_rec = self.pool.get('kg.machineshop').browse(cr,uid,ms_obj[0])
 						self.pool.get('kg.machineshop').write(cr,uid,ms_rec.id,{'state':'accept'})
-				
+					cr.execute(""" update kg_ms_operations set reject_state = 'issued' where id in (
+						select id from kg_ms_operations where state = 'reject' 
+						and order_line_id = %s and reject_state = 'not_issued' and ms_type = 'ms_item'
+						and item_code = '%s' and moc_id = %s limit 1) """%(line_ids.w_order_line_id.id,line_ids.ms_bot_id.code,line_ids.wo_moc_id.id))
 				
 				stock_move_obj.create(cr,uid,
 				{
