@@ -566,6 +566,16 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
 		</record>
 		
+		<record id="kg_hr_kg_special_incentive_con" model="ir.model.access">
+			<field name="model_id" ref="kg_contract.model_ch_con_special_incentive_policy"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Special Incentive in Contract</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
     </data>
 </openerp>
 	
