@@ -597,6 +597,7 @@ class kg_payslip(osv.osv):
 							spec_amount_1 = 0
 							spec_amount_2 = 0
 							get_spl_inc = self.pool.get('hr.payslip.line').search(cr,uid,[('code','=','SPI'),('slip_id','=',slip_rec.id)])
+							print "__________________________________",get_spl_inc
 							get_spl_inc_rc = self.pool.get('hr.payslip.line').browse(cr,uid,get_spl_inc[0])
 							for con_incs in con_ids_1.line_id_inc:
 								cal_days = salary_days - leave_days
