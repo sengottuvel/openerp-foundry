@@ -551,10 +551,11 @@ class kg_payslip(osv.osv):
 							
 							######### Incentive Calculation ###########
 							if inc_ids:
+								inc_rec = self.pool.get('ch.incentive.policy').browse(cr,uid,inc_ids[0])
 								for incentive_ids in inc_ids:
 									cal_days = salary_days - leave_days
-									if (absent+leave_days) >= con_incs.leave_consider:
-										wor_days =  cal_days + con_incs.leave_consider
+									if (absent+leave_days) >= inc_rec.leave_consider:
+										wor_days =  cal_days + inc_rec.leave_consider
 										print "wor_dayswor_dayswor_dayswor_days",wor_days
 									else:
 										wor_days = salary_days + absent
@@ -593,51 +594,80 @@ class kg_payslip(osv.osv):
 							if spec_id:
 								spec_rec = self.pool.get('ch.kg.contract.salary').browse(cr,uid,spec_id[0])
 								print "special Incentive amount in Contract---------------------------------------------------------------",spec_rec.salary_amt
-							spec_amount  = 0 
-							spec_amount_1 = 0
-							spec_amount_2 = 0
-							get_spl_inc = self.pool.get('hr.payslip.line').search(cr,uid,[('code','=','SPI'),('slip_id','=',slip_rec.id)])
-							print "__________________________________",get_spl_inc
-							get_spl_inc_rc = self.pool.get('hr.payslip.line').browse(cr,uid,get_spl_inc[0])
-							for con_incs in con_ids_1.line_id_inc:
-								cal_days = salary_days - leave_days
-								if (absent+leave_days) >= con_incs.leave_consider:
-									wor_days =  cal_days + con_incs.leave_consider
-									print "wor_dayswor_dayswor_dayswor_days",wor_days
-								else:
-									wor_days = salary_days + absent
-									print "wor_dayswor_dayswor_dayswor_days",wor_days
-								spec_amt = (spec_rec.salary_amt / calulation_days) * wor_days
-								print "___Special Incentive as per attendance__________________",spec_amt
-								if con_incs.type == 'percentage':
-									print"Turn Over amount ----------------------------------------",turn_over_amt
-									if con_incs.start_value <= turn_over_amt:
-										print "Incentive percentage value-----------------------------------",con_incs.incentive_value
-										spec_amount = (spec_rec.salary_amt /100)*con_incs.incentive_value
-										print "Actual Amount ---------------------",spec_amount
-										laks = float(str(turn_over_amt-int(turn_over_amt))[1:])
-										if con_incs.start_value < turn_over_amt and con_incs.end_value > turn_over_amt:
-											spec_amount_2 = ((((spec_rec.salary_amt/100)*con_incs.incentive_value) / 100) * laks) * 100 
-											spec_amount = spec_amount_2
-											print "________mid value_____________",spec_amount_2
-									print"************spec_amount",spec_amount
-									print"************spec_amount",spec_amount_2
-									spec_amount_1 += spec_amount
-									print "_______whole_____________",spec_amount_1
-									if spec_amount_1 != 0.00:
-										self.pool.get('hr.payslip.line').write(cr,uid,get_spl_inc_rc.id,
-											{
-												
-												'amount':((spec_amount_1+spec_rec.salary_amt)/calulation_days)* wor_days,
-											})
+								spec_amount  = 0 
+								spec_amount_1 = 0
+								spec_amount_2 = 0
+								get_spl_inc = self.pool.get('hr.payslip.line').search(cr,uid,[('code','=','SPI'),('slip_id','=',slip_rec.id)])
+								print "__________________________________",get_spl_inc
+								get_spl_inc_rc = self.pool.get('hr.payslip.line').browse(cr,uid,get_spl_inc[0])
+								for con_incs in con_ids_1.line_id_inc:
+									cal_days = salary_days - leave_days
+									if (absent+leave_days) >= con_incs.leave_consider:
+										wor_days =  cal_days + con_incs.leave_consider
+										print "wor_dayswor_dayswor_dayswor_days",wor_days
 									else:
-										self.pool.get('hr.payslip.line').write(cr,uid,get_spl_inc_rc.id,
-											{
-												
-												'amount':(spec_rec.salary_amt/calulation_days)* wor_days,
-											})
+										wor_days = salary_days + absent
+										print "wor_dayswor_dayswor_dayswor_days",wor_days
+									spec_amt = (spec_rec.salary_amt / calulation_days) * wor_days
+									print "___Special Incentive as per attendance__________________",spec_amt
+									if con_incs.type == 'percentage':
+										print"Turn Over amount ----------------------------------------",turn_over_amt
+										if con_incs.start_value <= turn_over_amt:
+											print "Incentive percentage value-----------------------------------",con_incs.incentive_value
+											spec_amount = (spec_rec.salary_amt /100)*con_incs.incentive_value
+											print "Actual Amount ---------------------",spec_amount
+											laks = float(str(turn_over_amt-int(turn_over_amt))[1:])
+											if con_incs.start_value < turn_over_amt and con_incs.end_value > turn_over_amt:
+												spec_amount_2 = ((((spec_rec.salary_amt/100)*con_incs.incentive_value) / 100) * laks) * 100 
+												spec_amount = spec_amount_2
+												print "________mid value_____________",spec_amount_2
+										print"************spec_amount",spec_amount
+										print"************spec_amount",spec_amount_2
+										spec_amount_1 += spec_amount
+										print "_______whole_____________",spec_amount_1
+										if spec_amount_1 != 0.00:
+											self.pool.get('hr.payslip.line').write(cr,uid,get_spl_inc_rc.id,
+												{
+													
+													'amount':((spec_amount_1+spec_rec.salary_amt)/calulation_days)* wor_days,
+												})
+										else:
+											self.pool.get('hr.payslip.line').write(cr,uid,get_spl_inc_rc.id,
+												{
+													
+													'amount':(spec_rec.salary_amt/calulation_days)* wor_days,
+												})
 								
 						######### Special Incentive Calculation ###########
+						
+				#### Creation of Fixed Incentive for the employee ####
+				
+				fix_inc_id = self.pool.get('ch.kg.contract.salary').search(cr,uid,[('header_id_salary','=',con_ids[0]),('salary_type','=',38)])
+				fix_inc_pay_id = self.pool.get('hr.payslip.line').search(cr,uid,[('code','=','FI'),('slip_id','=',slip_rec.id)])
+				if fix_inc_id:
+					fix_inc_rec = self.pool.get('ch.kg.contract.salary').browse(cr,uid,fix_inc_id[0])
+					print "Fixed Incentive in Contract Master ",fix_inc_rec.salary_amt
+					cal_days = salary_days - leave_days
+					if (absent+leave_days) >= 2:
+						wor_days =  cal_days + 2
+						print "Leave Exceeded",wor_days
+					else:
+						wor_days = salary_days + absent
+						print "Leaves within consideration",wor_days
+					fix_inc_val = (fix_inc_rec.salary_amt/calulation_days)*wor_days
+					print "Net Fixed Incentive value(Calculated)",fix_inc_val
+					if fix_inc_pay_id:
+						fix_inc_pay_rec = self.pool.get('hr.payslip.line').browse(cr,uid,fix_inc_pay_id[0])
+						self.pool.get('hr.payslip.line').write(cr,uid,fix_inc_pay_rec.id,
+											{
+												'amount':fix_inc_val,
+											})
+					else:
+						pass
+				else:
+					pass
+					
+				#### Creation of Fixed Incentive for the employee ####
 				
 				#### Creation of Incentive for the employee ####	
 				
