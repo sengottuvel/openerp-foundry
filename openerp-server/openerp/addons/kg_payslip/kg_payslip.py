@@ -46,6 +46,9 @@ class kg_payslip(osv.osv):
 	'date': fields.date('Creation Date'),
 	'month':fields.char('Month')
 	
+	###### Line Declarations ########
+	'line_id_other_sal':fields.one2many('ch.other.salary.comp','slip_id','Line Id Other Salary'),
+	
 	}
 	
 	
