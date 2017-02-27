@@ -938,6 +938,8 @@ class kg_payslip(osv.osv):
 		####### Reverting the advance amount of the employee for this month while cancelling ################
 		sql = """ delete from hr_payslip_line where slip_id=%s """%(slip_rec.id)
 		cr.execute(sql)
+		sql_1 = """ delete from ch_other_salary_comp where slip_id=%s """%(slip_rec.id)
+		cr.execute(sql_1)
 		sql_parent = """ update hr_payslip set tot_deduction=null ,con_cross_amt=null,cross_amt =null,tot_paid_days =null,tot_allowance=null,
 		round_val=null where id =%s """%(slip_rec.id)
 		cr.execute(sql_parent)
