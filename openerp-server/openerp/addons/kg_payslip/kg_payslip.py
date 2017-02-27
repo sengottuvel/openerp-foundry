@@ -44,7 +44,7 @@ class kg_payslip(osv.osv):
 	'dep_id': fields.many2one('hr.department','Department Name'),
 	'cum_ded_id': fields.many2one('kg.advance.deduction','Cumulative Deduction', readonly=True),
 	'date': fields.date('Creation Date'),
-	'month':fields.char('Month')
+	'month':fields.char('Month'),
 	
 	###### Line Declarations ########
 	'line_id_other_sal':fields.one2many('ch.other.salary.comp','slip_id','Line Id Other Salary'),
