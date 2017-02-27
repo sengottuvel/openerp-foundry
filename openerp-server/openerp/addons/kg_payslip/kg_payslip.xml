@@ -64,7 +64,22 @@
                     <field name="cross_amt"/>
                     <field name="tot_contribution" invisible="1"/>
                     <field name="credit_note" invisible="1"/>
-					</field>	
+					</field>
+					<xpath expr = "//page[@string='Salary Computation']" position="after">
+						<page string="Other Salary Component" >
+							<field name="line_id_other_sal" nolabel="1">
+								<tree string="Other Salary Component" editable="bottom" colors="blue:total == 0">
+									<field name="name" string="Name"/>
+									<field name="code"/>
+									<field name="category_id"/>
+									<field name="quantity"/>
+									<field name="rate" invisible="1"/>
+									<field name="amount"/>
+									<field name="total" invisible="1"/>
+								</tree>
+							</field>
+						</page>
+					</xpath>	
 									
 			
 				</field>

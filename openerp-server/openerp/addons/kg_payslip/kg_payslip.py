@@ -321,18 +321,33 @@ class kg_payslip(osv.osv):
 						
 					mon_sal = (comp_amt*salary_days)
 						
-					self.pool.get('hr.payslip.line').create(cr,uid,
-									{
-										'name':con_line_ids.salary_type.name,
-										'code':con_line_ids.salary_type.code,
-										'category_id':categ_ids,
-										'quantity':1,
-										'amount':mon_sal,
-										'salary_rule_id':con_line_ids.salary_type.id,
-										'employee_id':emp_id,
-										'contract_id':con_ids[0],
-										'slip_id':slip_rec.id,
-									},context = None)
+					if con_line_ids.salary_type.appears_on_payslip == True:
+						
+						self.pool.get('hr.payslip.line').create(cr,uid,
+										{
+											'name':con_line_ids.salary_type.name,
+											'code':con_line_ids.salary_type.code,
+											'category_id':categ_ids,
+											'quantity':1,
+											'amount':mon_sal,
+											'salary_rule_id':con_line_ids.salary_type.id,
+											'employee_id':emp_id,
+											'contract_id':con_ids[0],
+											'slip_id':slip_rec.id,
+										},context = None)
+					else:
+						self.pool.get('ch.other.salary.comp').create(cr,uid,
+										{
+											'name':con_line_ids.salary_type.name,
+											'code':con_line_ids.salary_type.code,
+											'category_id':categ_ids,
+											'quantity':1,
+											'amount':mon_sal,
+											'salary_rule_id':con_line_ids.salary_type.id,
+											'employee_id':emp_id,
+											'contract_id':con_ids[0],
+											'slip_id':slip_rec.id,
+										},context = None)
 					
 					if con_ids_1.pf_status and con_ids_1.pf_eff_date <= slip_rec.date_to and con_line_ids.salary_type.app_pf:
 						amt_sal += mon_sal
@@ -553,13 +568,13 @@ class kg_payslip(osv.osv):
 							if inc_ids:
 								inc_rec = self.pool.get('ch.incentive.policy').browse(cr,uid,inc_ids[0])
 								for incentive_ids in inc_ids:
-									cal_days = salary_days - leave_days
-									if (absent+leave_days) >= inc_rec.leave_consider:
-										wor_days =  cal_days + inc_rec.leave_consider
-										print "wor_dayswor_dayswor_dayswor_days",wor_days
-									else:
-										wor_days = salary_days + absent
-										print "wor_dayswor_dayswor_dayswor_days",wor_days
+									#~ cal_days = salary_days - leave_days
+									#~ if (absent+leave_days) >= inc_rec.leave_consider:
+										#~ wor_days =  cal_days + inc_rec.leave_consider
+										#~ print "wor_dayswor_dayswor_dayswor_days",wor_days
+									#~ else:
+										#~ wor_days = salary_days + absent
+										#~ print "wor_dayswor_dayswor_dayswor_days",wor_days
 									print "incentive_idsincentive_idsincentive_idsincentive_idsincentive_ids",incentive_ids
 									print "turn_over_amtturn_over_amtturn_over_amt",turn_over_amt
 									inc_ids = self.pool.get('ch.incentive.policy').browse(cr,uid,incentive_ids)
@@ -568,12 +583,12 @@ class kg_payslip(osv.osv):
 											print "*********inc_ids.incentive_value************",inc_ids.incentive_value
 											print "*********working_days************",calulation_days
 											print "*********worked_days************",worked_days
-											incent_amt = ((turn_over_amt*inc_ids.incentive_value)/calulation_days)*wor_days
+											incent_amt = ((turn_over_amt*inc_ids.incentive_value)/calulation_days)*salary_days
 										elif inc_ids.type == 'percentage':
 											turn_over_per = (turn_over_amt*inc_ids.incentive_value)/100
-											incent_amt = ((turn_over_per)/calulation_days)*wor_days
+											incent_amt = ((turn_over_per)/calulation_days)*salary_days
 										else:
-											incent_amt = ((inc_ids.incentive_value)/calulation_days)*wor_days
+											incent_amt = ((inc_ids.incentive_value)/calulation_days)*salary_days
 										self.pool.get('hr.payslip.line').create(cr,uid,
 												{
 													'name':'Incentive',
@@ -599,7 +614,7 @@ class kg_payslip(osv.osv):
 								spec_amount_2 = 0
 								get_spl_inc = self.pool.get('hr.payslip.line').search(cr,uid,[('code','=','SPI'),('slip_id','=',slip_rec.id)])
 								print "__________________________________",get_spl_inc
-								get_spl_inc_rc = self.pool.get('hr.payslip.line').browse(cr,uid,get_spl_inc[0])
+								get_spl_inc_othr = self.pool.get('ch.other.salary.comp').search(cr,uid,[('code','=','SPI'),('slip_id','=',slip_rec.id)])
 								for con_incs in con_ids_1.line_id_inc:
 									cal_days = salary_days - leave_days
 									if (absent+leave_days) >= con_incs.leave_consider:
@@ -625,18 +640,34 @@ class kg_payslip(osv.osv):
 										print"************spec_amount",spec_amount_2
 										spec_amount_1 += spec_amount
 										print "_______whole_____________",spec_amount_1
-										if spec_amount_1 != 0.00:
-											self.pool.get('hr.payslip.line').write(cr,uid,get_spl_inc_rc.id,
-												{
-													
-													'amount':((spec_amount_1+spec_rec.salary_amt)/calulation_days)* wor_days,
-												})
-										else:
-											self.pool.get('hr.payslip.line').write(cr,uid,get_spl_inc_rc.id,
-												{
-													
-													'amount':(spec_rec.salary_amt/calulation_days)* wor_days,
-												})
+										if get_spl_inc:
+											get_spl_inc_rc = self.pool.get('hr.payslip.line').browse(cr,uid,get_spl_inc[0])
+											if spec_amount_1 != 0.00:
+												self.pool.get('hr.payslip.line').write(cr,uid,get_spl_inc_rc.id,
+													{
+														
+														'amount':((spec_amount_1+spec_rec.salary_amt)/calulation_days)* wor_days,
+													})
+											else:
+												self.pool.get('hr.payslip.line').write(cr,uid,get_spl_inc_rc.id,
+													{
+														
+														'amount':(spec_rec.salary_amt/calulation_days)* wor_days,
+													})
+										elif get_spl_inc_othr:
+											get_spl_inc_rc_othr = self.pool.get('ch.other.salary.comp').browse(cr,uid,get_spl_inc_othr[0])
+											if spec_amount_1 != 0.00:
+												self.pool.get('ch.other.salary.comp').write(cr,uid,get_spl_inc_rc_othr.id,
+													{
+														
+														'amount':((spec_amount_1+spec_rec.salary_amt)/calulation_days)* wor_days,
+													})
+											else:
+												self.pool.get('ch.other.salary.comp').write(cr,uid,get_spl_inc_rc_othr.id,
+													{
+														
+														'amount':(spec_rec.salary_amt/calulation_days)* wor_days,
+													})
 								
 						######### Special Incentive Calculation ###########
 						
@@ -644,6 +675,7 @@ class kg_payslip(osv.osv):
 				
 				fix_inc_id = self.pool.get('ch.kg.contract.salary').search(cr,uid,[('header_id_salary','=',con_ids[0]),('salary_type','=',38)])
 				fix_inc_pay_id = self.pool.get('hr.payslip.line').search(cr,uid,[('code','=','FI'),('slip_id','=',slip_rec.id)])
+				fix_inc_pay_id_othr = self.pool.get('ch.other.salary.comp').search(cr,uid,[('code','=','FI'),('slip_id','=',slip_rec.id)])
 				if fix_inc_id:
 					fix_inc_rec = self.pool.get('ch.kg.contract.salary').browse(cr,uid,fix_inc_id[0])
 					print "Fixed Incentive in Contract Master ",fix_inc_rec.salary_amt
@@ -659,6 +691,13 @@ class kg_payslip(osv.osv):
 					if fix_inc_pay_id:
 						fix_inc_pay_rec = self.pool.get('hr.payslip.line').browse(cr,uid,fix_inc_pay_id[0])
 						self.pool.get('hr.payslip.line').write(cr,uid,fix_inc_pay_rec.id,
+											{
+												'amount':fix_inc_val,
+											})
+					elif fix_inc_pay_id_othr:
+						print "********************************"
+						fix_inc_pay_rec_othr = self.pool.get('ch.other.salary.comp').browse(cr,uid,fix_inc_pay_id_othr[0])
+						self.pool.get('ch.other.salary.comp').write(cr,uid,fix_inc_pay_rec_othr.id,
 											{
 												'amount':fix_inc_val,
 											})
@@ -778,9 +817,17 @@ class kg_payslip(osv.osv):
 						else:
 							coffe_allow = src_slary_rec.salary_amt
 				serc_coff_allow	= self.pool.get('hr.payslip.line').search(cr,uid,[('slip_id','=',slip_rec.id),('code','=','COFFEE ALL')])
+				serc_coff_allow_othr	= self.pool.get('ch.other.salary.comp').search(cr,uid,[('slip_id','=',slip_rec.id),('code','=','COFFEE ALL')])
 				if serc_coff_allow:
 					serc_coff_rec = self.pool.get('hr.payslip.line').browse(cr,uid,serc_coff_allow[0])
 					self.pool.get('hr.payslip.line').write(cr,uid,serc_coff_rec.id,
+											{
+												
+												'amount':coffe_allow,
+											})
+				elif serc_coff_allow_othr:
+					serc_coff_rec_othr = self.pool.get('ch.other.salary.comp').browse(cr,uid,serc_coff_allow_othr[0])
+					self.pool.get('ch.other.salary.comp').write(cr,uid,serc_coff_rec_othr.id,
 											{
 												
 												'amount':coffe_allow,
@@ -1058,3 +1105,42 @@ class ch_salary_slip(osv.osv):
 		
 	}
 ch_salary_slip()
+
+###### newly added class for capturing the hidden salary component #####
+
+class ch_other_salary_comp(osv.osv):
+	_name = 'ch.other.salary.comp'	
+	
+	
+	def _calculate_total(self, cr, uid, ids, name, args, context):
+		if not ids: return {}
+		res = {}
+		for line in self.browse(cr, uid, ids, context=context):
+			res[line.id] = float(line.quantity) * line.amount * line.rate / 100
+		return res
+	
+	_columns = {
+	
+	'name': fields.char('Description', size=256, required=True),
+	'code': fields.char('Code', size=52, required=True, help="The code that can be used in the salary rules"),
+	'slip_id':fields.many2one('hr.payslip', 'Pay Slip', required=True, ondelete='cascade'),
+	'salary_rule_id':fields.many2one('hr.salary.rule', 'Rule', required=True),
+	'employee_id':fields.many2one('hr.employee', 'Employee', required=True),
+	'contract_id':fields.many2one('hr.contract', 'Contract', required=True, select=True),
+	'rate': fields.float('Rate (%)', digits_compute=dp.get_precision('Payroll Rate')),
+	'amount': fields.float('Amount', digits_compute=dp.get_precision('Payroll')),
+	'quantity': fields.float('Quantity',digits_compute=dp.get_precision('Payroll')),
+	'total': fields.function(_calculate_total, method=True, type='float', string='Total', digits_compute=dp.get_precision('Payroll'),store=True ),
+	'cum_ded_id': fields.many2one('kg.advance.deduction','Cumulative Deduction', readonly=True),
+	'category_id':fields.many2one('hr.salary.rule.category', 'Category', required=False),
+		
+	}
+	
+	_defaults = {
+		'quantity': 1.0,
+		'rate': 100.0,
+	}
+ch_other_salary_comp()
+
+###### newly added class for capturing the hidden salary component #####
+
