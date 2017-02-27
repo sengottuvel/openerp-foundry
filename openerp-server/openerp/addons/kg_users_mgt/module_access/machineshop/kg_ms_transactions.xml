@@ -399,5 +399,15 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
+		<record id="t_ms_id_commitment" model="ir.model.access">
+			<field name="model_id" ref="kg_machineshop.model_kg_id_commitment"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">ID Commitment</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
     </data>
 </openerp>
