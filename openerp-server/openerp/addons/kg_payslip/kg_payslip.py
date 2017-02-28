@@ -830,18 +830,33 @@ class kg_payslip(osv.osv):
 					print "Driver bataa called --------------------------------------------------",con_ids_1.driver_batta
 					if con_ids_1.driver_batta > 0.00:
 						driv_bata = con_ids_1.driver_batta  * (worked_days+ot_days)
-						self.pool.get('hr.payslip.line').create(cr,uid,
-								{
-									'name':'Driver Batta',
-									'code':'DRB',
-									'category_id':2,
-									'quantity':1,
-									'amount':driv_bata,
-									'salary_rule_id':1,
-									'employee_id':emp_id,
-									'contract_id':con_ids[0],
-									'slip_id':slip_rec.id,
-								},context = None)
+						drv_id = rule_obj.browse(cr,uid,45)
+						if drv_id.appears_on_payslip:
+							self.pool.get('hr.payslip.line').create(cr,uid,
+									{
+										'name':drv_id.name,
+										'code':drv_id.code,
+										'category_id':2,
+										'quantity':1,
+										'amount':driv_bata,
+										'salary_rule_id':drv_id.id,
+										'employee_id':emp_id,
+										'contract_id':con_ids[0],
+										'slip_id':slip_rec.id,
+									},context = None)
+						else:
+							self.pool.get('ch.other.salary.comp').create(cr,uid,
+									{
+										'name':drv_id.name,
+										'code':drv_id.code,
+										'category_id':2,
+										'quantity':1,
+										'amount':driv_bata,
+										'salary_rule_id':drv_id.id,
+										'employee_id':emp_id,
+										'contract_id':con_ids[0],
+										'slip_id':slip_rec.id,
+									},context = None)
 				#### Creation of the Driver Batta per month for the employee ####
 				
 				#### Creation of Coffee Allowance per month for the employee ####
