@@ -738,7 +738,7 @@ class kg_ms_operations(osv.osv):
 			if entry_rec.ms_type == 'ms_item':
 				cr.execute("""select id from kg_ms_stores where  
 				item_code = %s and moc_id = %s and ms_type = 'ms_item' and accept_state = 'pending' 
-				and order_line_id = %s order by id asc"""%(entry_rec.item_code,
+				and order_line_id = %s order by id asc"""%("'"+entry_rec.item_code+"'",
 				entry_rec.moc_id.id,entry_rec.order_line_id.id))
 				ms_store_id = cr.fetchone();
 				if ms_store_id:
