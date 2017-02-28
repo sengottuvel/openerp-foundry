@@ -1006,7 +1006,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 			</textField>
 			<image>
 				<reportElement x="228" y="0" width="69" height="31"/>
-				<imageExpression><![CDATA["/OPENERP/Sam_Turbo/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
 			</image>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement mode="Transparent" x="0" y="31" width="801" height="27" isPrintWhenDetailOverflows="true"/>
