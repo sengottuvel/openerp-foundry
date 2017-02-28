@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="kg_sc_dc_onscreen_report" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="NoDataSection" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.2100000000000006"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.y" value="48"/>
 	<subDataset name="dataset1">
 		<parameter name="dc_id" class="java.lang.String"/>
 		<parameter name="header_id" class="java.lang.Integer">
@@ -12,14 +12,25 @@
 			<![CDATA[select
 dc.id as id,
 dc.entry_date,
-(CASE WHEN dc_line.pattern_code is null
+CASE WHEN ((dc_line.pattern_code is not null) and (dc_line.item_code is not null))
 THEN dc_line.item_code
-ELSE '-'
-end ) as pattern_code,
-(CASE WHEN dc_line.pattern_name is null
+else
+(CASE WHEN ((dc_line.pattern_code is not null) and (dc_line.item_code is null))
+THEN dc_line.pattern_code
+else
+(CASE WHEN ((dc_line.pattern_code is null) and (dc_line.item_code is not null))
+THEN dc_line.item_code else '-' end
+)end)  end as pattern_code,
+
+CASE WHEN ((dc_line.pattern_name is not null) and (dc_line.item_name is not null))
 THEN dc_line.item_name
-ELSE '-'
-end ) as pattern_name,
+else
+(CASE WHEN ((dc_line.pattern_name is not null) and (dc_line.item_name is null))
+THEN dc_line.pattern_name
+else
+(CASE WHEN ((dc_line.pattern_name is null) and (dc_line.item_name is not null))
+THEN dc_line.item_name else '-' end
+)end)  end as pattern_name,
 (CASE WHEN dc_line.order_no is null
 THEN 'STK WO'
 ELSE dc_line.order_no
@@ -255,9 +266,9 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 	<group name="work_order" isStartNewPage="true">
 		<groupExpression><![CDATA[$F{id}]]></groupExpression>
 		<groupHeader>
-			<band height="145">
+			<band height="165">
 				<staticText>
-					<reportElement mode="Transparent" x="414" y="121" width="78" height="24" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="414" y="141" width="78" height="24" isRemoveLineWhenBlank="true"/>
 					<box>
 						<pen lineWidth="0.75"/>
 						<topPen lineWidth="0.75"/>
@@ -271,7 +282,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<text><![CDATA[Operation No.]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="159" y="121" width="62" height="24" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="166" y="141" width="62" height="24" isRemoveLineWhenBlank="true"/>
 					<box>
 						<pen lineWidth="0.75"/>
 						<topPen lineWidth="0.75"/>
@@ -285,7 +296,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<text><![CDATA[Pattern code]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="39" y="121" width="61" height="24" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="39" y="141" width="61" height="24" isRemoveLineWhenBlank="true"/>
 					<box>
 						<pen lineWidth="0.75"/>
 						<topPen lineWidth="0.75"/>
@@ -299,7 +310,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<text><![CDATA[WO No.]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="277" y="121" width="53" height="24" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="277" y="141" width="53" height="24" isRemoveLineWhenBlank="true"/>
 					<box>
 						<pen lineWidth="0.75"/>
 						<topPen lineWidth="0.75"/>
@@ -313,7 +324,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<text><![CDATA[Part Name]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="492" y="121" width="63" height="24" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="492" y="141" width="63" height="24" isRemoveLineWhenBlank="true"/>
 					<box>
 						<pen lineWidth="0.75"/>
 						<topPen lineWidth="0.75"/>
@@ -327,7 +338,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<text><![CDATA[Stage]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="100" y="121" width="59" height="24" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="100" y="141" width="66" height="24" isRemoveLineWhenBlank="true"/>
 					<box>
 						<pen lineWidth="0.75"/>
 						<topPen lineWidth="0.75"/>
@@ -341,7 +352,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<text><![CDATA[SC WO No.]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="221" y="121" width="56" height="24" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="228" y="141" width="49" height="24" isRemoveLineWhenBlank="true"/>
 					<box>
 						<pen lineWidth="0.75"/>
 						<topPen lineWidth="0.75"/>
@@ -355,7 +366,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<text><![CDATA[Pos. No.]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="330" y="121" width="46" height="24" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="330" y="141" width="46" height="24" isRemoveLineWhenBlank="true"/>
 					<box>
 						<pen lineWidth="0.75"/>
 						<topPen lineWidth="0.75"/>
@@ -369,7 +380,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<text><![CDATA[MOC]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="376" y="121" width="38" height="24" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="376" y="141" width="38" height="24" isRemoveLineWhenBlank="true"/>
 					<box>
 						<pen lineWidth="0.75"/>
 						<topPen lineWidth="0.75"/>
@@ -383,7 +394,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<text><![CDATA[Qty]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="667" y="121" width="62" height="24" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="667" y="141" width="62" height="24" isRemoveLineWhenBlank="true"/>
 					<box>
 						<pen lineWidth="0.75"/>
 						<topPen lineWidth="0.75"/>
@@ -397,7 +408,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<text><![CDATA[Total Price]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="629" y="121" width="38" height="24" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="629" y="141" width="38" height="24" isRemoveLineWhenBlank="true"/>
 					<box>
 						<pen lineWidth="0.75"/>
 						<topPen lineWidth="0.75"/>
@@ -411,7 +422,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<text><![CDATA[Rate]]></text>
 				</staticText>
 				<textField>
-					<reportElement x="1" y="21" width="199" height="20"/>
+					<reportElement x="1" y="41" width="199" height="20"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -424,7 +435,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<textFieldExpression><![CDATA["TIN:"+$F{tin_no}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement x="1" y="41" width="51" height="20"/>
+					<reportElement x="1" y="61" width="51" height="20"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -437,7 +448,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<text><![CDATA[To:]]></text>
 				</staticText>
 				<textField>
-					<reportElement x="52" y="41" width="560" height="20"/>
+					<reportElement x="52" y="61" width="547" height="20"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -450,7 +461,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<textFieldExpression><![CDATA[$F{contractor_name}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement x="612" y="41" width="88" height="20"/>
+					<reportElement x="599" y="61" width="101" height="20"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -463,7 +474,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<text><![CDATA[Vehicle Details:]]></text>
 				</staticText>
 				<textField>
-					<reportElement x="700" y="41" width="102" height="20"/>
+					<reportElement x="700" y="61" width="102" height="20"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -476,7 +487,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<textFieldExpression><![CDATA[$F{vehicle_detail}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="1" y="121" width="38" height="24" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="1" y="141" width="38" height="24" isRemoveLineWhenBlank="true"/>
 					<box>
 						<pen lineWidth="0.75"/>
 						<topPen lineWidth="0.75"/>
@@ -490,7 +501,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<text><![CDATA[S.No]]></text>
 				</staticText>
 				<textField>
-					<reportElement x="200" y="21" width="153" height="20"/>
+					<reportElement x="200" y="41" width="153" height="20"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -503,7 +514,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<textFieldExpression><![CDATA["CST.No.:"+$F{cst_no}]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="353" y="21" width="246" height="20"/>
+					<reportElement x="353" y="41" width="246" height="20"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -516,7 +527,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<textFieldExpression><![CDATA["DT: "+$F{company_date}]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="599" y="21" width="203" height="20"/>
+					<reportElement x="599" y="41" width="203" height="20"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -529,7 +540,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<textFieldExpression><![CDATA["Code: "+$F{company_code}]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="1" y="101" width="801" height="20"/>
+					<reportElement x="1" y="121" width="801" height="20"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -542,7 +553,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<textFieldExpression><![CDATA["Annex 17 No./  "+"<b>"+$F{annexure_no}+"</b>"+"  dated  "+"<b>"+$F{annexure_date}+"</b>"+ " App. Value Rs.  "+"<b>"+$F{subtotal_amt}+"<b>"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="1" y="81" width="801" height="20"/>
+					<reportElement x="1" y="101" width="801" height="20"/>
 					<box>
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -552,8 +563,8 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<textElement verticalAlignment="Middle"/>
 					<textFieldExpression><![CDATA["    We have despatched the under mentioned items semifinished goods send for further processing under challan A-17 / Notification : 214 No./"]]></textFieldExpression>
 				</textField>
-				<textField>
-					<reportElement x="1" y="61" width="801" height="20"/>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" x="1" y="81" width="801" height="20"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -564,7 +575,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<textFieldExpression><![CDATA["Sir,"]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement mode="Transparent" x="244" y="0" width="442" height="21"/>
+					<reportElement mode="Transparent" x="1" y="0" width="801" height="20"/>
 					<box>
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -577,7 +588,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<textFieldExpression><![CDATA["Delivery Advice"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="52" y="0" width="192" height="21"/>
+					<reportElement x="52" y="20" width="634" height="21"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -590,7 +601,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<textFieldExpression><![CDATA[$F{dc_no}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement x="1" y="0" width="51" height="21"/>
+					<reportElement x="1" y="20" width="51" height="21"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -603,7 +614,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<text><![CDATA[DC No : ]]></text>
 				</staticText>
 				<textField>
-					<reportElement x="729" y="0" width="73" height="21"/>
+					<reportElement x="729" y="20" width="73" height="21"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -616,7 +627,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<textFieldExpression><![CDATA[$F{date}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement x="686" y="0" width="53" height="21"/>
+					<reportElement x="686" y="20" width="53" height="21"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -629,7 +640,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<text><![CDATA[Date: ]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="555" y="121" width="74" height="24" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="555" y="141" width="74" height="24" isRemoveLineWhenBlank="true"/>
 					<box>
 						<pen lineWidth="0.75"/>
 						<topPen lineWidth="0.75"/>
@@ -643,7 +654,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 					<text><![CDATA[TOTAL WEIGHT(Kg)]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="729" y="121" width="73" height="24" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="729" y="141" width="73" height="24" isRemoveLineWhenBlank="true"/>
 					<box>
 						<pen lineWidth="0.75"/>
 						<topPen lineWidth="0.75"/>
@@ -688,7 +699,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 								<textFieldExpression><![CDATA[$F{order_no}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="100" y="0" width="59" height="16"/>
+								<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="100" y="0" width="66" height="16"/>
 								<box leftPadding="2">
 									<pen lineWidth="0.75"/>
 									<topPen lineWidth="0.75"/>
@@ -702,7 +713,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 								<textFieldExpression><![CDATA[$F{sc_wo_name}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="221" y="0" width="56" height="16"/>
+								<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="228" y="0" width="49" height="16"/>
 								<box leftPadding="2">
 									<pen lineWidth="0.75"/>
 									<topPen lineWidth="0.75"/>
@@ -738,7 +749,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 									<bottomPen lineWidth="0.75"/>
 									<rightPen lineWidth="0.75"/>
 								</box>
-								<textElement verticalAlignment="Middle">
+								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
@@ -799,8 +810,8 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 								<textFieldExpression><![CDATA[$F{operation_name}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="159" y="0" width="62" height="16"/>
-								<box leftPadding="2">
+								<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="166" y="0" width="62" height="16"/>
+								<box leftPadding="2" rightPadding="1">
 									<pen lineWidth="0.75"/>
 									<topPen lineWidth="0.75"/>
 									<leftPen lineWidth="0.75"/>
@@ -897,7 +908,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 								<textFieldExpression><![CDATA[$F{gr_total_amt}]]></textFieldExpression>
 							</textField>
 							<staticText>
-								<reportElement x="221" y="0" width="155" height="17"/>
+								<reportElement x="228" y="0" width="148" height="17"/>
 								<box>
 									<topPen lineWidth="0.75"/>
 									<leftPen lineWidth="0.75"/>
@@ -995,7 +1006,7 @@ select regexp_split_to_table($P{dc_id}, ',') as sam) as sam)]]>
 			</textField>
 			<image>
 				<reportElement x="228" y="0" width="69" height="31"/>
-				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/OPENERP/Sam_Turbo/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
 			</image>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement mode="Transparent" x="0" y="31" width="801" height="27" isPrintWhenDetailOverflows="true"/>
