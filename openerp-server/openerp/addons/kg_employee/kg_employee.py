@@ -217,6 +217,7 @@ class kg_employee(osv.osv):
 			emp_categ_obj = self.pool.get('kg.employee.category')
 			emp_categ_line = self.pool.get('ch.salary.policy')
 			contract_salary = self.pool.get('ch.kg.contract.salary')
+			contract_inc = self.pool.get('ch.con.special.incentive.policy')
 			emp_categ_line_1 = emp_categ_obj.browse(cr,uid,rec.emp_categ_id.id)
 			emp_cntrct_ids = emp_obj_1.search(cr,uid,[('employee_id','=',rec.id)])
 			if emp_cntrct_ids:
