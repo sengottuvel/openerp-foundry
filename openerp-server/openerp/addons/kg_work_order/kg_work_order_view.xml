@@ -200,7 +200,7 @@
 							<field name="mar_prime_cost" readonly="1" invisible="0"/>
 							<field name="wo_prime_cost" readonly="1"/>
 							<field name="flag_offer" invisible="1"/>
-							<field name="note" string="Remarks"  attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
+							<field name="note" string="Remarks"/>
 						</group>
 					</group>
 					<newline/>
