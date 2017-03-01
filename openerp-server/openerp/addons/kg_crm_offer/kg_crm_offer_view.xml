@@ -214,6 +214,22 @@
 							</group>
 -->
 						</group>
+						<group string="Supervision Charge">
+							<field name="line_supervision_ids" colspan="4" nolabel="1" attrs="{'readonly':[('state','!=','draft')]}" context="{'prime_cost':supervision_amount}">
+								<tree string="Supervision History" editable="bottom">
+									<field name="prime_cost" sum="prime_cost" readonly="1"/>
+									<field name="sam_ratio"/>
+									<field name="dealer_discount"/>
+									<field name="special_discount"/>
+									<field name="p_f"/>
+									<field name="freight"/>
+									<field name="insurance"/>
+									<field name="customer_discount"/>
+									<field name="tax"/>
+									<field name="net_amount" sum="net_amount"/>
+								</tree>
+							</field>
+						</group>
 						<group>
 							<group>
 								<field name="load_term" on_change="onchange_term(load_term,line_term_ids)"/>
