@@ -39,7 +39,7 @@ class kg_part_qap(osv.osv):
 	
 		## Basic Info
 				
-		'name': fields.char('Dynamic Balancing No', size=12,select=True,readonly=True),
+		'name': fields.char('DB Reference No.', size=12,select=True,readonly=True),
 		'entry_date': fields.date('Date',required=True),		
 		'note': fields.text('Notes'),
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),

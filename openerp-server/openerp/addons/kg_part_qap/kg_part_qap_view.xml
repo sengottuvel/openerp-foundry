@@ -21,6 +21,7 @@
 								<field name="db_min_weight" attrs="{'readonly': ['|',('flag_db_customer_specific','!=',True),('db_state','=','completed')]}"/>
 								<field name="db_actual_unbal_weight" attrs="{'required': [('db_result','!=','reject')],'readonly': [('db_state','=','completed')]}"/>
 								<field name="db_shift_id" attrs="{'required': [('db_result','!=','reject')],'readonly': [('db_state','=','completed')]}"/>
+								<field name="name" attrs="{'required': [('db_result','!=','reject')],'readonly': [('db_state','=','completed')]}"/>
 								<field name="db_verified_by" attrs="{'required': [('db_result','!=','reject')],'readonly': [('db_state','=','completed')]}"/>
 								<field name="db_reject_remarks_id" attrs="{'readonly': [('db_state','=','completed')],'invisible':[('db_result','!=','reject')],'required':[('db_result','=','reject')]}"/>
 								<field name="db_remarks" attrs="{'readonly': [('db_state','=','completed')]}"/>
