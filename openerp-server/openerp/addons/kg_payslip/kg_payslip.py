@@ -371,9 +371,13 @@ class kg_payslip(osv.osv):
 					last = first - lastdate.timedelta(days=1)
 					res = last.strftime('%B')
 					datetttt = slip_rec.date_from
+					print "+++++++date from++++++++++++",datetttt[5:7]
+					a = datetttt[5:7]
+					b = (calendar.month_abbr[int(a)])
+					print "+++++++date Month++++++++++++",b
 					d1 = str(res)
-					print "Special incentive called -----------------------------------------------------",d1[:3]
-					turn_over_idss = self.pool.get('kg.turn.over').search(cr,uid,[('month','=',d1[:3]),('active','=',True)])
+					print "Special incentive called -----------------------------------------------------",b
+					turn_over_idss = self.pool.get('kg.turn.over').search(cr,uid,[('month','=',b),('active','=',True)])
 					if turn_over_idss:
 						turn_over_recs = self.pool.get('kg.turn.over').browse(cr,uid,turn_over_idss[0])
 						print "$$$$$$---------- Chamber in turn over -------$$$$$$$$$",turn_over_recs.da_chamber
@@ -401,6 +405,9 @@ class kg_payslip(osv.osv):
 									'contract_id':con_ids[0],
 									'slip_id':slip_rec.id,
 								},context = None)
+					else:
+						raise osv.except_osv(_('Warning'),
+							_('Turn Over is not fixed for last month for VDA Calculation !!'))				
 				else:
 					acc_vda_value = 0.00
 					pass
@@ -549,9 +556,13 @@ class kg_payslip(osv.osv):
 					last = first - lastdate.timedelta(days=1)
 					res = last.strftime('%B')
 					datetttt = slip_rec.date_from
+					print "+++++++date from++++++++++++",datetttt[5:7]
+					a = datetttt[5:7]
+					b = (calendar.month_abbr[int(a)])
+					print "+++++++date Month++++++++++++",b
 					d1 = str(res)
-					print "Special incentive called -----------------------------------------------------",d1[:3]
-					turn_over_ids = self.pool.get('kg.turn.over').search(cr,uid,[('month','=',d1[:3]),('active','=',True)])
+					print "Special incentive called -----------------------------------------------------",b
+					turn_over_ids = self.pool.get('kg.turn.over').search(cr,uid,[('month','=',b),('active','=',True)])
 					turn_over_amt = 0.00
 					turn_over_per = 0.00
 					incent_amt = 0.00
@@ -671,7 +682,9 @@ class kg_payslip(osv.osv):
 														
 														'amount':(spec_rec.salary_amt/calulation_days)* wor_days,
 													})
-								
+					else:
+						raise osv.except_osv(_('Warning'),
+							_('Turn Over is not fixed for last month for Incentive Calculation !!'))				
 						######### Special Incentive Calculation ###########
 						
 				#### Creation of Fixed Incentive for the employee ####
