@@ -752,6 +752,8 @@ class ch_assembly_foundry_heat_details(osv.osv):
 		'header_id':fields.many2one('ch.assembly.bom.details', 'Assembly Foundry', required=1, ondelete='cascade'),
 		'moc_id': fields.related('header_id','moc_id', type='many2one',relation='kg.moc.master', string='MOC', store=True, readonly=True),
 		'melting_id': fields.many2one('kg.melting','Heat No.',domain="[('moc_id','=',moc_id)]"),
+		'db_id': fields.many2one('kg.part.qap','DB reference No.',domain="[('name','!=',False),('pattern_id','=',pattern_id)]"),
+		'pattern_id': fields.many2one('kg.pattern.master','Pattern No.'),
 		'qty': fields.float('Qty'),
 
 	

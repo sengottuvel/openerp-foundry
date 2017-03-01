@@ -96,10 +96,11 @@
 										<field name="add_spec" readonly="1" widget="char"/>
 										<field name="reject_remarks"/>
 									</group>
-									<field name="line_ids" colspan="4" nolabel="1" context="{'moc_id':moc_id}">
+									<field name="line_ids" colspan="4" nolabel="1" context="{'moc_id':moc_id,'pattern_id':pattern_id}">
 										<tree string="Assembly BOM Heat Details Tree" editable="bottom">
 											<field name="moc_id" invisible="1"/>
 											<field name="melting_id" required="1"/>
+											<field name="db_id" required="1"/>
 											<field name="qty" required="1"/>
 										</tree>
 									</field>
