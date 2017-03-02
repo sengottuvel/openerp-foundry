@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Workorder_print" pageWidth="605" pageHeight="842" columnWidth="565" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
-	<property name="ireport.zoom" value="1.8150000000000004"/>
-	<property name="ireport.x" value="69"/>
-	<property name="ireport.y" value="59"/>
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="432"/>
 	<subDataset name="Spare dataset">
 		<parameter name="header_id" class="java.lang.Integer"/>
 		<parameter name="category" class="java.lang.String"/>
@@ -178,7 +178,9 @@ case when pump_crm.description is not null then pump_crm.description else '-' en
 coalesce(pump_crm.equipment_no,'-') as tag_no,
 wo_line.qty as qty,
 coalesce(pump_crm.size_suctionx,'-') as size,
-case when pump_crm.flange_standard > 0 then pump_crm.flange_standard::text else '-' end as flange_standard,
+
+case when flange.name is not null then flange.name::text else '-' end as flange_standard,
+
 coalesce(liquid.name,'-') as liquid_handled,
 case when pump_crm.specific_gravity > 0 then pump_crm.specific_gravity::text else '-' end as specific_gravity,
 case when pump_crm.temperature_in_c is not null then pump_crm.temperature_in_c::text else '-' end as temperature_in_c,
@@ -193,7 +195,8 @@ when pump_crm.primemover_categ = 'engine' then
 case when pump_crm.full_load_rpm > 0 then pump_crm.full_load_rpm::text else '-' end
 when pump_crm.primemover_categ = 'motor' then
 case when pump_crm.speed_in_motor > 0 then pump_crm.speed_in_motor::text else '-' end
-else case when pump_crm.full_load_rpm > 0 then pump_crm.full_load_rpm::text else '-' end
+when pump_crm.primemover_categ = 'vfd' then
+case when pump_crm.speed_in_motor > 0 then pump_crm.speed_in_motor::text else '-' end
 
 end as speed_rpm,
 
@@ -247,9 +250,11 @@ case when pump_crm.hydrostatic_test_pressure > 0 then round(cast(pump_crm.hydros
 to_char(wo_line.delivery_date::date,'dd-mm-YYYY') as due_date,
 to_char(wo.entry_date::date,'dd-mm-YYYY') as order_date,
 comp.name as company_name,
-wo_line.note as remarks
+wo_line.note as remarks,
+pump_crm.bkw_liq as bkw
 
 from ch_work_order_details wo_line
+
 left join kg_pumpmodel_master pump on pump.id = wo_line.pump_model_id
 left join ch_kg_crm_pumpmodel pump_crm on pump_crm.id = wo_line.enquiry_line_id
 left join kg_fluid_master liquid on liquid.id = pump_crm.fluid_id
@@ -257,10 +262,10 @@ left join kg_work_order wo on wo.id = wo_line.header_id
 left join res_partner cust on cust.id = wo.partner_id
 left join res_company comp on comp.id = wo.company_id
 left join kg_brand_master brand on brand.id = pump_crm.mech_seal_make
+left join ch_pumpseries_flange flange on flange.id = pump_crm.flange_standard
 
 where wo_line.id in (select order_id from m2m_work_order_print_report_details
-where foundry_wiz_id = $P{wiz_id}
-)]]>
+where foundry_wiz_id = $P{wiz_id})]]>
 	</queryString>
 	<field name="id" class="java.lang.Integer"/>
 	<field name="order_category" class="java.lang.String"/>
@@ -305,6 +310,7 @@ where foundry_wiz_id = $P{wiz_id}
 	<field name="order_date" class="java.lang.String"/>
 	<field name="company_name" class="java.lang.String"/>
 	<field name="remarks" class="java.lang.String"/>
+	<field name="bkw" class="java.lang.Double"/>
 	<group name="WO Group" isStartNewPage="true">
 		<groupExpression><![CDATA[$F{id}]]></groupExpression>
 		<groupHeader>
@@ -1080,7 +1086,7 @@ where foundry_wiz_id = $P{wiz_id}
 					<textElement textAlignment="Center" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA["-"]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{bkw}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="432" width="258" height="15"/>
