@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Purchase_Indent" language="groovy" pageWidth="595" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
-	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.zoom" value="1.3310000000000004"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<subDataset name="dataset1">
@@ -77,7 +77,7 @@ where pr.id = $P{indent_id} and pr.state = 'approved']]>
 	<group name="Product_Detail">
 		<groupExpression><![CDATA[$P{indent_id}]]></groupExpression>
 		<groupHeader>
-			<band height="49">
+			<band height="97">
 				<componentElement>
 					<reportElement x="0" y="34" width="555" height="15"/>
 					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
@@ -197,6 +197,26 @@ where pr.id = $P{indent_id} and pr.state = 'approved']]>
 					<textElement/>
 					<textFieldExpression><![CDATA[""]]></textFieldExpression>
 				</textField>
+				<textField>
+					<reportElement x="17" y="81" width="163" height="16"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Prepared By "]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="380" y="81" width="163" height="16"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Authorized By "]]></textFieldExpression>
+				</textField>
 			</band>
 		</groupHeader>
 	</group>
@@ -225,11 +245,11 @@ where pr.id = $P{indent_id} and pr.state = 'approved']]>
 				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_purchase_indent/img/sam.png"]]></imageExpression>
 			</image>
 		</band>
-	</title> 
+	</title>
 	<columnHeader>
 		<band height="15" splitType="Stretch">
 			<textField>
-				<reportElement x="0" y="0" width="337" height="15"/>
+				<reportElement x="0" y="0" width="229" height="15"/>
 				<box topPadding="2" leftPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -241,16 +261,26 @@ where pr.id = $P{indent_id} and pr.state = 'approved']]>
 				<textFieldExpression><![CDATA["PI.No. : "+$F{indent_no}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="337" y="0" width="218" height="15"/>
-				<box topPadding="2" leftPadding="2" rightPadding="2">
+				<reportElement x="344" y="0" width="211" height="15"/>
+				<box topPadding="2" leftPadding="2" rightPadding="4">
 					<topPen lineWidth="0.5"/>
 					<bottomPen lineWidth="0.0"/>
 					<rightPen lineWidth="0.5"/>
 				</box>
-				<textElement>
+				<textElement textAlignment="Right">
 					<font size="8" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Indent Date : "+$F{indent_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="229" y="0" width="115" height="15"/>
+				<box topPadding="2">
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Purchase Indent"]]></textFieldExpression>
 			</textField>
 		</band>
 	</columnHeader>
