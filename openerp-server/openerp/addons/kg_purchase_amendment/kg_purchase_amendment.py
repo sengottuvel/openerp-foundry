@@ -16,24 +16,15 @@ logger = logging.getLogger('server')
 today = datetime.now()
 
 UOM_CONVERSATION = [
-    ('one_dimension','One Dimension'),('two_dimension','Two Dimension')
+	('one_dimension','One Dimension'),('two_dimension','Two Dimension')
 ]
+
 class kg_purchase_amendment(osv.osv):	
 	
 	_name = "kg.purchase.amendment"	
 	_order = "date desc"
 	
 	def _amount_line_tax(self, cr, uid, line, context=None):
-		#~ val = 0.0
-		#~ new_amt_to_per = line.kg_discount_amend or 0.0 / line.product_qty_amend
-		#~ amt_to_per = (line.kg_discount_amend or 0.0 / (line.product_qty_amend * line.price_unit_amend or 1.0 )) * 100
-		#~ kg_discount_per = line.kg_discount_per_amend
-		#~ tot_discount_per = amt_to_per + kg_discount_per
-		#~ for c in self.pool.get('account.tax').compute_all(cr, uid, line.taxes_id_amend,
-			#~ line.price_unit_amend * (1-(tot_discount_per or 0.0)/100.0), line.product_qty_amend, line.product_id,
-			#~ line.amendment_id.partner_id)['taxes']:
-			#~ val += c.get('amount', 0.0)
-			
 		val = 0.0
 		qty = 0
 		if line.price_type_amend == 'per_kg':
@@ -78,24 +69,7 @@ class kg_purchase_amendment(osv.osv):
 				'amount_total_amend': 0.0,
 				'other_charge_amend': 0.0,
 			}
-			#~ val = val1 = val3 = 0.0
-			#~ cur = order.pricelist_id.currency_id
-			#~ for line in order.amendment_line:
-				#~ tot_discount = line.kg_discount_amend + line.kg_discount_per_value_amend
-				#~ val1 += line.price_subtotal
-				#~ val += self._amount_line_tax(cr, uid, line, context=context)
-				#~ val3 += tot_discount
-			#~ po_charges=order.value1_amend + order.value2_amend
-			#~ print "po_charges :::", po_charges , "val ::::", val, "val1::::", val1, "val3:::::", val3
-			#~ #res[order.id]['other_charge']=cur_obj.round(cr, uid, cur, po_charges)
-			#~ res[order.id]['total_amount'] = (val1 + val3) - val
-			#~ res[order.id]['grand_total']=cur_obj.round(cr, uid, cur, val)
-			#~ res[order.id]['amount_tax']=cur_obj.round(cr, uid, cur, val)
-			#~ res[order.id]['amount_untaxed']=cur_obj.round(cr, uid, cur, val1)
-			#~ res[order.id]['amount_total']=res[order.id]['amount_untaxed'] + res[order.id]['amount_tax'] + res[order.id]['other_charge']
-			#~ res[order.id]['discount']=cur_obj.round(cr, uid, cur, val3)
-			#~ #self.write(cr, uid,order.id, {'other_charge' : po_charges})
-		#~ print "res ^^^^^^^^^^^^^,", "amount_total====", res[order.id]['amount_total'], "^^^^^^^^^^^^^^", res
+			
 			val = val1 = val3 = 0.0
 			
 			pol = self.pool.get('kg.purchase.amendment.line')
@@ -126,8 +100,17 @@ class kg_purchase_amendment(osv.osv):
 	
 	_columns = {
 		
+		## Basic Info
+		
 		'name': fields.char('Amendment NO', size=128, readonly=True),
 		'date':fields.date('Amendment Date',readonly=False,states={'draft':[('readonly',False)]}),
+		'state':fields.selection([('draft','Draft'),('amend','Processing'),('confirm','Confirmed'),('approved','Approved'),('reject','Rejected'),('cancel','Cancel')], 'Status'),
+		'note': fields.text('Remarks'),
+		'remark': fields.text('Remarks', states={'confirm':[('readonly', True)]}),
+		'cancel_note': fields.text('Cancel Remarks'),
+		
+		## Module Requirement Info
+		
 		'po_id':fields.many2one('purchase.order','PO.NO', required=True,
 			domain="[('state','=','approved'),'&',('order_line.line_state','!=','cancel'),'&',('order_line.line_bill','=', False),'&',('order_line.pending_qty','>',0)]",
 			readonly=True,states={'amend':[('readonly',False)]}),
@@ -148,11 +131,7 @@ class kg_purchase_amendment(osv.osv):
 		'term_freight':fields.selection([('Inclusive','Inclusive'),('Extra','Extra'),('To Pay','To Pay'),('Paid','Paid'),
 						  ('Extra at our Cost','Extra at our Cost')], 'Freight',readonly=True),
 		'quot_ref_no':fields.char('Your Quot. Ref.'),
-		'note': fields.text('Remarks'),
-		'cancel_note': fields.text('Cancel Remarks'),
-		
 		'amend_flag':fields.boolean('Amend Flag'),
-		'state':fields.selection([('draft', 'Draft'),('amend', 'Processing'),('confirm', 'Confirmed'),('approved', 'Approved'),('cancel','Cancel')], 'Status'),
 		'amendment_line':fields.one2many('kg.purchase.amendment.line', 'amendment_id', 'Amendment Line'),
 		'add_text': fields.text('Address',readonly=True),
 		'delivery_address':fields.text('Delivery Address'),
@@ -211,7 +190,6 @@ class kg_purchase_amendment(osv.osv):
 			states={'confirm':[('readonly', True)]}),
 		'value1_amend':fields.float('Amend Value1', states={'confirm':[('readonly', True)]}),
 		'value2_amend':fields.float('Amend Value2', states={'confirm':[('readonly', True)]}),
-		'remark': fields.text('Remarks', states={'confirm':[('readonly', True)]}),
 		'terms': fields.text('Notes', states={'confirm':[('readonly', True)]}),
 		'term_warranty_amend':fields.char('Amend Warranty',readonly=False,states={'approved':[('readonly',True)]}),
 		'term_freight_amend':fields.selection([('Inclusive','Inclusive'),('Extra','Extra'),('To Pay','To Pay'),('Paid','Paid'),
@@ -224,6 +202,8 @@ class kg_purchase_amendment(osv.osv):
 		'quotation_date_amend': fields.date('Amend Quotation Date',readonly=False, states={'approved':[('readonly',True)]}),
 		'excise_duty_amend': fields.selection([('inclusive','Inclusive'),('extra','Extra'),('nil','Nil')],'Excise Duty',readonly=False, states={'approved':[('readonly',True)]}),
 		'division_amend': fields.selection([('ppd','PPD'),('ipd','IPD'),('foundry','Foundry')],'Amend Division',readonly=False, states={'approved':[('readonly',True)]}),
+		'approval_flag': fields.boolean('Spl Approval'),
+		'sent_mail_flag': fields.boolean('Sent Mail Flag'),
 		
 		'other_charge_amend': fields.float('Other Charges(+)',readonly=True),
 		'total_amount_amend': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Amount',
@@ -253,7 +233,7 @@ class kg_purchase_amendment(osv.osv):
 				
 			}, multi="sums",help="The total amount"),
 			
-		# Entry Info
+		## Entry Info
 		
 		'active': fields.boolean('Active'),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
@@ -271,7 +251,7 @@ class kg_purchase_amendment(osv.osv):
 	}
 	
 	_defaults = {
-	
+		
 		'date': lambda * a: time.strftime('%Y-%m-%d'),
 		'state': 'amend',
 		'active': True,
@@ -280,7 +260,9 @@ class kg_purchase_amendment(osv.osv):
 		'created_by': lambda obj, cr, uid, context: uid,
 		'pricelist_id': 2,
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.purchase.amendment', context=c),
-	
+		'approval_flag': False,
+		'sent_mail_flag': False,
+		
 	}
 	
 	def _check_advance(self, cr, uid, ids, context=None):
@@ -320,7 +302,7 @@ class kg_purchase_amendment(osv.osv):
 		amend = self.read(cr, uid, ids, ['state'], context=context)
 		unlink_ids = []
 		for t in amend:
-			if t['state'] in ('amend'):
+			if t['state'] in ('amend','draft'):
 				unlink_ids.append(t['id'])
 			else:
 				raise osv.except_osv(_('Invalid action !'), _('System not allow to delete a UN-DRAFT state Purchase Amendment!!'))
@@ -351,6 +333,9 @@ class kg_purchase_amendment(osv.osv):
 			'received_qty' : order_line.product_qty - order_line.pending_qty,
 			'price_unit' : order_line.price_unit or 0.0,
 			'price_unit_amend' : order_line.price_unit or 0.0,
+			'least_price' : order_line.least_price or 0.0,
+			'high_price' : order_line.high_price or 0.0,
+			'recent_price' : order_line.recent_price or 0.0,
 			
 			'length' : order_line.length,
 			'length_amend' : order_line.length,
@@ -415,78 +400,77 @@ class kg_purchase_amendment(osv.osv):
 			if obj.partner_id.id is False:
 			
 				vals = {
-				
-							'amend_flag': True,
-							'name' : amend_no, 
-							'po_date': po_order.date_order,
-							'po_date_amend': po_order.date_order,
-							'partner_id': po_order.dest_address_id.id or po_order.partner_id.id,
-							'partner_id_amend': po_order.dest_address_id.id or po_order.partner_id.id,
-							'pricelist_id': po_order.pricelist_id.id,
-							'currency_id': po_order.currency_id.id,
-							'bill_type': po_order.bill_type,
-							'bill_type_amend' : po_order.bill_type,
-							'payment_mode' : po_order.payment_mode.id,
-							'payment_mode_amend' : po_order.payment_mode.id,
-							'delivery_mode' : po_order.delivery_mode.id,
-							'delivery_mode_amend' : po_order.delivery_mode.id,
-							'po_type': po_order.po_type,
-							'po_type_amend': po_order.po_type,
-							'po_expenses_type1' : po_order.po_expenses_type1,
-							'po_expenses_type1_amend' : po_order.po_expenses_type1,
-							'po_expenses_type2' : po_order.po_expenses_type2,
-							'po_expenses_type2_amend' : po_order.po_expenses_type2,
-							'value1' : po_order.value1,
-							'value1_amend' : po_order.value1,
-							'value2' : po_order.value2,
-							'value2_amend' : po_order.value2,			
-							'other_charge':po_order.other_charge,
-							'grn_flag': grn,
-							'remark':po_order.note,
-							'terms':po_order.notes,
-							'add_text':po_order.add_text,
-							'add_text_amend':po_order.add_text,
-							'delivery_address':po_order.delivery_address,
-							'delivery_address_amend':po_order.delivery_address,
-							'price':po_order.term_price,
-							'price_amend':po_order.term_price,
-							'quot_ref_no':po_order.quot_ref_no,
-							'quot_ref_no_amend':po_order.quot_ref_no,
-							'term_warranty':po_order.term_warranty,
-							'term_warranty_amend':po_order.term_warranty,
-							'term_freight':po_order.term_freight,
-							'term_freight_amend':po_order.term_freight,
-							'mode_of_dispatch':po_order.mode_of_dispatch.id,
-							'mode_of_dispatch_amend':po_order.mode_of_dispatch.id,
-							'insurance':po_order.insurance,
-							'insurance_amend':po_order.insurance,
-							'purpose':po_order.purpose,
-							'purpose_amend':po_order.purpose,
-							'quotation_date':po_order.quotation_date,
-							'quotation_date_amend':po_order.quotation_date,
-							'excise_duty':po_order.excise_duty,
-							'excise_duty_amend':po_order.excise_duty,
-							'item_quality_term_id':[(6, 0, [x.id for x in po_order.item_quality_term_id])],
-							'item_quality_term_id_amend':[(6, 0, [x.id for x in po_order.item_quality_term_id])],
-							'division':po_order.division,
-							'division_amend':po_order.division,
-							'amendment_line' : [],
-							'total_amount':po_order.total_amount,
-							'total_amount_amend':po_order.total_amount,
-							'discount':po_order.discount,
-							'discount_amend':po_order.discount,
-							'amount_untaxed':po_order.amount_untaxed,
-							'amount_untaxed_amend':po_order.amount_untaxed,
-							'amount_tax':po_order.amount_tax,
-							'amount_tax_amend':po_order.amount_tax,
-							'grand_total':po_order.grand_total,
-							'grand_total_amend':po_order.grand_total,
-							'round_off':po_order.round_off,
-							'round_off_amend':po_order.round_off,
-							'amount_total':po_order.amount_total,
-							'amount_total_amend':po_order.amount_total,
-							
-							}
+						'amend_flag': True,
+						'name' : amend_no, 
+						'po_date': po_order.date_order,
+						'po_date_amend': po_order.date_order,
+						'partner_id': po_order.dest_address_id.id or po_order.partner_id.id,
+						'partner_id_amend': po_order.dest_address_id.id or po_order.partner_id.id,
+						'pricelist_id': po_order.pricelist_id.id,
+						'currency_id': po_order.currency_id.id,
+						'bill_type': po_order.bill_type,
+						'bill_type_amend' : po_order.bill_type,
+						'payment_mode' : po_order.payment_mode.id,
+						'payment_mode_amend' : po_order.payment_mode.id,
+						'delivery_mode' : po_order.delivery_mode.id,
+						'delivery_mode_amend' : po_order.delivery_mode.id,
+						'po_type': po_order.po_type,
+						'po_type_amend': po_order.po_type,
+						'po_expenses_type1' : po_order.po_expenses_type1,
+						'po_expenses_type1_amend' : po_order.po_expenses_type1,
+						'po_expenses_type2' : po_order.po_expenses_type2,
+						'po_expenses_type2_amend' : po_order.po_expenses_type2,
+						'value1' : po_order.value1,
+						'value1_amend' : po_order.value1,
+						'value2' : po_order.value2,
+						'value2_amend' : po_order.value2,			
+						'other_charge':po_order.other_charge,
+						'grn_flag': grn,
+						'remark':po_order.note,
+						'terms':po_order.notes,
+						'add_text':po_order.add_text,
+						'add_text_amend':po_order.add_text,
+						'delivery_address':po_order.delivery_address,
+						'delivery_address_amend':po_order.delivery_address,
+						'price':po_order.term_price,
+						'price_amend':po_order.term_price,
+						'quot_ref_no':po_order.quot_ref_no,
+						'quot_ref_no_amend':po_order.quot_ref_no,
+						'term_warranty':po_order.term_warranty,
+						'term_warranty_amend':po_order.term_warranty,
+						'term_freight':po_order.term_freight,
+						'term_freight_amend':po_order.term_freight,
+						'mode_of_dispatch':po_order.mode_of_dispatch.id,
+						'mode_of_dispatch_amend':po_order.mode_of_dispatch.id,
+						'insurance':po_order.insurance,
+						'insurance_amend':po_order.insurance,
+						'purpose':po_order.purpose,
+						'purpose_amend':po_order.purpose,
+						'quotation_date':po_order.quotation_date,
+						'quotation_date_amend':po_order.quotation_date,
+						'excise_duty':po_order.excise_duty,
+						'excise_duty_amend':po_order.excise_duty,
+						'item_quality_term_id':[(6, 0, [x.id for x in po_order.item_quality_term_id])],
+						'item_quality_term_id_amend':[(6, 0, [x.id for x in po_order.item_quality_term_id])],
+						'division':po_order.division,
+						'division_amend':po_order.division,
+						'amendment_line' : [],
+						'total_amount':po_order.total_amount,
+						'total_amount_amend':po_order.total_amount,
+						'discount':po_order.discount,
+						'discount_amend':po_order.discount,
+						'amount_untaxed':po_order.amount_untaxed,
+						'amount_untaxed_amend':po_order.amount_untaxed,
+						'amount_tax':po_order.amount_tax,
+						'amount_tax_amend':po_order.amount_tax,
+						'grand_total':po_order.grand_total,
+						'grand_total_amend':po_order.grand_total,
+						'round_off':po_order.round_off,
+						'round_off_amend':po_order.round_off,
+						'amount_total':po_order.amount_total,
+						'amount_total_amend':po_order.amount_total,
+						
+						}
 				print "vals ..........",vals
 				self.pool.get('kg.purchase.amendment').write(cr,uid,ids,vals)
 					
@@ -516,7 +500,7 @@ class kg_purchase_amendment(osv.osv):
 			else:
 				raise osv.except_osv(_('Amendment Created Already!'),
 					_('System not allow to create Amendment again !!')) 
-				
+		
 	def confirm_amend(self, cr, uid, ids,context=None):
 		amend_obj = self.browse(cr,uid,ids[0])
 		if amend_obj.state == 'draft':
@@ -526,7 +510,66 @@ class kg_purchase_amendment(osv.osv):
 			amend_line_obj = self.pool.get('kg.purchase.amendment.line')
 			pi_line_obj = self.pool.get('purchase.requisition.line')
 			stock_move_obj = self.pool.get('stock.move')
+			advance_obj = self.pool.get('kg.supplier.advance')
+			# Created advance process check
+			if amend_obj.bill_type == 'advance':
+				adv_ids = advance_obj.search(cr,uid,[('po_id','=',amend_obj.po_id.id)])
+				if adv_ids:
+					raise osv.except_osv(_('Warning!'),
+						_('You cannot change Payment Mode. Because advance created for this PO'))
+			approval = ''
 			for amend_line in amend_obj.amendment_line:
+				## Spl approval Process start
+				prod_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',amend_line.product_id_amend.id),('state','=','approved')])
+				if not prod_obj:
+					raise osv.except_osv(_('Warning!'),
+						_('%s Please Check for this item in Brand/Moc/Rate master !'%(amend_line.product_id_amend.name)))
+				#~ po_line_id
+				price_sql = """ 
+							select line.price_unit 
+							from purchase_order_line line 
+							left join purchase_order po on (po.id=line.order_id)
+							join kg_brandmoc_rate rate on (rate.product_id=line.product_id)
+							join ch_brandmoc_rate_details det on (det.header_id=rate.id)
+							where po.state = 'approved' and rate.state in ('approved')
+							and line.product_id = %s and line.brand_id = %s 
+							and line.moc_id = %s 
+							order by po.approved_date desc limit 1
+							"""%(amend_line.product_id_amend.id,amend_line.brand_id_amend.id,amend_line.moc_id_amend.id)
+							#~ select line.price_unit_amend 
+							#~ from kg_purchase_amendment_line line 
+							#~ left join kg_purchase_amendment po on (po.id=line.amendment_id)
+							#~ join kg_brandmoc_rate rate on (rate.product_id=line.product_id_amend)
+							#~ join ch_brandmoc_rate_details det on (det.header_id=rate.id)
+							#~ where po.state = 'approved' and rate.state in ('approved')
+							#~ and line.product_id_amend = %s and line.amendment_id = %s and line.brand_id_amend = %s 
+							#~ and line.moc_id_amend = %s 
+							#~ order by po.approved_date desc limit 1
+				cr.execute(price_sql)		
+				price_data = cr.dictfetchall()
+				if price_data:
+					if price_data[0]['price_unit'] < amend_line.price_unit_amend:
+						self.write(cr,uid,ids,{'approval_flag':True})
+						approval = 'yes'
+						self.pool.get('kg.purchase.amendment.line').write(cr,uid,amend_line.id,{'approval_flag':True})
+				
+				# Po price exceeds design rate process
+				else:
+					prod_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',amend_line.product_id_amend.id),('state','=','approved')])
+					if prod_obj:
+						prod_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,prod_obj[0])
+						for ele in prod_rec.line_ids:
+							if amend_line.brand_id_amend.id == ele.brand_id.id and amend_line.moc_id_amend.id == ele.moc_id.id:
+								if ele.rate < amend_line.price_unit_amend:
+									self.write(cr,uid,ids,{'approval_flag':True})
+									approval = 'yes'
+									self.pool.get('kg.purchase.amendment.line').write(cr,uid,amend_line.id,{'approval_flag':True})
+					else:
+						raise osv.except_osv(_('Warning!'),
+							_('%s Please Check for this item in Brand/Moc/Rate master !'%(amend_line.product_id_amend.name)))
+				
+				
+				
 				po_line_id = amend_line.po_line_id.id
 				po_rec = amend_obj.po_id
 				pol_record = amend_line.po_line_id
@@ -538,7 +581,7 @@ class kg_purchase_amendment(osv.osv):
 						if pi_line_record.pending_qty <= 0:
 							if not amend_line.kg_poindent_lines:
 								raise osv.except_osv(_('If you want to increase PO Qty'),
-									_('Select PI for this Product')) 
+									_('Select PI for this Product'))
 							else:
 								for ele in amend_line.kg_poindent_lines:
 									if ele.product_id.id == amend_line.product_id.id:
@@ -611,30 +654,68 @@ class kg_purchase_amendment(osv.osv):
 					qty = amend_line.product_qty_amend
 				
 				self.pool.get('kg.purchase.amendment.line').write(cr,uid,amend_line.id,{'quantity_amend':qty})
-								
+			
 			self.write(cr,uid,ids[0],{
 									  'state':'confirm',
 									  'confirmed_by':uid,
 									  'confirmed_date':time.strftime('%Y-%m-%d %H:%M:%S'),
 									   })
-						
+			
+			if approval == 'yes' and amend_obj.sent_mail_flag == False:
+				self.spl_po_apl_mail(cr,uid,ids,amend_obj,context)
+				self.write(cr,uid,ids,{'sent_mail_flag':True})
+		
 		return True
 	
-	def cancel_amend(self, cr, uid, ids,context=None):
+	def spl_po_apl_mail(self,cr,uid,ids,obj,context=None):
+		cr.execute("""select trans_po_amend_spl_approval('po amend spl approval',"""+str(obj.id)+""")""")
+		data = cr.fetchall();
+		if data[0][0] is None:
+			return False
+		if data[0][0] is not None:	
+			maildet = (str(data[0])).rsplit('~');
+			cont = data[0][0].partition('UNWANTED.')		
+			email_from = maildet[1]	
+			if maildet[2]:	
+				email_to = [maildet[2]]
+			else:
+				email_to = ['']			
+			if maildet[3]:
+				email_cc = [maildet[3]]	
+			else:
+				email_cc = ['']		
+			ir_mail_server = self.pool.get('ir.mail_server')
+			if maildet[4] != '':
+				msg = ir_mail_server.build_email(
+					email_from = email_from,
+					email_to = email_to,
+					subject = maildet[4],
+					body = cont[0],
+					email_cc = email_cc,
+					object_id = ids and ('%s-%s' % (ids, 'kg.mail.settings')),
+					subtype = 'html',
+					subtype_alternative = 'plain')
+				res = ir_mail_server.send_email(cr, uid, msg,mail_server_id=1, context=context)
+			else:
+				pass
+				
+		return True
+		
+	def reject_amend(self, cr, uid, ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.state in ('confirm','amend'):
 			if not rec.cancel_note:
 				raise osv.except_osv(_('Warning!'),
 					_('Please give reason for this cancellation'))
 			else:	
-				self.write(cr,uid,ids[0],{'state':'cancel'})
+				self.write(cr,uid,ids[0],{'state':'reject'})
 		
 		return True
 	
 	def write(self, cr, uid, ids, vals, context=None):		
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_purchase_amendment, self).write(cr, uid, ids, vals, context)
-			
+		
 	def approve_amend(self,cr,uid,ids,context={}):
 		
 		amend_obj = self.browse(cr,uid,ids[0])
@@ -652,6 +733,13 @@ class kg_purchase_amendment(osv.osv):
 			stock_lot_obj = self.pool.get('stock.production.lot')
 			po_id = False 
 			
+			# Created advance process check
+			if amend_obj.bill_type == 'advance':
+				adv_ids = advance_obj.search(cr,uid,[('po_id','=',amend_obj.po_id.id)])
+				if adv_ids:
+					raise osv.except_osv(_('Warning!'),
+						_('You cannot change Payment Mode. Because advance created for this PO'))
+						
 			#~ if amend_obj.bill_type_amend == 'advance':
 				#~ pre_obj = self.pool.get('kg.supplier.advance').search(cr,uid,[('po_id','=',amend_obj.po_id.id),('state','!=','cancel')])
 				#~ if not pre_obj:
@@ -743,6 +831,38 @@ class kg_purchase_amendment(osv.osv):
 						})
 			
 			for amend_line in amend_obj.amendment_line:
+				## Spl approval process
+				user_obj = self.pool.get('res.users').search(cr,uid,[('id','=',uid)])
+				if user_obj:
+					user_rec = self.pool.get('res.users').browse(cr,uid,user_obj[0])
+				
+				if amend_line.price_unit_amend > amend_line.price_unit:
+					if user_rec.special_approval == True:
+						pass
+					else:
+						raise osv.except_osv(_('Warning'),
+							_('%s price is exceeding last purchase price. It should be approved by special approver'%(amend_line.product_id_amend.name)))
+				
+				# Po price exceeds design rate 
+				else:
+					prod_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',amend_line.product_id_amend.id),('state','=','approved')])
+					if prod_obj:
+						prod_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,prod_obj[0])
+						for ele in prod_rec.line_ids:
+							if amend_line.brand_id_amend.id == ele.brand_id.id and amend_line.moc_id_amend.id == ele.moc_id.id:
+								latest_rate = 0
+								if ele.rate < amend_line.price_unit_amend:
+									if user_rec.special_approval == True:
+										pass
+									else:
+										raise osv.except_osv(_('Warning'),
+											_('%s price is exceeding design price. It should be approved by special approver'%(amend_line.product_id_amend.name)))
+									#~ latest_rate = item.price_unit + ((item.price_unit/100) * 5)
+									#~ self.pool.get('ch.brandmoc.rate.details').write(cr,uid,ele.id,{'rate':latest_rate})
+					else:
+						raise osv.except_osv(_('Warning!'),
+							_('%s Please Check for this item in Brand/Moc/Rate master !'%(amend_line.product_id_amend.name)))
+			
 				po_line_id = amend_line.po_line_id.id
 				po_rec = amend_obj.po_id
 				pol_record = amend_line.po_line_id
@@ -935,7 +1055,11 @@ class kg_purchase_amendment(osv.osv):
 					po_line_obj.write(cr,uid,po_line_id,{'quantity': amend_line.quantity_amend})
 				if amend_line.price_type != amend_line.price_type_amend:
 					po_line_obj.write(cr,uid,po_line_id,{'price_type': amend_line.price_type_amend})
-					
+				
+				#~ order_line_rec = amend_line.po_line_id
+				#~ product_tax_amt = self._amount_line_tax(cr, uid, order_line_rec, context=context)	
+				#~ po_line_obj.write(cr,uid,po_line_id,{'product_tax_amt': product_tax_amt})
+				
 				if amend_line.product_id.id != amend_line.product_id_amend.id:
 					po_grn_obj = self.pool.get('po.grn.line').search(cr,uid,[('po_id','=',amend_obj.po_id.id)])
 					if po_grn_obj:
@@ -1111,7 +1235,7 @@ class kg_purchase_amendment_line(osv.osv):
 	_columns = {
 	
 	'po_price_subtotal': fields.float('Subtotal'),
-	'price_subtotal': fields.function(_amount_line, string='Subtotal', digits_compute= dp.get_precision('Account')),
+	'price_subtotal': fields.function(_amount_line, string='Subtotal', digits_compute= dp.get_precision('Account'),store=True),
 	'order_id': fields.many2one('purchase.order', 'Order ID'),
 	'amendment_id':fields.many2one('kg.purchase.amendment','Amendment', select=True, required=True, ondelete='cascade'),
 	'pi_line_id':fields.many2one('purchase.requisition.line','PI Line', invisible=True),
@@ -1174,7 +1298,11 @@ class kg_purchase_amendment_line(osv.osv):
 	'product_uom_amend': fields.many2one('product.uom', 'Amend UOM'),
 	'price_type_amend': fields.selection([('po_uom','PO UOM'),('per_kg','Per Kg')],'Amend Price Type'),
 	'uom_conversation_factor_amend': fields.related('product_id_amend','uom_conversation_factor', type='selection',selection=UOM_CONVERSATION, string='UOM Conversation Factor',store=True,required=True),
-	
+	'approval_flag': fields.boolean('Spl Approval'),
+	'least_price': fields.float('Least Price',readonly=True),
+	'high_price': fields.float('Highest Price',readonly=True),
+	'recent_price': fields.float('Recent Price',readonly=True),
+		
 	}
 	
 	_defaults = {
@@ -1183,6 +1311,7 @@ class kg_purchase_amendment_line(osv.osv):
 		'qty_flag': True,
 		'discount_per_flag': False,
 		'discount_flag': False,
+		'approval_flag': False,
 		
 		}
 		
@@ -1295,7 +1424,11 @@ class kg_purchase_amendment_line(osv.osv):
 		return {'value': value}
 		
 	def onchange_brand_moc(self, cr, uid, ids, product_id_amend):
-		value = {'brand_id_amend':'','moc_id_amend':'','moc_id_temp_amend':''}
+		product_uom = ''
+		if product_id_amend:
+			prod_rec = self.pool.get('product.product').browse(cr,uid,product_id_amend)
+			product_uom = prod_rec.uom_po_id.id
+		value = {'brand_id_amend':'','moc_id_amend':'','moc_id_temp_amend':'','product_uom_amend':product_uom}
 		return {'value': value}
 		
 	def pol_cancel(self, cr, uid, ids, context=None):

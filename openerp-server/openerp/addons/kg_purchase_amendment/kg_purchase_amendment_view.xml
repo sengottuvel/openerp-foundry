@@ -6,7 +6,6 @@
           Form view
           =====================
         -->
-
         <record id="view_kg_poamend_form" model="ir.ui.view">
             <field name="name">view.kg.poamend.form</field>
             <field name="model">kg.purchase.amendment</field>
@@ -14,9 +13,9 @@
             <field name="arch" type="xml">
             <form string="Purchase Order Amendment" version="7.0">
 			<header>
-                <button name="approve_amend" states="confirm" string="Approve" type="object" class="oe_highlight" />
                 <button name="confirm_amend" states="draft" string="Confirm" type="object" class="oe_highlight"/>
-                <button name="cancel_amend" states="confirm" string="Cancel" type="object" class="oe_highlight"/>
+                <button name="reject_amend" states="confirm" string="Reject" type="object" class="oe_highlight"/>
+                <button name="approve_amend" states="confirm" string="Approve" type="object" class="oe_highlight" />
                 <button name="make_amend" string="Load PO Data" type="object" class="oe_highlight" attrs = "{'invisible':[('amend_flag','=',True)]}"/>
 			</header>
 				<group>
@@ -176,6 +175,9 @@
 						<field name="note" readonly="1"/>
 						<field name="line_bill" invisible="1"/>
 						<field name="po_type" invisible="1"/>
+						<field name="least_price"/>
+						<field name="high_price"/>
+						<field name="recent_price"/>
 					</group>
 					<group>
 						<field name="product_id_amend" attrs="{'readonly': [('po_type','=','frompi')]}" on_change="onchange_brand_moc(product_id_amend)" required="1"/>
@@ -240,7 +242,6 @@
 					<field name="partner_id"/>
 					<field name="amount_total"/>
 					<field name="state"/>
-
                 </tree> 
             </field>
         </record>
@@ -277,7 +278,7 @@
         ===================== -->
 
 		<record id="action_kg_poamendment_form" model="ir.actions.act_window">
-			<field name="name">Purchase Order Amendment</field>
+			<field name="name">PO Amendment</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.purchase.amendment</field>
 			<field name="view_type">form</field>
