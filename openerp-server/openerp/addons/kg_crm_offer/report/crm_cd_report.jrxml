@@ -110,7 +110,7 @@ sum((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 els
 (((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
 (((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100)) * (case when pump.tax = 0 or null then 1 else pump.tax end)/100))) * pump.insurance/100))) * avg(pump.dealer_discount) /100)::integer)::integer) /
 
-sum(pump.prime_cost))::numeric, 0.00)),'999G999G99G999G99G99G990D99'))::numeric as ratio,
+sum((case when pump.prime_cost = 0 or null then 1 else pump.prime_cost end)))::numeric, 0.00)),'999G999G99G999G99G99G990D99'))::numeric as ratio,
 
 avg(pump.tax) as avg_basic_cpo,
 avg((COALESCE(pump.customer_discount,0))) as avg_cust_dis,
@@ -277,7 +277,7 @@ ltrim(to_char((COALESCE((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 
 (((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
 (((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100)) * (COALESCE((case when pump.tax = 0 or null then 1 else pump.tax end),0))/100)) * (COALESCE(pump.insurance,0))/100)) * (COALESCE(pump.dealer_discount,0))/100)) /
 
-pump.prime_cost)),'999G999G99G999G99G99G990D99'))::numeric as ratio,
+(case when pump.prime_cost = 0 or null then 1 else pump.prime_cost end))),'999G999G99G999G99G99G990D99'))::numeric as ratio,
 
 --------
 
@@ -453,7 +453,7 @@ ltrim(to_char((COALESCE((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 
 (((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
 (((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100)) * (COALESCE((case when pump.tax = 0 or null then 1 else pump.tax end),0))/100)) * (COALESCE(pump.insurance,0))/100)) * (COALESCE(pump.dealer_discount,0))/100)) /
 
-pump.prime_cost)),'999G999G99G999G99G99G990D99'))::numeric as ratio,
+(case when pump.prime_cost = 0 or null then 1 else pump.prime_cost end))),'999G999G99G999G99G99G990D99'))::numeric as ratio,
 
 --------
 

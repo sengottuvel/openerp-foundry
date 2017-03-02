@@ -1350,7 +1350,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'motor_mounting': fields.selection([('foot','Foot'),('flange','Flange')],'Motor Mounting'),
 		'bearing_number_nde': fields.char('BEARING NUMBER NDE / DE'),
 		'bearing_qty_nde': fields.float('Bearing qty NDE / DE'),
-		'type_of_drive': fields.selection([('motor_direct','Direct'),('belt_drive','Belt drive'),('fc_gb','Fluid Coupling Gear Box')],'Transmission'),
+		'type_of_drive': fields.selection([('motor_direct','Direct'),('belt_drive','Belt drive'),('fc_gb','Fluid Coupling Gear Box'),('vfd','VFD')],'Transmission'),
 		'end_of_the_curve': fields.float('End of the curve - KW(Rated) liquid'),
 		'motor_frequency_hz': fields.float('Motor frequency HZ'),
 		'frequency': fields.selection([('50','50'),('60','60')],'Motor frequency (HZ)'),

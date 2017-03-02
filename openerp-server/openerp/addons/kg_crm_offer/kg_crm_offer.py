@@ -1182,6 +1182,8 @@ class kg_crm_offer(osv.osv):
 						THEN 'Belt drive'
 						WHEN enq_line.type_of_drive = 'fc_gb' 
 						THEN 'Fluid Coupling Gear Box'
+						WHEN enq_line.type_of_drive = 'vfd' 
+						THEN 'VFD'
 						ELSE ''
 						end ) as type_of_drive,
 					(CASE WHEN enq_line.pump_model_type = 'vertical' 
