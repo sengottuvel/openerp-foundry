@@ -1712,6 +1712,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 				load_bom = True
 			moc_const_rec = self.pool.get('kg.moc.construction').browse(cr, uid, moc_const_id)
 			for item in moc_const_rec.line_ids:
+				print"flag_standardflag_standard---------",flag_standard
 				moc_const_vals.append({
 								
 								'moc_id': item.moc_id.id,

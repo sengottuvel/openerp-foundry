@@ -380,11 +380,11 @@
 				</group>
 				<notebook attrs="{'invisible':[('purpose_categ','!=','pump')]}">
 					<page string="Offer Material">
-						<field name="line_ids_moc_a" context="{'flag_standard':flag_standard}" readonly="1">
+						<field name="line_ids_moc_a" context="{'flag_standard':flag_standard}">
 							<tree string="Material of Construction Details Entry Tree" editable="top" >
-								<field name="offer_id" attrs="{'readonly': [('flag_standard','!=',True)]}"/>
+								<field name="offer_id" readonly="1"/>
 								<field name="moc_id" attrs="{'readonly': [('flag_standard','!=',True)]}"/>
-								<field name="remarks" widget="char" attrs="{'readonly': [('flag_standard','!=',True)]}"/>										
+								<field name="remarks" widget="char" readonly="1"/>										
 								<field name="flag_standard" invisible="1"/>										
 							</tree>
 						</field>	
