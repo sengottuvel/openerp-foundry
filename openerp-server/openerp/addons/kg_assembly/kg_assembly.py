@@ -165,10 +165,21 @@ class kg_assembly_inward(osv.osv):
 							
 			### Heat Details Checking ###
 			for foundry_line_item in entry_rec.line_ids:
+				if foundry_line_item.pattern_id.need_dynamic_balancing == True:
+					if not foundry_line_item.line_ids:
+						raise osv.except_osv(_('Warning !'), _('DB Reference No. is required for Pattern %s !!')%(foundry_line_item.pattern_id.name))
+					if foundry_line_item.line_ids:
+						for foun_item in foundry_line_item.line_ids:
+							print "foun_item",foun_item.db_id
+							if not foun_item.db_id:
+								raise osv.except_osv(_('Warning !'), _('DB Reference No. is required for Pattern %s !!')%(foundry_line_item.pattern_id.name))
 				if foundry_line_item.pattern_id.flag_heat_no == True:
 					if not foundry_line_item.line_ids:
 						raise osv.except_osv(_('Warning !'), _('Heat No. is required for Pattern %s !!')%(foundry_line_item.pattern_id.name))
 					if foundry_line_item.line_ids:
+						for foun_item in foundry_line_item.line_ids:
+							if not foun_item.melting_id:
+								raise osv.except_osv(_('Warning !'), _('Heat No. is required for Pattern %s !!')%(foundry_line_item.pattern_id.name))
 						cr.execute(''' select qty from ch_assembly_foundry_heat_details where header_id=%s ''',[foundry_line_item.id])
 						foundry_heat_qty = cr.fetchone()
 						if foundry_heat_qty[0]:
