@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Workorder_print" pageWidth="605" pageHeight="842" columnWidth="565" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="432"/>
+	<property name="ireport.y" value="576"/>
 	<subDataset name="Spare dataset">
 		<parameter name="header_id" class="java.lang.Integer"/>
 		<parameter name="category" class="java.lang.String"/>
@@ -190,15 +190,10 @@ case when pump_crm.efficiency_in > 0 then pump_crm.efficiency_in::text else '-' 
 case when pump_crm.motor_kw > 0 then pump_crm.motor_kw::text else '-' end as motor_kw,
 case when brand.name is not null then brand.name::text else '-' end as motor_make,
 
-case
-when pump_crm.primemover_categ = 'engine' then
-case when pump_crm.full_load_rpm > 0 then pump_crm.full_load_rpm::text else '-' end
-when pump_crm.primemover_categ = 'motor' then
-case when pump_crm.speed_in_motor > 0 then pump_crm.speed_in_motor::text else '-' end
-when pump_crm.primemover_categ = 'vfd' then
-case when pump_crm.speed_in_motor > 0 then pump_crm.speed_in_motor::text else '-' end
 
-end as speed_rpm,
+case when pump_crm.speed_in_rpm > 0 then pump_crm.speed_in_rpm::text else '-' end as speed_pump,
+case when pump_crm.speed_in_motor > 0 then pump_crm.speed_in_motor::text else '-' end as speed_motor,
+
 
 case
 when type_of_drive = 'motor_direct' then 'Direct'
@@ -265,7 +260,7 @@ left join kg_brand_master brand on brand.id = pump_crm.mech_seal_make
 left join ch_pumpseries_flange flange on flange.id = pump_crm.flange_standard
 
 where wo_line.id in (select order_id from m2m_work_order_print_report_details
-where foundry_wiz_id = $P{wiz_id})]]>
+where foundry_wiz_id = $P{wiz_id} )]]>
 	</queryString>
 	<field name="id" class="java.lang.Integer"/>
 	<field name="order_category" class="java.lang.String"/>
@@ -294,7 +289,8 @@ where foundry_wiz_id = $P{wiz_id})]]>
 	<field name="efficiency" class="java.lang.String"/>
 	<field name="motor_kw" class="java.lang.String"/>
 	<field name="motor_make" class="java.lang.String"/>
-	<field name="speed_rpm" class="java.lang.String"/>
+	<field name="speed_pump" class="java.lang.String"/>
+	<field name="speed_motor" class="java.lang.String"/>
 	<field name="type_of_drive" class="java.lang.String"/>
 	<field name="lubrication_type" class="java.lang.String"/>
 	<field name="npsh_r_m" class="java.lang.String"/>
@@ -1125,7 +1121,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{speed_rpm}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{speed_pump}+" /  "+$F{speed_motor}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="479" width="258" height="16"/>
