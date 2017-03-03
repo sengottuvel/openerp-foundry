@@ -16,6 +16,7 @@
 						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="rotation_shift" type="object" string="Shift Rotation" class="oe_highlight"/>
 					</button>
 					
 					<field name="employee_id" position="replace">
@@ -37,7 +38,7 @@
 						<field name="department_id" readonly="1" invisible="1"/>
 						<field name="dep_id" readonly="1" />
 						<field name="emp_categ_id" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}" readonly="1" />
-						<field name="shift_id" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
+						<field name="shift_id" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}" required="1"/>
 					</field>
 					
 					<field name="type_id" position="after">
@@ -47,6 +48,7 @@
 -->
 						<field name="job_id" readonly="1"/>
 						<field name="rotation"  attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
+						<field name="rot_interval"  attrs="{'readonly':[('state','in',['approved','cancel','reject'])],'invisible':[('rotation','!=',True)],'required':[('rotation','=',True)]}"/>
 						<field name="state" style="width: 30%%" class="att_state_change"/>
 					</field>
 					
@@ -74,7 +76,7 @@
 								</group>
 								<group >
 									<field name="increament_type" invisible='1'/>
-									<field name="driver_batta" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}" required="0"/>
+									<field name="driver_batta" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}" required="1"/>
 									<field name="increament_amt" invisible='1'/>
 								</group>
 								<group colspan="5">
@@ -130,6 +132,16 @@
 										<field name="gross_salary"/>
 										<field name="mob_allowance"/>
 										<field name="increament_amt"/>
+									</tree>
+								</field>
+							</group>							
+						</page>
+						<page string="Shift Details" attrs="{'readonly':[('state','in',['approved','cancel','reject'])],'invisible':[('rotation','!=',True)]}">
+							<group>
+								<field name="line_id_shift" nolabel="1" >
+									<tree string="Shift" editable="bottom">
+										<field name="shift_id" on_change="onchange_shift(shift_id,sequence)"  required="1" string="Shift Name"/>
+										<field name="sequence" readonly="1" string="Sequence"/>
 									</tree>
 								</field>
 							</group>							

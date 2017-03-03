@@ -7,6 +7,7 @@ from datetime import datetime
 from datetime import date
 import re
 import math
+#~ import datetime
 dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
 class kg_contract(osv.osv):
@@ -100,19 +101,21 @@ class kg_contract(osv.osv):
 		'emp_categ_id': fields.many2one('kg.employee.category', 'Employee Category'),
 		'rotation':fields.boolean('Rotation Shift Applicable'),
 		'driver_bata_app':fields.boolean('Driver Bata Applicable'),
-		'shift_id': fields.many2one('kg.shift.master', 'Shift'),
+		'shift_id': fields.many2one('kg.shift.master', 'Current Shift'),
 		'dep_id':fields.many2one('kg.depmaster','Department'),
 		'vda_status': fields.boolean('VDA Applicable'),
 		'driver_batta': fields.float('Driver Batta(Per Day)'),
+		'rot_interval':fields.selection([('every_monday','Every Monday'),('month_1st','Month 1st')],'Rotational Interval'),
 			
 		
 		## Child Tables Declaration		
 		'line_id_salary':fields.one2many('ch.kg.contract.salary','header_id_salary','Line Id Salary'),	
+		'line_id_shift':fields.one2many('ch.contract.shift','header_id_shift','Line Id Shift'),	
+		'line_id_inc':fields.one2many('ch.con.special.incentive.policy','header_id_inc','Line Id inc'),	
 		'line_id_pre_salary':fields.one2many('ch.kg.contract.pre.salary','header_id_pre_salary','Line Id Pre Salary'),	
 		'line_id_his':fields.one2many('ch.kg.contract.his','header_id_his','Line Id contract History'),
 		'line_id_salary_his':fields.one2many('ch.kg.contract.salary.his','header_id_salary_his','Line Id Salary History'),	
-		'line_id_pre_salary_his':fields.one2many('ch.kg.contract.pre.salary.his','header_id_pre_salary_his','Line Id Pre Salary History'),
-		'line_id_inc':fields.one2many('ch.con.special.incentive.policy','header_id_inc','Line Id inc'),			
+		'line_id_pre_salary_his':fields.one2many('ch.kg.contract.pre.salary.his','header_id_pre_salary_his','Line Id Pre Salary History'),		
 				
 	}
 	
@@ -186,13 +189,21 @@ class kg_contract(osv.osv):
 		#~ return super(kg_contract, self).write(cr, uid, ids,vals,context)
 		
 	def write(self, cr, uid, ids, vals, context=None):
-		rec = self.browse(cr,uid,ids[0])
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid,'line_id_his':[(0,0,vals)]})
 		return super(kg_contract, self).write(cr, uid, ids, vals, context)
 	
 	###Validations###
+	
 	def _check_driver_batta(self, cr, uid,ids,context=None):
 		rec = self.browse(cr, uid, ids[0])
+		if rec.line_id_shift:
+			line_shift_type = [ line.shift_id for line in rec.line_id_shift ]
+			a= [line_shift_type.count(i) for i in line_shift_type ]
+			for j in a:
+				if j > 1:
+					raise osv.except_osv(_('Warning!'),
+								_('Duplicate Shifts are not allowed !!'))
+					return False
 		if rec.driver_bata_app:
 			if rec.driver_batta <= 0.00:
 				raise osv.except_osv(_('Warning!'),
@@ -276,6 +287,68 @@ class kg_contract(osv.osv):
 		
 	
 	## Module Requirement
+	
+	###### ROTATION SHIFTS RUNS ON MONDAY OR AT THE MONTH FIRST #######
+	
+	def rotation_shift(self,cr,uid,ids,context=None):
+		con_obj= self.pool.get('hr.contract')
+		con_shift_obj= self.pool.get('ch.contract.shift')
+		shift_obj= self.pool.get('kg.shift.master')
+		con_ids = con_obj.search(cr,uid,[('active','=',True)])
+		today = date.today()
+		print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%",today.day
+		tdy_date = today.day
+		month_name = today.strftime('%A')
+		print "********************************",month_name
+		count = 0
+		for cont_ids in con_ids:
+			con_rec = con_obj.browse(cr,uid,cont_ids)
+			if con_rec.rotation == True:
+				cr.execute('''select max(sequence) from kg_shift_master''')
+				max_seq = cr.dictfetchone()
+				print "_________________max sequence_______________________",max_seq['max']
+				cr.execute('''select min(sequence) from ch_contract_shift where header_id_shift = %s'''%(con_rec.id))
+				min_seq = cr.dictfetchone()
+				cr.execute('''select max(sequence) from ch_contract_shift where header_id_shift = %s'''%(con_rec.id))
+				max_seq_ch = cr.dictfetchone()
+				print "_________________max sequence_______________________",min_seq['min']
+				if con_rec.rot_interval == 'every_monday' and month_name == 'Friday':
+					curr_shift = con_rec.shift_id.sequence
+					for num in range(curr_shift,(max_seq['max']+1)):
+						if curr_shift == max_seq_ch['max']:
+							las_seq = con_shift_obj.search(cr,uid,[('sequence','=',min_seq['min']),('header_id_shift','=',con_rec.id)])
+							las_seq_rec = con_shift_obj.browse(cr,uid,las_seq[0])
+							self.write(cr,uid,con_rec.id,{'shift_id':las_seq_rec.shift_id.id})
+						else:
+							nums = num +1
+							ser_seq = con_shift_obj.search(cr,uid,[('sequence','=',nums),('header_id_shift','=',con_rec.id)])
+							if ser_seq:
+								seq_rec = con_shift_obj.browse(cr,uid,ser_seq[0])
+								print "seq_recseq_recseq_recseq_rec",seq_rec.shift_id.id
+								self.write(cr,uid,con_rec.id,{'shift_id':seq_rec.shift_id.id})
+								break
+							else:
+								pass
+				if con_rec.rot_interval == 'month_1st' and tdy_date == 3:
+					curr_shift = con_rec.shift_id.sequence
+					for num in range(curr_shift,(max_seq['max']+1)):
+						if curr_shift == max_seq_ch['max']:
+							las_seq = con_shift_obj.search(cr,uid,[('sequence','=',min_seq['min']),('header_id_shift','=',con_rec.id)])
+							las_seq_rec = con_shift_obj.browse(cr,uid,las_seq[0])
+							self.write(cr,uid,con_rec.id,{'shift_id':las_seq_rec.shift_id.id})
+						else:
+							nums = num +1
+							ser_seq = con_shift_obj.search(cr,uid,[('sequence','=',nums),('header_id_shift','=',con_rec.id)])
+							if ser_seq:
+								seq_rec = con_shift_obj.browse(cr,uid,ser_seq[0])
+								print "seq_recseq_recseq_recseq_rec",seq_rec.shift_id.id
+								self.write(cr,uid,con_rec.id,{'shift_id':seq_rec.shift_id.id})
+								break
+							else:
+								pass
+		return True
+		
+	###### ROTATION SHIFTS RUNS ON MONDAY OR AT THE MONTH FIRST #######
 	
 	def onchange_employee_code(self, cr, uid, ids, employee_id,code, context=None):
 		value = {'emp_name':'','dep_id':'','join_date':'','designation':''}
@@ -373,8 +446,8 @@ class kg_contract(osv.osv):
 	
 		#~ (_gross_salary, 'The break ups are not matching the gross salary !!!', ['  ']),		
 		(child_dups_val, 'The break ups are not matching the gross salary !!!', ['  ']),		
-		(_salary_brk_validation, 'The break ups are not matching the gross salary !!!', ['  ']),
-		#~ (_check_driver_batta, 'Driver Batta checking !!!', ['  ']),		
+		(_salary_brk_validation, 'The break ups are not matching the gross salary !!!', ['  ']),		
+		(_check_driver_batta, 'Driver Batta checking !!!', ['  ']),		
 		#~ (_gross_salary_check, 'System will not allow to process with zero or Negative Values gross salary !!!', ['  ']),		
 
 	]
@@ -437,6 +510,29 @@ class ch_con_special_incentive_policy(osv.osv):
 	]
 		
 ch_con_special_incentive_policy()
+
+class ch_contract_shift(osv.osv):
+	_name='ch.contract.shift'
+	
+	
+	
+	_columns = {
+		'header_id_shift':fields.many2one('hr.contract','Header Id Shift',invisible= True),
+		'shift_id':fields.many2one('kg.shift.master','Shift Master'),
+		'sequence':fields.integer('kg.shift.master','Shift Master'),
+	}
+	
+	def onchange_shift(self, cr, uid, ids, shift_id,sequence, context=None):
+		print "ONchanges called the shift"
+		value = {'sequence':''}
+		if shift_id:
+			shift = self.pool.get('kg.shift.master').browse(cr, uid, shift_id, context=context)
+			value = {
+					'sequence': shift.sequence,
+					}
+		return {'value': value}
+		
+ch_contract_shift()
 
 class ch_kg_contract_salary(osv.osv):
 	
