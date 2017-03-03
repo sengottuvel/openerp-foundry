@@ -312,7 +312,7 @@ class kg_contract(osv.osv):
 				cr.execute('''select max(sequence) from ch_contract_shift where header_id_shift = %s'''%(con_rec.id))
 				max_seq_ch = cr.dictfetchone()
 				print "_________________max sequence_______________________",min_seq['min']
-				if con_rec.rot_interval == 'every_monday' and month_name == 'Friday':
+				if con_rec.rot_interval == 'every_monday' and month_name == 'Monday':
 					curr_shift = con_rec.shift_id.sequence
 					for num in range(curr_shift,(max_seq['max']+1)):
 						if curr_shift == max_seq_ch['max']:
@@ -329,7 +329,7 @@ class kg_contract(osv.osv):
 								break
 							else:
 								pass
-				if con_rec.rot_interval == 'month_1st' and tdy_date == 3:
+				if con_rec.rot_interval == 'month_1st' and tdy_date == 1:
 					curr_shift = con_rec.shift_id.sequence
 					for num in range(curr_shift,(max_seq['max']+1)):
 						if curr_shift == max_seq_ch['max']:
