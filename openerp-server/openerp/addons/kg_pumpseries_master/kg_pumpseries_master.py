@@ -54,7 +54,7 @@ class kg_pumpseries_master(osv.osv):
 		'working_pressure': fields.float('Working Pressure(Kg/cm2)'),
 		'speed': fields.float('Speed(Rpm)'),
 		'suction_orientation': fields.selection([('axial','AXIAL'),('side','SIDE')],'Suction Orientation'),
-		'discharge_orientation': fields.selection([('top_side','TOP SIDE'),('bot_side','BOTTOM SIDE'),('top','TOP'),('top_cen_line','TOP CENTER LINE'),('side','Side')],'Discharge Orientation',required=True),
+		'discharge_orientation': fields.selection([('top_side','TOP SIDE'),('bot_side','BOTTOM SIDE'),('top','TOP'),('top_cen_line','TOP CENTER LINE'),('side','SIDE')],'Discharge Orientation',required=True),
 		'line_ids': fields.one2many('ch.pumpseries.flange', 'header_id', "Child Pumpseries Flange",readonly=False, states={'approved':[('readonly',True)]}),
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
 		
