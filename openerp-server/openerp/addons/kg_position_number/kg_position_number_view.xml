@@ -246,6 +246,8 @@
          <!-- Menu Name Start here --> 
         	
         	<menuitem name="Position Number" parent="kg_operation_master.mpm_ms_master_menu" action="mma_position_number_master" id="mam_position_number_menu" sequence="3"/>
+			
+			<menuitem action="mma_position_number_master" name="Position Number" id="mam_position_number_master_root" parent="kg_pumpmodel_master.mpm_planning_master" sequence="37"/>
 
 		<!-- Menu Name End here --> 
 		

@@ -34,6 +34,7 @@
             ref('kg_accessories_master.mam_accessories_master_menu'),
             ref('kg_rate_revision.mam_rate_revision_master'),
             ref('kg_accessories_category.mam_accessories_category'),
+            ref('kg_position_number.mam_position_number_master_root'),
           
             
              ref('kg_stock_inward.tpm_transactions'),
