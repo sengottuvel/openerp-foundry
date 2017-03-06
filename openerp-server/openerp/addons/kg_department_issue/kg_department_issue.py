@@ -488,6 +488,7 @@ class kg_department_issue(osv.osv):
 			#~ if line_ids.wo_state == 'accept':
 			if line_ids.issue_qty > 0:
 				self.pool.get('kg.department.issue.line').write(cr,uid,line_ids.id,{'state':'done'})
+				## MS store inward process
 				if line_ids.issue_id.department_id.name == 'DP2':
 					ms_obj = self.pool.get('kg.machineshop').search(cr,uid,[('order_line_id','=',line_ids.w_order_line_id.id),('ms_id','=',line_ids.ms_bot_id.id),('state','=','raw_pending')])
 					if ms_obj:
@@ -497,6 +498,15 @@ class kg_department_issue(osv.osv):
 						select id from kg_ms_operations where state = 'reject' 
 						and order_line_id = %s and reject_state = 'not_issued' and ms_type = 'ms_item'
 						and item_code = '%s' and moc_id = %s limit 1) """%(line_ids.w_order_line_id.id,line_ids.ms_bot_id.code,line_ids.wo_moc_id.id))
+						
+						
+				## BOT store inward process
+				if line_ids.issue_id.department_id.name == 'DP3':
+					ms_obj = self.pool.get('kg.ms.stores').search(cr,uid,[('order_line_id','=',line_ids.w_order_line_id.id),('item_code','=',line_ids.ms_bot_id.code),('moc_id','=',line_ids.wo_moc_id.id),
+																		('accept_state','=','pending'),('ms_type','=','bot_item')])
+					if ms_obj:
+						ms_rec = self.pool.get('kg.ms.stores').browse(cr,uid,ms_obj[0])
+						self.pool.get('kg.ms.stores').write(cr,uid,ms_rec.id,{'accept_state':'waiting'})
 				
 				stock_move_obj.create(cr,uid,
 				{
