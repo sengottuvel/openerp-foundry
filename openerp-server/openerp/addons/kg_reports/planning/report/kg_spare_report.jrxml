@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Workorder_print" pageWidth="605" pageHeight="842" columnWidth="565" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.6105100000000008"/>
-	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="1171"/>
+	<property name="ireport.x" value="230"/>
+	<property name="ireport.y" value="0"/>
 	<subDataset name="dataset2">
 		<parameter name="header_id" class="java.lang.Integer"/>
 		<queryString>
@@ -408,7 +408,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{wo_ref}]]></textFieldExpression>
 				</textField>
@@ -421,7 +421,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.0"/>
 					</box>
 					<textElement textAlignment="Right" verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
+						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[WORK ORDER REF:]]></text>
 				</staticText>
@@ -434,7 +434,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{pump_type}]]></textFieldExpression>
 				</textField>
@@ -447,7 +447,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.0"/>
 					</box>
 					<textElement textAlignment="Right" verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
+						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Pump Type :]]></text>
 				</staticText>
@@ -455,7 +455,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<reportElement mode="Transparent" x="0" y="0" width="565" height="31"/>
 					<box topPadding="13"/>
 					<textElement textAlignment="Center">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{company_name}]]></textFieldExpression>
 				</textField>
@@ -468,7 +468,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
+						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Customer :]]></text>
 				</staticText>
@@ -481,25 +481,12 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
+						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Dealer :]]></text>
 				</staticText>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="73" width="243" height="21"/>
-					<box leftPadding="2">
-						<topPen lineWidth="0.75"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement verticalAlignment="Middle">
-						<font size="8"/>
-					</textElement>
-					<textFieldExpression><![CDATA[""]]></textFieldExpression>
-				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="243" y="73" width="71" height="21" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="73" width="95" height="21" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -507,12 +494,12 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.0"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Order Date :]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="314" y="73" width="83" height="21"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="95" y="73" width="148" height="21"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.0"/>
@@ -520,12 +507,12 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{order_date}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="397" y="73" width="71" height="21" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="243" y="73" width="103" height="21" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -533,12 +520,12 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.0"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Due Date :]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="468" y="73" width="97" height="21"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="346" y="73" width="219" height="21"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.0"/>
@@ -546,7 +533,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{due_date}]]></textFieldExpression>
 				</textField>
@@ -598,7 +585,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
+						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[CPO Ref / Dealer Po Ref : --]]></text>
 				</staticText>
@@ -611,7 +598,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{wo_ref}]]></textFieldExpression>
 				</textField>
@@ -622,7 +609,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
+						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[W.O Ref]]></text>
 				</staticText>
@@ -635,7 +622,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
+						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Model]]></text>
 				</staticText>
@@ -648,7 +635,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Description]]></text>
 				</staticText>
@@ -661,7 +648,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Tag No.]]></text>
 				</staticText>
@@ -674,7 +661,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Quantity in Nos.]]></text>
 				</staticText>
@@ -687,7 +674,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Size in mm]]></text>
 				</staticText>
@@ -700,7 +687,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Flange standard]]></text>
 				</staticText>
@@ -713,7 +700,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Liquid handled]]></text>
 				</staticText>
@@ -726,7 +713,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Specific Gravity ]]></text>
 				</staticText>
@@ -739,7 +726,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[PH Value]]></text>
 				</staticText>
@@ -752,7 +739,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Temperature in °C ]]></text>
 				</staticText>
@@ -765,7 +752,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
+						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Capacity in m3/Hr]]></text>
 				</staticText>
@@ -778,7 +765,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
+						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Total Head in m]]></text>
 				</staticText>
@@ -791,7 +778,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Efficiency  %]]></text>
 				</staticText>
@@ -804,7 +791,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
+						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[BKW]]></text>
 				</staticText>
@@ -817,7 +804,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Motor KW ]]></text>
 				</staticText>
@@ -830,7 +817,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Motor Make & Frame Size]]></text>
 				</staticText>
@@ -843,7 +830,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Speed - RPM (P/M)]]></text>
 				</staticText>
@@ -856,7 +843,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Type of Drive]]></text>
 				</staticText>
@@ -869,7 +856,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
+						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Type of Lubrication]]></text>
 				</staticText>
@@ -882,7 +869,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[NPSH R/A -mts]]></text>
 				</staticText>
@@ -895,7 +882,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Shaft Sealing / Seal Make / Seal Type]]></text>
 				</staticText>
@@ -908,7 +895,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Face Combination / API Plan]]></text>
 				</staticText>
@@ -921,7 +908,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Shut off head in M]]></text>
 				</staticText>
@@ -934,7 +921,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Impeller Dia in MM(Max/Rated/Min)]]></text>
 				</staticText>
@@ -947,7 +934,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
+						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Hydro Test Pressure in Bar]]></text>
 				</staticText>
@@ -960,7 +947,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{model}]]></textFieldExpression>
 				</textField>
@@ -973,7 +960,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="false"/>
+						<font size="10" isBold="false"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{tag_no}]]></textFieldExpression>
 				</textField>
@@ -986,7 +973,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="false"/>
+						<font size="10" isBold="false"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{description}]]></textFieldExpression>
 				</textField>
@@ -999,7 +986,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{qty}]]></textFieldExpression>
 				</textField>
@@ -1012,7 +999,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="false"/>
+						<font size="10" isBold="false"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{size}]]></textFieldExpression>
 				</textField>
@@ -1025,7 +1012,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="false"/>
+						<font size="10" isBold="false"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{flange_standard}]]></textFieldExpression>
 				</textField>
@@ -1038,7 +1025,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{liquid_handled}]]></textFieldExpression>
 				</textField>
@@ -1051,7 +1038,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[""]]></textFieldExpression>
 				</textField>
@@ -1064,7 +1051,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="false"/>
+						<font size="10" isBold="false"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{specific_gravity}]]></textFieldExpression>
 				</textField>
@@ -1077,7 +1064,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="false"/>
+						<font size="10" isBold="false"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{temperature_in_c}]]></textFieldExpression>
 				</textField>
@@ -1090,7 +1077,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{capacity_in_m3hr}]]></textFieldExpression>
 				</textField>
@@ -1103,7 +1090,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{head_in_m}]]></textFieldExpression>
 				</textField>
@@ -1116,7 +1103,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{efficiency}]]></textFieldExpression>
 				</textField>
@@ -1129,7 +1116,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[""]]></textFieldExpression>
 				</textField>
@@ -1142,7 +1129,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[""]]></textFieldExpression>
 				</textField>
@@ -1155,7 +1142,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{motor_make}]]></textFieldExpression>
 				</textField>
@@ -1168,7 +1155,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{speed_rpm}]]></textFieldExpression>
 				</textField>
@@ -1181,7 +1168,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[""]]></textFieldExpression>
 				</textField>
@@ -1194,7 +1181,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{lubrication_type}]]></textFieldExpression>
 				</textField>
@@ -1207,7 +1194,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{npsh_r_m}]]></textFieldExpression>
 				</textField>
@@ -1220,7 +1207,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{shaft_sealing}]]></textFieldExpression>
 				</textField>
@@ -1233,7 +1220,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{face_combination}+" / "+$F{api_plan}]]></textFieldExpression>
 				</textField>
@@ -1246,7 +1233,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{shut_off_head}]]></textFieldExpression>
 				</textField>
@@ -1259,7 +1246,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{impeller_dia_min}]]></textFieldExpression>
 				</textField>
@@ -1272,7 +1259,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{hydrostatic_test_pressure}]]></textFieldExpression>
 				</textField>
@@ -1285,7 +1272,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{customer_name}]]></textFieldExpression>
 				</textField>
@@ -1298,7 +1285,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{delear}]]></textFieldExpression>
 				</textField>
@@ -1315,7 +1302,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Inspection: ]]></text>
 				</staticText>
@@ -1328,7 +1315,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{road_permit}]]></textFieldExpression>
 				</textField>
@@ -1341,7 +1328,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
+						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Penalty: ]]></text>
 				</staticText>
@@ -1354,7 +1341,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{l_d_clause}]]></textFieldExpression>
 				</textField>
@@ -1367,7 +1354,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{drawing_approval}]]></textFieldExpression>
 				</textField>
@@ -1380,7 +1367,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Road permit: ]]></text>
 				</staticText>
@@ -1393,7 +1380,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[ED Clearance: ]]></text>
 				</staticText>
@@ -1406,7 +1393,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{excise_duty}]]></textFieldExpression>
 				</textField>
@@ -1419,7 +1406,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Drg. Appr.: ]]></text>
 				</staticText>
@@ -1432,7 +1419,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{inspection}]]></textFieldExpression>
 				</textField>
@@ -1523,147 +1510,147 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 				<textField>
 					<reportElement x="1" y="0" width="564" height="20"/>
 					<textElement textAlignment="Center">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["SPARES LIST"]]></textFieldExpression>
 				</textField>
 				<textField>
 					<reportElement x="1" y="20" width="100" height="20"/>
 					<textElement>
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["ORDER REF:"]]></textFieldExpression>
 				</textField>
 				<textField>
 					<reportElement x="1" y="40" width="100" height="20"/>
 					<textElement>
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["PUMP MODEL:"]]></textFieldExpression>
 				</textField>
 				<textField>
 					<reportElement x="1" y="60" width="100" height="20"/>
 					<textElement>
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["SERIAL NO:"]]></textFieldExpression>
 				</textField>
-				<textField>
-					<reportElement x="82" y="80" width="46" height="20"/>
+				<textField isStretchWithOverflow="true">
+					<reportElement stretchType="RelativeToTallestObject" x="82" y="80" width="46" height="20"/>
 					<textElement textAlignment="Center">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["POSI NO"]]></textFieldExpression>
 				</textField>
 				<textField>
 					<reportElement x="397" y="20" width="42" height="20"/>
 					<textElement>
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["DT:"]]></textFieldExpression>
 				</textField>
-				<textField>
-					<reportElement x="421" y="80" width="51" height="20"/>
+				<textField isStretchWithOverflow="true">
+					<reportElement stretchType="RelativeToTallestObject" x="421" y="80" width="51" height="20"/>
 					<textElement textAlignment="Center">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["PAT.NO"]]></textFieldExpression>
 				</textField>
-				<textField>
-					<reportElement x="128" y="80" width="55" height="20"/>
+				<textField isStretchWithOverflow="true">
+					<reportElement stretchType="RelativeToTallestObject" x="128" y="80" width="55" height="20"/>
 					<textElement textAlignment="Center">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["PART NAME"]]></textFieldExpression>
 				</textField>
-				<textField>
-					<reportElement x="360" y="80" width="61" height="20"/>
+				<textField isStretchWithOverflow="true">
+					<reportElement stretchType="RelativeToTallestObject" x="360" y="80" width="61" height="20"/>
 					<textElement textAlignment="Center">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["MOC"]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true">
 					<reportElement stretchType="RelativeToTallestObject" x="324" y="80" width="36" height="20"/>
 					<textElement textAlignment="Center">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Weight in KG"]]></textFieldExpression>
 				</textField>
-				<textField>
-					<reportElement x="183" y="80" width="42" height="20"/>
+				<textField isStretchWithOverflow="true">
+					<reportElement stretchType="RelativeToTallestObject" x="183" y="80" width="42" height="20"/>
 					<textElement textAlignment="Center">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Req. Qty"]]></textFieldExpression>
 				</textField>
-				<textField>
-					<reportElement x="472" y="80" width="48" height="20"/>
+				<textField isStretchWithOverflow="true">
+					<reportElement stretchType="RelativeToTallestObject" x="472" y="80" width="48" height="20"/>
 					<textElement textAlignment="Center">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Remarks"]]></textFieldExpression>
 				</textField>
-				<textField>
-					<reportElement x="520" y="80" width="45" height="20"/>
+				<textField isStretchWithOverflow="true">
+					<reportElement stretchType="RelativeToTallestObject" x="520" y="80" width="45" height="20"/>
 					<textElement textAlignment="Center">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Material Code"]]></textFieldExpression>
 				</textField>
 				<textField>
 					<reportElement x="101" y="20" width="205" height="20"/>
 					<textElement>
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{wo_ref}]]></textFieldExpression>
 				</textField>
 				<textField>
 					<reportElement x="101" y="40" width="205" height="20"/>
 					<textElement>
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{model}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
 					<reportElement x="101" y="60" width="205" height="20"/>
 					<textElement>
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{serial_no}]]></textFieldExpression>
 				</textField>
 				<textField>
 					<reportElement x="439" y="20" width="126" height="20"/>
 					<textElement>
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{date}]]></textFieldExpression>
 				</textField>
-				<textField>
-					<reportElement x="278" y="80" width="46" height="20"/>
+				<textField isStretchWithOverflow="true">
+					<reportElement stretchType="RelativeToTallestObject" x="278" y="80" width="46" height="20"/>
 					<textElement textAlignment="Center">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["MTL. Form"]]></textFieldExpression>
 				</textField>
-				<textField>
-					<reportElement x="225" y="80" width="53" height="20"/>
+				<textField isStretchWithOverflow="true">
+					<reportElement stretchType="RelativeToTallestObject" x="225" y="80" width="53" height="20"/>
 					<textElement textAlignment="Center">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Drawing No."]]></textFieldExpression>
 				</textField>
-				<textField>
-					<reportElement x="1" y="80" width="33" height="20"/>
+				<textField isStretchWithOverflow="true">
+					<reportElement stretchType="RelativeToTallestObject" x="1" y="80" width="33" height="20"/>
 					<textElement textAlignment="Center">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["S.NO"]]></textFieldExpression>
 				</textField>
-				<textField>
-					<reportElement x="34" y="80" width="48" height="20"/>
+				<textField isStretchWithOverflow="true">
+					<reportElement stretchType="RelativeToTallestObject" x="34" y="80" width="48" height="20"/>
 					<textElement textAlignment="Center">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["CSD Code No."]]></textFieldExpression>
 				</textField>
@@ -1688,7 +1675,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<reportElement stretchType="RelativeToTallestObject" x="82" y="0" width="46" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="0"/>
 								<textElement textAlignment="Center">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{position_no}]]></textFieldExpression>
 							</textField>
@@ -1696,7 +1683,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<reportElement stretchType="RelativeToTallestObject" x="421" y="0" width="51" height="20"/>
 								<box topPadding="0"/>
 								<textElement textAlignment="Center">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{pattern_no}]]></textFieldExpression>
 							</textField>
@@ -1704,7 +1691,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<reportElement stretchType="RelativeToTallestObject" x="128" y="0" width="55" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="0"/>
 								<textElement textAlignment="Center">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{pattern_name}]]></textFieldExpression>
 							</textField>
@@ -1712,7 +1699,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<reportElement stretchType="RelativeToTallestObject" x="183" y="0" width="42" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="0"/>
 								<textElement textAlignment="Center">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{qty}]]></textFieldExpression>
 							</textField>
@@ -1720,7 +1707,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<reportElement stretchType="RelativeToTallestObject" x="324" y="0" width="36" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="0"/>
 								<textElement textAlignment="Center">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{weight_kg}]]></textFieldExpression>
 							</textField>
@@ -1728,7 +1715,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<reportElement stretchType="RelativeToTallestObject" x="360" y="0" width="61" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="0"/>
 								<textElement textAlignment="Center">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{moc_name}]]></textFieldExpression>
 							</textField>
@@ -1736,7 +1723,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<reportElement stretchType="RelativeToTallestObject" x="472" y="0" width="48" height="20"/>
 								<box topPadding="0"/>
 								<textElement textAlignment="Center">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{remarks}]]></textFieldExpression>
 							</textField>
@@ -1744,7 +1731,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<reportElement stretchType="RelativeToTallestObject" x="520" y="0" width="45" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="0"/>
 								<textElement textAlignment="Center">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{material_code}]]></textFieldExpression>
 							</textField>
@@ -1752,7 +1739,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<reportElement stretchType="RelativeToTallestObject" x="225" y="0" width="53" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="0"/>
 								<textElement textAlignment="Center">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{drawing_no}]]></textFieldExpression>
 							</textField>
@@ -1760,7 +1747,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<reportElement stretchType="RelativeToTallestObject" x="278" y="0" width="46" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="0"/>
 								<textElement textAlignment="Center">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{mtl_form}]]></textFieldExpression>
 							</textField>
@@ -1768,7 +1755,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<reportElement stretchType="RelativeToTallestObject" x="1" y="0" width="33" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="0"/>
 								<textElement textAlignment="Center">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 							</textField>
@@ -1776,7 +1763,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<reportElement stretchType="RelativeToTallestObject" x="34" y="0" width="48" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="0"/>
 								<textElement textAlignment="Center">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{csd_no}]]></textFieldExpression>
 							</textField>
@@ -1797,7 +1784,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<topPen lineWidth="0.5"/>
 				</box>
 				<textElement>
-					<font size="8"/>
+					<font size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{printed_by} + " "+ "/"  +" "+$F{new_date}]]></textFieldExpression>
 			</textField>
@@ -1807,7 +1794,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<topPen lineWidth="0.5"/>
 				</box>
 				<textElement>
-					<font size="8"/>
+					<font size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
@@ -1817,7 +1804,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<topPen lineWidth="0.5"/>
 				</box>
 				<textElement>
-					<font size="8"/>
+					<font size="10"/>
 				</textElement>
 			</textField>
 			<textField>
@@ -1826,7 +1813,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<topPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Right">
-					<font size="8"/>
+					<font size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
 			</textField>
@@ -1836,7 +1823,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 				</reportElement>
 				<box leftPadding="3"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="8" isBold="true"/>
+					<font size="10" isBold="true"/>
 				</textElement>
 				<text><![CDATA[APPROVED BY]]></text>
 			</staticText>
@@ -1846,7 +1833,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 				</reportElement>
 				<box leftPadding="3"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="8" isBold="true"/>
+					<font size="10" isBold="true"/>
 				</textElement>
 				<text><![CDATA[CHECKED BY]]></text>
 			</staticText>
@@ -1856,7 +1843,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 				</reportElement>
 				<box leftPadding="3"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="8" isBold="true"/>
+					<font size="10" isBold="true"/>
 				</textElement>
 				<text><![CDATA[PREPARED BY]]></text>
 			</staticText>
