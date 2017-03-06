@@ -475,6 +475,7 @@ class kg_crm_enquiry(osv.osv):
 																		'due_date': entry.due_date,
 																		'del_date': entry.del_date,
 																		'customer_id': entry.customer_id.id,
+																		'dealer_id': entry.dealer_id.id,
 																		'ref_mode': entry.ref_mode,
 																		'market_division': entry.market_division,
 																		'purpose': entry.purpose,
@@ -2222,6 +2223,7 @@ class ch_kg_crm_foundry_item(osv.osv):
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
 		'prime_cost': fields.float('Prime Cost'),
 		'purpose_categ': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories')],'Purpose Category'),
+		'material_code': fields.char('Material Code'),
 		
 	}
 	
@@ -2287,6 +2289,7 @@ class ch_kg_crm_machineshop_item(osv.osv):
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
 		'prime_cost': fields.float('Prime Cost'),
 		'purpose_categ': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories')],'Purpose Category'),
+		'material_code': fields.char('Material Code'),
 		
 	}
 	
@@ -2346,6 +2349,7 @@ class ch_kg_crm_bot(osv.osv):
 		'brand_id': fields.many2one('kg.brand.master','Brand '),
 		'flag_is_bearing': fields.boolean('Is Bearing'),
 		'purpose_categ': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories')],'Purpose Category'),
+		'material_code': fields.char('Material Code'),
 		
 	}
 	
@@ -2586,6 +2590,7 @@ class ch_crm_access_fou(osv.osv):
 		'load_bom': fields.boolean('Load BOM'),
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
 		'prime_cost': fields.float('Prime Cost'),
+		'material_code': fields.char('Material Code'),
 		
 	}
 	
@@ -2619,6 +2624,7 @@ class ch_crm_access_ms(osv.osv):
 		'load_bom': fields.boolean('Load BOM'),
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
 		'prime_cost': fields.float('Prime Cost'),
+		'material_code': fields.char('Material Code'),
 		
 	}
 	
@@ -2661,6 +2667,7 @@ class ch_crm_access_bot(osv.osv):
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
 		'prime_cost': fields.float('Prime Cost'),
 		'brand_id': fields.many2one('kg.brand.master','Brand'),
+		'material_code': fields.char('Material Code'),
 		
 	}
 	

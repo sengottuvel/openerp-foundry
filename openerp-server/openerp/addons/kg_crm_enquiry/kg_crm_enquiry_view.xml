@@ -451,6 +451,7 @@
 							<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
 							<field name="pattern_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
 							<field name="pattern_name" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+							<field name="material_code"/>
 							<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}"/>
 							<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
 							<field name="qty" required="1" attrs="{'readonly':[('purpose_categ','=','pump')]}"/>
@@ -468,6 +469,7 @@
 							<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
 							<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 							<field name="name" attrs="{'readonly':[('load_bom','=',True)]}"/>
+							<field name="material_code"/>
 							<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}"/>
 							<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
 							<field name="qty" required="1" attrs="{'readonly':[('purpose_categ','=','pump')]}"/>
@@ -485,6 +487,7 @@
 							<field name="position_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
 							<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 							<field name="item_name" attrs="{'readonly':[('load_bom','=',True)]}"/>
+							<field name="material_code"/>
 							<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}"/>
 							<field name="brand_id" attrs="{'required': [('flag_is_bearing','=',True),('is_applicable','=',True)]}"/>
 							<field name="qty" required="1" attrs="{'readonly':[('purpose_categ','=','pump')]}"/>
@@ -547,6 +550,7 @@
 											<field name="position_id" readonly="1"/>
 											<field name="pattern_id" readonly="1"/>
 											<field name="pattern_name" readonly="1"/>
+											<field name="material_code"/>
 											<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}"/>
 											<field name="csd_no" readonly="1"/>
 											<field name="qty" required="1"/>
@@ -563,6 +567,7 @@
 											<field name="position_id" readonly="1"/>
 											<field name="ms_id" readonly="1"/>
 											<field name="name" readonly="1"/>
+											<field name="material_code"/>
 											<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}"/>
 											<field name="csd_no" readonly="1"/>
 											<field name="qty" required="1"/>
@@ -578,6 +583,7 @@
 											<field name="is_applicable"/>
 											<field name="ms_id" readonly="1"/>
 											<field name="name" readonly="1"/>
+											<field name="material_code"/>
 											<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}"/>
 											<field name="csd_no" readonly="1"/>
 											<field name="qty" required="1"/>
