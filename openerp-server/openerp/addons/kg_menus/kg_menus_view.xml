@@ -292,7 +292,9 @@
 -->
 				<menuitem action="kg_subcontract_process.tma_sc_wo_spl" id="tam_sc_wo_spl_mgmt" parent="menu_mgmt_masters" sequence="2" name="SC Special Approval WO" />
 				<menuitem action="purchase.purchase_rfq_spl_approval" id="pam_purchase_order_spl_approvals_mgmt" name="Special Approval PO" parent="menu_mgmt_masters" sequence="3"/>
+<!--
 				<menuitem  name="Stock Statement"   parent="menu_mgmt_masters" action="kg_reports.wam_kg_stock_ledger_sum" id="wma_kg_stock_ledger_sum_mgmt" sequence='4'/>
+-->
 				
 		<!--MGMT menus-->
 		<!--HR menus-->
