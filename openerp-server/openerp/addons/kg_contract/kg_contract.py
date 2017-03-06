@@ -290,7 +290,7 @@ class kg_contract(osv.osv):
 	
 	###### ROTATION SHIFTS RUNS ON MONDAY OR AT THE MONTH FIRST #######
 	
-	def rotation_shift(self,cr,uid,ids,context=None):
+	def rotation_shift(self,cr,uid,ids=0,context=None):
 		con_obj= self.pool.get('hr.contract')
 		con_shift_obj= self.pool.get('ch.contract.shift')
 		shift_obj= self.pool.get('kg.shift.master')
