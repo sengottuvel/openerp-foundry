@@ -901,7 +901,59 @@ class kg_payslip(osv.osv):
 												'amount':coffe_allow,
 											})
 				
-				#### Creation of Coffee Allowance per month for the employee ####	
+				#### Creation of Coffee Allowance per month for the employee ####
+				
+				#### Creation of Worker Allowance per month for the employee ####	
+				
+				#### Creation of Painting Allowance #####
+				paint_sal_id = self.pool.get('ch.kg.contract.salary').search(cr,uid,[('header_id_salary','=',con_ids[0]),('salary_type','=',51)])
+				if paint_sal_id:
+					paint_sal_rec = self.pool.get('ch.kg.contract.salary').browse(cr,uid,paint_sal_id[0])
+					print "-----------Painting Allowance-----------------",paint_sal_rec.salary_amt
+					sall_days = worked_days + ot_days + od_days + arrear_days + sundays + nat_fes_days + half_days + leave_days
+					paint_allow = (paint_sal_rec.salary_amt/calulation_days)*(sall_days)
+					serc_paint_allow	= self.pool.get('hr.payslip.line').search(cr,uid,[('slip_id','=',slip_rec.id),('code','=','PAINT ALL')])
+					serc_paint_allow_othr	= self.pool.get('ch.other.salary.comp').search(cr,uid,[('slip_id','=',slip_rec.id),('code','=','PAINT ALL')])
+					if serc_paint_allow:
+						serc_paint_rec = self.pool.get('hr.payslip.line').browse(cr,uid,serc_paint_allow[0])
+						self.pool.get('hr.payslip.line').write(cr,uid,serc_paint_rec.id,
+												{
+													'amount':paint_allow,
+												})
+					elif serc_paint_allow_othr:
+						serc_paint_rec_othr = self.pool.get('ch.other.salary.comp').browse(cr,uid,serc_paint_allow_othr[0])
+						self.pool.get('ch.other.salary.comp').write(cr,uid,serc_paint_rec_othr.id,
+												{
+													'amount':paint_allow,
+												})
+					else:
+						pass
+				#### Creation of Painting Allowance #####
+				
+				#### Creation of NI Hard Allowance #####
+				ni_hard_sal_id = self.pool.get('ch.kg.contract.salary').search(cr,uid,[('header_id_salary','=',con_ids[0]),('salary_type','=',52)])
+				if ni_hard_sal_id:
+					ni_hard_sal_rec = self.pool.get('ch.kg.contract.salary').browse(cr,uid,ni_hard_sal_id[0])
+					print "-----------NIHARD ALL Allowance-----------------",ni_hard_sal_rec.salary_amt
+					sall_days = worked_days + ot_days + od_days + arrear_days + sundays + nat_fes_days + half_days+ leave_days
+					ni_hard_allow = (ni_hard_sal_rec.salary_amt/calulation_days)*(sall_days)
+					serc_ni_hard_allow	= self.pool.get('hr.payslip.line').search(cr,uid,[('slip_id','=',slip_rec.id),('code','=','NIHARD ALL')])
+					serc_ni_hard_allow_othr	= self.pool.get('ch.other.salary.comp').search(cr,uid,[('slip_id','=',slip_rec.id),('code','=','NIHARD ALL')])
+					if serc_ni_hard_allow:
+						serc_ni_hard_rec = self.pool.get('hr.payslip.line').browse(cr,uid,serc_ni_hard_allow[0])
+						self.pool.get('hr.payslip.line').write(cr,uid,serc_ni_hard_rec.id,
+												{
+													'amount':ni_hard_allow,
+												})
+					elif serc_ni_hard_allow_othr:
+						serc_ni_hard_rec_othr = self.pool.get('ch.other.salary.comp').browse(cr,uid,serc_ni_hard_allow_othr[0])
+						self.pool.get('ch.other.salary.comp').write(cr,uid,serc_ni_hard_rec_othr.id,
+												{
+													'amount':ni_hard_allow,
+												})
+					else:
+						pass
+				#### Creation of NI Hard Allowance #####	
 				
 				#### Creation of the total allowance and updating the total allowance field in parent ####
 				
