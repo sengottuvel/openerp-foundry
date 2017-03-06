@@ -222,6 +222,7 @@
 								   <field name="pattern_id"/>
 								   <field name="pattern_name" readonly="1"/>
 								   <field name="position_id"/>
+								   <field name="material_code"/>
 								   <field name="weight" />
 <!--
 								   <field name="ci_weight" readonly="1"/>
@@ -252,7 +253,8 @@
 									<field name="flag_applicable"/>
 									<field name="ms_id"/>		
 									<field name="name" readonly="1"/>
-									<field name="position_id"/>		
+									<field name="position_id"/>
+									<field name="material_code"/>		
 									<field name="qty" required="1"/>
 									<field name="unit_price"/>
 									<field name="mar_prime_cost" readonly="1" invisible="0"/>
@@ -274,7 +276,8 @@
 									<field name="order_category" invisible="1"/>
 									<field name="flag_applicable"/>
 									<field name="bot_id" on_change="onchange_bot(bot_id)"/>	
-									<field name="item_name" readonly="1"/>																			
+									<field name="item_name" readonly="1"/>	
+									<field name="material_code"/>																		
 									<field name="qty" required="1"/>
 									<field name="unit_price"/>
 									<field name="mar_prime_cost" readonly="1" invisible="0"/>
@@ -329,6 +332,7 @@
 													<field name="position_id"/>
 													<field name="pattern_id"/>
 													<field name="pattern_name" readonly="1"/>
+													<field name="material_code"/>
 													<field name="moc_id"/>
 													<field name="csd_no"/>
 													<field name="qty" required="1"/>
@@ -348,6 +352,7 @@
 													<field name="position_id"/>
 													<field name="ms_id"/>
 													<field name="name" readonly="1"/>
+													<field name="material_code"/>
 													<field name="moc_id"/>
 													<field name="csd_no"/>
 													<field name="qty" required="1"/>
@@ -367,6 +372,7 @@
 													<field name="position_id"/>
 													<field name="ms_id"/>
 													<field name="item_name" readonly="1"/>
+													<field name="material_code"/>
 													<field name="moc_id"/>
 													<field name="csd_no" required="1"/>
 													<field name="qty" required="1"/>

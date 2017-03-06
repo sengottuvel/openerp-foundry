@@ -2045,7 +2045,8 @@ class ch_order_bom_details(osv.osv):
 		'wo_prime_cost': fields.float('WO PC'),
 		'mar_prime_cost': fields.float('Marketing PC'),
 		'flag_trimming_dia': fields.boolean('Trimming Dia'),
-	
+		'material_code': fields.char('Material Code'),
+		
 	}
 	
 	_defaults = {
@@ -2161,7 +2162,8 @@ class ch_order_machineshop_details(osv.osv):
 		### Prime Cost ###
 		'wo_prime_cost': fields.float('WO PC'),
 		'mar_prime_cost': fields.float('Marketing PC'),
-	
+		'material_code': fields.char('Material Code'),
+		
 	}  
 	
 	_defaults = {
@@ -2211,6 +2213,7 @@ class ch_order_bot_details(osv.osv):
 		### Prime Cost ###
 		'wo_prime_cost': fields.float('WO PC'),
 		'mar_prime_cost': fields.float('Marketing PC'),
+		'material_code': fields.char('Material Code'),
 		
 	
 	}
@@ -2393,6 +2396,7 @@ class ch_wo_accessories_foundry(osv.osv):
 		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),
 		'prime_cost': fields.float('Prime Cost'),
 		'wo_prime_cost': fields.float('WO PC'),
+		'material_code': fields.char('Material Code'),
 		
 	}
 	
@@ -2422,6 +2426,7 @@ class ch_wo_accessories_ms(osv.osv):
 		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),
 		'prime_cost': fields.float('Prime Cost'),
 		'wo_prime_cost': fields.float('WO PC'),
+		'material_code': fields.char('Material Code'),
 		
 	}
 	
@@ -2455,6 +2460,7 @@ class ch_wo_accessories_bot(osv.osv):
 		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),
 		'prime_cost': fields.float('Prime Cost'),
 		'wo_prime_cost': fields.float('WO PC'),
+		'material_code': fields.char('Material Code'),
 		
 	}
 	
