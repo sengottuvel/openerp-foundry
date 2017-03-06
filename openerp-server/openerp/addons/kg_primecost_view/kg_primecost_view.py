@@ -1388,6 +1388,7 @@ class ch_primecost_view_fou(osv.osv):
 		'is_applicable': fields.boolean('Is Applicable'),
 		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),
 		'prime_cost': fields.float('Prime Cost'),
+		'material_code': fields.char('Material Code'),
 		
 		## Child Tables Declaration 
 		
@@ -1451,6 +1452,7 @@ class ch_primecost_view_ms(osv.osv):
 		'length': fields.float('Length'),
 		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),
 		'prime_cost': fields.float('Prime Cost'),
+		'material_code': fields.char('Material Code'),
 		
 		## Child Tables Declaration 
 		
@@ -1504,6 +1506,7 @@ class ch_primecost_view_bot(osv.osv):
 		'prime_cost': fields.float('Prime Cost'),
 		'brand_id': fields.many2one('kg.brand.master','Brand '),
 		'flag_is_bearing': fields.boolean('Is Bearing'),
+		'material_code': fields.char('Material Code'),
 		
 		## Child Tables Declaration 
 		

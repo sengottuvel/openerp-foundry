@@ -2,16 +2,21 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="casting_completion_report" language="groovy" pageWidth="595" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.y" value="48"/>
 	<parameter name="from_date" class="java.lang.String"/>
 	<parameter name="printed_by" class="java.lang.String"/>
 	<parameter name="print_date" class="java.lang.String"/>
 	<parameter name="to_date" class="java.lang.String"/>
 	<parameter name="wiz_id" class="java.lang.Integer"/>
 	<queryString>
-		<![CDATA[select count,row_number,new_row_number,order_no,company_name,date,pump_model,qty,order_amount,total_amt,remarks,
+		<![CDATA[select to_char((cc_date)::date,'dd-mm-YYYY') as ccc_date,*
+
+from (
+
+
+select count,row_number,new_row_number,order_no,company_name,date,pump_model,qty,order_amount,total_amt,remarks,
 from_date,to_date,
-to_char((select max(entry_date) from kg_machineshop where order_line_id = line_id)::date,'dd-mm-YYYY') as cc_date,
+(select max(entry_date) from kg_machineshop where order_line_id = line_id) as cc_date,
 (select
 
 trim(TO_CHAR((COALESCE((sum((work_order.unit_price * work_order.qty)) OVER ()),0.00) ), '999G999G99G999G99G99G990D99')) as cum_total_amt
@@ -23,42 +28,19 @@ left join res_company company on (company.id = pump.company_id)
 
  where work_order.id in (
 
-select order_line_id from (
+select header_pro.order_line_id from kg_production header_pro
+left join kg_fettling header_fettling on (header_fettling.production_id = header_pro.id )
+where header_pro.order_line_id not in (select order_line_id from (
+select order_line_id ,state
+from kg_production
+where
+order_priority != '2'
+) as sam where state not in ('fettling_com','moved_to_ms')) and header_fettling.update_date::date >= month_start::date and header_fettling.update_date::date <= month_end::date and header_fettling.order_priority != '2'
+group by header_pro.order_line_id
+order by header_pro.order_line_id
 
-select
 
-distinct order_line_id,
-Sum(case when type = 'order' then sum else 0 end) over(partition by order_line_id) as order_count,
-Sum(case when type = 'machine' then sum else 0 end) over(partition by order_line_id) as machine_count
-
-from (
-
-select count(order_bomline_id) as sum,order_line_id,'machine' as type from kg_machineshop  where order_bomline_id in (
-select id
-
-from ch_order_bom_details where flag_applicable = 't'
-
-order by id)
-and entry_date >= month_start::date  and entry_date <= month_end::date
-group by order_line_id
-
-union
-
-select count(id) as sum,header_id,'order' as type
-
-from ch_order_bom_details where flag_applicable = 't'
-and header_id in (select order_line_id from kg_machineshop  where order_bomline_id in (
-select id
-
-from ch_order_bom_details where flag_applicable = 't'
-
-order by id)
-and entry_date >= month_start::date and entry_date <=month_end::date )
-group by header_id,type
-) as a
-order by order_line_id ) as b
-
-where order_count = machine_count) limit 1 ) as cum_total_amt
+ ) limit 1 ) as cum_total_amt
 
 from (
 
@@ -88,46 +70,28 @@ left join res_company company on (company.id = pump.company_id)
 
  where work_order.id in (
 
-select order_line_id from (
+select header_pro.order_line_id from kg_production header_pro
+left join kg_fettling header_fettling on (header_fettling.production_id = header_pro.id )
+where header_pro.order_line_id not in (select order_line_id from (
+select order_line_id ,state
+from kg_production
+where
+order_priority != '2'
+) as sam where  state not in ('fettling_com','moved_to_ms')) and header_fettling.update_date::date >= $P{from_date}::date and header_fettling.update_date::date <= $P{to_date}::date and header_fettling.order_priority != '2'
+group by header_pro.order_line_id
+order by header_pro.order_line_id
 
-select
 
-distinct order_line_id,
-Sum(case when type = 'order' then sum else 0 end) over(partition by order_line_id) as order_count,
-Sum(case when type = 'machine' then sum else 0 end) over(partition by order_line_id) as machine_count
+ ) ) as bb )as cc
 
 
 
-from (
+where cc_date::date >= $P{from_date}::date  and cc_date::date <= $P{to_date}::date
 
 
-select count(order_bomline_id) as sum,order_line_id,'machine' as type from kg_machineshop  where order_bomline_id in (
-select id
-
-from ch_order_bom_details where flag_applicable = 't'
-
-order by id)
-and entry_date >= $P{from_date}::date and entry_date <= $P{to_date}::date
-group by order_line_id
-
-union
-
-select count(id) as sum,header_id,'order' as type
-
-from ch_order_bom_details where flag_applicable = 't'
-and header_id in (select order_line_id from kg_machineshop  where order_bomline_id in (
-select id
-
-from ch_order_bom_details where flag_applicable = 't'
-
-order by id)
-and entry_date::date >=  $P{from_date}::date and entry_date <= $P{to_date}::date)
-group by header_id,type
-) as a
-order by order_line_id ) as b
-
-where order_count = machine_count) ) as bb order by cc_date]]>
+order by cc_date]]>
 	</queryString>
+	<field name="ccc_date" class="java.lang.String"/>
 	<field name="count" class="java.lang.Long"/>
 	<field name="row_number" class="java.lang.Long"/>
 	<field name="new_row_number" class="java.lang.Long"/>
@@ -141,7 +105,7 @@ where order_count = machine_count) ) as bb order by cc_date]]>
 	<field name="remarks" class="java.lang.String"/>
 	<field name="from_date" class="java.lang.String"/>
 	<field name="to_date" class="java.lang.String"/>
-	<field name="cc_date" class="java.lang.String"/>
+	<field name="cc_date" class="java.sql.Date"/>
 	<field name="cum_total_amt" class="java.lang.String"/>
 	<variable name="qty_1" class="java.lang.Integer" resetType="Page" calculation="Sum">
 		<variableExpression><![CDATA[$F{qty}]]></variableExpression>
@@ -220,7 +184,7 @@ where order_count = machine_count) ) as bb order by cc_date]]>
 				</textElement>
 				<text><![CDATA[Cummulative value: ]]></text>
 			</staticText>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement x="482" y="51" width="73" height="20"/>
 				<box leftPadding="1"/>
 				<textElement verticalAlignment="Middle">
@@ -388,7 +352,7 @@ where order_count = machine_count) ) as bb order by cc_date]]>
 				<textElement verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{cc_date}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{ccc_date}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="105" y="0" width="115" height="16"/>

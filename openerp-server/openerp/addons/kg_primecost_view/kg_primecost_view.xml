@@ -47,6 +47,7 @@
 										<field name="position_id" readonly="1"/>
 										<field name="pattern_id" readonly="1"/>
 										<field name="pattern_name" readonly="1"/>
+										<field name="material_code"/>
 										<field name="moc_id" attrs="{'required': [('is_applicable','=',True)]}"/>
 										<field name="qty" attrs="{'required': [('is_applicable','=',True)]}"/>
 										<field name="prime_cost" readonly="1"/>
@@ -61,6 +62,7 @@
 										<field name="position_id" readonly="1"/>
 										<field name="ms_id" readonly="1"/>
 										<field name="ms_name" readonly="1"/>
+										<field name="material_code"/>
 										<field name="moc_id" attrs="{'required': [('is_applicable','=',True)]}"/>
 										<field name="length" readonly="1"/>
 										<field name="qty" attrs="{'required': [('is_applicable','=',True)]}"/>
@@ -76,6 +78,7 @@
 										<field name="position_id" readonly="1"/>
 										<field name="bot_id" readonly="1"/>
 										<field name="bot_name" readonly="1"/>
+										<field name="material_code"/>
 										<field name="moc_id" attrs="{'required': [('is_applicable','=',True)]}"/>
 										<field name="brand_id" attrs="{'required': [('flag_is_bearing','=',True),('is_applicable','=',True)]}"/>
 										<field name="qty" attrs="{'required': [('is_applicable','=',True)]}"/>

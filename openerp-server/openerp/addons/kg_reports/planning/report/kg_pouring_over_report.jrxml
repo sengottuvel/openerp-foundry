@@ -9,12 +9,15 @@
 	<parameter name="to_date" class="java.lang.String"/>
 	<parameter name="wiz_id" class="java.lang.Integer"/>
 	<queryString>
-		<![CDATA[select count,row_number,new_row_number,order_no,company_name,date,pump_model,qty,order_value,remarks,category,division_name,
-to_char((select max(pour_date) from kg_production where order_line_id  = line_id)::date,'dd-mm-YYYY') as pour_date,
+		<![CDATA[select
+to_char(pour_date::date,'dd-mm-YYYY') as poured_date,
+* from (
+
+select count,row_number,new_row_number,order_no,company_name,date,pump_model,qty,order_value,remarks,category,division_name,
+(select max(pour_date) from kg_production where order_line_id  = line_id) as pour_date,
 from_date,to_date
 from
 (
-
 select
 count(*) OVER () as count,
 row_number() OVER () as row_number,
@@ -35,8 +38,8 @@ WHEN order_de.order_category = 'access' THEN 'Accessories'
 ELSE ''
 end ) as category,
 work_order.id as line_id,
-(select to_char(from_date,'dd-mm-yyyy') from kg_pouring_over where id =$P{wiz_id} ) as from_date,
-(select to_char(to_date,'dd-mm-yyyy') from kg_pouring_over where id =$P{wiz_id} ) as to_date,
+(select to_char(from_date,'dd-mm-yyyy') from kg_pouring_over where id = $P{wiz_id}) as from_date,
+(select to_char(to_date,'dd-mm-yyyy') from kg_pouring_over where id = $P{wiz_id}) as to_date,
 (CASE WHEN order_de.location = 'ipd' THEN 'IPD'
 WHEN order_de.location = 'ppd' THEN 'PPD'
 WHEN order_de.location = 'export' THEN 'Export'
@@ -51,52 +54,22 @@ left join kg_division_master division on (division.id = order_de.division_id)
 left join kg_pumpmodel_master pump on (work_order.pump_model_id = pump.id)
 left join res_company company on (company.id = pump.company_id)
 
- where work_order.id in (
+ where work_order.id in
+(
+select order_line_id from kg_production where order_line_id not in (
 select order_line_id
-from
-(select
-distinct order_line_id,
-Sum(case when type = 'order' then order_count else 0 end) over(partition by order_line_id) as order_count,
-Sum(case when type = 'produc' then order_count else 0 end) over(partition by order_line_id) as produc_count,
-Sum(case when type = 'machine' then order_count else 0 end) over(partition by order_line_id) as machine_count
-from
-(select count(id) as order_count,header_id as order_line_id,'order' as type from ch_order_bom_details  where header_id in (
-select
-order_line_id
-from kg_production where
-state in ('pour_com','fettling_inprogress','moved_to_ms')
-and  pour_date::date >= $P{from_date}::date and pour_date::date <= $P{to_date}::date
-order by order_line_id)
-and flag_applicable = 't'
-group by header_id
-
-union
-
-select count(order_bomline_id) as produc_count,order_line_id,'produc' as type from kg_production  where order_line_id in (
-select order_line_id
-from kg_production where state in ('pour_com','fettling_inprogress')
-and  pour_date::date >= $P{from_date}::date and pour_date::date <= $P{to_date}::date
-order by order_line_id)
+from kg_production where pour_state in ('pending','partial')
+and order_priority != '2') and pour_date::date >= $P{from_date}::date and pour_date::date <=  $P{to_date}::date and pour_state in ('done') and order_priority != '2'
 group by order_line_id
 
-union
 
-select count(order_bomline_id) as machine_count,order_line_id,'machine' as type from kg_machineshop  where order_line_id in (
-select order_line_id
-from kg_production where state in ('pour_com','fettling_inprogress','moved_to_ms')
-and  pour_date >= $P{from_date}::date and pour_date <= $P{to_date}::date
-order by order_line_id)
-and order_line_id not in (select order_bomline_id
-from kg_production  where order_line_id in (
-select order_line_id
-from kg_production where state in ('pour_com','fettling_inprogress','moved_to_ms')
-and  pour_date::date >= $P{from_date}::date and pour_date::date <= $P{to_date}::date
-order by order_line_id)
-) group by order_line_id
-) as a
-) as b
-where order_count = (produc_count + machine_count)) ) as a order by pour_date]]>
+ )  ) as sub1 ) sub2
+
+ where pour_date::date >= $P{from_date}::date and pour_date::date <=$P{to_date}::date
+
+ order by pour_date]]>
 	</queryString>
+	<field name="poured_date" class="java.lang.String"/>
 	<field name="count" class="java.lang.Long"/>
 	<field name="row_number" class="java.lang.Long"/>
 	<field name="new_row_number" class="java.lang.Long"/>
@@ -109,7 +82,7 @@ where order_count = (produc_count + machine_count)) ) as a order by pour_date]]>
 	<field name="remarks" class="java.lang.String"/>
 	<field name="category" class="java.lang.String"/>
 	<field name="division_name" class="java.lang.String"/>
-	<field name="pour_date" class="java.lang.String"/>
+	<field name="pour_date" class="java.sql.Timestamp"/>
 	<field name="from_date" class="java.lang.String"/>
 	<field name="to_date" class="java.lang.String"/>
 	<group name="ProjectGroup" isStartNewPage="true">
@@ -333,7 +306,7 @@ where order_count = (produc_count + machine_count)) ) as a order by pour_date]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{pour_date}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{poured_date}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="60" y="0" width="135" height="16"/>
