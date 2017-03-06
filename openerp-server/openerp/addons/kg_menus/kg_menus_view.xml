@@ -286,10 +286,8 @@
 			
 		<menuitem name="MGMT" id="menu_mgmt" sequence="92"/>
 			<menuitem name="MGMT" id="menu_mgmt_masters"  parent="menu_mgmt"  sequence="0"/>
-				<menuitem  action="kg_work_order.tma_wo_special_approval" id="tam_wo_special_approval_mgmt" parent="menu_mgmt_masters" sequence="0"/>
-<!--
-				<menuitem  name="WO MD Approval"   parent="menu_mgmt_masters" action="kg_work_order.tma_work_order_mgmt" id="tam_work_order_md_mgmt" sequence='1'/>
--->
+				<menuitem action="kg_work_order.tma_wo_special_approval" id="tam_wo_special_approval_mgmt" parent="menu_mgmt_masters" sequence="0"/>
+				<menuitem name="WO MD Approval"   parent="menu_mgmt_masters" action="kg_work_order.tma_work_order_mgmt" id="tam_work_order_md_mgmt" sequence='1'/>
 				<menuitem action="kg_subcontract_process.tma_sc_wo_spl" id="tam_sc_wo_spl_mgmt" parent="menu_mgmt_masters" sequence="2" name="SC Special Approval WO" />
 				<menuitem action="purchase.purchase_rfq_spl_approval" id="pam_purchase_order_spl_approvals_mgmt" name="Special Approval PO" parent="menu_mgmt_masters" sequence="3"/>
 <!--
