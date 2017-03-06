@@ -1086,7 +1086,7 @@ class kg_primecost_view(osv.osv):
 								raise osv.except_osv(_('Warning!'),
 									_('%s You cannot save without Brand'%(bot_item.bot_id.code)))
 						bot_prime_cost = crm_obj._prime_cost_calculation(cr,uid,'bot',0,
-						0,bot_item.bot_id.id,entry.moc_const_id.id,bot_item.moc_id.id,0)
+						0,bot_item.bot_id.id,entry.moc_const_id.id,bot_item.moc_id.id,bot_item.brand_id.id)
 						self.pool.get('ch.primecost.view.bot').write(cr,uid,bot_item.id,{'prime_cost':bot_prime_cost * bot_item.qty})
 						prime_cost += bot_prime_cost * bot_item.qty
 				
