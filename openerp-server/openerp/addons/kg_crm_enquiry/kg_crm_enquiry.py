@@ -201,28 +201,35 @@ class kg_crm_enquiry(osv.osv):
 					applicable_b = 'no'
 					if rec.purpose_categ == 'spare' or rec.purpose_categ == 'pump':
 						if rec.line_ids:
+							for ele in rec.line_ids:
+								if ele.is_applicable == True and not ele.moc_id:
+									raise osv.except_osv(_('Warning!'),
+										_('Pump %s You cannot save without Component'%(rec.pump_id.name)))
 							fou_data = [x for x in rec.line_ids if x.is_applicable == True]
-							print"fou_datafou_datafou_data------------",
 							if fou_data:
 								applicable='yes'
 							else:
 								applicable='no'
 						if rec.line_ids_a:
+							for ele in rec.line_ids_a:
+								if ele.is_applicable == True and not ele.moc_id:
+									raise osv.except_osv(_('Warning!'),
+										_('Spare %s You cannot save without Component'%(rec.pump_id.name)))
 							ms_data = [x for x in rec.line_ids_a if x.is_applicable == True]
 							if ms_data:
 								applicable_a='yes'
 							else:
 								applicable_a='no'
 						if rec.line_ids_b:
+							for ele in rec.line_ids_b:
+								if ele.is_applicable == True and not ele.moc_id:
+									raise osv.except_osv(_('Warning!'),
+										_('Accessories %s You cannot save without Component'%(rec.pump_id.name)))
 							bot_data = [x for x in rec.line_ids_b if x.is_applicable == True]
 							if bot_data:
 								applicable_b='yes'
 							else:
 								applicable_b='no'
-						print"rec.pump_id.namerec.pump_id.name",rec.pump_id.name
-						print"applicableapplicable",applicable		
-						print"applicableapplicable",applicable_a		
-						print"applicableapplicable",applicable_b	
 						if applicable == 'no' and applicable_a == 'no' and applicable_b == 'no':
 							if rec.purpose_categ == 'spare':
 								raise osv.except_osv(_('Warning!'),

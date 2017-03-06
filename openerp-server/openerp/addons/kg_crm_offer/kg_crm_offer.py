@@ -244,10 +244,81 @@ class kg_crm_offer(osv.osv):
 				raise osv.except_osv(_('Warning!'),
 					_('Supervision more than one not allowed!!'))
 		return True
+		
+	def _exceed_discount(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+		if rec.customer_id:
+			if rec.o_customer_discount:
+				if rec.o_customer_discount > rec.customer_id.max_cust_discount:
+					raise osv.except_osv(_('Warning!'),
+						_('Customer discount is more than maximum limit configured'))
+			if rec.o_special_discount:
+				if rec.o_special_discount > rec.customer_id.max_spl_discount:
+					raise osv.except_osv(_('Warning!'),
+						_('Special discount is more than maximum limit configured'))
+			if rec.line_pump_ids:
+				for item in rec.line_pump_ids:
+					if item.customer_discount > rec.customer_id.max_cust_discount:
+						raise osv.except_osv(_('Warning!'),
+							_('%s Customer discount is more than maximum limit configured'%(item.pump_id.name)))
+					if item.special_discount > rec.customer_id.max_spl_discount:
+						raise osv.except_osv(_('Warning!'),
+							_('%s Special discount is more than maximum limit configured'%(item.pump_id.name)))
+			if rec.line_spare_ids:
+				for item in rec.line_spare_ids:
+					if item.customer_discount > rec.customer_id.max_cust_discount:
+						raise osv.except_osv(_('Warning!'),
+							_('%s - %s spare customer discount is more than maximum limit configured'%(item.pump_id.name,item.item_name)))
+					if item.special_discount > rec.customer_id.max_spl_discount:
+						raise osv.except_osv(_('Warning!'),
+							_('%s - %s spare special discount is more than maximum limit configured'%(item.pump_id.name,item.item_name)))
+			if rec.line_accessories_ids:
+				for item in rec.line_access_ids:
+					if item.customer_discount > rec.customer_id.max_cust_discount:
+						raise osv.except_osv(_('Warning!'),
+							_('%s customer discount is more than maximum limit configured'%(item.access_id.name)))
+					if item.special_discount > rec.customer_id.max_spl_discount:
+						raise osv.except_osv(_('Warning!'),
+							_('%s special discount is more than maximum limit configured'%(item.access_id.name)))
+			if rec.line_supervision_ids:
+				for item in rec.line_supervision_ids:
+					if item.customer_discount > rec.customer_id.max_cust_discount:
+						raise osv.except_osv(_('Warning!'),
+							_('Supervision customer discount is more than maximum limit configured'))
+					if item.special_discount > rec.customer_id.max_spl_discount:
+						raise osv.except_osv(_('Warning!'),
+							_('Supervision special discount is more than maximum limit configured'))
+		if rec.dealer_id:
+			if rec.o_dealer_discount:
+				if rec.o_dealer_discount > rec.dealer_id.max_deal_discount:
+					raise osv.except_osv(_('Warning!'),
+						_('Dealer discount is more than maximum limit configured'))
+			if rec.line_pump_ids:
+				for item in rec.line_pump_ids:
+					if item.dealer_discount > rec.dealer_id.max_deal_discount:
+						raise osv.except_osv(_('Warning!'),
+							_('%s Dealer discount is more than maximum limit configured'%(item.pump_id.name)))
+			if rec.line_spare_ids:
+				for item in rec.line_spare_ids:
+					if item.dealer_discount > rec.dealer_id.max_deal_discount:
+						raise osv.except_osv(_('Warning!'),
+							_('%s - %s dealer discount is more than maximum limit configured'%(item.pump_id.name,item.item_name)))
+			if rec.line_accessories_ids:
+				for item in rec.line_access_ids:
+					if item.dealer_discount > rec.dealer_id.max_deal_discount:
+						raise osv.except_osv(_('Warning!'),
+							_('%s dealer discount is more than maximum limit configured'%(item.access_id.name)))
+			if rec.line_supervision_ids:
+				for item in rec.line_supervision_ids:
+					if item.dealer_discount > rec.dealer_id.max_deal_discount:
+						raise osv.except_osv(_('Warning!'),
+							_('Supervision dealer discount is more than maximum limit configured'))
+		return True
 	
 	_constraints = [
 		(_spl_name, 'Special Character Not Allowed!', ['']),
 		(_supervision, 'Supervision more than one not allowed!', ['']),
+		(_exceed_discount, 'Discount more than confirgured not allowed!', ['']),
 		]
 			
 	def send_by_email(self, cr, uid, ids, context=None):
@@ -653,6 +724,7 @@ class kg_crm_offer(osv.osv):
 																							'flag_applicable': True,
 																							'flag_standard': True,
 																							'qty': ele.qty,
+																							'indent_qty': ele.qty,
 																							'position_id': ele.position_id.id,
 																							'ms_id': ele.ms_id.id,
 																							'material_code': ele.material_code,
@@ -733,9 +805,9 @@ class kg_crm_offer(osv.osv):
 																										'qty': ele.qty,
 																										'position_id': ele.position_id.id,
 																										'pattern_id': ele.pattern_id.id,
+																										'material_code': ele.material_code,
 																										'prime_cost': ele.prime_cost,
 																										'moc_id': ele.moc_id.id,
-																										'material_code': ele.material_code,
 																										#~ 'access_offer_line_id': off_line_id,
 																										})
 										prime_cost += ele.prime_cost
@@ -745,11 +817,12 @@ class kg_crm_offer(osv.osv):
 										fou_line = self.pool.get('ch.wo.accessories.ms').create(cr,uid,{'header_id': wo_access_id,
 																										'is_applicable': True,
 																										'qty': ele.qty,
+																										'indent_qty': ele.qty,
 																										'position_id': ele.position_id.id,
+																										'position_id': ele.material_code,
 																										'ms_id': ele.ms_id.id,
 																										'prime_cost': ele.prime_cost,
 																										'moc_id': ele.moc_id.id,
-																										'material_code': ele.material_code,
 																										#~ 'access_offer_line_id': off_line_id,
 																										})
 										prime_cost += ele.prime_cost
@@ -760,11 +833,11 @@ class kg_crm_offer(osv.osv):
 																										'is_applicable': True,
 																										'qty': ele.qty,
 																										'position_id': ele.position_id.id,
+																										'position_id': ele.material_code,
 																										'csd_no': ele.csd_no,
 																										'ms_id': ele.ms_id.id,
 																										'prime_cost': ele.prime_cost,
 																										'moc_id': ele.moc_id.id,
-																										'material_code': ele.material_code,
 																										#~ 'access_offer_line_id': off_line_id,
 																										})
 										prime_cost += ele.prime_cost
