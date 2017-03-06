@@ -49,6 +49,9 @@
 		<field name="cst_no" attrs="{'readonly':[('partner_state','=','approve')]}"/>
 		<field name="vat_no" attrs="{'readonly':[('partner_state','=','approve')]}"/>
 		<field name="cheque_in_favour" attrs="{'readonly':[('partner_state','=','approve')]}"/>
+		<field name="max_deal_discount" attrs="{'readonly':[('partner_state','=','approve')],'invisible':[('dealer','!=',True)]}"/>
+		<field name="max_cust_discount" attrs="{'readonly':[('partner_state','=','approve')],'invisible':[('customer','!=',True)]}"/>
+		<field name="max_spl_discount" attrs="{'readonly':[('partner_state','=','approve')],'invisible':[('customer','!=',True)]}"/>
 		<field name="economic_category" attrs="{'invisible':['|',('supplier','=',True),('dealer','=',True)],'readonly':[('partner_state','=','approve')]}"/>
 		<field name="dealer_id"  attrs="{'invisible':['|',('supplier','=',True),('dealer','=',True)],'readonly':[('partner_state','=','approve')]}"/>
 		</field>

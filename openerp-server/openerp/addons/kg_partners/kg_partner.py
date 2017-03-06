@@ -92,6 +92,9 @@ class kg_partner(osv.osv):
 	'mobile_2': fields.char('Mobile2',size=12),
 	'email_applicable': fields.selection([('yes','Yes'),('no','No')],'Email Applicable'),
 	'sms_applicable': fields.selection([('yes','Yes'),('no','No')],'SMS Applicable'),
+	'max_deal_discount': fields.float('Max.Dealer Discount(%)'),
+	'max_cust_discount': fields.float('Max.Customer Discount(%)'),
+	'max_spl_discount': fields.float('Max.Special Discount(%)'),
 	
 	## Entry Info
 	
@@ -393,6 +396,15 @@ class kg_partner(osv.osv):
 			if cheque_special_char:
 				raise osv.except_osv(_('Warning!'),
 					_('Special Character Not in Cheque in Favour Of!'))
+		if rec.max_deal_discount > 100 and rec.dealer == True:
+			raise osv.except_osv(_('Warning!'),
+				_('Max dealer discount(%) should not be accept above 100!'))
+		if rec.max_cust_discount > 100 and rec.customer == True:
+			raise osv.except_osv(_('Warning!'),
+				_('Max customer discount(%) should not be accept above 100!'))
+		if rec.max_spl_discount > 100 and rec.customer == True:
+			raise osv.except_osv(_('Warning!'),
+				_('Max special discount(%) should not be accept above 100!'))
 		if rec.contact_person:
 			contact_special_char = ''.join(c for c in rec.contact_person if c in '!@#$%^~*{}?+/=')
 			if contact_special_char:
