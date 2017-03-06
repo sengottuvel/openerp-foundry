@@ -79,7 +79,7 @@
 		<field name="bill_type" position="replace">
 			 <field name="date_order" required="1"  on_change="onchange_date_order(date_order)"/>
 			 <field name="quotation_date" />
-			 <field name="delivery_date"/>
+			 <field name="delivery_date" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
 			 <field name="quot_ref_no" />
 			 <field name="delivery_address"/>
 			 <field name="bill_type" required="1"/>
@@ -237,7 +237,7 @@
 			<field name="product_id" 
 				on_change="onchange_product_id(parent.pricelist_id,product_id,0,product_uom,parent.partner_id, parent.date_order,parent.fiscal_position,date_planned,name,price_unit,context)" 
 				attrs="{'readonly': [('line_flag', '=', True)]}" position="after">
-				<field name="brand_id" required="1" on_change="onchange_price(product_id,brand_id,moc_id)"/>
+				<field name="brand_id" required="1" on_change="onchange_brand_moc(product_id,brand_id)"/>
 				<field name="moc_id" required="1" on_change="onchange_price(product_id,brand_id,moc_id)" invisible="1"/>
 				<field name="moc_id_temp" on_change="onchange_moc(moc_id_temp)" required="1"/>
 				<field name="uom_conversation_factor" readonly="1" invisible="1"/>

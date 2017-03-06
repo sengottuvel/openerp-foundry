@@ -988,8 +988,12 @@ class kg_purchase_order_line(osv.osv):
 		order =  super(kg_purchase_order_line, self).create(cr, uid, vals, context=context)
 		return order
 	
+	def onchange_brand_moc(self, cr, uid, ids, product_id,brand_id):
+		value = {'moc_id_temp':''}
+		return {'value': value}
+		
 	def onchange_price(self, cr, uid, ids, product_id,brand_id,moc_id):
-		value = {'least_price':'','high_price':'','recent_price':''}
+		value = {'least_price':'','high_price':'','recent_price':'','moc_id_temp':''}
 		max_val = 0
 		min_val = 0
 		recent_val = 0
