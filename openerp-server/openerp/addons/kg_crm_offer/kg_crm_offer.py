@@ -630,6 +630,7 @@ class kg_crm_offer(osv.osv):
 																							'position_id': ele.position_id.id,
 																							'pattern_id': ele.pattern_id.id,
 																							'pattern_name': ele.pattern_name,
+																							'material_code': ele.material_code,
 																							'unit_price': ele.prime_cost,
 																							'mar_prime_cost': ele.prime_cost,
 																							'moc_id': ele.moc_id.id,
@@ -654,6 +655,7 @@ class kg_crm_offer(osv.osv):
 																							'qty': ele.qty,
 																							'position_id': ele.position_id.id,
 																							'ms_id': ele.ms_id.id,
+																							'material_code': ele.material_code,
 																							'unit_price': ele.prime_cost,
 																							'mar_prime_cost': ele.prime_cost,
 																							'moc_id': ele.moc_id.id,
@@ -678,6 +680,7 @@ class kg_crm_offer(osv.osv):
 																							'qty': ele.qty,
 																							'position_id': ele.position_id.id,
 																							'bot_id': ele.ms_id.id,
+																							'material_code': ele.material_code,
 																							'unit_price': ele.prime_cost,
 																							'mar_prime_cost': ele.prime_cost,
 																							'moc_id': ele.moc_id.id,
@@ -732,6 +735,7 @@ class kg_crm_offer(osv.osv):
 																										'pattern_id': ele.pattern_id.id,
 																										'prime_cost': ele.prime_cost,
 																										'moc_id': ele.moc_id.id,
+																										'material_code': ele.material_code,
 																										#~ 'access_offer_line_id': off_line_id,
 																										})
 										prime_cost += ele.prime_cost
@@ -745,6 +749,7 @@ class kg_crm_offer(osv.osv):
 																										'ms_id': ele.ms_id.id,
 																										'prime_cost': ele.prime_cost,
 																										'moc_id': ele.moc_id.id,
+																										'material_code': ele.material_code,
 																										#~ 'access_offer_line_id': off_line_id,
 																										})
 										prime_cost += ele.prime_cost
@@ -759,6 +764,7 @@ class kg_crm_offer(osv.osv):
 																										'ms_id': ele.ms_id.id,
 																										'prime_cost': ele.prime_cost,
 																										'moc_id': ele.moc_id.id,
+																										'material_code': ele.material_code,
 																										#~ 'access_offer_line_id': off_line_id,
 																										})
 										prime_cost += ele.prime_cost
