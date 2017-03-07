@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Workorder_print" pageWidth="605" pageHeight="842" columnWidth="565" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
-	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.zoom" value="2.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="576"/>
+	<property name="ireport.y" value="582"/>
 	<subDataset name="Spare dataset">
 		<parameter name="header_id" class="java.lang.Integer"/>
 		<parameter name="category" class="java.lang.String"/>
@@ -176,6 +176,8 @@ else 'Veritcal' end as pump_type,
 
 case when pump_crm.description is not null then pump_crm.description else '-' end as description,
 coalesce(pump_crm.equipment_no,'-') as tag_no,
+coalesce(pump_crm.ph_value,'-') as ph_value,
+case when pump_crm.consistency > 0 then pump_crm.consistency::text else '-' end as consistency,
 wo_line.qty as qty,
 coalesce(pump_crm.size_suctionx,'-') as size,
 
@@ -278,6 +280,8 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 	<field name="pump_type" class="java.lang.String"/>
 	<field name="description" class="java.lang.String"/>
 	<field name="tag_no" class="java.lang.String"/>
+	<field name="ph_value" class="java.lang.String"/>
+	<field name="consistency" class="java.lang.String"/>
 	<field name="qty" class="java.lang.Integer"/>
 	<field name="size" class="java.lang.String"/>
 	<field name="flange_standard" class="java.lang.String"/>
@@ -310,7 +314,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 	<group name="WO Group" isStartNewPage="true">
 		<groupExpression><![CDATA[$F{id}]]></groupExpression>
 		<groupHeader>
-			<band height="607">
+			<band height="623">
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="397" y="31" width="168" height="21"/>
 					<box leftPadding="2" rightPadding="1">
@@ -669,7 +673,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<text><![CDATA[Liquid handled]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="319" width="307" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="335" width="307" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -682,7 +686,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<text><![CDATA[Specific Gravity ]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="335" width="307" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="351" width="307" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -695,7 +699,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<text><![CDATA[PH Value]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="351" width="307" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="367" width="307" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -708,7 +712,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<text><![CDATA[Temperature in °C ]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="367" width="307" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="383" width="307" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -721,7 +725,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<text><![CDATA[Capacity in m3/Hr]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="383" width="307" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="399" width="307" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -734,7 +738,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<text><![CDATA[Total Head in m]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="399" width="307" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="415" width="307" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -747,7 +751,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<text><![CDATA[Efficiency  %]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="415" width="307" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="431" width="307" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -760,7 +764,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<text><![CDATA[BKW]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="431" width="307" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="447" width="307" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -773,7 +777,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<text><![CDATA[Motor KW ]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="447" width="307" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="463" width="307" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -786,7 +790,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<text><![CDATA[Motor Make & Frame Size]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="463" width="307" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="479" width="307" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -799,7 +803,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<text><![CDATA[Speed - RPM (P/M)]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="479" width="307" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="495" width="307" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -812,7 +816,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<text><![CDATA[Type of Drive]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="495" width="307" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="511" width="307" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -825,7 +829,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<text><![CDATA[Type of Lubrication]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="511" width="307" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="527" width="307" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -838,7 +842,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<text><![CDATA[NPSH R/A -mts]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="527" width="307" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="543" width="307" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -851,7 +855,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<text><![CDATA[Shaft Sealing / Seal Make / Seal Type]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="543" width="307" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="559" width="307" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -864,7 +868,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<text><![CDATA[Face Combination / API Plan ]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="559" width="307" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="575" width="307" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -877,7 +881,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<text><![CDATA[Shut off head in M]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="575" width="307" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="591" width="307" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -890,7 +894,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<text><![CDATA[Impeller Dia in MM(Max/Rated/Min)]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="591" width="307" height="16" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="607" width="307" height="16" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -994,7 +998,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<textFieldExpression><![CDATA[$F{liquid_handled}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="333" width="258" height="18"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="349" width="258" height="18"/>
 					<box>
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -1004,10 +1008,10 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA["-"]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{ph_value}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="318" width="258" height="17"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="334" width="258" height="17"/>
 					<box>
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -1020,7 +1024,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<textFieldExpression><![CDATA[$F{specific_gravity}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="350" width="258" height="18"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="366" width="258" height="18"/>
 					<box>
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -1033,7 +1037,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<textFieldExpression><![CDATA[$F{temperature_in_c}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="367" width="258" height="16"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="383" width="258" height="16"/>
 					<box>
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -1046,7 +1050,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<textFieldExpression><![CDATA[$F{capacity_in_m3hr}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="382" width="258" height="18"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="398" width="258" height="18"/>
 					<box>
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -1059,7 +1063,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<textFieldExpression><![CDATA[$F{head_in_m}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="397" width="258" height="18"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="413" width="258" height="18"/>
 					<box>
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -1072,7 +1076,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<textFieldExpression><![CDATA[$F{efficiency}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="415" width="258" height="17"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="431" width="258" height="17"/>
 					<box>
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -1085,7 +1089,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<textFieldExpression><![CDATA[$F{bkw}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="432" width="258" height="15"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="448" width="258" height="15"/>
 					<box>
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -1098,7 +1102,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<textFieldExpression><![CDATA[$F{motor_kw}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="447" width="258" height="16"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="463" width="258" height="16"/>
 					<box>
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -1111,7 +1115,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<textFieldExpression><![CDATA[$F{motor_make}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="463" width="258" height="16"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="479" width="258" height="16"/>
 					<box>
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -1124,7 +1128,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<textFieldExpression><![CDATA[$F{speed_pump}+" /  "+$F{speed_motor}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="479" width="258" height="16"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="495" width="258" height="16"/>
 					<box>
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -1137,7 +1141,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<textFieldExpression><![CDATA[$F{type_of_drive}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="495" width="258" height="16"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="511" width="258" height="16"/>
 					<box>
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -1150,7 +1154,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<textFieldExpression><![CDATA[$F{lubrication_type}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="511" width="258" height="16"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="527" width="258" height="16"/>
 					<box>
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -1163,7 +1167,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<textFieldExpression><![CDATA[$F{npsh_r_m}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="527" width="258" height="16" isPrintWhenDetailOverflows="true"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="543" width="258" height="16" isPrintWhenDetailOverflows="true"/>
 					<box>
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -1176,7 +1180,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<textFieldExpression><![CDATA[$F{shaft_sealing}+" / "+$F{mech_seal_make}+" / "+$F{seal_type}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="543" width="258" height="16"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="559" width="258" height="16"/>
 					<box>
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -1189,7 +1193,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<textFieldExpression><![CDATA[$F{face_combination}+" / "+$F{api_plan}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="559" width="258" height="16"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="575" width="258" height="16"/>
 					<box>
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -1202,7 +1206,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<textFieldExpression><![CDATA[$F{shut_off_head}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="575" width="258" height="16"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="591" width="258" height="16"/>
 					<box>
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -1215,7 +1219,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 					<textFieldExpression><![CDATA[$F{impeller_dia_min}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="591" width="258" height="16"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="607" width="258" height="16"/>
 					<box>
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -1308,6 +1312,32 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 						<font size="8"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{excise_duty}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="319" width="307" height="16" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="3">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="8" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Consistency In %]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="319" width="258" height="16"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{consistency}]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupHeader>
