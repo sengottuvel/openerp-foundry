@@ -93,7 +93,7 @@ class kg_contract(osv.osv):
 		'esi_status': fields.boolean('ESI Applicable', size=32),
 		'pf_eff_date': fields.date('PF Effective From'),
 		'esi_eff_date': fields.date('ESI Effective From'),
-		'pf_acc_no': fields.char('PF NO', size=7),
+		'pf_acc_no': fields.char('PF NO'),
 		'esi_acc_no': fields.char('ESI NO', size=17),
 		'job_id': fields.many2one('hr.job', 'Designation', readonly=True),
 		'bonus_applicable': fields.boolean('Bonus Applicable'),
