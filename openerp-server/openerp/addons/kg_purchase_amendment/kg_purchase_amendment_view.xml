@@ -83,15 +83,17 @@
 				</group>
 				<notebook>
 					<page string="Product" attrs = "{'invisible':[('state','=','amend')]}">
-						<field colspan="4" mode="tree" name="amendment_line" nolabel="1" widget="one2many_list" attrs = "{'readonly':[('state','=','approved')]}">
+						<field colspan="4" mode="tree" name="amendment_line" context="{'line_state':'draft','qty_flag':True,'discount_flag':False,'discount_per_flag':False,'rate_revise':'yes','approval_flag':False,'po_type':po_type_amend}"
+							   nolabel="1" widget="one2many_list" attrs = "{'readonly':[('state','=','approved')]}">
 							<tree  string="Purchase Amendment Line"> 
-								<field name="product_id"/>
+								<field name="product_id_amend"/>
 								<field name="brand_id_amend"/>
 								<field name="product_uom"/>
 								<field name="product_qty_amend"/>
 								<field name="price_unit_amend"/>
 								<field name="kg_discount_amend"/>
 								<field name="kg_discount_per_amend"/>
+								<field name="approval_flag"/>
 								<field name="taxes_id_amend" widget="many2many_tags"/>
 								<field name="price_subtotal"/>
 								<field name="po_type" invisible="1"/>
@@ -166,6 +168,7 @@
 						<field name="quantity" readonly="1"/>
 						<field name="price_type" readonly="1"/>
 						<field name="pi_qty" readonly="1"/>
+						<field name="rate_revise" attrs="{'required': [('approval_flag','=', True)],'invisible': [('approval_flag','=', False)]}"/>
 						<field name="kg_discount" readonly="1"/>
 						<field name="kg_disc_amt_per" invisible="1"/>
 						<field name="kg_discount_per" readonly="1"/>
@@ -175,13 +178,11 @@
 						<field name="note" readonly="1"/>
 						<field name="line_bill" invisible="1"/>
 						<field name="po_type" invisible="1"/>
-						<field name="least_price"/>
-						<field name="high_price"/>
-						<field name="recent_price"/>
+						<field name="approval_flag" inivsible="1"/>
 					</group>
 					<group>
 						<field name="product_id_amend" attrs="{'readonly': [('po_type','=','frompi')]}" on_change="onchange_brand_moc(product_id_amend)" required="1"/>
-						<field name="brand_id_amend" required="1"/>
+						<field name="brand_id_amend" required="1" on_change="onchange_bnd_moc(product_id_amend,brand_id_amend)"/>
 						<field name="moc_id_amend" required="1" invisible="1"/>
 						<field name="moc_id_temp_amend" on_change="onchange_moc(moc_id_temp_amend)" required="1"/>
 						<field name="length_amend" attrs="{'invisible':[('uom_conversation_factor_amend','!=','two_dimension')],'required':[('uom_conversation_factor_amend','=','two_dimension')]}"/>
@@ -282,12 +283,27 @@
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.purchase.amendment</field>
 			<field name="view_type">form</field>
+			<field name="domain">[('state','!=','confirm')]</field>
 			<field name="view_id" ref="view_kg_poamendment_tree"/>
 			<field name="search_view_id" ref="t_search_v_purchase_amend"/>
 		</record>
-	
+		
+		<record id="tma_po_amend_apl_view" model="ir.actions.act_window">
+			<field name="name">Special Approval</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.purchase.amendment</field>
+			<field name="context">{}</field>
+			<field name="domain">[('state','=','confirm'),('approval_flag','=',True)]</field>
+			<field name="view_mode">tree,form</field>
+			<field name="view_id" ref="view_kg_poamendment_tree"/>
+        </record>
+        
       	<!-- PO Amendment Order -->
 		<menuitem action="action_kg_poamendment_form" id="pam_po_amendment" name="PO Amendment" parent="purchase.menu_procurement_management" sequence="10"/>
 		
+		<!-- Special Approval PO Amend-->
+		<menuitem action="tma_po_amend_apl_view" id="tam_po_amend_apl_view" name="Special Approval PO" parent="purchase.menu_procurement_management" sequence="11"/>
+	
+	
     </data>
 </openerp>

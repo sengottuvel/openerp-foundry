@@ -132,7 +132,6 @@ class kg_purchase_amendment(osv.osv):
 						  ('Extra at our Cost','Extra at our Cost')], 'Freight',readonly=True),
 		'quot_ref_no':fields.char('Your Quot. Ref.'),
 		'amend_flag':fields.boolean('Amend Flag'),
-		'amendment_line':fields.one2many('kg.purchase.amendment.line', 'amendment_id', 'Amendment Line'),
 		'add_text': fields.text('Address',readonly=True),
 		'delivery_address':fields.text('Delivery Address'),
 		'other_charge': fields.float('Other Charges(+)',readonly=True),
@@ -232,7 +231,11 @@ class kg_purchase_amendment(osv.osv):
 				'kg.purchase.amendment.line': (_get_order, ['price_unit_amend', 'tax_id', 'kg_discount_amend', 'product_qty_amend'], 10),
 				
 			}, multi="sums",help="The total amount"),
-			
+		
+		## Child Tables Declaration
+		
+		'amendment_line':fields.one2many('kg.purchase.amendment.line', 'amendment_id', 'Amendment Line'),
+		
 		## Entry Info
 		
 		'active': fields.boolean('Active'),
@@ -333,9 +336,6 @@ class kg_purchase_amendment(osv.osv):
 			'received_qty' : order_line.product_qty - order_line.pending_qty,
 			'price_unit' : order_line.price_unit or 0.0,
 			'price_unit_amend' : order_line.price_unit or 0.0,
-			'least_price' : order_line.least_price or 0.0,
-			'high_price' : order_line.high_price or 0.0,
-			'recent_price' : order_line.recent_price or 0.0,
 			
 			'length' : order_line.length,
 			'length_amend' : order_line.length,
@@ -520,40 +520,10 @@ class kg_purchase_amendment(osv.osv):
 			approval = ''
 			for amend_line in amend_obj.amendment_line:
 				## Spl approval Process start
-				prod_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',amend_line.product_id_amend.id),('state','=','approved')])
-				if not prod_obj:
-					raise osv.except_osv(_('Warning!'),
-						_('%s Please Check for this item in Brand/Moc/Rate master !'%(amend_line.product_id_amend.name)))
-				#~ po_line_id
-				price_sql = """ 
-							select line.price_unit 
-							from purchase_order_line line 
-							left join purchase_order po on (po.id=line.order_id)
-							join kg_brandmoc_rate rate on (rate.product_id=line.product_id)
-							join ch_brandmoc_rate_details det on (det.header_id=rate.id)
-							where po.state = 'approved' and rate.state in ('approved')
-							and line.product_id = %s and line.brand_id = %s 
-							and line.moc_id = %s 
-							order by po.approved_date desc limit 1
-							"""%(amend_line.product_id_amend.id,amend_line.brand_id_amend.id,amend_line.moc_id_amend.id)
-							#~ select line.price_unit_amend 
-							#~ from kg_purchase_amendment_line line 
-							#~ left join kg_purchase_amendment po on (po.id=line.amendment_id)
-							#~ join kg_brandmoc_rate rate on (rate.product_id=line.product_id_amend)
-							#~ join ch_brandmoc_rate_details det on (det.header_id=rate.id)
-							#~ where po.state = 'approved' and rate.state in ('approved')
-							#~ and line.product_id_amend = %s and line.amendment_id = %s and line.brand_id_amend = %s 
-							#~ and line.moc_id_amend = %s 
-							#~ order by po.approved_date desc limit 1
-				cr.execute(price_sql)		
-				price_data = cr.dictfetchall()
-				if price_data:
-					if price_data[0]['price_unit'] < amend_line.price_unit_amend:
-						self.write(cr,uid,ids,{'approval_flag':True})
-						approval = 'yes'
-						self.pool.get('kg.purchase.amendment.line').write(cr,uid,amend_line.id,{'approval_flag':True})
-				
-				# Po price exceeds design rate process
+				if amend_line.price_unit_amend > amend_line.price_unit:
+					self.write(cr,uid,ids,{'approval_flag':True})
+					approval = 'yes'
+					self.pool.get('kg.purchase.amendment.line').write(cr,uid,amend_line.id,{'approval_flag':True})
 				else:
 					prod_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',amend_line.product_id_amend.id),('state','=','approved')])
 					if prod_obj:
@@ -568,7 +538,43 @@ class kg_purchase_amendment(osv.osv):
 						raise osv.except_osv(_('Warning!'),
 							_('%s Please Check for this item in Brand/Moc/Rate master !'%(amend_line.product_id_amend.name)))
 				
+				#~ prod_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',amend_line.product_id_amend.id),('state','=','approved')])
+				#~ if not prod_obj:
+					#~ raise osv.except_osv(_('Warning!'),
+						#~ _('%s Please Check for this item in Brand/Moc/Rate master !'%(amend_line.product_id_amend.name)))
+				#~ price_sql = """ 
+							#~ select line.price_unit 
+							#~ from purchase_order_line line 
+							#~ left join purchase_order po on (po.id=line.order_id)
+							#~ join kg_brandmoc_rate rate on (rate.product_id=line.product_id)
+							#~ join ch_brandmoc_rate_details det on (det.header_id=rate.id)
+							#~ where po.state = 'approved' and rate.state in ('approved')
+							#~ and line.product_id = %s and line.brand_id = %s 
+							#~ and line.moc_id = %s 
+							#~ order by po.approved_date desc limit 1
+							#~ """%(amend_line.product_id_amend.id,amend_line.brand_id_amend.id,amend_line.moc_id_amend.id)
+				#~ cr.execute(price_sql)		
+				#~ price_data = cr.dictfetchall()
+				#~ if price_data:
+					#~ if price_data[0]['price_unit'] < amend_line.price_unit_amend:
+						#~ self.write(cr,uid,ids,{'approval_flag':True})
+						#~ approval = 'yes'
+						#~ self.pool.get('kg.purchase.amendment.line').write(cr,uid,amend_line.id,{'approval_flag':True})
 				
+				# Po price exceeds design rate process
+				#~ else:
+					#~ prod_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',amend_line.product_id_amend.id),('state','=','approved')])
+					#~ if prod_obj:
+						#~ prod_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,prod_obj[0])
+						#~ for ele in prod_rec.line_ids:
+							#~ if amend_line.brand_id_amend.id == ele.brand_id.id and amend_line.moc_id_amend.id == ele.moc_id.id:
+								#~ if ele.rate < amend_line.price_unit_amend:
+									#~ self.write(cr,uid,ids,{'approval_flag':True})
+									#~ approval = 'yes'
+									#~ self.pool.get('kg.purchase.amendment.line').write(cr,uid,amend_line.id,{'approval_flag':True})
+					#~ else:
+						#~ raise osv.except_osv(_('Warning!'),
+							#~ _('%s Please Check for this item in Brand/Moc/Rate master !'%(amend_line.product_id_amend.name)))
 				
 				po_line_id = amend_line.po_line_id.id
 				po_rec = amend_obj.po_id
@@ -597,16 +603,17 @@ class kg_purchase_amendment(osv.osv):
 						else:
 							pass
 					else:
-						grn_id = self.pool.get('po.grn.line').search(cr, uid, [('po_line_id','=',amend_line.po_line_id.id)])
-						if grn_id:
-							grn_bro = self.pool.get('po.grn.line').browse(cr, uid, grn_id[0])
-							if grn_bro.po_grn_qty <= amend_line.product_qty_amend:
-								pass
+						if amend_line.po_line_id.id:
+							grn_id = self.pool.get('po.grn.line').search(cr, uid, [('po_line_id','=',amend_line.po_line_id.id)])
+							if grn_id:
+								grn_bro = self.pool.get('po.grn.line').browse(cr, uid, grn_id[0])
+								if grn_bro.po_grn_qty <= amend_line.product_qty_amend:
+									pass
+								else:
+									raise osv.except_osv(_('You can not decrease PO Qty'),
+										_('Because GRN is already created'))
 							else:
-								raise osv.except_osv(_('You can not decrease PO Qty'),
-									_('Because GRN is already created'))
-						else:
-							pass
+								pass
 					if amend_line.product_qty != amend_line.product_qty_amend:
 						if amend_line.pending_qty == 0 and not amend_line.kg_poindent_lines:
 							raise osv.except_osv(_('All Qty has received for this PO !'),
@@ -628,18 +635,19 @@ class kg_purchase_amendment(osv.osv):
 								_('Because GRN is already created'))
 					else:
 						pass
-					if amend_line.product_qty != amend_line.product_qty_amend:
-						if amend_line.pending_qty == 0 and not amend_line.kg_poindent_lines:
-							raise osv.except_osv(_('All Qty has received for this PO !'),
-								_('You can not increase PO Qty for product %s')%(amend_line.product_id.name))
-					else:
-						pass
+					if amend_line.product_id:
+						if amend_line.product_qty != amend_line.product_qty_amend:
+							if amend_line.pending_qty == 0 and not amend_line.kg_poindent_lines:
+								raise osv.except_osv(_('All Qty has received for this PO !'),
+									_('You can not increase PO Qty for product %s')%(amend_line.product_id.name))
+						else:
+							pass
 					#~ if amend_line.product_id != amend_line.product_id_amend:
 						#~ if not amend_line.kg_poindent_lines:
 							#~ raise osv.except_osv(
 								#~ _('If you want to change PO Product'),
 								#~ _('Select PI for this Product')) 
-				if amend_line.price_type == 'per_kg':
+				if amend_line.price_type_amend == 'per_kg':
 					if amend_line.product_id_amend.uom_conversation_factor == 'two_dimension':
 						if amend_line.product_id_amend.po_uom_in_kgs > 0:
 							qty = amend_line.product_qty_amend * amend_line.product_id_amend.po_uom_in_kgs * amend_line.length_amend * amend_line.breadth_amend
@@ -731,6 +739,7 @@ class kg_purchase_amendment(osv.osv):
 			pi_line_obj = self.pool.get('purchase.requisition.line')
 			stock_move_obj = self.pool.get('stock.move')
 			stock_lot_obj = self.pool.get('stock.production.lot')
+			advance_obj = self.pool.get('kg.supplier.advance')
 			po_id = False 
 			
 			# Created advance process check
@@ -862,7 +871,20 @@ class kg_purchase_amendment(osv.osv):
 					else:
 						raise osv.except_osv(_('Warning!'),
 							_('%s Please Check for this item in Brand/Moc/Rate master !'%(amend_line.product_id_amend.name)))
-			
+				
+				prod_obj = self.pool.get('product.product').search(cr,uid,[('id','=',amend_line.product_id_amend.id)])
+				prod_rec = self.pool.get('product.product').browse(cr,uid,prod_obj[0])
+				self.pool.get('product.product').write(cr,uid,prod_rec.id,{'latest_price' : amend_line.price_unit_amend})
+				
+				bmr_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',amend_line.product_id_amend.id),('state','=','approved')])
+				if bmr_obj:
+					bmr_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,bmr_obj[0])
+					for item in bmr_rec.line_ids:
+						if item.brand_id.id == amend_line.brand_id_amend.id and item.moc_id.id == amend_line.moc_id_amend.id and amend_line.rate_revise == 'yes':
+							self.pool.get('ch.brandmoc.rate.details').write(cr,uid,item.id,{'purchase_price' : amend_line.price_unit_amend})
+						else:
+							pass
+							
 				po_line_id = amend_line.po_line_id.id
 				po_rec = amend_obj.po_id
 				pol_record = amend_line.po_line_id
@@ -1184,20 +1206,6 @@ class kg_purchase_amendment_line(osv.osv):
 		res = {}
 		if context is None:
 			context = {}
-		#~ for line in self.browse(cr, uid, ids, context=context):
-			#~ amt_to_per = (line.kg_discount_amend / (line.product_qty_amend * line.price_unit_amend or 1.0 )) * 100
-			#~ kg_discount_per = line.kg_discount_per_amend
-			#~ tot_discount_per = amt_to_per + kg_discount_per
-			#~ price = line.price_unit_amend * (1 - (tot_discount_per or 0.0) / 100.0)
-			#~ print"line.taxes_id_amend",line.taxes_id_amend
-			#~ print"price",price
-			#~ print"line.product_qty_amend",line.product_qty_amend
-			#~ print"line.product_id_amend",line.product_id_amend
-			#~ print"line.amendment_id.partner_id_amend",line.amendment_id.partner_id_amend
-			#~ taxes = tax_obj.compute_all(cr, uid, line.taxes_id_amend, price, line.product_qty_amend, line.product_id_amend, 
-								#~ line.amendment_id.partner_id_amend)
-			#~ cur = line.amendment_id.pricelist_id.currency_id
-			#~ res[line.id] = cur_obj.round(cr, uid, cur, taxes['total_included'])
 		for line in self.browse(cr, uid, ids, context=context):
 			# Qty Calculation
 			qty = 0.00
@@ -1233,88 +1241,98 @@ class kg_purchase_amendment_line(osv.osv):
 		return res
 	
 	_columns = {
+		
+		## Basic Info
+		
+		'amendment_id':fields.many2one('kg.purchase.amendment','Amendment', select=True, required=True, ondelete='cascade'),
+		
+		## Module Requirement Fields
+		
+		'po_price_subtotal': fields.float('Subtotal'),
+		'price_subtotal': fields.function(_amount_line, string='Subtotal', digits_compute= dp.get_precision('Account'),store=True),
+		'order_id': fields.many2one('purchase.order', 'Order ID'),
+		'pi_line_id':fields.many2one('purchase.requisition.line','PI Line', invisible=True),
+		'product_id':fields.many2one('product.product', 'Product', domain="[('state','not in',('reject','cancel')),('purchase_ok','=',True)]"),
+		'kg_discount': fields.float('Discount Amount', digits_compute= dp.get_precision('Discount')),
+		'price_unit': fields.float('Unit Price', digits_compute= dp.get_precision('Product Price')),
+		'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
+		'pending_qty': fields.float('Pending Qty'),
+		'po_qty':fields.float('PI Qty'),
+		'received_qty':fields.float('Received Qty'),
+		'cancel_qty':fields.float('Cancel Qty'),
+		'product_uom': fields.many2one('product.uom', 'UOM',readonly=True),
+		'note': fields.text('Remarks'),
+		'kg_discount_per': fields.float('Discount (%)', digits_compute= dp.get_precision('Discount')),
+		'kg_discount_per_value': fields.float('Discount(%)Value', digits_compute= dp.get_precision('Discount')),
+		'kg_disc_amt_per': fields.float('Discount(%)', digits_compute= dp.get_precision('Discount')),
+		'po_line_id':fields.many2one('purchase.order.line', 'PO Line'),
+		'taxes_id': fields.many2many('account.tax', 'purchase_order_tax', 'amend_line_id', 'tax_id','Taxes',readonly=True),
+		'line_state': fields.selection([('draft', 'Draft'),('cancel', 'Cancel'),('done', 'Done')], 'Status'),
+		'line_bill': fields.boolean('PO Bill'),
+		'po_type': fields.selection([('direct', 'Direct'),('frompi', 'From PI')], 'PO Type',readonly=True),
+		'brand_id':fields.many2one('kg.brand.master','Brand'),
+		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'moc_id_temp': fields.many2one('ch.brandmoc.rate.details','MOC',domain="[('brand_id','=',brand_id_amend),('header_id.product_id','=',product_id_amend),('header_id.state','in',('draft','confirmed','approved'))]"),
+		
+		'length': fields.float('Length',digits=(16,4),),
+		'breadth': fields.float('Breadth',digits=(16,4)),
+		'quantity': fields.float("Weight(Kg's)"),
+		'price_type': fields.selection([('po_uom','PO UOM'),('per_kg','Per Kg')],'Price Type'),
+		'pi_qty':fields.float('Indent Qty'),
+		'uom_conversation_factor': fields.related('product_id','uom_conversation_factor', type='selection',selection=UOM_CONVERSATION, string='UOM Conversation Factor',store=True),
+		
+		'discount_per_flag': fields.boolean('Discount Amount Flag'),
+		'discount_flag': fields.boolean('Discount Flag'),
 	
-	'po_price_subtotal': fields.float('Subtotal'),
-	'price_subtotal': fields.function(_amount_line, string='Subtotal', digits_compute= dp.get_precision('Account'),store=True),
-	'order_id': fields.many2one('purchase.order', 'Order ID'),
-	'amendment_id':fields.many2one('kg.purchase.amendment','Amendment', select=True, required=True, ondelete='cascade'),
-	'pi_line_id':fields.many2one('purchase.requisition.line','PI Line', invisible=True),
-	'product_id':fields.many2one('product.product', 'Product', required=True,domain="[('state','not in',('reject','cancel')),('purchase_ok','=',True)]"),
-	'kg_discount': fields.float('Discount Amount', digits_compute= dp.get_precision('Discount')),
-	'price_unit': fields.float('Unit Price', digits_compute= dp.get_precision('Product Price')),
-	'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
-	'pending_qty': fields.float('Pending Qty'),
-	'po_qty':fields.float('PI Qty'),
-	'received_qty':fields.float('Received Qty'),
-	'cancel_qty':fields.float('Cancel Qty'),
-	'product_uom': fields.many2one('product.uom', 'UOM',required=True,readonly=True),
-	'note': fields.text('Remarks'),
-	'kg_discount_per': fields.float('Discount (%)', digits_compute= dp.get_precision('Discount')),
-	'kg_discount_per_value': fields.float('Discount(%)Value', digits_compute= dp.get_precision('Discount')),
-	'kg_disc_amt_per': fields.float('Discount(%)', digits_compute= dp.get_precision('Discount')),
-	'po_line_id':fields.many2one('purchase.order.line', 'PO Line'),
-	'taxes_id': fields.many2many('account.tax', 'purchase_order_tax', 'amend_line_id', 'tax_id','Taxes',readonly=True),
-	'line_state': fields.selection([('draft', 'Draft'),('cancel', 'Cancel'),('done', 'Done')], 'Status'),
-	'line_bill': fields.boolean('PO Bill'),
-	'po_type': fields.selection([('direct', 'Direct'),('frompi', 'From PI')], 'PO Type',readonly=True),
-	'brand_id':fields.many2one('kg.brand.master','Brand'),
-	'moc_id': fields.many2one('kg.moc.master','MOC'),
-	'moc_id_temp': fields.many2one('ch.brandmoc.rate.details','MOC',domain="[('brand_id','=',brand_id_amend),('header_id.product_id','=',product_id_amend),('header_id.state','in',('draft','confirmed','approved'))]"),
-	
-	'length': fields.float('Length',digits=(16,4),),
-	'breadth': fields.float('Breadth',digits=(16,4)),
-	'quantity': fields.float("Weight(Kg's)"),
-	'price_type': fields.selection([('po_uom','PO UOM'),('per_kg','Per Kg')],'Price Type'),
-	'pi_qty':fields.float('Indent Qty'),
-	'uom_conversation_factor': fields.related('product_id','uom_conversation_factor', type='selection',selection=UOM_CONVERSATION, string='UOM Conversation Factor',store=True,required=True),
-	
-	'discount_per_flag': fields.boolean('Discount Amount Flag'),
-	'discount_flag': fields.boolean('Discount Flag'),
-	
-	# Amendment Fields:
-	
-	'product_id_amend': fields.many2one('product.product','Amend Product'),
-	'kg_discount_amend': fields.float('Amend Discount Amount', digits_compute= dp.get_precision('Discount')),
-	'price_unit_amend': fields.float('Amend Unit Price', digits_compute= dp.get_precision('Product Price')),
-	'product_qty_amend': fields.float('Amend Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
-	'pending_qty_amend': fields.float('Amend Pending Qty',line_state={'cancel':[('readonly', True)]}),
-	'po_qty_amend':fields.float('Amend PI Qty'),
-	'kg_discount_per_amend': fields.float('Amend Discount (%)', digits_compute= dp.get_precision('Discount')),
-	'kg_discount_per_value_amend': fields.float('Amend Discount(%)Value', digits_compute= dp.get_precision('Discount')),
-	'kg_disc_amt_per_amend': fields.float('Amend Discount(%)', digits_compute= dp.get_precision('Discount')),
-	'note_amend': fields.text('Amend Remarks'),
-	'taxes_id_amend': fields.many2many('account.tax', 'amendment_order_tax', 'amend_line_id', 'tax_id','Amend Taxes'),
-	'cancel_flag':fields.boolean('Flag'),
-	'brand_id_amend':fields.many2one('kg.brand.master','Amend Brand',required=True,domain="[('product_ids','in',(product_id_amend)),('state','in',('draft','confirmed','approved'))]"),
-	'moc_id_amend': fields.many2one('kg.moc.master','Amend MOC'),
-	'moc_id_temp_amend': fields.many2one('ch.brandmoc.rate.details','Amend MOC',domain="[('brand_id','=',brand_id_amend),('header_id.product_id','=',product_id_amend),('header_id.state','in',('draft','confirmed','approved'))]"),
-	'qty_flag': fields.boolean('QTY'),
-	'kg_poindent_lines':fields.many2many('purchase.requisition.line','kg_poindent_po_line' , 'po_order_id', 'piline_id','POIndent Lines',
-			domain="[('pending_qty','>','0'), '&',('line_state','=','process'), '&',('draft_flag','=', False),'&',('product_id','=',product_id)]"),
-	
-	'length_amend': fields.float('Amend Length',digits=(16,4)),
-	'breadth_amend': fields.float('Amend Breadth',digits=(16,4)),
-	'quantity_amend': fields.float("Amend Weight(Kg's)"),
-	'product_uom_amend': fields.many2one('product.uom', 'Amend UOM'),
-	'price_type_amend': fields.selection([('po_uom','PO UOM'),('per_kg','Per Kg')],'Amend Price Type'),
-	'uom_conversation_factor_amend': fields.related('product_id_amend','uom_conversation_factor', type='selection',selection=UOM_CONVERSATION, string='UOM Conversation Factor',store=True,required=True),
-	'approval_flag': fields.boolean('Spl Approval'),
-	'least_price': fields.float('Least Price',readonly=True),
-	'high_price': fields.float('Highest Price',readonly=True),
-	'recent_price': fields.float('Recent Price',readonly=True),
+		# Amendment Fields:
+		
+		'product_id_amend': fields.many2one('product.product','Amend Product'),
+		'kg_discount_amend': fields.float('Amend Discount Amount', digits_compute= dp.get_precision('Discount')),
+		'price_unit_amend': fields.float('Amend Unit Price', digits_compute= dp.get_precision('Product Price')),
+		'product_qty_amend': fields.float('Amend Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
+		'pending_qty_amend': fields.float('Amend Pending Qty',line_state={'cancel':[('readonly', True)]}),
+		'po_qty_amend':fields.float('Amend PI Qty'),
+		'kg_discount_per_amend': fields.float('Amend Discount (%)', digits_compute= dp.get_precision('Discount')),
+		'kg_discount_per_value_amend': fields.float('Amend Discount(%)Value', digits_compute= dp.get_precision('Discount')),
+		'kg_disc_amt_per_amend': fields.float('Amend Discount(%)', digits_compute= dp.get_precision('Discount')),
+		'note_amend': fields.text('Amend Remarks'),
+		'taxes_id_amend': fields.many2many('account.tax', 'amendment_order_tax', 'amend_line_id', 'tax_id','Amend Taxes'),
+		'cancel_flag':fields.boolean('Flag'),
+		'brand_id_amend':fields.many2one('kg.brand.master','Amend Brand',required=True,domain="[('product_ids','in',(product_id_amend)),('state','in',('draft','confirmed','approved'))]"),
+		'moc_id_amend': fields.many2one('kg.moc.master','Amend MOC'),
+		'moc_id_temp_amend': fields.many2one('ch.brandmoc.rate.details','Amend MOC',domain="[('brand_id','=',brand_id_amend),('header_id.product_id','=',product_id_amend),('header_id.state','in',('draft','confirmed','approved'))]"),
+		'qty_flag': fields.boolean('QTY'),
+		
+		'length_amend': fields.float('Amend Length',digits=(16,4)),
+		'breadth_amend': fields.float('Amend Breadth',digits=(16,4)),
+		'quantity_amend': fields.float("Amend Weight(Kg's)"),
+		'product_uom_amend': fields.many2one('product.uom', 'Amend UOM'),
+		'price_type_amend': fields.selection([('po_uom','PO UOM'),('per_kg','Per Kg')],'Amend Price Type'),
+		'uom_conversation_factor_amend': fields.related('product_id_amend','uom_conversation_factor', type='selection',selection=UOM_CONVERSATION, string='UOM Conversation Factor',store=True),
+		'approval_flag': fields.boolean('Spl Approval'),
+		'rate_revise': fields.selection([('yes','Yes'),('no','No')],'Rate Revise'),
+		
+		## Child Tables Declaration
+		
+		'kg_poindent_lines':fields.many2many('purchase.requisition.line','kg_poindent_po_line' , 'po_order_id', 'piline_id','POIndent Lines',
+				domain="[('pending_qty','>','0'), '&',('line_state','=','process'), '&',('draft_flag','=', False),'&',('product_id','=',product_id)]"),
 		
 	}
 	
 	_defaults = {
-	
+		
 		'line_state': 'draft',
 		'qty_flag': True,
 		'discount_per_flag': False,
 		'discount_flag': False,
 		'approval_flag': False,
+		'rate_revise': 'yes',
 		
 		}
-		
+	
+	def default_get(self, cr, uid, fields, context=None):
+		return context
+			
 	def onchange_price_unit(self,cr,uid,price_unit,price_unit_amend,
 					kg_discount_per_amend,kg_discount_per_value_amend,product_qty_amend):
 						
@@ -1421,6 +1439,10 @@ class kg_purchase_amendment_line(osv.osv):
 		if moc_id_temp_amend:
 			rate_rec = self.pool.get('ch.brandmoc.rate.details').browse(cr,uid,moc_id_temp_amend)
 			value = {'moc_id_amend': rate_rec.moc_id.id}
+		return {'value': value}
+	
+	def onchange_bnd_moc(self, cr, uid, ids, product_id_amend,brand_id_amend):
+		value = {'moc_id_temp_amend':''}
 		return {'value': value}
 		
 	def onchange_brand_moc(self, cr, uid, ids, product_id_amend):
