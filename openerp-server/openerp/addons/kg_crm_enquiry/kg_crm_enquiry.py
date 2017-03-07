@@ -1326,7 +1326,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'suction_pressure_kg': fields.float('Suction Pressure - kg/cm2'),
 		
 		# Pump Specification
-		'pump_type': fields.char('Pump Model'),		
+		'pump_type': fields.char('Pump Model'),
 		'casing_design': fields.selection([('base','Base'),('center_line','Center Line')],'Casing Feet Location'),
 		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True),		
 		'spare_pump_id': fields.many2one('kg.pumpmodel.master','Pump Model'),		
@@ -1387,6 +1387,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'del_pipe_size': fields.selection([('32','32'),('40','40'),('50','50'),('65','65'),('80','80'),('100','100'),('125','125'),('150','150'),('200','200'),('250','250'),('300','300')],'Delivery Pipe Size(MM)'),
 		'qap_plan_id': fields.many2one('kg.qap.plan', 'QAP Standard'),
 		'spare_qap_plan_id': fields.many2one('kg.qap.plan', 'QAP Standard'),
+		'ph_value': fields.char('PH Value'),
 		
 		# Product model values
 		#'impeller_type': fields.char('Impeller Type', readonly=True),
