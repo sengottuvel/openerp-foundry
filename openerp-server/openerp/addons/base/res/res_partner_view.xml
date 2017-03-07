@@ -140,6 +140,7 @@
                         <group>
                         
                             <field name="name" placeholder="Name" attrs="{'readonly':[('partner_state','=','approve')]}"/>
+                            <field name="alias_name" attrs="{'readonly':[('partner_state','=','approve')],'invisible':[('customer','!=',True),('dealer','!=',True),('supplier','!=',True)]}"/>
 							<field name="code" placeholder="Code"  invisible="1" attrs="{'readonly':[('partner_state','=','approve')]}"/>
                         </group>
                         <group>

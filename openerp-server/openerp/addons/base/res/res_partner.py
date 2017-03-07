@@ -214,6 +214,7 @@ class res_partner(osv.osv, format_address):
 	_order = "name"
 	_columns = {
 		'name': fields.char('Name', size=128, required=True, select=True),
+		'alias_name': fields.char('Alias Name', size=128),
 		'date': fields.date('Date', select=1),
 		'title': fields.many2one('res.partner.title', 'Title'),
 		'parent_id': fields.many2one('res.partner', 'Related Company'),
