@@ -302,7 +302,7 @@
 		<menuitem action="action_kg_poamendment_form" id="pam_po_amendment" name="PO Amendment" parent="purchase.menu_procurement_management" sequence="10"/>
 		
 		<!-- Special Approval PO Amend-->
-		<menuitem action="tma_po_amend_apl_view" id="tam_po_amend_apl_view" name="Special Approval PO" parent="purchase.menu_procurement_management" sequence="11"/>
+		<menuitem action="tma_po_amend_apl_view" id="tam_po_amend_apl_view" name="Special Approval PO Amendment" parent="purchase.menu_procurement_management" sequence="11"/>
 	
 	
     </data>
