@@ -8,7 +8,7 @@
     'name': 'Assembly Process',
     'version': '0.1',
     'author': 'Sangeetha',    
-    'depends' : ['base','kg_ms_stores','kg_part_qap'],
+    'depends' : ['base','kg_ms_stores'],
     'data': [
 		'kg_assembly_view.xml'
 		],
