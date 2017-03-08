@@ -290,7 +290,9 @@
 				<menuitem name="WO MD Approval"   parent="menu_mgmt_masters" action="kg_work_order.tma_work_order_mgmt" id="tam_work_order_md_mgmt" sequence='1'/>
 				<menuitem action="kg_subcontract_process.tma_sc_wo_spl" id="tam_sc_wo_spl_mgmt" parent="menu_mgmt_masters" sequence="2" name="SC Special Approval WO" />
 				<menuitem action="purchase.purchase_rfq_spl_approval" id="pam_purchase_order_spl_approvals_mgmt" name="Special Approval PO" parent="menu_mgmt_masters" sequence="3"/>
-				<menuitem name="Stock Statement"   parent="menu_mgmt_masters" action="stock.action_production_lot_form" id="wma_kg_stock_list_mgmt" sequence='4'/>
+				<menuitem  name="Special Approval POA"   parent="menu_mgmt_masters" action="kg_purchase_amendment.action_kg_poamendment_form" id="tam_po_amend_apl_view_mgmt" sequence='4'/>
+				<menuitem name="Stock Statement"   parent="menu_mgmt_masters" action="stock.action_production_lot_form" id="wma_kg_stock_list_mgmt" sequence='5'/>
+				
 				
 		<!--MGMT menus-->
 		<!--HR menus-->
