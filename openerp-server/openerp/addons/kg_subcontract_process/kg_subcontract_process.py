@@ -1263,7 +1263,7 @@ class kg_subcontract_inward(osv.osv):
 		 
 		 			
 		'line_ids': fields.one2many('ch.subcontract.inward.line','header_id','Subcontract Inward Line'),   
-		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),
+		'state': fields.selection([('draft','Draft'),('inspection_qc','Inspection QC'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),
 		'flag_inward': fields.boolean('Flag Order'),		
 		'vehicle_detail': fields.char('Vehicle Detail'),
 		
@@ -1367,10 +1367,52 @@ class kg_subcontract_inward(osv.osv):
 		
 			
 		return True
+	
+	def entry_qc(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
+		sub_obj = self.pool.get('ch.subcontract.inward.operation.line')
+		dim_obj = self.pool.get('ch.inward.dimension.details')
+		ch_pos_obj = self.pool.get('ch.kg.position.number')
+		if entry.state == 'draft':
+			for line in entry.line_ids:
+				if line.com_operation_id:
+					s = [(6, 0, [x.id for x in line.com_operation_id])]
+					ss = [x.id for x in line.com_operation_id]				
+					print"Completed Operations",ss				
+					for item in ss:
+						print"itemitemitem",item
+						sub_id = sub_obj.create(cr,uid,{'header_id':line.id,'operation_id':item})
+						if sub_id:
+							ch_po_ids = ch_pos_obj.search(cr,uid,[('id','=',item)])
+							if ch_po_ids:
+								ch_po_rec = ch_pos_obj.browse(cr,uid,ch_po_ids[0])
+								if ch_po_rec.line_ids:
+									for dim in ch_po_rec.line_ids:
+										dim_obj.create(cr,uid,{'header_id':sub_id,
+										'position_id':line.position_id.id,
+										'operation_id':ch_po_rec.operation_id.id,
+										'operation_name':ch_po_rec.name,
+										'position_line_id':ch_po_rec.id,
+										'pos_dimension_id':dim.id,									
+										'dimension_id':dim.dimension_id.id,
+										'description':dim.description,
+										'min_val':dim.min_val,
+										'max_val':dim.max_val,
+										'remark':dim.remark										
+										})
+			
+			sc_inward_name = ''	
+			sc_inward_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.inward')])
+			rec = self.pool.get('ir.sequence').browse(cr,uid,sc_inward_seq_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(sc_inward_seq_id[0],rec.code,entry.entry_date))
+			sc_inward_name = cr.fetchone();								
+			self.write(cr, uid, ids, {'state': 'inspection_qc','name':sc_inward_name[0]})		
+
+		return True
 		
 	def entry_confirm(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.state == 'draft':		
+		if entry.state == 'inspection_qc':		
 			sc_dc_line_obj = self.pool.get('ch.subcontract.dc.line')
 			sc_obj = self.pool.get('kg.subcontract.process')
 			ms_operation_obj = self.pool.get('kg.ms.operations')
@@ -1444,10 +1486,10 @@ class kg_subcontract_inward(osv.osv):
 												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op12_state':'done'})											
 										
 									else:
+										
 										s = [(6, 0, [x.id for x in i.operation_id])]
 										ss = [x.id for x in i.operation_id]
-										print"Pending Operation List"
-										
+										print"Pending Operation List"										
 										for x in ss:									
 											op_rec = self.pool.get('ch.kg.position.number').browse(cr,uid,x)
 											op_name = op_rec.operation_id.name														
@@ -2730,13 +2772,9 @@ class kg_subcontract_inward(osv.osv):
 					{'sc_inward_qty':direct_sc_inward_qty})
 												
 			
-			sc_inward_name = ''	
-			sc_inward_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.subcontract.inward')])
-			rec = self.pool.get('ir.sequence').browse(cr,uid,sc_inward_seq_id[0])
-			cr.execute("""select generatesequenceno(%s,'%s','%s') """%(sc_inward_seq_id[0],rec.code,entry.entry_date))
-			sc_inward_name = cr.fetchone();
+			
 								
-			self.write(cr, uid, ids, {'state': 'confirmed','name':sc_inward_name[0]})
+			self.write(cr, uid, ids, {'state': 'confirmed'})
 								
 							
 		return True
@@ -2815,7 +2853,9 @@ class ch_subcontract_inward_line(osv.osv):
 		'item_code': fields.char('Item Code'),
 		'item_name': fields.char('Item Name'),
 		'entry_type': fields.selection([('direct','Direct'),('manual','Manual')], 'Entry Type', readonly=True),
-
+		
+		'line_ids': fields.one2many('ch.subcontract.inward.operation.line','header_id','Subcontract DC Line'),
+		
 		'order_category': fields.related('sc_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
 		'order_priority': fields.related('sc_id','order_priority', type='selection', selection=ORDER_PRIORITY, string='Priority', store=True, readonly=True),
 		#~ 'pump_model_id': fields.related('sc_id','pump_model_id', type='many2one', relation='kg.pumpmodel.master', string='Pump Model', store=True, readonly=True),
@@ -2861,3 +2901,63 @@ class ch_subcontract_inward_line(osv.osv):
 
 
 ch_subcontract_inward_line()
+
+
+
+
+class ch_subcontract_inward_operation_line(osv.osv):
+	
+	_name = "ch.subcontract.inward.operation.line"
+	_description = "Subcontract Inward Operation Line"
+	
+	_columns = {
+		
+		'header_id': fields.many2one('ch.subcontract.inward.line','Header Id'),	
+		'line_ids': fields.one2many('ch.inward.dimension.details','header_id','Subcontract Inward Operation Line'),
+		'operation_id': fields.many2one('ch.kg.position.number','Operation Name'),		
+		
+	}	
+	
+
+
+ch_subcontract_inward_operation_line()
+
+
+
+class ch_inward_dimension_details(osv.osv):
+	
+	_name = 'ch.inward.dimension.details'
+	
+	_columns = {
+		
+		'header_id':fields.many2one('ch.subcontract.inward.operation.line', '', required=True, ondelete='cascade'),
+		'position_id': fields.many2one('kg.position.number','Position No'),
+		'operation_id': fields.many2one('kg.operation.master','Operation'),
+		'operation_name': fields.char('Operation Name'),
+		'position_line_id': fields.many2one('ch.kg.position.number','Position No Line'),
+		'pos_dimension_id': fields.many2one('kg.dimension','Dimension'),	
+		'dimension_id': fields.many2one('kg.dimension.master','Dimension'), 				
+		'description': fields.char('Description'), 		
+		'min_val': fields.float('Minimum Value'), 
+		'max_val': fields.float('Maximum Value'), 
+		'actual_val': fields.float('Actual Value'), 
+		'remark': fields.text('Remarks'),
+		
+	}
+	
+	def _entry_val_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])		
+		if rec.actual_val >= rec.min_val and rec.actual_val <= rec.max_val:
+			pass
+		else:
+			return False
+		return True
+	_constraints = [			
+		#~ (_entry_val_check, 'Actual value should greater or equal to Minimum value !!',['Actual Value']),		
+	   ]
+	
+ch_inward_dimension_details()
+
+
+
+
