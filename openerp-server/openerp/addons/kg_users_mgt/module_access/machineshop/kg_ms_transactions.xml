@@ -253,6 +253,26 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
+		<record id="t_ms_subcontract_process_inspection_line" model="ir.model.access">
+			<field name="model_id" ref="kg_subcontract_process.model_ch_subcontract_inward_operation_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Subcontract Process Inspection Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_subcontract_process_inward_dimension" model="ir.model.access">
+			<field name="model_id" ref="kg_subcontract_process.model_ch_inward_dimension_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Subcontract Process Dimensition Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
 		<!-- MS Subcontract Process End -->
 		
 		<!-- QAP Process Start -->
