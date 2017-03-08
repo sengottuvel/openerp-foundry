@@ -8,7 +8,7 @@
     'name': 'Part QAP',
     'version': '0.1',
     'author': 'Sangeetha',    
-    'depends' : ['base','kg_ms_stores','kg_assembly'],
+    'depends' : ['base','kg_ms_stores'],
     'data': [
     
 			'kg_part_qap_view.xml',
