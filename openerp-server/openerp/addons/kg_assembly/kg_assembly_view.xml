@@ -23,6 +23,7 @@
 							<field name="remarks" string="Remarks" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
 						</group>											
 						<group>
+							<field name="rfi_date" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
 							<field name="order_id" readonly="1"/>
 							<field name="pump_model_id" readonly="1"/>
 							<field name="moc_construction_id" readonly="1"/>

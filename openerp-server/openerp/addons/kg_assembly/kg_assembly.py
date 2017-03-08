@@ -101,6 +101,8 @@ class kg_assembly_inward(osv.osv):
 		'full_assembly_shift_id': fields.many2one('kg.shift.master','Shift'),
 		'full_assembly_done_by': fields.many2one('hr.employee','Done By'),
 		
+		'rfi_date': fields.date('RFI Date'),
+		
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		
@@ -134,6 +136,7 @@ class kg_assembly_inward(osv.osv):
 		'active': True,
 		'division_id':_get_default_division,
 		'entry_mode': 'manual',
+		'rfi_date' : lambda * a: time.strftime('%Y-%m-%d'),
 	
 	}
 	
@@ -148,6 +151,19 @@ class kg_assembly_inward(osv.osv):
 		entry_date = datetime.strptime(entry_date, '%Y-%m-%d')
 		
 		if entry_date > today:
+			return False
+		return True
+		
+	def _future_rfi_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		today = datetime.strptime(today, '%Y-%m-%d')
+		rfi_date = rec.rfi_date
+		rfi_date = str(rfi_date)
+		rfi_date = datetime.strptime(rfi_date, '%Y-%m-%d')
+		
+		if rfi_date < today:
 			return False
 		return True
 		
@@ -428,6 +444,7 @@ class kg_assembly_inward(osv.osv):
 	_constraints = [		
 		
 		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
+		(_future_rfi_date_check, 'RFI Date should be greater than or equal to today date !!',['']),
 		
 	   ]
 	   
