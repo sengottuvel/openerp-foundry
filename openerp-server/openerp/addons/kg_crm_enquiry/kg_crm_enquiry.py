@@ -7,7 +7,6 @@ import openerp.addons.decimal_precision as dp
 from datetime import datetime
 import base64
 
-
 CALL_TYPE_SELECTION = [
     ('service','Service'),
     ('new_enquiry','New Enquiry')
@@ -23,11 +22,11 @@ MARKET_SELECTION = [
 ]
 
 class kg_crm_enquiry(osv.osv):
-
+	
 	_name = "kg.crm.enquiry"
 	_description = "CRM Enquiry Entry"
 	_order = "enquiry_date desc"
-
+	
 	_columns = {
 		
 		## Basic Info
@@ -77,6 +76,7 @@ class kg_crm_enquiry(osv.osv):
 		'drive': fields.selection([('motor','Motor'),('vfd','VFD'),('engine','Engine')],'Drive'),
 		'transmision': fields.selection([('cpl','Coupling'),('belt','Belt Drive'),('fc','Fluid Coupling'),('gear_box','Gear Box'),('fc_gear_box','Fluid Coupling With Gear Box')],'Transmision', required=True),
 		'acces': fields.selection([('yes','Yes'),('no','No')],'Accessories'),
+		'flag_data_bank': fields.boolean('Is Data WO',readonly=True, states={'draft':[('readonly',False)]}),
 		
 		## Child Tables Declaration
 		
@@ -99,7 +99,7 @@ class kg_crm_enquiry(osv.osv):
 	}
 	
 	_defaults = {
-	
+		
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_crm_enquiry', context=c),
 		'enquiry_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		'offer_date' : lambda * a: time.strftime('%Y-%m-%d'),
@@ -114,6 +114,7 @@ class kg_crm_enquiry(osv.osv):
 		'entry_mode': 'manual',
 		'revision': 0,
 		'wo_flag': False,
+		'flag_data_bank': False,
 		#~ 'division_id':_get_default_division,
 		#~ 'due_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		
@@ -130,7 +131,7 @@ class kg_crm_enquiry(osv.osv):
 		else:
 			raise osv.except_osv(_('Warning!'),
 				_('System should allow only past date !!'))
-						
+				
 	def onchange_del_date(self,cr,uid,ids,del_date,context=None):
 		today = date.today()
 		today = str(today)
@@ -142,7 +143,7 @@ class kg_crm_enquiry(osv.osv):
 		else:
 			raise osv.except_osv(_('Warning!'),
 						_('System not allow to save with past date !!'))
-		
+	
 	def _future_enquiry_date_check(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.entry_mode == 'manual':
@@ -155,7 +156,7 @@ class kg_crm_enquiry(osv.osv):
 			if enquiry_date > today:
 				return False
 		return True
-		
+	
 	def _future_due_date_check(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.entry_mode == 'manual':
@@ -168,7 +169,7 @@ class kg_crm_enquiry(osv.osv):
 			if due_date <= today:
 				return False
 		return True
-		
+	
 	def _future_del_date_check(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.entry_mode == 'manual':
@@ -181,7 +182,7 @@ class kg_crm_enquiry(osv.osv):
 			if del_date < today:
 				return False
 		return True
-		
+	
 	def _check_duplicates(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
 		cr.execute(''' select id from kg_weekly_schedule where entry_date = %s
@@ -190,7 +191,7 @@ class kg_crm_enquiry(osv.osv):
 		if duplicate_id:
 			return False
 		return True 
-		
+	
 	def _check_is_applicable(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.entry_mode == 'manual':
@@ -238,21 +239,21 @@ class kg_crm_enquiry(osv.osv):
 								raise osv.except_osv(_('Warning!'),
 									_('Pump %s You cannot save without Component'%(rec.pump_id.name)))
 		return True
-		
+	
 	def _check_lineitems(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.entry_mode == 'manual':
 			if not entry.ch_line_ids:
 				return False
 		return True
-		
+	
 	def _Validation(self, cr, uid, ids, context=None):
 		flds = self.browse(cr , uid , ids[0])
 		special_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+=' )
 		if special_char:
 			return False
 		return True
-		
+	
 	def _check_name(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
 		cr.execute(""" select name from kg_crm_enquiry where name  = '%s' """ %(entry.name))
@@ -317,7 +318,7 @@ class kg_crm_enquiry(osv.osv):
 										})
 								
 		return True
-		
+	
 	def list_details(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		obj = self.search(cr,uid,[('id','!=',rec.id),('customer_id','=',rec.customer_id.id)])
@@ -329,7 +330,7 @@ class kg_crm_enquiry(osv.osv):
 		else:
 			pass
 		return True
-		
+	
 	def send_to_dms(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		res_rec=self.pool.get('res.users').browse(cr,uid,uid)		
@@ -438,7 +439,7 @@ class kg_crm_enquiry(osv.osv):
 						prime_cost = tot_price
 					
 		return prime_cost
-  
+	
 	def prime_cost_update(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		print "entry.line_ids",entry.ch_line_ids
@@ -487,6 +488,7 @@ class kg_crm_enquiry(osv.osv):
 																		'market_division': entry.market_division,
 																		'purpose': entry.purpose,
 																		'segment': entry.segment,
+																		'flag_data_bank': entry.flag_data_bank,
 																		})
 																		
 				for order_item in entry.ch_line_ids:
@@ -565,7 +567,7 @@ class kg_crm_enquiry(osv.osv):
 										'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')
 									})		
 		return True
-		
+	
   	def access_creation(self,cr,uid,offer_id,order_item,item_type,context=None):
 		if order_item.line_ids_access_a:
 			pump_id = order_item.pump_id.id
@@ -1225,18 +1227,18 @@ class kg_crm_enquiry(osv.osv):
 	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_crm_enquiry, self).write(cr, uid, ids, vals, context)
-		
+	
 kg_crm_enquiry()
 
 
 class ch_kg_crm_enquiry(osv.osv):
-
+	
 	_name = "ch.kg.crm.enquiry"
 	_description = "Child CRM Enquiry Details"
 	_order = "enquiry_id"
 	
 	_columns = {
-	
+		
 		### Enquiry History Details ####
 		'header_id':fields.many2one('kg.crm.enquiry', 'Enquiry', ondelete='cascade'),
 		'enquiry_id':fields.many2one('kg.crm.enquiry', 'Enquiry'),
@@ -1247,7 +1249,6 @@ class ch_kg_crm_enquiry(osv.osv):
 		'state': fields.related('enquiry_id','state', type='selection', selection=STATE_SELECTION, string='Status'),
 		#'call_type': fields.related('enquiry_id','call_type', type='char', string='Call Type', store=True),
 		'call_type': fields.related('enquiry_id', 'call_type', type='selection', selection=CALL_TYPE_SELECTION, string='Call Type'),
-		
 		
 	}
 	
@@ -1263,21 +1264,21 @@ class ch_kg_crm_enquiry(osv.osv):
 			res = False
 		return res
 	"""	
-		
+	
 	def write(self, cr, uid, ids, vals, context=None):
 		return super(ch_kg_crm_enquiry, self).write(cr, uid, ids, vals, context)
-		
+	
 	
 ch_kg_crm_enquiry()
 
 
 class ch_kg_crm_pumpmodel(osv.osv):
-
+	
 	_name = "ch.kg.crm.pumpmodel"
 	_description = "Child Pump Model Details"
 	
 	_columns = {
-	
+		
 		## Basic Info
 		
 		'header_id':fields.many2one('kg.crm.enquiry', 'Enquiry', ondelete='cascade'),
@@ -1479,7 +1480,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			res = False
 		return res
 	"""	
-
+	
 	def default_get(self, cr, uid, fields, context=None):
 		print"contextcontextcontext",context
 		
@@ -1502,7 +1503,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			else:
 				pass
 		return context
-		
+	
 	def _check_qty(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
 		if rec.purpose_categ == 'pump':
@@ -1510,7 +1511,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 				raise osv.except_osv(_('Warning!'),
 					_('%s You cannot save with zero qty'%(rec.pump_id.name)))
 		return True
-		
+	
 	def _check_access(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
 		if rec.acces == 'yes' and not rec.line_ids_access_a:
@@ -1518,7 +1519,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 				raise osv.except_osv(_('Warning!'),
 					_('%s You cannot save without accessories'%(rec.pump_id.name)))
 		return True
-		
+	
 	def _check_access_qty(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
 		if rec.acces == 'yes' and rec.line_ids_access_a:
@@ -1528,7 +1529,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 						raise osv.except_osv(_('Warning!'),
 							_('%s %s You cannot save with zero qty'%(rec.pump_id.name,item.access_id.name)))
 		return True
-		
+	
 	def _check_is_applicable(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
 		applicable = ''
@@ -1566,7 +1567,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		return True
 	
 	_constraints = [
-	
+		
 		(_check_qty,'You cannot save with zero qty !',['Qty']),
 		(_check_access,'You cannot save without accessories !',['']),
 		(_check_access_qty,'You cannot save with zero qty !',['Qty']),
@@ -1574,7 +1575,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		#~ (_check_is_applicable,'You cannot save without Is applicable !',['Is Applicable']),
 		
 		]
-		
+	
 	def onchange_purpose_categ(self, cr, uid, ids, purpose_categ, context=None):
 		value = {'acces':''}
 		if purpose_categ == 'access':
@@ -1583,7 +1584,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			value = {'acces': ''}
 		print"valuevalue",value
 		return {'value': value}
-		
+	
 	def onchange_capacity_in_liquid(self, cr, uid, ids, capacity_in_liquid, head_in_liquid, context=None):
 		value = {'capacity_in_liquid':'','head_in_liquid': ''}
 		if capacity_in_liquid or head_in_liquid:
@@ -1711,7 +1712,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 									  
 										}}	
 		return {'value': value}
-		
+	
 	def onchange_moc(self, cr, uid, ids, moc_const_id,flag_standard,purpose_categ):
 		moc_const_vals=[]
 		load_bom = ''
@@ -1731,7 +1732,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 								
 								})
 		return {'value': {'line_ids_moc_a': moc_const_vals}}
-		
+	
 	def onchange_load_bom(self, cr, uid, ids, load_bom,pump_id,wo_line_id,purpose_categ,moc_const_id,qty):
 		fou_vals=[]
 		ms_vals=[]
@@ -1950,21 +1951,21 @@ class ch_kg_crm_pumpmodel(osv.osv):
 						print"bot_valsbot_vals",bot_vals
 					
 		return {'value': {'line_ids': fou_vals,'line_ids_a': ms_vals,'line_ids_b': bot_vals}}
-		
+	
 	def onchange_flange_type(self, cr, uid, ids, flange_type, flange_standard, context=None):
 		value = {'flange_standard': ''}
 		if flange_type:
 			value = {'flange_standard': ''}
 			
 		return {'value': value}
-			
+	
 	def onchange_differential_pressure_kg(self,cr,uid,ids,head_in,suction_pressure_kg,discharge_pressure_kg,sealing_water_pressure,context=None):
 		value = {'differential_pressure_kg': 0,'discharge_pressure_kg': 0}
 		total = 0.00
 		total = head_in / 10.00
 		value = {'differential_pressure_kg': total}
 		return {'value': value}
-		
+	
 	def onchange_bkw_liq(self, cr, uid, ids, bkw_water, bkw_liq, capacity_in, head_in, specific_gravity, efficiency_in, motor_margin, context=None):
 		value = {'bkw_water': '','bkw_liq': '','capacity_in': '','head_in': '','specific_gravity': '','efficiency_in': ''}
 		total = 0.00
@@ -1975,7 +1976,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			#~ water_total = round(water_total,2)
 			value = {'bkw_liq': total * 100 ,'bkw_water':water_total * 100}
 		return {'value': value}
-			
+	
 	def onchange_shut_off_pressure(self, cr, uid, ids, shut_off_head, context=None):
 		value = {'shut_off_pressure': 0}
 		total = 0.00
@@ -1983,7 +1984,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			total = shut_off_head / 10.00
 			value = {'shut_off_pressure': total}
 		return {'value': value}
-			
+	
 	def onchange_hydrostatic_test_pressure(self, cr, uid, ids, shut_off_pressure, discharge_pressure_kg, context=None):
 		value = {'hydrostatic_test_pressure': 0}
 		tot_1 = 0.00
@@ -2000,14 +2001,14 @@ class ch_kg_crm_pumpmodel(osv.osv):
 				total = total
 			value = {'hydrostatic_test_pressure': total}
 		return {'value': value}
-			
+	
 	def onchange_motor_margin(self, cr, uid, ids, motor_kw, bkw_liq,context=None):
 		value = {'motor_margin': 0}
 		total = 0.00
 		total = (100 - ((bkw_liq / motor_kw) * 100))
 		value = {'motor_margin': total}
 		return {'value': value}
-			
+	
 	def onchange_impeller_tip_speed(self, cr, uid, ids, impeller_tip_speed, impeller_dia_rated, full_load_rpm, context=None):
 		value = {'impeller_tip_speed': '','impeller_dia_rated': '','full_load_rpm': ''}
 		total = 0.00
@@ -2016,7 +2017,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			total = round(total,2)
 			value = {'impeller_tip_speed': total}
 		return {'value': value}
-			
+	
 	def onchange_belt_loss_in_kw(self, cr, uid, ids, belt_loss_in_kw, bkw_liq, context=None):
 		value = {'belt_loss_in_kw': '','bkw_liq': ''}
 		total = 0.00
@@ -2025,7 +2026,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			total = round(total,2)
 			value = {'belt_loss_in_kw': total}
 		return {'value': value}
-			
+	
 	#~ def onchange_type_of_drive(self,cr,uid,ids,type_of_drive,primemover_categ,context=None):
 		#~ 
 		#~ value = {'primemover_categ':''}
@@ -2045,34 +2046,29 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		#~ return {'value': value}
 	
 	def onchange_primemover(self, cr, uid, ids, primemover_id, context=None):
-		
 		value = {'frequency':'','motor_kw': '','speed_in_motor': '','engine_kw':''}
 		if primemover_id:
 			prime_rec = self.pool.get('kg.primemover.master').browse(cr, uid, primemover_id, context=context)
 			value = {'frequency': prime_rec.frequency,'motor_kw': prime_rec.power_kw,'speed_in_motor': prime_rec.speed,'engine_kw': prime_rec.power_kw}
-			
 		return {'value': value}
-			
+	
 	def onchange_liquid(self, cr, uid, ids, fluid_id, context=None):
-		
 		value = {'viscosity': '','temperature_in_c': '','specific_gravity': '','solid_concen':'','max_particle_size_mm':'','consistency':''}
 		if fluid_id:
 			liquid_rec = self.pool.get('kg.fluid.master').browse(cr, uid, fluid_id, context=context)
 			value = {'viscosity': liquid_rec.viscosity,'temperature_in_c': liquid_rec.temperature,
 					 'specific_gravity': liquid_rec.specific_gravity,'solid_concen':liquid_rec.solid_concentration,
 					 'max_particle_size_mm':liquid_rec.max_particle_size_mm,'consistency':liquid_rec.consistency}
-			
 		return {'value': value}
-		
+	
 	def onchange_head_in(self, cr, uid, ids, head_in, discharge_pressure_kg, sealing_water_pressure, context=None):
 		value = {'head_in': '','sealing_water_pressure':''}
 		total = 0.00
 		if head_in:
 			total = (head_in / 10.00) + 1
 			value = {'head_in': head_in,'sealing_water_pressure': total}
-			
 		return {'value': value}
-		
+	
 	def onchange_pumpmodel(self, cr, uid, ids, pump_id, market_division,suction_pressure_kg,discharge_pressure_kg,purpose_categ, context=None):
 		print"pump_idpump_idpump_idpump_idpump_id",pump_id
 		value = {'impeller_type': '','impeller_number': '','impeller_dia_max': '','impeller_dia_min': '','maximum_allowable_soild': '',
@@ -2121,7 +2117,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			#~ total = bkw_liq * 0.02
 			#~ value = {'gear_box_loss_high_speed':total}
 		#~ return {'value': value}
-			
+	
 	def onchange_pump_input_higher_speed(self,cr,uid,ids,capacity_in,head_higher_speed,specific_gravity,effy_high_speed,type_of_drive,context=None):
 		value = {'pump_input_higher_speed': 0.00}
 		total = 0.00
@@ -2129,7 +2125,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			total = (((capacity_in * head_higher_speed * specific_gravity) / 367.00) / (effy_high_speed / 100.00))
 			value = {'pump_input_higher_speed': total}
 		return {'value': value}
-			
+	
 	def onchange_mototr_output_power_rated(self, cr, uid, ids, gear_box_loss_rated, fluid_coupling_loss_rated, bkw_liq, type_of_drive, context=None):
 		value = {'mototr_output_power_rated': ''}
 		total = 0.00
@@ -2137,7 +2133,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			total = bkw_liq + gear_box_loss_rated + fluid_coupling_loss_rated 
 			value = {'mototr_output_power_rated': total}
 		return {'value': value}
-			
+	
 	def onchange_motor_output_power_high_speed(self,cr,uid,ids,pump_input_higher_speed,gear_box_loss_high_speed,fluid_coupling_loss,type_of_drive,context=None):
 		value = {'motor_output_power_high_speed': ''}
 		total = 0.00
@@ -2145,7 +2141,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			total = pump_input_higher_speed + gear_box_loss_high_speed + fluid_coupling_loss 
 			value = {'motor_output_power_high_speed': total}
 		return {'value': value}
-			
+	
 	def onchange_pump_input_lower_speed(self,cr,uid,ids,effy_lower_speed_point,specific_gravity,head_lower_speed,capacity_in,type_of_drive,context=None):
 		value = {'pump_input_lower_speed': ''}
 		total = 0.00
@@ -2157,7 +2153,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			gear_total = (total / 100.00 ) * 2.00
 			value = {'pump_input_lower_speed': total}
 		return {'value': value}
-			
+	
 	def onchange_motor_output_power_lower_speed(self,cr,uid,ids,pump_input_lower_speed,gear_box_loss_lower_speed,fluid_coupling_loss_lower_speed,type_of_drive,context=None):
 		value = {'motor_output_power_lower_speed': 0}
 		total = 0.00
@@ -2165,7 +2161,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			total = pump_input_lower_speed + gear_box_loss_lower_speed + fluid_coupling_loss_lower_speed
 			value = {'motor_output_power_lower_speed': total}
 		return {'value': value}
-			
+	
 	def create(self, cr, uid, vals, context=None):
 		pump_obj = self.pool.get('kg.pumpmodel.master')
 		if vals.get('pump_id'):		  
@@ -2174,7 +2170,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			'impeller_dia_min': pump_rec.impeller_dia_min,'maximum_allowable_soild': pump_rec.maximum_allowable_soild,'max_allowable_test': pump_rec.max_allowable_test,
 			'number_of_stages': pump_rec.number_of_stages,'crm_type': pump_rec.crm_type})
 		return super(ch_kg_crm_pumpmodel, self).create(cr, uid, vals, context=context)
-		
+	
 	def write(self, cr, uid, ids, vals, context=None):
 		pump_obj = self.pool.get('kg.pumpmodel.master')
 		if vals.get('pump_id'):
@@ -2205,12 +2201,12 @@ ch_kg_crm_pumpmodel()
 
 
 class ch_kg_crm_foundry_item(osv.osv):
-
+	
 	_name = "ch.kg.crm.foundry.item"
 	_description = "Child Foundry Item Details"
 	
 	_columns = {
-	
+		
 		## Basic Info
 		
 		'header_id':fields.many2one('ch.kg.crm.pumpmodel', 'Pump Model Id', ondelete='cascade'),
@@ -2232,6 +2228,7 @@ class ch_kg_crm_foundry_item(osv.osv):
 		'prime_cost': fields.float('Prime Cost'),
 		'purpose_categ': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories')],'Purpose Category'),
 		'material_code': fields.char('Material Code'),
+		'spare_offer_line_id': fields.integer('Spare Offer Line Id'),
 		
 	}
 	
@@ -2252,11 +2249,11 @@ class ch_kg_crm_foundry_item(osv.osv):
 		#~ return True
 	
 	_constraints = [
-	
+		
 		#~ (_check_qty,'You cannot save with zero qty !',['Qty']),
 		
 		]
-		
+	
 	def onchange_pattern_name(self, cr, uid, ids, pattern_code,pattern_name):
 		value = {'pattern_name':''}
 		pattern_obj = self.pool.get('kg.pattern.master').search(cr,uid,([('id','=',pattern_code)]))
@@ -2268,12 +2265,12 @@ class ch_kg_crm_foundry_item(osv.osv):
 ch_kg_crm_foundry_item()
 
 class ch_kg_crm_machineshop_item(osv.osv):
-
+	
 	_name = "ch.kg.crm.machineshop.item"
 	_description = "Macine Shop Item Details"
 	
 	_columns = {
-	
+		
 		## Basic Info
 		
 		'header_id':fields.many2one('ch.kg.crm.pumpmodel', 'Pump Model Id', ondelete='cascade'),
@@ -2298,9 +2295,9 @@ class ch_kg_crm_machineshop_item(osv.osv):
 		'prime_cost': fields.float('Prime Cost'),
 		'purpose_categ': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories')],'Purpose Category'),
 		'material_code': fields.char('Material Code'),
+		'spare_offer_line_id': fields.integer('Spare Offer Line Id'),
 		
 	}
-	
 	
 	_defaults = {
 		
@@ -2308,10 +2305,10 @@ class ch_kg_crm_machineshop_item(osv.osv):
 		'load_bom': False,
 		
 	}
-		
+	
 	def write(self, cr, uid, ids, vals, context=None):
 		return super(ch_kg_crm_machineshop_item, self).write(cr, uid, ids, vals, context)
-		
+	
 	def _check_qty(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
 		if rec.qty <= 0.00:
@@ -2319,19 +2316,20 @@ class ch_kg_crm_machineshop_item(osv.osv):
 		return True
 	
 	_constraints = [
-	
+		
 		#~ (_check_qty,'You cannot save with zero qty !',['Qty']),
 		
 		]
+	
 ch_kg_crm_machineshop_item()
 
 class ch_kg_crm_bot(osv.osv):
-
+	
 	_name = "ch.kg.crm.bot"
 	_description = "BOT Details"
 	
 	_columns = {
-	
+		
 		## Basic Info
 		
 		'header_id':fields.many2one('ch.kg.crm.pumpmodel', 'Pump Model Id', ondelete='cascade'),
@@ -2358,6 +2356,7 @@ class ch_kg_crm_bot(osv.osv):
 		'flag_is_bearing': fields.boolean('Is Bearing'),
 		'purpose_categ': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories')],'Purpose Category'),
 		'material_code': fields.char('Material Code'),
+		'spare_offer_line_id': fields.integer('Spare Offer Line Id'),
 		
 	}
 	
@@ -2368,10 +2367,10 @@ class ch_kg_crm_bot(osv.osv):
 		'flag_is_bearing': False,
 		
 	}
-		
+	
 	def write(self, cr, uid, ids, vals, context=None):
 		return super(ch_kg_crm_bot, self).write(cr, uid, ids, vals, context)
-		
+	
 	def _check_qty(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
 		if rec.qty <= 0.00:
@@ -2379,20 +2378,20 @@ class ch_kg_crm_bot(osv.osv):
 		return True
 	
 	_constraints = [
-	
+		
 		#~ (_check_qty,'You cannot save with zero qty !',['Qty']),
 		
 		]
-		
+	
 ch_kg_crm_bot()
 
 class ch_moc_construction(osv.osv):
-
+	
 	_name = "ch.moc.construction"
 	_description = "MOC Construction Details"
 	
 	_columns = {
-	
+		
 		## Basic Info
 		
 		'header_id':fields.many2one('ch.kg.crm.pumpmodel', 'Header Id', ondelete='cascade'),
@@ -2411,7 +2410,7 @@ class ch_moc_construction(osv.osv):
 	def default_get(self, cr, uid, fields, context=None):
 		
 		return context
-		
+	
 	#~ def onchange_pattern_name(self, cr, uid, ids, pattern_id, context=None):
 		#~ 
 		#~ value = {'pattern_name': ''}
@@ -2420,8 +2419,7 @@ class ch_moc_construction(osv.osv):
 			#~ value = {'pattern_name': pro_rec.pattern_name}
 			#~ 
 		#~ return {'value': value}
-		
-		
+	
 	#~ def create(self, cr, uid, vals, context=None):
 		#~ pattern_obj = self.pool.get('kg.pattern.master')
 		#~ if vals.get('pattern_id'):		  
@@ -2441,7 +2439,7 @@ class ch_moc_construction(osv.osv):
 ch_moc_construction()
 
 class ch_kg_crm_accessories(osv.osv):
-
+	
 	_name = "ch.kg.crm.accessories"
 	_description = "Ch KG CRM Accessories"
 	
@@ -2460,7 +2458,7 @@ class ch_kg_crm_accessories(osv.osv):
 			#~ res[order.id]['prime_cost'] = prime_cost
 		#~ print"res[order.id]['prime_cost']res[order.id]['prime_cost']****************",res[order.id]['prime_cost']
 		#~ return res
-		
+	
 	_columns = {
 		
 		## Basic Info
@@ -2494,7 +2492,7 @@ class ch_kg_crm_accessories(osv.osv):
 		return True
 	
 	_constraints = [
-	
+		
 		#~ (_check_qty,'You cannot save with zero qty !',['Qty']),
 		
 		]
@@ -2507,7 +2505,7 @@ class ch_kg_crm_accessories(osv.osv):
 			raise osv.except_osv(_('Warning!'),
 				_('System should allow without accessories category!'))
 		return {'value': value}
-			
+	
 	def onchange_load_access(self,cr,uid,ids,load_access,access_id,moc_id,qty):
 		fou_vals=[]
 		ms_vals=[]
@@ -2568,12 +2566,12 @@ class ch_kg_crm_accessories(osv.osv):
 					print"bot_valsbot_vals",bot_vals	
 		return {'value': {'line_ids': fou_vals,'line_ids_a': ms_vals,'line_ids_b': bot_vals}}
 		
-		
+	
 ch_kg_crm_accessories()
 
 
 class ch_crm_access_fou(osv.osv):
-
+	
 	_name = "ch.crm.access.fou"
 	_description = "Child Foundry Item Details"
 	
@@ -2605,12 +2603,12 @@ class ch_crm_access_fou(osv.osv):
 ch_crm_access_fou()
 
 class ch_crm_access_ms(osv.osv):
-
+	
 	_name = "ch.crm.access.ms"
 	_description = "ch crm Access MS"
 	
 	_columns = {
-	
+		
 		## Basic Info
 		
 		'header_id':fields.many2one('ch.kg.crm.accessories', 'Access Id', ondelete='cascade'),
@@ -2646,12 +2644,12 @@ class ch_crm_access_ms(osv.osv):
 ch_crm_access_ms()
 
 class ch_crm_access_bot(osv.osv):
-
+	
 	_name = "ch.crm.access.bot"
 	_description = "Ch Crm Access BOT"
 	
 	_columns = {
-	
+		
 		## Basic Info
 		
 		'header_id':fields.many2one('ch.kg.crm.accessories', 'Access Id', ondelete='cascade'),

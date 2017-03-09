@@ -46,6 +46,7 @@
 								<field name="del_date" on_change="onchange_del_date(del_date)" required="1" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
 								<field name="expected_value"/>								
 								<field name="segment" required="1"/>		
+								<field name="flag_data_bank"/>		
 								<field name="source" required="1" readonly="1" invisible="1"/>		
 								<field name="service_det" attrs="{'invisible': [('call_type','!=','service')],'required': [('call_type','=','service')]}"/>					
 								<field name="state" style="width: 30%%" class="att_state_change"/>

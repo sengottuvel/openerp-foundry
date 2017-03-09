@@ -19,7 +19,7 @@ PURPOSE_SELECTION = [
 	('pump','Pump'),('spare','Spare'),('prj','Project'),('pump_spare','Pump With Spare')
 ]
 STATE_SELECTION = [
-	('draft','Draft'),('moved_to_offer','Moved To Offer'),('call','Call Back'),('quote','Quote Process'),('wo_created','WO Created'),('wo_released','WO Released'),('reject','Rejected'),('revised','Revised')
+	('draft','Draft'),('moved_to_offer','Confirmed'),('wfa_md','WFA MD'),('approved_md','Approved MD'),('call','Call Back'),('quote','Quote Process'),('wo_created','WO Created'),('wo_released','WO Released'),('reject','Rejected'),('revised','Revised')
 ]
 MARKET_SELECTION = [
 	('cp','CP'),('ip','IP')
@@ -91,7 +91,7 @@ class kg_crm_offer(osv.osv):
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD'),('export','Export')],'Location'),
 		'offer_copy': fields.char('Offer Copy'),
 		'term_copy': fields.char('Terms Copy'),
-		'customer_po_no': fields.char('Customer PO No.',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
+		'customer_po_no': fields.char('Customer PO No.',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)],'approved_md':[('readonly',False)]}),
 		'dealer_po_no': fields.char('Dealer PO No.',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
 		'revision': fields.integer('Revision'),
 		'wo_flag': fields.boolean('WO Flag'),
@@ -115,6 +115,8 @@ class kg_crm_offer(osv.osv):
 		's_no': fields.char('Serial Number'),
 		'wo_no': fields.char('WO Number'),
 		'requirements': fields.text('Requirements'),
+		'is_zero_offer': fields.boolean('Is Zero Offer'),
+		'flag_data_bank': fields.boolean('Is Data WO',readonly=True, states={'draft':[('readonly',False)]}),
 		
 		'scope_of_supply': fields.selection([('bare_pump','Bare Pump'),('pump_with_acces','Pump With Accessories'),('pump_with_acces_motor','Pump With Accessories And Motor')],'Scope of Supply'),
 		'pump': fields.selection([('gld_packing','Gland Packing'),('mc_seal','M/C Seal'),('dynamic_seal','Dynamic seal')],'Shaft Sealing', required=True),
@@ -220,6 +222,8 @@ class kg_crm_offer(osv.osv):
 	#	'division_id':_get_default_division,
 		'due_date': lambda * a: time.strftime('%Y-%m-%d'),
 		'revision': 0,
+		'is_zero_offer': False,
+		'flag_data_bank': False,
 		
 	}
 	
@@ -426,54 +430,77 @@ class kg_crm_offer(osv.osv):
 										'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')
 									})
 		return True
+		
+	def entry_wfa_md(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
+		if entry.state == 'moved_to_offer':
+			self.write(cr, uid, ids, {'state': 'wfa_md'})
+		return True
+	
+	def entry_approved_md(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
+		if entry.state == 'wfa_md':
+			user_obj = self.pool.get('res.users').search(cr,uid,[('id','=',uid)])
+			if user_obj:
+				user_rec = self.pool.get('res.users').browse(cr,uid,user_obj[0])
+				if user_rec.special_approval == True:
+					self.write(cr, uid, ids, {'state': 'approved_md'})
+				else:
+					raise osv.except_osv(_('Warning'),
+						_('It should be approved by special approver'))
+		return True
+	
+	def entry_reject_md(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
+		if entry.state == 'wfa_md':
+			self.write(cr, uid, ids, {'state': 'draft'})
+		return True
 	
 	def entry_revision(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state in ('moved_to_offer','wo_created'):
 			revision = 0
-			wo_obj = self.pool.get('kg.work.order')
-			#~ wo_id = wo_obj.search(cr,uid,[('offer_id','=',entry.id),('state','not in',('draft','cancel'))])
-			wo_id = wo_obj.search(cr,uid,[('offer_no','=',entry.name),('state','not in',('draft','cancel'))])
-			if wo_id:
-				raise osv.except_osv(_('Warning!'),
-					_('You can not delete this entry because WO confirmed!'))
-						
+			print"entry.is_zero_offer",entry.is_zero_offer
+			if entry.is_zero_offer != True:
+				wo_obj = self.pool.get('kg.work.order')
+				#~ wo_id = wo_obj.search(cr,uid,[('offer_id','=',entry.id),('state','not in',('draft','cancel'))])
+				wo_id = wo_obj.search(cr,uid,[('offer_no','=',entry.name),('state','not in',('draft','cancel'))])
+				if wo_id:
+					raise osv.except_osv(_('Warning!'),
+						_('You can not delete this entry because WO confirmed!'))
+			
 			if entry.wo_flag == False:
 				revision = entry.revision + 1
-				print"revisionrevisionrevision",revision
+				print"revisionrevisionrevisionaaaaaaaa",revision
 				vals = {
 						'state' : 'draft',
 						'revision' : revision,
 						'revision_remarks' : '',
 						}
-				offer_id = self.copy(cr, uid, entry.id,vals, context) 
+				offer_id = self.copy(cr,uid,entry.id,vals,context) 
 				print"offer_idoffer_idoffer_id",offer_id
-				#~ offer_id = self.create(cr,uid,{'name': entry.name,
-									#~ 'enquiry_no': entry.enquiry_no,
-									#~ 'offer_date': entry.offer_date,
-									#~ 'enquiry_date': entry.enquiry_date,
-									#~ 'customer_id': entry.customer_id.id,
-									#~ 'segment': entry.segment,
-									#~ 'ref_mode': entry.ref_mode,
-									#~ 'location': entry.location,
-									#~ 'market_division': entry.market_division,
-									#~ 'state': 'draft',
-									#~ 'revision': revision,
-									#~ 'note': entry.note,
-									#~ 'purpose': entry.purpose,
-									#~ 'wo_flag': entry.wo_flag,
-									#~ 'offer_net_amount': entry.offer_net_amount,
-									#~ })
-						
 				self.write(cr, uid, ids, {
 										  'state': 'revised',
 										})
-								
+			if entry.wo_flag == True and entry.is_zero_offer == True:
+				revision = entry.revision + 1
+				print"revisionrevisionrevisionbbbbbbbbbbb",revision
+				vals = {
+						'state' : 'draft',
+						'revision' : revision,
+						'revision_remarks' : '',
+						}
+				offer_id = self.copy(cr,uid,entry.id,vals,context) 
+				print"offer_idoffer_idoffer_id",offer_id
+				
+				self.write(cr, uid, ids, {
+										  'state': 'revised',
+										})
 		return True
 	
 	def wo_creation(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.state == 'moved_to_offer':
+		if entry.state in ('moved_to_offer','approved_md'):
 			if not entry.customer_po_no:
 				raise osv.except_osv(_('Warning!'),
 					_('Update Customer PO No.'))
@@ -487,6 +514,7 @@ class kg_crm_offer(osv.osv):
 																  'enquiry_no': entry.enquiry_id.name,
 																  'offer_no': entry.name,
 																  'location': entry.location,
+																  'flag_data_bank': entry.flag_data_bank,
 																  'entry_mode': 'auto',
 																  'partner_id': entry.customer_id.id,
 																  'order_value': entry.offer_net_amount,
@@ -1901,6 +1929,7 @@ class ch_pump_offer(osv.osv):
 		'ed': fields.float('ED(%)'),
 		'supervision_amount': fields.float('Supervision(Rs.)'),
 		'total_price': fields.float('Total Price(%)'),
+		'wo_line_id': fields.many2one('ch.work.order.details','WO Line'),
 		
 		'tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),	
 		'sam_ratio_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Sam Ratio',multi="sums",store=True),	
@@ -2024,6 +2053,7 @@ class ch_supervision_offer(osv.osv):
 		'insurance': fields.float('Insurance(%)'),
 		'ed': fields.float('ED(%)'),
 		'supervision_amount': fields.float('Supervision(Rs.)'),
+		'wo_line_id': fields.many2one('ch.work.order.details','WO Line'),
 		#~ 'total_price': fields.float('Total Price(%)'),
 		
 		'tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),	
@@ -2147,6 +2177,7 @@ class ch_spare_offer(osv.osv):
 		'ed': fields.float('ED(%)'),
 		'supervision_amount': fields.float('Supervision(Rs.)'),
 		'total_price': fields.float('Total Price'),
+		'spare_offer_line_id': fields.many2one('ch.spare.offer','Spare Offer Line Id'),
 		
 		'tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),	
 		'sam_ratio_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Sam Ratio',multi="sums",store=True),	

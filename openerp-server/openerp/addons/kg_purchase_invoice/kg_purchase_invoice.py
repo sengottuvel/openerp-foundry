@@ -919,8 +919,9 @@ class ch_expense_details(osv.osv):
 	_columns = {
 	
 		'header_id':fields.many2one('kg.purchase.invoice','Header_id'),
-		'expense':fields.char('Expense'),
-		'expense_amt':fields.float('Amount'),
+		'expense_id': fields.many2one('kg.expense.master','Expense',domain="[('state','not in',('cancel','reject'))]"),
+		'expense': fields.char('Expense'),
+		'expense_amt': fields.float('Amount'),
 		'expense_tax_ids': fields.many2many('account.tax', 'ch_expense_tax', 'expense_line_id', 'taxes_id', 'Taxes(+)'),
 		'price_subtotal': fields.function(_amount_line,string='Line Total', digits_compute= dp.get_precision('Account')),
 		
