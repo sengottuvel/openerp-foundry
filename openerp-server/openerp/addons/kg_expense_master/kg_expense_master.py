@@ -7,8 +7,10 @@ from datetime import datetime
 import re
 import math
 
-class kg_expense_master(osv.osv):
+dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
+class kg_expense_master(osv.osv):
+	
 	_name = "kg.expense.master"
 	_description = "Expense Master"
 	
@@ -39,16 +41,22 @@ class kg_expense_master(osv.osv):
 		return res
 	
 	_columns = {
-			
+		
+		## Basic Info
+		
 		'name': fields.char('Name', size=128, required=True, select=True),
 		'code': fields.char('Code', size=128, required=True),
-		'category': fields.selection([('po','PO'),('so','Service Order'),('grn','GRN'),('wo','WO'),('gen_exp','General Expenses'),('all','All'),('other','Others')],'Category'),
-		'ledger_id': fields.many2one('account.account','Ledger Name'),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
-		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
+		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode', readonly=True),
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),
+		
+		## Module Requirement Info
+		
+		'category': fields.selection([('po','PO'),('so','Service Order'),('grn','GRN'),('wo','WO'),('gen_exp','General Expenses'),('all','All'),('other','Others')],'Category'),
+		'account_id': fields.many2one('account.account','Ledger Name'),
 		
 		### Entry Info ###
 		
@@ -64,22 +72,23 @@ class kg_expense_master(osv.osv):
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),		
-				
+		
 	}
 	
 	_defaults = {
-	
+		
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.expense.master', context=c),
 		'active': True,		
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),	
 		'modify': 'no',
+		'entry_mode': 'manual',
 		
 	}
 	
 	_sql_constraints = [
-	
+		
 		('name', 'unique(name)', 'Name must be unique!!'),
 		('code', 'unique(code)', 'Code must be unique!!'),
 	]
@@ -90,7 +99,7 @@ class kg_expense_master(osv.osv):
 		if name_special_char:
 			return False		
 		return True	
-		
+	
 	def _CodeValidation(self, cr, uid, ids, context=None):
 		flds = self.browse(cr , uid , ids[0])	
 		if flds.code:		
@@ -98,7 +107,7 @@ class kg_expense_master(osv.osv):
 			if code_special_char:
 				return False
 		return True	
-		
+	
 	def _name_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
 		res = True
@@ -112,7 +121,7 @@ class kg_expense_master(osv.osv):
 			else:
 				res = True				
 		return res
-			
+	
 	def _code_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
 		res = True
@@ -131,7 +140,7 @@ class kg_expense_master(osv.osv):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.state == 'approved':
 			if rec.cancel_remark:
-				self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+				self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': dt_time})
 			else:
 				raise osv.except_osv(_('Cancel remark is must !!'),
 					_('Enter the remarks in Cancel remarks field !!'))
@@ -140,47 +149,59 @@ class kg_expense_master(osv.osv):
 	def entry_confirm(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.state == 'draft':
-			self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': dt_time})
 		return True
-		
+	
 	def entry_draft(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.state == 'approved':
 			self.write(cr, uid, ids, {'state': 'draft'})
 		return True
-
+	
 	def entry_approve(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.state == 'confirmed':
-			self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			ac_obj = self.pool.get('account.account')
+			ac_type_ids = self.pool.get('account.account.type').search(cr,uid,[('name','=','Expense View')])
+			if ac_type_ids:
+				ac_type_rec = self.pool.get('account.account.type').browse(cr,uid,ac_type_ids[0])
+				ac_type = ac_type_rec.id
+			account_id = ac_obj.create(cr,uid,{'name': rec.name,
+											   'code': '',
+											   'user_type': ac_type,
+											   'entry_mode': 'auto',
+											   'type': 'other',
+											   'note': 'New Expense Type Added',
+											   })
+			self.write(cr, uid, ids, {'account_id':account_id,'state':'approved','ap_rej_user_id':uid,'ap_rej_date':dt_time})
 		return True
-
+	
 	def entry_reject(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.state == 'confirmed':
 			if rec.remark:
-				self.write(cr, uid, ids, {'state': 'reject','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+				self.write(cr, uid, ids, {'state': 'reject','ap_rej_user_id': uid, 'ap_rej_date': dt_time})
 			else:
 				raise osv.except_osv(_('Rejection remark is must !!'),
 					_('Enter the remarks in rejection remark field !!'))
 		return True
-		
+	
 	def unlink(self,cr,uid,ids,context=None):
 		unlink_ids = []		
 		for rec in self.browse(cr,uid,ids):	
 			if rec.state not in ('draft','cancel'):				
 				raise osv.except_osv(_('Warning!'),
-						_('You can not delete this entry !!'))
+					_('You can not delete this entry !!'))
 			else:
 				unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
-		
-	def write(self, cr, uid, ids, vals, context=None):
-		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
-		return super(kg_expense_master, self).write(cr, uid, ids, vals, context)
-		
-	_constraints = [
 	
+	def write(self, cr, uid, ids, vals, context=None):
+		vals.update({'update_date': dt_time,'update_user_id':uid})
+		return super(kg_expense_master, self).write(cr, uid, ids, vals, context)
+	
+	_constraints = [
+		
 		(_Validation, 'Special Character Not Allowed !!!', ['Check Name']),
 		(_CodeValidation, 'Special Character Not Allowed !!!', ['Check Code']),
 		(_name_validate, 'Division name must be unique !!', ['name']),		
