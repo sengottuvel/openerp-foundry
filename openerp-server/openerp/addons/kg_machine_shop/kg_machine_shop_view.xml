@@ -37,8 +37,8 @@
 							<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
 							<field name="uom_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" invisible="1"/>											
 							<field name="type" invisible="1"/>
-							<field name="dynamic_length" attrs="{'invisible':[('type','=','bot')]}"/>	
-							<field name="flag_heat_no" attrs="{'invisible':[('type','=','bot')]}"/>													
+							<field name="dynamic_length" attrs="{'invisible':[('type','=','bot')]}"/>												
+							<field name="flag_heat_no" attrs="{'invisible':[('type','=','bot')]}"/>												
 							<field name="is_bearing" attrs="{'invisible':[('type','=','ms')]}"/>												
 							<field name="od" invisible="1"/>											
 							<field name="length" invisible="1"/>	
@@ -50,6 +50,7 @@
 						<group>
 							<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 							<field name="csd_code"/>
+							<field name="painting_cost"/>
 							<field name="breadth" invisible="1"/>
 							<field name="thickness" invisible="1"/>																
 							<field name="length_type" attrs="{'invisible':['|',('type','=','bot'),('dynamic_length','=',False)],'required': [('dynamic_length','=',True)]}"/>																
