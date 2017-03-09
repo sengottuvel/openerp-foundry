@@ -148,14 +148,14 @@ where issue_date >=$P{from_date} and issue_date <= $P{to_date}]]>
 	<pageHeader>
 		<band height="41" splitType="Stretch">
 			<textField>
-				<reportElement x="575" y="26" width="50" height="15"/>
+				<reportElement x="575" y="26" width="82" height="15"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{from_date}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="644" y="26" width="47" height="15"/>
+				<reportElement x="677" y="26" width="59" height="15"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font size="8" isBold="true"/>
 				</textElement>
@@ -169,7 +169,7 @@ where issue_date >=$P{from_date} and issue_date <= $P{to_date}]]>
 				<textFieldExpression><![CDATA["Date Range :"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="624" y="26" width="20" height="15"/>
+				<reportElement x="657" y="26" width="20" height="15"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="8" isBold="true"/>
 				</textElement>
