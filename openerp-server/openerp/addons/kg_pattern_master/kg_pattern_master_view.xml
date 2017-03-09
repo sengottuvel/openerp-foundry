@@ -36,29 +36,29 @@
 					
 					<group>
 						<group>						
-							<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>		
-							<field name="alias_name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>																
+							<field name="name" class="aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>		
+							<field name="alias_name" class="aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>																
 							<field name="box_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>															
-							<field name="csd_code"/>		
+							<field name="csd_code" class="aplhanum_expect"/>		
 							<field name="modify" invisible="1"/>		
 							<field name="copy_flag" invisible="1"/>														
 							<field name="delivery_lead" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>													
 							<field name="mould_rate" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" invisible="1"/>
-							<field name="location" />									
-							<field name="offer_info" invisible="1"/>									
+							<field name="location" class="aplhanum_expect" />														
 							<field name="need_dynamic_balancing" />									
 							<field name="corless_pattern" />									
 							<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>					
 						</group>
 						<group>
-							<field name="pattern_name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							<field name="make_by" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
+							<field name="pattern_name" class="aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="make_by" class="aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="code" class="aplhanum_expect" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 							<field name="making_cost"/>																		
 							<field name="dynamic_length"/>									
 							<field name="length_type" attrs="{'required': [('dynamic_length','=',True)],'invisible': [('dynamic_length','=',False)]}"/>									
-							<field name="need_hydro_test"/>	
-							<field name="flag_heat_no"/>																
+							<field name="need_hydro_test"/>															
+							<field name="flag_heat_no"/>															
+							<field name="painting_cost"/>															
 							<field name="pattern_state" style="width: 50%%" class="att_state_change"/>							
 							<field name="state" style="width: 30%%" class="att_state_change"/>							
 						</group>
@@ -72,8 +72,7 @@
 						</group>											
 						<group>
 							<field name="ci_weight" />		
-							<field name="pcs_weight"/>										
-							<field name="tolerance_flag" invisible="1"/>									
+							<field name="pcs_weight"/>																
 						</group>					
 					</group>
 					

@@ -17,14 +17,7 @@ class kg_pattern_master(osv.osv):
 	_name = "kg.pattern.master"
 	_description = "SAM Pattern Master"
 	
-	def fields_view_get(self, cr, uid, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):		
-		if context is None:
-			context={}
-
-		context.update({
-			'dept': 1
-		})
-		return super(kg_pattern_master,self).fields_view_get(cr, uid, view_id=view_id, view_type=view_type, context=context, toolbar=toolbar, submenu=submenu)
+	### Version 0.1
 
 	def _get_modify(self, cr, uid, ids, field_name, arg,  context=None):
 		res={}		
@@ -58,57 +51,25 @@ class kg_pattern_master(osv.osv):
 					res[h.id] = 'no'	
 		return res	
 		
-	
+		### Version 0.2
 	
 	_columns = {
 		
+		### Basic Info
 		
-		'name': fields.char('No.', size=128, required=True),
-		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
-		'box_id': fields.many2one('kg.box.master','Box',readonly=True,domain="[('active','=','t')]"),		
-		'pattern_name': fields.char('Name', size=128,required=True),
+		'name': fields.char('No.', size=128, required=True),		
 		'code': fields.char('Customer Code No.', size=128),
-		'active': fields.boolean('Active'),
-		'pcs_weight': fields.float('SS Weight(kgs)'),
-		'ci_weight': fields.float('CI Weight(kgs)'),
-		'mould_rate': fields.float('Mould Rate(Rs)'),
-		'location': fields.char('Physical Location', required=True),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
-		'pattern_state': fields.selection([('active','Active'),('hold','Hold'),('rework','Rework'),('reject','Rejected'),('new_develop','New Development')],'Pattern Status',required=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
-		'line_ids':fields.one2many('ch.mocwise.rate', 'header_id', "MOC Wise Rate"),
-		'line_ids_a':fields.one2many('ch.pattern.attachment', 'header_id', "Attachments"),
-		'line_ids_b':fields.one2many('ch.pattern.history', 'header_id', "Pattern History"),	
-		'line_ids_c':fields.one2many('ch.latest.weight', 'header_id', "Latest Weight details"),	
-		
-		'offer_info': fields.boolean('Offer Info'),
-		'dynamic_length': fields.boolean('Dynamic Length'),	
-		'corless_pattern': fields.boolean('Coreless Pattern'),
-		'length_type': fields.selection([('single_column_pipe','Single Column Pipe'),('single_shaft','Single Shaft'),('delivery_pipe','Delivery Pipe'),('drive_column_pipe','Drive Column Pipe'),('pump_column_pipe','Pump Column Pipe'),('pump_shaft','Pump Shaft'),('drive_shaft','Drive Shaft')],'Length Type'),		
-		
-		'tolerance': fields.float('Tolerance(-%)'),
-		'nonferous_weight': fields.float('Non-Ferrous Weight(kgs)'),		
-		'alias_name': fields.char('Alias Name', size=128),
-		'make_by': fields.char('Make By', size=128),
-		'delivery_lead': fields.integer('Delivery Lead Time(Weeks)', size=128),
-		'csd_code': fields.char('CSD Code No.', size=128),
-		'making_cost': fields.float('Pattern Making Cost'),
-		'moc_const_type': fields.many2many('kg.construction.type', 'm2m_moc_rate_details', 'moc_const_id', 'const_type_id','Type', domain="[('active','=','t')]"),
-		'moc_id': fields.many2one('kg.moc.master','Default MOC',domain="[('active','=','t')]" ,required=True ),	
-		
-		
-		'pattern_type': fields.selection([('new_pattern','New Pattern'),('copy_pattern','Copy Pattern')],'Type', required=True),	
-		'source_pattern': fields.many2one('kg.pattern.master', 'Source Pattern',domain="[('active','=','t')]"),
-		'copy_flag':fields.boolean('Copy Flag'),		
-		'tolerance_flag':fields.boolean('Tolerance Flag'),	
-		'list_moc_flag': fields.boolean('List MOC Flag'),	
-		'need_dynamic_balancing': fields.boolean('Need Dynamic Balancing '),	
-		'need_hydro_test': fields.boolean('Need Hydro Test'),	
-		'flag_heat_no': fields.boolean('Heat No. Required'),
+		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode', readonly=True),
+		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),			
 		
 		### Entry Info ###
+		
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
+		'active': fields.boolean('Active'),
 		'crt_date': fields.datetime('Created Date',readonly=True),
 		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
 		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
@@ -118,8 +79,46 @@ class kg_pattern_master(osv.osv):
 		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
-		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
-		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=10),		
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),		
+		
+		## Module Requirement Info
+		
+		'box_id': fields.many2one('kg.box.master','Box',readonly=True),		
+		'pattern_name': fields.char('Name', size=128,required=True),
+		'pcs_weight': fields.float('SS Weight(kgs)'),
+		'ci_weight': fields.float('CI Weight(kgs)'),
+		'mould_rate': fields.float('Mould Rate(Rs)'),
+		'location': fields.char('Physical Location', required=True),		
+		'pattern_state': fields.selection([('active','Active'),('hold','Hold'),('rework','Rework'),('reject','Rejected'),('new_develop','New Development')],'Pattern Status',required=True),
+		'offer_info': fields.boolean('Offer Info'),
+		'dynamic_length': fields.boolean('Dynamic Length'),	
+		'corless_pattern': fields.boolean('Coreless Pattern'),
+		'length_type': fields.selection([('single_column_pipe','Single Column Pipe'),('single_shaft','Single Shaft'),('delivery_pipe','Delivery Pipe'),('drive_column_pipe','Drive Column Pipe'),('pump_column_pipe','Pump Column Pipe'),('pump_shaft','Pump Shaft'),('drive_shaft','Drive Shaft')],'Length Type'),		
+		'tolerance': fields.float('Tolerance(-%)'),
+		'nonferous_weight': fields.float('Non-Ferrous Weight(kgs)'),		
+		'alias_name': fields.char('Alias Name', size=128),
+		'make_by': fields.char('Make By', size=128),
+		'delivery_lead': fields.integer('Delivery Lead Time(Weeks)', size=128),
+		'csd_code': fields.char('CSD Code No.', size=128),
+		'making_cost': fields.float('Pattern Making Cost'),
+		'moc_const_type': fields.many2many('kg.construction.type', 'm2m_moc_rate_details', 'moc_const_id', 'const_type_id','Type'),
+		'moc_id': fields.many2one('kg.moc.master','Default MOC' ,required=True ),			
+		'pattern_type': fields.selection([('new_pattern','New Pattern'),('copy_pattern','Copy Pattern')],'Type', required=True),	
+		'source_pattern': fields.many2one('kg.pattern.master', 'Source Pattern'),
+		'copy_flag':fields.boolean('Copy Flag'),		
+		'tolerance_flag':fields.boolean('Tolerance Flag'),	
+		'list_moc_flag': fields.boolean('List MOC Flag'),	
+		'need_dynamic_balancing': fields.boolean('Need Dynamic Balancing '),	
+		'need_hydro_test': fields.boolean('Need Hydro Test'),
+		'flag_heat_no': fields.boolean('Heat No. Required'),
+		'painting_cost': fields.float('Painting Cost'),						
+		
+		## Child Tables Declaration	
+		
+		'line_ids':fields.one2many('ch.mocwise.rate', 'header_id', "MOC Wise Rate"),
+		'line_ids_a':fields.one2many('ch.pattern.attachment', 'header_id', "Attachments"),
+		'line_ids_b':fields.one2many('ch.pattern.history', 'header_id', "Pattern History"),	
+		'line_ids_c':fields.one2many('ch.latest.weight', 'header_id', "Latest Weight details"),		
 				
 	}
 	
@@ -137,66 +136,16 @@ class kg_pattern_master(osv.osv):
 		'copy_flag' : False,
 		'tolerance_flag' : False,
 		'pattern_type':'new_pattern',
+		'entry_mode': 'manual',
 		'flag_heat_no' : False,
 	}
-	
-	def _Validation(self, cr, uid, ids, context=None):
-		flds = self.browse(cr , uid , ids[0])
-		cr.execute(""" UPDATE ch_pattern_history
-									SET s_no=subquery.row
-									FROM (SELECT row_number() OVER () as row,id as ch_id from ch_pattern_history where header_id = %s) AS subquery
-									WHERE ch_pattern_history.id=subquery.ch_id """ %(ids[0]))		
-		if flds.name:
-			name_char = ''.join( c for c in flds.name if  c in '!@#$%^~*{}?+=' )
-			if name_char:
-				return False
-		if flds.pattern_name:
-			pattern_name_char = ''.join( c for c in flds.pattern_name if  c in '!@#$%^~*{}?+=' )
-			if pattern_name_char:
-				return False
-		if flds.alias_name:
-			alias_name_char = ''.join( c for c in flds.alias_name if  c in '!@#$%^~*{}?+=' )
-			if alias_name_char:
-				return False	
-		if flds.make_by:
-			make_by_char = ''.join( c for c in flds.make_by if  c in '!@#$%^~*{}?+=' )
-			if make_by_char:
-				return False
-		if flds.code:
-			code_char = ''.join( c for c in flds.code if  c in '!@#$%^~*{}?+=' )
-			if code_char:
-				return False
-		if flds.csd_code:
-			csd_code_char = ''.join( c for c in flds.csd_code if  c in '!@#$%^~*{}?+=' )
-			if csd_code_char:
-				return False
-		if flds.location:
-			location_char = ''.join( c for c in flds.location if  c in '!@#$%^~*{}?+=' )
-			if location_char:
-				return False		
-		return True	
-	
-	def _check_pcs_weight(self, cr, uid, ids, context=None):		
-		rec = self.browse(cr, uid, ids[0])		
-		if rec.pcs_weight <= 0.00:			
-			return False					
-		return True
-		
-	def _check_nonferous_weight(self, cr, uid, ids, context=None):		
-		rec = self.browse(cr, uid, ids[0])		
-		if rec.nonferous_weight <= 0.00:			
-			return False					
-		return True
-		
-	def _check_ci_weight(self, cr, uid, ids, context=None):		
-		rec = self.browse(cr, uid, ids[0])		
-		if rec.ci_weight <= 0.00:			
-			return False					
-		return True	
-		
 		
 	def _name_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
+		cr.execute(""" UPDATE ch_pattern_history
+						SET s_no=subquery.row
+						FROM (SELECT row_number() OVER () as row,id as ch_id from ch_pattern_history where header_id = %s) AS subquery
+						WHERE ch_pattern_history.id=subquery.ch_id """ %(ids[0]))		
 		res = True
 		if rec.name:
 			division_name = rec.name
@@ -232,8 +181,7 @@ class kg_pattern_master(osv.osv):
 		
 			
 	def list_moc(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])
-		
+		rec = self.browse(cr,uid,ids[0])		
 		if rec.moc_const_type:				
 			moc_type_ids = []
 			for moc_type in rec.moc_const_type:				
@@ -324,17 +272,14 @@ class kg_pattern_master(osv.osv):
 		return True
 		
 		
-	
-		
-		
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.cancel_remark:
-			self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		else:
-			raise osv.except_osv(_('Cancel remark is must !!'),
-				_('Enter the remarks in Cancel remarks field !!'))
-				
+		if rec.state == 'approved':
+			if rec.cancel_remark:
+				self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			else:
+				raise osv.except_osv(_('Cancel remark is must !!'),
+					_('Enter the remarks in Cancel remarks field !!'))				
 		return True
 
 	def entry_confirm(self,cr,uid,ids,context=None):
@@ -371,16 +316,13 @@ class kg_pattern_master(osv.osv):
 						rate_line.remarks
 
 						from ch_mocwise_rate rate_line 
-
 						left join kg_pattern_master header on header.id  = rate_line.header_id
-
 						where header.pattern_type = 'copy_pattern' and header.id = %s''',[rec.id])
 				
 				source_rate_ids = cr.fetchall()		
 				source_rate_len = len(source_rate_ids)	
 				
 				cr.execute('''select 
-
 						rate_line.moc_id,
 						rate_line.code,
 						rate_line.rate,
@@ -389,7 +331,6 @@ class kg_pattern_master(osv.osv):
 						rate_line.remarks
 
 						from ch_mocwise_rate rate_line 
-
 						where rate_line.header_id  = %s''',[rec.source_pattern.id])
 				
 				source_old_rate_ids = cr.fetchall()
@@ -397,26 +338,17 @@ class kg_pattern_master(osv.osv):
 				source_old_rate_len = len(source_old_rate_ids)
 								
 				cr.execute('''select 
-
 						rate_line.code,
 						rate_line.rate
-						
-
 						from ch_mocwise_rate rate_line 
-
 						left join kg_pattern_master header on header.id  = rate_line.header_id
-
 						where header.pattern_type = 'copy_pattern' and header.id = %s
 
 						INTERSECT
-
 						select 
-
 						rate_line.code,
 						rate_line.rate
-
 						from ch_mocwise_rate rate_line 
-
 						where rate_line.header_id  = %s ''',[rec.id,rec.source_pattern.id])
 				repeat_rates_ids = cr.fetchall()			
 				new_rate_len = len(repeat_rates_ids)			
@@ -425,28 +357,20 @@ class kg_pattern_master(osv.osv):
 				
 				### Check Duplicates Attachments Items start ###
 				
-				cr.execute('''select 
-						 
+				cr.execute('''select 						 
 						attach_line.date,
 						attach_line.attach_file
-						
-
 						from ch_pattern_attachment attach_line 
-
 						left join kg_pattern_master header on header.id  = attach_line.header_id
-
 						where header.pattern_type = 'copy_pattern' and header.id = %s''',[rec.id])
 				
 				source_attach_ids = cr.fetchall()		
 				source_attach_len = len(source_attach_ids)	
 				
 				cr.execute('''select 
-
 						attach_line.date,
 						attach_line.attach_file
-
 						from ch_pattern_attachment attach_line 
-
 						where attach_line.header_id  = %s''',[rec.source_pattern.id])
 				
 				source_old_attach_ids = cr.fetchall()
@@ -454,25 +378,17 @@ class kg_pattern_master(osv.osv):
 				source_old_attach_len = len(source_old_attach_ids)
 								
 				cr.execute('''select 
-
 						attach_line.date,
 						attach_line.attach_file
-
 						from ch_pattern_attachment attach_line 
-
 						left join kg_pattern_master header on header.id  = attach_line.header_id
-
 						where header.pattern_type = 'copy_pattern' and header.id = %s
 
 						INTERSECT
-
 						select 
-
 						attach_line.date,
 						attach_line.attach_file
-
 						from ch_pattern_attachment attach_line 
-
 						where attach_line.header_id  = %s ''',[rec.id,rec.source_pattern.id])
 				repeat_attach_ids = cr.fetchall()			
 				new_attach_len = len(repeat_attach_ids)			
@@ -480,31 +396,24 @@ class kg_pattern_master(osv.osv):
 				
 				### Check Duplicates Pattern History Items start ###
 				
-				cr.execute('''select 
-						   
+				cr.execute('''select 						   
 						history_line.s_no,
 						history_line.date,
 						history_line.reason,
 						history_line.remarks
-
 						from ch_pattern_history history_line 
-
 						left join kg_pattern_master header on header.id  = history_line.header_id
-
 						where header.pattern_type = 'copy_pattern' and header.id = %s''',[rec.id])
 				
 				source_history_ids = cr.fetchall()		
 				source_history_len = len(source_history_ids)	
 				
 				cr.execute('''select 
-
 						history_line.s_no,
 						history_line.date,
 						history_line.reason,
 						history_line.remarks
-
 						from ch_pattern_history history_line 
-
 						where history_line.header_id  = %s''',[rec.source_pattern.id])
 				
 				source_old_history_ids = cr.fetchall()
@@ -512,29 +421,21 @@ class kg_pattern_master(osv.osv):
 				source_old_history_len = len(source_old_history_ids)
 								
 				cr.execute('''select 
-
 						history_line.s_no,
 						history_line.date,
 						history_line.reason,
 						history_line.remarks
-
 						from ch_pattern_history history_line 
-
 						left join kg_pattern_master header on header.id  = history_line.header_id
-
 						where header.pattern_type = 'copy_pattern' and header.id = %s
 
 						INTERSECT
-
 						select 
-
 						history_line.s_no,
 						history_line.date,
 						history_line.reason,
 						history_line.remarks
-
 						from ch_pattern_history history_line 
-
 						where history_line.header_id  = %s ''',[rec.id,rec.source_pattern.id])
 				repeat_history_ids = cr.fetchall()			
 				new_history_len = len(repeat_history_ids)			
@@ -597,16 +498,19 @@ class kg_pattern_master(osv.osv):
 		return True
 	
 	def entry_draft(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'draft'})
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'approved':	
+			self.write(cr, uid, ids, {'state': 'draft'})
 		return True
 
 	def entry_reject(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])
-		if rec.remark:
-			self.write(cr, uid, ids, {'state': 'reject','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		else:
-			raise osv.except_osv(_('Rejection remark is must !!'),
-				_('Enter the remarks in rejection remark field !!'))
+		rec = self.browse(cr,uid,ids[0])		
+		if rec.state == 'confirmed':
+			if rec.remark:
+				self.write(cr, uid, ids, {'state': 'reject','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			else:
+				raise osv.except_osv(_('Rejection remark is must !!'),
+					_('Enter the remarks in rejection remark field !!'))
 		return True
 		
 	def unlink(self,cr,uid,ids,context=None):
@@ -626,13 +530,9 @@ class kg_pattern_master(osv.osv):
 		return super(kg_pattern_master, self).write(cr, uid, ids, vals, context)
 		
 	
-	_constraints = [
-	
-		(_Validation, 'Special Character Not Allowed !!!', ['Check']),
+	_constraints = [	
+		
 		(_name_validate, 'Pattern No must be unique !!', ['no']),		
-		#(_check_pcs_weight,'You cannot save with zero value !',['SS Weight(kgs)']),
-		#(_check_nonferous_weight,'You cannot save with zero value !',['Non-Ferrous Weight(kgs)']),
-		#(_check_ci_weight,'You cannot save with zero value !',['CI Weight(kgs)']),
 	]
 	
 kg_pattern_master()
@@ -646,7 +546,7 @@ class ch_mocwise_rate(osv.osv):
 	_columns = {
 			
 		'header_id':fields.many2one('kg.pattern.master', 'Pattern Entry', required=True, ondelete='cascade'),	
-		'moc_id': fields.many2one('kg.moc.master','MOC', required=True,domain="[('active','=','t')]" ),		
+		'moc_id': fields.many2one('kg.moc.master','MOC', required=True),		
 		'code':fields.many2one('kg.moc.construction','MOC Construction Code'),		
 		'rate':fields.float('Design Rate(Rs)',required=True),
 		'amount':fields.float('Design Amount(Rs)'),
@@ -666,7 +566,9 @@ class ch_mocwise_rate(osv.osv):
 		value = {'rate': '','pro_cost':''}
 		if moc_id:
 			moc_rec = self.pool.get('kg.moc.master').browse(cr, uid, moc_id, context=context)
-			value = {'rate': moc_rec.rate,'pro_cost':moc_rec.pro_cost}			
+			value = {'rate': moc_rec.rate,'pro_cost':moc_rec.pro_cost}
+		else:
+			pass			
 		return {'value': value}
 		
 	def create(self, cr, uid, vals, context=None):
@@ -719,13 +621,11 @@ class ch_pattern_history(osv.osv):
 			return False
 		return True
 		
-	_constraints = [		
-			  
+	_constraints = [		  
 		
-		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),   
-		
-		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),  		
 	   ]
+	   
 ch_pattern_history()
 
 
@@ -755,13 +655,11 @@ class ch_pattern_attachment(osv.osv):
 			return False
 		return True
 		
-	_constraints = [		
-			  
+	_constraints = [		  
 		
-		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),   
-		
-		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),		
 	   ]
+	   
 ch_pattern_attachment()
 
 

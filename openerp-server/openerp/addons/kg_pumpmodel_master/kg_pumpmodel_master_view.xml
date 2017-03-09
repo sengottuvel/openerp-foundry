@@ -22,7 +22,7 @@
 							<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 							<field name="series_id"/>								
 							<field name="alias_name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
-							<field name="type" />															
+							<field name="type"/>															
 							<field name="impeller_type"/>								
 							<field name="impeller_number"/>								
 							<field name="impeller_dia_max"/>								
@@ -60,7 +60,8 @@
 							<field name="lubrication_type" />		
 							<field name="suction_orientation" />		
 							<field name="gd_sq_value" />		
-							<field name="pump_shaft_dia_at" />	
+							<field name="pump_shaft_dia_at" />		
+							<field name="painting_cost" />		
 							<field name="bom" readonly="1" />		
 							<field name="companion_flange" invisible="1"/>		
 							<field name="max_solid_size" invisible="1"/>									
