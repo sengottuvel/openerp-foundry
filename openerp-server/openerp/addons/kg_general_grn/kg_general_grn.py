@@ -361,6 +361,7 @@ class kg_general_grn(osv.osv):
 																		   'qty': grn_line_rec.reject_qty,
 																		   'grn_pending_qty': grn_line_rec.reject_qty,
 																		   'mode': 'direct',
+																		   'entry_mode': 'auto',
 																		   })
 			
 			for line in grn_entry.grn_line:

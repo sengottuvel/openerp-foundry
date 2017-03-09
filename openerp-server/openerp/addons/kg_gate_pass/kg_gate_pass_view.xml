@@ -22,12 +22,13 @@
 					<group>
 						<group>
 							<field name="name"/>
-							<field name="partner_id" required="1"/>
-							<field name="outward_type"/>
+							<field name="partner_id" required="1" attrs="{'readonly':['|',('entry_mode','=','auto'),('state','!=','draft')]}"/>
+							<field name="outward_type" attrs="{'readonly':['|',('entry_mode','=','auto'),('state','!=','draft')]}"/>
 							<field name="mode" attrs="{'invisible':[('outward_type','!=','service')]}"/>
 							<field name="transport_id"/>
 							<field name="vehicle_details"/>
 							<field name="remark"/>
+							<field name="entry_mode" invisible="1"/>
 							<field name="division" invisible="1"/>
 							<field name="received_by" invisible="1"/>
 							<field name="gp_type" invisible="1"/>
@@ -46,16 +47,17 @@
 					</group>
 					<notebook>
 						<page string="Item Details" attrs="{'invisible':[('mode','in',['frm_indent']),('indent_flag','=',False)]}">
-						<field colspan="4" string="Gate Pass Line" mode="tree" name="gate_line" nolabel="1" widget="one2many_list" context="{'mode':mode}">									 
+						<field colspan="4" string="Gate Pass Line" mode="tree" name="gate_line" nolabel="1" widget="one2many_list" context="{'mode':mode,'entry_mode':'manual'}">
 							<tree string="Gate Pass Line" editable="bottom"> 
-								<field name="product_id" attrs="{'readonly':[('mode','in',['frm_indent'])]}" on_change="onchange_uom(product_id)" required="1"/>
-								<field name="brand_id" attrs="{'readonly':[('mode','in',['frm_indent'])]}"/>
+								<field name="product_id" attrs="{'readonly':['|',('mode','in',['frm_indent']),('entry_mode','=','auto')]}" on_change="onchange_uom(product_id)" required="1"/>
+								<field name="brand_id" attrs="{'readonly':['|',('mode','in',['frm_indent']),('entry_mode','=','auto')]}"/>
 								<field name="uom" readonly="1" required="1"/>
-								<field name="qty" required="1" on_change="onchange_pending_qty(qty,grn_pending_qty,so_pending_qty)"/>
-								<field name="serial_no" attrs="{'readonly':[('mode','in',['frm_indent'])]}"/>
-								<field name="ser_no" attrs="{'readonly':[('mode','in',['frm_indent'])]}"/>
-								<field name="remark_id"/>
+								<field name="qty" attrs="{'readonly':[('entry_mode','=','auto')]}" required="1" on_change="onchange_pending_qty(qty,grn_pending_qty,so_pending_qty)"/>
+								<field name="serial_no" attrs="{'readonly':['|',('mode','in',['frm_indent']),('entry_mode','=','auto')]}"/>
+								<field name="ser_no" attrs="{'readonly':['|',('mode','in',['frm_indent']),('entry_mode','=','auto')]}"/>
+								<field name="remark_id" attrs="{'readonly':[('entry_mode','=','auto')]}" />
 								<field name="mode" invisible="1"/>
+								<field name="entry_mode" invisible="1"/>
 								<field name="so_flag" invisible="1"/>
 								<field name="grn_pending_qty" invisible="1"/>
 								<field name="so_pending_qty" invisible="1"/>

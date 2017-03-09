@@ -12,11 +12,11 @@ from dateutil import relativedelta
 from itertools import groupby
 
 class kg_gate_pass(osv.osv):
-
+	
 	_name = "kg.gate.pass"
 	_description = "KG Gate Pass"
 	_order = "date desc"
-
+	
 	_columns = {
 		
 		## Basic Info
@@ -32,8 +32,8 @@ class kg_gate_pass(osv.osv):
 		
 		'dep_id': fields.many2one('kg.depmaster','Source Location', select=True,readonly=True, states={'draft':[('readonly',False)]}),
 		'return_date': fields.date('Expected Return Date',readonly=True, states={'draft':[('readonly',False)]},required=True),
-		'partner_id': fields.many2one('res.partner', 'Supplier',readonly=True, states={'draft':[('readonly',False)]},domain="[('supplier','=',True)]"),
-		'out_type': fields.many2one('kg.outwardmaster', 'OutwardType',readonly=True, states={'draft':[('readonly',False)]}),
+		'partner_id': fields.many2one('res.partner', 'Supplier',domain="[('supplier','=',True)]"),
+		'out_type': fields.many2one('kg.outwardmaster', 'OutwardType',domain="[('state','not in',(''reject),'cancel')]"),
 		'origin': fields.many2one('kg.service.indent', 'Origin', readonly=True),
 		'in_state': fields.selection([('pending', 'Pending'), ('partial', 'Partial'), ('done', 'Received'), ('cancel', 'Cancelled')], 'In Status',readonly=True),
 		#~ 'in_state': fields.selection([('open', 'OPEN'),('pending', 'Pending'), ('done', 'Received'), ('cancel', 'Cancelled')], 'In Status',readonly=True),
@@ -56,7 +56,7 @@ class kg_gate_pass(osv.osv):
 		
 		## Child Tables Declaration
 		
-		'gate_line': fields.one2many('kg.gate.pass.line', 'gate_id', 'Gate Pass Line',readonly=True, states={'draft':[('readonly',False)]}),
+		'gate_line': fields.one2many('kg.gate.pass.line', 'gate_id', 'Gate Pass Line',readonly=True, states={'draft':[('readonly',False)]},required=True),
 		
 		## Entry Info
 		
@@ -357,7 +357,14 @@ class kg_gate_pass_line(osv.osv):
 		'so_flag':fields.boolean('SO Flag'),
 		'serial_no':fields.many2one('stock.production.lot','Serial No',domain="[('product_id','=',product_id)]"),	
 		'mode': fields.selection([('direct', 'Direct'), ('frm_indent', 'From Indent')], 'Mode'),
-		'remark_id': fields.many2one('kg.rejection.master','Remarks')
+		'remark_id': fields.many2one('kg.rejection.master','Remarks'),
+		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode', readonly=True),
+		
+	}
+	
+	_defaults = {
+		
+		'entry_mode': 'manual',
 		
 	}
 	
