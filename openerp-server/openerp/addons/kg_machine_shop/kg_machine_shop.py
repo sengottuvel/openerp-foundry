@@ -70,9 +70,11 @@ class kg_machine_shop(osv.osv):
 		'breadth': fields.float('Breadth'),
 		'thickness': fields.float('Thickness'),
 		'weight': fields.float('Weight'),
+		'painting_cost': fields.float('Painting Cost'),	
 		
 		'dynamic_length': fields.boolean('Dynamic Length'),			
 		'is_bearing': fields.boolean('Is Bearing'),			
+		'flag_heat_no': fields.boolean('Heat No. Required'),			
 		'length_type': fields.selection([('single_column_pipe','Single Column Pipe'),('single_shaft','Single Shaft'),('delivery_pipe','Delivery Pipe'),('drive_column_pipe','Drive Column Pipe'),('pump_column_pipe','Pump Column Pipe'),('pump_shaft','Pump Shaft'),('drive_shaft','Drive Shaft')],'Length Type'),		
 		
 		'moc_const_type': fields.many2many('kg.construction.type', 'm2m_moc_construction_details', 'moc_const_id', 'const_type_id','Type', domain="[('active','=','t')]"),
@@ -83,7 +85,6 @@ class kg_machine_shop(osv.osv):
 		'source_item': fields.many2one('kg.machine.shop', 'Source Item',domain="[('type','=',type),('active','=','t')]"),
 		'copy_flag':fields.boolean('Copy Flag'),
 		'list_moc_flag':fields.boolean('List MOC Flag'),
-		'flag_heat_no': fields.boolean('Heat No. Required'),		
 		
 		### Entry Info ###
 		'crt_date': fields.datetime('Created Date',readonly=True),
@@ -433,7 +434,7 @@ class ch_ms_raw_material(osv.osv):
 	_columns = {
 			
 		'header_id':fields.many2one('kg.machine.shop', 'MS Entry', required=True, ondelete='cascade'),	
-		'product_id': fields.many2one('product.product','Raw Material', required=True, domain="[('product_type','in',['ms','bot','consu','coupling'])]"),			
+		'product_id': fields.many2one('product.product','Raw Material', required=True, domain="[('product_type','in',['ms','bot','consu'])]"),			
 		'uom':fields.many2one('product.uom','UOM',size=128 ,required=True),
 		'od': fields.float('OD'),
 		'length': fields.float('Length'),
@@ -495,7 +496,7 @@ class ch_ms_raw_material(osv.osv):
 	
 	def _check_values(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
-		cr.execute(""" select product_id from ch_ms_raw_material where product_id  = '%s' and length = '%s' and header_id = '%s' """ %(entry.product_id.id,entry.length,entry.header_id.id))
+		cr.execute(""" select product_id from ch_ms_raw_material where product_id  = '%s' and length = '%s' and breadth = '%s' and header_id = '%s' """ %(entry.product_id.id,entry.length,entry.breadth,entry.header_id.id))
 		data = cr.dictfetchall()			
 		if len(data) > 1:		
 			return False
