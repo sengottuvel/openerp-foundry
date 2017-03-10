@@ -373,10 +373,10 @@
 	<!-- Form View Start -->
 
 		<record id="t_form_v_batch_ms_accept" model="ir.ui.view">
-			<field name="name">Batch MS Accept Form</field>
+			<field name="name">Batch MS foundry Inward Accept Form</field>
 			<field name="model">kg.ms.batch.accept</field>
 			<field name="arch" type="xml">
-				<form string="Batch Entry - MS Accept" version="7.0"  delete="false">
+				<form string="Batch Entry - MS foundry Inward Accept" version="7.0"  delete="false">
 					<header>
 						<button name="entry_accept" type="object" string="Update" states="draft" class="oe_highlight"/>
 					</header>
@@ -395,7 +395,7 @@
 						</group>					
 					</group>
 					<notebook>
-						<page string="MS Inward Items" attrs="{'invisible':[('flag_msline','=',False)]}">
+						<page string="MS foundry Inward Items" attrs="{'invisible':[('flag_msline','=',False)]}">
 							<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
 								<tree string="MS Batch Accept Line Entry" editable="top" create="false" delete="false">	
 									<field name="ms_inward_no" readonly="1"/>
@@ -410,7 +410,7 @@
 								</tree>
 							</field>
 						</page>
-						<page string="Select MS Inward Items">	
+						<page string="Select MS foundry Inward Items">	
 							<field name="ms_line_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
 							context="{'tree_view_ref' : 't_tree_v_common_batch_tree'}">
 								<tree string = "MS Items" create="false" edit="false">
@@ -458,7 +458,7 @@
 	<!-- Tree View Start -->
 		
 		<record id="t_tree_v_batch_ms_accept" model="ir.ui.view">
-			<field name="name">Batch MS Accept Tree</field>
+			<field name="name">Batch MS foundry Inward Accept Tree</field>
 			<field name="model">kg.ms.batch.accept</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">	
@@ -475,7 +475,7 @@
 	<!-- Search View Start -->
 
 		<record id="t_search_v_batch_ms_accept" model="ir.ui.view">
-            <field name="name">Batch MS Inward Search</field>
+            <field name="name">Batch MS foundry Inward Search</field>
             <field name="model">kg.ms.batch.accept</field>
             <field name="arch" type="xml">
                 <search string="MS Batch Accept">
@@ -496,7 +496,7 @@
 	<!-- Menu Action Start-->	
 		
 		<record id="tma_batch_ms_accept" model="ir.actions.act_window">
-			<field name="name">MS Accept</field>
+			<field name="name">MS foundry Inward Accept</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.ms.batch.accept</field>
 			<field name="view_type">form</field>
@@ -846,7 +846,7 @@
 		
 	<menuitem name="Batch Entries" id="tpm_ms_batch" parent="kg_operation_master.mpm_crm" sequence="4"/>
 	
-		<menuitem action="tma_batch_ms_accept" id="tam_batch_ms_accept" parent="tpm_ms_batch" sequence="1" />
+		<menuitem action="tma_batch_ms_accept" name="MS foundry Inward Accept" id="tam_batch_ms_accept" parent="tpm_ms_batch" sequence="1" />
 	
 	</data>
 </openerp>
