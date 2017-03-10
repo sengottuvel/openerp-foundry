@@ -535,6 +535,8 @@
 							<group>
 								<field name="qap_plan_id"/>
 								<field name="operator" required="1" attrs="{'readonly': [('painting_state','=','completed')]}"/>
+								<field name="contractor_id" attrs="{'required':[('operator','=','contractor')],'invisible':[('operator','!=','contractor')],'readonly': [('painting_state','=','completed')]}"/>
+								<field name="employee_id" attrs="{'required':[('operator','=','comp_employee')],'invisible':[('operator','!=','comp_employee')],'readonly': [('painting_state','=','completed')]}"/>
 								<field name="paint_color" required="1" attrs="{'readonly': ['|',('flag_customer_specific','!=',True),('painting_state','=','completed')]}"/>
 								<field name="primer" attrs="{'readonly': ['|',('flag_customer_specific','!=',True),('painting_state','=','completed')]}"/>
 								<field name="inter_mediater" attrs="{'readonly': ['|',('flag_customer_specific','!=',True),('painting_state','=','completed')]}"/>
