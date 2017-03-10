@@ -485,9 +485,25 @@ class kg_purchase_order(osv.osv):
 						else:
 							raise osv.except_osv(_('Warning'),
 								_('%s price is exceeding last purchase price. It should be approved by special approver'%(item.product_id.name)))
-				
-				# Po price exceeds design rate 
 				else:
+					# When raised the first po for the product
+					price_sql = """ 
+							select line.price_unit 
+							from purchase_order_line line 
+							left join purchase_order po on (po.id=line.order_id)
+							join kg_brandmoc_rate rate on (rate.product_id=line.product_id)
+							join ch_brandmoc_rate_details det on (det.header_id=rate.id)
+							where po.state = 'approved' and rate.state in ('approved')
+							and line.product_id = %s and line.order_id != %s and line.brand_id = %s 
+							and line.moc_id = %s 
+							order by po.approved_date desc limit 1
+							"""%(item.product_id.id,obj.id,item.brand_id.id,item.moc_id.id)
+					cr.execute(price_sql)		
+					price_data = cr.dictfetchall()
+					if not price_data:
+						raise osv.except_osv(_('Warning'),
+							_('%s price is exceeding last purchase price. It should be approved by special approver'%(item.product_id.name)))
+					# Po price exceeds design rate
 					prod_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',item.product_id.id),('state','=','approved')])
 					if prod_obj:
 						prod_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,prod_obj[0])
