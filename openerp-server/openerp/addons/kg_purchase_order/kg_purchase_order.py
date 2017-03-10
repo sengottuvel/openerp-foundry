@@ -335,9 +335,26 @@ class kg_purchase_order(osv.osv):
 						self.write(cr,uid,ids,{'approval_flag':True})
 						approval = 'yes'
 						self.pool.get('purchase.order.line').write(cr,uid,item.id,{'approval_flag':True})
-				
-				# Po price exceeds design rate process
 				else:
+					# When raised the first po for the product
+					price_sql = """ 
+							select line.price_unit 
+							from purchase_order_line line 
+							left join purchase_order po on (po.id=line.order_id)
+							join kg_brandmoc_rate rate on (rate.product_id=line.product_id)
+							join ch_brandmoc_rate_details det on (det.header_id=rate.id)
+							where po.state = 'approved' and rate.state in ('approved')
+							and line.product_id = %s and line.order_id != %s and line.brand_id = %s 
+							and line.moc_id = %s 
+							order by po.approved_date desc limit 1
+							"""%(item.product_id.id,obj.id,item.brand_id.id,item.moc_id.id)
+					cr.execute(price_sql)		
+					price_data = cr.dictfetchall()
+					if not price_data:
+						approval = 'yes'
+						self.pool.get('purchase.order.line').write(cr,uid,item.id,{'approval_flag':True})
+					
+					# Po price exceeds design rate process
 					prod_obj = self.pool.get('kg.brandmoc.rate').search(cr,uid,[('product_id','=',item.product_id.id),('state','=','approved')])
 					if prod_obj:
 						prod_rec = self.pool.get('kg.brandmoc.rate').browse(cr,uid,prod_obj[0])
@@ -440,8 +457,8 @@ class kg_purchase_order(osv.osv):
 									  'confirmed_date':time.strftime('%Y-%m-%d %H:%M:%S')})
 			if approval == 'yes' and obj.sent_mail_flag == False:
 				self.spl_po_apl_mail(cr,uid,ids,obj,context)
-				self.write(cr,uid,ids,{'sent_mail_flag':True})
-			
+				self.write(cr,uid,ids,{'sent_mail_flag':True,'approval_flag':True})
+		
 		return True
 			
 	def wkf_approve_order(self, cr, uid, ids, context=None):
@@ -544,8 +561,7 @@ class kg_purchase_order(osv.osv):
 					if total <= po_qty:
 						pass
 					else:
-						raise osv.except_osv(
-							_('Warning!'),
+						raise osv.except_osv(_('Warning!'),
 							_('Please Check WO Qty'))
 					wo_sql = """ select count(wo_id) as wo_tot,wo_id as wo_name from ch_purchase_wo where header_id = %s group by wo_id"""%(po_lines[i].id)
 					cr.execute(wo_sql)		
@@ -553,9 +569,8 @@ class kg_purchase_order(osv.osv):
 					
 					for wo in wo_data:
 						if wo['wo_tot'] > 1:
-							raise osv.except_osv(
-							_('Warning!'),
-							_('%s This WO No. repeated'%(wo['wo_name'])))
+							raise osv.except_osv(_('Warning!'),
+								_('%s This WO No. repeated'%(wo['wo_name'])))
 						else:
 							pass
 				if obj.po_type == 'frompi':
@@ -566,9 +581,8 @@ class kg_purchase_order(osv.osv):
 						po_pending_qty=po_lines[i].pi_qty
 						pi_pending_qty= po_pending_qty - po_qty
 						if po_qty > po_pending_qty:
-							raise osv.except_osv(
-							_('If PO from Purchase Indent'),
-							_('PO Qty should not be greater than purchase indent Qty. You can raise this PO Qty upto %s --FOR-- %s.'
+							raise osv.except_osv(_('If PO from Purchase Indent'),
+								_('PO Qty should not be greater than purchase indent Qty. You can raise this PO Qty upto %s --FOR-- %s.'
 										%(po_pending_qty, product)))
 														
 						pi_obj=self.pool.get('purchase.requisition.line')
