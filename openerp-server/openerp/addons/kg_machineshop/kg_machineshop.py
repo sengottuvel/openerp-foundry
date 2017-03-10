@@ -18,6 +18,12 @@ ORDER_PRIORITY = [
   
 ]
 
+ORDER_WO_PRIORITY = [
+   ('normal','Normal'),
+   ('emergency','Emergency')
+]
+
+
 ORDER_CATEGORY = [
    ('pump','Pump'),
    ('spare','Spare'),
@@ -505,8 +511,6 @@ class ch_ms_batch_accept_line(osv.osv):
 	
 ch_ms_batch_accept_line()
 
-
-
 class kg_id_commitment(osv.osv):
 
 	_name = "kg.id.commitment"
@@ -545,6 +549,24 @@ class kg_id_commitment(osv.osv):
 		'remark': fields.text('Approve/Reject'),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected')],'Status', readonly=True),
 		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode', readonly=True),
+		
+		## After added
+		'ms_schedule_no': fields.char('MS Schedule No.',required=True),
+		'ms_schedule_date': fields.date('MS Schedule Date',required=True),				
+		'order_priority': fields.selection(ORDER_WO_PRIORITY,'Priority'),
+		'delivery_date': fields.date('Delivery Date',required=True),
+		'inspection': fields.selection([('yes','Yes'),('no','No'),('tpi','TPI'),('customer','Customer'),('consultant','Consultant'),('stagewise','Stage wise')],'Inspection'),
+		'packing_type': fields.selection([('gld_packing','Gland Packing'),('mc_seal','M/C Seal'),('dynamic_seal','Dynamic seal')],'Packing Type', required=True),
+		'rm_date': fields.date('R.M Completed Date',required=True),
+		'sub_con_date': fields.date('Sub.Con Completed Date'),
+		'in_house_date': fields.date('IN-House Completed Date'),
+		'spc_remarks': fields.char('SPC Remarks'),
+		'bot_status': fields.char('BOT Status'),
+		'hydro_status': fields.date('Hydro Status'),
+		'testing_status': fields.date('Testing status'),
+		'painting_status': fields.date('Painting status'),
+		
+		
 		
 		### Entry Info ####
 		'active': fields.boolean('Active'),

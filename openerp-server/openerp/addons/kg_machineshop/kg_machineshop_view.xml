@@ -373,10 +373,10 @@
 	<!-- Form View Start -->
 
 		<record id="t_form_v_batch_ms_accept" model="ir.ui.view">
-			<field name="name">Batch MS foundry Inward Accept Form</field>
+			<field name="name">Batch MS Foundry Inward Accept Form</field>
 			<field name="model">kg.ms.batch.accept</field>
 			<field name="arch" type="xml">
-				<form string="Batch Entry - MS foundry Inward Accept" version="7.0"  delete="false">
+				<form string="Batch Entry - MS Accept" version="7.0"  delete="false">
 					<header>
 						<button name="entry_accept" type="object" string="Update" states="draft" class="oe_highlight"/>
 					</header>
@@ -395,7 +395,7 @@
 						</group>					
 					</group>
 					<notebook>
-						<page string="MS foundry Inward Items" attrs="{'invisible':[('flag_msline','=',False)]}">
+						<page string="MS Foundry Inward Items" attrs="{'invisible':[('flag_msline','=',False)]}">
 							<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','in',['confirmed'])]}">
 								<tree string="MS Batch Accept Line Entry" editable="top" create="false" delete="false">	
 									<field name="ms_inward_no" readonly="1"/>
@@ -410,7 +410,7 @@
 								</tree>
 							</field>
 						</page>
-						<page string="Select MS foundry Inward Items">	
+						<page string="Select MS Foundry Inward Items">	
 							<field name="ms_line_ids" widget="many2many" attrs="{'readonly': [('state','in',['confirmed'])]}" mode="tree" 
 							context="{'tree_view_ref' : 't_tree_v_common_batch_tree'}">
 								<tree string = "MS Items" create="false" edit="false">
@@ -458,7 +458,7 @@
 	<!-- Tree View Start -->
 		
 		<record id="t_tree_v_batch_ms_accept" model="ir.ui.view">
-			<field name="name">Batch MS foundry Inward Accept Tree</field>
+			<field name="name">Batch MS Foundry Inward Accept Tree</field>
 			<field name="model">kg.ms.batch.accept</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">	
@@ -475,7 +475,7 @@
 	<!-- Search View Start -->
 
 		<record id="t_search_v_batch_ms_accept" model="ir.ui.view">
-            <field name="name">Batch MS foundry Inward Search</field>
+            <field name="name">Batch MS Foundry Inward Search</field>
             <field name="model">kg.ms.batch.accept</field>
             <field name="arch" type="xml">
                 <search string="MS Batch Accept">
@@ -496,7 +496,7 @@
 	<!-- Menu Action Start-->	
 		
 		<record id="tma_batch_ms_accept" model="ir.actions.act_window">
-			<field name="name">MS foundry Inward Accept</field>
+			<field name="name">MS Foundry Inward Accept</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.ms.batch.accept</field>
 			<field name="view_type">form</field>
@@ -562,13 +562,19 @@
 						<group>
 							<field name="order_id" readonly="1"/>
 							<field name="order_category" readonly="1"/>
-							<field name="schedule_id" readonly="1"/>
+							<field name="schedule_id" readonly="1"/>							
+							<field name="ms_schedule_no"/>
+							<field name="delivery_date" readonly="1"/>
 							<field name="location" readonly="1"/>
 							<field name="pump_model_id" readonly="1"/>
+							<field name="inspection" readonly="1"/>
 							<field name="cc_date"/>
+							<field name="rm_date"/>
+							<field name="in_house_date"/>
 							<field name="ms_material_date"/>
 							<field name="in_house_date"/>
 							<field name="id_date"/>						
+							<field name="hydro_status"/>						
 							<field name="acc_commit_date" />
 							<field name="rfd_date" />
 							<field name="note" />							
@@ -577,11 +583,19 @@
 							<field name="entry_date" readonly="1" />
 							<field name="pump_model_type" readonly="1"/>
 							<field name="qty" readonly="1"/>
+							<field name="ms_schedule_date" />
 							<field name="order_value" readonly="1"/>
+							<field name="order_priority" readonly="1"/>
+							<field name="packing_type" readonly="1"/>
+							<field name="spc_remarks" readonly="1"/>
+							<field name="bot_status"/>
 							<field name="pouring_date" />
+							<field name="sub_con_date" />
 							<field name="ms_material_status" />
 							<field name="sub_con_date" />
 							<field name="accessories" />
+							<field name="testing_status" />
+							<field name="painting_status" />
 							<field name="id_commitment_date" />
 							<field name="despatch_date" />
 							<field name="acc_material_status" />							
@@ -841,8 +855,10 @@
 		<menuitem action="tma_id_commitment" id="tam_ms_id_commitment" parent="tpm_ms_process" sequence="0" />
 		<menuitem action="tma_trimming_dia" id="tam_trimming_dia" parent="tpm_ms_process" sequence="1" />
 		<menuitem action="kg_stock_inward.tma_ms_stock_details" id="tam_ms_stock_list" parent="tpm_ms_process" sequence="2" />
+		<menuitem action="kg_qc_verification.tma_ms_qc_verification" id="tam_ms_qc_verif" parent="tpm_ms_process" sequence="2" />
 		<menuitem action="tma_ms_inward" id="tam_ms_inward" parent="tpm_ms_process" sequence="3" />
 		<menuitem action="tma_ms_sch_list" id="tam_ms_sch_list" parent="tpm_ms_process" sequence="4" />
+		
 		
 	<menuitem name="Batch Entries" id="tpm_ms_batch" parent="kg_operation_master.mpm_crm" sequence="4"/>
 	
