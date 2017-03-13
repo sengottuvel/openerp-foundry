@@ -21,22 +21,24 @@
 							<field name="schedule_id" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
 							<field name="division_id" readonly="1"/>
 							<field name="order_id" readonly="1"/>
-							<field name="pattern_id" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
+							<field name="item_code" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
 							<field name="moc_construction_id" readonly="1" attrs="{'invisible': [('stock_type','=','pattern')]}"/>
 							<field name="moc_id" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
 							<field name="total_weight" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
 							<field name="oth_spec"/>
 							<field name="stage_id" invisible="1"/>
 							<field name="stock_type" invisible="1"/>
+							<field name="qc_type" invisible="1"/>
 						</group>											
 						<group>
 							<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 							<field name="schedule_date" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
 							<field name="location" readonly="1"/>
 							<field name="pump_model_id" readonly="1"/>
-							<field name="pattern_name" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
+							<field name="item_name" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
 							<field name="each_weight" readonly="1" attrs="{'invisible': [('stock_type','=','pump')]}"/>
 							<field name="active" invisible="1"/>
+							<field name="heat_no" readonly="1"/>
 							<field name="state" style="width: 30%%" class="att_state_change"/>	
 						</group>					
 					</group>
@@ -117,8 +119,8 @@
 					<field name="location" invisible="1"/>
 					<field name="schedule_id" invisible="1"/>
 					<field name="pump_model_id" invisible="1"/>
-					<field name="pattern_id" string="Part No."/>
-					<field name="pattern_name" string="Part Name."/>
+					<field name="item_code" string="Part No."/>
+					<field name="item_name" string="Part Name."/>
 					<field name="moc_id"/>
 					<field name="allocated_qty" sum="Total Qty" invisible="1"/>
 					<field name="qty" sum="Total Qty"/>
@@ -224,7 +226,7 @@
 			<field name="context">{}</field>
 			<field name="view_id" ref="t_tree_v_qc_verification"/>
 			<field name="search_view_id" ref="t_search_v_qc_verification"/>
-			<field name="domain">[('stock_type','=','pattern')]</field>
+			<field name="domain">[('stock_type','=','pattern'),('qc_type','=','foundry')]</field>
 			<field name="context">{"search_default_draft":1}</field>
 		</record>
 		
@@ -246,6 +248,23 @@
 		</record>
 		
 	<!-- Menu Action End for Part QC Verication-->
+	
+	<!-- Menu Action Start for Part MS QC Verication-->
+		
+		
+		<record id="tma_ms_qc_verification" model="ir.actions.act_window">
+			<field name="name">MS QC Verification</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.qc.verification</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_qc_verification"/>
+			<field name="search_view_id" ref="t_search_v_qc_verification"/>
+			<field name="domain">[('stock_type','=','pattern'),('qc_type','=','ms')]</field>
+			<field name="context">{"search_default_draft":1}</field>
+		</record>
+		
+	<!-- Menu Action End for Part MS QC Verication-->
 	
 	<!-- Audit Log Xml Data Start-->
 		

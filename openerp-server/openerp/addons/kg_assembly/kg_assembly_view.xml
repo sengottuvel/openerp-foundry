@@ -2,7 +2,7 @@
 <openerp>
 	<data>
 
-	 Form View Start 
+	<!-- Form View Start --> 
 
 		<record id="t_form_v_assembly_inward" model="ir.ui.view">
 			<field name="name">Assembly Inward Entry Form</field>
@@ -24,11 +24,12 @@
 						</group>											
 						<group>
 							<field name="rfi_date" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
-							<field name="order_id" readonly="1"/>
+							<field name="order_line_id" string="WO No." readonly="1"/>
 							<field name="pump_model_id" readonly="1"/>
 							<field name="moc_construction_id" readonly="1"/>
 							<field name="state" style="width: 30%%" class="att_state_change"/>
 							<field name="entry_mode" invisible="1"/>
+							<field name="flag_data_bank" invisible="1"/>
 						</group>					
 					</group>
 					<group>
@@ -205,7 +206,7 @@
 				<tree toolbar="True" string="Assembly Inward Entry Tree" create="false">					
 					<field name="name" invisible="1"/>
 					<field name="entry_date"/>
-					<field name="order_id"/>
+					<field name="order_line_id" string="WO No."/>
 					<field name="order_delivery_date"/>
 					<field name="order_category"/>
 					<field name="pump_model_id"/>
@@ -224,7 +225,7 @@
             <field name="model">kg.assembly.inward</field>
             <field name="arch" type="xml">
                 <search string="Assembly Inward Entry Search">
-					<field name="order_id" string="WO No."  filter_domain="[('order_id','ilike',self)]" />
+					<field name="order_line_id" string="WO No."  filter_domain="[('order_line_id','ilike',self)]" />
 					<field name="pump_model_id" string="Pump Model"  filter_domain="[('pump_model_id','ilike',self)]" />
 					<field name="moc_construction_id" string="MOC Construction Code"  filter_domain="[('moc_construction_id','ilike',self)]" />
 					<filter icon="terp-check" name="waiting" string="Waiting for Accept" domain="[('state','=','waiting')]"/>
@@ -234,7 +235,7 @@
 					<filter icon="terp-check" name="rejected" string="Assembly Rejected" domain="[('state','=','rejected')]"/>					
 					<separator/>
                     <group expand="0" string="Group By...">
-						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_id'}"/>
+						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_line_id'}"/>
 						<filter string="Order Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_category'}"/>
 						<filter string="Pump Model" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'pump_model_id'}"/>
 						<filter string="MOC Construction Code" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'moc_construction_id'}"/>
@@ -257,6 +258,7 @@
 			<field name="context">{}</field>
 			<field name="view_id" ref="t_tree_v_assembly_inward"/>
 			<field name="search_view_id" ref="t_search_v_assembly_inward"/>
+			<field name="domain">[('flag_data_bank','!=', 't')]</field>
 			<field name="context">{"search_default_waiting":1}</field>
 		</record>
 		
@@ -288,6 +290,220 @@
 	</record>
 	
 	<!-- Sequence Number Setting Ends Here -->
+	
+	<!-- Pump Data -->
+	
+	<!-- Form View Start --> 
+
+		<record id="t_form_v_pump_data" model="ir.ui.view">
+			<field name="name">Pump Data Entry Form</field>
+			<field name="model">kg.assembly.inward</field>
+			<field name="arch" type="xml">
+				<form string="Pump Data" version="7.0" create="false">
+					<header>
+						<button name="entry_confirm" type="object" string="Confirm" states="completed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+					</header>
+					<group>
+						<group>
+							<field name="entry_date" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+							<field name="pump_model_id" readonly="1"/>
+							<field name="pump_serial_no" required="1" attrs="{'readonly': [('state','in',['confirm'])]}"/>
+							<field name="partner_id" readonly="1"/>
+							<field name="remarks" string="Remarks" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+						</group>											
+						<group>
+							<field name="order_line_id" string="WO No." readonly="1"/>
+							<field name="moc_construction_id" readonly="1"/>
+							<field name="order_delivery_date" string="Dispatch Date" readonly="1"/>
+							<field name="flag_data_bank" readonly="1"/>
+							<field name="state" style="width: 30%%" class="att_state_change"/>
+							
+							<field name="entry_mode" invisible="1"/>
+						</group>					
+					</group>
+					<notebook>
+						<page string="Foundry Items">
+							<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}">
+								<tree string="Pump Data BOM Details Tree" create="false" delete="false">
+								   <field name="pattern_id" readonly="1"/>
+								   <field name="pattern_name" readonly="1"/>
+								   <field name="position_id" readonly="1"/>
+								   <field name="weight" readonly="1" invisible="1"/>
+								   <field name="order_bom_qty" readonly="1"/>
+								   <field name="unit_price" readonly="1" invisible="1"/>
+								   <field name="flag_applicable" readonly="1" invisible="1"/>
+								   <field name="flag_pattern_check" readonly="1" invisible="1"/>
+								   <field name="moc_id" readonly="1"/>
+								   <field name="add_spec" readonly="1" widget="char"/>
+								   <field name="flag_standard" invisible="1"/>
+								   <field name="order_entry_mode" invisible="1"/>
+								   <field name="entry_mode" invisible="1"/>
+								   <field name="state" style="width: 30%%" class="att_state_change"/>
+								</tree>
+								<form string="Pump Data BOM Details Form">
+									<group>
+										<field name="pattern_id" readonly="1"/>
+										<field name="position_id" readonly="1"/>
+										<field name="moc_id" readonly="1"/>
+										<field name="state" style="width: 30%%" class="att_state_change"/>
+										<button name="entry_reject" type="object" string="Reject" states="waiting" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+									</group>
+									<group>
+										<field name="pattern_name" readonly="1"/>
+										<field name="order_bom_qty" readonly="1"/>
+										<field name="add_spec" readonly="1" widget="char"/>
+										<field name="reject_remarks"/>
+									</group>
+									<field name="line_ids" colspan="4" nolabel="1" context="{'moc_id':moc_id,'pattern_id':pattern_id}">
+										<tree string="Pump Data BOM Heat Details Tree" editable="bottom">
+											<field name="moc_id" invisible="1"/>
+											<field name="melting_id" required="0"/>
+<!--
+											<field name="db_id" required="0"/>
+-->
+											<field name="qty" required="1"/>
+										</tree>
+									</field>
+								</form>
+							</field>
+						</page>
+					
+						<page string="Machine Shop">
+							<field name="line_ids_a" nolabel="1" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}">
+								<tree string="Pump Data Machine Shop Details Entry Tree" create="false" delete="false">
+									<field name="ms_id" readonly="1"/>		
+									<field name="name" readonly="1"/>
+									<field name="position_id" readonly="1"/>		
+									<field name="order_ms_qty" readonly="1"/>
+									<field name="flag_applicable" readonly="1" invisible="1"/>
+									<field name="moc_id" readonly="1"/>
+									<field name="order_ms_remarks" widget="char" readonly="1"/>
+									<field name="flag_standard" invisible="1"/>
+									<field name="order_entry_mode" invisible="1"/>
+									 <field name="entry_mode" invisible="1"/>
+									<field name="state" style="width: 30%%" class="att_state_change"/>
+								</tree>
+								<form string="Pump Data Machine Shop Details Entry Form">
+									<group>
+										<field name="ms_id" readonly="1"/>
+										<field name="position_id" readonly="1"/>
+										<field name="moc_id" readonly="1"/>
+										<field name="state" style="width: 30%%" class="att_state_change"/>
+										<button name="entry_reject" type="object" string="Reject" states="waiting" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+									</group>
+									<group>
+										<field name="name" readonly="1"/>
+										<field name="order_ms_qty" readonly="1"/>
+										<field name="order_ms_remarks" widget="char" readonly="1"/>
+										<field name="reject_remarks"/>
+									</group>
+									<field name="line_ids" colspan="4" nolabel="1" context="{'moc_id':moc_id}">
+										<tree string="Pump Data MS Heat Details Tree" editable="bottom">
+											<field name="moc_id" invisible="1"/>
+											<field name="melting_id" required="0"/>
+											<field name="qty" required="1"/>
+										</tree>
+									</field>
+								</form>
+							</field>
+						</page>
+						<page string="BOT">
+							<field name="line_ids_b" nolabel="1" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}">
+								<tree string="Pump Data BOT Details Entry Tree" editable="bottom" create="false" delete="false">	
+									<field name="bot_id" readonly="1"/>		
+									<field name="item_name" readonly="1"/>								
+									<field name="order_bot_qty" readonly="1"/>
+									<field name="flag_applicable" readonly="1" invisible="1"/>
+									<field name="moc_id" readonly="1"/>
+									<field name="order_bot_remarks" widget="char" readonly="1"/>
+									<field name="flag_standard" invisible="1"/>
+									<field name="order_entry_mode" invisible="1"/>
+									<field name="entry_mode" invisible="1"/>
+								</tree>
+							</field>
+						</page>
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
+								<group>
+									<field name="user_id"/>
+									<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="cancel_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="cancel_date" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_pump_data" model="ir.ui.view">
+			<field name="name">Pump Data Entry Tree</field>
+			<field name="model">kg.assembly.inward</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Pump Data Entry Tree" create="false">					
+					<field name="entry_date"/>
+					<field name="order_line_id" string="WO No."/>
+					<field name="order_delivery_date" string="Dispatch Date"/>
+					<field name="order_category"/>
+					<field name="partner_id"/>
+					<field name="pump_serial_no"/>
+					<field name="pump_model_id"/>
+					<field name="moc_construction_id"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	
+	<!-- Menu Action Start -->
+		
+		
+		<record id="tma_pump_data" model="ir.actions.act_window">
+			<field name="name">Pump Data</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.assembly.inward</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="domain">[('flag_data_bank','=', 't')]</field>
+			<field name="search_view_id" ref="t_search_v_assembly_inward"/>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_pump_data_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_pump_data"/>
+            <field name="act_window_id" ref="tma_pump_data"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_pump_data_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_pump_data"/>
+            <field name="act_window_id" ref="tma_pump_data"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
 	
 	<!-- Manual Assembly Inward -->
 	
@@ -568,8 +784,9 @@
 
 		
 		<menuitem action="tma_assembly_inward" id="tam_assembly_inward" parent="tpm_assembly_process" sequence="2" />
+		<menuitem action="tma_pump_data" id="tam_pump_data" parent="tpm_assembly_process" sequence="3" />
 		
-		<menuitem action="tma_performance_testing" id="tam_performance_testing" parent="tpm_assembly_process" sequence="3" />
+		<menuitem action="tma_performance_testing" id="tam_performance_testing" parent="tpm_assembly_process" sequence="4" />
 		
 	
 	<!-- Menu Item End -->

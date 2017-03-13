@@ -311,8 +311,11 @@ class ch_stock_inward_details(osv.osv):
 		pattern_obj = self.pool.get('kg.pattern.master')
 		moc_obj = self.pool.get('kg.moc.master')
 		inward_obj = self.pool.get('kg.stock.inward')
-		entry_rec = self.browse(cr, uid, ids[0] )
-		
+		print "ids----------------------------",ids
+		if type(ids) is list:
+			entry_rec = self.browse(cr, uid, ids[0] )
+		else:
+			entry_rec = self.browse(cr, uid, ids )
 		if entry_rec.stock_type == 'pattern':
 			if vals.get('moc_id') == None or vals.get('moc_id') == False: 
 				moc_rec = moc_obj.browse(cr, uid, entry_rec.moc_id.id )
@@ -350,9 +353,12 @@ class ch_stock_inward_details(osv.osv):
 		'total_value': total_value
 		
 		})
-		
-		cr.execute(''' select sum(total_value) from ch_stock_inward_details where header_id = %s and id != %s ''',[entry_rec.header_id.id, ids[0]])
-		inward_total = cr.fetchone()
+		if type(ids) is list:
+			cr.execute(''' select sum(total_value) from ch_stock_inward_details where header_id = %s and id != %s ''',[entry_rec.header_id.id, ids[0]])
+			inward_total = cr.fetchone()
+		else:
+			cr.execute(''' select sum(total_value) from ch_stock_inward_details where header_id = %s and id != %s ''',[entry_rec.header_id.id, ids])
+			inward_total = cr.fetchone()
 		if inward_total[0] != None:
 			total = inward_total[0]
 		else:

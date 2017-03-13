@@ -329,263 +329,355 @@ class kg_work_order(osv.osv):
 		today = str(today)
 		today = datetime.strptime(today, '%Y-%m-%d')
 		entry = self.browse(cr,uid,ids[0])
+		assembly_obj = self.pool.get('kg.assembly.inward')
+		assembly_foundry_obj = self.pool.get('ch.assembly.bom.details')
+		assembly_ms_obj = self.pool.get('ch.assembly.machineshop.details')
+		assembly_bot_obj = self.pool.get('ch.assembly.bot.details')
 		
 		if entry.state in ('design_approved'):
 			order_line_ids = []
 			
-			
+			if entry.flag_data_bank == False:
 							
-			#~ number = 1
-			print "entry.line_ids",entry.line_ids
-			
-			for item in entry.line_ids:
+				#~ number = 1
+				print "entry.line_ids",entry.line_ids
 				
-				
-				for foundry_item in item.line_ids:
+				for item in entry.line_ids:
 					
-					### Trimming dia creation ###
-					if foundry_item.pattern_id.need_dynamic_balancing == True and foundry_item.flag_applicable == True:
-						trim_dia_obj = self.pool.get('kg.trimming.dia')
-						enq_line_obj = self.pool.get('ch.kg.crm.pumpmodel')
-						enq_line_rec = enq_line_obj.browse(cr,uid,item.enquiry_line_id)
-						print ":",enq_line_rec.id
-						if enq_line_rec.id > 0:
-							capacity_in = enq_line_rec.capacity_in
-							head_in = enq_line_rec.head_in
-							bkw_water = enq_line_rec.bkw_water
-							speed_in_rpm = enq_line_rec.speed_in_rpm
-							efficiency_in = enq_line_rec.efficiency_in
-							motor_kw = enq_line_rec.motor_kw
-							old_ref = enq_line_rec.wo_no
-						else:
-							capacity_in = 0
-							head_in = 0
-							bkw_water = 0
-							speed_in_rpm = 0
-							efficiency_in = 0
-							motor_kw = 0
-							old_ref = ''
-
-						dia_vals = { 
-							'order_line_id': item.id,
-							'order_bomline_id': foundry_item.id,
-							'order_category': item.order_category,		
-							'pump_model_type': item.pump_model_type,
-							'pump_model_id': item.pump_model_id.id,
-							'pattern_id': foundry_item.pattern_id.id,
-							'capacity_in': capacity_in,
-							'head_in': head_in,
-							'bkw_water': bkw_water,
-							'speed_in_rpm': speed_in_rpm,
-							'efficiency_in': efficiency_in,
-							'motor_kw': motor_kw,
-							'trimming_dia': item.trimming_dia,
-							'old_ref': old_ref,
-						}
-						trim_dia_obj.create(cr,uid,dia_vals)
-						self.pool.get('ch.order.bom.details').write(cr,uid,foundry_item.id,{'flag_trimming_dia':True})
 					
-				qc_created = 'no'
-				print "item",item
-				
-				### Work Order Number Generation in Line Details
-				#~ cr.execute(''' select to_char(%s, 'FMRN') ''',[number])	  
-				#~ roman = cr.fetchone()
-				#~ order_name = entry.name + '-' + str(roman[0])
-				#~ line_obj.write(cr, uid, item.id, {'order_no': order_name})
-				#~ number = number + 1
-
-				cr.execute(''' update ch_order_bom_details set state = 'confirmed' where header_id = %s and flag_applicable = 't' ''',[item.id])
-				
-				rem_qty = item.qty
-				
-				if entry.order_category != 'project':
-				
-					if item.order_category in 'pump':
-					
-						### Checking the Pump Stock ###
-									
-						### Checking in Stock Inward for Ready for MS ###
+					for foundry_item in item.line_ids:
 						
-						cr.execute(""" select id,available_qty as stock_qty,serial_no,stock_location_id
-							from ch_stock_inward_details  
-							where pump_model_id = %s
-							and foundry_stock_state = 'ready_for_ms' and available_qty > 0 and stock_type = 'pump' and stock_mode = 'manual' 
-							order by serial_no """%(item.pump_model_id.id))
-						stock_inward_items = cr.dictfetchall();
-						print "stock_inward_items",stock_inward_items
+						### Trimming dia creation ###
+						if foundry_item.pattern_id.need_dynamic_balancing == True and foundry_item.flag_applicable == True:
+							trim_dia_obj = self.pool.get('kg.trimming.dia')
+							enq_line_obj = self.pool.get('ch.kg.crm.pumpmodel')
+							enq_line_rec = enq_line_obj.browse(cr,uid,item.enquiry_line_id)
+							print ":",enq_line_rec.id
+							if enq_line_rec.id > 0:
+								capacity_in = enq_line_rec.capacity_in
+								head_in = enq_line_rec.head_in
+								bkw_water = enq_line_rec.bkw_water
+								speed_in_rpm = enq_line_rec.speed_in_rpm
+								efficiency_in = enq_line_rec.efficiency_in
+								motor_kw = enq_line_rec.motor_kw
+								old_ref = enq_line_rec.wo_no
+							else:
+								capacity_in = 0
+								head_in = 0
+								bkw_water = 0
+								speed_in_rpm = 0
+								efficiency_in = 0
+								motor_kw = 0
+								old_ref = ''
+
+							dia_vals = { 
+								'order_line_id': item.id,
+								'order_bomline_id': foundry_item.id,
+								'order_category': item.order_category,		
+								'pump_model_type': item.pump_model_type,
+								'pump_model_id': item.pump_model_id.id,
+								'pattern_id': foundry_item.pattern_id.id,
+								'capacity_in': capacity_in,
+								'head_in': head_in,
+								'bkw_water': bkw_water,
+								'speed_in_rpm': speed_in_rpm,
+								'efficiency_in': efficiency_in,
+								'motor_kw': motor_kw,
+								'trimming_dia': item.trimming_dia,
+								'old_ref': old_ref,
+							}
+							trim_dia_obj.create(cr,uid,dia_vals)
+							self.pool.get('ch.order.bom.details').write(cr,uid,foundry_item.id,{'flag_trimming_dia':True})
 						
-						if stock_inward_items:
+					qc_created = 'no'
+					print "item",item
+					
+					### Work Order Number Generation in Line Details
+					#~ cr.execute(''' select to_char(%s, 'FMRN') ''',[number])	  
+					#~ roman = cr.fetchone()
+					#~ order_name = entry.name + '-' + str(roman[0])
+					#~ line_obj.write(cr, uid, item.id, {'order_no': order_name})
+					#~ number = number + 1
+
+					cr.execute(''' update ch_order_bom_details set state = 'confirmed' where header_id = %s and flag_applicable = 't' ''',[item.id])
+					
+					rem_qty = item.qty
+					
+					if entry.order_category != 'project':
+					
+						if item.order_category in 'pump':
+						
+							### Checking the Pump Stock ###
+										
+							### Checking in Stock Inward for Ready for MS ###
 							
-							for stock_item in stock_inward_items:
-								if rem_qty != 0:
-									if stock_item['stock_qty'] != None:
-										
-										if rem_qty < stock_item['stock_qty']:
-											rem_qty = 0
-											qc_qty = rem_qty
-										else:
-											rem_qty = rem_qty
-											qc_qty = stock_item['stock_qty']
-											
-										rem_qty =  rem_qty - stock_item['stock_qty']
-										
-										### Order Priority ###
-												
-										if entry.order_category in ('pump','pump_spare','project'):
-											if entry.order_priority == 'normal':
-												priority = '6'
-											if entry.order_priority == 'emergency':
-												priority = '4'
-										if entry.order_category == 'service':
-											priority = '3'
-										if entry.order_category == 'spare':
-											priority = '5'
-										
-										
-										### Creating QC Verification ###
-										
-										qc_obj = self.pool.get('kg.qc.verification')
-										
-										### QC Sequence Number Generation  ###
-										qc_name = ''	
-										qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.qc.verification')])
-										rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
-										cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.entry_date))
-										qc_name = cr.fetchone();
-									
-										qc_vals = {
-																		
-											'name': qc_name[0],
-											#~ 'schedule_id': entry.id,
-											#~ 'schedule_date': entry.entry_date,
-											'division_id': entry.division_id.id,
-											'location' : entry.location,
-											#~ 'schedule_line_id': schedule_item.id,
-											'order_id': entry.id,
-											'order_line_id': item.id,
-											'qty' : qc_qty,
-											'stock_qty': qc_qty,                   
-											'allocated_qty':qc_qty,                 
-											'state' : 'draft',
-											'order_category':entry.order_category,
-											'order_priority':priority,
-											'pump_model_id' : item.pump_model_id.id,
-											'moc_construction_id' : item.moc_construction_id.id,
-											'stock_type': 'pump',
-											'serial_no': stock_item['serial_no'],
-											'stock_location_id': stock_item['stock_location_id'],
-											'stock_inward_id': stock_item['id']
-													
-											}
-										
-										print "qc_vals",qc_vals	
-										
-										qc_id = qc_obj.create(cr, uid, qc_vals)
-										qc_created = 'yes'
-										
-										### Qty Updation in Stock Inward ###
-										
-										inward_line_obj = self.pool.get('ch.stock.inward.details')
-										
-										stock_avail_qty = stock_item['stock_qty'] - qc_qty
-										print "stock_avail_qtystock_avail_qty",stock_avail_qty
-										if stock_avail_qty == 0:
-											inward_line_obj.write(cr, uid, [stock_item['id']],{'available_qty': stock_avail_qty})
-										else:
-											inward_line_obj.write(cr, uid, [stock_item['id']],{'available_qty': stock_avail_qty})
-										
+							cr.execute(""" select id,available_qty as stock_qty,serial_no,stock_location_id
+								from ch_stock_inward_details  
+								where pump_model_id = %s
+								and foundry_stock_state = 'ready_for_ms' and available_qty > 0 and stock_type = 'pump' and stock_mode = 'manual' 
+								order by serial_no """%(item.pump_model_id.id))
+							stock_inward_items = cr.dictfetchall();
+							print "stock_inward_items",stock_inward_items
+							
+							if stock_inward_items:
 								
-				line_obj.write(cr, uid, item.id, {'pump_rem_qty':rem_qty})
-				
-				print "qc_created",qc_created
-				if qc_created == 'no': 
-					order_line_ids.append(item.id)
-				
-				print "order_line_ids",order_line_ids
-				#~ if entry.order_priority == 'normal' and entry.order_category in ('spare','service'):
-				#~ 
-					#~ ### Schedule Creation ###
-					#~ 
-					#~ schedule_item_vals = {
-													#~ 
-						#~ 'name': '',
-						#~ 'location' : entry.location,
-						#~ 'order_priority': 'normal',
-						#~ 'delivery_date': entry.delivery_date,
-						#~ 'order_line_ids': [(6, 0, order_line_ids)],
-						#~ 'state' : 'draft',
-						#~ 'entry_mode' : 'auto',				   
-					#~ }
-					#~ 
-					#~ schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
-					#~ 
-					#~ ### Schedule Line Item Creation ###
-					#~ 
-					#~ if item.order_category == 'pump':
-					#~ 
-						#~ schedule_obj.update_line_items(cr, uid, [schedule_id],rem_qty)
-					#~ else:
-						#~ schedule_obj.update_line_items(cr, uid, [schedule_id],0)
-					#~ 
-					#~ ### Schedule Confirmation ###
-					#~ 
-					#~ schedule_obj.entry_confirm(cr, uid, [schedule_id])
+								for stock_item in stock_inward_items:
+									if rem_qty != 0:
+										if stock_item['stock_qty'] != None:
+											
+											if rem_qty < stock_item['stock_qty']:
+												rem_qty = 0
+												qc_qty = rem_qty
+											else:
+												rem_qty = rem_qty
+												qc_qty = stock_item['stock_qty']
+												
+											rem_qty =  rem_qty - stock_item['stock_qty']
+											
+											### Order Priority ###
+													
+											if entry.order_category in ('pump','pump_spare','project'):
+												if entry.order_priority == 'normal':
+													priority = '6'
+												if entry.order_priority == 'emergency':
+													priority = '4'
+											if entry.order_category == 'service':
+												priority = '3'
+											if entry.order_category == 'spare':
+												priority = '5'
+											
+											
+											### Creating QC Verification ###
+											
+											qc_obj = self.pool.get('kg.qc.verification')
+											
+											### QC Sequence Number Generation  ###
+											qc_name = ''	
+											qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.qc.verification')])
+											rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
+											cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.entry_date))
+											qc_name = cr.fetchone();
+										
+											qc_vals = {
+																			
+												'name': qc_name[0],
+												#~ 'schedule_id': entry.id,
+												#~ 'schedule_date': entry.entry_date,
+												'division_id': entry.division_id.id,
+												'location' : entry.location,
+												#~ 'schedule_line_id': schedule_item.id,
+												'order_id': entry.id,
+												'order_line_id': item.id,
+												'qty' : qc_qty,
+												'stock_qty': qc_qty,                   
+												'allocated_qty':qc_qty,                 
+												'state' : 'draft',
+												'order_category':entry.order_category,
+												'order_priority':priority,
+												'pump_model_id' : item.pump_model_id.id,
+												'moc_construction_id' : item.moc_construction_id.id,
+												'stock_type': 'pump',
+												'serial_no': stock_item['serial_no'],
+												'stock_location_id': stock_item['stock_location_id'],
+												'stock_inward_id': stock_item['id']
+														
+												}
+											
+											print "qc_vals",qc_vals	
+											
+											qc_id = qc_obj.create(cr, uid, qc_vals)
+											qc_created = 'yes'
+											
+											### Qty Updation in Stock Inward ###
+											
+											inward_line_obj = self.pool.get('ch.stock.inward.details')
+											
+											stock_avail_qty = stock_item['stock_qty'] - qc_qty
+											print "stock_avail_qtystock_avail_qty",stock_avail_qty
+											if stock_avail_qty == 0:
+												inward_line_obj.write(cr, uid, [stock_item['id']],{'available_qty': stock_avail_qty})
+											else:
+												inward_line_obj.write(cr, uid, [stock_item['id']],{'available_qty': stock_avail_qty})
+											
+									
+					line_obj.write(cr, uid, item.id, {'pump_rem_qty':rem_qty})
 					
+					print "qc_created",qc_created
+					if qc_created == 'no': 
+						order_line_ids.append(item.id)
+					
+					print "order_line_ids",order_line_ids
+					#~ if entry.order_priority == 'normal' and entry.order_category in ('spare','service'):
+					#~ 
+						#~ ### Schedule Creation ###
+						#~ 
+						#~ schedule_item_vals = {
+														#~ 
+							#~ 'name': '',
+							#~ 'location' : entry.location,
+							#~ 'order_priority': 'normal',
+							#~ 'delivery_date': entry.delivery_date,
+							#~ 'order_line_ids': [(6, 0, order_line_ids)],
+							#~ 'state' : 'draft',
+							#~ 'entry_mode' : 'auto',				   
+						#~ }
+						#~ 
+						#~ schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
+						#~ 
+						#~ ### Schedule Line Item Creation ###
+						#~ 
+						#~ if item.order_category == 'pump':
+						#~ 
+							#~ schedule_obj.update_line_items(cr, uid, [schedule_id],rem_qty)
+						#~ else:
+							#~ schedule_obj.update_line_items(cr, uid, [schedule_id],0)
+						#~ 
+						#~ ### Schedule Confirmation ###
+						#~ 
+						#~ schedule_obj.entry_confirm(cr, uid, [schedule_id])
+						
+				
+				if entry.order_priority == 'emergency' and entry.order_category in ('pump','spare','pump_spare','service'):
+					
+					### Schedule Creation ###
+					
+					schedule_item_vals = {
+													
+						'name': '',
+						'location' : entry.location,
+						'order_priority': 'emergency',
+						'delivery_date': entry.delivery_date,
+						'order_line_ids': [(6, 0, order_line_ids)],
+						'state' : 'draft',			   
+						'entry_mode' : 'auto',			   
+					}
+					
+					schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
+					
+					### Schedule Line Item Creation ###
+					
+					if item.order_category == 'pump':
+					
+						schedule_obj.update_line_items(cr, uid, [schedule_id],rem_qty)
+					else:
+						schedule_obj.update_line_items(cr, uid, [schedule_id],0)
+					
+					### Schedule Confirmation ###
+					
+					schedule_obj.entry_confirm(cr, uid, [schedule_id])
+					
+				if entry.order_priority == 'emergency' and entry.order_category in ('project'):
+					
+					### Schedule Creation ###
+					
+					schedule_item_vals = {
+													
+						'name': '',
+						'location' : entry.location,
+						'order_priority': 'emergency',
+						'delivery_date': entry.delivery_date,
+						'order_line_ids': [(6, 0, order_line_ids)],
+						'state' : 'draft',
+						'entry_mode' : 'auto',				   
+					}
+					
+					schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
+					
+					### Schedule Line Item Creation ###
+					
+					if item.order_category == 'pump':
+					
+						schedule_obj.update_line_items(cr, uid, [schedule_id],rem_qty)
+					else:
+						schedule_obj.update_line_items(cr, uid, [schedule_id],0)
 			
-			if entry.order_priority == 'emergency' and entry.order_category in ('pump','spare','pump_spare','service'):
+			if entry.flag_data_bank == True:
 				
-				### Schedule Creation ###
+				### Assembly Inward Creation ###
 				
-				schedule_item_vals = {
-												
-					'name': '',
-					'location' : entry.location,
-					'order_priority': 'emergency',
-					'delivery_date': entry.delivery_date,
-					'order_line_ids': [(6, 0, order_line_ids)],
-					'state' : 'draft',			   
-					'entry_mode' : 'auto',			   
-				}
+				for order_item in entry.line_ids:
 				
-				schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
+					for accepted_qty in range(order_item.qty):
+									
+						### Assembly Header Creation ###
+						
+						ass_header_values = {
+							'name': '',
+							'order_id': entry.id,
+							'order_line_id': order_item.id,
+							'pump_model_id': order_item.pump_model_id.id,
+							'moc_construction_id': order_item.moc_construction_id.id,
+							'state': 'completed',
+							'entry_mode': 'auto',
+							'qap_plan_id': order_item.qap_plan_id.id,
+							'partner_id': entry.partner_id.id,
+							'flag_data_bank':entry.flag_data_bank
+							}
+						assembly_id = assembly_obj.create(cr, uid, ass_header_values)
+						print "assembly_id//////////////////////////",assembly_id
+						### Assembly Foundry Items Creation ###
+						
+						order_bom_ids = self.pool.get('ch.order.bom.details').search(cr, uid, [('header_id','=',order_item.id)])
+						
+						if order_bom_ids:
+							for foundry_item in order_bom_ids:
+								order_bom_rec = self.pool.get('ch.order.bom.details').browse(cr, uid, foundry_item)
+								if order_bom_rec.qty == 1:
+									order_bom_qty = order_bom_rec.qty
+								if order_bom_rec.qty > 1:
+									order_bom_qty = order_bom_rec.qty / order_item.qty
+								
+								ass_foundry_vals = {
+									'header_id': assembly_id,
+									'order_bom_id': order_bom_rec.id,
+									'order_bom_qty': order_bom_qty,
+									'entry_mode': 'auto',
+									'state': 'completed'
+									}
+								print "ass_foundry_vals----------------",ass_foundry_vals
+								assembly_foundry_id = assembly_foundry_obj.create(cr, uid, ass_foundry_vals)
+							
+						### Assembly MS Items Creation ###
+						
+						order_ms_ids = self.pool.get('ch.order.machineshop.details').search(cr, uid, [('header_id','=',order_item.id)])
+						if order_ms_ids:
+							for ms_item in order_ms_ids:
+								order_ms_rec = self.pool.get('ch.order.machineshop.details').browse(cr, uid, ms_item)
+								if order_ms_rec.qty == 1:
+									order_ms_qty = order_ms_rec.qty
+								if order_ms_rec.qty > 1:
+									order_ms_qty = order_ms_rec.qty / order_item.qty
+								ass_ms_vals = {
+									'header_id': assembly_id,
+									'order_ms_id': order_ms_rec.id,
+									'order_ms_qty': order_ms_qty,
+									'entry_mode': 'auto',
+									'state': 'completed',
+								}
+								print "ass_ms_vals----------------",ass_ms_vals
+								assembly_ms_id = assembly_ms_obj.create(cr, uid, ass_ms_vals)	
+						
+						### Assembly BOT Items Creation ###
+						
+						order_bot_ids = self.pool.get('ch.order.bot.details').search(cr, uid, [('header_id','=',order_item.id)])
+						if order_bot_ids:
+							for bot_item in order_bot_ids:
+								order_bot_rec = self.pool.get('ch.order.bot.details').browse(cr, uid, bot_item)
+								
+								if order_bot_rec.qty == 1:
+									order_bot_qty = order_bot_rec.qty
+								if order_bot_rec.qty > 1:
+									order_bot_qty = order_bot_rec.qty / order_item.qty
+								ass_bot_vals = {
+								'header_id': assembly_id,
+								'order_bot_id': order_bot_rec.id,
+								'order_bot_qty': order_bot_qty,
+								'state': 'completed',
+								}
+								print "ass_bot_vals----------------",ass_bot_vals
+								assembly_bot_id = assembly_bot_obj.create(cr, uid, ass_bot_vals)
 				
-				### Schedule Line Item Creation ###
 				
-				if item.order_category == 'pump':
-				
-					schedule_obj.update_line_items(cr, uid, [schedule_id],rem_qty)
-				else:
-					schedule_obj.update_line_items(cr, uid, [schedule_id],0)
-				
-				### Schedule Confirmation ###
-				
-				schedule_obj.entry_confirm(cr, uid, [schedule_id])
-				
-			if entry.order_priority == 'emergency' and entry.order_category in ('project'):
-				
-				### Schedule Creation ###
-				
-				schedule_item_vals = {
-												
-					'name': '',
-					'location' : entry.location,
-					'order_priority': 'emergency',
-					'delivery_date': entry.delivery_date,
-					'order_line_ids': [(6, 0, order_line_ids)],
-					'state' : 'draft',
-					'entry_mode' : 'auto',				   
-				}
-				
-				schedule_id = schedule_obj.create(cr, uid, schedule_item_vals)
-				
-				### Schedule Line Item Creation ###
-				
-				if item.order_category == 'pump':
-				
-					schedule_obj.update_line_items(cr, uid, [schedule_id],rem_qty)
-				else:
-					schedule_obj.update_line_items(cr, uid, [schedule_id],0)
 				
 				
 			cr.execute(''' select sum(unit_price) from ch_work_order_details where header_id = %s ''',[entry.id])	   
@@ -1023,6 +1115,7 @@ class ch_work_order_details(osv.osv):
 						'ms_id': bom_ms_details['ms_id'],
 						'name': bom_ms_details['name'],
 						'qty': bom_ms_qty,
+						'indent_qty':bom_ms_qty,
 						'flag_applicable' : applicable,
 						'flag_standard':flag_standard,
 						'entry_mode':'auto',
@@ -2046,7 +2139,7 @@ class ch_order_bom_details(osv.osv):
 		'mar_prime_cost': fields.float('Marketing PC'),
 		'flag_trimming_dia': fields.boolean('Trimming Dia'),
 		'material_code': fields.char('Material Code'),
-		
+	
 	}
 	
 	_defaults = {
@@ -2156,14 +2249,14 @@ class ch_order_machineshop_details(osv.osv):
 		'remarks':fields.text('Remarks'), 
 		'flag_standard': fields.boolean('Non Standard'), 
 		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
-		
+		'indent_qty': fields.integer('Indent Creation Qty'),
 		### Offer Details ###
 		'spare_offer_line_id': fields.integer('Spare Offer'),
 		### Prime Cost ###
 		'wo_prime_cost': fields.float('WO PC'),
 		'mar_prime_cost': fields.float('Marketing PC'),
 		'material_code': fields.char('Material Code'),
-		
+	
 	}  
 	
 	_defaults = {
@@ -2171,6 +2264,9 @@ class ch_order_machineshop_details(osv.osv):
 		'entry_mode':'manual', 
 		
 	}
+	
+	def onchange_qty(self, cr, uid, ids, qty):
+		return {'value': {'indent_qty': qty}}
 	
 	def default_get(self, cr, uid, fields, context=None):
 		
@@ -2303,6 +2399,8 @@ class ch_wo_accessories(osv.osv):
 		
 	}
 	
+	
+	
 	def _check_qty(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
 		if rec.qty <= 0.00:
@@ -2348,6 +2446,7 @@ class ch_wo_accessories(osv.osv):
 									'ms_id': item.ms_id.id,
 									'moc_id': moc_id,
 									'qty': item.qty * qty,
+									'indent_qty': item.qty * qty,
 									'load_bom': True,
 									'is_applicable': True,
 									
@@ -2426,6 +2525,7 @@ class ch_wo_accessories_ms(osv.osv):
 		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),
 		'prime_cost': fields.float('Prime Cost'),
 		'wo_prime_cost': fields.float('WO PC'),
+		'indent_qty': fields.integer('Indent Creation Qty'),
 		'material_code': fields.char('Material Code'),
 		
 	}
@@ -2437,6 +2537,9 @@ class ch_wo_accessories_ms(osv.osv):
 		'load_bom':False,
 		
 	}
+	
+	def onchange_qty(self, cr, uid, ids, qty):
+		return {'value': {'indent_qty': qty}}
 	
 ch_wo_accessories_ms()
 

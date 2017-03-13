@@ -35,6 +35,7 @@
 							<field name="entry_mode" invisible="1"/>
 							<field name="wo_spc_app_flag" invisible="1"/>
 							<field name="design_flag" invisible="1"/>
+							<field name="flag_data_bank" readonly="1"/>
 						</group>											
 						<group>
 							<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
@@ -254,8 +255,9 @@
 									<field name="ms_id"/>		
 									<field name="name" readonly="1"/>
 									<field name="position_id"/>
-									<field name="material_code"/>		
-									<field name="qty" required="1"/>
+									<field name="material_code"/>
+									<field name="qty" required="1" on_change="onchange_qty(qty)"/>
+									<field name="indent_qty" invisible="1"/>
 									<field name="unit_price"/>
 									<field name="mar_prime_cost" readonly="1" invisible="0"/>
 									<field name="wo_prime_cost" readonly="1"/>
@@ -276,8 +278,8 @@
 									<field name="order_category" invisible="1"/>
 									<field name="flag_applicable"/>
 									<field name="bot_id" on_change="onchange_bot(bot_id)"/>	
-									<field name="item_name" readonly="1"/>	
-									<field name="material_code"/>																		
+									<field name="item_name" readonly="1"/>
+									<field name="material_code"/>																			
 									<field name="qty" required="1"/>
 									<field name="unit_price"/>
 									<field name="mar_prime_cost" readonly="1" invisible="0"/>
@@ -355,7 +357,8 @@
 													<field name="material_code"/>
 													<field name="moc_id"/>
 													<field name="csd_no"/>
-													<field name="qty" required="1"/>
+													<field name="qty" required="1" on_change="onchange_qty(qty)"/>
+													<field name="indent_qty" invisible="1"/>
 													<field name="prime_cost" readonly="1" invisible="0"/>
 													<field name="wo_prime_cost" readonly="1"/>
 													
@@ -440,21 +443,7 @@
 		
 	<!-- Menu Action End for Work Order -->
 	
-	<!-- Menu Action starts for Work Order MD Approval -->
-	
-	<record id="tma_work_order_mgmt" model="ir.actions.act_window">
-			<field name="name">WO MD Approval</field>
-			<field name="type">ir.actions.act_window</field>
-			<field name="res_model">kg.work.order</field>
-			<field name="view_type">form</field>
-			<field name="view_mode">tree,form</field>
-			<field name="context">{}</field>
-			<field name="view_id" ref="t_tree_v_work_order"/>
-			<field name="search_view_id" ref="t_search_v_work_order"/>
-			<field name="domain">[('state','=','design_approved')]</field>
-	</record>
-	
-	<!-- Menu Action ends for Work Order MD Approval -->
+	<!-- Menu Action Start for CRM Work Order -->
 		
 		<record id="tma_crm_work_order" model="ir.actions.act_window">
 			<field name="name">Work Order</field>
@@ -466,6 +455,19 @@
 			<field name="view_id" ref="t_tree_v_work_order"/>
 			<field name="search_view_id" ref="t_search_v_work_order"/>
 			<field name="domain">[('wo_spc_app_flag','!=','t'),('state','=','draft'),('entry_mode','=','auto')]</field>
+			
+		</record>
+		
+		<record id="tma_crm_work_order_mgmt" model="ir.actions.act_window">
+			<field name="name">WO MD Approval</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.work.order</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_tree_v_work_order"/>
+			<field name="search_view_id" ref="t_search_v_work_order"/>
+			<field name="domain">[('state','=','design_approved')]</field>
 			
 		</record>
 		

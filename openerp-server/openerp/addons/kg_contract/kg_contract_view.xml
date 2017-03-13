@@ -48,7 +48,7 @@
 -->
 						<field name="job_id" readonly="1"/>
 						<field name="rotation"  attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
-						<field name="rot_interval"  attrs="{'readonly':[('state','in',['approved','cancel','reject'])],'invisible':[('rotation','!=',True)],'required':[('rotation','=',True)]}"/>
+						<field name="rot_interval"  attrs="{'readonly':[('state','in',['approved','cancel','reject'])],'invisible':[('rotation','!=',True)]}"/>
 						<field name="state" style="width: 30%%" class="att_state_change"/>
 					</field>
 					

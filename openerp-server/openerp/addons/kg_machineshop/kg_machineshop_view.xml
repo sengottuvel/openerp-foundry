@@ -855,9 +855,7 @@
 		<menuitem action="tma_id_commitment" id="tam_ms_id_commitment" parent="tpm_ms_process" sequence="0" />
 		<menuitem action="tma_trimming_dia" id="tam_trimming_dia" parent="tpm_ms_process" sequence="1" />
 		<menuitem action="kg_stock_inward.tma_ms_stock_details" id="tam_ms_stock_list" parent="tpm_ms_process" sequence="2" />
-<!--
 		<menuitem action="kg_qc_verification.tma_ms_qc_verification" id="tam_ms_qc_verif" parent="tpm_ms_process" sequence="2" />
--->
 		<menuitem action="tma_ms_inward" id="tam_ms_inward" parent="tpm_ms_process" sequence="3" />
 		<menuitem action="tma_ms_sch_list" id="tam_ms_sch_list" parent="tpm_ms_process" sequence="4" />
 		

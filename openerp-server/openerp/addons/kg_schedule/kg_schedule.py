@@ -458,7 +458,7 @@ class kg_schedule(osv.osv):
 							
 							### Checking in Stock Inward for Ready for MS ###
 							
-							cr.execute(""" select id,available_qty as stock_qty,stock_location_id 
+							cr.execute(""" select id,available_qty as stock_qty,stock_location_id,heat_no
 								from ch_stock_inward_details  
 								where pattern_id = %s and moc_id = %s
 								and foundry_stock_state = 'ready_for_ms' and available_qty > 0  and stock_type = 'pattern' """%(schedule_item.pattern_id.id,schedule_item.moc_id.id))
@@ -527,7 +527,11 @@ class kg_schedule(osv.osv):
 												'stock_type': 'pattern',
 												'order_bomline_id': schedule_item.order_bomline_id.id,
 												'stock_location_id': stock_item['stock_location_id'],
-												'stock_inward_id': stock_item['id']
+												'stock_inward_id': stock_item['id'],
+												'qc_type': 'foundry',
+												'item_code': schedule_item.pattern_id.name,
+												'item_name': schedule_item.pattern_id.pattern_name,
+												'heat_no': stock_item['heat_no'],
 												
 														
 												}
@@ -653,6 +657,7 @@ class kg_schedule(osv.osv):
 													'pour_qty':rem_qty,
 													'inward_accept_qty': rem_qty,
 													'state':'waiting',
+													
 													
 													
 													}
@@ -1209,6 +1214,7 @@ class kg_schedule(osv.osv):
 						production_id = production_obj.create(cr, uid, production_vals)
 						
 					if ms_no == 1:
+						
 						### Machine shop Item Creation ####
 						cr.execute("""
 							select order_ms.id as order_ms_line_id,order_ms.qty as sch_qty,order_ms.ms_id as ms_id,order_ms.name as item_name,
@@ -1271,50 +1277,166 @@ class kg_schedule(osv.osv):
 									else:
 										oth_spec = ''
 								
-								### Sequence Number Generation ###
-								ms_name = ''	
-								ms_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.ms.inward')])
-								seq_rec = self.pool.get('ir.sequence').browse(cr,uid,ms_seq_id[0])
-								cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(ms_seq_id[0],seq_rec.code))
-								ms_name = cr.fetchone();
 								
-								ms_vals = {
+								### Checking MS Stock list and creating ms qc verification ###
+								reject_rem_qty = ms_item['sch_qty']
+							
+								### Checking in Stock Inward for Ready for MS ###
+								item_code = "'"+ms_rec.code+"'"
+								item_name = "'"+ms_item['item_name']+"'"
+								print "item_code",item_code
+								print "item_name",item_name
+								cr.execute(""" select id,available_qty as stock_qty,stock_location_id 
+									from ch_stock_inward_details  
+									where item_code = %s and item_name= %s and moc_id = %s and stock_item = 'ms_item'
+									and ms_stock_state != 'reject' and available_qty > 0  and stock_type = 'pattern' """%(item_code,item_name
+									,ms_item['moc_id']))
+								stock_inward_items = cr.dictfetchall();
+								print "stock_inward_items---------------------------->>>",stock_inward_items
 								
-								'order_ms_line_id': order_ms_line_id,
-								'acc_ms_line_id': acc_ms_line_id,
-								'name': ms_name[0],
-								'location': entry.location,
-								'schedule_id': entry.id,
-								'schedule_date': entry.entry_date,
-								'schedule_line_id': schedule_item.id,
-								'order_id': ms_item['order_id'],
-								'order_line_id':ms_item['order_line_id'],
-								'order_no': ms_item['order_no'],
-								'order_delivery_date': ms_item['delivery_date'],
-								'order_date': ms_item['order_date'],
-								'order_category': ms_item['order_category'],
-								'order_priority': priority,
-								'pump_model_id':ms_item['pump_model_id'],
-								'moc_id':ms_item['moc_id'],
-								'schedule_qty':ms_item['sch_qty'],
-								'ms_sch_qty':ms_item['sch_qty'],
-								'ms_type': 'ms_item',
-								'ms_state': 'in_plan',
-								'state':'raw_pending',
-								'ms_id': ms_item['ms_id'],
-								'ms_bom_id': ms_item['ms_bom_id'],
-								'ms_bom_line_id': ms_bom_line_id,
-								'position_id': ms_item['position_id'],
-								'item_code': ms_rec.code,
-								'item_name': ms_item['item_name' ],
-								'oth_spec': oth_spec
+								if stock_inward_items:
+									print "reject_rem_qty",reject_rem_qty
+									if reject_rem_qty > 0:
+										for stock_item in  stock_inward_items:
+											if reject_rem_qty > 0:
+												if stock_item['stock_qty'] != None:
+													allocate_qty =  reject_rem_qty - stock_item['stock_qty']
+													print "reject_rem_qty",reject_rem_qty
+													if allocate_qty <= 0:
+														qc_qty = reject_rem_qty
+														reject_rem_qty = 0
+														
+													else:
+														reject_rem_qty = allocate_qty
+														qc_qty = stock_item['stock_qty']
+												print "qc_qty",qc_qty
+												
+												### Creating QC Verification ###
+												
+												qc_obj = self.pool.get('kg.qc.verification')
+												
+												### QC Sequence Number Generation  ###
+												qc_name = ''	
+												qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.qc.verification')])
+												rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
+												cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,schedule_item.header_id.entry_date))
+												qc_name = cr.fetchone();
+											
+												qc_vals = {
+																				
+													'name': qc_name[0],
+													'schedule_id': entry.id,
+													'schedule_date': entry.entry_date,
+													'division_id': entry.division_id.id,
+													'location' : entry.location,
+													'schedule_line_id': schedule_item.id,
+													'order_id': schedule_item.order_id.id,
+													'order_line_id': schedule_item.order_line_id.id,
+													'pump_model_id': schedule_item.order_line_id.pump_model_id.id,
+													'qty' : qc_qty,
+													'stock_qty': qc_qty,				   
+													'allocated_qty':qc_qty,				 
+													'state' : 'draft',
+													'order_category':schedule_item.order_id.order_category,
+													'order_priority':priority,
+													'item_code': ms_rec.code,
+													'item_name': ms_item['item_name' ],
+													'moc_id' : schedule_item.moc_id.id,
+													'stock_type': 'pattern',
+													'order_bomline_id': schedule_item.order_bomline_id.id,
+													'stock_location_id': stock_item['stock_location_id'],
+													'stock_inward_id': stock_item['id'],
+													'qc_type': 'ms',
+													'position_id':ms_item['position_id'],
+													'order_ms_line_id': order_ms_line_id,
+													'acc_ms_line_id': acc_ms_line_id,
+													'ms_id': ms_item['ms_id'],
+													
+															
+													}
+													
+												
+												qc_id = qc_obj.create(cr, uid, qc_vals)
+												
+												### Qty Updation in Stock Inward ###
+												
+												inward_line_obj = self.pool.get('ch.stock.inward.details')
+												
+												stock_updation_qty = qc_qty
+												
+												if stock_updation_qty > 0:
+													
+													if stock_item['stock_qty'] <= stock_updation_qty:
+														stock_avail_qty = 0
+														inward_line_obj.write(cr, uid, [stock_item['id']],{'available_qty': stock_avail_qty})
+													if stock_item['stock_qty'] > stock_updation_qty:
+														stock_avail_qty = stock_item['stock_qty'] - stock_updation_qty
+														inward_line_obj.write(cr, uid, [stock_item['id']],{'available_qty': stock_avail_qty})
+														
+												if ms_item['purpose'] == 'pump':
+													if order_ms_line_id != False:
+														order_ms_rec = self.pool.get('ch.order.machineshop.details').browse(cr, uid, order_ms_line_id)
+														print "order_ms_rec.indent_qty>>>>>>>>>>>>>>>",order_ms_rec.indent_qty,qc_qty
+														if order_ms_rec.indent_qty > 0:
+															self.pool.get('ch.order.machineshop.details').write(cr, uid, order_ms_line_id,
+															{'indent_qty':order_ms_rec.indent_qty - qc_qty})
+												if ms_item['purpose'] == 'acc':
+													if order_ms_line_id != False:
+														order_ms_rec = self.pool.get('ch.wo.accessories.ms').browse(cr, uid, order_ms_line_id)
+														if order_ms_rec.indent_qty > 0:
+															self.pool.get('ch.wo.accessories.ms').browse(cr, uid, order_ms_line_id,
+															{'indent_qty':order_ms_rec.indent_qty - qc_qty})
+												
+								print "lssssssssss",reject_rem_qty					
+								if reject_rem_qty > 0:
+									
+									### Sequence Number Generation ###
+									ms_name = ''	
+									ms_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.ms.inward')])
+									seq_rec = self.pool.get('ir.sequence').browse(cr,uid,ms_seq_id[0])
+									cr.execute("""select generatesequenceno(%s,'%s', now()::date ) """%(ms_seq_id[0],seq_rec.code))
+									ms_name = cr.fetchone();
+									
+									ms_vals = {
+									
+									'order_ms_line_id': order_ms_line_id,
+									'acc_ms_line_id': acc_ms_line_id,
+									'name': ms_name[0],
+									'location': entry.location,
+									'schedule_id': entry.id,
+									'schedule_date': entry.entry_date,
+									'schedule_line_id': schedule_item.id,
+									'order_id': ms_item['order_id'],
+									'order_line_id':ms_item['order_line_id'],
+									'order_no': ms_item['order_no'],
+									'order_delivery_date': ms_item['delivery_date'],
+									'order_date': ms_item['order_date'],
+									'order_category': ms_item['order_category'],
+									'order_priority': priority,
+									'pump_model_id':ms_item['pump_model_id'],
+									'moc_id':ms_item['moc_id'],
+									'schedule_qty':reject_rem_qty,
+									'ms_sch_qty':reject_rem_qty,
+									'ms_type': 'ms_item',
+									'ms_state': 'in_plan',
+									'state':'raw_pending',
+									'ms_id': ms_item['ms_id'],
+									'ms_bom_id': ms_item['ms_bom_id'],
+									'ms_bom_line_id': ms_bom_line_id,
+									'position_id': ms_item['position_id'],
+									'item_code': ms_rec.code,
+									'item_name': ms_item['item_name' ],
+									'oth_spec': oth_spec
+									
+									}
+									
+									print "ms_vals",ms_vals
+									
+									ms_no = ms_no + 1
 								
-								}
-								
-								print "ms_vals",ms_vals
-								
-								ms_no = ms_no + 1
-								ms_id = ms_obj.create(cr, uid, ms_vals)
+									ms_id = ms_obj.create(cr, uid, ms_vals)
+									
+						
 						### BOT Item Creation in Finished part list ###
 						
 						cr.execute("""
@@ -1525,7 +1647,7 @@ class kg_schedule(osv.osv):
 					select pump_model_id,order_line_id,sum(indent_qty) as indent_qty from 
 
 						(
-						select (raw.qty * order_ms.qty) as indent_qty,raw.product_id,wo_line.pump_model_id,
+						select (raw.qty * order_ms.indent_qty) as indent_qty,raw.product_id,wo_line.pump_model_id,
 						order_ms.header_id as order_line_id
 						from ch_ms_raw_material as raw
 						left join ch_order_machineshop_details order_ms on raw.header_id = order_ms.ms_id
@@ -1536,7 +1658,7 @@ class kg_schedule(osv.osv):
 						
 						union
 
-						select (raw.qty * acc_order_ms.qty) as indent_qty,raw.product_id,wo_line.pump_model_id,
+						select (raw.qty * acc_order_ms.indent_qty) as indent_qty,raw.product_id,wo_line.pump_model_id,
 						wo_acc_line.header_id as order_line_id
 						from ch_ms_raw_material as raw
 						left join ch_wo_accessories_ms acc_order_ms on raw.header_id = acc_order_ms.ms_id
@@ -1552,8 +1674,7 @@ class kg_schedule(osv.osv):
 						as sub_query
 						group by order_line_id,pump_model_id"""%(entry.id,entry.id))
 				ms_pumpmodel_details = cr.dictfetchall();
-				print"kkkkkkkkkkkk",entry.id
-				print"ms_pumpmodel_details",ms_pumpmodel_details
+				
 				if ms_pumpmodel_details:
 					
 					for ms_pm_item in ms_pumpmodel_details:
@@ -1595,7 +1716,7 @@ class kg_schedule(osv.osv):
 									select type,pump_model_id,ms_item,product_id,uom,order_line_id,order_ms_id,position_id,moc_id,sum(indent_qty) as indent_qty from 
 
 										(
-										select (raw.qty * order_ms.qty) as indent_qty,raw.product_id,raw.uom,wo_line.pump_model_id,
+										select (raw.qty * order_ms.indent_qty) as indent_qty,raw.product_id,raw.uom,wo_line.pump_model_id,
 										order_ms.header_id as order_line_id, raw.id as ms_item, order_ms.id as order_ms_id,
 										order_ms.position_id as position_id,order_ms.moc_id as moc_id,'foun' as type
 										from ch_ms_raw_material as raw
@@ -1607,7 +1728,7 @@ class kg_schedule(osv.osv):
 										
 										union
 
-										select (raw.qty * acc_order_ms.qty) as indent_qty,raw.product_id,raw.uom,wo_line.pump_model_id,
+										select (raw.qty * acc_order_ms.indent_qty) as indent_qty,raw.product_id,raw.uom,wo_line.pump_model_id,
 										wo_acc_line.header_id as order_line_id, raw.id as ms_item, acc_order_ms.id as order_ms_id,
 										acc_order_ms.position_id as position_id,acc_order_ms.moc_id as moc_id,'acc' as type
 										from ch_ms_raw_material as raw
@@ -1632,7 +1753,8 @@ class kg_schedule(osv.osv):
 									
 									ms_raw_obj = self.pool.get('ch.ms.raw.material')
 									ms_raw_rec = ms_raw_obj.browse(cr, uid, ms_indent_item['ms_item'])
-
+									
+									
 									if ms_indent_item['type'] == 'foun':
 										ms_order_obj = self.pool.get('ch.order.machineshop.details')
 										ms_order_rec = ms_order_obj.browse(cr, uid, ms_indent_item['order_ms_id'])
@@ -1640,7 +1762,7 @@ class kg_schedule(osv.osv):
 											length = ms_raw_rec.length
 										else:
 											length = ms_order_rec.length
-										print "length",length
+										
 									elif ms_indent_item['type'] == 'acc':
 										ms_acc_obj = self.pool.get('ch.wo.accessories.ms')
 										ms_order_rec = ms_acc_obj.browse(cr, uid, ms_indent_item['order_ms_id'])
@@ -1649,9 +1771,7 @@ class kg_schedule(osv.osv):
 										indent_qty = ms_indent_item['indent_qty']
 										cutting_qty = 0
 										
-									print "length",length
-									
-										
+								
 									if length > 0:
 										
 										if ms_raw_rec.uom_conversation_factor == 'one_dimension':	
@@ -1659,11 +1779,11 @@ class kg_schedule(osv.osv):
 												indent_qty = ms_indent_item['indent_qty']
 												cutting_qty = ms_indent_item['indent_qty']
 											else:				
-												indent_qty =  (length * ms_raw_rec.temp_qty) * ms_order_rec.qty
-												cutting_qty = ms_raw_rec.temp_qty  * ms_order_rec.qty
+												indent_qty =  (length * ms_raw_rec.temp_qty) * ms_order_rec.indent_qty
+												cutting_qty = ms_raw_rec.temp_qty  * ms_order_rec.indent_qty
 										if ms_raw_rec.uom_conversation_factor == 'two_dimension':
-											indent_qty = (length * ms_raw_rec.breadth * ms_raw_rec.temp_qty) * ms_order_rec.qty
-											cutting_qty = ms_raw_rec.temp_qty  * ms_order_rec.qty
+											indent_qty = (length * ms_raw_rec.breadth * ms_raw_rec.temp_qty) * ms_order_rec.indent_qty
+											cutting_qty = ms_raw_rec.temp_qty  * ms_order_rec.indent_qty
 									else:
 										if ms_indent_item['indent_qty'] == None:
 											indent_qty = 0
@@ -1671,8 +1791,9 @@ class kg_schedule(osv.osv):
 											indent_qty = ms_indent_item['indent_qty']
 										cutting_qty = 0
 									
-									
+									print "sssssssssssssssssssssssssssssssssvvvvvvvvvvvv",indent_qty,ms_order_rec.indent_qty
 									if indent_qty > 0:
+									
 										ms_dep_indent_line_vals = {
 											'indent_id':indent_id,
 											'product_id':ms_indent_item['product_id'],
@@ -1689,7 +1810,7 @@ class kg_schedule(osv.osv):
 											'length': length,
 											'breadth': ms_raw_rec.breadth
 										}
-										
+
 										indent_line_id = dep_indent_line_obj.create(cr, uid, ms_dep_indent_line_vals)
 
 				### BOT Items ###

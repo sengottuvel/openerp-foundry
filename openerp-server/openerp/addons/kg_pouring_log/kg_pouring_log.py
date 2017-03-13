@@ -711,6 +711,8 @@ class kg_pouring_log(osv.osv):
 									'stock_mode': 'excess',
 									'foundry_stock_state': 'foundry_inprogress',
 									'stock_item': 'foundry_item',
+									'fettling_id': fettling_id,
+									'heat_no': entry.melting_id.name
 								}
 								
 								inward_line_id = inward_line_obj.create(cr, uid, inward_line_vals)
@@ -962,6 +964,7 @@ class kg_pouring_log(osv.osv):
 							'stock_mode': 'excess',
 							'foundry_stock_state': 'foundry_inprogress',
 							'stock_item': 'foundry_item',
+							'fettling_id': fettling_id
 						}
 						
 						inward_line_id = inward_line_obj.create(cr, uid, inward_line_vals)

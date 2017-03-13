@@ -54,6 +54,7 @@ class kg_assembly_inward(osv.osv):
 			('re_process','Assembly Re Process'),
 			('completed','Assembly Completed'),
 			('rejected','Assembly Rejected'),
+			('confirm','Confirmed'),
 			],'Status', readonly=True),
 		
 		### Work Order Details ###
@@ -102,6 +103,9 @@ class kg_assembly_inward(osv.osv):
 		'full_assembly_done_by': fields.many2one('hr.employee','Done By'),
 		
 		'rfi_date': fields.date('RFI Date'),
+		'partner_id': fields.many2one('res.partner','Customer'),
+		'flag_data_bank': fields.boolean('Is Data WO'),
+		
 		
 		### Entry Info ####
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
@@ -167,6 +171,10 @@ class kg_assembly_inward(osv.osv):
 			return False
 		return True
 		
+	def entry_confirm(self,cr,uid,ids,context=None):
+		self.write(cr,uid,ids,{'state':'confirm'})
+		return True
+		
 	def entry_approve(self,cr,uid,ids,context=None):
 		ass_bom_obj = self.pool.get('ch.assembly.bom.details')
 		ass_ms_obj = self.pool.get('ch.assembly.machineshop.details')
@@ -178,17 +186,17 @@ class kg_assembly_inward(osv.osv):
 			if entry_rec.time_taken <= 0:
 				raise osv.except_osv(_('Warning!'),
 							_('Time Taken should be greater than zero!!'))
-							
+			
 			### Heat Details Checking ###
 			for foundry_line_item in entry_rec.line_ids:
 				if foundry_line_item.pattern_id.need_dynamic_balancing == True:
 					if not foundry_line_item.line_ids:
 						raise osv.except_osv(_('Warning !'), _('DB Reference No. is required for Pattern %s !!')%(foundry_line_item.pattern_id.name))
-					#~ if foundry_line_item.line_ids:
-						#~ for foun_item in foundry_line_item.line_ids:
-							#~ print "foun_item",foun_item.db_id
-							#~ if not foun_item.db_id:
-								#~ raise osv.except_osv(_('Warning !'), _('DB Reference No. is required for Pattern %s !!')%(foundry_line_item.pattern_id.name))
+					if foundry_line_item.line_ids:
+						for foun_item in foundry_line_item.line_ids:
+							print "foun_item",foun_item.db_id
+							if not foun_item.db_id:
+								raise osv.except_osv(_('Warning !'), _('DB Reference No. is required for Pattern %s !!')%(foundry_line_item.pattern_id.name))
 				if foundry_line_item.pattern_id.flag_heat_no == True:
 					if not foundry_line_item.line_ids:
 						raise osv.except_osv(_('Warning !'), _('Heat No. is required for Pattern %s !!')%(foundry_line_item.pattern_id.name))

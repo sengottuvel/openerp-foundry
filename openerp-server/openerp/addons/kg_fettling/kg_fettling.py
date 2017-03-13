@@ -814,7 +814,7 @@ class kg_fettling(osv.osv):
 					
 					### Checking in Stock Inward for Ready for MS ###
 					
-					cr.execute(""" select id,available_qty as stock_qty,stock_location_id
+					cr.execute(""" select id,available_qty as stock_qty,stock_location_id,heat_no
 						from ch_stock_inward_details  
 						where pattern_id = %s and moc_id = %s
 						and foundry_stock_state = 'ready_for_ms' and available_qty > 0 and stock_type = 'pattern'  """%(entry.pattern_id.id,entry.moc_id.id))
@@ -870,8 +870,13 @@ class kg_fettling(osv.osv):
 											'stock_type': 'pattern',
 											'order_bomline_id': entry.order_bomline_id.id,
 											'stock_location_id': stock_item['stock_location_id'],
-											'stock_inward_id': stock_item['id']
-													
+											'stock_inward_id': stock_item['id'],
+											'item_code': ms_rec.code,
+											'item_name': ms_item['item_name' ],
+											'qc_type': 'foundry',
+											'position_id': entry.order_bomline_id.position_id.id,
+											'heat_no': stock_item['heat_no'],
+											
 											}
 										
 										qc_id = qc_obj.create(cr, uid, qc_vals)
@@ -1699,7 +1704,7 @@ class kg_fettling(osv.osv):
 			
 				### Checking in Stock Inward for Ready for MS ###
 				
-				cr.execute(""" select id,available_qty as stock_qty,stock_location_id 
+				cr.execute(""" select id,available_qty as stock_qty,stock_location_id,heat_no
 					from ch_stock_inward_details  
 					where pattern_id = %s and moc_id = %s
 					and  foundry_stock_state = 'ready_for_ms' and available_qty > 0 and stock_type = 'pattern'  """%(entry.pattern_id.id,entry.moc_id.id))
@@ -1755,7 +1760,12 @@ class kg_fettling(osv.osv):
 										'stock_type': 'pattern',
 										'order_bomline_id': entry.order_bomline_id.id,
 										'stock_location_id': stock_item['stock_location_id'],
-										'stock_inward_id': stock_item['id']
+										'stock_inward_id': stock_item['id'],
+										'item_code': ms_rec.code,
+										'item_name': ms_item['item_name' ],
+										'qc_type': 'foundry',
+										'position_id': entry.order_bomline_id.position_id.id,
+										'heat_no': stock_item['heat_no'],
 												
 										}
 									
@@ -3135,7 +3145,7 @@ class kg_fettling(osv.osv):
 				
 					### Checking in Stock Inward for Ready for MS ###
 					
-					cr.execute(""" select id,available_qty as stock_qty,stock_location_id 
+					cr.execute(""" select id,available_qty as stock_qty,stock_location_id,heat_no
 						from ch_stock_inward_details  
 						where pattern_id = %s and moc_id = %s
 						and  foundry_stock_state = 'ready_for_ms' and available_qty > 0 and stock_type = 'pattern'  """%(entry.pattern_id.id,entry.moc_id.id))
@@ -3191,7 +3201,12 @@ class kg_fettling(osv.osv):
 											'stock_type': 'pattern',
 											'order_bomline_id': entry.order_bomline_id.id,
 											'stock_location_id': stock_item['stock_location_id'],
-											'stock_inward_id': stock_item['id']
+											'stock_inward_id': stock_item['id'],
+											'item_code': ms_rec.code,
+											'item_name': ms_item['item_name' ],
+											'qc_type': 'foundry',
+											'position_id': entry.order_bomline_id.position_id.id,
+											'heat_no': stock_item['heat_no'],
 													
 											}
 										
@@ -4090,7 +4105,7 @@ class kg_fettling(osv.osv):
 				
 				### Checking in Stock Inward for Ready for MS ###
 				
-				cr.execute(""" select id,available_qty as stock_qty,stock_location_id 
+				cr.execute(""" select id,available_qty as stock_qty,stock_location_id,heat_no
 					from ch_stock_inward_details  
 					where pattern_id = %s and moc_id = %s
 					and  foundry_stock_state = 'ready_for_ms' and available_qty > 0 and stock_type = 'pattern'  """%(entry.pattern_id.id,entry.moc_id.id))
@@ -4145,7 +4160,12 @@ class kg_fettling(osv.osv):
 										'stock_type': 'pattern',
 										'order_bomline_id': entry.order_bomline_id.id,
 										'stock_location_id': stock_item['stock_location_id'],
-										'stock_inward_id': stock_item['id']
+										'stock_inward_id': stock_item['id'],
+										'item_code': ms_rec.code,
+										'item_name': ms_item['item_name' ],
+										'qc_type': 'foundry',
+										'position_id': entry.order_bomline_id.position_id.id,
+										'heat_no': stock_item['heat_no'],
 												
 										}
 									
