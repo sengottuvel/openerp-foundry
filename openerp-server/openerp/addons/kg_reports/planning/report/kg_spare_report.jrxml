@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Workorder_print" pageWidth="605" pageHeight="842" columnWidth="565" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
-	<property name="ireport.zoom" value="1.6105100000000008"/>
-	<property name="ireport.x" value="230"/>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Workorder_print" pageWidth="842" pageHeight="605" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="0.7320500000000003"/>
+	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<subDataset name="dataset2">
 		<parameter name="header_id" class="java.lang.Integer"/>
@@ -395,12 +395,12 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 	<field name="new_date" class="java.lang.String"/>
 	<field name="serial_no" class="java.lang.String"/>
 	<field name="delear" class="java.lang.String"/>
-	<group name="WO Group">
+	<group name="WO Group Header">
 		<groupExpression><![CDATA[$F{id}]]></groupExpression>
 		<groupHeader>
-			<band height="621">
+			<band height="508">
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="397" y="31" width="168" height="21"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="645" y="32" width="158" height="21"/>
 					<box>
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.0"/>
@@ -413,7 +413,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{wo_ref}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="243" y="31" width="154" height="21" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="421" y="32" width="224" height="21" isRemoveLineWhenBlank="true"/>
 					<box>
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -426,7 +426,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<text><![CDATA[WORK ORDER REF:]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="126" y="31" width="117" height="21"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="183" y="32" width="238" height="21"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.0"/>
@@ -439,7 +439,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{pump_type}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="31" width="126" height="21" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="32" width="183" height="21" isRemoveLineWhenBlank="true"/>
 					<box>
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -452,7 +452,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<text><![CDATA[Pump Type :]]></text>
 				</staticText>
 				<textField>
-					<reportElement mode="Transparent" x="0" y="0" width="565" height="31"/>
+					<reportElement mode="Transparent" x="0" y="1" width="802" height="31"/>
 					<box topPadding="13"/>
 					<textElement textAlignment="Center">
 						<font size="10" isBold="true"/>
@@ -460,7 +460,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{company_name}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="52" width="95" height="21" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="53" width="140" height="21" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -473,7 +473,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<text><![CDATA[Customer :]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="243" y="52" width="154" height="21" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="421" y="53" width="224" height="21" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -486,7 +486,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<text><![CDATA[Dealer :]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="73" width="95" height="21" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="74" width="140" height="21" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -499,7 +499,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<text><![CDATA[Order Date :]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="95" y="73" width="148" height="21"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="140" y="74" width="281" height="21"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.0"/>
@@ -512,7 +512,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{order_date}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="243" y="73" width="103" height="21" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="421" y="74" width="224" height="21" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -525,7 +525,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<text><![CDATA[Due Date :]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="346" y="73" width="219" height="21"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="645" y="74" width="158" height="21"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.0"/>
@@ -538,7 +538,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{due_date}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="94" width="278" height="22" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="95" width="421" height="22" isRemoveLineWhenBlank="true"/>
 					<box>
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -551,7 +551,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<text><![CDATA[Category :]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="278" y="94" width="287" height="22"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="421" y="95" width="382" height="22"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.0"/>
@@ -564,20 +564,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{order_priority}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="190" width="565" height="15" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="2">
-						<topPen lineWidth="0.75"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="10" isBold="true" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[TECHNICAL SPECIFICATION :]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="155" width="565" height="35" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="156" width="803" height="35" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -590,681 +577,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<text><![CDATA[CPO Ref / Dealer Po Ref : --]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="204" width="259" height="17"/>
-					<box>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10" isBold="true"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{wo_ref}]]></textFieldExpression>
-				</textField>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="205" width="306" height="16" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="2">
-						<leftPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="10" isBold="true" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[W.O Ref]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="221" width="306" height="16" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="3">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="10" isBold="true" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Model]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="237" width="306" height="16" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="3">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="10" isBold="false" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Description]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="253" width="306" height="16" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="3">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="10" isBold="false" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Tag No.]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="269" width="306" height="16" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="3">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="10" isBold="false" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Quantity in Nos.]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="285" width="306" height="16" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="3">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="10" isBold="false" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Size in mm]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="301" width="306" height="16" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="3">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="10" isBold="false" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Flange standard]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="317" width="306" height="16" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="3">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="10" isBold="false" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Liquid handled]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="333" width="306" height="16" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="3">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="10" isBold="false" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Specific Gravity ]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="349" width="306" height="16" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="3">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="10" isBold="false" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[PH Value]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="365" width="306" height="16" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="3">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="10" isBold="false" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Temperature in °C ]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="381" width="306" height="16" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="3">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="10" isBold="true" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Capacity in m3/Hr]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="397" width="306" height="16" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="3">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="10" isBold="true" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Total Head in m]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="413" width="306" height="16" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="3">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="10" isBold="false" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Efficiency  %]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="429" width="306" height="16" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="3">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="10" isBold="true" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[BKW]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="445" width="306" height="16" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="3">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="10" isBold="false" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Motor KW ]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="461" width="306" height="16" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="3">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="10" isBold="false" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Motor Make & Frame Size]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="477" width="306" height="16" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="3">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="10" isBold="false" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Speed - RPM (P/M)]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="493" width="306" height="16" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="3">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="10" isBold="false" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Type of Drive]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="509" width="306" height="16" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="3">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="10" isBold="true" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Type of Lubrication]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="525" width="306" height="16" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="3">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="10" isBold="false" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[NPSH R/A -mts]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="541" width="306" height="16" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="3">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="10" isBold="false" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Shaft Sealing / Seal Make / Seal Type]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="557" width="306" height="16" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="3">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="10" isBold="false" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Face Combination / API Plan]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="573" width="306" height="16" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="3">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="10" isBold="false" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Shut off head in M]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="589" width="306" height="16" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="3">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="10" isBold="false" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Impeller Dia in MM(Max/Rated/Min)]]></text>
-				</staticText>
-				<staticText>
-					<reportElement mode="Transparent" x="0" y="605" width="306" height="16" isRemoveLineWhenBlank="true"/>
-					<box leftPadding="2">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="10" isBold="true" isItalic="false"/>
-					</textElement>
-					<text><![CDATA[Hydro Test Pressure in Bar]]></text>
-				</staticText>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="221" width="259" height="17"/>
-					<box>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10" isBold="true"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{model}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="255" width="259" height="14"/>
-					<box>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10" isBold="false"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{tag_no}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="238" width="259" height="17"/>
-					<box>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10" isBold="false"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{description}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="269" width="259" height="17"/>
-					<box>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{qty}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="286" width="259" height="17"/>
-					<box>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10" isBold="false"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{size}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="303" width="259" height="14"/>
-					<box>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10" isBold="false"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{flange_standard}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="317" width="259" height="16"/>
-					<box>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{liquid_handled}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="348" width="259" height="17"/>
-					<box>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10"/>
-					</textElement>
-					<textFieldExpression><![CDATA[""]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="333" width="259" height="16"/>
-					<box>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10" isBold="false"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{specific_gravity}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="365" width="259" height="17"/>
-					<box>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10" isBold="false"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{temperature_in_c}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="382" width="259" height="15"/>
-					<box>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10" isBold="true"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{capacity_in_m3hr}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="397" width="259" height="17"/>
-					<box>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10" isBold="true"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{head_in_m}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="412" width="259" height="17"/>
-					<box>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{efficiency}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="429" width="259" height="17"/>
-					<box>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10"/>
-					</textElement>
-					<textFieldExpression><![CDATA[""]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="446" width="259" height="15"/>
-					<box>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10"/>
-					</textElement>
-					<textFieldExpression><![CDATA[""]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="461" width="259" height="16"/>
-					<box>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{motor_make}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="477" width="259" height="16"/>
-					<box>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{speed_rpm}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="493" width="259" height="16"/>
-					<box>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10"/>
-					</textElement>
-					<textFieldExpression><![CDATA[""]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="509" width="259" height="16"/>
-					<box>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10" isBold="true"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{lubrication_type}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="525" width="259" height="16"/>
-					<box>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{npsh_r_m}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="541" width="259" height="16"/>
-					<box>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{shaft_sealing}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="557" width="259" height="16"/>
-					<box>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{face_combination}+" / "+$F{api_plan}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="573" width="259" height="16"/>
-					<box>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{shut_off_head}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="589" width="259" height="16"/>
-					<box>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{impeller_dia_min}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="605" width="259" height="16"/>
-					<box>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.75"/>
-						<bottomPen lineWidth="0.75"/>
-						<rightPen lineWidth="0.75"/>
-					</box>
-					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="10" isBold="true"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{hydrostatic_test_pressure}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="95" y="52" width="148" height="21"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="140" y="53" width="281" height="21"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.0"/>
@@ -1277,7 +590,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{customer_name}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="397" y="52" width="168" height="21"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="645" y="53" width="158" height="21"/>
 					<box leftPadding="3">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.0"/>
@@ -1290,11 +603,11 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{delear}]]></textFieldExpression>
 				</textField>
 				<image>
-					<reportElement x="87" y="0" width="69" height="31"/>
+					<reportElement x="87" y="1" width="69" height="31"/>
 					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
 				</image>
 				<staticText>
-					<reportElement mode="Transparent" x="241" y="116" width="53" height="21" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="241" y="117" width="134" height="21" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -1307,7 +620,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<text><![CDATA[Inspection: ]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="61" y="137" width="180" height="18"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="101" y="138" width="274" height="18"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -1320,7 +633,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{road_permit}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="116" width="61" height="21" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="117" width="101" height="21" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -1333,7 +646,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<text><![CDATA[Penalty: ]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="61" y="116" width="180" height="21"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="101" y="117" width="140" height="21"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -1346,7 +659,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{l_d_clause}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="454" y="116" width="111" height="21"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="645" y="117" width="158" height="21"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -1359,7 +672,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{drawing_approval}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="0" y="137" width="61" height="18" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="0" y="138" width="101" height="18" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -1372,7 +685,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<text><![CDATA[Road permit: ]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="241" y="137" width="78" height="18" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="375" y="138" width="145" height="18" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -1385,7 +698,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<text><![CDATA[ED Clearance: ]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="319" y="137" width="246" height="18"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="520" y="138" width="283" height="18"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -1398,7 +711,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{excise_duty}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement mode="Transparent" x="397" y="116" width="57" height="21" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="520" y="117" width="125" height="21" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -1411,7 +724,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<text><![CDATA[Drg. Appr.: ]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="294" y="116" width="103" height="21"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="375" y="117" width="145" height="21"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -1423,6 +736,700 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{inspection}]]></textFieldExpression>
 				</textField>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="191" width="803" height="15" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="10" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[TECHNICAL SPECIFICATION :]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="463" y="205" width="340" height="17"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{wo_ref}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="206" width="463" height="16" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="2">
+						<leftPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="10" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[W.O Ref]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="222" width="463" height="16" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="3">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="10" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Model]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="463" y="221" width="340" height="17"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{model}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="237" width="463" height="16" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="3">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="10" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Description]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="253" width="463" height="16" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="3">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="10" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Tag No.]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="269" width="463" height="16" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="3">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="10" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Quantity in Nos.]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="285" width="463" height="16" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="3">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="10" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Size in mm]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="301" width="463" height="16" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="3">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="10" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Flange standard]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="317" width="463" height="16" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="3">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="10" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Liquid handled]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="333" width="463" height="16" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="3">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="10" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Specific Gravity ]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="349" width="463" height="16" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="3">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="10" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[PH Value]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="463" y="255" width="340" height="14"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{tag_no}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="463" y="238" width="340" height="17"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{description}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="463" y="269" width="340" height="17"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{qty}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="463" y="286" width="340" height="17"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{size}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="463" y="303" width="340" height="14"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{flange_standard}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="463" y="317" width="340" height="16"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{liquid_handled}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="463" y="348" width="340" height="17"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA[""]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="463" y="333" width="340" height="16"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{specific_gravity}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="365" width="463" height="16" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="3">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="10" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Temperature in °C ]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="463" y="365" width="340" height="17"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{temperature_in_c}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="380" width="463" height="16" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="3">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="10" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Capacity in m3/Hr]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="396" width="463" height="16" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="3">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="10" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Total Head in m]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="412" width="463" height="16" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="3">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="10" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Efficiency  %]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="428" width="463" height="16" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="3">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="10" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[BKW]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="444" width="463" height="16" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="3">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="10" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Motor KW ]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="460" width="463" height="16" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="3">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="10" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Motor Make & Frame Size]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="476" width="463" height="16" isRemoveLineWhenBlank="true"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="10" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Speed - RPM (P/M)]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="463" y="381" width="340" height="15"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{capacity_in_m3hr}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="463" y="396" width="340" height="17"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{head_in_m}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="463" y="411" width="340" height="17"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{efficiency}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="463" y="428" width="340" height="17"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA[""]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="463" y="445" width="340" height="15"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA[""]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="463" y="460" width="340" height="16"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{motor_make}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="463" y="476" width="340" height="16"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{speed_rpm}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="492" width="463" height="16" isRemoveLineWhenBlank="true"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="10" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Type of Drive]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="463" y="492" width="340" height="16"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA[""]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="WO Group">
+		<groupExpression><![CDATA[$F{id}]]></groupExpression>
+		<groupHeader>
+			<band height="116">
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="0" width="462" height="20" isRemoveLineWhenBlank="true"/>
+					<box>
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="10" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Type of Lubrication]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="20" width="462" height="16" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="3">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="10" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[NPSH R/A -mts]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="36" width="462" height="16" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="3">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="10" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Shaft Sealing / Seal Make / Seal Type]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="52" width="462" height="16" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="3">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="10" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Face Combination / API Plan]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="68" width="462" height="16" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="3">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="10" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Shut off head in M]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="84" width="462" height="16" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="3">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="10" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Impeller Dia in MM(Max/Rated/Min)]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="0" y="100" width="462" height="16" isRemoveLineWhenBlank="true"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="10" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Hydro Test Pressure in Bar]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="462" y="0" width="340" height="20"/>
+					<box>
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{lubrication_type}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="462" y="20" width="340" height="16"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{npsh_r_m}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="462" y="36" width="340" height="16"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{shaft_sealing}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="462" y="52" width="340" height="16"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{face_combination}+" / "+$F{api_plan}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="462" y="68" width="340" height="16"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{shut_off_head}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="462" y="84" width="340" height="16"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{impeller_dia_min}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="462" y="100" width="340" height="16"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{hydrostatic_test_pressure}]]></textFieldExpression>
+				</textField>
 			</band>
 		</groupHeader>
 	</group>
@@ -1431,7 +1438,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 		<groupHeader>
 			<band height="28">
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="0" width="306" height="28"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="0" width="462" height="28"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -1444,7 +1451,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA["Material:"]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="306" y="0" width="259" height="28"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="462" y="0" width="340" height="28"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.0"/>
@@ -1463,7 +1470,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 		<groupHeader>
 			<band height="26">
 				<componentElement>
-					<reportElement x="0" y="0" width="566" height="21"/>
+					<reportElement x="0" y="0" width="802" height="21"/>
 					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 						<datasetRun subDataset="dataset1">
 							<datasetParameter name="header_id">
@@ -1471,9 +1478,9 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 							</datasetParameter>
 							<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 						</datasetRun>
-						<jr:listContents height="21" width="566">
+						<jr:listContents height="21" width="802">
 							<textField>
-								<reportElement x="0" y="0" width="307" height="21"/>
+								<reportElement x="0" y="0" width="462" height="21"/>
 								<box leftPadding="2">
 									<topPen lineWidth="0.75"/>
 									<leftPen lineWidth="0.75"/>
@@ -1484,7 +1491,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<textFieldExpression><![CDATA[$F{mat}]]></textFieldExpression>
 							</textField>
 							<textField>
-								<reportElement x="307" y="0" width="258" height="21"/>
+								<reportElement x="462" y="0" width="340" height="21"/>
 								<box leftPadding="2">
 									<topPen lineWidth="0.75"/>
 									<leftPen lineWidth="0.75"/>
@@ -1508,7 +1515,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 		<groupHeader>
 			<band height="100">
 				<textField>
-					<reportElement x="1" y="0" width="564" height="20"/>
+					<reportElement x="1" y="0" width="801" height="20"/>
 					<textElement textAlignment="Center">
 						<font size="10" isBold="true"/>
 					</textElement>
@@ -1543,98 +1550,98 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA["POSI NO"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="397" y="20" width="42" height="20"/>
+					<reportElement x="634" y="20" width="42" height="20"/>
 					<textElement>
 						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["DT:"]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true">
-					<reportElement stretchType="RelativeToTallestObject" x="421" y="80" width="51" height="20"/>
+					<reportElement stretchType="RelativeToTallestObject" x="582" y="80" width="75" height="20"/>
 					<textElement textAlignment="Center">
 						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["PAT.NO"]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true">
-					<reportElement stretchType="RelativeToTallestObject" x="128" y="80" width="55" height="20"/>
+					<reportElement stretchType="RelativeToTallestObject" x="128" y="80" width="62" height="20"/>
 					<textElement textAlignment="Center">
 						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["PART NAME"]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true">
-					<reportElement stretchType="RelativeToTallestObject" x="360" y="80" width="61" height="20"/>
+					<reportElement stretchType="RelativeToTallestObject" x="480" y="80" width="102" height="20"/>
 					<textElement textAlignment="Center">
 						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["MOC"]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true">
-					<reportElement stretchType="RelativeToTallestObject" x="324" y="80" width="36" height="20"/>
+					<reportElement stretchType="RelativeToTallestObject" x="407" y="80" width="73" height="20"/>
 					<textElement textAlignment="Center">
 						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Weight in KG"]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true">
-					<reportElement stretchType="RelativeToTallestObject" x="183" y="80" width="42" height="20"/>
+					<reportElement stretchType="RelativeToTallestObject" x="190" y="80" width="58" height="20"/>
 					<textElement textAlignment="Center">
 						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Req. Qty"]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true">
-					<reportElement stretchType="RelativeToTallestObject" x="472" y="80" width="48" height="20"/>
+					<reportElement stretchType="RelativeToTallestObject" x="657" y="80" width="83" height="20"/>
 					<textElement textAlignment="Center">
 						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Remarks"]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true">
-					<reportElement stretchType="RelativeToTallestObject" x="520" y="80" width="45" height="20"/>
+					<reportElement stretchType="RelativeToTallestObject" x="740" y="80" width="62" height="20"/>
 					<textElement textAlignment="Center">
 						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Material Code"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="101" y="20" width="205" height="20"/>
+					<reportElement x="101" y="20" width="277" height="20"/>
 					<textElement>
 						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{wo_ref}]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="101" y="40" width="205" height="20"/>
+					<reportElement x="101" y="40" width="277" height="20"/>
 					<textElement>
 						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{model}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="101" y="60" width="205" height="20"/>
+					<reportElement x="101" y="60" width="277" height="20"/>
 					<textElement>
 						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{serial_no}]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="439" y="20" width="126" height="20"/>
+					<reportElement x="676" y="20" width="126" height="20"/>
 					<textElement>
 						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{date}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true">
-					<reportElement stretchType="RelativeToTallestObject" x="278" y="80" width="46" height="20"/>
+					<reportElement stretchType="RelativeToTallestObject" x="330" y="80" width="76" height="20"/>
 					<textElement textAlignment="Center">
 						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["MTL. Form"]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true">
-					<reportElement stretchType="RelativeToTallestObject" x="225" y="80" width="53" height="20"/>
+					<reportElement stretchType="RelativeToTallestObject" x="248" y="80" width="82" height="20"/>
 					<textElement textAlignment="Center">
 						<font size="10" isBold="true"/>
 					</textElement>
@@ -1662,7 +1669,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 		<groupHeader>
 			<band height="27">
 				<componentElement>
-					<reportElement mode="Transparent" x="0" y="0" width="565" height="27"/>
+					<reportElement mode="Transparent" x="0" y="0" width="802" height="27"/>
 					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 						<datasetRun subDataset="dataset3">
 							<datasetParameter name="header_id">
@@ -1670,7 +1677,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 							</datasetParameter>
 							<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 						</datasetRun>
-						<jr:listContents height="27" width="565">
+						<jr:listContents height="27" width="802">
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 								<reportElement stretchType="RelativeToTallestObject" x="82" y="0" width="46" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="0"/>
@@ -1680,7 +1687,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<textFieldExpression><![CDATA[$F{position_no}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="421" y="0" width="51" height="20"/>
+								<reportElement stretchType="RelativeToTallestObject" x="582" y="0" width="75" height="20"/>
 								<box topPadding="0"/>
 								<textElement textAlignment="Center">
 									<font size="10"/>
@@ -1688,7 +1695,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<textFieldExpression><![CDATA[$F{pattern_no}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="128" y="0" width="55" height="20" isPrintWhenDetailOverflows="true"/>
+								<reportElement stretchType="RelativeToTallestObject" x="128" y="0" width="62" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="0"/>
 								<textElement textAlignment="Center">
 									<font size="10"/>
@@ -1696,7 +1703,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<textFieldExpression><![CDATA[$F{pattern_name}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="183" y="0" width="42" height="20" isPrintWhenDetailOverflows="true"/>
+								<reportElement stretchType="RelativeToTallestObject" x="190" y="0" width="58" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="0"/>
 								<textElement textAlignment="Center">
 									<font size="10"/>
@@ -1704,7 +1711,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<textFieldExpression><![CDATA[$F{qty}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="324" y="0" width="36" height="20" isPrintWhenDetailOverflows="true"/>
+								<reportElement stretchType="RelativeToTallestObject" x="407" y="0" width="73" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="0"/>
 								<textElement textAlignment="Center">
 									<font size="10"/>
@@ -1712,7 +1719,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<textFieldExpression><![CDATA[$F{weight_kg}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="360" y="0" width="61" height="20" isPrintWhenDetailOverflows="true"/>
+								<reportElement stretchType="RelativeToTallestObject" x="480" y="0" width="102" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="0"/>
 								<textElement textAlignment="Center">
 									<font size="10"/>
@@ -1720,7 +1727,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<textFieldExpression><![CDATA[$F{moc_name}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="472" y="0" width="48" height="20"/>
+								<reportElement stretchType="RelativeToTallestObject" x="657" y="0" width="83" height="20"/>
 								<box topPadding="0"/>
 								<textElement textAlignment="Center">
 									<font size="10"/>
@@ -1728,7 +1735,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<textFieldExpression><![CDATA[$F{remarks}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="520" y="0" width="45" height="20" isPrintWhenDetailOverflows="true"/>
+								<reportElement stretchType="RelativeToTallestObject" x="740" y="0" width="62" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="0"/>
 								<textElement textAlignment="Center">
 									<font size="10"/>
@@ -1736,7 +1743,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<textFieldExpression><![CDATA[$F{material_code}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="225" y="0" width="53" height="20" isPrintWhenDetailOverflows="true"/>
+								<reportElement stretchType="RelativeToTallestObject" x="248" y="0" width="82" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="0"/>
 								<textElement textAlignment="Center">
 									<font size="10"/>
@@ -1744,7 +1751,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<textFieldExpression><![CDATA[$F{drawing_no}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="278" y="0" width="46" height="20" isPrintWhenDetailOverflows="true"/>
+								<reportElement stretchType="RelativeToTallestObject" x="332" y="0" width="74" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="0"/>
 								<textElement textAlignment="Center">
 									<font size="10"/>
@@ -1779,7 +1786,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 	<pageFooter>
 		<band height="50">
 			<textField>
-				<reportElement x="0" y="30" width="243" height="20"/>
+				<reportElement x="1" y="30" width="405" height="20"/>
 				<box topPadding="3">
 					<topPen lineWidth="0.5"/>
 				</box>
@@ -1789,7 +1796,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 				<textFieldExpression><![CDATA[$P{printed_by} + " "+ "/"  +" "+$F{new_date}]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
-				<reportElement x="330" y="30" width="48" height="20"/>
+				<reportElement x="480" y="30" width="70" height="20"/>
 				<box topPadding="3">
 					<topPen lineWidth="0.5"/>
 				</box>
@@ -1799,7 +1806,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="378" y="30" width="187" height="20"/>
+				<reportElement stretchType="RelativeToTallestObject" x="550" y="30" width="252" height="20"/>
 				<box topPadding="3">
 					<topPen lineWidth="0.5"/>
 				</box>
@@ -1808,7 +1815,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 				</textElement>
 			</textField>
 			<textField>
-				<reportElement x="243" y="30" width="87" height="20"/>
+				<reportElement x="407" y="30" width="73" height="20"/>
 				<box topPadding="3">
 					<topPen lineWidth="0.5"/>
 				</box>
@@ -1818,7 +1825,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="440" y="10" width="125" height="22">
+				<reportElement x="676" y="10" width="125" height="22">
 					<printWhenExpression><![CDATA[$F{brkneed} == "stop"]]></printWhenExpression>
 				</reportElement>
 				<box leftPadding="3"/>
@@ -1828,7 +1835,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 				<text><![CDATA[APPROVED BY]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="236" y="10" width="125" height="22">
+				<reportElement x="330" y="10" width="125" height="22">
 					<printWhenExpression><![CDATA[$F{brkneed} == "stop"]]></printWhenExpression>
 				</reportElement>
 				<box leftPadding="3"/>
@@ -1852,7 +1859,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 	<noData>
 		<band height="20">
 			<staticText>
-				<reportElement mode="Transparent" x="0" y="0" width="565" height="20"/>
+				<reportElement mode="Transparent" x="0" y="0" width="801" height="20"/>
 				<textElement textAlignment="Center"/>
 				<text><![CDATA[No Records Found]]></text>
 			</staticText>
