@@ -491,7 +491,7 @@ class kg_subcontract_wo(osv.osv):
 						
 				dc_line = dc_obj_line.create(cr,uid,{'header_id':dc_id,'sc_id':line_item.sc_id.id,'qty':line_item.qty,'sc_dc_qty':line_item.qty,'sc_wo_qty':line_item.qty,					
 						'entry_type_stk':line_item.entry_type,'order_id':line_item.order_id.id,'moc_id':line_item.moc_id.id,'position_id':line_item.position_id.id,
-						'pump_model_id':line_item.pump_model_id.id,'pattern_id':line_item.pattern_id.id,'pattern_code':line_item.pattern_code,'pattern_name':line_item.pattern_name,
+						'pump_model_id':line_item.pump_model_id.id,'pattern_id':line_item.pattern_id.id,'ms_shop_id':line_item.ms_shop_id.id,'pattern_code':line_item.pattern_code,'pattern_name':line_item.pattern_name,
 						'item_code':line_item.item_code,'item_name':line_item.item_name,			
 						'actual_qty':line_item.actual_qty,'sc_wo_line_id': line_item.id,'entry_mode': 'from_wo','pending_qty':line_item.qty})		
 				for line in line_item.line_ids:	
@@ -928,6 +928,7 @@ class kg_subcontract_dc(osv.osv):
 					'position_id':item.position_id.id,
 					'pump_model_id':item.pump_model_id.id,
 					'pattern_id':item.pattern_id.id,
+					'ms_shop_id':item.ms_shop_id.id,
 					'pattern_code':item.pattern_code,
 					'pattern_name':item.pattern_name,
 					'item_code':item.item_code,
@@ -1181,6 +1182,7 @@ class ch_subcontract_dc_line(osv.osv):
 		'position_id': fields.many2one('kg.position.number','Position No.', required=True),
 		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True),
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern Number', required=True),
+		'ms_shop_id': fields.many2one('kg.machine.shop','MS Item Name', domain="[('type','=','ms')]"),
 		'pattern_code': fields.char('Pattern Code'),
 		'pattern_name': fields.char('Pattern Name'),
 		'item_code': fields.char('Item Code'),
@@ -1322,6 +1324,7 @@ class kg_subcontract_inward(osv.osv):
 				'position_id':item.position_id.id,
 				'pump_model_id':item.pump_model_id.id,
 				'pattern_id':item.pattern_id.id,
+				'ms_shop_id':item.ms_shop_id.id,
 				'pattern_code':item.pattern_code,
 				'pattern_name':item.pattern_name,
 				'item_code':item.item_code,
@@ -1374,6 +1377,13 @@ class kg_subcontract_inward(osv.osv):
 		dim_obj = self.pool.get('ch.inward.dimension.details')
 		ch_pos_obj = self.pool.get('ch.kg.position.number')
 		if entry.state == 'draft':
+			if len(entry.line_ids) == 0:
+				raise osv.except_osv(_('Warning!'),
+								_('System not allow to without line items !!'))
+			for line in entry.line_ids:			
+				if line.com_weight <= 0.00:
+					raise osv.except_osv(_('Warning!'),
+								_('System not allow to save Zero and Negative values in Completed weight field !!'))
 			for line in entry.line_ids:
 				if line.com_operation_id:
 					s = [(6, 0, [x.id for x in line.com_operation_id])]
@@ -1417,14 +1427,8 @@ class kg_subcontract_inward(osv.osv):
 			sc_obj = self.pool.get('kg.subcontract.process')
 			ms_operation_obj = self.pool.get('kg.ms.operations')
 			ms_dimension_obj = self.pool.get('ch.ms.dimension.details')
-			ms_obj = self.pool.get('kg.machineshop')				
-			if len(entry.line_ids) == 0:
-				raise osv.except_osv(_('Warning!'),
-								_('System not allow to without line items !!'))
-			for line in entry.line_ids:			
-				if line.com_weight <= 0.00:
-					raise osv.except_osv(_('Warning!'),
-								_('System not allow to save Zero and Negative values in Completed weight field !!'))								
+			ms_obj = self.pool.get('kg.machineshop')		
+										
 			if entry.line_ids:
 				for item in entry.line_ids:
 					print"item.entry_type",item.entry_type
@@ -2116,9 +2120,12 @@ class kg_subcontract_inward(osv.osv):
 																
 																					
 					else:
-					
-						
-						
+						print"item.pattern_id",item.pattern_id
+						print"item.pattern_id",item.ms_shop_id
+						if item.pattern_id:
+							ms_type='foundry_item'
+						else:
+							ms_type='ms_item'						
 						work_id = self.pool.get('kg.work.order').search(cr, uid, [('name','=','STK WO')])
 						work_rec = self.pool.get('kg.work.order').browse(cr,uid,work_id[0])
 						
@@ -2275,7 +2282,7 @@ class kg_subcontract_inward(osv.osv):
 									'order_line_id': work_rec.line_ids[0].id,		
 									'order_category': item.order_category,
 									'order_priority': item.order_priority,
-									'ms_type': item.ms_type,																									
+									'ms_type': ms_type,																									
 									'inhouse_qty': 1,
 									'op1_stage_id': op1_stage_id,
 									'op1_clamping_area': op1_clamping_area,
@@ -2724,10 +2731,12 @@ class kg_subcontract_inward(osv.osv):
 							inward_line_vals = {
 								'header_id': inward_id,
 								'location': item.order_id.location,
-								'stock_type': 'pump',
+								'stock_type': 'pattern',
 								'pump_model_id': item.pump_model_id.id,
 								'pattern_id': item.pattern_id.id,
 								'pattern_name': item.pattern_name,
+								'item_code': item.item_code,
+								'item_name': item.item_name,
 								'moc_id': item.moc_id.id,							
 								'qty': item.qty,
 								'available_qty': item.qty,
@@ -2736,7 +2745,8 @@ class kg_subcontract_inward(osv.osv):
 								'unit_price': 0,
 								'stock_mode': 'excess',
 								'ms_stock_state': 'operation_inprogress',
-								'stock_item': 'ms_item'
+								'stock_item': ms_type,
+								'position_id': item.position_id.id,
 								
 							}
 							
@@ -2848,6 +2858,7 @@ class ch_subcontract_inward_line(osv.osv):
 		'position_id': fields.many2one('kg.position.number','Position No.', required=True),
 		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True),
 		'pattern_id': fields.many2one('kg.pattern.master','Pattern Number', required=True),
+		'ms_shop_id': fields.many2one('kg.machine.shop','MS Item Name', domain="[('type','=','ms')]"),
 		'pattern_code': fields.char('Pattern Code'),
 		'pattern_name': fields.char('Pattern Name'),
 		'item_code': fields.char('Item Code'),

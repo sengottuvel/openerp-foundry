@@ -824,7 +824,7 @@
 									<field name="operation_id" widget="many2many_tags" readonly="1"/>											
 									<field name="com_operation_id" widget="many2many_tags" />											
 									<field name="each_weight" readonly="1" />
-									<field name="com_weight" required="1" on_change="onchange_com_weight(com_weight,qty)"/>
+									<field name="com_weight" on_change="onchange_com_weight(com_weight,qty)"/>
 									<field name="totel_weight" readonly="1"/>										
 									<field name="remarks" widget="char"/>
 									<field name="oth_spec" widget="char"/>
@@ -988,14 +988,14 @@
 					<group>
 						<group>
 							<field name="name"/>
-							<field name="transfer_type" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
-							<field name="to_division_id" attrs="{'invisible': [('transfer_type','=','sub_contractor')],'required': [('transfer_type','=','internal')],'readonly': [('state','in',['confirmed','cancel'])]}"/>
-							<field name="contractor_id" on_change="onchange_contractor(contractor_id)"  attrs="{'readonly': [('state','in',['confirmed','cancel'])], 'invisible': [('transfer_type','=','internal')],'required': [('transfer_type','=','sub_contractor')]}"/>	
+							<field name="transfer_type" required="1" attrs="{'readonly': [('state','in',['inspection_qc','confirmed','cancel'])]}"/>
+							<field name="to_division_id" attrs="{'invisible': [('transfer_type','=','sub_contractor')],'required': [('transfer_type','=','internal')],'readonly': [('state','in',['inspection_qc','confirmed','cancel'])]}"/>
+							<field name="contractor_id" on_change="onchange_contractor(contractor_id)"  attrs="{'readonly': [('state','in',['inspection_qc','confirmed','cancel'])], 'invisible': [('transfer_type','=','internal')],'required': [('transfer_type','=','sub_contractor')]}"/>	
 							<field name="phone" readonly="1" attrs="{'invisible': [('transfer_type','=','internal')]}"/>																			
 							
 						</group>											
 						<group>
-							<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="entry_date" attrs="{'readonly': [('state','in',['inspection_qc','confirmed','cancel'])]}"/>
 							<field name="division_id" readonly="1"/>
 							<field name="contact_person" readonly="1" attrs="{'invisible': [('transfer_type','=','internal')]}"/>									
 							<field name="flag_inward" invisible="1"/>			
@@ -1016,7 +1016,7 @@
 									<field name="operation_id" widget="many2many_tags" readonly="1"/>											
 									<field name="com_operation_id" widget="many2many_tags" />											
 									<field name="each_weight" readonly="1" />
-									<field name="com_weight" required="1" on_change="onchange_com_weight(com_weight,qty)"/>
+									<field name="com_weight" on_change="onchange_com_weight(com_weight,qty)"/>
 									<field name="totel_weight" readonly="1"/>										
 									<field name="remarks" widget="char"/>
 									<field name="oth_spec" widget="char"/>
@@ -1146,6 +1146,33 @@
 		</record>
 		
 	<!-- Tree View End -->
+	
+	<!-- Inward Line Tree View Start -->
+		
+		<record id="t_tree_v_sc_inward_line" model="ir.ui.view">
+			<field name="name">Subcontract Inward Line Tree</field>
+			<field name="model">ch.subcontract.inward.line</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Subcontract Inward Line Tree">				
+					<field name="order_id"/>
+					<field name="order_delivery_date"/>					
+					<field name="order_priority" string="Category"/>
+					<field name="pump_model_id"/>					
+					<field name="item_code" />
+					<field name="item_name"/>
+					<field name="moc_id"/>					
+					<field name="qty"/>					
+					<field name="entry_type" invisible="1"/>					
+					<field name="actual_qty" sum="Total SC Qty"/>
+					<field name="pending_qty" sum="Total pending Qty"/>
+					<field name="oth_spec" widget="char"/>					
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+		
 		
 	
 		<record id="tma_sc_inspection" model="ir.actions.act_window">

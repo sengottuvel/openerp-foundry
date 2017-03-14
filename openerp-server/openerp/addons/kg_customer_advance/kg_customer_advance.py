@@ -16,8 +16,8 @@ class kg_customer_advance(osv.osv):
 	
 	def _balance_amount_value(self, cr, uid, ids, field_name, arg, context=None):
 		result = {}
-		bal_value = 0.00
-		for entry in self.browse(cr, uid, ids, context=context):
+		bal_value = total_amt = total = 0.00
+		for entry in self.browse(cr, uid, ids, context=context):				
 			bal_value = entry.advance_amt - entry.adjusted_amt			
 			result[entry.id] = bal_value
 		return result
@@ -32,7 +32,8 @@ class kg_customer_advance(osv.osv):
 		'entry_date': fields.date('Advance Date',required=True),		
 		'note': fields.text('Notes'),
 		'cancel_remark': fields.text('Cancel'),
-		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),
+		'reject_remark': fields.text('Reject'),			
+		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('approved','AC ACK Pending'),('done','AC ACK Done'),('cancel','Cancelled')],'Status', readonly=True),
 		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode', readonly=True),
 		'flag_sms': fields.boolean('SMS Notification'),
 		'flag_email': fields.boolean('Email Notification'),
@@ -46,8 +47,10 @@ class kg_customer_advance(osv.osv):
 		'user_id': fields.many2one('res.users', 'Created By', readonly=True),		
 		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
 		'confirm_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),		
-		'ap_rej_date': fields.datetime('Approved/Reject Date', readonly=True),
-		'ap_rej_user_id': fields.many2one('res.users', 'Approved/Reject By', readonly=True),	
+		'ap_rej_date': fields.datetime('Approved Date', readonly=True),
+		'done_date': fields.datetime('Done Date', readonly=True),
+		'done_user_id': fields.many2one('res.users', 'Done By', readonly=True),	
+		'ap_rej_user_id': fields.many2one('res.users', 'Approved By', readonly=True),	
 		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
@@ -58,15 +61,20 @@ class kg_customer_advance(osv.osv):
 		'customer_id':fields.many2one('res.partner','Customer',required=True,readonly=False, states={'approved':[('readonly',True)]}, domain=[('customer', '=', True)]),
 		
 		'order_id':fields.many2one('kg.work.order','Work Order No',
-				domain="[('partner_id','=',customer_id), '&', ('state','!=','draft')]",required=True,
+				domain="[('partner_id','=',customer_id), '&', ('state','=','confirmed')]",required=True,
 				readonly=False, states={'approved':[('readonly',True)]}),
 		
 		
-	    'advance_amt': fields.float('Advance Amount'),			
+	    'advance_amt': fields.float('AC ACK Amount'),			
+	    'received_amt': fields.float('Received Amount'),			
+	    'balance_receivable': fields.float('Balance Receivable'),			
+	    'adv_amt': fields.float('Advance Amount'),			
 		'order_value': fields.float('Order Value'),		
 		'adjusted_amt': fields.float('Adjusted Amount'),		
-		'balance_amt': fields.function(_balance_amount_value, string='Balance Amount',store=True, type='float'),		
-		'order_no': fields.char('Order NO',readonly=True),				
+		'wo_balance_amt': fields.float('Eligible Advance Value'),		
+		'balance_amt': fields.function(_balance_amount_value, string='Balance Amount',store=True, type='float'),			
+		'order_no': fields.char('Order NO',readonly=True),	
+		'location': fields.selection([('ipd','IPD'),('ppd','PPD'),('export','Export')],'Location'),			
 		
 		## Child Tables Declaration 				
 		'line_ids': fields.one2many('ch.cus.advance.line', 'header_id', "Line Details"),		
@@ -88,34 +96,44 @@ class kg_customer_advance(osv.osv):
 		
 	}
 	
-	def onchange_order_value(self, cr, uid, ids, order_id, context=None):
-		value = {'order_value':0.00}		
+	def onchange_order_value(self, cr, uid, ids, order_id,customer_id, context=None):		
+		sup_ids = self.pool.get('kg.customer.advance').search(cr,uid,[('order_id','=',order_id),('customer_id','=',customer_id),('state','in',('done','approved'))])
+		value = {'order_value':0.00,'wo_balance_amt':0.00,'location':''}		
 		total_value = 0.00
+		total = 0.00
 		order_no = ''
+		if 	sup_ids :
+			for ele in sup_ids:					
+				adv_rec = self.pool.get('kg.customer.advance').browse(cr,uid,ele)	
+				total += adv_rec.balance_amt	
 		if order_id:			
 			work_rec = self.pool.get('kg.work.order').browse(cr,uid,order_id)		
 			total_value = work_rec.order_value
-			order_no = work_rec.name
+			location_type = work_rec.location
+			order_no = work_rec.name	
 			
-		return {'value': {'order_value' : total_value,'order_no':order_no}}	
+		total_elgiable_value = 	total_value - total 
+			
+		return {'value': {'order_value' : total_value,'order_no':order_no,'wo_balance_amt':total_elgiable_value,'location':location_type}}	
 	
 	
 	def onchange_customer_id(self, cr, uid, ids, customer_id, context=None):
 		value = {}		
-		sup_ids = self.pool.get('kg.customer.advance').search(cr,uid,[('customer_id','=',customer_id),('state','=','confirmed')])		
-		adv_line_vals=[]			
-		for ele in sup_ids:			
-			adv_rec = self.pool.get('kg.customer.advance').browse(cr,uid,ele)			
-			adv_line_vals.append({
-							'advance_no':adv_rec.name,
-						   'advance_date':adv_rec.entry_date,
-						   'order_no':adv_rec.order_no,
-						   'advance_amt':adv_rec.advance_amt,
-						   'adjusted_amt':adv_rec.adjusted_amt,
-						   'balance_amt':adv_rec.balance_amt,
-							})
-			value['line_ids'] = adv_line_vals			
-		return {'value': value}
+		sup_ids = self.pool.get('kg.customer.advance').search(cr,uid,[('customer_id','=',customer_id),('state','in',('done','approved'))])		
+		adv_line_vals=[]
+		if 	sup_ids :		
+			for ele in sup_ids:					
+				adv_rec = self.pool.get('kg.customer.advance').browse(cr,uid,ele)			
+				adv_line_vals.append({
+								'advance_no':adv_rec.name,
+							   'advance_date':adv_rec.entry_date,
+							   'order_no':adv_rec.order_no,
+							   'advance_amt':adv_rec.adv_amt,
+							   'adjusted_amt':adv_rec.adjusted_amt,
+							   'balance_amt':adv_rec.balance_amt,
+								})
+		value['line_ids'] = adv_line_vals			
+		return {'value': {'line_ids': adv_line_vals, 'order_id':''}}
 	
 	def _future_entry_date_check(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -129,6 +147,17 @@ class kg_customer_advance(osv.osv):
 			return False
 		return True
 		
+	def _check_order_amt(self,cr,uid,ids,context = None):
+		rec = self.browse(cr,uid,ids[0])
+		total = 0.00
+		for line in rec.line_ids:
+			if rec.order_no == line.order_no:
+				total += line.balance_amt
+		total_amt = rec.adv_amt + total
+		if total_amt > rec.order_value:
+			return False
+		else:
+			return True	
 		
 	def _check_adv_amt(self,cr,uid,ids,context = None):
 		rec = self.browse(cr,uid,ids[0])
@@ -136,8 +165,8 @@ class kg_customer_advance(osv.osv):
 		for line in rec.line_ids:
 			if rec.order_no == line.order_no:
 				total += line.balance_amt
-		total_amt = rec.advance_amt + total
-		if rec.advance_amt <= 0.00 or total_amt > rec.order_value:
+		total_amt = rec.adv_amt + total
+		if rec.adv_amt <= 0.00 or rec.adv_amt > rec.order_value:
 			return False
 		else:
 			return True		
@@ -146,6 +175,7 @@ class kg_customer_advance(osv.osv):
         
         (_future_entry_date_check, 'System not allow to save with future date. !!',['Advance Date']),         
         (_check_adv_amt, 'Please Check the advance amount. Advance amount should not be allow zero,negative and greater than Order Value amount !!',['Advance amount']),       
+        (_check_order_amt, 'Please Check the advance amount. Advance amount already adjusted this order, kindly verify !!',['Advance amount']),       
         
        ]
        
@@ -179,12 +209,7 @@ class kg_customer_advance(osv.osv):
 			
 			self.write(cr, uid, ids, {'name':entry_name,'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		
-		return True
-		
-	def entry_approve(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		return True
-		
+		return True		
 		
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -193,6 +218,35 @@ class kg_customer_advance(osv.osv):
 		else:
 			raise osv.except_osv(_('Cancel remark is must !!'),
 				_('Enter the remarks in Cancel remarks field !!'))
+		return True
+	
+	def entry_reject(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'approved':
+			if rec.reject_remark:
+				self.write(cr, uid, ids, {'state': 'confirmed','update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			else:
+				raise osv.except_osv(_('Reject remark is must !!'),
+					_('Enter the remarks in Reject remarks field !!'))
+			return True
+		
+	def entry_approved(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'confirmed':
+			self.write(cr, uid, ids, {'advance_amt':rec.adv_amt,'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		else:
+			pass		
+		return True
+		
+	def entry_accept(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'approved':
+			if rec.advance_amt > rec.adv_amt:			
+				raise osv.except_osv(_('AC ACK Amount exceed !!'),
+						_('Enter the AC ACK Amount greater than Advance Amount !!'))
+			self.write(cr, uid, ids, {'balance_receivable':rec.advance_amt,'state': 'done','done_user_id': uid, 'done_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		else:
+			pass
 		return True
 		
 		
