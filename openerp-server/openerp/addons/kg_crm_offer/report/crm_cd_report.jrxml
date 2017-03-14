@@ -149,152 +149,123 @@ where header_id = $P{offer_id}]]>
 		<parameter name="offer_id" class="java.lang.Integer"/>
 		<queryString>
 			<![CDATA[select
-pump.item_name as pump_name,
-pump.net_amount as net_amount,
-((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end))::integer as basic_cpo_val,
-(((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))::integer as cust_dis_val,
+sum((COALESCE((COALESCE(pump.net_amount,0)),0))) as net_amount,
+sum(((COALESCE((COALESCE(pump.net_amount,0)),0))/(case when pump.tax = 0 or null then 1 else pump.tax end)))::integer as basic_cpo_val,
+sum((((COALESCE((COALESCE(pump.net_amount,0)),0))/ (case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))::integer as cust_dis_val,
 
-(((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))::integer as book_val,
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100)::integer as spl_val,
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)::integer as pf_val,
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.freight,0))/100)::integer as freight_val,
+sum((((COALESCE((COALESCE(pump.net_amount,0)),0))/(case when (case when pump.tax = 0 or null then 1 else pump.tax end) = 0 or null then 1 else (case when pump.tax = 0 or null then 1 else pump.tax end) end)) - (((COALESCE((COALESCE(pump.net_amount,0)),0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))))::integer as book_val,
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100))::integer as spl_val,
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))::integer as pf_val,
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.freight,0))/100))::integer as freight_val,
 
 
-(((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))::integer as book,
-
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0.00))/100))::integer as pf,
-
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100)::integer as ed,
-
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE((COALESCE(pump.net_amount,0)),0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0.00))/100)) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100)) * (COALESCE((case when pump.tax = 0 or null then 1 else pump.tax end),0))/100)::integer as tax,
-
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0.00))/100)) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE((COALESCE(pump.net_amount,0)),0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0.00))/100)) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100)) * (COALESCE((case when pump.tax = 0 or null then 1 else pump.tax end),0))/100))::integer as tot,
-
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0.00))/100)) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE((COALESCE(pump.net_amount,0)),0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0.00))/100)) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100)) * (COALESCE((case when pump.tax = 0 or null then 1 else pump.tax end),0))/100)) * (COALESCE(pump.insurance,0))/100)::integer as insurance_val,
+sum((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
+((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) +
+(((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100))) +
+((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
+((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100)) * (case when pump.tax = 0 or null then 1 else pump.tax end)/100))) * pump.insurance/100))::integer as insurance_val,
 
 ----------------
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.freight,0))/100) -
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0.00))/100)) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE((COALESCE(pump.net_amount,0)),0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0.00))/100)) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100)) * (COALESCE((case when pump.tax = 0 or null then 1 else pump.tax end),0))/100)) * (COALESCE(pump.insurance,0))/100))::integer as dealer_val,
+
+((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE((COALESCE(pump.special_discount,0)),0))/100)) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.freight,0))/100))) -
+sum((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
+((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) +
+(((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100))) +
+((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
+((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100)) * (case when pump.tax = 0 or null then 1 else pump.tax end)/100))) * pump.insurance/100)))::integer as dealer_val,
 
 ------------------------------
-
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.freight,0))/100) -
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0.00))/100)) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE((COALESCE(pump.net_amount,0)),0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0.00))/100)) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100)) * (COALESCE((case when pump.tax = 0 or null then 1 else pump.tax end),0))/100)) * (COALESCE(pump.insurance,0))/100)) * (COALESCE(pump.dealer_discount,0))/100)::integer as les_dealer_val,
-
+(((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100)) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.freight,0))/100))) -
+sum((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
+((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) +
+(((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100))) +
+((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
+((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100)) * (case when pump.tax = 0 or null then 1 else pump.tax end)/100))) * pump.insurance/100))) * avg(pump.dealer_discount) /100)::integer as les_dealer_val,
 ---------
-
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.freight,0))/100) -
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0.00))/100)) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE((COALESCE(pump.net_amount,0)),0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0.00))/100)) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100)) * (COALESCE((case when pump.tax = 0 or null then 1 else pump.tax end),0))/100)) * (COALESCE(pump.insurance,0))/100)) -
-
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.freight,0))/100) -
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0.00))/100)) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE((COALESCE(pump.net_amount,0)),0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0.00))/100)) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100)) * (COALESCE((case when pump.tax = 0 or null then 1 else pump.tax end),0))/100)) * (COALESCE(pump.insurance,0))/100)) * (COALESCE(pump.dealer_discount,0))/100))::integer as works_val,
-
 ------------
+(((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100)) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.freight,0))/100))) -
+sum((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
+((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) +
+(((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100))) +
+((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
+((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100)) * (case when pump.tax = 0 or null then 1 else pump.tax end)/100))) * pump.insurance/100)))::integer -
 
-pump.prime_cost::integer as prime_cost,
+(((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100)) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.freight,0))/100))) -
+sum((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
+((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) +
+(((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100))) +
+((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
+((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100)) * (case when pump.tax = 0 or null then 1 else pump.tax end)/100))) * pump.insurance/100))) * avg(pump.dealer_discount) /100)::integer)::integer as works_val,
 
-ltrim(to_char((COALESCE((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.freight,0))/100) -
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0.00))/100)) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE((COALESCE(pump.net_amount,0)),0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0.00))/100)) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100)) * (COALESCE((case when pump.tax = 0 or null then 1 else pump.tax end),0))/100)) * (COALESCE(pump.insurance,0))/100)) -
+sum(pump.prime_cost)::integer as prime_cost,
 
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.freight,0))/100) -
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0.00))/100)) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE((COALESCE(pump.net_amount,0)),0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0.00))/100)) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100)) * (COALESCE((case when pump.tax = 0 or null then 1 else pump.tax end),0))/100)) * (COALESCE(pump.insurance,0))/100)) * (COALESCE(pump.dealer_discount,0))/100)) /
+ltrim(to_char((COALESCE(((((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100)) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.freight,0))/100))) -
+sum((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
+((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) +
+(((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100))) +
+((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
+((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100)) * (case when pump.tax = 0 or null then 1 else pump.tax end)/100))) * pump.insurance/100)))::integer -
 
-(case when pump.prime_cost = 0 or null then 1 else pump.prime_cost end))),'999G999G99G999G99G99G990D99'))::numeric as ratio,
+((((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100)) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.freight,0))/100))) -
+sum((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
+((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) +
+(((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100))) +
+((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
+((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100)) * (case when pump.tax = 0 or null then 1 else pump.tax end)/100))) * pump.insurance/100))) * avg(pump.dealer_discount) /100)::integer)::integer) /
 
---------
+sum((case when pump.prime_cost = 0 or null then 1 else pump.prime_cost end)))::numeric, 0.00)),'999G999G99G999G99G99G990D99'))::numeric as ratio,
 
-pump.tax as avg_basic_cpo,
-pump.customer_discount as avg_cust_dis,
-pump.special_discount as avg_spl_dis,
-pump.p_f as avg_pf_dis,
-pump.freight as avg_freight_dis,
-pump.insurance as avg_ins_dis,
-pump.dealer_discount as avg_deal_dis
+avg(pump.tax) as avg_basic_cpo,
+avg((COALESCE(pump.customer_discount,0))) as avg_cust_dis,
+avg((COALESCE(pump.special_discount,0))) as avg_spl_dis,
+avg((COALESCE(pump.p_f,0))) as avg_pf_dis,
+avg((COALESCE(pump.freight,0))) as avg_freight_dis,
+avg(pump.insurance) as avg_ins_dis,
+avg(pump.dealer_discount) as avg_deal_dis
 
 from ch_spare_offer pump
 
-left join kg_pumpmodel_master pumpmas on(pumpmas.id=pump.pump_id)
-where header_id =  $P{offer_id}]]>
+where header_id = $P{offer_id}]]>
 		</queryString>
-		<field name="pump_name" class="java.lang.String"/>
 		<field name="net_amount" class="java.math.BigDecimal"/>
 		<field name="basic_cpo_val" class="java.lang.Integer"/>
 		<field name="cust_dis_val" class="java.lang.Integer"/>
@@ -302,11 +273,6 @@ where header_id =  $P{offer_id}]]>
 		<field name="spl_val" class="java.lang.Integer"/>
 		<field name="pf_val" class="java.lang.Integer"/>
 		<field name="freight_val" class="java.lang.Integer"/>
-		<field name="book" class="java.lang.Integer"/>
-		<field name="pf" class="java.lang.Integer"/>
-		<field name="ed" class="java.lang.Integer"/>
-		<field name="tax" class="java.lang.Integer"/>
-		<field name="tot" class="java.lang.Integer"/>
 		<field name="insurance_val" class="java.lang.Integer"/>
 		<field name="dealer_val" class="java.lang.Integer"/>
 		<field name="les_dealer_val" class="java.lang.Integer"/>
@@ -468,8 +434,7 @@ pump.dealer_discount as avg_deal_dis
 from ch_accessories_offer pump
 
 left join kg_accessories_master access on(access.id=pump.access_id)
-where header_id = $P{offer_id}
-]]>
+where header_id = $P{offer_id}]]>
 		</queryString>
 		<field name="access_name" class="java.lang.String"/>
 		<field name="net_amount" class="java.math.BigDecimal"/>
@@ -587,96 +552,91 @@ sum(pump.prime_cost)::integer as prime_cost
 
 from ch_pump_offer pump
 
-where header_id = 241)
+where header_id = $P{offer_id})
 ---------------Spare
 union all
 
 (select
-sum(pump.net_amount) as net_amount,
-sum(((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)))::integer as basic_cpo_val,
-sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))::integer as cust_dis_val,
+sum((COALESCE((COALESCE(pump.net_amount,0)),0))) as net_amount,
+sum(((COALESCE((COALESCE(pump.net_amount,0)),0))/(case when pump.tax = 0 or null then 1 else pump.tax end)))::integer as basic_cpo_val,
+sum((((COALESCE((COALESCE(pump.net_amount,0)),0))/ (case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))::integer as cust_dis_val,
 
-sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))))::integer as book_val,
+sum((((COALESCE((COALESCE(pump.net_amount,0)),0))/(case when (case when pump.tax = 0 or null then 1 else pump.tax end) = 0 or null then 1 else (case when pump.tax = 0 or null then 1 else pump.tax end) end)) - (((COALESCE((COALESCE(pump.net_amount,0)),0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))))::integer as book_val,
 sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100))::integer as spl_val,
 sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))::integer as pf_val,
 sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.freight,0))/100))::integer as freight_val,
 
+
 sum((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0.00))/100)) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE((COALESCE(pump.net_amount,0)),0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0.00))/100)) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100)) * (COALESCE((case when pump.tax = 0 or null then 1 else pump.tax end),0))/100)) * (COALESCE(pump.insurance,0))/100))::integer as insurance_val,
+((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) +
+(((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100))) +
+((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
+((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100)) * (case when pump.tax = 0 or null then 1 else pump.tax end)/100))) * pump.insurance/100))::integer as insurance_val,
 
 ----------------
-sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.freight,0))/100) -
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0.00))/100)) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE((COALESCE(pump.net_amount,0)),0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0.00))/100)) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100)) * (COALESCE((case when pump.tax = 0 or null then 1 else pump.tax end),0))/100)) * (COALESCE(pump.insurance,0))/100)))::integer as dealer_val,
+
+((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE((COALESCE(pump.special_discount,0)),0))/100)) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.freight,0))/100))) -
+sum((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
+((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) +
+(((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100))) +
+((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
+((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100)) * (case when pump.tax = 0 or null then 1 else pump.tax end)/100))) * pump.insurance/100)))::integer as dealer_val,
 
 ------------------------------
-
-sum((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.freight,0))/100) -
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0.00))/100)) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE((COALESCE(pump.net_amount,0)),0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0.00))/100)) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100)) * (COALESCE((case when pump.tax = 0 or null then 1 else pump.tax end),0))/100)) * (COALESCE(pump.insurance,0))/100)) * (COALESCE(pump.dealer_discount,0))/100))::integer as les_dealer_val,
-
+(((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100)) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.freight,0))/100))) -
+sum((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
+((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) +
+(((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100))) +
+((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
+((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100)) * (case when pump.tax = 0 or null then 1 else pump.tax end)/100))) * pump.insurance/100))) * avg(pump.dealer_discount) /100)::integer as les_dealer_val,
 ---------
-
-sum((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.freight,0))/100) -
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0.00))/100)) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE((COALESCE(pump.net_amount,0)),0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0.00))/100)) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100)) * (COALESCE((case when pump.tax = 0 or null then 1 else pump.tax end),0))/100)) * (COALESCE(pump.insurance,0))/100)) -
-
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) -
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.freight,0))/100) -
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0.00))/100)) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE((COALESCE(pump.net_amount,0)),0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0.00))/100)) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * pump.p_f/100))) * (COALESCE(pump.ed,0))/100)) * (COALESCE((case when pump.tax = 0 or null then 1 else pump.tax end),0))/100)) * (COALESCE(pump.insurance,0))/100)) * (COALESCE(pump.dealer_discount,0))/100)))::integer as works_val,
-
 ------------
+(((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100)) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.freight,0))/100))) -
+sum((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
+((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) +
+(((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100))) +
+((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
+((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100)) * (case when pump.tax = 0 or null then 1 else pump.tax end)/100))) * pump.insurance/100)))::integer -
+
+(((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100)) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) -
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.freight,0))/100))) -
+sum((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
+((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) +
+(((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100))) +
+((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
+((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100)) * (case when pump.tax = 0 or null then 1 else pump.tax end)/100))) * pump.insurance/100))) * avg(pump.dealer_discount) /100)::integer)::integer as works_val,
 
 sum(pump.prime_cost)::integer as prime_cost
 
---------
-
 from ch_spare_offer pump
 
-left join kg_pumpmodel_master pumpmas on(pumpmas.id=pump.pump_id)
-where header_id =  241)
+where header_id = $P{offer_id})
 
 union all
 ---------------Access
@@ -766,7 +726,7 @@ sum(pump.prime_cost)::integer as prime_cost
 from ch_accessories_offer pump
 
 left join kg_accessories_master access on(access.id=pump.access_id)
-where header_id = 241)) as tot]]>
+where header_id = $P{offer_id})) as tot]]>
 		</queryString>
 		<field name="net_amount" class="java.math.BigDecimal"/>
 		<field name="basic_cpo_val" class="java.lang.Long"/>
@@ -846,8 +806,7 @@ sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else
 
 from ch_pump_offer pump
 
-where header_id = $P{offer_id}
-]]>
+where header_id = $P{offer_id}]]>
 		</queryString>
 		<field name="book_val" class="java.lang.Integer"/>
 		<field name="pf_val" class="java.lang.Integer"/>
@@ -861,29 +820,29 @@ where header_id = $P{offer_id}
 		<parameter name="offer_id" class="java.lang.Integer"/>
 		<queryString>
 			<![CDATA[select
-pump.item_name as pump_name,
-(((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))::integer as book_val,
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)::integer as pf_val,
+sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))))::integer as book_val,
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))::integer as pf_val,
 
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) * (COALESCE(pump.ed,0))/100)::integer as ed_val,
+((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * avg((COALESCE(pump.ed,0)))/100)::integer as ed_val,
 
-((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) +
-((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) * (COALESCE(pump.ed,0))/100))) * (case when pump.tax = 0 or null then 0 else pump.tax end)/100)::integer as tax,
+(((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))))) +
+(sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) +
+(((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * avg((COALESCE(pump.ed,0)))/100))) * avg((case when pump.tax = 0 or null then 0 else pump.tax end))/100)::integer as tax,
 
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) +
-((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) * (COALESCE(pump.ed,0))/100)) +
-(((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) +
-((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) * (COALESCE(pump.ed,0))/100))) * (case when pump.tax = 0 or null then 0 else pump.tax end)/100)))::integer as total,
+((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))))) +
+(sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) +
+(((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * avg((COALESCE(pump.ed,0)))/100)) +
+((((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))))) +
+(sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) +
+(((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * avg((COALESCE(pump.ed,0)))/100))) * avg((case when pump.tax = 0 or null then 0 else pump.tax end))/100)))::integer as total,
 
-((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100)) +
-((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) -
+
+((sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100))) +
+(sum((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) -
 (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)) -
 ((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) -
 ((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.freight,0))/100) -
@@ -894,19 +853,19 @@ pump.item_name as pump_name,
 ((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
 ((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) +
 (((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100)) * (case when pump.tax = 0 or null then 0 else pump.tax end)/100))) * pump.insurance/100)) * pump.dealer_discount /100)))::integer as les_deal_dis,
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100)) * (case when pump.tax = 0 or null then 0 else pump.tax end)/100))) * pump.insurance/100)) * pump.dealer_discount /100))))::integer as les_deal_dis,
 -----------------
 
-(((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) +
-((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) * (COALESCE(pump.ed,0))/100)) +
-(((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) +
-((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) * (COALESCE(pump.ed,0))/100))) * (case when pump.tax = 0 or null then 0 else pump.tax end)/100)))) -
-(((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100)) +
-((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) -
+((((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))))) +
+(sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) +
+(((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * avg((COALESCE(pump.ed,0)))/100)) +
+((((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))))) +
+(sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) +
+(((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * avg((COALESCE(pump.ed,0)))/100))) * avg((case when pump.tax = 0 or null then 0 else pump.tax end))/100)))) -
+(((sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100))) +
+(sum((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) -
 (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)) -
 ((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) -
 ((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.freight,0))/100) -
@@ -917,13 +876,13 @@ pump.item_name as pump_name,
 ((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
 ((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) +
 (((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100)) * (case when pump.tax = 0 or null then 0 else pump.tax end)/100))) * pump.insurance/100)) * pump.dealer_discount /100)))))::integer as nett_sam
+(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100)) * (case when pump.tax = 0 or null then 0 else pump.tax end)/100))) * pump.insurance/100)) * pump.dealer_discount /100))))))::integer as nett_sam
+
+
 from ch_spare_offer pump
 
-left join kg_pumpmodel_master pumpmas on(pumpmas.id=pump.pump_id)
 where header_id = $P{offer_id}]]>
 		</queryString>
-		<field name="pump_name" class="java.lang.String"/>
 		<field name="book_val" class="java.lang.Integer"/>
 		<field name="pf_val" class="java.lang.Integer"/>
 		<field name="ed_val" class="java.lang.Integer"/>
@@ -1084,25 +1043,26 @@ union all
 sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))))::integer as book_val,
 sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))::integer as pf_val,
 
-sum((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) * (COALESCE(pump.ed,0))/100))::integer as ed_val,
+((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * avg((COALESCE(pump.ed,0)))/100)::integer as ed_val,
 
-sum(((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) +
-((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) * (COALESCE(pump.ed,0))/100))) * (case when pump.tax = 0 or null then 0 else pump.tax end)/100))::integer as tax,
+(((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))))) +
+(sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) +
+(((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * avg((COALESCE(pump.ed,0)))/100))) * avg((case when pump.tax = 0 or null then 0 else pump.tax end))/100)::integer as tax,
 
-sum((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) +
-((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) * (COALESCE(pump.ed,0))/100)) +
-(((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) +
-((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) * (COALESCE(pump.ed,0))/100))) * (case when pump.tax = 0 or null then 0 else pump.tax end)/100))))::integer as total,
+((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))))) +
+(sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) +
+(((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * avg((COALESCE(pump.ed,0)))/100)) +
+((((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))))) +
+(sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) +
+(((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * avg((COALESCE(pump.ed,0)))/100))) * avg((case when pump.tax = 0 or null then 0 else pump.tax end))/100)))::integer as total,
 
-sum(((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100)) +
-((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) -
+
+((sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100))) +
+(sum((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) -
 (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)) -
 ((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) -
 ((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.freight,0))/100) -
@@ -1116,16 +1076,16 @@ sum(((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 el
 (((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100)) * (case when pump.tax = 0 or null then 0 else pump.tax end)/100))) * pump.insurance/100)) * pump.dealer_discount /100))))::integer as les_deal_dis,
 -----------------
 
-sum((((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
-(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) +
-((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) * (COALESCE(pump.ed,0))/100)) +
-(((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) +
-((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) +
-((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100)) * (COALESCE(pump.ed,0))/100))) * (case when pump.tax = 0 or null then 0 else pump.tax end)/100)))) -
-(((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100)) +
-((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) -
+((((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))))) +
+(sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) +
+(((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * avg((COALESCE(pump.ed,0)))/100)) +
+((((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))))) +
+(sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) +
+(((sum((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
+sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * avg((COALESCE(pump.ed,0)))/100))) * avg((case when pump.tax = 0 or null then 0 else pump.tax end))/100)))) -
+(((sum(((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.special_discount,0))/100))) +
+(sum((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) -
 (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)) -
 ((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100) -
 ((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.freight,0))/100) -
@@ -1138,10 +1098,11 @@ sum((((((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 e
 (((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100)))) +
 (((((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) - (((COALESCE(pump.net_amount,0))/(case when pump.tax = 0 or null then 1 else pump.tax end)) * ((COALESCE(pump.customer_discount,0))/100))) * (COALESCE(pump.p_f,0))/100))) * ((COALESCE(pump.ed,0))/100)) * (case when pump.tax = 0 or null then 0 else pump.tax end)/100))) * pump.insurance/100)) * pump.dealer_discount /100))))))::integer as nett_sam
 
+
 from ch_spare_offer pump
 
-left join kg_pumpmodel_master pumpmas on(pumpmas.id=pump.pump_id)
 where header_id = $P{offer_id})
+
 ---------------Access
 union all
 
@@ -1556,9 +1517,9 @@ where off.id = $P{offer_id}]]>
 									<rightPen lineWidth="0.5"/>
 								</box>
 								<textElement textAlignment="Center">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{pump_name}]]></textFieldExpression>
+								<textFieldExpression><![CDATA["Spare"]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
 								<reportElement x="140" y="0" width="47" height="14"/>
@@ -2460,9 +2421,9 @@ where off.id = $P{offer_id}]]>
 									<rightPen lineWidth="0.5"/>
 								</box>
 								<textElement textAlignment="Center">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{pump_name}]]></textFieldExpression>
+								<textFieldExpression><![CDATA["Spare"]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
 								<reportElement x="140" y="0" width="154" height="14"/>
