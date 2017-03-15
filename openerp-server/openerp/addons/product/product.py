@@ -93,6 +93,7 @@ class product_uom_categ(osv.osv):
 product_uom_categ()
 
 class product_uom(osv.osv):
+	
 	_name = 'product.uom'
 	_description = 'Product Unit of Measure'
 	
@@ -172,6 +173,7 @@ class product_uom(osv.osv):
 
 	_order = "name"
 	_columns = {
+		
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'name': fields.char('Name', size=64, required=True, translate=True),
 		'code': fields.char('Code'),
@@ -235,34 +237,41 @@ class product_uom(osv.osv):
 	]
 
 	def entry_confirm(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'dummy_state': 'confirm','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		rec = self.browse(cr,uid,ids[0])
+		if rec.dummy_state == 'draft':
+			self.write(cr, uid, ids, {'dummy_state': 'confirm','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
 	def entry_approve(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'dummy_state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		rec = self.browse(cr,uid,ids[0])
+		if rec.dummy_state == 'confirm':
+			self.write(cr, uid, ids, {'dummy_state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
 	def entry_reject(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.remark:
-			self.write(cr, uid, ids, {'dummy_state': 'reject','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		else:
-			raise osv.except_osv(_('Rejection remark is must !!'),
-				_('Enter rejection remark in remark field !!'))
+		if rec.dummy_state == 'confirm':
+			if rec.remark:
+				self.write(cr, uid, ids, {'dummy_state': 'reject','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			else:
+				raise osv.except_osv(_('Rejection remark is must !!'),
+					_('Enter rejection remark in remark field !!'))
 		return True
-	
 	
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.cancel_remark:
-			self.write(cr, uid, ids, {'dummy_state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		else:
-			raise osv.except_osv(_('Cancel remark is must !!'),
-				_('Enter the remarks in Cancel remarks field !!'))
+		if rec.dummy_state == 'approved':
+			if rec.cancel_remark:
+				self.write(cr, uid, ids, {'dummy_state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			else:
+				raise osv.except_osv(_('Cancel remark is must !!'),
+					_('Enter the remarks in Cancel remarks field !!'))
 		return True
 	
 	def entry_draft(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'dummy_state': 'draft'})
+		rec = self.browse(cr,uid,ids[0])
+		if rec.dummy_state == 'approved':
+			self.write(cr, uid, ids, {'dummy_state': 'draft'})
 		return True
 			
 	def unlink(self,cr,uid,ids,context=None):
@@ -288,10 +297,6 @@ class product_uom(osv.osv):
 	def _compute_qty_obj(self, cr, uid, from_unit, qty, to_unit, context=None):
 		if context is None:
 			context = {}
-		print"from_unit.category_id.id",from_unit.category_id.id
-		print"from_unit.category_id",from_unit.category_id
-		print"from_unit",from_unit
-		print"to_unit",to_unit
 		if from_unit.category_id.id <> to_unit.category_id.id:
 			if context.get('raise-exception', True):
 				raise osv.except_osv(_('Error!'), _('Conversion from Product UoM %s to Default UoM %s is not possible as they both belong to different Category!.') % (from_unit.name,to_unit.name,))
@@ -363,7 +368,7 @@ product_ul()
 # Categories
 #----------------------------------------------------------
 class product_category(osv.osv):
-
+	
 	def name_get(self, cr, uid, ids, context=None):
 		if isinstance(ids, (list, tuple)) and not len(ids):
 			return []
@@ -377,7 +382,7 @@ class product_category(osv.osv):
 				name = record['parent_id'][1]+' / '+name
 			res.append((record['id'], name))
 		return res
-
+	
 	def _name_get_fnc(self, cr, uid, ids, prop, unknow_none, context=None):
 		res = self.name_get(cr, uid, ids, context=context)
 		return dict(res)
@@ -413,10 +418,12 @@ class product_category(osv.osv):
 				else:
 					res[h.id] = 'yes'								
 		return res
-		
+	
 	_name = "product.category"
 	_description = "Product Category"
+	
 	_columns = {
+		
 		'name': fields.char('Name', size=64, required=True, translate=True, select=True),
 		'complete_name': fields.function(_name_get_fnc, type="char", string='Name'),
 		'parent_id': fields.many2one('product.category','Parent Category', select=True, ondelete='cascade', domain="[('flag_isparent','=',True)]"),
@@ -435,6 +442,7 @@ class product_category(osv.osv):
 		'code': fields.char('Code'),
 		'modify': fields.function(_get_modify, string='Modify', method=True, type='char', size=3),
 		'notes':fields.text('Notes'),
+		
 		
 		# Entry Info
 		
@@ -458,7 +466,7 @@ class product_category(osv.osv):
 		('name', 'unique(name)', 'Category name must be unique!'),
 		
 	]
-
+	
 	_defaults = {
 		
 		'type': lambda *a : 'normal',
@@ -470,7 +478,7 @@ class product_category(osv.osv):
 		'modify': 'yes',
 		
 	}
-
+	
 	_parent_name = "parent_id"
 	_parent_store = True
 	_parent_order = 'sequence, name'
@@ -502,33 +510,35 @@ class product_category(osv.osv):
 		return result
 	"""
 	def entry_confirm(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'confirm','conf_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		rec = self.browse(cr, uid, ids[0])
+		if rec.state == 'draft':
+			self.write(cr, uid, ids, {'state': 'confirm','conf_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
-
-	def entry_approve(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		return True
-
+	
 	def entry_reject(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.remark:
-			self.write(cr, uid, ids, {'state': 'reject','rej_user_id': uid, 'reject_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		else:
-			raise osv.except_osv(_('Rejection remark is must !!'),
-				_('Enter rejection remark in remark field !!'))
+		if rec.state == 'confirm':
+			if rec.remark:
+				self.write(cr, uid, ids, {'state': 'reject','rej_user_id': uid, 'reject_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			else:
+				raise osv.except_osv(_('Rejection remark is must !!'),
+					_('Enter rejection remark in remark field !!'))
 		return True
-		
+	
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.cancel_remark:
-			self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		else:
-			raise osv.except_osv(_('Cancel remark is must !!'),
-				_('Enter the remarks in Cancel remarks field !!'))
+		if rec.state in ('approved','reject'):
+			if rec.cancel_remark:
+				self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			else:
+				raise osv.except_osv(_('Cancel remark is must !!'),
+					_('Enter the remarks in Cancel remarks field !!'))
 		return True
-		
+	
 	def entry_draft(self,cr,uid,ids,context=None):
-		self.write(cr, uid, ids, {'state': 'draft'})
+		rec = self.browse(cr, uid, ids[0])
+		if rec.state == 'approved':
+			self.write(cr, uid, ids, {'state': 'draft'})
 		return True
 			
 	def write(self, cr, uid, ids, vals, context=None):	  
@@ -783,8 +793,7 @@ class product_product(osv.osv):
 			res[p.id] = (data['code'] and ('['+data['code']+'] ') or '') + \
 					(data['name'] or '') + (data['variants'] and (' - '+data['variants']) or '')
 		return res
-
-
+	
 	def _get_main_product_supplier(self, cr, uid, product, context=None):
 		"""Determines the main (best) product supplier for ``product``,
 		returning the corresponding ``supplierinfo`` record, or False
@@ -810,8 +819,7 @@ class product_product(osv.osv):
 				'seller_id': main_supplier and main_supplier.name.id or False
 			}
 		return result
-
-
+	
 	def _get_image(self, cr, uid, ids, name, args, context=None):
 		result = dict.fromkeys(ids, False)
 		for obj in self.browse(cr, uid, ids, context=context):
@@ -859,14 +867,16 @@ class product_product(osv.osv):
 				else:
 					res[h.id] = 'yes'								
 		return res
-		
+	
 	_name = "product.product"
 	_description = "Product"
 	_table = "product_product"
 	_inherits = {'product.template': 'product_tmpl_id'}
 	_inherit = ['mail.thread']
 	_order = 'default_code,name_template'
+	
 	_columns = {
+		
 		'qty_available': fields.function(_product_qty_available, type='float', string='Quantity On Hand'),
 		'virtual_available': fields.function(_product_virtual_available, type='float', string='Quantity Available'),
 		'incoming_qty': fields.function(_product_incoming_qty, type='float', string='Incoming'),
@@ -947,7 +957,6 @@ class product_product(osv.osv):
 		'company_id': fields.many2one('res.company','Company Name',readonly=True),
 		
 	}
-	
 	
 	_sql_constraints = [
 		('name_template', 'unique(name_template)', 'Product Name must be unique!'),
