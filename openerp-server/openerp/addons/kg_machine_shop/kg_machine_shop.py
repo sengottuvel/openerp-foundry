@@ -481,11 +481,14 @@ class ch_ms_raw_material(osv.osv):
 		weight=0.00
 		if uom_conversation_factor == 'one_dimension':	
 			if prod_rec.uom_id.id == prod_rec.uom_po_id.id:
-				qty_value = temp_qty
+				qty_value = length * temp_qty
 				weight = 0.00
+			if length == 0.00:
+				qty_value = temp_qty
 			else:				
 				qty_value = length * temp_qty			
 				weight = qty_value * prod_rec.po_uom_in_kgs
+			
 		if uom_conversation_factor == 'two_dimension':
 			qty_value = length * breadth * temp_qty				
 			weight = qty_value * prod_rec.po_uom_in_kgs		
