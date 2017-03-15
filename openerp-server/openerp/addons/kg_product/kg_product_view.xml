@@ -196,6 +196,21 @@
 		<field name="domain">[('product_type','in',('raw','consu')),]</field>
 	</record>
 	
+	<!-- Product Category Form view inherited start -->
+	
+	<record model="ir.ui.view" id="kg_product_category_form_inherit">
+        <field name="name">kg.product.category.form.inherit</field>
+        <field name="model">product.category</field>
+        <field name="inherit_id" ref="product.product_category_form_view"/>
+        <field name="arch" type="xml">		
+			<field name="flag_isparent" position="after">
+				<field name="account_id" readonly="1"/>
+			</field>
+		</field>
+	</record>
+	
+	<!-- Product Category Form view inherited end -->
+	
 	<!-- Product Master Purchase --> 
 	<menuitem action="product.product_normal_action" name="Product Master-Purchase" id="mam_product_master" parent="kg_menus.ppm_master_menu" sequence="2"/>
 	

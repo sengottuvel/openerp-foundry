@@ -145,7 +145,7 @@ class kg_expense_master(osv.osv):
 				raise osv.except_osv(_('Cancel remark is must !!'),
 					_('Enter the remarks in Cancel remarks field !!'))
 		return True
-
+	
 	def entry_confirm(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.state == 'draft':
@@ -161,19 +161,21 @@ class kg_expense_master(osv.osv):
 	def entry_approve(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.state == 'confirmed':
+			
+			## Account master creation process start
 			ac_obj = self.pool.get('account.account')
-			ac_type_ids = self.pool.get('account.account.type').search(cr,uid,[('name','=','Expense View')])
-			if ac_type_ids:
-				ac_type_rec = self.pool.get('account.account.type').browse(cr,uid,ac_type_ids[0])
-				ac_type = ac_type_rec.id
-			account_id = ac_obj.create(cr,uid,{'name': rec.name,
-											   'code': '',
-											   'user_type': ac_type,
-											   'entry_mode': 'auto',
-											   'type': 'other',
-											   'note': 'New Expense Type Added',
-											   })
-			self.write(cr, uid, ids, {'account_id':account_id,'state':'approved','ap_rej_user_id':uid,'ap_rej_date':dt_time})
+			old_acc_ids = ac_obj.search(cr,uid,[('master_id','=',rec.id)])
+			if old_acc_ids:
+				old_acc_rec = ac_obj.browse(cr,uid,old_acc_ids[0])
+				ac_obj.write(cr,uid,old_acc_rec.id,{'name': rec.name})
+			acc_ids = ac_obj.search(cr,uid,[('name','=',rec.name)])
+			if not acc_ids:
+				account_id = ac_obj.account_creation(cr,uid,rec.name,rec.id,'auto','other','New Expense Type Added',context=context)
+				self.write(cr, uid, ids, {'account_id':account_id})
+			
+			## Account master creation process end
+			
+			self.write(cr, uid, ids, {'state':'approved','ap_rej_user_id':uid,'ap_rej_date':dt_time})
 		return True
 	
 	def entry_reject(self,cr,uid,ids,context=None):

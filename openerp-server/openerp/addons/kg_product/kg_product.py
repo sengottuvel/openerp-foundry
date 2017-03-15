@@ -27,10 +27,11 @@ class kg_product(osv.osv):
 	
 	_name = "product.product"
 	_inherit = "product.product"
-	_columns = {
 	
+	_columns = {
+		
 		#'minor_name': fields.many2one('kg.minormaster', 'Minor Name'),
-
+		
 		'capital': fields.boolean('Capital Goods'),
 		'abc': fields.boolean('ABC Analysis'),
 		'po_uom_coeff': fields.float('PO Coeff', digits=(16,10), required=True, help="One Purchase Unit of Measure = Value of(PO Coeff)UOM"),
@@ -172,7 +173,7 @@ class kg_product(osv.osv):
 				raise osv.except_osv(_('Rejection remark is must !!'),
 					_('Enter rejection remark in remark field !!'))
 		return True
-		
+	
 	def _name_validate(self, cr, uid,ids, context=None):
 		rec = self.browse(cr,uid,ids[0])
 		res = True
@@ -183,15 +184,15 @@ class kg_product(osv.osv):
 		rec = self.browse(cr, uid, ids[0])
 		if rec.name:
 			name_special_char = ''.join(c for c in rec.name if c in '!@#$%^~*{}?+/=')
-			#~ if name_special_char:
-				#~ raise osv.except_osv(_('Warning!'),
-					#~ _('Special Character Not Allowed in Name!'))
+			if name_special_char:
+				raise osv.except_osv(_('Warning!'),
+					_('Special Character Not Allowed in Name!'))
 			
 			return True
 		else:
 			return True
 		return False
-		
+	
 	def _po_coeff(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr, uid, ids[0])
 		if rec.uom_id != rec.uom_po_id and rec.po_uom_coeff == 0 and rec.state != 'approved':
@@ -201,7 +202,7 @@ class kg_product(osv.osv):
 			raise osv.except_osv(_('Warning!'),
 				_('Please check and update tolerance for %s in product master !'%(rec.name)))
 		return True
-			
+	
 	#~ def write(self, cr, uid, ids, vals, context=None):
 		#~ vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		#~ return super(kg_product, self).write(cr, uid, ids, vals, context)	 
@@ -209,7 +210,7 @@ class kg_product(osv.osv):
 	_constraints = [
 		
 		(_name_validate, 'product name must be unique !!', ['name']),
-		(_spl_name, 'Special Character Not Allowed!', ['']),
+		#~ (_spl_name, 'Special Character Not Allowed!', ['']),
 		#~ (_po_coeff, 'System should not be accept zero value!', ['']),
 	   
 		#(fields_validation, 'Please Enter the valid Format',['Invalid Format']),
@@ -226,7 +227,7 @@ class kg_product(osv.osv):
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
 		
 	""" 
-
+	
 	def write(self,cr,uid,ids,vals,context={}):
 		#if 'default_code' in vals:
 		#	 raise osv.except_osv(_('Warning !'),_('You can not modify Product code'))
@@ -256,5 +257,36 @@ class kg_product(osv.osv):
 				pass
 		return super(kg_product, self).write(cr, uid, ids,vals, context)
 	
-	
 kg_product()
+
+class kg_product_category(osv.osv):
+	
+	_name = "product.category"
+	_inherit = "product.category"
+	
+	_columns = {
+		
+		'account_id': fields.many2one('account.account','Ledger Name'),
+		
+	}
+	
+	def entry_approve(self,cr,uid,ids,context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.state == 'confirm':
+			
+			## Account master creation process start
+			ac_obj = self.pool.get('account.account')
+			old_acc_ids = ac_obj.search(cr,uid,[('master_id','=',rec.id)])
+			if old_acc_ids:
+				old_acc_rec = ac_obj.browse(cr,uid,old_acc_ids[0])
+				ac_obj.write(cr,uid,old_acc_rec.id,{'name': rec.name})
+			acc_ids = ac_obj.search(cr,uid,[('name','=',rec.name)])
+			if not acc_ids:
+				account_id = ac_obj.account_creation(cr,uid,rec.name,rec.id,'auto','other','New Product Category Added',context=context)
+				self.write(cr, uid, ids, {'account_id':account_id})
+			## Account master creation process end
+			
+			self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'approve_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		return True
+	
+kg_product_category()
