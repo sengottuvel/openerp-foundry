@@ -73,10 +73,11 @@ class kg_ms_operations(osv.osv):
 		'inhouse_qty': fields.integer('In-house Qty'),
 		'parent_id': fields.integer('Parent Id'),
 		'last_operation_check_id': fields.integer('Last Operation Check Id'),
-		'state': fields.selection([('active','Active'),('reject','Reject')],'Status'),
+		'state': fields.selection([('active','Active'),('complete','Complete'),('reject','Reject')],'Status'),
 		'oth_spec': fields.related('ms_id','oth_spec', type='text', string='WO Remarks', store=True, readonly=True),
 		
 		'flag_allocated': fields.boolean('Allocated from stock'),
+		'stock_inward_id': fields.many2one('ch.stock.inward.details','Inward No.', readonly=True),
 		
 		
 		
@@ -740,7 +741,7 @@ class kg_ms_operations(osv.osv):
 			if entry_rec.ms_type == 'ms_item':
 				cr.execute("""select id from kg_ms_stores where  
 				item_code = %s and moc_id = %s and ms_type = 'ms_item' and accept_state = 'pending' 
-				and order_line_id = %s order by id asc"""%(entry_rec.item_code,
+				and order_line_id = %s order by id asc"""%("'"+entry_rec.item_code+"'",
 				entry_rec.moc_id.id,entry_rec.order_line_id.id))
 				ms_store_id = cr.fetchone();
 				if ms_store_id:
@@ -1213,12 +1214,28 @@ class kg_ms_operations(osv.osv):
 						if pending_operation == None:
 							if entry_rec.order_id.flag_for_stock == False:
 								if entry_rec.op1_process_result == 'accept':
-									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
+									if entry_rec.ms_id.ms_completed_qty == None:
+										ms_completed_qty = 0
+									else:
+										ms_completed_qty = entry_rec.ms_id.ms_completed_qty
+										
+									if entry_rec.inhouse_qty == None:
+										inhouse_qty = 0
+									else:
+										inhouse_qty = entry_rec.inhouse_qty
+									if entry_rec.ms_id:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': ms_completed_qty + inhouse_qty})
 									### MS Store Operation ###
 									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
+								if entry_rec.ms_id:	
+									if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
 									
-								if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+							else:
+								if entry_rec.stock_inward_id.id > 0:
+									stock_obj = self.pool.get('ch.stock.inward.details')
+									### Updation in stock inward ###
+									stock_obj.write(cr,uid,entry_rec.stock_inward_id.id,{'ms_stock_state':'ready_for_ass'})
 				
 				if entry_rec.op1_process_result == 'reject':
 				
@@ -1888,13 +1905,28 @@ class kg_ms_operations(osv.osv):
 						if pending_operation == None:
 							if entry_rec.order_id.flag_for_stock == False:
 								if entry_rec.op2_process_result == 'accept':
-									
-									print "entry_rec.ms_id.assembly_line_id",entry_rec.ms_id.assembly_line_id
-									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
+									if entry_rec.ms_id.ms_completed_qty == None:
+										ms_completed_qty = 0
+									else:
+										ms_completed_qty = entry_rec.ms_id.ms_completed_qty
+										
+									if entry_rec.inhouse_qty == None:
+										inhouse_qty = 0
+									else:
+										inhouse_qty = entry_rec.inhouse_qty
+									if entry_rec.ms_id:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': ms_completed_qty + inhouse_qty})
 									## MS Store Operation ###
 									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
-								if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+								if entry_rec.ms_id:
+									if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+									
+							else:
+								if entry_rec.stock_inward_id.id > 0:
+									stock_obj = self.pool.get('ch.stock.inward.details')
+									### Updation in stock inward ###
+									stock_obj.write(cr,uid,entry_rec.stock_inward_id.id,{'ms_stock_state':'ready_for_ass'})
 				
 				if entry_rec.op2_process_result == 'reject':
 				
@@ -2553,11 +2585,29 @@ class kg_ms_operations(osv.osv):
 						if pending_operation == None:
 							if entry_rec.order_id.flag_for_stock == False:
 								if entry_rec.op3_process_result == 'accept':
-									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
+									if entry_rec.ms_id.ms_completed_qty == None:
+										ms_completed_qty = 0
+									else:
+										ms_completed_qty = entry_rec.ms_id.ms_completed_qty
+										
+									if entry_rec.inhouse_qty == None:
+										inhouse_qty = 0
+									else:
+										inhouse_qty = entry_rec.inhouse_qty
+									if entry_rec.ms_id:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': ms_completed_qty + inhouse_qty})
 									## MS Store Operation ###
 									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
-								if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+								if entry_rec.ms_id:
+									if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+									
+							else:
+								print "entry_reccccccccccccccccc",entry_rec.stock_inward_id.id
+								if entry_rec.stock_inward_id.id > 0:
+									stock_obj = self.pool.get('ch.stock.inward.details')
+									### Updation in stock inward ###
+									stock_obj.write(cr,uid,entry_rec.stock_inward_id.id,{'ms_stock_state':'ready_for_ass'})
 				
 				if entry_rec.op3_process_result == 'reject':
 				
@@ -3219,11 +3269,28 @@ class kg_ms_operations(osv.osv):
 						if pending_operation == None:
 							if entry_rec.order_id.flag_for_stock == False:
 								if entry_rec.op4_process_result == 'accept':
-									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
+									if entry_rec.ms_id.ms_completed_qty == None:
+										ms_completed_qty = 0
+									else:
+										ms_completed_qty = entry_rec.ms_id.ms_completed_qty
+										
+									if entry_rec.inhouse_qty == None:
+										inhouse_qty = 0
+									else:
+										inhouse_qty = entry_rec.inhouse_qty
+									if entry_rec.ms_id:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': ms_completed_qty + inhouse_qty})
 									## MS Store Operation ###
 									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
-								if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+								if entry_rec.ms_id:
+									if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+									
+							else:
+								if entry_rec.stock_inward_id.id > 0:
+									stock_obj = self.pool.get('ch.stock.inward.details')
+									### Updation in stock inward ###
+									stock_obj.write(cr,uid,entry_rec.stock_inward_id.id,{'ms_stock_state':'ready_for_ass'})
 				
 				if entry_rec.op4_process_result == 'reject':
 					
@@ -3884,11 +3951,28 @@ class kg_ms_operations(osv.osv):
 						if pending_operation == None:
 							if entry_rec.order_id.flag_for_stock == False:
 								if entry_rec.op5_process_result == 'accept':
-									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
+									if entry_rec.ms_id.ms_completed_qty == None:
+										ms_completed_qty = 0
+									else:
+										ms_completed_qty = entry_rec.ms_id.ms_completed_qty
+										
+									if entry_rec.inhouse_qty == None:
+										inhouse_qty = 0
+									else:
+										inhouse_qty = entry_rec.inhouse_qty
+									if entry_rec.ms_id:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': ms_completed_qty + inhouse_qty})
 									## MS Store Operation ###
 									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
-								if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+								if entry_rec.ms_id:
+									if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+									
+							else:
+								if entry_rec.stock_inward_id.id > 0:
+									stock_obj = self.pool.get('ch.stock.inward.details')
+									### Updation in stock inward ###
+									stock_obj.write(cr,uid,entry_rec.stock_inward_id.id,{'ms_stock_state':'ready_for_ass'})
 				
 				if entry_rec.op5_process_result == 'reject':
 					
@@ -4548,11 +4632,28 @@ class kg_ms_operations(osv.osv):
 						if pending_operation == None:
 							if entry_rec.order_id.flag_for_stock == False:
 								if entry_rec.op6_process_result == 'accept':
-									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
+									if entry_rec.ms_id.ms_completed_qty == None:
+										ms_completed_qty = 0
+									else:
+										ms_completed_qty = entry_rec.ms_id.ms_completed_qty
+										
+									if entry_rec.inhouse_qty == None:
+										inhouse_qty = 0
+									else:
+										inhouse_qty = entry_rec.inhouse_qty
+									if entry_rec.ms_id:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': ms_completed_qty + inhouse_qty})
 									## MS Store Operation ###
 									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
-								if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+								if entry_rec.ms_id:
+									if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+									
+							else:
+								if entry_rec.stock_inward_id.id > 0:
+									stock_obj = self.pool.get('ch.stock.inward.details')
+									### Updation in stock inward ###
+									stock_obj.write(cr,uid,entry_rec.stock_inward_id.id,{'ms_stock_state':'ready_for_ass'})
 				
 				if entry_rec.op6_process_result == 'reject':
 					
@@ -5212,11 +5313,28 @@ class kg_ms_operations(osv.osv):
 						if pending_operation == None:
 							if entry_rec.order_id.flag_for_stock == False:
 								if entry_rec.op7_process_result == 'accept':
-									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
+									if entry_rec.ms_id.ms_completed_qty == None:
+										ms_completed_qty = 0
+									else:
+										ms_completed_qty = entry_rec.ms_id.ms_completed_qty
+										
+									if entry_rec.inhouse_qty == None:
+										inhouse_qty = 0
+									else:
+										inhouse_qty = entry_rec.inhouse_qty
+									if entry_rec.ms_id:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': ms_completed_qty + inhouse_qty})
 									## MS Store Operation ###
 									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
-								if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+								if entry_rec.ms_id:
+									if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+									
+							else:
+								if entry_rec.stock_inward_id.id > 0:
+									stock_obj = self.pool.get('ch.stock.inward.details')
+									### Updation in stock inward ###
+									stock_obj.write(cr,uid,entry_rec.stock_inward_id.id,{'ms_stock_state':'ready_for_ass'})
 				
 				if entry_rec.op7_process_result == 'reject':
 					
@@ -5876,11 +5994,28 @@ class kg_ms_operations(osv.osv):
 						if pending_operation == None:
 							if entry_rec.order_id.flag_for_stock == False:
 								if entry_rec.op8_process_result == 'accept':
-									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
+									if entry_rec.ms_id.ms_completed_qty == None:
+										ms_completed_qty = 0
+									else:
+										ms_completed_qty = entry_rec.ms_id.ms_completed_qty
+										
+									if entry_rec.inhouse_qty == None:
+										inhouse_qty = 0
+									else:
+										inhouse_qty = entry_rec.inhouse_qty
+									if entry_rec.ms_id:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': ms_completed_qty + inhouse_qty})
 									## MS Store Operation ###
 									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
-								if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+								if entry_rec.ms_id:
+									if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+									
+							else:
+								if entry_rec.stock_inward_id.id > 0:
+									stock_obj = self.pool.get('ch.stock.inward.details')
+									### Updation in stock inward ###
+									stock_obj.write(cr,uid,entry_rec.stock_inward_id.id,{'ms_stock_state':'ready_for_ass'})
 				
 				if entry_rec.op8_process_result == 'reject':
 					
@@ -6540,11 +6675,29 @@ class kg_ms_operations(osv.osv):
 						if pending_operation == None:
 							if entry_rec.order_id.flag_for_stock == False:
 								if entry_rec.op9_process_result == 'accept':
-									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
+									if entry_rec.ms_id.ms_completed_qty == None:
+										ms_completed_qty = 0
+									else:
+										ms_completed_qty = entry_rec.ms_id.ms_completed_qty
+										
+									if entry_rec.inhouse_qty == None:
+										inhouse_qty = 0
+									else:
+										inhouse_qty = entry_rec.inhouse_qty
+									
+									if entry_rec.ms_id:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': ms_completed_qty + inhouse_qty})
 									## MS Store Operation ###
 									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
-								if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+									
+								if entry_rec.ms_id:
+									if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+							else:
+								if entry_rec.stock_inward_id.id > 0:
+									stock_obj = self.pool.get('ch.stock.inward.details')
+									### Updation in stock inward ###
+									stock_obj.write(cr,uid,entry_rec.stock_inward_id.id,{'ms_stock_state':'ready_for_ass'})
 				
 				if entry_rec.op9_process_result == 'reject':
 					
@@ -7208,11 +7361,28 @@ class kg_ms_operations(osv.osv):
 						if pending_operation == None:
 							if entry_rec.order_id.flag_for_stock == False:
 								if entry_rec.op10_process_result == 'accept':
-									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
+									if entry_rec.ms_id.ms_completed_qty == None:
+										ms_completed_qty = 0
+									else:
+										ms_completed_qty = entry_rec.ms_id.ms_completed_qty
+										
+									if entry_rec.inhouse_qty == None:
+										inhouse_qty = 0
+									else:
+										inhouse_qty = entry_rec.inhouse_qty
+									if entry_rec.ms_id:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': ms_completed_qty + inhouse_qty})
 									## MS Store Operation ###
 									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
-								if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+								if entry_rec.ms_id:
+									if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+									
+							else:
+								if entry_rec.stock_inward_id.id > 0:
+									stock_obj = self.pool.get('ch.stock.inward.details')
+									### Updation in stock inward ###
+									stock_obj.write(cr,uid,entry_rec.stock_inward_id.id,{'ms_stock_state':'ready_for_ass'})
 				
 				if entry_rec.op10_process_result == 'reject':
 					
@@ -7873,11 +8043,28 @@ class kg_ms_operations(osv.osv):
 						if pending_operation == None:
 							if entry_rec.order_id.flag_for_stock == False:
 								if entry_rec.op11_process_result == 'accept':
-									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
+									if entry_rec.ms_id.ms_completed_qty == None:
+										ms_completed_qty = 0
+									else:
+										ms_completed_qty = entry_rec.ms_id.ms_completed_qty
+										
+									if entry_rec.inhouse_qty == None:
+										inhouse_qty = 0
+									else:
+										inhouse_qty = entry_rec.inhouse_qty
+									if entry_rec.ms_id:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': ms_completed_qty + inhouse_qty})
 									## MS Store Operation ###
 									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
-								if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+								if entry_rec.ms_id:
+									if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+									
+							else:
+								if entry_rec.stock_inward_id.id > 0:
+									stock_obj = self.pool.get('ch.stock.inward.details')
+									### Updation in stock inward ###
+									stock_obj.write(cr,uid,entry_rec.stock_inward_id.id,{'ms_stock_state':'ready_for_ass'})
 				
 				if entry_rec.op11_process_result == 'reject':
 					## Operation 11 Status Updation ###
@@ -8539,11 +8726,19 @@ class kg_ms_operations(osv.osv):
 						if pending_operation == None:
 							if entry_rec.order_id.flag_for_stock == False:
 								if entry_rec.op12_process_result == 'accept':
-									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
+									if entry_rec.ms_id:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_completed_qty': entry_rec.ms_id.ms_completed_qty + entry_rec.inhouse_qty})
 									## MS Store Operation ###
 									self.ms_store_creation(cr, uid, [entry_rec.id],context=None)
-								if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
-									ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+								if entry_rec.ms_id:
+									if (entry_rec.ms_id.ms_completed_qty + entry_rec.ms_id.ms_rejected_qty) == entry_rec.ms_id.ms_sch_qty:
+										ms_obj.write(cr, uid, entry_rec.ms_id.id, {'ms_state':'op_completed'})
+									
+							else:
+								if entry_rec.stock_inward_id.id > 0:
+									stock_obj = self.pool.get('ch.stock.inward.details')
+									### Updation in stock inward ###
+									stock_obj.write(cr,uid,entry_rec.stock_inward_id.id,{'ms_stock_state':'ready_for_ass'})
 				
 				if entry_rec.op12_process_result == 'reject':
 					## Operation 12 Status Updation ###

@@ -1289,8 +1289,9 @@ class kg_schedule(osv.osv):
 								cr.execute(""" select id,available_qty as stock_qty,stock_location_id 
 									from ch_stock_inward_details  
 									where item_code = %s and item_name= %s and moc_id = %s and stock_item = 'ms_item'
-									and ms_stock_state != 'reject' and available_qty > 0  and stock_type = 'pattern' """%(item_code,item_name
-									,ms_item['moc_id']))
+									and ms_stock_state != 'reject' and available_qty > 0  and stock_type = 'pattern'
+									and position_id = %s 
+									order by id asc """%(item_code,item_name,ms_item['moc_id'],ms_item['position_id']))
 								stock_inward_items = cr.dictfetchall();
 								print "stock_inward_items---------------------------->>>",stock_inward_items
 								

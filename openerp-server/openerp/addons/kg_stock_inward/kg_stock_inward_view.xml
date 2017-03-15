@@ -230,6 +230,7 @@
 					<field name="item_code" string="Item Code"/>
 					<field name="item_name" string="Item Name"/>
 					<field name="moc_id"/>
+					<field name="position_id"/>
 					<field name="available_qty"/>
 					<field name="serial_no" invisible="1"/>
 					<field name="heat_no" invisible="1"/>

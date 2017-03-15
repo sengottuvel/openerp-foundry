@@ -443,7 +443,7 @@ class account_account(osv.osv):
     _columns = {
         'name': fields.char('Name', size=256, required=True, select=True),
         'currency_id': fields.many2one('res.currency', 'Secondary Currency', help="Forces all moves for this account to have this secondary currency."),
-        'code': fields.char('Code', size=64, required=True, select=1),
+        'code': fields.char('Code', size=64, select=1),
         'type': fields.selection([
             ('view', 'View'),
             ('other', 'Regular'),
@@ -456,7 +456,7 @@ class account_account(osv.osv):
             "different types of accounts: view can not have journal items, consolidation are accounts that "\
             "can have children accounts for multi-company consolidations, payable/receivable are for "\
             "partners accounts (for debit/credit computations), closed for depreciated accounts."),
-        'user_type': fields.many2one('account.account.type', 'Account Type', required=True,
+        'user_type': fields.many2one('account.account.type', 'Account Type',
             help="Account Type is used for information purpose, to generate "
               "country-specific legal reports, and set the rules to close a fiscal year and generate opening entries."),
         'financial_report_ids': fields.many2many('account.financial.report', 'account_account_financial_report', 'account_id', 'report_line_id', 'Financial Reports'),
@@ -496,16 +496,29 @@ class account_account(osv.osv):
              store={
                     'account.account': (_get_children_and_consol, ['level', 'parent_id'], 10),
                    }),
+        'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode', readonly=True),
+        
     }
 
     _defaults = {
+        'entry_mode': 'manual',
         'type': 'other',
         'reconcile': False,
         'active': True,
         'currency_mode': 'current',
         'company_id': lambda s, cr, uid, c: s.pool.get('res.company')._company_default_get(cr, uid, 'account.account', context=c),
     }
-
+	
+	def account_creation(self, cr, uid,acc_name,master_id,entry_mode,internal_type,note, context=None):
+		
+		account_id = self.create(cr,uid,{'name': acc_name,
+										 'master_id': master_id,
+										 'type': internal_type,
+										 'entry_mode': entry_mode,
+										 'note': note,
+										})
+		return account_id
+	
     def _check_recursion(self, cr, uid, ids, context=None):
         obj_self = self.browse(cr, uid, ids[0], context=context)
         p_id = obj_self.parent_id and obj_self.parent_id.id

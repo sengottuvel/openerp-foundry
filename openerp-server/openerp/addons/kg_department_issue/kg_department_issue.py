@@ -232,7 +232,7 @@ class kg_department_issue(osv.osv):
 						wo_id = False
 					dep_stock_location = depindent_obj.dest_location_id.id
 					main_location = depindent_obj.src_location_id.id
-										
+					
 					vals = {
 					
 						'indent_id':depindent_obj.id,
@@ -365,8 +365,16 @@ class kg_department_issue(osv.osv):
 							po_tot = 0.0
 							lot_browse = lot_obj.browse(cr, uid,val[0])
 							grn_id = lot_browse.grn_move
-							dep_issue_line_rec.write({'price_unit': lot_browse.price_unit or 0.0,'confirm_qty':dep_issue_line_rec.issue_qty
-										})											
+							cutting_qty = 0
+							if obj_rec.department_id.name == 'DP2':
+								if item.indent_line_id:
+									if item.indent_line_id.qty == item.indent_line_id.cutting_qty:
+										cutting_qty = item.issue_qty
+									elif item.indent_line_id.qty != item.indent_line_id.cutting_qty:
+										cutting_qty = item.indent_qty / (item.indent_line_id.qty/item.indent_line_id.cutting_qty)
+									else:
+										cutting_qty = 0
+							dep_issue_line_rec.write({'price_unit': lot_browse.price_unit or 0.0,'confirm_qty':dep_issue_line_rec.issue_qty,'cutting_qty': cutting_qty})
 							for i in val:
 								lot_rec = lot_obj.browse(cr, uid, i)
 								stock_tot += lot_rec.reserved_qty
@@ -730,16 +738,16 @@ class kg_department_issue(osv.osv):
 kg_department_issue()
 
 class kg_department_issue_line(osv.osv):
-
+	
 	_name = "kg.department.issue.line"
 	_description = "Department Issue Line"
-
+	
 	_columns = {
 		
 		## Basic Info
 		
 		#~ 'issue_date':fields.date('PO GRN Date'),
-		'issue_id':fields.many2one('kg.department.issue','Issue No'),
+		'issue_id': fields.many2one('kg.department.issue','Issue No'),
 		'name': fields.related('issue_id','name', type='char', string='Issue No'),
 		'state': fields.selection([('draft', 'Draft'), ('confirmed', 'Confirmed'),('done', 'Done'), ('cancel', 'Cancelled')], 'Status',readonly=True),
 		'remarks': fields.text('Remarks'),
@@ -747,32 +755,33 @@ class kg_department_issue_line(osv.osv):
 		## Module Requirement Fields
 		
 		'issue_date': fields.related('issue_id','issue_date', type='date', string='Issue Date',store=True),
-		'product_id':fields.many2one('product.product','Product Name',required=True,domain="[('state','not in',('reject','cancel')),('purchase_ok','=',True)]"),
-		'uom_id':fields.many2one('product.uom','UOM',readonly=True),
-		'issue_qty':fields.float('Issue Qty',required=True,readonly=False,states={'done':[('readonly',True)]}),
-		'issue_qty_2':fields.float('Issue Qty 2',required=True),
-		'indent_qty':fields.float('Indent Quantity'),
-		'reject_qty':fields.float('Reject Qty'),
-		'price_unit':fields.float('Unit Price'),
+		'product_id': fields.many2one('product.product','Product Name',required=True,domain="[('state','not in',('reject','cancel')),('purchase_ok','=',True)]"),
+		'uom_id': fields.many2one('product.uom','UOM',readonly=True),
+		'issue_qty': fields.float('Issue Qty',required=True,readonly=False,states={'done':[('readonly',True)]}),
+		'issue_qty_2': fields.float('Issue Qty 2',required=True),
+		'cutting_qty': fields.float('Cutting Qty'),
+		'indent_qty': fields.float('Indent Quantity'),
+		'reject_qty': fields.float('Reject Qty'),
+		'price_unit': fields.float('Unit Price'),
 		'kg_discount_per': fields.float('Discount (%)', digits_compute= dp.get_precision('Discount')),
 		'kg_discount': fields.float('Discount Amount'),
 		'tax_id': fields.many2many('account.tax', 'department_issue_tax', 'issue_line_id', 'taxes_id', 'Taxes'),
 		'location_id': fields.many2one('stock.location', 'Source Location'),
 		'location_dest_id': fields.many2one('stock.location', 'Destination Location'),
-		'indent_id':fields.many2one('kg.depindent','Department Indent'),
-		'indent_line_id':fields.many2one('kg.depindent.line','Department Indent Line'),
-		'service_indent_line_id':fields.many2one('kg.service.indent.line','Service Indent Line'),
+		'indent_id': fields.many2one('kg.depindent','Department Indent'),
+		'indent_line_id': fields.many2one('kg.depindent.line','Department Indent Line'),
+		'service_indent_line_id': fields.many2one('kg.service.indent.line','Service Indent Line'),
 		'issue_type': fields.selection([('material', 'Material'), ('service', 'Service')], 'Issue Type'),
-		'dep_issue_type':fields.selection([('from_indent','From Indent'),('direct','Direct')], string='Issue Type'),
+		'dep_issue_type': fields.selection([('from_indent','From Indent'),('direct','Direct')], string='Issue Type'),
 		'kg_grn_moves': fields.many2many('stock.production.lot','kg_department_issue_details','grn_id','lot_id', 'GRN Entry',
 					domain="[('product_id','=',product_id),'&',('grn_type','=',issue_type),'&', ('reserved_qty','>',0), '&', ('lot_type','!=','out')]",
 					),
 		#'kg_grn_moves': fields.many2many('stock.production.lot','kg_department_issue_details','grn_id','lot_id', 'GRN Entry'),
-		'brand_id':fields.many2one('kg.brand.master','Brand Name',domain="[('product_ids','in',(product_id)),('state','in',('draft','confirmed','approved'))]"),
-		'issue_return_line':fields.boolean('Excess Return Flag'),
-		'excess_return_qty':fields.float('Excess Return Qty'),
-		'damage_flag':fields.boolean('Damage Return Flag'),
-		'return_qty':fields.float('Returned Qty'),
+		'brand_id': fields.many2one('kg.brand.master','Brand Name',domain="[('product_ids','in',(product_id)),('state','in',('draft','confirmed','approved'))]"),
+		'issue_return_line': fields.boolean('Excess Return Flag'),
+		'excess_return_qty': fields.float('Excess Return Qty'),
+		'damage_flag': fields.boolean('Damage Return Flag'),
+		'return_qty': fields.float('Returned Qty'),
 		'wo_state': fields.selection([('accept','Accept'),('reject','Reject')],'Status'),
 		'ms_name': fields.char('MS Item Name'),
 		'confirm_qty': fields.float('Confirmed Qty'),
@@ -785,28 +794,28 @@ class kg_department_issue_line(osv.osv):
 		'wo_moc_id': fields.related('indent_line_id','moc_id', type='many2one',relation='kg.moc.master', string='MOC',store=True),
 		'wo_position_id': fields.related('indent_line_id','position_id', type='many2one',relation='kg.position.number', string='Position No.',store=True),
 		'order_priority': fields.related('wo_id','order_priority', type='selection', selection=ORDER_PRIORITY, string='Priority', store=True),
-		'accept_date':fields.date('Accepted Date'),
-		'remark_id':fields.many2one('kg.rejection.master','Rejection Remarks'),
+		'accept_date': fields.date('Accepted Date'),
+		'remark_id': fields.many2one('kg.rejection.master','Rejection Remarks'),
 		
 		## Child Tables Declaration
 		
-		'kg_itemwise_issue_line':fields.one2many('kg.item.wise.dept.issue','issue_line_id','Item wise Department Issue',readonly=True),
+		'kg_itemwise_issue_line': fields.one2many('kg.item.wise.dept.issue','issue_line_id','Item wise Department Issue',readonly=True),
 		
 	}
 	
 	_defaults = {
-	
+		
 		'state': 'draft',
 		'wo_state': 'accept',
 		'accept_date': lambda * a: time.strftime('%Y-%m-%d'),
 		
 	}
-
+	
 	def default_get(self, cr, uid, fields, context=None):
 		print"contextcontextcontext",context
 		
 		return context
-		
+	
 	def onchange_product_id(self, cr, uid, ids, product_id,context=None):
 		value = {'uom_id': ''}
 		if product_id:
@@ -826,14 +835,25 @@ class kg_department_issue_line(osv.osv):
 			value = {'reject_qty': issue_qty_2 - issue_qty}
 		return {'value': value}
 	
+	def onchange_cutting_qty(self, cr, uid, ids,cutting_qty,indent_qty,indent_line_id,context=None):
+		value = {'issue_qty': 0}
+		qty = 0
+		if indent_qty > 0 and indent_line_id:
+			indent_rec = self.pool.get('kg.depindent.line').browse(cr,uid,indent_line_id)
+			if indent_rec.cutting_qty == indent_rec.qty:
+				qty = cutting_qty
+			elif indent_rec.cutting_qty != indent_rec.qty:
+				qty = (indent_rec.qty/indent_rec.cutting_qty) * cutting_qty
+			value = {'issue_qty': qty}
+		return {'value': value}
+	
 	def line_action_process(self, cr, uid, ids, context=None):
 		issue_record = self.browse(cr,uid,ids[0])
 		if issue_record.state == 'confirmed':
 			issue_line_id = [issue_record.id]
-			self.action_process(cr,uid,issue_line_id)
-		
+			self.action_process(cr,uid,issue_line_id)	
 		return True
-		
+	
 	def action_process(self, cr, uid, issue_line_id, context=None):
 		issue_record = self.browse(cr,uid,issue_line_id[0])
 		#~ issue_record.write({'state': 'done','approved_by':uid,'approved_date':time.strftime('%Y-%m-%d %H:%M:%S')})
@@ -870,7 +890,7 @@ class kg_department_issue_line(osv.osv):
 				pass
 		
 		return True
-			
+	
 	def update_lines(self, cr, uid, ids, context=None):
 		
 		dep_issue_obj = self.pool.get('kg.item.wise.dept.issue')
@@ -928,10 +948,10 @@ class kg_department_issue_line(osv.osv):
 kg_department_issue_line()
 
 class kg_item_wise_dept_issue(osv.osv):
-
+	
 	_name = "kg.item.wise.dept.issue"
 	_description = "Item wise Department Issue"
-
+	
 	_columns = {
 		
 		## Basic Info

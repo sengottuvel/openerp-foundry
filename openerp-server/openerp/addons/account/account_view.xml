@@ -176,16 +176,19 @@
                     </h1>
                     <group>
                         <group>
+							<field name="code" required="1"/> 
                             <field name="parent_id"/>
                             <field name="type"/>
-                            <field name="user_type"/>
+                            <field name="user_type" required="1"/>
                             <field name="active"/>
                             <field name="company_id" widget="selection" groups="base.group_multi_company"/>
                         </group>
                         <group>
+							<field name="name" attrs="{'readonly':[('entry_mode','=','auto')]}"/>
                             <field name="debit" attrs="{'readonly':[('type','=','view')]}"/>
                             <field name="credit" attrs="{'readonly':[('type','=','view')]}"/>
                             <field name="balance"/>
+                            <field name="entry_mode" invisible="1"/>
                         </group>
                         <group>
                             <field name="tax_ids" domain="[('parent_id','=',False)]" widget="many2many_tags"/>

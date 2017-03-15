@@ -1380,10 +1380,7 @@ class kg_subcontract_inward(osv.osv):
 			if len(entry.line_ids) == 0:
 				raise osv.except_osv(_('Warning!'),
 								_('System not allow to without line items !!'))
-			for line in entry.line_ids:			
-				if line.com_weight <= 0.00:
-					raise osv.except_osv(_('Warning!'),
-								_('System not allow to save Zero and Negative values in Completed weight field !!'))
+			
 			for line in entry.line_ids:
 				if line.com_operation_id:
 					s = [(6, 0, [x.id for x in line.com_operation_id])]
@@ -2133,7 +2130,44 @@ class kg_subcontract_inward(osv.osv):
 						print"work_rec.line_ids.idwork_rec.line_ids.id",work_rec.line_ids[0].id
 						
 						
-						
+						if item.qty > 0:						
+								
+							### Stock Inward Creation ###
+							inward_obj = self.pool.get('kg.stock.inward')
+							inward_line_obj = self.pool.get('ch.stock.inward.details')						
+							print"line_item.order_id.location",item.order_id.location
+							
+							inward_vals = {
+								'location': item.order_id.location
+							}
+							
+							inward_id = inward_obj.create(cr, uid, inward_vals)
+							
+							inward_line_vals = {
+								'header_id': inward_id,
+								'location': item.order_id.location,
+								'stock_type': 'pattern',
+								'pump_model_id': item.pump_model_id.id,
+								'pattern_id': item.pattern_id.id,
+								'pattern_name': item.pattern_name,
+								'item_code': item.item_code,
+								'item_name': item.item_name,
+								'moc_id': item.moc_id.id,							
+								'qty': item.qty,
+								'available_qty': item.qty,
+								'each_wgt': 0,
+								'total_weight': 0,
+								'unit_price': 0,
+								'stock_mode': 'excess',
+								'ms_stock_state': 'operation_inprogress',
+								'stock_item': ms_type,
+								'position_id': item.position_id.id,
+								
+							}
+							
+							inward_line_id = inward_line_obj.create(cr, uid, inward_line_vals)
+							print "inward_line_valsinward_line_valsinward_line_vals",inward_line_vals
+		
 						
 						## Daily Planing Operation Creation Process ###			
 						print "FROM DAILY Planning>>>>>>>>>>>>>>>>>>>>@@@@@@@@@@@@@@@@@@@@@@"
@@ -2267,13 +2301,14 @@ class kg_subcontract_inward(osv.osv):
 									op12_clamping_area = pos_line_item.clamping_area
 							
 							### Operation Creation ###
-							
+							print"inward_line_idinward_line_idinward@@@@@@@@@@@@@@@@@@@@@@#########################_line_id",inward_line_id
 							for operation in range(item.qty):
 															
 								operation_vals = {
 									'ms_id': item.ms_id.id,		
 									'position_id': item.position_id.id,		
 									'pump_model_id': item.pump_model_id.id,		
+									'stock_inward_id': inward_line_id,		
 									'pattern_id': item.pattern_id.id,		
 									'moc_id': item.moc_id.id,		
 									'item_code': item.item_code,		
@@ -2715,43 +2750,7 @@ class kg_subcontract_inward(osv.osv):
 												self.pool.get('kg.ms.operations').write(cr,uid,ms_op_id,{'op12_state':'pending'})	
 						
 												
-						if item.qty > 0:						
-								
-							### Stock Inward Creation ###
-							inward_obj = self.pool.get('kg.stock.inward')
-							inward_line_obj = self.pool.get('ch.stock.inward.details')						
-							print"line_item.order_id.location",item.order_id.location
-							
-							inward_vals = {
-								'location': item.order_id.location
-							}
-							
-							inward_id = inward_obj.create(cr, uid, inward_vals)
-							
-							inward_line_vals = {
-								'header_id': inward_id,
-								'location': item.order_id.location,
-								'stock_type': 'pattern',
-								'pump_model_id': item.pump_model_id.id,
-								'pattern_id': item.pattern_id.id,
-								'pattern_name': item.pattern_name,
-								'item_code': item.item_code,
-								'item_name': item.item_name,
-								'moc_id': item.moc_id.id,							
-								'qty': item.qty,
-								'available_qty': item.qty,
-								'each_wgt': 0,
-								'total_weight': 0,
-								'unit_price': 0,
-								'stock_mode': 'excess',
-								'ms_stock_state': 'operation_inprogress',
-								'stock_item': ms_type,
-								'position_id': item.position_id.id,
-								
-							}
-							
-							inward_line_id = inward_line_obj.create(cr, uid, inward_line_vals)
-			direct_sc_inward_qty = 0.00
+			direct_sc_inward_qty = 0		
 			for line_item in entry.line_ids:				
 				if line_item.qty < 0:
 					raise osv.except_osv(_('Warning!'),
@@ -2768,7 +2767,7 @@ class kg_subcontract_inward(osv.osv):
 								
 				if line_item.entry_type == 'direct':
 					direct_sc_inward_qty = line_item.sc_id.sc_inward_qty + line_item.qty					
-				inward_state=''					
+									
 				if (line_item.sc_dc_line_id.sc_in_qty + line_item.qty) == line_item.sc_dc_line_id.qty:
 					inward_state = 'done'
 				if (line_item.sc_dc_line_id.sc_in_qty + line_item.qty) < line_item.sc_dc_line_id.qty:

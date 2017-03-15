@@ -2500,8 +2500,34 @@ class kg_fettling(osv.osv):
 			
 			self.fettling_accept_process(cr,uid,ids,entry.knockout_qty,entry.knockout_accept_qty,
 				entry.knockout_weight,entry.knockout_date)
-			self.fettling_reject_process(cr,uid,ids,entry.knockout_qty,entry.knockout_reject_qty,
-				entry.knockout_weight,entry.knockout_date,entry.knockout_reject_remarks_id.id)
+			#~ self.fettling_reject_process(cr,uid,ids,entry.knockout_qty,entry.knockout_reject_qty,
+				#~ entry.knockout_weight,entry.knockout_date,entry.knockout_reject_remarks_id.id)
+				
+			self.pool.get('kg.qc.verification').reject_process(cr,uid,0,entry.knockout_reject_qty,'foundry','fettling',entry,False,entry.knockout_qty)
+					
+			if entry.knockout_reject_qty > 0:
+			
+				### Entry Creation in Foundry Rejection List ###
+				foundry_rejection_obj = self.pool.get('kg.foundry.rejection.list')
+				
+				rejection_vals = {
+					
+					'division_id': entry.division_id.id,
+					'location': entry.location,
+					'order_id': entry.order_id.id,
+					'order_line_id': entry.order_line_id.id,
+					'order_priority': entry.order_priority,
+					'pattern_id': entry.pattern_id.id,
+					'moc_id': entry.moc_id.id,
+					'stage_id':entry.stage_id.id,
+					'stage_name': entry.stage_name,
+					'qty': entry.knockout_reject_qty,
+					'each_weight': entry.knockout_weight,
+					'reject_remarks_id': entry.knockout_reject_remarks_id.id,
+					'oth_spec': entry.oth_spec
+				}
+				
+				foundry_rejection_id = foundry_rejection_obj.create(cr, uid, rejection_vals)
 			self.write(cr, uid, ids, {'knockout_state':'complete'})
 		else:
 			pass
@@ -2550,8 +2576,34 @@ class kg_fettling(osv.osv):
 			
 			self.fettling_accept_process(cr,uid,ids,entry.decoring_qty,entry.decoring_accept_qty,
 				entry.decoring_weight,entry.decoring_date)
-			self.fettling_reject_process(cr,uid,ids,entry.decoring_qty,entry.decoring_reject_qty,
-				entry.decoring_weight,entry.decoring_date,entry.decoring_reject_remarks_id.id)
+			#~ self.fettling_reject_process(cr,uid,ids,entry.decoring_qty,entry.decoring_reject_qty,
+				#~ entry.decoring_weight,entry.decoring_date,entry.decoring_reject_remarks_id.id)
+				
+			self.pool.get('kg.qc.verification').reject_process(cr,uid,0,entry.decoring_reject_qty,'foundry','fettling',entry,False,entry.decoring_qty)
+				
+			if entry.decoring_reject_qty > 0:
+			
+				### Entry Creation in Foundry Rejection List ###
+				foundry_rejection_obj = self.pool.get('kg.foundry.rejection.list')
+				
+				rejection_vals = {
+					
+					'division_id': entry.division_id.id,
+					'location': entry.location,
+					'order_id': entry.order_id.id,
+					'order_line_id': entry.order_line_id.id,
+					'order_priority': entry.order_priority,
+					'pattern_id': entry.pattern_id.id,
+					'moc_id': entry.moc_id.id,
+					'stage_id':entry.stage_id.id,
+					'stage_name': entry.stage_name,
+					'qty': entry.decoring_reject_qty,
+					'each_weight': entry.decoring_weight,
+					'reject_remarks_id': entry.decoring_reject_remarks_id.id,
+					'oth_spec': entry.oth_spec
+				}
+				
+				foundry_rejection_id = foundry_rejection_obj.create(cr, uid, rejection_vals)
 			self.write(cr, uid, ids, {'decoring_state':'complete'})
 		else:
 			pass
@@ -2599,8 +2651,34 @@ class kg_fettling(osv.osv):
 			
 			self.fettling_accept_process(cr,uid,ids,entry.shot_blast_qty,entry.shot_blast_accept_qty,
 				entry.shot_blast_weight,entry.shot_blast_date)
-			self.fettling_reject_process(cr,uid,ids,entry.shot_blast_qty,entry.shot_blast_reject_qty,
-				entry.shot_blast_weight,entry.shot_blast_date,entry.shot_blast_reject_remarks_id.id)
+			#~ self.fettling_reject_process(cr,uid,ids,entry.shot_blast_qty,entry.shot_blast_reject_qty,
+				#~ entry.shot_blast_weight,entry.shot_blast_date,entry.shot_blast_reject_remarks_id.id)
+				
+			self.pool.get('kg.qc.verification').reject_process(cr,uid,0,entry.shot_blast_reject_qty,'foundry','fettling',entry,False,entry.shot_blast_qty)
+				
+			if entry.shot_blast_reject_qty > 0:
+			
+				### Entry Creation in Foundry Rejection List ###
+				foundry_rejection_obj = self.pool.get('kg.foundry.rejection.list')
+				
+				rejection_vals = {
+					
+					'division_id': entry.division_id.id,
+					'location': entry.location,
+					'order_id': entry.order_id.id,
+					'order_line_id': entry.order_line_id.id,
+					'order_priority': entry.order_priority,
+					'pattern_id': entry.pattern_id.id,
+					'moc_id': entry.moc_id.id,
+					'stage_id':entry.stage_id.id,
+					'stage_name': entry.stage_name,
+					'qty': entry.shot_blast_reject_qty,
+					'each_weight': entry.shot_blast_weight,
+					'reject_remarks_id': entry.shot_blast_reject_remarks_id.id,
+					'oth_spec': entry.oth_spec
+				}
+				
+				foundry_rejection_id = foundry_rejection_obj.create(cr, uid, rejection_vals)
 			
 			self.write(cr, uid, ids, {'shot_blast_state':'complete'})
 		else:
@@ -2649,8 +2727,34 @@ class kg_fettling(osv.osv):
 			
 			self.fettling_accept_process(cr,uid,ids,entry.hammering_qty,entry.hammering_accept_qty,
 				entry.hammering_weight,entry.hammering_date)
-			self.fettling_reject_process(cr,uid,ids,entry.hammering_qty,entry.hammering_reject_qty,
-				entry.hammering_weight,entry.hammering_date,entry.hammering_reject_remarks_id.id)
+			#~ self.fettling_reject_process(cr,uid,ids,entry.hammering_qty,entry.hammering_reject_qty,
+				#~ entry.hammering_weight,entry.hammering_date,entry.hammering_reject_remarks_id.id)
+				
+			self.pool.get('kg.qc.verification').reject_process(cr,uid,0,entry.hammering_reject_qty,'foundry','fettling',entry,False,entry.hammering_qty)
+				
+			if entry.hammering_reject_qty > 0:
+			
+				### Entry Creation in Foundry Rejection List ###
+				foundry_rejection_obj = self.pool.get('kg.foundry.rejection.list')
+				
+				rejection_vals = {
+					
+					'division_id': entry.division_id.id,
+					'location': entry.location,
+					'order_id': entry.order_id.id,
+					'order_line_id': entry.order_line_id.id,
+					'order_priority': entry.order_priority,
+					'pattern_id': entry.pattern_id.id,
+					'moc_id': entry.moc_id.id,
+					'stage_id':entry.stage_id.id,
+					'stage_name': entry.stage_name,
+					'qty': entry.hammering_reject_qty,
+					'each_weight': entry.hammering_weight,
+					'reject_remarks_id': entry.hammering_reject_remarks_id.id,
+					'oth_spec': entry.oth_spec
+				}
+				
+				foundry_rejection_id = foundry_rejection_obj.create(cr, uid, rejection_vals)
 			
 			self.write(cr, uid, ids, {'hammering_state':'complete'})
 		else:
@@ -2698,8 +2802,34 @@ class kg_fettling(osv.osv):
 			
 			self.fettling_accept_process(cr,uid,ids,entry.wheel_cutting_qty,entry.wheel_cutting_accept_qty,
 				entry.wheel_cutting_weight,entry.wheel_cutting_date)
-			self.fettling_reject_process(cr,uid,ids,entry.wheel_cutting_qty,entry.wheel_cutting_reject_qty,
-				entry.wheel_cutting_weight,entry.wheel_cutting_date,entry.wheel_cutting_reject_remarks_id.id)
+			#~ self.fettling_reject_process(cr,uid,ids,entry.wheel_cutting_qty,entry.wheel_cutting_reject_qty,
+				#~ entry.wheel_cutting_weight,entry.wheel_cutting_date,entry.wheel_cutting_reject_remarks_id.id)
+				
+			self.pool.get('kg.qc.verification').reject_process(cr,uid,0,entry.wheel_cutting_reject_qty,'foundry','fettling',entry,False,entry.wheel_cutting_qty)
+				
+			if entry.wheel_cutting_reject_qty > 0:
+			
+				### Entry Creation in Foundry Rejection List ###
+				foundry_rejection_obj = self.pool.get('kg.foundry.rejection.list')
+				
+				rejection_vals = {
+					
+					'division_id': entry.division_id.id,
+					'location': entry.location,
+					'order_id': entry.order_id.id,
+					'order_line_id': entry.order_line_id.id,
+					'order_priority': entry.order_priority,
+					'pattern_id': entry.pattern_id.id,
+					'moc_id': entry.moc_id.id,
+					'stage_id':entry.stage_id.id,
+					'stage_name': entry.stage_name,
+					'qty': entry.wheel_cutting_reject_qty,
+					'each_weight': entry.wheel_cutting_weight,
+					'reject_remarks_id': entry.wheel_cutting_reject_remarks_id.id,
+					'oth_spec': entry.oth_spec
+				}
+				
+				foundry_rejection_id = foundry_rejection_obj.create(cr, uid, rejection_vals)
 			
 			self.write(cr, uid, ids, {'wheel_cutting_state':'complete'})
 		else:
@@ -2747,8 +2877,34 @@ class kg_fettling(osv.osv):
 			
 			self.fettling_accept_process(cr,uid,ids,entry.gas_cutting_qty,entry.gas_cutting_accept_qty,
 				entry.gas_cutting_weight,entry.gas_cutting_date)
-			self.fettling_reject_process(cr,uid,ids,entry.gas_cutting_qty,entry.gas_cutting_reject_qty,
-				entry.gas_cutting_weight,entry.gas_cutting_date,entry.gas_cutting_reject_remarks_id.id)
+			#~ self.fettling_reject_process(cr,uid,ids,entry.gas_cutting_qty,entry.gas_cutting_reject_qty,
+				#~ entry.gas_cutting_weight,entry.gas_cutting_date,entry.gas_cutting_reject_remarks_id.id)
+				
+			self.pool.get('kg.qc.verification').reject_process(cr,uid,0,entry.gas_cutting_accept_qty,'foundry','fettling',entry,False,entry.gas_cutting_qty)
+				
+			if entry.gas_cutting_reject_qty > 0:
+			
+				### Entry Creation in Foundry Rejection List ###
+				foundry_rejection_obj = self.pool.get('kg.foundry.rejection.list')
+				
+				rejection_vals = {
+					
+					'division_id': entry.division_id.id,
+					'location': entry.location,
+					'order_id': entry.order_id.id,
+					'order_line_id': entry.order_line_id.id,
+					'order_priority': entry.order_priority,
+					'pattern_id': entry.pattern_id.id,
+					'moc_id': entry.moc_id.id,
+					'stage_id':entry.stage_id.id,
+					'stage_name': entry.stage_name,
+					'qty': entry.gas_cutting_reject_qty,
+					'each_weight': entry.gas_cutting_weight,
+					'reject_remarks_id': entry.gas_cutting_reject_remarks_id.id,
+					'oth_spec': entry.oth_spec
+				}
+				
+				foundry_rejection_id = foundry_rejection_obj.create(cr, uid, rejection_vals)
 			
 			self.write(cr, uid, ids, {'gas_cutting_state':'complete'})
 		else:
@@ -2798,8 +2954,34 @@ class kg_fettling(osv.osv):
 			
 			self.fettling_accept_process(cr,uid,ids,entry.arc_cutting_qty,entry.arc_cutting_accept_qty,
 				entry.arc_cutting_weight,entry.arc_cutting_date)
-			self.fettling_reject_process(cr,uid,ids,entry.arc_cutting_qty,entry.arc_cutting_reject_qty,
-				entry.arc_cutting_weight,entry.arc_cutting_date,entry.arc_cutting_reject_remarks_id.id)
+			#~ self.fettling_reject_process(cr,uid,ids,entry.arc_cutting_qty,entry.arc_cutting_reject_qty,
+				#~ entry.arc_cutting_weight,entry.arc_cutting_date,entry.arc_cutting_reject_remarks_id.id)
+				
+			self.pool.get('kg.qc.verification').reject_process(cr,uid,0,entry.arc_cutting_reject_qty,'foundry','fettling',entry,False,entry.arc_cutting_qty)
+				
+			if entry.arc_cutting_reject_qty > 0:
+			
+				### Entry Creation in Foundry Rejection List ###
+				foundry_rejection_obj = self.pool.get('kg.foundry.rejection.list')
+				
+				rejection_vals = {
+					
+					'division_id': entry.division_id.id,
+					'location': entry.location,
+					'order_id': entry.order_id.id,
+					'order_line_id': entry.order_line_id.id,
+					'order_priority': entry.order_priority,
+					'pattern_id': entry.pattern_id.id,
+					'moc_id': entry.moc_id.id,
+					'stage_id':entry.stage_id.id,
+					'stage_name': entry.stage_name,
+					'qty': entry.arc_cutting_reject_qty,
+					'each_weight': entry.arc_cutting_weight,
+					'reject_remarks_id': entry.arc_cutting_reject_remarks_id.id,
+					'oth_spec': entry.oth_spec
+				}
+				
+				foundry_rejection_id = foundry_rejection_obj.create(cr, uid, rejection_vals)
 			
 			self.write(cr, uid, ids, {'arc_cutting_state':'complete'})
 		else:
@@ -2849,8 +3031,34 @@ class kg_fettling(osv.osv):
 			
 			self.fettling_accept_process(cr,uid,ids,entry.heat_qty,entry.heat_qty,
 				entry.heat_each_weight,entry.heat_date)
-			self.fettling_reject_process(cr,uid,ids,entry.heat_qty,entry.heat_reject_qty,
-				entry.heat_each_weight,entry.heat_date,entry.heat_reject_remarks_id.id)
+			#~ self.fettling_reject_process(cr,uid,ids,entry.heat_qty,entry.heat_reject_qty,
+				#~ entry.heat_each_weight,entry.heat_date,entry.heat_reject_remarks_id.id)
+				
+			self.pool.get('kg.qc.verification').reject_process(cr,uid,0,entry.heat_reject_qty,'foundry','fettling',entry,False,entry.heat_qty)
+			
+			if entry.heat_reject_qty > 0:
+			
+				### Entry Creation in Foundry Rejection List ###
+				foundry_rejection_obj = self.pool.get('kg.foundry.rejection.list')
+				
+				rejection_vals = {
+					
+					'division_id': entry.division_id.id,
+					'location': entry.location,
+					'order_id': entry.order_id.id,
+					'order_line_id': entry.order_line_id.id,
+					'order_priority': entry.order_priority,
+					'pattern_id': entry.pattern_id.id,
+					'moc_id': entry.moc_id.id,
+					'stage_id':entry.stage_id.id,
+					'stage_name': entry.stage_name,
+					'qty': entry.heat_reject_qty,
+					'each_weight': entry.heat_each_weight,
+					'reject_remarks_id': entry.heat_reject_remarks_id.id,
+					'oth_spec': entry.oth_spec
+				}
+				
+				foundry_rejection_id = foundry_rejection_obj.create(cr, uid, rejection_vals)
 				
 				
 			### Updating Total Weight ###
@@ -2906,8 +3114,34 @@ class kg_fettling(osv.osv):
 			
 			self.fettling_accept_process(cr,uid,ids,entry.heat2_qty,entry.heat2_qty,
 				entry.heat2_each_weight,entry.heat_date)
-			self.fettling_reject_process(cr,uid,ids,entry.heat2_qty,entry.heat2_reject_qty,
-				entry.heat2_each_weight,entry.heat_date,entry.heat2_reject_remarks_id.id)
+			#~ self.fettling_reject_process(cr,uid,ids,entry.heat2_qty,entry.heat2_reject_qty,
+				#~ entry.heat2_each_weight,entry.heat_date,entry.heat2_reject_remarks_id.id)
+				
+			self.pool.get('kg.qc.verification').reject_process(cr,uid,0,entry.heat2_reject_qty,'foundry','fettling',entry,False,entry.heat2_qty)
+				
+			if entry.heat2_reject_qty > 0:
+			
+				### Entry Creation in Foundry Rejection List ###
+				foundry_rejection_obj = self.pool.get('kg.foundry.rejection.list')
+				
+				rejection_vals = {
+					
+					'division_id': entry.division_id.id,
+					'location': entry.location,
+					'order_id': entry.order_id.id,
+					'order_line_id': entry.order_line_id.id,
+					'order_priority': entry.order_priority,
+					'pattern_id': entry.pattern_id.id,
+					'moc_id': entry.moc_id.id,
+					'stage_id':entry.stage_id.id,
+					'stage_name': entry.stage_name,
+					'qty': entry.heat2_reject_qty,
+					'each_weight': entry.heat2_each_weight,
+					'reject_remarks_id': entry.heat2_reject_remarks_id.id,
+					'oth_spec': entry.oth_spec
+				}
+				
+				foundry_rejection_id = foundry_rejection_obj.create(cr, uid, rejection_vals)
 				
 				
 			### Updating Total Weight ###
@@ -2961,8 +3195,34 @@ class kg_fettling(osv.osv):
 			
 			self.fettling_accept_process(cr,uid,ids,entry.heat3_qty,entry.heat3_qty,
 				entry.heat3_each_weight,entry.heat_date)
-			self.fettling_reject_process(cr,uid,ids,entry.heat3_qty,entry.heat3_reject_qty,
-				entry.heat3_each_weight,entry.heat_date,entry.heat3_reject_remarks_id.id)
+			#~ self.fettling_reject_process(cr,uid,ids,entry.heat3_qty,entry.heat3_reject_qty,
+				#~ entry.heat3_each_weight,entry.heat_date,entry.heat3_reject_remarks_id.id)
+				
+			self.pool.get('kg.qc.verification').reject_process(cr,uid,0,entry.heat3_reject_qty,'foundry','fettling',entry,False,entry.heat3_qty)
+				
+			if entry.heat3_reject_qty > 0:
+			
+				### Entry Creation in Foundry Rejection List ###
+				foundry_rejection_obj = self.pool.get('kg.foundry.rejection.list')
+				
+				rejection_vals = {
+					
+					'division_id': entry.division_id.id,
+					'location': entry.location,
+					'order_id': entry.order_id.id,
+					'order_line_id': entry.order_line_id.id,
+					'order_priority': entry.order_priority,
+					'pattern_id': entry.pattern_id.id,
+					'moc_id': entry.moc_id.id,
+					'stage_id':entry.stage_id.id,
+					'stage_name': entry.stage_name,
+					'qty': entry.heat3_reject_qty,
+					'each_weight': entry.heat3_each_weight,
+					'reject_remarks_id': entry.heat3_reject_remarks_id.id,
+					'oth_spec': entry.oth_spec
+				}
+				
+				foundry_rejection_id = foundry_rejection_obj.create(cr, uid, rejection_vals)
 				
 				
 			### Updating Total Weight ###
@@ -3019,8 +3279,34 @@ class kg_fettling(osv.osv):
 			
 			self.fettling_accept_process(cr,uid,ids,entry.rough_grinding_qty,entry.rough_grinding_accept_qty,
 				entry.rough_grinding_weight,entry.rough_grinding_date)
-			self.fettling_reject_process(cr,uid,ids,entry.rough_grinding_qty,entry.rough_grinding_reject_qty,
-				entry.rough_grinding_weight,entry.rough_grinding_date,entry.rough_grinding_reject_remarks_id.id)
+			#~ self.fettling_reject_process(cr,uid,ids,entry.rough_grinding_qty,entry.rough_grinding_reject_qty,
+				#~ entry.rough_grinding_weight,entry.rough_grinding_date,entry.rough_grinding_reject_remarks_id.id)
+				
+			self.pool.get('kg.qc.verification').reject_process(cr,uid,0,entry.rough_grinding_reject_qty,'foundry','fettling',entry,False,entry.rough_grinding_qty)
+				
+			if entry.rough_grinding_reject_qty > 0:
+			
+				### Entry Creation in Foundry Rejection List ###
+				foundry_rejection_obj = self.pool.get('kg.foundry.rejection.list')
+				
+				rejection_vals = {
+					
+					'division_id': entry.division_id.id,
+					'location': entry.location,
+					'order_id': entry.order_id.id,
+					'order_line_id': entry.order_line_id.id,
+					'order_priority': entry.order_priority,
+					'pattern_id': entry.pattern_id.id,
+					'moc_id': entry.moc_id.id,
+					'stage_id':entry.stage_id.id,
+					'stage_name': entry.stage_name,
+					'qty': entry.rough_grinding_reject_qty,
+					'each_weight': entry.rough_grinding_weight,
+					'reject_remarks_id': entry.rough_grinding_reject_remarks_id.id,
+					'oth_spec': entry.oth_spec
+				}
+				
+				foundry_rejection_id = foundry_rejection_obj.create(cr, uid, rejection_vals)
 					
 			if entry.rough_grinding_rework_qty:
 				### Next Stage Qty ###
@@ -3945,6 +4231,32 @@ class kg_fettling(osv.osv):
 					entry.finish_grinding_weight,entry.finish_grinding_date)
 				self.fettling_reject_process(cr,uid,ids,entry.finish_grinding_qty,entry.finish_grinding_reject_qty,
 					entry.finish_grinding_weight,entry.finish_grinding_date,entry.finish_grinding_reject_remarks_id.id)
+					
+				self.pool.get('kg.qc.verification').reject_process(cr,uid,0,entry.finish_grinding_reject_qty,'foundry','fettling',entry,False,entry.finish_grinding_qty)
+					
+				if entry.finish_grinding_reject_qty > 0:
+			
+					### Entry Creation in Foundry Rejection List ###
+					foundry_rejection_obj = self.pool.get('kg.foundry.rejection.list')
+					
+					rejection_vals = {
+						
+						'division_id': entry.division_id.id,
+						'location': entry.location,
+						'order_id': entry.order_id.id,
+						'order_line_id': entry.order_line_id.id,
+						'order_priority': entry.order_priority,
+						'pattern_id': entry.pattern_id.id,
+						'moc_id': entry.moc_id.id,
+						'stage_id':entry.stage_id.id,
+						'stage_name': entry.stage_name,
+						'qty': entry.finish_grinding_reject_qty,
+						'each_weight': entry.finish_grinding_weight,
+						'reject_remarks_id': entry.finish_grinding_reject_remarks_id.id,
+						'oth_spec': entry.oth_spec
+					}
+					
+					foundry_rejection_id = foundry_rejection_obj.create(cr, uid, rejection_vals)
 			
 			self.write(cr, uid, ids, {'finish_grinding_state':'complete','update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		else:
@@ -3993,8 +4305,36 @@ class kg_fettling(osv.osv):
 			
 			self.fettling_accept_process(cr,uid,ids,entry.reshot_blasting_qty,entry.reshot_blasting_accept_qty,
 					entry.reshot_blasting_weight,entry.reshot_blasting_date)
-			self.fettling_reject_process(cr,uid,ids,entry.reshot_blasting_qty,entry.reshot_blasting_reject_qty,
-					entry.reshot_blasting_weight,entry.reshot_blasting_date,entry.reshot_blasting_reject_remarks_id.id)
+			#~ self.fettling_reject_process(cr,uid,ids,entry.reshot_blasting_qty,entry.reshot_blasting_reject_qty,
+					#~ entry.reshot_blasting_weight,entry.reshot_blasting_date,entry.reshot_blasting_reject_remarks_id.id)
+					
+			self.pool.get('kg.qc.verification').reject_process(cr,uid,0,entry.reshot_blasting_reject_qty,'foundry','fettling',entry,False,entry.reshot_blasting_qty)
+					
+				
+			
+			if entry.reshot_blasting_reject_qty > 0:
+			
+				### Entry Creation in Foundry Rejection List ###
+				foundry_rejection_obj = self.pool.get('kg.foundry.rejection.list')
+				
+				rejection_vals = {
+					
+					'division_id': entry.division_id.id,
+					'location': entry.location,
+					'order_id': entry.order_id.id,
+					'order_line_id': entry.order_line_id.id,
+					'order_priority': entry.order_priority,
+					'pattern_id': entry.pattern_id.id,
+					'moc_id': entry.moc_id.id,
+					'stage_id':entry.stage_id.id,
+					'stage_name': entry.stage_name,
+					'qty': entry.reshot_blasting_reject_qty,
+					'each_weight': entry.reshot_blasting_weight,
+					'reject_remarks_id': entry.reshot_blasting_reject_remarks_id.id,
+					'oth_spec': entry.oth_spec
+				}
+				
+				foundry_rejection_id = foundry_rejection_obj.create(cr, uid, rejection_vals)
 			
 			self.write(cr, uid, ids, {'reshot_blasting_state':'complete','update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		else:

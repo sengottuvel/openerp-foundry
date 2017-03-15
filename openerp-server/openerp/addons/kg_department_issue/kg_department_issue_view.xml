@@ -480,7 +480,7 @@
             <field name="view_id" ref="kg_bot_issue_form"/>
             <field name="act_window_id" ref="action_bot_issue"/>
         </record>
-         
+        
         <record id="action_ms_issue" model="ir.actions.act_window">
             <field name="name">MS Store Inward</field>
             <field name="type">ir.actions.act_window</field>
@@ -516,30 +516,38 @@
 					<header>
 						<button name="line_action_process" string="Accept" states="confirmed" type="object" class="oe_highlight"/>
 					</header>
-					<group string="Product Details">
+					<group string="WO Details">
+						<group>
+							<field name="w_order_line_id" readonly="1"/>
+							<field name="wo_moc_id" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
+							<field name="wo_pump_model_id" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
+							<field name="wo_position_id" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
+						</group>
+						<group>
+							<field name="wo_delivery_date" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
+							<field name="ms_bot_id" readonly="1"/>
+							<field name="traceability_no" readonly="1"/>
+							<field name="order_priority" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
+						</group>
+					</group>
+					<group string="Issue Details">
 						<group>
 							<field name="issue_id" readonly="1"/>
-							<field name="w_order_line_id" readonly="1"/>
-							<field name="wo_delivery_date" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
 							<field name="product_id" readonly="1"/>
-							<field name="wo_moc_id" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
-							<field name="order_priority" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
-							<field name="traceability_no" readonly="1"/>
+							<field name="accept_date" readonly="1"/>
 							<field name="remark_id" attrs="{'required':[('reject_qty','>',0)]}"/>
 						</group>
 						<group>
 							<field name="issue_date" readonly="1"/>
-							<field name="accept_date" readonly="1"/>
-							<field name="ms_bot_id" readonly="1"/>
-							<field name="wo_pump_model_id" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
-							<field name="wo_position_id" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
 							<field name="indent_qty" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
 							<field name="issue_qty_2" string="Issued Qty" readonly="1"/>
-							<field name="issue_qty" string="Accepted Qty" on_change="onchange_reject_qty(issue_qty_2,issue_qty)"/>
+							<field name="issue_qty" string="Accepted Qty" invisible="1" on_change="onchange_reject_qty(issue_qty_2,issue_qty)"/>
+							<field name="cutting_qty" string="Accepted Qty" required="1" on_change="onchange_cutting_qty(cutting_qty,indent_qty,indent_line_id)"/>
 							<field name="reject_qty" readonly="1"/>
 							<field name="state" invisible="1"/>
 							<field name="wo_state" invisible="1"/>
 							<field name="dep_issue_type" invisible="1"/>
+							<field name="indent_line_id" invisible="1"/>
 						</group>
 					</group>
                 </form> 
@@ -563,7 +571,8 @@
 					<field name="wo_moc_id"/>
 					<field name="indent_qty"/>
 					<field name="issue_qty_2" string="Issued Qty"/>
-					<field name="issue_qty" string="Accepted Qty"/>
+					<field name="cutting_qty" string="Accepted Qty"/>
+					<field name="issue_qty" string="Accepted Qty" invisible="1"/>
 					<field name="state" invisible="1"/>
 					<field name="issue_id" invisible="1"/>
                 </tree> 
@@ -581,20 +590,26 @@
 					<header>
 						<button name="line_action_process" string="Accept" states="confirmed" type="object" class="oe_highlight"/>
 					</header>
-					<group string="Product Details">
+					<group string="WO Details">
+						<group>
+							<field name="w_order_line_id" readonly="1"/>
+							<field name="wo_pump_model_id" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
+						</group>
+						<group>
+							<field name="wo_delivery_date" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
+							<field name="traceability_no" readonly="1"/>
+							<field name="order_priority" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
+						</group>
+					</group>
+					<group string="Issue Details">
 						<group>
 							<field name="issue_id" readonly="1"/>
-							<field name="w_order_line_id" readonly="1"/>
-							<field name="wo_delivery_date" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
 							<field name="product_id" readonly="1"/>
-							<field name="order_priority" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
-							<field name="traceability_no" readonly="1"/>
+							<field name="accept_date" readonly="1"/>
 							<field name="remark_id" attrs="{'required':[('reject_qty','>',0)]}"/>
 						</group>
 						<group>
 							<field name="issue_date" readonly="1"/>
-							<field name="accept_date" readonly="1"/>
-							<field name="wo_pump_model_id" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
 							<field name="indent_qty" readonly="1" attrs="{'invisible':[('dep_issue_type','!=','from_indent')]}"/>
 							<field name="issue_qty_2" string="Issued Qty" readonly="1"/>
 							<field name="issue_qty" string="Accepted Qty" on_change="onchange_reject_qty(issue_qty_2,issue_qty)"/>
@@ -604,7 +619,7 @@
 							<field name="dep_issue_type" invisible="1"/>
 						</group>
 					</group>
-                </form> 
+                </form>
             </field>
         </record>
         
