@@ -2266,7 +2266,9 @@
 			
 		<!-- Sequence Number Setting Ends Here -->     
         
+<!--
 		<menuitem action="action_move_journal_line_pro_jor" name="Provisional Journal" id="mam_account_move_pj" parent="kg_emp_cash_issue.mpm_accounts_transaction" sequence="4"/> 
+-->
         
         
         <!-- Provisional Journal Entry Ends (Done by Sujith)-->
