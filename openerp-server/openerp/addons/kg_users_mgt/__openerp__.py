@@ -37,7 +37,8 @@ keep track and order all your purchase orders.
 			'module_access/purchase/kg_purchase_transactions.xml',
 			'module_access/purchase/kg_vendor_quote_transactions.xml',		
 			'module_access/crm/kg_crm_admin.xml',		
-			'module_access/hrm/kg_hr_admin.xml',		
+			'module_access/hrm/kg_hr_admin.xml',
+			'module_access/accounts/kg_accounts_admin.xml',			
 			'rules/kg_model_rules.xml',
 			
 			

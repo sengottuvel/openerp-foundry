@@ -1,0 +1,92 @@
+<?xml version="1.0" ?>
+<openerp>
+<data noupdate="0">  
+		
+		
+		<record id="m_accounts_account_master" model="ir.model.access">
+			<field name="model_id" ref="account.model_account_account"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Account Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
+		
+		<record id="m_accounts_fiscalyear_master" model="ir.model.access">
+			<field name="model_id" ref="account.model_account_fiscalyear"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Account Fiscalyear Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
+		
+		<record id="m_accounts_period_master" model="ir.model.access">
+			<field name="model_id" ref="account.model_account_period"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Period Master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
+		
+		<record id="m_accounts_kg_emp_cash_issue" model="ir.model.access">
+			<field name="model_id" ref="kg_emp_cash_issue.model_kg_emp_cash_issue"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Employee Cash Issue</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
+		
+		<record id="m_accounts_kg_cash_voucher" model="ir.model.access">
+			<field name="model_id" ref="kg_cash_voucher.model_kg_cash_voucher"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Cash Voucher</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
+		
+		<record id="m_accounts_kg_account_chart" model="ir.model.access">
+			<field name="model_id" ref="account.model_account_chart"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Chart of Accounts</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
+		
+		
+		
+		
+		<record id="m_accounts_account_journal" model="ir.model.access">
+			<field name="model_id" ref="account.model_account_journal"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Books</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
+		
+		<record id="m_accounts_account_cashbox_journal" model="ir.model.access">
+			<field name="model_id" ref="account.model_account_journal_cashbox_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">CASH BOX</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
+		
+		
+		
+ </data>
+</openerp>

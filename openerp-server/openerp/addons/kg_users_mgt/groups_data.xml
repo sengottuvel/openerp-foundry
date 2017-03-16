@@ -550,6 +550,41 @@
 			])]"  name="menu_access"/>
 	  
 	</record>
+	
+	 <record id="group_accounts_admin" model="res.groups">
+        <field name="name">Accounts Admin</field>
+        <field name="implied_ids" eval="[(4, ref('stock.group_stock_user'))]"/>
+        <field name="custom_group">True</field>       
+        <field name="category_id" ref="base.module_category_warehouse_management"/>
+        <field eval="[(6,0,[
+       
+			ref('account.mpm_acc_masters'),			
+			ref('account.mpm_accounts_master'),			
+			ref('account.mam_account_period_master'),			
+			ref('account.mam_account_fiscalyear'),			
+			ref('account.mam_account_acounting_map'),			
+			ref('account.mam_account_acounting_map_ledger_name'),			
+			ref('kg_customer_advance.mpm_accounts_advance'),			
+			ref('kg_customer_advance.tam_cus_advance_ack'),			
+			ref('kg_emp_cash_issue.mpm_accounts_transaction'),			
+			ref('kg_emp_cash_issue.mam_kg_emp_cas_issue'),			
+			ref('kg_cash_voucher.mam_kg_cash_voucher'),			
+			ref('kg_menus.menu_kg_chart_acc'),			
+			ref('kg_menus.mam_kg_chart_accounts'),			
+			ref('kg_bank_statement.mam_kg_bank_state_brs'),			
+			ref('kg_bank_statement.mam_kg_bank_statement'),			
+			ref('kg_direct_expense_entry.tmi_direct_expense_entry'),			
+			ref('kg_tds_process.mam_kg_tds_pro'),			
+			ref('account.mam_account_journal_book_name'),			
+			ref('account.mma_open_bal_account_move'),			
+			ref('account.mam_open_bal_account_move'),			
+			ref('account.mam_account_move_pj'),			
+			ref('kg_advance_deduction.tam_kg_adv_ack'),			
+			
+			
+            ])]" name="menu_access"/>
+            <field name="users" eval="[(4, ref('base.user_root'))]"/>
+    </record>
  
 	
 	
