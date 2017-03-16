@@ -391,12 +391,11 @@
 		
 		<menuitem id="tam_cus_advance" name="Customer Advance" parent="kg_advance_menu" sequence="1" action="tma_cus_advance" />
 		
-		
-<!--
+
 		<menuitem name="Acknowledge" id="mpm_accounts_advance" parent = "account.mpm_acc_masters" sequence="2"/>
 				
 		<menuitem id="tam_cus_advance_ack" name="Customer Advance" parent="mpm_accounts_advance" sequence="1" action="tma_cus_advance_ack" />	
--->
+
 	
 	<!-- Menu Item End -->
 	
