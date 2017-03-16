@@ -286,7 +286,7 @@ ltrim(to_char((COALESCE((((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer) /
-sum(pump.prime_cost)::integer)::numeric, 0.00)),'999G999G99G999G99G99G990D99'))::numeric as ratio,
+sum(pump.prime_cost)::numeric)::numeric, 0.00)),'999G999G99G999G99G99G990D99'))::numeric as ratio,
 
 avg(pump.tax) as avg_basic_cpo,
 avg((COALESCE(pump.customer_discount,0))) as avg_cust_dis,
@@ -604,7 +604,7 @@ ltrim(to_char((COALESCE((((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer) /
-sum(pump.prime_cost)::integer)::numeric, 0.00)),'999G999G99G999G99G99G990D99'))::numeric as ratio,
+sum(pump.prime_cost)::numeric)::numeric, 0.00)),'999G999G99G999G99G99G990D99'))::numeric as ratio,
 
 avg(pump.tax) as avg_basic_cpo,
 avg((COALESCE(pump.customer_discount,0))) as avg_cust_dis,
