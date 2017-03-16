@@ -569,17 +569,11 @@
 			ref('kg_emp_cash_issue.mpm_accounts_transaction'),			
 			ref('kg_emp_cash_issue.mam_kg_emp_cas_issue'),			
 			ref('kg_cash_voucher.mam_kg_cash_voucher'),			
-			ref('kg_menus.menu_kg_chart_acc'),			
-			ref('kg_menus.mam_kg_chart_accounts'),			
-			ref('kg_bank_statement.mam_kg_bank_state_brs'),			
-			ref('kg_bank_statement.mam_kg_bank_statement'),			
-			ref('kg_direct_expense_entry.tmi_direct_expense_entry'),			
-			ref('kg_tds_process.mam_kg_tds_pro'),			
 			ref('account.mam_account_journal_book_name'),			
 			ref('account.mma_open_bal_account_move'),			
 			ref('account.mam_open_bal_account_move'),			
 			ref('account.mam_account_move_pj'),			
-			ref('kg_advance_deduction.tam_kg_adv_ack'),			
+				
 			
 			
             ])]" name="menu_access"/>
