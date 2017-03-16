@@ -276,13 +276,18 @@ class kg_product_category(osv.osv):
 			
 			## Account master creation process start
 			ac_obj = self.pool.get('account.account')
+			ac_type_ids = self.pool.get('account.account.type').search(cr,uid,[('name','=','Expense')])
+			ac_type = ''
+			if ac_type_ids:
+				ac_type_rec = self.pool.get('account.account.type').browse(cr,uid,ac_type_ids[0])
+				ac_type = ac_type_rec.id
 			old_acc_ids = ac_obj.search(cr,uid,[('master_id','=',rec.id)])
 			if old_acc_ids:
 				old_acc_rec = ac_obj.browse(cr,uid,old_acc_ids[0])
 				ac_obj.write(cr,uid,old_acc_rec.id,{'name': rec.name})
 			acc_ids = ac_obj.search(cr,uid,[('name','=',rec.name)])
 			if not acc_ids:
-				account_id = ac_obj.account_creation(cr,uid,rec.name,rec.id,'auto','other','New Product Category Added',context=context)
+				account_id = ac_obj.account_creation(cr,uid,rec.name,ac_type,rec.id,'auto','other','New Product Category Added',context=context)
 				self.write(cr, uid, ids, {'account_id':account_id})
 			## Account master creation process end
 			

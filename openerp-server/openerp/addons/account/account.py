@@ -543,11 +543,12 @@ class account_account(osv.osv):
 		'company_id': lambda s, cr, uid, c: s.pool.get('res.company')._company_default_get(cr, uid, 'account.account', context=c),
 	}
 	
-	def account_creation(self, cr, uid,acc_name,master_id,entry_mode,internal_type,note, context=None):
+	def account_creation(self, cr, uid,acc_name,ac_type,master_id,entry_mode,internal_type,note, context=None):
 		
 		account_id = self.create(cr,uid,{'name': acc_name,
 										 'master_id': master_id,
 										 'type': internal_type,
+										 'user_type': ac_type,
 										 'entry_mode': entry_mode,
 										 'note': note,
 										})

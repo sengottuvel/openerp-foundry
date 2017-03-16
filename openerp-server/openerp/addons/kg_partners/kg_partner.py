@@ -176,9 +176,53 @@ class kg_partner(osv.osv):
 	def approve_partner(self, cr, uid, ids, context=None): 
 		rec = self.browse(cr, uid, ids[0])
 		if rec.partner_state == 'confirm':
+			
+			## Account master creation process start
+			
+			internal_type = note = ''
+			entry_mode = 'auto'
+			account_payable_id = ''
+			ac_obj = self.pool.get('account.account')
+			old_acc_ids = ac_obj.search(cr,uid,[('master_id','=',rec.id)])
+			if old_acc_ids:
+				old_acc_rec = ac_obj.browse(cr,uid,old_acc_ids[0])
+				ac_obj.write(cr,uid,old_acc_rec.id,{'name': rec.name})
+			acc_ids = ac_obj.search(cr,uid,[('name','=',rec.name)])
+			ac_type = ''
+			if not acc_ids:
+				if rec.customer == True:
+					ac_type_ids = self.pool.get('account.account.type').search(cr,uid,[('name','=','Asset')])
+					if ac_type_ids:
+						ac_type_rec = self.pool.get('account.account.type').browse(cr,uid,ac_type_ids[0])
+						ac_type = ac_type_rec.id
+					internal_type = 'receivable'
+					note = 'New Customer Added'
+				if rec.supplier == True:
+					internal_type = 'payable'
+					note = 'New Supplier Added'
+				if rec.dealer == True:
+					internal_type = 'payable'
+					note = 'New Delear Added'
+				if rec.contractor == True:
+					internal_type = 'payable'
+					note = 'New Contractor Added'
+				if rec.supplier == True or rec.dealer == True or rec.contractor == True:
+					ac_type_ids = self.pool.get('account.account.type').search(cr,uid,[('name','=','Liability')])
+					if ac_type_ids:
+						ac_type_rec = self.pool.get('account.account.type').browse(cr,uid,ac_type_ids[0])
+						ac_type = ac_type_rec.id
+				account_receivable_id = ac_obj.account_creation(cr,uid,rec.name,ac_type,rec.id,entry_mode,internal_type,note,context=context)
+				creditor_ids = ac_obj.search(cr,uid,[('name','=','Sundry Creditors')])
+				if creditor_ids:
+					creditor_rec = ac_obj.browse(cr,uid,creditor_ids[0])
+					account_payable_id = creditor_rec.id
+				self.write(cr, uid, ids, {'property_account_receivable':account_receivable_id,'property_account_payable':account_payable_id})
+			
+			## Account master creation process end
+			
 			self.write(cr, uid, ids, {'partner_state': 'approve','approved_by':uid,'approved_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
-
+	
 	def entry_draft(self,cr,uid,ids,context=None):
 		rec = self.browse(cr, uid, ids[0])
 		if rec.partner_state == 'approve':
@@ -428,7 +472,7 @@ class kg_partner(osv.osv):
 		(_check_acc_no,'A/C No. should contain 6-18 digit numerics. Else system not allow to save.',['A/C No.']),
 		(_check_mobile_no,'Mobile No. should contain 10-12 digit numerics. Else system not allow to save.',['Mobile']),
 		(_name_validate, 'Name must be unique !!', ['Name']),		
-		#~ (_unique_tin, 'TIN must be unique !!', ['TIN']),
+		(_unique_tin, 'TIN must be unique !!', ['TIN']),
 		(_spl_name, 'Special Character Not Allowed!', ['']),
 		]
 			
