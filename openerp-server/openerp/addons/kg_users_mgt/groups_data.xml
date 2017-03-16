@@ -572,7 +572,8 @@
 			ref('account.mam_account_journal_book_name'),			
 			ref('account.mma_open_bal_account_move'),			
 			ref('account.mam_open_bal_account_move'),			
-			ref('account.mam_account_move_pj'),			
+			ref('account.mam_account_move_pj'),		
+			ref('kg_direct_expense_entry.tmi_direct_expense_entry'),		
 				
 			
 			

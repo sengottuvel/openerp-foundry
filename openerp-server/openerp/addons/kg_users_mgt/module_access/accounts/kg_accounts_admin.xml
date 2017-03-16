@@ -86,6 +86,26 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
 		</record>
 		
+		<record id="m_accounts_direct_entry_expense" model="ir.model.access">
+			<field name="model_id" ref="kg_direct_expense_entry.model_direct_entry_expense"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Direct Expense Entry</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
+		
+		<record id="m_accounts_ch_direct_entry_expense" model="ir.model.access">
+			<field name="model_id" ref="kg_direct_expense_entry.model_direct_entry_expense_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Direct Expense Entry Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
+		
 		
 		
  </data>
