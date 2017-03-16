@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>     
+
+
+		<report string="Production Planning Report"
+        model="kg.production"
+        auto="True"
+        name="onscreen_production_planning_report"
+        rml="kg_production/report/kg_production_planning_report.jrxml"
+        id="production_planning_jasper_report_menu" 
+        menu="True"
+        header="False"
+        />
+
+
+    </data>
+</openerp>
