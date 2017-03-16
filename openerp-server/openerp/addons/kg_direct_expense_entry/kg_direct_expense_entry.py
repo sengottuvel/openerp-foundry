@@ -106,7 +106,7 @@ class kg_direct_expense_entry(osv.osv):
 	
 		'name':fields.char('Name'),
 		'invoice_no':fields.char('Supplier Invoice No'),
-		'expense_date':fields.date('Expense Date'),
+		'expense_date':fields.date('Date'),
 		'invoice_date':fields.date('Supplier Invoice Date'),
 		'supplier_id':fields.many2one('res.partner','Supplier'),
 		'Supplier_add':fields.text('Supplier Address'),
