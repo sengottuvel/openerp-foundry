@@ -9,34 +9,57 @@
             <field name="arch" type="xml">
                 <form string="Fiscal year" version="7.0">
                 <header>
+					<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>					
+					<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
                     <button name="create_period" states="draft" string="Create Monthly Periods" type="object" class="oe_highlight"/>
-                    <button name="create_period3" states="draft" string="Create 3 Months Periods" type="object" class="oe_highlight"/>
-                    <field name="state" widget="statusbar" nolabel="1" />
+                    <button name="create_period3" states="draft" string="Create 3 Months Periods" type="object" class="oe_highlight"/>                   
+                    
                 </header>
                     <group>
                         <group>
-                            <field name="name"/>
-                            <field name="code"/>
+                            <field name="name" attrs="{'readonly': [('state','in',['confirmed','approved'])]}"/>
+                            <field name="code" attrs="{'readonly': [('state','in',['confirmed','approved'])]}"/>
                             <field name="company_id" groups="base.group_multi_company"/>
-                            <field name="end_journal_period_id"/>
+                            <field name="end_journal_period_id" attrs="{'readonly': [('state','in',['confirmed','approved'])]}"/>
                         </group>
                         <group>
-                            <field name="date_start"/>
-                            <field name="date_stop"/>
+                            <field name="date_start" attrs="{'readonly': [('state','in',['confirmed','approved'])]}"/>
+                            <field name="date_stop" attrs="{'readonly': [('state','in',['confirmed','approved'])]}"/>
+                            <field name="state"/>
                         </group>
                     </group>
-                    <field colspan="4" name="period_ids" nolabel="1" widget="one2many_list">
-                        <form string="Period" version="7.0">
-                            <group col="4">
+                    <field name="period_ids" nolabel="1" readonly ="1">
+						<tree string="Periods" editable="top" >                   
                                 <field name="name"/>
                                 <field name="code"/>
                                 <field name="date_start"/>
                                 <field name="date_stop"/>
                                 <field name="special"/>
-                                <field name="state" invisible="1"/>
-                            </group>
-                        </form>
+                                <field name="state" invisible="1"/>                          
+                        </tree>
                     </field>
+                    <notebook>	
+						<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+									<field name="active"/>		
+								</group>
+								<group>
+								<group>
+									<field name="user_id"/>
+									<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="app_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>								
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="app_date" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>								
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>  
+					</notebook>	                  
                 </form>
             </field>
         </record>
@@ -44,7 +67,7 @@
             <field name="name">account.fiscalyear.tree</field>
             <field name="model">account.fiscalyear</field>
             <field name="arch" type="xml">
-                <tree colors="blue:state == 'draft';gray:state == 'done' " string="Fiscalyear">
+                <tree colors="blue:state == 'draft';red:state == 'confirmed';black:state == 'approved' " toolbar="True" string="Fiscalyear">					
                     <field name="code"/>
                     <field name="name"/>
                     <field name="company_id" groups="base.group_multi_company"/>
@@ -88,8 +111,11 @@
         </record>
         <menuitem id="next_id_23" name="Periods" parent="account.menu_finance_configuration" sequence="5" />
         <menuitem id="menu_action_account_fiscalyear" action="action_account_fiscalyear" parent="next_id_23"/>
+        
+        <menuitem action="action_account_fiscalyear" name="Fiscal Years" id="mam_account_fiscalyear" parent="mpm_accounts_master" sequence="1"/>
 
-        <!-- Period -->
+        <!-- Accounts Period Module standard by Karthikeyan Start here-->
+        
         <record id="view_account_period_form" model="ir.ui.view">
             <field name="name">account.period.form</field>
             <field name="model">account.period</field>
@@ -99,25 +125,43 @@
                         <button string="Close Period" name="%(account.action_account_period_close)d" type="action" class="oe_highlight" states="draft"/>
                         <button name="action_draft" states="done" string="Re-Open Period" type="object" groups="account.group_account_manager"/>
                         <field name="state" widget="statusbar" nolabel="1"/>
-                    </header>
-                    <sheet>
-                        <group>
-                            <group>
-                                <field name="name"/>
-                                <field name="fiscalyear_id" widget="selection"/>
-                                <label for="date_start" string="Duration"/>
-                                <div>
-                                    <field name="date_start" class="oe_inline" nolabel="1"/> -
-                                    <field name="date_stop" nolabel="1" class="oe_inline"/>
-                                </div>
-                            </group>
-                            <group>
-                                <field name="code"/>
-                                <field name="special"/>
-                                <field name="company_id" widget="selection" groups="base.group_multi_company"/>
-                            </group>
-                        </group>
-                    </sheet>
+                    </header>                    
+					<group>
+						<group>
+							<field name="name"/>
+							<field name="fiscalyear_id" widget="selection"/>
+							<label for="date_start" string="Duration"/>
+							<div>
+								<field name="date_start" class="oe_inline" nolabel="1"/> -
+								<field name="date_stop" nolabel="1" class="oe_inline"/>
+							</div>
+						</group>
+						<group>
+							<field name="code"/>
+							<field name="special"/>
+							<field name="company_id" widget="selection" groups="base.group_multi_company"/>
+						</group>
+					</group>
+					<notebook>
+						<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+									<field name="active"/>
+								</group>
+								<group>
+								<group>
+									<field name="user_id"/>
+									<field name="close_id" attrs="{'invisible':[('state','in',['draft'])]}"/>									
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="close_date" attrs="{'invisible':[('state','in',['draft'])]}"/>									
+									<field name="update_date"/>									
+								</group>
+							</group>
+						</page>
+					</notebook>        
                 </form>
             </field>
         </record>
@@ -162,48 +206,95 @@
             </field>
         </record>
         <menuitem id="menu_action_account_period" action="action_account_period" parent="account.next_id_23"/>
-
-        <!-- Accounts -->
+        
+        <!-- Parent Master Menu -->
+		<menuitem name="Accounts" id="mpm_acc_masters" sequence="35"/>
+            
+            <!-- Accounts Masters Menu -->
+            <menuitem name="Masters" id="mpm_accounts_master" parent = "mpm_acc_masters" sequence="0"/>
+            
+            <!-- Periods Master  -->
+				<menuitem action="action_account_period" name="Periods" id="mam_account_period_master" parent="mpm_accounts_master" sequence="2"/>
+				
+		<!-- Menu Name End here --> 
+        
+        
+    <!-- Accounts Period Module standard by Karthikeyan Start here-->
+        <!-- Accounts Ledger Name Start here-->
         <record id="view_account_form" model="ir.ui.view">
             <field name="name">account.account.form</field>
             <field name="model">account.account</field>
             <field name="arch" type="xml">
                 <form string="Account" version="7.0">
-                    <label for="code" class="oe_edit_only" string="Account Code and Name"/>
-                    <h1>
-                        <field name="code" class="oe_inline" placeholder="Account code" style="width: 6em"/> -
-                        <field name="name" class="oe_inline" placeholder="Account name"/>
-                    </h1>
+					<header>						
+						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>						
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>									
+					</header>	                   
                     <group>
                         <group>
-							<field name="code" required="1"/> 
-                            <field name="parent_id"/>
-                            <field name="type"/>
-                            <field name="user_type" required="1"/>
-                            <field name="active"/>
+							<field name="code" required="1" attrs="{'readonly':[('state','=','approved')]}"/> 
+                            <field name="parent_id" attrs="{'readonly':[('state','=','approved')]}"/>                           
+                           
+                            <field name="user_type" required="1" attrs="{'readonly':[('state','=','approved')]}"/>                           
                             <field name="company_id" widget="selection" groups="base.group_multi_company"/>
+                                              
                         </group>
                         <group>
-							<field name="name" attrs="{'readonly':[('entry_mode','=','auto')]}"/>
-                            <field name="debit" attrs="{'readonly':[('type','=','view')]}"/>
-                            <field name="credit" attrs="{'readonly':[('type','=','view')]}"/>
-                            <field name="balance"/>
+							<field name="name" attrs="{'readonly':['|',('state','=','approved'),('entry_mode','=','auto')]}"/>
+                            <field name="type" attrs="{'readonly':[('state','=','approved')]}"/>
                             <field name="entry_mode" invisible="1"/>
+                            <field name="state"  style="width: 30%%" class="att_state_change"/>       
+                            
                         </group>
                         <group>
-                            <field name="tax_ids" domain="[('parent_id','=',False)]" widget="many2many_tags"/>
-                            <field name="reconcile"/>
+                            <field name="tax_ids" domain="[('parent_id','=',False)]" widget="many2many_tags" attrs="{'readonly':[('state','=','approved')]}" invisible = "1"/>
+                            <field name="reconcile" attrs="{'readonly':[('state','=','approved')]}" invisible = "1"/>
                             <field name="child_consol_ids"
                                 attrs="{'invisible':[('type','!=','consolidation')]}"
-                                widget="many2many_tags"/>
+                                widget="many2many_tags" invisible = "1"/>
                         </group>
                         <group groups="base.group_multi_currency">
-                            <field name="currency_id"/>
-                            <field name="currency_mode" attrs="{'readonly': [('currency_id','=',False)]}"/>
+                            <field name="currency_id" invisible = "1"/>
+                            <field name="currency_mode" attrs="{'readonly': [('currency_id','=',False)]}" invisible = "1"/>
                         </group>
                     </group>
+                    
+                     <group string="Statutory Configuration">
+							<group>
+								<field name="flag_tds"/>
+								<field name="flag_vat"/>
+								<field name="flag_service"/>
+							</group>
+							<group>
+								<field name="flag_ed"/>
+								<field name="flag_gst"/>
+							</group>
+							
+					</group>
                     <label for="note"/>
                     <field name="note"/>
+                    <notebook>						
+						<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+									<field name="active"/>		
+								</group>
+								<group>
+								<group>
+									<field name="user_id"/>
+									<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="app_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>									
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="app_date" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>									
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>	                  
                 </form>
             </field>
         </record>
@@ -211,18 +302,20 @@
             <field name="name">account.account.list</field>
             <field name="model">account.account</field>
             <field name="field_parent">child_id</field>
-            <field name="arch" type="xml">
-                <tree colors="blue:type == 'view';black:type in ('other','receivable','payable','consolidation');gray:type == 'closed'" string="Chart of accounts" toolbar="1" >
+            <field name="arch" type="xml">					
+				<tree colors="blue:state == 'draft';red:state == 'confirmed';black:state == 'approved'" toolbar="True" string="Chart of accounts">
+						
                     <field name="code"/>
                     <field name="name"/>
-                    <field name="parent_id" invisible="1"/>
+                    <field name="parent_id"/>
                     <field name="user_type" invisible="1"/>
                     <field name="debit"/>
                     <field name="credit"/>
                     <field name="balance"/>
-                    <field name="type"/>
-                    <field name="company_id" groups="base.group_multi_company"/>
-                    <field name="company_currency_id"/>
+                    <field name="type" invisible="1"/>
+                    <field name="company_id" groups="base.group_multi_company" invisible="1"/>
+                    <field name="company_currency_id" invisible="1"/>
+                    <field name="state"/>
                 </tree>
             </field>
         </record>
@@ -243,28 +336,173 @@
                 </search>
             </field>
         </record>
+        
+        <!-- End for Ledger Name -->
+        
+        
+         <!-- Accounts Ledger Group Start here-->
+        <record id="view_account_group_form" model="ir.ui.view">
+            <field name="name">account.account.form</field>
+            <field name="model">account.account</field>
+            <field name="arch" type="xml">
+                <form string="Account" version="7.0">
+					<header>						
+						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>						
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>									
+					</header>	                   
+                    <group>
+                        <group>
+							<field name="code" required="1"  attrs="{'readonly':[('state','=','approved')]}"/> 
+                            <field name="parent_id" attrs="{'readonly':[('state','=','approved')]}"/>                                
+                            <field name="user_type" attrs="{'readonly':[('state','=','approved')]}"/>                           
+                            <field name="company_id" widget="selection" groups="base.group_multi_company"/>
+                                                    
+                        </group>
+                        <group>
+							<field name="name" attrs="{'readonly':[('state','=','approved')]}"/>
+							<field name="type" readonly = "1"/>
+							<field name="state"/>   
+                            
+                        </group>
+                        <group>
+                            <field name="tax_ids" domain="[('parent_id','=',False)]" widget="many2many_tags" attrs="{'readonly':[('state','=','approved')]}" invisible = "1"/>
+                            <field name="reconcile" attrs="{'readonly':[('state','=','approved')]}" invisible = "1"/>
+                            <field name="child_consol_ids"
+                                attrs="{'invisible':[('type','!=','consolidation')]}"
+                                widget="many2many_tags" invisible = "1"/>
+                        </group>
+                        <group groups="base.group_multi_currency">
+                            <field name="currency_id" invisible = "1"/>
+                            <field name="currency_mode" attrs="{'readonly': [('currency_id','=',False)]}" invisible = "1"/>
+                        </group>
+                    </group>
+                    
+                    <label for="note"/>
+                    <field name="note"/>
+                    <notebook>						
+						<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+									<field name="active"/>		
+								</group>
+								<group>
+								<group>
+									<field name="user_id"/>
+									<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="app_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>									
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="app_date" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>									
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>	                  
+                </form>
+            </field>
+        </record>
+        <record id="view_account_group_list" model="ir.ui.view">
+            <field name="name">account.account.list</field>
+            <field name="model">account.account</field>
+            <field name="field_parent">child_id</field>
+            <field name="arch" type="xml">					
+				<tree colors="blue:state == 'draft';red:state == 'confirmed';black:state == 'approved'" toolbar="True" string="Chart of accounts">
+						
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="parent_id"/>
+                    <field name="user_type" invisible="1"/>                    
+                    <field name="type" invisible="1"/>
+                    <field name="company_id" groups="base.group_multi_company" invisible="1"/>
+                    <field name="company_currency_id" invisible="1"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+        <record id="view_account_group_search" model="ir.ui.view">
+            <field name="name">account.account.search</field>
+            <field name="model">account.account</field>
+            <field name="arch" type="xml">
+                <search string="Accounts">
+                    <field name="name" filter_domain="['|', ('name','ilike',self), ('code','ilike',self)]" string="Account"/>
+                    <filter icon="terp-sale" string="Receivable Accounts" domain="[('type','=','receivable')]"/>
+                    <filter icon="terp-purchase" string="Payable Accounts" domain="[('type','=','payable')]"/>
+                    <field name="user_type"/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Parent Account" icon="terp-folder-orange" domain="" context="{'group_by':'parent_id'}"/>
+                        <filter string="Account Type" icon="terp-stock_symbol-selection" domain="" context="{'group_by':'user_type'}"/>
+                        <filter string="Internal Type" icon="terp-stock_symbol-selection" domain="" context="{'group_by':'type'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+        
+        
+        <!-- End for ledger group -->       
+        
+        
+        
         <record id="action_account_form" model="ir.actions.act_window">
             <field name="name">Accounts</field>
             <field name="res_model">account.account</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form,graph</field>
-            <field name="search_view_id" ref="view_account_search"/>
+            <field name="search_view_id" ref="view_account_search"/>           
+            <field name="help" type="html">              
+            </field>
+        </record>	
+        
+        <record id="kg_account_name_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
             <field name="view_id" ref="view_account_list"/>
-            <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
-                Click to add an account.
-              </p><p>
-                An account is part of a ledger allowing your company
-                to register all kinds of debit and credit transactions.
-                Companies present their annual accounts in two main parts: the
-                balance sheet and the income statement (profit and loss
-                account). The annual accounts of a company are required by law
-                to disclose a certain amount of information.
-              </p>
+            <field name="act_window_id" ref="action_account_form"/>
+        </record>
+		
+		<record id="kg_account_name_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_account_form"/>
+            <field name="act_window_id" ref="action_account_form"/>
+        </record>	
+        
+        
+         <record id="action_account_form_ledger_name" model="ir.actions.act_window">
+            <field name="name">Ledger Group</field>
+            <field name="res_model">account.account</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form,graph</field>
+            <field name="search_view_id" ref="view_account_group_search"/>
+            <field name="context">{'default_type': 'view'}</field>  
+            <field name="domain">[('type','=','view')]</field>         
+            <field name="help" type="html">              
             </field>
         </record>
+        
+        <record id="kg_account_group_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_account_group_list"/>
+            <field name="act_window_id" ref="action_account_form_ledger_name"/>
+        </record>
+		
+		<record id="kg_account_group_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_account_group_form"/>
+            <field name="act_window_id" ref="action_account_form_ledger_name"/>
+        </record>
+        
         <menuitem id="account_account_menu" name="Accounts" parent="account.menu_finance_configuration" sequence="15"/>
         <menuitem action="action_account_form" id="menu_action_account_form" parent="account_account_menu"/>
+        
+         <menuitem action="action_account_form" name="Ledger Name" id="mam_account_acounting_map" parent="mpm_accounts_master" sequence="4"/>
+         
+         
+           <menuitem action="action_account_form_ledger_name" name="Ledger Group" id="mam_account_acounting_map_ledger_name" parent="mpm_accounts_master" sequence="3"/>
 
         <act_window
             id="act_account_acount_move_line_open_unreconciled"
@@ -489,6 +727,142 @@
            context="{'search_default_journal_id': active_id, 'default_journal_id': active_id}"
            res_model="account.move.line"
            src_model="account.journal"/>
+           
+           
+       <!-- Account Book Start here -->
+       
+       <record id="view_account_journal_book_form" model="ir.ui.view">
+            <field name="name">account.journal.form</field>
+            <field name="model">account.journal</field>
+            <field name="arch" type="xml">
+                <form string="Account Journal" version="7.0">   
+					<header>
+						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?" />
+						<button name="entry_cancel" type="object" string="Cancel" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>						
+					</header>                 
+                    <group>
+                        <group>
+                            <field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+                            <field name="division_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+                            <field name="type" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+                            <field name="default_credit_account_id" attrs="{'required':[('type','in',('cash', 'bank'))], 'readonly': [('state','in',['approved','reject','cancel'])]}" domain="[('type','&lt;&gt;','view'),('type','&lt;&gt;','consolidation')]" />
+                        </group>
+                        <group>
+							<field name="code" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+                            <field name="default_debit_account_id" attrs="{'required':[('type','in', ('cash', 'bank'))], 'readonly': [('state','in',['approved','reject','cancel'])]}" domain="[('type','&lt;&gt;','view'),('type','&lt;&gt;','consolidation')]"/>                           
+                            <field name="state" style="width: 30%%" class="att_state_change"/>	                            
+                        </group>
+                    </group>
+                    <group string='Remarks'>
+						<group>	
+							<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['approved','reject','cancel'])]}"/>
+						</group>
+						<group>												
+							<field name="cancel_remark" attrs="{'invisible':[('state','in',['confirmed','approved','reject'])], 'readonly': [('state','in',['cancel'])]}"/>		
+						</group>
+					</group>
+                    <notebook>
+						<page string="Entry Info">
+								<group>
+									<field name="company_id"/>
+									<field name="active"/>		
+								</group>
+								<group>
+								<group>
+									<field name="user_id"/>
+									<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="ap_rej_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>
+									<field name="cancel_user_id" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="ap_rej_date" attrs="{'invisible':[('state','in',['draft', 'confirmed'])]}"/>
+									<field name="cancel_date" attrs="{'invisible':[('state','in',['draft', 'confirmed','reject','approved'])]}"/>
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>                        
+                    </notebook>
+                </form>
+            </field>
+        </record>
+       
+        <record id="view_account_journal_book_tree" model="ir.ui.view">
+            <field name="name">account.journal.tree</field>
+            <field name="model">account.journal</field>
+            <field name="arch" type="xml">
+                <tree colors="blue:state == 'draft';red:state == 'confirmed';black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'"  toolbar="True" string="Account Journal">
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="entry_mode"/>
+                    <field name="type"/>
+                    <field name="state"/>                    
+                </tree>
+            </field>
+        </record>
+        
+        
+        <record id="view_account_journal_book_search" model="ir.ui.view">
+            <field name="name">account.journal.search</field>
+            <field name="model">account.journal</field>
+            <field name="arch" type="xml">
+                <search string="Search Account Journal">
+                    <field name="name" filter_domain="['|', ('name','ilike',self), ('code','ilike',self)]" string="Journal"/>
+                    <filter domain="['|', ('type', '=', 'sale'), ('type', '=', 'sale_refund')]" string="Sale" icon="terp-camera_test"/>
+                    <filter domain="['|', ('type', '=', 'purchase'), ('type', '=', 'purchase_refund')]" string="Purchase" icon="terp-purchase"/>
+                    <filter domain="['|', ('type', '=', 'cash'), ('type', '=', 'bank')]" string="Liquidity" icon="terp-dolar"/>
+                    <filter domain="['|', ('type', '=', 'general'), ('type', '=', 'situation')]" string="Others" icon="terp-stock"/>                    
+                    <filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>				
+					<filter icon="terp-check" name="approve" string="Approved" domain="[('state','=','approved')]"/>				
+					<filter icon="terp-check" name="reject" string="Rejected" domain="[('state','=','reject')]"/>
+                    <field name="user_id"/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Name" context="{'group_by':'name'}" icon="terp-personal"/>
+                        <filter string="Type" context="{'group_by':'type'}" icon="terp-stock_symbol-selection"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+       
+       <record id="action_account_journal_book_form" model="ir.actions.act_window">
+            <field name="name">Books</field>
+            <field name="res_model">account.journal</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_account_journal_book_search"/>               
+            <field name="help" type="html">              
+            </field>
+        </record>
+        
+        <record id="kg_account_journal_book_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_account_journal_book_tree"/>
+            <field name="act_window_id" ref="action_account_journal_book_form"/>
+        </record>
+		
+		<record id="kg_account_journal_book_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_account_journal_book_form"/>
+            <field name="act_window_id" ref="action_account_journal_book_form"/>
+        </record>
+       
+       
+        <menuitem action="action_account_journal_book_form" name="Books" id="mam_account_journal_book_name" parent="mpm_accounts_master" sequence="3"/>
+
+       
+       <!-- Account Book End here -->
+       
+           
+           
+           
+           
 
         <!-- Bank statement -->
         <record id="view_account_bank_statement_filter" model="ir.ui.view">
@@ -1430,6 +1804,460 @@
             parent="account.menu_finance_entries"
             groups="group_account_user"
             sequence="5"/>
+            
+            
+        <!-- General Journal Start hear Karthikeyan -->
+        
+        
+        <record id="view_move_tree_jo" model="ir.ui.view">
+            <field name="name">account.move.tree</field>
+            <field name="model">account.move</field>
+            <field name="arch" type="xml">
+                <tree colors="blue:state == 'draft';black:state == 'posted'" string="Journal Entries">
+                    <field name="name"/>                   
+                    <field name="date"/>
+                    <field name="period_id"/>
+                    <field name="journal_id"/>                    
+                    <field name="amount" sum="Total Amount"/>                    
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+        <record id="view_move_form_jo" model="ir.ui.view">
+            <field name="name">account.move.form</field>
+            <field name="model">account.move</field>
+            <field name="arch" type="xml">
+                <form string="Journal Entries" version="7.0">
+                <header>
+                    <button name="button_validate" states="draft" string="Post" type="object" class="oe_highlight"/>
+                    <button name="button_cancel" states="posted" string="Cancel Entry" type="object" />
+                </header>               
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="journal_id"/>
+                            <field name="narration" required = "1"/>                           
+                        </group>
+                        <group>                            
+                            <field name="date"/> 
+                            <field name="trans_type" readonly="1" invisible="1"/>   
+                           <field name="state" style="width: 30%%" class="att_state_change"/>	              
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Journal Items">                           
+							<field name="line_id" nolabel="1" context="{'line_id': line_id , 'journal_id': journal_id }">
+							<tree string="Journal Items Tree" editable="top">                                   
+								<field name="account_id" on_change="onchange_code(account_id)"/>
+								<field name="code" required = "1"/>
+								<field name="debit" required = "1"/>
+								<field name="credit" required = "1"/>
+								<field name="narration" widget="char"/>                                       
+							</tree>
+							</field> 
+                        </page>
+                        <page string="Entry Info">
+							<group>
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+							</group>
+							<group>
+								<group>
+									<field name="user_id"/>
+									<field name="post_date" attrs="{'invisible':[('state','in',['draft'])]}"/>									
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="post_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>									
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+                    </notebook>                   
+                </form>
+            </field>
+        </record>
+        <record id="view_account_move_filter_jo" model="ir.ui.view">
+            <field name="name">account.move.select</field>
+            <field name="model">account.move</field>
+            <field name="arch" type="xml">
+                <search string="Search Move">
+                    <field name="name" filter_domain="['|', ('name','ilike',self), ('ref','ilike',self)]" string="Move"/>
+                    <field name="date"/>
+                    <filter icon="terp-document-new" string="Unposted" domain="[('state','=','draft')]" help="Unposted Journal Entries"/>
+                    <filter icon="terp-camera_test" string="Posted" domain="[('state','=','posted')]" help="Posted Journal Entries"/>
+                    <separator/>
+                    <filter icon="terp-gtk-jump-to-ltr" string="To Review" domain="[('to_check','=',True)]" help="Journal Entries to Review"/>
+                    <field name="partner_id"/>
+                    <field name="journal_id"/>
+                    <field name="period_id"/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Partner" icon="terp-partner" domain="[]" context="{'group_by':'partner_id'}"/>
+                        <filter string="Journal" icon="terp-folder-orange" domain="[]" context="{'group_by':'journal_id'}"/>
+                        <filter string="States" icon="terp-stock_effects-object-colorize" domain="[]" context="{'group_by':'state'}"/>
+                        <filter string="Period" icon="terp-go-month" domain="[]" context="{'group_by':'period_id'}"/>
+                        <filter string="Date" icon="terp-go-month" domain="[]" context="{'group_by':'date'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>       
+        
+        
+        <record id="action_move_journal_line_jo" model="ir.actions.act_window">
+            <field name="name">General Journal</field>
+            <field name="res_model">account.move</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_account_move_filter_jo"/>
+            <field name="context">{'default_trans_type':'gl'}</field>    
+            <field name="domain">[('trans_type','=','gl')]</field>           
+            <field name="help" type="html">              
+            </field>
+        </record>
+        
+        <record id="kg_journal_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_move_tree_jo"/>
+            <field name="act_window_id" ref="action_move_journal_line_jo"/>
+        </record>
+		
+		<record id="kg_journal_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_move_form_jo"/>
+            <field name="act_window_id" ref="action_move_journal_line_jo"/>
+        </record>   
+        
+        
+         <!-- Sequence Number Setting Starts Here -->
+	
+			<record forcecreate="1" id="seq_type_account_move" model="ir.sequence.type">	
+				<field name="name">General Journal</field>
+				<field name="code">account.move</field>
+			</record>
+
+			<record forcecreate="1" id="seq_account_move" model="ir.sequence">
+			  <field name="name">General Journal</field>
+			  <field name="code">account.move</field>
+			  <field name="padding" eval="3"/>
+			  <field name="prefix">GV/%(year)s/%(month)s/</field>
+			  <field name="reset_sequence">fiscal_reset</field>
+			</record>
+			
+			<!-- Sequence Number Setting Ends Here -->    
+        
+         <menuitem action="action_move_journal_line_jo" name="General Journal" id="mam_journal_account_move" parent="mpm_accounts_master" sequence="5"/>    
+                
+        <!-- General Journal End -->
+        
+        <!-- Opening Balance Entry Starts (Done by Sujith)-->
+        
+        <record id="view_move_form_open_bal" model="ir.ui.view">
+            <field name="name">account.move.form</field>
+            <field name="model">account.move</field>
+            <field name="arch" type="xml">
+                <form string="Opening Balance Entry" version="7.0">
+                <header>
+                     <button name="button_validate" states="draft" string="Post" type="object" class="oe_highlight" />
+                    <button name="button_cancel" states="posted" string="Cancel Entry" type="object" />
+                </header>               
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="journal_id" string="Book" attrs="{'readonly':[('state','in',['posted'])]}"/>
+                            <field name="trans_type" readonly="1" invisible="1"/>
+                            <field name="notes" attrs="{'readonly':[('state','in',['draft'])]}" invisible="1"/>	
+                        </group>
+                        <group>   
+							<field name="date" readonly="1"/>      
+							<field name="division_id" required="1" attrs="{'readonly':[('state','in',['posted'])]}"/>                           
+                           <field name="state" style="width: 30%%" class="att_state_change"/>	              
+                        </group>
+                    </group>	
+                    <notebook>
+                        <page string="Opening Balance Entry">                           
+							<field name="line_id" nolabel="1" context="{'line_id': line_id , 'journal_id': journal_id }">
+							<tree string="Opening Balance Entry" editable="top" >                                   
+								<field name="account_id" string="Account Name" on_change="onchange_code(account_id)"/>
+								<field name="code" required = "1"/>
+								<field name="debit" required = "1"/>
+								<field name="credit" required = "1"/>
+								<field name="narration" widget="char" readonly="1"/>                                       
+							</tree>
+							</field> 
+                        </page>
+                        <page string="Entry Info">
+							<group>
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+							</group>
+							<group>
+								<group>
+									<field name="user_id"/>
+									<field name="post_date" attrs="{'invisible':[('state','in',['draft'])]}"/>							
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="post_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+                    </notebook>                   
+                </form>
+            </field>
+        </record>
+        
+         <record id="view_move_tree_open_bal" model="ir.ui.view">
+            <field name="name">account.move.tree</field>
+            <field name="model">account.move</field>
+            <field name="arch" type="xml">
+                <tree colors="blue:state == 'draft';black:state == 'posted'" string="Opening Balance Entry">
+                    <field name="name"/>                   
+                    <field name="date"/>
+                    <field name="division_id"/>
+                    <field name="journal_id"/>                    
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record id="view_account_move_filter_open_bal" model="ir.ui.view">
+            <field name="name">account.move.select</field>
+            <field name="model">account.move</field>
+            <field name="arch" type="xml">
+                <search string="Opening Balance Entry">
+                    <field name="name" filter_domain="['|', ('name','ilike',self), ('ref','ilike',self)]" string="Move"/>
+                    <field name="date"/>
+                    <filter icon="terp-document-new" string="Unposted" domain="[('state','=','draft')]" help="Unposted Journal Entries"/>
+                    <filter icon="terp-camera_test" string="Posted" domain="[('state','=','posted')]" help="Posted Journal Entries"/>
+                    <separator/>
+                    <filter icon="terp-gtk-jump-to-ltr" string="To Review" domain="[('to_check','=',True)]" help="Journal Entries to Review"/>
+                    <field name="division_id"/>
+                    <field name="journal_id"/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Journal" icon="terp-folder-orange" domain="[]" context="{'group_by':'journal_id'}"/>
+                        <filter string="States" icon="terp-stock_effects-object-colorize" domain="[]" context="{'group_by':'state'}"/>
+                        <filter string="Division" icon="terp-go-month" domain="[]" context="{'group_by':'division_id'}"/>
+                        <filter string="Date" icon="terp-go-month" domain="[]" context="{'group_by':'date'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>       
+        
+        
+        <record id="action_move_journal_line_open_bal" model="ir.actions.act_window">
+            <field name="name">Opening Balance Entry</field>
+            <field name="res_model">account.move</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_account_move_filter_open_bal"/>       
+            <field name="context">{'default_trans_type':'op'}</field>   
+            <field name="domain">[('trans_type','=','op')]</field>              
+            <field name="help" type="html">              
+            </field>
+        </record>
+        
+        <record id="kg_open_bal_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_move_tree_open_bal"/>
+            <field name="act_window_id" ref="action_move_journal_line_open_bal"/>
+        </record>
+		
+		<record id="kg_open_bal_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_move_form_open_bal"/>
+            <field name="act_window_id" ref="action_move_journal_line_open_bal"/>
+        </record>      
+        
+        <!-- Sequence Number Setting Starts Here -->
+	
+
+			<record forcecreate="1" id="seq_type_account_move_op" model="ir.sequence.type">	
+				<field name="name">Opening Balance</field>
+				<field name="code">account.move.op</field>
+			</record>
+
+			<record forcecreate="1" id="seq_account_move_op" model="ir.sequence">
+			  <field name="name">Opening Balance</field>
+			  <field name="code">account.move.op</field>
+			  <field name="padding" eval="3"/>
+			  <field name="prefix">OP/%(year)s/%(month)s/</field>
+			  <field name="reset_sequence">fiscal_reset</field>
+			</record>
+
+			
+		<!-- Sequence Number Setting Ends Here -->     
+        
+        <menuitem name="OP Process" parent="mpm_acc_masters" id="mma_open_bal_account_move" sequence="5"/>
+         <menuitem action="action_move_journal_line_open_bal" name="Opening Balance Entry" id="mam_open_bal_account_move" parent="mma_open_bal_account_move" sequence="0"/> 
+        
+        
+        <!-- Opening Balance Entry Ends (Done by Sujith)-->
+        
+		<!-- Provisional Journal Starts (Done by Sujith)-->
+        
+        <record id="view_move_form_pro_jor" model="ir.ui.view">
+            <field name="name">account.move.form</field>
+            <field name="model">account.move</field>
+            <field name="arch" type="xml">
+                <form string="Provisional Journal" version="7.0">
+                <header>
+                     <button name="button_validate" states="draft" string="Post" type="object" class="oe_highlight" />
+                    <button name="button_cancel" states="posted" string="Cancel Entry" type="object" />
+                </header>               
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="journal_id" string="Book" attrs="{'readonly':[('state','in',['posted'])]}"/>
+                            <field name="trans_type" readonly="1" invisible="1"/>
+                            <field name="narration" required="1" attrs="{'readonly':[('state','in',['posted'])]}"/>	
+                        </group>
+                        <group>   
+							<field name="date" required="1" attrs="{'readonly':[('state','in',['posted'])]}"/>      
+							<field name="division_id" required="1" attrs="{'readonly':[('state','in',['posted'])]}"/>                           
+                           <field name="state" style="width: 30%%" class="att_state_change"/>	              
+                        </group>
+                    </group>	
+                    <notebook>
+                        <page string="Journal Items">                           
+							<field name="line_id" nolabel="1" context="{'line_id': line_id , 'journal_id': journal_id }">
+							<tree string="Provisional Journal" editable="top" >                                   
+								<field name="account_id" string="Account Name" on_change="onchange_code(account_id)"/>
+								<field name="code" required = "1"/>
+								<field name="debit" required = "1"/>
+								<field name="credit" required = "1"/>
+								<field name="narration" widget="char" readonly="1"/>                                       
+							</tree>
+							</field> 
+                        </page>
+                        <page string="Entry Info">
+							<group>
+								<group>
+									<field name="company_id"/>
+								</group>
+								<group>
+									<field name="active"/>
+								</group>
+							</group>
+							<group>
+								<group>
+									<field name="user_id"/>
+									<field name="post_date" attrs="{'invisible':[('state','in',['draft'])]}"/>							
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="post_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+                    </notebook>                   
+                </form>
+            </field>
+        </record>
+        
+         <record id="view_move_tree_pro_jor" model="ir.ui.view">
+            <field name="name">account.move.tree</field>
+            <field name="model">account.move</field>
+            <field name="arch" type="xml">
+                <tree colors="blue:state == 'draft';black:state == 'posted'" string="Provisional Journal">
+                    <field name="name"/>                   
+                    <field name="date"/>
+                    <field name="division_id"/>
+                    <field name="journal_id"/>                    
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record id="view_account_move_filter_pro_jor" model="ir.ui.view">
+            <field name="name">account.move.select</field>
+            <field name="model">account.move</field>
+            <field name="arch" type="xml">
+                <search string="Provisional Journal">
+                    <field name="name" filter_domain="['|', ('name','ilike',self), ('ref','ilike',self)]" string="Move"/>
+                    <field name="date"/>
+                    <filter icon="terp-document-new" string="Unposted" domain="[('state','=','draft')]" help="Unposted Journal Entries"/>
+                    <filter icon="terp-camera_test" string="Posted" domain="[('state','=','posted')]" help="Posted Journal Entries"/>
+                    <separator/>
+                    <filter icon="terp-gtk-jump-to-ltr" string="To Review" domain="[('to_check','=',True)]" help="Journal Entries to Review"/>
+                    <field name="division_id"/>
+                    <field name="journal_id"/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Journal" icon="terp-folder-orange" domain="[]" context="{'group_by':'journal_id'}"/>
+                        <filter string="States" icon="terp-stock_effects-object-colorize" domain="[]" context="{'group_by':'state'}"/>
+                        <filter string="Division" icon="terp-go-month" domain="[]" context="{'group_by':'division_id'}"/>
+                        <filter string="Date" icon="terp-go-month" domain="[]" context="{'group_by':'date'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>       
+        
+        
+        <record id="action_move_journal_line_pro_jor" model="ir.actions.act_window">
+            <field name="name">Provisional Journal</field>
+            <field name="res_model">account.move</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_account_move_filter_pro_jor"/>       
+            <field name="context">{'default_trans_type':'provision'}</field>   
+            <field name="domain">[('trans_type','=','provision')]</field>              
+            <field name="help" type="html">              
+            </field>
+        </record>
+        
+        <record id="kg_pro_jor_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_move_tree_pro_jor"/>
+            <field name="act_window_id" ref="action_move_journal_line_pro_jor"/>
+        </record>
+		
+		<record id="kg_pro_jor_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_move_form_pro_jor"/>
+            <field name="act_window_id" ref="action_move_journal_line_pro_jor"/>
+        </record>      
+        
+        <!-- Sequence Number Setting Starts Here -->
+	
+
+		<record forcecreate="1" id="seq_type_account_move_pj" model="ir.sequence.type">	
+			<field name="name">Provisional Journal</field>
+			<field name="code">account.move.pj</field>
+		</record>
+
+		<record forcecreate="1" id="seq_account_move_pj" model="ir.sequence">
+		  <field name="name">Provisional Journal</field>
+		  <field name="code">account.move.pj</field>
+		  <field name="padding" eval="3"/>
+		  <field name="prefix">PRO/%(year)s/%(month)s/</field>
+		  <field name="reset_sequence">fiscal_reset</field>
+		</record>
+
+			
+		<!-- Sequence Number Setting Ends Here -->     
+        
+		<menuitem action="action_move_journal_line_pro_jor" name="Provisional Journal" id="mam_account_move_pj" parent="kg_emp_cash_issue.mpm_accounts_transaction" sequence="4"/> 
+        
+        
+        <!-- Provisional Journal Entry Ends (Done by Sujith)-->
 
         <record id="action_move_line_form" model="ir.actions.act_window">
             <field name="name">Entries</field>

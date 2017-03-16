@@ -430,15 +430,16 @@ class account_move_line(osv.osv):
         return res
 
     _columns = {
-        'name': fields.char('Name', size=64, required=True),
+        'name': fields.char('Name', size=64),
+        'code': fields.char('Code', size=64),
         'quantity': fields.float('Quantity', digits=(16,2), help="The optional quantity expressed by this line, eg: number of product sold. The quantity is not a legal requirement but is very useful for some reports."),
         'product_uom_id': fields.many2one('product.uom', 'Unit of Measure'),
         'product_id': fields.many2one('product.product', 'Product'),
         'debit': fields.float('Debit', digits_compute=dp.get_precision('Account')),
         'credit': fields.float('Credit', digits_compute=dp.get_precision('Account')),
-        'account_id': fields.many2one('account.account', 'Account', required=True, ondelete="cascade", domain=[('type','<>','view'), ('type', '<>', 'closed')], select=2),
+        'account_id': fields.many2one('account.account', 'Ledger Name', required=True, ondelete="cascade", domain=[('type','<>','view'), ('type', '<>', 'closed')], select=2),
         'move_id': fields.many2one('account.move', 'Journal Entry', ondelete="cascade", help="The move of this entry line.", select=2, required=True),
-        'narration': fields.related('move_id','narration', type='text', relation='account.move', string='Internal Note'),
+        'narration': fields.related('move_id','narration', type='text', relation='account.move', string='Narration'),
         'ref': fields.related('move_id', 'ref', string='Reference', type='char', size=64, store=True),
         'statement_id': fields.many2one('account.bank.statement', 'Statement', help="The bank statement used for bank reconciliation", select=1),
         'reconcile_id': fields.many2one('account.move.reconcile', 'Reconcile', readonly=True, ondelete='set null', select=2),
@@ -558,6 +559,16 @@ class account_move_line(osv.osv):
         ('credit_debit1', 'CHECK (credit*debit=0)',  'Wrong credit or debit value in accounting entry !'),
         ('credit_debit2', 'CHECK (credit+debit>=0)', 'Wrong credit or debit value in accounting entry !'),
     ]
+    
+    def onchange_code(self, cr, uid, ids, account_id, context=None):
+		
+		value = {'code': ''}
+		if account_id:
+			account_rec = self.pool.get('account.account').browse(cr, uid, account_id, context=context)
+			value = {'code': account_rec.code}
+		else:
+			pass			
+		return {'value': value}
 
     def _auto_init(self, cr, context=None):
         super(account_move_line, self)._auto_init(cr, context=context)

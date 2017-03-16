@@ -33,6 +33,8 @@ from openerp.tools.float_utils import float_round
 
 import openerp.addons.decimal_precision as dp
 
+from datetime import date
+
 _logger = logging.getLogger(__name__)
 
 def check_cycle(self, cr, uid, ids, context=None):
@@ -480,7 +482,7 @@ class account_account(osv.osv):
 			'account_id', 'tax_id', 'Default Taxes'),
 		'note': fields.text('Internal Notes'),
 		'company_currency_id': fields.function(_get_company_currency, type='many2one', relation='res.currency', string='Company Currency'),
-		'company_id': fields.many2one('res.company', 'Company', required=True),
+		'company_id': fields.many2one('res.company', 'Company', readonly=True),
 		'active': fields.boolean('Active', select=2, help="If the active field is set to False, it will allow you to hide the account without removing it."),
 
 		'parent_left': fields.integer('Parent Left', select=1),
@@ -496,16 +498,48 @@ class account_account(osv.osv):
 			 store={
 					'account.account': (_get_children_and_consol, ['level', 'parent_id'], 10),
 				   }),
+				   
+		
+		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved')],'Status', readonly=True),
+		
+		'notes': fields.text('Notes'),
+		'remark': fields.text('Approve'),	
+		'master_id': fields.integer('Master Id'),	
+		
+		### Module Requirement 
+		
+		'flag_tds': fields.boolean('Is TDS Applicable'),
+		'flag_vat': fields.boolean('Is VAT Applicable'),
+		'flag_service': fields.boolean('Is Service Tax Applicable'),
+		'flag_ed': fields.boolean('Is ED Applicable'),		
+		'flag_gst': fields.boolean('Is GST Applicable'),	
 		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode', readonly=True),
+		'division_id': fields.many2one('kg.division.master','Division'),		
+				   
+				   
+		### Entry Info ###
+		'crt_date': fields.datetime('Creation Date',readonly=True),
+		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
+		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
+		'confirm_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
+		'app_date': fields.datetime('Approved Date', readonly=True),
+		'app_user_id': fields.many2one('res.users', 'Approved By', readonly=True),		
+		'update_date': fields.datetime('Last Updated Date', readonly=True),
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),		
+		
+		
 		
 	}
 
 	_defaults = {
-		'entry_mode': 'manual',
 		'type': 'other',
+		'state': 'draft',		
+		'entry_mode': 'manual',
 		'reconcile': False,
 		'active': True,
 		'currency_mode': 'current',
+		'user_id': lambda obj, cr, uid, context: uid,
+		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'company_id': lambda s, cr, uid, c: s.pool.get('res.company')._company_default_get(cr, uid, 'account.account', context=c),
 	}
 	
@@ -518,7 +552,7 @@ class account_account(osv.osv):
 										 'note': note,
 										})
 		return account_id
-	
+		
 	def _check_recursion(self, cr, uid, ids, context=None):
 		obj_self = self.browse(cr, uid, ids[0], context=context)
 		p_id = obj_self.parent_id and obj_self.parent_id.id
@@ -547,6 +581,14 @@ class account_account(osv.osv):
 		for account in accounts:
 			if account.child_id and account.type not in ('view', 'consolidation'):
 				return False
+		return True
+	
+	def entry_confirm(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		return True	
+
+	def entry_approve(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'app_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
 	def _check_account_type(self, cr, uid, ids, context=None):
@@ -690,6 +732,7 @@ class account_account(osv.osv):
 			ids = [ids]
 
 		# Dont allow changing the company_id when account_move_line already exist
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		if 'company_id' in vals:
 			move_lines = self.pool.get('account.move.line').search(cr, uid, [('account_id', 'in', ids)])
 			if move_lines:
@@ -714,6 +757,11 @@ account_account()
 class account_journal(osv.osv):
 	_name = "account.journal"
 	_description = "Journal"
+	
+	def _get_default_division(self, cr, uid, context=None):
+		res = self.pool.get('kg.division.master').search(cr, uid, [('code','=','SAM'),('state','=','approved'), ('active','=','t')], context=context)
+		return res and res[0] or False
+		
 	_columns = {
 		'with_last_closing_balance' : fields.boolean('Opening With Last Closing Balance'),
 		'name': fields.char('Journal Name', size=64, required=True),
@@ -731,22 +779,50 @@ class account_journal(osv.osv):
 		'centralisation': fields.boolean('Centralized Counterpart', help="Check this box to determine that each entry of this journal won't create a new counterpart but will share the same counterpart. This is used in fiscal year closing."),
 		'update_posted': fields.boolean('Allow Cancelling Entries', help="Check this box if you want to allow the cancellation the entries related to this journal or of the invoice related to this journal"),
 		'group_invoice_lines': fields.boolean('Group Invoice Lines', help="If this box is checked, the system will try to group the accounting lines when generating them from invoices."),
-		'sequence_id': fields.many2one('ir.sequence', 'Entry Sequence', help="This field contains the information related to the numbering of the journal entries of this journal.", required=True),
-		'user_id': fields.many2one('res.users', 'User', help="The user responsible for this journal"),
+		'sequence_id': fields.many2one('ir.sequence', 'Entry Sequence', help="This field contains the information related to the numbering of the journal entries of this journal.", required=True),		
 		'groups_id': fields.many2many('res.groups', 'account_journal_group_rel', 'journal_id', 'group_id', 'Groups'),
 		'currency': fields.many2one('res.currency', 'Currency', help='The currency used to enter statement'),
 		'entry_posted': fields.boolean('Skip \'Draft\' State for Manual Entries', help='Check this box if you don\'t want new journal entries to pass through the \'draft\' state and instead goes directly to the \'posted state\' without any manual validation. \nNote that journal entries that are automatically created by the system are always skipping that state.'),
-		'company_id': fields.many2one('res.company', 'Company', required=True, select=1, help="Company related to this journal"),
+		'company_id': fields.many2one('res.company', 'Company', readonly=True, select=1, help="Company related to this journal"),
 		'allow_date':fields.boolean('Check Date in Period', help= 'If set to True then do not accept the entry if the entry date is not into the period dates'),
 
 		'profit_account_id' : fields.many2one('account.account', 'Profit Account'),
 		'loss_account_id' : fields.many2one('account.account', 'Loss Account'),
 		'internal_account_id' : fields.many2one('account.account', 'Internal Transfers Account', select=1),
 		'cash_control' : fields.boolean('Cash Control', help='If you want the journal should be control at opening/closing, check this option'),
+		
+		
+		### Entry Info ###
+		
+		
+		'active': fields.boolean('Active'),
+		'crt_date': fields.datetime('Created Date',readonly=True),
+		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
+		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
+		'confirm_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
+		'ap_rej_date': fields.datetime('Approved/Rejected Date', readonly=True),
+		'ap_rej_user_id': fields.many2one('res.users', 'Approved/Rejected By', readonly=True),	
+		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
+		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
+		'update_date': fields.datetime('Last Updated Date', readonly=True),
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),	
+		
+		'division_id': fields.many2one('kg.division.master','Division',required=True),
+		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode', readonly=True),
+		'remark': fields.text('Approve/Reject'),
+		'cancel_remark': fields.text('Cancel'),
+		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
+		
 	}
 
 	_defaults = {
 		'cash_control' : False,
+		'division_id':_get_default_division,
+		'active': True,
+		'entry_mode': 'manual',
+		'state': 'draft',
+		'user_id': lambda obj, cr, uid, context: uid,
+		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),	
 		'with_last_closing_balance' : False,
 		'user_id': lambda self, cr, uid, context: uid,
 		'company_id': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).company_id.id,
@@ -770,6 +846,34 @@ class account_journal(osv.osv):
 	_constraints = [
 		(_check_currency, 'Configuration error!\nThe currency chosen should be shared by the default accounts too.', ['currency','default_debit_account_id','default_credit_account_id']),
 	]
+	
+	
+	
+	def entry_cancel(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.cancel_remark:
+			self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		else:
+			raise osv.except_osv(_('Cancel remark is must !!'),
+				_('Enter the remarks in Cancel remarks field !!'))
+		return True
+
+	def entry_confirm(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		return True	
+
+	def entry_approve(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		return True
+
+	def entry_reject(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.remark:
+			self.write(cr, uid, ids, {'state': 'reject','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		else:
+			raise osv.except_osv(_('Rejection remark is must !!'),
+				_('Enter the remarks in rejection remark field !!'))
+		return True	
 
 	def copy(self, cr, uid, id, default=None, context=None, done_list=None, local=False):
 		default = {} if default is None else default.copy()
@@ -787,11 +891,13 @@ class account_journal(osv.osv):
 			context = {}
 		if isinstance(ids, (int, long)):
 			ids = [ids]
+		
 		for journal in self.browse(cr, uid, ids, context=context):
 			if 'company_id' in vals and journal.company_id.id != vals['company_id']:
 				move_lines = self.pool.get('account.move.line').search(cr, uid, [('journal_id', 'in', ids)])
 				if move_lines:
 					raise osv.except_osv(_('Warning!'), _('This journal already contains items, therefore you cannot modify its company field.'))
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(account_journal, self).write(cr, uid, ids, vals, context=context)
 
 	def create_sequence(self, cr, uid, vals, context=None):
@@ -817,6 +923,7 @@ class account_journal(osv.osv):
 			# if we have the right to create a journal, we should be able to
 			# create it's sequence.
 			vals.update({'sequence_id': self.create_sequence(cr, SUPERUSER_ID, vals, context)})
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(account_journal, self).create(cr, uid, vals, context)
 
 	def name_get(self, cr, user, ids, context=None):
@@ -869,15 +976,33 @@ class account_fiscalyear(osv.osv):
 	_columns = {
 		'name': fields.char('Fiscal Year', size=64, required=True),
 		'code': fields.char('Code', size=6, required=True),
-		'company_id': fields.many2one('res.company', 'Company', required=True),
+		'company_id': fields.many2one('res.company', 'Company', readonly=True),
 		'date_start': fields.date('Start Date', required=True),
 		'date_stop': fields.date('End Date', required=True),
 		'period_ids': fields.one2many('account.period', 'fiscalyear_id', 'Periods'),
-		'state': fields.selection([('draft','Open'), ('done','Closed')], 'Status', readonly=True),
+		#~ 'state': fields.selection([('draft','Open'), ('done','Closed')], 'Status', readonly=True),
+		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved')],'Status', readonly=True),
+		
+		'active': fields.boolean('Active'),
+		'notes': fields.text('Notes'),
+		'remark': fields.text('Approve'),
+		
+		### Entry Info ###
+		'crt_date': fields.datetime('Creation Date',readonly=True),
+		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
+		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
+		'confirm_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
+		'app_date': fields.datetime('Approved Date', readonly=True),
+		'app_user_id': fields.many2one('res.users', 'Approved By', readonly=True),		
+		'update_date': fields.datetime('Last Updated Date', readonly=True),
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),	
 	}
 	_defaults = {
 		'state': 'draft',
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.users').browse(cr, uid, uid, c).company_id.id,
+		'active': True,		
+		'user_id': lambda obj, cr, uid, context: uid,
+		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 	}
 	_order = "date_start, id"
 
@@ -889,8 +1014,20 @@ class account_fiscalyear(osv.osv):
 		return True
 
 	_constraints = [
-		(_check_duration, 'Error!\nThe start date of a fiscal year must precede its end date.', ['date_start','date_stop'])
+		(_check_duration, 'The start date of a fiscal year must precede its end date.', ['Start Date','End Date'])
 	]
+	
+	def entry_confirm(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])	
+		if not rec.period_ids:
+			raise osv.except_osv(_('Warning!'),
+								_('System not allow to without line values !!'))
+		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		return True	
+
+	def entry_approve(self,cr,uid,ids,context=None):
+		self.write(cr, uid, ids, {'state': 'approved','app_user_id': uid, 'app_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		return True
 
 	def create_period3(self, cr, uid, ids, context=None):
 		return self.create_period(cr, uid, ids, context, 3)
@@ -943,7 +1080,8 @@ class account_fiscalyear(osv.osv):
 				raise osv.except_osv(_('Error!'), _('There is no fiscal year defined for this date.\nPlease create one from the configuration of the accounting menu.'))
 			else:
 				return []
-		return ids
+		return ids		
+	
 
 	def name_search(self, cr, user, name, args=None, operator='ilike', context=None, limit=80):
 		if args is None:
@@ -955,7 +1093,74 @@ class account_fiscalyear(osv.osv):
 			ids = self.search(cr, user, [('code', 'ilike', name)]+ args, limit=limit)
 		if not ids:
 			ids = self.search(cr, user, [('name', operator, name)]+ args, limit=limit)
-		return self.name_get(cr, user, ids, context=context)
+		return self.name_get(cr, user, ids, context=context)	
+	
+		
+	def _name_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])		
+		res = True
+		if rec.name:
+			fiscal_year = rec.name
+			name=fiscal_year.upper()			
+			cr.execute(""" select upper(name) from account_fiscalyear where upper(name)  = '%s' """ %(name))
+			data = cr.dictfetchall()
+			
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res
+	def _code_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])		
+		res = True
+		if rec.code:
+			fiscal_code = rec.code
+			code=fiscal_code.upper()			
+			cr.execute(""" select upper(code) from account_fiscalyear where upper(name)  = '%s' """ %(code))
+			data = cr.dictfetchall()
+			
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res
+		
+	def _date_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])		
+		res = True
+		if rec.date_start >= rec.date_stop:
+			res = False
+		else:
+			res = True
+		return res
+	
+	def _empty_line_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])		
+		res = True
+		if not rec.period_ids:
+			res = False
+		else:
+			res = True
+		return res
+		
+	def unlink(self,cr,uid,ids,context=None):
+		unlink_ids = []		
+		for rec in self.browse(cr,uid,ids):			
+			if rec.state not in ('draft'):								
+				raise osv.except_osv(_('Warning!'),
+						_('You can not delete this entry !!'))
+			else:
+				cr.execute(""" delete from account_period where fiscalyear_id  = %s """ %(rec.id))
+				unlink_ids.append(rec.id)
+		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
+		
+	_constraints = [	
+		
+		(_name_validate, 'Fiscal Year must be unique !!', ['Fiscal Year']),		
+		(_code_validate, 'Fiscal Year Code must be unique !!', ['Fiscal Year Code']),		
+		(_date_validate, 'Greater than and equal to Start Date and End Date Not Allowed !!', ['Start Date,End Date']),		
+		#~ (_empty_line_validate, 'Enter the Periods details !! !!', ['Periods']),		
+	]
 
 account_fiscalyear()
 
@@ -972,10 +1177,29 @@ class account_period(osv.osv):
 		'fiscalyear_id': fields.many2one('account.fiscalyear', 'Fiscal Year', required=True, states={'done':[('readonly',True)]}, select=True),
 		'state': fields.selection([('draft','Open'), ('done','Closed')], 'Status', readonly=True,
 								  help='When monthly periods are created. The status is \'Draft\'. At the end of monthly period it is in \'Done\' status.'),
-		'company_id': fields.related('fiscalyear_id', 'company_id', type='many2one', relation='res.company', string='Company', store=True, readonly=True)
+		'company_id': fields.related('fiscalyear_id', 'company_id', type='many2one', relation='res.company', string='Company', store=True, readonly=True),
+		
+		'active': fields.boolean('Active'),	
+		'notes': fields.text('Notes'),
+		'remark': fields.text('Approve/Reject'),		
+		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode', readonly=True),
+		
+		 ### Entry Info ###
+		'crt_date': fields.datetime('Creation Date',readonly=True),
+		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
+		'close_id': fields.many2one('res.users', 'Closed By', readonly=True),
+		'close_date': fields.datetime('Closed Date', readonly=True),		
+		'update_date': fields.datetime('Last Updated Date', readonly=True),
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),	
+		
+		
 	}
 	_defaults = {
 		'state': 'draft',
+		'active': True,		
+		'user_id': lambda obj, cr, uid, context: uid,
+		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),		
+		'entry_mode': 'manual',
 	}
 	_order = "date_start, special desc"
 	_sql_constraints = [
@@ -1006,8 +1230,8 @@ class account_period(osv.osv):
 		return True
 
 	_constraints = [
-		(_check_duration, 'Error!\nThe duration of the Period(s) is/are invalid.', ['date_stop']),
-		(_check_year_limit, 'Error!\nThe period is invalid. Either some periods are overlapping or the period\'s dates are not matching the scope of the fiscal year.', ['date_stop'])
+		(_check_duration, 'The duration of the Period(s) is/are invalid.', ['End of Period']),
+		(_check_year_limit, 'The period is invalid. Either some periods are overlapping or the period dates are not matching the scope of the fiscal year.', ['End of Period'])
 	]
 
 	def next(self, cr, uid, period, step, context=None):
@@ -1065,11 +1289,15 @@ class account_period(osv.osv):
 		return self.name_get(cr, user, ids, context=context)
 
 	def write(self, cr, uid, ids, vals, context=None):
-		if 'company_id' in vals:
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		if 'company_id' in vals:			
 			move_lines = self.pool.get('account.move.line').search(cr, uid, [('period_id', 'in', ids)])
 			if move_lines:
-				raise osv.except_osv(_('Warning!'), _('This journal already contains items for this period, therefore you cannot modify its company field.'))
+				raise osv.except_osv(_('Warning!'), _('This journal already contains items for this period, therefore you cannot modify its company field.'))	
+		
 		return super(account_period, self).write(cr, uid, ids, vals, context=context)
+		
+
 
 	def build_ctx_periods(self, cr, uid, period_from_id, period_to_id):
 		if period_from_id == period_to_id:
@@ -1166,6 +1394,10 @@ class account_fiscalyear(osv.osv):
 			'end_journal_period_id': False
 		})
 		return super(account_fiscalyear, self).copy(cr, uid, id, default=default, context=context)
+		
+	def write(self, cr, uid, ids, vals, context=None):		
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(account_fiscalyear, self).write(cr, uid, ids, vals, context=context)
 
 account_fiscalyear()
 #----------------------------------------------------------
@@ -1229,20 +1461,20 @@ class account_move(osv.osv):
 
 		return self.name_get(cr, user, ids, context=context)
 
-	def name_get(self, cursor, user, ids, context=None):
-		if isinstance(ids, (int, long)):
-			ids = [ids]
-		if not ids:
-			return []
-		res = []
-		data_move = self.pool.get('account.move').browse(cursor, user, ids, context=context)
-		for move in data_move:
-			if move.state=='draft':
-				name = '*' + str(move.id)
-			else:
-				name = move.name
-			res.append((move.id, name))
-		return res
+	#~ def name_get(self, cursor, user, ids, context=None):
+		#~ if isinstance(ids, (int, long)):
+			#~ ids = [ids]
+		#~ if not ids:
+			#~ return []
+		#~ res = []
+		#~ data_move = self.pool.get('account.move').browse(cursor, user, ids, context=context)
+		#~ for move in data_move:
+			#~ if move.state=='draft':
+				#~ name = '*' + str(move.id)
+			#~ else:
+				#~ name = move.name
+			#~ res.append((move.id, name))
+		#~ return res
 
 	def _get_period(self, cr, uid, context=None):
 		ctx = dict(context or {}, account_period_prefer_normal=True)
@@ -1281,28 +1513,66 @@ class account_move(osv.osv):
 		return [('id', '=', '0')]
 
 	_columns = {
-		'name': fields.char('Number', size=64, required=True),
+		'name': fields.char('Voucher No', size=64, readonly=True),
 		'ref': fields.char('Reference', size=64),
 		'period_id': fields.many2one('account.period', 'Period', required=True, states={'posted':[('readonly',True)]}),
-		'journal_id': fields.many2one('account.journal', 'Journal', required=True, states={'posted':[('readonly',True)]}),
-		'state': fields.selection([('draft','Unposted'), ('posted','Posted')], 'Status', required=True, readonly=True,
+		'journal_id': fields.many2one('account.journal', 'Book Name', required=True, states={'posted':[('readonly',True)]}),
+		'state': fields.selection([('draft','Unposted'), ('posted','Posted'),('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')], 'Status', required=True, readonly=True,
 			help='All manually created new journal entries are usually in the status \'Unposted\', but you can set the option to skip that status on the related journal. In that case, they will behave as journal entries automatically created by the system on document validation (invoices, bank statements...) and will be created in \'Posted\' status.'),
 		'line_id': fields.one2many('account.move.line', 'move_id', 'Entries', states={'posted':[('readonly',True)]}),
 		'to_check': fields.boolean('To Review', help='Check this box if you are unsure of that journal entry and if you want to note it as \'to be reviewed\' by an accounting expert.'),
 		'partner_id': fields.related('line_id', 'partner_id', type="many2one", relation="res.partner", string="Partner", store=True),
 		'amount': fields.function(_amount_compute, string='Amount', digits_compute=dp.get_precision('Account'), type='float', fnct_search=_search_amount),
 		'date': fields.date('Date', required=True, states={'posted':[('readonly',True)]}, select=True),
-		'narration':fields.text('Internal Note'),
+		'narration':fields.text('Narration'),
 		'company_id': fields.related('journal_id','company_id',type='many2one',relation='res.company',string='Company', store=True, readonly=True),
 		'balance': fields.float('balance', digits_compute=dp.get_precision('Account'), help="This is a field only used for internal purpose and shouldn't be displayed"),
+		'notes': fields.text('Notes'),
+		'remark': fields.text('Approve/Reject'),
+		'cancel_remark': fields.text('Cancel'),
+		
+		'division_id': fields.many2one('kg.division.master', 'Division', required=False),
+		'trans_type':fields.char('Transaction Type'),
+		
+		### Entry Info ###
+		'active': fields.boolean('Active'),
+		'crt_date': fields.datetime('Creation Date',readonly=True),
+		'user_id': fields.many2one('res.users', 'Created By', readonly=True),
+		'post_date': fields.datetime('Posted Date', readonly=True),
+		'post_user_id': fields.many2one('res.users', 'Posted By', readonly=True),		
+		'update_date': fields.datetime('Last Updated Date', readonly=True),
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
+		
+		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
+		'confirm_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
+		'ap_rej_date': fields.datetime('Approved/Rejected Date', readonly=True),
+		'ap_rej_user_id': fields.many2one('res.users', 'Approved/Rejected By', readonly=True),	
+		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
+		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
+		
+		
+	
 	}
-
+	
+	def _get_fiscalyear(self, cr, uid, context=None):
+		entry_date = ''
+		fiscalyear_obj = self.pool.get('account.fiscalyear').search(cr,uid,[('date_start','<=',date.today()),('date_stop','>=',date.today())])
+		if fiscalyear_obj:
+			fiscalyear_rec = self.pool.get('account.fiscalyear').browse(cr,uid,fiscalyear_obj[0])
+			entry_date = fiscalyear_rec.date_start
+		return entry_date
+		
 	_defaults = {
-		'name': '/',
+		
 		'state': 'draft',
+		'active': True,
 		'period_id': _get_period,
-		'date': fields.date.context_today,
+		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
+		'user_id': lambda obj, cr, uid, context: uid,
+		#~ 'date': lambda * a: time.strftime('%Y-%m-%d'),
 		'company_id': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).company_id.id,
+		'date': _get_fiscalyear,
+		
 	}
 
 	def _check_centralisation(self, cursor, user, ids, context=None):
@@ -1380,7 +1650,21 @@ class account_move(osv.osv):
 					   'WHERE id IN %s', ('draft', tuple(ids),))
 		return True
 
-	def write(self, cr, uid, ids, vals, context=None):
+	def write(self, cr, uid, ids, vals, context=None):		
+		rec = self.browse(cr,uid,ids[0])	
+		voucher_name = rec.name
+		print"rec.name",rec.name
+		if rec.name is False:			
+			voucher_no_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','account.move')])
+			seq_rec = self.pool.get('ir.sequence').browse(cr,uid,voucher_no_id[0])
+			cr.execute("""select generatesequenceno(%s,'%s',now()::date) """%(voucher_no_id[0],seq_rec.code))
+			voucher_name = cr.fetchone();
+			voucher_name = voucher_name[0] 
+		else:
+			voucher_name = rec.name			
+			print "voucher_namevoucher_name",voucher_name
+		vals.update({'name':voucher_name,'update_date' : time.strftime('%Y-%m-%d %H:%M:%S'),
+					 'update_user_id':uid})
 		if context is None:
 			context = {}
 		c = context.copy()
@@ -1393,6 +1677,42 @@ class account_move(osv.osv):
 	# TODO: Check if period is closed !
 	#
 	def create(self, cr, uid, vals, context=None):
+		print"vals",vals['name']
+		print "==================================",vals['trans_type']
+			
+		voucher_name = vals['name']
+		print"rec.name",vals['name']
+		if vals['name'] is False:
+			if vals['trans_type'] == 'gl':			
+				voucher_no_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','account.move')])
+				seq_rec = self.pool.get('ir.sequence').browse(cr,uid,voucher_no_id[0])
+				cr.execute("""select generatesequenceno(%s,'%s',now()::date) """%(voucher_no_id[0],seq_rec.code))
+				voucher_name_gl = cr.fetchone();
+				voucher_name_gl = voucher_name_gl[0] 
+				vals.update({'name':voucher_name_gl})
+			if vals['trans_type'] == 'op':
+				voucher_no_id_op = self.pool.get('ir.sequence').search(cr,uid,[('code','=','account.move.op')])
+				seq_rec_op = self.pool.get('ir.sequence').browse(cr,uid,voucher_no_id_op[0])
+				cr.execute("""select generatesequenceno(%s,'%s',now()::date) """%(voucher_no_id_op[0],seq_rec_op.code))
+				voucher_name_op = cr.fetchone();
+				voucher_name_op = voucher_name_op[0]
+				if vals['line_id']:
+					src_fis_yr = self.pool.get('account.fiscalyear').search(cr,uid,[('date_start','=',vals['date']),('active','=',True)])
+					if src_fis_yr:
+						rec_fis_yr = self.pool.get('account.fiscalyear').browse(cr,uid,src_fis_yr[0])
+						narration = "Opening Balance for fiscal year %s "%(rec_fis_yr.code) 
+						vals.update({'narration':narration,'name':voucher_name_op})
+			if vals['trans_type'] == 'provision':
+				voucher_no_id_pro = self.pool.get('ir.sequence').search(cr,uid,[('code','=','account.move.pj')])
+				seq_rec_pro = self.pool.get('ir.sequence').browse(cr,uid,voucher_no_id_pro[0])
+				cr.execute("""select generatesequenceno(%s,'%s',now()::date) """%(voucher_no_id_pro[0],seq_rec_pro.code))
+				voucher_name_pro = cr.fetchone();
+				voucher_name_pro = voucher_name_pro[0]
+				vals.update({'name':voucher_name_pro})
+		else:
+			voucher_name = vals['name']		
+			print "voucher_namevoucher_name",voucher_name
+			vals.update({'name':voucher_name})
 		if context is None:
 			context = {}
 		if 'line_id' in vals and context.get('copy'):
@@ -1437,14 +1757,14 @@ class account_move(osv.osv):
 		else:
 			result = super(account_move, self).create(cr, uid, vals, context)
 		return result
-
+	
 	def copy(self, cr, uid, id, default=None, context=None):
 		default = {} if default is None else default.copy()
 		context = {} if context is None else context.copy()
 		default.update({
 			'state':'draft',
 			'ref': False,
-			'name':'/',
+			
 		})
 		context.update({
 			'copy':True
