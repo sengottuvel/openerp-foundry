@@ -570,6 +570,7 @@ class kg_crm_enquiry(osv.osv):
 	
   	def access_creation(self,cr,uid,offer_id,order_item,item_type,context=None):
 		if order_item.line_ids_access_a:
+			moc_changed_flag = False
 			pump_id = order_item.pump_id.id
 			
 			prime_cost = 0
@@ -588,6 +589,7 @@ class kg_crm_enquiry(osv.osv):
 							prime_cost += acc_fou_prime_cost * acc_fou_item.qty
 							print "acc_fou_prime_cost",acc_fou_prime_cost
 							print "fou_prime_cost_access",prime_cost
+							moc_changed_flag = acc_fou_item.moc_changed_flag
 				if foundry_item.line_ids_a:
 					for acc_ms_item in foundry_item.line_ids_a:
 						if acc_ms_item.is_applicable == True:
@@ -600,6 +602,7 @@ class kg_crm_enquiry(osv.osv):
 							prime_cost += acc_ms_prime_cost * acc_ms_item.qty
 							print "acc_ms_prime_cost",acc_ms_prime_cost
 							print "ms_prime_cost_access",prime_cost
+							moc_changed_flag = acc_ms_item.moc_changed_flag
 				if foundry_item.line_ids_b:
 					for acc_bot_item in foundry_item.line_ids_b:
 						if acc_bot_item.is_applicable == True:
@@ -612,6 +615,7 @@ class kg_crm_enquiry(osv.osv):
 							prime_cost += acc_bot_prime_cost * acc_bot_item.qty
 							print "acc_bot_prime_cost",acc_bot_prime_cost
 							print "bot_prime_cost_access",prime_cost
+							moc_changed_flag = acc_bot_item.moc_changed_flag
 				self.pool.get('ch.kg.crm.accessories').write(cr,uid,foundry_item.id,{'prime_cost':prime_cost})
 				access_id = self.pool.get('ch.accessories.offer').create(cr,uid,{
 															'header_id': offer_id,
@@ -627,6 +631,7 @@ class kg_crm_enquiry(osv.osv):
 		return True
 						
   	def spare_creation(self,cr,uid,offer_id,order_item,bom_item,prime_cost,item_type,context=None):
+		moc_changed_flag = False
 		if item_type == 'foundry':
 			item_code = bom_item.pattern_id.name
 			item_name = bom_item.pattern_id.pattern_name
@@ -635,6 +640,7 @@ class kg_crm_enquiry(osv.osv):
 			bot_id = False
 			moc_id = bom_item.moc_id.id
 			qty = bom_item.qty
+			moc_changed_flag = bom_item.moc_changed_flag
 		elif item_type == 'ms' :
 			item_code = bom_item.ms_id.code
 			item_name = bom_item.ms_id.name
@@ -643,6 +649,7 @@ class kg_crm_enquiry(osv.osv):
 			bot_id = False
 			moc_id = bom_item.moc_id.id
 			qty = bom_item.qty
+			moc_changed_flag = bom_item.moc_changed_flag
 		elif item_type == 'bot':
 			item_code = bom_item.ms_id.code
 			item_name = bom_item.ms_id.name
@@ -651,7 +658,7 @@ class kg_crm_enquiry(osv.osv):
 			bot_id = bom_item.ms_id.id
 			moc_id = bom_item.moc_id.id
 			qty = bom_item.qty
-			
+			moc_changed_flag = bom_item.moc_changed_flag
 		spare_id = self.pool.get('ch.spare.offer').create(cr,uid,{'header_id': offer_id,
 																  'pumpseries_id': order_item.pumpseries_id.id,
 																  'pump_id': order_item.pump_id.id,
@@ -664,10 +671,13 @@ class kg_crm_enquiry(osv.osv):
 																  'ms_id': ms_id,
 																  'bot_id': bot_id,
 																  'moc_id': moc_id,
+																  'moc_changed_flag': moc_changed_flag,
 																  'qty': qty,
 																   })
-																  
-																
+		
+		spare_rec = self.pool.get('ch.spare.offer').browse(cr,uid,spare_id)
+		self.pool.get('ch.spare.offer').write(cr,uid,spare_rec.id,{'spare_offer_line_id': spare_id,})
+		
 		return True
   	
 	def entry_confirm(self,cr,uid,ids,context=None):
@@ -732,6 +742,7 @@ class kg_crm_enquiry(osv.osv):
 							per_pump_prime_cost = primecost_vals / item.qty
 						else:
 							per_pump_prime_cost = 0
+						
 						pump_id = self.pool.get('ch.pump.offer').create(cr,uid,{
 																		'header_id': offer_id,
 																		'pumpseries_id': item.pumpseries_id.id,
@@ -962,6 +973,11 @@ class kg_crm_enquiry(osv.osv):
 				print"pat_amtpat_amtpat_amt",pat_amt
 			
 			if bom == 'fou':
+				moc_cons = [x.moc_changed_flag for x in item.line_ids if x.moc_changed_flag == True]
+				if moc_cons:
+					moc_changed_flag = True
+				else:
+					moc_changed_flag = False
 				if item.purpose_categ == 'spare' and catg == 'non_acc':
 					spare_id = self.pool.get('ch.spare.offer').create(cr,uid,{
 													'header_id': offer_id,
@@ -974,6 +990,7 @@ class kg_crm_enquiry(osv.osv):
 													'item_name': fou_line.pattern_id.pattern_name,
 													'pattern_id': fou_line.pattern_id.id,
 													'moc_id': fou_line.moc_id.id,
+													'moc_changed_flag': moc_changed_flag,
 													'qty': fou_line.qty,
 													})
 											
@@ -1050,6 +1067,11 @@ class kg_crm_enquiry(osv.osv):
 								else:
 									pass
 						if bom == 'ms':
+							moc_cons = [x.moc_changed_flag for x in item.line_ids if x.moc_changed_flag == True]
+							if moc_cons:
+								moc_changed_flag = True
+							else:
+								moc_changed_flag = False
 							if item.purpose_categ == 'spare' and catg == 'non_acc':
 								spare_id = self.pool.get('ch.spare.offer').create(cr,uid,{
 																'header_id': offer_id,
@@ -1062,6 +1084,7 @@ class kg_crm_enquiry(osv.osv):
 																'item_name': ms_line.ms_id.name,
 																'ms_id': ms_line.ms_id.id,
 																'moc_id': ms_line.moc_id.id,
+																'moc_changed_flag': moc_changed_flag,
 																'qty': ms_line.qty,
 																})
 																
@@ -1164,6 +1187,11 @@ class kg_crm_enquiry(osv.osv):
 									else:
 										pass
 							if bom == 'bot':
+								moc_cons = [x.moc_changed_flag for x in item.line_ids if x.moc_changed_flag == True]
+								if moc_cons:
+									moc_changed_flag = True
+								else:
+									moc_changed_flag = False
 								if item.purpose_categ == 'spare' and catg == 'non_acc':
 									spare_id = self.pool.get('ch.spare.offer').create(cr,uid,{
 																'header_id': offer_id,
@@ -1176,6 +1204,7 @@ class kg_crm_enquiry(osv.osv):
 																'item_name': bot_line.ms_id.name,
 																'bot_id': bot_line.ms_id.id,
 																'moc_id': bot_line.moc_id.id,
+																'moc_changed_flag': moc_changed_flag,
 																'qty': bot_line.qty,
 																})
 					bot_price += tot_price * bot_line.qty
@@ -1782,11 +1811,16 @@ class ch_kg_crm_pumpmodel(osv.osv):
 									if pat_line_obj:
 										pat_line_rec = self.pool.get('ch.mocwise.rate').browse(cr,uid,pat_line_obj[0])
 										moc_id = pat_line_rec.moc_id.id
+						if moc_id:
+							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
+							moc_changed_flag = True
 						fou_vals.append({
 										'position_id': item.position_id.id,
 										'pattern_id': item.pattern_id.id,
 										'pattern_name': item.pattern_name,
 										'moc_id': moc_id,
+										'moc_name': moc_rec.name,
+										'moc_changed_flag': moc_changed_flag,
 										'qty': item.qty,
 										'load_bom': True,
 										'is_applicable': False,
@@ -1813,11 +1847,16 @@ class ch_kg_crm_pumpmodel(osv.osv):
 									if ms_line_obj:
 										ms_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,ms_line_obj[0])
 										moc_id = ms_line_rec.moc_id.id
+						if moc_id:
+							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
+							moc_changed_flag = True
 						ms_vals.append({
 										'name': item.name,
 										'position_id': item.position_id.id,							
 										'ms_id': item.ms_id.id,
 										'moc_id': moc_id,
+										'moc_name': moc_rec.name,
+										'moc_changed_flag': moc_changed_flag,
 										'qty': item.qty,
 										'load_bom': True,
 										'is_applicable': False,
@@ -1848,10 +1887,15 @@ class ch_kg_crm_pumpmodel(osv.osv):
 									if bot_line_obj:
 										bot_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,bot_line_obj[0])
 										moc_id = bot_line_rec.moc_id.id
+						if moc_id:
+							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
+							moc_changed_flag = True
 						bot_vals.append({
 										'item_name': item_name,
 										'ms_id': item.bot_id.id,
 										'moc_id': moc_id,
+										'moc_name': moc_rec.name,
+										'moc_changed_flag': moc_changed_flag,
 										'qty': item.qty,
 										'load_bom': True,
 										'is_applicable': False,
@@ -1880,12 +1924,16 @@ class ch_kg_crm_pumpmodel(osv.osv):
 									pat_line_rec = self.pool.get('ch.mocwise.rate').browse(cr,uid,pat_line_obj[0])
 									moc_id = pat_line_rec.moc_id.id
 						print"moc_idmoc_id",moc_id	
-								
+						if moc_id:
+							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
+							moc_changed_flag = True	
 						fou_vals.append({
 										'position_id': item.position_id.id,
 										'pattern_id': item.pattern_id.id,
 										'pattern_name': item.pattern_name,
 										'moc_id': moc_id,
+										'moc_name': moc_rec.name,
+										'moc_changed_flag': moc_changed_flag,
 										'qty': item.qty * qty,
 										'load_bom': True,
 										'is_applicable': True,
@@ -1908,11 +1956,16 @@ class ch_kg_crm_pumpmodel(osv.osv):
 								if ms_line_obj:
 									ms_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,ms_line_obj[0])
 									moc_id = ms_line_rec.moc_id.id
+						if moc_id:
+							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
+							moc_changed_flag = True
 						ms_vals.append({
 										'name': item.name,
 										'position_id': item.position_id.id,							
 										'ms_id': item.ms_id.id,
 										'moc_id': moc_id,
+										'moc_name': moc_rec.name,
+										'moc_changed_flag': moc_changed_flag,
 										'qty': item.qty * qty,
 										'load_bom': True,
 										'is_applicable': True,
@@ -1936,10 +1989,15 @@ class ch_kg_crm_pumpmodel(osv.osv):
 								if bot_line_obj:
 									bot_line_rec = self.pool.get('ch.machine.mocwise').browse(cr,uid,bot_line_obj[0])
 									moc_id = bot_line_rec.moc_id.id
+						if moc_id:
+							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
+							moc_changed_flag = True
 						bot_vals.append({
 										'item_name': item_name,
 										'ms_id': item.bot_id.id,
 										'moc_id': moc_id,
+										'moc_name': moc_rec.name,
+										'moc_changed_flag': moc_changed_flag,
 										'qty': item.qty * qty,
 										'load_bom': True,
 										'is_applicable': True,
@@ -2225,6 +2283,8 @@ class ch_kg_crm_foundry_item(osv.osv):
 		'is_applicable': fields.boolean('Is Applicable'),
 		'load_bom': fields.boolean('Load BOM'),
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'moc_name': fields.char('MOC Name'),
+		'moc_changed_flag': fields.boolean('MOC Changed'),
 		'prime_cost': fields.float('Prime Cost'),
 		'purpose_categ': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories')],'Purpose Category'),
 		'material_code': fields.char('Material Code'),
@@ -2262,6 +2322,16 @@ class ch_kg_crm_foundry_item(osv.osv):
 			value = {'pattern_name':pattern_rec.pattern_name}
 		return {'value': value}
 	
+	def onchange_moc(self,cr,uid,ids,moc_id,moc_name, context=None):
+		value = {'moc_changed_flag':''}
+		if moc_id:
+			moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
+			if moc_rec.name == moc_name:
+				pass
+			else:
+				value = {'moc_changed_flag': True}
+		return {'value': value}
+	
 ch_kg_crm_foundry_item()
 
 class ch_kg_crm_machineshop_item(osv.osv):
@@ -2292,6 +2362,8 @@ class ch_kg_crm_machineshop_item(osv.osv):
 		'is_applicable': fields.boolean('Is Applicable'),
 		'load_bom': fields.boolean('Load BOM'),
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'moc_name': fields.char('MOC Name'),
+		'moc_changed_flag': fields.boolean('MOC Changed'),
 		'prime_cost': fields.float('Prime Cost'),
 		'purpose_categ': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories')],'Purpose Category'),
 		'material_code': fields.char('Material Code'),
@@ -2314,6 +2386,16 @@ class ch_kg_crm_machineshop_item(osv.osv):
 		if rec.qty <= 0.00:
 			return False
 		return True
+	
+	def onchange_moc(self,cr,uid,ids,moc_id,moc_name, context=None):
+		value = {'moc_changed_flag':''}
+		if moc_id:
+			moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
+			if moc_rec.name == moc_name:
+				pass
+			else:
+				value = {'moc_changed_flag': True}
+		return {'value': value}
 	
 	_constraints = [
 		
@@ -2351,6 +2433,8 @@ class ch_kg_crm_bot(osv.osv):
 		'is_applicable': fields.boolean('Is Applicable'),
 		'load_bom': fields.boolean('Load BOM'),
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'moc_name': fields.char('MOC Name'),
+		'moc_changed_flag': fields.boolean('MOC Changed'),
 		'prime_cost': fields.float('Prime Cost'),
 		'brand_id': fields.many2one('kg.brand.master','Brand '),
 		'flag_is_bearing': fields.boolean('Is Bearing'),
@@ -2377,6 +2461,16 @@ class ch_kg_crm_bot(osv.osv):
 			return False
 		return True
 	
+	def onchange_moc(self,cr,uid,ids,moc_id,moc_name, context=None):
+		value = {'moc_changed_flag':''}
+		if moc_id:
+			moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
+			if moc_rec.name == moc_name:
+				pass
+			else:
+				value = {'moc_changed_flag': True}
+		return {'value': value}
+	
 	_constraints = [
 		
 		#~ (_check_qty,'You cannot save with zero qty !',['Qty']),
@@ -2394,13 +2488,13 @@ class ch_moc_construction(osv.osv):
 		
 		## Basic Info
 		
-		'header_id':fields.many2one('ch.kg.crm.pumpmodel', 'Header Id', ondelete='cascade'),
-		'remarks':fields.text('Remarks'),
+		'header_id': fields.many2one('ch.kg.crm.pumpmodel', 'Header Id', ondelete='cascade'),
+		'remarks': fields.text('Remarks'),
 		
 		## Module Requirement Fields
 		
-		'moc_id':fields.many2one('kg.moc.master', 'MOC Name',domain = "[('state','not in',('raject','cancel'))]",required=True),
-		'offer_id':fields.many2one('kg.offer.materials', 'Material Name',domain = "[('state','not in',('raject','cancel'))]",required=True),
+		'moc_id': fields.many2one('kg.moc.master', 'MOC Name',domain = "[('state','not in',('raject','cancel'))]",required=True),
+		'offer_id': fields.many2one('kg.offer.materials', 'Material Name',domain = "[('state','not in',('raject','cancel'))]",required=True),
 		#~ 'pattern_id': fields.many2one('kg.pattern.master','Pattern No', required=True), 		
 		#~ 'pattern_name': fields.char('Pattern Name'), 	
 		'flag_standard': fields.boolean('Non Standard'),
@@ -2511,7 +2605,7 @@ class ch_kg_crm_accessories(osv.osv):
 		ms_vals=[]
 		bot_vals=[]
 		data_rec = ''
-		
+		moc_changed_flag = False
 		if load_access == True and access_id:
 			access_obj = self.pool.get('kg.accessories.master').search(cr, uid, [('id','=',access_id)])
 			if access_obj:
@@ -2520,11 +2614,16 @@ class ch_kg_crm_accessories(osv.osv):
 		if data_rec:
 			if data_rec.line_ids_b:
 				for item in data_rec.line_ids_b:
+					if moc_id:
+						moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
+						moc_changed_flag = True
 					fou_vals.append({
 									'position_id': item.position_id.id,
 									'pattern_id': item.pattern_id.id,
 									'pattern_name': item.pattern_name,
 									'moc_id': moc_id,
+									'moc_name': moc_rec.name,
+									'moc_changed_flag': moc_changed_flag,
 									'qty': item.qty * qty,
 									'load_bom': True,
 									'is_applicable': True,
@@ -2533,12 +2632,17 @@ class ch_kg_crm_accessories(osv.osv):
 									})
 				print"fou_valsfou_vals",fou_vals
 			if data_rec.line_ids_a:
-				for item in data_rec.line_ids_a:	
+				for item in data_rec.line_ids_a:
+					if moc_id:
+						moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
+						moc_changed_flag = True	
 					ms_vals.append({
 									'name': item.name,
 									'position_id': item.position_id.id,							
 									'ms_id': item.ms_id.id,
 									'moc_id': moc_id,
+									'moc_name': moc_rec.name,
+									'moc_changed_flag': moc_changed_flag,
 									'qty': item.qty * qty,
 									'load_bom': True,
 									'is_applicable': True,
@@ -2547,7 +2651,10 @@ class ch_kg_crm_accessories(osv.osv):
 									})
 					print"ms_valsms_vals",ms_vals	
 			if data_rec.line_ids:
-				for item in data_rec.line_ids:	
+				for item in data_rec.line_ids:
+					if moc_id:
+						moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
+						moc_changed_flag = True
 					bot_vals.append({
 									#~ 'product_id': item.product_id.id,
 									#~ 'brand_id': item.brand_id.id,
@@ -2557,6 +2664,8 @@ class ch_kg_crm_accessories(osv.osv):
 									'position_id': item.position_id.id,							
 									'ms_id': item.ms_id.id,
 									'moc_id': moc_id,
+									'moc_name': moc_rec.name,
+									'moc_changed_flag': moc_changed_flag,
 									'qty': item.qty * qty,
 									'load_bom': True,
 									'is_applicable': True,
@@ -2595,10 +2704,22 @@ class ch_crm_access_fou(osv.osv):
 		'is_applicable': fields.boolean('Is Applicable'),
 		'load_bom': fields.boolean('Load BOM'),
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'moc_name': fields.char('MOC Name'),
+		'moc_changed_flag': fields.boolean('MOC Changed'),
 		'prime_cost': fields.float('Prime Cost'),
 		'material_code': fields.char('Material Code'),
 		
 	}
+	
+	def onchange_moc(self,cr,uid,ids,moc_id,moc_name, context=None):
+		value = {'moc_changed_flag':''}
+		if moc_id:
+			moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
+			if moc_rec.name == moc_name:
+				pass
+			else:
+				value = {'moc_changed_flag': True}
+		return {'value': value}
 	
 ch_crm_access_fou()
 
@@ -2629,10 +2750,22 @@ class ch_crm_access_ms(osv.osv):
 		'is_applicable': fields.boolean('Is Applicable'),
 		'load_bom': fields.boolean('Load BOM'),
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'moc_name': fields.char('MOC Name'),
+		'moc_changed_flag': fields.boolean('MOC Changed'),
 		'prime_cost': fields.float('Prime Cost'),
 		'material_code': fields.char('Material Code'),
 		
 	}
+	
+	def onchange_moc(self,cr,uid,ids,moc_id,moc_name, context=None):
+		value = {'moc_changed_flag':''}
+		if moc_id:
+			moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
+			if moc_rec.name == moc_name:
+				pass
+			else:
+				value = {'moc_changed_flag': True}
+		return {'value': value}
 	
 	_defaults = {
 		
@@ -2671,10 +2804,22 @@ class ch_crm_access_bot(osv.osv):
 		'is_applicable': fields.boolean('Is Applicable'),
 		'load_bom': fields.boolean('Load BOM'),
 		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'moc_name': fields.char('MOC Name'),
+		'moc_changed_flag': fields.boolean('MOC Changed'),
 		'prime_cost': fields.float('Prime Cost'),
 		'brand_id': fields.many2one('kg.brand.master','Brand'),
 		'material_code': fields.char('Material Code'),
 		
 	}
+	
+	def onchange_moc(self,cr,uid,ids,moc_id,moc_name, context=None):
+		value = {'moc_changed_flag':''}
+		if moc_id:
+			moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
+			if moc_rec.name == moc_name:
+				pass
+			else:
+				value = {'moc_changed_flag': True}
+		return {'value': value}
 	
 ch_crm_access_bot()

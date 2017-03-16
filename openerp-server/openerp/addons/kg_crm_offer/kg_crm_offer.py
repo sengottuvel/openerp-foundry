@@ -277,7 +277,7 @@ class kg_crm_offer(osv.osv):
 						raise osv.except_osv(_('Warning!'),
 							_('%s - %s spare special discount is more than maximum limit configured'%(item.pump_id.name,item.item_name)))
 			if rec.line_accessories_ids:
-				for item in rec.line_access_ids:
+				for item in rec.line_accessories_ids:
 					if item.customer_discount > rec.customer_id.max_cust_discount:
 						raise osv.except_osv(_('Warning!'),
 							_('%s customer discount is more than maximum limit configured'%(item.access_id.name)))
@@ -500,7 +500,7 @@ class kg_crm_offer(osv.osv):
 	
 	def wo_creation(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.state in ('moved_to_offer','approved_md'):
+		if entry.state in ('moved_to_offer','approved_md') and entry.revision == 0:
 			if not entry.customer_po_no:
 				raise osv.except_osv(_('Warning!'),
 					_('Update Customer PO No.'))
@@ -514,7 +514,6 @@ class kg_crm_offer(osv.osv):
 																  'enquiry_no': entry.enquiry_id.name,
 																  'offer_no': entry.name,
 																  'location': entry.location,
-																  'flag_data_bank': entry.flag_data_bank,
 																  'entry_mode': 'auto',
 																  'partner_id': entry.customer_id.id,
 																  'order_value': entry.offer_net_amount,
@@ -539,6 +538,7 @@ class kg_crm_offer(osv.osv):
 						pump_vals = self._prepare_pump_details(cr,uid,wo_id,entry,enquiry_line_id,off_line_id,purpose)
 						if pump_vals:
 							wo_line_id = self.pool.get('ch.work.order.details').create(cr, uid, pump_vals, context=context)
+							self.pool.get('ch.pump.offer').write(cr,uid,off_line_id.id,{'wo_line_id':wo_line_id})
 							if wo_line_id:
 								item = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,enquiry_line_id)
 								if item:
@@ -565,6 +565,7 @@ class kg_crm_offer(osv.osv):
 						pump_vals = self._prepare_pump_details(cr,uid,wo_id,entry,enquiry_line_id,off_line_id,purpose)
 						if pump_vals:
 							wo_line_id = self.pool.get('ch.work.order.details').create(cr, uid, pump_vals, context=context)
+							self.pool.get('ch.spare.offer').write(cr,uid,off_line_id.id,{'wo_line_id':wo_line_id})
 							if wo_line_id:
 								item = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,enquiry_line_id)
 								if item:
@@ -608,23 +609,67 @@ class kg_crm_offer(osv.osv):
 			if wo_id:
 				self.write(cr, uid, ids, {'wo_flag': True,'state':'wo_created'})
 				self.pool.get('kg.crm.enquiry').write(cr,uid,entry.enquiry_id.id,{'wo_flag':True,'state':'wo_created'})
+		
+		if entry.state in ('moved_to_offer','approved_md') and entry.revision > 0:
+			wo_obj = self.pool.get('kg.work.order')
+			wo_ids = wo_obj.search(cr,uid,[('offer_no','=',entry.name),('state','!=','cancel')])
+			if wo_ids:
+				wo_rec = wo_obj.browse(cr,uid,wo_ids[0])
+				wo_id = wo_rec.id
+				if entry.line_pump_ids:
+					groups = []
+					#~ for item in entry.line_spare_ids:
+					for key, group in groupby(entry.line_pump_ids, lambda x: x.enquiry_line_id.id):
+						groups.append(map(lambda r:r,group))
+					for key,group in enumerate(groups):
+						enquiry_line_id = group[0].enquiry_line_id.id
+						off_line_id = group[0]
+						print"enquiry_line_idenquiry_line_id",enquiry_line_id
+						print"off_line_idoff_line_id",off_line_id
+						wo_line_id = self.pool.get('ch.pump.offer').browse(cr,uid,off_line_id)
+						purpose = 'pump'
+						
+						wo_line_id = off_line_id.wo_line_id.id
+						print"wo_line_id",wo_line_id
+						print"off_line_id.id",off_line_id.id
+						self.pool.get('ch.work.order.details').write(cr,uid,wo_line_id,{'pump_offer_line_id':off_line_id.id})
+						#~ if wo_line_id:
+							#~ item = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,enquiry_line_id)
+							#~ if item:
+								#~ self.prepare_bom_revision(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
+				if entry.line_spare_ids:
+					groups = []
+					for key, group in groupby(entry.line_spare_ids, lambda x: x.pump_id.id):
+						groups.append(map(lambda r:r,group))
+					for key,group in enumerate(groups):
+						enquiry_line_id = group[0].enquiry_line_id.id
+						off_line_id = group[0]
+						off_ids = self.pool.get('kg.crm.offer').search(cr,uid,[('enquiry_no','=',entry.enquiry_no),('state','!=','revised')])
+						off_rec = self.pool.get('kg.crm.offer').browse(cr,uid,off_ids[0])
+						spa_off_obj = self.pool.get('ch.spare.offer').search(cr,uid,[('header_id','=',off_rec.id),('enquiry_line_id','=',enquiry_line_id)])
+						print"off_line_idoff_line_id++++++++++++++++++++++++",off_line_id.id
+						wo_line_id = self.pool.get('ch.spare.offer').browse(cr,uid,off_line_id.id)
+						print"wo_line_idwo_line_id",wo_line_id.spare_offer_line_id.id
+						
+						purpose = 'spare'
+						print"off_line_idoff_line_id",off_line_id
+						#~ stop
+						#~ wo_line_id = off_line_id.wo_line_id.id
+						#~ 
+						#~ self.pool.get('ch.work.order.details').write(cr,uid,wo_line_id,{'pump_offer_line_id':0})
+						if wo_line_id:
+							item = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,enquiry_line_id)
+							if item:
+								for li in spa_off_obj:
+									print"liliii",li
+									off_line_id = spa_off_obj
+								self.prepare_bom_revision(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
+								
+			self.write(cr, uid, ids, {'wo_flag': True,'state':'wo_created'})
+			self.pool.get('kg.crm.enquiry').write(cr,uid,entry.enquiry_id.id,{'wo_flag':True,'state':'wo_created'})			
+		
 		return True
 	
-	#~ def _prepare_pump_details(self,cr,uid,wo_id,entry,item,context=None):		
-		#~ print"item.pump_iditem.pump_id.name",item.pump_id.name
-		#~ pump_vals = {
-			#~ 
-			#~ 'header_id': wo_id,
-			#~ 'pump_model_id': item.pump_id.id,
-			#~ 'order_category': 'pump',
-			#~ 'moc_construction_id': item.moc_const_id.id,
-			#~ 'unit_price': item.net_amount,
-			#~ 'qty': item.qty,
-			#~ 'flag_load_bom': True,
-			#~ }			
-			#~ 
-		#~ return pump_vals
-		
 	def _prepare_pump_details(self,cr,uid,wo_id,entry,enquiry_line_id,off_line_id,purpose,context=None):	
 		print"iteiteitieiteitieit",enquiry_line_id
 		item = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,enquiry_line_id)
@@ -707,6 +752,142 @@ class kg_crm_offer(osv.osv):
 			
 		return pump_vals
 			
+	def prepare_bom_revision(self,cr,uid,wo_line_id,item,off_line_id,purpose,context=None):
+		
+		if purpose in ('pump','spare'):
+			if item.purpose_categ in ('pump','spare'):
+				arr = of_li_id = 0
+				if item.line_ids:
+					for ele in item.line_ids:
+						if ele.is_applicable == True:
+							print"ele.position_id.idele.position_id.id",ele.position_id.id
+							if purpose == 'spare':
+								print"off_line_idoff_line_idoff_line_id0000000000000000",off_line_id
+								of_li_id = off_line_id[arr]
+								if ele.spare_offer_line_id > 0:
+									fou_ids = self.pool.get('ch.order.bom.details').search(cr,uid,[('spare_offer_line_id','=',ele.spare_offer_line_id)])
+									print"fou_idsfou_idsfou_ids------------",fou_ids
+									if fou_ids:
+										fou_rec = self.pool.get('ch.order.bom.details').browse(cr,uid,fou_ids[0])
+										print"fou_re///////////////////cfou_rec",fou_rec.id
+										self.pool.get('ch.order.bom.details').write(cr,uid,fou_rec.id,{'spare_offer_line_id':of_li_id})
+										self.pool.get('ch.kg.crm.foundry.item').write(cr,uid,ele.id,{'spare_offer_line_id':of_li_id})
+							arr = arr+1
+						else:
+							if purpose == 'spare':
+								of_li_id = 0
+				if item.line_ids_a:
+					for ele in item.line_ids_a:
+						if ele.is_applicable == True:
+							if purpose == 'spare':
+								print"off_line_idoff_line_idoff_line_id0000000000000000",off_line_id
+								of_li_id = off_line_id[arr]
+								if ele.spare_offer_line_id > 0:
+									ms_ids = self.pool.get('ch.order.machineshop.details').search(cr,uid,[('spare_offer_line_id','=',ele.spare_offer_line_id)])
+									print"ms_idsms_idsms_ids------------",ms_ids
+									if ms_ids:
+										ms_rec = self.pool.get('ch.order.machineshop.details').browse(cr,uid,ms_ids[0])
+										print"ms_rec///////////////////ms_rec",ms_rec.id
+										self.pool.get('ch.order.machineshop.details').write(cr,uid,ms_rec.id,{'spare_offer_line_id':of_li_id})
+										self.pool.get('ch.kg.crm.machineshop.item').write(cr,uid,ele.id,{'spare_offer_line_id':of_li_id})
+							arr = arr+1
+						else:
+							if purpose == 'spare':
+								of_li_id = 0
+				if item.line_ids_b:
+					for ele in item.line_ids_b:
+						if ele.is_applicable == True:
+							if purpose == 'spare':
+								print"off_line_idoff_line_idoff_line_id0000000000000000",off_line_id
+								of_li_id = off_line_id[arr]
+								if ele.spare_offer_line_id > 0:
+									bot_ids = self.pool.get('ch.order.bot.details').search(cr,uid,[('spare_offer_line_id','=',ele.spare_offer_line_id)])
+									print"bot_idsbot_idsbot_ids------------",bot_ids
+									if bot_ids:
+										bot_rec = self.pool.get('ch.order.bot.details').browse(cr,uid,bot_ids[0])
+										print"bot_rec///////////////////bot_rec",bot_rec.id
+										self.pool.get('ch.order.bot.details').write(cr,uid,bot_rec.id,{'spare_offer_line_id':of_li_id})
+										self.pool.get('ch.kg.crm.bot').write(cr,uid,ele.id,{'spare_offer_line_id':of_li_id})
+							arr = arr+1
+						else:
+							if purpose == 'spare':
+								of_li_id = 0
+		#~ if purpose == 'access':
+			#~ prime_cost = 0
+			#~ print"ddddddddddddddddddddddddddddD",prime_cost
+			#~ if item.acces == 'yes':
+				#~ arr = of_li_id = 0
+				#~ if item.line_ids_access_a:
+					#~ for line in item.line_ids_access_a:
+						#~ of_li_id = off_line_id[arr]
+						#~ print"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",of_li_id
+						#~ wo_access_id = self.pool.get('ch.wo.accessories').create(cr,uid,{'header_id':wo_line_id,
+																						 #~ 'access_id':line.access_id.id,
+																						 #~ 'moc_id':line.moc_id.id,
+																						 #~ 'qty':line.qty,
+																						 #~ 'load_access':line.load_access,
+																						 #~ 'access_offer_line_id': of_li_id,
+																						#~ })
+						#~ arr = arr+1
+						#~ if wo_access_id:
+							#~ if line.line_ids:
+								#~ for ele in line.line_ids:
+									#~ if ele.is_applicable == True:
+										#~ fou_line = self.pool.get('ch.wo.accessories.foundry').create(cr,uid,{'header_id': wo_access_id,
+																										#~ 'is_applicable': True,
+																										#~ 'qty': ele.qty,
+																										#~ 'position_id': ele.position_id.id,
+																										#~ 'pattern_id': ele.pattern_id.id,
+																										#~ 'material_code': ele.material_code,
+																										#~ 'prime_cost': ele.prime_cost,
+																										#~ 'moc_id': ele.moc_id.id,
+																										#~ 'access_offer_line_id': off_line_id,
+																										#~ })
+										#~ prime_cost += ele.prime_cost
+							#~ if line.line_ids_a:
+								#~ for ele in line.line_ids_a:
+									#~ if ele.is_applicable == True:
+										#~ fou_line = self.pool.get('ch.wo.accessories.ms').create(cr,uid,{'header_id': wo_access_id,
+																										#~ 'is_applicable': True,
+																										#~ 'qty': ele.qty,
+																										#~ 'indent_qty': ele.qty,
+																										#~ 'position_id': ele.position_id.id,
+																										#~ 'position_id': ele.material_code,
+																										#~ 'ms_id': ele.ms_id.id,
+																										#~ 'prime_cost': ele.prime_cost,
+																										#~ 'moc_id': ele.moc_id.id,
+																										#~ 'access_offer_line_id': off_line_id,
+																										#~ })
+										#~ prime_cost += ele.prime_cost
+							#~ if line.line_ids_b:
+								#~ for ele in line.line_ids_b:
+									#~ if ele.is_applicable == True:
+										#~ fou_line = self.pool.get('ch.wo.accessories.bot').create(cr,uid,{'header_id': wo_access_id,
+																										#~ 'is_applicable': True,
+																										#~ 'qty': ele.qty,
+																										#~ 'position_id': ele.position_id.id,
+																										#~ 'position_id': ele.material_code,
+																										#~ 'csd_no': ele.csd_no,
+																										#~ 'ms_id': ele.ms_id.id,
+																										#~ 'prime_cost': ele.prime_cost,
+																										#~ 'moc_id': ele.moc_id.id,
+																										#~ 'access_offer_line_id': off_line_id,
+																										#~ })
+										#~ prime_cost += ele.prime_cost
+							#~ self.pool.get('ch.wo.accessories').write(cr,uid,wo_access_id,{'mar_prime_cost':prime_cost})
+							#~ prime_cost = 0.00
+							#~ off_access_obj = self.pool.get('ch.accessories.offer').search(cr,uid,[('enquiry_line_id','=',item.id),('pump_id','=',item.pump_id.id)])
+							#~ if off_access_obj:
+								#~ print"off_access_obj",off_access_obj
+								#~ for line in off_access_obj:
+									#~ print"linelelelelelle",line
+									#~ off_access_rec = self.pool.get('ch.accessories.offer').browse(cr,uid,line)
+									#~ prime_cost += off_access_rec.net_amount
+								#~ print"*************************************************",prime_cost
+								#~ self.pool.get('ch.work.order.details').write(cr,uid,wo_line_id,{'unit_price':prime_cost})
+		
+		return True
+	
 	def prepare_bom(self,cr,uid,wo_line_id,item,off_line_id,purpose,context=None):	
 		prime_cost = 0
 		if purpose in ('pump','spare'):
@@ -736,6 +917,7 @@ class kg_crm_offer(osv.osv):
 																							'entry_mode': 'auto',
 																							'spare_offer_line_id': of_li_id,
 																							})
+							self.pool.get('ch.kg.crm.foundry.item').write(cr,uid,ele.id,{'spare_offer_line_id':of_li_id})
 							prime_cost += ele.prime_cost
 							print"aaaaaaaaaaaaa",prime_cost
 							arr = arr+1
@@ -762,6 +944,7 @@ class kg_crm_offer(osv.osv):
 																							'entry_mode': 'auto',
 																							'spare_offer_line_id': of_li_id,
 																							})
+							self.pool.get('ch.kg.crm.machineshop.item').write(cr,uid,ele.id,{'spare_offer_line_id':of_li_id})
 							prime_cost += ele.prime_cost
 							print"bbbbbbbbbbbbbb",prime_cost
 							arr = arr+1
@@ -788,6 +971,7 @@ class kg_crm_offer(osv.osv):
 																							'spare_offer_line_id': of_li_id,
 																							'brand_id': ele.brand_id.id,
 																							})
+							self.pool.get('ch.kg.crm.bot').write(cr,uid,ele.id,{'spare_offer_line_id':of_li_id})
 							prime_cost += ele.prime_cost
 							print"ccccccccccccccccc",prime_cost
 							arr = arr+1
@@ -883,7 +1067,7 @@ class kg_crm_offer(osv.osv):
 						
 		print"prime_costprime_cost",prime_cost
 		return True
-			
+	
 	def offer_copy(self,cr,uid,ids,context=None):
 		import StringIO
 		import base64
@@ -892,7 +1076,7 @@ class kg_crm_offer(osv.osv):
 			import xlwt
 		except:
 		   raise osv.except_osv('Warning !','Please download python xlwt module from\nhttp://pypi.python.org/packages/source/x/xlwt/xlwt-0.7.2.tar.gz\nand install it')
-		   
+		
 		rec =self.browse(cr,uid,ids[0])
 		print"recrec",rec
 		
@@ -912,7 +1096,7 @@ class kg_crm_offer(osv.osv):
 			from ch_accessories_offer pump
 			left join kg_pumpmodel_master pmm on(pmm.id=pump.pump_id)
 			where header_id = """+ str(rec.id) +""" order by pump.pump_id)
-
+			
 			"""
 		cr.execute(line_sql)		
 		line_data = cr.dictfetchall()
@@ -1048,10 +1232,10 @@ class kg_crm_offer(osv.osv):
 		#~ sheet1.write_merge(7, 7, 1, len_col, 'List Of Horizontal Centrifugal pump for Heavy Water Upgradation Plant', style6)
 		sheet1.write_merge(13, 13, 0, len_col, 'Liquid details given by the customer:', style5)
 		sheet1.row(13).height = 400
-		sheet1.write_merge(26, 26, 0, len_col, 'Pump Specification:', style5)
-		sheet1.row(26).height = 400
-		sheet1.write_merge(75, 75, 0, len_col, 'Material of construction:', style5)
-		sheet1.row(75).height = 400
+		sheet1.write_merge(27, 27, 0, len_col, 'Pump Specification:', style5)
+		sheet1.row(27).height = 400
+		sheet1.write_merge(77, 77, 0, len_col, 'Material of construction:', style5)
+		sheet1.row(77).height = 400
 		########
 		
 		col_1 = ''
@@ -1088,63 +1272,65 @@ class kg_crm_offer(osv.osv):
 		sheet1.write(s2+11,0,"Specific Gravity",style6)
 		sheet1.write(s2+12,0,"Density(kg/m3)",style6)
 		sheet1.write(s2+13,0,"Viscosity in CST",style6)
-		sheet1.write(s2+14,0,"Max Particle Size-mm",style6)
-		sheet1.write(s2+15,0,"NPSH-AVL",style6)
-		sheet1.write(s2+16,0,"Capacity in M3/hr(Liquid)",style6)
-		sheet1.write(s2+17,0,"Total Head in Mlc(Liquid)",style6)
-		sheet1.write(s2+19,0,"Pump Type",style6)
-		sheet1.row(s2+19).height = 490
-		sheet1.write(s2+20,0,"Pump Model",style6)
+		sheet1.write(s2+14,0,"Viscosity correction factors",style6)
+		sheet1.write(s2+15,0,"Max Particle Size-mm",style6)
+		sheet1.write(s2+16,0,"NPSH-AVL",style6)
+		sheet1.write(s2+17,0,"Capacity in M3/hr(Liquid)",style6)
+		sheet1.write(s2+18,0,"Total Head in Mlc(Liquid)",style6)
+		sheet1.write(s2+20,0,"Pump Type",style6)
+		sheet1.row(s2+20).height = 490
+		sheet1.write(s2+21,0,"Pump Model",style6)
 		#~ sheet1.write(s2+20,0,"Pumpseries",style6)
 		#~ sheet1.write(s2+21,0,"Previous Supply Reference",style6)
-		sheet1.write(s2+21,0,"Shaft Sealing",style6)
-		sheet1.write(s2+22,0,"Scope of Supply",style6)
-		sheet1.write(s2+23,0,"Number of stages",style6)
-		sheet1.write(s2+24,0,"Impeller Type",style6)
-		sheet1.write(s2+25,0,"Impeller Dia Min mm",style6)
-		sheet1.write(s2+26,0,"Size-SuctionX Delivery(mm)",style6)
+		sheet1.write(s2+22,0,"PH value",style6)
+		sheet1.write(s2+23,0,"Shaft Sealing",style6)
+		sheet1.write(s2+24,0,"Scope of Supply",style6)
+		sheet1.write(s2+25,0,"Number of stages",style6)
+		sheet1.write(s2+26,0,"Impeller Type",style6)
+		sheet1.write(s2+27,0,"Impeller Dia Min mm",style6)
+		sheet1.write(s2+28,0,"Size-SuctionX Delivery(mm)",style6)
 		#~ sheet1.write(s2+26,0,"Flange Type",style6)
-		sheet1.write(s2+27,0,"Flange Standard",style6)
-		sheet1.write(s2+28,0,"Efficiency in % Wat",style6)
-		sheet1.write(s2+29,0,"NPSH R - M",style6)
-		sheet1.write(s2+30,0,"Best Efficiency NPSH in M",style6)
-		sheet1.write(s2+31,0,"BKW Water",style6)
-		sheet1.write(s2+32,0,"BKW Liq",style6)
-		sheet1.write(s2+33,0,"Impeller Dia Rated mm",style6)
-		sheet1.write(s2+34,0,"Impeller Tip Speed -M/Sec",style6)
-		sheet1.write(s2+35,0,"Hydrostatic Test Pressure - Kg/cm2",style6)
-		sheet1.write(s2+36,0,"Setting Height",style6)
-		sheet1.write(s2+37,0,"Speed in RPM-Pump",style6)
-		sheet1.write(s2+38,0,"Speed in RPM-Engine",style6)
-		sheet1.write(s2+39,0,"Motor frequency (HZ)",style6)
-		sheet1.write(s2+40,0,"Motor KW",style6)
-		sheet1.write(s2+41,0,"Motor Margin(%)",style6)
-		sheet1.write(s2+42,0,"Speed in RPM-Motor",style6)
-		sheet1.write(s2+43,0,"End of the curve - KW(Rated) liquid",style6)
-		sheet1.write(s2+44,0,"Critical Speed",style6)
-		sheet1.write(s2+45,0,"Maximum Allowable Soild Size - MM",style6)
-		sheet1.write(s2+46,0,"Impeller Number of vanes",style6)
+		sheet1.write(s2+29,0,"Flange Standard",style6)
+		sheet1.write(s2+30,0,"Efficiency in % Wat",style6)
+		sheet1.write(s2+31,0,"NPSH R - M",style6)
+		sheet1.write(s2+32,0,"Best Efficiency NPSH in M",style6)
+		sheet1.write(s2+33,0,"BKW Water",style6)
+		sheet1.write(s2+34,0,"BKW Liq",style6)
+		sheet1.write(s2+35,0,"Impeller Dia Rated mm",style6)
+		sheet1.write(s2+36,0,"Impeller Tip Speed -M/Sec",style6)
+		sheet1.write(s2+37,0,"Hydrostatic Test Pressure - Kg/cm2",style6)
+		sheet1.write(s2+38,0,"Setting Height",style6)
+		sheet1.write(s2+39,0,"Speed in RPM-Pump",style6)
+		sheet1.write(s2+40,0,"Speed in RPM-Engine",style6)
+		sheet1.write(s2+41,0,"Motor frequency (HZ)",style6)
+		sheet1.write(s2+42,0,"Motor KW",style6)
+		sheet1.write(s2+43,0,"Motor Margin(%)",style6)
+		sheet1.write(s2+44,0,"Speed in RPM-Motor",style6)
+		sheet1.write(s2+45,0,"End of the curve - KW(Rated) liquid",style6)
+		sheet1.write(s2+46,0,"Critical Speed",style6)
+		sheet1.write(s2+47,0,"Maximum Allowable Soild Size - MM",style6)
+		sheet1.write(s2+48,0,"Impeller Number of vanes",style6)
 		
-		sheet1.write(s2+47,0,"Impeller Dia Max mm",style6)
-		sheet1.write(s2+48,0,"Max Allowable Casing Design Pressure",style6)
-		sheet1.write(s2+49,0,"Pump Design",style6)
-		sheet1.write(s2+50,0,"Casing Feet Location",style6)
-		sheet1.write(s2+51,0,"Shut off Head in M",style6)
-		sheet1.write(s2+52,0,"Shut off Pressure",style6)
-		sheet1.write(s2+53,0,"Minimum Contionuous Flow - M3/hr",style6)
-		sheet1.write(s2+54,0,"Specific Speed",style6)
-		sheet1.write(s2+55,0,"Suction Specific Speed",style6)
-		sheet1.write(s2+56,0,"Sealing Water Pressure Kg/cm^2",style6)
-		sheet1.write(s2+57,0,"Sealing Water Capcity- m3/hr",style6)
-		sheet1.write(s2+58,0,"GD SQ value",style6)
-		sheet1.write(s2+59,0,"Bearing Make",style6)
-		sheet1.write(s2+60,0,"BEARING NUMBER NDE / DE",style6)
-		sheet1.write(s2+61,0,"Bearing Qty NDE / DE",style6)
-		sheet1.write(s2+62,0,"Lubrication",style6)
-		sheet1.write(s2+63,0,"Primemover Category",style6)
-		sheet1.write(s2+64,0,"Transmission",style6)
-		sheet1.write(s2+65,0,"Primemover",style6)
-		sheet1.write(s2+66,0,"Operation Range",style6)
+		sheet1.write(s2+49,0,"Impeller Dia Max mm",style6)
+		sheet1.write(s2+50,0,"Max Allowable Casing Design Pressure",style6)
+		sheet1.write(s2+51,0,"Pump Design",style6)
+		sheet1.write(s2+52,0,"Casing Feet Location",style6)
+		sheet1.write(s2+53,0,"Shut off Head in M",style6)
+		sheet1.write(s2+54,0,"Shut off Pressure",style6)
+		sheet1.write(s2+55,0,"Minimum Contionuous Flow - M3/hr",style6)
+		sheet1.write(s2+56,0,"Specific Speed",style6)
+		sheet1.write(s2+57,0,"Suction Specific Speed",style6)
+		sheet1.write(s2+58,0,"Sealing Water Pressure Kg/cm^2",style6)
+		sheet1.write(s2+59,0,"Sealing Water Capcity- m3/hr",style6)
+		sheet1.write(s2+60,0,"GD SQ value",style6)
+		sheet1.write(s2+61,0,"Bearing Make",style6)
+		sheet1.write(s2+62,0,"BEARING NUMBER NDE / DE",style6)
+		sheet1.write(s2+63,0,"Bearing Qty NDE / DE",style6)
+		sheet1.write(s2+64,0,"Lubrication",style6)
+		sheet1.write(s2+65,0,"Primemover Category",style6)
+		sheet1.write(s2+66,0,"Transmission",style6)
+		sheet1.write(s2+67,0,"Primemover",style6)
+		sheet1.write(s2+68,0,"Operation Range",style6)
 		
 		if line_data:
 			coln_no = 1
@@ -1163,12 +1349,14 @@ class kg_crm_offer(osv.osv):
 					enq_line.solid_concen_vol as solid_concen_vol,
 					enq_line.specific_gravity as specific_gravity,
 					enq_line.viscosity as viscosity,
+					enq_line.viscosity_crt_factor as viscosity_crt_factor,
 					enq_line.max_particle_size_mm as max_particle_size_mm,
 					enq_line.npsh_avl as npsh_avl,
 					enq_line.density as density,
 					enq_line.capacity_in_liquid as capacity_in_liquid,
 					enq_line.head_in_liquid as head_in_liquid,
 					enq_line.consistency as consistency,
+					enq_line.ph_value as ph_value,
 					psm.name as pumpseries,
 					psms.name as pumpseries,
 					enq_line.pre_suppliy_ref as pre_suppliy_ref,
@@ -1329,63 +1517,65 @@ class kg_crm_offer(osv.osv):
 						sheet1.write(s2+11,coln_no,ele['specific_gravity'] or "-",style8)
 						sheet1.write(s2+12,coln_no,ele['density'] or "-",style8)
 						sheet1.write(s2+13,coln_no,ele['viscosity'] or "-",style8)
-						sheet1.write(s2+14,coln_no,ele['max_particle_size_mm'] or "-",style8)
-						sheet1.write(s2+15,coln_no,ele['npsh_avl'] or "-",style8)
-						sheet1.write(s2+16,coln_no,ele['capacity_in_liquid'] or "-",style8)
-						sheet1.write(s2+17,coln_no,ele['head_in_liquid'] or "-",style8)
-						sheet1.write(s2+19,coln_no,ele['pump_type'] or "-",style8)
-						sheet1.row(s2+19).height = 490
-						sheet1.write(s2+20,coln_no,item['name'] or "-",style1)
+						sheet1.write(s2+14,coln_no,ele['viscosity_crt_factor'] or "-",style8)
+						sheet1.write(s2+15,coln_no,ele['max_particle_size_mm'] or "-",style8)
+						sheet1.write(s2+16,coln_no,ele['npsh_avl'] or "-",style8)
+						sheet1.write(s2+17,coln_no,ele['capacity_in_liquid'] or "-",style8)
+						sheet1.write(s2+18,coln_no,ele['head_in_liquid'] or "-",style8)
+						sheet1.write(s2+20,coln_no,ele['pump_type'] or "-",style8)
+						sheet1.row(s2+20).height = 490
+						sheet1.write(s2+21,coln_no,item['name'] or "-",style1)
 						#~ sheet1.write(s2+20,coln_no,ele['pumpseries'] or "-",style8)	
 						#~ sheet1.write(s2+21,coln_no,ele['pre_suppliy_ref'] or "-",style8)
-						sheet1.write(s2+21,coln_no,ele['shaft_sealing'] or "-",style8)
-						sheet1.write(s2+22,coln_no,ele['scope_of_supply'] or "-",style8)
-						sheet1.write(s2+23,coln_no,ele['number_of_stages'] or "-",style8)
-						sheet1.write(s2+24,coln_no,ele['impeller_type'] or "-",style8)
-						sheet1.write(s2+25,coln_no,ele['impeller_dia_min'] or "-",style8)
-						sheet1.write(s2+26,coln_no,ele['size_suctionx'] or "-",style8)
+						sheet1.write(s2+22,coln_no,ele['ph_value'] or "-",style8)
+						sheet1.write(s2+23,coln_no,ele['shaft_sealing'] or "-",style8)
+						sheet1.write(s2+24,coln_no,ele['scope_of_supply'] or "-",style8)
+						sheet1.write(s2+25,coln_no,ele['number_of_stages'] or "-",style8)
+						sheet1.write(s2+26,coln_no,ele['impeller_type'] or "-",style8)
+						sheet1.write(s2+27,coln_no,ele['impeller_dia_min'] or "-",style8)
+						sheet1.write(s2+28,coln_no,ele['size_suctionx'] or "-",style8)
 						#~ sheet1.write(s2+26,coln_no,ele['flange_type'] or "-",style8)
-						sheet1.write(s2+27,coln_no,ele['flange_standard'] or "-",style8)
-						sheet1.write(s2+28,coln_no,ele['efficiency_in'] or "-",style8)
-						sheet1.write(s2+29,coln_no,ele['npsh_r_m'] or "-",style8)
-						sheet1.write(s2+30,coln_no,ele['best_efficiency'] or "-",style8)
-						sheet1.write(s2+31,coln_no,ele['bkw_water'] or "-",style8)
-						sheet1.write(s2+32,coln_no,ele['bkw_liq'] or "-",style8)
-						sheet1.write(s2+33,coln_no,ele['impeller_dia_rated'] or "-",style8)
-						sheet1.write(s2+34,coln_no,ele['impeller_tip_speed'] or "-",style8)
-						sheet1.write(s2+35,coln_no,ele['hydrostatic_test_pressure'] or "-",style8)
-						sheet1.write(s2+36,coln_no,ele['setting_height'] or "-",style8)
-						sheet1.write(s2+37,coln_no,ele['speed_in_rpm'] or "-",style8)
-						sheet1.write(s2+38,coln_no,ele['full_load_rpm'] or "-",style8)
-						sheet1.write(s2+39,coln_no,ele['frequency'] or "-",style8)
-						sheet1.write(s2+40,coln_no,ele['motor_kw'] or "-",style8)
-						sheet1.write(s2+41,coln_no,ele['motor_margin'] or "-",style8)
-						sheet1.write(s2+42,coln_no,ele['speed_in_motor'] or "-",style8)
-						sheet1.write(s2+43,coln_no,ele['end_of_the_curve'] or "-",style8)
-						sheet1.write(s2+44,coln_no,ele['critical_speed'] or "-",style8)
-						sheet1.write(s2+45,coln_no,ele['maximum_allowable_soild'] or "-",style8)
-						sheet1.write(s2+46,coln_no,ele['impeller_number'] or "-",style8)
+						sheet1.write(s2+29,coln_no,ele['flange_standard'] or "-",style8)
+						sheet1.write(s2+30,coln_no,ele['efficiency_in'] or "-",style8)
+						sheet1.write(s2+31,coln_no,ele['npsh_r_m'] or "-",style8)
+						sheet1.write(s2+32,coln_no,ele['best_efficiency'] or "-",style8)
+						sheet1.write(s2+33,coln_no,ele['bkw_water'] or "-",style8)
+						sheet1.write(s2+34,coln_no,ele['bkw_liq'] or "-",style8)
+						sheet1.write(s2+35,coln_no,ele['impeller_dia_rated'] or "-",style8)
+						sheet1.write(s2+36,coln_no,ele['impeller_tip_speed'] or "-",style8)
+						sheet1.write(s2+37,coln_no,ele['hydrostatic_test_pressure'] or "-",style8)
+						sheet1.write(s2+38,coln_no,ele['setting_height'] or "-",style8)
+						sheet1.write(s2+39,coln_no,ele['speed_in_rpm'] or "-",style8)
+						sheet1.write(s2+40,coln_no,ele['full_load_rpm'] or "-",style8)
+						sheet1.write(s2+41,coln_no,ele['frequency'] or "-",style8)
+						sheet1.write(s2+42,coln_no,ele['motor_kw'] or "-",style8)
+						sheet1.write(s2+43,coln_no,ele['motor_margin'] or "-",style8)
+						sheet1.write(s2+44,coln_no,ele['speed_in_motor'] or "-",style8)
+						sheet1.write(s2+45,coln_no,ele['end_of_the_curve'] or "-",style8)
+						sheet1.write(s2+46,coln_no,ele['critical_speed'] or "-",style8)
+						sheet1.write(s2+47,coln_no,ele['maximum_allowable_soild'] or "-",style8)
+						sheet1.write(s2+48,coln_no,ele['impeller_number'] or "-",style8)
 					
-						sheet1.write(s2+47,coln_no,ele['impeller_dia_max'] or "-",style8)
-						sheet1.write(s2+48,coln_no,ele['max_allowable_test'] or "-",style8)
-						sheet1.write(s2+49,coln_no,ele['crm_type'] or "-",style8)
-						sheet1.write(s2+50,coln_no,ele['casing_design'] or "-",style8)
-						sheet1.write(s2+51,coln_no,ele['shut_off_head'] or "-",style8)
-						sheet1.write(s2+52,coln_no,ele['shut_off_pressure'] or "-",style8)
-						sheet1.write(s2+53,coln_no,ele['minimum_contionuous'] or "-",style8)
-						sheet1.write(s2+54,coln_no,ele['specific_speed'] or "-",style8)
-						sheet1.write(s2+55,coln_no,ele['suction_specific_speed'] or "-",style8)
-						sheet1.write(s2+56,coln_no,ele['sealing_water_pressure'] or "-",style8)
-						sheet1.write(s2+57,coln_no,ele['sealing_water_capacity'] or "-",style8)
-						sheet1.write(s2+58,coln_no,ele['gd_sq_value'] or "-",style8)
-						sheet1.write(s2+59,coln_no,ele['bearing_make'] or "-",style8)
-						sheet1.write(s2+60,coln_no,ele['bearing_number_nde'] or "-",style8)
-						sheet1.write(s2+61,coln_no,ele['bearing_qty_nde'] or "-",style8)
-						sheet1.write(s2+62,coln_no,ele['lubrication_type'] or "-",style8)
-						sheet1.write(s2+63,coln_no,ele['primemover_categ'] or "-",style8)
-						sheet1.write(s2+64,coln_no,ele['type_of_drive'] or "-",style8)
-						sheet1.write(s2+65,coln_no,ele['primemover'] or "-",style8)
-						sheet1.write(s2+66,coln_no,ele['operation_range'] or "-",style8)
+						sheet1.write(s2+49,coln_no,ele['impeller_dia_max'] or "-",style8)
+						sheet1.write(s2+50,coln_no,ele['max_allowable_test'] or "-",style8)
+						sheet1.write(s2+51,coln_no,ele['crm_type'] or "-",style8)
+						sheet1.write(s2+52,coln_no,ele['casing_design'] or "-",style8)
+						sheet1.write(s2+53,coln_no,ele['shut_off_head'] or "-",style8)
+						sheet1.write(s2+54,coln_no,ele['shut_off_pressure'] or "-",style8)
+						sheet1.write(s2+55,coln_no,ele['minimum_contionuous'] or "-",style8)
+						sheet1.write(s2+56,coln_no,ele['specific_speed'] or "-",style8)
+						sheet1.write(s2+57,coln_no,ele['suction_specific_speed'] or "-",style8)
+						sheet1.write(s2+58,coln_no,ele['sealing_water_pressure'] or "-",style8)
+						sheet1.write(s2+59,coln_no,ele['sealing_water_capacity'] or "-",style8)
+						sheet1.write(s2+60,coln_no,ele['gd_sq_value'] or "-",style8)
+						sheet1.write(s2+61,coln_no,ele['bearing_make'] or "-",style8)
+						sheet1.write(s2+62,coln_no,ele['bearing_number_nde'] or "-",style8)
+						sheet1.write(s2+63,coln_no,ele['bearing_qty_nde'] or "-",style8)
+						sheet1.write(s2+64,coln_no,ele['lubrication_type'] or "-",style8)
+						sheet1.write(s2+65,coln_no,ele['primemover_categ'] or "-",style8)
+						sheet1.write(s2+66,coln_no,ele['type_of_drive'] or "-",style8)
+						sheet1.write(s2+67,coln_no,ele['primemover'] or "-",style8)
+						sheet1.write(s2+68,coln_no,ele['operation_range'] or "-",style8)
 						
 						s_no = s_no + 1
 					coln_no = coln_no + 1
@@ -1405,21 +1595,21 @@ class kg_crm_offer(osv.osv):
 					sheet1.write(s2+14,coln_no,"-",style6)
 					sheet1.write(s2+15,coln_no,"-",style6)
 					sheet1.write(s2+16,coln_no,"-",style6)
-					sheet1.write(s2+18,coln_no,"-",style6)
-					sheet1.row(s2+18).height = 490
-					sheet1.write(s2+19,coln_no,"-",style1)
-					sheet1.write(s2+20,coln_no,"-",style6)	
+					sheet1.write(s2+17,coln_no,"-",style6)
+					sheet1.write(s2+19,coln_no,"-",style6)
+					sheet1.row(s2+19).height = 490
+					sheet1.write(s2+20,coln_no,"-",style1)
+					sheet1.write(s2+21,coln_no,"-",style6)	
 					#~ sheet1.write(s2+20,coln_no,"-",style6)
 					#~ sheet1.write(s2+21,coln_no,"-",style6)
-					sheet1.write(s2+21,coln_no,"-",style6)
 					sheet1.write(s2+22,coln_no,"-",style6)
 					sheet1.write(s2+23,coln_no,"-",style6)
 					sheet1.write(s2+24,coln_no,"-",style6)
 					sheet1.write(s2+25,coln_no,"-",style6)
 					sheet1.write(s2+26,coln_no,"-",style6)
-					#~ sheet1.write(s2+26,coln_no,"-",style6)
 					sheet1.write(s2+27,coln_no,"-",style6)
 					sheet1.write(s2+28,coln_no,"-",style6)
+					#~ sheet1.write(s2+26,coln_no,"-",style6)
 					sheet1.write(s2+29,coln_no,"-",style6)
 					sheet1.write(s2+30,coln_no,"-",style6)
 					sheet1.write(s2+31,coln_no,"-",style6)
@@ -1437,9 +1627,9 @@ class kg_crm_offer(osv.osv):
 					sheet1.write(s2+43,coln_no,"-",style6)
 					sheet1.write(s2+44,coln_no,"-",style6)
 					sheet1.write(s2+45,coln_no,"-",style6)
+					sheet1.write(s2+46,coln_no,"-",style6)
+					sheet1.write(s2+47,coln_no,"-",style6)
 					
-					sheet1.write(s2+48,coln_no,"-",style6)
-					sheet1.write(s2+49,coln_no,"-",style6)
 					sheet1.write(s2+50,coln_no,"-",style6)
 					sheet1.write(s2+51,coln_no,"-",style6)
 					sheet1.write(s2+52,coln_no,"-",style6)
@@ -1458,6 +1648,8 @@ class kg_crm_offer(osv.osv):
 					sheet1.write(s2+65,coln_no,"-",style6)
 					sheet1.write(s2+66,coln_no,"-",style6)
 					sheet1.write(s2+67,coln_no,"-",style6)
+					sheet1.write(s2+68,coln_no,"-",style6)
+					sheet1.write(s2+69,coln_no,"-",style6)
 					coln_no = coln_no+ 1
 					
 		if line_data:
@@ -1478,7 +1670,7 @@ class kg_crm_offer(osv.osv):
 				cr.execute(mat_sql)		
 				mat_data = cr.dictfetchall()
 				print"mat_data",mat_data
-				row_no = s2+68
+				row_no = s2+70
 				
 				if mat_data:
 					for item_1 in mat_data:
@@ -1738,7 +1930,7 @@ class kg_crm_offer(osv.osv):
 					em_col = em_col + 1
 		row_no = row_no
 		print"row_norow_norow_norow_norow_norow_no",row_no
-				
+			
 		"""Parsing data as string """
 		file_data=StringIO.StringIO()
 		
@@ -1827,7 +2019,7 @@ class kg_crm_offer(osv.osv):
 		report_name = 'Terms Copy' + '.' + 'xls'
 		
 		return self.write(cr, uid, ids, {'term_data':out, 'term_copy':report_name},context=context)
-		
+	
 kg_crm_offer()
 
 
@@ -1897,7 +2089,7 @@ class ch_pump_offer(osv.osv):
 			res[line.id]['net_amount'] = net_amount
 			
 		return res
-		
+	
 	_name = "ch.pump.offer"
 	_description = "Ch Pump Offer"
 	
@@ -1959,7 +2151,7 @@ class ch_pump_offer(osv.osv):
 		#~ 'load_bom':False,
 		#~ 
 	#~ }
-
+	
 ch_pump_offer()
 
 class ch_supervision_offer(osv.osv):
@@ -2028,7 +2220,7 @@ class ch_supervision_offer(osv.osv):
 			res[line.id]['net_amount'] = net_amount
 			
 		return res
-		
+	
 	_name = "ch.supervision.offer"
 	_description = "Ch Supervision Offer"
 	
@@ -2072,12 +2264,12 @@ class ch_supervision_offer(osv.osv):
 	
 	def default_get(self, cr, uid, fields, context=None):
 		return context
-		
+	
 ch_supervision_offer()
 
 
 class ch_spare_offer(osv.osv):
-
+	
 	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
 		res = {}
 		cur_obj=self.pool.get('res.currency')
@@ -2142,7 +2334,7 @@ class ch_spare_offer(osv.osv):
 			res[line.id]['net_amount'] = net_amount
 			
 		return res
-		
+	
 	_name = "ch.spare.offer"
 	_description = "Ch Spare Offer"
 	
@@ -2178,6 +2370,7 @@ class ch_spare_offer(osv.osv):
 		'supervision_amount': fields.float('Supervision(Rs.)'),
 		'total_price': fields.float('Total Price'),
 		'spare_offer_line_id': fields.many2one('ch.spare.offer','Spare Offer Line Id'),
+		'moc_changed_flag': fields.boolean('MOC Changed'),
 		
 		'tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),	
 		'sam_ratio_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Sam Ratio',multi="sums",store=True),	
@@ -2200,7 +2393,7 @@ class ch_spare_offer(osv.osv):
 		
 	}
 	
-
+	
 ch_spare_offer()
 
 class ch_accessories_offer(osv.osv):
@@ -2269,7 +2462,7 @@ class ch_accessories_offer(osv.osv):
 			res[line.id]['net_amount'] = net_amount
 			
 		return res
-		
+	
 	_name = "ch.accessories.offer"
 	_description = "Ch Accessories Offer"
 	
@@ -2301,6 +2494,7 @@ class ch_accessories_offer(osv.osv):
 		'supervision_amount': fields.float('Supervision(Rs.)'),
 		'pump_price': fields.float('Pump Price'),
 		'total_price': fields.float('Total Price'),
+		'moc_changed_flag': fields.boolean('MOC Changed'),
 		
 		'tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),	
 		'sam_ratio_tot': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Sam Ratio',multi="sums",store=True),	
@@ -2352,20 +2546,20 @@ class ch_term_offer(osv.osv):
 				value = {'term': term_rec.term}
 		return {'value': value}
 	
-		
+	
 ch_term_offer()
 
 
 class kg_mail_compose_message(osv.osv):
-
+	
 	_name = "mail.compose.message"
 	_inherit = "mail.compose.message"
 	_description = "Email composition wizard"
 	
 	_columns = {
-	
-	'cc_mail' : fields.char('Cc'),
-	
+		
+		'cc_mail' : fields.char('Cc'),
+		
 	}
 	
 	def send_mail_offer(self, cr, uid, ids,context=None):
@@ -2417,5 +2611,5 @@ class kg_mail_compose_message(osv.osv):
 			print "Offer Copy and Term Copy Mail Seccessfully Sent TO ---->>> ::",to_mails 
 		
 		return True
-		
+	
 kg_mail_compose_message()

@@ -386,8 +386,8 @@
 							<tree string="Material of Construction Details Entry Tree" editable="top" >
 								<field name="offer_id" readonly="1"/>
 								<field name="moc_id" attrs="{'readonly': [('flag_standard','!=',True)]}"/>
-								<field name="remarks" widget="char" readonly="1"/>										
-								<field name="flag_standard" invisible="1"/>										
+								<field name="remarks" widget="char" readonly="1"/>
+								<field name="flag_standard" invisible="1"/>
 							</tree>
 						</field>	
 					</page>							
@@ -454,13 +454,15 @@
 							<field name="pattern_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
 							<field name="pattern_name" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 							<field name="material_code"/>
-							<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}"/>
+							<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
 							<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
 							<field name="qty" required="1" attrs="{'readonly':[('purpose_categ','=','pump')]}"/>
 							<field name="prime_cost" readonly="1"/>
 							<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
 							<field name="load_bom" invisible="1"/>
 							<field name="purpose_categ" invisible="1"/>
+							<field name="moc_name" invisible="1"/>
+							<field name="moc_changed_flag" invisible="1"/>
 						</tree>
 					</field>								
 				</page>
@@ -472,13 +474,15 @@
 							<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 							<field name="name" attrs="{'readonly':[('load_bom','=',True)]}"/>
 							<field name="material_code"/>
-							<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}"/>
+							<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
 							<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
 							<field name="qty" required="1" attrs="{'readonly':[('purpose_categ','=','pump')]}"/>
 							<field name="prime_cost" readonly="1"/>
 							<field name="remarks" attrs="{'readonly':[('load_bom','=',True)]}"/>
 							<field name="load_bom" invisible="1"/>
 							<field name="purpose_categ" invisible="1"/>
+							<field name="moc_name" invisible="1"/>
+							<field name="moc_changed_flag" invisible="1"/>
 						</tree>
 					</field>								
 				</page>
@@ -490,7 +494,7 @@
 							<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 							<field name="item_name" attrs="{'readonly':[('load_bom','=',True)]}"/>
 							<field name="material_code"/>
-							<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}"/>
+							<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
 							<field name="brand_id" attrs="{'required': [('flag_is_bearing','=',True),('is_applicable','=',True)]}"/>
 							<field name="qty" required="1" attrs="{'readonly':[('purpose_categ','=','pump')]}"/>
 							<field name="prime_cost" readonly="1"/>
@@ -498,6 +502,8 @@
 							<field name="load_bom" invisible="1"/>
 							<field name="flag_is_bearing" invisible="1"/>
 							<field name="purpose_categ" invisible="1"/>
+							<field name="moc_name" invisible="1"/>
+							<field name="moc_changed_flag" invisible="1"/>
 						</tree>
 					</field>								
 				</page>
@@ -553,12 +559,14 @@
 											<field name="pattern_id" readonly="1"/>
 											<field name="pattern_name" readonly="1"/>
 											<field name="material_code"/>
-											<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}"/>
+											<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
 											<field name="csd_no" readonly="1"/>
 											<field name="qty" required="1"/>
 											<field name="prime_cost" readonly="1"/>
 											<field name="remarks" />
 											<field name="load_bom" invisible="1"/>
+											<field name="moc_name" invisible="1"/>
+											<field name="moc_changed_flag" invisible="1"/>
 										</tree>
 									</field>								
 								</page>
@@ -570,12 +578,14 @@
 											<field name="ms_id" readonly="1"/>
 											<field name="name" readonly="1"/>
 											<field name="material_code"/>
-											<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}"/>
+											<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
 											<field name="csd_no" readonly="1"/>
 											<field name="qty" required="1"/>
 											<field name="prime_cost" readonly="1"/>
 											<field name="remarks"/>
 											<field name="load_bom" invisible="1"/>
+											<field name="moc_name" invisible="1"/>
+											<field name="moc_changed_flag" invisible="1"/>
 										</tree>
 									</field>								
 								</page>
@@ -586,12 +596,14 @@
 											<field name="ms_id" readonly="1"/>
 											<field name="name" readonly="1"/>
 											<field name="material_code"/>
-											<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}"/>
+											<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
 											<field name="csd_no" readonly="1"/>
 											<field name="qty" required="1"/>
 											<field name="prime_cost" readonly="1"/>
 											<field name="remarks"/>
 											<field name="load_bom" invisible="1"/>
+											<field name="moc_name" invisible="1"/>
+											<field name="moc_changed_flag" invisible="1"/>
 										</tree>
 									</field>								
 								</page>

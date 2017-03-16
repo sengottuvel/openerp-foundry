@@ -15,7 +15,7 @@
 						<button name="entry_approved_md" type="object" string="Approve MD" states="wfa_md" class="oe_highlight"/>
 						<button name="entry_reject_md" type="object" string="Reject" states="wfa_md" class="oe_highlight"/>
 						<button name="wo_creation" type="object" string="WO Creation" states="approved_md" class="oe_highlight"/>
-						<button name="entry_revision" type="object" string="Create Revision" states="moved_to_offer,approved_md,wo_created" class="oe_highlight"/>
+						<button name="entry_revision" type="object" string="Create Revision" attrs="{'invisible':['|',('state','!=','wo_created'),('is_zero_offer','!=',True)]}" class="oe_highlight"/>
 						<button name="offer_copy" type="object" states="moved_to_offer,approved_md,wo_created" string="Offer Copy" class="oe_highlight"/>
 						<button name="term_copy" type="object" states="moved_to_offer,approved_md,wo_created" string="Terms Copy" class="oe_highlight"/>
 						<button name="send_by_email" type="object" states="approved_md,wo_created" string="Send by Email" class="oe_highlight"/>
@@ -33,7 +33,7 @@
 								<field name="inspection"/>
 								<field name="revision" readonly="1"/>
 								<field name="note"/>
-								<field name="is_zero_offer" />
+								<field name="is_zero_offer" attrs="{'readonly':[('state','=','wo_created')]}"/>
 								<field name="purpose" readonly="1"/>
 <!--							<field name="revision_remarks" attrs="{'invisible':[('state','not in',('moved_to_offer','wo_created','revised'))],'readonly':[('state','=','revised')]}"/>-->
 								<field name="revision_remarks" attrs="{'invisible':[('revision','=',0)],'readonly':[('state','=','revised')],'required':[('revision','!=',0)]}"/>
@@ -131,6 +131,7 @@
 									<field name="item_code" required="1"/>
 									<field name="item_name" required="1"/>
 									<field name="moc_id"/>
+									<field name="moc_changed_flag" readonly="1"/>
 									<field name="qty" sum="qty"/>
 									<field name="prime_cost" sum="prime_cost"/>
 									<field name="sam_ratio"/>
@@ -175,6 +176,7 @@
 									<field name="access_id" required="1" readonly="1"/>
 									<field name="pump_id" required="1" readonly="1"/>
 									<field name="moc_id" required="1" readonly="1"/>
+									<field name="moc_changed_flag" readonly="1"/>
 									<field name="qty" sum="qty"/>
 									<field name="per_access_prime_cost" sum="per_access_prime_cost" readonly="1"/>
 									<field name="prime_cost" sum="prime_cost" readonly="1"/>
@@ -263,16 +265,16 @@
 					<group string="Pump Offer Details">
 						<group>
 							<field name="pumpseries_id" required="1" readonly="1"/>
-							<field name="pump_id" required="1"  readonly="1"/>
+							<field name="pump_id" required="1" readonly="1"/>
 							<field name="moc_const_id" readonly="1"/>
 							<field name="drawing_approval"/>
 							<field name="inspection"/>
 							<field name="qty" readonly="1"/>
 							<field name="prime_cost" readonly="1"/>
 							<field name="sam_ratio"/>
-							<field name="dealer_discount"/>
 						</group>
 						<group>
+							<field name="dealer_discount"/>
 							<field name="customer_discount"/>
 							<field name="special_discount"/>
 							<field name="tax"/>
@@ -293,6 +295,7 @@
 										<field name="pattern_id" attrs="{'readonly':[('load_bom','=',True)]}"/>
 										<field name="pattern_name" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 										<field name="moc_id" required="1" readonly="1"/>
+										<field name="moc_changed_flag" readonly="1"/>
 										<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
 										<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 										<field name="prime_cost" readonly="1"/>
@@ -311,6 +314,7 @@
 										<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 										<field name="name" attrs="{'readonly':[('load_bom','=',True)]}"/>
 										<field name="moc_id" readonly="1" required="1"/>
+										<field name="moc_changed_flag" readonly="1"/>
 										<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
 										<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 										<field name="prime_cost" readonly="1"/>
@@ -329,6 +333,7 @@
 										<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 										<field name="item_name" attrs="{'readonly':[('load_bom','=',True)]}"/>
 										<field name="moc_id" readonly="1" required="1"/>
+										<field name="moc_changed_flag" readonly="1"/>
 										<field name="brand_id" readonly="1"/>
 										<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 										<field name="prime_cost" readonly="1"/>
@@ -381,6 +386,7 @@
 							<field name="item_code" required="1" readonly="1"/>
 							<field name="item_name" required="1" readonly="1"/>
 							<field name="moc_id" required="1" readonly="1"/>
+							<field name="moc_changed_flag" readonly="1"/>
 							<field name="qty" readonly="1"/>
 							<field name="prime_cost" readonly="1"/>
 							<field name="sam_ratio"/>
@@ -493,23 +499,24 @@
 				<sheet>
 					<group string="Accessories Offer Details">
 						<group>
-						<field name="access_id" required="1" readonly="1"/>
-						<field name="moc_id" required="1" readonly="1"/>
-						<field name="pump_id" readonly="1"/>
-						<field name="qty" readonly="1"/>
-						<field name="prime_cost" readonly="1"/>
-						<field name="sam_ratio"/>
-						<field name="dealer_discount"/>
-						<field name="customer_discount"/>
+							<field name="access_id" required="1" readonly="1"/>
+							<field name="moc_id" required="1" readonly="1"/>
+							<field name="moc_changed_flag" readonly="1"/>
+							<field name="pump_id" readonly="1"/>
+							<field name="qty" readonly="1"/>
+							<field name="prime_cost" readonly="1"/>
+							<field name="sam_ratio"/>
 						</group>
 						<group>
-						<field name="special_discount"/>
-						<field name="tax"/>
-						<field name="p_f"/>
-						<field name="freight"/>
-						<field name="insurance"/>
-						<field name="ed"/>
-						<field name="supervision_amount"/>
+							<field name="dealer_discount"/>
+							<field name="customer_discount"/>
+							<field name="special_discount"/>
+							<field name="tax"/>
+							<field name="p_f"/>
+							<field name="freight"/>
+							<field name="insurance"/>
+							<field name="ed"/>
+							<field name="supervision_amount"/>
 <!--
 						<field name="pump_price" readonly="1"/>
 -->
