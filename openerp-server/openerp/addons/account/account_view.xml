@@ -112,7 +112,9 @@
         <menuitem id="next_id_23" name="Periods" parent="account.menu_finance_configuration" sequence="5" />
         <menuitem id="menu_action_account_fiscalyear" action="action_account_fiscalyear" parent="next_id_23"/>
         
+<!--
         <menuitem action="action_account_fiscalyear" name="Fiscal Years" id="mam_account_fiscalyear" parent="mpm_accounts_master" sequence="1"/>
+-->
 
         <!-- Accounts Period Module standard by Karthikeyan Start here-->
         
@@ -214,7 +216,9 @@
             <menuitem name="Masters" id="mpm_accounts_master" parent = "mpm_acc_masters" sequence="0"/>
             
             <!-- Periods Master  -->
+<!--
 				<menuitem action="action_account_period" name="Periods" id="mam_account_period_master" parent="mpm_accounts_master" sequence="2"/>
+-->
 				
 		<!-- Menu Name End here --> 
         
@@ -499,10 +503,14 @@
         <menuitem id="account_account_menu" name="Accounts" parent="account.menu_finance_configuration" sequence="15"/>
         <menuitem action="action_account_form" id="menu_action_account_form" parent="account_account_menu"/>
         
+<!--
          <menuitem action="action_account_form" name="Ledger Name" id="mam_account_acounting_map" parent="mpm_accounts_master" sequence="4"/>
+-->
          
          
+<!--
            <menuitem action="action_account_form_ledger_name" name="Ledger Group" id="mam_account_acounting_map_ledger_name" parent="mpm_accounts_master" sequence="3"/>
+-->
 
         <act_window
             id="act_account_acount_move_line_open_unreconciled"
@@ -854,7 +862,9 @@
         </record>
        
        
+<!--
         <menuitem action="action_account_journal_book_form" name="Books" id="mam_account_journal_book_name" parent="mpm_accounts_master" sequence="3"/>
+-->
 
        
        <!-- Account Book End here -->
@@ -1952,7 +1962,9 @@
 			
 			<!-- Sequence Number Setting Ends Here -->    
         
+<!--
          <menuitem action="action_move_journal_line_jo" name="General Journal" id="mam_journal_account_move" parent="mpm_accounts_master" sequence="5"/>    
+-->
                 
         <!-- General Journal End -->
         
