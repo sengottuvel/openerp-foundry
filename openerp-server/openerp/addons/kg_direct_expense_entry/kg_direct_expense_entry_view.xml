@@ -104,8 +104,8 @@
 				<tree colors="blue:state == 'draft';red:state == 'confirmed'
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" 
 								toolbar="True" string="Direct Expense Entry">
-					<field name='name'/>
 					<field name='division_id'/>
+					<field name='name'/>
 					<field name='expense_date'/>
 					<field name='invoice_no'/>
 					<field name='invoice_date'/>
