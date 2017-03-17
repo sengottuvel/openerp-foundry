@@ -55,7 +55,7 @@ class kg_advance_deduction(osv.osv):
 		### Basic Info
 			
 		'code': fields.char('Code', size=10, required=True),		
-		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
+		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','AC ACK Pending'),('done','AC ACK Done'),('reject','AC Rejected'),('cancel','Cancelled')],'Status', readonly=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
@@ -76,6 +76,8 @@ class kg_advance_deduction(osv.osv):
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
+		'done_date': fields.datetime('AC ACK Date', readonly=True),
+		'done_user_id': fields.many2one('res.users', 'AC ACK By', readonly=True),
 		
 		## Module Requirement Info
 		
@@ -90,6 +92,7 @@ class kg_advance_deduction(osv.osv):
 		'amt_paid': fields.float('Amount Paid So Far'),
 		'bal_amt': fields.float('Balance Amount'),
 		'round_bal': fields.float('Round Balance'),
+		'emp_categ_id':fields.many2one('kg.employee.category','Employee Category'),
 		
 		## Child Tables Declaration		
 		
@@ -115,7 +118,7 @@ class kg_advance_deduction(osv.osv):
 	
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.state == 'confirmed':
+		if rec.state == 'approved':
 			if rec.cancel_remark:
 				self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 			else:
@@ -137,7 +140,7 @@ class kg_advance_deduction(osv.osv):
 		
 	def entry_draft(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.state == 'confirmed':
+		if rec.state == 'cancel':
 			self.write(cr, uid, ids, {'state': 'draft'})
 		else:
 			raise osv.except_osv(_('Warning!!!'),
@@ -155,7 +158,7 @@ class kg_advance_deduction(osv.osv):
 
 	def entry_reject(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.state == 'confirmed':
+		if rec.state == 'approved':
 			if rec.remark:
 				self.write(cr, uid, ids, {'state': 'reject','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 			else:
@@ -185,10 +188,10 @@ class kg_advance_deduction(osv.osv):
 	## Module Requirement
 	
 	def onchange_employee_id(self, cr, uid, ids, employee_id,code, context=None):
-		value = {'code': ''}
+		value = {'code': '','emp_categ_id':''}
 		if employee_id:
 			emp = self.pool.get('hr.employee').browse(cr, uid, employee_id, context=context)
-			value = {'code': emp.code}
+			value = {'code': emp.code,'emp_categ_id':emp.emp_categ_id.id}
 		return {'value': value}
 		
 	def onchange_repay_amount(self,cr,uid,ids ,tot_amt, period,context = None):
@@ -196,11 +199,13 @@ class kg_advance_deduction(osv.osv):
 						'bal_amt' : tot_amt,}
 		return {'value' : value}
 		
-	#~ def onchange_amount(self, cr, uid,ids,tot_amt,amt_paid, context=None):
-		#~ value = {'amt_paid': ''}
-		#~ if tot_amt:
-			#~ value = {'amt_paid': tot_amt}
-		#~ return {'value': value}
+	def entry_accept(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'approved':
+			self.write(cr, uid, ids, {'state': 'done','done_user_id': uid, 'done_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		else:
+			pass
+		return True
 	
 	###Validations###
 	
