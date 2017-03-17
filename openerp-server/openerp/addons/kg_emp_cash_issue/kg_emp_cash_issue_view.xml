@@ -19,7 +19,7 @@
 						<group>
 							<group>						
 								<field name="employee_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" on_change="onchange_employee_id(employee_id,emp_code,dep_id)" required="1"/>																
-								<field name="division_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1"/>
+								<field name="division_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" readonly="1"/>
 								<field name="acc_journal_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1"/>		
 								<field name="amount" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1" on_change="onchange_amount(amount,bal_amt)"/>														
 								<field name="narration" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1" class="aplhanum_expect"/>																
