@@ -17,14 +17,14 @@
                 </header>
                     <group>
                         <group>
-                            <field name="name" readonly = "1"/>
-                            <field name="code" readonly = "1"/>
+                            <field name="name" readonly = "1"attrs="{'readonly': [('state','in',['confirmed','approved'])]}"/>
+                            <field name="code" attrs="{'readonly': [('state','in',['confirmed','approved'])]}"/>
                             <field name="company_id" groups="base.group_multi_company"/>
-                            <field name="end_journal_period_id" readonly = "1"/>
+                            <field name="end_journal_period_id" attrs="{'readonly': [('state','in',['confirmed','approved'])]}"/>
                         </group>
                         <group>
-                            <field name="date_start" readonly = "1"/>
-                            <field name="date_stop" readonly = "1"/>
+                            <field name="date_start" attrs="{'readonly': [('state','in',['confirmed','approved'])]}"/>
+                            <field name="date_stop" attrs="{'readonly': [('state','in',['confirmed','approved'])]}"/>
                             <field name="state"/>
                         </group>
                     </group>
@@ -128,17 +128,17 @@
                     </header>                    
 					<group>
 						<group>
-							<field name="name"/>
-							<field name="fiscalyear_id" widget="selection"/>
-							<label for="date_start" string="Duration"/>
+							<field name="name" readonly="1"/>
+							<field name="fiscalyear_id" widget="selection" readonly="1"/>
+							<label for="date_start" string="Duration" readonly="1"/>
 							<div>
-								<field name="date_start" class="oe_inline" nolabel="1"/> -
-								<field name="date_stop" nolabel="1" class="oe_inline"/>
+								<field name="date_start" class="oe_inline" nolabel="1" readonly="1"/> -
+								<field name="date_stop" nolabel="1" class="oe_inline" readonly="1"/>
 							</div>
 						</group>
 						<group>
-							<field name="code"/>
-							<field name="special"/>
+							<field name="code" readonly="1"/>
+							<field name="special" />
 							<field name="company_id" widget="selection" groups="base.group_multi_company"/>
 						</group>
 					</group>
