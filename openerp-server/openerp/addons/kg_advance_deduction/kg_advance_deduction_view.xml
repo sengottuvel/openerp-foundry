@@ -155,10 +155,10 @@
 		<!-- Form view for ACC Acknowledge -->	
 		
 		<record id="m_form_v_kg_adv_det_ack" model="ir.ui.view">
-			<field name="name">Advance Deduction Form</field>
+			<field name="name">Employee Advance Form</field>
 			<field name="model">kg.advance.deduction</field>
 			<field name="arch" type="xml">
-				<form string="Advance deduction" version="7.0" create="false">					
+				<form string="Employee Advance" version="7.0" create="false">					
 					<header>
 						<button name="entry_reject" type="object" string="AC Reject" states="approved" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_accept" type="object" string="AC Accept" states="approved" class="oe_highlight" confirm="Are you sure to proceed ?"/>
@@ -229,7 +229,7 @@
 		<!-- Tree View Starts For ACC Ack-->	
 		
 		<record id="m_tree_v_kg_adv_det_ack" model="ir.ui.view">
-			<field name="name">Advance Deduction Tree</field>
+			<field name="name">Employee Advance Tree</field>
 			<field name="model">kg.advance.deduction</field>
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'draft';red:state == 'confirmed'
@@ -252,7 +252,7 @@
 		<!-- Menu Action For ACC Ack-->
 				
 		 <record id="mma_kg_adv_det_ack" model="ir.actions.act_window">
-			<field name="name">Advance Deduction</field>
+			<field name="name">Employee Advance</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.advance.deduction</field>
 			<field name="view_type">form</field>
