@@ -277,9 +277,13 @@
 						<field name="pumpseries_id" on_change="onchange_pumpseries(pumpseries_id,flange_standard,flange_type)" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 						<field name="qap_plan_id"/>
 						<field name="ph_value"/>
-						<field name="del_pipe_size"/>
+<!--	Vertical Specification added start	-->
+						<field name="motor_power" attrs="{'required':[('pump_model_type','=','vertical')]}"/>
+						
+<!--	Vertical Specification end	-->
+						<field name="del_pipe_size" attrs="{'required':[('pump_model_type','=','vertical')]}"/>
 						<field name="pre_suppliy_ref"/>
-						<field name="shaft_sealing"/>
+						<field name="shaft_sealing" attrs="{'required':[('pump_model_type','=','vertical')]}"/>
 						<field name="scope_of_supply" on_change="onchange_scope_of_supply(scope_of_supply,primemover_categ)"/>
 						<field name="number_of_stages" />
 						<field name="impeller_type" />
@@ -295,13 +299,13 @@
 						<field name="impeller_dia_rated" on_change="onchange_impeller_tip_speed(impeller_tip_speed,impeller_dia_rated,full_load_rpm)"/>
 						<field name="impeller_tip_speed"/>
 						<field name="hydrostatic_test_pressure" />
-						<field name="setting_height" />
+						<field name="setting_height" attrs="{'required':[('pump_model_type','=','vertical')]}" widget="float"/>
 						<field name="full_load_rpm" on_change="onchange_impeller_tip_speed(impeller_tip_speed,impeller_dia_rated,full_load_rpm)"/>
 						<field name="engine_make" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
 						<field name="engine_type" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
 						<field name="belt_loss_in_kw" on_change="onchange_belt_loss_in_kw(belt_loss_in_kw,bkw_liq)" attrs="{'invisible':[('type_of_drive','not in',['belt_drive'])]}"/>
 						<field name="frequency" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
-						<field name="motor_kw" on_change="onchange_motor_margin(motor_kw,bkw_liq)"  attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct','fc_gb'])]}"/>
+						<field name="motor_kw" on_change="onchange_motor_margin(motor_kw,bkw_liq)"  attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct','fc_gb'])],'required':[('pump_model_type','=','vertical')]}"/>
 						<field name="motor_margin" attrs="{'invisible':[('type_of_drive','not in',['belt_drive','motor_direct'])]}"/>
 <!--
 						<field name="speed_in_pump" attrs="{'invisible':[('type_of_drive','in',['motor_direct','fc_gb'])]}"/>
@@ -329,10 +333,10 @@
 						<field name="impeller_dia_max" />
 						<field name="max_allowable_test" />
 						<field name="crm_type" />
-						<field name="bush_bearing_lubrication" attrs="{'invisible':[('pump_model_type','!=','vertical')]}"/>
-						<field name="push_bearing" />
+						<field name="bush_bearing_lubrication" attrs="{'invisible':[('pump_model_type','!=','vertical')],'required':[('pump_model_type','=','vertical')]}"/>
+						<field name="push_bearing" attrs="{'required':[('pump_model_type','=','vertical')]}"/>
 						<field name="suction_size" />
-						<field name="speed_in_rpm" />
+						<field name="speed_in_rpm" attrs="{'required':[('pump_model_type','=','vertical')]}"/>
 						<field name="casing_design" />
 						<field name="shut_off_head" on_change="onchange_shut_off_pressure(shut_off_head)"/>
 						<field name="shut_off_pressure" on_change="onchange_hydrostatic_test_pressure(shut_off_pressure,discharge_pressure_kg)"/>
@@ -394,7 +398,7 @@
 				</notebook>
 				<group>
 					<group>
-						<field name="load_bom" on_change="onchange_load_bom(load_bom,pump_id,wo_line_id,purpose_categ,moc_const_id,qty)" attrs="{'invisible':[('purpose_categ','=','access')]}"/>
+						<field name="load_bom" on_change="onchange_load_bom(load_bom,pump_id,wo_line_id,purpose_categ,moc_const_id,qty,motor_power,del_pipe_size,shaft_sealing,setting_height,motor_kw,bush_bearing_lubrication,push_bearing,speed_in_rpm)" attrs="{'invisible':[('purpose_categ','=','access')]}"/>
 					</group>
 					<group>
 					</group>

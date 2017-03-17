@@ -7,7 +7,7 @@ import openerp.addons.decimal_precision as dp
 from datetime import datetime
 
 class kg_primecost_view(osv.osv):
-
+	
 	_name = "kg.primecost.view"
 	_description = "Statndard Transaction"
 	_order = "entry_date desc"
@@ -39,13 +39,13 @@ class kg_primecost_view(osv.osv):
 			res[order.id]['total_cost'] = total_cost
 		
 		return res
-		
+	
 	_columns = {
-	
+		
 		## Version 0.1
-	
+		
 		## Basic Info
-				
+		
 		'name': fields.char('No', size=12,select=True,readonly=True),
 		'entry_date': fields.date('Entry Date',required=True),		
 		'note': fields.text('Notes'),
@@ -56,7 +56,7 @@ class kg_primecost_view(osv.osv):
 		'flag_spl_approve': fields.boolean('Special Approval'),
 		
 		### Entry Info ####
-			
+		
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),	
 		'active': fields.boolean('Active'),	
 		'crt_date': fields.datetime('Created Date',readonly=True),
@@ -91,25 +91,25 @@ class kg_primecost_view(osv.osv):
 		'motor_kw': fields.float('Motor KW'),
 		
 		## Child Tables Declaration 
-				
+		
 		'line_ids': fields.one2many('ch.primecost.view.fou', 'header_id', "Fou Details"),
 		'line_ids_a': fields.one2many('ch.primecost.view.ms', 'header_id', "MS Details"),
 		'line_ids_b': fields.one2many('ch.primecost.view.bot', 'header_id', "BOT Details"),
 		
 	}
-		
-	_defaults = {
 	
-		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.primecost.view', context=c),			
+	_defaults = {
+		
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.primecost.view', context=c),
 		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
-		'state': 'draft',		
+		'state': 'draft',
 		'active': True,
-		'entry_mode': 'manual',		
-		'flag_sms': False,		
-		'flag_email': False,		
-		'flag_spl_approve': False,		
+		'entry_mode': 'manual',
+		'flag_sms': False,
+		'flag_email': False,
+		'flag_spl_approve': False,
 		
 	}
 	
@@ -124,7 +124,7 @@ class kg_primecost_view(osv.osv):
 		if entry_date > today:
 			return False
 		return True
-			
+		
 	def _check_lineitems(self, cr, uid, ids, context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if not entry.line_ids:
@@ -154,13 +154,13 @@ class kg_primecost_view(osv.osv):
 						_('Item Name %s You cannot save without MOC'%(line.bot_id.name)))
 					
 		return True
-			
+	
 	_constraints = [        
-              
-        (_future_entry_date_check, 'System not allow to save with future date. !!',['']),
-        (_check_is_applicable, 'Kindly select anyone is appli !!',['']),
-        #~ (_check_lineitems, 'System not allow to save with empty Details !!',['']),
-       
+            
+			(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
+			(_check_is_applicable, 'Kindly select anyone is appli !!',['']),
+			#~ (_check_lineitems, 'System not allow to save with empty Details !!',['']),
+			
        ]
 	
 	def onchange_bom(self, cr, uid, ids, load_bom,pump_id,moc_const_id,qty,speed_in_rpm,setting_height,shaft_sealing,motor_power,bush_bearing,del_pipe_size,bush_bearing_lubrication):
@@ -280,7 +280,13 @@ class kg_primecost_view(osv.osv):
 						limitation = 'upto_3000'
 					if setting_height >= 3000:
 						limitation = 'above_3000'
-
+					
+					### For Base Plate ###
+					if setting_height < 3000:
+						base_limitation = 'upto_2999'
+					if setting_height >= 3000:
+						base_limitation = 'above_3000'
+					
 					cr.execute('''
 					
 						-- Bed Assembly ----
@@ -447,10 +453,37 @@ class kg_primecost_view(osv.osv):
 						and active='t'
 						) 
 						
+						union all
+							
+						-- Base Plate --
+								
+						select bom.id,
+						bom.header_id,
+						bom.pattern_id,
+						bom.pattern_name,
+						bom.qty, 
+						bom.pos_no,
+						bom.position_id,
+						pattern.pcs_weight, 
+						pattern.ci_weight,
+						pattern.nonferous_weight
+
+						from ch_bom_line as bom
+
+						LEFT JOIN kg_pattern_master pattern on pattern.id = bom.pattern_id
+
+						where bom.header_id = 
+						(
+						select id from kg_bom 
+						where id = (select partlist_id from ch_base_plate
+						where limitation = %s and header_id = (select id from kg_bom where pump_model_id = %s and active='t'))
+						and active='t'
+						)
+						
 						  ''',[limitation,shaft_sealing,rpm,pump_model_id,motor_power,rpm,pump_model_id,
 						  bush_bearing,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,delivery_pipe_size,
 						  setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,lubrication,setting_height,setting_height,
-						  rpm,pump_model_id,rpm,pump_model_id])
+						  rpm,pump_model_id,rpm,pump_model_id,base_limitation,pump_model_id])
 					vertical_foundry_details = cr.dictfetchall()
 					
 					#~ if order_category == 'pump' :
@@ -619,11 +652,25 @@ class kg_primecost_view(osv.osv):
 								where rpm = %s and header_id = %s ))
 								and active='t'
 								) 
-
+								
+								union all
+								
+								-- Base Plate --
+								
+								select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
+								from ch_machineshop_details
+								where header_id = 
+								(
+								select id from kg_bom 
+								where id = (select partlist_id from ch_base_plate 
+								where limitation = %s and header_id = (select id from kg_bom where pump_model_id = %s and active='t') )
+								and active='t'
+								)
+								
 						  ''',[limitation,shaft_sealing,rpm,pump_model_id,motor_power,rpm,pump_model_id,
 						  bush_bearing,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,delivery_pipe_size,
 						  setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,lubrication,setting_height,setting_height,
-						  rpm,pump_model_id,rpm,pump_model_id])
+						  rpm,pump_model_id,rpm,pump_model_id,base_limitation,pump_model_id])
 					vertical_ms_details = cr.dictfetchall()
 					for vertical_ms_details in vertical_ms_details:
 						
@@ -1002,10 +1049,24 @@ class kg_primecost_view(osv.osv):
 								and active='t'
 								) 
 								
+								union all
+									
+								-- Base Plate --
+								
+								select id,bot_id,qty,header_id as bom_id
+								from ch_bot_details
+								where header_id =
+								(
+								select id from kg_bom 
+								where id = (select partlist_id from ch_base_plate 
+								where limitation = %s and header_id = (select id from kg_bom where pump_model_id = %s and active='t') )
+								and active='t'
+								)
+								
 						  ''',[limitation,shaft_sealing,rpm,pump_model_id,motor_power,rpm,pump_model_id,
 						  bush_bearing,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,delivery_pipe_size,
 						  setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,lubrication,setting_height,setting_height,
-						  rpm,pump_model_id,rpm,pump_model_id])
+						  rpm,pump_model_id,rpm,pump_model_id,base_limitation,pump_model_id])
 					vertical_bot_details = cr.dictfetchall()
 					
 					for vertical_bot_details in vertical_bot_details:
@@ -1092,7 +1153,7 @@ class kg_primecost_view(osv.osv):
 				
 			self.write(cr, uid, ids, {'confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
-			
+	
 	def entry_update(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'draft':
@@ -1314,7 +1375,7 @@ class kg_primecost_view(osv.osv):
 		print"primecost_valsprimecost_vals",primecost_vals
 		
 		return primecost_vals
-		
+	
 	def entry_confirm(self,cr,uid,ids,context=None):
 		
 		rec = self.browse(cr,uid,ids[0])		
@@ -1333,7 +1394,7 @@ class kg_primecost_view(osv.osv):
 		self.write(cr, uid, ids, {'name':entry_name,'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		
 		return True
-		
+	
 	def entry_approve(self,cr,uid,ids,context=None):
 		self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
@@ -1341,7 +1402,7 @@ class kg_primecost_view(osv.osv):
 	def entry_cancel(self,cr,uid,ids,context=None):
 		self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
-		
+	
 	def unlink(self,cr,uid,ids,context=None):
 		unlink_ids = []		
 		for rec in self.browse(cr,uid,ids):	
@@ -1351,28 +1412,28 @@ class kg_primecost_view(osv.osv):
 			else:
 				unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
-		
+	
 	def create(self, cr, uid, vals, context=None):
 		return super(kg_primecost_view, self).create(cr, uid, vals, context=context)
-		
+	
 	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_primecost_view, self).write(cr, uid, ids, vals, context)
-		
-	_sql_constraints = [
 	
+	_sql_constraints = [
+		
 		('name', 'unique(name)', 'No must be Unique !!'),
 	]	
 	
 kg_primecost_view()
 
 class ch_primecost_view_fou(osv.osv):
-
+	
 	_name = "ch.primecost.view.fou"
 	_description = "Child Foundry Item Details"
 	
 	_columns = {
-	
+		
 		### Basic Info
 		
 		'header_id':fields.many2one('kg.primecost.view', 'Pump Material', ondelete='cascade'),
@@ -1406,7 +1467,7 @@ class ch_primecost_view_fou(osv.osv):
 	
 	def write(self, cr, uid, ids, vals, context=None):
 		return super(ch_primecost_view_fou, self).write(cr, uid, ids, vals, context)
-		
+	
 	#~ def _check_qty(self, cr, uid, ids, context=None):
 		#~ rec = self.browse(cr, uid, ids[0])
 		#~ if rec.qty <= 0.00:
@@ -1414,11 +1475,11 @@ class ch_primecost_view_fou(osv.osv):
 		#~ return True
 	
 	_constraints = [
-	
+		
 		#~ (_check_qty,'You cannot save with zero qty !',['Qty']),
 		
 		]
-		
+	
 	def onchange_pattern_name(self, cr, uid, ids, pattern_code,pattern_name):
 		value = {'pattern_name':''}
 		pattern_obj = self.pool.get('kg.pattern.master').search(cr,uid,([('id','=',pattern_code)]))
@@ -1430,7 +1491,7 @@ class ch_primecost_view_fou(osv.osv):
 ch_primecost_view_fou()
 
 class ch_primecost_view_ms(osv.osv):
-
+	
 	_name = "ch.primecost.view.ms"
 	_description = "Child MS Item Details"
 	
@@ -1467,7 +1528,7 @@ class ch_primecost_view_ms(osv.osv):
 		'active': True,
 		
 	}
-		
+	
 	def _check_qty(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
 		if rec.qty <= 0.00:
@@ -1475,20 +1536,20 @@ class ch_primecost_view_ms(osv.osv):
 		return True
 	
 	_constraints = [
-	
+		
 		#~ (_check_qty,'You cannot save with zero qty !',['Qty']),
 		
 		]
-		
+	
 ch_primecost_view_ms()
 
 class ch_primecost_view_bot(osv.osv):
-
+	
 	_name = "ch.primecost.view.bot"
 	_description = "Child BOT Item Details"
 	
 	_columns = {
-	
+		
 		### Basic Info
 		
 		'header_id':fields.many2one('kg.primecost.view', 'Pump Material', ondelete='cascade'),
@@ -1522,7 +1583,7 @@ class ch_primecost_view_bot(osv.osv):
 		'active': True,
 		
 	}
-			
+	
 	def _check_qty(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
 		if rec.qty <= 0.00:
@@ -1530,9 +1591,9 @@ class ch_primecost_view_bot(osv.osv):
 		return True
 	
 	_constraints = [
-	
+		
 		#~ (_check_qty,'You cannot save with zero qty !',['Qty']),
 		
 		]
-		
+	
 ch_primecost_view_bot()

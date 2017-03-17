@@ -1418,7 +1418,9 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'qap_plan_id': fields.many2one('kg.qap.plan', 'QAP Standard'),
 		'spare_qap_plan_id': fields.many2one('kg.qap.plan', 'QAP Standard'),
 		'ph_value': fields.char('PH Value'),
-		
+		'motor_power': fields.selection([('90','90'),('100','100'),('112','112'),('132','132'),('160','160'),('180','180'),('200','200'),('225','225'),
+				('250','250'),('280','280'),('315','315'),('315_l','315L')],'Motor Frame size'),
+				
 		# Product model values
 		#'impeller_type': fields.char('Impeller Type', readonly=True),
 		'impeller_type': fields.selection([('open','Open'),('semi_open','Semi Open'),('close','Closed')],'Impeller Type'),
@@ -1762,7 +1764,29 @@ class ch_kg_crm_pumpmodel(osv.osv):
 								})
 		return {'value': {'line_ids_moc_a': moc_const_vals}}
 	
-	def onchange_load_bom(self, cr, uid, ids, load_bom,pump_id,wo_line_id,purpose_categ,moc_const_id,qty):
+	def onchange_load_bom(self, cr, uid, ids, load_bom,pump_id,wo_line_id,purpose_categ,moc_const_id,qty,
+		motor_power,del_pipe_size,shaft_sealing,setting_height,motor_kw,bush_bearing_lubrication,push_bearing,speed_in_rpm):
+		
+		delivery_pipe_size = del_pipe_size
+		lubrication = bush_bearing_lubrication
+		bush_bearing = push_bearing
+		if lubrication:
+			if lubrication == 'external':
+				lubrication = 'cft_ext'
+			elif lubrication == 'self':
+				lubrication = 'cft_self'
+			elif lubrication == 'ex_pressure':
+				lubrication = 'cut_less_rubber'
+		
+		pump_model_id = pump_id
+		rpm = speed_in_rpm
+		moc_construction_id = moc_const_id
+		if rpm:
+			if rpm <= 1450:
+				rpm = '1450'
+			elif rpm > 1450 and rpm <= 2900:
+				rpm = '2900'
+		
 		fou_vals=[]
 		ms_vals=[]
 		bot_vals=[]
@@ -1774,6 +1798,9 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		print"pump_id",pump_id
 		print"load_bom",load_bom
 		if load_bom == True:
+			if qty <= 0:
+				raise osv.except_osv(_('Warning!'),
+					_('System sholud not be accept without Quantity'))
 			if purpose_categ == 'pump':
 				print"aaaaaaaaaa"
 				bom_obj = self.pool.get('kg.bom').search(cr, uid, [('pump_model_id','=',pump_id),('state','in',('draft','confirmed','approved'))])
@@ -1792,6 +1819,8 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		print"data_recdata_rec",data_rec
 		
 		if data_rec:
+			moc_name = ''
+			moc_changed_flag = False
 			if purpose_categ == 'spare' and pump_id:
 				print"-------------------------------"
 				if data_rec.line_ids:
@@ -1814,12 +1843,13 @@ class ch_kg_crm_pumpmodel(osv.osv):
 						if moc_id:
 							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
 							moc_changed_flag = True
+							moc_name = moc_rec.name
 						fou_vals.append({
 										'position_id': item.position_id.id,
 										'pattern_id': item.pattern_id.id,
 										'pattern_name': item.pattern_name,
 										'moc_id': moc_id,
-										'moc_name': moc_rec.name,
+										'moc_name': moc_name,
 										'moc_changed_flag': moc_changed_flag,
 										'qty': item.qty,
 										'load_bom': True,
@@ -1850,12 +1880,13 @@ class ch_kg_crm_pumpmodel(osv.osv):
 						if moc_id:
 							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
 							moc_changed_flag = True
+							moc_name = moc_rec.name
 						ms_vals.append({
 										'name': item.name,
 										'position_id': item.position_id.id,							
 										'ms_id': item.ms_id.id,
 										'moc_id': moc_id,
-										'moc_name': moc_rec.name,
+										'moc_name': moc_name,
 										'moc_changed_flag': moc_changed_flag,
 										'qty': item.qty,
 										'load_bom': True,
@@ -1890,11 +1921,12 @@ class ch_kg_crm_pumpmodel(osv.osv):
 						if moc_id:
 							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
 							moc_changed_flag = True
+							moc_name = moc_rec.name
 						bot_vals.append({
 										'item_name': item_name,
 										'ms_id': item.bot_id.id,
 										'moc_id': moc_id,
-										'moc_name': moc_rec.name,
+										'moc_name': moc_name,
 										'moc_changed_flag': moc_changed_flag,
 										'qty': item.qty,
 										'load_bom': True,
@@ -1927,12 +1959,13 @@ class ch_kg_crm_pumpmodel(osv.osv):
 						if moc_id:
 							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
 							moc_changed_flag = True	
+							moc_name = moc_rec.name
 						fou_vals.append({
 										'position_id': item.position_id.id,
 										'pattern_id': item.pattern_id.id,
 										'pattern_name': item.pattern_name,
 										'moc_id': moc_id,
-										'moc_name': moc_rec.name,
+										'moc_name': moc_name,
 										'moc_changed_flag': moc_changed_flag,
 										'qty': item.qty * qty,
 										'load_bom': True,
@@ -1959,12 +1992,13 @@ class ch_kg_crm_pumpmodel(osv.osv):
 						if moc_id:
 							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
 							moc_changed_flag = True
+							moc_name = moc_rec.name
 						ms_vals.append({
 										'name': item.name,
 										'position_id': item.position_id.id,							
 										'ms_id': item.ms_id.id,
 										'moc_id': moc_id,
-										'moc_name': moc_rec.name,
+										'moc_name': moc_name,
 										'moc_changed_flag': moc_changed_flag,
 										'qty': item.qty * qty,
 										'load_bom': True,
@@ -1992,11 +2026,12 @@ class ch_kg_crm_pumpmodel(osv.osv):
 						if moc_id:
 							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
 							moc_changed_flag = True
+							moc_name = moc_rec.name
 						bot_vals.append({
 										'item_name': item_name,
 										'ms_id': item.bot_id.id,
 										'moc_id': moc_id,
-										'moc_name': moc_rec.name,
+										'moc_name': moc_name,
 										'moc_changed_flag': moc_changed_flag,
 										'qty': item.qty * qty,
 										'load_bom': True,
@@ -2007,6 +2042,866 @@ class ch_kg_crm_pumpmodel(osv.osv):
 										#~ 'remarks': item.remarks,
 										})
 						print"bot_valsbot_vals",bot_vals
+		
+		## Load BOM Veritical Pump process start 
+		
+		if load_bom == True:
+			if rpm != False:
+				moc_name = ''
+				moc_changed_flag = False
+				if shaft_sealing != False and motor_power != False and bush_bearing != False and setting_height > 0 and delivery_pipe_size != False and lubrication != False:
+					
+					#### Load Foundry Items ####
+					
+					if setting_height < 3000:
+						limitation = 'upto_3000'
+					if setting_height >= 3000:
+						limitation = 'above_3000'
+					
+					### For Base Plate ###
+					if setting_height < 3000:
+						base_limitation = 'upto_2999'
+					if setting_height >= 3000:
+						base_limitation = 'above_3000'
+							
+					cr.execute('''
+					
+						-- Bed Assembly ----
+						select bom.id,
+						bom.header_id,
+						bom.pattern_id,
+						bom.pattern_name,
+						bom.qty, 
+						bom.pos_no,
+						bom.position_id,
+						pattern.pcs_weight, 
+						pattern.ci_weight,
+						pattern.nonferous_weight
+
+						from ch_bom_line as bom
+
+						LEFT JOIN kg_pattern_master pattern on pattern.id = bom.pattern_id
+
+						where bom.header_id = 
+						(
+						select id from kg_bom 
+						where id = (select partlist_id from ch_bed_assembly 
+						where limitation = %s and packing = %s and header_id = 
+
+						( select vo_id from ch_vo_mapping
+						where rpm = %s and header_id = %s))
+						and active='t'
+						) 
+						
+						union all
+
+						--- Motor Assembly ---
+						select bom.id,
+						bom.header_id,
+						bom.pattern_id,
+						bom.pattern_name,
+						bom.qty, 
+						bom.pos_no,
+						bom.position_id,
+						pattern.pcs_weight, 
+						pattern.ci_weight,
+						pattern.nonferous_weight
+
+						from ch_bom_line as bom
+
+						LEFT JOIN kg_pattern_master pattern on pattern.id = bom.pattern_id
+
+						where bom.header_id = 
+						(
+						select id from kg_bom 
+						where id = (select partlist_id from ch_motor_assembly 
+						where value = %s and header_id = 
+
+						( select vo_id from ch_vo_mapping
+						where rpm = %s and header_id = %s ))
+						and active='t'
+						) 
+						
+						union all
+
+						-- Column Pipe ------
+
+						select bom.id,
+						bom.header_id,
+						bom.pattern_id,
+						bom.pattern_name,
+						bom.qty, 
+						bom.pos_no,
+						bom.position_id,
+						pattern.pcs_weight, 
+						pattern.ci_weight,
+						pattern.nonferous_weight
+
+						from ch_bom_line as bom
+
+						LEFT JOIN kg_pattern_master pattern on pattern.id = bom.pattern_id
+
+						where bom.header_id = 
+						(
+						select id from kg_bom 
+						where id = (select partlist_id from ch_columnpipe_assembly 
+						where pipe_type = %s and star = (select star from ch_power_series 
+						where %s BETWEEN min AND max and %s <= max
+						
+						and header_id = ( select vo_id from ch_vo_mapping
+						where rpm = %s and header_id = %s)
+						
+						) and header_id = 
+
+						( select vo_id from ch_vo_mapping
+						where rpm = %s and header_id = %s ))
+						and active='t'
+						)
+						
+						union all
+
+						-- Delivery Pipe ------
+
+						select bom.id,
+						bom.header_id,
+						bom.pattern_id,
+						bom.pattern_name,
+						bom.qty, 
+						bom.pos_no,
+						bom.position_id,
+						pattern.pcs_weight, 
+						pattern.ci_weight,
+						pattern.nonferous_weight
+
+						from ch_bom_line as bom
+
+						LEFT JOIN kg_pattern_master pattern on pattern.id = bom.pattern_id
+
+						where bom.header_id = 
+						(
+						select id from kg_bom 
+						where id = (select partlist_id from ch_deliverypipe_assembly 
+						where size = %s and star = (select star from ch_power_series 
+						where %s BETWEEN min AND max and %s <= max
+						
+						and header_id = ( select vo_id from ch_vo_mapping
+						where rpm = %s and header_id = %s)
+						
+						) and header_id = 
+
+						( select vo_id from ch_vo_mapping
+						where rpm = %s and header_id = %s))
+						and active='t'
+						) 
+						
+						union all
+
+						-- Lubrication ------
+
+						select bom.id,
+						bom.header_id,
+						bom.pattern_id,
+						bom.pattern_name,
+						bom.qty, 
+						bom.pos_no,
+						bom.position_id,
+						pattern.pcs_weight, 
+						pattern.ci_weight,
+						pattern.nonferous_weight
+
+						from ch_bom_line as bom
+
+						LEFT JOIN kg_pattern_master pattern on pattern.id = bom.pattern_id
+
+						where bom.header_id = 
+						(
+						select id from kg_bom 
+						where id = (select partlist_id from ch_lubricant 
+						where type = %s and star = (select star from ch_power_series 
+						where %s BETWEEN min AND max and %s <= max
+						
+						and header_id = ( select vo_id from ch_vo_mapping
+						where rpm = %s and header_id = %s)
+						
+						) and header_id = 
+
+						( select vo_id from ch_vo_mapping
+						where rpm = %s and header_id = %s))
+						and active='t'
+						) 
+						
+						union all
+							
+						-- Base Plate --
+								
+						select bom.id,
+						bom.header_id,
+						bom.pattern_id,
+						bom.pattern_name,
+						bom.qty, 
+						bom.pos_no,
+						bom.position_id,
+						pattern.pcs_weight, 
+						pattern.ci_weight,
+						pattern.nonferous_weight
+
+						from ch_bom_line as bom
+
+						LEFT JOIN kg_pattern_master pattern on pattern.id = bom.pattern_id
+
+						where bom.header_id = 
+						(
+						select id from kg_bom 
+						where id = (select partlist_id from ch_base_plate
+						where limitation = %s and header_id = (select id from kg_bom where pump_model_id = %s and active='t'))
+						and active='t'
+						)
+						
+						  ''',[limitation,shaft_sealing,rpm,pump_model_id,motor_power,rpm,pump_model_id,
+						  bush_bearing,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,delivery_pipe_size,
+						  setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,lubrication,setting_height,setting_height,
+						  rpm,pump_model_id,rpm,pump_model_id,base_limitation,pump_model_id])
+					vertical_foundry_details = cr.dictfetchall()
+					
+					#~ if order_category == 'pump' :
+					for vertical_foundry in vertical_foundry_details:
+						
+						#~ if order_category == 'pump' :
+							#~ applicable = True
+						#~ if order_category in ('spare','pump_spare'):
+							#~ applicable = False
+							
+						### Loading MOC from MOC Construction
+						
+						if moc_construction_id != False:
+							
+							cr.execute(''' select pat_moc.moc_id
+								from ch_mocwise_rate pat_moc
+								LEFT JOIN kg_moc_construction const on const.id = pat_moc.code
+								where pat_moc.header_id = %s and const.id = %s
+								  ''',[vertical_foundry['pattern_id'],moc_construction_id])
+							const_moc_id = cr.fetchone()
+							if const_moc_id != None:
+								moc_id = const_moc_id[0]
+							else:
+								moc_id = False
+						else:
+							moc_id = False
+						wgt = 0.00	
+						if moc_id != False:
+							moc_rec = self.pool.get('kg.moc.master').browse(cr, uid, moc_id)
+							if moc_rec.weight_type == 'ci':
+								wgt =  vertical_foundry['ci_weight']
+							if moc_rec.weight_type == 'ss':
+								wgt = vertical_foundry['pcs_weight']
+							if moc_rec.weight_type == 'non_ferrous':
+								wgt = vertical_foundry['nonferous_weight']
+								
+						
+						bom_qty = vertical_foundry['qty']
+						
+						if vertical_foundry['position_id'] == None:
+							raise osv.except_osv(_('Warning!'),
+							_('Kindly Configure Position No. in Foundry Items for respective Pump Bom and proceed further !!'))
+						if moc_id:
+							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
+							moc_changed_flag = True
+							moc_name = moc_rec.name
+						fou_vals.append({
+							
+							'pattern_id': vertical_foundry['pattern_id'],
+							'pattern_name': vertical_foundry['pattern_name'],						
+							'position_id': vertical_foundry['position_id'],			  
+							'qty' : bom_qty * qty,
+							'moc_id': moc_id,
+							'is_applicable': True,
+							'active': True,
+							'load_bom': True,
+							'moc_name': moc_name,
+							'moc_changed_flag': moc_changed_flag,
+							#~ 'bom_id': vertical_foundry['header_id'],
+							#~ 'bom_line_id': vertical_foundry['id'],	
+							#~ 'weight': wgt or 0.00,								  
+							#~ 'pos_no': vertical_foundry['pos_no'],		   
+							#~ 'schedule_qty' : bom_qty,				  
+							#~ 'production_qty' : 0,				   
+							#~ 'flag_applicable' : applicable,
+							#~ 'order_category':	order_category,
+							#~ 'flag_standard':flag_standard,
+							#~ 'entry_mode':'auto',
+							
+							})
+								
+					#### Load Machine Shop Items ####
+					
+					cr.execute(''' 
+								
+								-- Bed Assembly ----
+								select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
+								from ch_machineshop_details
+								where header_id = 
+								(
+								select id from kg_bom 
+								where id = (select partlist_id from ch_bed_assembly 
+								where limitation = %s and packing = %s and header_id = 
+
+								( select vo_id from ch_vo_mapping
+								where rpm = %s and header_id = %s))
+								and active='t'
+								) 
+								
+								union all
+
+								--- Motor Assembly ---
+								select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
+								from ch_machineshop_details
+								where header_id =  
+								(
+								select id from kg_bom 
+								where id = (select partlist_id from ch_motor_assembly 
+								where value = %s and header_id = 
+
+								( select vo_id from ch_vo_mapping
+								where rpm = %s and header_id = %s ))
+								and active='t'
+								) 
+								
+								union all
+
+								-- Column Pipe ------
+
+								select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
+								from ch_machineshop_details
+								where header_id = 
+								(
+								select id from kg_bom 
+								where id = (select partlist_id from ch_columnpipe_assembly 
+								where pipe_type = %s and star = (select star from ch_power_series 
+								where %s BETWEEN min AND max and %s <= max
+								
+								and header_id = ( select vo_id from ch_vo_mapping
+								where rpm = %s and header_id = %s)
+								
+								) and header_id = 
+
+								( select vo_id from ch_vo_mapping
+								where rpm = %s and header_id = %s))
+								and active='t'
+								)
+						
+								union all
+
+								-- Delivery Pipe ------
+
+								select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
+								from ch_machineshop_details
+								where header_id =  
+								(
+								select id from kg_bom 
+								where id = (select partlist_id from ch_deliverypipe_assembly 
+								where size = %s and star = (select star from ch_power_series 
+								where %s BETWEEN min AND max and %s <= max
+								
+								and header_id = ( select vo_id from ch_vo_mapping
+								where rpm = %s and header_id = %s)
+								
+								) and header_id = 
+
+								( select vo_id from ch_vo_mapping
+								where rpm = %s and header_id = %s))
+								and active='t'
+								) 
+								
+								union all
+
+								-- Lubrication ------
+
+								select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
+								from ch_machineshop_details
+								where header_id = 
+								(
+								select id from kg_bom 
+								where id = (select partlist_id from ch_lubricant 
+								where type = %s and star = (select star from ch_power_series 
+								where %s BETWEEN min AND max and %s <= max
+								
+								and header_id = ( select vo_id from ch_vo_mapping
+								where rpm = %s and header_id = %s)
+								
+								) and header_id = 
+
+								( select vo_id from ch_vo_mapping
+								where rpm = %s and header_id = %s ))
+								and active='t'
+								) 
+								
+								union all
+								-- Base Plate --
+								
+								select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
+								from ch_machineshop_details
+								where header_id = 
+								(
+								select id from kg_bom 
+								where id = (select partlist_id from ch_base_plate 
+								where limitation = %s and header_id = (select id from kg_bom where pump_model_id = %s and active='t') )
+								and active='t'
+								)
+								
+						  ''',[limitation,shaft_sealing,rpm,pump_model_id,motor_power,rpm,pump_model_id,
+						  bush_bearing,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,delivery_pipe_size,
+						  setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,lubrication,setting_height,setting_height,
+						  rpm,pump_model_id,rpm,pump_model_id,base_limitation,pump_model_id])
+					vertical_ms_details = cr.dictfetchall()
+					for vertical_ms_details in vertical_ms_details:
+						
+						### Loading MOC from MOC Construction
+				
+						if moc_construction_id != False:
+							
+							cr.execute(''' select machine_moc.moc_id
+								from ch_machine_mocwise machine_moc
+								LEFT JOIN kg_moc_construction const on const.code = machine_moc.code
+								where machine_moc.header_id = %s and const.id = %s ''',[vertical_ms_details['ms_id'],moc_construction_id])
+							const_moc_id = cr.fetchone()
+							if const_moc_id != None:
+								moc_id = const_moc_id[0]
+							else:
+								moc_id = False
+						else:
+							moc_id = False
+							
+						if vertical_ms_details['pos_no'] == None:
+							pos_no = 0
+						else:
+							pos_no = vertical_ms_details['pos_no']
+							
+							
+						### Dynamic Length Calculation ###
+						length = 0.00
+						a_value = 0.00
+						a1_value = 0.00
+						a2_value = 0.00
+						star_value = 0
+						ms_rec = self.pool.get('kg.machine.shop').browse(cr, uid, vertical_ms_details['ms_id'])
+						if ms_rec.dynamic_length == True and ms_rec.length_type != False:
+							
+							### Getting Alpha Values from Pump Model ###
+							cr.execute(''' select alpha_type,alpha_value
+									from ch_alpha_value
+									where header_id = %s ''',[pump_model_id])
+							alpha_val = cr.dictfetchall()
+							
+							if alpha_val:
+								for alpha_item in alpha_val:
+									
+									if alpha_item['alpha_type'] == 'a':
+										a_value = alpha_item['alpha_value']
+									elif alpha_item['alpha_type'] == 'a1':
+										a1_value = alpha_item['alpha_value']
+									elif alpha_item['alpha_type'] == 'a2':
+										a2_value = alpha_item['alpha_value']
+									else:
+										a_value = 0.00
+										a1_value = 0.00
+										a2_value = 0.00
+							else:
+								a_value = 0.00
+								a1_value = 0.00
+								a2_value = 0.00
+							
+							### Getting No of Star Support from VO ###
+							
+							cr.execute(''' select (case when star = 'nil' then '0' else star end)::int as star from ch_power_series 
+								where %s BETWEEN min AND max and %s <= max
+								and header_id = ( select vo_id from ch_vo_mapping
+								where rpm = %s and header_id = %s) ''',[setting_height,setting_height,rpm,pump_model_id])
+							star_val = cr.fetchone()
+							star_value = star_val[0]
+							
+							
+							### Getting ABOVE BP(H),BEND from pump model ###
+							cr.execute(''' select h_value,b_value from ch_delivery_pipe
+								where header_id = %s and delivery_size = %s ''',[pump_model_id,delivery_pipe_size])
+							h_b_val = cr.dictfetchone()
+							
+							if h_b_val:
+								h_value = h_b_val['h_value']
+								b_value = h_b_val['b_value']
+							else:
+								h_value = 0.00
+								b_value = 0.00
+							
+							if ms_rec.length_type == 'single_column_pipe':
+								
+								if star_value == 0:
+								 
+									### Formula ###
+									#3.5+BP+SETTING HEIGHT-A1
+									###
+									length = 3.5 + bp + setting_height - a1_value
+									
+							### Getting BP and Shaft Ext from VO Master ###
+							cr.execute('''
+				
+								 (select bp,shaft_ext from ch_bed_assembly 
+								where limitation = %s and packing = %s and header_id = 
+
+								( select vo_id from ch_vo_mapping
+								where rpm = %s and header_id = %s))
+								
+								
+								  ''',[limitation,shaft_sealing,rpm,pump_model_id])
+							bed_ass_details = cr.dictfetchone()
+							if not bed_ass_details:
+								bp = 0
+								shaft_ext = 0
+							else:
+								if bed_ass_details['bp'] == None:
+									bp = 0
+								else:
+									bp = bed_ass_details['bp']
+								if bed_ass_details['shaft_ext'] == None:
+									shaft_ext = 0
+								else:
+									shaft_ext = bed_ass_details['shaft_ext']
+							
+							### Getting Star Value ###
+							cr.execute('''
+							
+								select star,lcp,ls from kg_vo_master 
+								where id in 
+
+								( select vo_id from ch_vo_mapping
+								where rpm = %s and header_id = %s)
+								
+								
+								  ''',[rpm,pump_model_id])
+							vo_star_value = cr.dictfetchone()
+							
+								
+							if ms_rec.length_type == 'single_shaft':
+								
+								if star_value == 0:
+								
+									### Formula ###
+									#SINGLE COL.PIPE+A2-3.5+SHAFT EXT
+									###
+									### Getting Single Column Pipe Length ###
+									single_colpipe_length = 3.5 + bp + setting_height - a1_value
+									length = single_colpipe_length + a2_value -3.5 + shaft_ext
+								
+							if ms_rec.length_type == 'delivery_pipe':
+								if star_value == 0.0:
+									### Formula ###
+									#ABOVE BP(H)+BP+SETTING HEIGHT-A-BEND-1.5
+									###
+									length = h_value + bp + setting_height - a_value - b_value - 1.5
+									
+								if star_value == 1:
+									### Formula ###
+									#(ABOVE BP(H)+BP+SETTING HEIGHT-A-BEND-3)/2
+									###
+									print "ddddddddddddddd",h_value, bp, setting_height, a_value, b_value
+									length = (h_value + bp + setting_height - a_value - b_value - 3)/2
+									
+								if star_value > 1:
+									### Formula ###
+									#(ABOVE BP(H)+BP+SETTING HEIGHT-A-BEND-1.5)-(NO OF STAR SUPPORT*1.5)/NO OF STAR SUPPORT+1
+									###
+									length = ((h_value+bp+setting_height-a_value-b_value-1.5)-(star_value*1.5))/(star_value+1)
+									
+							if ms_rec.length_type == 'drive_column_pipe':
+								
+								if star_value == 1:
+									### Formula ###
+									#(3.5+bp+setting height-a1-no of star support)/2
+									###
+									length = (3.5+bp+setting_height-a1_value-vo_star_value['star'])/2
+									
+									
+								if star_value > 1:
+									### Formula ###
+									#(3.5+bp+setting height-a1-(No. of star support * star support value)-((No. Of star support-1) * LINE COLUMN PIPE value))/2
+									###
+									### Calculating Line Column Pipe ###
+									### Formula = Standard Length ###
+									line_column_pipe = vo_star_value['lcp']
+									length = (3.5+bp+setting_height-a1_value-(star_value * vo_star_value['star'])-((star_value-1)*line_column_pipe))/2
+									
+									
+							if ms_rec.length_type == 'pump_column_pipe':
+								
+								if star_value == 1:
+									### Formula ###
+									#(3.5+bp+setting height-a1-no of star support)/2
+									###
+									length = (3.5+bp+setting_height-a1_value-vo_star_value['star'])/2
+									
+									
+								if star_value > 1:
+									### Formula ###
+									#(3.5+bp+setting height-a1-no of star support-NO OF LINE COLUMN PIPE)/2
+									###
+									### Calculating Line Column Pipe ###
+									### Formula = Standard Length ###
+									line_column_pipe = vo_star_value['lcp']
+									length = (3.5+bp+setting_height-a1_value-(star_value * vo_star_value['star'])-((star_value-1)*line_column_pipe))/2
+									
+									
+							if ms_rec.length_type == 'pump_shaft':
+								
+								if star_value == 1:
+									### Formula ###
+									#(STAR SUPPORT/2-1)+PUMP COLOUMN PIPE+A2
+									###
+									pump_column_pipe = (3.5+bp+setting_height-a1_value-vo_star_value['star'])/2
+									length = (star_value/2-1)+pump_column_pipe+a2_value
+									
+									
+								if star_value > 1:
+									### Formula ###
+									#(STAR SUPPORT/2-1)+PUMP COLOUMN PIPE+A2
+									###
+									line_column_pipe = vo_star_value['lcp']
+									pump_column_pipe = (3.5+bp+setting_height-a1_value-(star_value * vo_star_value['star'])-((star_value-1)*line_column_pipe))/2
+									length = ((vo_star_value['star']/2)-1)+pump_column_pipe+a2_value
+									
+							if ms_rec.length_type == 'drive_shaft':
+								
+								if star_value == 1:
+									### Formula ###
+									#(STAR SUPPORT/2-1)+DRIVE COLOUMN PIPE-3.5+SHAFT EXT
+									###
+									drive_col_pipe = (3.5+bp+setting_height-a1_value-vo_star_value['star'])/2
+									length = (star_value/2-1)+drive_col_pipe-3.5+shaft_ext
+									
+								if star_value > 1:
+									### Formula ###
+									#(STAR SUPPORT/2-1)+DRIVE COLOUMN PIPE-3.5+SHAFT EXT
+									###
+									line_column_pipe = vo_star_value['lcp']
+									drive_col_pipe = (3.5+bp+setting_height-a1_value-(star_value * vo_star_value['star'])-((star_value-1)*line_column_pipe))/2
+									length = ((vo_star_value['star']/2)-1)+drive_col_pipe-3.5+shaft_ext
+						
+						print "length---------------------------->>>>",length
+						if length > 0:
+							ms_bom_qty = round(length,0)
+						else:
+							ms_bom_qty = 0
+						print "ms_bom_qty---------------------------->>>>",ms_bom_qty
+						#~ if qty == 0:
+							#~ vertical_ms_qty = vertical_ms_details['qty']
+						#~ if qty > 0
+						vertical_ms_qty = ms_bom_qty
+							
+						print "vertical_ms_qty---------------------------->>>>",vertical_ms_qty
+						
+						if vertical_ms_details['position_id'] == None:
+							raise osv.except_osv(_('Warning!'),
+							_('Kindly Configure Position No. in MS Items for respective Pump Bom and proceed further !!'))
+						if moc_id:
+							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
+							moc_changed_flag = True
+							moc_name = moc_rec.name
+						ms_vals.append({
+							
+							'position_id':vertical_ms_details['position_id'],
+							'ms_id': vertical_ms_details['ms_id'],
+							'qty': vertical_ms_details['qty'] * qty,
+							'ms_name': vertical_ms_details['name'],
+							'length': vertical_ms_qty,
+							'load_bom': True,
+							'is_applicable': True,
+							'active': True,
+							'moc_id': moc_id,
+							'moc_name': moc_name,
+							'moc_changed_flag': moc_changed_flag,
+							
+							#~ 'pos_no':pos_no,
+							#~ 'ms_line_id': vertical_ms_details['id'],
+							#~ 'bom_id': vertical_ms_details['bom_id'],
+							#~ 'name': vertical_ms_details['name'],
+							#~ 'length': vertical_ms_qty,
+							#~ 'flag_applicable' : applicable,
+							#~ 'flag_standard':flag_standard,
+							#~ 'entry_mode':'auto',
+							#~ 'order_category':order_category,
+									  
+							})
+							
+							#~ 'moc_id': moc_id,
+							
+					#### Load BOT Items ####
+					
+					bom_bot_obj = self.pool.get('ch.machineshop.details')
+					cr.execute(''' 
+								
+								-- Bed Assembly ----
+								select id,bot_id,qty,header_id as bom_id
+								from ch_bot_details
+								where header_id =
+								(
+								select id from kg_bom 
+								where id = (select partlist_id from ch_bed_assembly 
+								where limitation = %s and packing = %s and header_id = 
+
+								( select vo_id from ch_vo_mapping
+								where rpm = %s and header_id = %s))
+								and active='t'
+								) 
+								
+								union all
+
+								--- Motor Assembly ---
+								select id,bot_id,qty,header_id as bom_id
+								from ch_bot_details
+								where header_id =
+								(
+								select id from kg_bom 
+								where id = (select partlist_id from ch_motor_assembly 
+								where value = %s and header_id = 
+
+								( select vo_id from ch_vo_mapping
+								where rpm = %s and header_id = %s))
+								and active='t'
+								) 
+								
+								union all
+
+								-- Column Pipe ------
+
+								select id,bot_id,qty,header_id as bom_id
+								from ch_bot_details
+								where header_id =
+								(
+								select id from kg_bom 
+								where id = (select partlist_id from ch_columnpipe_assembly 
+								where pipe_type = %s and star = (select star from ch_power_series 
+								where %s BETWEEN min AND max and %s <= max
+								and header_id = ( select vo_id from ch_vo_mapping
+								where rpm = %s and header_id = %s)
+								
+								) and header_id = 
+
+								( select vo_id from ch_vo_mapping
+								where rpm = %s and header_id = %s))
+								and active='t'
+								)
+								
+								union all
+
+								-- Delivery Pipe ------
+
+								select id,bot_id,qty,header_id as bom_id
+								from ch_bot_details
+								where header_id =  
+								(
+								select id from kg_bom 
+								where id = (select partlist_id from ch_deliverypipe_assembly 
+								where size = %s and star = (select star from ch_power_series 
+								where %s BETWEEN min AND max and %s <= max
+								
+								and header_id = ( select vo_id from ch_vo_mapping
+								where rpm = %s and header_id = %s)
+								
+								)and header_id = 
+
+								( select vo_id from ch_vo_mapping
+								where rpm = %s and header_id = %s))
+								and active='t'
+								) 
+								
+								union all
+
+								-- Lubrication ------
+
+								select id,bot_id,qty,header_id as bom_id
+								from ch_bot_details
+								where header_id =
+								(
+								select id from kg_bom 
+								where id = (select partlist_id from ch_lubricant 
+								where type = %s and star = (select star from ch_power_series 
+								where %s BETWEEN min AND max and %s <= max
+								
+								and header_id = ( select vo_id from ch_vo_mapping
+								where rpm = %s and header_id = %s)
+								
+								)and header_id = 
+
+								( select vo_id from ch_vo_mapping
+								where rpm = %s and header_id = %s))
+								and active='t'
+								) 
+								
+								union all
+									
+								-- Base Plate --
+								
+								select id,bot_id,qty,header_id as bom_id
+								from ch_bot_details
+								where header_id =
+								(
+								select id from kg_bom 
+								where id = (select partlist_id from ch_base_plate 
+								where limitation = %s and header_id = (select id from kg_bom where pump_model_id = %s and active='t') )
+								and active='t'
+								)
+								
+						  ''',[limitation,shaft_sealing,rpm,pump_model_id,motor_power,rpm,pump_model_id,
+						  bush_bearing,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,delivery_pipe_size,
+						  setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,lubrication,setting_height,setting_height,
+						  rpm,pump_model_id,rpm,pump_model_id,base_limitation,pump_model_id])
+					vertical_bot_details = cr.dictfetchall()
+					
+					for vertical_bot_details in vertical_bot_details:
+						
+						### Loading MOC from MOC Construction
+				
+						if moc_construction_id != False:
+							
+							cr.execute(''' select bot_moc.moc_id
+								from ch_machine_mocwise bot_moc
+								LEFT JOIN kg_moc_construction const on const.code = bot_moc.code
+								where bot_moc.header_id = %s and const.id = %s ''',[vertical_bot_details['bot_id'],moc_construction_id])
+							const_moc_id = cr.fetchone()
+							if const_moc_id != None:
+								moc_id = const_moc_id[0]
+							else:
+								moc_id = False
+						else:
+							moc_id = False
+							
+						vertical_bot_qty = vertical_bot_details['qty']
+						bot_obj = self.pool.get('kg.machine.shop')
+						bot_rec = bot_obj.browse(cr, uid, vertical_bot_details['bot_id'])
+						if moc_id:
+							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
+							moc_changed_flag = True
+							moc_name = moc_rec.name
+						bot_vals.append({
+							
+							#~ 'bot_line_id': vertical_bot_details['id'],
+							#~ 'bom_id': vertical_bot_details['bom_id'],							
+							#~ 'flag_applicable' : applicable,
+							#~ 'flag_standard':flag_standard,
+							#~ 'entry_mode':'auto',
+							#~ 'order_category':	order_category,
+							'ms_id': vertical_bot_details['bot_id'],
+							'qty': vertical_bot_qty * qty,
+							'load_bom': True,
+							'is_applicable': True,
+							'active': True,
+							'flag_is_bearing': bot_rec.is_bearing,
+							'moc_id': moc_id,
+							'moc_name': moc_name,
+							'moc_changed_flag': moc_changed_flag,
+							
+							})
+			
+			
+			
 					
 		return {'value': {'line_ids': fou_vals,'line_ids_a': ms_vals,'line_ids_b': bot_vals}}
 	
