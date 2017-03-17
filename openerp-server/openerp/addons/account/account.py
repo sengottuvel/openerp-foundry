@@ -765,7 +765,7 @@ class account_journal(osv.osv):
 		
 	_columns = {
 		'with_last_closing_balance' : fields.boolean('Opening With Last Closing Balance'),
-		'name': fields.char('Journal Name', size=64, required=True),
+		'name': fields.char('Name', size=64, required=True),
 		'code': fields.char('Code', size=5, required=True, help="The code will be displayed on reports."),
 		'type': fields.selection([('sale', 'Sale'),('sale_refund','Sale Refund'), ('purchase', 'Purchase'), ('purchase_refund','Purchase Refund'), ('cash', 'Cash'), ('bank', 'Bank and Checks'), ('general', 'General'), ('situation', 'Opening/Closing Situation')], 'Type', size=32, required=True,
 								 help="Select 'Sale' for customer invoices journals."\
@@ -776,7 +776,7 @@ class account_journal(osv.osv):
 		'type_control_ids': fields.many2many('account.account.type', 'account_journal_type_rel', 'journal_id','type_id', 'Type Controls', domain=[('code','<>','view'), ('code', '<>', 'closed')]),
 		'account_control_ids': fields.many2many('account.account', 'account_account_type_rel', 'journal_id','account_id', 'Account', domain=[('type','<>','view'), ('type', '<>', 'closed')]),
 		'default_credit_account_id': fields.many2one('account.account', 'Default Credit Account', domain="[('type','!=','view')]", help="It acts as a default account for credit amount"),
-		'default_debit_account_id': fields.many2one('account.account', 'Default Debit Account', domain="[('type','!=','view')]", help="It acts as a default account for debit amount"),
+		'default_debit_account_id': fields.many2one('account.account', 'Default Ledger', domain="[('type','!=','view')]", help="It acts as a default account for debit amount"),
 		'centralisation': fields.boolean('Centralized Counterpart', help="Check this box to determine that each entry of this journal won't create a new counterpart but will share the same counterpart. This is used in fiscal year closing."),
 		'update_posted': fields.boolean('Allow Cancelling Entries', help="Check this box if you want to allow the cancellation the entries related to this journal or of the invoice related to this journal"),
 		'group_invoice_lines': fields.boolean('Group Invoice Lines', help="If this box is checked, the system will try to group the accounting lines when generating them from invoices."),
@@ -848,7 +848,14 @@ class account_journal(osv.osv):
 		(_check_currency, 'Configuration error!\nThe currency chosen should be shared by the default accounts too.', ['currency','default_debit_account_id','default_credit_account_id']),
 	]
 	
-	
+	def onchange_default_debit_account_id(self, cr, uid, ids, default_debit_account_id, context=None):
+		
+		value = {'default_credit_account_id': ''}
+		if default_debit_account_id:			
+			value = {'default_credit_account_id': default_debit_account_id}
+		else:
+			pass			
+		return {'value': value}
 	
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -858,7 +865,17 @@ class account_journal(osv.osv):
 			raise osv.except_osv(_('Cancel remark is must !!'),
 				_('Enter the remarks in Cancel remarks field !!'))
 		return True
-
+	
+	def unlink(self,cr,uid,ids,context=None):
+		unlink_ids = []		
+		for rec in self.browse(cr,uid,ids):	
+			if rec.state not in ('draft','cancel'):				
+				raise osv.except_osv(_('Warning!'),
+						_('You can not delete this entry !!'))
+			else:
+				unlink_ids.append(rec.id)
+		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
+	
 	def entry_confirm(self,cr,uid,ids,context=None):
 		self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True	
@@ -1594,15 +1611,19 @@ class account_move(osv.osv):
 	]
 
 	def post(self, cr, uid, ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
 		if context is None:
 			context = {}
 		invoice = context.get('invoice', False)
 		valid_moves = self.validate(cr, uid, ids, context)
-
+		for line in rec.line_id:
+			if line.debit <= 0.00 and line.credit <= 0.00:
+				raise osv.except_osv(_('Debit and Credit'), _('Debit and Credit zero and negative values not allowed!!'))
 		if not valid_moves:
-			raise osv.except_osv(_('Error!'), _('You cannot validate a non-balanced entry.\nMake sure you have configured payment terms properly.\nThe latest payment term line should be of the "Balance" type.'))
+			raise osv.except_osv(_('Debit and Credit'), _('Debit and Credit values Mismatch!!'))
 		obj_sequence = self.pool.get('ir.sequence')
 		for move in self.browse(cr, uid, valid_moves, context=context):
+			
 			if move.name =='/':
 				new_name = False
 				journal = move.journal_id
