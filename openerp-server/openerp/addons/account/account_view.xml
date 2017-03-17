@@ -17,7 +17,7 @@
                 </header>
                     <group>
                         <group>
-                            <field name="name" readonly = "1"attrs="{'readonly': [('state','in',['confirmed','approved'])]}"/>
+                            <field name="name" attrs="{'readonly': [('state','in',['confirmed','approved'])]}"/>
                             <field name="code" attrs="{'readonly': [('state','in',['confirmed','approved'])]}"/>
                             <field name="company_id" groups="base.group_multi_company"/>
                             <field name="end_journal_period_id" attrs="{'readonly': [('state','in',['confirmed','approved'])]}"/>
