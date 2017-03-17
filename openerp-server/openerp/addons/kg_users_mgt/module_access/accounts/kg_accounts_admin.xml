@@ -116,6 +116,36 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
 		</record>
 		
+		<record id="m_accounts_hr_payslip_run" model="ir.model.access">
+			<field name="model_id" ref="hr_payroll.model_hr_payslip_run"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">HR Payslip Run</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
+		<record id="m_accounts_hr_payslip" model="ir.model.access">
+			<field name="model_id" ref="hr_payroll.model_hr_payslip"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Employee Payslips</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
+		<record id="m_accounts_hr_payslip_line" model="ir.model.access">
+			<field name="model_id" ref="hr_payroll.model_hr_payslip_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Employee Payslips Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
 		
 		
  </data>
