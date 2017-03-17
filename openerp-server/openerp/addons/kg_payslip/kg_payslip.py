@@ -195,14 +195,14 @@ class kg_payslip(osv.osv):
 				start_date = "'"+date_from+"'"
 				end_date = 	"'"+date_to+"'"
 				month_att_obj = self.pool.get('kg.monthly.attendance')				
-				sql = """ select mon_tot_days,worked from kg_monthly_attendance where employee_id=%s and start_date=%s and end_date=%s""" %(emp_id,start_date,end_date)
+				sql = """ select total_days,worked_days from kg_monthly_attendance where employee_id=%s and start_date=%s and end_date=%s""" %(emp_id,start_date,end_date)
 				cr.execute(sql)
 				data = cr.dictfetchall()
 				val , val1 = 0, 0
 				if data:					
-					val = [d['mon_tot_days'] for d in data if 'mon_tot_days' in d]
+					val = [d['total_days'] for d in data if 'total_days' in d]
 					val = val[0]
-					val1 = [d['worked'] for d in data if 'worked' in d]
+					val1 = [d['worked_days'] for d in data if 'worked_days' in d]
 					val1 = val1[0]
 				else:
 					pass
@@ -1011,6 +1011,18 @@ class kg_payslip(osv.osv):
 		
 			
 	def hr_verify_sheet(self, cr, uid, ids, context=None):
+		slip_obj = self.pool.get('hr.payslip')
+		contract_obj = self.pool.get('hr.contract')
+		slip_rec = self.browse(cr, uid, ids[0])
+		emp_rec = slip_rec.employee_id
+		cont_ids = contract_obj.search(cr,uid,[('employee_id','=',slip_rec.employee_id.id)])
+		if cont_ids:
+			ex_ids = slip_obj.search(cr, uid, [('employee_id','=', slip_rec.employee_id.id),
+						('date_from','=',slip_rec.date_from),('date_to','=',slip_rec.date_to),
+						('state','=', 'done')])
+			for i in ex_ids:
+				sql = """ delete from hr_payslip where id=%s """%(i)
+				cr.execute(sql)
 		self.salary_slip_calculation(cr, uid, ids, context)
 		return self.write(cr, uid, ids, {'state': 'done'}, context=context)
 		
@@ -1084,7 +1096,22 @@ kg_payslip()
 class kg_batch_payslip(osv.osv): 
 	
 	_name = 'hr.payslip.run'	
-	_inherit = 'hr.payslip.run'	
+	_inherit = 'hr.payslip.run'
+	
+	def _tot_sal_amt(self, cr, uid, ids, field_name, arg, context=None):
+		res = {}
+		tot_val = 0
+		for order in self.browse(cr, uid, ids, context=context):
+			res[order.id] = {
+				'tot_val': 0.0,
+			}
+			if order.slip_ids:
+				for item in order.slip_ids:
+					tot_val += item.round_val
+			else:
+				tot_val = 0
+			res[order.id]['tot_val'] = tot_val or 0.00
+		return res	
 	
 	_columns = {
 	
@@ -1093,13 +1120,64 @@ class kg_batch_payslip(osv.osv):
 	'date_end': fields.date('Date To', required=True, readonly=False),
 	'slip_date': fields.date('Creation Date'),
 	'slip_ids': fields.one2many('hr.payslip', 'payslip_run_id', 'Payslips', required=False, readonly=True),
-	'state': fields.selection([
-			('draft', 'Draft'),			
-			('done', 'Done'),
-			('close', 'Close'),
-		], 'Status', select=True, readonly=True),
+	'state': fields.selection([('draft', 'Draft'),('confirmed','WFA'),('approved','AC ACK Pending'),('done','Done'),('ac_accept','AC Accepted'),('reject','AC Rejected'),('cancel','Cancelled')], 'Status', select=True, readonly=True),
+	'tot_val':fields.function(_tot_sal_amt, string='Total Value',multi="sums",store=True),
+	'remark': fields.text('Approve/Reject'),
+	'cancel_remark': fields.text('Cancel'),
 	
 	}
+	
+	def entry_cancel(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'approved':
+			if rec.cancel_remark:
+				self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			else:
+				raise osv.except_osv(_('Cancel remark is must !!'),
+					_('Enter the remarks in Cancel remarks field !!'))
+		else:
+			raise osv.except_osv(_('Warning!!!'),
+				_('Confirm the record to proceed further'))
+		return True	
+	
+	def entry_accept(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'approved':
+			self.write(cr, uid, ids, {'state': 'ac_accept','done_user_id': uid, 'done_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		else:
+			pass
+		return True
+	
+	def entry_confirm(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state ==  'done':
+			self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		else:
+			raise osv.except_osv(_('Warning!!!'),
+					_('The Record is not in draft !!!!!!'))
+		return True
+		
+	def entry_approve(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'confirmed':
+			self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		else:
+			raise osv.except_osv(_('Warning!!!'),
+					_('Confirm the record to proceed further'))
+		return True
+
+	def entry_reject(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'approved':
+			if rec.remark:
+				self.write(cr, uid, ids, {'state': 'confirmed','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			else:
+				raise osv.except_osv(_('Rejection remark is must !!'),
+					_('Enter the remarks in rejection remark field !!'))
+		else:
+			raise osv.except_osv(_('Warning!!!'),
+					_('Approve the record to proceed further'))
+		return True
 	
 	def _get_last_month_first(self, cr, uid, context=None):
 		
@@ -1137,7 +1215,7 @@ class kg_batch_payslip(osv.osv):
 		dup_ids = obj.search(cr, uid, [( 'date_start','=',date_from),( 'date_end','=',to_date),
 									( 'state','=','done')])
 		if len(dup_ids) > 1:
-			return False
+			#~ return False
 		return True
 		
 	def print_monthly_individual_payslip(self, cr, uid, ids, context=None):		
@@ -1164,11 +1242,11 @@ class kg_batch_payslip(osv.osv):
 		}
 		return {'type': 'ir.actions.report.xml', 'report_name': 'onscreen.salary.muster','name':'Employee_Salary_Muster','datas': datas, 'ids' : ids, 'nodestroy': True}	
 		
-	#_constraints = [
+	_constraints = [
 		
-		#(_check_employee_slip_dup, 'Payslip has been created already for this month. Check Month and State !!',['amount']),
+		(_check_employee_slip_dup, 'Payslip has been created already for this month. Check Month and State !!',['amount']),
 		
-		#] 
+		] 
 		
 	
 	_defaults = {

@@ -20,7 +20,7 @@ related requisition. This new object will regroup and will allow you to easily
 keep track and order all your purchase orders.
 """,
 
-     'depends' : ['base', 'hr_payroll','hr','hr_contract',
+    'depends' : ['base', 'hr_payroll','hr','hr_contract',
 			     'kg_allowance_deduction','kg_division_master','kg_monthly_attendance','kg_contribution',
 			     'kg_turn_over','kg_advance_deduction'
 					],

@@ -9,7 +9,7 @@
             <field name="arch" type="xml">
                 <field name="paid" position="after">
                     <field name="period_id"/>
-                    <field name="journal_id" required="0"/>
+                    <field name="journal_id" invisible="1"/>
                     <field name="move_id" readonly="1"/>
                 </field>
             </field>
@@ -59,7 +59,7 @@
             <field name="inherit_id" ref="hr_payroll.hr_payslip_run_filter"/>
             <field name="arch" type="xml">
                 <filter name='done_filter' position="after">
-                    <field name="journal_id"/>
+                    <field name="journal_id" />
                 </filter>
             </field>
         </record>
@@ -70,7 +70,7 @@
             <field name="inherit_id" ref="hr_payroll.hr_payslip_run_tree"/>
             <field name="arch" type="xml">
                 <field name="date_end" position="after">
-                    <field name="journal_id"/>
+                    <field name="journal_id" invisible="1"/>
                 </field>
             </field>
         </record>
@@ -81,7 +81,7 @@
             <field name="inherit_id" ref="hr_payroll.hr_payslip_run_form"/>
             <field name="arch" type="xml">
                 <field name="credit_note" position="before">
-                    <field name="journal_id"/>
+                    <field name="journal_id" invisible="1"/>
                 </field>
             </field>
         </record>

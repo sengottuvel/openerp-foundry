@@ -216,7 +216,7 @@ class hr_payslip_run(osv.osv):
     _inherit = 'hr.payslip.run'
     _description = 'Payslip Run'
     _columns = {
-        'journal_id': fields.many2one('account.journal', 'Salary Journal', states={'draft': [('readonly', False)]}, readonly=True, required=True),
+        'journal_id': fields.many2one('account.journal', 'Salary Journal', states={'draft': [('readonly', False)]}, readonly=True, required=False),
     }
 
     def _get_default_journal(self, cr, uid, context=None):

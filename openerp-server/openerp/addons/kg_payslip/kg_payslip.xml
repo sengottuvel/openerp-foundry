@@ -107,6 +107,10 @@
 						
 					</field>
 					
+					<field name="name" position="replace"/>
+					<field name="date_from" position="replace"/>
+					<field name="date_to" position="replace"/>
+					 
 				</field>
 			</record>
 			
@@ -115,23 +119,132 @@
 				<field name="model">hr.payslip.run</field>
 				<field name="inherit_id" ref="hr_payroll.hr_payslip_run_form"/>
 				<field name="arch" type="xml">
-					
-					
 					<button name="close_payslip_run" type="object" string="Close" states="draft" class="oe_highlight" position="after">
-						<button name="print_monthly_individual_payslip" string="Generate Individual PDF" type="object" class="oe_highlight" states="done"/> 
-						<button name="print_monthly_payslip" string="Generate Salary Muster" type="object" class="oe_highlight" states="done"/> 
+						<button name="print_monthly_individual_payslip" string="Generate Individual PDF" type="object" class="oe_highlight" states="done" invisible="1"/> 
+						<button name="print_monthly_payslip" string="Generate Salary Muster" type="object" class="oe_highlight" states="done" invisible="1"/>
+						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_confirm" type="object" string="Confirm" states="done" class="oe_highlight"/>
+						<button name="entry_cancel" type="object" string="Cancel" class="oe_highlight" confirm="Are you sure to proceed ?" states="approved" invisible="1"/> 
 					</button>
-					
-					
 					<field name="credit_note" position="replace">
-					<field name="date_start" style="width: 30%%" class="att_month_change"/>
-					<field name="date_end" style="width: 30%%" class="att_month_change"/>
-					<field name="state"/>
-					<field name="credit_note" invisible="1"/>
+						<field name="date_start"  class="att_month_change" attrs="{'readonly': [('state','in',['done','ac_accept','approved','cancel','reject'])]}"/>
+						<field name="date_end"  class="att_month_change" attrs="{'readonly': [('state','in',['done','ac_accept','approved','cancel','reject'])]}"/>
+						<field name="tot_val"/>
+						<field name="state" style="width: 30%%" class="att_state_change"/>
+						<field name="credit_note" invisible="1"/>
+						 <group string='Remarks' attrs="{'invisible':[('state','=','draft')]}" colspan="4">
+							<group >	
+								<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['done','reject','cancel'])]}"/>
+							</group>
+							<group>												
+								<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','confirmed'])], 'readonly': [('state','in',['cancel'])]}" invisible="1"/>		
+							</group>
+						</group>
 					</field>
-				
 				</field>
 			</record>
+			
+			<record model="ir.ui.view" id="kg_payslip_run_tree">
+				<field name="name">hr.payslip.run.tree.inherit</field>
+				<field name="model">hr.payslip.run</field>
+				<field name="inherit_id" ref="hr_payroll.hr_payslip_run_tree"/>
+				<field name="arch" type="xml">
+					<field name="name" position="after">
+						<field name="tot_val"/>
+					</field>
+				</field>
+			</record>
+			
+		<record id="hr_payslip_run_form_dupl" model="ir.ui.view">
+            <field name="name">hr.payslip.run.form</field>
+            <field name="model">hr.payslip.run</field>
+            <field name="arch" type="xml">
+                <form string="Payslips Batches" version="7.0" create="false">
+					<header>
+						<button name="entry_reject" type="object" string="AC Reject" states="approved" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_accept" type="object" string="AC Accept" states="approved" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+					</header>
+                    <label for="name" class="oe_edit_only"/>
+                    <h1>
+                        <field name="name"/>
+                    </h1>
+                    <group col="4">
+						<group>
+							<field name="date_start" attrs="{'readonly': [('state','in',['done','ac_accept','approved','cancel','reject'])]}"/>/>
+							<field name="tot_val"/>
+							<field name="credit_note" invisible="1"/>
+						</group>
+						<group>
+							<field name="date_end" attrs="{'readonly': [('state','in',['done','ac_accept','approved','cancel','reject'])]}"/>/>
+							<field name="state"/>
+						</group>
+                    </group>
+                    <group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
+						<group>	
+							<field name="remark" attrs="{'invisible':[('state','=','draft')], 'readonly': [('state','in',['done','reject','cancel'])]}"/>
+						</group>
+						<group>												
+							<field name="cancel_remark" attrs="{'invisible':[('state','in',['draft','confirmed'])], 'readonly': [('state','in',['cancel'])]}" invisible="1"/>		
+						</group>
+					</group>
+                    <separator string="Payslips"/>
+                    <field name="slip_ids"/>
+                </form>
+            </field>
+        </record>
+        
+		<record id="m_tree_v_kg_pay_batch_dup" model="ir.ui.view">
+			<field name="name">Payslip Batches ACK</field>
+			<field name="model">hr.payslip.run</field>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';red:state == 'confirmed'
+						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" 
+								toolbar="True" string="Employee Payslip" create="false">				
+					<field name="name"/>
+					<field name="tot_val"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+		<record model="ir.ui.view" id="m_search_v_kg_pay_batch_dup">
+			<field name="name">kg.payslip.filter</field>
+			<field name="model">hr.payslip.run</field>
+			<field name="inherit_id" ref="hr_payroll.hr_payslip_run_filter"/>
+			<field name="arch" type="xml">
+				 <filter icon="terp-document-new" string="Draft" domain="[('state','=','draft')]" help="Draft Payslip Batches" position="after">
+					  <filter icon="terp-document-new" string="AC ACK Pending" name="approved" domain="[('state','=','approved')]"/>
+				 </filter>
+			</field>
+		</record>
+			
+		<record id="action_hr_payslip_run_ack_dupl" model="ir.actions.act_window">
+            <field name="name">Employee Salary</field>
+            <field name="res_model">hr.payslip.run</field>
+            <field name="view_type">form</field>
+            <field name="domain">[('state','=','approved')]</field>
+            <field name="context">{"search_default_approved":1}</field>
+            <field name="view_id" ref="m_tree_v_kg_pay_batch_dup"/>
+            <field name="search_view_id" ref="m_search_v_kg_pay_batch_dup"/>
+        </record>
+        
+        <record id="tms_kg_monthly_payslip_dup_tree" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="m_tree_v_kg_pay_batch_dup"/>
+            <field name="act_window_id" ref="action_hr_payslip_run_ack_dupl"/>
+        </record>
+        
+        <record id="tms_kg_monthly_payslip_dup_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="hr_payslip_run_form_dupl"/>
+            <field name="act_window_id" ref="action_hr_payslip_run_ack_dupl"/>
+        </record>
+
+			
+			
+			
 			
 			<record id="kg_salary_stru_form_1" model="ir.ui.view">
 				<field name="name">salary.stru.form</field>
@@ -152,15 +265,16 @@
 			<field name="model">hr.payslip</field>
 			<field name="inherit_id" ref="hr_payroll.view_hr_payslip_filter"/>
 			<field name="arch" type="xml">
-			 
+				 <filter icon="terp-camera_test" string="Done" domain="[('state','=','done')]" help="Done Slip" position="after">
+					  <filter icon="terp-document-new" string="AC ACK Pending" name="approved" domain="[('state','=','approved')]"/>
+				 </filter>
 				<filter string="Employees" icon="terp-personal" name="employee_id" context="{'group_by':'employee_id'}" position="before">
-				
-				<filter string="Month" icon="terp-personal" name="date_from" context="{'group_by':'date_from'}"/>
-					
+					<filter string="Month" icon="terp-personal" name="date_from" context="{'group_by':'date_from'}"/>					
 				</filter>
-				
 			</field>
 		</record>
+		
+		<menuitem action="action_hr_payslip_run_ack_dupl" id="menu_hr_payslip_account" parent="kg_customer_advance.mpm_accounts_advance" sequence='5' name="Employee Salary"/>
             
     </data>
 </openerp>

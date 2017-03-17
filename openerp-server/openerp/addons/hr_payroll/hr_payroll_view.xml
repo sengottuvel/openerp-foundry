@@ -357,6 +357,7 @@
                     <field name="date_from"/>
                     <filter icon="terp-document-new" string="Draft" domain="[('state','=','draft')]" help="Draft Slip"/>
                     <filter icon="terp-camera_test" string="Done" domain="[('state','=','done')]" help="Done Slip"/>
+                    <filter icon="terp-document-new" string="AC ACK Pending" name="approved" domain="[('state','=','approved')]"/>
                     <field name="employee_id"/>
                     <field name="payslip_run_id"/>
                     <group expand="0" string="Group By...">
@@ -685,9 +686,9 @@
             <field name="arch" type="xml">
                 <tree string="Payslips Batches">
                     <field name="name"/>
-                    <field name="date_start"/>
-                    <field name="date_end"/>
-                    <field name="credit_note"/>
+                    <field name="date_start" invisible="1"/>
+                    <field name="date_end" invisible="1"/>
+                    <field name="credit_note" invisible="1"/>
                     <field name="state"/>
                 </tree>
             </field>
@@ -700,9 +701,9 @@
                 <form string="Payslips Batches" version="7.0">
                 <header>
                     <button name="close_payslip_run" type="object" string="Close" states="draft" class="oe_highlight"/>
-                    <button name="%(action_hr_payslip_by_employees)d" type="action" states="draft" string="Generate Payslips" class="oe_highlight"/>
+                    <button name="%(action_hr_payslip_by_employees)d" type="action" attrs="{'invisible': [('state','not in',['draft','confirmed'])]}" string="Choose Employees" class="oe_highlight"/>
                     <button string="Set to Draft" name="draft_payslip_run" type="object" states="close" />
-                    <field name="state" widget="statusbar"/>
+                    <field name="state" widget="statusbar" invisible="1"/>
                 </header>
                     <label for="name" class="oe_edit_only"/>
                     <h1>
@@ -729,9 +730,25 @@
             <field name="name">Payslips Batches</field>
             <field name="res_model">hr.payslip.run</field>
             <field name="view_type">form</field>
+            <field name="domain">[('state','!=','approved')]</field>
             <field name="view_id" ref="hr_payslip_run_tree"/>
             <field name="search_view_id" ref="hr_payslip_run_filter"/>
         </record>
+        
+         <record id="action_hr_payslip_run_tree_view" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="hr_payslip_run_tree"/>
+            <field name="act_window_id" ref="action_hr_payslip_run_tree"/>
+        </record>
+        
+         <record id="action_hr_payslip_run_form_view" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="hr_payslip_run_form"/>
+            <field name="act_window_id" ref="action_hr_payslip_run_tree"/>
+        </record>
+
         <menuitem action="action_hr_payslip_run_tree" id="menu_hr_payslip_run" parent="menu_hr_root_payroll"/>
 
         <!--  Shortcuts -->

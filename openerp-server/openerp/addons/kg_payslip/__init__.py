@@ -5,6 +5,6 @@
 
 
 import kg_payslip
-#~ import kg_payslip_batch_wizard
+import kg_payslip_batch_wizard
 #~ import wizard
 #~ import report
