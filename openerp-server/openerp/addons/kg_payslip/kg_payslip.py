@@ -1215,6 +1215,8 @@ class kg_batch_payslip(osv.osv):
 		dup_ids = obj.search(cr, uid, [( 'date_start','=',date_from),( 'date_end','=',to_date),
 									( 'state','=','done')])
 		if len(dup_ids) > 1:
+			raise osv.except_osv(_('Warning !!'),
+					_('Payslip for this month already exists !!'))
 			#~ return False
 		return True
 		
