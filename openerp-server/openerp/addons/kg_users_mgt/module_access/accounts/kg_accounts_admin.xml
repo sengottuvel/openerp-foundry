@@ -106,6 +106,16 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
 		</record>
 		
+		<record id="m_accounts_kg_advance_deduction" model="ir.model.access">
+			<field name="model_id" ref="kg_advance_deduction.model_kg_advance_deduction"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Advance Deduction</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
 		
 		
  </data>
