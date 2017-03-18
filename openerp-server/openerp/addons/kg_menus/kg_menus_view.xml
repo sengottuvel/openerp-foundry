@@ -310,5 +310,10 @@
 				<menuitem parent="menu_masters_menu" id="mam_kg_job_nature"  action="kg_job_nature.mma_standard_kg_job_nature" sequence="10" name="Nature of Job"/>
 				<menuitem parent="menu_masters_menu" id="mam_kg_division_master_action"  action="kg_division_master.mma_division_master" sequence="10" name="Division"/>
 		
+			<!--Duplicate Account Menus-->
+			<menuitem  name="Views" id="menu_kg_chart_acc" parent = "account.mpm_acc_masters" sequence="4"/>
+				<menuitem action="account.action_account_chart" name="Chart Of Accounts" id="mam_kg_chart_accounts" parent="menu_kg_chart_acc" sequence="0"/>
+		
+		
     </data>
 </openerp>
