@@ -575,7 +575,12 @@
 			ref('account.mam_account_move_pj'),		
 			ref('kg_direct_expense_entry.tmi_direct_expense_entry'),	
 			ref('kg_advance_deduction.tam_kg_adv_ack'),
-			ref('kg_payslip.menu_hr_payslip_account'),			
+			ref('kg_payslip.menu_hr_payslip_account'),		
+			ref('kg_bank_statement.mam_kg_bank_state_brs'),			
+			ref('kg_bank_statement.mam_kg_bank_statement'),			
+			ref('kg_bank_reconcile.mma_kg_bank_reconcile'),		
+			ref('kg_menus.menu_kg_chart_acc'),			
+			ref('kg_menus.mam_kg_chart_accounts'),		
 				
 			
 			
