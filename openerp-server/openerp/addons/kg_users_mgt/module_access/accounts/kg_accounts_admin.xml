@@ -216,6 +216,26 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
 		</record>
 		
+		<record id="m_accounts_kg_tds_process" model="ir.model.access">
+			<field name="model_id" ref="kg_tds_process.model_kg_tds_process"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">TDS Process</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
+		
+		<record id="m_accounts_ch_tds_process" model="ir.model.access">
+			<field name="model_id" ref="kg_tds_process.model_ch_tds_process"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">TDS Process Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
+		
 		
 		
  </data>
