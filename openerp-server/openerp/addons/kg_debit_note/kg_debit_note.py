@@ -301,3 +301,51 @@ class ch_debit_note(osv.osv):
 		return context
 		
 ch_debit_note()
+
+
+class kg_purchase_invoice_inherit(osv.osv):
+	
+	_name = "kg.purchase.invoice"
+	_inherit = "kg.purchase.invoice"
+	
+	_columns = {
+		
+		'debit_note_ids':fields.one2many('ch.kg.debit.note', 'header_id', "Debit Note",readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),		
+		
+	}
+	
+kg_purchase_invoice_inherit()
+
+
+class ch_kg_debit_note(osv.osv):
+	
+	_name = 'ch.kg.debit.note'
+	_description = 'This module is about the details of debit note'
+	
+	_columns = {
+		
+		'header_id':fields.many2one('kg.purchase.invoice','Header_id'),
+		'debit_id':fields.many2one('kg.debit.note','Debit Note No'),
+		'debit_date':fields.date('Debit Note Date'),
+		'supplier_id':fields.many2one('res.partner','Supplier',domain = [('supplier','=',True),('sup_state','=','approved')],readonly=True),
+		'supplier_invoice_no':fields.char('Supplier Invoice No',readonly=True),
+		'supplier_invoice_date':fields.date('Supplier Invoice Date',readonly=True),	
+		'debit_amt':fields.float('Debit Note Amount'),
+		
+	}
+	
+	def onchange_debit_id(self, cr, uid, ids, debit_id):
+		debit_obj = self.pool.get('kg.debit.note')
+	
+		if debit_id:
+			debit_rec = debit_obj.browse(cr, uid, debit_id)
+			return {'value': {
+				'debit_date' : debit_rec.date,
+				'supplier_id' : debit_rec.supplier_id.id,
+				'supplier_invoice_no' : debit_rec.supplier_invoice_no,
+				'supplier_invoice_date' : debit_rec.supplier_invoice_date,
+				'debit_amt' : debit_rec.amount_total,
+				
+				}}
+	
+ch_kg_debit_note()

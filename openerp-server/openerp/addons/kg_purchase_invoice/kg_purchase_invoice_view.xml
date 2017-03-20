@@ -8,10 +8,10 @@
 			<field name="arch" type="xml">
 				<form string="Purchase Invoice" version="7.0">
 				<header>
+					<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight"/>
 					<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 					<button name="entry_cancel" type="object" string="Cancel" states="approved" class="oe_highlight"/>
-					<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight"/>
 				</header>
 					<group>
 						<group>
@@ -47,7 +47,7 @@
 					<group string='Remarks' attrs="{'invisible':[('state','not in',('confirmed','approved'))]}">
 						<group>	
 							<field name="can_remark" attrs="{'invisible':[('state','not in',('draft','approved','cancel'))], 'readonly': [('state','in',['cancel','reject'])]}"/>
-							<field name="reject_remark" attrs="{'invisible':[('state','not in',['confirmed','reject'])], 'readonly': [('state','in',['cancel','reject'])]}"/>	
+							<field name="reject_remark" attrs="{'invisible':[('state','not in',['confirmed','reject'])], 'readonly': [('state','in',['cancel','reject'])]}"/>
 						</group>
 						<group>												
 						</group>
@@ -106,6 +106,7 @@
 									</tree>
 								</field>
 							</page>
+<!--
 							<page string="Credit Note">
 								<field name="credit_note_ids" nolabel="1">
 								<tree editable="bottom">
@@ -117,6 +118,20 @@
 								</tree>
 								</field>
 							</page>
+-->
+<!--
+							<page string="Debit Note">
+								<field name="debit_note_ids" nolabel="1">
+								<tree editable="bottom">
+									<field name="debit_id" required="1" domain = "[('supplier_id','=',parent.supplier_id),('state','=','approved'),('supplier_invoice_no','=',parent.sup_invoice_no)]" on_change="onchange_debit_id(debit_id)"/>
+									<field name="debit_date" readonly="1"/>
+									<field name="supplier_invoice_no" readonly="1"/>
+									<field name="supplier_invoice_date" readonly="1"/>
+									<field name="debit_amt"  readonly="1"/>
+								</tree>
+								</field>
+							</page>
+-->
 							<page string="Additional charges">
 								<field name="expense_line_ids" nolabel="1">
 									<tree editable="bottom">
@@ -195,7 +210,7 @@
 						<field name="discount"/>
 							<field name="other_charge"/>
 							<field name="advance_adjusted_amt"/>
-							<field name="credit_amt"/>
+							<field name="debit_amt"/>
 							<field name="amount_untaxed" widget="monetary" options="{'currency_field': 'currency_id'}"/>
 							<field name="amount_tax" widget="monetary" options="{'currency_field': 'currency_id'}"/>
 							<field name="round_off_amt"/>
@@ -248,6 +263,7 @@
 					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
 					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>
 					<filter icon="terp-check" name="approved" string="Approved" domain="[('state','=','approved')]"/>
+					<filter icon="terp-check" name="ac_ack_pending" string="AC ACK Pending" domain="[('state','=','ac_ack_pending')]"/>
 				<field name="name" string="Invoice no"/>
 				<field name="supplier_id" string="Supplier"/>
 				<field name="product_id" string="PO or SO GRN"/>
@@ -259,22 +275,308 @@
 					</group>
 				</search>
 			</field>
-		</record>		 
+		</record>
+		
+		<!--	AC Process Form view start	-->
+		
+		<record id="t_form_v_ac_purchase_invoice_view" model="ir.ui.view">
+			<field name="name">ac.purchase.invoice.form.view</field>
+			<field name="model">kg.purchase.invoice</field>
+			<field name="arch" type="xml">
+				<form string="Purchase Invoice" version="7.0" create="false" delete="false">
+				<header>
+					<button name="entry_reject" type="object" string="Reject" states="ac_ack_pending" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+					<button name="entry_ack_approve" type="object" string="Accept" states="ac_ack_pending" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+				</header>
+					<group string="Invoice Details">
+						<group>
+							<field name="name"/>
+							<field name="po_so_name" string="Order No" readonly="1"/>
+							<field name="purpose" required="1"/>
+							<field name="type" required="1" invisible="1"/>
+							<field name="grn_type" required="1" attrs="{'readonly': [('load_items_flag','=',True)]}" invisible="1"/>
+							<field name="his_state" invisible="1"/>
+						</group>
+						<group>
+							<field name="invoice_date"/>
+							<field name="po_so_date" string="Order Date" readonly="1"/>
+							<field name="payment_due_date" string="Due Date"/>
+							<field name="load_items_flag" invisible="1"/>
+						</group>
+					</group>
+					<group string = "Supplier Information">
+						<group>
+							<field name="supplier_id"  on_change="onchange_supplier_id(supplier_id)" required="1"/>
+							<field name="sup_invoice_no" required="1"/>
+							<field name="remarks"/>
+							<field name="grn_no" invisible="1"/>
+							<field name="payment_id" invisible="1"/>
+						</group>
+						<group>
+							<field name="sup_address"/>
+							<field name="sup_invoice_date" required="1"/>
+							<field name="payment_type" invisible="1"/>
+							<field name="state" style="width: 30%%" class="att_state_change"/>
+						</group>
+					</group>
+					<group string='Remarks' attrs="{'invisible':[('state','not in',('confirmed','reject','ac_ack_pending'))]}">
+						<group>	
+							<field name="reject_remark" attrs="{'invisible':[('state','not in',('confirmed','reject','ac_ack_pending'))], 'readonly': [('state','in',('cancel','reject'))]}"/>
+						</group>
+						<group>
+						</group>
+					</group>
+					<group>
+<!--
+							<page string="Payment History" attrs="{'invisible':[('state','in',('draft','confirmed','reject','cancel'))]}" >
+								<button name="paid" string="Paid" class="oe_highlight"  type="object" attrs="{'invisible': [('his_state','=','paid')]}" />
+								<group >								
+									<field name="history_line_ids" nolabel="1" attrs="{'readonly': [('his_state','=','paid')]}" >												
+										<tree editable="bottom" delete ="false" >
+											<field name="pay_flag" invisible="1"/>													
+											<field name="pay_mode" required="1" attrs="{'readonly': [('pay_flag','=',True)]}"  />
+											<field name="reference" required="1" attrs="{'readonly': [('pay_flag','=',True)]}"/>
+											<field name="dop" required="1" attrs="{'readonly': [('pay_flag','=',True)]}" />
+											<field name="amt" required="1" attrs="{'readonly': [('pay_flag','=',True)]}" />
+										</tree>
+									</field>						    
+							    </group>
+							</page>
+							<page string="Select PO GRN" attrs="{'invisible': [('grn_type','!=','from_po_grn')]}">
+								<field name="po_grn_ids" nolabel="1" attrs="{'readonly': [('state','!=','draft')]}">
+									<tree string = "PO GRN" delete="false">
+										<field name="name" readonly="1"/>
+										<field name="grn_date" readonly="1"/>
+										<field name="po_id" readonly="1"/>
+										<field name="po_date" readonly="1"/>
+										<field name="so_id" readonly="1"/>
+										<field name="so_date" readonly="1"/>
+										<field name="inward_type" readonly="1"/>
+										<field name="dc_no" readonly="1"/>
+										<field name="dc_date" readonly="1"/>
+									</tree>
+								</field>
+							</page>
+							<page string="Select General GRN" attrs="{'invisible': [('grn_type','!=','from_general_grn')]}">
+							   <field name="general_grn_ids" nolabel="1" attrs="{'readonly': [('state','!=','draft')]}">
+							   		<tree string = "General GRN" delete="false">
+										<field name="name" readonly="1"/>
+										<field name="grn_date" readonly="1"/>
+										<field name="inward_type" readonly="1"/>
+										<field name="dc_no" readonly="1"/>
+										<field name="dc_date" readonly="1"/>
+										<field name="amount_total" readonly="1"/>
+									</tree>
+								</field>
+							</page>
+							<page string="Select Labour &amp; AMC" attrs="{'invisible': ['|',('grn_type','!=','others'),('type','=','from_po')]}">
+							   <field name="labour_ids" nolabel="1">
+									<tree string = "Labour &amp; AMC" delete="false">
+										<field name="service_order_id" readonly="1"/>
+										<field name="service_order_date" readonly="1"/>
+										<field name="partner_id" readonly="1"/>
+										<field name="supplier_invoice_no" readonly="1"/>
+										<field name="dep_name" readonly="1"/>
+									</tree>
+								</field>
+							</page>
+-->
+						
+					</group>
+					<button name="load_details" string="List" type="object" states="draft"/>
+					<group>
+						<group>
+							<notebook string="Invoice Details" colspan="4">
+								<page string = "Invoice Details">
+									<field name="line_ids" nolabel="1" readonly="0">
+										<tree editable="bottom">
+											<field name="grn_no" readonly="1"/>
+											<field name="grn_date" readonly="1"/>
+											<field name="order_no" readonly="1"/>
+											<field name="product_id" string="Item Name" readonly="1"/>
+											<field name="account_id"/>
+											<field name="rec_qty" string="Quantity" readonly="1"/>
+											<field name="uom_id" string="UOM" readonly="1"/>
+											<field name="price_unit" string="Unit Price" readonly="1"/>
+											<field name="total_amt" readonly="1"/>
+											<field name="discount" readonly="1"/>
+											<field name="kg_discount_per" readonly="1"/>
+											<field name="invoice_tax_ids" widget="many2many_tags" readonly="1"/>
+											<field name="price_subtotal" string="Total"/>
+											<field name="qty" readonly="1" invisible="1"/>
+											<field name="dc_no" readonly="1" invisible="1"/>
+										</tree>
+									</field>
+								</page>
+								<page string="Entry Info">
+									<group>
+										<group>
+											<field name="company_id"/>
+										</group>
+										<group>
+											<field name="active"/>
+										</group>
+										<group>
+											<field name="created_by"/>
+											<field name="conf_user_id" attrs="{'invisible':[('state','in',['draft','reject'])]}"/>
+											<field name="app_user_id" attrs="{'invisible':[('state','in',['draft','confirmed','reject'])]}"/>
+											<field name="update_user_id"/>
+										</group>
+										<group>
+											<field name="creation_date"/>
+											<field name="confirmed_date" attrs="{'invisible':[('state','in',['draft','reject'])]}"/>
+											<field name="approved_date" attrs="{'invisible':[('state','in',['draft','confirmed','reject'])]}"/>
+											<field name="update_date"/>
+										</group>
+									</group>
+								</page>
+							</notebook>
+						</group>
+					</group>
+					<button name="load_advance" string="Load Advance" type="object"  attrs="{'invisible':[('state','in',('draft','reject','approved','ac_ack_pending'))]}"/>
+					<group attrs="{'invisible':[('state','=','draft')]}">
+						<notebook>
+							<page string="Advance Adjustment">
+								<field name="advance_line_ids" nolabel="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'invisible':[('state','=','draft')]}" >
+									<tree editable="bottom" create="false" >
+										<field name="po_id" required="1" readonly="1"/>
+										<field name="po_amt" invisible="1"/>
+										<field name="sup_advance_id"/>
+										<field name="sup_advance_date" readonly="1"/>
+										<field name="tot_advance_amt" />
+										<field name="already_adjusted_amt" invisible="1"/>
+										<field name="balance_amt"/>
+										<field name="current_adv_amt"/>
+									</tree>
+								  </field>
+							</page>
+						</notebook>
+					</group>
+					<group>
+						<notebook>
+							<page string="Additional charges">
+								<field name="expense_line_ids" nolabel="1">
+									<tree editable="bottom">
+										<field name="expense_id" required="1"/>
+										<field name="expense_amt" required="1"/>
+										<field name="expense_tax_ids" widget="many2many_tags"/>
+										<field name="price_subtotal"/>
+									</tree>
+								</field>
+							</page>
+						</notebook>
+						
+					</group>
+					<group>
+						<field name="specification" string="Specification"/>
+					</group>
+					<group class="oe_subtotal_footer oe_right">
+						<field name="discount"/>
+							<field name="other_charge"/>
+							<field name="advance_adjusted_amt"/>
+							<field name="debit_amt"/>
+							<field name="amount_untaxed" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+							<field name="amount_tax" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+							<field name="round_off_amt"/>
+							<div class="oe_subtotal_footer_separator oe_inline">
+							<label for="amount_total"/>
+							</div>
+							<field name="amount_total" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+							<div class="oe_subtotal_footer_separator oe_inline">
+							<label for="bal_amt"/>
+							</div>
+							<field name="bal_amt" nolabel="1" class="oe_subtotal_footer_separator"/>
+							<button name="compute_values" string="Compute" type="object" attrs="{'invisible': [('state','in','approved')]}" />
+					</group>
+					</form>
+			</field> 
+		</record>
+		<!--	AC Process Form view end	-->
+		
+		<!--	AC Process Tree view start	-->
+		
+		<record id="t_tree_v_ac_purchase_invoice_tree_view" model="ir.ui.view">
+			<field name="name">kg.purchase.invoice.tree.view</field>
+			<field name="model">kg.purchase.invoice</field>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';red:state == 'confirmed';black:state == 'approved'" 
+								toolbar="True" string="Purchase Invoice" create="false" delete="false">
+					<field name="name"/>
+					<field name="invoice_date"/>
+					<field name="sup_invoice_no"/>
+					<field name="sup_invoice_date"/>
+					<field name="supplier_id"/>
+					<field name="payment_due_date" string="Due Date"/>
+					<field name="amount_total" string="Invoice Amount"/>
+					<field name="bal_amt"/>
+					<field name="state"/>
+					<field name="order_no" invisible="1"/>
+					<field name="order_date" invisible="1"/>
+					<field name="grn_no" invisible="1"/>
+					<field name="payment_id" invisible="1"/>
+					<field name="remarks" invisible="1"/>
+					<field name="his_state" invisible="1"/>
+					<field name="payment_date" invisible="1"/>
+				</tree>
+			</field>
+		</record>
+		<!--	AC Process Tree view end	-->
 		
 		<record id="tma_kg_purchase_invoice_action_form" model="ir.actions.act_window">
 			<field name="name">Purchase Invoice</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.purchase.invoice</field>
 			<field name="view_type">form</field>
-			<field name="view_id" ref="t_tree_v_kg_purchase_invoice_tree_view"/>
+			<field name="context">{}</field>
+			<field name="domain">[('state','!=','ac_ack_pending')]</field>
 			<field name="search_view_id" ref="t_search_v_purchase_invoice_search_view"/>
 		</record>
+		
+		<record id="tma_pi_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_kg_purchase_invoice_tree_view"/>
+            <field name="act_window_id" ref="tma_kg_purchase_invoice_action_form"/>
+        </record>
+		
+		<record id="tma_pi_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_kg_purchase_invoice_view"/>
+            <field name="act_window_id" ref="tma_kg_purchase_invoice_action_form"/>
+        </record>
+        
+		<!--	AC Process Action view start	-->
+		<record id="tma_ac_purchase_invoice_action_form" model="ir.actions.act_window">
+			<field name="name">Purchase Invoice</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.purchase.invoice</field>
+			<field name="view_type">form</field>
+			<field name="search_view_id" ref="t_search_v_purchase_invoice_search_view"/>
+			<field name="context">{"search_default_ac_ack_pending":1}</field>
+		</record>
+		
+		<record id="tma_ac_pi_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_ac_purchase_invoice_tree_view"/>
+            <field name="act_window_id" ref="tma_ac_purchase_invoice_action_form"/>
+        </record>
+		
+		<record id="tma_ac_pi_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_ac_purchase_invoice_view"/>
+            <field name="act_window_id" ref="tma_ac_purchase_invoice_action_form"/>
+        </record>
+		<!--	AC Process Action view end	-->
+		
 		
 		<record forcecreate="1" id="seq_pur_inv" model="ir.sequence.type">	
 			<field name="name">Purchase Inv</field>
 			<field name="code">kg.purchase.invoice</field>
 		</record>
-
+		
 		<record forcecreate="1" id="pur_inv_id" model="ir.sequence">
 		  <field name="name">Purchase Inv</field>
 		  <field name="code">kg.purchase.invoice</field>
@@ -285,6 +587,9 @@
 		
 		<!-- Purchase Invoice Transaction Menu -->                
 		<menuitem action="tma_kg_purchase_invoice_action_form" id="pam_purchase_invoice" name="Purchase Invoice" parent="kg_menus.ppm_purchase_invoice_menu" sequence="1"/>
-
+		
+		<!-- Purchase Invoice Transaction Menu -->                
+		<menuitem action="tma_ac_purchase_invoice_action_form" id="tam_ac_purchase_invoice" name="Purchase Invoice" parent="kg_customer_advance.mpm_accounts_advance" sequence="5"/>
+		
 </data>
 	</openerp>

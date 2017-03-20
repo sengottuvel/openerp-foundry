@@ -87,8 +87,8 @@
 									<field name="moc_const_id"/>
 									<field name="qty" sum="qty"/>
 									<field name="per_pump_prime_cost" sum="per_pump_prime_cost"/>
-									<field name="prime_cost" sum="prime_cost"/>
 									<field name="additional_cost"/>
+									<field name="prime_cost" sum="prime_cost"/>
 									<field name="sam_ratio"/>
 									<field name="sam_ratio_tot" string="Works Value"/>
 									<field name="dealer_discount"/>
@@ -134,8 +134,8 @@
 									<field name="moc_id"/>
 									<field name="moc_changed_flag" readonly="1"/>
 									<field name="qty" sum="qty"/>
-									<field name="prime_cost" sum="prime_cost"/>
 									<field name="additional_cost"/>
+									<field name="prime_cost" sum="prime_cost"/>
 									<field name="sam_ratio"/>
 									<field name="sam_ratio_tot" string="Works Value"/>
 									<field name="dealer_discount"/>
@@ -181,8 +181,8 @@
 									<field name="moc_changed_flag" readonly="1"/>
 									<field name="qty" sum="qty"/>
 									<field name="per_access_prime_cost" sum="per_access_prime_cost" readonly="1"/>
-									<field name="prime_cost" sum="prime_cost" readonly="1"/>
 									<field name="additional_cost"/>
+									<field name="prime_cost" sum="prime_cost" readonly="1"/>
 									<field name="sam_ratio"/>
 									<field name="sam_ratio_tot" string="Works Value"/>
 									<field name="dealer_discount"/>

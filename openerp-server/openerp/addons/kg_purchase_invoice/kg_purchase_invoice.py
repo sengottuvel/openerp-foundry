@@ -60,8 +60,7 @@ class kg_purchase_invoice(osv.osv):
 				'discount' : 0.0,
 				'other_charge': 0.0,
 				'advance_adjusted_amt': 0.0,
-				'credit_amt': 0.0,
-				'bal_amt': 0.0,
+				'debit_amt': 0.0,
 			}
 			val = val1 = val3 = line_total = 0.0
 			cur = order.supplier_id.property_product_pricelist_purchase.currency_id
@@ -73,10 +72,10 @@ class kg_purchase_invoice(osv.osv):
 				line_total += line.rec_qty * line.price_unit
 				val += self._amount_line_tax(cr, uid, line, context=context)
 				val3 += tot_discount
-			if order.credit_note_ids:
-				credit_amt = (round(sum(map(lambda c:c.credit_amt,order.credit_note_ids))))
+			if order.debit_note_ids:
+				debit_amt = (round(sum(map(lambda c:c.debit_amt,order.debit_note_ids))))
 			else:
-				credit_amt = 0.00
+				debit_amt = 0.00
 				
 			if order.expense_line_ids:
 				other_charges = (round(sum(map(lambda c:c.price_subtotal,order.expense_line_ids))))
@@ -88,10 +87,11 @@ class kg_purchase_invoice(osv.osv):
 				
 			res[order.id]['other_charge'] = other_charges
 			res[order.id]['advance_adjusted_amt'] = advance_net_amt
-			res[order.id]['credit_amt'] = credit_amt
+			res[order.id]['debit_amt'] = debit_amt
 			res[order.id]['amount_tax'] = (round(val,0))
 			res[order.id]['amount_untaxed'] = (round(line_total,0))
-			res[order.id]['amount_total'] = ((round(val1 + res[order.id]['other_charge'],0)) - credit_amt + order.round_off_amt) - advance_net_amt
+			res[order.id]['amount_total'] = ((round(val1 + res[order.id]['other_charge'],0)) - debit_amt + order.round_off_amt) - advance_net_amt
+			res[order.id]['bal_amt'] = ((round(val1 + res[order.id]['other_charge'],0)) - debit_amt + order.round_off_amt) - advance_net_amt
 			res[order.id]['discount'] = val3
 			
 		return res
@@ -105,19 +105,22 @@ class kg_purchase_invoice(osv.osv):
 	_name = "kg.purchase.invoice"
 	_order = "invoice_date desc"
 	_description = "Purchase Invoice"
-	_columns = {
 	
+	_columns = {
+		
+		## Basic Info
+		
 		'name':fields.char('Invoice No',readonly=True),
 		'invoice_date':fields.date('Invoice Date',readonly=True,required=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'type': fields.selection([('from_po', 'Product'), ('from_so', 'Service'),('from_gp','Gate Pass')], 'Product/Service',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'purpose': fields.selection([('consu', 'Consumables'), ('project', 'Project'), ('asset', 'Asset')], 'Purpose',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'grn_type': fields.selection([('from_po_grn', 'PO/SO GRN'), ('from_general_grn', 'General GRN'), ('others', 'Others')], 'GRN Type',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
-		'state': fields.selection([('draft','Draft'),('confirmed','Waiting for approval'),('approved','Approved'),
+		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('ac_ack_pending','AC ACK Pending'),('approved','AC Accepted'),
 				('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True,track_visibility='onchange',select=True),	
 		'his_state':fields.selection([('pending', 'Pending'), ('paid', 'Paid')],'Payment Status'),
 		'payment_date':fields.date('Payment Date', readonly=True),
 		
-		#Entry Info
+		## Entry Info
 		
 		'active': fields.boolean('Active'),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),	
@@ -163,13 +166,15 @@ class kg_purchase_invoice(osv.osv):
 			 
 		'labour_ids': fields.many2many('kg.service.invoice', 'service_invoice_grn_ids', 'invoice_id','service_id', 'GRN', delete=False,domain="[('state','=','approved'),'&',('partner_id','=',supplier_id)]"),
 		
-		### LINE IDS #####
+		## Child Tables Declaration
 		
 		'line_ids':fields.one2many('ch.invoice.line','header_id','Purchase Line Id',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		
 		'expense_line_ids':fields.one2many('ch.expense.details','header_id','Expense Line Id',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 			
 		'credit_note_ids':fields.one2many('ch.kg.credit.note','header_id','Credit Note',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
+		
+		#~ 'debit_note_ids':fields.one2many('ch.kg.debit.note','header_id','Debit Note',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		
 		'history_line_ids':fields.one2many('kg.purchase.payment.history','header_id','History_Line_ids'),
 		
@@ -183,7 +188,10 @@ class kg_purchase_invoice(osv.osv):
 		'advance_adjusted_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Advanced Adjustment Amount(-)',
 			 multi="sums", help="The amount with tax", track_visibility='always',store=True),	
 			 
-		'credit_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Credit Note Amount',
+		#~ 'credit_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Credit Note Amount',
+			 #~ multi="sums", help="The amount with tax", track_visibility='always',store=True),	
+		
+		'debit_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Debit Note Amount',
 			 multi="sums", help="The amount with tax", track_visibility='always',store=True),	
 		
 		'discount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Discount(-)',
@@ -206,7 +214,7 @@ class kg_purchase_invoice(osv.osv):
 				
 		'round_off_amt': fields.float('Round off(+/-)',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'net_amt': fields.float('Net Amount',readonly=True),
-		'bal_amt': fields.float('Balance Amount',readonly=True),
+		'bal_amt': fields.float('Payable Amount',readonly=True),
 		
 		'pricelist_id':fields.many2one('product.pricelist', 'Pricelist'),
 		'currency_id': fields.many2one('res.currency', 'Currency', readonly=True),
@@ -217,7 +225,6 @@ class kg_purchase_invoice(osv.osv):
 		
 		### Other fields ###
 		'specification': fields.text('Specification',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
-		#~ 'dep_project':fields.many2one('kg.project.master','Dept/Project Name',readonly=True,states={'draft': [('readonly', False)],'confirmed':[('readonly',False)]}),	
 		'po_so_name': fields.char('PO/SO NO',readonly=True,states={'draft': [('readonly', False)],'confirmed':[('readonly',False)]}),
 		'po_so_date': fields.char('PO/SO Date'),
 		'product_id': fields.related('line_ids','product_id', type='many2one', relation='product.product', string='Product'),
@@ -237,7 +244,6 @@ class kg_purchase_invoice(osv.osv):
 		'name': '',
 		'active': True,
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_purchase_invoice', context=c),
-		'bal_amt': 0,
 		
 	}
 	
@@ -257,7 +263,7 @@ class kg_purchase_invoice(osv.osv):
 		
 	def paid(self,cr,uid,ids,context=None):
 		mast_dt = self.browse(cr,uid,ids[0])
-		cr.execute(""" select sum(amt) as amtt from kg_purchase_payment_history as a  where a.header_id = %d """ %(mast_dt))
+		cr.execute(""" select sum(amt) as amtt from kg_purchase_payment_history as a where a.header_id = %d """ %(mast_dt))
 		rr = cr.fetchall();	
 		if rr:
 			for t in rr:
@@ -265,25 +271,23 @@ class kg_purchase_invoice(osv.osv):
 				today_date = today.strftime('%Y-%m-%d')
 				calll = mast_dtt.amount_total - t[0]
 				if calll == 0:
-					cr.execute(""" select id from kg_purchase_payment_history as a  where a.header_id = %d """ %(mast_dt))
+					cr.execute(""" select id from kg_purchase_payment_history as a where a.header_id = %d """ %(mast_dt))
 					rrr = cr.fetchall();
 					ran=tuple(rrr)
 					for tt in rrr:
 						cr.execute("""update kg_purchase_payment_history set pay_flag = 't' where id = %d """%(tt[0]))
-					
 					self.write(cr, uid, ids[0],{'his_state':'paid','payment_date':today_date,'bal_amt':calll})
 					return False
 				else:
-					cr.execute(""" select id from kg_purchase_payment_history as a  where a.header_id = %d """ %(mast_dt))
+					cr.execute(""" select id from kg_purchase_payment_history as a where a.header_id = %d """ %(mast_dt))
 					rrr = cr.fetchall();
 					ran=tuple(rrr)
-					
 					for tt in rrr:
 						cr.execute("""update kg_purchase_payment_history set pay_flag = 't' where id = %d """%(tt[0]))
-			
+					
 					self.write(cr,uid,ids,{'his_state':'pending','bal_amt':calll})
 					return True	
-			
+		
 		return True
 	
 	def _future_date_check(self,cr,uid,ids,contaxt=None):
@@ -400,6 +404,7 @@ class kg_purchase_invoice(osv.osv):
 								'header_id': invoice_rec.id,
 								'order_no': po_so_name,
 								'grn_no': grn_line_record.po_grn_id.name or '',
+								'grn_date': grn_line_record.po_grn_id.grn_date,
 								'po_id': grn_line_record.po_id.id or False,
 								'so_id': grn_line_record.so_id.id or False,
 								'gp_id': grn_line_record.gp_id.id or False,
@@ -408,18 +413,19 @@ class kg_purchase_invoice(osv.osv):
 								'gp_line_id': grn_line_record.gp_line_id.id or False,
 								'po_grn_id': grn_line_record.po_grn_id.id or False,
 								'po_grn_line_id': grn_line_record.id or False,
-							
+								
 								'dc_no': grn_record.dc_no,
 								'product_id': grn_line_record.product_id.id,
-								'qty':po_so_qty,
-								'rec_qty':grn_line_record.po_grn_qty,
+								'account_id': grn_line_record.product_id.categ_id.account_id.id,
+								'qty': po_so_qty,
+								'rec_qty': grn_line_record.po_grn_qty,
 								'uom_id': grn_line_record.uom_id.id,
 								'price_unit': grn_line_record.price_unit,
 								'total_amt': grn_line_record.po_grn_qty * grn_line_record.price_unit,
 								'discount': (grn_line_record.kg_discount / grn_line_record.po_qty) * grn_line_record.po_grn_qty,
 								'kg_discount_per': grn_line_record.kg_discount_per,
 								'invoice_tax_ids': [(6, 0, [x.id for x in grn_line_record.grn_tax_ids])],
-							})						
+							})
 				self.write(cr, uid, ids[0], {'po_so_name' :po_name ,'po_so_date':po_date})			
 			if invoice_rec.grn_type == 'from_general_grn':
 				self.write(cr, uid, ids[0], {'load_items_flag' : True})
@@ -439,6 +445,7 @@ class kg_purchase_invoice(osv.osv):
 								'header_id': invoice_rec.id,
 								'order_no': '',
 								'grn_no': grn_line_record.grn_id.name or '',
+								'grn_date': grn_line_record.grn_id.grn_date,
 								'general_grn_id': grn_line_record.grn_id.id or False,
 								'general_grn_line_id': grn_line_record.id or False,
 								'dc_no': grn_record.dc_no,
@@ -532,15 +539,15 @@ class kg_purchase_invoice(osv.osv):
 	def entry_confirm(self, cr, uid, ids,context=None):
 		invoice_rec = self.browse(cr,uid,ids[0])
 		if invoice_rec.state == 'draft':
-		### Credit Note Checking ###
-			credit_amt = 0
+		### Debit Note Checking ###
+			debit_amt = 0
 
-			if invoice_rec.credit_note_ids:
-				for credit in invoice_rec.credit_note_ids:
-					credit_amt += credit.credit_amt
-					if credit_amt > invoice_rec.amount_total:
+			if invoice_rec.debit_note_ids:
+				for debit in invoice_rec.debit_note_ids:
+					debit_amt += debit.debit_amt
+					if debit_amt > invoice_rec.amount_total:
 						raise osv.except_osv(_('Warning!'),
-							_('Credit Note amount should not be greater than Invoice amount'))
+							_('Debit Note amount should not be greater than Invoice amount'))
 
 			### Checking Advance date ###
 			
@@ -588,26 +595,34 @@ class kg_purchase_invoice(osv.osv):
 				inv_no = seq_name[0]
 			elif invoice_rec.name:
 				inv_no = invoice_rec.name
-			self.write(cr,uid,ids[0],{'state': 'confirmed',
+			self.write(cr,uid,ids[0],{
+									  'bal_amt': invoice_rec.amount_total,
+									  'state':'confirmed',
 									  'conf_user_id': uid,
 									  'confirmed_date': time.strftime('%Y-%m-%d %H:%M:%S'),
 									  'name': inv_no,
 									   })
 		return True
-		
+	
 	def entry_approve(self, cr, uid, ids,context=None):
 		invoice_rec = self.browse(cr,uid,ids[0])
 		if invoice_rec.state == 'confirmed':
-			credit_obj = self.pool.get('kg.credit.note')
+			self.write(cr,uid,ids[0],{'bal_amt': invoice_rec.amount_total,'state':'ac_ack_pending',})
+		return True
+	
+	def entry_ack_approve(self, cr, uid, ids,context=None):
+		invoice_rec = self.browse(cr,uid,ids[0])
+		if invoice_rec.state == 'ac_ack_pending':
+			debit_obj = self.pool.get('kg.debit.note')
 			
-			credit_amt = 0
+			debit_amt = 0
 			
-			if invoice_rec.credit_note_ids:
-				for credit in invoice_rec.credit_note_ids:
-					credit_amt += credit.credit_amt
-					if credit_amt > invoice_rec.amount_total:
+			if invoice_rec.debit_note_ids:
+				for debit in invoice_rec.debit_note_ids:
+					debit_amt += debit.debit_amt
+					if debit_amt > invoice_rec.amount_total:
 						raise osv.except_osv(_('Warning!'),
-							_('Credit Note amount should not be greater than Invoice amount'))
+							_('Debit Note amount should not be greater than Invoice amount'))
 			
 			if invoice_rec.grn_type == 'from_po_grn':
 				cr.execute(""" select grn_id from purchase_invoice_grn_ids where invoice_id = %s """ %(invoice_rec.id))
@@ -665,6 +680,7 @@ class kg_purchase_invoice(osv.osv):
 					_('Adjust amount should not be greater than total amount'))
 			
 			self.write(cr,uid,ids[0],{'state': 'approved',
+									  'bal_amt': invoice_rec.amount_total,
 									  'app_user_id': uid,
 									  'approved_date': time.strftime('%Y-%m-%d %H:%M:%S'),
 									   })	
@@ -701,12 +717,16 @@ class kg_purchase_invoice(osv.osv):
 			if not rec.reject_remark:
 				raise osv.except_osv(_('Remarks Needed !!'),
 					_('Enter Remark in Remarks ....'))
-			self.write(cr, uid,ids,{'state' : 'draft',
-									'rej_user_id': uid,
-									'reject_date': time.strftime("%Y-%m-%d %H:%M:%S"),
-									})
+		if rec.state == 'ac_ack_pending':
+			if not rec.reject_remark:
+				raise osv.except_osv(_('Remarks Needed !!'),
+					_('Enter Remark in Remarks ....'))
+		self.write(cr,uid,ids,{'state': 'draft',
+							   'rej_user_id': uid,
+							   'reject_date': time.strftime("%Y-%m-%d %H:%M:%S"),
+								})
 		return True
-				
+	
 	def unlink(self,cr,uid,ids,context=None):
 		unlink_ids = []		
 		for rec in self.browse(cr,uid,ids):	
@@ -716,7 +736,7 @@ class kg_purchase_invoice(osv.osv):
 			else:
 				unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
-		
+	
 kg_purchase_invoice()
 
 
@@ -759,11 +779,12 @@ class ch_invoice_line(osv.osv):
 			cur = line.header_id.supplier_id.property_product_pricelist_purchase.currency_id
 			res[line.id] = cur_obj.round(cr, uid, cur, taxes['total_included'])
 		return res  
-
+	
 	_name = "ch.invoice.line"
 	_description = "Purchase Invoice Line"
-	_columns = {
 	
+	_columns = {
+		
 		'po_grn_id' : fields.many2one('kg.po.grn', 'GRN NO.'),	
 		'po_grn_line_id':fields.many2one('po.grn.line','PO GRN Entry Line'),
 		
@@ -773,9 +794,12 @@ class ch_invoice_line(osv.osv):
 		'soi_id' : fields.many2one('kg.service.invoice', 'Service Invoice No.'),		
 		'soi_line_id' : fields.many2one('kg.service.invoice.line','Service Order Line'),
 		
+		'account_id' : fields.many2one('account.account','Ledger Name'),
+		
 		'dc_no' : fields.char('VENDOR DC NO.'),
 		'name' : fields.char('invoice no'),
 		'grn_no' : fields.char('GRN No'),
+		'grn_date' : fields.char('GRN Date'),
 		'order_no' : fields.char('Order NO.'),
 		'po_id' : fields.many2one('purchase.order','Purchase Order'),
 		'so_id' : fields.many2one('kg.service.order','Service Order'),
@@ -871,7 +895,7 @@ class ch_kg_credit_note(osv.osv):
 	_description = 'This module is about the details of credit note'
 	
 	_columns = {
-	
+		
 		'header_id':fields.many2one('kg.purchase.invoice','Header_id'),
 		'credit_id':fields.many2one('kg.credit.note','Credit Note No'),
 		'credit_date':fields.date('Credit Note Date'),
@@ -897,6 +921,8 @@ class ch_kg_credit_note(osv.osv):
 				}}
 	
 ch_kg_credit_note()
+
+
 
 
 class ch_expense_details(osv.osv):

@@ -168,6 +168,57 @@
 		
 		<menuitem id="tam_debit_note" name="Debit Note" parent="kg_menus.ppm_purchase_invoice_menu" sequence="2" action="tma_debit_note" />
 			
-		<!--menu item ends-->	
+		<!--menu item ends-->
+		
+		<!--	Purchase Invoice Inherit start	-->
+		
+		<record model="ir.ui.view" id="t_form_v_kg_purchase_invoice_view_inherit">
+			<field name="name">kg.purchase.invoice.inherit</field>
+			<field name="model">kg.purchase.invoice</field>
+			<field name="inherit_id" ref="kg_purchase_invoice.t_form_v_kg_purchase_invoice_view"/>
+			<field name="arch" type="xml">
+				<xpath expr = "//page[@string='Additional charges']" position="before" >
+					<page string="Debit Note">
+						<field name="debit_note_ids" nolabel="1">
+						<tree editable="bottom">
+							<field name="debit_id" required="1" domain = "[('supplier_id','=',parent.supplier_id),('state','=','approved'),('supplier_invoice_no','=',parent.sup_invoice_no)]" on_change="onchange_debit_id(debit_id)"/>
+							<field name="debit_date" readonly="1"/>
+							<field name="supplier_invoice_no" readonly="1"/>
+							<field name="supplier_invoice_date" readonly="1"/>
+							<field name="debit_amt"  readonly="1"/>
+						</tree>
+						</field>
+					</page>
+				</xpath>
+			</field>
+		</record>
+		<!--	Purchase Invoice Inherit end	-->
+		
+		<!--	AC Purchase Invoice Inherit start	-->
+		
+		<record model="ir.ui.view" id="t_form_v_ac_purchase_invoice_view_inherit">
+			<field name="name">ac.purchase.invoice.inherit</field>
+			<field name="model">kg.purchase.invoice</field>
+			<field name="inherit_id" ref="kg_purchase_invoice.t_form_v_ac_purchase_invoice_view"/>
+			<field name="arch" type="xml">
+				<xpath expr = "//notebook[@string='Invoice Details']" position="after">
+					<notebook>
+						<page string="Debit Note">
+							<field name="debit_note_ids" nolabel="1" >
+							<tree editable="bottom">
+								<field name="debit_id" required="1" domain = "[('supplier_id','=',parent.supplier_id),('state','=','approved'),('supplier_invoice_no','=',parent.sup_invoice_no)]" on_change="onchange_debit_id(debit_id)"/>
+								<field name="debit_date" readonly="1"/>
+								<field name="supplier_invoice_no" readonly="1"/>
+								<field name="supplier_invoice_date" readonly="1"/>
+								<field name="debit_amt"  readonly="1"/>
+							</tree>
+							</field>
+						</page>
+					</notebook>
+				</xpath>
+			</field>
+		</record>
+		<!--	AC Purchase Invoice Inherit end	-->
+		
 	</data>
 </openerp>
