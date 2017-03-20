@@ -189,7 +189,7 @@
         <!-- Audit Log Xml Data End-->
 		
 		<!-- Menu Name Start here --> 
-				<menuitem action="mma_kg_bank_reconcile" name="Bank Reconcile" id="mam_kg_bank_reconcile" parent="kg_bank_statement.mam_kg_bank_state_brs" sequence="1"/>
+				<menuitem action="mma_kg_bank_reconcile" name="Bank Reconcile" id="mam_kg_bank_reconcile" parent="kg_bank_statement.tam_kg_bank_state_brs" sequence="1"/>
 		<!-- Menu Name End here --> 
 
 	</data>
