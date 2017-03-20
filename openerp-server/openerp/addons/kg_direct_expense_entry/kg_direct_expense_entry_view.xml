@@ -105,7 +105,7 @@
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" 
 								toolbar="True" string="Direct Expense Entry">
 					<field name='division_id'/>
-					<field name='name'/>
+					<field name='name' string="Doc No"/>
 					<field name='expense_date'/>
 					<field name='invoice_no'/>
 					<field name='invoice_date'/>
