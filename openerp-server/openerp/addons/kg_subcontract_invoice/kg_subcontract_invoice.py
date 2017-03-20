@@ -8,7 +8,10 @@ from datetime import datetime
 dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 
 
-
+	
+	
+	
+	
 ORDER_PRIORITY = [
    ('1','MS NC'),
    ('2','NC'),
@@ -27,13 +30,57 @@ ORDER_CATEGORY = [
    ('project','Project')
 ]
 
+	
+
+
 class kg_subcontract_invoice(osv.osv):
 
 	_name = "kg.subcontract.invoice"
 	_description = "Subcontract Invoice"
 	_order = "entry_date desc"
 	
-	
+	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
+		res = {}
+		cur_obj=self.pool.get('res.currency')
+		
+		for order in self.browse(cr, uid, ids, context=context):
+			
+			res[order.id] = {
+				'amount_untaxed': 0.0,
+				'total_discount': 0.0,
+				'amount_tax': 0.0,
+				'total_amt' : 0.0,
+				'amount_total':0.0,
+				'payable_amt':0.0,
+			}
+			tax_amt = discount_value = 0.00			
+			if order.discount > 0.00:
+				amt_to_per = (order.discount / (order.invoice_amt or 1.0 )) * 100
+				kg_discount_per = order.discount_per
+				tot_discount_per = amt_to_per
+			else:
+				tot_discount_per = order.discount_per
+			val = 0.00 
+			print"tot_discount_pertot_discount_per",tot_discount_per
+			for c in self.pool.get('account.tax').compute_all(cr, uid, order.tax_id,
+				order.invoice_amt * (1-(tot_discount_per or 0.0)/100.0), 1, 1,
+				 order.contractor_id)['taxes']:
+				val += c.get('amount', 0.0)
+				print"valvalval",val
+				tax_amt = val	
+			
+			if order.discount_per > 0.00:					
+				discount_value = (order.invoice_amt /100.00) * order.discount_per	
+			else:
+				discount_value = order.discount
+			
+			res[order.id]['amount_untaxed'] = order.invoice_amt - tax_amt
+			res[order.id]['total_discount'] = discount_value 
+			res[order.id]['amount_tax'] = tax_amt
+			res[order.id]['total_amt'] = order.invoice_amt + tax_amt
+			res[order.id]['amount_total'] = (order.invoice_amt + tax_amt + order.round_off_amt) - discount_value 
+			res[order.id]['payable_amt'] = (order.invoice_amt + tax_amt + order.round_off_amt) - discount_value 	
+		return res	
 	_columns = {
 	
 		## Version 0.1
@@ -43,7 +90,7 @@ class kg_subcontract_invoice(osv.osv):
 		'name': fields.char('Invoice No', size=24,select=True,readonly=True),
 		'entry_date': fields.date('Invoice Date',required=True),		
 		'note': fields.text('Notes'),
-		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),
+		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled'),('approved','AC ACK Pending'),('done','AC ACK Done')],'Status', readonly=True),
 		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode', readonly=True),
 		'flag_sms': fields.boolean('SMS Notification'),
 		'flag_email': fields.boolean('Email Notification'),
@@ -57,25 +104,52 @@ class kg_subcontract_invoice(osv.osv):
 		'user_id': fields.many2one('res.users', 'Created By', readonly=True),		
 		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
 		'confirm_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),		
-		'ap_rej_date': fields.datetime('Approved/Reject Date', readonly=True),
-		'ap_rej_user_id': fields.many2one('res.users', 'Approved/Reject By', readonly=True),	
+		'ap_rej_date': fields.datetime('Approved Date', readonly=True),
+		'done_date': fields.datetime('Done Date', readonly=True),
+		'done_user_id': fields.many2one('res.users', 'Done By', readonly=True),	
+		'ap_rej_user_id': fields.many2one('res.users', 'Approved By', readonly=True),	
 		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
 		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
-		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),			
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),	
+		
+		'cancel_remark': fields.text('Cancel'),			
+		'reject_remark': fields.text('Reject'),			
 		
 		## Module Requirement Info	
 		
-		'contractor_id': fields.many2one('res.partner','Subcontractor',required=True),
-		'inward_id': fields.many2one('kg.subcontract.inward','Inward No.',domain="[('contractor_id','=',contractor_id)]",required=True),
+		'contractor_id': fields.many2one('res.partner','Subcontractor',required=True,domain="[('contractor','=','t')]"),		
 		'phone': fields.char('Phone',size=64),
 		'contact_person': fields.char('Contact Person', size=128),
 				
 		'inward_subcontract_line_ids': fields.many2many('ch.subcontract.inward.line','m2m_invoice_details' , 'order_id', 'sc_id', 'SC Items',
-			domain="[('state','in',('pending','partial')),('contractor_id','=',contractor_id),('header_id','=',inward_id)]"),	 			
+			domain="[('state','in',('pending','partial')),('contractor_id','=',contractor_id)]"),	 			
 		
-		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),
+		
 		'flag_invoice': fields.boolean('Flag Invoice'),	
+		
+		## Calculation process Start now 
+		
+		'con_invoice_no': fields.char('Contractor Invoice No', size=128,required=True),
+		'invoice_date': fields.date('Invoice Date',required=True),
+		'due_date': fields.date('Due Date',required=True),
+		'invoice_amt': fields.float('Invoice Amount',required=True),
+		'invoice_copy':fields.binary('Invoice Copy'),
+		'tax_id': fields.many2many('account.tax', 'subcontract_invoice_taxes', 'invoice_id', 'tax_id', 'Taxes'),
+		'discount': fields.float('Discount Amount'),	
+		'discount_per': fields.float('Discount(%)'),
+		'discount_flag': fields.boolean('Discount Flag'),
+		'discount_per_flag': fields.boolean('Discount Amount Flag'),
+		
+		# Invoice Total and Tax amount calculation	
+		'amount_untaxed': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Untaxed Amount',store=True,multi="sums",help="Untaxed Amount"),
+		'total_discount': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Discount Amount(-)',store=True,multi="sums",help="Discount Amount"),
+		'amount_tax': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Tax Amount',store=True,multi="sums",help="Tax Amount"),
+		'total_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Amount',store=True,multi="sums",help="Total Amount"),
+		'amount_total': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',store=True,multi="sums",help="Net Amount"),
+		'payable_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Payable Amount',store=True,multi="sums",help="Payable Amount"),
+		
+		'round_off_amt': fields.float('Round off(+/-)'),
 				
 		
 		## Child Tables Declaration 
@@ -96,9 +170,57 @@ class kg_subcontract_invoice(osv.osv):
 		'entry_mode': 'manual',		
 		'flag_sms': False,		
 		'flag_email': False,		
-		'flag_spl_approve': False,		
+		'flag_spl_approve': False,	
+		'discount_flag': False,
+		'discount_per_flag': False,	
 		
 	}
+	
+	
+	def onchange_invoice_amt(self,cr,uid,ids,invoice_amt,discount_per,context = None):
+		discount = 0.00
+		if invoice_amt >0.00 and discount_per > 0.00:
+			discount = (invoice_amt * discount_per) / 100.0
+		return {'value':{'discount':(round(discount,2))}}
+		
+	
+	
+	def onchange_discount_value(self, cr, uid, ids, invoice_amt,discount_per):		
+		discount_value =  invoice_amt * discount_per / 100.00
+		if discount_value:
+			return {'value': {'discount_flag':True }}
+		else:
+			return {'value': {'discount_flag':False }}
+			
+	def onchange_discount_percent(self,cr,uid,ids,invoice_amt,discount):		
+		if discount:
+			discount = discount + 0.00
+			amt_to_per = (discount / (invoice_amt or 1.0 )) * 100.00
+			return {'value': {'discount_per_flag':True}}
+		else:
+			return {'value': {'discount_per_flag':False}}	
+	
+	
+	def button_dummy(self, cr, uid, ids, context=None):
+		return True
+	
+		
+	#~ def onchange_discount_percent(self,cr,uid,ids,invoice_amt,discount,context = None):
+		#~ discount_percent = 0.00
+		#~ discount_per_flag = False
+		#~ if discount > 0.00:
+			#~ discount_percent = (100.00/invoice_amt)*(round(discount,2))
+			#~ discount_per_flag = True
+		#~ return {'value':{'discount_per_flag':discount_per_flag}}
+		#~ 
+	#~ def onchange_discount_value(self,cr,uid,ids,invoice_amt,discount_per,context = None):
+		#~ discount_value = 0.00
+		#~ discount_flag = False
+		#~ if discount_per > 0.00:
+			#~ discount_value = (invoice_amt /100.00)*discount_per
+			#~ discount_flag = True
+		#~ return {'value':{'discount_flag':discount_flag}}
+	#~ 
 	
 	def _future_entry_date_check(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -212,8 +334,43 @@ class kg_subcontract_invoice(osv.osv):
 			else:
 				sc_invoice_name = entry.name		
 											
-			self.write(cr, uid, ids, {'state': 'confirmed','name':sc_invoice_name})								
+			self.write(cr, uid, ids, {'state': 'confirmed','name':sc_invoice_name,'confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})								
 								
+		return True
+		
+	def entry_cancel(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.cancel_remark:
+			self.write(cr, uid, ids, {'state': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		else:
+			raise osv.except_osv(_('Cancel remark is must !!'),
+				_('Enter the remarks in Cancel remarks field !!'))
+		return True
+		
+	def entry_reject(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'approved':
+			if rec.reject_remark:
+				self.write(cr, uid, ids, {'state': 'confirmed','update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			else:
+				raise osv.except_osv(_('Reject remark is must !!'),
+					_('Enter the remarks in Reject remarks field !!'))
+			return True
+		
+	def entry_approved(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'confirmed':
+			self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		else:
+			pass		
+		return True
+		
+	def entry_accept(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if rec.state == 'approved':			
+			self.write(cr, uid, ids, {'state': 'done','done_user_id': uid, 'done_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		else:
+			pass
 		return True
 		
 		
