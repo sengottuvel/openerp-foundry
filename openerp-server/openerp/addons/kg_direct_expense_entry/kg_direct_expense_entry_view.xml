@@ -17,7 +17,7 @@
 					</header>				
 						<group>
 							<group>								
-								<field name='name' readonly="1"/>
+								<field name='name' readonly="1" string="Doc No"/>
 								<field name='invoice_no' required ="True" attrs="{'readonly': [('state','in',('approved','reject'))]}"/>
 								<field name='supplier_id' on_change="onchange_supplier(supplier_id)" required ="True"  attrs="{'readonly': [('state','in',('approved','reject'))]}" />
 								<field name='payment_type' readonly="0" attrs="{'readonly': [('state','in',('approved','reject'))]}" required="1"/>	
