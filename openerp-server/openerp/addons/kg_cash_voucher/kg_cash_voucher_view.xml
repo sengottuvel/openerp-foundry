@@ -28,7 +28,7 @@
 							</group>
 							<group>
 								<field name="voucher_date" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1"/>
-								<field name="acc_journal_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'invisible':[('pay_mode','!=','from_ac')],'required':[('pay_mode','=','from_ac')]}"/>	
+								<field name="acc_journal_id" domain="[('type','=','cash')]" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'invisible':[('pay_mode','!=','from_ac')],'required':[('pay_mode','=','from_ac')]}"/>	
 								<field name="employee_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])] ,'invisible':[('pay_mode','!=','from_emp')],'required':[('pay_mode','=','from_emp')]}" on_change="onchange_emp(employee_id,balc_amt)"/>
 								<field name="balc_amt" readonly="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])] ,'invisible':[('pay_mode','!=','from_emp')],'required':[('pay_mode','=','from_emp')]}" />
 								<field name="paid_to" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1" class="aplhanum_expect"/>
@@ -84,9 +84,9 @@
 								toolbar="True" string="Cash Voucher">				
 					<field name="name"/>
 					<field name="voucher_date"/>
-					<field name="division_id"/>
-					<field name="entry_mode"/>
+					<field name="division_id"/>					
 					<field name="state"/>
+					<field name="entry_mode"/>
 				</tree>
 			</field>
 		</record>

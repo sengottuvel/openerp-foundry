@@ -513,6 +513,8 @@ class account_account(osv.osv):
 		'flag_service': fields.boolean('Is Service Tax Applicable'),
 		'flag_ed': fields.boolean('Is ED Applicable'),		
 		'flag_gst': fields.boolean('Is GST Applicable'),	
+		'flag_cash': fields.boolean('Is Cash'),	
+		'flag_bank': fields.boolean('Is Bank'),	
 		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode', readonly=True),
 		'division_id': fields.many2one('kg.division.master','Division'),		
 				   
@@ -1037,6 +1039,7 @@ class account_fiscalyear(osv.osv):
 	
 	def entry_confirm(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])	
+		self.create_period(cr, uid, ids, context, 1)
 		if not rec.period_ids:
 			raise osv.except_osv(_('Warning!'),
 								_('System not allow to without line values !!'))
@@ -1560,6 +1563,7 @@ class account_move(osv.osv):
 		'post_user_id': fields.many2one('res.users', 'Posted By', readonly=True),		
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
+		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode', readonly=True),
 		
 		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
 		'confirm_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
@@ -1590,6 +1594,7 @@ class account_move(osv.osv):
 		#~ 'date': lambda * a: time.strftime('%Y-%m-%d'),
 		'company_id': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).company_id.id,
 		'date': _get_fiscalyear,
+		'entry_mode': 'manual',
 		
 	}
 
@@ -1603,10 +1608,22 @@ class account_move(osv.osv):
 				if len(move_ids) > 1:
 					return False
 		return True
-
+		
+	def _check_deb_crd(self,cr,uid,ids,context=None):
+		for move in self.browse(cr, uid, ids, context=context):
+			for values in move.line_id:
+				if values.debit == values.credit:
+					raise osv.except_osv(_('Debit and Credit'), _('Debit and Credit values Should not be Same!!'))
+				elif values.debit and values.credit:
+					raise osv.except_osv(_('Debit and Credit'), _('Both Debit and Credit should not contain value!!'))
+		return True
+		
 	_constraints = [
 		(_check_centralisation,
 			'You cannot create more than one move per period on a centralized journal.',
+			['journal_id']),
+		(_check_deb_crd,
+			'Debit and Credit values Should not be Same',
 			['journal_id']),
 	]
 
@@ -1616,37 +1633,52 @@ class account_move(osv.osv):
 			context = {}
 		invoice = context.get('invoice', False)
 		valid_moves = self.validate(cr, uid, ids, context)
+		if rec.line_id:
+			line_led_name = [ line.account_id for line in rec.line_id ]
+			a= [line_led_name.count(i) for i in line_led_name ]
+			for j in a:
+				if j > 1:
+					raise osv.except_osv(_('Warning!'),
+								_('Duplicates are not allowed in Ledger Name!!'))
 		for line in rec.line_id:
 			if line.debit <= 0.00 and line.credit <= 0.00:
 				raise osv.except_osv(_('Debit and Credit'), _('Debit and Credit zero and negative values not allowed!!'))
-		if not valid_moves:
-			raise osv.except_osv(_('Debit and Credit'), _('Debit and Credit values Mismatch!!'))
+		if rec.trans_type != 'op':
+			if not valid_moves:
+				raise osv.except_osv(_('Debit and Credit'), _('Debit and Credit values Mismatch!!'))
+		else:
+			pass
 		obj_sequence = self.pool.get('ir.sequence')
-		for move in self.browse(cr, uid, valid_moves, context=context):
-			
-			if move.name =='/':
-				new_name = False
-				journal = move.journal_id
+		#~ for move in self.browse(cr, uid, valid_moves, context=context):
+			#~ 
+			#~ if move.name =='/':
+				#~ new_name = False
+				#~ journal = move.journal_id
+#~ 
+				#~ if invoice and invoice.internal_number:
+					#~ new_name = invoice.internal_number
+				#~ else:
+					#~ if journal.sequence_id:
+						#~ c = {'fiscalyear_id': move.period_id.fiscalyear_id.id}
+						#~ new_name = obj_sequence.next_by_id(cr, uid, journal.sequence_id.id, c)
+					#~ else:
+						#~ raise osv.except_osv(_('Error!'), _('Please define a sequence on the journal.'))
 
-				if invoice and invoice.internal_number:
-					new_name = invoice.internal_number
-				else:
-					if journal.sequence_id:
-						c = {'fiscalyear_id': move.period_id.fiscalyear_id.id}
-						new_name = obj_sequence.next_by_id(cr, uid, journal.sequence_id.id, c)
-					else:
-						raise osv.except_osv(_('Error!'), _('Please define a sequence on the journal.'))
+				#~ if new_name:
+					#~ self.write(cr, uid, [move.id], {'name':new_name})
 
-				if new_name:
-					self.write(cr, uid, [move.id], {'name':new_name})
-
+		#~ cr.execute('UPDATE account_move '\
+				   #~ 'SET state=%s '\
+				   #~ 'WHERE id IN %s',
+				   #~ ('posted', tuple(valid_moves),))
 		cr.execute('UPDATE account_move '\
 				   'SET state=%s '\
-				   'WHERE id IN %s',
-				   ('posted', tuple(valid_moves),))
+				   'WHERE id IN (%s)',
+				   ('posted', rec.id))
 		return True
 
 	def button_validate(self, cursor, user, ids, context=None):
+		rec = self.browse(cursor,user,ids[0])
 		for move in self.browse(cursor, user, ids, context=context):
 			# check that all accounts have the same topmost ancestor
 			top_common = None
@@ -1657,9 +1689,12 @@ class account_move(osv.osv):
 					top_account = top_account.parent_id
 				if not top_common:
 					top_common = top_account
-				elif top_account.id != top_common.id:
-					raise osv.except_osv(_('Error!'),
-										 _('You cannot validate this journal entry because account "%s" does not belong to chart of accounts "%s".') % (account.name, top_common.name))
+				#~ if move.trans_type =='gl':
+					#~ if top_account.id != top_common.id:
+						#~ raise osv.except_osv(_('Error!'),
+											 #~ _('You cannot validate this journal entry because account "%s" does not belong to chart of accounts "%s".') % (account.name, top_common.name))
+				#~ else:
+					 #~ pass
 		return self.post(cursor, user, ids, context=context)
 
 	def button_cancel(self, cr, uid, ids, context=None):
@@ -1684,8 +1719,8 @@ class account_move(osv.osv):
 			voucher_name = voucher_name[0] 
 		else:
 			voucher_name = rec.name			
-			print "voucher_namevoucher_name",voucher_name
-		vals.update({'name':voucher_name,'update_date' : time.strftime('%Y-%m-%d %H:%M:%S'),
+		print "voucher_namevoucher_name",voucher_name
+		vals.update({'update_date' : time.strftime('%Y-%m-%d %H:%M:%S'),
 					 'update_user_id':uid})
 		if context is None:
 			context = {}

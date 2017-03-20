@@ -110,6 +110,7 @@
 					<field name="clear_date"/>
 					<field name="division_id"/>
 					<field name="state"/>
+					<field name="entry_mode"/>
 				</tree>
 			</field>
 		</record>

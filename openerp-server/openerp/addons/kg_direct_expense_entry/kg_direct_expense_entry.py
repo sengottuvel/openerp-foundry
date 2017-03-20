@@ -82,6 +82,7 @@ class kg_direct_expense_entry(osv.osv):
 				'amount_total': 0.0,
 				'discount' : 0.0,
 				'other_charge': 0.0,
+				'round_off': 0.0,
 			}
 			val = val1 = val3 = line_total = 0.0
 			for line in order.line_ids:
@@ -91,10 +92,13 @@ class kg_direct_expense_entry(osv.osv):
 				line_total += line.total_amt 
 				val += self._amount_line_tax(cr, uid, line, context=context)
 				val3 += tot_discount	
-			res[order.id]['amount_tax']=(round(val,0))
-			res[order.id]['amount_untaxed']=(round(line_total,0))
-			res[order.id]['discount']=(round(val3,0))   
-			res[order.id]['amount_total']=res[order.id]['amount_untaxed'] + res[order.id]['amount_tax'] - res[order.id]['discount']
+			res[order.id]['amount_tax']=val
+			res[order.id]['amount_untaxed']=line_total
+			res[order.id]['discount']=val3
+			res[order.id]['round_off'] = order.round_off
+			print "res[order.id]['amount_untaxed']res[order.id]['amount_untaxed']res[order.id]['amount_untaxed']res[order.id]['amount_untaxed']",type(res[order.id]['amount_untaxed'])
+
+			res[order.id]['amount_total']=res[order.id]['amount_untaxed']+ res[order.id]['amount_tax'] - res[order.id]['discount'] + order.round_off or 0.00
 		return res
 	def _get_order(self, cr, uid, ids, context=None):
 		result = {}
@@ -106,7 +110,7 @@ class kg_direct_expense_entry(osv.osv):
 	
 		'name':fields.char('Name'),
 		'invoice_no':fields.char('Supplier Invoice No'),
-		'expense_date':fields.date('Date'),
+		'expense_date':fields.date('Expense Date'),
 		'invoice_date':fields.date('Supplier Invoice Date'),
 		'supplier_id':fields.many2one('res.partner','Supplier'),
 		'Supplier_add':fields.text('Supplier Address'),
@@ -139,6 +143,7 @@ class kg_direct_expense_entry(osv.osv):
 		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode', readonly=True),
 		'notes': fields.text('Notes'),
 		'division_id':fields.many2one('kg.division.master','Division'),	
+		'round_off': fields.float('Round off',size=5,readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 			
 			
 			### Entry Info ###

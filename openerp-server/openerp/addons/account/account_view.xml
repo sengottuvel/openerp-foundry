@@ -11,8 +11,8 @@
                 <header>
 					<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>					
 					<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
-                    <button name="create_period" states="draft" string="Create Monthly Periods" type="object" class="oe_highlight"/>
-                    <button name="create_period3" states="draft" string="Create 3 Months Periods" type="object" class="oe_highlight"/>                   
+                    <button name="create_period" states="draft" string="Create Monthly Periods" type="object" class="oe_highlight" invisible="1"/>
+                    <button name="create_period3" states="draft" string="Create 3 Months Periods" type="object" class="oe_highlight" invisible="1"/>                   
                     
                 </header>
                     <group>
@@ -70,6 +70,8 @@
                 <tree colors="blue:state == 'draft';red:state == 'confirmed';black:state == 'approved' " toolbar="True" string="Fiscalyear">					
                     <field name="code"/>
                     <field name="name"/>
+                    <field name="date_start"/>
+                    <field name="date_stop"/>
                     <field name="company_id" groups="base.group_multi_company"/>
                     <field name="state"/>
                 </tree>
@@ -120,7 +122,7 @@
             <field name="name">account.period.form</field>
             <field name="model">account.period</field>
             <field name="arch" type="xml">
-                <form string="Account Period" version="7.0">
+                <form string="Account Period" version="7.0" create = "false">
                     <header>
                         <button string="Close Period" name="%(account.action_account_period_close)d" type="action" class="oe_highlight" states="draft"/>
                         <button name="action_draft" states="done" string="Re-Open Period" type="object" groups="account.group_account_manager"/>
@@ -169,12 +171,13 @@
             <field name="name">account.period.tree</field>
             <field name="model">account.period</field>
             <field name="arch" type="xml">
-              <tree colors="blue:state == 'draft';gray:state == 'done' " string="Period">
-                    <field name="name"/>
-                    <field name="code"/>
-                    <field name="date_start"/>
-                    <field name="date_stop"/>
-                    <field name="special"/>
+              <tree colors="blue:state == 'draft';gray:state == 'done' " string="Period" editable="top" create = "false">
+                    <field name="name" readonly="1"/>
+                    <field name="code" readonly="1"/>
+                    <field name="fiscalyear_id" readonly="1"/>                    
+                    <field name="date_start" readonly="1"/>
+                    <field name="date_stop" readonly="1"/>
+                    <field name="special" readonly="1"/>
                     <field name="company_id" groups="base.group_multi_company"/>
                     <field name="state"/>
                 </tree>
@@ -187,6 +190,10 @@
                 <search string="Search Period">
                     <field name="name" filter_domain="['|', ('name','ilike',self), ('code','ilike',self)]" string="Period"/>
                     <filter string="To Close" name="draft" domain="[('state','=','draft')]" icon="terp-dialog-close"/>
+                    <separator/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Fiscal Year" icon="terp-personal" domain="[]" context="{'group_by':'fiscalyear_id'}"/>                        
+					</group>
                 </search>
             </field>
         </record>
@@ -237,12 +244,14 @@
                            
                             <field name="user_type" required="1" attrs="{'readonly':[('state','=','approved')]}"/>                           
                             <field name="company_id" widget="selection" groups="base.group_multi_company"/>
+                            <field name="flag_cash" attrs="{'readonly':[('state','=','approved')]}"/>
                                               
                         </group>
                         <group>
 							<field name="name" attrs="{'readonly':['|',('state','=','approved'),('entry_mode','=','auto')]}"/>
                             <field name="type" attrs="{'readonly':[('state','=','approved')]}"/>
                             <field name="entry_mode" invisible="1"/>
+                            <field name="flag_bank" attrs="{'readonly':[('state','=','approved')]}"/>
                             <field name="state"  style="width: 30%%" class="att_state_change"/>       
                             
                         </group>
@@ -261,13 +270,13 @@
                     
                      <group string="Statutory Configuration">
 							<group>
-								<field name="flag_tds"/>
-								<field name="flag_vat"/>
-								<field name="flag_service"/>
+								<field name="flag_tds" attrs="{'readonly':[('state','=','approved')]}"/>
+								<field name="flag_vat" attrs="{'readonly':[('state','=','approved')]}"/>
+								<field name="flag_service" attrs="{'readonly':[('state','=','approved')]}"/>
 							</group>
 							<group>
-								<field name="flag_ed"/>
-								<field name="flag_gst"/>
+								<field name="flag_ed" attrs="{'readonly':[('state','=','approved')]}"/>
+								<field name="flag_gst" attrs="{'readonly':[('state','=','approved')]}"/>
 							</group>
 							
 					</group>
@@ -306,8 +315,7 @@
 				<tree colors="blue:state == 'draft';red:state == 'confirmed';black:state == 'approved'" toolbar="True" string="Chart of accounts">
 						
                     <field name="code"/>
-                    <field name="name"/>
-                    <field name="entry_mode"/>
+                    <field name="name"/>                    
                     <field name="parent_id"/>
                     <field name="user_type" invisible="1"/>
                     <field name="debit"/>
@@ -317,6 +325,7 @@
                     <field name="company_id" groups="base.group_multi_company" invisible="1"/>
                     <field name="company_currency_id" invisible="1"/>
                     <field name="state"/>
+                    <field name="entry_mode"/>
                 </tree>
             </field>
         </record>
@@ -413,14 +422,14 @@
 				<tree colors="blue:state == 'draft';red:state == 'confirmed';black:state == 'approved'" toolbar="True" string="Chart of accounts">
 						
                     <field name="code"/>
-                    <field name="name"/>
-                    <field name="entry_mode"/>
+                    <field name="name"/>                    
                     <field name="parent_id"/>
                     <field name="user_type" invisible="1"/>                    
                     <field name="type" invisible="1"/>
                     <field name="company_id" groups="base.group_multi_company" invisible="1"/>
                     <field name="company_currency_id" invisible="1"/>
                     <field name="state"/>
+                    <field name="entry_mode"/>
                 </tree>
             </field>
         </record>
@@ -808,10 +817,10 @@
             <field name="arch" type="xml">
                 <tree colors="blue:state == 'draft';red:state == 'confirmed';black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'"  toolbar="True" string="Account Journal">
                     <field name="code"/>
-                    <field name="name"/>
-                    <field name="entry_mode"/>
+                    <field name="name"/>                    
                     <field name="type"/>
-                    <field name="state"/>                    
+                    <field name="state"/>  
+                    <field name="entry_mode"/>                  
                 </tree>
             </field>
         </record>
@@ -1830,9 +1839,10 @@
                     <field name="name"/>                   
                     <field name="date"/>
                     <field name="period_id"/>
-                    <field name="journal_id"/>                    
+                    <field name="journal_id" />                    
                     <field name="amount" sum="Total Amount"/>                    
                     <field name="state"/>
+                    <field name="entry_mode"/>
                 </tree>
             </field>
         </record>
@@ -1847,7 +1857,7 @@
                     <group>
                         <group>
                             <field name="name"/>
-                            <field name="journal_id"/>
+                            <field name="journal_id" domain="[('type','in',('cash','bank'))]"/>
                             <field name="narration" required = "1"/>                           
                         </group>
                         <group>                            
@@ -1861,8 +1871,8 @@
 							<field name="line_id" nolabel="1" context="{'line_id': line_id , 'journal_id': journal_id }">
 							<tree string="Journal Items Tree" editable="top">                                   
 								<field name="account_id" on_change="onchange_code(account_id)"/>								
-								<field name="debit" required = "1"/>
-								<field name="credit" required = "1"/>
+								<field name="debit" required = "1" sum="Total Debit"/>
+								<field name="credit" required = "1" sum="Total Credit"/>
 								<field name="narration" widget="char"/>                                       
 							</tree>
 							</field> 
@@ -1963,7 +1973,7 @@
 			
 			<!-- Sequence Number Setting Ends Here -->    
         
-         <menuitem action="action_move_journal_line_jo" name="General Journal" id="mam_journal_account_move" parent="mpm_accounts_master" sequence="5"/>    
+         <menuitem action="action_move_journal_line_jo" name="General Journal" id="mam_journal_account_move" parent="kg_emp_cash_issue.mpm_accounts_transaction" sequence="4"/>    
                 
         <!-- General Journal End -->
         
@@ -1981,7 +1991,7 @@
                     <group>
                         <group>
                             <field name="name"/>
-                            <field name="journal_id" string="Book" attrs="{'readonly':[('state','in',['posted'])]}"/>
+                            <field name="journal_id" string="Book" domain="[('type','in',('cash','bank'))]" attrs="{'readonly':[('state','in',['posted'])]}"/>
                             <field name="trans_type" readonly="1" invisible="1"/>
                             <field name="notes" attrs="{'readonly':[('state','in',['draft'])]}" invisible="1"/>	
                         </group>
@@ -2040,6 +2050,7 @@
                     <field name="division_id"/>
                     <field name="journal_id"/>                    
                     <field name="state"/>
+                    <field name="entry_mode"/>
                 </tree>
             </field>
         </record>
@@ -2133,7 +2144,7 @@
                     <group>
                         <group>
                             <field name="name"/>
-                            <field name="journal_id" string="Book" attrs="{'readonly':[('state','in',['posted'])]}"/>
+                            <field name="journal_id" string="Book" domain="[('type','in',('cash','bank'))]" attrs="{'readonly':[('state','in',['posted'])]}"/>
                             <field name="trans_type" readonly="1" invisible="1"/>
                             <field name="narration" required="1" attrs="{'readonly':[('state','in',['posted'])]}"/>	
                         </group>
@@ -2192,6 +2203,7 @@
                     <field name="division_id"/>
                     <field name="journal_id"/>                    
                     <field name="state"/>
+                    <field name="entry_mode"/>
                 </tree>
             </field>
         </record>

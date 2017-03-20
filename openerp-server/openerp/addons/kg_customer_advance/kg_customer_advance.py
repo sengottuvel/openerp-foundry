@@ -65,7 +65,7 @@ class kg_customer_advance(osv.osv):
 				readonly=False, states={'approved':[('readonly',True)]}),
 		
 		
-	    'advance_amt': fields.float('AC ACK Amount'),			
+	    'advance_amt': fields.float('Advance Amount'),			
 	    'received_amt': fields.float('Received Amount'),			
 	    'balance_receivable': fields.float('Balance Receivable'),			
 	    'adv_amt': fields.float('Advance Amount'),			
@@ -128,7 +128,7 @@ class kg_customer_advance(osv.osv):
 								'advance_no':adv_rec.name,
 							   'advance_date':adv_rec.entry_date,
 							   'order_no':adv_rec.order_no,
-							   'advance_amt':adv_rec.adv_amt,
+							   'advance_amt':adv_rec.advance_amt,
 							   'adjusted_amt':adv_rec.adjusted_amt,
 							   'balance_amt':adv_rec.balance_amt,
 								})
@@ -153,7 +153,7 @@ class kg_customer_advance(osv.osv):
 		for line in rec.line_ids:
 			if rec.order_no == line.order_no:
 				total += line.balance_amt
-		total_amt = rec.adv_amt + total
+		total_amt = rec.advance_amt + total
 		if total_amt > rec.order_value:
 			return False
 		else:
@@ -165,8 +165,8 @@ class kg_customer_advance(osv.osv):
 		for line in rec.line_ids:
 			if rec.order_no == line.order_no:
 				total += line.balance_amt
-		total_amt = rec.adv_amt + total
-		if rec.adv_amt <= 0.00 or rec.adv_amt > rec.order_value:
+		total_amt = rec.advance_amt + total
+		if rec.advance_amt <= 0.00 or rec.advance_amt > rec.order_value:
 			return False
 		else:
 			return True		
@@ -233,17 +233,14 @@ class kg_customer_advance(osv.osv):
 	def entry_approved(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.state == 'confirmed':
-			self.write(cr, uid, ids, {'advance_amt':rec.adv_amt,'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		else:
 			pass		
 		return True
 		
 	def entry_accept(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.state == 'approved':
-			if rec.advance_amt > rec.adv_amt:			
-				raise osv.except_osv(_('AC ACK Amount exceed !!'),
-						_('Enter the AC ACK Amount greater than Advance Amount !!'))
+		if rec.state == 'approved':			
 			self.write(cr, uid, ids, {'balance_receivable':rec.advance_amt,'state': 'done','done_user_id': uid, 'done_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		else:
 			pass

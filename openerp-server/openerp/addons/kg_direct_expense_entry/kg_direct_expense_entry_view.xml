@@ -53,6 +53,7 @@
 										<field name="discount"/>
 										<field name="amount_untaxed" widget="monetary" options="{'currency_field': 'currency_id'}"/>
 										<field name="amount_tax" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+										<field name="round_off"/>
 										<div class="oe_subtotal_footer_separator oe_inline">
 										<button name="button_dummy"
                                         attrs="{'invisible': [('state','not in',['draft','confirmed'])]}" string="(update)" type="object" class="oe_edit_only oe_link"/>
@@ -104,15 +105,15 @@
 				<tree colors="blue:state == 'draft';red:state == 'confirmed'
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" 
 								toolbar="True" string="Direct Expense Entry">
+					<field name='name'/>
 					<field name='division_id'/>
-					<field name='name' string="Doc No"/>
 					<field name='expense_date'/>
 					<field name='invoice_no'/>
 					<field name='invoice_date'/>
 					<field name='supplier_id'/>
 					<field name="amount_total"/>
-					<field name="entry_mode"/>
 					<field name = 'state'/>
+					<field name="entry_mode"/>
 				</tree>
 			</field>
 		</record>
