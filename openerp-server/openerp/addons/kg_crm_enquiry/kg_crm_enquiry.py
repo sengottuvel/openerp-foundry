@@ -663,6 +663,7 @@ class kg_crm_enquiry(osv.osv):
 																  'pumpseries_id': order_item.pumpseries_id.id,
 																  'pump_id': order_item.pump_id.id,
 																  'moc_const_id': order_item.moc_const_id.id,
+																  'per_spare_prime_cost': prime_cost,
 																  'prime_cost': prime_cost * qty,
 																  'enquiry_line_id': order_item.id,
 																  'item_code': item_code,

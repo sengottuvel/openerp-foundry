@@ -2029,7 +2029,7 @@ class ch_pump_offer(osv.osv):
 		res = {}
 		cur_obj=self.pool.get('res.currency')
 		sam_ratio_tot = dealer_discount_tot = customer_discount_tot = spl_discount_tot = tax_tot = p_f_tot = freight_tot = insurance_tot = pump_price_tot = tot_price = net_amount = 0
-		i_tot = k_tot = m_tot = p_tot = r_tot = 0
+		i_tot = k_tot = m_tot = p_tot = r_tot = prime_cost = 0
 		for line in self.browse(cr, uid, ids, context=context):
 			print"linelineline",line
 			res[line.id] = {
@@ -2044,8 +2044,10 @@ class ch_pump_offer(osv.osv):
 				'insurance_tot': 0.0,
 				'pump_price': 0.0,
 				'tot_price': 0.0,
+				'prime_cost': 0.0,
 				
 			}
+			
 			print"line.prime_cost",line.prime_cost
 			print"line.sam_ratio",line.sam_ratio
 			sam_ratio_tot = line.prime_cost * line.sam_ratio
@@ -2087,6 +2089,7 @@ class ch_pump_offer(osv.osv):
 			res[line.id]['pump_price_tot'] = pump_price_tot
 			res[line.id]['tot_price'] = tot_price
 			res[line.id]['net_amount'] = net_amount
+			res[line.id]['prime_cost'] = (line.per_pump_prime_cost * line.qty) + line.additional_cost
 			
 		return res
 	
@@ -2108,7 +2111,10 @@ class ch_pump_offer(osv.osv):
 		'moc_const_id': fields.many2one('kg.moc.construction','MOC'),
 		'drawing_approval': fields.selection([('yes','Yes'),('no','No')],'Drawing approval'),
 		'inspection': fields.selection([('yes','Yes'),('no','No'),('tpi','TPI'),('customer','Customer'),('consultant','Consultant'),('stagewise','Stage wise')],'Inspection'),
-		'prime_cost': fields.float('Prime Cost'),
+		#~ 'prime_cost': fields.float('Prime Cost'),
+		'additional_cost': fields.float('Additional Cost'),
+		'additional_cost_remark': fields.text('Additional Cost Remark'),
+		'prime_cost': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Prime Cost',multi="sums",store=True),
 		'per_pump_prime_cost': fields.float('Per Pump Prime Cost'),
 		'sam_ratio': fields.float('Sam Ratio(%)'),
 		'dealer_discount': fields.float('Dealer Discount(%)'),
@@ -2274,7 +2280,7 @@ class ch_spare_offer(osv.osv):
 		res = {}
 		cur_obj=self.pool.get('res.currency')
 		sam_ratio_tot = dealer_discount_tot = customer_discount_tot = spl_discount_tot = tax_tot = p_f_tot = freight_tot = insurance_tot = pump_price_tot = tot_price = net_amount = 0
-		i_tot = k_tot = m_tot = p_tot = r_tot = 0
+		i_tot = k_tot = m_tot = p_tot = r_tot = prime_cost = 0
 		for line in self.browse(cr, uid, ids, context=context):
 			print"linelineline",line
 			res[line.id] = {
@@ -2289,6 +2295,7 @@ class ch_spare_offer(osv.osv):
 				'insurance_tot': 0.0,
 				'pump_price': 0.0,
 				'tot_price': 0.0,
+				'prime_cost': 0.0,
 				
 			}
 			print"line.prime_cost",line.prime_cost
@@ -2332,6 +2339,7 @@ class ch_spare_offer(osv.osv):
 			res[line.id]['pump_price_tot'] = pump_price_tot
 			res[line.id]['tot_price'] = tot_price
 			res[line.id]['net_amount'] = net_amount
+			res[line.id]['prime_cost'] = (line.per_spare_prime_cost * line.qty) + line.additional_cost
 			
 		return res
 	
@@ -2357,7 +2365,11 @@ class ch_spare_offer(osv.osv):
 		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Type'),
 		'pumpseries_id': fields.many2one('kg.pumpseries.master','Pump Series'),
 		'moc_const_id': fields.many2one('kg.moc.construction','MOC'),
-		'prime_cost': fields.float('Prime Cost'),
+		'per_spare_prime_cost': fields.float('Per Spare Prime Cost'),
+		'additional_cost': fields.float('Additional Cost'),
+		'additional_cost_remark': fields.text('Additional Cost Remark'),
+		'prime_cost': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Prime Cost',multi="sums",store=True),
+		#~ 'prime_cost': fields.float('Prime Cost'),
 		'sam_ratio': fields.float('Sam Ratio(%)'),
 		'dealer_discount': fields.float('Dealer Discount(%)'),
 		'customer_discount': fields.float('Customer Discount(%)'),
@@ -2402,7 +2414,7 @@ class ch_accessories_offer(osv.osv):
 		res = {}
 		cur_obj=self.pool.get('res.currency')
 		sam_ratio_tot = dealer_discount_tot = customer_discount_tot = spl_discount_tot = tax_tot = p_f_tot = freight_tot = insurance_tot = pump_price_tot = tot_price = net_amount = 0
-		i_tot = k_tot = m_tot = p_tot = r_tot = 0
+		i_tot = k_tot = m_tot = p_tot = r_tot = prime_cost = 0
 		for line in self.browse(cr, uid, ids, context=context):
 			print"linelineline",line
 			res[line.id] = {
@@ -2417,6 +2429,7 @@ class ch_accessories_offer(osv.osv):
 				'insurance_tot': 0.0,
 				'pump_price': 0.0,
 				'tot_price': 0.0,
+				'prime_cost': 0.0,
 				
 			}
 			print"line.prime_cost",line.prime_cost
@@ -2460,6 +2473,7 @@ class ch_accessories_offer(osv.osv):
 			res[line.id]['pump_price_tot'] = pump_price_tot
 			res[line.id]['tot_price'] = tot_price
 			res[line.id]['net_amount'] = net_amount
+			res[line.id]['prime_cost'] = (line.per_access_prime_cost * line.qty) + line.additional_cost
 			
 		return res
 	
@@ -2480,7 +2494,10 @@ class ch_accessories_offer(osv.osv):
 		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Type'),
 		'moc_id':fields.many2one('kg.moc.master', 'MOC'),
 		'qty':fields.integer('Quantity'),
-		'prime_cost': fields.float('Prime Cost'),
+		#~ 'prime_cost': fields.float('Prime Cost'),
+		'additional_cost': fields.float('Additional Cost'),
+		'additional_cost_remark': fields.text('Additional Cost Remark'),
+		'prime_cost': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Prime Cost',multi="sums",store=True),
 		'per_access_prime_cost': fields.float('Per Access Prime Cost'),
 		'sam_ratio': fields.float('Sam Ratio(%)'),
 		'dealer_discount': fields.float('Dealer Discount(%)'),
