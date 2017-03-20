@@ -188,6 +188,7 @@
 					</field>
 					<field name="employee_id" position="after">
 						<field name="code"/>
+						<field name="emp_categ_id"/>
 					</field>
 					<field name="job_id" position="replace">
 						<field name="job_id" />
