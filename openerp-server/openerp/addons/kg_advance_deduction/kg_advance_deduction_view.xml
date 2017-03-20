@@ -169,7 +169,7 @@
 								<field name="emp_categ_id" attrs="{'readonly': [('state','in',['approved','done','reject','cancel'])]}" readonly="1"/>																
 								<field name="ded_type" string="Detection Type" attrs="{'readonly': [('state','in',['done','reject','cancel'])]}" required="1"/>
 								<field name="tot_amt" attrs="{'readonly': [('state','in',['done','reject','cancel'])]}" required="1"/>																
-								<field name="allow" attrs="{'readonly': [('state','in',['reject','cancel'])]}"/>
+								<field name="allow" attrs="{'readonly': [('state','in',['reject','cancel'])]}" invisible="1"/>
 								<field name="modify" invisible = "1"/>
 							</group>
 							<group>

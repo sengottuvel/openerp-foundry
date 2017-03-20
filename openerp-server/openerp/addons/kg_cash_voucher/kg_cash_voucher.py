@@ -87,6 +87,7 @@ class kg_cash_voucher(osv.osv):
 		'acc_journal_id':fields.many2one('account.journal','Cash Account'),
 		'narration': fields.text('Narration'),
 		'division_id':fields.many2one('kg.division.master','Division'),
+		'balc_amt':fields.float('Balance Amount'),
 		
 		## Child Tables Declaration
 		
@@ -237,5 +238,14 @@ class kg_cash_voucher(osv.osv):
 	]
 	
 	## Module Requirement
+	
+	def onchange_emp(self,cr,uid,ids,employee_id,balc_amt,context=None):
+		cr.execute('''select sum(bal_amt) from kg_emp_cash_issue where employee_id=%s and state !='cancel' '''%(employee_id))
+		bal_amount = cr.dictfetchone()
+		print "bal_amount['sum']bal_amount['sum']bal_amount['sum']bal_amount['sum']",bal_amount['sum']
+		if bal_amount['sum'] == None:
+			bal_amount['sum']=0.00
+		value = {'balc_amt':bal_amount['sum']}
+		return {'value': value}
 
 kg_cash_voucher()

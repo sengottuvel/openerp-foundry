@@ -85,7 +85,7 @@ class kg_bank_statement(osv.osv):
 		'calc_close_bal_type':fields.selection([('dr','Dr'),('cr','Cr')],'Dr/Cr'),
 		'actual_close_bal_type':fields.selection([('dr','Dr'),('cr','Cr')],'Dr/Cr'),
 		'division_id':fields.many2one('kg.division.master','Division'),
-		'acct_name':fields.char('Account Name'),
+		'acct_name':fields.many2one('account.account','Account Name'),
 		
 		## Child Tables Declaration
 		
@@ -191,6 +191,11 @@ class kg_bank_statement(osv.osv):
 		
 	]
 	## Module Requirement
+	
+	def onchange_account(self,cr,uid,ids,acc_journal_id,acct_name,context=None):
+		led_rec = self.pool.get('account.journal').browse(cr,uid,acc_journal_id)
+		value = {'acct_name':led_rec.default_debit_account_id.id}
+		return {'value': value}
 	
 kg_bank_statement()
 

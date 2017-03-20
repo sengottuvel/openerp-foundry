@@ -19,13 +19,13 @@
 						<group>
 							<group>						
 								<field name="division_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1"/>																
-								<field name="acct_name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1"/>																
+								<field name="acct_name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" readonly="1"/>																
 								<field name="as_on_date" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>																
 								<field name="modify" invisible = "1"/>
 								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 							</group>
 							<group>
-								<field name="acc_journal_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" options="{'datepicker':{'maxDate': null}}" required="1"/>
+								<field name="acc_journal_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1" on_change="onchange_account(acc_journal_id,acct_name)"/>
 								<field name="trans_type" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1"/>
 								<field name="entry_mode" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1"/>
 								<field name="state" style="width: 30%%" class="att_state_change"/>								

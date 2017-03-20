@@ -77,7 +77,7 @@ class kg_bank_reconcile(osv.osv):
 		
 		## Module Requirement Info
 		'division_id':fields.many2one('kg.division.master','Division'),
-		'acct_name':fields.char('Account Name'),
+		'acct_name':fields.many2one('account.account','Account Name'),
 		'acc_journal_id':fields.many2one('account.journal','Bank Account'),
 		'as_on_date':fields.date('As On Date'),
 		'trans_type':fields.selection([('all','All'),('payment','Payment'),('receipt','Receipt')],'Transaction Type'),
@@ -175,6 +175,11 @@ class kg_bank_reconcile(osv.osv):
 		return super(kg_bank_reconcile, self).write(cr, uid, ids, vals, context)	
 	
 	## Module Requirement
+	
+	def onchange_account(self,cr,uid,ids,acc_journal_id,acct_name,context=None):
+		led_rec = self.pool.get('account.journal').browse(cr,uid,acc_journal_id)
+		value = {'acct_name':led_rec.default_debit_account_id.id}
+		return {'value': value}
 	
 	def list(self,cr,uid,ids,context=None):
 		return True

@@ -83,7 +83,7 @@ class kg_emp_cash_issue(osv.osv):
 		'given_bal_amt':fields.float('Given Balance Amount'),
 		'amount':fields.float('Amount'),
 		'entry_date':fields.date('Date'),
-		'acc_journal_id':fields.many2one('account.journal','Cash Account'),
+		'acc_journal_id':fields.many2one('account.journal','Cash Account',domain=[('type','=','cash')]),
 		'bal_amt':fields.float('Balance Amount'),
 		'narration': fields.text('Narration'),
 		'division_id':fields.many2one('kg.division.master','Division'),
