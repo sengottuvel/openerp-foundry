@@ -105,6 +105,7 @@
 						<field name="tot_paid_days"/>
 						<field name="con_cross_amt"/>
 						<field name="round_val"/>
+						<field name="othr_sal_amt"/>
 						
 					</field>
 					
