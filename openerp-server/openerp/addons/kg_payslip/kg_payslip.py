@@ -981,7 +981,7 @@ class kg_payslip(osv.osv):
 				
 				#### Creation of the net gross amount in the parent ####
 				
-				serc_chil_ids_2 = self.pool.get('hr.payslip.line').search(cr,uid,[('slip_id','=',slip_rec.id),('category_id','!=',4)])
+				serc_chil_ids_2 = self.pool.get('hr.payslip.line').search(cr,uid,[('slip_id','=',slip_rec.id)])
 				net_gross_amt = 0.00	
 				for payslip_net_gross in serc_chil_ids_2:
 					payslip_line_rec = self.pool.get('hr.payslip.line').browse(cr,uid,payslip_net_gross)
