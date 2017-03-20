@@ -59,9 +59,10 @@
                     <field name="credit_note" position="replace">
                     <field name="tot_deduction"/>
                     <field name="tot_allowance"/>
-                    <field name="con_cross_amt"/>
+                    <field name="con_cross_amt" invisible="1"/>
 					<field name="round_val"/>
                     <field name="cross_amt"/>
+                    <field name="othr_sal_amt"/>
                     <field name="tot_contribution" invisible="1"/>
                     <field name="credit_note" invisible="1"/>
 					</field>

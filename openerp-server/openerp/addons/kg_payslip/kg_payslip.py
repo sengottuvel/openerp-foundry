@@ -32,6 +32,7 @@ class kg_payslip(osv.osv):
 	'balance_val': fields.float('Balance Salary', readonly=True),
 	'cross_amt': fields.float('Net Gross Amount',readonly=True),
 	'con_cross_amt': fields.float('Gross Amount',readonly=True),
+	'othr_sal_amt': fields.float('Other Salary Amount',readonly=True),
 	'date_from': fields.date('Date From', readonly=False, required=True),
 	'date_to': fields.date('Date To', readonly=False, required=True),
 	'emp_name': fields.char('Employee Code', size=128, readonly=True),
@@ -989,6 +990,18 @@ class kg_payslip(osv.osv):
 				self.write(cr, uid, ids, {'cross_amt': net_gross_amt,'round_val':net_gross_amt-tot_ded_amt})
 				
 				#### Creation of the net gross amount in the parent ####
+				
+				#### Creation of the other salary component amount in the parent ####
+				
+				serc_othr_sal_comp = self.pool.get('ch.other.salary.comp').search(cr,uid,[('slip_id','=',slip_rec.id)])
+				if serc_othr_sal_comp:
+					net_othr_sal_amt = 0.00	
+					for payslip_othr_sal in serc_othr_sal_comp:
+						payslip_othr_line_rec = self.pool.get('ch.other.salary.comp').browse(cr,uid,payslip_othr_sal)
+						net_othr_sal_amt += payslip_othr_line_rec.amount
+					self.write(cr, uid, ids, {'othr_sal_amt': net_othr_sal_amt})
+				
+				#### Creation of the other salary component amount in the parent ####
 				
 				
 				
