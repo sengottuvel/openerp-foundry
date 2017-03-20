@@ -2162,7 +2162,7 @@
 								<field name="code" invisible = "1"/>
 								<field name="debit" required = "1"/>
 								<field name="credit" required = "1"/>
-								<field name="narration" widget="char" readonly="1"/>                                       
+								<field name="narration" widget="char" readonly="0"/>                                       
 							</tree>
 							</field> 
                         </page>
