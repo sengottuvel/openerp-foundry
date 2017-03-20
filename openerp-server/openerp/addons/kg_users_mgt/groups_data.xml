@@ -579,7 +579,9 @@
 				
 			ref('kg_menus.menu_kg_chart_acc'),			
 			ref('kg_menus.mam_kg_chart_accounts'),
-				
+			
+			ref('kg_purchase_invoice.tam_ac_purchase_invoice'),			
+			ref('kg_supplier_advance.tam_ac_sup_advance'),
 				
 			
 			

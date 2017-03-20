@@ -236,7 +236,55 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
 		</record>
 		
+		<record id="m_accounts_kg_purchase_invoice" model="ir.model.access">
+			<field name="model_id" ref="kg_purchase_invoice.model_kg_purchase_invoice"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Purchase Invoice</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
 		
+		<record id="m_accounts_kg_supplier_advance" model="ir.model.access">
+			<field name="model_id" ref="kg_supplier_advance.model_kg_supplier_advance"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Supplier Advance</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
+		
+		<record id="m_accounts_ch_advance_line" model="ir.model.access">
+			<field name="model_id" ref="kg_supplier_advance.model_ch_advance_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Supplier Advance Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
+		
+		<record id="m_accounts_purchase_order" model="ir.model.access">
+			<field name="model_id" ref="purchase.model_purchase_order"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Purchase Order</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
+		
+		<record id="m_accounts_purchase_order_line" model="ir.model.access">
+			<field name="model_id" ref="purchase.model_purchase_order_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Purchase Order Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
 		
  </data>
 </openerp>
