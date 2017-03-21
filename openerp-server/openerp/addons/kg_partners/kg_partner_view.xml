@@ -32,6 +32,9 @@
 		<field name="mobile" position="before">
 		<field name="sms_applicable" required="1" attrs="{'readonly':[('partner_state','=','approve')]}"/>
 		</field>
+		<field name="country_id" position="after">
+		<field name="region" attrs="{'readonly':[('partner_state','=','approve')],'invisible':[('customer','!=',True),('dealer','!=',True)]}"/>
+		</field>
 		<field name="email" position="before">
 		<field name="email_applicable" required="1" attrs="{'readonly':[('partner_state','=','approve')]}"/>
 		</field>

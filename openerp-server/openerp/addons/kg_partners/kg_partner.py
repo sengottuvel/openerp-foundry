@@ -59,6 +59,7 @@ class kg_partner(osv.osv):
 	'grade': fields.selection([('a','A'),('b','B'),('c','C')],'Grade'),
 	'payment_id': fields.many2one('kg.payment.master','Payment Terms'),
 	'language': fields.selection([('tamil', 'Tamil'),('english', 'English'),('hindi', 'Hindi'),('malayalam', 'Malayalam'),('others','Others')],'Preferred Language'),
+	'region': fields.selection([('north','North'),('east','East'),('west','West'),('south','South')],'Region'),
 	'cheque_in_favour': fields.char('Cheque in Favor Of'),
 	'advance_limit': fields.float('Credit Limit'),
 	'transport_id': fields.many2one('kg.transport','Transport'),
