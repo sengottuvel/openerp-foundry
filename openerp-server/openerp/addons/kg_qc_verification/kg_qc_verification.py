@@ -2205,7 +2205,8 @@ class kg_qc_verification(osv.osv):
 						(
 						select (raw.qty * %s) as indent_qty,raw.product_id,raw.uom, raw.id as ms_item
 						from ch_ms_raw_material as raw
-						where raw.header_id = %s
+						where raw.header_id in
+						(select ms_id from ch_order_machineshop_details  where id = %s)
 						)
 						
 
