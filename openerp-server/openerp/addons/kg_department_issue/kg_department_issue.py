@@ -200,7 +200,7 @@ class kg_department_issue(osv.osv):
 			res['move_lines'] = []
 			if obj.issue_line_ids:
 				issue_lines = map(lambda x:x.id,obj.issue_line_ids)
-				move_obj.unlink(cr,uid,issue_lines)
+				issue_line_obj.unlink(cr,uid,issue_lines)
 			dep_rec = dep_obj.browse(cr, uid, obj.user_id.dep_name.id)
 			issue_dep_id = obj.department_id.id
 			

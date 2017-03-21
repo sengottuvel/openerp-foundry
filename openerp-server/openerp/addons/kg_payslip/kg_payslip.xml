@@ -62,7 +62,7 @@
 <!--
                     <field name="con_cross_amt" invisible="1"/>
 -->
-                    <field name="cross_amt"/>
+                    <field name="cross_amt" string="Gross Amount"/>
 					<field name="round_val"/>
                     <field name="othr_sal_amt"/>
                     <field name="tot_contribution" invisible="1"/>

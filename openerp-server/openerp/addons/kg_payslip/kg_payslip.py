@@ -248,6 +248,15 @@ class kg_payslip(osv.osv):
 			start_date = "'"+slip_rec.date_from+"'"
 			end_date = 	"'"+slip_rec.date_to+"'"
 			
+			cont_ids = con_obj.search(cr,uid,[('employee_id','=',slip_rec.employee_id.id)])
+			if cont_ids:
+				ex_ids = self.pool.get('hr.payslip').search(cr, uid, [('employee_id','=', slip_rec.employee_id.id),
+							('date_from','=',slip_rec.date_from),('date_to','=',slip_rec.date_to),
+							('state','=', 'done')])
+				for i in ex_ids:
+					sql = """ delete from hr_payslip where id=%s """%(i)
+					cr.execute(sql)
+			
 			
 			# Employee Attendance details calculation
 						
@@ -457,7 +466,7 @@ class kg_payslip(osv.osv):
 				empr_esi_ids = employee_cont.search(cr , uid ,[('active','=',True),('state','=','approved')])
 				emp_esi_rec = employee_cont.browse(cr,uid,empr_esi_ids[0])
 				if esi_amt_sal:
-					if con_ids_1.gross_salary < emp_esi_rec.esi_slab:
+					if esi_amt_sal + acc_vda_value < emp_esi_rec.esi_slab:
 						esi_stand_amt = esi_amt_sal + acc_vda_value
 					else:
 						esi_stand_amt = 0
@@ -964,7 +973,7 @@ class kg_payslip(osv.osv):
 				for payslip_line_ids_all in serc_chil_ids:
 					payslip_line_rec = self.pool.get('hr.payslip.line').browse(cr,uid,payslip_line_ids_all)
 					tot_allow_amt += payslip_line_rec.amount
-				self.write(cr, uid, ids, {'tot_allowance': tot_allow_amt})
+				self.write(cr, uid, slip_rec.id, {'tot_allowance': tot_allow_amt})
 				
 				#### Creation of the total allowance and updating the total allowance field in parent ####
 				
@@ -976,7 +985,7 @@ class kg_payslip(osv.osv):
 				for payslip_line_ids_ded in serc_chil_ids_1:
 					payslip_line_rec = self.pool.get('hr.payslip.line').browse(cr,uid,payslip_line_ids_ded)
 					tot_ded_amt += payslip_line_rec.amount
-				self.write(cr, uid, ids, {'tot_deduction': tot_ded_amt})
+				self.write(cr, uid, slip_rec.id, {'tot_deduction': tot_ded_amt})
 				
 				#### Creation of the total deduction and updating the total allowance field in parent ####
 				
@@ -987,7 +996,7 @@ class kg_payslip(osv.osv):
 				for payslip_net_gross in serc_chil_ids_2:
 					payslip_line_rec = self.pool.get('hr.payslip.line').browse(cr,uid,payslip_net_gross)
 					net_gross_amt += payslip_line_rec.amount
-				self.write(cr, uid, ids, {'cross_amt': net_gross_amt,'round_val':net_gross_amt-tot_ded_amt})
+				self.write(cr, uid, slip_rec.id, {'cross_amt': net_gross_amt,'round_val':net_gross_amt-tot_ded_amt})
 				
 				#### Creation of the net gross amount in the parent ####
 				
@@ -999,7 +1008,7 @@ class kg_payslip(osv.osv):
 					for payslip_othr_sal in serc_othr_sal_comp:
 						payslip_othr_line_rec = self.pool.get('ch.other.salary.comp').browse(cr,uid,payslip_othr_sal)
 						net_othr_sal_amt += payslip_othr_line_rec.amount
-					self.write(cr, uid, ids, {'othr_sal_amt': net_othr_sal_amt})
+					self.write(cr, uid, slip_rec.id, {'othr_sal_amt': net_othr_sal_amt})
 				
 				#### Creation of the other salary component amount in the parent ####
 				
