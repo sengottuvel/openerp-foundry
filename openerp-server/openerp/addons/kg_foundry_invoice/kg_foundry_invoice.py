@@ -38,33 +38,41 @@ class kg_foundry_invoice(osv.osv):
 				'total_amt' : 0.0,
 				'amount_total':0.0,
 				'payable_amt':0.0,
+				'additional_charges':0.0,
 			}
-			tax_amt = discount_value = 0.00
+			tax_amt = discount_value = final_other_charges = 0.00
+			total_value_amt = 0.00
+			for line in order.line_ids:
+				total_value_amt += line.total_value
+			for item in order.line_ids_b:				
+				final_other_charges += item.expense_amt
+				
 			if order.discount > 0.00:
-				amt_to_per = (order.discount / (order.invoice_amt or 1.0 )) * 100
+				amt_to_per = (total_value_amt / (total_value_amt or 1.0 )) * 100
 				kg_discount_per = order.discount_per
 				tot_discount_per = amt_to_per
 			else:
 				tot_discount_per = order.discount_per			
 			val = 0.00 
 			for c in self.pool.get('account.tax').compute_all(cr, uid, order.tax_id,
-				order.invoice_amt * (1-(tot_discount_per or 0.0)/100.0), 1, 1,
+				total_value_amt * (1-(tot_discount_per or 0.0)/100.0), 1, 1,
 				 order.contractor_id)['taxes']:
 				val += c.get('amount', 0.0)
 				print"valvalval",val
 				tax_amt = val	
 			
 			if order.discount_per > 0.00:					
-				discount_value = (order.invoice_amt /100.00) * order.discount_per	
+				discount_value = (total_value_amt /100.00) * order.discount_per	
 			else:
 				discount_value = order.discount	
 			
-			res[order.id]['amount_untaxed'] = order.invoice_amt - tax_amt
+			res[order.id]['amount_untaxed'] = total_value_amt - tax_amt
 			res[order.id]['total_discount'] = discount_value
 			res[order.id]['amount_tax'] = tax_amt
-			res[order.id]['total_amt'] = order.invoice_amt + tax_amt
-			res[order.id]['amount_total'] = (order.invoice_amt + tax_amt + order.round_off_amt) - discount_value
-			res[order.id]['payable_amt'] = (order.invoice_amt + tax_amt + order.round_off_amt) - discount_value
+			res[order.id]['additional_charges'] = final_other_charges
+			res[order.id]['total_amt'] = final_other_charges + total_value_amt + tax_amt
+			res[order.id]['amount_total'] = (final_other_charges + total_value_amt + tax_amt + order.round_off_amt) - discount_value
+			res[order.id]['payable_amt'] = (final_other_charges + total_value_amt + tax_amt + order.round_off_amt) - discount_value
 		return res	
 	
 	
@@ -115,10 +123,10 @@ class kg_foundry_invoice(osv.osv):
 		## Calculation process Start now 
 		
 		'con_invoice_no': fields.char('Contractor Invoice No', size=128,required=True),
-		'invoice_date': fields.date('Invoice Date',required=True),
+		'invoice_date': fields.date('Contractor Invoice Date',required=True),
 		'due_date': fields.date('Due Date',required=True),
-		'invoice_amt': fields.float('Invoice Amount',required=True),
-		'invoice_copy':fields.binary('Invoice Copy'),
+		'invoice_amt': fields.float('Contractor Invoice Amount',required=True),
+		'invoice_copy':fields.binary('Contractor Invoice Copy'),
 		'tax_id': fields.many2many('account.tax', 'foundry_invoice_taxes', 'invoice_id', 'tax_id', 'Taxes'),
 		'discount': fields.float('Discount Amount'),	
 		'discount_per': fields.float('Discount(%)'),
@@ -132,6 +140,7 @@ class kg_foundry_invoice(osv.osv):
 		'total_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Amount',store=True,multi="sums",help="Total Amount"),
 		'amount_total': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',store=True,multi="sums",help="Net Amount"),
 		'payable_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Payable Amount',store=True,multi="sums",help="Payable Amount"),
+		'additional_charges': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Additional Charges',store=True,multi="sums",help="Additional Charges"),
 		
 		'round_off_amt': fields.float('Round off(+/-)'),		
 		
@@ -139,6 +148,7 @@ class kg_foundry_invoice(osv.osv):
 				
 		'line_ids': fields.one2many('ch.foundry.invoice.line.details', 'header_id', "Line Details"),
 		'line_ids_a': fields.one2many('ch.foundry.invoice.line.summary', 'header_id', "Line Summary "),
+		'line_ids_b': fields.one2many('ch.foundry.invoice.expense.track','header_id',"Expense Track"),
 		
 				
 	}
@@ -160,15 +170,15 @@ class kg_foundry_invoice(osv.osv):
 		
 	}
 	
-	def onchange_invoice_amt(self,cr,uid,ids,invoice_amt,discount_per,context = None):
-		discount = 0.00
-		if invoice_amt >0.00 and discount_per > 0.00:
-			discount = (invoice_amt * discount_per) / 100.0
-		return {'value':{'discount':(round(discount,2))}}
+	#~ def onchange_invoice_amt(self,cr,uid,ids,invoice_amt,discount_per,context = None):
+		#~ discount = 0.00
+		#~ if invoice_amt >0.00 and discount_per > 0.00:
+			#~ discount = (invoice_amt * discount_per) / 100.0
+		#~ return {'value':{'discount':(round(discount,2))}}
 		
 	def onchange_discount_value(self, cr, uid, ids, invoice_amt,discount_per):		
 		discount_value =  invoice_amt * discount_per / 100.00
-		if discount_value:
+		if discount_per:
 			return {'value': {'discount_flag':True }}
 		else:
 			return {'value': {'discount_flag':False }}
@@ -384,15 +394,23 @@ class kg_foundry_invoice(osv.osv):
 	def entry_confirm(self,cr,uid,ids,context=None):
 		
 		entry = self.browse(cr,uid,ids[0])	
+		final_other_charges = 0.00
+		for item in entry.line_ids_b:				
+			final_other_charges += item.expense_amt
 		if len(entry.line_ids) == 0:		
 			raise osv.except_osv(_('Invoice details is must !!'),
 				_('Enter the proceed button!!'))
-		if entry.state == 'draft':				
-			for line_item in entry.line_ids:				
-								
+		if entry.state == 'draft':
+			if (entry.invoice_amt + final_other_charges) > entry.amount_total:
+				raise osv.except_osv(_('Invoice Amount Exceed!!'),
+					_('System not allow to Invoice Amount grether than Net Amount !!'))
+			if (entry.invoice_amt + final_other_charges) != entry.amount_total:		
+				raise osv.except_osv(_('Invoice Amount !!'),
+					_('System allow to Invoice Amount is Equal to Net amount !!'))	
+			for line_item in entry.line_ids:								
 				if line_item.qty == 0:
 					raise osv.except_osv(_('Warning!'),
-								_('System not allow to save Zero values !!'))		
+						_('System not allow to save Zero values !!'))		
 				
 			
 			### Sequence Number Generation  ###									
@@ -430,8 +448,20 @@ class kg_foundry_invoice(osv.osv):
 			return True
 		
 	def entry_approved(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])
-		if rec.state == 'confirmed':
+		entry = self.browse(cr,uid,ids[0])
+		final_other_charges = 0.00
+		for item in entry.line_ids_b:				
+			final_other_charges += item.expense_amt
+		if len(entry.line_ids) == 0:		
+			raise osv.except_osv(_('Invoice details is must !!'),
+				_('Enter the proceed button!!'))
+		if entry.state == 'confirmed':
+			if (entry.invoice_amt + final_other_charges) > entry.amount_total:
+				raise osv.except_osv(_('Invoice Amount Exceed!!'),
+					_('System not allow to Invoice Amount grether than Net Amount !!'))
+			if (entry.invoice_amt + final_other_charges) != entry.amount_total:		
+				raise osv.except_osv(_('Invoice Amount !!'),
+					_('System allow to Invoice Amount is Equal to Net amount !!'))			
 			self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		else:
 			pass		
@@ -658,3 +688,47 @@ class ch_foundry_invoice_line_summary(osv.osv):
 	
 		
 ch_foundry_invoice_line_summary()
+
+
+class ch_foundry_invoice_expense_track(osv.osv):
+
+	_name = "ch.foundry.invoice.expense.track"
+	_description = "Expense track"
+	
+	
+	def _get_total_amt(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}	
+		val = 0.00
+		total_value = 0.00
+		tot_discount_per = 0.00
+		for entry in self.browse(cr, uid, ids, context=context):
+			for c in self.pool.get('account.tax').compute_all(cr, uid, entry.tax_id,
+				entry.amount * (1-(tot_discount_per or 0.0)/100.0), 1, 1,
+				entry.expense)['taxes']:
+				val += c.get('amount', 0.0)								
+			result[entry.id] = val + entry.amount
+		return result
+	
+	_columns = {
+		
+		'header_id': fields.many2one('kg.foundry.invoice', 'Expense Track'),
+		'name': fields.char('Number', size=128, select=True,readonly=False),
+		'date': fields.date('Creation Date'),
+		'amount': fields.float('Amount'),		
+		'tax_id': fields.many2many('account.tax', 'foundry_invoice_expense_taxe', 'invoice_id', 'tax_id', 'Tax'),
+		'company_id': fields.many2one('res.company', 'Company Name'),
+		'description': fields.char('Description'),
+		'remark': fields.text('Remarks'),		
+		'expense_amt': fields.function(_get_total_amt, string='Total Amount',digits=(16,2), method=True, store=True, type='float'),		
+		'expense': fields.many2one('kg.expense.master','Expense'),
+		
+	}
+	
+	_defaults = {
+		
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'ch.foundry.invoice.expense.track', context=c),
+		'date' : lambda * a: time.strftime('%Y-%m-%d'),
+	
+		}	
+	
+ch_foundry_invoice_expense_track()
