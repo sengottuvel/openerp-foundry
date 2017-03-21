@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="casting_list_report" language="groovy" pageWidth="595" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.2396694214876032"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="22"/>
+	<property name="ireport.y" value="0"/>
 	<parameter name="wiz_id" class="java.lang.Integer"/>
 	<parameter name="printed_by" class="java.lang.String"/>
 	<parameter name="print_date" class="java.lang.String"/>
@@ -396,7 +396,7 @@ work_order.id in (select  id from kg_work_order) end order by ch_work.order_no]]
 		</band>
 	</detail>
 	<pageFooter>
-		<band height="98">
+		<band height="34">
 			<textField>
 				<reportElement x="236" y="14" width="87" height="20"/>
 				<box topPadding="0">
