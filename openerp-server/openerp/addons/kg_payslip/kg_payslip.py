@@ -1033,18 +1033,18 @@ class kg_payslip(osv.osv):
 		
 			
 	def hr_verify_sheet(self, cr, uid, ids, context=None):
-		slip_obj = self.pool.get('hr.payslip')
-		contract_obj = self.pool.get('hr.contract')
-		slip_rec = self.browse(cr, uid, ids[0])
-		emp_rec = slip_rec.employee_id
-		cont_ids = contract_obj.search(cr,uid,[('employee_id','=',slip_rec.employee_id.id)])
-		if cont_ids:
-			ex_ids = slip_obj.search(cr, uid, [('employee_id','=', slip_rec.employee_id.id),
-						('date_from','=',slip_rec.date_from),('date_to','=',slip_rec.date_to),
-						('state','=', 'done')])
-			for i in ex_ids:
-				sql = """ delete from hr_payslip where id=%s """%(i)
-				cr.execute(sql)
+		#~ slip_obj = self.pool.get('hr.payslip')
+		#~ contract_obj = self.pool.get('hr.contract')
+		#~ slip_rec = self.browse(cr, uid, ids[0])
+		#~ emp_rec = slip_rec.employee_id
+		#~ cont_ids = contract_obj.search(cr,uid,[('employee_id','=',slip_rec.employee_id.id)])
+		#~ if cont_ids:
+			#~ ex_ids = slip_obj.search(cr, uid, [('employee_id','=', slip_rec.employee_id.id),
+						#~ ('date_from','=',slip_rec.date_from),('date_to','=',slip_rec.date_to),
+						#~ ('state','=', 'done')])
+			#~ for i in ex_ids:
+				#~ sql = """ delete from hr_payslip where id=%s """%(i)
+				#~ cr.execute(sql)
 		self.salary_slip_calculation(cr, uid, ids, context)
 		return self.write(cr, uid, ids, {'state': 'done'}, context=context)
 		
