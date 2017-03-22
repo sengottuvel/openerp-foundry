@@ -16,7 +16,7 @@ CALL_TYPE_SELECTION = [
 	('new_enquiry','New Enquiry')
 ]
 PURPOSE_SELECTION = [
-	('pump','Pump'),('spare','Spare'),('prj','Project'),('pump_spare','Pump With Spare')
+	('pump','Pump'),('spare','Spare'),('prj','Project'),('pump_spare','Pump With Spare'),('in_development','In Development')
 ]
 STATE_SELECTION = [
 	('draft','Draft'),('moved_to_offer','Confirmed'),('wfa_md','WFA MD'),('approved_md','Approved MD'),('call','Call Back'),('quote','Quote Process'),('wo_created','WO Created'),('wo_released','WO Released'),('reject','Rejected'),('revised','Revised')
@@ -500,7 +500,7 @@ class kg_crm_offer(osv.osv):
 	
 	def wo_creation(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
-		if entry.state in ('moved_to_offer','approved_md') and entry.revision == 0:
+		if entry.state in ('moved_to_offer','approved_md') and entry.revision == 0 and entry.purpose not in ('in_development'):
 			if not entry.customer_po_no:
 				raise osv.except_osv(_('Warning!'),
 					_('Update Customer PO No.'))
@@ -508,6 +508,10 @@ class kg_crm_offer(osv.osv):
 				if not entry.dealer_po_no:
 					raise osv.except_osv(_('Warning!'),
 						_('Update Dealer PO No.'))
+						
+			spr_svp = [x.decision for x in entry.line_pump_ids if x.purpose_categ in ('attended','not_attended')]
+			print"spr_svp",spr_svp
+				
 			wo_id = self.pool.get('kg.work.order').create(cr,uid,{'order_category': entry.purpose,
 																  'name': '',
 																  'order_priority': '',
@@ -535,20 +539,21 @@ class kg_crm_offer(osv.osv):
 						print"enquiry_line_idenquiry_line_id",enquiry_line_id
 						print"off_line_idoff_line_id",off_line_id
 						purpose = 'pump'
-						pump_vals = self._prepare_pump_details(cr,uid,wo_id,entry,enquiry_line_id,off_line_id,purpose)
-						if pump_vals:
-							wo_line_id = self.pool.get('ch.work.order.details').create(cr, uid, pump_vals, context=context)
-							self.pool.get('ch.pump.offer').write(cr,uid,off_line_id.id,{'wo_line_id':wo_line_id})
-							if wo_line_id:
-								item = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,enquiry_line_id)
-								if item:
-									self.prepare_bom(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
-									## Accessories creation
-									acc_off_obj = self.pool.get('ch.accessories.offer').search(cr,uid,[('enquiry_line_id','=',enquiry_line_id)])
-									for li in acc_off_obj:
-										off_line_id = acc_off_obj
-									purpose='access'
-									self.prepare_bom(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
+						if group[0].enquiry_line_id.purpose_categ not in ('in_development'):
+							pump_vals = self._prepare_pump_details(cr,uid,wo_id,entry,enquiry_line_id,off_line_id,purpose)
+							if pump_vals:
+								wo_line_id = self.pool.get('ch.work.order.details').create(cr, uid, pump_vals, context=context)
+								self.pool.get('ch.pump.offer').write(cr,uid,off_line_id.id,{'wo_line_id':wo_line_id})
+								if wo_line_id:
+									item = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,enquiry_line_id)
+									if item:
+										self.prepare_bom(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
+										## Accessories creation
+										acc_off_obj = self.pool.get('ch.accessories.offer').search(cr,uid,[('enquiry_line_id','=',enquiry_line_id)])
+										for li in acc_off_obj:
+											off_line_id = acc_off_obj
+										purpose='access'
+										self.prepare_bom(cr,uid,wo_line_id,item,off_line_id,purpose,context=context)
 				if entry.line_spare_ids:
 					groups = []
 					#~ for item in entry.line_spare_ids:
@@ -2110,6 +2115,7 @@ class ch_pump_offer(osv.osv):
 		'pumpseries_id': fields.many2one('kg.pumpseries.master','Pump Series'),
 		'moc_const_id': fields.many2one('kg.moc.construction','MOC'),
 		'drawing_approval': fields.selection([('yes','Yes'),('no','No')],'Drawing approval'),
+		'purpose_categ': fields.selection([('pump','Pump'),('in_development','In Development')],'Purpose Categ'),
 		'inspection': fields.selection([('yes','Yes'),('no','No'),('tpi','TPI'),('customer','Customer'),('consultant','Consultant'),('stagewise','Stage wise')],'Inspection'),
 		#~ 'prime_cost': fields.float('Prime Cost'),
 		'additional_cost': fields.float('Additional Cost'),
@@ -2147,6 +2153,7 @@ class ch_pump_offer(osv.osv):
 		'off_fou_id': fields.related('enquiry_line_id','line_ids', type='one2many', relation='ch.kg.crm.foundry.item', string='Foundry Items'),
 		'off_ms_id': fields.related('enquiry_line_id','line_ids_a', type='one2many', relation='ch.kg.crm.machineshop.item', string='MS Items'),
 		'off_bot_id': fields.related('enquiry_line_id','line_ids_b', type='one2many', relation='ch.kg.crm.bot', string='BOT Items'),
+		'line_development_ids': fields.one2many('ch.pump.offer.development', 'header_id', "Pump Offer Development"),
 		
 	}
 	
@@ -2159,6 +2166,101 @@ class ch_pump_offer(osv.osv):
 	#~ }
 	
 ch_pump_offer()
+
+class ch_pump_offer_development(osv.osv):
+	
+	#~ def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
+		#~ res = {}
+		#~ cur_obj=self.pool.get('res.currency')
+		#~ sam_ratio_tot = dealer_discount_tot = customer_discount_tot = spl_discount_tot = tax_tot = p_f_tot = freight_tot = insurance_tot = pump_price_tot = tot_price = net_amount = 0
+		#~ i_tot = k_tot = m_tot = p_tot = r_tot = prime_cost = 0
+		#~ for line in self.browse(cr, uid, ids, context=context):
+			#~ print"linelineline",line
+			#~ res[line.id] = {
+				#~ 
+				#~ 'sam_ratio_tot': 0.0,
+				#~ 'dealer_discount_tot': 0.0,
+				#~ 'customer_discount_tot' : 0.0,
+				#~ 'spl_discount_tot' : 0.0,
+				#~ 'tax_tot': 0.0,
+				#~ 'p_f_tot': 0.0,
+				#~ 'freight_tot': 0.0,
+				#~ 'insurance_tot': 0.0,
+				#~ 'pump_price': 0.0,
+				#~ 'tot_price': 0.0,
+				#~ 'prime_cost': 0.0,
+				#~ 
+			#~ }
+			#~ 
+			#~ print"line.prime_cost",line.prime_cost
+			#~ print"line.sam_ratio",line.sam_ratio
+			#~ sam_ratio_tot = line.prime_cost * line.sam_ratio
+			#~ print"sam_ratio_totsam_ratio_tot",sam_ratio_tot
+			#~ dealer_discount_tot = sam_ratio_tot / (( 100 - line.dealer_discount ) / 100.00 ) - sam_ratio_tot
+			#~ print"dealer_discount_totdealer_discount_tot",dealer_discount_tot
+			#~ i_tot = sam_ratio_tot + dealer_discount_tot
+			#~ customer_discount_tot = i_tot / (( 100 - line.customer_discount ) / 100.00 ) - i_tot
+			#~ print"customer_discount_totcustomer_discount_tot",customer_discount_tot
+			#~ k_tot = i_tot + customer_discount_tot
+			#~ spl_discount_tot = k_tot / (( 100 - line.special_discount ) / 100.00 ) - k_tot
+			#~ print"spl_discount_totspl_discount_tot",spl_discount_tot
+			#~ m_tot = k_tot + spl_discount_tot
+			#~ tax_tot = (m_tot / 100) * line.tax
+			#~ print"tax_tottax_tot",tax_tot
+			#~ p_f_tot = ( m_tot + tax_tot ) / 100.00 * line.p_f
+			#~ print"p_f_totp_f_tot",p_f_tot
+			#~ p_tot = m_tot + tax_tot + p_f_tot
+			#~ freight_tot = p_tot / (( 100 - line.freight ) / 100.00 ) - p_tot
+			#~ print"freight_totfreight_tot",freight_tot
+			#~ r_tot = p_tot + freight_tot
+			#~ insurance_tot = r_tot / (( 100 - line.insurance ) / 100.00 ) - r_tot
+			#~ print"insurance_totinsurance_tot",insurance_tot
+			#~ pump_price_tot = r_tot + insurance_tot
+			#~ print"pump_price_totpump_price_tot",pump_price_tot
+			#~ tot_price = pump_price_tot / line.qty
+			#~ print"tot_pricetot_price",tot_price
+			#~ net_amount = tot_price * line.qty
+			#~ print"net_amountnet_amount",net_amount
+			#~ 
+			#~ res[line.id]['sam_ratio_tot'] = sam_ratio_tot
+			#~ res[line.id]['dealer_discount_tot'] = dealer_discount_tot
+			#~ res[line.id]['customer_discount_tot'] = customer_discount_tot
+			#~ res[line.id]['spl_discount_tot'] = spl_discount_tot
+			#~ res[line.id]['tax_tot'] = tax_tot
+			#~ res[line.id]['p_f_tot'] = p_f_tot
+			#~ res[line.id]['freight_tot'] = freight_tot
+			#~ res[line.id]['insurance_tot'] = insurance_tot
+			#~ res[line.id]['pump_price_tot'] = pump_price_tot
+			#~ res[line.id]['tot_price'] = tot_price
+			#~ res[line.id]['net_amount'] = net_amount
+			#~ res[line.id]['prime_cost'] = (line.per_pump_prime_cost * line.qty) + line.additional_cost
+			#~ 
+		#~ return res
+	
+	_name = "ch.pump.offer.development"
+	_description = "Ch Pump Offer Development"
+	
+	_columns = {
+		
+		## Basic Info
+		
+		'header_id':fields.many2one('ch.pump.offer', 'Pump Offer', ondelete='cascade'),
+		
+		## Module Requirement Fields
+		
+		'position_no': fields.char('Position No.'),
+		'pattern_no': fields.char('Pattern No.'),
+		'pattern_name': fields.char('Pattern Name'),
+		'material_code': fields.char('Material Code'),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','not in',('reject','cancel'))]"),
+		'csd_no': fields.char('CSD No.', size=128),
+		'qty':fields.integer('Quantity'),
+		'is_applicable': fields.boolean('Is Applicable'),
+		'prime_cost': fields.float('Prime Cost'),
+		
+	}
+	
+ch_pump_offer_development()
 
 class ch_supervision_offer(osv.osv):
 	

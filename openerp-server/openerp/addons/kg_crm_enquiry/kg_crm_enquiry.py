@@ -12,7 +12,7 @@ CALL_TYPE_SELECTION = [
     ('new_enquiry','New Enquiry')
 ]
 PURPOSE_SELECTION = [
-    ('pump','Pump'),('spare','Spare'),('prj','Project'),('pump_spare','Pump and Spare'),('access','Only Accessories')
+    ('pump','Pump'),('spare','Spare'),('prj','Project'),('pump_spare','Pump and Spare'),('access','Only Accessories'),('in_development','In Development')
 ]
 STATE_SELECTION = [
     ('draft','Draft'),('moved_to_offer','Moved To Offer'),('call','Call Back'),('quote','Quote Process'),('wo_created','WO Created'),('wo_released','WO Released'),('reject','Rejected'),('revised','Revised')
@@ -543,7 +543,7 @@ class kg_crm_enquiry(osv.osv):
 								if order_item.purpose_categ == 'spare':
 									self.spare_creation(cr,uid,offer_id,order_item,bot_item,bot_prime_cost,'bot')
 						pump_prime_cost += prime_cost
-				
+					
 					if order_item.purpose_categ == 'pump':
 						print"pump_prime_cost",pump_prime_cost
 						pump_offer_id = self.pool.get('ch.pump.offer').create(cr,uid,{'header_id': offer_id,
@@ -553,9 +553,35 @@ class kg_crm_enquiry(osv.osv):
 																					  'moc_const_id': order_item.moc_const_id.id,
 																					  'per_pump_prime_cost': pump_prime_cost / order_item.qty,
 																					  'prime_cost': pump_prime_cost,
-																					  'enquiry_line_id': order_item.id
+																					  'enquiry_line_id': order_item.id,
+																					  'purpose_categ': 'pump',
 																					   })
-					
+					if order_item.purpose_categ == 'in_development':
+						print"pump_prime_cost",pump_prime_cost
+						pump_prime_cost = sum(line.prime_cost for line in order_item.line_ids_development)
+						pump_offer_id = self.pool.get('ch.pump.offer').create(cr,uid,{'header_id': offer_id,
+																					  'pumpseries_id': order_item.pumpseries_id.id,
+																					  'pump_id': order_item.pump_id.id,
+																					  'qty': order_item.qty,
+																					  'moc_const_id': order_item.moc_const_id.id,
+																					  'per_pump_prime_cost': pump_prime_cost / order_item.qty,
+																					  'prime_cost': pump_prime_cost,
+																					  'enquiry_line_id': order_item.id,
+																					  'purpose_categ': 'in_development',
+																					   })
+						if pump_offer_id and order_item.line_ids_development:
+							for develop_id in order_item.line_ids_development:
+								if develop_id.is_applicable == True:
+									self.pool.get('ch.pump.offer.development').create(cr,uid,{'header_id': pump_offer_id,
+																						  'position_no': develop_id.position_no,
+																						  'pattern_no': develop_id.pattern_no,
+																						  'pattern_name': develop_id.pattern_name,
+																						  'material_code': develop_id.material_code,
+																						  'moc_id': develop_id.moc_id.id,
+																						  'csd_no': develop_id.csd_no,
+																						  'qty': develop_id.qty,
+																						  'is_applicable': develop_id.is_applicable,
+																						  })
 					## Accesssories Part
 					if order_item.acces == 'yes':
 						self.access_creation(cr,uid,offer_id,order_item,'fou')
@@ -1320,7 +1346,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'qty':fields.integer('Quantity'),
 		'del_date':fields.date('Delivery Date'),
 		'oth_spec':fields.char('Other Specification'),
-		'purpose_categ': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories')],'Purpose Category'),
+		'purpose_categ': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories'),('in_development','In Development')],'Purpose Category'),
 		#~ 'purpose_categ': fields.selection([('pump','Pump'),('spare','Spare'),('prj','Project'),('pump_spare','Pump With Spare')],'Purpose Category'),
 		
 		# Item Details
@@ -1488,6 +1514,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'line_ids_b': fields.one2many('ch.kg.crm.bot', 'header_id', "BOT Details"),
 		'line_ids_moc_a': fields.one2many('ch.moc.construction', 'header_id', "MOC Construction"),
 		'line_ids_access_a': fields.one2many('ch.kg.crm.accessories', 'header_id', "Accessories"),
+		'line_ids_development': fields.one2many('ch.crm.development.details', 'header_id', "Accessories"),
 		
 	}
 	
@@ -1530,6 +1557,8 @@ class ch_kg_crm_pumpmodel(osv.osv):
 					context['acces'] = 'yes'
 				if context['purpose_categ'] == 'pump_spare':
 					context['purpose_categ'] = ''
+				if context['purpose_categ'] == 'in_development':
+					context['purpose_categ'] = 'in_development'
 				else:
 					pass
 			else:
@@ -3153,6 +3182,51 @@ class ch_kg_crm_pumpmodel(osv.osv):
 	
 ch_kg_crm_pumpmodel()
 
+
+class ch_crm_development_details(osv.osv):
+	
+	_name = "ch.crm.development.details"
+	_description = "Child In Development Details"
+	
+	_columns = {
+		
+		## Basic Info
+		
+		'header_id':fields.many2one('ch.kg.crm.pumpmodel', 'Pump Model Id', ondelete='cascade'),
+		'remarks': fields.char('Remarks'),
+		
+		## Module Requirement Fields
+		
+		'position_no': fields.char('Position No.'),
+		'pattern_no': fields.char('Pattern No.'),
+		'pattern_name': fields.char('Pattern Name'),
+		'material_code': fields.char('Material Code'),
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('state','not in',('reject','cancel'))]"),
+		'csd_no': fields.char('CSD No.', size=128),
+		'qty':fields.integer('Quantity'),
+		'prime_cost': fields.float('Prime Cost'),
+		
+		'is_applicable': fields.boolean('Is Applicable'),
+		'purpose_categ': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories'),('in_development','In Development')],'Purpose Category'),
+		
+	}
+	
+	_defaults = {
+		
+		'is_applicable': True,
+		
+	}
+	
+	def write(self, cr, uid, ids, vals, context=None):
+		return super(ch_crm_development_details, self).write(cr, uid, ids, vals, context)
+	
+	_constraints = [
+		
+		#~ (_check_qty,'You cannot save with zero qty !',['Qty']),
+		
+		]
+	
+ch_crm_development_details()
 
 class ch_kg_crm_foundry_item(osv.osv):
 	
