@@ -146,10 +146,8 @@
 				<!-- Issue Return Transaction Menu -->
 				<menuitem action="kg_issue_return.action_kg_issuereturn_form" id="iam_issue_return" name="Issue Return" parent="gpm_grn_issue_menu" sequence="5"/>
 				
-				<!-- Physical Stock Transaction Menu -->
-<!--
-				<menuitem action="kg_physical_stock.action_kg_physicalstock_form" id="iam_physical_stock" name="Physical Stock Entry" parent="gpm_grn_issue_menu" sequence="6"/>
--->
+				<!-- Physical Stock -->
+				<menuitem id="tpm_physical_stock" name="Physical Stock" parent="stock.menu_stock_root" sequence="3"/>
 				
 				<!-- Consumption Transaction Menu -->
 <!--
@@ -160,16 +158,16 @@
 				<menuitem id="gpm_gate_pass_menu" name="Gate Pass" parent="stock.menu_stock_root" sequence="2"/>
                 
 				<!-- Purchase Invoice -->
-				<menuitem id="ppm_purchase_invoice_menu" name="Invoice" parent="stock.menu_stock_root" sequence="3"/>
+				<menuitem id="ppm_purchase_invoice_menu" name="Invoice" parent="stock.menu_stock_root" sequence="4"/>
                 
 				<!-- Inward -->
-				<menuitem id="cpm_contractor_inward_menu" name="Inward" parent="stock.menu_stock_root" sequence="4"/>
+				<menuitem id="cpm_contractor_inward_menu" name="Inward" parent="stock.menu_stock_root" sequence="5"/>
                 
                 <!-- Contractor Inward Transaction Menu -->
 				<menuitem action="kg_contractor_inward.kg_contractor_inward_action" id="cam_contractor" name="Contractor Inward" parent="cpm_contractor_inward_menu" sequence="1"/>
 				
 				<!-- Manual Closing -->
-				<menuitem id="mpm_manual_closing_menu" name="Manual Closing" parent="stock.menu_stock_root" sequence="5"/>
+				<menuitem id="mpm_manual_closing_menu" name="Manual Closing" parent="stock.menu_stock_root" sequence="6"/>
                 
                 <!--PO Manual Closing Transaction Menu -->
 				<menuitem action="kg_po_manual_closing.po_close_form_action" id="mam_po_manual_closing" name="Purchase Order" parent="mpm_manual_closing_menu" sequence="1"/>
@@ -178,14 +176,14 @@
 				<menuitem action="kg_so_manual_closing.so_close_form_action" id="mam_so_manual_closing" name="Service Order" parent="mpm_manual_closing_menu" sequence="2"/>
 				
 				<!-- Item Ledger -->
-				<menuitem id="ipm_item_ledger_menu" name="Item Ledger" parent="stock.menu_stock_root" sequence="6"/>
+				<menuitem id="ipm_item_ledger_menu" name="Item Ledger" parent="stock.menu_stock_root" sequence="7"/>
                 
                 <!--PO Manual Closing Transaction Menu -->
 				<menuitem action="kg_item_ledger.action_kg_item_ledger" id="iam_item_ledger" name="Item Ledger View" parent="ipm_item_ledger_menu" sequence="1"/>
 			
 					
 			<!-- Store Reports Menu -->
-            <menuitem name="Reports" id="rpm_str_reports" parent = "stock.menu_stock_root" sequence="7"/>
+            <menuitem name="Reports" id="rpm_str_reports" parent = "stock.menu_stock_root" sequence="8"/>
             
 				<!-- Product Register Menu -->
 <!--

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1" language="groovy" pageWidth="595" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isSummaryWithPageHeaderAndFooter="true">
-	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.zoom" value="1.4641000000000008"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<subDataset name="dataset1">
@@ -12,6 +12,7 @@ pi_line.id as pi_line_id,
 product.name_template as product_name,
 uom.name as uom,
 pi_line.brand as brand,
+pi_line.moc as moc,
 round(pi_line.qty::numeric,2) as s_qty,
 CASE WHEN pi_line.physical_stock is null THEN '0.00'
 ELSE round(pi_line.physical_stock::numeric,2)
@@ -20,21 +21,18 @@ CASE WHEN round((pi_line.physical_stock - pi_line.qty)::numeric,2) is null THEN 
 ELSE round((pi_line.physical_stock - pi_line.qty)::numeric,2)
 END as diff
 
-
 from kg_physical_stock_line pi_line
 
 left join kg_physical_stock pi on (pi.id=pi_line.stock_pid)
-
 left join product_product product on (pi_line.product_id=product.id)
-
 left join product_uom uom on (pi_line.uom=uom.id)
-
 where pi_line.stock_pid = $P{pi_id} order by pi_line.id]]>
 		</queryString>
 		<field name="pi_line_id" class="java.lang.Integer"/>
 		<field name="product_name" class="java.lang.String"/>
 		<field name="uom" class="java.lang.String"/>
 		<field name="brand" class="java.lang.String"/>
+		<field name="moc" class="java.lang.String"/>
 		<field name="s_qty" class="java.math.BigDecimal"/>
 		<field name="p_qty" class="java.math.BigDecimal"/>
 		<field name="diff" class="java.math.BigDecimal"/>
@@ -47,13 +45,14 @@ pi.id as pi_id,
 CASE WHEN pi.stock_type = 'main' THEN 'Main stock' ELSE 'Sales stock' END as type,
 pi.state as status,
 comp.name as company_name,
-part.street as street1,
-part.street2 as street2,
-comp_city.name as city,
-part.zip as zip,
-part.phone as phone,
-part.fax as fax,
-part.email as email,
+(CASE WHEN part.street is null THEN '' ELSE part.street end) as street1,
+(CASE WHEN part.street2 is null THEN '' ELSE part.street end) as street2,
+(CASE WHEN comp_city.name is null THEN '' ELSE comp_city.name end) as city,
+(CASE WHEN part.zip is null THEN '' ELSE part.zip end) as zip,
+(CASE WHEN part.phone is null THEN '' ELSE part.phone end) as phone,
+(CASE WHEN part.fax is null THEN '' ELSE part.fax end) as fax,
+(CASE WHEN part.email is null THEN '' ELSE part.email end) as email,
+
 to_char(pi.date::date,'dd-mm-YYYY') as pi_date,
 to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS New_Date,
 user_part.name as user_name
@@ -63,9 +62,9 @@ left join res_users users on (users.id = pi.user_id)
 left join res_partner user_part on (user_part.id = users.partner_id)
 left join res_company comp on (comp.id = pi.company_id)
 left join res_partner part on (part.id = comp.partner_id)
-left join res_city comp_city on (comp_city.id = comp.city)
+left join res_city comp_city on (comp_city.id = part.city_id)
 
-where pi.id =$P{pi_id} and pi.state != 'cancel']]>
+where pi.id = $P{pi_id} and pi.state != 'cancel']]>
 	</queryString>
 	<field name="pi_id" class="java.lang.Integer"/>
 	<field name="type" class="java.lang.String"/>
@@ -92,28 +91,30 @@ where pi.id =$P{pi_id} and pi.state != 'cancel']]>
 		</band>
 	</background>
 	<title>
-		<band height="41" splitType="Stretch">
+		<band height="26" splitType="Stretch">
 			<textField>
-				<reportElement x="0" y="0" width="555" height="20"/>
+				<reportElement x="0" y="0" width="555" height="15"/>
 				<textElement>
-					<font size="14" isBold="true"/>
+					<font size="10" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{company_name}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="20" width="555" height="20"/>
+				<reportElement x="0" y="15" width="555" height="11"/>
 				<box>
 					<bottomPen lineWidth="1.0"/>
 				</box>
-				<textElement/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
 				<textFieldExpression><![CDATA[$F{street1}+$F{street2}+$F{city}+"-"+$F{zip}]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>
 	<columnHeader>
-		<band height="58" splitType="Stretch">
+		<band height="47" splitType="Stretch">
 			<textField>
-				<reportElement x="0" y="2" width="555" height="20"/>
+				<reportElement x="-1" y="0" width="555" height="14"/>
 				<box leftPadding="177"/>
 				<textElement>
 					<font isBold="true"/>
@@ -121,21 +122,21 @@ where pi.id =$P{pi_id} and pi.state != 'cancel']]>
 				<textFieldExpression><![CDATA["System stock Vs Physical stock"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="22" width="172" height="20"/>
+				<reportElement x="-1" y="26" width="173" height="15"/>
 				<textElement/>
 				<textFieldExpression><![CDATA["Date :"+" "+$F{pi_date}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="399" y="22" width="157" height="20"/>
+				<reportElement x="387" y="26" width="157" height="15"/>
 				<textElement/>
 				<textFieldExpression><![CDATA["Stock Location :"+" "+$F{type}]]></textFieldExpression>
 			</textField>
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="40" splitType="Stretch">
+		<band height="64" splitType="Stretch">
 			<textField>
-				<reportElement x="1" y="0" width="42" height="20"/>
+				<reportElement x="0" y="0" width="43" height="20"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -174,7 +175,7 @@ where pi.id =$P{pi_id} and pi.state != 'cancel']]>
 				<textFieldExpression><![CDATA["Brand"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="231" y="0" width="45" height="20"/>
+				<reportElement x="275" y="0" width="45" height="20"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -187,7 +188,7 @@ where pi.id =$P{pi_id} and pi.state != 'cancel']]>
 				<textFieldExpression><![CDATA["UOM"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="276" y="0" width="80" height="20"/>
+				<reportElement x="320" y="0" width="67" height="20"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -200,7 +201,7 @@ where pi.id =$P{pi_id} and pi.state != 'cancel']]>
 				<textFieldExpression><![CDATA["System stock"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="356" y="0" width="100" height="20"/>
+				<reportElement x="387" y="0" width="69" height="20"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -213,7 +214,7 @@ where pi.id =$P{pi_id} and pi.state != 'cancel']]>
 				<textFieldExpression><![CDATA["Physical stock"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="456" y="0" width="98" height="20"/>
+				<reportElement x="456" y="0" width="99" height="20"/>
 				<box>
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.75"/>
@@ -226,7 +227,7 @@ where pi.id =$P{pi_id} and pi.state != 'cancel']]>
 				<textFieldExpression><![CDATA["Difference"]]></textFieldExpression>
 			</textField>
 			<componentElement>
-				<reportElement x="0" y="20" width="555" height="20"/>
+				<reportElement x="0" y="20" width="555" height="12"/>
 				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 					<datasetRun subDataset="dataset1">
 						<datasetParameter name="pi_id">
@@ -234,9 +235,9 @@ where pi.id =$P{pi_id} and pi.state != 'cancel']]>
 						</datasetParameter>
 						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 					</datasetRun>
-					<jr:listContents height="20" width="555">
+					<jr:listContents height="12" width="555">
 						<textField>
-							<reportElement x="1" y="0" width="42" height="20"/>
+							<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="0" y="0" width="43" height="12"/>
 							<box>
 								<topPen lineWidth="0.75"/>
 								<leftPen lineWidth="0.75"/>
@@ -248,8 +249,8 @@ where pi.id =$P{pi_id} and pi.state != 'cancel']]>
 							</textElement>
 							<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 						</textField>
-						<textField>
-							<reportElement x="43" y="0" width="145" height="20"/>
+						<textField isBlankWhenNull="true">
+							<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="43" y="0" width="145" height="12"/>
 							<box leftPadding="3">
 								<topPen lineWidth="0.75"/>
 								<leftPen lineWidth="0.75"/>
@@ -261,8 +262,8 @@ where pi.id =$P{pi_id} and pi.state != 'cancel']]>
 							</textElement>
 							<textFieldExpression><![CDATA[$F{product_name}]]></textFieldExpression>
 						</textField>
-						<textField>
-							<reportElement x="188" y="0" width="43" height="20"/>
+						<textField isBlankWhenNull="true">
+							<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="188" y="0" width="43" height="12"/>
 							<box topPadding="2">
 								<topPen lineWidth="0.75"/>
 								<leftPen lineWidth="0.75"/>
@@ -274,8 +275,8 @@ where pi.id =$P{pi_id} and pi.state != 'cancel']]>
 							</textElement>
 							<textFieldExpression><![CDATA[$F{brand}]]></textFieldExpression>
 						</textField>
-						<textField>
-							<reportElement x="231" y="0" width="45" height="20"/>
+						<textField isBlankWhenNull="true">
+							<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="275" y="0" width="45" height="12"/>
 							<box>
 								<topPen lineWidth="0.75"/>
 								<leftPen lineWidth="0.75"/>
@@ -287,9 +288,9 @@ where pi.id =$P{pi_id} and pi.state != 'cancel']]>
 							</textElement>
 							<textFieldExpression><![CDATA[$F{uom}]]></textFieldExpression>
 						</textField>
-						<textField>
-							<reportElement x="276" y="0" width="80" height="20"/>
-							<box>
+						<textField isBlankWhenNull="true">
+							<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="320" y="0" width="67" height="12"/>
+							<box rightPadding="2">
 								<topPen lineWidth="0.75"/>
 								<leftPen lineWidth="0.75"/>
 								<bottomPen lineWidth="0.75"/>
@@ -300,9 +301,9 @@ where pi.id =$P{pi_id} and pi.state != 'cancel']]>
 							</textElement>
 							<textFieldExpression><![CDATA[$F{s_qty}]]></textFieldExpression>
 						</textField>
-						<textField isBlankWhenNull="false">
-							<reportElement x="356" y="0" width="100" height="20"/>
-							<box>
+						<textField isBlankWhenNull="true">
+							<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="387" y="0" width="69" height="12"/>
+							<box rightPadding="2">
 								<topPen lineWidth="0.75"/>
 								<leftPen lineWidth="0.75"/>
 								<bottomPen lineWidth="0.75"/>
@@ -313,9 +314,9 @@ where pi.id =$P{pi_id} and pi.state != 'cancel']]>
 							</textElement>
 							<textFieldExpression><![CDATA[$F{p_qty}]]></textFieldExpression>
 						</textField>
-						<textField isBlankWhenNull="false">
-							<reportElement x="456" y="0" width="98" height="20"/>
-							<box>
+						<textField isBlankWhenNull="true">
+							<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="456" y="0" width="99" height="12"/>
+							<box rightPadding="2">
 								<topPen lineWidth="0.75"/>
 								<leftPen lineWidth="0.75"/>
 								<bottomPen lineWidth="0.75"/>
@@ -326,15 +327,42 @@ where pi.id =$P{pi_id} and pi.state != 'cancel']]>
 							</textElement>
 							<textFieldExpression><![CDATA[$F{diff}]]></textFieldExpression>
 						</textField>
+						<textField isBlankWhenNull="true">
+							<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="231" y="0" width="44" height="12"/>
+							<box topPadding="2">
+								<pen lineWidth="0.75"/>
+								<topPen lineWidth="0.75"/>
+								<leftPen lineWidth="0.75"/>
+								<bottomPen lineWidth="0.75"/>
+								<rightPen lineWidth="0.75"/>
+							</box>
+							<textElement textAlignment="Center">
+								<font size="8"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{moc}]]></textFieldExpression>
+						</textField>
 					</jr:listContents>
 				</jr:list>
 			</componentElement>
+			<textField>
+				<reportElement x="231" y="0" width="44" height="20"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["MOC"]]></textFieldExpression>
+			</textField>
 		</band>
 	</detail>
 	<pageFooter>
 		<band height="54" splitType="Stretch">
 			<textField>
-				<reportElement x="0" y="34" width="230" height="20"/>
+				<reportElement x="0" y="34" width="231" height="20"/>
 				<box>
 					<topPen lineWidth="1.0"/>
 				</box>
@@ -352,11 +380,13 @@ where pi.id =$P{pi_id} and pi.state != 'cancel']]>
 					<bottomPen lineWidth="0.0"/>
 					<rightPen lineWidth="0.0"/>
 				</box>
-				<textElement textAlignment="Right"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
 				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
-				<reportElement x="310" y="34" width="244" height="20"/>
+				<reportElement x="310" y="34" width="245" height="20"/>
 				<box>
 					<pen lineWidth="0.0"/>
 					<topPen lineWidth="1.0"/>
@@ -364,15 +394,17 @@ where pi.id =$P{pi_id} and pi.state != 'cancel']]>
 					<bottomPen lineWidth="0.0"/>
 					<rightPen lineWidth="0.0"/>
 				</box>
-				<textElement/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
 				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageFooter>
 	<noData>
-		<band height="50">
+		<band height="51">
 			<textField>
-				<reportElement x="188" y="0" width="168" height="20" isPrintInFirstWholeBand="true"/>
+				<reportElement x="188" y="10" width="168" height="15" isPrintInFirstWholeBand="true"/>
 				<textElement/>
 				<textFieldExpression><![CDATA["Cancelled Entry cannot be printed"]]></textFieldExpression>
 			</textField>
