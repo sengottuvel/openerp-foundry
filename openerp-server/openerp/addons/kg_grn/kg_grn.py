@@ -1770,6 +1770,7 @@ class kg_stock_production_lot(osv.osv):
     'user_id':fields.many2one('res.users','LOT User'),
     'grn_type': fields.selection([('material', 'Material'), ('service', 'Service')], 'GRN Type'),
     'brand_id': fields.many2one('kg.brand.master','Brand Name'),
+    'moc_id': fields.many2one('kg.moc.master','MOC Name'),
     'reserved_qty': fields.float('Reserved Qty'),
     
     }   
