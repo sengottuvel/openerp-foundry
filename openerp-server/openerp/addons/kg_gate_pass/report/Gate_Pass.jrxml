@@ -416,7 +416,7 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 		</band>
 	</pageHeader>
 	<columnHeader>
-		<band height="144" splitType="Stretch">
+		<band height="154" splitType="Stretch">
 			<staticText>
 				<reportElement x="2" y="0" width="553" height="15"/>
 				<textElement textAlignment="Center" verticalAlignment="Top">
@@ -474,7 +474,7 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 				<text><![CDATA[Please allow the following To]]></text>
 			</staticText>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="372" y="129" width="39" height="15"/>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="371" y="139" width="39" height="15"/>
 				<box leftPadding="2">
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.0"/>
@@ -487,7 +487,7 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 				<textFieldExpression><![CDATA["QTY"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="411" y="129" width="67" height="15"/>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="410" y="139" width="67" height="15"/>
 				<box leftPadding="2">
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.0"/>
@@ -500,7 +500,7 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 				<textFieldExpression><![CDATA["UOM"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="32" y="129" width="204" height="15"/>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="32" y="139" width="204" height="15"/>
 				<box leftPadding="2">
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.0"/>
@@ -513,7 +513,7 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 				<textFieldExpression><![CDATA["PRODUCT"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="0" y="129" width="32" height="15"/>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="0" y="139" width="32" height="15"/>
 				<box leftPadding="2" rightPadding="2">
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.0"/>
@@ -526,7 +526,7 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 				<textFieldExpression><![CDATA["S.No. "]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="477" y="129" width="78" height="15"/>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="476" y="139" width="80" height="15"/>
 				<box leftPadding="2">
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.0"/>
@@ -539,7 +539,7 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 				<textFieldExpression><![CDATA["REMARKS"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="236" y="129" width="77" height="15"/>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="236" y="139" width="77" height="15"/>
 				<box leftPadding="2">
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.0"/>
@@ -552,7 +552,7 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 				<textFieldExpression><![CDATA["Brand"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="313" y="129" width="59" height="15"/>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="312" y="139" width="59" height="15"/>
 				<box leftPadding="2">
 					<topPen lineWidth="0.75"/>
 					<leftPen lineWidth="0.0"/>
