@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="1">
+
+        <record forcecreate="1" id="seq_stock_movement" model="ir.sequence.type"> 
+			<field name="name">Excess Return</field>
+			<field name="code">kg.stock.movement</field>
+		</record>
+
+		<record forcecreate="1" id="stock_movement_id" model="ir.sequence">
+			  <field name="name">Excess Return</field>
+			  <field name="code">kg.stock.movement</field>
+			  <field name="padding" eval="4"/>
+			  <field name="prefix">ER/16-17/</field>
+			  <field name="reset_sequence">yearly_reset</field>
+		</record>
+		
+
+		<record forcecreate="1" id="seq_stock_movement_damage_fromsub" model="ir.sequence.type"> 
+			<field name="name">Damage Return From SS</field>
+			<field name="code">kg.stock.movement.damage.fromsub</field>
+		</record>
+
+		<record forcecreate="1" id="stock_movement_damage_fromsub_id" model="ir.sequence">
+			  <field name="name">Damage Return From SS</field>
+			  <field name="code">kg.stock.movement.damage.fromsub</field>
+			  <field name="padding" eval="4"/>
+			  <field name="prefix">DRS/16-17/</field>
+			  <field name="reset_sequence">yearly_reset</field>
+		</record>
+		
+
+		<record forcecreate="1" id="seq_stock_movement_damage_frommaina" model="ir.sequence.type"> 
+			<field name="name">Damage Return From MS</field>
+			<field name="code">kg.stock.movement.damage.fm</field>
+		</record>
+
+		<record forcecreate="1" id="stock_movement_damage_frommaina_id" model="ir.sequence">
+			  <field name="name">Damage Return From MS</field>
+			  <field name="code">kg.stock.movement.damage.fm</field>
+			  <field name="padding" eval="4"/>
+			  <field name="prefix">DRM/16-17/</field>
+			  <field name="reset_sequence">yearly_reset</field>
+		</record>
+
+		
+	<record forcecreate="1" id="seq_stock_movement_purchase_frommain" model="ir.sequence.type"> 
+			<field name="name">Purchase Return From MS</field>
+			<field name="code">kg.stock.movement.po.frommain</field>
+		</record>
+
+
+		<record forcecreate="1" id="stock_movement_purchase_frommain_id" model="ir.sequence">
+			  <field name="name">Purchase Return From MS</field>
+			  <field name="code">kg.stock.movement.po.frommain</field>
+			  <field name="padding" eval="4"/>
+			  <field name="prefix">PRM/16-17/</field>
+			  <field name="reset_sequence">yearly_reset</field>
+		</record>	
+
+		
+	<record forcecreate="1" id="seq_stock_movement_purchase_fromsub" model="ir.sequence.type"> 
+			<field name="name">Purchase Return From SS</field>
+			<field name="code">kg.stock.movement.po.fromsub</field>
+		</record>
+
+		<record forcecreate="1" id="stock_movement_purchase_fromsub_id" model="ir.sequence">
+			  <field name="name">Purchase Return From SS</field>
+			  <field name="code">kg.stock.movement.po.fromsub</field>
+			  <field name="padding" eval="4"/>
+			  <field name="prefix">PRS/16-17/</field>
+			  <field name="reset_sequence">yearly_reset</field>
+		</record>	
+		
+	<record forcecreate="1" id="seq_stock_movement_stock_transfer" model="ir.sequence.type"> 
+			<field name="name">Stock Transfer</field>
+			<field name="code">kg.stock.movement.stock.transfer</field>
+		</record>
+
+		<record forcecreate="1" id="stock_movement_stock_transfer_id" model="ir.sequence">
+			  <field name="name">Stock Transfer</field>
+			  <field name="code">kg.stock.movement.stock.transfer</field>
+			  <field name="padding" eval="4"/>
+			  <field name="prefix">ST/16-17/</field>
+			  <field name="reset_sequence">yearly_reset</field>
+		</record>		
+		
+	<record forcecreate="1" id="seq_stock_movement_gp_fromsub" model="ir.sequence.type"> 
+			<field name="name">Gate Pass From SS</field>
+			<field name="code">kg.stock.movement.gp.fromsub</field>
+		</record>
+
+		<record forcecreate="1" id="stock_movement_gp_fromsub_id" model="ir.sequence">
+			  <field name="name">Gate Pass From SS</field>
+			  <field name="code">kg.stock.movement.gp.fromsub</field>
+			  <field name="padding" eval="4"/>
+			  <field name="prefix">GPS/16-17/</field>
+			  <field name="reset_sequence">yearly_reset</field>
+		</record>			
+		
+	<record forcecreate="1" id="seq_stock_movement_gp_frommain" model="ir.sequence.type"> 
+			<field name="name">Gate Pass From MS</field>
+			<field name="code">kg.stock.movement.gp.frommain</field>
+		</record>
+
+		<record forcecreate="1" id="stock_movement_gp_frommain_id" model="ir.sequence">
+			  <field name="name">Gate Pass From MS</field>
+			  <field name="code">kg.stock.movement.gp.frommain</field>
+			  <field name="padding" eval="4"/>
+			  <field name="prefix">GPM/16-17/</field>
+			  <field name="reset_sequence">yearly_reset</field>
+		</record>			
+
+    </data>
+</openerp>

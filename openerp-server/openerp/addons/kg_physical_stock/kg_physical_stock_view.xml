@@ -27,11 +27,11 @@
 						<field name="categ_id" widget="many2many_tags"/>
 						<!--<button name="list_issue" string="List Details" type="object" class="oe_highlight" />-->
 						<field name="load" invisible="1"/>
-						<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
                     </group>
                     <group>
 						<field name="product_type"/>
 						<field name="stock_type" required="1"/>
+						<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
                     </group>
 				</group>
 				<notebook>

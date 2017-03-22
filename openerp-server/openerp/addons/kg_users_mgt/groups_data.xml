@@ -365,6 +365,8 @@
 			ref('kg_department_issue.gam_dept_issue'),
 			ref('kg_menus.iam_issue_return'),
 			
+			ref('kg_menus.tpm_physical_stock'),
+			ref('kg_physical_stock.tam_physical_stock'),
 			
 			ref('kg_menus.gpm_gate_pass_menu'),
 			ref('kg_gate_pass.gam_gate_pass'),
