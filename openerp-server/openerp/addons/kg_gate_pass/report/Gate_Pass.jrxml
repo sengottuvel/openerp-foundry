@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Gate_Pass" pageWidth="595" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="144"/>
+	<property name="ireport.y" value="0"/>
 	<subDataset name="New Dataset 1">
 		<parameter name="pass_id" class="java.lang.Integer"/>
 		<queryString>
@@ -63,6 +63,11 @@ pass.received_by as received_by,
 pass.note as notes,
 to_char(pass.date::date,'dd-mm-YYYY')  as pass_date,
 partner.name as supplier_name,
+(CASE WHEN partner.tin_no is null
+THEN ''
+ELSE 'TIN No. '||partner.tin_no
+end ) as sup_tin_no,
+partner.tin_no as sup_tin_no,
 (CASE WHEN partner.street is null
 THEN  ' '
 ELSE partner.street
@@ -131,6 +136,7 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 	<field name="notes" class="java.lang.String"/>
 	<field name="pass_date" class="java.lang.String"/>
 	<field name="supplier_name" class="java.lang.String"/>
+	<field name="sup_tin_no" class="java.lang.String"/>
 	<field name="sup_street1" class="java.lang.String"/>
 	<field name="sup_street2" class="java.lang.String"/>
 	<field name="contact_person" class="java.lang.String"/>
@@ -434,7 +440,7 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 				<textElement verticalAlignment="Top">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{supplier_name}+", \n"+$F{sup_street1}+",\n"+$F{sup_city}+"-"+$F{sup_zip}+",\n"+$F{sup_state}+",\n"+$F{sup_country}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{supplier_name}+", \n"+$F{sup_street1}+",\n"+$F{sup_city}+"-"+$F{sup_zip}+",\n"+$F{sup_state}+",\n"+$F{sup_country}+",\n"+$F{sup_tin_no}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="5" y="48" width="19" height="15"/>
