@@ -435,7 +435,7 @@ where pass.id = $P{pass_id} and pass.state = 'done']]>
 				<textFieldExpression><![CDATA["Date     :   "+$F{pass_date}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="RelativeToTallestObject" x="372" y="62" width="167" height="67"/>
+				<reportElement stretchType="RelativeToTallestObject" x="372" y="62" width="167" height="58"/>
 				<box topPadding="2"/>
 				<textElement verticalAlignment="Top">
 					<font size="8"/>
