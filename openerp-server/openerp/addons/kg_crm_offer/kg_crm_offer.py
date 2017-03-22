@@ -508,10 +508,7 @@ class kg_crm_offer(osv.osv):
 				if not entry.dealer_po_no:
 					raise osv.except_osv(_('Warning!'),
 						_('Update Dealer PO No.'))
-						
-			spr_svp = [x.decision for x in entry.line_pump_ids if x.purpose_categ in ('attended','not_attended')]
-			print"spr_svp",spr_svp
-				
+			
 			wo_id = self.pool.get('kg.work.order').create(cr,uid,{'order_category': entry.purpose,
 																  'name': '',
 																  'order_priority': '',
