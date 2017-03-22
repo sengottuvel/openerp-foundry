@@ -1127,11 +1127,13 @@ class ch_work_order_details(osv.osv):
 				#### Loading BOT Details
 				
 				bom_bot_obj = self.pool.get('ch.bot.details')
-				cr.execute(''' select id,bot_id,qty,header_id as bom_id
+				cr.execute(''' select id,position_id,bot_id,qty,header_id as bom_id
 						from ch_bot_details
 						where header_id = (select id from kg_bom where pump_model_id = %s and  active='t') ''',[pump_model_id])
 				bom_bot_details = cr.dictfetchall()
 				for bom_bot_details in bom_bot_details:
+					if bom_bot_details['position_id'] == None:
+						bom_bot_details['position_id'] = False
 					if qty == 0:
 						bom_bot_qty = bom_bot_details['qty']
 					if qty > 0:
@@ -1162,6 +1164,7 @@ class ch_work_order_details(osv.osv):
 						'bot_line_id': bom_bot_details['id'],
 						'bom_id': bom_bot_details['bom_id'],							
 						'bot_id': bom_bot_details['bot_id'],
+						'position_id': bom_bot_details['position_id'],
 						'qty': bom_bot_qty,
 						'flag_applicable' : applicable,
 						'flag_standard':flag_standard,
@@ -2303,6 +2306,7 @@ class ch_order_bot_details(osv.osv):
 		'entry_mode': fields.selection([('manual','Manual'),('auto','Auto')],'Entry Mode'),
 		'flag_is_bearing': fields.boolean('Is Bearing'),
 		'brand_id': fields.many2one('kg.brand.master','Brand'),	
+		'position_id': fields.many2one('kg.position.number','Position No'),
 		
 		### Offer Details ###
 		'spare_offer_line_id': fields.integer('Spare Offer'),

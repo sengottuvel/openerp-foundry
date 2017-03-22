@@ -336,17 +336,17 @@ class account_voucher(osv.osv):
     }
 
     _columns = {
-        'active': fields.boolean('Active', help="By default, reconciliation vouchers made on draft bank statements are set as inactive, which allow to hide the customer/supplier payment while the bank statement isn't confirmed."),
+        
         'type':fields.selection([
             ('sale','Sale'),
             ('purchase','Purchase'),
             ('payment','Payment'),
             ('receipt','Receipt'),
         ],'Default Type', readonly=True, states={'draft':[('readonly',False)]}),
-        'name':fields.char('Memo', size=256, readonly=True, states={'draft':[('readonly',False)]}),
+        
         'date':fields.date('Date', readonly=True, select=True, states={'draft':[('readonly',False)]}, help="Effective date for accounting entries"),
-        'journal_id':fields.many2one('account.journal', 'Journal', required=True, readonly=True, states={'draft':[('readonly',False)]}),
-        'account_id':fields.many2one('account.account', 'Account', required=True, readonly=True, states={'draft':[('readonly',False)]}),
+       
+        'account_id':fields.many2one('account.account', 'Account', readonly=True, states={'draft':[('readonly',False)]}),
         'line_ids':fields.one2many('account.voucher.line','voucher_id','Voucher Lines', readonly=True, states={'draft':[('readonly',False)]}),
         'line_cr_ids':fields.one2many('account.voucher.line','voucher_id','Credits',
             domain=[('type','=','cr')], context={'default_type':'cr'}, readonly=True, states={'draft':[('readonly',False)]}),
@@ -355,24 +355,15 @@ class account_voucher(osv.osv):
         'period_id': fields.many2one('account.period', 'Period', required=True, readonly=True, states={'draft':[('readonly',False)]}),
         'narration':fields.text('Notes', readonly=True, states={'draft':[('readonly',False)]}),
         'currency_id': fields.function(_get_journal_currency, type='many2one', relation='res.currency', string='Currency', readonly=True, required=True),
-        'company_id': fields.many2one('res.company', 'Company', required=True, readonly=True, states={'draft':[('readonly',False)]}),
-        'state':fields.selection(
-            [('draft','Draft'),
-             ('cancel','Cancelled'),
-             ('proforma','Pro-forma'),
-             ('posted','Posted')
-            ], 'Status', readonly=True, size=32, track_visibility='onchange',
-            help=' * The \'Draft\' status is used when a user is encoding a new and unconfirmed Voucher. \
-                        \n* The \'Pro-forma\' when voucher is in Pro-forma status,voucher does not have an voucher number. \
-                        \n* The \'Posted\' status is used when user create voucher,a voucher number is generated and voucher entries are created in account \
-                        \n* The \'Cancelled\' status is used when user cancel voucher.'),
+       
+       
         'amount': fields.float('Total', digits_compute=dp.get_precision('Account'), required=True, readonly=True, states={'draft':[('readonly',False)]}),
         'tax_amount':fields.float('Tax Amount', digits_compute=dp.get_precision('Account'), readonly=True, states={'draft':[('readonly',False)]}),
         'reference': fields.char('Ref #', size=64, readonly=True, states={'draft':[('readonly',False)]}, help="Transaction reference number."),
         'number': fields.char('Number', size=32, readonly=True,),
         'move_id':fields.many2one('account.move', 'Account Entry'),
         'move_ids': fields.related('move_id','line_id', type='one2many', relation='account.move.line', string='Journal Items', readonly=True),
-        'partner_id':fields.many2one('res.partner', 'Partner', change_default=1, readonly=True, states={'draft':[('readonly',False)]}),
+        
         'audit': fields.related('move_id','to_check', type='boolean', help='Check this box if you are unsure of that journal entry and if you want to note it as \'to be reviewed\' by an accounting expert.', relation='account.move', string='To Review'),
         'paid': fields.function(_check_paid, string='Paid', type='boolean', help="The Voucher has been totally paid."),
         'pay_now':fields.selection([
@@ -396,22 +387,32 @@ class account_voucher(osv.osv):
         'paid_amount_in_company_currency': fields.function(_paid_amount_in_company_currency, string='Paid Amount in Company Currency', type='float', readonly=True),
         'is_multi_currency': fields.boolean('Multi Currency Voucher', help='Fields with internal purpose only that depicts if the voucher is a multi currency one or not'),
         'currency_help_label': fields.function(_fnct_currency_help_label, type='text', string="Helping Sentence", help="This sentence helps you to know how to specify the payment rate by giving you the direct effect it has"), 
+        
+        ## Module process
+        
+        'state':fields.selection([('draft','Draft'),('cancel','Cancelled'),('proforma','WFA'),('posted','Posted')], 'Status', readonly=True),
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
+		'active': fields.boolean('Active'),
+		'partner_id':fields.many2one('res.partner', 'Partner',required=True),
+        'journal_id':fields.many2one('account.journal', 'Book Name', required=True),
+        'name':fields.char('Voucher No.', size=256, readonly=True),
+        
+        
+        
     }
     _defaults = {
+        
         'active': True,
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'account.voucher', context=c),
+        'state': 'draft',
         'period_id': _get_period,
-        'partner_id': _get_partner,
-        'journal_id':_get_journal,
         'currency_id': _get_currency,
         'reference': _get_reference,
         'narration':_get_narration,
         'amount': _get_amount,
-        'type':_get_type,
-        'state': 'draft',
-        'pay_now': 'pay_now',
-        'name': '',
-        'date': lambda *a: time.strftime('%Y-%m-%d'),
-        'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'account.voucher',context=c),
+        'type':_get_type,        
+        'pay_now': 'pay_now',        
+        'date': lambda *a: time.strftime('%Y-%m-%d'),       
         'tax_id': _get_tax,
         'payment_option': 'without_writeoff',
         'comment': _('Write-Off'),
@@ -1491,7 +1492,7 @@ class account_voucher_line(osv.osv):
     _columns = {
         'voucher_id':fields.many2one('account.voucher', 'Voucher', required=1, ondelete='cascade'),
         'name':fields.char('Description', size=256),
-        'account_id':fields.many2one('account.account','Account', required=True),
+        
         'partner_id':fields.related('voucher_id', 'partner_id', type='many2one', relation='res.partner', string='Partner'),
         'untax_amount':fields.float('Untax Amount'),
         'amount':fields.float('Amount', digits_compute=dp.get_precision('Account')),
@@ -1505,6 +1506,26 @@ class account_voucher_line(osv.osv):
         'amount_unreconciled': fields.function(_compute_balance, multi='dc', type='float', string='Open Balance', store=True, digits_compute=dp.get_precision('Account')),
         'company_id': fields.related('voucher_id','company_id', relation='res.company', type='many2one', string='Company', store=True, readonly=True),
         'currency_id': fields.function(_currency_id, string='Currency', type='many2one', relation='res.currency', readonly=True),
+        
+        ### Module Requirements
+        'doc_no':fields.char('Doc.No', required=True), 
+        'doc_date':fields.date('Doc.Date', required=True), 
+        'account_id':fields.many2one('account.account','Ledger Name', required=True),
+        'code':fields.char('Code', readonly=True),
+        'debit':fields.float('Debit', required=True),
+        'credit':fields.float('Credit', required=True),
+        'narration':fields.char('Narration', required=True),
+        'remarks':fields.char('Remarks'),
+        'source':fields.selection([('purchase_bills','Purchase Bills'),
+								('po_advance','PO Advance'),
+								('fettling_bills','Fettling Bills'),
+								('ms_sc_bills','MS SC Bills'),
+								('salary','Salary'),
+								('direct_bills','Direct Bills'),
+								('sale_invoice','Sale Invoice'),
+								('customer_advance','Customer Advance')], 'Source'),
+								
+        
     }
     _defaults = {
         'name': '',
@@ -1716,5 +1737,4 @@ def resolve_o2m_operations(cr, uid, target_osv, operations, fields, context):
             results.append(result)
     return results
 
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+  

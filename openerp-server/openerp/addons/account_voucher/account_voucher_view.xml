@@ -40,8 +40,7 @@
             <field name="name">account.voucher.form</field>
             <field name="model">account.voucher</field>
             <field name="arch" type="xml">
-                <form string="Accounting Voucher" version="7.0" class="qwertyuioop">
-					
+                <form string="Accounting Voucher" version="7.0">
                   <header>
                       <button name="proforma_voucher" string="Post" states="draft" class="oe_highlight"/>
                       <button name="cancel_voucher" string="Cancel Voucher" type="object" states="posted" confirm="Are you sure you want to unreconcile this record?"/>
@@ -177,12 +176,14 @@
         </record>
         <menuitem action="action_voucher_list" id="menu_encode_entries_by_voucher" parent="account.menu_finance_entries" sequence="6" groups="base.group_no_one"/>
 
+<!--
         <act_window
             id="act_journal_voucher_open"
             name="Voucher Entries"
             context="{'search_default_journal_id': active_id, 'type':type, 'default_journal_id': active_id}"
             res_model="account.voucher"
             src_model="account.journal"/>
+-->
 
         <record model="ir.actions.act_window" id="action_review_voucher_list">
             <field name="name">Vouchers Entries</field>
@@ -279,7 +280,10 @@
         <record id="base.open_menu" model="ir.actions.todo">
             <field name="action_id" ref="action_client_invoice_menu"/>
             <field name="state">open</field>
-        </record>
+        </record>   
+        
+       
+        
 
     </data>
 </openerp>

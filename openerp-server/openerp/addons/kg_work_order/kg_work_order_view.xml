@@ -279,6 +279,7 @@
 									<field name="flag_applicable"/>
 									<field name="bot_id" on_change="onchange_bot(bot_id)"/>	
 									<field name="item_name" readonly="1"/>
+									<field name="position_id"/>
 									<field name="material_code"/>																			
 									<field name="qty" required="1"/>
 									<field name="unit_price"/>
