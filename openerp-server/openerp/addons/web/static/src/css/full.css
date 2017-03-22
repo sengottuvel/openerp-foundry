@@ -10,3 +10,7 @@ body {
     overflow-y: scroll;
     height: 100%;
 }
+
+table.oe_form_group.oe_subtotal_footer.oe_right{
+	margin-bottom: 70px;
+}
