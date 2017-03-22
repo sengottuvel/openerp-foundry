@@ -232,6 +232,26 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Inventory Admin')]"/>
 		</record>
 		
+		<record id="t_inventory_stock_movement" model="ir.model.access">
+			<field name="model_id" ref="kg_stock_movement.model_kg_stock_movement"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Stock Movement</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Inventory Admin')]"/>
+		</record>
+		
+		<record id="t_inventory_ch_stock_movement" model="ir.model.access">
+			<field name="model_id" ref="kg_stock_movement.model_ch_stock_movement"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Ch Stock Movement</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Inventory Admin')]"/>
+		</record>
+		
 		<record id="t_inventory_department_issue" model="ir.model.access">
 			<field name="model_id" ref="kg_department_issue.model_kg_department_issue"/>
 			<field eval="1" name="perm_read"/>
