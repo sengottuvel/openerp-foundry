@@ -286,5 +286,127 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
 		</record>
 		
+		<!-- Account Voucher Receipt-->
+		
+		<record id="m_accounts_account_voucher" model="ir.model.access">
+			<field name="model_id" ref="account_voucher.model_account_voucher"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Account Voucher</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
+		
+		<record id="m_accounts_account_voucher_line" model="ir.model.access">
+			<field name="model_id" ref="account_voucher.model_account_voucher_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Account Voucher Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
+		
+		<record id="m_accounts_account_voucher_sale_invoice_details" model="ir.model.access">
+			<field name="model_id" ref="kg_account_voucher.model_ch_sale_invoice_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Account Voucher Receipt</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
+		
+		<record id="m_accounts_account_voucher_customer_advance_details" model="ir.model.access">
+			<field name="model_id" ref="kg_account_voucher.model_ch_customer_advance_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Account Voucher Receipt</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
+		
+		<!-- Account Voucher Receipt End hear -->
+		
+		<!-- Account Voucher Payment Start hear -->
+		
+		<record id="m_accounts_ch_purchase_bill_details" model="ir.model.access">
+			<field name="model_id" ref="kg_account_voucher.model_ch_purchase_bill_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Account Voucher payment</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
+		
+		<record id="m_accounts_ch_supplier_advance_details" model="ir.model.access">
+			<field name="model_id" ref="kg_account_voucher.model_ch_supplier_advance_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Account Voucher payment</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
+		<record id="m_accounts_ch_fettling_bill_details" model="ir.model.access">
+			<field name="model_id" ref="kg_account_voucher.model_ch_fettling_bill_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Account Voucher payment</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
+		<record id="m_accounts_ch_ms_sc_bill_details" model="ir.model.access">
+			<field name="model_id" ref="kg_account_voucher.model_ch_ms_sc_bill_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Account Voucher payment</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
+		<record id="m_accounts_ch_salary_details" model="ir.model.access">
+			<field name="model_id" ref="kg_account_voucher.model_ch_salary_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Account Voucher payment</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
+		<record id="m_accounts_ch_direct_bill_details" model="ir.model.access">
+			<field name="model_id" ref="kg_account_voucher.model_ch_direct_bill_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Account Voucher payment</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
+		<record id="m_accounts_ch_tds_details" model="ir.model.access">
+			<field name="model_id" ref="kg_account_voucher.model_ch_tds_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Account Voucher payment</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
+		<record id="m_accounts_ch_credit_note_details" model="ir.model.access">
+			<field name="model_id" ref="kg_account_voucher.model_ch_credit_note_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Account Voucher payment</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Accounts Admin')]"/>
+		</record>
+	
+	<!-- Account Voucher Payment End hear -->
+		
  </data>
 </openerp>
