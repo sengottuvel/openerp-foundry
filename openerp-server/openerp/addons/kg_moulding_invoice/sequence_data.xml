@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+	
+		
+	<record forcecreate="1" id="seq_type_moulding_invoice" model="ir.sequence.type">	
+		<field name="name">KG Moulding Invoice</field>
+		<field name="code">kg.moulding.invoice</field>
+	</record>
+
+	<record forcecreate="1" id="seq_moulding_invoice" model="ir.sequence">
+	  <field name="name">KG Moulding Invoice</field>
+	  <field name="code">kg.moulding.invoice</field>
+	  <field name="padding" eval="5"/>
+	  <field name="prefix">INVOICE/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+		
+	
+		
+</data>
+</openerp>
