@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Workorder_print" pageWidth="842" pageHeight="605" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="0.8857805000000005"/>
-	<property name="ireport.x" value="9"/>
-	<property name="ireport.y" value="101"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="99"/>
 	<subDataset name="dataset2">
 		<parameter name="header_id" class="java.lang.Integer"/>
 		<queryString>
@@ -756,7 +756,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
-					<text><![CDATA[Motor KW ]]></text>
+					<text><![CDATA[Speed - RPM (P/M)]]></text>
 				</staticText>
 				<staticText>
 					<reportElement mode="Transparent" x="0" y="233" width="421" height="16" isRemoveLineWhenBlank="true"/>
@@ -782,7 +782,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
-					<text><![CDATA[Speed - RPM (P/M)]]></text>
+					<text><![CDATA[Motor KW ]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="421" y="218" width="382" height="15"/>
@@ -824,7 +824,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{remarks}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="421" y="265" width="382" height="15"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="421" y="281" width="382" height="15"/>
 					<box>
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
@@ -850,7 +850,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA[$F{motor_make}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="421" y="280" width="382" height="16"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="421" y="264" width="382" height="16"/>
 					<box>
 						<topPen lineWidth="0.0"/>
 						<leftPen lineWidth="0.75"/>
