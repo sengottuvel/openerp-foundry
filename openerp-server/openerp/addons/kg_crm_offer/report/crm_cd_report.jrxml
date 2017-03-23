@@ -3260,17 +3260,6 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{avg_deal_dis}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="639" y="0" width="48" height="14"/>
-								<box topPadding="2" rightPadding="2">
-									<bottomPen lineWidth="0.5"/>
-									<rightPen lineWidth="0.5"/>
-								</box>
-								<textElement textAlignment="Right">
-									<font size="8"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$F{dealer_val}]]></textFieldExpression>
-							</textField>
-							<textField isBlankWhenNull="true">
 								<reportElement x="687" y="0" width="48" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
@@ -3302,6 +3291,17 @@ where off.id = $P{offer_id}]]>
 									<font size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{ratio}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="639" y="0" width="48" height="14"/>
+								<box topPadding="2" rightPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{les_dealer_val}]]></textFieldExpression>
 							</textField>
 						</jr:listContents>
 					</jr:list>
