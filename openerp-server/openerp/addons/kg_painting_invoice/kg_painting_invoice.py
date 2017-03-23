@@ -77,7 +77,7 @@ class kg_painting_invoice(osv.osv):
 			res[order.id]['order_value'] = wo_value
 			res[order.id]['total_value'] = total_value + final_other_charges
 			res[order.id]['additional_charges'] = final_other_charges
-			res[order.id]['amount_untaxed'] = total_value_amt - tax_amt
+			res[order.id]['amount_untaxed'] = total_value_amt
 			res[order.id]['total_discount'] = discount_value
 			res[order.id]['amount_tax'] = tax_amt
 			res[order.id]['total_amt'] = final_other_charges + total_value_amt + tax_amt

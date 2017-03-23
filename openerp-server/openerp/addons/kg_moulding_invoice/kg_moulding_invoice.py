@@ -79,7 +79,7 @@ class kg_moulding_invoice(osv.osv):
 			res[order.id]['order_value'] = wo_value
 			res[order.id]['total_value'] = total_value + final_other_charges
 			res[order.id]['additional_charges'] = final_other_charges
-			res[order.id]['amount_untaxed'] = total_value_amt - tax_amt
+			res[order.id]['amount_untaxed'] = total_value_amt
 			res[order.id]['total_discount'] = discount_value
 			res[order.id]['amount_tax'] = tax_amt
 			res[order.id]['total_amt'] = final_other_charges + total_value_amt + tax_amt
@@ -300,7 +300,11 @@ class kg_moulding_invoice(osv.osv):
 		for mould_item in mould_ids:
 			
 			pattern_rec = self.pool.get('kg.pattern.master').browse(cr,uid,mould_item['pattern_id'] )
-
+			if pattern_rec.box_id.cost == None:
+				each_rate = 0
+			else:
+				each_rate = pattern_rec.box_id.cost
+			print "each_rate",each_rate
 			vals = {
 			
 				'header_id': entry.id,
@@ -308,7 +312,8 @@ class kg_moulding_invoice(osv.osv):
 				'qty':mould_item['total_mould_qty'],
 				'pattern_id':mould_item['pattern_id'],						
 				'date':mould_item['mould_date'],						
-				'each_rate':pattern_rec.box_id.cost,						
+				'each_rate':each_rate,
+				'total_amt': int(mould_item['total_mould_qty']) * int(each_rate)					
 							
 				
 			}
@@ -432,12 +437,23 @@ class ch_moulding_invoice_line_details(osv.osv):
 	
 	
 	def _get_total_value(self, cr, uid, ids, field_name, arg, context=None):
-		result = {}
+		res = {}
 		
 		for entry in self.browse(cr, uid, ids, context=context):
-			total_value = entry.qty * entry.each_rate
-			result[entry.id] = total_value
-		return result
+			print "entry.each_rate",entry.each_rate
+			if entry.each_rate != False:
+				each_rate = entry.each_rate
+			else:
+				each_rate = entry.pattern_id.box_id.cost
+				if each_rate == None:
+					each_rate = 0
+				else:
+					each_rate = each_rate
+				
+			total_value = entry.qty * each_rate
+			print "total_value",total_value
+			res[entry.id] = total_value
+		return res
 	
 	
 	
@@ -458,7 +474,7 @@ class ch_moulding_invoice_line_details(osv.osv):
 		'qty': fields.integer('Quantity',required=True),
 		'mould_box_id': fields.related('pattern_id','box_id', type='many2one', relation='kg.box.master', string='Box Size', store=True),
 		'each_rate': fields.related('mould_box_id','cost', type='float', string='Each Rate'),
-		'total_amt': fields.function(_get_total_value, string='Total', method=True, store=True, type='float'),
+		'total_amt': fields.function(_get_total_value, string='Total',store=True,help="Total"),
 		## Child Tables Declaration 				
 		
 	}

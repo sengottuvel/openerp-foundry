@@ -1263,6 +1263,7 @@ class kg_qc_verification(osv.osv):
 		
 	#### Rejection Function ####
 	
+	
 	def reject_process(self,cr,uid,ids,reject_qty,qc_type,reject_type,ref_id,stock_inward_id,fettling_qty,context=None):
 		production_obj = self.pool.get('kg.production')
 		fettling_obj = self.pool.get('kg.fettling')
@@ -1275,6 +1276,10 @@ class kg_qc_verification(osv.osv):
 		assembly_bot_obj = self.pool.get('ch.assembly.bot.details')
 		
 		### Creating QC or Stock Allocation When Rejection
+		if stock_inward_id == False:
+			stock_inward_id=0
+		else:
+			stock_inward_id = stock_inward_id
 		print "reject_qty",reject_qty
 		if reject_qty > 0:
 			
@@ -1379,6 +1384,11 @@ class kg_qc_verification(osv.osv):
 										
 										qc_id = qc_obj.create(cr, uid, qc_vals)
 										
+										if reject_type == 'fettling':
+											### Production Update ###
+											if ref_id.production_id.id:
+												production_obj.write(cr,uid,ref_id.production_id.id,{'qty':ref_id.production_id.qty - qc_qty})
+										
 										### Qty Updation in Stock Inward ###
 										
 										inward_line_obj = self.pool.get('ch.stock.inward.details')
@@ -1445,14 +1455,14 @@ class kg_qc_verification(osv.osv):
 									### Qty Updation in Stock Inward ###
 								
 									inward_line_obj = self.pool.get('ch.stock.inward.details')
-									
+									 
 									cr.execute(""" select id,available_qty
 										from ch_stock_inward_details  
 										where pattern_id = %s and moc_id = %s
 										and foundry_stock_state = 'foundry_inprogress' 
 										and available_qty > 0 and stock_type = 'pattern'
-										and id != %s and id not in (select id from ch_stock_inward_details where order_id = %s)
-										 """%(ref_id.pattern_id.id,ref_id.moc_id.id,entry.stock_inward_id.id,entry.order_id.id))
+										and id not in (select id from ch_stock_inward_details where order_id = %s)
+										 """%(ref_id.pattern_id.id,ref_id.moc_id.id,ref_id.order_id.id))
 										
 									stock_inward_items = cr.dictfetchall();
 									
@@ -1940,6 +1950,12 @@ class kg_qc_verification(osv.osv):
 							full_reject_qty = fettling_qty - rem_qty
 							if full_reject_qty == 0:
 								fettling_obj.write(cr, uid, ref_id.id, {'state':'complete'})
+							### Production Update ###
+							print "ref_id.production_id.id",ref_id.production_id.id
+							print "ref_id.production_id.qty",ref_id.production_id.qty
+							if ref_id.production_id.id:
+								production_obj.write(cr,uid,ref_id.production_id.id,{'qty':ref_id.production_id.qty - rem_qty})
+								
 						
 						### Production Number ###
 						produc_name = ''	
@@ -2309,7 +2325,9 @@ class kg_qc_verification(osv.osv):
 									'breadth': ms_raw_rec.breadth
 								}
 
-								indent_line_id = dep_indent_line_obj.create(cr, uid, ms_dep_indent_line_vals)		
+		
+								indent_line_id = dep_indent_line_obj.create(cr, uid, ms_dep_indent_line_vals)
+				
 		return True
 		
 	def entry_confirm(self,cr,uid,ids,context=None):
