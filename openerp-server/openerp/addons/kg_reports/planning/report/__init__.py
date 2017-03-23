@@ -7,6 +7,6 @@ import kg_workorder_report
 import kg_spare_report
 import kg_casting_completion_report
 import kg_pouring_over_report
-
+import kg_purchase_list_report
 
 
