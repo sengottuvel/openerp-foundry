@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Workorder_print" pageWidth="842" pageHeight="605" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="0.8857805000000005"/>
-	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.x" value="9"/>
+	<property name="ireport.y" value="101"/>
 	<subDataset name="dataset2">
 		<parameter name="header_id" class="java.lang.Integer"/>
 		<queryString>
@@ -269,7 +269,7 @@ case when pump_crm.description is not null then pump_crm.description else '-' en
 coalesce(pump_crm.equipment_no,'-') as tag_no,
 wo_line.qty as qty,
 coalesce(pump_crm.size_suctionx,'-') as size,
-case when pump_crm.flange_standard > 0 then pump_crm.flange_standard::text else '-' end as flange_standard,
+coalesce(flange.name,'-') as flange_standard,
 coalesce(liquid.name,'-') as liquid_handled,
 case when pump_crm.specific_gravity > 0 then pump_crm.specific_gravity::text else '-' end as specific_gravity,
 case when pump_crm.temperature_in_c is not null then pump_crm.temperature_in_c::text else '-' end as temperature_in_c,
@@ -318,6 +318,12 @@ case when pump_crm.shut_off_head > 0 then pump_crm.shut_off_head::text else '-' 
 case when pump_crm.impeller_dia_min > 0 then pump_crm.impeller_dia_min::text else '-' end as impeller_dia_min,
 case when pump_crm.hydrostatic_test_pressure > 0 then pump_crm.hydrostatic_test_pressure::text else '-' end as hydrostatic_test_pressure,
 
+case when pump_crm.motor_kw > 0 then round(cast(pump_crm.motor_kw as numeric),2)::text else '-' end as motor_kw,
+
+case when pump_crm.speed_in_rpm > 0 then pump_crm.speed_in_rpm::text else '-' end as speed_pump,
+case when pump_crm.speed_in_motor > 0 then pump_crm.speed_in_motor::text else '-' end as speed_motor,
+
+
 to_char(wo_line.delivery_date::date,'dd-mm-YYYY') as due_date,
 to_char(wo.entry_date::date,'dd-mm-YYYY') as order_date,
 comp.name as company_name,
@@ -338,6 +344,7 @@ left join res_partner cust on cust.id = wo.partner_id
 left join res_partner dealer on dealer.id = crm_enquiry.dealer_id
 left join res_company comp on comp.id = wo.company_id
 left join kg_brand_master brand on brand.id = pump_crm.mech_seal_make
+left join ch_pumpseries_flange flange on flange.id = pump_crm.flange_standard
 
 where case
 when (select order_id from m2m_work_order_spare_print_report_details where foundry_wiz_id =$P{wiz_id}  limit 1) is not null then wo_line.id in (select order_id from m2m_work_order_spare_print_report_details where foundry_wiz_id = $P{wiz_id})
@@ -386,6 +393,9 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 	<field name="shut_off_head" class="java.lang.String"/>
 	<field name="impeller_dia_min" class="java.lang.String"/>
 	<field name="hydrostatic_test_pressure" class="java.lang.String"/>
+	<field name="motor_kw" class="java.lang.String"/>
+	<field name="speed_pump" class="java.lang.String"/>
+	<field name="speed_motor" class="java.lang.String"/>
 	<field name="due_date" class="java.lang.String"/>
 	<field name="order_date" class="java.lang.String"/>
 	<field name="company_name" class="java.lang.String"/>
@@ -824,7 +834,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
 						<font size="10"/>
 					</textElement>
-					<textFieldExpression><![CDATA[""]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{motor_kw}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="421" y="233" width="382" height="16"/>
@@ -850,7 +860,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
 						<font size="10"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{speed_rpm}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{speed_pump}+" /  "+$F{speed_motor}]]></textFieldExpression>
 				</textField>
 				<staticText>
 					<reportElement mode="Transparent" x="0" y="296" width="421" height="20" isRemoveLineWhenBlank="true"/>
@@ -902,7 +912,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
 						<font size="10"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{shaft_sealing}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{shaft_sealing}+" / "+$F{mech_seal_make}+" / "+$F{seal_type}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="421" y="332" width="382" height="16"/>
