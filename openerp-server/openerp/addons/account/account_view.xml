@@ -355,7 +355,7 @@
             <field name="name">account.account.form</field>
             <field name="model">account.account</field>
             <field name="arch" type="xml">
-                <form string="Account" version="7.0">
+                <form string="Ledger Name" version="7.0">
 					<header>						
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>						
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>									
@@ -457,11 +457,12 @@
         
         
         <record id="action_account_form" model="ir.actions.act_window">
-            <field name="name">Accounts</field>
+            <field name="name">Ledger Name</field>
             <field name="res_model">account.account</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
-            <field name="search_view_id" ref="view_account_search"/>           
+            <field name="search_view_id" ref="view_account_search"/> 
+             <field name="domain">[('type','!=','view')]</field>               
             <field name="help" type="html">              
             </field>
         </record>	
@@ -2162,7 +2163,7 @@
 								<field name="code" invisible = "1"/>
 								<field name="debit" required = "1"/>
 								<field name="credit" required = "1"/>
-								<field name="narration" widget="char" readonly="0"/>                                       
+								<field name="narration" widget="char" readonly="1"/>                                       
 							</tree>
 							</field> 
                         </page>
