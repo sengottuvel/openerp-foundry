@@ -62,7 +62,11 @@
 			ref('kg_melting.tam_melting'),
 			ref('kg_pouring_log.tam_pouring_log'),
 			
-			ref('kg_foundry_invoice.tam_foundry_invoice'),  
+			ref('kg_foundry_invoice.tam_foundry_invoice'), 
+			ref('kg_moulding_invoice.tam_moulding_invoice'),          
+            ref('kg_moulding_invoice.tam_sp_moulding_invoice'),          
+            ref('kg_painting_invoice.tam_painting_invoice'),          
+            ref('kg_painting_invoice.tam_sp_painting_invoice'),  
 			
 			ref('kg_fettling.tpm_fettling_process'),
 			ref('kg_fettling.tam_fettling_inward'),

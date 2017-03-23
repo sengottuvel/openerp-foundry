@@ -429,5 +429,35 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
+		<record id="t_foundry_painting_invoice" model="ir.model.access">
+			<field name="model_id" ref="kg_painting_invoice.model_kg_painting_invoice"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Painting Invoice</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_foundry_painting_invoice_line" model="ir.model.access">
+			<field name="model_id" ref="kg_painting_invoice.model_ch_painting_invoice_line_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Painting Invoice line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_foundry_painting_invoice_expense_line" model="ir.model.access">
+			<field name="model_id" ref="kg_painting_invoice.model_ch_painting_invoice_expense_track"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Painting Expense line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
     </data>
 </openerp>
