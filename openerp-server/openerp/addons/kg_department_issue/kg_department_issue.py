@@ -27,37 +27,39 @@ ORDER_PRIORITY = [
 ]
 
 class kg_department_issue(osv.osv):
-
+	
 	_name = "kg.department.issue"
 	_description = "Department Issue"
 	_order = "issue_date desc"
-
+	
 	_columns = {
+		
+		## Basic Info
 		
 		'name': fields.char('Issue No.',readonly=True),
 		'issue_date':fields.date('Issue Date',required=True,readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
-		'issue_line_ids':fields.one2many('kg.department.issue.line','issue_id','Line Entry',
-						 readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
+		'state': fields.selection([('draft', 'Draft'),
+			('confirmed', 'WFC'),
+			('approve', 'WFA'),
+			('done', 'Issued'),('cancel', 'Cancelled'),('reject', 'Rejected')], 'Status',readonly=True),
+		'remarks': fields.text('Remarks',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
+		'can_remark': fields.text('Cancel Remarks'),
+		'reject_remark': fields.text('Reject Remarks'),
+		'notes': fields.text('Notes'),
+		
+		## Module Requirement Info
+		
 		'kg_dep_indent_line':fields.many2many('kg.depindent.line', 'kg_department_indent_picking', 'kg_depline_id', 'stock_picking_id', 'Department Indent', 
 				 domain="[('indent_id.state','=','approved'), '&', ('indent_id.main_store','=',False),'&', ('indent_id.dep_name','=',department_id),'&', ('issue_pending_qty','>','0'),'&', ('pi_cancel' ,'!=', 'True')]", 
 				 readonly=True, states={'draft': [('readonly', False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
 		'outward_type': fields.many2one('kg.outwardmaster', 'Outward Type',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
 		'department_id': fields.many2one('kg.depmaster','Department',required=True,readonly=True, 
 						 domain="[('item_request','=',True),('state','in',('draft','confirmed','approved'))]", states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
-		'state': fields.selection([('draft', 'Draft'),
-			('confirmed', 'WFC'),
-			('approve', 'WFA'),
-			('done', 'Issued'),('cancel', 'Cancelled'),('reject', 'Rejected')], 'Status',readonly=True),
-		
 		'type': fields.selection([('in', 'IN'), ('out', 'OUT'), ('internal', 'Internal')], 'Type'),
 		'confirm_flag':fields.boolean('Confirm Flag'),
 		'approve_flag':fields.boolean('Expiry Flag'),
 		'products_flag':fields.boolean('Products Flag'),
 		'user_id' : fields.many2one('res.users', 'User', readonly=False),
-		'remarks': fields.text('Remarks',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
-		'can_remark': fields.text('Cancel Remarks'),
-		'reject_remark': fields.text('Reject Remarks'),
-		'notes': fields.text('Notes'),
 		'project':fields.char('Project',size=100,readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
 		'building':fields.char('Building',size=100,readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
 		'issue_type': fields.selection([('material', 'Material'), ('service', 'Service')], 'Issue Type',readonly=True,states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
@@ -70,7 +72,12 @@ class kg_department_issue(osv.osv):
 					readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'wo_line_id': fields.many2one('ch.work.order.details','WO No.',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		
-		# Entry Info
+		## Child Tables Declaration
+		
+		'issue_line_ids':fields.one2many('kg.department.issue.line','issue_id','Line Entry',
+						 readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)],'confirmed':[('readonly',False)],'approve':[('readonly',False)]}),
+		
+		## Entry Info
 		
 		'active':fields.boolean('Active'),
 		'company_id':fields.many2one('res.company','Company',readonly=True),
@@ -86,7 +93,7 @@ class kg_department_issue(osv.osv):
 		'rej_user_id': fields.many2one('res.users', 'Rejected By', readonly=True),
 		'update_date' : fields.datetime('Last Updated Date',readonly=True),
 		'update_user_id' : fields.many2one('res.users','Last Updated By',readonly=True),
-	
+		
 	}
 	
 	_defaults = {
@@ -105,7 +112,7 @@ class kg_department_issue(osv.osv):
 		'issue_return': False,
 		'company_id' : lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.department.issue', context=c),
 		'user_id': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).id ,
-
+		
 	}
 	
 	def _issdate_validation(self, cr, uid, ids, context=None):
@@ -115,13 +122,32 @@ class kg_department_issue(osv.osv):
 		if issue_date > today:
 			return False
 		return True
-		
-	_constraints = [
 	
+	def _dp2_qty_validation(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.dep_issue_type == 'from_indent' and rec.department_id.name == 'DP2':
+			if rec.issue_line_ids:
+				for item in rec.issue_line_ids:
+					if item.indent_qty > 0 and item.indent_line_id:
+						indent_rec = self.pool.get('kg.depindent.line').browse(cr,uid,item.indent_line_id.id)
+						if indent_rec.cutting_qty != indent_rec.qty:
+							qty = item.issue_qty / (indent_rec.qty/indent_rec.cutting_qty)
+							number_dec = str(qty-int(qty))[1:]
+							number_dec = float(number_dec)
+							if number_dec > 0.00:
+								raise osv.except_osv(_('Warning!'),
+									_('System not allow to issue %s. Insufficient MS Qty"'%(item.product_id.name)))
+							else:
+								pass
+		return True
+	
+	_constraints = [
+		
 		(_issdate_validation, 'Issue Date should not be greater than current date !!',['issue_date']),
+		(_dp2_qty_validation, 'Qty mismatched',['']),
 		
 		]
-		
+	
 	def onchange_direct_issue(self,cr,uid,ids,dep_iss_type,products_flag,context = None):
 		value = {'products_flag':'','state':''}
 		state = 'draft'
@@ -133,7 +159,7 @@ class kg_department_issue(osv.osv):
 		if dep_iss_type == 'direct':
 			state = 'confirmed'
 		return {'value':{'products_flag':product_flag,'state':state}}
-		
+	
 	def write(self, cr, uid, ids, vals, context=None):		
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_department_issue, self).write(cr, uid, ids, vals, context)
@@ -158,7 +184,7 @@ class kg_department_issue(osv.osv):
 						pass
 			self.write(cr, uid,ids,{'state' : 'reject','reject_date':time.strftime('%Y-%m-%d %H:%M:%S'),'rej_user_id':uid})
 		return True
-			
+	
 	def entry_cancel(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr,uid,ids[0])
 		if rec.state == 'done':
@@ -167,14 +193,14 @@ class kg_department_issue(osv.osv):
 					_('Enter Remarks for Issue Cancellation..'))
 			self.write(cr, uid,ids,{'state' : 'cancel','cancel_date':time.strftime('%Y-%m-%d %H:%M:%S'),'cancel_user_id':uid})
 		return True
-				
+	
 	def onchange_user_id(self, cr, uid, ids, user_id, context=None):
 		value = {'department_id': ''}
 		if user_id:
 			user = self.pool.get('res.users').browse(cr, uid, user_id, context=context)
 			value = {'department_id': user.dep_name.id}
 		return {'value': value}
-		
+	
 	def print_issue_slip(self, cr, uid, ids, context=None):		
 		assert len(ids) == 1, 'This option should only be used for a single id at a time'
 		wf_service = netsvc.LocalService("workflow")
@@ -185,7 +211,7 @@ class kg_department_issue(osv.osv):
 				 'form': self.read(cr, uid, ids[0], context=context),
 		}
 		return {'type': 'ir.actions.report.xml', 'report_name': 'issueslip.on.screen.report', 'datas': datas, 'nodestroy': True}
-		
+	
 	def update_depindent_to_issue(self,cr,uid,ids,context=None):
 		obj =  self.browse(cr,uid,ids[0])
 		if obj.state in ('draft','confirmed'):
@@ -261,7 +287,7 @@ class kg_department_issue(osv.osv):
 			self.write(cr,uid,ids,res)
 		
 		return True
-		
+	
 	def update_serviceindent_to_issue(self,cr,uid,ids,context=None):
 		obj =  self.browse(cr,uid,ids[0])
 		if obj.state in ('draft','confirmed'):
@@ -323,7 +349,7 @@ class kg_department_issue(osv.osv):
 						self.write(cr,uid,ids[0],{'issue_line_ids':[(0,0,vals)]})
 			self.write(cr,uid,ids,res)
 		return True
-		
+	
 	def entry_confirm(self, cr, uid, ids, context=None):
 		obj_rec = self.browse(cr, uid, ids[0])
 		if obj_rec.state == 'confirmed':	
@@ -415,7 +441,7 @@ class kg_department_issue(osv.osv):
 							_('You cannot process Issue with Item Line Qty Zero for Product %s.' %(dep_issue_line_rec.product_id.name)))
 		
 		return True
-			
+	
 	def action_process(self, cr, uid, ids, context=None):
 		issue_record = self.browse(cr,uid,ids[0])
 		if issue_record.state == 'approve':
@@ -446,7 +472,7 @@ class kg_department_issue(osv.osv):
 				pass
 				
 		return True
-		
+	
 	def issue_item_approval(self,cr,uid,issue_line_ids,context=None):
 		print"issue_line_idsissue_line_ids***********",issue_line_ids
 		stock_move_obj=self.pool.get('stock.move')
@@ -734,7 +760,7 @@ class kg_department_issue(osv.osv):
 		else:
 			raise osv.except_osv(_('Warning!'),_('System will delete draft entry only!'))
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
-		
+	
 kg_department_issue()
 
 class kg_department_issue_line(osv.osv):
@@ -944,7 +970,7 @@ class kg_department_issue_line(osv.osv):
 			#~ unlink_ids.append(rec.id)
 		#~ 
 		#~ return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
-				
+	
 kg_department_issue_line()
 
 class kg_item_wise_dept_issue(osv.osv):
