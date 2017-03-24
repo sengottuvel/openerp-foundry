@@ -27,7 +27,7 @@ left join kg_moc_master moc on (moc.id = ch_bom.moc_id)
 
 where ch_bom.is_applicable = True and
 
-ch_access.id = $P{header_id}
+work_order.id = $P{header_id}
 
 UNION
 
@@ -52,7 +52,7 @@ left join kg_position_number position_num on (position_num.id = ch_machineshop.p
 left join kg_moc_master moc on (moc.id = ch_machineshop.moc_id)
 
 where ch_machineshop.is_applicable = True and
-ch_access.id = $P{header_id}
+work_order.id =$P{header_id}
 
 UNION
 
@@ -79,7 +79,7 @@ left join kg_moc_master moc on (moc.id = ch_bot.moc_id)
 
 where ch_bot.is_applicable = True and
 
-ch_access.id = $P{header_id}]]>
+work_order.id = $P{header_id}]]>
 		</queryString>
 		<field name="position_no" class="java.lang.String"/>
 		<field name="drawing_no" class="java.lang.String"/>
@@ -95,8 +95,7 @@ ch_access.id = $P{header_id}]]>
 	<queryString>
 		<![CDATA[select
 company.name as company_name,
-wo_line.id as id,
-ch_access.id as header_id,
+wo_line.id as header_id,
 wo_line.order_no as wo_no,
 pump.name as pump_type,
 case
@@ -128,7 +127,6 @@ wo_line.id in (select  id from ch_work_order_details) end
 and ch_access.id is not null]]>
 	</queryString>
 	<field name="company_name" class="java.lang.String"/>
-	<field name="id" class="java.lang.Integer"/>
 	<field name="header_id" class="java.lang.Integer"/>
 	<field name="wo_no" class="java.lang.String"/>
 	<field name="pump_type" class="java.lang.String"/>
@@ -136,7 +134,7 @@ and ch_access.id is not null]]>
 	<field name="date" class="java.lang.String"/>
 	<field name="new_date" class="java.lang.String"/>
 	<group name="WO Group Header" isStartNewPage="true">
-		<groupExpression><![CDATA[$F{header_id}]]></groupExpression>
+		<groupExpression><![CDATA[$F{wo_no}]]></groupExpression>
 		<groupHeader>
 			<band height="135">
 				<staticText>
