@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<openerp>
+    <data>
+        
+        <record id="r_form_v_accessories_list_print" model="ir.ui.view">
+            <field name="name">kg.accessories.list.print.form</field>
+            <field name="model">kg.accessories.list.print</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Accessories List Report Statement">
+                   <group col="4" fill="0" height="500">	
+						<notebook tabpos="up" colspan="4">
+						<page string="Filters" name="filters">	
+						<group>										
+												   				     
+							<field name="order_id" required = "1" />						   				     
+							
+						</group>					   				     
+						</page>	                                                                           
+                    </notebook>     
+                     <separator colspan="4"/>
+						<group col="4" colspan="4">
+							<button name="create_report" string="Generate" type="object" icon="gtk-ok"/>
+						</group>
+						</group>
+                </form>
+            </field>
+        </record>
+        
+        
+        
+        <report string="Accessories List Print Statement"
+		model="kg.accessories.list.print"
+		auto="True"
+		name="jasper_accessories_part_list_report"
+		rml="kg_reports/planning/report/kg_accessories_part_list_report.jrxml"
+		id="accessoriespartlistreport" 
+		menu="False"
+		/>
+		
+       <record id="rma_accessories_list_print" model="ir.actions.act_window">  
+            <field name="name">Accessories Part List</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">kg.accessories.list.print</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+            
+	<menuitem name="Accessories Part List" parent="kg_menus.rpm_planning_reports" action="rma_accessories_list_print" id="kg_accessories_list_print_reports" sequence="9"/>	
+      
+
+    </data>
+</openerp>
