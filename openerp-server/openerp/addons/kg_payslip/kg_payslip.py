@@ -965,6 +965,78 @@ class kg_payslip(osv.osv):
 						pass
 				#### Creation of NI Hard Allowance #####	
 				
+				#### Creation of Night Allowance #####
+				
+				night_allo_sal_id = self.pool.get('ch.kg.contract.salary').search(cr,uid,[('header_id_salary','=',con_ids[0]),('salary_type','=',57)])
+				if night_allo_sal_id:
+					night_allow_rec = self.pool.get('ch.kg.contract.salary').browse(cr,uid,night_allo_sal_id[0])
+					daily_att_ids = self.pool.get('ch.daily.attendance').search(cr,uid,[('employee_id','=',emp_id),('date','>=', slip_rec.date_from),('date','<=', slip_rec.date_to)])
+					pre_days = 0
+					if daily_att_ids:
+						for daily_ids in daily_att_ids:
+							daily_att_rec = self.pool.get('ch.daily.attendance').browse(cr,uid,daily_ids)
+							if daily_att_rec.in_time1:
+								in_time1 = float(str(daily_att_rec.in_time1) .replace(':', '.'))
+							else:
+								in_time1=12.00
+							if daily_att_rec.in_time2:
+								in_time2 = float(str(daily_att_rec.in_time2) .replace(':', '.'))
+							else:
+								in_time2 = 12.00
+							if daily_att_rec.in_time3:
+								in_time3 = float(str(daily_att_rec.in_time3) .replace(':', '.'))
+							else:
+								in_time3 = 12.00
+							if daily_att_rec.in_time4:
+								in_time4 = float(str(daily_att_rec.in_time4) .replace(':', '.'))
+							else:
+								in_time4 = 12.00
+							if daily_att_rec.out_time1:
+								out_time1 = float(str(daily_att_rec.out_time1) .replace(':', '.'))
+							else:
+								out_time1 = 12.00
+							if daily_att_rec.out_time2:
+								out_time2 = float(str(daily_att_rec.out_time2) .replace(':', '.'))
+							else:
+								out_time2 = 12.00
+							if daily_att_rec.out_time3:
+								out_time3 = float(str(daily_att_rec.out_time3) .replace(':', '.'))
+							else:
+								out_time3 = 12.00
+							if daily_att_rec.out_time4:
+								out_time4 = float(str(daily_att_rec.out_time4) .replace(':', '.'))
+							else:
+								out_time4 = 12.00
+							if (daily_att_rec.status == 'present') and (in_time1 >= 19.00 or in_time1 <= 7.00 or in_time2 >= 19.00 or in_time2 <= 7.00 or in_time3 >= 19.00 or in_time3 <= 7.00 or in_time4 >= 19.00 or in_time4 <= 7.00 or out_time1 >= 19.00 or out_time1 <= 7.00 or out_time2 >= 19.00 or out_time2 <= 7.00 or out_time3 >= 19.00 or out_time3 <= 7.00 or out_time4 >= 19.00 or out_time4 <= 7.00):
+								print "daily attendance date",daily_att_rec.date
+								pre_days += 1
+							else:
+								print "not with the timing",daily_att_rec.date
+						print "present days 8888888888888888888888888888888888",pre_days
+						#~ sall_days = pre_days + ot_days + od_days + arrear_days + sundays + nat_fes_days + half_days+ leave_days
+						sall_days = pre_days 
+						night_allow = (night_allow_rec.salary_amt/calulation_days)*(sall_days)
+						serc_night_allow	= self.pool.get('hr.payslip.line').search(cr,uid,[('slip_id','=',slip_rec.id),('code','=','NIGHT ALL')])
+						serc_night_allow_othr	= self.pool.get('ch.other.salary.comp').search(cr,uid,[('slip_id','=',slip_rec.id),('code','=','NIGHT ALL')])
+						if serc_night_allow:
+							serc_night_rec = self.pool.get('hr.payslip.line').browse(cr,uid,serc_night_allow[0])
+							self.pool.get('hr.payslip.line').write(cr,uid,serc_night_rec.id,
+													{
+														'amount':night_allow,
+													})
+						elif serc_night_allow_othr:
+							serc_night_rec_othr = self.pool.get('ch.other.salary.comp').browse(cr,uid,serc_night_allow_othr[0])
+							self.pool.get('ch.other.salary.comp').write(cr,uid,serc_night_rec_othr.id,
+													{
+														'amount':night_allow,
+													})
+						else:
+							pass
+					else:
+						pass
+				
+				#### Creation of Night Allowance #####
+				
 				#### Creation of the total allowance and updating the total allowance field in parent ####
 				
 				serc_chil_ids = self.pool.get('hr.payslip.line').search(cr,uid,[('slip_id','=',slip_rec.id),('category_id','in',(2,8,7))])
