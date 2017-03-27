@@ -1274,7 +1274,7 @@ class kg_qc_verification(osv.osv):
 		assembly_foundry_obj = self.pool.get('ch.assembly.bom.details')
 		assembly_ms_obj = self.pool.get('ch.assembly.machineshop.details')
 		assembly_bot_obj = self.pool.get('ch.assembly.bot.details')
-		
+		production_qty = 0
 		### Creating QC or Stock Allocation When Rejection
 		if stock_inward_id == False:
 			stock_inward_id=0
@@ -1387,6 +1387,7 @@ class kg_qc_verification(osv.osv):
 										if reject_type == 'fettling':
 											### Production Update ###
 											if ref_id.production_id.id:
+												production_qty = ref_id.production_id.qty - qc_qty
 												production_obj.write(cr,uid,ref_id.production_id.id,{'qty':ref_id.production_id.qty - qc_qty})
 										
 										### Qty Updation in Stock Inward ###
@@ -1954,7 +1955,12 @@ class kg_qc_verification(osv.osv):
 							print "ref_id.production_id.id",ref_id.production_id.id
 							print "ref_id.production_id.qty",ref_id.production_id.qty
 							if ref_id.production_id.id:
-								production_obj.write(cr,uid,ref_id.production_id.id,{'qty':ref_id.production_id.qty - rem_qty})
+								if production_qty > 0:
+									production_qty = production_qty
+								else:
+									production_qty = ref_id.production_id.qty
+								print "production_qty",production_qty
+								production_obj.write(cr,uid,ref_id.production_id.id,{'qty':production_qty - rem_qty})
 								
 						
 						### Production Number ###
