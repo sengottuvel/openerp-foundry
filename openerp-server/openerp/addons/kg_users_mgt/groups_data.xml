@@ -260,7 +260,7 @@
 			ref('kg_brandmoc_rate.mam_brandmocrate_purchase_master'),
 			ref('kg_expense_master.mam_expense_master'),
 			ref('kg_dispatch_master.mam_dispatch_master'),
-			ref('kg_menus.mam_item_quality_master'),
+			ref('kg_item_quality.mam_item_quality_master'),
 			
 			ref('kg_menus.qpm_quotations_menu'),
 			ref('kg_quotation.qam_quotation'),
@@ -313,7 +313,7 @@
 			ref('kg_brandmoc_rate.mam_brandmocrate_purchase_master'),
 			ref('kg_expense_master.mam_expense_master'),
 			ref('kg_dispatch_master.mam_dispatch_master'),
-			ref('kg_menus.mam_item_quality_master'),
+			ref('kg_item_quality.mam_item_quality_master'),
 			
 			
 			])]" name="menu_access"/>
