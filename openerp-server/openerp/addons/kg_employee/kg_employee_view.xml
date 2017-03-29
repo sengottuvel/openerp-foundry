@@ -176,6 +176,15 @@
 								<field name="line_id_ref_emp" nolabel="1" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
 							</group>
 						</page>
+						<page string="Training / Certification" >
+							<field name="line_id_ref_train_cer" nolabel="1" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}">
+								<tree name="Training / Certification" editable="bottom">
+									<field name="description" required="1" class="aplhanum_expect"/>
+									<field name="completion_date" required="1" options="{'datepicker':{'maxDate': 0}}"/>
+									<field name="conducted_by" required="1" class="aplhanum_expect"/>
+								</tree>
+							</field>
+						</page>
 					</xpath>
 					
 					<xpath expr="//group[@name='active_group']" position="before">

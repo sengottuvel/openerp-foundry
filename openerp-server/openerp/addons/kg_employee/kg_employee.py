@@ -149,6 +149,7 @@ class kg_employee(osv.osv):
 		'line_id_ref':fields.one2many('ch.kg.employee.ref','header_id_ref','Line Id Ref'),	
 		'line_id_ref_edu':fields.one2many('ch.kg.employee.ref.edu','header_id_ref_edu','Line Id Ref Edu'),	
 		'line_id_ref_emp':fields.one2many('ch.kg.employee.ref.emp','header_id_ref_emp','Line Id Ref Emp'),
+		'line_id_ref_train_cer':fields.one2many('ch.kg.employee.train.cer','header_id_ref_train_cer','Line Id Ref Train_Cer'),
 		
 		'line_id_his':fields.one2many('ch.kg.employee.his','header_id_his','Line Id History'),	
 		
@@ -486,6 +487,21 @@ class ch_kg_employee_ref_emp(osv.osv):
 		return {'value': value}
 		
 ch_kg_employee_ref_emp()
+
+class ch_kg_employee_train_cer (osv.osv):
+	
+	_name = 'ch.kg.employee.train.cer'
+	
+	_columns = {
+		'header_id_ref_train_cer':fields.many2one('hr.employee','Header ID Ref Train Cer'),
+		'description':fields.char('Description' ,required=True),
+		'completion_date':fields.date('Completion Date' ,required=True),
+		'conducted_by':fields.char('Conducted By' ,required=True),
+	
+	}
+	
+	
+ch_kg_employee_train_cer()
 
 ##History Tracking starts###
 
