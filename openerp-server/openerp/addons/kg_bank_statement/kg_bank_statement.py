@@ -86,7 +86,6 @@ class kg_bank_statement(osv.osv):
 		'actual_close_bal_type':fields.selection([('dr','Dr'),('cr','Cr')],'Dr/Cr'),
 		'division_id':fields.many2one('kg.division.master','Division'),
 		'acct_name':fields.many2one('account.account','Account Name'),
-		'bnk_imp_id':fields.many2one('kg.bank.statement.import','Bank Statement Import'),
 		
 		## Child Tables Declaration
 		
@@ -128,16 +127,6 @@ class kg_bank_statement(osv.osv):
 
 	def entry_confirm(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if not rec.line_id:
-			raise osv.except_osv(_('Warning!'),
-				_('Bank Statement Details should not be empty !!'))
-		for line_ids in rec.line_id:
-			if (line_ids.debit == 0.00 and line_ids.credit == 0.00):
-				raise osv.except_osv(_('Warning!'),
-					_('Debit and credit should not be zero for Cheque No/Ref No %s !!'%(line_ids.cheque_no)))
-			elif (line_ids.debit != 0.00 and line_ids.credit != 0.00):
-				raise osv.except_osv(_('Warning!'),
-					_('Both Debit and credit should not contain value for Cheque No/Ref No %s !!'%(line_ids.cheque_no)))
 		if rec.state == 'draft':
 			self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		else:
@@ -185,7 +174,22 @@ class kg_bank_statement(osv.osv):
 	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_bank_statement, self).write(cr, uid, ids, vals, context)	
+	
+	####Validations####
+	
+	def  _validations (self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		if not rec.line_id:
+			raise osv.except_osv(_('Warning!'),
+				_('Bank Statement Details should not be empty !!'))
+			return False
+		return True
+		
+	_constraints = [
 
+		(_validations, 'validations', [' ']),		
+		
+	]
 	## Module Requirement
 	
 	def onchange_account(self,cr,uid,ids,acc_journal_id,acct_name,context=None):
