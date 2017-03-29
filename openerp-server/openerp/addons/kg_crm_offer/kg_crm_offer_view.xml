@@ -28,7 +28,7 @@
 								<field name="ref_mode" readonly="1"/>
 								<field name="customer_po_no"/>
 								<field name="dealer_po_no"/>
-								<field name="market_division" readonly="1"/>
+								<field name="division_id" readonly="1"/>
 								<field name="road_permit"/>
 								<field name="inspection"/>
 								<field name="revision" readonly="1"/>

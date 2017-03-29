@@ -48,6 +48,7 @@ class kg_crm_enquiry(osv.osv):
 		'call_type': fields.selection(CALL_TYPE_SELECTION,'Call Type', required=True),
 		'ref_mode': fields.selection([('direct','Direct'),('dealer','Dealer')],'Reference Mode', required=True,readonly=True, states={'draft':[('readonly',False)]}),
 		'market_division': fields.selection(MARKET_SELECTION,'Marketing Division',readonly=True, states={'draft':[('readonly',False)]}),
+		'division_id': fields.many2one('kg.division.master','Division',readonly=True, states={'draft':[('readonly',False)]},domain="[('state','not in',('reject','cancel'))]"),
 		'ref_no': fields.char('Reference Number'),
 		'segment': fields.selection([('dom','Domestic'),('exp','Export')],'Segment',readonly=True, states={'draft':[('readonly',False)]}),
 		'customer_id': fields.many2one('res.partner','Customer Name',domain=[('customer','=',True),('contact','=',False)],readonly=True, states={'draft':[('readonly',False)]}),
@@ -304,7 +305,6 @@ class kg_crm_enquiry(osv.osv):
 									#~ 'segment': entry.segment,
 									#~ 'ref_mode': entry.ref_mode,
 									#~ 'location': entry.location,
-									#~ 'market_division': entry.market_division,
 									#~ 'state': 'draft',
 									#~ 'revision': revision,
 									#~ 'note': entry.note,
@@ -453,15 +453,15 @@ class kg_crm_enquiry(osv.osv):
 					off_no = cr.fetchone();
 					off_no = off_no[0]
 				elif entry.call_type == 'new_enquiry':
-					if entry.market_division == 'cp':				
-						off_no = ''	
+					if entry.division_id.code == 'CPD':				
+						off_no = ''
 						qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','crm.enquiry.cp')])
 						rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.enquiry_date))
 						off_no = cr.fetchone();
 						off_no = off_no[0]
-					elif entry.market_division == 'ip':				
-						off_no = ''	
+					elif entry.division_id.code == 'IPD':				
+						off_no = ''
 						qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','crm.enquiry.ip')])
 						rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.enquiry_date))
@@ -485,7 +485,7 @@ class kg_crm_enquiry(osv.osv):
 																		'customer_id': entry.customer_id.id,
 																		'dealer_id': entry.dealer_id.id,
 																		'ref_mode': entry.ref_mode,
-																		'market_division': entry.market_division,
+																		'division_id': entry.division_id.id,
 																		'purpose': entry.purpose,
 																		'segment': entry.segment,
 																		'flag_data_bank': entry.flag_data_bank,
@@ -719,14 +719,14 @@ class kg_crm_enquiry(osv.osv):
 					off_no = cr.fetchone();
 					off_no = off_no[0]
 				elif entry.call_type == 'new_enquiry':
-					if entry.market_division == 'cp':				
+					if entry.division_id.code == 'CPD':				
 						off_no = ''	
 						qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','crm.enquiry.cp')])
 						rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
 						cr.execute("""select generatesequenceno(%s,'%s','%s') """%(qc_seq_id[0],rec.code,entry.enquiry_date))
 						off_no = cr.fetchone();
 						off_no = off_no[0]
-					elif entry.market_division == 'ip':				
+					elif entry.division_id == 'IPD':				
 						off_no = ''	
 						qc_seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','crm.enquiry.ip')])
 						rec = self.pool.get('ir.sequence').browse(cr,uid,qc_seq_id[0])
@@ -748,7 +748,7 @@ class kg_crm_enquiry(osv.osv):
 																	'del_date': entry.del_date,
 																	'customer_id': entry.customer_id.id,
 																	'ref_mode': entry.ref_mode,
-																	'market_division': entry.market_division,
+																	'division_id': entry.division_id.id,
 																	'purpose': entry.purpose,
 																	'segment': entry.segment,
 																	})
@@ -1434,9 +1434,10 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'flange_type': fields.selection([('standard','Standard'),('optional','Optional')],'Flange Type'),
 		'pre_suppliy_ref': fields.char('Previous Supply Reference'),
 		'market_division': fields.selection([('cp','CP'),('ip','IP')],'Market Division'),
+		'division_id': fields.many2one('kg.division.master','Division',domain="[('state','not in',('reject','cancel'))]"),
 		'lubrication_type': fields.selection([('grease','Grease'),('oil','Oil')],'Lubrication'),
 		'flag_standard': fields.boolean('Non Standard'),
-		'push_bearing': fields.selection([('grease_bronze','Grease'),('cft','CFT'),('cut','Cut Less Rubber')],'Bush Bearing'),
+		'push_bearing': fields.selection([('grease_bronze','Bronze'),('cft','CFT'),('cut','Cut Less Rubber')],'Bush Bearing'),
 		'suction_size': fields.selection([('32','32'),('40','40'),('50','50'),('65','65'),('80','80'),('100','100'),('125','125'),('150','150'),('200','200'),('250','250'),('300','300')],'Suction Size'),
 		'speed_in_rpm': fields.float('Speed in RPM - Pump'),
 		'pump_model_type':fields.selection([('vertical','Vertical'),('horizontal','Horizontal')], 'Pump Type'),
@@ -3052,7 +3053,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			value = {'head_in': head_in,'sealing_water_pressure': total}
 		return {'value': value}
 	
-	def onchange_pumpmodel(self, cr, uid, ids, pump_id, market_division,suction_pressure_kg,discharge_pressure_kg,purpose_categ, context=None):
+	def onchange_pumpmodel(self, cr, uid, ids, pump_id, division_id,suction_pressure_kg,discharge_pressure_kg,purpose_categ, context=None):
 		print"pump_idpump_idpump_idpump_idpump_id",pump_id
 		value = {'impeller_type': '','impeller_number': '','impeller_dia_max': '','impeller_dia_min': '','maximum_allowable_soild': '',
 				'max_allowable_test': '','number_of_stages': '','crm_type': '','bearing_number_nde':'','bearing_qty_nde':'',
@@ -3063,10 +3064,12 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		if pump_id:
 			pump_rec = self.pool.get('kg.pumpmodel.master').browse(cr, uid, pump_id, context=context)
 			print"pump_recpump_recpump_rec",pump_rec
-			if market_division == 'cp':
-				total = suction_pressure_kg + ((discharge_pressure_kg / 100.00) * 40) + pump_rec.sealing_water_pressure
-			if market_division == 'ip':
-				total = suction_pressure_kg + discharge_pressure_kg + pump_rec.sealing_water_pressure
+			if division_id:
+				div_rec = self.pool.get('kg.division.master').browse(cr, uid, division_id, context=context)
+				if div_rec.code == 'CPD':
+					total = suction_pressure_kg + ((discharge_pressure_kg / 100.00) * 40) + pump_rec.sealing_water_pressure
+				if div_rec.code == 'IPD':
+					total = suction_pressure_kg + discharge_pressure_kg + pump_rec.sealing_water_pressure
 				
 			value = {'impeller_type': pump_rec.impeller_type,'impeller_number': pump_rec.impeller_number,'impeller_dia_max': pump_rec.impeller_dia_max,
 			'impeller_dia_min': pump_rec.impeller_dia_min,'maximum_allowable_soild': pump_rec.maximum_allowable_soild,'max_allowable_test': pump_rec.max_allowable_test,

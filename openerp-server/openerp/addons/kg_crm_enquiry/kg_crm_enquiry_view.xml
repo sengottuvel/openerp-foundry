@@ -30,7 +30,7 @@
 								<field name="industry_id"/>
 								<field name="call_type" readonly="1"/>
 								<field name="ref_mode"/>
-								<field name="market_division" required="1"/>
+								<field name="division_id" required="1"/>
 								<field name="dealer_id" attrs="{'invisible': [('ref_mode','=','direct')],'required': [('ref_mode','=','dealer')]}"/>
 								<field name="note"/>
 								<field name="purpose" attrs="{'invisible': [('call_type','=','service')],'required': [('call_type','!=','service')]}"/>
@@ -87,7 +87,7 @@
 						</group>
 						
 						<group string="Pump/Spare Details">
-							<field name="ch_line_ids" colspan="4" nolabel="1" context="{'market_division':market_division,'purpose_categ':purpose,'temperature': 'normal','flange_type': 'standard','load_bom':False,}" widget="one2many_selectable">
+							<field name="ch_line_ids" colspan="4" nolabel="1" context="{'division_id':division_id,'purpose_categ':purpose,'temperature': 'normal','flange_type': 'standard','load_bom':False,}" widget="one2many_selectable">
 								<tree string="Pump History">
 									<field name="equipment_no" required="1"/>
 									<field name="description" required="1"/>
@@ -272,7 +272,7 @@
 			
 				<group string="Pump Specification">
 					<group>
-						<field name="pump_id" on_change="onchange_pumpmodel(pump_id,market_division,suction_pressure_kg,discharge_pressure_kg,purpose_categ)" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
+						<field name="pump_id" on_change="onchange_pumpmodel(pump_id,division_id,suction_pressure_kg,discharge_pressure_kg,purpose_categ)" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 						<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 						<field name="pumpseries_id" on_change="onchange_pumpseries(pumpseries_id,flange_standard,flange_type)" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 						<field name="qap_plan_id"/>
@@ -372,7 +372,7 @@
 						<field name="motor_output_power_lower_speed" attrs="{'invisible':[('type_of_drive','not in',['fc_gb'])]}"/>
 						<field name="gland_plate"/>
 						<field name="api_plan"/>
-						<field name="market_division" invisible="1"/>
+						<field name="division_id" invisible="1"/>
 					</group>
 				</group>
 				

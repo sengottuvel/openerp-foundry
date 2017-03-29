@@ -16,7 +16,7 @@ CALL_TYPE_SELECTION = [
 	('new_enquiry','New Enquiry')
 ]
 PURPOSE_SELECTION = [
-	('pump','Pump'),('spare','Spare'),('prj','Project'),('pump_spare','Pump With Spare'),('in_development','In Development')
+	('pump','Pump'),('spare','Spare'),('access','Accessories'),('prj','Project'),('pump_spare','Pump With Spare'),('in_development','In Development')
 ]
 STATE_SELECTION = [
 	('draft','Draft'),('moved_to_offer','Confirmed'),('wfa_md','WFA MD'),('approved_md','Approved MD'),('call','Call Back'),('quote','Quote Process'),('wo_created','WO Created'),('wo_released','WO Released'),('reject','Rejected'),('revised','Revised')
@@ -102,7 +102,8 @@ class kg_crm_offer(osv.osv):
 		'due_date': fields.date('Due Date',required=True),
 		'call_type': fields.selection(CALL_TYPE_SELECTION,'Call Type', required=True),
 		'ref_mode': fields.selection([('direct','Direct'),('dealer','Dealer')],'Reference Mode', required=True),
-		'market_division': fields.selection(MARKET_SELECTION,'Marketing Division', required=True),
+		'market_division': fields.selection(MARKET_SELECTION,'Marketing Division'),
+		'division_id': fields.many2one('kg.division.master','Division',domain="[('state','not in',('reject','cancel'))]",required=True),
 		'ref_no': fields.char('Reference Number'),
 		'segment': fields.selection([('dom','Domestic'),('exp','Export')],'Segment', required=True),
 		'dealer_id': fields.many2one('res.partner','Dealer Name',domain=[('dealer','=',True),('contact','=',False)]),
@@ -508,12 +509,13 @@ class kg_crm_offer(osv.osv):
 				if not entry.dealer_po_no:
 					raise osv.except_osv(_('Warning!'),
 						_('Update Dealer PO No.'))
-			
+
 			wo_id = self.pool.get('kg.work.order').create(cr,uid,{'order_category': entry.purpose,
 																  'name': '',
 																  'order_priority': '',
 																  'enquiry_no': entry.enquiry_id.name,
 																  'offer_no': entry.name,
+																  'division_id': entry.division_id.id,
 																  'location': entry.location,
 																  'entry_mode': 'auto',
 																  'partner_id': entry.customer_id.id,

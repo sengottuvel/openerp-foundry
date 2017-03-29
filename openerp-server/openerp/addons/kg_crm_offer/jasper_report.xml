@@ -2,12 +2,26 @@
 <openerp>
     <data>
 		
+		<!-- CD Print -->
+		
 		<report string="CD Print"
 				model="kg.crm.offer"
 				auto="True"
 				name="onscreen_cd_report"
 				rml="kg_crm_offer/report/crm_cd_report.jrxml"
 				id="cd_jasper_report_menu1" 
+				menu="True"
+				header="False"
+        />
+        
+		<!-- Offer Copy -->
+		
+		<report string="Offer Copy"
+				model="kg.crm.offer"
+				auto="True"
+				name="onscreen_offer_copy_report"
+				rml="kg_crm_offer/report/offer_copy_report.jrxml"
+				id="offer_copy_jasper_report_menu" 
 				menu="True"
 				header="False"
         />
