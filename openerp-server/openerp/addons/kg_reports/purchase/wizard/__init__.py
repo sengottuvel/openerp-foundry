@@ -1,1 +1,2 @@
 import kg_po_register_wiz
+import kg_vendor_profile_wiz

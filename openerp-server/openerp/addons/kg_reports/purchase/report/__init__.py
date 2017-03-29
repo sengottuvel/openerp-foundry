@@ -1,1 +1,2 @@
 import kg_po_register
+import kg_vendor_profile

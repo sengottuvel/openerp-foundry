@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="kg_vendor_profile" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="NoDataSection" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="to_date" class="java.lang.String"/>
+	<parameter name="wiz_id" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[select a.supplier as supplier,
+trim(COALESCE(to_char(a.po_value,'999G999G99G999G99G99G990D99'),0.00::text)) as po_value,
+trim(COALESCE(to_char(a.grn_value,'999G999G99G999G99G99G990D99'),0.00::text)) as grn_value,
+trim(COALESCE(to_char(a.advance_value,'999G999G99G999G99G99G990D99'),0.00::text)) as advance_value,
+trim(COALESCE(to_char(a.inv_amt,'999G999G99G999G99G99G990D99'),0.00::text)) as inv_amt,
+trim(COALESCE(to_char(a.against_inv,'999G999G99G999G99G99G990D99'),0.00::text)) as against_inv,
+trim(COALESCE(to_char(a.bal_amt,'999G999G99G999G99G99G990D99'),0.00::text)) as bal_amt,
+(select to_char(to_date,'dd-mm-yyyy') from kg_vendor_profile_wiz where id = $P{wiz_id}) as to_date,
+to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY') AS New_Date,
+res_company.name as company_name,
+users.login as printed_by,
+(select to_char(crt_date + interval '5.30 hour','dd-mm-YYYY HH:MM:SS') from kg_vendor_profile_wiz where id = $P{wiz_id}) as print_date,
+(select flag_footer from kg_vendor_profile_wiz where id = $P{wiz_id}) as flag_footer
+
+from
+
+(select res.name as supplier,
+po.company_id,
+po.partner_id,
+round((sum(po.amount_total)+
+(select COALESCE(sum(amount_total),0.00) from kg_service_order where partner_id = po.partner_id and state = 'approved' and to_char(approved_date::date,'yyyy-mm-dd') <= $P{to_date}) ),2)as po_value,
+
+round((select COALESCE(sum(amount_total),0.00) from kg_po_grn where supplier_id = po.partner_id and state = 'done'
+and to_char(approved_date::date,'yyyy-mm-dd') <= $P{to_date})
++
+(select COALESCE(sum(amount_total),0.00) from kg_general_grn where supplier_id = po.partner_id and state = 'done'
+and to_char(approved_date::date,'yyyy-mm-dd') <= $P{to_date}) ,2)
+ as grn_value,
+
+round((select COALESCE(sum(advance_amt)) from kg_supplier_advance where supplier_id = po.partner_id and state = 'approve' and to_char(ap_rej_date::date,'yyyy-mm-dd') <= $P{to_date})::integer,2) as advance_value,
+
+round((select COALESCE(sum(amount_total),0.00) from kg_purchase_invoice where supplier_id = po.partner_id and state = 'approved' and to_char(approved_date::date,'yyyy-mm-dd') <= $P{to_date})::integer,2) as inv_amt,
+
+round((select COALESCE((sum(amount_total)-sum(bal_amt)),0.00) from kg_purchase_invoice where supplier_id = po.partner_id and state = 'approved' and to_char(approved_date::date,'yyyy-mm-dd') <= $P{to_date})::integer,2) as against_inv,
+
+round((select COALESCE(sum(bal_amt)) from kg_purchase_invoice where supplier_id = po.partner_id and state = 'approved' and to_char(approved_date::date,'yyyy-mm-dd') <= $P{to_date})::integer,2) as bal_amt
+ from purchase_order po
+left join res_partner res on (res.id = po.partner_id)
+
+left join kg_purchase_invoice inv on (inv.supplier_id = po.partner_id)
+where res.supplier='t' and po.state ='approved' and to_char(po.approved_date::date,'yyyy-mm-dd') <= $P{to_date}
+and
+
+case
+when (select supplier_id from m2m_res_partners where wiz_id = $P{wiz_id} limit 1) is not null then po.partner_id in (select supplier_id from m2m_res_partners where wiz_id = $P{wiz_id})
+else
+po.partner_id in (select distinct partner_id from purchase_order)end
+
+group by res.name,po.partner_id,po.company_id
+order by res.name) as a
+left join res_company on (res_company.id = a.company_id)
+left join res_partner part on (part.id = res_company.partner_id)
+left join res_users users on (users.id = (select user_id from kg_vendor_profile_wiz where id =$P{wiz_id} ))]]>
+	</queryString>
+	<field name="supplier" class="java.lang.String"/>
+	<field name="po_value" class="java.lang.String"/>
+	<field name="grn_value" class="java.lang.String"/>
+	<field name="advance_value" class="java.lang.String"/>
+	<field name="inv_amt" class="java.lang.String"/>
+	<field name="against_inv" class="java.lang.String"/>
+	<field name="bal_amt" class="java.lang.String"/>
+	<field name="to_date" class="java.lang.String"/>
+	<field name="new_date" class="java.lang.String"/>
+	<field name="company_name" class="java.lang.String"/>
+	<field name="printed_by" class="java.lang.String"/>
+	<field name="print_date" class="java.lang.String"/>
+	<field name="flag_footer" class="java.lang.Boolean"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="56" splitType="Stretch">
+			<textField>
+				<reportElement x="244" y="0" width="317" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{company_name}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="355" y="20" width="100" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Vendor's Profile]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="561" y="36" width="100" height="20"/>
+				<box topPadding="2"/>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[As on Date:  ]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="667" y="36" width="100" height="20"/>
+				<box topPadding="2"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{to_date}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="27">
+			<staticText>
+				<reportElement x="0" y="0" width="29" height="27"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[SNo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="29" y="0" width="180" height="27"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Vendor]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="209" y="0" width="111" height="27"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Order Value]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="320" y="0" width="100" height="27"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Goods Received Value]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="420" y="0" width="100" height="27"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Advance Paid]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="520" y="0" width="100" height="27"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Invoice value]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="620" y="0" width="92" height="27"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Paid Against Invoice]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="712" y="0" width="90" height="27"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Balance Payable]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="16" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="29" y="0" width="180" height="16" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{supplier}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="0" y="0" width="29" height="16" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="209" y="0" width="111" height="16" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{po_value}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="320" y="0" width="100" height="16" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{grn_value}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="420" y="0" width="100" height="16" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{advance_value}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="520" y="0" width="100" height="16" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{inv_amt}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="620" y="0" width="92" height="16" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{against_inv}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="712" y="0" width="90" height="16" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{bal_amt}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="21" splitType="Stretch">
+			<textField>
+				<reportElement x="320" y="1" width="80" height="20">
+					<printWhenExpression><![CDATA[(new Boolean(($F{flag_footer}.equals(true))))]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="400" y="1" width="40" height="20">
+					<printWhenExpression><![CDATA[(new Boolean(($F{flag_footer}.equals(true))))]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="1" width="320" height="20">
+					<printWhenExpression><![CDATA[(new Boolean(($F{flag_footer}.equals(true))))]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{printed_by}+'/'+$F{print_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="440" y="1" width="362" height="20">
+					<printWhenExpression><![CDATA[(new Boolean(($F{flag_footer}.equals(true))))]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<noData>
+		<band height="50">
+			<staticText>
+				<reportElement x="244" y="0" width="317" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[No Records Found]]></text>
+			</staticText>
+		</band>
+	</noData>
+</jasperReport>

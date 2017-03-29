@@ -21,6 +21,7 @@
 		'planning/wizard/kg_accessories_list_view.xml',						
 		'purchase/excel/kg_excel_po_register_view.xml',
 		'purchase/wizard/kg_po_register_wiz.xml',
+		'purchase/wizard/kg_vendor_profile_wiz_view.xml',
 		'warehouse/wizard/main_closing_stock_wizard.xml',
 		'warehouse/wizard/grn_register_report_wizard.xml',
 		'warehouse/wizard/dep_issue_register_wizard.xml',

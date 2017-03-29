@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>	
+		<!-- View Starts -->
+		
+        <record id="wf_v_kg_vendor_profile_wiz" model="ir.ui.view">
+            <field name="name">Vendor's Profile</field>
+            <field name="model">kg.vendor.profile.wiz</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+             <form string="Vendor's Profile">
+				 <group>
+					<group >
+						<field name="supplier_id" required="0" widget="many2many_tags"/>
+						<field name="flag_footer" invisible="1"/>
+					</group>
+					<group>
+						<field name="to_date" required="1" options="{'datepicker':{'minDate': null,'maxDate': 0,}}"/>
+					</group>
+				</group>
+				<separator colspan="4"/>
+					<group col="4" colspan="4">
+						<button icon="gtk-print" name="create_report" string="Generate" type="object" colspan="2" default_focus="1" />
+					</group>
+            </form>
+            </field>
+        </record>
+        
+		<!-- View Ends -->
+		
+		<!-- Action Menu Starts-->
+		
+        <record id="wam_kg_vendor_profile_wiz" model="ir.actions.act_window">  
+            <field name="name">Vendor's Profile</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">kg.vendor.profile.wiz</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+        
+        <!--Action Menu Ends-->
+        
+        <!-- Menu item Starts-->
+        
+        <menuitem  name="Vendor Profile"   parent="kg_menus.rpm_purchase_reports" action="wam_kg_vendor_profile_wiz" id="wma_kg_vendor_profile_wiz" sequence='2'/>
+        
+        <!-- Menu item Ends-->
+        
+        <!-- Jasper Report Starts-->
+        
+        <report string="Vendor's Profile"
+				model="kg.vendor.profile.wiz"
+				auto="True"
+				name="jasper_kg_vendor_profile"
+				rml="kg_reports/purchase/report/kg_vendor_profile.jrxml"
+				id="vendor_profile_jasper_register_id"
+				menu="False"
+		/>
+		    
+		<!-- Jasper Report Ends-->
+		
+    </data>
+</openerp>
