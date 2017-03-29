@@ -282,6 +282,7 @@
 			ref('kg_menus.ram_po_register_reports'),
 			ref('kg_menus.rpm_excel_report_menu'),
 			ref('kg_menus.ram_excel_po_register_reports'),
+			ref('kg_reports.wma_kg_vendor_profile_wiz'),
 			
 			])]" name="menu_access"/>
 			<field name="users" eval="[(4, ref('base.user_root'))]"/>
