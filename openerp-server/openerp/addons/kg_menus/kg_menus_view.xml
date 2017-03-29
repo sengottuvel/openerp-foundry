@@ -88,9 +88,6 @@
 			<!-- Purchase Master Menu -->
 				<menuitem id="ppm_master_menu" name="Masters" parent="base.menu_purchase_root" sequence="0"/>
 				
-				<!-- Item Quality Master  --> 
-				<menuitem action="kg_item_quality_master.mma_item_quality_master" name="General Term" id="mam_item_quality_master" parent="ppm_master_menu" sequence="16"/>
-				
 				<!-- Quotations Menu -->
 				<menuitem id="qpm_quotations_menu" name="Quotations" parent="base.menu_purchase_root" sequence="1"/>
 				
