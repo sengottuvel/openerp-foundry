@@ -4,49 +4,43 @@
 
 	<!-- Form View Start -->
 	
-		<record id="m_form_v_kg_bank_state" model="ir.ui.view">
-			<field name="name">Bank Statement Entry Form</field>
-			<field name="model">kg.bank.statement</field>
+		<record id="m_form_v_kg_bank_state_imp" model="ir.ui.view">
+			<field name="name">Bank Statement Import Form</field>
+			<field name="model">kg.bank.statement.import</field>
 			<field name="arch" type="xml">
-				<form string="Bank Statement Entry" version="7.0">					
+				<form string="Bank Statement Import" version="7.0">					
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?" />
 						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
-						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
-						<button name="entry_draft" type="object" states="cancel" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_confirm" type="object" states="draft" string="Confirm" class="oe_highlight"/>
+						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
 						<group>
 							<group>						
-								<field name="division_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" invisible="1"/>																
-								<field name="clear_date" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" options="{'datepicker':{'maxDate': 0}}" required="1"/>															
+								<field name="from_date" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" options="{'datepicker':{'maxDate': 0}}" required="1"/>																
+								<field name="acc_journal_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"  required="1"/>
+								<field name="filename" invisible="1"/>															
 								<field name="modify" invisible = "1"/>
 							</group>
 							<group>
-								<field name="acc_journal_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1" on_change="onchange_account(acc_journal_id,acct_name)"/>	
-								<field name="acct_name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" invisible="1"/>	
+								<field name="to_date" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1" options="{'datepicker':{'maxDate': 0}}"/>	
+								<field name="file_data" filename="filename" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>			
+								<field name="file_type" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" invisible="1"/>	
 								<field name="state" style="width: 30%%" class="att_state_change"/>								
 							</group>
 						</group>
 						<group string="Bank Statement Details">
-							<field name="line_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" nolabel="1" colspan="4">
+							<button name="file_import" type="object" string="Import" class="oe_highlight"  attrs="{'invisible': [('state','in',['approved','reject','cancel'])]}"/>
+							<field name="line_id" readonly="1" nolabel="1" colspan="4">
 								<tree name="Bank Statement Details" editable="bottom">
-									<field name="cheque_no" required="1" class="aplhanum_expect"/>
-									<field name="narration" required="1" class="aplhanum_expect"/>
+									<field name="trans_date" required="1"/>
+									<field name="ref_no" required="1" class="aplhanum_expect"/>
 									<field name="debit" required="1"/>
 									<field name="credit" required="1"/>
+									<field name="narration" required="1" class="aplhanum_expect"/>
 								</tree>
 							</field>
-							<group>
-								<field name="open_bal" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" readonly="1"/>	
-								<field name="calc_close_bal" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" readonly="1"/>	
-								<field name="actual_close_bal" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
-							</group>
-							<group>
-								<field name="open_bal_type" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" readonly="1"/>	
-								<field name="calc_close_bal_type" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" readonly="1"/>	
-								<field name="actual_close_bal_type" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
-							</group>
 						</group>
 						<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
 							<group>	
@@ -99,18 +93,18 @@
 
 		<!-- Tree View Start -->
 		
-		<record id="m_tree_v_kg_bank_state" model="ir.ui.view">
-			<field name="name">Bank Statement Entry Tree</field>
-			<field name="model">kg.bank.statement</field>
+		<record id="m_tree_v_kg_bank_state_imp" model="ir.ui.view">
+			<field name="name">Bank Statement Import Tree</field>
+			<field name="model">kg.bank.statement.import</field>
 			<field name="arch" type="xml">
 				<tree colors="blue:state == 'draft';red:state == 'confirmed'
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" 
-								toolbar="True" string="Bank Statement Entry">				
+								toolbar="True" string="Bank Statement Import">				
+					<field name="from_date"/>
+					<field name="to_date"/>
 					<field name="acc_journal_id"/>
-					<field name="clear_date"/>
-					<field name="division_id" invisible="1"/>
+					<field name="file_type"/>
 					<field name="state"/>
-					<field name="entry_mode"/>
 				</tree>
 			</field>
 		</record>
@@ -119,11 +113,11 @@
 
 		<!-- Search View Start -->
 
-		<record id="m_search_v_kg_bank_state" model="ir.ui.view">
-            <field name="name">Bank Statement Entry Search</field>
-            <field name="model">kg.bank.statement</field>
+		<record id="m_search_v_kg_bank_state_imp" model="ir.ui.view">
+            <field name="name">Bank Statement Import Search</field>
+            <field name="model">kg.bank.statement.import</field>
             <field name="arch" type="xml">
-                <search string="Bank Statement">
+                <search string="Bank Statement Import">
 					<field name="acc_journal_id" string="Master"  filter_domain="[('acc_journal_id','ilike',self)]" />
 					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
 					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>				
@@ -142,31 +136,30 @@
 
 		<!-- Menu Action Start-->
 		
-		 <record id="mma_kg_bank_state" model="ir.actions.act_window">
-			<field name="name">Bank Statement Entry</field>
+		 <record id="mma_kg_bank_state_imp" model="ir.actions.act_window">
+			<field name="name">Bank Statement Import</field>
 			<field name="type">ir.actions.act_window</field>
-			<field name="res_model">kg.bank.statement</field>
+			<field name="res_model">kg.bank.statement.import</field>
 			<field name="view_type">form</field>
 			<field name="context">{}</field>
-			<field name="view_id" ref="m_tree_v_kg_bank_state"/>
-			<field name="search_view_id" ref="m_search_v_kg_bank_state"/>
+			<field name="view_id" ref="m_tree_v_kg_bank_state_imp"/>
+			<field name="search_view_id" ref="m_search_v_kg_bank_state_imp"/>
 		</record>			
 		
 		<!-- Menu Action End-->
 		
 		 <!-- Audit Log Xml Data Start -->
 		
-        <record id="division_kg_bank_state" model="audittrail.rule">
-            <field name="name">Audit Log Bank Statement</field>
-            <field name="object_id" eval="ref('kg_bank_statement.model_kg_bank_statement')"/>       
+        <record id="division_kg_bank_state_imp" model="audittrail.rule">
+            <field name="name">Audit Log Bank Statement Import</field>
+            <field name="object_id" eval="ref('kg_bank_statement_import.model_kg_bank_statement_import')"/>       
             <field name="state">subscribed</field>              
         </record>
         
         <!-- Audit Log Xml Data End-->
 		
 		<!-- Menu Name Start here --> 
-			<menuitem id = "tam_kg_bank_state_brs" parent = "account.mpm_acc_masters" sequence="3" name="BRS Process"/>
-				<menuitem action="mma_kg_bank_state" name="Bank Statement Entry" id="mam_kg_bank_statement" parent="tam_kg_bank_state_brs" sequence="1"/>
+		<menuitem action="mma_kg_bank_state_imp" name="Bank Statement Import" id="mam_kg_bank_statement_imp" parent="kg_bank_statement.tam_kg_bank_state_brs" sequence="0"/>
 
 		<!-- Menu Name End here --> 
 
