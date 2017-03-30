@@ -127,6 +127,7 @@ class kg_foundry_invoice(osv.osv):
 		'due_date': fields.date('Due Date',required=True),
 		'invoice_amt': fields.float('Contractor Invoice Amount',required=True),
 		'invoice_copy':fields.binary('Contractor Invoice Copy'),
+		'filename':fields.char('File Name'),
 		'tax_id': fields.many2many('account.tax', 'foundry_invoice_taxes', 'invoice_id', 'tax_id', 'Taxes'),
 		'discount': fields.float('Discount Amount'),	
 		'discount_per': fields.float('Discount(%)'),

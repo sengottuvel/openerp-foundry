@@ -22,8 +22,8 @@
 							<field name="phone" readonly="1" />																			
 							<field name="con_invoice_no" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}"/>																									
 							<field name="due_date" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}"/>																					
-							<field name="invoice_copy" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}"/>																			
-							
+							<field name="invoice_copy" filename="filename" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}"/>																			
+							<field name="filename" invisible="1"/>	
 							
 						</group>											
 						<group>
@@ -218,8 +218,8 @@
 							<field name="phone" readonly="1" />																			
 							<field name="con_invoice_no" attrs="{'readonly': [('state','in',['confirmed','cancel','approved','done'])]}"/>																									
 							<field name="due_date" attrs="{'readonly': [('state','in',['confirmed','cancel','approved','done'])]}"/>																					
-							<field name="invoice_copy" attrs="{'readonly': [('state','in',['confirmed','cancel','approved','done'])]}"/>																			
-							
+							<field name="invoice_copy" filename="filename" attrs="{'readonly': [('state','in',['confirmed','cancel','approved','done'])]}"/>																			
+							<field name="filename" invisible="1"/>	
 							
 						</group>											
 						<group>
