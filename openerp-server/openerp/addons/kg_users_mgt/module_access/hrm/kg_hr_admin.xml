@@ -616,6 +616,16 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
 		</record>
 		
+		<record id="kg_hr_kg_emp_asset_tracking" model="ir.model.access">
+			<field name="model_id" ref="kg_emp_asset_tracking.model_kg_emp_asset_tracking"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Employee Asset Tracking</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
     </data>
 </openerp>
 	
