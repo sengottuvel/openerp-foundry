@@ -77,7 +77,7 @@ class kg_contract(osv.osv):
 		
 		## Module Requirement Info
 		'designation': fields.char('Designation', size=128, readonly=False),
-		'department_id': fields.many2one('hr.department', 'Department ', readonly=True),
+		'department_id': fields.many2one('kg.depmaster', 'Department ', readonly=True),
 		'join_date': fields.date('Join Date', readonly=False),
 		'gross_salary':fields.float('Gross Salary', help="Please Enter the Gross salary per month."),
 		'mobile_allow':fields.float('Mobile Allowance'),
@@ -93,7 +93,7 @@ class kg_contract(osv.osv):
 		'esi_status': fields.boolean('ESI Applicable', size=32),
 		'pf_eff_date': fields.date('PF Effective From'),
 		'esi_eff_date': fields.date('ESI Effective From'),
-		'pf_acc_no': fields.char('PF NO'),
+		'pf_acc_no': fields.char('PF NO', size=7),
 		'esi_acc_no': fields.char('ESI NO', size=17),
 		'job_id': fields.many2one('hr.job', 'Designation', readonly=True),
 		'bonus_applicable': fields.boolean('Bonus Applicable'),
@@ -106,6 +106,8 @@ class kg_contract(osv.osv):
 		'vda_status': fields.boolean('VDA Applicable'),
 		'driver_batta': fields.float('Driver Batta(Per Day)'),
 		'rot_interval':fields.selection([('every_monday','Every Monday'),('month_1st','Month 1st')],'Rotational Interval'),
+		'emp_categ_id':fields.many2one('kg.employee.category','Category'),
+		'division_id':fields.many2one('kg.division.master','Division'),
 			
 		
 		## Child Tables Declaration		
@@ -290,7 +292,7 @@ class kg_contract(osv.osv):
 	
 	###### ROTATION SHIFTS RUNS ON MONDAY OR AT THE MONTH FIRST #######
 	
-	def rotation_shift(self,cr,uid,ids=0,context=None):
+	def rotation_shift(self,cr,uid,ids,context=None):
 		con_obj= self.pool.get('hr.contract')
 		con_shift_obj= self.pool.get('ch.contract.shift')
 		shift_obj= self.pool.get('kg.shift.master')
@@ -312,7 +314,7 @@ class kg_contract(osv.osv):
 				cr.execute('''select max(sequence) from ch_contract_shift where header_id_shift = %s'''%(con_rec.id))
 				max_seq_ch = cr.dictfetchone()
 				print "_________________max sequence_______________________",min_seq['min']
-				if con_rec.rot_interval == 'every_monday' and month_name == 'Monday':
+				if con_rec.rot_interval == 'every_monday' and month_name == 'Friday':
 					curr_shift = con_rec.shift_id.sequence
 					for num in range(curr_shift,(max_seq['max']+1)):
 						if curr_shift == max_seq_ch['max']:
@@ -329,7 +331,7 @@ class kg_contract(osv.osv):
 								break
 							else:
 								pass
-				if con_rec.rot_interval == 'month_1st' and tdy_date == 1:
+				if con_rec.rot_interval == 'month_1st' and tdy_date == 3:
 					curr_shift = con_rec.shift_id.sequence
 					for num in range(curr_shift,(max_seq['max']+1)):
 						if curr_shift == max_seq_ch['max']:
@@ -402,6 +404,7 @@ class kg_contract(osv.osv):
 									'employee_id':rec.employee_id.id,
 									'emp_code':rec.code,
 									'emp_categ_id':rec.emp_categ_id.id,
+									'division_id':rec.division_id.id,
 									'valid_from':time.strftime('%Y-%m-%d'),
 									'valid_to':date(date.today().year, 12, 31),
 									}

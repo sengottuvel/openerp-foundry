@@ -47,8 +47,9 @@
 						<field name="designation" readonly="1"/>
 -->
 						<field name="job_id" readonly="1"/>
+						<field name="division_id" readonly="1"/>
 						<field name="rotation"  attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
-						<field name="rot_interval"  attrs="{'readonly':[('state','in',['approved','cancel','reject'])],'invisible':[('rotation','!=',True)]}"/>
+						<field name="rot_interval"  attrs="{'readonly':[('state','in',['approved','cancel','reject'])],'invisible':[('rotation','!=',True)],'required':[('rotation','=',True)]}"/>
 						<field name="state" style="width: 30%%" class="att_state_change"/>
 					</field>
 					
@@ -188,7 +189,8 @@
 					</field>
 					<field name="employee_id" position="after">
 						<field name="code"/>
-						<field name="emp_categ_id" string="Category"/>
+						<field name="emp_categ_id"/>
+						<field name="division_id"/>
 					</field>
 					<field name="job_id" position="replace">
 						<field name="job_id" />
@@ -235,8 +237,10 @@
             <field name="model">hr.contract</field>
             <field name="inherit_id" ref="hr_contract.hr_contract_view_search"/>
             <field name="arch" type="xml">
+				<field name="name" position="replace">
+					<field name="code" string="Employees"  filter_domain="['|', ('employee_id','ilike',self), ('code','ilike',self)]" />
+				</field>
 					<field name="employee_id" position="replace">
-						<field name="employee_id" string="Employees"  filter_domain="['|', ('employee_id','ilike',self), ('code','ilike',self)]" />
 						<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
 						<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>				
 						<filter icon="terp-check" name="approve" string="Approved" domain="[('state','=','approved')]"/>				
@@ -254,6 +258,8 @@
                     <group expand="0" string="Group By...">
 						<field name="employee_id" position ="replace">
 							<filter string="Designation" icon="terp-personal" domain="[]" context="{'group_by':'job_id'}"/>
+							<filter string="category" icon="terp-personal" domain="[]" context="{'group_by':'emp_categ_id'}"/>
+							<filter string="Division" icon="terp-personal" domain="[]" context="{'group_by':'division_id'}"/>
 							<filter string="Department" icon="terp-personal" domain="[]" context="{'group_by':'dep_id'}"/>
 							<filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/> 
 						</field>
