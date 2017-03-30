@@ -606,6 +606,16 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
 		</record>
 		
+		<record id="kg_hr_kg_emp_transfer" model="ir.model.access">
+			<field name="model_id" ref="kg_emp_transfer.model_kg_emp_transfer"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Employee Transfer</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
     </data>
 </openerp>
 	
