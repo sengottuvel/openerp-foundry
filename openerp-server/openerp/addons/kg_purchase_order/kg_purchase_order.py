@@ -121,7 +121,7 @@ class kg_purchase_order(osv.osv):
 	_columns = {
 		
 		#~ 'po_type': fields.selection([('direct', 'Direct'),('frompi', 'From PI'),('fromquote', 'From Quote')], 'PO Type',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)],'cancel':[('readonly',True)]}),
-		'po_type': fields.selection([('direct', 'Direct'),('frompi', 'From PI')], 'PO Type',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)],'cancel':[('readonly',True)]}),
+		'po_type': fields.selection([('direct', 'Direct'),('frompi', 'From PI'),('fromquote', 'From Quote')], 'PO Type',readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'bill_type': fields.selection([('cash','Cash'),('credit','Credit'),('advance','Advance')], 'Payment Mode',states={'approved':[('readonly',True)],'done':[('readonly',True)],'cancel':[('readonly',True)]}),
 		'po_expenses_type1': fields.selection([('freight','Freight Charges'),('others','Others')], 'Expenses Type1', readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		'po_expenses_type2': fields.selection([('freight','Freight Charges'),('others','Others')], 'Expenses Type2', readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
@@ -629,6 +629,20 @@ class kg_purchase_order(osv.osv):
 					for item in bmr_rec.line_ids:
 						if item.brand_id.id == po_lines[i].brand_id.id and item.moc_id.id == po_lines[i].moc_id.id and po_lines[i].rate_revise == 'yes':
 							self.pool.get('ch.brandmoc.rate.details').write(cr,uid,item.id,{'purchase_price' : po_lines[i].price_unit})
+							
+							## Design Rate update process start
+							
+							design_rate = 0
+							if item.rate <= po_lines[i].price_unit:
+								design_rate = ((po_lines[i].price_unit/100.00) * 5) + po_lines[i].price_unit
+								self.pool.get('ch.brandmoc.rate.details').write(cr,uid,item.id,{'rate' : design_rate})
+							elif (item.rate - ((item.rate/100.00) * 5)) >= po_lines[i].price_unit:
+								design_rate = ((po_lines[i].price_unit/100.00)*5) + po_lines[i].price_unit
+								self.pool.get('ch.brandmoc.rate.details').write(cr,uid,item.id,{'rate' : design_rate})
+							else:
+								pass
+							## Design Rate update process end
+							
 						else:
 							pass
 	

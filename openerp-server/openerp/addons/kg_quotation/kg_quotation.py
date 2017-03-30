@@ -119,8 +119,8 @@ class kg_rfq_vendor_selection(osv.osv):
 		
 	_constraints = [
 		(_line_entry_check, 'You cannot Confirm the record without line entry!', ['id']),
-		(_quotedate_validation, 'Last Submission date should be equal or greater than current date !!',['Due Date']),
-		(_past_date_check, 'System not allow to save with past date. !!',['RFQ Date']),
+		#~ (_quotedate_validation, 'Last Submission date should be equal or greater than current date !!',['Due Date']),
+		#~ (_past_date_check, 'System not allow to save with past date. !!',['RFQ Date']),
 	]
 		
 	def confirm_rfq(self, cr, uid, ids, context=None):
@@ -764,6 +764,8 @@ class kg_quotation_entry_header(osv.osv):
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
 		'confirm_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),
+		'approve_date': fields.datetime('Approved Date', readonly=True),
+		'app_user_id': fields.many2one('res.users', 'Approved By', readonly=True),
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
 		
@@ -790,10 +792,6 @@ class kg_quotation_entry_header(osv.osv):
 		
 	}
 	
-	def write(self, cr, uid, ids, vals, context=None):
-		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
-		return super(kg_quotation_entry_header, self).write(cr, uid, ids, vals, context)
-		
 	def select_vendor_1(self, cr, uid, ids, context=None):
 		for hdr in self.browse(cr, uid, ids, context):
 			cr.execute('''update kg_quotation_entry_lines set 
@@ -1116,7 +1114,7 @@ class kg_quotation_entry_header(osv.osv):
 		
 	def write(self, cr, uid, ids, vals, context=None):
 		for quo in self.browse(cr, uid, ids, context=context):
-			vals.update({'rfq_name': quo.rfq_name,'rfq_date':quo.rfq_date})
+			vals.update({'rfq_name': quo.rfq_name,'rfq_date':quo.rfq_date,'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_quotation_entry_header, self).write(cr, uid, ids, vals, context)				
 	
 	def send_for_approval(self, cr, uid, ids, context=None):
@@ -1162,13 +1160,17 @@ class kg_quotation_entry_header(osv.osv):
 		#~ if rec.remarks == False:
 			#~ raise osv.except_osv(_('Warning'),_('Please enter Approve/Reject Remarks'))
 		if rec.state == 'confirmed':
-			self.write(cr, uid, ids, {'state':'approved'})
-			ven_sel_obj = self.pool.get('kg.rfq.vendor.selection').search(cr,uid,[('id','=',rec.rfq_no_id.id)])
-			ven_sel_rec = self.pool.get('kg.rfq.vendor.selection').browse(cr,uid,ven_sel_obj[0])
-			self.pool.get('kg.rfq.vendor.selection').write(cr,uid,ven_sel_rec.id,{'state': 'comparison_approved'})
-			q_ids = self.pool.get('kg.quotation.requisition.header').search(cr, uid, [('rfq_no_id','=',rec.rfq_no_id.id),('state','=','approved')])
-			q_rec = self.pool.get('kg.quotation.requisition.header').browse(cr, uid, q_ids[0])
-			self.pool.get('kg.quotation.requisition.header').write(cr, uid, q_rec.id,{'revised_flag':True})
+			quote_header = self.pool.get('kg.quotation.requisition.header')
+			ven_sel_obj = self.pool.get('kg.rfq.vendor.selection')
+			self.write(cr, uid, ids, {'state':'approved','approve_date':time.strftime('%Y-%m-%d %H:%M:%S'),'app_user_id':uid})
+			ven_sel_ids = ven_sel_obj.search(cr,uid,[('id','=',rec.rfq_no_id.id),('state','!=','revised')])
+			if ven_sel_ids:
+				ven_sel_rec = ven_sel_obj.browse(cr,uid,ven_sel_ids[0])
+				ven_sel_obj.write(cr,uid,ven_sel_rec.id,{'state': 'comparison_approved'})
+			q_ids = quote_header.search(cr, uid, [('rfq_no_id','=',rec.rfq_no_id.id),('state','=','approved')])
+			if q_ids:
+				q_rec = quote_header.browse(cr, uid, q_ids[0])
+				quote_header.write(cr, uid, q_rec.id,{'revised_flag':True})
 		
 		return True
 	
@@ -1262,7 +1264,6 @@ class kg_quotation_entry_header(osv.osv):
 						po_line_id = po_lin_obj.create(cr, uid, po_line_vals)						
 						cr.execute('insert into kg_poindent_po_line(po_order_id,piline_id) values(%s,%s)', (po_id,items['pi_line_id']))	
 		return True
-	
 	
 	def po_generate(self, cr, uid, ids, context=None):
 		for quo in self.browse(cr, uid, ids, context):

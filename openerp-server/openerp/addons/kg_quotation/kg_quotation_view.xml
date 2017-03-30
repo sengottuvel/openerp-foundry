@@ -277,7 +277,7 @@
 					</group>
 					<group colspan="14" col="14">
 						<group colspan="2" col="1">
-							<button name="list_quotations" string="List" attrs="{'invisible':[('rfq_no_id','=',False)]}" type="object" icon="gtk-execute"/>
+							<button name="list_quotations" string="List" attrs="{'invisible':['|',('rfq_no_id','=',False),('state','!=','draft')]}" type="object" icon="gtk-execute"/>
 						</group>
 						<group colspan="2" col="1">
 						</group>
@@ -518,7 +518,7 @@
 						<field name="remarks" colspan="4" attrs="{'invisible': [('state','=','draft')],'readonly': [('state',' in',('approved','cancel'))]}"/>
 					<group colspan="14" col="14">
 						<group colspan="4" col="4">
-						<button name="send_for_approval" type="object" attrs="{'invisible':[('rfq_no_id','=',False),('state','=','draft')]}" string="Confirm"  icon="gtk-execute"/>
+						<button name="send_for_approval" type="object" attrs="{'invisible':['|','|',('rfq_no_id','=',False),('state','!=','draft'),('quote_list_flag','=',False)]}" string="Confirm"  icon="gtk-execute"/>
 						<button name="approve_quote" type="object" states='confirmed' string="Approve"  icon="gtk-execute"/>
 						<button name="approve_po_quote" type="object" states='confirmed' string="Approve &amp; Generate PO"  icon="gtk-execute"/>
 						<button name="po_generate" type="object" states='approved' string="Generate PO"  icon="gtk-execute"/>
@@ -540,10 +540,12 @@
 							</group>
 							<group>
 								<field name="confirm_user_id" string="Confirmed By" attrs="{'invisible': [('state','=','draft')]}"/>
+								<field name="app_user_id" string="Approved By" attrs="{'invisible': [('state','not in',('approved','cancel'))]}"/>
 								<field name="update_user_id" string="Last Updated By"/>
 							</group>
 							<group>
 								<field name="confirm_date" string="Confirmed Date" attrs="{'invisible': [('state','=','draft')]}"/>
+								<field name="approve_date" string="Approved Date" attrs="{'invisible': [('state','not in',('approved','cancel'))]}"/>
 								<field name="update_date" string="Last Updated Date"/>
 							</group>
 						</group>
