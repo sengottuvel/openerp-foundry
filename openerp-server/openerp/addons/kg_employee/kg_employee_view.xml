@@ -74,7 +74,7 @@
 					</field>
 					
 					<field name="job_id" position="replace">
-						<field name="job_id" string="Designation" required="0" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+						<field name="job_id" string="Designation" required="1" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
 					</field>
 					
 					<field name="coach_id" position="replace">
@@ -237,6 +237,8 @@
 					
 					<field name="name" position="after">
 						<field name="code" />
+						<field name="emp_categ_id" />
+						<field name="division_id" />
 					</field>					
 					<field name="department_id" position="replace">
 						<field name="dep_id" />
@@ -264,7 +266,7 @@
             <field name="inherit_id" ref="hr.view_employee_filter"/>
             <field name="arch" type="xml">
 					<field name="name" position="replace">
-						<field name="name" string="Employees"  filter_domain="['|', ('name','ilike',self), ('code','ilike',self)]" />
+						<field name="code" string="Employee"  filter_domain="['|',('code','ilike',self),('name','ilike',self)]" />
 						<filter icon="terp-check" name="draft" string="Draft" domain="[('status','=','draft')]"/>
 						<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('status','=','confirmed')]"/>				
 						<filter icon="terp-check" name="approve" string="Approved" domain="[('status','=','approved')]"/>				
@@ -273,6 +275,8 @@
                     <group expand="0" string="Group By...">
 						<field name="department_id" position ="replace">
 							<filter string="Department" icon="terp-personal" domain="[]" context="{'group_by':'department_id'}"/>
+							<filter string="Employee Category" icon="terp-personal" domain="[]" context="{'group_by':'emp_categ_id'}"/>
+							<filter string="Division" icon="terp-personal" domain="[]" context="{'group_by':'division_id'}"/>
 							<filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'status'}"/> 
 						</field>
 						<field name="parent_id" position ="replace">

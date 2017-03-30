@@ -134,7 +134,7 @@ class kg_employee(osv.osv):
 		'join_mode': fields.selection([('new','New'),('rejoin','Re-Join')],'Joining Mode'),
 		'mode_of_att': fields.selection([('manual','Manual'),('electronic','Electronic'),('both','Both')],'Mode of Attendance'),
 		'personal_email': fields.char('Personal Email'),
-		'emp_categ_id':fields.many2one('kg.employee.category','Employee Category'),
+		'emp_categ_id':fields.many2one('kg.employee.category','Category'),
 		'bank_acc_no': fields.char('Bank Account No',size=15),
 		'children_1': fields.integer('Children',),
 		'nationality': fields.char('Nationality',),
@@ -220,6 +220,7 @@ class kg_employee(osv.osv):
 			contract_salary = self.pool.get('ch.kg.contract.salary')
 			contract_inc = self.pool.get('ch.con.special.incentive.policy')
 			emp_categ_line_1 = emp_categ_obj.browse(cr,uid,rec.emp_categ_id.id)
+			emp_categ_line_inc = contract_inc.browse(cr,uid,rec.emp_categ_id.id)
 			emp_cntrct_ids = emp_obj_1.search(cr,uid,[('employee_id','=',rec.id)])
 			if emp_cntrct_ids:
 				pass
@@ -231,8 +232,10 @@ class kg_employee(osv.osv):
 						'dep_id':rec.dep_id.id,
 						'job_id':rec.job_id.id,
 						'emp_categ_id':rec.emp_categ_id.id,
+						'division_id':rec.division_id.id,
 						'shift_id':emp_categ_line_1.shift_id.id,
 						'driver_batta':rec.emp_categ_id.driver_batta,
+
 						}
 				att_id = emp_obj_1.create(cr,uid,emp_vals)
 				emp_obj = self.pool.get('hr.contract')
@@ -248,7 +251,6 @@ class kg_employee(osv.osv):
 
 						}
 					salary_policy = contract_salary.create(cr,uid,emp_con_vals)
-				
 				if emp_categ_line_1.line_id_1:
 					for j in emp_categ_line_1.line_id_1:
 
@@ -290,7 +292,7 @@ class kg_employee(osv.osv):
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
 		
 	def write(self, cr, uid, ids, vals, context=None):
-		rec = self.browse(cr,uid,ids[0])
+		#~ rec = self.browse(cr,uid,ids[0])
 		#~ vals['header_id_his'] = ids[0]
 		#~ vals['update_date'] = time.strftime('%Y-%m-%d %H:%M:%S')
 		#~ vals['update_user_id'] = uid
