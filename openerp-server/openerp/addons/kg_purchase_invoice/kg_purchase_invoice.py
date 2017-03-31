@@ -119,6 +119,7 @@ class kg_purchase_invoice(osv.osv):
 				('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True,track_visibility='onchange',select=True),	
 		'his_state':fields.selection([('pending', 'Pending'), ('paid', 'Paid')],'Payment Status'),
 		'payment_date':fields.date('Payment Date', readonly=True),
+		'division_id': fields.many2one('kg.division.master','Division',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]},domain="[('state','not in',('reject','cancel'))]"),
 		
 		## Entry Info
 		
@@ -149,7 +150,7 @@ class kg_purchase_invoice(osv.osv):
 		'payment_type': fields.selection([('cash', 'Cash'), ('credit', 'Credit')], 'Payment Type',readonly=True),
 		'can_remark': fields.text('Cancel Remarks'),
 		'reject_remark': fields.text('Reject Remarks'),
-			 
+		
 		### Order Details ###
 		
 		'order_no': fields.char('Order NO',readonly=True),
@@ -176,9 +177,9 @@ class kg_purchase_invoice(osv.osv):
 		
 		#~ 'debit_note_ids':fields.one2many('ch.kg.debit.note','header_id','Debit Note',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		
-		'history_line_ids':fields.one2many('kg.purchase.payment.history','header_id','History_Line_ids'),
+		'history_line_ids':fields.one2many('kg.purchase.payment.history','header_id','History Line'),
 		
-		'advance_line_ids':fields.one2many('ch.poadvance.purchase.invoice.line','header_id','History_Line_ids'),
+		'advance_line_ids':fields.one2many('ch.poadvance.purchase.invoice.line','header_id','Advance Line'),
 		
 		### Amount Calculation fields ### 
 		

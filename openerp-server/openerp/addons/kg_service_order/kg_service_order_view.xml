@@ -33,7 +33,7 @@
 						<field name="payment_mode" attrs="{'required':[('payment_type','=','credit')]}"/>
 						<field name="advance_amt" attrs="{'required':[('payment_type','=','advance')],'invisible': [('payment_type','!=','advance')]}"/>
 						<field name="mode_of_dispatch"/>
-						<field name="note" attrs="{'readonly': [('state','in',['confirm'])]}"/>
+						<field name="remark" attrs="{'invisible':[('state','=','draft')]}"/>
 						<field name="so_bill" invisible="1"/>
 						<field name="so_reonly_flag" invisible="1"/>
 						<field name="so_flag" id = "so_flag" invisible="1"/>
@@ -142,7 +142,7 @@
 				</notebook>
 			<group>
 				<field name="specification"/>
-				<field name="remark"/>
+				<field name="note"/>
 			</group>
 			</form>
 		</field>

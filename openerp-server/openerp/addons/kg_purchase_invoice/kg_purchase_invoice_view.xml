@@ -22,6 +22,7 @@
 						</group>
 						<group>
 							<field name="invoice_date"/>
+							<field name="division_id" required="1"/>
 							<field name="purpose" required="1"/>
 							<field name="load_items_flag" invisible="1"/>
 						</group>

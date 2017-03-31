@@ -107,8 +107,8 @@ class kg_service_order(osv.osv):
 		'name': fields.char('SO No', size=64,readonly=True),
 		'date': fields.date('SO Date', required=True,readonly=True, states={'draft':[('readonly',False)],'confirm':[('readonly',False)]}),
 		'state': fields.selection([('draft', 'Draft'),('confirm','WFA'),('approved','Approved'),('inv','Invoiced'),('cancel','Cancelled'),('reject','Rejected')], 'Status', track_visibility='onchange'),
-		'note': fields.text('Remarks'),
-		'remark': fields.text('Remarks', readonly=True, states={'approved': [('readonly', False)],'done':[('readonly',False)]}),
+		'note': fields.text('Notes',readonly=True, states={'confirm':[('readonly',False)]}),
+		'remark': fields.text('Remarks', readonly=True, states={'approved': [('readonly', False)],'done':[('readonly',False)],'confirm':[('readonly',False)]}),
 		
 		## Module Requirement Info
 		

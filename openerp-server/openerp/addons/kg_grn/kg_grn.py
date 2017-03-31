@@ -1564,6 +1564,8 @@ class kg_stock_move(osv.osv):
     'kg_discount_per': fields.float('Discount (%)', digits_compute= dp.get_precision('Discount')),
     'kg_discount': fields.float('Discount Amount'),
     'exp_line_id':fields.one2many('kg.grn.exp.batch', 'grn_line_id','Expiry Batch Line'),
+    'flag_opening':fields.boolean('Opening Flag'),
+    'transaction_type':fields.char('Transaction Type'),
     
     # General GRN Line
     
