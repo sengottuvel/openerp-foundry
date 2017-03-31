@@ -192,7 +192,7 @@ class kg_rfq_vendor_selection(osv.osv):
 				#~ if custom.name == '/':
 					#~ name = self.pool.get('ir.sequence').get(cr, uid, 'kg.rfq.vendor.selection')
 				#~ else:
-					#~ name = custom.name 
+					#~ name = custom.name
 				seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.rfq.vendor.selection')])
 				seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
 				cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,custom.quotation_date))

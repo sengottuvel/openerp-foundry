@@ -315,7 +315,7 @@ class kg_leave_request(osv.osv):
 	]
 	
 	## Module Requirement
-	def onchange_employee_id(self, cr, uid, ids, employee_id,code, context=None):
+	def onchange_employee_id(self, cr, uid, ids, employee_id,code,emp_categ_id,division_id,  context=None):
 		moc_const_vals=[]
 		le_all = self.pool.get('kg.leave.allocation').search(cr,uid,[('employee_id','=',employee_id)])
 		if le_all:
