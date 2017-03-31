@@ -46,6 +46,8 @@ class kg_payslip(osv.osv):
 	'cum_ded_id': fields.many2one('kg.advance.deduction','Cumulative Deduction', readonly=True),
 	'date': fields.date('Creation Date'),
 	'month':fields.char('Month'),
+	'emp_categ_id':fields.many2one('kg.employee.category','Category'),
+	'division_id':fields.many2one('kg.division.master','Division'),
 	
 	###### Line Declarations ########
 	'line_id_other_sal':fields.one2many('ch.other.salary.comp','slip_id','Line Id Other Salary'),
@@ -146,6 +148,8 @@ class kg_payslip(osv.osv):
 					'name': _('Salary Slip of %s for %s') % (employee_id.name, tools.ustr(ttyme.strftime('%B-%Y'))),
 					'company_id': employee_id.company_id.id,
 					'emp_name': employee_id.code,
+					'emp_categ_id': employee_id.emp_categ_id.id,
+					'division_id': employee_id.division_id.id,
 		})
 
 		if not context.get('contract', False):

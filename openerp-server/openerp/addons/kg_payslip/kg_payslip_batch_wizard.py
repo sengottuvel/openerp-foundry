@@ -51,6 +51,8 @@ class kg_payslip_batch_wizard(osv.osv_memory):
 			res = {
 				'employee_id': emp.id,
 				'emp_name': emp.code,
+				'emp_categ_id': emp.emp_categ_id.id,
+				'division_id': emp.division_id.id,
 				'number': self.pool.get('ir.sequence').get(cr, uid, 'hr.payslip'),
 				'struct_id': slip_data['value'].get('struct_id', False),
 				'contract_id': slip_data['value'].get('contract_id', False),

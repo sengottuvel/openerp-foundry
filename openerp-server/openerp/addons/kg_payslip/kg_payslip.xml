@@ -50,6 +50,9 @@
 					
 					<field name="date_from" position="after">
 					<field name="emp_name"/>
+					<field name="emp_categ_id" readonly="1"/>
+					<field name="division_id" readonly="1"/>
+					<field name="name" invisible="1"/>
 					</field>
 					
 					<field name="date_to" position="after">
@@ -67,6 +70,8 @@
                     <field name="othr_sal_amt"/>
                     <field name="tot_contribution" invisible="1"/>
                     <field name="credit_note" invisible="1"/>
+                    <field name="tot_paid_days" invisible="1"/>
+                    <field name="tot_paid_days" readonly="1"/>
 					</field>
 					<xpath expr = "//page[@string='Salary Computation']" position="after">
 						<page string="Other Salary Component" >
@@ -101,6 +106,8 @@
 				
 					<field name="employee_id" position="after">
 						<field name="emp_name"/>
+						<field name="emp_categ_id"/>
+						<field name="division_id"/>
 					</field>
 					
 					<field name="state" position="before">
@@ -115,6 +122,21 @@
 					<field name="date_from" position="replace"/>
 					<field name="date_to" position="replace"/>
 					 
+				</field>
+			</record>
+			<record model="ir.ui.view" id="kg_payslip_search">
+				<field name="name">kg.payslip.search</field>
+				<field name="model">hr.payslip</field>
+				<field name="inherit_id" ref="hr_payroll.view_hr_payslip_filter"/>
+				<field name="arch" type="xml">
+				<field name="name" string="Payslips" filter_domain="['|',('name','ilike',self),('number','ilike',self)]" position="replace">
+					<field name="employee_id" string="Employee Name"  filter_domain="[('employee_id','ilike',self)]" />
+					<field name="emp_name" string="Employee Code"  filter_domain="[('emp_name','ilike',self)]" />
+				</field>
+				<filter string="Employees" icon="terp-personal" name="employee_id" context="{'group_by':'employee_id'}" position="after">
+					<filter string="Employee Category" icon="terp-personal" domain="[]" context="{'group_by':'emp_categ_id'}"/>
+					<filter string="Division" icon="terp-personal" domain="[]" context="{'group_by':'division_id'}"/> 
+				</filter>
 				</field>
 			</record>
 			
