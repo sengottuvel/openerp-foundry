@@ -180,7 +180,7 @@ class kg_partner(osv.osv):
 			
 			## Account master creation process start
 			
-			internal_type = note = ''
+			internal_type = note = account_receivable_id = account_payable_id =  ''
 			entry_mode = 'auto'
 			account_payable_id = ''
 			ac_obj = self.pool.get('account.account')
@@ -198,6 +198,7 @@ class kg_partner(osv.osv):
 						ac_type = ac_type_rec.id
 					internal_type = 'receivable'
 					note = 'New Customer Added'
+					account_receivable_id = ac_obj.account_creation(cr,uid,rec.name,ac_type,rec.id,entry_mode,internal_type,note,context=context)
 				if rec.supplier == True:
 					internal_type = 'payable'
 					note = 'New Supplier Added'
@@ -212,16 +213,19 @@ class kg_partner(osv.osv):
 					if ac_type_ids:
 						ac_type_rec = self.pool.get('account.account.type').browse(cr,uid,ac_type_ids[0])
 						ac_type = ac_type_rec.id
-				account_receivable_id = ac_obj.account_creation(cr,uid,rec.name,ac_type,rec.id,entry_mode,internal_type,note,context=context)
-				creditor_ids = ac_obj.search(cr,uid,[('name','=','Sundry Creditors')])
-				if creditor_ids:
-					creditor_rec = ac_obj.browse(cr,uid,creditor_ids[0])
-					account_payable_id = creditor_rec.id
+					account_payable_id = ac_obj.account_creation(cr,uid,rec.name,ac_type,rec.id,entry_mode,internal_type,note,context=context)
+				#~ account_receivable_id = ac_obj.account_creation(cr,uid,rec.name,ac_type,rec.id,entry_mode,internal_type,note,context=context)
+				#~ creditor_ids = ac_obj.search(cr,uid,[('name','=','Sundry Creditors')])
+				#~ if creditor_ids:
+					#~ creditor_rec = ac_obj.browse(cr,uid,creditor_ids[0])
+					#~ account_payable_id = creditor_rec.id
+				
 				self.write(cr, uid, ids, {'property_account_receivable':account_receivable_id,'property_account_payable':account_payable_id})
 			
 			## Account master creation process end
 			
 			self.write(cr, uid, ids, {'partner_state': 'approve','approved_by':uid,'approved_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		
 		return True
 	
 	def entry_draft(self,cr,uid,ids,context=None):

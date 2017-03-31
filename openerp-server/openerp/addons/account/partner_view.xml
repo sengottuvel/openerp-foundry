@@ -62,9 +62,7 @@
             id="menu_action_account_fiscal_position_form"
             parent="next_id_27" sequence="20"/>
 
-        <!--
         Partners Extension
-        -->
 
         <record id="view_partner_property_form" model="ir.ui.view">
             <field name="name">res.partner.property.form.inherit</field>
@@ -73,9 +71,19 @@
             <field name="inherit_id" ref="base.view_partner_form"/>
             <field name="arch" type="xml">
                 <page string="History" position="before" version="7.0">
-                <!--<page string="Accounting" col="4" name="accounting" attrs="{'invisible': [('is_company','=',False),('parent_id','!=',False)]}">-->
-                <page string="Accounting" col="4" name="accounting" invisible="1">
+<!--
+                <page string="Accounting" col="4" name="accounting" attrs="{'invisible': [('is_company','=',False),('parent_id','!=',False)]}">
+-->
+                <page string="Accounting" col="4" name="accounting">
                     <group>
+						<!-- Accounting list to supplier,customer start -->
+							<field name="property_account_receivable" attrs="{'invisible':[('customer','!=',True)]}" readonly="1"/>
+							<field name="property_account_payable" attrs="{'invisible':[('supplier','!=',True),('dealer','!=',True)]}" readnoly="1"/>
+						
+					</group>
+						<!-- Accounting list to supplier,customer end -->
+<!--
+						
                         <group>
                             <field name="property_account_position" widget="selection"/>
                         </group>
@@ -109,12 +117,15 @@
                         <p>Accounting-related settings are managed on <button name="open_commercial_entity" type="object" string="the parent company" class="oe_link"/></p>
                     </div>
                 </page>
+-->
+                </page>
                 </page>
             </field>
         </record>
 
         <!--  Partners info tab view-->
 
+<!--
         <act_window
             id="action_analytic_open"
             name="Contracts/Analytic Accounts"
@@ -123,6 +134,7 @@
             src_model="res.partner"
             view_type="form"
             view_mode="tree,form"/>
+-->
 
     </data>
 </openerp>
