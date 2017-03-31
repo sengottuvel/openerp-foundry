@@ -19,7 +19,6 @@ from openerp import netsvc
 from tools import number_to_text_convert_india
 logger = logging.getLogger('server')
 today = datetime.now()
-
 import urllib
 import urllib2
 import logging
