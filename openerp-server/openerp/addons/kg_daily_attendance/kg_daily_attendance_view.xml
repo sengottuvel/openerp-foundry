@@ -19,6 +19,8 @@
 						</group>
 						<group>
 							<field name="month" readonly="0"/>
+							<field name="emp_categ_id"/>	
+							<field name="division_id"/>		
 							<field name="year"/>
 							<field name="active" invisible="1"/>				
 						</group>
@@ -90,8 +92,9 @@
 				<tree string="Employee Attendance" version="7.0">
 					<field name="year"/>					
                     <field name="month"/>
-                    <field name="employee_id"/>      
-                    					
+                    <field name="employee_id"/>
+                    <field name="emp_categ_id"/>	
+					<field name="division_id"/>		      
 				</tree>
 			</field>
 		</record>			
@@ -104,11 +107,15 @@
             <field name="arch" type="xml">
                 <search string="Attendance Filter">
 				<filter icon="terp-check" name="punch_type" string="Punch Type"/>
+				<field name="employee_id" string="Employees"  filter_domain="[('employee_id','ilike',self)]" />
+				<field name="emp_code" string="Employee Code"  filter_domain="[('emp_code','ilike',self)]" />
 				<separator/>
 				<group expand="0" string="Group By...">
 					<filter string="Year" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'year'}"/>
 					<filter string="Month" icon="terp-personal" domain="[]" context="{'group_by':'month'}"/>
 					<filter string="Emp Name" icon="terp-personal" domain="[]" context="{'group_by':'employee_id'}"/>
+					<filter string="Employee Category" icon="terp-personal" domain="[]" context="{'group_by':'emp_categ_id'}"/>
+					<filter string="Division" icon="terp-personal" domain="[]" context="{'group_by':'division_id'}"/>
 					</group>
                 </search>
 			</field>

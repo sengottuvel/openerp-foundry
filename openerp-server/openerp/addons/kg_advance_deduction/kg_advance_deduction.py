@@ -93,6 +93,7 @@ class kg_advance_deduction(osv.osv):
 		'bal_amt': fields.float('Balance Amount'),
 		'round_bal': fields.float('Round Balance'),
 		'emp_categ_id':fields.many2one('kg.employee.category','Employee Category'),
+		'division_id':fields.many2one('kg.division.master','Division'),
 		
 		## Child Tables Declaration		
 		
@@ -187,11 +188,11 @@ class kg_advance_deduction(osv.osv):
 	
 	## Module Requirement
 	
-	def onchange_employee_id(self, cr, uid, ids, employee_id,code, context=None):
-		value = {'code': '','emp_categ_id':''}
+	def onchange_employee_id(self, cr, uid, ids, employee_id,emp_categ_id,division_id,code, context=None):
+		value = {'code': '','emp_categ_id':'','division_id':''}
 		if employee_id:
 			emp = self.pool.get('hr.employee').browse(cr, uid, employee_id, context=context)
-			value = {'code': emp.code,'emp_categ_id':emp.emp_categ_id.id}
+			value = {'code': emp.code,'emp_categ_id':emp.emp_categ_id.id,'division_id':emp.division_id.id}
 		return {'value': value}
 		
 	def onchange_repay_amount(self,cr,uid,ids ,tot_amt, period,context = None):

@@ -25,10 +25,12 @@
 								<field name="end_date" style="width: 30%%" class="att_start_end_date" required="1" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>	
 							</group>
 							<group>
-								<field name="employee_id" on_change = "onchange_emp_id(employee_id,code)"  attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1"/>	
+								<field name="employee_id" on_change = "onchange_emp_id(employee_id,code,emp_categ_id,division_id)"  attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1"/>
+								<field name="emp_categ_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" readonly="1"/>	
 							</group>
 							<group>
 								<field name="code" required="1" readonly="1"/>
+								<field name="division_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" readonly="1"/>
 							</group>
 							<group>
 								<field name="modify" invisible = "1"/>
@@ -106,6 +108,8 @@
 					<field name="month"/>
 					<field name="employee_id"/>
 					<field name="code"/>
+					<field name="emp_categ_id"/>
+					<field name="division_id"/>
 					<field name="state" invisible="1"/>
 				</tree>
 			</field>
@@ -120,7 +124,8 @@
             <field name="model">kg.monthly.attendance</field>
             <field name="arch" type="xml">
                 <search string="Monthly Attendance">
-					<field name="employee_id" string="Master"  filter_domain="['|', ('employee_id','ilike',self), ('code','ilike',self)]" />
+					<field name="employee_id" string="Employee Name"  filter_domain="[('employee_id','ilike',self)]" />
+					<field name="code" string="Employee Code"  filter_domain="[('code','ilike',self)]" />
 					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
 					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>				
 					<filter icon="terp-check" name="approve" string="Approved" domain="[('state','=','approved')]"/>				
@@ -128,6 +133,8 @@
 					<separator/>
                     <group expand="0" string="Group By...">
                         <filter string="Name" icon="terp-personal" domain="[]" context="{'group_by':'employee_id'}"/> 
+                         <filter string="Employee Category" icon="terp-personal" domain="[]" context="{'group_by':'emp_categ_id'}"/>
+						<filter string="Division" icon="terp-personal" domain="[]" context="{'group_by':'division_id'}"/> 
                         <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
 					</group>
                 </search>

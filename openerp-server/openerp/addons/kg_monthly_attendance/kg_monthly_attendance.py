@@ -114,6 +114,8 @@ class kg_monthly_attendance(osv.osv):
 		'month':fields.char('Month'),
 		'sundays':fields.integer('Sundays'),	
 		'nat_fes_days':fields.integer('National/Festival Holidays'),	
+		'emp_categ_id':fields.many2one('kg.employee.category','Category'),
+		'division_id':fields.many2one('kg.division.master','Division')
 		
 		## Child Tables Declaration		
 		
@@ -226,10 +228,10 @@ class kg_monthly_attendance(osv.osv):
 		res = last.strftime('%Y-%m-%d')
 		return res
 	
-	def onchange_emp_id(self, cr, uid, ids, employee_id,code,context=None):		
-		value = {'code': ''}
+	def onchange_emp_id(self, cr, uid, ids, employee_id,emp_categ_id,division_id,code,context=None):		
+		value = {'code': '','emp_categ_id': '','division_id': ''}
 		emp = self.pool.get('hr.employee').browse(cr, uid, employee_id, context=context)
-		value = {'code': emp.code}
+		value = {'code': emp.code,'emp_categ_id':emp.emp_categ_id.id,'division_id':emp.division_id.id}
 		return {'value': value}
 		
 	def update_monthly_att(self,cr,uid,ids,context=None):

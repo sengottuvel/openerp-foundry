@@ -74,6 +74,8 @@ class kg_daily_attendance(osv.osv):
 		
 		'att_code': fields.char('Attendance Code', size=64),
 		'date': fields.date('Creation Date'),
+		'emp_categ_id':fields.many2one('kg.employee.category','Category'),
+		'division_id':fields.many2one('kg.division.master','Division'),
 		
 		## Child Tables Declaration		
 		'line_id': fields.one2many('ch.daily.attendance', 'header_id','Daily Attendance Line'),
