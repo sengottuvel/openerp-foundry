@@ -66,6 +66,10 @@ class kg_product(osv.osv):
 		'sleeve_dia': fields.char('Sleeve dia(MM)'),
 		'coupling_make': fields.many2one('kg.brand.master','Coupling Make'),
 		
+		## Child 
+		
+		'avg_line_ids':fields.one2many('ch.product.yearly.average.price','product_id','Line Entry'),
+		
 		#~ 'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		
 		# Entry Info
@@ -295,3 +299,23 @@ class kg_product_category(osv.osv):
 		return True
 	
 kg_product_category()
+
+class ch_product_yearly_average_price(osv.osv):
+	
+    _name = "ch.product.yearly.average.price"
+	
+    _columns = {
+		
+        'avg_price': fields.float('Average Price', required=True),
+        'product_id': fields.many2one('product.product', 'Product'),
+        'fiscal_id': fields.many2one('account.fiscalyear', 'Fiscal year'),
+       
+    }
+    
+    _defaults = {
+		
+        'avg_price' : 0.00,
+		
+    }
+    
+ch_product_yearly_average_price()
