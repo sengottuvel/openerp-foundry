@@ -32,7 +32,7 @@ When a purchase order is created, you now have the opportunity to save the
 related requisition. This new object will regroup and will allow you to easily
 keep track and order all your purchase orders.
 """,
-    'depends' : ['base','hr','hr_contract'],
+    'depends' : ['base','hr','hr_contract','kg_employee_category'],
     'data': ['kg_leave_request_view.xml'],
     'css': ['static/src/css/state.css'],
     'auto_install': False,

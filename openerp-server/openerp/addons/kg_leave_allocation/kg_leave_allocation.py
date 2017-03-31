@@ -85,6 +85,8 @@ class kg_leave_allocation(osv.osv):
 		'emp_categ_id':fields.many2one('kg.employee.category','Employee Category',required=True),
 		'valid_from':fields.date('Valid From'),
 		'valid_to':fields.date('Valid till'),
+		'emp_categ_id':fields.many2one('kg.employee.category','Category'),
+		'division_id':fields.many2one('kg.division.master','Division'),
 	
 		## Child Tables Declaration
 		

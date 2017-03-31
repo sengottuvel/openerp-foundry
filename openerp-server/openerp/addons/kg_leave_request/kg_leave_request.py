@@ -99,6 +99,8 @@ class kg_leave_request(osv.osv):
 		'from_date':fields.date('From Date'),
 		'to_date':fields.date('To Date'),
 		'holiday_status_name': fields.related('holiday_status_id','name',type='char', string='Leave Type Name', store=True),
+		'emp_categ_id':fields.many2one('kg.employee.category','Category'),
+		'division_id':fields.many2one('kg.division.master','Division'),
 		## Child Tables Declaration		
 		'line_id_1': fields.one2many('ch.leave.request', 'header_id_1','Leave Allocation'),
 				
@@ -334,9 +336,12 @@ class kg_leave_request(osv.osv):
 		if employee_id:
 			emp = self.pool.get('hr.employee').browse(cr,uid,employee_id)
 			value = {'code': emp.code,
-					'department_id':emp.department_id.id,
+							'emp_categ_id': emp.emp_categ_id.id,
+							'division_id': emp.division_id.id,
+							'department_id':emp.department_id.id,
 					}
-		return {'value': {'line_id_1': moc_const_vals, 'code': emp.code,
+		return {'value': {'line_id_1': moc_const_vals, 'code': emp.code,'emp_categ_id': emp.emp_categ_id.id,
+							'division_id': emp.division_id.id,
 					'department_id':emp.department_id.id,}}
 		
 	def onchange_to_date(self, cr, uid, ids,to_date,from_date,context=None):
