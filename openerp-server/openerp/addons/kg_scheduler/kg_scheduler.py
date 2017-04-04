@@ -283,7 +283,7 @@ class kg_scheduler(osv.osv):
 								'sno':sno,
 								'product_id':item['a_product_id'],
 						
-								'brand':False,
+								'brand':' ',
 								'uom':item['uom'],
 								'qty':item['close_qty'],
 								'physical_stock':item['close_qty'],
