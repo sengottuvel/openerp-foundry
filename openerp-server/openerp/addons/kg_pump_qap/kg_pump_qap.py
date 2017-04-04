@@ -539,7 +539,9 @@ class kg_packing(osv.osv):
 		## PACKING ##
 		
 		'shift_id': fields.many2one('kg.shift.master','Shift'),
-		'operator': fields.char('Operator'),
+		'operator': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
+		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t')]"),
+		'employee_id': fields.many2one('hr.employee','Employee Name'),
 		'verified_by': fields.char('Verified By'),
 		'packing_id': fields.many2one('kg.packing.type','Packing Type',domain="[('active','=','t')]"),	
 		'wood_type': fields.char('Wood Type'),

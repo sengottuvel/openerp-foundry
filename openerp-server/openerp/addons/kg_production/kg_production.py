@@ -163,7 +163,7 @@ class kg_production(osv.osv):
 		'core_contractor':fields.many2one('res.partner','Contractor'),
 		'core_moulder': fields.integer('Moulder'),
 		'core_helper': fields.integer('Helper'),
-		'core_operator': fields.char('Operator',size=128),
+		'core_operator': fields.many2one('hr.employee','Operator'),
 		'core_qty': fields.integer('Qty'),
 		'total_core_qty': fields.integer('Total Core Qty'),
 		'core_rem_qty': fields.integer('Remaining Qty', readonly=True),
@@ -182,7 +182,7 @@ class kg_production(osv.osv):
 		'mould_moulder': fields.integer('Moulder'),
 		'mould_box_id': fields.related('pattern_id','box_id', type='many2one', relation='kg.box.master', string='Box Size', store=True),
 		'mould_helper': fields.integer('Helper'),
-		'mould_operator': fields.char('Operator',size=128),
+		'mould_operator': fields.many2one('hr.employee','Operator'),
 		'mould_qty': fields.integer('Qty'),
 		'total_mould_qty': fields.integer('Total Mould Qty'),
 		'mould_rem_qty': fields.integer('Remaining Qty', readonly=True),
@@ -682,7 +682,7 @@ class kg_core_batch(osv.osv):
 		'core_date': fields.date('Core Date'),
 		'core_shift_id':fields.many2one('kg.shift.master','Shift'),
 		'core_contractor':fields.many2one('res.partner','Contractor'),
-		'core_operator': fields.integer('Operator'),
+		'core_operator': fields.many2one('hr.employee','Operator'),
 		'core_helper': fields.integer('Helper'),
 		'core_hardness': fields.char('Core Hardness'),
 		'core_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
@@ -755,7 +755,7 @@ class kg_core_batch(osv.osv):
 					'core_date': entry.core_date,
 					'core_shift_id': entry.core_shift_id.id,
 					'core_contractor':entry.core_contractor.id,
-					'core_operator': entry.core_operator,
+					'core_operator': entry.core_operator.id,
 					'core_helper': entry.core_helper,
 					'core_hardness': entry.core_hardness,
 					'remarks':entry.remarks,
@@ -783,7 +783,7 @@ class kg_core_batch(osv.osv):
 			
 			for req_item in entry.line_ids:
 				production_obj.write(cr, uid,req_item.production_id.id,{'core_remarks':req_item.remarks,'core_date':req_item.core_date,
-				'core_shift_id':req_item.core_shift_id.id,'core_contractor':req_item.core_contractor.id,'core_operator':req_item.core_operator,
+				'core_shift_id':req_item.core_shift_id.id,'core_contractor':req_item.core_contractor.id,'core_operator':req_item.core_operator.id,
 				'core_helper':req_item.core_helper,'core_qty':req_item.core_qty,'core_hardness':req_item.core_hardness,
 				'core_by':req_item.core_by
 				})
@@ -836,7 +836,7 @@ class ch_core_batch_line(osv.osv):
 		'core_date': fields.date('Core Date'),
 		'core_shift_id':fields.many2one('kg.shift.master','Shift'),
 		'core_contractor':fields.many2one('res.partner','Contractor'),
-		'core_operator': fields.integer('Operator'),
+		'core_operator': fields.many2one('hr.employee','Operator'),
 		'core_helper': fields.integer('Helper'),
 		'core_qty': fields.integer('Completed Qty'),
 		'core_hardness': fields.char('Core Hardness'),
@@ -910,7 +910,7 @@ class kg_mould_batch(osv.osv):
 		'mould_shift_id':fields.many2one('kg.shift.master','Shift'),
 		'mould_contractor':fields.many2one('res.partner','Contractor'),
 		'mould_moulder': fields.integer('Moulder'),
-		'mould_operator': fields.integer('Operator'),
+		'mould_operator': fields.many2one('hr.employee','Operator'),
 		'mould_helper': fields.integer('Helper Count'),
 		'mould_qty': fields.integer('Qty'),		
 		'mould_hardness': fields.char('Mould Hardness'),
@@ -985,7 +985,7 @@ class kg_mould_batch(osv.osv):
 					'mould_shift_id':entry.mould_shift_id.id,
 					'mould_contractor':entry.mould_contractor.id,
 					'mould_moulder': entry.mould_moulder,
-					'mould_operator': entry.mould_operator,
+					'mould_operator': entry.mould_operator.id,
 					'mould_helper': entry.mould_helper,
 					'mould_hardness': entry.mould_hardness,
 					'remarks':entry.remarks,
@@ -1015,7 +1015,7 @@ class kg_mould_batch(osv.osv):
 				production_obj.write(cr, uid,req_item.production_id.id,{'mould_remarks':req_item.remarks,'mould_date':req_item.mould_date,
 				'mould_shift_id':req_item.mould_shift_id.id,'mould_contractor':req_item.mould_contractor.id,'mould_moulder':req_item.mould_moulder,
 				'mould_helper':req_item.mould_helper,'mould_qty':req_item.mould_qty,'mould_hardness':req_item.mould_hardness,'mould_box_id':req_item.mould_box_id.id,
-				'mould_by':req_item.mould_by,'mould_operator':req_item.mould_operator})
+				'mould_by':req_item.mould_by,'mould_operator':req_item.mould_operator.id})
 				production_obj.mould_update(cr, uid, [req_item.production_id.id])
 				
 			### Mould Batch Sequence Number Generation  ###
@@ -1066,7 +1066,7 @@ class ch_mould_batch_line(osv.osv):
 		'mould_contractor':fields.many2one('res.partner','Contractor'),
 		'mould_moulder': fields.integer('Moulder'),
 		'mould_helper': fields.integer('Helper'),
-		'mould_operator': fields.integer('Operator'),
+		'mould_operator': fields.many2one('hr.employee','Operator'),
 		'mould_qty': fields.integer('Completed Qty'),		
 		'mould_hardness': fields.char('Mould Hardness'),
 		'mould_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),

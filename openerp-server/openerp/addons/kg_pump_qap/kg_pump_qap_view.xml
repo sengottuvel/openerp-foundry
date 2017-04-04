@@ -699,12 +699,14 @@
 								<field name="wood_type" required="1" attrs="{'readonly': ['|',('flag_customer_specific','!=',True),('packing_state','=','completed')]}"/>
 								<field name="gross_weight" required="1"  on_change="onchange_pump_weight(gross_weight, net_weight)" attrs="{'readonly': [('packing_state','=','completed')]}"/>
 								<field name="remarks" attrs="{'readonly': [('packing_state','=','completed')]}"/>
-								<field name="packing_state" invisible="0"/>
+								<field name="packing_state" readonly="1"/>
 								
 							</group>											
 							<group>
 								<field name="qap_plan_id"/>
 								<field name="operator" required="1" attrs="{'readonly': [('packing_state','=','completed')]}"/>
+								<field name="contractor_id" attrs="{'required':[('operator','=','contractor')],'invisible':[('operator','!=','contractor')],'readonly': [('packing_state','=','completed')]}"/>
+								<field name="employee_id" attrs="{'required':[('operator','=','comp_employee')],'invisible':[('operator','!=','comp_employee')],'readonly': [('packing_state','=','completed')]}"/>
 								<field name="packing_id" required="1" attrs="{'readonly': ['|',('flag_customer_specific','!=',True),('packing_state','=','completed')]}"/>
 								<field name="box_size" required="1" attrs="{'readonly': ['|',('flag_customer_specific','!=',True),('packing_state','=','completed')]}"/>
 								<field name="net_weight" required="1"  on_change="onchange_pump_weight(gross_weight, net_weight)" attrs="{'readonly': [('packing_state','=','completed')]}"/>

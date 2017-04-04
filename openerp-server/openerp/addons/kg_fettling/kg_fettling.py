@@ -99,7 +99,7 @@ class kg_fettling(osv.osv):
 		'knockout_date': fields.date('Date'),
 		'knockout_shift_id':fields.many2one('kg.shift.master','Shift'),
 		'knockout_contractor':fields.many2one('res.partner','Contractor'),
-		'knockout_employee': fields.char('Employee',size=128),
+		'knockout_employee': fields.many2one('hr.employee','Employee'),
 		'knockout_qty': fields.integer('Total Qty'),
 		'knockout_accept_qty': fields.integer('Accepted Qty'),
 		'knockout_reject_qty': fields.integer('Rejected Qty'),
@@ -118,7 +118,7 @@ class kg_fettling(osv.osv):
 		'decoring_date': fields.date('Date'),
 		'decoring_shift_id':fields.many2one('kg.shift.master','Shift'),
 		'decoring_contractor':fields.many2one('res.partner','Contractor'),
-		'decoring_employee': fields.char('Employee',size=128),
+		'decoring_employee': fields.many2one('hr.employee','Employee'),
 		'decoring_qty': fields.integer('Total Qty'),
 		'decoring_accept_qty': fields.integer('Accepted Qty'),
 		'decoring_reject_qty': fields.integer('Rejected Qty'),
@@ -136,7 +136,7 @@ class kg_fettling(osv.osv):
 		'shot_blast_date': fields.date('Date'),
 		'shot_blast_shift_id':fields.many2one('kg.shift.master','Shift'),
 		'shot_blast_contractor':fields.many2one('res.partner','Contractor'),
-		'shot_blast_employee': fields.char('Employee',size=128),
+		'shot_blast_employee': fields.many2one('hr.employee','Employee'),
 		'shot_blast_qty': fields.integer('Total Qty'),
 		'shot_blast_accept_qty': fields.integer('Accepted Qty'),
 		'shot_blast_reject_qty': fields.integer('Rejected Qty'),
@@ -154,7 +154,7 @@ class kg_fettling(osv.osv):
 		'hammering_date': fields.date('Date'),
 		'hammering_shift_id':fields.many2one('kg.shift.master','Shift'),
 		'hammering_contractor':fields.many2one('res.partner','Contractor'),
-		'hammering_employee': fields.char('Employee',size=128),
+		'hammering_employee': fields.many2one('hr.employee','Employee'),
 		'hammering_qty': fields.integer('Total Qty'),
 		'hammering_accept_qty': fields.integer('Accepted Qty'),
 		'hammering_reject_qty': fields.integer('Rejected Qty'),
@@ -172,7 +172,7 @@ class kg_fettling(osv.osv):
 		'wheel_cutting_date': fields.date('Date'),
 		'wheel_cutting_shift_id':fields.many2one('kg.shift.master','Shift'),
 		'wheel_cutting_contractor':fields.many2one('res.partner','Contractor'),
-		'wheel_cutting_employee': fields.char('Employee',size=128),
+		'wheel_cutting_employee': fields.many2one('hr.employee','Employee'),
 		'wheel_cutting_qty': fields.integer('Total Qty'),
 		'wheel_cutting_accept_qty': fields.integer('Accepted Qty'),
 		'wheel_cutting_reject_qty': fields.integer('Rejected Qty'),
@@ -190,7 +190,7 @@ class kg_fettling(osv.osv):
 		'gas_cutting_date': fields.date('Date'),
 		'gas_cutting_shift_id':fields.many2one('kg.shift.master','Shift'),
 		'gas_cutting_contractor':fields.many2one('res.partner','Contractor'),
-		'gas_cutting_employee': fields.char('Employee',size=128),
+		'gas_cutting_employee': fields.many2one('hr.employee','Employee'),
 		'gas_cutting_qty': fields.integer('Total Qty'),
 		'gas_cutting_accept_qty': fields.integer('Accepted Qty'),
 		'gas_cutting_reject_qty': fields.integer('Rejected Qty'),
@@ -208,7 +208,7 @@ class kg_fettling(osv.osv):
 		'arc_cutting_date': fields.date('Date'),
 		'arc_cutting_shift_id':fields.many2one('kg.shift.master','Shift'),
 		'arc_cutting_contractor':fields.many2one('res.partner','Contractor'),
-		'arc_cutting_employee': fields.char('Employee',size=128),
+		'arc_cutting_employee': fields.many2one('hr.employee','Employee'),
 		'arc_cutting_qty': fields.integer('Total Qty'),
 		'arc_cutting_accept_qty': fields.integer('Accepted Qty'),
 		'arc_cutting_reject_qty': fields.integer('Rejected Qty'),
@@ -249,7 +249,7 @@ class kg_fettling(osv.osv):
 		'heat_user_id': fields.many2one('res.users', 'Updated By', readonly=True),
 		'heat_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'heat_contractor':fields.many2one('res.partner','Contractor'),
-		'heat_employee': fields.char('Employee',size=128),
+		'heat_employee': fields.many2one('hr.employee','Employee'),
 		'heat_state': fields.selection([('pending','Pending'),('complete','Completed')],'Heat State', readonly=True),
 		
 		### HEAT TREATMENT 2 ###
@@ -280,7 +280,7 @@ class kg_fettling(osv.osv):
 		'heat2_user_id': fields.many2one('res.users', 'Updated By', readonly=True),
 		'heat2_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'heat2_contractor':fields.many2one('res.partner','Contractor'),
-		'heat2_employee': fields.char('Employee',size=128),
+		'heat2_employee': fields.many2one('hr.employee','Employee'),
 		'heat2_state': fields.selection([('pending','Pending'),('complete','Completed')],'Heat2 State', readonly=True),
 		
 		### HEAT TREATMENT 3 ###
@@ -311,7 +311,7 @@ class kg_fettling(osv.osv):
 		'heat3_user_id': fields.many2one('res.users', 'Updated By', readonly=True),
 		'heat3_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'heat3_contractor':fields.many2one('res.partner','Contractor'),
-		'heat3_employee': fields.char('Employee',size=128),
+		'heat3_employee': fields.many2one('hr.employee','Employee'),
 		'heat3_state': fields.selection([('pending','Pending'),('complete','Completed')],'Heat3 State', readonly=True),
 		
 		
@@ -320,7 +320,7 @@ class kg_fettling(osv.osv):
 		'rough_grinding_date': fields.date('Date'),
 		'rough_grinding_shift_id':fields.many2one('kg.shift.master','Shift'),
 		'rough_grinding_contractor':fields.many2one('res.partner','Contractor'),
-		'rough_grinding_employee': fields.char('Employee',size=128),
+		'rough_grinding_employee': fields.many2one('hr.employee','Employee'),
 		'rough_grinding_qty': fields.integer('Total Qty'),
 		'rough_grinding_accept_qty': fields.integer('Accepted Qty'),
 		'rough_grinding_reject_qty': fields.integer('Rejected Qty'),
@@ -339,7 +339,7 @@ class kg_fettling(osv.osv):
 		'welding_date': fields.date('Date'),
 		'welding_shift_id':fields.many2one('kg.shift.master','Shift'),
 		'welding_contractor':fields.many2one('res.partner','Contractor'),
-		'welding_employee': fields.char('Employee',size=128),
+		'welding_employee': fields.many2one('hr.employee','Employee'),
 		'welding_qty': fields.integer('Total Qty'),
 		'welding_accept_qty': fields.integer('Accepted Qty'),
 		'welding_reject_qty': fields.integer('Rejected Qty'),
@@ -360,7 +360,7 @@ class kg_fettling(osv.osv):
 		'finish_grinding_date': fields.date('Date'),
 		'finish_grinding_shift_id':fields.many2one('kg.shift.master','Shift'),
 		'finish_grinding_contractor':fields.many2one('res.partner','Contractor'),
-		'finish_grinding_employee': fields.char('Employee',size=128),
+		'finish_grinding_employee': fields.many2one('hr.employee','Employee'),
 		'finish_grinding_qty': fields.integer('Total Qty'),
 		'finish_grinding_accept_qty': fields.integer('Accepted Qty'),
 		'finish_grinding_reject_qty': fields.integer('Rejected Qty'),
@@ -380,7 +380,7 @@ class kg_fettling(osv.osv):
 		'reshot_blasting_date': fields.date('Date'),
 		'reshot_blasting_shift_id':fields.many2one('kg.shift.master','Shift'),
 		'reshot_blasting_contractor':fields.many2one('res.partner','Contractor'),
-		'reshot_blasting_employee': fields.char('Employee',size=128),
+		'reshot_blasting_employee': fields.many2one('hr.employee','Employee'),
 		'reshot_blasting_qty': fields.integer('Total Qty'),
 		'reshot_blasting_accept_qty': fields.integer('Accepted Qty'),
 		'reshot_blasting_reject_qty': fields.integer('Rejected Qty'),
@@ -4014,7 +4014,7 @@ class kg_batch_knock_out(osv.osv):
 		'shift_id':fields.many2one('kg.shift.master','Shift'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'contractor_id':fields.many2one('res.partner','Contractor'),
-		'employee_name': fields.char('Employee',size=128),
+		'employee_name': fields.many2one('hr.employee','Employee'),
 		'weight':fields.integer('Weight(kgs)'),
 		
 
@@ -4088,7 +4088,7 @@ class kg_batch_knock_out(osv.osv):
 					'shift_id': entry.shift_id.id,
 					'done_by': entry.done_by,
 					'contractor_id': entry.contractor_id.id,
-					'employee_name': entry.employee_name,
+					'employee_name': entry.employee_name.id,
 					'weight': entry.weight,
 					'remarks':  entry.remarks
 				}
@@ -4124,7 +4124,7 @@ class kg_batch_knock_out(osv.osv):
 				'knockout_date': item.date,
 				'knockout_shift_id': item.shift_id.id,
 				'knockout_contractor': item.contractor_id.id,
-				'knockout_employee': item.employee_name,
+				'knockout_employee': item.employee_name.id,
 				'knockout_by': item.done_by,
 				'knockout_weight': item.weight,
 				})
@@ -4181,7 +4181,7 @@ class ch_batch_knockout_line(osv.osv):
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'employee_name': fields.char('Employee',size=128),
+		'employee_name': fields.many2one('hr.employee','Employee'),
 		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		
 		
@@ -4253,7 +4253,7 @@ class kg_batch_decoring(osv.osv):
 		'shift_id':fields.many2one('kg.shift.master','Shift'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'contractor_id':fields.many2one('res.partner','Contractor'),
-		'employee_name': fields.char('Employee',size=128),
+		'employee_name': fields.many2one('hr.employee','Employee'),
 		'weight':fields.integer('Weight(kgs)'),
 
 		### Entry Info ####
@@ -4326,7 +4326,7 @@ class kg_batch_decoring(osv.osv):
 					'shift_id': entry.shift_id.id,
 					'done_by': entry.done_by,
 					'contractor_id': entry.contractor_id.id,
-					'employee_name': entry.employee_name,
+					'employee_name': entry.employee_name.id,
 					'weight': entry.weight,
 					'remarks':  entry.remarks
 				}
@@ -4362,7 +4362,7 @@ class kg_batch_decoring(osv.osv):
 				'decoring_date': item.date,
 				'decoring_shift_id': item.shift_id.id,
 				'decoring_contractor': item.contractor_id.id,
-				'decoring_employee': item.employee_name,
+				'decoring_employee': item.employee_name.id,
 				'decoring_by': item.done_by,
 				'decoring_weight': item.weight,
 				})
@@ -4419,7 +4419,7 @@ class ch_batch_decoring_line(osv.osv):
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'employee_name': fields.char('Employee',size=128),
+		'employee_name':fields.many2one('hr.employee','Employee'),
 		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),   
 		
 		
@@ -4489,7 +4489,7 @@ class kg_batch_shot_blast(osv.osv):
 		'shift_id':fields.many2one('kg.shift.master','Shift'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'contractor_id':fields.many2one('res.partner','Contractor'),
-		'employee_name': fields.char('Employee',size=128),
+		'employee_name': fields.many2one('hr.employee','Employee'),
 		'weight':fields.integer('Weight(kgs)'),
 
 		### Entry Info ####
@@ -4562,7 +4562,7 @@ class kg_batch_shot_blast(osv.osv):
 					'shift_id': entry.shift_id.id,
 					'done_by': entry.done_by,
 					'contractor_id': entry.contractor_id.id,
-					'employee_name': entry.employee_name,
+					'employee_name': entry.employee_name.id,
 					'weight': entry.weight,
 					'remarks':  entry.remarks
 				}
@@ -4598,7 +4598,7 @@ class kg_batch_shot_blast(osv.osv):
 				'shot_blast_date': item.date,
 				'shot_blast_shift_id': item.shift_id.id,
 				'shot_blast_contractor': item.contractor_id.id,
-				'shot_blast_employee': item.employee_name,
+				'shot_blast_employee': item.employee_name.id,
 				'shot_blast_by': item.done_by,
 				'shot_blast_weight': item.weight,
 				})
@@ -4655,7 +4655,7 @@ class ch_batch_shot_blast_line(osv.osv):
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'employee_name': fields.char('Employee',size=128),
+		'employee_name': fields.many2one('hr.employee','Employee'),
 		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		
 		
@@ -4724,7 +4724,7 @@ class kg_batch_hammering(osv.osv):
 		'shift_id':fields.many2one('kg.shift.master','Shift'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'contractor_id':fields.many2one('res.partner','Contractor'),
-		'employee_name': fields.char('Employee',size=128),
+		'employee_name': fields.many2one('hr.employee','Employee'),
 		'weight':fields.integer('Weight(kgs)'),
 
 		### Entry Info ####
@@ -4797,7 +4797,7 @@ class kg_batch_hammering(osv.osv):
 					'shift_id': entry.shift_id.id,
 					'done_by': entry.done_by,
 					'contractor_id': entry.contractor_id.id,
-					'employee_name': entry.employee_name,
+					'employee_name': entry.employee_name.id,
 					'weight': entry.weight,
 					'remarks':  entry.remarks
 				}
@@ -4833,7 +4833,7 @@ class kg_batch_hammering(osv.osv):
 				'hammering_date': item.date,
 				'hammering_shift_id': item.shift_id.id,
 				'hammering_contractor': item.contractor_id.id,
-				'hammering_employee': item.employee_name,
+				'hammering_employee': item.employee_name.id,
 				'hammering_by': item.done_by,
 				'hammering_weight': item.weight,
 				})
@@ -4890,7 +4890,7 @@ class ch_batch_hammering_line(osv.osv):
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),  
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'employee_name': fields.char('Employee',size=128),
+		'employee_name': fields.many2one('hr.employee','Employee'),
 		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		
 		
@@ -4960,7 +4960,7 @@ class kg_batch_wheel_cutting(osv.osv):
 		'shift_id':fields.many2one('kg.shift.master','Shift'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'contractor_id':fields.many2one('res.partner','Contractor'),
-		'employee_name': fields.char('Employee',size=128),
+		'employee_name': fields.many2one('hr.employee','Employee'),
 		'weight':fields.integer('Weight(kgs)'),
 
 		### Entry Info ####
@@ -5033,7 +5033,7 @@ class kg_batch_wheel_cutting(osv.osv):
 					'shift_id': entry.shift_id.id,
 					'done_by': entry.done_by,
 					'contractor_id': entry.contractor_id.id,
-					'employee_name': entry.employee_name,
+					'employee_name': entry.employee_name.id,
 					'weight': entry.weight,
 					'remarks':  entry.remarks
 				}
@@ -5069,7 +5069,7 @@ class kg_batch_wheel_cutting(osv.osv):
 				'wheel_cutting_date': item.date,
 				'wheel_cutting_shift_id': item.shift_id.id,
 				'wheel_cutting_contractor': item.contractor_id.id,
-				'wheel_cutting_employee': item.employee_name,
+				'wheel_cutting_employee': item.employee_name.id,
 				'wheel_cutting_by': item.done_by,
 				'wheel_cutting_weight': item.weight,
 				})
@@ -5126,7 +5126,7 @@ class ch_batch_wheel_cutting_line(osv.osv):
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),  
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'employee_name': fields.char('Employee',size=128),
+		'employee_name': fields.many2one('hr.employee','Employee'),
 		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		
 		
@@ -5196,7 +5196,7 @@ class kg_batch_gas_cutting(osv.osv):
 		'shift_id':fields.many2one('kg.shift.master','Shift'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'contractor_id':fields.many2one('res.partner','Contractor'),
-		'employee_name': fields.char('Employee',size=128),
+		'employee_name': fields.many2one('hr.employee','Employee'),
 		'weight':fields.integer('Weight(kgs)'),
 
 		### Entry Info ####
@@ -5269,7 +5269,7 @@ class kg_batch_gas_cutting(osv.osv):
 					'shift_id': entry.shift_id.id,
 					'done_by': entry.done_by,
 					'contractor_id': entry.contractor_id.id,
-					'employee_name': entry.employee_name,
+					'employee_name': entry.employee_name.id,
 					'weight': entry.weight,
 					'remarks':  entry.remarks
 				}
@@ -5305,7 +5305,7 @@ class kg_batch_gas_cutting(osv.osv):
 				'gas_cutting_date': item.date,
 				'gas_cutting_shift_id': item.shift_id.id,
 				'gas_cutting_contractor': item.contractor_id.id,
-				'gas_cutting_employee': item.employee_name,
+				'gas_cutting_employee': item.employee_name.id,
 				'gas_cutting_by': item.done_by,
 				'gas_cutting_weight': item.weight,
 				})
@@ -5362,7 +5362,7 @@ class ch_batch_gas_cutting_line(osv.osv):
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'employee_name': fields.char('Employee',size=128),
+		'employee_name': fields.many2one('hr.employee','Employee'),
 		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),   
 		
 		
@@ -5431,7 +5431,7 @@ class kg_batch_arc_cutting(osv.osv):
 		'shift_id':fields.many2one('kg.shift.master','Shift'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'contractor_id':fields.many2one('res.partner','Contractor'),
-		'employee_name': fields.char('Employee',size=128),
+		'employee_name': fields.many2one('hr.employee','Employee'),
 		'weight':fields.integer('Weight(kgs)'),
 
 		### Entry Info ####
@@ -5504,7 +5504,7 @@ class kg_batch_arc_cutting(osv.osv):
 					'shift_id': entry.shift_id.id,
 					'done_by': entry.done_by,
 					'contractor_id': entry.contractor_id.id,
-					'employee_name': entry.employee_name,
+					'employee_name': entry.employee_name.id,
 					'weight': entry.weight,
 					'remarks':  entry.remarks
 				}
@@ -5540,7 +5540,7 @@ class kg_batch_arc_cutting(osv.osv):
 				'arc_cutting_date': item.date,
 				'arc_cutting_shift_id': item.shift_id.id,
 				'arc_cutting_contractor': item.contractor_id.id,
-				'arc_cutting_employee': item.employee_name,
+				'arc_cutting_employee': item.employee_name.id,
 				'arc_cutting_by': item.done_by,
 				'arc_cutting_weight': item.weight,
 				})
@@ -5597,7 +5597,7 @@ class ch_batch_arc_cutting_line(osv.osv):
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'employee_name': fields.char('Employee',size=128),
+		'employee_name': fields.many2one('hr.employee','Employee'),
 		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),   
 		
 		
@@ -5668,7 +5668,7 @@ class kg_batch_heat_treatment(osv.osv):
 		'heat_specification':fields.char('Specification', size=128),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'contractor_id':fields.many2one('res.partner','Contractor'),
-		'employee_name': fields.char('Employee',size=128),
+		'employee_name': fields.many2one('hr.employee','Employee'),
 		'each_weight':fields.integer('Each Weight(kgs)'),
 		
 		
@@ -5755,7 +5755,7 @@ class kg_batch_heat_treatment(osv.osv):
 					'date': entry.heat_treatment_date,
 					'done_by': entry.done_by,
 					'contractor_id': entry.contractor_id.id,
-					'employee_name': entry.employee_name,
+					'employee_name': entry.employee_name.id,
 					'each_weight': entry.each_weight,
 					'remarks':  entry.remarks,
 					'heat_cycle_no': entry.heat_cycle_no,
@@ -5806,7 +5806,7 @@ class kg_batch_heat_treatment(osv.osv):
 				'heat_reject_remarks_id': item.reject_remarks_id.id,
 				'heat_date': item.date,
 				'heat_contractor': item.contractor_id.id,
-				'heat_employee': item.employee_name,
+				'heat_employee': item.employee_name.id,
 				'heat_by': item.done_by,
 				'heat_each_weight': item.each_weight,
 				'heat_cycle_no': item.heat_cycle_no,
@@ -5876,7 +5876,7 @@ class ch_batch_heat_treatment_line(osv.osv):
 		'remarks': fields.text('Remarks'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'employee_name': fields.char('Employee',size=128),
+		'employee_name': fields.many2one('hr.employee','Employee'),
 		'heat_cycle_no':fields.char('Heat Cycle No.', size=128),
 		'heat_specification':fields.char('Specification', size=128),
 		
@@ -5961,7 +5961,7 @@ class kg_batch_heat2_treatment(osv.osv):
 		'heat_specification':fields.char('Specification', size=128),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'contractor_id':fields.many2one('res.partner','Contractor'),
-		'employee_name': fields.char('Employee',size=128),
+		'employee_name': fields.many2one('hr.employee','Employee'),
 		'each_weight':fields.integer('Each Weight(kgs)'),
 		
 		
@@ -6048,7 +6048,7 @@ class kg_batch_heat2_treatment(osv.osv):
 					'date': entry.heat_treatment_date,
 					'done_by': entry.done_by,
 					'contractor_id': entry.contractor_id.id,
-					'employee_name': entry.employee_name,
+					'employee_name': entry.employee_name.id,
 					'each_weight': entry.each_weight,
 					'remarks':  entry.remarks,
 					'heat_cycle_no': entry.heat_cycle_no,
@@ -6099,7 +6099,7 @@ class kg_batch_heat2_treatment(osv.osv):
 				'heat2_reject_remarks_id': item.reject_remarks_id.id,
 				'heat2_date': item.date,
 				'heat2_contractor': item.contractor_id.id,
-				'heat2_employee': item.employee_name,
+				'heat2_employee': item.employee_name.id,
 				'heat2_by': item.done_by,
 				'heat2_each_weight': item.each_weight,
 				'heat2_cycle_no': item.heat_cycle_no,
@@ -6169,7 +6169,7 @@ class ch_batch_heat2_treatment_line(osv.osv):
 		'remarks': fields.text('Remarks'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'employee_name': fields.char('Employee',size=128),
+		'employee_name': fields.many2one('hr.employee','Employee'),
 		'heat_cycle_no':fields.char('Heat Cycle No.', size=128),
 		'heat_specification':fields.char('Specification', size=128),
 		
@@ -6254,7 +6254,7 @@ class kg_batch_heat3_treatment(osv.osv):
 		'heat_specification':fields.char('Specification', size=128),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'contractor_id':fields.many2one('res.partner','Contractor'),
-		'employee_name': fields.char('Employee',size=128),
+		'employee_name': fields.many2one('hr.employee','Employee'),
 		'each_weight':fields.integer('Each Weight(kgs)'),
 		
 		
@@ -6341,7 +6341,7 @@ class kg_batch_heat3_treatment(osv.osv):
 					'date': entry.heat_treatment_date,
 					'done_by': entry.done_by,
 					'contractor_id': entry.contractor_id.id,
-					'employee_name': entry.employee_name,
+					'employee_name': entry.employee_name.id,
 					'each_weight': entry.each_weight,
 					'remarks':  entry.remarks,
 					'heat_cycle_no': entry.heat_cycle_no,
@@ -6392,7 +6392,7 @@ class kg_batch_heat3_treatment(osv.osv):
 				'heat3_reject_remarks_id': item.reject_remarks_id.id,
 				'heat3_date': item.date,
 				'heat3_contractor': item.contractor_id.id,
-				'heat3_employee': item.employee_name,
+				'heat3_employee': item.employee_name.id,
 				'heat3_by': item.done_by,
 				'heat3_each_weight': item.each_weight,
 				'heat3_cycle_no': item.heat_cycle_no,
@@ -6462,7 +6462,7 @@ class ch_batch_heat3_treatment_line(osv.osv):
 		'remarks': fields.text('Remarks'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'employee_name': fields.char('Employee',size=128),
+		'employee_name': fields.many2one('hr.employee','Employee'),
 		'heat_cycle_no':fields.char('Heat Cycle No.', size=128),
 		'heat_specification':fields.char('Specification', size=128),
 		
@@ -6547,7 +6547,7 @@ class kg_batch_rough_grinding(osv.osv):
 		'shift_id':fields.many2one('kg.shift.master','Shift'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'contractor_id':fields.many2one('res.partner','Contractor'),
-		'employee_name': fields.char('Employee',size=128),
+		'employee_name': fields.many2one('hr.employee','Employee'),
 		'weight':fields.integer('Weight(kgs)'),
 
 		### Entry Info ####
@@ -6620,7 +6620,7 @@ class kg_batch_rough_grinding(osv.osv):
 					'shift_id': entry.shift_id.id,
 					'done_by': entry.done_by,
 					'contractor_id': entry.contractor_id.id,
-					'employee_name': entry.employee_name,
+					'employee_name': entry.employee_name.id,
 					'weight': entry.weight,
 					'remarks':  entry.remarks
 				}
@@ -6657,7 +6657,7 @@ class kg_batch_rough_grinding(osv.osv):
 				'rough_grinding_date': item.date,
 				'rough_grinding_shift_id': item.shift_id.id,
 				'rough_grinding_contractor': item.contractor_id.id,
-				'rough_grinding_employee': item.employee_name,
+				'rough_grinding_employee': item.employee_name.id,
 				'rough_grinding_by': item.done_by,
 				'rough_grinding_weight': item.weight,
 				})
@@ -6715,7 +6715,7 @@ class ch_batch_rough_grinding_line(osv.osv):
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),  
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'employee_name': fields.char('Employee',size=128),
+		'employee_name': fields.many2one('hr.employee','Employee'),
 		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		
 		
@@ -6786,7 +6786,7 @@ class kg_batch_welding(osv.osv):
 		'shift_id':fields.many2one('kg.shift.master','Shift'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'contractor_id':fields.many2one('res.partner','Contractor'),
-		'employee_name': fields.char('Employee',size=128),
+		'employee_name': fields.many2one('hr.employee','Employee'),
 		'weight':fields.integer('Weight(kgs)'),
 
 		### Entry Info ####
@@ -6859,7 +6859,7 @@ class kg_batch_welding(osv.osv):
 					'shift_id': entry.shift_id.id,
 					'done_by': entry.done_by,
 					'contractor_id': entry.contractor_id.id,
-					'employee_name': entry.employee_name,
+					'employee_name': entry.employee_name.id,
 					'weight': entry.weight,
 					'remarks':  entry.remarks
 				}
@@ -6895,7 +6895,7 @@ class kg_batch_welding(osv.osv):
 				'welding_date': item.date,
 				'welding_shift_id': item.shift_id.id,
 				'welding_contractor': item.contractor_id.id,
-				'welding_employee': item.employee_name,
+				'welding_employee': item.employee_name.id,
 				'welding_by': item.done_by,
 				'welding_weight': item.weight,
 				})
@@ -6952,7 +6952,7 @@ class ch_batch_welding_line(osv.osv):
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'employee_name': fields.char('Employee',size=128),
+		'employee_name': fields.many2one('hr.employee','Employee'),
 		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),   
 		
 		
@@ -7022,7 +7022,7 @@ class kg_batch_finish_grinding(osv.osv):
 		'shift_id':fields.many2one('kg.shift.master','Shift'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'contractor_id':fields.many2one('res.partner','Contractor'),
-		'employee_name': fields.char('Employee',size=128),
+		'employee_name': fields.many2one('hr.employee','Employee'),
 		'weight':fields.integer('Weight(kgs)'),
 		'flag_reshot_blast_applicable': fields.boolean('Re-Shot Blasting Applicable'),
 
@@ -7095,7 +7095,7 @@ class kg_batch_finish_grinding(osv.osv):
 					'shift_id': entry.shift_id.id,
 					'done_by': entry.done_by,
 					'contractor_id': entry.contractor_id.id,
-					'employee_name': entry.employee_name,
+					'employee_name': entry.employee_name.id,
 					'weight': entry.weight,
 					'remarks':  entry.remarks,
 					'flag_reshot_blast_applicable': entry.flag_reshot_blast_applicable,
@@ -7134,7 +7134,7 @@ class kg_batch_finish_grinding(osv.osv):
 				'finish_grinding_date': item.date,
 				'finish_grinding_shift_id': item.shift_id.id,
 				'finish_grinding_contractor': item.contractor_id.id,
-				'finish_grinding_employee': item.employee_name,
+				'finish_grinding_employee': item.employee_name.id,
 				'finish_grinding_by': item.done_by,
 				'finish_grinding_weight': item.weight,
 				'flag_reshot_blast_applicable': item.flag_reshot_blast_applicable
@@ -7192,7 +7192,7 @@ class ch_batch_finish_grinding_line(osv.osv):
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'employee_name': fields.char('Employee',size=128),
+		'employee_name': fields.many2one('hr.employee','Employee'),
 		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		'flag_reshot_blast_applicable': fields.boolean('Re-Shot Blasting Applicable'),  
 		
@@ -7262,7 +7262,7 @@ class kg_batch_reshot_blasting(osv.osv):
 		'shift_id':fields.many2one('kg.shift.master','Shift'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'contractor_id':fields.many2one('res.partner','Contractor'),
-		'employee_name': fields.char('Employee',size=128),
+		'employee_name': fields.many2one('hr.employee','Employee'),
 		'weight':fields.integer('Weight(kgs)'),
 
 		### Entry Info ####
@@ -7335,7 +7335,7 @@ class kg_batch_reshot_blasting(osv.osv):
 					'shift_id': entry.shift_id.id,
 					'done_by': entry.done_by,
 					'contractor_id': entry.contractor_id.id,
-					'employee_name': entry.employee_name,
+					'employee_name': entry.employee_name.id,
 					'weight': entry.weight,
 					'remarks':  entry.remarks
 				}
@@ -7371,7 +7371,7 @@ class kg_batch_reshot_blasting(osv.osv):
 				'reshot_blasting_date': item.date,
 				'reshot_blasting_shift_id': item.shift_id.id,
 				'reshot_blasting_contractor': item.contractor_id.id,
-				'reshot_blasting_employee': item.employee_name,
+				'reshot_blasting_employee': item.employee_name.id,
 				'reshot_blasting_by': item.done_by,
 				'reshot_blasting_weight': item.weight,
 				})
@@ -7428,7 +7428,7 @@ class ch_batch_reshot_blasting_line(osv.osv):
 		'reject_user_id': fields.many2one('res.users', 'Rejected By'),
 		'accept_user_id': fields.many2one('res.users', 'Accepted By'),
 		'done_by': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
-		'employee_name': fields.char('Employee',size=128),
+		'employee_name': fields.many2one('hr.employee','Employee'),
 		'reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),   
 		
 		
