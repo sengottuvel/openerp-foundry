@@ -96,7 +96,7 @@ class kg_partner(osv.osv):
 	'max_deal_discount': fields.float('Max.Dealer Discount(%)'),
 	'max_cust_discount': fields.float('Max.Customer Discount(%)'),
 	'max_spl_discount': fields.float('Max.Special Discount(%)'),
-	
+	'con_category_id': fields.many2one('kg.contractor.category', 'Contractor category'),
 	## Entry Info
 	
 	'creation_date': fields.datetime('Created Date',readonly=True),

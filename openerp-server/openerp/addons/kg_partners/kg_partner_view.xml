@@ -19,7 +19,9 @@
 			<button name="entry_draft" class="oe_highlight" type="object" string="Set To Draft" attrs = "{'invisible':[('partner_state','not in',('approve'))]}"/> 
 		</header>
 		</xpath>
-        
+        <field name="name" position="after">
+        <field name="con_category_id" attrs="{'readonly':[('partner_state','=','approve')],'invisible':[('contractor','!=',True)],'required':[('contractor','=',True)]}"/>
+		</field>
 		<field name="city" position="after">
 		<field name="city_id" on_change="onchange_city(city_id)" style="width: 40%%" placeholder="City"  attrs="{'readonly':[('partner_state','=','approve')]}"/>
 		</field>
@@ -303,6 +305,28 @@
 		</field>
 	</record>
 	
+	<!-- Contractor tree view -->
+	
+	<record id="kg_contractor_tree_1" model="ir.ui.view">
+			<field name="name">Contractor Tree</field>
+			<field name="model">res.partner</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">	
+			<tree toolbar="True" string="Contractor" colors="blue:partner_state == 'draft';red:partner_state == 'confirm'
+						;black:partner_state == 'approved';gray:partner_state == 'reject';gray:partner_state == 'cancel'" >									
+					<field name="name"/>
+					<field name="contact_person"/>
+					<field name="mobile"/>
+					<field name="email"/>
+					<field name="con_category_id"/>
+					<field name="partner_state"/>				
+				</tree>
+			</field>
+		</record>
+		
+	
+	<!-- End Tree view -->
+	
 	<!-- Audit Log Xml Data Start-->
 		
       <!--  <record id="partnermaster_model" model="audittrail.rule">
@@ -319,6 +343,7 @@
 		<field name="res_model">res.partner</field>
 		<field name="view_type">form</field>
 		<field name="view_mode">tree,form</field>
+		<field name="view_id" ref="kg_partner_tree"/>
 		<field name="context">{'default_customer': True,'default_supplier': False,'default_contractor': False,'default_dealer': False,'default_group_flag': False}</field>
 		<field name="domain">[('customer','=',True),('contact','=',False)]</field>
 		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
@@ -331,6 +356,7 @@
 		<field name="res_model">res.partner</field>
 		<field name="view_type">form</field>
 		<field name="view_mode">tree,form</field>
+		<field name="view_id" ref="kg_partner_tree"/>
 		<field name="context">{'default_dealer': True,'default_customer': False,'default_supplier': False,'default_contractor': False,'default_group_flag': False}</field>
 		<field name="domain">[('dealer','=',True),('contact','=',False)]</field>
 		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
@@ -343,6 +369,7 @@
 		<field name="res_model">res.partner</field>
 		<field name="view_type">form</field>
 		<field name="view_mode">tree,form</field>
+		<field name="view_id" ref="kg_contractor_tree_1"/>
 		<field name="context">{'default_contractor': True,'default_dealer': False,'default_customer': False,'default_supplier': False,'default_group_flag': False,'default_tin_flag': True}</field>
 		<field name="domain">[('contractor','=',True),('contact','=',False)]</field>
 		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>
@@ -355,6 +382,7 @@
 		<field name="res_model">res.partner</field>
 		<field name="view_type">form</field>
 		<field name="view_mode">tree,form</field>
+		<field name="view_id" ref="kg_partner_tree"/>
 		<field name="context">{'default_group_flag': True,'default_dealer': False,'default_customer': False,'default_supplier': False,'default_contractor': False}</field>
 		<field name="domain">[('dealer','=',True),('contact','=',False)]</field>
 		<!--<field name="search_view_id" ref="base.view_res_partner_filter"/>

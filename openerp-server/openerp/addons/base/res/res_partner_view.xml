@@ -516,6 +516,7 @@
             <field name="res_model">res.partner</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="kg_partners.kg_partner_tree"/>
             <field name="context">{'default_customer': False,'default_supplier': True}</field>
             <field name="domain">[('supplier','=',True),('contact','=',False)]</field>
             <field name="filter" eval="True"/>
