@@ -285,9 +285,9 @@ when pump.header_id is null and spare.header_id is null then acces.header_id
 end ) as header_id
 
 from ch_pump_offer pump
-left join ch_spare_offer spare on(spare.header_id=255)
-left join ch_accessories_offer acces on(acces.header_id=255)
-where pump.header_id = 255 group by pump.pump_id,pump.header_id,spare.header_id,acces.header_id
+left join ch_spare_offer spare on(spare.header_id=$P{offer_id})
+left join ch_accessories_offer acces on(acces.header_id=$P{offer_id})
+where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.header_id,acces.header_id
 ) order by enq_line.equipment_no)
 
 ---------------Spare
@@ -433,9 +433,9 @@ when pump.header_id is null and spare.header_id is null then acces.header_id
 end ) as header_id
 
 from ch_spare_offer pump
-left join ch_pump_offer spare on(spare.header_id=255)
-left join ch_accessories_offer acces on(acces.header_id=255)
-where pump.header_id = 255 group by pump.pump_id,pump.header_id,spare.header_id,acces.header_id
+left join ch_pump_offer spare on(spare.header_id=$P{offer_id})
+left join ch_accessories_offer acces on(acces.header_id=$P{offer_id})
+where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.header_id,acces.header_id
 ) order by enq_line.equipment_no)
 
 -------------Accessories
@@ -582,9 +582,9 @@ when pump.header_id is null and spare.header_id is null then acces.header_id
 end ) as header_id
 
 from ch_accessories_offer pump
-left join ch_pump_offer spare on(spare.header_id=255)
-left join ch_spare_offer acces on(acces.header_id=255)
-where pump.header_id = 255 group by pump.pump_id,pump.header_id,spare.header_id,acces.header_id
+left join ch_pump_offer spare on(spare.header_id=$P{offer_id})
+left join ch_spare_offer acces on(acces.header_id=$P{offer_id})
+where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.header_id,acces.header_id
 ) order by enq_line.equipment_no)) as main_query order by equipment_no]]>
 	</queryString>
 	<field name="enq_line_id" class="java.lang.Integer"/>
