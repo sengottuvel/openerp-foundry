@@ -309,7 +309,7 @@ class kg_crm_offer(osv.osv):
 						raise osv.except_osv(_('Warning!'),
 							_('%s - %s dealer discount is more than maximum limit configured'%(item.pump_id.name,item.item_name)))
 			if rec.line_accessories_ids:
-				for item in rec.line_access_ids:
+				for item in rec.line_accessories_ids:
 					if item.dealer_discount > rec.dealer_id.max_deal_discount:
 						raise osv.except_osv(_('Warning!'),
 							_('%s dealer discount is more than maximum limit configured'%(item.access_id.name)))

@@ -427,7 +427,7 @@ class kg_quotation_requisition_header(osv.osv):
 				for quotes in lines.pi_line_ids:
 					if quotes.ven_del_date:
 						ven_del_date = datetime.strptime(str(quotes.ven_del_date), '%Y-%m-%d')
-						if ven_del_date > today:
+						if ven_del_date < today:
 							raise osv.except_osv(_('Warning!'),
 								_('%s System not allow to save with future date for this %s!'%(quotes.product_id.name,lines.partner_id.name)))
 					if quotes.vendors_price<=0:
