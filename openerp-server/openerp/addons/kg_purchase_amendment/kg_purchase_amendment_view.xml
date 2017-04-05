@@ -54,7 +54,6 @@
                     <group>
                     <field name="date" required="1" attrs = "{'readonly':[('state','!=','amend')],'invisible': [('state','=','amend')]}"/>
 					<field name="division_amend" attrs="{'required': [('state','!=','amend')],'invisible': [('state','=','amend')]}"/>
-					<field name="po_date_amend" attrs="{'invisible': [('state','=','amend')]}"/>
 					<field name="quotation_date_amend" attrs="{'invisible': [('state','=','amend')]}"/>
 					<field name="quot_ref_no_amend" attrs="{'invisible': [('state','=','amend')]}"/>
                     <field name="partner_id_amend" attrs="{'required': [('state','!=','amend')],'invisible': [('state','=','amend')]}" on_change="onchange_partner_id(partner_id_amend,add_text_amend)"/>
@@ -283,7 +282,6 @@
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.purchase.amendment</field>
 			<field name="view_type">form</field>
-			<field name="domain">[('state','!=','confirm')]</field>
 			<field name="view_id" ref="view_kg_poamendment_tree"/>
 			<field name="search_view_id" ref="t_search_v_purchase_amend"/>
 		</record>
