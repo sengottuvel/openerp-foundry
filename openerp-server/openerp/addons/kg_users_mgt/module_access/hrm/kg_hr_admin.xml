@@ -636,6 +636,36 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
 		</record>
 		
+		<record id="kg_hr_kg_weekly_attendance" model="ir.model.access">
+			<field name="model_id" ref="kg_weekly_attendance.model_kg_weekly_attendance"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Labour Weekly Attendance</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
+		<record id="kg_hr_kg_weekly_wages" model="ir.model.access">
+			<field name="model_id" ref="kg_weekly_wages.model_kg_weekly_wages"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Weekly Wages</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
+		<record id="kg_hr_ch_weekly_wages" model="ir.model.access">
+			<field name="model_id" ref="kg_weekly_wages.model_ch_weekly_wages"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Weekly Wages Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
     </data>
 </openerp>
 	

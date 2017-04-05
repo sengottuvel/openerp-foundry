@@ -554,6 +554,8 @@
 			ref('kg_emp_transfer.mam_kg_emp_transfer'),
 			ref('kg_emp_asset_tracking.mam_kg_emp_ass_tr'),
 			ref('kg_labour_master.mam_kg_labour_master'),
+			ref('kg_weekly_attendance.mam_kg_weekly_att'),
+			ref('kg_weekly_wages.mam_kg_weekly_wages'),
 			
 			
 	   
