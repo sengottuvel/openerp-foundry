@@ -254,6 +254,7 @@
             <field name="arch" type="xml">
                 <search string="Purchase Amendment Search">
 					<field name="name" string="Amendment No" filter_domain="[('name','ilike',self)]" />
+					<field name="po_id" string="PO No" filter_domain="[('po_id','ilike',self)]" />
 					<field name="partner_id" string="Supplier" filter_domain="[('partner_id','ilike',self)]" />
 					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
 					<filter icon="terp-check" name="amend" string="Processing" domain="[('state','=','amend')]"/>					
