@@ -52,7 +52,7 @@ class account_move_line(osv.osv):
                 #this option is needed by the aged balance report because otherwise, if we search only the draft ones, an open invoice of a closed fiscalyear won't be displayed
                 fiscalyear_ids = fiscalyear_obj.search(cr, uid, [])
             else:
-                fiscalyear_ids = fiscalyear_obj.search(cr, uid, [('state', '=', 'draft')])
+                fiscalyear_ids = fiscalyear_obj.search(cr, uid, [('state', '=', 'approved')])
         else:
             #for initial balance as well as for normal query, we check only the selected FY because the best practice is to generate the FY opening entries
             fiscalyear_ids = [context['fiscalyear']]
