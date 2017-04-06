@@ -101,6 +101,7 @@ class kg_moulding_invoice(osv.osv):
 		'flag_sms': fields.boolean('SMS Notification'),
 		'flag_email': fields.boolean('Email Notification'),
 		'flag_spl_approve': fields.boolean('Special Approval'),
+		'narration': fields.char('Narration'),	
 		
 		### Entry Info ####
 			
@@ -136,7 +137,7 @@ class kg_moulding_invoice(osv.osv):
 		'additional_amount': fields.float('Additional Amount'),		
 		#~ 'total_value': fields.function(_amount_all, string='Total Value', method=True, store=True, type='float'),
 		'total_value': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Value',store=True,multi="sums",help="Total Value"),
-		
+		'division_id': fields.many2one('kg.division.master', 'Division',required=True),
 		## Calculation process Start now 
 		
 		'con_invoice_no': fields.char('Contractor Invoice No', size=128,required=True),
@@ -273,7 +274,7 @@ class kg_moulding_invoice(osv.osv):
 			  
 		
 		(_future_date_from_check, 'System not allow to greater than Data from!!',['Date To']),	   
-		(_future_entry_date_check, 'System not allow to save with future and past date. !!',['Invoice Date']),	   
+		#~ (_future_entry_date_check, 'System not allow to save with future and past date. !!',['Invoice Date']),	   
 		(_future_date_to_check, 'System not allow to save with future and past date. !!',['Date To and Date From']),	   
 		(_same_date_check, 'System not allow to Same date.Already avaliable in this date !!',['Date From and Date To']),	   
 		
@@ -332,6 +333,9 @@ class kg_moulding_invoice(osv.osv):
 			raise osv.except_osv(_('Invoice details is must !!'),
 				_('Enter the proceed button!!'))
 		if entry.state == 'draft':
+			print "entry.invoice_amt",entry.invoice_amt
+			print " final_other_charges", final_other_charges
+			print " entry.amount_total", entry.amount_total
 			if (entry.invoice_amt + final_other_charges) > entry.amount_total:
 				raise osv.except_osv(_('Invoice Amount Exceed!!'),
 					_('System not allow to Invoice Amount grether than Net Amount !!'))
@@ -397,10 +401,143 @@ class kg_moulding_invoice(osv.osv):
 		
 	def entry_accept(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.state == 'approved':			
-			self.write(cr, uid, ids, {'state': 'done','done_user_id': uid, 'done_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-		else:
-			pass
+		journal_obj = self.pool.get('account.journal')
+		journal_ids = self.pool.get('account.journal').search(cr,uid,[('type','=','purchase')])	
+		if journal_ids == []:
+			raise osv.except_osv(_('Book Configuration Warning !!'),
+				_('Type is purchase book should be created !!'))		
+		journal_rec = self.pool.get('account.journal').browse(cr,uid,journal_ids[0])
+		if rec.state == 'approved':
+			total_value_amt = 0.00
+			for line in rec.line_ids:
+				total_value_amt += line.total_amt			
+				self.write(cr, uid, ids, {'state': 'done','done_user_id': uid, 'done_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			else:
+				pass
+							
+			## Account Posting Process Start
+			vou_obj = self.pool.get('account.voucher')				
+			move_vals = {
+						'name':rec.name,
+						'journal_id':journal_rec.id,
+						'narration':rec.narration,
+						'source_id':rec.id,
+						'date':rec.entry_date,
+						'division_id':rec.division_id.id,
+						'trans_type':'MI',
+						}			
+			move_id = vou_obj.create_account_move(cr,uid,move_vals)	
+			if rec.contractor_id:
+				account_id = rec.contractor_id.property_account_payable.id
+				if not account_id:
+					raise osv.except_osv(_('Contractor Configuration Warning !!'),
+						_('Contractor account should be configured !!'))
+				credit = rec.amount_total
+				debit = 0.00
+				move_line_vals = {
+						'move_id': move_id,
+						'account_id': account_id,
+						'credit': credit,
+						'debit': debit,					
+						'journal_id': journal_rec.id,						
+						'date': rec.entry_date,
+						'name': rec.name,
+						}
+				move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)		
+			for expense in rec.line_ids_a:
+				ex_account_id = expense.expense.account_id.id			
+				tax_obj = self.pool.get('account.tax')
+				taxes = tax_obj.compute_all(cr, uid, expense.tax_id, expense.amount, 1, 1, partner=rec.contractor_id)			
+				for tax in taxes['taxes']:
+					print "taxtax",tax
+					tax_rec = self.pool.get('account.tax').browse(cr,uid,tax['id'])				
+					credit = 0.00
+					debit = ((tax['amount']))					
+					tax_account = tax['account_collected_id']				
+					if not tax_account:
+						raise osv.except_osv(_('Account Configuration Warning !!'),
+							_('Tax account should be configured !!'))
+					move_line_vals = {
+						'move_id': move_id,
+						'account_id': tax_account,
+						'credit': credit,
+						'debit': debit,					
+						'journal_id': journal_rec.id,						
+						'date': rec.entry_date,
+						'name': rec.name,
+						}
+					move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)			
+				if not ex_account_id:
+					raise osv.except_osv(_('Expense Configuration Warning !!'),
+						_('Expense account should be configured !!'))
+				move_line_vals = {
+						'move_id': move_id,
+						'account_id': ex_account_id,
+						'credit': 0.00,
+						'debit': expense.amount,				
+						'journal_id': journal_rec.id,						
+						'date': rec.entry_date,
+						'name': rec.name,
+						}
+				
+				move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)		
+			
+			discount = 0.00
+			if rec.tax_id:				
+				if rec.discount > 0:
+					discount = rec.discount
+				else:
+					discount = (total_value_amt * rec.discount_per) / 100			
+				price_amt_val = total_value_amt	- discount			
+				tax_obj = self.pool.get('account.tax')
+				taxes = tax_obj.compute_all(cr, uid, rec.tax_id, price_amt_val, 1, product=rec.contractor_id, partner=rec.contractor_id)			
+				for tax in taxes['taxes']:
+					tax_rec = self.pool.get('account.tax').browse(cr,uid,tax['id'])
+					credit = 0.00
+					debit = ((tax['amount']))					
+					tax_account = tax['account_collected_id']				
+					if not tax_account:
+						raise osv.except_osv(_('Account Configuration Warning !!'),
+							_('Tax account should be configured !!'))
+					move_line_vals = {
+						'move_id': move_id,
+						'account_id': tax_account,
+						'credit': credit,
+						'debit': debit,					
+						'journal_id': journal_rec.id,						
+						'date': rec.entry_date,
+						'name': rec.name,
+						}
+					move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)
+			
+			if rec.amount_untaxed > 0:
+				discount = 0.00
+				if rec.discount > 0:
+					discount = rec.discount
+				else:
+					discount = (total_value_amt * rec.discount_per) / 100
+				account_ids = self.pool.get('account.account').search(cr,uid,[('code','=','CON INV')])	
+				if account_ids == []:
+					raise osv.except_osv(_('Account Configuration Warning !!'),
+						_('code name is CON INV account should be created !!'))		
+				account_rec = self.pool.get('account.account').browse(cr,uid,account_ids[0])
+				account_id = account_rec.id			
+				if not account_id:
+					raise osv.except_osv(_('Invoice Configuration Warning !!'),
+						_('Invoice account should be configured !!'))
+				credit = 0.00
+				debit = (rec.amount_untaxed + rec.round_off_amt) - discount
+				move_line_vals = {
+						'move_id': move_id,
+						'account_id': account_id,
+						'credit': credit,
+						'debit': debit,					
+						'journal_id': journal_rec.id,						
+						'date': rec.entry_date,
+						'name': rec.name,
+						}
+				
+				move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)
 		return True
 		
 		

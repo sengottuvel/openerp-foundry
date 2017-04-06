@@ -19,6 +19,7 @@
 							<field name="name"/>							
 							<field name="date_from" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel','approved','done'])]}"/>							
 							<field name="contractor_id" on_change="onchange_contractor(contractor_id)"  attrs="{'readonly': [('state','in',['cancel','approved','done'])]}"/>	
+							<field name="division_id" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}"/>
 							<field name="phone" readonly="1" />																			
 							<field name="con_invoice_no" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}"/>																									
 							<field name="due_date" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}"/>
@@ -26,7 +27,7 @@
 							<field name="invoice_copy" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}"/>																
 						</group>											
 						<group>
-							<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed','cancel','approved','done'])]}"/>														
+							<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed','cancel','approved','done'])]}" options="{'datepicker':{'minDate': 0,'maxDate': 0,}}"/>														
 							<field name="date_to" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel','approved','done'])]}"/>									
 							<field name="contact_person" readonly="1" />									
 							<field name="flag_invoice" invisible="1"/>
@@ -200,11 +201,13 @@
 							<field name="name"/>							
 							<field name="date_from" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel','approved','done'])]}"/>							
 							<field name="contractor_id" on_change="onchange_contractor(contractor_id)"  attrs="{'readonly': [('state','in',['confirmed','cancel','approved','done'])]}"/>	
+							<field name="division_id" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}"/>
 							<field name="phone" readonly="1" />																			
 							<field name="con_invoice_no" attrs="{'readonly': [('state','in',['confirmed','cancel','approved','done'])]}"/>																									
 							<field name="due_date" attrs="{'readonly': [('state','in',['confirmed','cancel','approved','done'])]}"/>
 							<field name="order_value" readonly="1" />																							
-							<field name="invoice_copy" attrs="{'readonly': [('state','in',['confirmed','cancel','approved','done'])]}"/>																	
+							<field name="invoice_copy" attrs="{'readonly': [('state','in',['confirmed','cancel','approved','done'])]}"/>
+							<field name="narration" attrs="{'required': [('state','in',['approved'])],'readonly': [('state','in',['done'])]}"/>																
 
 						</group>											
 						<group>
