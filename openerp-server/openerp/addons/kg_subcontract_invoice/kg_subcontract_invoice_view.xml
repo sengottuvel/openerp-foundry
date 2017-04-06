@@ -18,23 +18,22 @@
 						<group>
 							<field name="name"/>							
 							<field name="contractor_id" on_change="onchange_contractor(contractor_id)"  attrs="{'readonly': [('state','in',['cancel','approved','done'])]}"/>	
+							<field name="division_id" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}"/>
 							<field name="phone" readonly="1" />	
 							<field name="con_invoice_no" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}"/>																									
-							<field name="due_date" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}"/>																					
-							<field name="invoice_copy" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}"/>																			
-							<field name="tax_id" widget="many2many_tags" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}"/>																																					
+							<field name="due_date" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}"/>	
+							<field name="invoice_copy" filename="filename" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}"/>																			
+							<field name="filename" invisible="1"/>																			
 							
 						</group>											
 						<group>
-							<field name="entry_date" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}"/>														
+							<field name="entry_date" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}" options="{'datepicker':{'minDate': 0,'maxDate': 0,}}"/>														
 							<field name="contact_person" readonly="1" />									
 							<field name="flag_invoice" invisible="1"/>
 							<field name="discount_flag" invisible="1"/>
 							<field name="discount_per_flag" invisible="1"/>
 							<field name="invoice_date" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}"/>	
-							<field name="invoice_amt" required="1" on_change="onchange_invoice_amt(invoice_amt,discount_per)" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}"/>
-                            <field name="discount_per" on_change="onchange_discount_value(invoice_amt,discount_per)" attrs="{'readonly': ['|',('state','in',['cancel','approved','done']),('discount_per_flag', '=', True)]}"/>
-                            <field name="discount" on_change="onchange_discount_percent(invoice_amt,discount)" attrs="{'readonly': ['|',('state','in',['cancel','approved','done']),('discount_flag', '=', True)]}"/>       	
+							<field name="invoice_amt" required="1" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}"/>                           
 							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>		
 								
 						</group>					
@@ -79,8 +78,19 @@
 									<field name="remark" widget="char"/>
 								</tree>
 							</field>
-							</group>					
-							
+							</group>
+							<group string = "Additonal Charges">
+							<field colspan="4" mode="tree" name="line_ids_a" nolabel="1" widget="one2many_list" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}">
+								<tree string="Expense Lines" editable="bottom"> 
+									<field name="expense" required="1"/>
+									<field name="description"/>
+									<field name="amount" required="1" />
+									<field name="tax_id" widget="many2many_tags"/>
+									<field name="expense_amt" readonly="1"/>
+									<field name="remark" required="1" widget="char"/>
+								</tree>
+							</field>					
+							</group>
 						</page>
 						
 						<page string="Entry Info">
@@ -110,10 +120,22 @@
 							</group>
 						</page>
 					</notebook>
-					<group class="oe_subtotal_footer oe_right" colspan="2" name="Invoice Total">					
-						<field name="amount_untaxed" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+					
+					<group>
+						<group>
+							<field name="discount_per" on_change="onchange_discount_value(invoice_amt,discount_per)" attrs="{'readonly': ['|',('state','in',['cancel','approved','done']),('discount_per_flag', '=', True)]}"/>
+							<field name="discount" on_change="onchange_discount_percent(invoice_amt,discount)" attrs="{'readonly': ['|',('state','in',['cancel','approved','done']),('discount_flag', '=', True)]}"/>       	
+						</group>							
+						<group>
+						   <field name="tax_id" widget="many2many_tags" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}"/>																			
+						</group>						
+					</group>
+					
+					<group class="oe_subtotal_footer oe_right" colspan="2" name="Invoice Total">						
 						<field name="total_discount" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-						<field name="amount_tax" widget='monetary' options="{'currency_field': 'currency_id'}"/>                                
+						<field name="amount_untaxed" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+						<field name="amount_tax" widget='monetary' options="{'currency_field': 'currency_id'}"/>  
+						<field name="additional_charges" widget='monetary' options="{'currency_field': 'currency_id'}"/>                                  
 						<field name="total_amt" widget='monetary' options="{'currency_field': 'currency_id'}"/>                   
 						<field name="round_off_amt" widget='monetary' attrs="{'readonly': [('state', 'not in', ['draft','confirm'])]}"
 								options="{'currency_field': 'currency_id'}"/>                                
@@ -175,9 +197,9 @@
 							<field name="phone" readonly="1" />	
 							<field name="con_invoice_no" attrs="{'readonly': [('state','in',['confirmed','cancel','approved','done'])]}"/>																									
 							<field name="due_date" attrs="{'readonly': [('state','in',['confirmed','cancel','approved','done'])]}"/>																					
-							<field name="invoice_copy" attrs="{'readonly': [('state','in',['confirmed','cancel','approved','done'])]}"/>																			
-							<field name="tax_id" widget="many2many_tags" attrs="{'readonly': [('state','in',['confirmed','cancel','approved','done'])]}"/>																																					
-							
+							<field name="invoice_copy" filename="filename" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}"/>																			
+							<field name="filename" invisible="1"/>
+							<field name="narration" attrs="{'required': [('state','in',['approved'])],'readonly': [('state','in',['done'])]}"/>						
 						</group>											
 						<group>
 							<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed','cancel','approved','done'])]}"/>														
@@ -186,11 +208,8 @@
 							<field name="discount_flag" invisible="1"/>
 							<field name="discount_per_flag" invisible="1"/>
 							<field name="invoice_date" attrs="{'readonly': [('state','in',['confirmed','cancel','approved','done'])]}"/>	
-							<field name="invoice_amt" required="1" on_change="onchange_invoice_amt(invoice_amt,discount_per)" attrs="{'readonly': [('state','in',['confirmed','cancel','approved','done'])]}"/>
-                            <field name="discount_per" on_change="onchange_discount_value(invoice_amt,discount_per)" attrs="{'readonly': ['|',('state','in',['confirmed','cancel','approved','done']),('discount_per_flag', '=', True)]}"/>
-                            <field name="discount" on_change="onchange_discount_percent(invoice_amt,discount)" attrs="{'readonly': ['|',('state','in',['confirmed','cancel','approved','done']),('discount_flag', '=', True)]}"/>       	
+							<field name="invoice_amt" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel','approved','done'])]}"/>                            
 							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>		
-								
 						</group>					
 					</group>
 					<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">							
@@ -202,9 +221,24 @@
 						</group>
 					</group>
 					<notebook>
-						<page string="Invoice Details" attrs="{'invisible': [('flag_invoice','!=',True)]}">
+						
+						<page string="Select Items">
+							<field name="inward_subcontract_line_ids" attrs="{'readonly': [('state','in',['confirmed','approved','done','cancel'])]}">
+								<tree string="Inward Items" create="false" editable="top">
+									<field name="order_no"/>
+									<field name="order_delivery_date"/>
+									<field name="order_priority" string="Category"/>
+									<field name="pump_model_id" readonly="1"/>
+									<field name="item_code" readonly="1"/>
+									<field name="item_name" readonly="1"/>
+									<field name="moc_id" readonly="1"/>										
+								</tree>
+							</field>
+							
+							<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed','approved','done','cancel'])]}"/>
+							<group string = "Invoice Details">
 							<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel','approved','done','cancel'])]}">
-								<tree string = "Invoice Items">
+								<tree string = "Invoice Items" create="false">
 									<field name="order_no" readonly="1"/>
 									<field name="item_code" readonly="1"/>
 									<field name="item_name" readonly="1"/>
@@ -218,22 +252,19 @@
 									<field name="remark" widget="char"/>
 								</tree>
 							</field>
-						</page>
-						<page string="Select Items">
-							<field name="inward_subcontract_line_ids" attrs="{'readonly': [('state','in',['confirmed','approved','done','cancel'])]}">
-								<tree string="Inward Items" create="false">
-									<field name="order_no"/>
-									<field name="order_delivery_date"/>
-									<field name="order_priority" string="Category"/>
-									<field name="pump_model_id"/>
-									<field name="item_code" />
-									<field name="item_name"/>
-									<field name="moc_id"/>										
+							</group>
+							<group string = "Additonal Charges">
+							<field colspan="4" mode="tree" name="line_ids_a" nolabel="1" widget="one2many_list" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}">
+								<tree string="Expense Lines" editable="bottom"> 
+									<field name="expense" required="1"/>
+									<field name="description"/>
+									<field name="amount" required="1" />
+									<field name="tax_id" widget="many2many_tags"/>
+									<field name="expense_amt" readonly="1"/>
+									<field name="remark" required="1" widget="char"/>
 								</tree>
-							</field>
-													
-							
-							<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed','approved','done','cancel'])]}"/>
+							</field>					
+							</group>
 						</page>
 						
 						<page string="Entry Info">
@@ -263,11 +294,21 @@
 							</group>
 						</page>
 					</notebook>
-					<group class="oe_subtotal_footer oe_right" colspan="2" name="Invoice Total">					
-						<field name="amount_untaxed" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-						<field name="total_discount" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+					<group>
+						<group>
+							<field name="discount_per" on_change="onchange_discount_value(invoice_amt,discount_per)" attrs="{'readonly': ['|',('state','in',['cancel','approved','done']),('discount_per_flag', '=', True)]}"/>
+							<field name="discount" on_change="onchange_discount_percent(invoice_amt,discount)" attrs="{'readonly': ['|',('state','in',['cancel','approved','done']),('discount_flag', '=', True)]}"/>       	
+						</group>							
+						<group>
+						   <field name="tax_id" widget="many2many_tags" attrs="{'readonly': [('state','in',['cancel','approved','done'])]}"/>																			
+						</group>						
+					</group>
+					<group class="oe_subtotal_footer oe_right" colspan="2" name="Invoice Total">	
+						<field name="total_discount" widget='monetary' options="{'currency_field': 'currency_id'}"/>				
+						<field name="amount_untaxed" widget='monetary' options="{'currency_field': 'currency_id'}"/>						
 						<field name="amount_tax" widget='monetary' options="{'currency_field': 'currency_id'}"/>                                
-						<field name="total_amt" widget='monetary' options="{'currency_field': 'currency_id'}"/>                   
+						<field name="total_amt" widget='monetary' options="{'currency_field': 'currency_id'}"/>    
+						<field name="additional_charges" widget='monetary' options="{'currency_field': 'currency_id'}"/>                   
 						<field name="round_off_amt" widget='monetary' attrs="{'readonly': [('state', 'not in', ['draft','confirm'])]}"
 								options="{'currency_field': 'currency_id'}"/>                                
 						<div class="oe_subtotal_footer_separator oe_inline">

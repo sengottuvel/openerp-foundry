@@ -52,34 +52,39 @@ class kg_subcontract_invoice(osv.osv):
 				'total_amt' : 0.0,
 				'amount_total':0.0,
 				'payable_amt':0.0,
+				'additional_charges':0.0,
 			}
-			tax_amt = discount_value = 0.00			
-			if order.discount > 0.00:
-				amt_to_per = (order.discount / (order.invoice_amt or 1.0 )) * 100
-				kg_discount_per = order.discount_per
-				tot_discount_per = amt_to_per
+			tax_amt = discount_value = final_other_charges = 0.00
+			total_value_amt = 0.00
+			for line in order.line_ids:
+				total_value_amt += line.total_value
+			for item in order.line_ids_a:				
+				final_other_charges += item.expense_amt			
+			if order.discount > 0:
+				discount = order.discount
 			else:
-				tot_discount_per = order.discount_per
+				discount = (total_value_amt * order.discount_per) / 100			
+			price_amt_val = total_value_amt	- discount	
 			val = 0.00 
-			print"tot_discount_pertot_discount_per",tot_discount_per
 			for c in self.pool.get('account.tax').compute_all(cr, uid, order.tax_id,
-				order.invoice_amt * (1-(tot_discount_per or 0.0)/100.0), 1, 1,
+				price_amt_val, 1, 1,
 				 order.contractor_id)['taxes']:
 				val += c.get('amount', 0.0)
 				print"valvalval",val
 				tax_amt = val	
 			
 			if order.discount_per > 0.00:					
-				discount_value = (order.invoice_amt /100.00) * order.discount_per	
+				discount_value = (total_value_amt /100.00) * order.discount_per	
 			else:
-				discount_value = order.discount
+				discount_value = order.discount	
 			
-			res[order.id]['amount_untaxed'] = order.invoice_amt - tax_amt
-			res[order.id]['total_discount'] = discount_value 
+			res[order.id]['amount_untaxed'] = total_value_amt
+			res[order.id]['total_discount'] = discount_value
 			res[order.id]['amount_tax'] = tax_amt
-			res[order.id]['total_amt'] = order.invoice_amt + tax_amt
-			res[order.id]['amount_total'] = (order.invoice_amt + tax_amt + order.round_off_amt) - discount_value 
-			res[order.id]['payable_amt'] = (order.invoice_amt + tax_amt + order.round_off_amt) - discount_value 	
+			res[order.id]['additional_charges'] = final_other_charges
+			res[order.id]['total_amt'] = final_other_charges + total_value_amt + tax_amt
+			res[order.id]['amount_total'] = (final_other_charges + total_value_amt + tax_amt + order.round_off_amt) - discount_value
+			res[order.id]['payable_amt'] = (final_other_charges + total_value_amt + tax_amt + order.round_off_amt) - discount_value
 		return res	
 	_columns = {
 	
@@ -95,6 +100,7 @@ class kg_subcontract_invoice(osv.osv):
 		'flag_sms': fields.boolean('SMS Notification'),
 		'flag_email': fields.boolean('Email Notification'),
 		'flag_spl_approve': fields.boolean('Special Approval'),
+		'narration': fields.char('Narration'),	
 		
 		### Entry Info ####
 			
@@ -126,15 +132,17 @@ class kg_subcontract_invoice(osv.osv):
 			domain="[('state','in',('pending','partial')),('contractor_id','=',contractor_id)]"),	 			
 		
 		
-		'flag_invoice': fields.boolean('Flag Invoice'),	
+		'flag_invoice': fields.boolean('Flag Invoice'),
+		'division_id': fields.many2one('kg.division.master', 'Division',required=True),	
 		
 		## Calculation process Start now 
 		
 		'con_invoice_no': fields.char('Contractor Invoice No', size=128,required=True),
-		'invoice_date': fields.date('Invoice Date',required=True),
+		'invoice_date': fields.date('Contractor Invoice Date',required=True),
 		'due_date': fields.date('Due Date',required=True),
-		'invoice_amt': fields.float('Invoice Amount',required=True),
-		'invoice_copy':fields.binary('Invoice Copy'),
+		'invoice_amt': fields.float('Contractor Invoice Amount',required=True),
+		'invoice_copy':fields.binary('Contractor Invoice Copy'),
+		'filename':fields.char('File Name'),
 		'tax_id': fields.many2many('account.tax', 'subcontract_invoice_taxes', 'invoice_id', 'tax_id', 'Taxes'),
 		'discount': fields.float('Discount Amount'),	
 		'discount_per': fields.float('Discount(%)'),
@@ -148,14 +156,16 @@ class kg_subcontract_invoice(osv.osv):
 		'total_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Amount',store=True,multi="sums",help="Total Amount"),
 		'amount_total': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Net Amount',store=True,multi="sums",help="Net Amount"),
 		'payable_amt': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Payable Amount',store=True,multi="sums",help="Payable Amount"),
-		
+		'additional_charges': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Additional Charges',store=True,multi="sums",help="Additional Charges"),
 		'round_off_amt': fields.float('Round off(+/-)'),
 				
-		
+		##Accounts Process
+		'balance_receivable': fields.float('Balance Receivable'),		
+		'accounts_state': fields.selection([('pending','Pending'),('paid','Paid')],'Accounts State', readonly=True),
 		## Child Tables Declaration 
 				
 		'line_ids': fields.one2many('ch.subcontract.invoice.line', 'header_id', "Line Details"),
-		
+		'line_ids_a': fields.one2many('ch.subcontract.invoice.expense.track','header_id',"Expense Track"),
 				
 	}
 		
@@ -167,7 +177,8 @@ class kg_subcontract_invoice(osv.osv):
 		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'state': 'draft',		
 		'active': True,
-		'entry_mode': 'manual',		
+		'entry_mode': 'manual',	
+		'accounts_state': 'pending',	
 		'flag_sms': False,		
 		'flag_email': False,		
 		'flag_spl_approve': False,	
@@ -177,17 +188,9 @@ class kg_subcontract_invoice(osv.osv):
 	}
 	
 	
-	def onchange_invoice_amt(self,cr,uid,ids,invoice_amt,discount_per,context = None):
-		discount = 0.00
-		if invoice_amt >0.00 and discount_per > 0.00:
-			discount = (invoice_amt * discount_per) / 100.0
-		return {'value':{'discount':(round(discount,2))}}
-		
-	
-	
 	def onchange_discount_value(self, cr, uid, ids, invoice_amt,discount_per):		
 		discount_value =  invoice_amt * discount_per / 100.00
-		if discount_value:
+		if discount_per:
 			return {'value': {'discount_flag':True }}
 		else:
 			return {'value': {'discount_flag':False }}
@@ -198,29 +201,14 @@ class kg_subcontract_invoice(osv.osv):
 			amt_to_per = (discount / (invoice_amt or 1.0 )) * 100.00
 			return {'value': {'discount_per_flag':True}}
 		else:
-			return {'value': {'discount_per_flag':False}}	
+			return {'value': {'discount_per_flag':False}}		
 	
 	
 	def button_dummy(self, cr, uid, ids, context=None):
 		return True
 	
 		
-	#~ def onchange_discount_percent(self,cr,uid,ids,invoice_amt,discount,context = None):
-		#~ discount_percent = 0.00
-		#~ discount_per_flag = False
-		#~ if discount > 0.00:
-			#~ discount_percent = (100.00/invoice_amt)*(round(discount,2))
-			#~ discount_per_flag = True
-		#~ return {'value':{'discount_per_flag':discount_per_flag}}
-		#~ 
-	#~ def onchange_discount_value(self,cr,uid,ids,invoice_amt,discount_per,context = None):
-		#~ discount_value = 0.00
-		#~ discount_flag = False
-		#~ if discount_per > 0.00:
-			#~ discount_value = (invoice_amt /100.00)*discount_per
-			#~ discount_flag = True
-		#~ return {'value':{'discount_flag':discount_flag}}
-	#~ 
+	
 	
 	def _future_entry_date_check(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
@@ -234,20 +222,10 @@ class kg_subcontract_invoice(osv.osv):
 			return False
 		return True
 			
-		
-	#~ def _check_lineitems(self, cr, uid, ids, context=None):
-		#~ entry = self.browse(cr,uid,ids[0])
-		#~ if not entry.line_ids:
-			#~ return False
-		#~ return True
-			
 	
-	_constraints = [		
-			  
+	_constraints = [				  
 		
-		(_future_entry_date_check, 'System not allow to save with future and past date. !!',['Invoice Date']),
-		#~ (_check_lineitems, 'System not allow to save with empty Details !!',['']),
-	   
+		#~ (_future_entry_date_check, 'System not allow to save with future and past date. !!',['Invoice Date']),   
 		
 	   ]
 	   
@@ -291,22 +269,26 @@ class kg_subcontract_invoice(osv.osv):
 	def entry_confirm(self,cr,uid,ids,context=None):
 		
 		entry = self.browse(cr,uid,ids[0])		
-		
+		final_other_charges = 0.00
+		for item in entry.line_ids_a:				
+			final_other_charges += item.expense_amt
 		### Sequence Number Generation  ###
-		
-		if entry.state == 'draft':		
+		if len(entry.line_ids) == 0:		
+			raise osv.except_osv(_('Invoice details is must !!'),
+				_('Enter the proceed button!!'))
+		if entry.state == 'draft':
 			sc_inward_line_obj = self.pool.get('ch.subcontract.inward.line')
-			if len(entry.line_ids) == 0:
-				raise osv.except_osv(_('Warning!'),
-								_('System not allow to without line items !!'))
-			for line_item in entry.line_ids:				
-				if line_item.qty < 0:
-					raise osv.except_osv(_('Warning!'),
-								_('System not allow to save negative values !!'))
-								
+			if (entry.invoice_amt + final_other_charges) > entry.amount_total:
+				raise osv.except_osv(_('Invoice Amount Exceed!!'),
+					_('System not allow to Invoice Amount grether than Net Amount !!'))
+			if (entry.invoice_amt + final_other_charges) != entry.amount_total:		
+				raise osv.except_osv(_('Invoice Amount !!'),
+					_('System allow to Invoice Amount is Equal to Net amount !!'))	
+			for line_item in entry.line_ids:								
 				if line_item.qty == 0:
 					raise osv.except_osv(_('Warning!'),
-								_('System not allow to save Zero values !!'))	
+						_('System not allow to save Zero values !!'))		
+		
 				
 				if (line_item.sc_inward_line_id.sc_invoice_qty + line_item.qty) > line_item.sc_inward_line_id.qty:
 					raise osv.except_osv(_('Warning!'),
@@ -358,8 +340,20 @@ class kg_subcontract_invoice(osv.osv):
 			return True
 		
 	def entry_approved(self,cr,uid,ids,context=None):
-		rec = self.browse(cr,uid,ids[0])
-		if rec.state == 'confirmed':
+		entry = self.browse(cr,uid,ids[0])
+		final_other_charges = 0.00
+		for item in entry.line_ids_a:				
+			final_other_charges += item.expense_amt
+		if len(entry.line_ids) == 0:		
+			raise osv.except_osv(_('Invoice details is must !!'),
+				_('Enter the proceed button!!'))
+		if entry.state == 'confirmed':
+			if (entry.invoice_amt + final_other_charges) > entry.amount_total:
+				raise osv.except_osv(_('Invoice Amount Exceed!!'),
+					_('System not allow to Invoice Amount grether than Net Amount !!'))
+			if (entry.invoice_amt + final_other_charges) != entry.amount_total:		
+				raise osv.except_osv(_('Invoice Amount !!'),
+					_('System allow to Invoice Amount is Equal to Net amount !!'))			
 			self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		else:
 			pass		
@@ -367,11 +361,145 @@ class kg_subcontract_invoice(osv.osv):
 		
 	def entry_accept(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.state == 'approved':			
-			self.write(cr, uid, ids, {'state': 'done','done_user_id': uid, 'done_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		journal_obj = self.pool.get('account.journal')
+		journal_ids = self.pool.get('account.journal').search(cr,uid,[('type','=','purchase')])	
+		if journal_ids == []:
+			raise osv.except_osv(_('Book Configuration Warning !!'),
+				_('Type is purchase book should be created !!'))		
+		journal_rec = self.pool.get('account.journal').browse(cr,uid,journal_ids[0])
+		if rec.state == 'approved':	
+			total_value_amt = 0.00
+			for line in rec.line_ids:
+				total_value_amt += line.total_value	
+			self.write(cr, uid, ids, {'balance_receivable':rec.amount_total,'state': 'done','done_user_id': uid, 'done_date': time.strftime('%Y-%m-%d %H:%M:%S')})			
+			
+			## Account Posting Process Start
+			vou_obj = self.pool.get('account.voucher')				
+			move_vals = {
+						'name':rec.name,
+						'journal_id':journal_rec.id,
+						'narration':rec.narration,
+						'source_id':rec.id,
+						'date':rec.entry_date,
+						'division_id':rec.division_id.id,
+						'trans_type':'FI',
+						}			
+			move_id = vou_obj.create_account_move(cr,uid,move_vals)	
+			if rec.contractor_id:
+				account_id = rec.contractor_id.property_account_payable.id
+				if not account_id:
+					raise osv.except_osv(_('Contractor Configuration Warning !!'),
+						_('Contractor account should be configured !!'))
+				credit = rec.amount_total
+				debit = 0.00
+				move_line_vals = {
+						'move_id': move_id,
+						'account_id': account_id,
+						'credit': credit,
+						'debit': debit,					
+						'journal_id': journal_rec.id,						
+						'date': rec.entry_date,
+						'name': rec.name,
+						}
+				move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)	
+				
+			for expense in rec.line_ids_a:
+				ex_account_id = expense.expense.account_id.id			
+				tax_obj = self.pool.get('account.tax')
+				taxes = tax_obj.compute_all(cr, uid, expense.tax_id, expense.amount, 1, 1, partner=rec.contractor_id)			
+				for tax in taxes['taxes']:
+					tax_rec = self.pool.get('account.tax').browse(cr,uid,tax['id'])				
+					credit = 0.00
+					debit = ((tax['amount']))					
+					tax_account = tax['account_collected_id']				
+					if not tax_account:
+						raise osv.except_osv(_('Account Configuration Warning !!'),
+							_('Tax account should be configured !!'))
+					move_line_vals = {
+						'move_id': move_id,
+						'account_id': tax_account,
+						'credit': credit,
+						'debit': debit,					
+						'journal_id': journal_rec.id,						
+						'date': rec.entry_date,
+						'name': rec.name,
+						}
+					move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)			
+				if not ex_account_id:
+					raise osv.except_osv(_('Expense Configuration Warning !!'),
+						_('Expense account should be configured !!'))
+				move_line_vals = {
+						'move_id': move_id,
+						'account_id': ex_account_id,
+						'credit': 0.00,
+						'debit': expense.amount,					
+						'journal_id': journal_rec.id,						
+						'date': rec.entry_date,
+						'name': rec.name,
+						}
+				
+				move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)		
+			
+			discount = 0.00
+			if rec.tax_id:				
+				if rec.discount > 0:
+					discount = rec.discount
+				else:
+					discount = (total_value_amt * rec.discount_per) / 100			
+				price_amt_val = total_value_amt	- discount			
+				tax_obj = self.pool.get('account.tax')
+				taxes = tax_obj.compute_all(cr, uid, rec.tax_id, price_amt_val, 1, product=rec.contractor_id, partner=rec.contractor_id)			
+				for tax in taxes['taxes']:
+					tax_rec = self.pool.get('account.tax').browse(cr,uid,tax['id'])
+					credit = 0.00
+					debit = ((tax['amount']))					
+					tax_account = tax['account_collected_id']				
+					if not tax_account:
+						raise osv.except_osv(_('Account Configuration Warning !!'),
+							_('Tax account should be configured !!'))
+					move_line_vals = {
+						'move_id': move_id,
+						'account_id': tax_account,
+						'credit': credit,
+						'debit': debit,					
+						'journal_id': journal_rec.id,						
+						'date': rec.entry_date,
+						'name': rec.name,
+						}
+					move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)
+			
+			if rec.amount_untaxed > 0:
+				discount = 0.00
+				if rec.discount > 0:
+					discount = rec.discount
+				else:
+					discount = (total_value_amt * rec.discount_per) / 100
+				account_ids = self.pool.get('account.account').search(cr,uid,[('code','=','CON INV')])	
+				if account_ids == []:
+					raise osv.except_osv(_('Account Configuration Warning !!'),
+						_('code name is CON INV account should be created !!'))		
+				account_rec = self.pool.get('account.account').browse(cr,uid,account_ids[0])
+				account_id = account_rec.id			
+				if not account_id:
+					raise osv.except_osv(_('Invoice Configuration Warning !!'),
+						_('Invoice account should be configured !!'))
+				credit = 0.00
+				debit = (rec.amount_untaxed + rec.round_off_amt) - discount
+				move_line_vals = {
+						'move_id': move_id,
+						'account_id': account_id,
+						'credit': credit,
+						'debit': debit,					
+						'journal_id': journal_rec.id,						
+						'date': rec.entry_date,
+						'name': rec.name,
+						}
+				
+				move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)				
+			
+			return True
 		else:
-			pass
-		return True
+			pass	
 		
 		
 		
@@ -477,3 +605,48 @@ class ch_subcontract_invoice_line(osv.osv):
 		return {'value': {'total_value': total_value}}
 		
 ch_subcontract_invoice_line()
+
+
+class ch_subcontract_invoice_expense_track(osv.osv):
+
+	_name = "ch.subcontract.invoice.expense.track"
+	_description = "Expense track"
+	
+	
+	def _get_total_amt(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}	
+		val = 0.00
+		total_value = 0.00
+		tot_discount_per = 0.00
+		for entry in self.browse(cr, uid, ids, context=context):
+			for c in self.pool.get('account.tax').compute_all(cr, uid, entry.tax_id,
+				entry.amount * (1-(tot_discount_per or 0.0)/100.0), 1, 1,
+				entry.expense)['taxes']:
+				val += c.get('amount', 0.0)								
+			result[entry.id] = val + entry.amount
+		return result
+	
+	_columns = {
+		
+		'header_id': fields.many2one('kg.subcontract.invoice', 'Expense Track'),
+		'name': fields.char('Number', size=128, select=True,readonly=False),
+		'date': fields.date('Creation Date'),
+		'amount': fields.float('Amount'),		
+		'tax_id': fields.many2many('account.tax', 'subcontract_invoice_expense_taxe', 'invoice_id', 'tax_id', 'Tax'),
+		'company_id': fields.many2one('res.company', 'Company Name'),
+		'description': fields.char('Description'),
+		'remark': fields.text('Remarks'),		
+		'expense_amt': fields.function(_get_total_amt, string='Total Amount',digits=(16,2), method=True, store=True, type='float'),		
+		'expense': fields.many2one('kg.expense.master','Expense'),
+		
+	}
+	
+	_defaults = {
+		
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'ch.subcontract.invoice.expense.track', context=c),
+		'date' : lambda * a: time.strftime('%Y-%m-%d'),
+	
+		}	
+	
+ch_subcontract_invoice_expense_track()
+
