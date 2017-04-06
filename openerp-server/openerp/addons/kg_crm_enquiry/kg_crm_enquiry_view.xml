@@ -299,7 +299,7 @@
 						<field name="impeller_dia_rated" on_change="onchange_impeller_tip_speed(impeller_tip_speed,impeller_dia_rated,full_load_rpm)"/>
 						<field name="impeller_tip_speed"/>
 						<field name="hydrostatic_test_pressure" />
-						<field name="setting_height" attrs="{'required':[('pump_model_type','=','vertical')]}" widget="float"/>
+						<field name="setting_height" attrs="{'required':[('pump_model_type','=','vertical')]}"/>
 						<field name="full_load_rpm" on_change="onchange_impeller_tip_speed(impeller_tip_speed,impeller_dia_rated,full_load_rpm)"/>
 						<field name="engine_make" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
 						<field name="engine_type" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
