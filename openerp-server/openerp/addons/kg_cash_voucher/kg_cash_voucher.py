@@ -88,6 +88,7 @@ class kg_cash_voucher(osv.osv):
 		'narration': fields.text('Narration'),
 		'division_id':fields.many2one('kg.division.master','Division'),
 		'balc_amt':fields.float('Balance Amount'),
+		'expense_id':fields.many2one('kg.expense.master','Expense Type'),
 		
 		## Child Tables Declaration
 		
@@ -186,9 +187,73 @@ class kg_cash_voucher(osv.osv):
 								self.pool.get('kg.emp.cash.issue').write(cr,uid,pay_issue_rec.id,{'bal_amt':0})
 								index = index + 1
 								print"index-----------------1",index
+
 					else:
 						raise osv.except_osv(_('Warning'),
 							_('Amount Not yet Issued !!!'))
+			else:
+				pass
+			
+			###### Account Posting occurs #########	
+			
+			journal_obj = self.pool.get('account.journal')
+			journal_ids = self.pool.get('account.journal').search(cr,uid,[('type','=','purchase')])	
+			if journal_ids == []:
+				raise osv.except_osv(_('Book Configuration Warning !!'),
+					_('Type is purchase book should be created !!'))		
+			journal_rec = self.pool.get('account.journal').browse(cr,uid,journal_ids[0])
+			vou_obj = self.pool.get('account.voucher')				
+			move_vals = {
+						'name':rec.name,
+						'journal_id':journal_rec.id,
+						'narration':rec.narration,
+						'source_id':rec.id,
+						'date':rec.voucher_date,
+						'division_id':rec.division_id.id,
+						'trans_type':'EC',
+						}			
+			move_id = vou_obj.create_account_move(cr,uid,move_vals)	
+			
+			if rec.employee_id:
+				account_id = rec.employee_id.account_id.id
+				if not account_id:
+					raise osv.except_osv(_('Employee Configuration Warning !!'),
+						_('Employee account should be configured !!'))
+			elif rec.acc_journal_id:
+				account_id = rec.acc_journal_id.default_debit_account_id.id
+				if not account_id:
+					raise osv.except_osv(_('Cash Account Configuration Warning !!'),
+						_('Cash Account should be configured !!'))
+			credit = rec.amount
+			debit = 0.00
+			move_line_vals = {
+					'move_id': move_id,
+					'account_id': account_id,
+					'credit': credit,
+					'debit': debit,					
+					'journal_id': journal_rec.id,						
+					'date': rec.voucher_date,
+					'name': rec.name,
+					}
+			move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)
+	
+			ex_account_id = rec.expense_id.account_id.id	
+			if not ex_account_id:
+				raise osv.except_osv(_('Expense Account Configuration Warning !!'),
+					_('Expense Account should be configured !!'))
+			move_line_vals = {
+					'move_id': move_id,
+					'account_id': ex_account_id,
+					'credit': 0.00,
+					'debit': rec.amount,					
+					'journal_id': journal_rec.id,						
+					'date': rec.voucher_date,
+					'name': rec.name,
+					}
+			move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)	
+			
+			###### Account Posting occurs #########
+			
 			self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		else:
 			pass

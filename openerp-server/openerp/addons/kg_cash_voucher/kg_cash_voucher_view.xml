@@ -20,11 +20,12 @@
 							<group>						
 								<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" readonly="1"/>																
 								<field name="pay_mode" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1"/>																
+								<field name="expense_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1"/>																
 								<field name="division_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1"/>																
 								<field name="amount" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1"/>																
 								<field name="narration" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1" class="aplhanum_expect"/>																
 								<field name="modify" invisible = "1"/>
-								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
+								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" invisible="1"/>				
 							</group>
 							<group>
 								<field name="voucher_date" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1"/>
