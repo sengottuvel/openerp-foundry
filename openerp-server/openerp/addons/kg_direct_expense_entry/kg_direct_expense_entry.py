@@ -108,7 +108,7 @@ class kg_direct_expense_entry(osv.osv):
 	
 	_columns = {
 	
-		'name':fields.char('Name'),
+		'name':fields.char('Code'),
 		'invoice_no':fields.char('Supplier Invoice No'),
 		'expense_date':fields.date('Expense Date'),
 		'invoice_date':fields.date('Supplier Invoice Date'),
@@ -144,6 +144,9 @@ class kg_direct_expense_entry(osv.osv):
 		'notes': fields.text('Notes'),
 		'division_id':fields.many2one('kg.division.master','Division'),	
 		'round_off': fields.float('Round off',size=5,readonly=False, states={'approved':[('readonly',True)],'done':[('readonly',True)]}),
+		
+		'balance_receivable': fields.float('Balance Receivable'),		
+		'accounts_state': fields.selection([('pending','Pending'),('paid','Paid')],'Accounts State', readonly=True),
 			
 			
 			### Entry Info ###
@@ -173,11 +176,18 @@ class kg_direct_expense_entry(osv.osv):
 		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'modify': 'no',
 		'entry_mode': 'manual',
+		'accounts_state': 'pending',
 	}
 	
 	def  _validations (self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.line_ids:
+			line_expense = [ line.expense_id for line in rec.line_ids ]
+			a= [line_expense.count(i) for i in line_expense ]
+			for j in a:
+				if j > 1:
+					raise osv.except_osv(_('Warning!'),
+								_('Duplicates are not allowed in Expense !!'))
 			for line in rec.line_ids:
 				if line.dis_amt < 0.00:
 					raise osv.except_osv(_('Warning!'),
@@ -185,6 +195,7 @@ class kg_direct_expense_entry(osv.osv):
 				if line.total_amt <=0.00:
 					raise osv.except_osv(_('Warning!'),
 						_('The Amount should not be less than or equal to zero !!'))
+				
 			#~ return False
 		return True
 		
@@ -223,8 +234,82 @@ class kg_direct_expense_entry(osv.osv):
 
 	def entry_approve(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
+		journal_obj = self.pool.get('account.journal')
+		journal_ids = self.pool.get('account.journal').search(cr,uid,[('type','=','purchase')])	
+		if journal_ids == []:
+			raise osv.except_osv(_('Book Configuration Warning !!'),
+				_('Type is purchase book should be created !!'))		
+		journal_rec = self.pool.get('account.journal').browse(cr,uid,journal_ids[0])
 		if rec.state == 'confirmed':
-			self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			## Account Posting Process Start
+			vou_obj = self.pool.get('account.voucher')				
+			move_vals = {
+						'name':rec.name,
+						'journal_id':journal_rec.id,
+						'narration':rec.notes,
+						'source_id':rec.id,
+						'date':rec.expense_date,
+						'division_id':rec.division_id.id,
+						'trans_type':'DEJ',
+						}			
+			move_id = vou_obj.create_account_move(cr,uid,move_vals)	
+			if rec.supplier_id:
+				account_id = rec.supplier_id.property_account_payable.id
+				print"account_idaccount_id",account_id
+				if not account_id:
+					raise osv.except_osv(_('Supplier Configuration Warning !!'),
+						_('Supplier account should be configured !!'))
+				credit = rec.amount_total
+				debit = 0.00
+				move_line_vals = {
+						'move_id': move_id,
+						'account_id': account_id,
+						'credit': credit,
+						'debit': debit,					
+						'journal_id': journal_rec.id,						
+						'date': rec.expense_date,
+						'name': rec.name,
+						}
+				move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)	
+			for expense in rec.line_ids:
+				ex_account_id = expense.expense_id.account_id.id	
+				print"ex_account_idex_account_id"	,ex_account_id	
+				tax_obj = self.pool.get('account.tax')
+				taxes = tax_obj.compute_all(cr, uid, expense.tax_id, (expense.total_amt-expense.dis_amt), 1, 1, partner=rec.supplier_id)			
+				for tax in taxes['taxes']:
+					tax_rec = self.pool.get('account.tax').browse(cr,uid,tax['id'])				
+					credit = 0.00
+					debit = ((tax['amount']))				
+					tax_account = tax['account_collected_id']				
+					if not tax_account:
+						raise osv.except_osv(_('Account Configuration Warning !!'),
+							_('Tax account should be configured !!'))
+					move_line_vals = {
+						'move_id': move_id,
+						'account_id': tax_account,
+						'credit': credit,
+						'debit': debit,					
+						'journal_id': journal_rec.id,						
+						'date': rec.expense_date,
+						'name': rec.name,
+						}
+					move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)			
+				if not ex_account_id:
+					raise osv.except_osv(_('Expense Configuration Warning !!'),
+						_('Expense account should be configured !!'))
+				move_line_vals = {
+						'move_id': move_id,
+						'account_id': ex_account_id,
+						'credit': 0.00,
+						'debit': expense.total_amt-expense.dis_amt,					
+						'journal_id': journal_rec.id,						
+						'date': rec.expense_date,
+						'name': rec.name,
+						}
+				
+				move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)
+			
+			self.write(cr, uid, ids, {'balance_receivable':rec.amount_total,'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 
 	def entry_reject(self,cr,uid,ids,context=None):
@@ -292,10 +377,11 @@ class ch_direct_expense_entry(osv.osv):
 	_columns={
 	
 		'header_id':fields.many2one('direct.entry.expense','Entry'),
-		'exp_des':fields.char('Expense Description',size=200),
+		'expense_id':fields.many2one('kg.expense.master','Expense Description'),
 		'dis_amt':fields.float('Discount Amount'),
 		'tax_id': fields.many2many('account.tax', 'sol_taxes', 'sol_id', 'tax_id', 'Taxes'),
 		'total_amt':fields.float('Amount'),
+		'remarks':fields.char('Remarks'),
 		
 		
 		

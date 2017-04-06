@@ -154,6 +154,63 @@ class kg_emp_cash_issue(osv.osv):
 		rec = self.browse(cr,uid,ids[0])
 		
 		if rec.state == 'confirmed':
+			
+			###### Account Posting occurs #########
+			
+			journal_obj = self.pool.get('account.journal')
+			journal_ids = self.pool.get('account.journal').search(cr,uid,[('type','=','purchase')])	
+			if journal_ids == []:
+				raise osv.except_osv(_('Book Configuration Warning !!'),
+					_('Type is purchase book should be created !!'))		
+			journal_rec = self.pool.get('account.journal').browse(cr,uid,journal_ids[0])
+			
+			vou_obj = self.pool.get('account.voucher')				
+			move_vals = {
+						'name':'Employee Cash Issue',
+						'journal_id':journal_rec.id,
+						'narration':rec.narration,
+						'source_id':rec.id,
+						'date':rec.entry_date,
+						'division_id':rec.division_id.id,
+						'trans_type':'EC',
+						}			
+			move_id = vou_obj.create_account_move(cr,uid,move_vals)	
+	
+			ex_account_id = rec.acc_journal_id.default_debit_account_id.id	
+			if not ex_account_id:
+				raise osv.except_osv(_('Cash Account Configuration Warning !!'),
+					_('Cash Account should be configured !!'))
+			move_line_vals = {
+					'move_id': move_id,
+					'account_id': ex_account_id,
+					'credit': rec.amount,
+					'debit': 0.00,					
+					'journal_id': journal_rec.id,						
+					'date': rec.entry_date,
+					'name': 'Employee Cash Issue',
+					}
+			move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)		
+			if rec.employee_id:
+				account_id = rec.employee_id.account_id.id
+				print"account_idaccount_id",account_id
+				if not account_id:
+					raise osv.except_osv(_('Employee Configuration Warning !!'),
+						_('Employee account should be configured !!'))
+				credit = 0.00
+				debit = rec.amount
+				move_line_vals = {
+						'move_id': move_id,
+						'account_id': account_id,
+						'credit': credit,
+						'debit': debit,					
+						'journal_id': journal_rec.id,						
+						'date': rec.entry_date,
+						'name': 'Employee Cash Issue',
+						}
+				move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)
+			
+			###### Account Posting occurs #########
+			
 			self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 			
 		else:

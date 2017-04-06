@@ -17,12 +17,12 @@
 					</header>				
 						<group>
 							<group>								
-								<field name='name' readonly="1" string="Doc No"/>
+								<field name='name' readonly="1"/>
 								<field name='invoice_no' required ="True" attrs="{'readonly': [('state','in',('approved','reject'))]}"/>
 								<field name='supplier_id' on_change="onchange_supplier(supplier_id)" required ="True"  attrs="{'readonly': [('state','in',('approved','reject'))]}" />
 								<field name='payment_type' readonly="0" attrs="{'readonly': [('state','in',('approved','reject'))]}" required="1"/>	
 								<field name='division_id' attrs="{'readonly': [('state','in',('approved','reject'))]}" required="1"/>	
-								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
+								<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'required':[('state','=','confirmed')]}" string="Narration"/>				
 							</group>
 							<group >
 								<field name='expense_date' required ="True" attrs="{'readonly': [('state','in',('approved','reject'))]}"/>
@@ -43,10 +43,11 @@
 							<page string='Expenses' >								
 									<field name='line_ids' nolabel="1" attrs="{'readonly': [('state','in',['approved','reject'])]}" >										
 										<tree editable="bottom">
-											<field name = 'exp_des' required="True" class="aplhanum_expect"/>
+											<field name = 'expense_id' required="True"/>
 											<field name = 'tax_id' widget='many2many_tags' />
 											<field name = 'dis_amt' />
 											<field name = 'total_amt' sum='Total amount' required="True" />											
+											<field name = 'remarks' />											
 										</tree>																
 									</field>
 									<group class="oe_subtotal_footer oe_right">										
