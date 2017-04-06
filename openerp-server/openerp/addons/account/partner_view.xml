@@ -78,7 +78,7 @@
                     <group>
 						<!-- Accounting list to supplier,customer start -->
 							<field name="property_account_receivable" attrs="{'invisible':[('customer','!=',True)]}" readonly="1"/>
-							<field name="property_account_payable" attrs="{'invisible':[('supplier','!=',True),('dealer','!=',True)]}" readnoly="1"/>
+							<field name="property_account_payable" attrs="{'invisible':[('supplier','!=',True),('dealer','!=',True),('contractor','!=',True)]}" readnoly="1"/>
 						
 					</group>
 						<!-- Accounting list to supplier,customer end -->

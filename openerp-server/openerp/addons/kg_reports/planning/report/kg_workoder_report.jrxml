@@ -190,7 +190,7 @@ case when pump_crm.capacity_in_liquid > 0 then pump_crm.capacity_in_liquid::text
 case when pump_crm.head_in_liquid > 0 then round(cast(pump_crm.head_in_liquid as numeric),2)::text else '-' end as head_in_m,
 case when pump_crm.efficiency_in > 0 then pump_crm.efficiency_in::text else '-' end as efficiency,
 case when pump_crm.motor_kw > 0 then round(cast(pump_crm.motor_kw as numeric),2)::text else '-' end as motor_kw,
-case when brand.name is not null then brand.name::text else '-' end as motor_make,
+case when brand_motor.name is not null then brand_motor.name::text else '-' end as motor_make,
 
 
 case when pump_crm.speed_in_rpm > 0 then pump_crm.speed_in_rpm::text else '-' end as speed_pump,
@@ -213,7 +213,7 @@ when pump_crm.shaft_sealing = 'gld_packing_ptfe' then 'Gland Packing-PTFE'
 when pump_crm.shaft_sealing = 'mc_seal' then 'M/C Seal'
 when pump_crm.shaft_sealing = 'dynamic_seal' then 'Dynamic Seal'
 else '-' end as shaft_sealing,
-coalesce(brand.name,'-') as mech_seal_make,
+coalesce(brand_mech.name,'-') as mech_seal_make,
 
 case
 when pump_crm.seal_type = 'sums' then 'Single Unbalanced Multiple Spring'
@@ -261,7 +261,8 @@ left join kg_fluid_master liquid on liquid.id = pump_crm.fluid_id
 left join kg_work_order wo on wo.id = wo_line.header_id
 left join res_partner cust on cust.id = wo.partner_id
 left join res_company comp on comp.id = wo.company_id
-left join kg_brand_master brand on brand.id = pump_crm.mech_seal_make
+left join kg_brand_master brand_mech on brand_mech.id = pump_crm.mech_seal_make
+left join kg_brand_master brand_motor on brand_motor.id = pump_crm.motor_make
 left join ch_pumpseries_flange flange on flange.id = pump_crm.flange_standard
 
 where wo_line.id in (select order_id from m2m_work_order_print_report_details
