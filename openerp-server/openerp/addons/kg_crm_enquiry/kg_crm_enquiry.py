@@ -473,6 +473,8 @@ class kg_crm_enquiry(osv.osv):
 					pass
 			elif entry.name:
 				off_no = entry.name
+			print"off_nooff_no",off_no
+			
 			prime_cost = 0.0
 			if entry.ch_line_ids:
 				
@@ -1378,7 +1380,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'differential_pressure_kg': fields.float('Differential Pressure - kg/cm2'),
 		'slurry_correction_in': fields.float('Slurry Correction in'),
 		'temperature': fields.selection([('normal','NORMAL'),('jacketting','JACKETTING'),('centre_line','CENTRE LINE')],'Temperature Condition'),
-		'suction_condition': fields.selection([('positive','Positive'),('negative','Negative'),('flooded','Flooded'),('sub_merged','Submerged')],'Suction Condition'),
+		'suction_condition': fields.selection([('positive','Positive'),('negative','Negative'),('flooded','Flooded'),('sub_merged','Submerged'),('suction_lift','Suction Lift')],'Suction Condition'),
 		'discharge_pressure_kg': fields.float('Discharge Pressure - kg/cm2'),
 		'suction_pressure_kg': fields.float('Suction Pressure - kg/cm2'),
 		

@@ -243,6 +243,7 @@
 						<field name="npsh_avl" />
 						<field name="capacity_in_liquid" on_change="onchange_capacity_in_liquid(capacity_in_liquid,head_in_liquid)"/>
 						<field name="consistency" />
+						<field name="suction_condition" />
 					</group>											
 					<group>
 						<field name="temperature_in_c" />
@@ -264,7 +265,6 @@
 					<group>
 						<field name="head_in" on_change="onchange_head_in(head_in,discharge_pressure_kg,sealing_water_pressure)"/>
 						<field name="differential_pressure_kg" />
-						<field name="suction_condition" />
 						<field name="discharge_pressure_kg" on_change="onchange_head_in(head_in,discharge_pressure_kg,sealing_water_pressure)"/>
 						<field name="temperature" />
 					</group>					
