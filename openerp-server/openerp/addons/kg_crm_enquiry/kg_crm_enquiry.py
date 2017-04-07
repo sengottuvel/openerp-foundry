@@ -3341,6 +3341,7 @@ class ch_kg_crm_machineshop_item(osv.osv):
 		'moc_changed_flag': fields.boolean('MOC Changed'),
 		'prime_cost': fields.float('Prime Cost'),
 		'purpose_categ': fields.selection([('pump','Pump'),('spare','Spare'),('access','Accessories')],'Purpose Category'),
+		'length': fields.float('Length'),
 		'material_code': fields.char('Material Code'),
 		'spare_offer_line_id': fields.integer('Spare Offer Line Id'),
 		

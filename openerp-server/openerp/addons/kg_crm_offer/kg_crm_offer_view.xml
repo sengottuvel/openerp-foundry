@@ -320,6 +320,7 @@
 										<field name="ms_id" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>
 										<field name="name" attrs="{'readonly':[('load_bom','=',True)]}"/>
 										<field name="moc_id" readonly="1" required="1"/>
+										<field name="length" readonly="1"/>
 										<field name="moc_changed_flag" readonly="1"/>
 										<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
 										<field name="qty" required="1" attrs="{'readonly':[('load_bom','=',True)]}"/>

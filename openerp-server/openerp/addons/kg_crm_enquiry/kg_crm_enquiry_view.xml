@@ -479,6 +479,7 @@
 							<field name="name" attrs="{'readonly':[('load_bom','=',True)]}"/>
 							<field name="material_code"/>
 							<field name="moc_id" attrs="{'required':[('is_applicable','=',True)]}" on_change="onchange_moc(moc_id,moc_name)"/>
+							<field name="length"/>
 							<field name="csd_no" attrs="{'readonly':[('load_bom','=',True)]}"/>
 							<field name="qty" required="1" attrs="{'readonly':[('purpose_categ','=','pump')]}"/>
 							<field name="prime_cost" readonly="1"/>
