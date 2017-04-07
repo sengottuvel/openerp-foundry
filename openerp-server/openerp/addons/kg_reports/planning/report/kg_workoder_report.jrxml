@@ -239,6 +239,10 @@ when pump_crm.face_combination = 'c_vs_sic' then 'SIC VS SIC / C VS SIC'
 when pump_crm.face_combination = 'gft_vs_ceramic' then 'GFT VS CERAMIC'
 else '-' end as face_combination,
 
+coalesce(case
+when pump_crm.motor_power = '315_l' then '315L'
+else pump_crm.motor_power end,'-') as motor_power,
+
 coalesce(pump_crm.api_plan,'-') as api_plan,
 case when pump_crm.shut_off_head > 0 then round(cast(pump_crm.shut_off_head as numeric),2)::text else '-' end as shut_off_head,
 case when pump_crm.impeller_dia_min > 0 then pump_crm.impeller_dia_min::text else '-' end as impeller_dia_min,
