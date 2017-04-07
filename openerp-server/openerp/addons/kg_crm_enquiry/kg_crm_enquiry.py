@@ -266,6 +266,32 @@ class kg_crm_enquiry(osv.osv):
 			res = True	
 		return res 
 	
+	def _spl_name(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])
+		if rec.ch_line_ids:
+			for item in rec.ch_line_ids:
+				if item.insulation:
+					insulation_special_char = ''.join(c for c in item.insulation if c in '!@#$%^~*{}?+/=')
+					if insulation_special_char:
+						raise osv.except_osv(_('Warning!'),
+							_('%s Special Character Not Allowed in Insulation!'%(item.pump_id.name)))
+				if item.phase:
+					phase_special_char = ''.join(c for c in item.phase if c in '!@#$%^~*{}?+/=')
+					if phase_special_char:
+						raise osv.except_osv(_('Warning!'),
+							_('%s Special Character Not Allowed in Phase!'%(item.pump_id.name)))
+				if item.protection:
+					protection_special_char = ''.join(c for c in item.protection if c in '!@#$%^~*{}?+/=')
+					if protection_special_char:
+						raise osv.except_osv(_('Warning!'),
+							_('%s Special Character Not Allowed in Protection!'%(item.pump_id.name)))
+				if item.voltage:
+					voltage_special_char = ''.join(c for c in item.voltage if c in '!@#$%^~*{}?+/=')
+					if voltage_special_char:
+						raise osv.except_osv(_('Warning!'),
+							_('%s Special Character Not Allowed in Voltage!'%(item.pump_id.name)))
+		return True
+	
 	_constraints = [		
 		
 		#~ (_future_enquiry_date_check, 'System not allow to save with past date!',['Enquiry Date']),
@@ -276,7 +302,7 @@ class kg_crm_enquiry(osv.osv):
 		#(_check_duplicates, 'System not allow to do duplicate entry !!',['']),
 		#(_Validation, 'Special Character Not Allowed in Work Order No.', ['']),
 		#(_check_name, 'Work Order No. must be Unique', ['']),
-		
+		(_spl_name, 'Special Character Not Allowed!', ['']),
 	   ]
 	
 	def entry_revision(self,cr,uid,ids,context=None):
@@ -444,6 +470,7 @@ class kg_crm_enquiry(osv.osv):
 		entry = self.browse(cr,uid,ids[0])
 		print "entry.line_ids",entry.ch_line_ids
 		if entry.state == 'draft':
+			off_no = ''
 			if not entry.name:
 				if entry.call_type == 'service':		
 					off_no = ''	
@@ -1430,7 +1457,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'belt_loss_in_kw': fields.float('Belt Loss in Kw - 3% of BKW'),
 		'type_make_selection': fields.selection([('base','Base'),('center_line','Center Line')],'Type Make Selection'),
 		'engine_rpm': fields.float('Engine(RPM)'),
-		'shaft_sealing': fields.selection([('gld_packing_tiga','Gland Packing-TIGA'),('gld_packing_ptfe','Gland Packing-PTFE'),('mc_seal','M/C Seal'),('dynamic_seal','Dynamic seal')],'Shaft Sealing'),
+		'shaft_sealing': fields.selection([('gld_packing_tiga','Gland Packing-TIGA'),('gld_packing_ptfe','Gland Packing-PTFE'),('mc_seal','M/C Seal'),('f_s','Felt Seal'),('dynamic_seal','Dynamic Seal')],'Shaft Sealing'),
 		'scope_of_supply': fields.selection([('bare_pump','Bare Pump'),('pump_with_acces','Pump With Accessories'),('pump_with_acces_motor','Pump With Accessories And Motor')],'Scope of Supply'),
 		'drive': fields.selection([('motor','MOTOR'),('vfd','VFD'),('engine','ENGINE')],'Drive'),
 		'flange_type': fields.selection([('standard','Standard'),('optional','Optional')],'Flange Type'),
@@ -1697,6 +1724,8 @@ class ch_kg_crm_pumpmodel(osv.osv):
 					elif wo_rec.shaft_sealing == 'm_s':
 						shaft_sealing = 'mc_seal'
 					elif wo_rec.shaft_sealing == 'f_s':
+						shaft_sealing = 'f_s'
+					elif wo_rec.shaft_sealing == 'd_s':
 						shaft_sealing = 'dynamic_seal'
 					else:
 						shaft_sealing = ''
@@ -1816,11 +1845,13 @@ class ch_kg_crm_pumpmodel(osv.osv):
 				lubrication = 'cut_less_rubber'
 		
 		if shaft_sealing:
-			if shaft_sealing == 'gld_packing_tiga':
+			if shaft_sealing == 'gld_packing_tiga' or shaft_sealing == 'gld_packing_ptfe':
 				shaft_sealing = 'g_p'
 			elif shaft_sealing == 'mc_seal':
 				shaft_sealing = 'm_s'
 			elif shaft_sealing == 'dynamic_seal':
+				shaft_sealing = 'd_s'
+			elif shaft_sealing == 'f_s':
 				shaft_sealing = 'f_s'
 		if bush_bearing:
 			if bush_bearing == 'grease_bronze':
