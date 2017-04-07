@@ -1450,7 +1450,11 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'ph_value': fields.char('PH Value'),
 		'motor_power': fields.selection([('90','90'),('100','100'),('112','112'),('132','132'),('160','160'),('180','180'),('200','200'),('225','225'),
 				('250','250'),('280','280'),('315','315'),('315_l','315L')],'Motor Frame size'),
-				
+		'insulation': fields.char('Insulation'),
+		'protection': fields.char('Protection'),
+		'voltage': fields.char('Voltage'),
+		'phase': fields.char('Phase'),
+		
 		# Product model values
 		#'impeller_type': fields.char('Impeller Type', readonly=True),
 		'impeller_type': fields.selection([('open','Open'),('semi_open','Semi Open'),('close','Closed')],'Impeller Type'),

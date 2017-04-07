@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="offer_copy_report" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.210000000000006"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="436"/>
+	<property name="ireport.y" value="1112"/>
 	<subDataset name="dataset2">
 		<parameter name="enq_line_id" class="java.lang.Integer"/>
 		<queryString>
@@ -69,16 +69,26 @@ where enq_line.id = $P{enq_line_id}]]>
 		<queryString>
 			<![CDATA[select
 
-enq_line.shaft_sealing as shaft_sealing,
-enq_line.qty as qty,
-enq_line.qty as qty
+enq_line.insulation as insulation,
+enq_line.protection as protection,
+enq_line.voltage as voltage,
+enq_line.phase as phase,
+(CASE WHEN enq_line.frequency = '50' THEN '50' WHEN enq_line.frequency = '60' THEN '60' ELSE ' ' end) as frequency,
+(CASE WHEN enq_line.motor_mounting = 'foot' THEN 'Foot' WHEN enq_line.motor_mounting = 'flange' THEN 'Flange' ELSE ' ' end) as motor_mounting,
+(CASE WHEN enq_line.motor_type = 'eff_1' THEN 'Eff-1' WHEN enq_line.motor_type = 'eff_1' THEN 'EFF-2'
+WHEN enq_line.motor_type = 'eff_3' THEN 'EFF-3' ELSE ' ' end) as motor_type
 
 from ch_kg_crm_pumpmodel enq_line
 
 where enq_line.id = $P{enq_line_id}]]>
 		</queryString>
-		<field name="shaft_sealing" class="java.lang.String"/>
-		<field name="qty" class="java.lang.Integer"/>
+		<field name="insulation" class="java.lang.String"/>
+		<field name="protection" class="java.lang.String"/>
+		<field name="voltage" class="java.lang.String"/>
+		<field name="phase" class="java.lang.String"/>
+		<field name="frequency" class="java.lang.String"/>
+		<field name="motor_mounting" class="java.lang.String"/>
+		<field name="motor_type" class="java.lang.String"/>
 	</subDataset>
 	<subDataset name="scope_of_supply">
 		<parameter name="enq_line_id" class="java.lang.Integer"/>
@@ -2940,9 +2950,9 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 	<group name="Motor_Make_Detail">
 		<groupExpression><![CDATA[$F{enq_line_id}]]></groupExpression>
 		<groupHeader>
-			<band height="50">
+			<band height="98">
 				<componentElement>
-					<reportElement x="0" y="14" width="555" height="36"/>
+					<reportElement x="0" y="14" width="555" height="84"/>
 					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 						<datasetRun subDataset="motor_make_detail">
 							<datasetParameter name="enq_line_id">
@@ -2950,34 +2960,12 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 							</datasetParameter>
 							<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 						</datasetRun>
-						<jr:listContents height="36" width="555">
+						<jr:listContents height="84" width="555">
 							<textField isBlankWhenNull="true">
-								<reportElement x="277" y="0" width="278" height="12"/>
+								<reportElement x="278" y="24" width="277" height="12" isRemoveLineWhenBlank="true">
+									<printWhenExpression><![CDATA[!($F{insulation}.equals(null ))]]></printWhenExpression>
+								</reportElement>
 								<box topPadding="2" leftPadding="2">
-									<bottomPen lineWidth="0.5"/>
-									<rightPen lineWidth="0.5"/>
-								</box>
-								<textElement>
-									<font size="8"/>
-								</textElement>
-								<textFieldExpression><![CDATA["-"]]></textFieldExpression>
-							</textField>
-							<textField isBlankWhenNull="true">
-								<reportElement x="277" y="12" width="278" height="12"/>
-								<box topPadding="2" leftPadding="2">
-									<bottomPen lineWidth="0.5"/>
-									<rightPen lineWidth="0.5"/>
-								</box>
-								<textElement>
-									<font size="8"/>
-								</textElement>
-								<textFieldExpression><![CDATA["-"]]></textFieldExpression>
-							</textField>
-							<textField>
-								<reportElement x="0" y="12" width="277" height="12"/>
-								<box topPadding="2" leftPadding="1">
-									<pen lineWidth="0.5"/>
-									<topPen lineWidth="0.0"/>
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2985,13 +2973,13 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 								<textElement>
 									<font size="8"/>
 								</textElement>
-								<textFieldExpression><![CDATA["Insulation / protection"]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{insulation}]]></textFieldExpression>
 							</textField>
-							<textField>
-								<reportElement x="0" y="24" width="277" height="12"/>
+							<textField isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="278" height="12" isRemoveLineWhenBlank="true">
+									<printWhenExpression><![CDATA[!($F{motor_type} == ' ')]]></printWhenExpression>
+								</reportElement>
 								<box topPadding="2" leftPadding="1">
-									<pen lineWidth="0.5"/>
-									<topPen lineWidth="0.0"/>
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -2999,18 +2987,175 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 								<textElement>
 									<font size="8"/>
 								</textElement>
-								<textFieldExpression><![CDATA["Voltage / Phase / Frequency"]]></textFieldExpression>
+								<textFieldExpression><![CDATA["Type"]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="277" y="24" width="278" height="12"/>
-								<box topPadding="2" leftPadding="2">
+								<reportElement x="0" y="12" width="278" height="12" isRemoveLineWhenBlank="true">
+									<printWhenExpression><![CDATA[!($F{motor_mounting} == ' ')]]></printWhenExpression>
+								</reportElement>
+								<box topPadding="2" leftPadding="1">
+									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
 								<textElement>
 									<font size="8"/>
 								</textElement>
-								<textFieldExpression><![CDATA["-"]]></textFieldExpression>
+								<textFieldExpression><![CDATA["Mounting"]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="0" y="24" width="278" height="12" isRemoveLineWhenBlank="true">
+									<printWhenExpression><![CDATA[!($F{insulation}.equals(null ))]]></printWhenExpression>
+								</reportElement>
+								<box topPadding="2" leftPadding="1">
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement>
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA["Insulation"]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="0" y="36" width="278" height="12" isRemoveLineWhenBlank="true">
+									<printWhenExpression><![CDATA[!($F{protection}.equals(null ))]]></printWhenExpression>
+								</reportElement>
+								<box topPadding="2" leftPadding="1">
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement>
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA["Protection"]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="0" y="48" width="278" height="12" isRemoveLineWhenBlank="true">
+									<printWhenExpression><![CDATA[!($F{voltage}.equals(null ))]]></printWhenExpression>
+								</reportElement>
+								<box topPadding="2" leftPadding="1">
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement>
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA["Voltage"]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="0" y="60" width="278" height="12" isRemoveLineWhenBlank="true">
+									<printWhenExpression><![CDATA[!($F{phase}.equals(null ))]]></printWhenExpression>
+								</reportElement>
+								<box topPadding="2" leftPadding="1">
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement>
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA["Phase"]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="0" y="72" width="278" height="12" isRemoveLineWhenBlank="true">
+									<printWhenExpression><![CDATA[!($F{frequency} == ' ')]]></printWhenExpression>
+								</reportElement>
+								<box topPadding="2" leftPadding="1">
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement>
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA["Frequency"]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="278" y="0" width="277" height="12" isRemoveLineWhenBlank="true">
+									<printWhenExpression><![CDATA[!($F{motor_type} == ' ')]]></printWhenExpression>
+								</reportElement>
+								<box topPadding="2" leftPadding="2">
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement>
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{motor_type}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="278" y="12" width="277" height="12" isRemoveLineWhenBlank="true">
+									<printWhenExpression><![CDATA[!($F{motor_mounting} == ' ')]]></printWhenExpression>
+								</reportElement>
+								<box topPadding="2" leftPadding="2">
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement>
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{motor_mounting}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="278" y="36" width="277" height="12" isRemoveLineWhenBlank="true">
+									<printWhenExpression><![CDATA[!($F{protection}.equals(null ))]]></printWhenExpression>
+								</reportElement>
+								<box topPadding="2" leftPadding="2">
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement>
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{protection}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="278" y="48" width="277" height="12" isRemoveLineWhenBlank="true">
+									<printWhenExpression><![CDATA[!($F{voltage}.equals(null ))]]></printWhenExpression>
+								</reportElement>
+								<box topPadding="2" leftPadding="2">
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement>
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{voltage}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="278" y="60" width="277" height="12" isRemoveLineWhenBlank="true">
+									<printWhenExpression><![CDATA[!($F{phase}.equals(null ))]]></printWhenExpression>
+								</reportElement>
+								<box topPadding="2" leftPadding="2">
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement>
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{phase}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="278" y="72" width="277" height="12" isRemoveLineWhenBlank="true">
+									<printWhenExpression><![CDATA[!($F{frequency} == ' ')]]></printWhenExpression>
+								</reportElement>
+								<box topPadding="2" leftPadding="2">
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement>
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{frequency}]]></textFieldExpression>
 							</textField>
 						</jr:listContents>
 					</jr:list>
@@ -3028,20 +3173,6 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 					<textFieldExpression><![CDATA['Motor Make Details:']]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="0" y="14" width="277" height="12"/>
-					<box topPadding="2" leftPadding="1">
-						<pen lineWidth="0.5"/>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.5"/>
-						<bottomPen lineWidth="0.5"/>
-						<rightPen lineWidth="0.5"/>
-					</box>
-					<textElement>
-						<font size="8"/>
-					</textElement>
-					<textFieldExpression><![CDATA["Type / Mounting"]]></textFieldExpression>
-				</textField>
-				<textField>
 					<reportElement x="115" y="0" width="440" height="14"/>
 					<box>
 						<topPen lineWidth="0.5"/>
@@ -3051,6 +3182,18 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 					<textElement/>
 					<textFieldExpression><![CDATA[""]]></textFieldExpression>
 				</textField>
+				<line>
+					<reportElement x="-1" y="14" width="1" height="84"/>
+					<graphicElement>
+						<pen lineWidth="0.5"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="554" y="14" width="1" height="84"/>
+					<graphicElement>
+						<pen lineWidth="0.5"/>
+					</graphicElement>
+				</line>
 			</band>
 		</groupHeader>
 	</group>

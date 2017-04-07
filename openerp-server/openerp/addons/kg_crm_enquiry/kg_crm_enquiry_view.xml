@@ -301,6 +301,10 @@
 						<field name="hydrostatic_test_pressure" />
 						<field name="setting_height" attrs="{'required':[('pump_model_type','=','vertical')]}"/>
 						<field name="full_load_rpm" on_change="onchange_impeller_tip_speed(impeller_tip_speed,impeller_dia_rated,full_load_rpm)"/>
+						<field name="insulation" attrs="{'invisible':[('primemover_categ','not in',['motor'])]}"/>
+						<field name="protection" attrs="{'invisible':[('primemover_categ','not in',['motor'])]}"/>
+						<field name="voltage" attrs="{'invisible':[('primemover_categ','not in',['motor'])]}"/>
+						<field name="phase" attrs="{'invisible':[('primemover_categ','not in',['motor'])]}"/>
 						<field name="engine_make" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
 						<field name="engine_type" attrs="{'invisible':[('primemover_categ','not in',['engine'])]}"/>
 						<field name="belt_loss_in_kw" on_change="onchange_belt_loss_in_kw(belt_loss_in_kw,bkw_liq)" attrs="{'invisible':[('type_of_drive','not in',['belt_drive'])]}"/>
