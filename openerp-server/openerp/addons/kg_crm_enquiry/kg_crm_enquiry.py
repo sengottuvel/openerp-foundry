@@ -1811,6 +1811,20 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			elif lubrication == 'ex_pressure':
 				lubrication = 'cut_less_rubber'
 		
+		if shaft_sealing:
+			if shaft_sealing == 'gld_packing_tiga':
+				shaft_sealing = 'g_p'
+			elif shaft_sealing == 'mc_seal':
+				shaft_sealing = 'm_s'
+			elif shaft_sealing == 'dynamic_seal':
+				shaft_sealing = 'f_s'
+		if bush_bearing:
+			if bush_bearing == 'grease_bronze':
+				bush_bearing = 'grease'
+			elif bush_bearing == 'cft':
+				bush_bearing = 'cft_self'
+			if bush_bearing == 'cut':
+				bush_bearing = 'cut_less_rubber'
 		pump_model_id = pump_id
 		rpm = speed_in_rpm
 		moc_construction_id = moc_const_id

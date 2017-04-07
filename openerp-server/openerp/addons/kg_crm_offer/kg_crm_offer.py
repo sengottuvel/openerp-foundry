@@ -680,7 +680,7 @@ class kg_crm_offer(osv.osv):
 		#~ purpose = item.purpose_categ
 		qty = 1
 		moc_const_id = m_power = setting_height = 0
-		pump_model_type = speed_in_rpm = bush_bearing = shaft_sealing = lubrication_type = rpm = qap_plan_id = drawing_approval = inspection = ''
+		pump_model_type = speed_in_rpm = bush_bearing = shaft_sealing = lubrication = lubrication_type = rpm = qap_plan_id = drawing_approval = inspection = ''
 		pump_model_type = item.pump_model_type
 		if purpose == 'pump':
 			qty = item.qty
@@ -695,8 +695,9 @@ class kg_crm_offer(osv.osv):
 				 bush_bearing = 'cft_self'
 			elif item.push_bearing == 'cut':
 				 bush_bearing = 'cut_less_rubber'
-			m_power = item.mototr_output_power_rated
-			setting_height = float(item.setting_height)
+			#~ m_power = item.mototr_output_power_rated
+			m_power = item.motor_kw
+			setting_height = item.setting_height
 			qap_plan_id = item.qap_plan_id.id
 			if item.shaft_sealing == 'gld_packing_tiga':
 				 shaft_sealing = 'g_p'
@@ -706,6 +707,14 @@ class kg_crm_offer(osv.osv):
 				 shaft_sealing = 'f_s'
 			if item.lubrication_type == 'grease':
 				 lubrication_type = 'grease'
+			if item.bush_bearing_lubrication == 'grease':
+				 lubrication = 'grease'
+			elif item.bush_bearing_lubrication == 'external':
+				 lubrication = 'cft_ext'
+			elif item.bush_bearing_lubrication == 'self':
+				 lubrication = 'cft_self'
+			elif item.bush_bearing_lubrication == 'ex_pressure':
+				 lubrication = 'cut_less_rubber'
 			if item.speed_in_rpm:
 				if item.speed_in_rpm <= 1800 or item.speed_in_rpm == 0.00:
 					rpm = '1450'
@@ -746,12 +755,13 @@ class kg_crm_offer(osv.osv):
 			'm_power': m_power,
 			'setting_height': setting_height,
 			'shaft_sealing': shaft_sealing,
-			'lubrication_type': lubrication_type,
+			#~ 'lubrication_type': lubrication_type,
+			'lubrication': lubrication,
 			'rpm': rpm,
 			'flag_offer': True,
 			'drawing_approval': drawing_approval,
 			'inspection': inspection,
-			
+			'delivery_pipe_size': item.del_pipe_size,
 			}
 			
 		return pump_vals
