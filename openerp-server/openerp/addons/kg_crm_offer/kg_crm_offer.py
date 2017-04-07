@@ -762,6 +762,8 @@ class kg_crm_offer(osv.osv):
 			'drawing_approval': drawing_approval,
 			'inspection': inspection,
 			'delivery_pipe_size': item.del_pipe_size,
+			'motor_power': item.motor_power,
+			'flag_standard': item.flag_standard,
 			}
 			
 		return pump_vals
