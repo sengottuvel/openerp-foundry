@@ -1399,7 +1399,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'impeller_dia_rated': fields.float('Impeller Dia Rated mm'),
 		'impeller_tip_speed': fields.float('Impeller Tip Speed -M/Sec'),		
 		'hydrostatic_test_pressure': fields.float('Hydrostatic Test Pressure - Kg/cm2'),		
-		'setting_height': fields.char('Setting Height'),		
+		'setting_height': fields.float('Setting Height'),		
 		'shut_off_head': fields.float('Shut off Head in M'),
 		'shut_off_pressure': fields.float('Shut off Pressure'),
 		'minimum_contionuous': fields.float('Minimum Contionuous Flow - M3/hr'),
@@ -1669,7 +1669,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		value = {'pump_id':'','moc_const_id':'','wo_no':'','pump_model_type':'',
 				 'qap_plan_id':'','suction_size':'','push_bearing':'',
 				 'flange_standard':'','suction_size':'','push_bearing':'',
-				 'motor_kw':'','qty':'','setting_height':'','shaft_sealing':'',
+				 'motor_kw':'','qty':'','setting_height':0,'shaft_sealing':'',
 				 'bush_bearing_lubrication':'','load_bom':'',
 				 }
 		if wo_line_id:
