@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Workorder_print" pageWidth="605" pageHeight="842" columnWidth="565" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
-	<property name="ireport.zoom" value="3.0"/>
+	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="1624"/>
+	<property name="ireport.y" value="325"/>
 	<subDataset name="Spare dataset">
 		<parameter name="header_id" class="java.lang.Integer"/>
 		<parameter name="category" class="java.lang.String"/>
@@ -243,6 +243,7 @@ coalesce(case
 when pump_crm.motor_power = '315_l' then '315L'
 else pump_crm.motor_power end,'-') as motor_power,
 
+
 coalesce(pump_crm.api_plan,'-') as api_plan,
 case when pump_crm.shut_off_head > 0 then round(cast(pump_crm.shut_off_head as numeric),2)::text else '-' end as shut_off_head,
 case when pump_crm.impeller_dia_min > 0 then pump_crm.impeller_dia_min::text else '-' end as impeller_dia_min,
@@ -270,7 +271,7 @@ left join kg_brand_master brand_motor on brand_motor.id = pump_crm.motor_make
 left join ch_pumpseries_flange flange on flange.id = pump_crm.flange_standard
 
 where wo_line.id in (select order_id from m2m_work_order_print_report_details
-where foundry_wiz_id = $P{wiz_id} )]]>
+where foundry_wiz_id = $P{wiz_id})]]>
 	</queryString>
 	<field name="id" class="java.lang.Integer"/>
 	<field name="order_category" class="java.lang.String"/>
@@ -310,6 +311,7 @@ where foundry_wiz_id = $P{wiz_id} )]]>
 	<field name="mech_seal_make" class="java.lang.String"/>
 	<field name="seal_type" class="java.lang.String"/>
 	<field name="face_combination" class="java.lang.String"/>
+	<field name="motor_power" class="java.lang.String"/>
 	<field name="api_plan" class="java.lang.String"/>
 	<field name="shut_off_head" class="java.lang.String"/>
 	<field name="impeller_dia_min" class="java.lang.String"/>
