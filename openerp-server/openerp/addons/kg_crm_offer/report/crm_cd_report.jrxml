@@ -4435,7 +4435,7 @@ where off.id = $P{offer_id}]]>
 			</textField>
 			<image>
 				<reportElement x="-12" y="0" width="60" height="38"/>
-				<imageExpression><![CDATA["/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.png"]]></imageExpression>
+				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.png"]]></imageExpression>
 			</image>
 			<textField isBlankWhenNull="true">
 				<reportElement x="616" y="72" width="197" height="16"/>
