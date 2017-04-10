@@ -1902,7 +1902,7 @@ where header_id = $P{offer_id})) as tot]]>
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) +
+* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) -
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.special_discount ,0.00))))/100)::integer +
@@ -2060,7 +2060,7 @@ where header_id = $P{offer_id}]]>
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) +
+* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) -
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.special_discount ,0.00))))/100)::integer +
@@ -2385,7 +2385,7 @@ sum(les_deal_dis) as les_deal_dis,sum(nett_sam) as nett_sam from
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) +
+* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) -
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.special_discount ,0.00))))/100)::integer +
@@ -2535,7 +2535,7 @@ union all
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) +
+* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) -
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.special_discount ,0.00))))/100)::integer +
@@ -4435,7 +4435,7 @@ where off.id = $P{offer_id}]]>
 			</textField>
 			<image>
 				<reportElement x="-12" y="0" width="60" height="38"/>
-				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.png"]]></imageExpression>
+				<imageExpression><![CDATA["/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.png"]]></imageExpression>
 			</image>
 			<textField isBlankWhenNull="true">
 				<reportElement x="616" y="72" width="197" height="16"/>
