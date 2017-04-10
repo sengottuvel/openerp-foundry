@@ -882,7 +882,7 @@ class kg_purchase_order(osv.osv):
 	
 		(_check_line,'You can not save this Purchase Order with out Line and Zero Qty !',['order_line']),
 		(_check_advance,'System sholud not be accecpt with out Advance !',['']),
-		(_future_date,'System sholud not be accecpt future date !',['']),
+		#~ (_future_date,'System sholud not be accecpt future date !',['']),
 		
 	]
 	
