@@ -3,96 +3,99 @@
 	<data>
 	
 	<!-- Form View -->
-	
+		
 		<record id="kg_so_amend_form_view" model="ir.ui.view">
-				<field name="name">SO Amendment</field>
-				<field name="model">kg.so.amendment</field>
-				<field name="arch" type="xml">
-				<form string="SO Amendment Form" version="7.0">
-				<header>
-					<button name="entry_reject" type="object" string="Reject" states="confirm" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-					<button name="approve_amend" type="object" string="Approve" states="confirm" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-					<button name="entry_draft" type="object" string="Set Draft" states="cancel" class="oe_highlight"/>
-					<button name="confirm_amend" type="object" string="Confirm" states="draft" class="oe_highlight"/>
-					<button name="entry_cancel" type="object" string="Cancel" states="approved" class="oe_highlight" confirm="Are you sure to proceed ?"/>
-					<button name="make_amend" string="Load SO Data" type="object" states="amend" class="oe_highlight"/>
-				</header>			
-					<group>
+			<field name="name">SO Amendment</field>
+			<field name="model">kg.so.amendment</field>
+			<field name="arch" type="xml">
+			<form string="SO Amendment Form" version="7.0">
+			<header>
+				<button name="entry_reject" type="object" string="Reject" states="confirm" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+				<button name="approve_amend" type="object" string="Approve" states="confirm" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+				<button name="entry_draft" type="object" string="Set Draft" states="cancel" class="oe_highlight"/>
+				<button name="confirm_amend" type="object" string="Confirm" states="draft" class="oe_highlight"/>
+				<button name="entry_cancel" type="object" string="Cancel" states="approved" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+				<button name="make_amend" string="Load SO Data" type="object" attrs="{'invisible': ['|',('state','!=','amend'),('so_id','=',False)]}" class="oe_highlight"/>
+			</header>
+			<group>
+				<group>
+					<field name="name"/>
+					<field name="so_id"/>
+					<field name="so_date"/>	
+					<field name="quot_ref_no"/>	
+					<field name="partner_id"/>
+					<field name="partner_address"/>
+					<field name="payment_mode"/>
+					<field name="freight_charges"/>
+					<field name="dep_name"/>
+					<field name="warranty"/>
+					<field name="price"/>
+					<field name="payment_type"/>
+					<field name="advance_amt"/>
+				</group>											
+				<group>
+					<field name="so_date_amend" attrs="{'invisible': [('state','=','amend')]}" required="1"/>
+					<field name="quot_ref_no_amend" attrs="{'invisible': [('state','=','amend')]}"/>
+					<field name="partner_id_amend" on_change="onchange_partner_id(partner_id_amend,partner_address_amend)" attrs="{'invisible': [('state','=','amend')]}" required="1"/>
+					<field name="partner_address_amend" attrs="{'invisible': [('state','=','amend')]}"/>
+					<field name="payment_mode_amend" attrs="{'required': [('payment_type_amend','=','credit')],'invisible': [('state','=','amend')]}"/>
+					<field name="freight_charges_amend" attrs="{'invisible': [('state','=','amend')]}"/>
+					<field name="dep_name_amend" attrs="{'invisible': [('state','=','amend')]}"/>
+					<field name="warranty_amend" attrs="{'invisible': [('state','=','amend')]}"/>
+					<field name="price_amend" attrs="{'invisible': [('state','=','amend')]}"/>
+					<field name="payment_type_amend" attrs="{'required': [('state','!=','amend')],'invisible': [('state','=','amend')]}"/>
+					<field name="advance_amt_amend" attrs="{'required': [('payment_type_amend','=','advance')],'invisible': [('payment_type_amend','!=','advance')]}"/>
+					<field name="amend_flag" invisible="1"/>
+					<field name="state" style="width: 30%%" class="att_state_change"/>
+				</group>
+				<field name="remark" placeholder="Remarks" attrs="{'invisible': [('state','=','amend')]}"/>
+			</group>
+			<notebook attrs="{'invisible': [('so_id','=',False)]}">
+				<page string="Line Details" >
+				<field colspan="4" mode="tree" name="line_ids" nolabel="1" widget="one2many_list" >
+					<tree string="SO Amendment Line">
+						<field name="product_id"/>
+						<field name="uom_id"/>
+						<field name="product_qty_amend"/>
+						<field name="brand_id_amend" readonly="1"/>
+						<field name="price_unit_amend"/>
+						<field name="price_subtotal"/>
+					</tree>
+					<form string="SO Amendment Line" >
 						<group>
-							<field name="name"/>
-							<field name="so_id"/>
-							<field name="so_date"/>	
-							<field name="quot_ref_no"/>	
-							<field name="partner_id"/>
-							<field name="partner_address"/>
-							<field name="origin"/>
-							<field name="payment_mode"/>
-							<field name="freight_charges"/>
-							<field name="dep_name"/>
-							<field name="warranty"/>
-							<field name="price"/>
-						</group>											
-						<group>
-							<field name="trans_date"/>					
-							<field name="active"/>		
-							<field name="so_date_amend"/>	
-							<field name="quot_ref_no_amend"/>	
-							<field name="partner_id_amend" on_change="onchange_partner_id(partner_id_amend,partner_address_amend)"/>
-							<field name="partner_address_amend"/>
-							<field name="origin_amend"/>
-							<field name="payment_mode_amend"/>
-							<field name="freight_charges_amend"/>
-							<field name="dep_name_amend"/>
-							<field name="warranty_amend"/>
-							<field name="price_amend"/>
-							<field name="amend_flag" invisible="1"/>		
-							<field name="state" style="width: 30%%" class="att_state_change"/>							
-						</group>					
-					</group>				   
-					<notebook>
-						<page string="Line Details">
-						<field colspan="4" mode="tree" name="line_ids" nolabel="1" widget="one2many_list" >
-							<tree string="SO Amendment Line"> 
-								<field name="product_id"/>								
-								<field name="uom_id"/>								
+							<group>
+								<field name="product_id" readonly="1"/>
+								<field name="uom_id" readonly="1"/>
+								<field name="brand_id" readonly="1"/>
+								<field name="product_qty" readonly="1"/>
+								<field name="price_unit" readonly="1"/>
+								<field name="discount" readonly="1"/>
+								<field name="taxes_id" widget="many2many_tags" invisible="1"/>
+								<field name="note" readonly="1"/>
+							</group>
+							<group>
+								<field name="product_id_amend"/>
+								<field name="uom_id_amend"/>
+								<field name="brand_id_amend"/>
 								<field name="product_qty_amend"/>
-								<field name="brand_id_amend" readonly="1"/>								
-								<field name="price_unit_amend"/>								
-								<field name="price_subtotal"/>								
-							</tree>					
-							<form string="SO Amendment Line" >
-								<group>
-									<group>
-										<field name="product_id"/>										
-										<field name="product_qty"/>
-										<field name="brand_id"/>											
-										<field name="note"/>											
-										<field name="price_unit" invisible="0"/>	
-										<field name="taxes_id" widget="many2many_tags" invisible="1"/>									
-									</group>
-									<group>
-										<field name="uom_id"/>
-										<field name="product_qty_amend"/>	
-										<field name="brand_id_amend"/>		
-										<field name="note_amend"/>		
-										<field name="discount" invisible="1"/>	
-										<field name="price_unit_amend" invisible="0"/>										
-										<field name="taxes_id_amend" widget="many2many_tags" invisible="1"/>
-									</group>
-									<field name="kg_soindent_lines" nolabel="1"/>
-								</group>
-							</form>
-						</field>
-						</page>	
-						<page string="Reject Remark">
-							<field name="remark" placeholder="Remarks"/>
-						</page>
-						<page string="Entry Info">
+								<field name="price_unit_amend"/>
+								<field name="discount_amend"/>
+								<field name="taxes_id_amend" widget="many2many_tags" invisible="1"/>
+								<field name="note_amend"/>
+							</group>
+							<field name="kg_soindent_lines" nolabel="1"/>
+						</group>
+					</form>
+				</field>
+				</page>
+				<page string="Entry Info" >
 					<group>
-						<field name="company_id"/>
-					</group>
-					
-					<group>
+						<group>
+							<field name="company_id"/>
+						</group>
+						<group>
+							<field name="active"/>
+						</group>
 						<group>
 							<field name="user_id"/>
 							<field name="conf_user_id" attrs="{'invisible':[('state','in',['draft','amend'])]}"/>
@@ -110,25 +113,27 @@
 							<field name="update_date"/>
 						</group>
 					</group>
-				</page>	
-					</notebook>					
-					
-					<group class="oe_subtotal_footer oe_right">
-								<field name="discount"/>
-								<field name="other_charge"/>
-                                <field name="amount_untaxed" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                                <field name="amount_tax" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                                <div class="oe_subtotal_footer_separator oe_inline">
-                                    <label for="amount_total"/>
-                                    <button name="button_dummy"
-                                        states="draft" string="(update)" type="object" class="oe_edit_only oe_link"/>
-                                </div>
-                                <field name="amount_total" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                            </group>
-				</form>
+				</page>
+				</notebook>
+				<group class="oe_subtotal_footer oe_right" attrs="{'invisible': [('so_id','=',False)]}">
+					<field name="total_amount_amend"/>
+					<field name="discount_amend"/>
+					<field name="amount_untaxed_amend"/>
+					<field name="amount_tax_amend"/>
+					<field name="grand_total_amend"/>
+					<field name="round_off_amend"/>
+					<div class="oe_subtotal_footer_separator oe_inline">
+					<label for="amount_total_amend"/>
+					</div>
+					<field name="amount_total_amend" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+				</group>
+				<group>
+					<field name="note" class="oe_inline" placeholder="Notes.."/>
+				</group>
+			</form>
 			</field>
 		</record>
-
+		
 	<!-- Tree View -->
 		
 		<record id="kg_so_amendment_sample_tree_view" model="ir.ui.view">
@@ -136,30 +141,28 @@
 			<field name="model">kg.so.amendment</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<tree colors="blue:state == 'draft';red:state == 'confirm'
-						;black:state == 'approved';gray:state == 'reject'" 
-								toolbar="True" string="SO Amendment">				
+				<tree colors="blue:state == 'draft';red:state == 'confirm';black:state == 'approved';gray:state == 'reject'" 
+								toolbar="True" string="SO Amendment">
 					<field name="name"/>
 					<field name="trans_date"/>
 					<field name="so_id"/>
 					<field name="so_date"/>
 					<field name="partner_id"/>
 					<field name="amount_total"/>
-					<field name="state"/>				
+					<field name="state"/>
 				</tree>
 			</field>
 		</record>
 		
-
 	<!-- Search View Start -->
-
+		
 		<record id="t_search_v_so_amend" model="ir.ui.view">
             <field name="name">SO Amend Search</field>
             <field name="model">kg.so.amendment</field>
             <field name="arch" type="xml">
                 <search string="SO Amendment Search">
-					<field name="name" string="Amendment SO No" filter_domain="[('name','ilike',self)]" />
-					<field name="partner_id" string="Supplier" filter_domain="[('partner_id','ilike',self)]" />
+					<field name="name" string="Amendment SO No" filter_domain="[('name','ilike',self)]"/>
+					<field name="partner_id" string="Supplier" filter_domain="[('partner_id','ilike',self)]"/>
 					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
 					<filter icon="terp-check" name="amend" string="Processing" domain="[('state','=','amend')]"/>					
 					<filter icon="terp-check" name="confirm" string="Confirmed" domain="[('state','=','confirm')]"/>					
@@ -176,10 +179,10 @@
 		</record>
 		
 	<!-- Search View End -->		
-        
+	
 	<!-- Menu Action -->			
 		
-		 <record id="so_amendment_sample_form_action1" model="ir.actions.act_window">
+		<record id="so_amendment_sample_form_action1" model="ir.actions.act_window">
 			<field name="name">SO Amendment</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.so.amendment</field>
@@ -190,9 +193,8 @@
 			<field name="search_view_id" ref="t_search_v_so_amend"/>
 		</record>	
 		
-	<!-- Menu Items
-				
-		<menuitem action="so_amendment_sample_form_action" id="kg_so_amendment_sample_action_menu" parent="kg_master.master_parent_menu" sequence="3"/>
-		 -->
+		<!-- SO Amendment Order -->
+		<menuitem action="so_amendment_sample_form_action1" id="sam_so_amendment" name="Service Amendment" parent="kg_menus.spm_service_order_menu" sequence="2"/>
+		
 	</data>
 </openerp>

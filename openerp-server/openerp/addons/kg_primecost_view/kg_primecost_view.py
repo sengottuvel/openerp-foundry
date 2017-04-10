@@ -81,6 +81,7 @@ class kg_primecost_view(osv.osv):
 		
 		'pump_model_type':fields.selection([('vertical','Vertical'),('horizontal','Horizontal')], 'Pump Type'),
 		'speed_in_rpm': fields.float('Speed in RPM - Pump'),
+		'rpm': fields.selection([('1450','1450'),('2900','2900')],'RPM'),
 		'motor_power': fields.selection([('90','90'),('100','100'),('112','112'),('132','132'),('160','160'),('180','180'),('200','200'),('225','225'),
 				('250','250'),('280','280'),('315','315'),('315_l','315L')],'Motor Frame size'),
 		'setting_height': fields.float('Setting Height (MM)'),
@@ -163,7 +164,7 @@ class kg_primecost_view(osv.osv):
 			
        ]
 	
-	def onchange_bom(self, cr, uid, ids, load_bom,pump_id,moc_const_id,qty,speed_in_rpm,setting_height,shaft_sealing,motor_power,bush_bearing,del_pipe_size,bush_bearing_lubrication):
+	def onchange_bom(self, cr, uid, ids, load_bom,pump_id,moc_const_id,qty,speed_in_rpm,rpm,setting_height,shaft_sealing,motor_power,bush_bearing,del_pipe_size,bush_bearing_lubrication):
 		delivery_pipe_size = del_pipe_size
 		lubrication = bush_bearing_lubrication
 		if qty <= 0:
@@ -178,13 +179,14 @@ class kg_primecost_view(osv.osv):
 				lubrication = 'cut_less_rubber'
 		
 		pump_model_id = pump_id
-		rpm = speed_in_rpm
+		#~ rpm = speed_in_rpm
+		rpm = rpm
 		moc_construction_id = moc_const_id
-		if rpm:
-			if rpm <= 1450:
-				rpm = '1450'
-			elif rpm > 1450 and rpm <= 2900:
-				rpm = '2900'
+		#~ if rpm:
+			#~ if rpm <= 1450:
+				#~ rpm = '1450'
+			#~ elif rpm > 1450 and rpm <= 2900:
+				#~ rpm = '2900'
 				
 		fou_vals=[]
 		ms_vals=[]

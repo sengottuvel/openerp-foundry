@@ -310,6 +310,7 @@
 							<field name="supplier_id"  on_change="onchange_supplier_id(supplier_id)" required="1"/>
 							<field name="sup_invoice_no" required="1"/>
 							<field name="remarks"/>
+							<field name="narration" attrs="{'invisible':[('state','not in',('confirmed','ac_ack_pending'))],'readonly':[('state','!=','confirmed')]}"/>
 							<field name="grn_no" invisible="1"/>
 							<field name="payment_id" invisible="1"/>
 						</group>

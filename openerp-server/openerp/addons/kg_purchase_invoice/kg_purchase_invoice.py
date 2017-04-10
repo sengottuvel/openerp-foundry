@@ -150,6 +150,7 @@ class kg_purchase_invoice(osv.osv):
 		'payment_type': fields.selection([('cash', 'Cash'), ('credit', 'Credit')], 'Payment Type',readonly=True),
 		'can_remark': fields.text('Cancel Remarks'),
 		'reject_remark': fields.text('Reject Remarks'),
+		'narration': fields.char('Narration'),
 		
 		### Order Details ###
 		
@@ -224,6 +225,8 @@ class kg_purchase_invoice(osv.osv):
 		
 		'load_items_flag':fields.boolean('load_items_flag'),
 		
+		##Accounts Process			
+		'accounts_state': fields.selection([('pending','Pending'),('paid','Paid')],'Accounts State', readonly=True),
 		### Other fields ###
 		'specification': fields.text('Specification',readonly=True, states={'draft':[('readonly',False)],'confirmed':[('readonly',False)]}),
 		'po_so_name': fields.char('PO/SO NO',readonly=True,states={'draft': [('readonly', False)],'confirmed':[('readonly',False)]}),
@@ -241,6 +244,7 @@ class kg_purchase_invoice(osv.osv):
 		'load_items_flag': False,
 		'state': 'draft',
 		'his_state': 'pending',
+		'accounts_state': 'pending',
 		'purpose': 'consu',
 		'name': '',
 		'active': True,
@@ -609,6 +613,115 @@ class kg_purchase_invoice(osv.osv):
 		invoice_rec = self.browse(cr,uid,ids[0])
 		if invoice_rec.state == 'confirmed':
 			self.write(cr,uid,ids[0],{'bal_amt': invoice_rec.amount_total,'state':'ac_ack_pending',})
+			
+			total_value_amt = 0.00
+			for line in invoice_rec.line_ids:
+				total_value_amt += line.total_amt
+				
+			journal_obj = self.pool.get('account.journal')
+			journal_ids = journal_obj.search(cr,uid,[('type','=','purchase')])	
+			if not journal_ids:
+				raise osv.except_osv(_('Book Configuration Warning!'),
+					_('Type is purchase book should be created!'))		
+			journal_rec = journal_obj.browse(cr,uid,journal_ids[0])
+			
+			## Account Posting Process Start
+			vou_obj = self.pool.get('account.voucher')
+			move_vals = {
+						'name':invoice_rec.name,
+						'journal_id':journal_rec.id,
+						'narration':invoice_rec.narration,
+						'source_id':invoice_rec.id,
+						'date':invoice_rec.invoice_date,
+						'division_id':invoice_rec.division_id.id,
+						'trans_type':'PI',
+						}
+			move_id = vou_obj.create_account_move(cr,uid,move_vals)
+			
+			if invoice_rec.supplier_id:
+				account_id = invoice_rec.supplier_id.property_account_payable.id
+				if not account_id:
+					raise osv.except_osv(_('Contractor Configuration Warning!'),
+						_('Contractor account should be configured!'))
+				credit = invoice_rec.amount_total
+				debit = 0.00
+				move_line_vals = {
+						'move_id': move_id,
+						'account_id': account_id,
+						'credit': credit,
+						'debit': debit,
+						'journal_id': journal_rec.id,
+						'date': invoice_rec.invoice_date,
+						'name': invoice_rec.name,
+						}
+				move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)
+				
+			for expense in invoice_rec.expense_line_ids:
+				ex_account_id = expense.expense_id.account_id.id
+				tax_obj = self.pool.get('account.tax')
+				taxes = tax_obj.compute_all(cr, uid, expense.expense_tax_ids, expense.expense_amt, 1, 1, partner=invoice_rec.supplier_id)
+				for tax in taxes['taxes']:
+					tax_rec = self.pool.get('account.tax').browse(cr,uid,tax['id'])
+					credit = 0.00
+					debit = ((tax['amount']))
+					tax_account = tax['account_collected_id']
+					if not tax_account:
+						raise osv.except_osv(_('Account Configuration Warning!'),
+							_('Tax account should be configured!'))
+					move_line_vals = {
+						'move_id': move_id,
+						'account_id': tax_account,
+						'credit': credit,
+						'debit': debit,
+						'journal_id': journal_rec.id,
+						'date': invoice_rec.invoice_date,
+						'name': invoice_rec.name,
+						}
+					move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)
+				if not ex_account_id:
+					raise osv.except_osv(_('Expense Configuration Warning!'),
+						_('Expense account should be configured!'))
+				move_line_vals = {
+						'move_id': move_id,
+						'account_id': ex_account_id,
+						'credit': 0.00,
+						'debit': expense.expense_amt,
+						'journal_id': journal_rec.id,
+						'date': invoice_rec.invoice_date,
+						'name': invoice_rec.name,
+						}
+				
+				move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)
+				
+			if invoice_rec.amount_untaxed > 0:
+				discount = 0.00
+				if invoice_rec.discount > 0:
+					discount = invoice_rec.discount
+				#~ else:
+					#~ discount = (total_value_amt * invoice_rec.discount_per) / 100
+				account_ids = self.pool.get('account.account').search(cr,uid,[('code','=','PUR INV')])
+				if not account_ids:
+					raise osv.except_osv(_('Account Configuration Warning!'),
+						_('code name is CON INV account should be created!'))
+				account_rec = self.pool.get('account.account').browse(cr,uid,account_ids[0])
+				account_id = account_rec.id
+				if not account_id:
+					raise osv.except_osv(_('Invoice Configuration Warning!'),
+						_('Invoice account should be configured!'))
+				credit = 0.00
+				debit = invoice_rec.amount_untaxed - invoice_rec.debit_amt
+				move_line_vals = {
+						'move_id': move_id,
+						'account_id': account_id,
+						'credit': credit,
+						'debit': debit,
+						'journal_id': journal_rec.id,
+						'date': invoice_rec.invoice_date,
+						'name': invoice_rec.name,
+						}
+				
+				move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)
+			
 		return True
 	
 	def entry_ack_approve(self, cr, uid, ids,context=None):

@@ -1469,6 +1469,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'push_bearing': fields.selection([('grease_bronze','Bronze'),('cft','CFT'),('cut','Cut Less Rubber')],'Bush Bearing'),
 		'suction_size': fields.selection([('32','32'),('40','40'),('50','50'),('65','65'),('80','80'),('100','100'),('125','125'),('150','150'),('200','200'),('250','250'),('300','300')],'Suction Size'),
 		'speed_in_rpm': fields.float('Speed in RPM - Pump'),
+		'rpm': fields.selection([('1450','1450'),('2900','2900')],'RPM'),
 		'pump_model_type':fields.selection([('vertical','Vertical'),('horizontal','Horizontal')], 'Pump Type'),
 		'bush_bearing_lubrication':fields.selection([('grease','Grease'),('external','External'),('self','Self'),('ex_pressure','External Under Pressure')], 'Bush Bearing Lubrication'),
 		'del_pipe_size': fields.selection([('32','32'),('40','40'),('50','50'),('65','65'),('80','80'),('100','100'),('125','125'),('150','150'),('200','200'),('250','250'),('300','300')],'Delivery Pipe Size(MM)'),
@@ -1831,7 +1832,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		return {'value': {'line_ids_moc_a': moc_const_vals}}
 	
 	def onchange_load_bom(self, cr, uid, ids, load_bom,pump_id,wo_line_id,purpose_categ,moc_const_id,qty,
-		motor_power,del_pipe_size,shaft_sealing,setting_height,motor_kw,bush_bearing_lubrication,push_bearing,speed_in_rpm):
+		motor_power,del_pipe_size,shaft_sealing,setting_height,motor_kw,bush_bearing_lubrication,push_bearing,speed_in_rpm,rpm):
 		
 		delivery_pipe_size = del_pipe_size
 		lubrication = bush_bearing_lubrication
@@ -1861,13 +1862,14 @@ class ch_kg_crm_pumpmodel(osv.osv):
 			if bush_bearing == 'cut':
 				bush_bearing = 'cut_less_rubber'
 		pump_model_id = pump_id
-		rpm = speed_in_rpm
+		#~ rpm = speed_in_rpm
+		rpm = rpm
 		moc_construction_id = moc_const_id
-		if rpm:
-			if rpm <= 1450:
-				rpm = '1450'
-			elif rpm > 1450 and rpm <= 2900:
-				rpm = '2900'
+		#~ if rpm:
+			#~ if rpm <= 1450:
+				#~ rpm = '1450'
+			#~ elif rpm > 1450 and rpm <= 2900:
+				#~ rpm = '2900'
 		
 		fou_vals=[]
 		ms_vals=[]

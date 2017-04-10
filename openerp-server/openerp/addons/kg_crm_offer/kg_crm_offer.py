@@ -680,13 +680,13 @@ class kg_crm_offer(osv.osv):
 		#~ purpose = item.purpose_categ
 		qty = 1
 		moc_const_id = m_power = setting_height = 0
-		pump_model_type = speed_in_rpm = bush_bearing = shaft_sealing = lubrication = lubrication_type = rpm = qap_plan_id = drawing_approval = inspection = ''
+		pump_model_type = speed_in_rpm = rpm = bush_bearing = shaft_sealing = lubrication = lubrication_type = rpm = qap_plan_id = drawing_approval = inspection = ''
 		pump_model_type = item.pump_model_type
 		if purpose == 'pump':
 			qty = item.qty
 			moc_const_id = item.moc_const_id.id
 			pump_id = item.pump_id.id
-			speed_in_rpm = item.speed_in_rpm
+			rpm = item.rpm
 			drawing_approval = off_line_id.drawing_approval
 			inspection = off_line_id.inspection
 			if item.push_bearing == 'grease_bronze':
@@ -704,6 +704,8 @@ class kg_crm_offer(osv.osv):
 			elif item.shaft_sealing == 'mc_seal':
 				 shaft_sealing = 'm_s'
 			elif item.shaft_sealing == 'dynamic_seal':
+				 shaft_sealing = 'd_s'
+			elif item.shaft_sealing == 'f_s':
 				 shaft_sealing = 'f_s'
 			if item.lubrication_type == 'grease':
 				 lubrication_type = 'grease'
@@ -715,11 +717,12 @@ class kg_crm_offer(osv.osv):
 				 lubrication = 'cft_self'
 			elif item.bush_bearing_lubrication == 'ex_pressure':
 				 lubrication = 'cut_less_rubber'
-			if item.speed_in_rpm:
-				if item.speed_in_rpm <= 1800 or item.speed_in_rpm == 0.00:
-					rpm = '1450'
-				elif item.speed_in_rpm >= 1801 and item.speed_in_rpm <= 3600:
-					rpm = '2900'
+			if item.rpm:
+				rpm = item.rpm
+				#~ if float(item.rpm) <= 1800 or float(item.rpm) == 0.00:
+					#~ rpm = '1450'
+				#~ elif float(item.rpm) >= 1801 and float(item.rpm) <= 3600:
+					#~ rpm = '2900'
 		elif purpose == 'spare':
 			purpose == 'spare'
 			moc_const_id = item.moc_const_id.id
@@ -750,7 +753,7 @@ class kg_crm_offer(osv.osv):
 			'enquiry_line_id': enquiry_line_id,
 			'pump_offer_line_id': off_line_id,
 			'pump_model_type': pump_model_type,
-			'rpm': speed_in_rpm,
+			'rpm': rpm,
 			'bush_bearing': bush_bearing,
 			'm_power': m_power,
 			'setting_height': setting_height,
@@ -1384,6 +1387,8 @@ class kg_crm_offer(osv.osv):
 						THEN 'M/C Seal'
 						WHEN enq_line.shaft_sealing = 'dynamic_seal' 
 						THEN 'Dynamic Seal'
+						WHEN enq_line.shaft_sealing = 'f_s' 
+						THEN 'Felt Seal'
 						ELSE ''
 						end ) as shaft_sealing,
 					(CASE WHEN enq_line.scope_of_supply = 'bare_pump' 
@@ -1422,6 +1427,7 @@ class kg_crm_offer(osv.osv):
 					enq_line.hydrostatic_test_pressure as hydrostatic_test_pressure,
 					enq_line.setting_height as setting_height,
 					enq_line.speed_in_rpm as speed_in_rpm,
+					enq_line.rpm as rpm,
 					enq_line.full_load_rpm as full_load_rpm,
 					(CASE WHEN enq_line.frequency = '50' 
 						THEN '50'
@@ -1561,7 +1567,7 @@ class kg_crm_offer(osv.osv):
 						sheet1.write(s2+36,coln_no,ele['impeller_tip_speed'] or "-",style8)
 						sheet1.write(s2+37,coln_no,ele['hydrostatic_test_pressure'] or "-",style8)
 						sheet1.write(s2+38,coln_no,ele['setting_height'] or "-",style8)
-						sheet1.write(s2+39,coln_no,ele['speed_in_rpm'] or "-",style8)
+						sheet1.write(s2+39,coln_no,ele['rpm'] or "-",style8)
 						sheet1.write(s2+40,coln_no,ele['full_load_rpm'] or "-",style8)
 						sheet1.write(s2+41,coln_no,ele['frequency'] or "-",style8)
 						sheet1.write(s2+42,coln_no,ele['motor_kw'] or "-",style8)

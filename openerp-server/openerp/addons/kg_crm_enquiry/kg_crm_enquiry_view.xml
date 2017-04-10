@@ -340,7 +340,8 @@
 						<field name="bush_bearing_lubrication" attrs="{'invisible':[('pump_model_type','!=','vertical')],'required':[('pump_model_type','=','vertical')]}"/>
 						<field name="push_bearing" attrs="{'required':[('pump_model_type','=','vertical')]}"/>
 						<field name="suction_size" />
-						<field name="speed_in_rpm" attrs="{'required':[('pump_model_type','=','vertical')]}"/>
+						<field name="rpm" attrs="{'required':[('pump_model_type','=','vertical')]}"/>
+						<field name="speed_in_rpm"/>
 						<field name="casing_design" />
 						<field name="shut_off_head" on_change="onchange_shut_off_pressure(shut_off_head)"/>
 						<field name="shut_off_pressure" on_change="onchange_hydrostatic_test_pressure(shut_off_pressure,discharge_pressure_kg)"/>
@@ -402,7 +403,7 @@
 				</notebook>
 				<group>
 					<group>
-						<field name="load_bom" on_change="onchange_load_bom(load_bom,pump_id,wo_line_id,purpose_categ,moc_const_id,qty,motor_power,del_pipe_size,shaft_sealing,setting_height,motor_kw,bush_bearing_lubrication,push_bearing,speed_in_rpm)" attrs="{'invisible':[('purpose_categ','in',('access','in_development'))]}"/>
+						<field name="load_bom" on_change="onchange_load_bom(load_bom,pump_id,wo_line_id,purpose_categ,moc_const_id,qty,motor_power,del_pipe_size,shaft_sealing,setting_height,motor_kw,bush_bearing_lubrication,push_bearing,speed_in_rpm,rpm)" attrs="{'invisible':[('purpose_categ','in',('access','in_development'))]}"/>
 					</group>
 					<group>
 					</group>
