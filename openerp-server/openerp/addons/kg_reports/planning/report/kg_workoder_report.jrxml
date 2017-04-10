@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Workorder_print" pageWidth="605" pageHeight="842" columnWidth="565" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="325"/>
+	<property name="ireport.y" value="613"/>
 	<subDataset name="Spare dataset">
 		<parameter name="header_id" class="java.lang.Integer"/>
 		<parameter name="category" class="java.lang.String"/>
@@ -247,6 +247,8 @@ else pump_crm.motor_power end,'-') as motor_power,
 coalesce(pump_crm.api_plan,'-') as api_plan,
 case when pump_crm.shut_off_head > 0 then round(cast(pump_crm.shut_off_head as numeric),2)::text else '-' end as shut_off_head,
 case when pump_crm.impeller_dia_min > 0 then pump_crm.impeller_dia_min::text else '-' end as impeller_dia_min,
+case when pump_crm.impeller_dia_max > 0 then pump_crm.impeller_dia_max::text else '-' end as impeller_dia_max,
+case when pump_crm.impeller_dia_rated > 0 then pump_crm.impeller_dia_rated::text else '-' end as impeller_dia_rated,
 case when pump_crm.hydrostatic_test_pressure > 0 then round(cast(pump_crm.hydrostatic_test_pressure as numeric),2)::text else '-' end as hydrostatic_test_pressure,
 
 to_char(wo_line.delivery_date::date,'dd-mm-YYYY') as due_date,
@@ -315,6 +317,8 @@ where foundry_wiz_id = $P{wiz_id})]]>
 	<field name="api_plan" class="java.lang.String"/>
 	<field name="shut_off_head" class="java.lang.String"/>
 	<field name="impeller_dia_min" class="java.lang.String"/>
+	<field name="impeller_dia_max" class="java.lang.String"/>
+	<field name="impeller_dia_rated" class="java.lang.String"/>
 	<field name="hydrostatic_test_pressure" class="java.lang.String"/>
 	<field name="due_date" class="java.lang.String"/>
 	<field name="order_date" class="java.lang.String"/>
@@ -1227,7 +1231,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{impeller_dia_min}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{impeller_dia_max}+" / "+$F{impeller_dia_rated}+" / "+$F{impeller_dia_min}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="607" width="258" height="16"/>
