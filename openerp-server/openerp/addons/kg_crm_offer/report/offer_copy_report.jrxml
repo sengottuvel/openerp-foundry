@@ -75,7 +75,7 @@ enq_line.voltage as voltage,
 enq_line.phase as phase,
 (CASE WHEN enq_line.frequency = '50' THEN '50' WHEN enq_line.frequency = '60' THEN '60' ELSE ' ' end) as frequency,
 (CASE WHEN enq_line.motor_mounting = 'foot' THEN 'Foot' WHEN enq_line.motor_mounting = 'flange' THEN 'Flange' ELSE ' ' end) as motor_mounting,
-(CASE WHEN enq_line.motor_type = 'eff_1' THEN 'Eff-1' WHEN enq_line.motor_type = 'eff_1' THEN 'EFF-2'
+(CASE WHEN enq_line.motor_type = 'eff_1' THEN 'Eff-1' WHEN enq_line.motor_type = 'eff_2' THEN 'EFF-2'
 WHEN enq_line.motor_type = 'eff_3' THEN 'EFF-3' ELSE ' ' end) as motor_type
 
 from ch_kg_crm_pumpmodel enq_line
@@ -212,7 +212,7 @@ enq_line.ph_value as ph_value,
 enq_line.motor_power as motor_power,
 enq_line.del_pipe_size as del_pipe_size,
 (CASE WHEN enq_line.shaft_sealing = 'gld_packing_tiga' THEN 'Gland Packing-TIGA' WHEN enq_line.shaft_sealing = 'gld_packing_ptfe' THEN 'Gland Packing-PTFE'
-WHEN enq_line.shaft_sealing = 'mc_seal' THEN 'M/C Seal'	WHEN enq_line.shaft_sealing = 'dynamic_seal' THEN 'Dynamic Seal' ELSE ' ' end) as shaft_sealing,
+WHEN enq_line.shaft_sealing = 'mc_seal' THEN 'M/C Seal'	WHEN enq_line.shaft_sealing = 'dynamic_seal' THEN 'Dynamic Seal' WHEN enq_line.shaft_sealing = 'f_s' THEN 'Felt Seal' ELSE ' ' end) as shaft_sealing,
 (CASE WHEN enq_line.scope_of_supply = 'bare_pump' THEN 'Bare Pump' WHEN enq_line.scope_of_supply = 'pump_with_acces' THEN 'Pump With Accessories'
 WHEN enq_line.scope_of_supply = 'pump_with_acces_motor' THEN 'Pump With Accessories And Motor' ELSE ' ' end) as scope_of_supply,
 enq_line.number_of_stages as number_of_stages,
@@ -363,7 +363,7 @@ enq_line.ph_value as ph_value,
 enq_line.motor_power as motor_power,
 enq_line.del_pipe_size as del_pipe_size,
 (CASE WHEN enq_line.shaft_sealing = 'gld_packing_tiga' THEN 'Gland Packing-TIGA' WHEN enq_line.shaft_sealing = 'gld_packing_ptfe' THEN 'Gland Packing-PTFE'
-WHEN enq_line.shaft_sealing = 'mc_seal' THEN 'M/C Seal'	WHEN enq_line.shaft_sealing = 'dynamic_seal' THEN 'Dynamic Seal' ELSE ' ' end) as shaft_sealing,
+WHEN enq_line.shaft_sealing = 'mc_seal' THEN 'M/C Seal'	WHEN enq_line.shaft_sealing = 'dynamic_seal' THEN 'Dynamic Seal' WHEN enq_line.shaft_sealing = 'f_s' THEN 'Felt Seal' ELSE ' ' end) as shaft_sealing,
 (CASE WHEN enq_line.scope_of_supply = 'bare_pump' THEN 'Bare Pump' WHEN enq_line.scope_of_supply = 'pump_with_acces' THEN 'Pump With Accessories'
 WHEN enq_line.scope_of_supply = 'pump_with_acces_motor' THEN 'Pump With Accessories And Motor' ELSE ' ' end) as scope_of_supply,
 enq_line.number_of_stages as number_of_stages,
@@ -513,7 +513,7 @@ enq_line.ph_value as ph_value,
 enq_line.motor_power as motor_power,
 enq_line.del_pipe_size as del_pipe_size,
 (CASE WHEN enq_line.shaft_sealing = 'gld_packing_tiga' THEN 'Gland Packing-TIGA' WHEN enq_line.shaft_sealing = 'gld_packing_ptfe' THEN 'Gland Packing-PTFE'
-WHEN enq_line.shaft_sealing = 'mc_seal' THEN 'M/C Seal'	WHEN enq_line.shaft_sealing = 'dynamic_seal' THEN 'Dynamic Seal' ELSE ' ' end) as shaft_sealing,
+WHEN enq_line.shaft_sealing = 'mc_seal' THEN 'M/C Seal'	WHEN enq_line.shaft_sealing = 'dynamic_seal' THEN 'Dynamic Seal' WHEN enq_line.shaft_sealing = 'f_s' THEN 'Felt Seal' ELSE ' ' end) as shaft_sealing,
 (CASE WHEN enq_line.scope_of_supply = 'bare_pump' THEN 'Bare Pump' WHEN enq_line.scope_of_supply = 'pump_with_acces' THEN 'Pump With Accessories'
 WHEN enq_line.scope_of_supply = 'pump_with_acces_motor' THEN 'Pump With Accessories And Motor' ELSE ' ' end) as scope_of_supply,
 enq_line.number_of_stages as number_of_stages,
@@ -3216,6 +3216,9 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 									<printWhenExpression><![CDATA[$F{tot_price} > 0]]></printWhenExpression>
 								</reportElement>
 								<box topPadding="2" leftPadding="2">
+									<pen lineWidth="0.0"/>
+									<topPen lineWidth="0.0"/>
+									<leftPen lineWidth="0.0"/>
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
@@ -3224,8 +3227,10 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 								</textElement>
 								<textFieldExpression><![CDATA[$F{tot_price}]]></textFieldExpression>
 							</textField>
-							<textField>
-								<reportElement x="0" y="0" width="277" height="12"/>
+							<textField isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="277" height="12" isRemoveLineWhenBlank="true">
+									<printWhenExpression><![CDATA[$F{tot_price} > 0]]></printWhenExpression>
+								</reportElement>
 								<box topPadding="2" leftPadding="1">
 									<pen lineWidth="0.5"/>
 									<topPen lineWidth="0.0"/>
@@ -3316,7 +3321,7 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 								</reportElement>
 								<box topPadding="2" leftPadding="2">
 									<bottomPen lineWidth="0.5"/>
-									<rightPen lineWidth="0.0"/>
+									<rightPen lineWidth="0.5"/>
 								</box>
 								<textElement>
 									<font size="8"/>
@@ -3384,6 +3389,8 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 									<printWhenExpression><![CDATA[$F{net_amount} > 0]]></printWhenExpression>
 								</reportElement>
 								<box topPadding="2" leftPadding="1">
+									<pen lineWidth="0.5"/>
+									<topPen lineWidth="0.0"/>
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -3398,6 +3405,9 @@ where pump.header_id = $P{offer_id} group by pump.pump_id,pump.header_id,spare.h
 									<printWhenExpression><![CDATA[$F{net_amount} > 0]]></printWhenExpression>
 								</reportElement>
 								<box topPadding="2" leftPadding="2">
+									<pen lineWidth="0.5"/>
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
