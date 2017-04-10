@@ -7,7 +7,7 @@
 		<parameter name="offer_id" class="java.lang.Integer"/>
 		<queryString>
 			<![CDATA[select
-sum((COALESCE((COALESCE(pump.net_amount,0)),0))) as net_amount,
+sum((COALESCE((COALESCE(pump.net_amount,0)),0))) as net_amount, 
 -- Basic cpo val
 (sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer as basic_cpo_val,
 -- Cust Dis val
