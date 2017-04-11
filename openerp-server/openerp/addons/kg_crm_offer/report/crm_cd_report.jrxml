@@ -224,7 +224,7 @@ sum((COALESCE((COALESCE(pump.net_amount,0)),0))) as net_amount,
 sum(pump.prime_cost)::integer as prime_cost,
 
 -- Ratio val
-ltrim(to_char((COALESCE((((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+ltrim(to_char((COALESCE(((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
@@ -285,8 +285,11 @@ ltrim(to_char((COALESCE((((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer) /
-sum((case when pump.tax = 0 or null then 1 else pump.prime_cost end))::numeric)::numeric, 0.00)),'999G999G99G999G99G99G990D99'))::numeric as ratio,
+* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer)
+
+/
+
+sum(pump.prime_cost)::numeric, 0.00)),'999G999G99G999G99G99G990D99')) as ratio,
 
 avg(pump.tax) as avg_basic_cpo,
 avg((COALESCE(pump.customer_discount,0))) as avg_cust_dis,
@@ -312,7 +315,7 @@ where header_id = $P{offer_id}]]>
 		<field name="les_dealer_val" class="java.lang.Integer"/>
 		<field name="works_val" class="java.lang.Integer"/>
 		<field name="prime_cost" class="java.lang.Integer"/>
-		<field name="ratio" class="java.math.BigDecimal"/>
+		<field name="ratio" class="java.lang.String"/>
 		<field name="avg_basic_cpo" class="java.lang.Double"/>
 		<field name="avg_cust_dis" class="java.lang.Double"/>
 		<field name="avg_spl_dis" class="java.lang.Double"/>
@@ -542,7 +545,8 @@ sum((COALESCE((COALESCE(pump.net_amount,0)),0))) as net_amount,
 sum(pump.prime_cost)::integer as prime_cost,
 
 -- Ratio val
-ltrim(to_char((COALESCE((((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+
+ltrim(to_char((COALESCE(((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
@@ -603,8 +607,11 @@ ltrim(to_char((COALESCE((((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer) /
-sum((case when pump.tax = 0 or null then 1 else pump.prime_cost end))::numeric)::numeric, 0.00)),'999G999G99G999G99G99G990D99'))::numeric as ratio,
+* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer)
+
+/
+
+sum(pump.prime_cost)::numeric, 0.00)),'999G999G99G999G99G99G990D99')) as ratio,
 
 avg(pump.tax) as avg_basic_cpo,
 avg((COALESCE(pump.customer_discount,0))) as avg_cust_dis,
@@ -630,7 +637,7 @@ where header_id = $P{offer_id}]]>
 		<field name="les_dealer_val" class="java.lang.Integer"/>
 		<field name="works_val" class="java.lang.Integer"/>
 		<field name="prime_cost" class="java.lang.Integer"/>
-		<field name="ratio" class="java.math.BigDecimal"/>
+		<field name="ratio" class="java.lang.String"/>
 		<field name="avg_basic_cpo" class="java.lang.Double"/>
 		<field name="avg_cust_dis" class="java.lang.Double"/>
 		<field name="avg_spl_dis" class="java.lang.Double"/>
