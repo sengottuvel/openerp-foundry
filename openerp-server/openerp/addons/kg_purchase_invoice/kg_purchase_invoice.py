@@ -88,10 +88,10 @@ class kg_purchase_invoice(osv.osv):
 			res[order.id]['other_charge'] = other_charges
 			res[order.id]['advance_adjusted_amt'] = advance_net_amt
 			res[order.id]['debit_amt'] = debit_amt
-			res[order.id]['amount_tax'] = (round(val,0))
-			res[order.id]['amount_untaxed'] = (round(line_total,0))
-			res[order.id]['amount_total'] = ((round(val1 + res[order.id]['other_charge'],0)) - debit_amt + order.round_off_amt) - advance_net_amt
-			res[order.id]['bal_amt'] = ((round(val1 + res[order.id]['other_charge'],0)) - debit_amt + order.round_off_amt) - advance_net_amt
+			res[order.id]['amount_tax'] = val or 0.0
+			res[order.id]['amount_untaxed'] = line_total or 0.0
+			res[order.id]['amount_total'] = ((val1 + res[order.id]['other_charge']) - debit_amt + order.round_off_amt) - advance_net_amt
+			res[order.id]['bal_amt'] = ((val1 + res[order.id]['other_charge']) - debit_amt + order.round_off_amt) - advance_net_amt
 			res[order.id]['discount'] = val3
 			
 		return res
@@ -612,7 +612,14 @@ class kg_purchase_invoice(osv.osv):
 	def entry_approve(self, cr, uid, ids,context=None):
 		invoice_rec = self.browse(cr,uid,ids[0])
 		if invoice_rec.state == 'confirmed':
-			self.write(cr,uid,ids[0],{'bal_amt': invoice_rec.amount_total,'state':'ac_ack_pending',})
+			self.write(cr,uid,ids[0],{'state':'ac_ack_pending',})
+			
+		return True
+	
+	def entry_ack_approve(self, cr, uid, ids,context=None):
+		invoice_rec = self.browse(cr,uid,ids[0])
+		if invoice_rec.state == 'ac_ack_pending':
+			debit_obj = self.pool.get('kg.debit.note')
 			
 			total_value_amt = 0.00
 			for line in invoice_rec.line_ids:
@@ -655,29 +662,61 @@ class kg_purchase_invoice(osv.osv):
 						'name': invoice_rec.name,
 						}
 				move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)
-				
+			
+			tax_sql = """ select sub_query.acc_col_id,sum(sub_query.debit) as debit
+
+							from (
+							select 
+
+							ac_tax.account_collected_id as acc_col_id,
+							sum((line_exp.expense_amt * ac_tax.amount)) as debit
+
+							from 
+
+							ch_expense_tax line_tax 
+
+							left join ch_expense_details line_exp on(line_exp.id=line_tax.expense_line_id)
+							left join account_tax ac_tax on(ac_tax.id=line_tax.taxes_id)
+							left join kg_purchase_invoice inv on(inv.id=line_exp.header_id)
+
+							where line_exp.header_id = %s
+							group by 1
+
+							union all
+
+							select 
+
+							ac_tax.account_collected_id as acc_col_id,
+							sum(((line_exp.total_amt - line_exp.discount) * ac_tax.amount)) as debit
+
+							from 
+
+							ch_invoice_tax line_tax 
+
+							left join ch_invoice_line line_exp on(line_exp.id=line_tax.invoice_line_id)
+							left join account_tax ac_tax on(ac_tax.id=line_tax.taxes_id)
+							left join kg_purchase_invoice inv on(inv.id=line_exp.header_id)
+
+							where line_exp.header_id = %s
+							group by 1) as sub_query
+
+							group by 1"""%(invoice_rec.id,invoice_rec.id)
+			cr.execute(tax_sql)		
+			data = cr.dictfetchall()
+			for vals in data:
+				move_line_vals = {
+					'move_id': move_id,
+					'account_id': vals['acc_col_id'],
+					'credit': 0.00,
+					'debit': vals['debit'],
+					'journal_id': journal_rec.id,
+					'date': invoice_rec.invoice_date,
+					'name': invoice_rec.name,
+					}
+				move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)
+					
 			for expense in invoice_rec.expense_line_ids:
 				ex_account_id = expense.expense_id.account_id.id
-				tax_obj = self.pool.get('account.tax')
-				taxes = tax_obj.compute_all(cr, uid, expense.expense_tax_ids, expense.expense_amt, 1, 1, partner=invoice_rec.supplier_id)
-				for tax in taxes['taxes']:
-					tax_rec = self.pool.get('account.tax').browse(cr,uid,tax['id'])
-					credit = 0.00
-					debit = ((tax['amount']))
-					tax_account = tax['account_collected_id']
-					if not tax_account:
-						raise osv.except_osv(_('Account Configuration Warning!'),
-							_('Tax account should be configured!'))
-					move_line_vals = {
-						'move_id': move_id,
-						'account_id': tax_account,
-						'credit': credit,
-						'debit': debit,
-						'journal_id': journal_rec.id,
-						'date': invoice_rec.invoice_date,
-						'name': invoice_rec.name,
-						}
-					move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)
 				if not ex_account_id:
 					raise osv.except_osv(_('Expense Configuration Warning!'),
 						_('Expense account should be configured!'))
@@ -709,7 +748,7 @@ class kg_purchase_invoice(osv.osv):
 					raise osv.except_osv(_('Invoice Configuration Warning!'),
 						_('Invoice account should be configured!'))
 				credit = 0.00
-				debit = invoice_rec.amount_untaxed - invoice_rec.debit_amt
+				debit = invoice_rec.amount_untaxed - invoice_rec.debit_amt - invoice_rec.discount
 				move_line_vals = {
 						'move_id': move_id,
 						'account_id': account_id,
@@ -721,13 +760,6 @@ class kg_purchase_invoice(osv.osv):
 						}
 				
 				move_line_id = vou_obj.create_account_move_line(cr,uid,move_line_vals)
-			
-		return True
-	
-	def entry_ack_approve(self, cr, uid, ids,context=None):
-		invoice_rec = self.browse(cr,uid,ids[0])
-		if invoice_rec.state == 'ac_ack_pending':
-			debit_obj = self.pool.get('kg.debit.note')
 			
 			debit_amt = 0
 			
