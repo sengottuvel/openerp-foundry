@@ -10,7 +10,7 @@
             <field name="name">account.voucher.tree</field>
             <field name="model">account.voucher</field>
             <field name="arch" type="xml">
-				<tree colors="blue:state == 'draft';black:state == 'proforma'
+				<tree colors="blue:state == 'draft';red:state == 'proforma'
 						;black:state == 'posted';gray:state == 'cancel'" 
 						toolbar="True" string="Receipt Voucher Entries">               
                     <field name="name"/>
@@ -31,63 +31,65 @@
             <field name="arch" type="xml">
                 <form string="Receipt Accounting Voucher" version="7.0">
                   <header>
-                      <button name="proforma_voucher" string="Post" states="proforma" class="oe_highlight" invisible="1"/>
+                      <button name="entry_post" type="object" string="Post" states="proforma" class="oe_highlight" confirm="Are you sure to proceed ?"/>
                       <button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
-                      <button name="cancel_voucher" string="Cancel Voucher" type="object" states="posted" confirm="Are you sure you want to unreconcile this record?"/>
+                      <button name="cancel_voucher" string="Cancel Voucher" type="object" states="posted" confirm="Are you sure you want to unreconcile this record?" invisible="1"/>
                                                              
                   </header> 
                   <group>                
 						<group>
 							<field name="name"/>
-							<field name="payment_mode" string="Receipt Mode"/>
-							<field name="reference_no"/>
-							<field name="partner_id"/>							
+							<field name="payment_mode" string="Receipt Mode" attrs="{'readonly': [('state','in',['proforma','posted'])]}"/>
+							<field name="reference_no" attrs="{'readonly': [('state','in',['proforma','posted'])]}"/>
+							<field name="partner_id" attrs="{'readonly': [('state','in',['proforma','posted'])]}"/>							
+							<field name="narration" required ="1" attrs="{'readonly': [('state','in',['proforma','posted'])]}"/>							
 							<field name="book_current_bal"/>
 							<field name="voucher_amt"/>												   
 						</group>
 						<group>
-							<field name="entry_date"/>
-							<field name="sub_mode" attrs="{'required':[('payment_mode','in',['bank'])]}"/>
-							<field name="receipt_source" required ="1"/>
-							<field name="journal_id"/>							
+							<field name="entry_date" required ="1" attrs="{'readonly': [('state','in',['proforma','posted'])]}" options="{'datepicker':{'minDate': 0,'maxDate': 0,}}"/>
+							<field name="sub_mode" required ="1" attrs="{'required':[('payment_mode','in',['bank'])],'readonly': [('state','in',['proforma','posted'])]}"/>
+							<field name="receipt_source" required ="1" attrs="{'readonly': [('state','in',['proforma','posted'])]}"/>
+							<field name="division_id" attrs="{'readonly': [('state','in',['proforma','posted'])]}"/>							
+							<field name="journal_id" on_change="onchange_book_value(journal_id)" attrs="{'readonly': [('state','in',['proforma','posted'])]}"/>							
 							<field name="state" style="width: 30%%" class="att_state_change"/>	
 						</group>
-                    </group> 
-                    <button name="load_data" string="Load Data" class="oe_highlight"/>
+                    </group>
+                    <button name="load_data" type="object" string="Load Data" class="oe_highlight" attrs="{'invisible': [('state','in',['cancel','proforma','posted'])]}"/>                  
                     <notebook colspan="4">
                         <page string="Sales Invoice Details" attrs="{'invisible':[('receipt_source','in',['advance'])]}">	
-							<field name="line_ids_a" nolabel="1" >
-								<tree string="Sales Invoice Details Tree" editable="top" >									
+							<field name="line_ids_a" nolabel="1" attrs="{'readonly': [('state','in',['proforma','posted'])]}">
+								<tree string="Sales Invoice Details Tree" editable="top" create="false" delete="false">									
 									<field name="flag_select" />
-									<field name="invoice_id"/>														
-									<field name="invoice_date"/>										
-									<field name="invoice_amt"/>										
-									<field name="balance_amt"/>										
-									<field name="current_amt" sum="Current Amount"/>																												
+									<field name="invoice_id" readonly="1"/>														
+									<field name="invoice_date" readonly="1"/>										
+									<field name="invoice_amt" readonly="1"/>										
+									<field name="balance_amt" readonly="1"/>										
+									<field name="current_amt" sum="Current Amount" required="1"/>																												
 								</tree>
 							</field>																								
 						</page>
 						<page string="Advance Details" attrs="{'invisible':[('receipt_source','in',['sales_invoice'])]}">	
-							<field name="line_ids_b" nolabel="1" >
-								<tree string="Advance Details Tree" editable="top" >									
+							<field name="line_ids_b" nolabel="1" attrs="{'readonly': [('state','in',['proforma','posted'])]}">
+								<tree string="Advance Details Tree" editable="top" create="false" delete="false">									
 									<field name="flag_select"/>											
-									<field name="advance_id" />											
-									<field name="advance_date"/>	
-									<field name="advance_amt" />				   
-									<field name="balance_amt" />				   
-									<field name="current_amt" sum="Current Amount"/>																																				
+									<field name="advance_id" readonly="1"/>											
+									<field name="advance_date" readonly="1"/>	
+									<field name="advance_amt" readonly="1"/>				   
+									<field name="balance_amt" readonly="1"/>				   
+									<field name="current_amt" sum="Current Amount" required="1"/>																																				
 								</tree>
 							</field>																								
 						</page>	
 						<page string="Voucher Details">	
-							<field name="line_ids" nolabel="1" >
-								<tree string="Voucher Details Tree" editable="top" >									
-									<field name="doc_no"/>											
-									<field name="doc_date" />											
-									<field name="account_id"/>	
+							<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['draft','posted'])]}">
+								<tree string="Voucher Details Tree" editable="top" create="false" delete="false">									
+									<field name="doc_no" readonly="1"/>											
+									<field name="doc_date" readonly="1"/>											
+									<field name="account_id" readonly="1"/>	
 									<field name="code"/>	
-									<field name="debit" sum="Debit Amount"/>	
-									<field name="credit" sum="Credit Amount"/>	
+									<field name="debit" sum="Debit Amount" readonly="1"/>	
+									<field name="credit" sum="Credit Amount" readonly="1"/>	
 									<field name="narration"/>	
 									<field name="remarks"/>																																						
 								</tree>
@@ -200,7 +202,7 @@
             <field name="name">account.voucher.tree</field>
             <field name="model">account.voucher</field>
             <field name="arch" type="xml">
-				<tree colors="blue:state == 'draft';black:state == 'proforma'
+				<tree colors="blue:state == 'draft';red:state == 'proforma'
 						;black:state == 'posted';gray:state == 'cancel'" 
 						toolbar="True" string="Payment Voucher Entries">               
                     <field name="name"/>
@@ -221,126 +223,128 @@
             <field name="arch" type="xml">
                 <form string="Payment Accounting Voucher" version="7.0">
                   <header>
-                      <button name="proforma_voucher" string="Post" states="proforma" class="oe_highlight" invisible="1"/>
+                     <button name="entry_post" type="object" string="Post" states="proforma" class="oe_highlight" confirm="Are you sure to proceed ?"/>
                       <button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
-                      <button name="cancel_voucher" string="Cancel Voucher" type="object" states="posted" confirm="Are you sure you want to unreconcile this record?"/>
+                      <button name="cancel_voucher" string="Cancel Voucher" type="object" states="posted" confirm="Are you sure you want to unreconcile this record?" invisible="1"/>
                                                              
                   </header> 
                   <group>                
 						<group>
 							<field name="name"/>
-							<field name="payment_mode"/>
-							<field name="reference_no"/>
-							<field name="partner_id" on_change="onchange_cheque_in_favor(partner_id,sub_mode)"/>
-							<field name="cheque_in_favor"/>
+							<field name="payment_mode" attrs="{'readonly': [('state','in',['proforma','posted'])]}"/>
+							<field name="reference_no" attrs="{'required':[('payment_mode','in',['bank'])],'readonly': [('state','in',['proforma','posted'])]}"/>
+							<field name="partner_id" on_change="onchange_cheque_in_favor(partner_id,sub_mode)" attrs="{'readonly': [('state','in',['proforma','posted'])]}"/>
+							<field name="cheque_in_favor" attrs="{'readonly': [('state','in',['proforma','posted'])],'required': [('sub_mode','in',['cheque'])]}"/>
+							<field name="narration" required ="1" attrs="{'readonly': [('state','in',['proforma','posted'])]}"/>
 							<field name="book_current_bal"/>
 							<field name="voucher_amt"/>												   
 						</group>
 						<group>
-							<field name="entry_date"/>
-							<field name="sub_mode" attrs="{'required':[('payment_mode','in',['bank'])]}" on_change="onchange_cheque_in_favor(partner_id,sub_mode)"/>
-							<field name="tds_flag"/>
-							<field name="payment_source" required ="1"/>
-							<field name="journal_id"/>							
+							<field name="entry_date" attrs="{'readonly': [('state','in',['proforma','posted'])]}"/>
+							<field name="sub_mode" attrs="{'required':[('payment_mode','in',['bank'])],'readonly': [('state','in',['proforma','posted'])]}" on_change="onchange_cheque_in_favor(partner_id,sub_mode)"/>
+							<field name="tds_flag" attrs="{'readonly': [('state','in',['proforma','posted'])]}"/>
+							<field name="payment_source" required ="1" attrs="{'readonly': [('state','in',['proforma','posted'])]}"/>
+							<field name="division_id" attrs="{'readonly': [('state','in',['proforma','posted'])]}"/>
+							<field name="journal_id" on_change="onchange_book_value(journal_id)" attrs="{'readonly': [('state','in',['proforma','posted'])]}"/>							
 							<field name="state" style="width: 30%%" class="att_state_change"/>	
 						</group>
                     </group> 
-                    <button name="load_data" string="Load Data" class="oe_highlight"/>
+                   <button name="load_data" type="object" string="Load Data" class="oe_highlight" attrs="{'invisible': [('state','in',['cancel','proforma','posted'])]}"/>                  
                     <notebook colspan="4">
                         <page string="Purchase Bill Details" attrs="{'invisible':[('payment_source','in',['po_advance','fettling_bills','ms_sc_bills','salary','direct_bills','credit_note'])]}">	
-							<field name="line_ids_c" nolabel="1" >
-								<tree string="Sales Invoice Details Tree" editable="top" >									
+							<field name="line_ids_c" nolabel="1" attrs="{'readonly': [('state','in',['proforma','posted'])]}">
+								<tree string="Sales Invoice Details Tree" editable="top" create="false" delete="false">									
 									<field name="flag_select" />
-									<field name="invoice_id"/>														
-									<field name="invoice_date"/>										
-									<field name="sup_invoice_no"/>										
-									<field name="due_date"/>										
-									<field name="invoice_amt"/>										
-									<field name="balance_amt"/>										
-									<field name="current_amt" sum="Current Amount"/>																												
+									<field name="invoice_id" readonly="1"/>														
+									<field name="invoice_date" readonly="1"/>										
+									<field name="sup_invoice_no" readonly="1"/>										
+									<field name="due_date" readonly="1"/>										
+									<field name="invoice_amt" readonly="1"/>										
+									<field name="balance_amt" readonly="1"/>										
+									<field name="current_amt" sum="Current Amount" required="1"/>																												
 								</tree>
 							</field>																								
 						</page>
 						<page string="Advance Details" attrs="{'invisible':[('payment_source','in',['purchase_bills','fettling_bills','ms_sc_bills','salary','direct_bills','credit_note'])]}">	
-							<field name="line_ids_d" nolabel="1" >
-								<tree string="Advance Details Tree" editable="top" >									
+							<field name="line_ids_d" nolabel="1" attrs="{'readonly': [('state','in',['proforma','posted'])]}">
+								<tree string="Advance Details Tree" editable="top" create="false" delete="false">									
 									<field name="flag_select"/>											
-									<field name="advance_id" />											
-									<field name="advance_date"/>	
-									<field name="advance_amt" />				   
-									<field name="balance_amt" />				   
-									<field name="current_amt" sum="Current Amount"/>																																				
+									<field name="advance_id" readonly="1"/>											
+									<field name="advance_date" readonly="1"/>	
+									<field name="advance_amt" readonly="1"/>				   
+									<field name="balance_amt" readonly="1"/>				   
+									<field name="current_amt" sum="Current Amount" required="1"/>																																				
 								</tree>
 							</field>																								
 						</page>	
 						<page string="Fettling Bill Details" attrs="{'invisible':[('payment_source','in',['purchase_bills','po_advance','ms_sc_bills','salary','direct_bills','credit_note'])]}">	
-							<field name="line_ids_e" nolabel="1" >
-								<tree string="Fettling Bill Details Tree" editable="top" >									
+							<field name="line_ids_e" nolabel="1" attrs="{'readonly': [('state','in',['proforma','posted'])]}">
+								<tree string="Fettling Bill Details Tree" editable="top" create="false" delete="false">									
 									<field name="flag_select" />
-									<field name="invoice_id"/>														
-									<field name="invoice_date"/>										
-									<field name="sup_invoice_no"/>										
-									<field name="due_date"/>										
-									<field name="invoice_amt"/>										
-									<field name="balance_amt"/>										
-									<field name="current_amt" sum="Current Amount"/>																																				
+									<field name="invoice_id" readonly="1"/>														
+									<field name="invoice_date" readonly="1"/>										
+									<field name="sup_invoice_no" readonly="1"/>										
+									<field name="due_date" readonly="1"/>										
+									<field name="invoice_amt" readonly="1"/>										
+									<field name="balance_amt" readonly="1"/>										
+									<field name="current_amt" sum="Current Amount" required="1"/>																																				
 								</tree>
 							</field>																								
 						</page>	
 						<page string="MS SC Bill Details" attrs="{'invisible':[('payment_source','in',['purchase_bills','po_advance','fettling_bills','salary','direct_bills','credit_note'])]}">	
-							<field name="line_ids_f" nolabel="1" >
-								<tree string="MS SC Bill Details Tree" editable="top" >									
+							<field name="line_ids_f" nolabel="1" attrs="{'readonly': [('state','in',['proforma','posted'])]}">
+								<tree string="MS SC Bill Details Tree" editable="top" create="false" delete="false">									
 									<field name="flag_select" />
-									<field name="invoice_id"/>														
-									<field name="invoice_date"/>										
-									<field name="sup_invoice_no"/>										
-									<field name="due_date"/>										
-									<field name="invoice_amt"/>										
-									<field name="balance_amt"/>										
-									<field name="current_amt" sum="Current Amount"/>																																				
+									<field name="invoice_id" readonly="1"/>														
+									<field name="invoice_date" readonly="1"/>										
+									<field name="sup_invoice_no" readonly="1"/>										
+									<field name="due_date" readonly="1"/>										
+									<field name="invoice_amt" readonly="1"/>										
+									<field name="balance_amt" readonly="1"/>										
+									<field name="current_amt" sum="Current Amount" required="1"/>																																				
 								</tree>
 							</field>																								
 						</page>	
 						<page string="Salary Details" attrs="{'invisible':[('payment_source','in',['purchase_bills','po_advance','fettling_bills','ms_sc_bills','direct_bills','credit_note'])]}">	
-							<field name="line_ids_g" nolabel="1" >
-								<tree string="Salary Details Tree" editable="top" >									
+							<field name="line_ids_g" nolabel="1" attrs="{'readonly': [('state','in',['proforma','posted'])]}">
+								<tree string="Salary Details Tree" editable="top" create="false" delete="false">									
 									<field name="flag_select" />
-									<field name="employee_id"/>														
-									<field name="employee_code"/>										
-									<field name="month"/>										
-									<field name="salary_amt"/>										
-									<field name="current_amt" sum="Current Amount"/>																																												
+									<field name="employee_id" readonly="1"/>														
+									<field name="employee_code" readonly="1"/>										
+									<field name="month" readonly="1"/>										
+									<field name="salary_amt" readonly="1"/>										
+									<field name="current_amt" sum="Current Amount" required="1"/>																																												
 								</tree>
 							</field>																								
 						</page>	
 						<page string="Direct Bill Details" attrs="{'invisible':[('payment_source','in',['purchase_bills','po_advance','fettling_bills','salary','ms_sc_bills','credit_note'])]}">	
-							<field name="line_ids_h" nolabel="1" >
-								<tree string="Direct Bill Details Tree" editable="top" >									
+							<field name="line_ids_h" nolabel="1" attrs="{'readonly': [('state','in',['proforma','posted'])]}">
+								<tree string="Direct Bill Details Tree" editable="top" create="false" delete="false">									
 									<field name="flag_select" />
-									<field name="invoice_id"/>														
-									<field name="invoice_date"/>										
-									<field name="sup_invoice_no"/>										
-									<field name="due_date"/>										
-									<field name="invoice_amt"/>										
-									<field name="balance_amt"/>										
-									<field name="current_amt" sum="Current Amount"/>																																				
+									<field name="invoice_id" readonly="1"/>														
+									<field name="invoice_date" readonly="1"/>										
+									<field name="sup_invoice_no" readonly="1"/>										
+									<field name="due_date" readonly="1"/>										
+									<field name="invoice_amt" readonly="1"/>										
+									<field name="balance_amt" readonly="1"/>										
+									<field name="current_amt" sum="Current Amount" required="1"/>																																				
 								</tree>
 							</field>																								
 						</page>	
 						<page string="Credit Note Details" attrs="{'invisible':[('payment_source','in',['purchase_bills','po_advance','fettling_bills','salary','ms_sc_bills','direct_bills'])]}">	
-							<field name="line_ids_j" nolabel="1" >
-								<tree string="Credit Note Details Tree" editable="top" >									
+							<field name="line_ids_j" nolabel="1" attrs="{'readonly': [('state','in',['proforma','posted'])]}">
+								<tree string="Credit Note Details Tree" editable="top" create="false" delete="false">									
 									<field name="flag_select" />
-									<field name="credit_id"/>														
-									<field name="credit_date"/>										
-									<field name="credit_amt"/>										
-									<field name="balance_amt"/>										
-									<field name="current_amt" sum="Current Amount"/>																																													
+									<field name="credit_id" readonly="1"/>														
+									<field name="credit_date" readonly="1"/>										
+									<field name="credit_amt" readonly="1"/>										
+									<field name="balance_amt" readonly="1"/>										
+									<field name="current_amt" sum="Current Amount" required="1"/>																																													
 								</tree>
 							</field>																								
 						</page>	
 						<page string="TDS">	
-							<field name="line_ids_i" nolabel="1" >
+							<field name="line_ids_i" nolabel="1" attrs="{'readonly': [('state','in',['proforma','posted'])]}">
 								<tree string="TDS Tree" editable="top" >									
 									<field name="tds_section_no"/>											
 									<field name="basis_type" />											
@@ -350,15 +354,15 @@
 							</field>																								
 						</page>	
 						<page string="Voucher Details">	
-							<field name="line_ids" nolabel="1" >
-								<tree string="Voucher Details Tree" editable="top" >									
-									<field name="doc_no"/>											
-									<field name="doc_date" />											
-									<field name="account_id"/>	
+							<field name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['draft','posted'])]}">
+								<tree string="Voucher Details Tree" editable="top" create="false" delete="false">									
+									<field name="doc_no" readonly="1"/>											
+									<field name="doc_date" readonly="1"/>											
+									<field name="account_id" readonly="1"/>	
 									<field name="code"/>	
-									<field name="debit" sum="Debit Amount"/>	
-									<field name="credit" sum="Credit Amount"/>	
-									<field name="narration"/>	
+									<field name="debit" sum="Debit Amount" readonly="1"/>	
+									<field name="credit" sum="Credit Amount" readonly="1"/>	
+									<field name="narration" required="1"/>	
 									<field name="remarks"/>																																						
 								</tree>
 							</field>																								
