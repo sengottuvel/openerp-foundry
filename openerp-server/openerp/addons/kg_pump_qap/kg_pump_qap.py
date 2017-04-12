@@ -110,6 +110,7 @@ class kg_pump_qap(osv.osv):
 		'hs_remarks': fields.text('Remarks'),
 		'flag_hs_customer_specific': fields.boolean('Customer Specific'),
 		'hs_state': fields.selection([('pending','Pending'),('completed','Completed')],'HS State'),
+		'flag_sent_for_inspection': fields.boolean('Sent for Inspection'),
 
 		
 		## Performance Testing ##
@@ -146,7 +147,8 @@ class kg_pump_qap(osv.osv):
 		'flag_sms': False,		
 		'flag_email': False,		
 		'flag_spl_approve': False,
-		'overall_dim': 'pump_ass'	
+		'overall_dim': 'pump_ass',
+		'flag_sent_for_inspection': False
 		
 	}
 	
@@ -196,8 +198,29 @@ class kg_pump_qap(osv.osv):
 			raise osv.except_osv(_('Warning !!'),
 				_('Test Pressure should be greater than zero. !!'))	
 		### Sequence Number Generation  ###
+		tag_no = ''
+		description = ''
 		if rec.hs_state == 'pending':
-			self.write(cr, uid, ids, {'test_state':'pt','pt_state':'pending','hs_state':'completed','update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			if rec.order_line_id.inspection != 'no':
+				if rec.order_line_id.enquiry_line_id:
+					enquiry_line_rec = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,rec.order_line_id.enquiry_line_id)
+					tag_no = enquiry_line_rec.equipment_no
+					description = enquiry_line_rec.description
+				### Sending to Inspection ###
+				inspection_vals = {
+					'qap_plan_id' : rec.qap_plan_id.id,
+					'pump_qap_id': rec.id,
+					'order_id': rec.order_id.id,
+					'order_line_id': rec.order_line_id.id,
+					'assembly_id': rec.assembly_id.id,
+					'equipment_no': tag_no,
+					'description': description,
+				}
+				inspection_id = self.pool.get('kg.inspection').create(cr, uid, inspection_vals)
+				self.write(cr, uid, ids, {'flag_sent_for_inspection':True,'hs_state':'completed','update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			else:
+	
+				self.write(cr, uid, ids, {'test_state':'pt','pt_state':'pending','hs_state':'completed','update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		else:
 			pass	
 		return True
