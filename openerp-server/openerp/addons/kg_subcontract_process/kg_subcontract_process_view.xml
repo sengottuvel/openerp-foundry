@@ -219,7 +219,7 @@
 							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
 						</group>					
 					</group>
-					<notebook>
+					<notebook class="qwertyuiop">
 						<page string="Work Order Details" attrs="{'invisible': [('flag_order','!=',True)]}">
 							<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}" >
 								<tree string = "Work Order Items" >
@@ -250,7 +250,7 @@
 									<field name="oth_spec" widget="char"/>
 								</tree>
 							</field>
-							<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','not in',['draft'])]}"/>
+							<button name="update_line_items" class="proceed_button" type='object' string="Proceed" attrs="{'invisible': [('state','not in',['draft'])]}"/>
 						</page>
 						
 						<page string="Entry Info">
@@ -790,15 +790,14 @@
 			<field name="arch" type="xml">
 				<form string="Subcontract Inward" version="7.0">
 					<header>
-						<button name="entry_confirm" type="object" string="Confirm" states="inspection_qc" class="oe_highlight"/>
-						<button name="entry_qc" type="object" string="Inspection QC" states="draft" class="oe_highlight"/>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>						
 					</header>
 					<group>
 						<group>
 							<field name="name"/>
-							<field name="transfer_type" required="1" attrs="{'readonly': [('state','in',['inspection_qc','confirmed','cancel'])]}"/>
-							<field name="to_division_id" attrs="{'invisible': [('transfer_type','=','sub_contractor')],'required': [('transfer_type','=','internal')],'readonly': [('state','in',['confirmed','inspection_qc','cancel'])]}"/>
-							<field name="contractor_id" on_change="onchange_contractor(contractor_id)"  attrs="{'readonly': [('state','in',['confirmed','cancel','inspection_qc'])], 'invisible': [('transfer_type','=','internal')],'required': [('transfer_type','=','sub_contractor')]}"/>	
+							<field name="transfer_type" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="to_division_id" attrs="{'invisible': [('transfer_type','=','sub_contractor')],'required': [('transfer_type','=','internal')],'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="contractor_id" on_change="onchange_contractor(contractor_id)"  attrs="{'readonly': [('state','in',['confirmed','cancel'])], 'invisible': [('transfer_type','=','internal')],'required': [('transfer_type','=','sub_contractor')]}"/>	
 							<field name="phone" readonly="1" attrs="{'invisible': [('transfer_type','=','internal')]}"/>																			
 							
 						</group>											
@@ -820,7 +819,7 @@
 									<field name="position_id" readonly="1"/>
 									<field name="moc_id" readonly="1"/>
 									<field name="sc_wo_qty" readonly="1"/>
-									<field name="qty" required="1"/>
+									<field name="qty" required="1" on_change="onchange_com_weight(com_weight,qty)"/>
 									<field name="operation_id" widget="many2many_tags" readonly="1"/>											
 									<field name="com_operation_id" widget="many2many_tags" />											
 									<field name="each_weight" readonly="1" />
@@ -894,7 +893,7 @@
 			<field name="model">kg.subcontract.inward</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<tree colors="blue:state == 'draft';black:state == 'confirmed';red:state == 'inspection_qc';
+				<tree colors="blue:state == 'draft';black:state == 'confirmed';
 						gray:state == 'cancel'" 
 						toolbar="True" string="Subcontract Inward Tree">							
 					<field name="name"/>
@@ -945,8 +944,7 @@
             <field name="res_model">kg.subcontract.inward</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
-            <field name="search_view_id" ref="t_search_v_sc_inward"/> 
-            <field name="domain">[('state','!=','inspection_qc')]</field>            
+            <field name="search_view_id" ref="t_search_v_sc_inward"/>            
             <field name="help" type="html">
 			              
             </field>
@@ -973,46 +971,71 @@
 	
 	
 	
-	<!-- Inward Inspection Code start here -->	
+	
+	<!-- Audit Log Xml Data Start -->
+		
+        <record id="audit_sc_inward" model="audittrail.rule">
+            <field name="name">Audit Subcontract inward</field>
+            <field name="object_id" eval="ref('kg_subcontract_process.model_kg_subcontract_inward')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->
+    
+    <!-- Sequence Number Setting Starts Here -->
+	
+	<record forcecreate="1" id="seq_type_subcontract_inward" model="ir.sequence.type">	
+		<field name="name">KG Subcontract Inward</field>
+		<field name="code">kg.subcontract.inward</field>
+	</record>
+
+	<record forcecreate="1" id="seq_subcontract_inward" model="ir.sequence">
+	  <field name="name">KG Subcontract Inward</field>
+	  <field name="code">kg.subcontract.inward</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">IN/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Sequence Number Setting Ends Here -->	
 	
 	
-	<record id="t_form_v_sc_inspection" model="ir.ui.view">
+	<!-- Inward Code End Here -->
+	
+	<!-- Inspection Code End Here -->
+	
+	
+	<record id="t_form_v_sc_inspection_new" model="ir.ui.view">
 			<field name="name">Subcontract inspection Form</field>
-			<field name="model">kg.subcontract.inward</field>
+			<field name="model">kg.subcontract.inspection</field>
 			<field name="arch" type="xml">
-				<form string="Subcontract Inspection" version="7.0" create="false">
+				<form string="Subcontract Inspection" version="7.0">
 					<header>
-						<button name="entry_confirm" type="object" string="Confirm" states="inspection_qc" class="oe_highlight"/>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
 						
 					</header>
 					<group>
 						<group>
 							<field name="name"/>
-							<field name="transfer_type" required="1" attrs="{'readonly': [('state','in',['inspection_qc','confirmed','cancel'])]}"/>
-							<field name="to_division_id" attrs="{'invisible': [('transfer_type','=','sub_contractor')],'required': [('transfer_type','=','internal')],'readonly': [('state','in',['inspection_qc','confirmed','cancel'])]}"/>
-							<field name="contractor_id" on_change="onchange_contractor(contractor_id)"  attrs="{'readonly': [('state','in',['inspection_qc','confirmed','cancel'])], 'invisible': [('transfer_type','=','internal')],'required': [('transfer_type','=','sub_contractor')]}"/>	
-							<field name="phone" readonly="1" attrs="{'invisible': [('transfer_type','=','internal')]}"/>																			
-							
+							<field name="order_id" widget="many2many_tags" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}" />						
 						</group>											
 						<group>
-							<field name="entry_date" attrs="{'readonly': [('state','in',['inspection_qc','confirmed','cancel'])]}"/>
-							<field name="division_id" readonly="1"/>
-							<field name="contact_person" readonly="1" attrs="{'invisible': [('transfer_type','=','internal')]}"/>									
-							<field name="flag_inward" invisible="1"/>			
+							<field name="entry_date" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>										
 							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
 						</group>					
 					</group>
+					<button name="update_line_items" type='object' string="Load Data" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
 					<notebook>
-						<page string="Inward Details" attrs="{'invisible': [('flag_inward','!=',True)]}">
+						<page string="Inspection Details">
 							<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
-								<tree string = "Inward Items" delete="false">
+								<tree string = "Inward Items" >
 									<field name="order_id" readonly="1"/>
 									<field name="item_code" readonly="1"/>
 									<field name="item_name" readonly="1"/>
 									<field name="position_id" readonly="1"/>
 									<field name="moc_id" readonly="1"/>
 									<field name="sc_wo_qty" readonly="1"/>
-									<field name="qty" required="1"/>
+									<field name="qty" required="1" on_change="onchange_com_weight(com_weight,qty)"/>
 									<field name="operation_id" widget="many2many_tags" readonly="1"/>											
 									<field name="com_operation_id" widget="many2many_tags" />											
 									<field name="each_weight" readonly="1" />
@@ -1035,7 +1058,6 @@
 											<field name="qty" required="1"/>																						
 											<field name="com_operation_id" widget="many2many_tags" />	
 									   </group>									
-									
 									
 									<notebook colspan="4">
 										<page string="Operations Details">
@@ -1072,34 +1094,7 @@
 									</group>
 								</form>
 							</field>
-						</page>
-						<page string="Select Items">
-							<field name="dc_line_ids" attrs="{'readonly': [('state','in',['confirmed','inspection_qc'])],'invisible': [('transfer_type','=','sub_contractor')]}">
-								<tree string="SC Items" create="false">
-									<field name="order_id"/>
-									<field name="order_delivery_date"/>									
-									<field name="pump_model_id"/>
-									<field name="item_code" />
-									<field name="item_name"/>
-									<field name="moc_id"/>
-									<field name="oth_spec" widget="char"/>									
-								</tree>
-							</field>
-							<field name="inward_sub_line_ids" attrs="{'readonly': [('state','in',['confirmed','inspection_qc'])],'invisible': [('transfer_type','=','internal')]}">
-								<tree string="SC Items" create="false" delete = "false">
-									<field name="order_id"/>
-									<field name="order_delivery_date"/>
-									<field name="order_priority" string="Category"/>
-									<field name="pump_model_id"/>
-									<field name="item_code" />
-									<field name="item_name"/>
-									<field name="moc_id"/>
-									<field name="oth_spec" widget="char"/>									
-								</tree>
-							</field>							
-							
-							<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed','inspection_qc'])]}"/>
-						</page>
+						</page>		
 						
 						<page string="Entry Info">
 							<group>
@@ -1128,17 +1123,14 @@
 	
 	<!-- Tree View Start -->
 		
-		<record id="t_tree_v_sc_inspection" model="ir.ui.view">
-			<field name="name">Subcontract Inward Tree</field>
-			<field name="model">kg.subcontract.inward</field>
+		<record id="t_tree_v_sc_inspection_new" model="ir.ui.view">
+			<field name="name">Subcontract Inspection Tree</field>
+			<field name="model">kg.subcontract.inspection</field>
 			<field eval="8" name="priority"/>
 			<field name="arch" type="xml">
-				<tree colors="blue:state == 'draft';black:state == 'confirmed';red:state == 'inspection_qc';
-						gray:state == 'cancel'" 
-						toolbar="True" string="Subcontract Inward Tree" create="false">							
-					<field name="name"/>
-					<field name="transfer_type"/>
-					<field name="contractor_id"/>
+				<tree colors="blue:state == 'draft';black:state == 'confirmed';gray:state == 'cancel'" 
+						toolbar="True" string="Subcontract Inspection Tree">							
+					<field name="name"/>					
 					<field name="entry_date"/>					
 					<field name="state"/>				
 				</tree>
@@ -1147,95 +1139,76 @@
 		
 	<!-- Tree View End -->
 	
-	<!-- Inward Line Tree View Start -->
-		
-		<record id="t_tree_v_sc_inward_line" model="ir.ui.view">
-			<field name="name">Subcontract Inward Line Tree</field>
-			<field name="model">ch.subcontract.inward.line</field>
-			<field eval="8" name="priority"/>
-			<field name="arch" type="xml">
-				<tree toolbar="True" string="Subcontract Inward Line Tree">				
-					<field name="order_id"/>
-					<field name="order_delivery_date"/>					
-					<field name="order_priority" string="Category"/>
-					<field name="pump_model_id"/>					
-					<field name="item_code" />
-					<field name="item_name"/>
-					<field name="moc_id"/>					
-					<field name="qty"/>					
-					<field name="entry_type" invisible="1"/>					
-					<field name="actual_qty" sum="Total SC Qty"/>
-					<field name="pending_qty" sum="Total pending Qty"/>
-					<field name="oth_spec" widget="char"/>					
-				</tree>
+	<!-- Search View Start -->
+
+		<record id="t_search_v_sc_inspection" model="ir.ui.view">
+            <field name="name">Subcontract inspection Search</field>
+            <field name="model">kg.subcontract.inspection</field>
+            <field name="arch" type="xml">
+                <search string="Subcontract Inspection Search">					
+					<field name="name" string="Inspection No."  filter_domain="[('name','ilike',self)]" />				
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>					
+					<filter icon="terp-check" name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>				
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="Inspection No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'name'}"/>						
+						<filter string="State" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>						
+					</group>
+                </search>
 			</field>
 		</record>
 		
-	<!-- Tree View End -->
-		
+	<!-- Search View End -->	
+	
+	<!-- Inspection Menu Action Start Here -->
 		
 	
-		<record id="tma_sc_inspection" model="ir.actions.act_window">
+		<record id="tma_sc_inspection_new" model="ir.actions.act_window">
             <field name="name">SC Inspection QC</field>
-            <field name="res_model">kg.subcontract.inward</field>
+            <field name="res_model">kg.subcontract.inspection</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
-            <field name="search_view_id" ref="t_search_v_sc_inward"/>  
-            <field name="domain">[('state','=','inspection_qc')]</field>         
+            <field name="search_view_id" ref="t_search_v_sc_inspection"/>              
             <field name="help" type="html">              
             </field>
         </record>	
         
-        <record id="kg_inspection_name_tree" model="ir.actions.act_window.view">
+        <record id="kg_inspection_name_tree_new" model="ir.actions.act_window.view">
             <field eval="1" name="sequence"/>
             <field name="view_mode">tree</field>
-            <field name="view_id" ref="t_tree_v_sc_inspection"/>
-            <field name="act_window_id" ref="tma_sc_inspection"/>
+            <field name="view_id" ref="t_tree_v_sc_inspection_new"/>
+            <field name="act_window_id" ref="tma_sc_inspection_new"/>
         </record>
 		
-		<record id="kg_inspection_name_form" model="ir.actions.act_window.view">
+		<record id="kg_inspection_name_form_new" model="ir.actions.act_window.view">
             <field eval="2" name="sequence"/>
             <field name="view_mode">form</field>
-            <field name="view_id" ref="t_form_v_sc_inspection"/>
-            <field name="act_window_id" ref="tma_sc_inspection"/>
-        </record>			
+            <field name="view_id" ref="t_form_v_sc_inspection_new"/>
+            <field name="act_window_id" ref="tma_sc_inspection_new"/>
+        </record>	
 	
+	<!-- Inspection Menu Action End Here -->
 	
-	<!-- Inward Inspection Code End here -->
-
-	
-	<!-- Audit Log Xml Data Start -->
-		
-        <record id="audit_sc_inward" model="audittrail.rule">
-            <field name="name">Audit Subcontract inward</field>
-            <field name="object_id" eval="ref('kg_subcontract_process.model_kg_subcontract_inward')"/>       
-            <field name="state">subscribed</field>              
-        </record>
-        
-    <!-- Audit Log Xml Data End-->
     
     <!-- Sequence Number Setting Starts Here -->
 	
-	<record forcecreate="1" id="seq_type_subcontract_inward" model="ir.sequence.type">	
-		<field name="name">KG Subcontract Inward</field>
-		<field name="code">kg.subcontract.inward</field>
+	<record forcecreate="1" id="seq_type_subcontract_inspection" model="ir.sequence.type">	
+		<field name="name">KG Subcontract inspection</field>
+		<field name="code">kg.subcontract.inspection</field>
 	</record>
 
-	<record forcecreate="1" id="seq_subcontract_inward" model="ir.sequence">
-	  <field name="name">KG Subcontract Inward</field>
-	  <field name="code">kg.subcontract.inward</field>
-	  <field name="padding" eval="3"/>
-	  <field name="prefix">IN/%(year)s/%(month)s/</field>
+	<record forcecreate="1" id="seq_subcontract_inspection" model="ir.sequence">
+	  <field name="name">KG Subcontract inspection</field>
+	  <field name="code">kg.subcontract.inspection</field>
+	  <field name="padding" eval="5"/>
+	  <field name="prefix">INS/%(year)s/</field>
 	  <field name="reset_sequence">fiscal_reset</field>
 	</record>
 	
 	<!-- Sequence Number Setting Ends Here -->	
 	
-	
-	<!-- Inward Code End Here -->
-	
-	
-	<!-- Inward Code End Here -->
+	<!-- Inspection Code End here -->	
 		
 		
 		
@@ -1248,12 +1221,7 @@
 		<menuitem action="tma_sc_wo_spl" id="tam_sc_wo_spl" parent="tpm_sc_process" sequence="2" />
 		<menuitem action="tma_sc_dc" id="tam_sc_dc" parent="tpm_sc_process" sequence="3" />
 		<menuitem action="tma_sc_inward" id="tam_sc_inward" parent="tpm_sc_process" sequence="4" />
-		<menuitem action="tma_sc_inspection" id="tam_sc_inspection" parent="tpm_sc_process" sequence="4" />
-		
-		
-		
-		
-		
+		<menuitem action="tma_sc_inspection_new" id="tam_sc_inspection" parent="tpm_sc_process" sequence="4" />	
 		
 	
 	</data>
