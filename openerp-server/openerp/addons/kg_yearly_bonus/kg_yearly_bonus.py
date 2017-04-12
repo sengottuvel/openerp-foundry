@@ -237,7 +237,7 @@ class kg_yearly_bonus(osv.osv):
 				con_rec = con_obj.browse(cr,uid,cont_ids)
 				pay_slip_ids = payslip_obj.search(cr,uid,[('date_from','>=',rec.from_date),('date_to','<=',rec.to_date),('employee_id','=',con_rec.employee_id.id)])
 				if pay_slip_ids:
-					if con_rec.emp_categ_id.id == 2:
+					if con_rec.emp_categ_id.id == 13:
 						tot_gross_amt=0
 						bonus_amt=0
 						for pay_ids in pay_slip_ids:

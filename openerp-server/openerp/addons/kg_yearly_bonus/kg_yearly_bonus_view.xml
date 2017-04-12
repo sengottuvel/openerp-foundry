@@ -21,13 +21,13 @@
 								<field name="fiscal_yr" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1" on_change="onchange_fiscal_yr(fiscal_yr,from_date,to_date)"/>																
 								<field name="from_date" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" options="{'datepicker':{'maxDate': 0}}" readonly="1"/>																
 								<field name="modify" invisible = "1"/>
-								<field name="allow_ded_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'invisible':[('emp_categ_id','!=',2)],'required':[('emp_categ_id','=',2)]}" widget="many2many_tags"/>				
+								<field name="allow_ded_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'invisible':[('emp_categ_id','=',13)],'required':[('emp_categ_id','!=',13)]}" widget="many2many_tags"/>				
 							</group>
 							<group>
 								<field name="emp_categ_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1"/>
 								<field name="to_date" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" options="{'datepicker':{'maxDate': 0}}" readonly="1"/>
 								<field name="bonus_per" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}" required="1"/>
-								<field name="gross_sal_per" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'invisible':[('emp_categ_id','!=',1)],'required':[('emp_categ_id','=',1)],}" required="0"/>
+								<field name="gross_sal_per" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'invisible':[('emp_categ_id','!=',13)],'required':[('emp_categ_id','=',13)],}" required="0"/>
 								<field name="state" style="width: 30%%" class="att_state_change"/>								
 							</group>
 						</group>
