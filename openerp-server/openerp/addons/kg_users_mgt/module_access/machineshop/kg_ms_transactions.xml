@@ -459,5 +459,25 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
+		<record id="t_foundry_inspection" model="ir.model.access">
+			<field name="model_id" ref="kg_inspection.model_kg_inspection"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Inspection</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_foundry_inspection_attachments" model="ir.model.access">
+			<field name="model_id" ref="kg_inspection.model_ch_inspection_attachments"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Inspection Attachments</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
     </data>
 </openerp>

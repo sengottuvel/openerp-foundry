@@ -141,6 +141,7 @@
 			ref('kg_part_qap.tam_pre_hydrostatic'),
 			ref('kg_pump_qap.tam_dimensional_inspection'),
 			ref('kg_pump_qap.tam_hydrostatic_assembly'),
+			ref('kg_inspection.tam_inspection'),
 			ref('kg_pump_qap.tam_performance_testing'),
 			ref('kg_pump_qap.tam_painting'),
 			ref('kg_pump_qap.tam_packing'),
