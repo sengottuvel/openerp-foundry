@@ -666,6 +666,76 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
 		</record>
 		
+		<record id="kg_hr_kg_yearly_bonus" model="ir.model.access">
+			<field name="model_id" ref="kg_yearly_bonus.model_kg_yearly_bonus"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Yearly Bonus</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
+		<record id="kg_hr_ch_yearly_bonus" model="ir.model.access">
+			<field name="model_id" ref="kg_yearly_bonus.model_ch_yearly_bonus"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Yearly Bonus Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
+		<record id="kg_hr_kg_yos_bonus" model="ir.model.access">
+			<field name="model_id" ref="kg_yos_bonus.model_kg_yos_bonus"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Yos Bonus</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
+		<record id="kg_hr_ch_yos_bonus_values" model="ir.model.access">
+			<field name="model_id" ref="kg_yos_bonus.model_ch_yos_bonus_values"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Yos Bonus Line Values</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
+		<record id="kg_hr_ch_yos_bonus_emp" model="ir.model.access">
+			<field name="model_id" ref="kg_yos_bonus.model_ch_yos_bonus_emp"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Yos Bonus Line Employee Details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
+		<record id="kg_hr_kg_el_encasement" model="ir.model.access">
+			<field name="model_id" ref="kg_el_encasement.model_kg_el_encasement"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">EL Encasement</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
+		<record id="kg_hr_ch_el_encasement" model="ir.model.access">
+			<field name="model_id" ref="kg_el_encasement.model_ch_el_encasement"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">EL Encasement Line Employee Details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
     </data>
 </openerp>
 	

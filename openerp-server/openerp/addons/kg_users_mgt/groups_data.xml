@@ -556,6 +556,10 @@
 			ref('kg_labour_master.mam_kg_labour_master'),
 			ref('kg_weekly_attendance.mam_kg_weekly_att'),
 			ref('kg_weekly_wages.mam_kg_weekly_wages'),
+			ref('kg_yearly_bonus.mpm_kg_yrly_bonus'),
+			ref('kg_yearly_bonus.mam_kg_yrly_bonus'),
+			ref('kg_yos_bonus.mam_kg_yos_bonus'),
+			ref('kg_el_encasement.mam_kg_el_encase'),
 			
 			
 	   
