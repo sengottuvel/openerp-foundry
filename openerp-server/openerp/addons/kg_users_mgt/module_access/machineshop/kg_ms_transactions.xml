@@ -233,8 +233,8 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
-		<record id="t_ms_subcontract_process_invoice" model="ir.model.access">
-			<field name="model_id" ref="kg_subcontract_process.model_kg_subcontract_invoice"/>
+	<record id="t_ms_subcontract_process_invoice" model="ir.model.access">
+			<field name="model_id" ref="kg_subcontract_invoice.model_kg_subcontract_invoice"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">Subcontract Process Invoice</field>
 			<field eval="1" name="perm_unlink"/>
@@ -244,7 +244,7 @@
 		</record>
 		
 		<record id="t_ms_subcontract_process_invoice_line" model="ir.model.access">
-			<field name="model_id" ref="kg_subcontract_process.model_ch_subcontract_invoice_line"/>
+			<field name="model_id" ref="kg_subcontract_invoice.model_ch_subcontract_invoice_line"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">Subcontract Process Invoice Line</field>
 			<field eval="1" name="perm_unlink"/>
@@ -252,9 +252,29 @@
 			<field eval="1" name="perm_create"/>
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
+		<record id="t_ms_subcontract_process_invoice_ex_track" model="ir.model.access">
+			<field name="model_id" ref="kg_subcontract_invoice.model_ch_subcontract_invoice_expense_track"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Subcontract Process Invoice Expense</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
 		
-		<record id="t_ms_subcontract_process_inspection_line" model="ir.model.access">
-			<field name="model_id" ref="kg_subcontract_process.model_ch_subcontract_inward_operation_line"/>
+		<record id="t_ms_subcontract_process_inspection_new" model="ir.model.access">
+			<field name="model_id" ref="kg_subcontract_process.model_kg_subcontract_inspection"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Subcontract Process Inspection</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<record id="t_ms_subcontract_process_inspection_line_new_line" model="ir.model.access">
+			<field name="model_id" ref="kg_subcontract_process.model_ch_subcontract_inspection_line"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">Subcontract Process Inspection Line</field>
 			<field eval="1" name="perm_unlink"/>
@@ -263,8 +283,18 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
-		<record id="t_ms_subcontract_process_inward_dimension" model="ir.model.access">
-			<field name="model_id" ref="kg_subcontract_process.model_ch_inward_dimension_details"/>
+		<record id="t_ms_subcontract_process_inspection_line_new" model="ir.model.access">
+			<field name="model_id" ref="kg_subcontract_process.model_ch_subcontract_inspection_operation_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Subcontract Process Inspection Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_subcontract_process_inward_dimension_new" model="ir.model.access">
+			<field name="model_id" ref="kg_subcontract_process.model_ch_inspection_dimension_details"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">Subcontract Process Dimensition Line</field>
 			<field eval="1" name="perm_unlink"/>
