@@ -300,7 +300,7 @@ class kg_payslip(osv.osv):
 					salary_days = salary_days + ot_days
 				####### OT Calculation if OT applicable for the employee in the contract########
 				
-				self.write(cr, uid, ids, {'tot_paid_days': salary_days})
+				self.write(cr, uid, slip_rec.id, {'tot_paid_days': salary_days})
 				
 				
 				

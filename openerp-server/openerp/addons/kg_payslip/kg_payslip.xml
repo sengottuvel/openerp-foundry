@@ -48,24 +48,29 @@
 					</field>
 					
 					
-					<field name="date_from" position="after">
+					<field name="date_from" position="before">
 					<field name="emp_name"/>
 					<field name="emp_categ_id" readonly="1"/>
 					<field name="division_id" readonly="1"/>
 					<field name="name" invisible="1"/>
 					</field>
 					
+<!--
 					<field name="date_to" position="after">
 					<field name="tot_paid_days" readonly="1"/>
 					</field>
+-->
 
                     <field name="credit_note" position="replace">
                     <field name="tot_deduction"/>
                     <field name="tot_allowance"/>
+                     <field name="cross_amt"/>
 <!--
                     <field name="con_cross_amt" invisible="1"/>
 -->
+<!--
                     <field name="cross_amt" string="Gross Amount"/>
+-->
 					<field name="round_val"/>
                     <field name="othr_sal_amt"/>
                     <field name="tot_contribution" invisible="1"/>
