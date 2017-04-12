@@ -133,7 +133,7 @@
 		<!-- Menu Action Start-->
 		
 		 <record id="mma_kg_el_encase" model="ir.actions.act_window">
-			<field name="name">EL Encasement</field>
+			<field name="name">EL Encashment</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">kg.el.encasement</field>
 			<field name="view_type">form</field>
@@ -156,7 +156,7 @@
         
         <!-- Menu Action Start-->
         
-		<menuitem action="mma_kg_el_encase" name="EL Encasement" id="mam_kg_el_encase" parent="kg_yearly_bonus.mpm_kg_yrly_bonus" sequence="2"/>
+		<menuitem action="mma_kg_el_encase" name="EL Encashment" id="mam_kg_el_encase" parent="kg_yearly_bonus.mpm_kg_yrly_bonus" sequence="2"/>
         
         <!-- Menu Action End-->
 
