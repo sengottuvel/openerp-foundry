@@ -310,8 +310,8 @@ class ch_el_encasement(osv.osv):
 	'header_id':fields.many2one('kg.el.encasement','Header id'),
 	'employee_id':fields.many2one('hr.employee','Employee'),
 	'emp_code':fields.char('Code'),
-	'encase_days':fields.float('Encasement Days'),
-	'encase_amt':fields.float('Encasement Amount'),
+	'encase_days':fields.float('Encashment Days'),
+	'encase_amt':fields.float('Encashment Amount'),
 	
 	}
 	
