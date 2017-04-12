@@ -236,7 +236,7 @@ class kg_el_encasement(osv.osv):
 				tot_work_days = work_days['sum']
 				if work_days['sum'] < rec.min_el_days:
 					if rec.mat_leave_app == True:
-						leave_ids = leaves_obj.search(cr,uid,[('employee_id','=',con_rec.employee_id.id),('from_date','>=',year_start),('to_date','<=',year_end),('holiday_status_id','=',34)])
+						leave_ids = leaves_obj.search(cr,uid,[('employee_id','=',con_rec.employee_id.id),('from_date','>=',year_start),('to_date','<=',year_end),('holiday_status_id','=',18)])
 						print "LEave ids are ..................................",leave_ids
 						if leave_ids:
 							for leaves_id in leave_ids:
@@ -277,7 +277,7 @@ class kg_el_encasement(osv.osv):
 									print "Salary components..............................",pay_line_rec.name,pay_line_rec.amount
 									sal_comp_amt += pay_line_rec.amount
 								el_amt = (sal_comp_amt/30)*el_eligible_days
-					if rec.emp_categ_id.id == 1:
+					if rec.emp_categ_id.id == 15:
 						if rec.sal_base == 'gross':
 							el_amt = (payslip_rec.cross_amt/26)*el_eligible_days
 							print "payslip gross amount and el eligible days.......................",payslip_rec.cross_amt,el_eligible_days
