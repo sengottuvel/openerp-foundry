@@ -30,6 +30,7 @@
 								
 							</group>											
 							<group>
+								<field name="rfd_date"/>
 								<field name="order_no"/>
 								<field name="pump_model_id"/>
 								<field name="pump_serial_no" attrs="{'invisible': [('order_category','=','spare')]}"/>

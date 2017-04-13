@@ -88,7 +88,8 @@ class kg_inspection(osv.osv):
 		'ins_conformed_date': fields.date('Ins. Conformed date'),		
 		'ins_completed_date': fields.date('Ins. Completed date'),	
 		'ins_remarks': fields.char('Ins. Remarks'),	
-		'mkd_remarks': fields.char('Mkd. Remarks'),	
+		'mkd_remarks': fields.char('Mkd. Remarks'),
+		'rfd_date': fields.date('RFD Date',required=True),			
 		
 		### Attachments ###
 		
@@ -101,7 +102,7 @@ class kg_inspection(osv.osv):
 	
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_pump_qap', context=c),			
 		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),
-		
+		'rfd_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
 		'state': 'draft',		
@@ -126,6 +127,15 @@ class kg_inspection(osv.osv):
 	def entry_confirm(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		if rec.state == 'draft':
+			today = date.today()
+			today = str(today)
+			today = datetime.strptime(today, '%Y-%m-%d')
+			rfd_date = rec.rfd_date
+			rfd_date = str(rfd_date)
+			rfd_date = datetime.strptime(rfd_date, '%Y-%m-%d')
+			if rfd_date > today:
+				raise osv.except_osv(_('Warning!'),
+						_('RFD Date should not in past date !!'))
 			self.pool.get('kg.pump.qap').write(cr,uid, rec.pump_qap_id.id,{'test_state':'pt','pt_state':'pending'} )
 			self.write(cr, uid, ids, {'state':'confirmed','update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 		else:
