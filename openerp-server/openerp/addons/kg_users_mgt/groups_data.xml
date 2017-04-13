@@ -457,6 +457,7 @@
 			ref('kg_position_number.mam_position_number_menu'),		 
 			ref('kg_machinery_master.mam_machinery_master'),
 			ref('kg_packing_type.mam_packing_type_master'),
+			ref('kg_packing_checklist.mam_packing_checklist'),
 			
 			])]" name="menu_access"/>
 			<field name="users" eval="[(4, ref('base.user_root'))]"/>
