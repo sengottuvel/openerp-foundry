@@ -6,7 +6,19 @@
 	<subDataset name="dataset1">
 		<parameter name="header_id" class="java.lang.Integer"/>
 		<queryString>
-			<![CDATA[SELECT
+			<![CDATA[select sub.position_no,
+sub.drawing_no,
+sub.mtl_form,
+sub.pattern_no,
+sub.pattern_name,
+sub.moc_name,
+sub.qty,
+sub.access_id
+
+
+from (
+
+SELECT
 position_num.name as position_no,
 case
 when position_num.drawing_no is null then '-'
@@ -15,7 +27,8 @@ else position_num.drawing_no end as drawing_no,
 pattern.name as pattern_no,
 pattern.pattern_name as pattern_name,
 moc.name as moc_name,
-ch_bom.qty as qty
+ch_bom.qty as qty,
+ch_access.id as access_id
 
 FROM ch_work_order_details work_order
 
@@ -29,7 +42,7 @@ where ch_bom.is_applicable = True and
 
 work_order.id = $P{header_id}
 
-UNION
+UNION All
 
 SELECT
 
@@ -41,7 +54,8 @@ else position_num.drawing_no end as drawing_no,
 machine.code as pattern_no,
 machine.name as pattern_name,
 moc.name as moc_name,
-ch_machineshop.qty as qty
+ch_machineshop.qty as qty,
+ch_access.id as access_id
 
 FROM ch_work_order_details work_order
 
@@ -54,7 +68,7 @@ left join kg_moc_master moc on (moc.id = ch_machineshop.moc_id)
 where ch_machineshop.is_applicable = True and
 work_order.id =$P{header_id}
 
-UNION
+UNION ALL
 
 SELECT
 
@@ -66,7 +80,8 @@ else position_num.drawing_no end as drawing_no,
 machine.code as pattern_no,
 machine.name as pattern_name,
 moc.name as moc_name,
-ch_bot.qty as qty
+ch_bot.qty as qty,
+ch_access.id as access_id
 
 FROM ch_work_order_details work_order
 
@@ -79,7 +94,7 @@ left join kg_moc_master moc on (moc.id = ch_bot.moc_id)
 
 where ch_bot.is_applicable = True and
 
-work_order.id = $P{header_id}]]>
+work_order.id = $P{header_id}) as sub order by sub.access_id]]>
 		</queryString>
 		<field name="position_no" class="java.lang.String"/>
 		<field name="drawing_no" class="java.lang.String"/>
@@ -88,6 +103,7 @@ work_order.id = $P{header_id}]]>
 		<field name="pattern_name" class="java.lang.String"/>
 		<field name="moc_name" class="java.lang.String"/>
 		<field name="qty" class="java.lang.Integer"/>
+		<field name="access_id" class="java.lang.Integer"/>
 	</subDataset>
 	<parameter name="printed_by" class="java.lang.String"/>
 	<parameter name="print_date" class="java.lang.String"/>
