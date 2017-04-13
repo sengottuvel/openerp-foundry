@@ -569,10 +569,10 @@
 							<field name="pump_model_id" readonly="1"/>
 							<field name="inspection" readonly="1"/>
 							<field name="cc_date"/>
-							<field name="rm_date"/>
-							<field name="in_house_date"/>
+							<field name="rm_date"/>							
 							<field name="ms_material_date"/>
 							<field name="in_house_date"/>
+							<field name="in_house_com_date"/>
 							<field name="id_date"/>						
 							<field name="hydro_status"/>						
 							<field name="acc_commit_date" />
@@ -589,10 +589,10 @@
 							<field name="packing_type" readonly="1"/>
 							<field name="spc_remarks" readonly="1"/>
 							<field name="bot_status"/>
-							<field name="pouring_date" />
-							<field name="sub_con_date" />
+							<field name="pouring_date" />							
 							<field name="ms_material_status" />
 							<field name="sub_con_date" />
+							<field name="sub_comple_date" />
 							<field name="accessories" />
 							<field name="testing_status" />
 							<field name="painting_status" />
@@ -600,7 +600,7 @@
 							<field name="despatch_date" />
 							<field name="acc_material_status" />							
 							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
-						</group>					
+						</group>				
 					</group>
 					<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
 						<group>	
@@ -649,15 +649,36 @@
 				 ;black:state == 'approved';gray:state == 'reject'" 
 				 toolbar="True" string="ID Commitment Process" create="false">										
 					<field name="order_id"/>
-					<field name="entry_date"/>					
-					<field name="order_category"/>
-					<field name="schedule_id"/>
-					<field name="location"/>
+					<field name="order_priority"/>
+					<field name="delivery_date"/>
 					<field name="order_value"/>
+					<field name="cc_date"/>
+					<field name="location"/>
+					<field name="schedule_id"/>
 					<field name="order_category"/>
-					<field name="pump_model_type"/>
+					<field name="pump_model_id"/>
 					<field name="qty"/>
-					<field name="state"/>
+					<field name="inspection"/>
+					<field name="packing_type"/>
+					<field name="ms_material_status"/>
+					<field name="ms_material_date"/>
+					<field name="rm_date"/>
+					<field name="sub_con_date"/>
+					<field name="sub_comple_date"/>
+					<field name="in_house_date"/>
+					<field name="in_house_com_date"/>
+					<field name="id_date"/>
+					<field name="spc_remarks"/>
+					<field name="note"/>
+					<field name="accessories"/>
+					<field name="acc_commit_date"/>
+					<field name="bot_status"/>
+					<field name="hydro_status"/>
+					<field name="testing_status"/>
+					<field name="painting_status"/>
+					<field name="rfd_date"/>					
+					<field name="despatch_date"/>					
+					<field name="state" invisible="1"/>	
 				</tree>
 			</field>
 		</record>

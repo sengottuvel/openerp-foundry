@@ -531,9 +531,7 @@ class kg_id_commitment(osv.osv):
 		
 		'pouring_date': fields.date('Pouring Over date'),
 		'cc_date': fields.date('CC Date'),
-		'ms_material_date': fields.date('MS Item Material Commitment'),
-		'sub_con_date': fields.date('SUB.CON Commitment'),
-		'in_house_date': fields.date('IN-HOUSE Commitment'),
+		'ms_material_date': fields.date('MS Item Material Commitment'),		
 		'id_commitment_date': fields.date('ID Commitment'),
 		'id_date': fields.date('ID Date'),
 		'acc_commit_date': fields.date('ACC Commitment Date'),
@@ -558,14 +556,15 @@ class kg_id_commitment(osv.osv):
 		'inspection': fields.selection([('yes','Yes'),('no','No'),('tpi','TPI'),('customer','Customer'),('consultant','Consultant'),('stagewise','Stage wise')],'Inspection'),
 		'packing_type': fields.selection([('gld_packing','Gland Packing'),('mc_seal','M/C Seal'),('dynamic_seal','Dynamic seal')],'Packing Type', required=True),
 		'rm_date': fields.date('R.M Completed Date',required=True),
-		'sub_con_date': fields.date('Sub.Con Completed Date'),
-		'in_house_date': fields.date('IN-House Completed Date'),
+		'sub_comple_date': fields.date('Sub.Con Completed Date'),
+		'sub_con_date': fields.date('Sub.Con commitment Date'),
+		'in_house_date': fields.date('IN-House commitment Date'),
+		'in_house_com_date': fields.date('IN-House Completed Date'),
 		'spc_remarks': fields.char('SPC Remarks'),
 		'bot_status': fields.char('BOT Status'),
 		'hydro_status': fields.date('Hydro Status'),
 		'testing_status': fields.date('Testing status'),
-		'painting_status': fields.date('Painting status'),
-		
+		'painting_status': fields.date('Painting status'),		
 		
 		
 		### Entry Info ####
