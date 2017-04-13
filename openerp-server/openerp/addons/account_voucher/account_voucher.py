@@ -394,7 +394,7 @@ class account_voucher(osv.osv):
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
 		'active': fields.boolean('Active'),
 		'partner_id':fields.many2one('res.partner', 'Partner',required=True),
-        'journal_id':fields.many2one('account.journal', 'Book Name', required=True),
+        'journal_id':fields.many2one('account.journal', 'Book Name', domain=[('type','in',('cash','bank'))], required=True),
         'name':fields.char('Voucher No.', size=256, readonly=True),
         
         
