@@ -67,13 +67,31 @@
 								<field name="o_sam_ratio"/>
 								<field name="o_dealer_discount"/>
 								<field name="o_special_discount"/>
-								<field name="o_p_f"/>
+								<label for="o_p_f" string="P&amp;F"/>
+								<div>
+									<div class="address_format">
+										<field name="o_p_f" style="width: 18%%"/>
+										<field name="o_p_f_in_ex" style="width: 16%%" attrs="{'required': [('o_p_f','>',0)]}"/>
+									</div>
+								</div>
 							</group>
 							<group>
 								<field name="spare_per_flag"/>
 								<field name="super_per_flag" invisible="1"/>
-								<field name="o_freight"/>
-								<field name="o_insurance"/>
+								<label for="o_freight" string="Freight"/>
+								<div>
+									<div class="address_format">
+										<field name="o_freight" style="width: 19%%"/>
+										<field name="o_freight_in_ex" style="width: 17%%" attrs="{'required': [('o_freight','>',0)]}"/>
+									</div>
+								</div>
+								<label for="o_insurance" string="Insurance"/>
+								<div>
+									<div class="address_format">
+										<field name="o_insurance" style="width: 19%%"/>
+										<field name="o_insurance_in_ex" style="width: 17%%" attrs="{'required': [('o_insurance','>',0)]}"/>
+									</div>
+								</div>
 								<field name="o_customer_discount"/>
 								<field name="o_tax"/>
 							</group>
@@ -284,9 +302,27 @@
 							<field name="customer_discount"/>
 							<field name="special_discount"/>
 							<field name="tax"/>
-							<field name="p_f"/>
-							<field name="freight"/>
-							<field name="insurance"/>
+							<label for="p_f" string="P&amp;F"/>
+							<div>
+								<div class="address_format">
+									<field name="p_f" style="width: 40%%"/>
+									<field name="p_f_in_ex" style="width: 35%%" attrs="{'required': [('p_f','>',0)]}"/>
+								</div>
+							</div>
+							<label for="freight" string="Freight"/>
+							<div>
+								<div class="address_format">
+									<field name="freight" style="width: 40%%"/>
+									<field name="freight_in_ex" style="width: 35%%" attrs="{'required': [('freight','>',0)]}"/>
+								</div>
+							</div>
+							<label for="insurance" string="Insurance"/>
+							<div>
+								<div class="address_format">
+									<field name="insurance" style="width: 40%%"/>
+									<field name="insurance_in_ex" style="width: 35%%" attrs="{'required': [('insurance','>',0)]}"/>
+								</div>
+							</div>
 							<field name="ed"/>
 							<field name="supervision_amount"/>
 						</group>
@@ -427,9 +463,27 @@
 							<field name="customer_discount"/>
 							<field name="special_discount"/>
 							<field name="tax"/>
-							<field name="p_f"/>
-							<field name="freight"/>
-							<field name="insurance"/>
+							<label for="p_f" string="P&amp;F"/>
+							<div>
+								<div class="address_format">
+									<field name="p_f" style="width: 40%%"/>
+									<field name="p_f_in_ex" style="width: 35%%" attrs="{'required': [('p_f','>',0)]}"/>
+								</div>
+							</div>
+							<label for="freight" string="Freight"/>
+							<div>
+								<div class="address_format">
+									<field name="freight" style="width: 40%%"/>
+									<field name="freight_in_ex" style="width: 35%%" attrs="{'required': [('freight','>',0)]}"/>
+								</div>
+							</div>
+							<label for="insurance" string="Insurance"/>
+							<div>
+								<div class="address_format">
+									<field name="insurance" style="width: 40%%"/>
+									<field name="insurance_in_ex" style="width: 35%%" attrs="{'required': [('insurance','>',0)]}"/>
+								</div>
+							</div>
 							<field name="ed"/>
 							<field name="supervision_amount"/>
 						</group>					
@@ -542,9 +596,27 @@
 							<field name="customer_discount"/>
 							<field name="special_discount"/>
 							<field name="tax"/>
-							<field name="p_f"/>
-							<field name="freight"/>
-							<field name="insurance"/>
+							<label for="p_f" string="P&amp;F"/>
+							<div>
+								<div class="address_format">
+									<field name="p_f" style="width: 40%%"/>
+									<field name="p_f_in_ex" style="width: 35%%" attrs="{'required': [('p_f','>',0)]}"/>
+								</div>
+							</div>
+							<label for="freight" string="Freight"/>
+							<div>
+								<div class="address_format">
+									<field name="freight" style="width: 40%%"/>
+									<field name="freight_in_ex" style="width: 35%%" attrs="{'required': [('freight','>',0)]}"/>
+								</div>
+							</div>
+							<label for="insurance" string="Insurance"/>
+							<div>
+								<div class="address_format">
+									<field name="insurance" style="width: 40%%"/>
+									<field name="insurance_in_ex" style="width: 35%%" attrs="{'required': [('insurance','>',0)]}"/>
+								</div>
+							</div>
 							<field name="ed"/>
 							<field name="supervision_amount"/>
 <!--

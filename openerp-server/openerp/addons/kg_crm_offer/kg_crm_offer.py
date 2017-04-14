@@ -139,6 +139,9 @@ class kg_crm_offer(osv.osv):
 		'o_p_f': fields.float('P&F(%)',readonly=True, states={'draft':[('readonly',False)]}),
 		'o_freight': fields.float('Freight(%)',readonly=True, states={'draft':[('readonly',False)]}),
 		'o_insurance': fields.float('Insurance(%)',readonly=True, states={'draft':[('readonly',False)]}),
+		'o_p_f_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'P&F',readonly=True, states={'draft':[('readonly',False)]}),
+		'o_freight_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Freight',readonly=True, states={'draft':[('readonly',False)]}),
+		'o_insurance_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Insurance',readonly=True, states={'draft':[('readonly',False)]}),
 		'o_customer_discount': fields.float('Customer Discount(%)',readonly=True, states={'draft':[('readonly',False)]}),
 		'o_tax': fields.float('Tax(%)',readonly=True, states={'draft':[('readonly',False)]}),
 		
@@ -402,8 +405,11 @@ class kg_crm_offer(osv.osv):
 									  'dealer_discount':entry.o_dealer_discount,
 									  'special_discount':entry.o_special_discount,
 									  'p_f':entry.o_p_f,
+									  'p_f_in_ex':entry.o_p_f_in_ex,
 									  'freight':entry.o_freight,
+									  'freight_in_ex':entry.o_freight_in_ex,
 									  'insurance':entry.o_insurance,
+									  'insurance_in_ex':entry.o_insurance_in_ex,
 									  'customer_discount':entry.o_customer_discount,
 									  'tax':entry.o_tax,
 									  })
@@ -1176,12 +1182,12 @@ class kg_crm_offer(osv.osv):
 		style8 = xlwt.easyxf('font: height 200,color_index black;' 'align: wrap on, vert centre, horiz centre;''borders: left thin, right thin, top thin, bottom thin') 
 		
 		
-		img = Image.open('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.png')
+		img = Image.open('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.png')
 		r, g, b, a = img.split()
 		img = Image.merge("RGB", (r, g, b))
-		img.save('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp')
-		img = Image.open('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.png')
-		img.save('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp')
+		img.save('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp')
+		img = Image.open('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.png')
+		img.save('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp')
 		
 		#~ r, g, b, a = img.split()
 		#~ img = Image.merge("RGB", (r, g, b))
@@ -1270,8 +1276,8 @@ class kg_crm_offer(osv.osv):
 				logo_size = 120
 			elif len_col >= 4:
 				logo_size = 100
-			sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
-			sheet1.insert_bitmap('/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp',0,len_col,logo_size)
+			sheet1.insert_bitmap('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/sam.bmp',0,0)
+			sheet1.insert_bitmap('/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_crm_offer/img/TUV_NORD.bmp',0,len_col,logo_size)
 			#~ print"col_1",col_1
 			#~ sheet1.write(s1,col_no,str(col_1),style1)
 			col_no = col_no + 1
@@ -2147,6 +2153,9 @@ class ch_pump_offer(osv.osv):
 		'p_f': fields.float('P&F(%)'),
 		'freight': fields.float('Freight(%)'),
 		'insurance': fields.float('Insurance(%)'),
+		'p_f_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'P&F'),
+		'freight_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Freight'),
+		'insurance_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Insurance'),
 		'ed': fields.float('ED(%)'),
 		'supervision_amount': fields.float('Supervision(Rs.)'),
 		'total_price': fields.float('Total Price(%)'),
@@ -2497,6 +2506,9 @@ class ch_spare_offer(osv.osv):
 		'p_f': fields.float('P&F(%)'),
 		'freight': fields.float('Freight(%)'),
 		'insurance': fields.float('Insurance(%)'),
+		'p_f_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'P&F'),
+		'freight_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Freight'),
+		'insurance_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Insurance'),
 		'ed': fields.float('ED(%)'),
 		'supervision_amount': fields.float('Supervision(Rs.)'),
 		'total_price': fields.float('Total Price'),
@@ -2626,6 +2638,9 @@ class ch_accessories_offer(osv.osv):
 		'p_f': fields.float('P&F(%)'),
 		'freight': fields.float('Freight(%)'),
 		'insurance': fields.float('Insurance(%)'),
+		'p_f_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'P&F'),
+		'freight_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Freight'),
+		'insurance_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Insurance'),
 		'ed': fields.float('ED(%)'),
 		'supervision_amount': fields.float('Supervision(Rs.)'),
 		'pump_price': fields.float('Pump Price'),
