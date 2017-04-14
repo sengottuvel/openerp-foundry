@@ -78,7 +78,7 @@ class kg_work_order(osv.osv):
 		'order_priority': fields.selection(ORDER_PRIORITY,'Priority'),
 		'delivery_date': fields.date('Delivery Date',required=True),
 		'order_value': fields.function(_get_order_value, string='WO Value', method=True, store=True, type='float'),
-		'order_category': fields.selection(ORDER_CATEGORY,'Category'),
+		'order_category': fields.selection(ORDER_CATEGORY,'Purpose'),
 		'partner_id': fields.many2one('res.partner','Customer'),
 		'progress_state': fields.selection([
 		('mould_com','Moulding Completed'),
@@ -94,7 +94,7 @@ class kg_work_order(osv.osv):
 		'version':fields.char('Version'),
 		'flag_for_stock': fields.boolean('For Stock'),
 		'invoice_flag': fields.boolean('For Invoice'),
-		'offer_no': fields.char('Offer No'),
+		'offer_no': fields.char('Offer No.'),
 		'enquiry_no': fields.char('Enquiry No.'),
 		#~'enquiry_id': fields.many2one('kg.crm.enquiry','Enquiry No.'),
 		#~ 'offer_id': fields.many2one('kg.crm.offer','Offer No.'),
