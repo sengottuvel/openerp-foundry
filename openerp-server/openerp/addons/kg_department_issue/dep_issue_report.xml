@@ -11,6 +11,16 @@
                 menu="True"
                 usage="default"
                 />
-
+		
+		<report string="Inward Copy"
+				model="kg.department.issue.line"
+				auto="True"
+				name="onscreen_ms_inward_print_report"
+				rml="kg_department_issue/report/kg_ms_inward_onscreen_report.jrxml"
+				id="ms_inward_jasper_report_menu" 
+				menu="True"
+				header="False"
+				/>
+        
     </data>
 </openerp>

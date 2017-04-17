@@ -1,8 +1,2 @@
-# KG Store Reports
-
-
-import issueslip_on_screen_report
-#import grn_print
-
-# Store Low Proiority Reports
-
+#~ import issueslip_on_screen_report
+import onscreen_ms_inward_print_report

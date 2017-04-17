@@ -1,0 +1,479 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="kg_ms_inward_onscreen_report" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="NoDataSection" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.1000000000000005"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<subDataset name="ms_bot_detail">
+		<parameter name="ms_inward_id" class="java.lang.String"/>
+		<queryString>
+			<![CDATA[select
+
+company.name as company_name,
+part.street as street1,
+part.street2 as street2,
+comp_city.name as city,
+part.zip as zip,
+to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS new_date,
+(case when dep.name = 'DP2' then 'MS Store Inward Inspection Copy'
+when dep.name = 'DP3' then 'BOT Store Inward Inspection Copy'
+else ' ' end) as ms_bot,
+
+line.id as id,
+wo_line.order_no as wo_name,
+prod.name_template as product,
+ms.name as item_code,
+moc.name as moc,
+line.issue_qty_2 as issue_qty,
+(case when dep.name = 'DP2' then line.cutting_qty
+when dep.name = 'DP3' then line.issue_qty
+else 0 end) as accpet_qty,
+line.reject_qty as reject_qty,
+reject.name as reject_name
+
+from
+
+kg_department_issue_line line
+
+left join kg_department_issue issue on (issue.id = line.issue_id)
+left join ch_work_order_details wo_line on (wo_line.id = line.w_order_line_id)
+left join product_product prod on (prod.id = line.product_id)
+left join kg_machine_shop ms on (ms.id = line.ms_bot_id)
+left join kg_moc_master moc on (moc.id = line.wo_moc_id)
+left join res_company company on (company.id = issue.company_id)
+left join res_partner part on (part.id = company.partner_id)
+left join res_city comp_city on (comp_city.id = part.city_id)
+left join kg_rejection_master reject on (reject.id = line.remark_id)
+left join kg_depmaster dep on (dep.id = issue.department_id)
+
+where line.id
+in (select sam::int from (
+select regexp_split_to_table($P{ms_inward_id}, ',') as sam) as sam)]]>
+		</queryString>
+		<field name="company_name" class="java.lang.String"/>
+		<field name="street1" class="java.lang.String"/>
+		<field name="street2" class="java.lang.String"/>
+		<field name="city" class="java.lang.String"/>
+		<field name="zip" class="java.lang.String"/>
+		<field name="new_date" class="java.lang.String"/>
+		<field name="ms_bot" class="java.lang.String"/>
+		<field name="id" class="java.lang.Integer"/>
+		<field name="wo_name" class="java.lang.String"/>
+		<field name="product" class="java.lang.String"/>
+		<field name="item_code" class="java.lang.String"/>
+		<field name="moc" class="java.lang.String"/>
+		<field name="issue_qty" class="java.lang.Double"/>
+		<field name="accpet_qty" class="java.lang.Double"/>
+		<field name="reject_qty" class="java.lang.Double"/>
+		<field name="reject_name" class="java.lang.String"/>
+	</subDataset>
+	<parameter name="ms_inward_id" class="java.lang.String"/>
+	<parameter name="printed_by" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select
+
+company.name as company_name,
+part.street as street1,
+part.street2 as street2,
+comp_city.name as city,
+part.zip as zip,
+to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS new_date,
+(case when dep.name = 'DP2' then 'MS Store Inward Inspection Copy'
+when dep.name = 'DP3' then 'BOT Store Inward Inspection Copy'
+else ' ' end) as ms_bot,
+
+line.id as id,
+wo_line.order_no as wo_name,
+prod.name_template as product,
+ms.name as item_code,
+moc.name as moc,
+line.issue_qty_2 as issue_qty,
+(case when dep.name = 'DP2' then line.cutting_qty
+when dep.name = 'DP3' then line.issue_qty
+else 0 end) as accpet_qty,
+line.reject_qty as reject_qty,
+reject.name as reject_name
+
+from
+
+kg_department_issue_line line
+
+left join kg_department_issue issue on (issue.id = line.issue_id)
+left join ch_work_order_details wo_line on (wo_line.id = line.w_order_line_id)
+left join product_product prod on (prod.id = line.product_id)
+left join kg_machine_shop ms on (ms.id = line.ms_bot_id)
+left join kg_moc_master moc on (moc.id = line.wo_moc_id)
+left join res_company company on (company.id = issue.company_id)
+left join res_partner part on (part.id = company.partner_id)
+left join res_city comp_city on (comp_city.id = part.city_id)
+left join kg_rejection_master reject on (reject.id = line.remark_id)
+left join kg_depmaster dep on (dep.id = issue.department_id)
+
+where line.id
+in (select sam::int from (
+select regexp_split_to_table($P{ms_inward_id}, ',') as sam) as sam) limit 1]]>
+	</queryString>
+	<field name="company_name" class="java.lang.String"/>
+	<field name="street1" class="java.lang.String"/>
+	<field name="street2" class="java.lang.String"/>
+	<field name="city" class="java.lang.String"/>
+	<field name="zip" class="java.lang.String"/>
+	<field name="new_date" class="java.lang.String"/>
+	<field name="ms_bot" class="java.lang.String"/>
+	<field name="id" class="java.lang.Integer"/>
+	<field name="wo_name" class="java.lang.String"/>
+	<field name="product" class="java.lang.String"/>
+	<field name="item_code" class="java.lang.String"/>
+	<field name="moc" class="java.lang.String"/>
+	<field name="issue_qty" class="java.lang.Double"/>
+	<field name="accpet_qty" class="java.lang.Double"/>
+	<field name="reject_qty" class="java.lang.Double"/>
+	<field name="reject_name" class="java.lang.String"/>
+	<group name="ProjectGroup" isStartNewPage="true">
+		<groupExpression><![CDATA[]]></groupExpression>
+	</group>
+	<group name="Table Heading">
+		<groupExpression><![CDATA[]]></groupExpression>
+	</group>
+	<group name="DesignationGroup" isStartNewPage="true">
+		<groupExpression><![CDATA[]]></groupExpression>
+	</group>
+	<group name="Label" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{company_name}]]></groupExpression>
+	</group>
+	<group name="work_order">
+		<groupExpression><![CDATA[$P{ms_inward_id}]]></groupExpression>
+	</group>
+	<group name="DC Header">
+		<groupExpression><![CDATA[$F{id}]]></groupExpression>
+	</group>
+	<group name="MS_BOT_Detail">
+		<groupExpression><![CDATA[$P{ms_inward_id}]]></groupExpression>
+		<groupHeader>
+			<band height="15">
+				<componentElement>
+					<reportElement x="0" y="0" width="802" height="15"/>
+					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+						<datasetRun subDataset="ms_bot_detail">
+							<datasetParameter name="ms_inward_id">
+								<datasetParameterExpression><![CDATA[$P{ms_inward_id}]]></datasetParameterExpression>
+							</datasetParameter>
+							<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+						<jr:listContents height="15" width="802">
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="262" y="0" width="194" height="15"/>
+								<box topPadding="2" leftPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement/>
+								<textFieldExpression><![CDATA[$F{product}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="456" y="0" width="80" height="15"/>
+								<box topPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center"/>
+								<textFieldExpression><![CDATA[$F{moc}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="100" y="0" width="162" height="15"/>
+								<box topPadding="2" leftPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement/>
+								<textFieldExpression><![CDATA[$F{item_code}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="38" y="0" width="62" height="15"/>
+								<box topPadding="2" leftPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement/>
+								<textFieldExpression><![CDATA[$F{wo_name}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="0" y="0" width="39" height="15"/>
+								<box topPadding="2">
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center"/>
+								<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="536" y="0" width="49" height="15"/>
+								<box topPadding="2" rightPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right"/>
+								<textFieldExpression><![CDATA[$F{issue_qty}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="585" y="0" width="64" height="15"/>
+								<box topPadding="2" rightPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right"/>
+								<textFieldExpression><![CDATA[$F{accpet_qty}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="649" y="0" width="57" height="15"/>
+								<box topPadding="2" rightPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right"/>
+								<textFieldExpression><![CDATA[$F{reject_qty}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="706" y="0" width="96" height="15"/>
+								<box topPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center"/>
+								<textFieldExpression><![CDATA[$F{reject_name}]]></textFieldExpression>
+							</textField>
+						</jr:listContents>
+					</jr:list>
+				</componentElement>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="50">
+				<textField>
+					<reportElement x="616" y="36" width="100" height="14"/>
+					<box topPadding="2"/>
+					<textElement>
+						<font isBold="true" isUnderline="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Verified By"]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="75">
+			<textField>
+				<reportElement mode="Transparent" x="0" y="0" width="802" height="16"/>
+				<box topPadding="2"/>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{company_name}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement mode="Transparent" x="0" y="16" width="802" height="15" isPrintWhenDetailOverflows="true"/>
+				<box topPadding="2" leftPadding="0">
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{street1}+$F{street2}+$F{city}+" - "+$F{zip}+"."]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="31" width="802" height="20"/>
+				<box topPadding="4">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ms_bot}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Transparent" x="706" y="51" width="96" height="24" isRemoveLineWhenBlank="true"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[Remarks]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="262" y="51" width="194" height="24" isRemoveLineWhenBlank="true"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[Item Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="39" y="51" width="61" height="24" isRemoveLineWhenBlank="true"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[WO No.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="536" y="51" width="49" height="24" isRemoveLineWhenBlank="true"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[Issue Qty]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="100" y="51" width="162" height="24" isRemoveLineWhenBlank="true"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[Item Code]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="456" y="51" width="80" height="24" isRemoveLineWhenBlank="true"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[MOC]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="585" y="51" width="64" height="24" isRemoveLineWhenBlank="true"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[Accepted Qty]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="649" y="51" width="57" height="24" isRemoveLineWhenBlank="true"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[Rejected Qty]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="0" y="51" width="39" height="24" isRemoveLineWhenBlank="true"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[S.No]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageFooter>
+		<band height="20">
+			<textField>
+				<reportElement x="353" y="0" width="87" height="20"/>
+				<box topPadding="3">
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="440" y="0" width="48" height="20"/>
+				<box topPadding="3">
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="354" height="20"/>
+				<box topPadding="3">
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{printed_by} + " "+ "/"  +" "+$F{new_date}]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="488" y="0" width="314" height="20"/>
+				<box topPadding="3">
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+			</textField>
+		</band>
+	</pageFooter>
+	<noData>
+		<band height="20">
+			<staticText>
+				<reportElement mode="Transparent" x="1" y="0" width="801" height="20"/>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[No Records Found]]></text>
+			</staticText>
+		</band>
+	</noData>
+</jasperReport>
