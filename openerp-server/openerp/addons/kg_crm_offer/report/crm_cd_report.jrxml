@@ -22,11 +22,27 @@ sum((COALESCE((COALESCE(pump.net_amount,0)),0))) as net_amount,
 -- PF val
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer as pf_val,
+* avg((COALESCE(pump.p_f ,0.00))))/100)::integer as pf_val_wo_in_ex,
 -- Freight val
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.freight ,0.00))))/100)::integer as freight_val,
+
+-- PF val
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer pf_val,
+
 /*
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
@@ -74,24 +90,64 @@ sum((COALESCE((COALESCE(pump.net_amount,0)),0))) as net_amount,
 -- Insurance val
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer as insurance_val,
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer as insurance_val,
 
 -- Dealer val
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
@@ -99,127 +155,327 @@ sum((COALESCE((COALESCE(pump.net_amount,0)),0))) as net_amount,
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer -
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.freight ,0.00))))/100)::integer -
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer as dealer_val,
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer as dealer_val,
 -- Les Dealer val
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer -
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.freight ,0.00))))/100)::integer -
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer as les_dealer_val,
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer as les_dealer_val,
 -- Works val
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer -
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.freight ,0.00))))/100)::integer -
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer -
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer -
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer -
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.freight ,0.00))))/100)::integer -
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer) as works_val,
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer) as works_val,
 -- Primecost val
 sum(pump.prime_cost)::integer as prime_cost,
 
@@ -229,63 +485,163 @@ ltrim(to_char((COALESCE(((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((s
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer -
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.freight ,0.00))))/100)::integer -
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer -
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer -
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer -
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.freight ,0.00))))/100)::integer -
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer)
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer)
 
 /
 
@@ -308,8 +664,9 @@ where header_id = $P{offer_id}]]>
 		<field name="cust_dis_val" class="java.lang.Integer"/>
 		<field name="book_val" class="java.lang.Integer"/>
 		<field name="spl_val" class="java.lang.Integer"/>
-		<field name="pf_val" class="java.lang.Integer"/>
+		<field name="pf_val_wo_in_ex" class="java.lang.Integer"/>
 		<field name="freight_val" class="java.lang.Integer"/>
+		<field name="pf_val" class="java.lang.Integer"/>
 		<field name="insurance_val" class="java.lang.Integer"/>
 		<field name="dealer_val" class="java.lang.Integer"/>
 		<field name="les_dealer_val" class="java.lang.Integer"/>
@@ -343,11 +700,27 @@ sum((COALESCE((COALESCE(pump.net_amount,0)),0))) as net_amount,
 -- PF val
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer as pf_val,
+* avg((COALESCE(pump.p_f ,0.00))))/100)::integer as pf_val_wo_in_ex,
 -- Freight val
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.freight ,0.00))))/100)::integer as freight_val,
+
+-- PF val
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer pf_val,
+
 /*
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
@@ -395,24 +768,64 @@ sum((COALESCE((COALESCE(pump.net_amount,0)),0))) as net_amount,
 -- Insurance val
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer as insurance_val,
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer as insurance_val,
 
 -- Dealer val
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
@@ -420,194 +833,493 @@ sum((COALESCE((COALESCE(pump.net_amount,0)),0))) as net_amount,
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer -
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.freight ,0.00))))/100)::integer -
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer as dealer_val,
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer as dealer_val,
 -- Les Dealer val
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer -
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.freight ,0.00))))/100)::integer -
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer as les_dealer_val,
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer as les_dealer_val,
 -- Works val
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer -
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.freight ,0.00))))/100)::integer -
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer -
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer -
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer -
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.freight ,0.00))))/100)::integer -
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer) as works_val,
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer) as works_val,
 -- Primecost val
 sum(pump.prime_cost)::integer as prime_cost,
 
 -- Ratio val
-
 ltrim(to_char((COALESCE(((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer -
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.freight ,0.00))))/100)::integer -
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer -
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer -
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer -
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.freight ,0.00))))/100)::integer -
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'inclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer)
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer)
 
 /
 
@@ -630,8 +1342,9 @@ where header_id = $P{offer_id}]]>
 		<field name="cust_dis_val" class="java.lang.Integer"/>
 		<field name="book_val" class="java.lang.Integer"/>
 		<field name="spl_val" class="java.lang.Integer"/>
-		<field name="pf_val" class="java.lang.Integer"/>
+		<field name="pf_val_wo_in_ex" class="java.lang.Integer"/>
 		<field name="freight_val" class="java.lang.Integer"/>
+		<field name="pf_val" class="java.lang.Integer"/>
 		<field name="insurance_val" class="java.lang.Integer"/>
 		<field name="dealer_val" class="java.lang.Integer"/>
 		<field name="les_dealer_val" class="java.lang.Integer"/>
@@ -1810,48 +2523,133 @@ where header_id = $P{offer_id})) as tot]]>
 --PF val
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer as pf_val,
+* avg((COALESCE(pump.p_f ,0.00))))/100)::integer as pf_val_wo_in_ex,
+
+-- PF val
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer pf_val,
 
 -- ED val
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer as ed_val,
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer as ed_val,
 
 --Tax val
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer as tax,
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer as tax,
 
 -- Tot val
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) as total,
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) as total,
 
 -- Les deal dis
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
@@ -1862,54 +2660,144 @@ where header_id = $P{offer_id})) as tot]]>
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer -
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.freight ,0.00))))/100)::integer -
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer)::integer as les_deal_dis,
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer)::integer as les_deal_dis,
 
 -- Nett sam
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) -
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) -
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.special_discount ,0.00))))/100)::integer +
@@ -1918,38 +2806,89 @@ where header_id = $P{offer_id})) as tot]]>
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer -
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.freight ,0.00))))/100)::integer -
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer)::integer as nett_sam
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_pump_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer)::integer as nett_sam
 
 from ch_pump_offer pump
 
 where header_id = $P{offer_id}]]>
 		</queryString>
 		<field name="book_val" class="java.lang.Integer"/>
+		<field name="pf_val_wo_in_ex" class="java.lang.Integer"/>
 		<field name="pf_val" class="java.lang.Integer"/>
 		<field name="ed_val" class="java.lang.Integer"/>
 		<field name="tax" class="java.lang.Integer"/>
@@ -1968,48 +2907,133 @@ where header_id = $P{offer_id}]]>
 --PF val
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer as pf_val,
+* avg((COALESCE(pump.p_f ,0.00))))/100)::integer as pf_val_wo_in_ex,
+
+-- PF val
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer pf_val,
 
 -- ED val
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer as ed_val,
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer as ed_val,
 
 --Tax val
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer as tax,
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer as tax,
 
 -- Tot val
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) as total,
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) as total,
 
 -- Les deal dis
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
@@ -2020,54 +3044,144 @@ where header_id = $P{offer_id}]]>
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer -
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.freight ,0.00))))/100)::integer -
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer)::integer as les_deal_dis,
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer)::integer as les_deal_dis,
 
 -- Nett sam
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) -
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) -
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.special_discount ,0.00))))/100)::integer +
@@ -2076,38 +3190,89 @@ where header_id = $P{offer_id}]]>
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.special_discount ,0.00))))/100)::integer -
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer -
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer -
 ((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
 * avg((COALESCE(pump.freight ,0.00))))/100)::integer -
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer +
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer +
 (((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer) +
-((((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
+COALESCE((select ref_calc from (
+select p_f_in_ex,
+case when p_f_in_ex = 'exclusive' then calc else 0.00 end as ref_calc,
+calc from (
+select pump.p_f_in_ex,(((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer -
 (((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))-((sum((COALESCE((COALESCE(pump.net_amount,0)),0)))*avg((COALESCE(pump.tax ,0.00))))/100))::integer*avg((COALESCE(pump.customer_discount ,0.00))))/100)::integer)
-* avg((COALESCE(pump.p_f ,0.00))))/100)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer)::integer as nett_sam
+* avg((COALESCE(pump.p_f ,0.00))))/100 as calc
+from ch_spare_offer pump
+
+where header_id = $P{offer_id}
+group by pump.p_f_in_ex
+) as sample
+) as sam where ref_calc != 0),0)::integer) * avg((COALESCE(pump.ed ,0.00))))/100)::integer) * avg((COALESCE(pump.tax ,0.00))))/100)::integer) * avg((COALESCE(pump.insurance ,0.00))))/100)::integer)::integer * avg((COALESCE(pump.dealer_discount ,0.00))))/100)::integer)::integer as nett_sam
 
 from ch_spare_offer pump
 
 where header_id = $P{offer_id}]]>
 		</queryString>
 		<field name="book_val" class="java.lang.Integer"/>
+		<field name="pf_val_wo_in_ex" class="java.lang.Integer"/>
 		<field name="pf_val" class="java.lang.Integer"/>
 		<field name="ed_val" class="java.lang.Integer"/>
 		<field name="tax" class="java.lang.Integer"/>
