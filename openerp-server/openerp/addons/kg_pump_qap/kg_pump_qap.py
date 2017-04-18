@@ -565,7 +565,7 @@ class kg_packing(osv.osv):
 		'operator': fields.selection([('comp_employee','Company Employee'),('contractor','Contractor')],'Done By'),
 		'contractor_id':fields.many2one('res.partner','Contractor',domain="[('contractor','=','t')]"),
 		'employee_id': fields.many2one('hr.employee','Employee Name'),
-		'verified_by': fields.char('Verified By'),
+		'verified_by': fields.many2one('hr.employee','Verified By',domain="[('active','=','t')]"),
 		'packing_id': fields.many2one('kg.packing.type','Packing Type',domain="[('active','=','t')]"),	
 		'wood_type': fields.char('Wood Type'),
 		'box_size': fields.char('Box Size (L*B*H)'),
@@ -577,7 +577,15 @@ class kg_packing(osv.osv):
 		'manual_book_attach': fields.binary('Manual Book'),
 		'photos_attach': fields.binary('Photos'),
 		'packing_state': fields.selection([('pending','Pending'),('completed','Completed')],'State'),
+		'outer_length': fields.float('Outer length'),
+		'outer_breadth': fields.float('Outer Breadth'),
+		'outer_height': fields.float('Outer Height'),
+		'inner_length': fields.float('Inner length'),
+		'inner_breadth': fields.float('Inner Breadth'),
+		'inner_height': fields.float('Inner Height'),
+		'closing_cft': fields.float('Closing CFT'),
 	}
+	
 		
 	
 
@@ -622,6 +630,10 @@ class kg_packing(osv.osv):
 	def onchange_pump_weight(self, cr, uid, ids, gross_weight, net_weight):
 		pump_wgt = net_weight - gross_weight
 		return {'value': {'pump_weight':pump_wgt}}
+		
+	def onchange_closing_cft(self, cr, uid, ids, outer_length, outer_breadth,outer_height,inner_length,inner_breadth,inner_height):
+		closing_cft = (outer_length*outer_breadth*outer_height) - (inner_length*inner_breadth*inner_height)
+		return {'value': {'closing_cft':closing_cft}}
 	
 	def packing_update(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])		

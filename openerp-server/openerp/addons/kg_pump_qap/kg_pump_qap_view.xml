@@ -698,8 +698,16 @@
 								<field name="verified_by" required="1" attrs="{'readonly': [('packing_state','=','completed')]}"/>
 								<field name="wood_type" required="1" attrs="{'readonly': ['|',('flag_customer_specific','!=',True),('packing_state','=','completed')]}"/>
 								<field name="gross_weight" required="1"  on_change="onchange_pump_weight(gross_weight, net_weight)" attrs="{'readonly': [('packing_state','=','completed')]}"/>
-								<field name="remarks" attrs="{'readonly': [('packing_state','=','completed')]}"/>
+								
+								<field name="outer_length" required="1" attrs="{'readonly': ['|',('flag_customer_specific','!=',True),('packing_state','=','completed')]}"
+									on_change="onchange_closing_cft(outer_length, outer_breadth,outer_height,inner_length,inner_breadth,inner_height)" />
+								<field name="outer_breadth" required="1" attrs="{'readonly': ['|',('flag_customer_specific','!=',True),('packing_state','=','completed')]}"
+									on_change="onchange_closing_cft(outer_length, outer_breadth,outer_height,inner_length,inner_breadth,inner_height)" />
+								<field name="outer_height" required="1" attrs="{'readonly': ['|',('flag_customer_specific','!=',True),('packing_state','=','completed')]}"
+									on_change="onchange_closing_cft(outer_length, outer_breadth,outer_height,inner_length,inner_breadth,inner_height)" />
 								<field name="packing_state" readonly="1"/>
+								<field name="remarks" attrs="{'readonly': [('packing_state','=','completed')]}"/>
+								
 								
 							</group>											
 							<group>
@@ -708,9 +716,16 @@
 								<field name="contractor_id" attrs="{'required':[('operator','=','contractor')],'invisible':[('operator','!=','contractor')],'readonly': [('packing_state','=','completed')]}"/>
 								<field name="employee_id" attrs="{'required':[('operator','=','comp_employee')],'invisible':[('operator','!=','comp_employee')],'readonly': [('packing_state','=','completed')]}"/>
 								<field name="packing_id" required="1" attrs="{'readonly': ['|',('flag_customer_specific','!=',True),('packing_state','=','completed')]}"/>
-								<field name="box_size" required="1" attrs="{'readonly': ['|',('flag_customer_specific','!=',True),('packing_state','=','completed')]}"/>
+								<field name="box_size" invisible="1" attrs="{'readonly': ['|',('flag_customer_specific','!=',True),('packing_state','=','completed')]}"/>
 								<field name="net_weight" required="1"  on_change="onchange_pump_weight(gross_weight, net_weight)" attrs="{'readonly': [('packing_state','=','completed')]}"/>
 								<field name="pump_weight" readonly="1"/>
+								<field name="inner_length" required="1" attrs="{'readonly': ['|',('flag_customer_specific','!=',True),('packing_state','=','completed')]}"
+									on_change="onchange_closing_cft(outer_length, outer_breadth,outer_height,inner_length,inner_breadth,inner_height)" />
+								<field name="inner_breadth" required="1" attrs="{'readonly': ['|',('flag_customer_specific','!=',True),('packing_state','=','completed')]}"
+									on_change="onchange_closing_cft(outer_length, outer_breadth,outer_height,inner_length,inner_breadth,inner_height)" />
+								<field name="inner_height" required="1" attrs="{'readonly': ['|',('flag_customer_specific','!=',True),('packing_state','=','completed')]}"
+									on_change="onchange_closing_cft(outer_length, outer_breadth,outer_height,inner_length,inner_breadth,inner_height)" />
+								<field name="closing_cft" required="1" readonly="1"/>
 								<field name="flag_customer_specific" attrs="{'readonly': [('packing_state','=','completed')]}"/>
 							</group>					
 						</group>
