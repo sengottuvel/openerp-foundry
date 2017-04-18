@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+	
+	<!-- Work Order Name process --> 
+		
+	<record forcecreate="1" id="seq_type_fettling_workoreder" model="ir.sequence.type">	
+		<field name="name">KG Fettling Work Order</field>
+		<field name="code">kg.fettling.workorder</field>
+	</record>
+
+	<record forcecreate="1" id="seq_fettling_workoreder" model="ir.sequence">
+	  <field name="name">KG Fettling Work Order</field>
+	  <field name="code">kg.fettling.workorder</field>
+	  <field name="padding" eval="5"/>
+	  <field name="prefix">F/SC/%(year)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- DC Name process --> 
+	
+	<record forcecreate="1" id="seq_type_fettling_dc" model="ir.sequence.type">	
+		<field name="name">KG Fettling DC</field>
+		<field name="code">kg.fettling.dc</field>
+	</record>
+
+	<record forcecreate="1" id="seq_fettling_dc" model="ir.sequence">
+	  <field name="name">KG Fettling DC</field>
+	  <field name="code">kg.fettling.dc</field>
+	  <field name="padding" eval="5"/>
+	  <field name="prefix">F/DC/%(year)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Inward Name process --> 
+	
+	<record forcecreate="1" id="seq_type_fettling_inward" model="ir.sequence.type">	
+		<field name="name">KG Fettling Inward</field>
+		<field name="code">kg.fettling.sc.inward</field>
+	</record>
+
+	<record forcecreate="1" id="seq_fettling_inward" model="ir.sequence">
+	  <field name="name">KG Fettling Inward</field>
+	  <field name="code">kg.fettling.sc.inward</field>
+	  <field name="padding" eval="5"/>
+	  <field name="prefix">F/INWARD/%(year)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+		
+	
+		
+</data>
+</openerp>

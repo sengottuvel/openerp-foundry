@@ -1,0 +1,672 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+	
+	
+	<!-- Fettling WO Starts Here -->
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_fettling_wo" model="ir.ui.view">
+			<field name="name">Fettling WO Form</field>
+			<field name="model">kg.fettling.workorder</field>
+			<field name="arch" type="xml">
+				<form string="Fettling WO" version="7.0">
+					<header>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
+						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight"/>
+						<button name="approve_dc" type="object" string="Approve &amp; DC" states="confirmed" class="oe_highlight"/>
+					</header>
+					<group>
+						<group>
+							<field name="name"/>
+							<field name="contractor_id" on_change="onchange_contractor(contractor_id)" required="1"  attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="phone" readonly="1"/>
+							<field name="wo_value" readonly="1"/>								
+						</group>											
+						<group>
+							<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="contact_person" readonly="1"/>
+							<field name="billing_type" invisible="1"/>
+							<field name="delivery_date" options="{'datepicker':{'maxDate': 185}}" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							
+							<field name="flag_spl_approve" invisible="1"/>
+							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
+						</group>					
+					</group>
+					<notebook>
+						<page string="Work Order Details">
+							<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}" >
+								<tree string = "Work Order Items" create="false" >
+									<field name="order_id" readonly="1"/>
+									<field name="pump_model_id" readonly="1"/>
+									<field name="pattern_id" readonly="1"/>
+									<field name="pattern_code" readonly="1"/>
+									<field name="pattern_name" readonly="1"/>
+									<field name="moc_id" readonly="1"/>
+									<field name="stage_id" readonly="1"/>
+									<field name="qty" readonly="1"/>										
+									<field name="amount" readonly="1"/>
+									<field name="remarks" widget="char" readonly="1"/>
+									<field name="oth_spec" widget="char" readonly="1"/>									
+								</tree>
+								<form>
+									<group>
+										<field name="order_id" readonly="1"/>
+										<field name="moc_id" readonly="1"/>										
+										<field name="stage_id" readonly="1"/>										
+										<field name="qty" readonly="1"/>
+										<field name="oth_spec" readonly="1"/>
+										<field name="seq_no" invisible="1"/>
+										<field name="remarks"/>
+																		
+									</group>											
+									<group>
+										<field name="pattern_id" readonly="1"/>
+										<field name="pattern_name" readonly="1"/>
+										<field name="pump_model_id" readonly="1"/>
+										<field name="each_weight" readonly="1"/>										
+										<field name="amount" readonly="1"/>										
+									</group>									
+									<notebook colspan="4">
+										<page string="Work Order Stage Details">	
+											<field colspan="4" name="line_ids" nolabel="1" context="{'moc_id':moc_id,'each_weight':each_weight,'seq_no':seq_no,}">
+												<tree string = "Work Order Stage Details" editable="bottom">
+													<field name="each_weight" invisible="1"/>
+													<field name="moc_id" invisible="1"/>
+													<field name="seq_no" invisible="1"/>
+													<field name="moc_stage_id" on_change="onchange_stage_id(moc_stage_id)"/>
+													<field name="stage_id" invisible="1" on_change="onchange_stage_rate(stage_id,moc_id,each_weight)"/>
+													<field name="stage_rate" readonly="1"/>
+													<field name="remarks" widget="char"/>																			
+												</tree>
+											</field>
+										</page>
+									</notebook>
+								</form>
+							</field>
+						</page>
+						<page string="Select Items">
+							<field name="fettling_line_ids" attrs="{'readonly': [('state','not in',['draft'])]}">
+								<tree string="Fettling Items" create="false">
+									<field name="order_no"/>
+									<field name="order_delivery_date"/>
+									<field name="order_priority" string="Category"/>
+									<field name="pattern_id"/>
+									<field name="pump_model_id"/>
+									<field name="pattern_code" />
+									<field name="pattern_name"/>
+									<field name="moc_id"/>
+									<field name="inward_accept_qty"/>
+									<field name="oth_spec" widget="char"/>
+								</tree>
+							</field>
+							<button name="update_line_items" class="proceed_button" type='object' string="Proceed" attrs="{'invisible': [('state','not in',['draft'])]}"/>
+						</page>
+						
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
+								<group>
+									<field name="user_id"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_fettling_wo" model="ir.ui.view">
+			<field name="name">Fettling WO Tree</field>
+			<field name="model">kg.fettling.workorder</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';black:state == 'confirmed'
+						;black:state == 'confirmed_dc';gray:state == 'cancel'" 
+						toolbar="True" string="Fettling WO Tree">					
+					<field name="name"/>
+					<field name="entry_date"/>
+					<field name="contractor_id"/>
+					<field name="billing_type"/>
+					<field name="wo_value"/>
+					<field name="delivery_date"/>
+					<field name="state"/>					
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Fettling Subcontract WO Line Tree View Start -->
+		
+		<record id="t_tree_v_fettling_wo_line" model="ir.ui.view">
+			<field name="name">Subcontract Fettling Line Tree</field>
+			<field name="model">ch.fettling.wo.line</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Fettling Subcontract WO Line Tree">				
+					<field name="order_id"/>
+					<field name="pump_model_id"/>					
+					<field name="pattern_id"/>
+					<field name="moc_id"/>								
+					<field name="qty" sum="Total SC Qty"/>
+					<field name="pending_qty" sum="Total SC Qty"/>					
+				</tree>
+			</field>
+		</record>
+		
+	<!--Fettling Subcontract WO Line Tree View End -->
+	
+	
+	<!-- Search View Start -->
+
+		<record id="t_search_v_fettling_wo" model="ir.ui.view">
+            <field name="name">Fettling WO Search</field>
+            <field name="model">kg.fettling.workorder</field>
+            <field name="arch" type="xml">
+                <search string="Fettling WO Search">
+					
+					<field name="name" string="WO No."  filter_domain="[('name','ilike',self)]" />
+					<field name="contractor_id" string="Contractor Name"  filter_domain="[('contractor_id','ilike',self)]" />					
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>					
+					<filter icon="terp-check" name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>				
+				
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'name'}"/>
+						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'delivery_date'}"/>
+						<filter string="Contractor" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'contractor_id'}"/>
+						<filter string="State" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>						
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+		
+		<!-- Menu Action Start -->
+		
+		
+		<record id="tma_fettling_wo" model="ir.actions.act_window">
+			<field name="name">Fettling WO</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.fettling.workorder</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="search_view_id" ref="t_search_v_fettling_wo"/>
+			<field name="domain">[('state','in',('draft','approved','approved_dc','cancel')),('flag_spl_approve','=',False)]</field>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_fettling_wo_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_fettling_wo"/>
+            <field name="act_window_id" ref="tma_fettling_wo"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_fettling_wo_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_fettling_wo"/>
+            <field name="act_window_id" ref="tma_fettling_wo"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Menu Action Start -->
+		
+		
+		<record id="tma_fettling_wo_spl" model="ir.actions.act_window">
+			<field name="name">Special Approval WO</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.fettling.workorder</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="search_view_id" ref="t_search_v_fettling_wo"/>
+			<field name="domain">[('state','=','confirmed'),('flag_spl_approve','=',True)]</field>
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_fettling_wo_tree_view_spl">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_fettling_wo"/>
+            <field name="act_window_id" ref="tma_fettling_wo_spl"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_fettling_wo_form_view_spl">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_fettling_wo"/>
+            <field name="act_window_id" ref="tma_fettling_wo_spl"/>
+        </record>
+		
+	<!-- Menu Action End-->
+
+	
+	<!-- Audit Log Xml Data Start -->
+		
+        <record id="audit_fettling_wo" model="audittrail.rule">
+            <field name="name">Audit Subcontract WO</field>
+            <field name="object_id" eval="ref('kg_fettling_process.model_kg_fettling_workorder')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->	    
+    
+    <!-- Fettling DC Starts Here -->
+	
+	<!-- Form DC View Start -->
+
+		<record id="t_form_v_fettling_dc" model="ir.ui.view">
+			<field name="name">Fettling DC Form</field>
+			<field name="model">kg.fettling.dc</field>
+			<field name="arch" type="xml">
+				<form string="Fettling DC" version="7.0">
+					<header>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>						
+					</header>
+					<group>
+						<group>
+							<field name="name"/>
+							<field name="contractor_id" on_change="onchange_contractor(contractor_id)" required="1"  attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="phone" readonly="1"/>
+							<field name="to_division_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="annexure_no" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+																				
+						</group>											
+						<group>
+							<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="annexure_date" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="contact_person" readonly="1"/>
+							<field name="division_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>							
+							<field name="vehicle_detail" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}" required="1"/>						
+							<field name="entry_mode" invisible="1"/>	
+							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
+						</group>					
+					</group>
+					<notebook>
+						<page string="DC Details">
+							<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
+								<tree string = "Work Order Items" editable="bottom" create="false">
+									<field name="order_id" readonly="1"/>
+									<field name="pump_model_id" readonly="1"/>
+									<field name="pattern_id" readonly="1"/>
+									<field name="pattern_code" readonly="1"/>
+									<field name="entry_mode" invisible="1"/>
+									<field name="pattern_name" readonly="1"/>
+									<field name="moc_id" readonly="1"/>									
+									<field name="moc_stage_id" required="1" widget="many2many_tags" readonly="1"/>							
+									<field name="each_weight" readonly="1" />
+									<field name="qty" readonly="1"/>
+									<field name="oth_spec" widget="char"/>									
+									<field name="remarks" widget="char"/>
+								</tree>
+							</field>
+						</page>
+						<page string="Select Items" attrs="{'invisible': [('entry_mode','=','auto')]}">
+							<field name="dc_sub_line_ids" attrs="{'readonly': [('state','not in',['draft'])]}">
+								<tree string="Work Order Line Items" create="false">
+									<field name="order_id"/>
+									<field name="pump_model_id"/>
+									<field name="pattern_id"/>
+									<field name="moc_id"/>
+									<field name="each_weight"/>
+									<field name="qty" />
+									<field name="pending_qty" />									
+								</tree>
+							</field>
+							<button name="update_line_items" class="proceed_button" type='object' string="Proceed" attrs="{'invisible': [('state','not in',['draft'])]}"/>
+						</page>
+						
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
+								<group>
+									<field name="user_id"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_fettling_dc" model="ir.ui.view">
+			<field name="name">Fettling DC Tree</field>
+			<field name="model">kg.fettling.dc</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';black:state == 'confirmed';gray:state == 'cancel'" 
+						toolbar="True" string="Fettling WO Tree">					
+					<field name="name"/>
+					<field name="entry_date"/>					
+					<field name="sub_wo_no"/>					
+					<field name="contractor_id"/>	
+					<field name="state"/>					
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- DC Line Tree View Start -->
+		
+	<record id="t_tree_v_fettling_dc_line" model="ir.ui.view">
+		<field name="name">Fettling Subcontract DC Line Tree</field>
+		<field name="model">ch.fettling.dc.line</field>
+		<field eval="8" name="priority"/>
+		<field name="arch" type="xml">
+			<tree toolbar="True" string="Fettling Subcontract DC Line Tree">				
+				<field name="order_id"/>
+				<field name="pump_model_id"/>					
+				<field name="pattern_id"/>
+				<field name="moc_id"/>								
+				<field name="qty" sum="Total SC Qty"/>
+				<field name="pending_qty" sum="Total SC Qty"/>						
+			</tree>
+		</field>
+	</record>
+		
+	<!-- Tree View End -->
+	
+	
+	<!-- Search View Start -->
+
+		<record id="t_search_v_fettling_dc" model="ir.ui.view">
+            <field name="name">Fettling DC Search</field>
+            <field name="model">kg.fettling.dc</field>
+            <field name="arch" type="xml">
+                <search string="Fettling DC Search">
+					
+					<field name="name" string="DC No."  filter_domain="[('name','ilike',self)]" />
+					<field name="contractor_id" string="Contractor Name"  filter_domain="[('contractor_id','ilike',self)]" />					
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>					
+					<filter icon="terp-check" name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>				
+				
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="DC No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'name'}"/>						
+						<filter string="Contractor" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'contractor_id'}"/>
+						<filter string="State" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>						
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+		
+		<!-- Menu Action Start -->
+		
+		
+		<record id="tma_fettling_dc" model="ir.actions.act_window">
+			<field name="name">Fettling DC</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.fettling.dc</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="search_view_id" ref="t_search_v_fettling_dc"/>
+			
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_fettling_dc_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_fettling_dc"/>
+            <field name="act_window_id" ref="tma_fettling_dc"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_fettling_dc_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_fettling_dc"/>
+            <field name="act_window_id" ref="tma_fettling_dc"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start -->
+		
+        <record id="audit_fettling_dc" model="audittrail.rule">
+            <field name="name">Audit Subcontract DC</field>
+            <field name="object_id" eval="ref('kg_fettling_process.model_kg_fettling_dc')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->	
+    
+    
+     <!-- Fettling Inward Starts Here -->
+	
+	<!-- Form Inward View Start -->
+
+		<record id="t_form_v_fettling_inward" model="ir.ui.view">
+			<field name="name">Fettling Inward Form</field>
+			<field name="model">kg.fettling.inward</field>
+			<field name="arch" type="xml">
+				<form string="Fettling Inward" version="7.0">
+					<header>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>						
+					</header>
+					<group>
+						<group>
+							<field name="name"/>
+							<field name="contractor_id" on_change="onchange_contractor(contractor_id)" required="1"  attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="phone" readonly="1"/>
+							<field name="to_division_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>						
+																				
+						</group>											
+						<group>
+							<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="contact_person" readonly="1"/>
+							<field name="division_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>											
+							<field name="entry_mode" invisible="1"/>	
+							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
+						</group>					
+					</group>
+					<notebook>
+						<page string="Inward Details">
+							<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
+								<tree string = "Work Order Items" editable="bottom" create="false">
+									<field name="order_id" readonly="1"/>
+									<field name="pump_model_id" readonly="1"/>
+									<field name="pattern_id" readonly="1"/>
+									<field name="pattern_code" readonly="1"/>
+									<field name="entry_mode" invisible="1"/>
+									<field name="pattern_name" readonly="1"/>
+									<field name="moc_id" readonly="1"/>									
+									<field name="moc_stage_id" required="1" widget="many2many_tags" readonly="1"/>							
+									<field name="com_moc_stage_id" required="1" widget="many2many_tags"/>							
+									<field name="each_weight" readonly="1" />
+									<field name="qty" readonly="1"/>
+									<field name="oth_spec" widget="char"/>									
+									<field name="remarks" widget="char"/>
+								</tree>
+							</field>
+						</page>
+						<page string="Select Items" attrs="{'invisible': [('entry_mode','=','auto')]}">
+							<field name="inward_sub_line_ids" attrs="{'readonly': [('state','not in',['draft'])]}">
+								<tree string="Work Order Line Items" create="false">
+									<field name="order_id"/>
+									<field name="pump_model_id"/>
+									<field name="pattern_id"/>
+									<field name="moc_id"/>
+									<field name="each_weight"/>
+									<field name="qty" />
+									<field name="pending_qty" />									
+								</tree>
+							</field>
+							<button name="update_line_items" class="proceed_button" type='object' string="Proceed" attrs="{'invisible': [('state','not in',['draft'])]}"/>
+						</page>						
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
+								<group>
+									<field name="user_id"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_fettling_inward" model="ir.ui.view">
+			<field name="name">Fettling Inward Tree</field>
+			<field name="model">kg.fettling.inward</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';black:state == 'confirmed';gray:state == 'cancel'" 
+						toolbar="True" string="Fettling Inward Tree">					
+					<field name="name"/>
+					<field name="entry_date"/>							
+					<field name="contractor_id"/>	
+					<field name="state"/>					
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Inward Line Tree View Start -->
+		
+	<record id="t_tree_v_fettling_inward_line" model="ir.ui.view">
+		<field name="name">Fettling Subcontract Inward Line Tree</field>
+		<field name="model">ch.fettling.inward.line</field>
+		<field eval="8" name="priority"/>
+		<field name="arch" type="xml">
+			<tree toolbar="True" string="Fettling Subcontract Inward Line Tree">				
+				<field name="order_id"/>
+				<field name="pump_model_id"/>					
+				<field name="pattern_id"/>
+				<field name="moc_id"/>								
+				<field name="qty" sum="Total SC Qty"/>
+				<field name="pending_qty" sum="Total SC Qty"/>						
+			</tree>
+		</field>
+	</record>
+		
+	<!-- Tree View End -->
+	
+	
+	<!-- Search View Start -->
+
+		<record id="t_search_v_fettling_inward" model="ir.ui.view">
+            <field name="name">Fettling Inward Search</field>
+            <field name="model">kg.fettling.inward</field>
+            <field name="arch" type="xml">
+                <search string="Fettling Inward Search">
+					
+					<field name="name" string="Inward No."  filter_domain="[('name','ilike',self)]" />
+					<field name="contractor_id" string="Contractor Name"  filter_domain="[('contractor_id','ilike',self)]" />					
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>					
+					<filter icon="terp-check" name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>				
+				
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="Inward No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'name'}"/>						
+						<filter string="Contractor" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'contractor_id'}"/>
+						<filter string="State" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>						
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+		
+		<!-- Menu Action Start -->
+		
+		
+		<record id="tma_fettling_inward" model="ir.actions.act_window">
+			<field name="name">Fettling Inward</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.fettling.inward</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="search_view_id" ref="t_search_v_fettling_inward"/>
+			
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_fettling_inward_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_fettling_inward"/>
+            <field name="act_window_id" ref="tma_fettling_inward"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_fettling_inward_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_fettling_inward"/>
+            <field name="act_window_id" ref="tma_fettling_inward"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start -->
+		
+        <record id="audit_fettling_inward" model="audittrail.rule">
+            <field name="name">Audit Subcontract Inward</field>
+            <field name="object_id" eval="ref('kg_fettling_process.model_kg_fettling_inward')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->	   
+		
+		
+	<!-- Menu Item Starts Here -->
+	
+	<menuitem action="tma_fettling_wo" id="tam_fettling_workorder" parent="kg_fettling.tpm_fettling_process" sequence="21"/>
+	<menuitem action="tma_fettling_dc" id="tam_fettling_dc" parent="kg_fettling.tpm_fettling_process" sequence="22"/>
+	<menuitem action="tma_fettling_inward" id="tam_fettling_inward" parent="kg_fettling.tpm_fettling_process" sequence="23"/>
+	
+	
+	</data>
+</openerp>

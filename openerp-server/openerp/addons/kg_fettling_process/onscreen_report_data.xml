@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>		
+	
+		<report string="DC Print Copy"
+        model="kg.fettling.dc"
+        auto="True"
+        name="onscreen_fettling_print_report"
+        rml="kg_fettling_process/report/kg_fettling_dc_onscreen_report.jrxml"
+        id="fettling_jasper_report_menu" 
+        menu="True"
+        header="False"
+        />
+		
+	</data>
+</openerp>

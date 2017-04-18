@@ -1060,6 +1060,113 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
+		<!-- Karthikeyan Added Fettling Process Start-->
+		
+		<record id="t_foundry_fettling_process_sub_wo" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling_process.model_kg_fettling_workorder"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Fettling Process WO</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_foundry_fettling_process_sub_wo_line" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling_process.model_ch_fettling_wo_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Fettling Process WO Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_foundry_fettling_process_sub_wo_stage" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling_process.model_ch_wo_stage_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Fettling Process WO Stage Details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_foundry_fettling_process_sub_dc" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling_process.model_kg_fettling_dc"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Fettling Process DC</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_foundry_fettling_process_sub_dc_line" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling_process.model_ch_fettling_dc_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Fettling Process DC Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_foundry_fettling_process_sub_inward" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling_process.model_kg_fettling_inward"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Fettling Process Inward</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_foundry_fettling_process_sub_inward_line" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling_process.model_ch_fettling_inward_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Fettling Process Inward Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		
+		<!-- Invoice Process -->
+		
+		<record id="t_foundry_fettling_process_invoice" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling_invoice.model_kg_fettling_invoice"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Fettling Invoice</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_foundry_fettling_process_invoice_line" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling_invoice.model_ch_fettling_invoice_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Fettling Invoice Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_foundry_fettling_process_invoice_line_exp" model="ir.model.access">
+			<field name="model_id" ref="kg_fettling_invoice.model_ch_fettling_invoice_expense_track"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Fettling Invoice Line Expense</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+	<!-- Karthikeyan Added Fettling Process END-->
+		
     </data>
 </openerp>
 	
