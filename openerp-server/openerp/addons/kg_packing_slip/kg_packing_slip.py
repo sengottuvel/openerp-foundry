@@ -127,6 +127,16 @@ class kg_packing_slip(osv.osv):
 			return False
 		return True
 		
+	def onchange_assembly_id(self, cr, uid, ids, assembly_id):
+		value = {'order_id':False,'order_line_id':False}
+		if assembly_id:
+			ass_rec = self.pool.get('kg.assembly.inward').browse(cr,uid,assembly_id)	
+			value = {'order_id': ass_rec.order_id.id,'order_line_id': ass_rec.order_line_id.id,
+			'pump_model_type':ass_rec.order_line_id.pump_model_type}
+
+		return {'value': value}
+		
+		
 	def onchange_pump_serial(self, cr, uid, ids, assembly_id,packing_type,order_line_id):
 		value = {'order_id':False,'order_line_id':False}
 		default_items = []
@@ -213,13 +223,7 @@ class kg_packing_slip(osv.osv):
 				})
 			value = {'order_id': order_rec.header_id.id,'order_line_id': order_rec.id,
 			'pump_model_type':order_rec.pump_model_type,'line_ids':default_items}
-			
-		if assembly_id:
-			ass_rec = self.pool.get('kg.assembly.inward').browse(cr,uid,assembly_id)
-			
-			value = {'order_id': ass_rec.order_id.id,'order_line_id': ass_rec.order_line_id.id,
-			'pump_model_type':ass_rec.order_line_id.pump_model_type}
-			
+		
 
 		return {'value': value}
 		

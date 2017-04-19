@@ -8,7 +8,7 @@
 			<field name="name">Packing Slip Entry Form</field>
 			<field name="model">kg.packing.slip</field>
 			<field name="arch" type="xml">
-				<form string="Packing Slip" version="7.0" create="false">
+				<form string="Packing Slip" version="7.0">
 					<header>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 					</header>
@@ -17,7 +17,7 @@
 							<field name="name" invisible="1" readonly="1"/>
 							<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 							<field name="assembly_id" attrs="{'readonly': [('state','not in',['draft'])],'required': [('packing_type','=','pump')]}"
-								on_change="onchange_pump_serial(assembly_id,packing_type,order_line_id)"/>
+								on_change="onchange_assembly_id(assembly_id)"/>
 							<field name="pump_model_type"/>
 							<field name="note" attrs="{'readonly': [('state','not in',['draft'])]}"/>
 							<button name="load_bom" type="object" string="Load Bom" attrs="{'invisible': [('state','not in',['draft'])]}"/>
@@ -138,7 +138,7 @@
 						<page string="Other Checklist">
 							<field name="line_ids_e" colspan="4" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}">
 								<tree string="Checklist Items" editable="top">
-								   <field name="checklist_id" />
+								   <field name="checklist_id" required="1"/>
 								   <field name="value" />
 								   <field name="remarks" widget="char"/>
 								</tree>

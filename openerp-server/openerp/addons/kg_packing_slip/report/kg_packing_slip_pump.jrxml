@@ -36,19 +36,19 @@ order by id asc)
 
 union
 
-(select description,qty::char as value,remarks,2 as type from ch_packing_accessories_foundry
+(select description,qty::char as value,remarks,5 as type from ch_packing_accessories_foundry
 where header_id in (select id from ch_packing_accessories where header_id = $P{slip_id})
 order by id asc)
 
 union
 
-(select description,qty::char as value,remarks,3 as type from ch_packing_accessories_ms
+(select description,qty::char as value,remarks,6 as type from ch_packing_accessories_ms
 where header_id in (select id from ch_packing_accessories where header_id =$P{slip_id} )
 order by id asc)
 
 union
 
-(select description,qty::char as value,remarks,4 as type from ch_packing_accessories_bot
+(select description,qty::char as value,remarks,7 as type from ch_packing_accessories_bot
 where header_id in (select id from ch_packing_accessories where header_id =$P{slip_id})
 order by id asc
 )
@@ -56,7 +56,7 @@ order by id asc
 union
 
 (select
-check_master.name as description,pack_check.value::char as value,pack_check.remarks,5 as type
+check_master.name as description,pack_check.value::char as value,pack_check.remarks,8 as type
 from ch_packing_checklist pack_check
 left join kg_packing_checklist check_master on (check_master.id = pack_check.checklist_id)
 where pack_check.header_id = $P{slip_id}
@@ -327,7 +327,7 @@ select regexp_split_to_table($P{slip_id}, ',') as sam) as sam) limit 1]]>
 					<reportElement x="0" y="0" width="751" height="572">
 						<printWhenExpression><![CDATA[(new Boolean(($F{state}.equals("draft"))))]]></printWhenExpression>
 					</reportElement>
-					<imageExpression><![CDATA["/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_packing_slip/images/Draft.jpg"]]></imageExpression>
+					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_packing_slip/images/Draft.jpg"]]></imageExpression>
 				</image>
 			</frame>
 		</band>
@@ -363,7 +363,7 @@ select regexp_split_to_table($P{slip_id}, ',') as sam) as sam) limit 1]]>
 				<box>
 					<topPen lineWidth="0.5"/>
 				</box>
-				<imageExpression><![CDATA["/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
 			</image>
 		</band>
 	</title>

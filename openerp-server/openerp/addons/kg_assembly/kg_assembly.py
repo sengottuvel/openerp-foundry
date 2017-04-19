@@ -34,6 +34,7 @@ class kg_assembly_inward(osv.osv):
 	_name = "kg.assembly.inward"
 	_description = "Assembly Inward Entry"
 	_order = "entry_date desc"
+	_rec_name = "pump_serial_no"
 	
 	def _get_default_division(self, cr, uid, context=None):
 		res = self.pool.get('kg.division.master').search(cr, uid, [('code','=','SAM'),('state','=','approved'), ('active','=','t')], context=context)
@@ -189,14 +190,14 @@ class kg_assembly_inward(osv.osv):
 			
 			### Heat Details Checking ###
 			for foundry_line_item in entry_rec.line_ids:
-				if foundry_line_item.pattern_id.need_dynamic_balancing == True:
-					if not foundry_line_item.line_ids:
-						raise osv.except_osv(_('Warning !'), _('DB Reference No. is required for Pattern %s !!')%(foundry_line_item.pattern_id.name))
-					if foundry_line_item.line_ids:
-						for foun_item in foundry_line_item.line_ids:
-							print "foun_item",foun_item.db_id
-							if not foun_item.db_id:
-								raise osv.except_osv(_('Warning !'), _('DB Reference No. is required for Pattern %s !!')%(foundry_line_item.pattern_id.name))
+				#~ if foundry_line_item.pattern_id.need_dynamic_balancing == True:
+					#~ if not foundry_line_item.line_ids:
+						#~ raise osv.except_osv(_('Warning !'), _('DB Reference No. is required for Pattern %s !!')%(foundry_line_item.pattern_id.name))
+					#~ if foundry_line_item.line_ids:
+						#~ for foun_item in foundry_line_item.line_ids:
+							#~ print "foun_item",foun_item.db_id
+							#~ if not foun_item.db_id:
+								#~ raise osv.except_osv(_('Warning !'), _('DB Reference No. is required for Pattern %s !!')%(foundry_line_item.pattern_id.name))
 				if foundry_line_item.pattern_id.flag_heat_no == True:
 					if not foundry_line_item.line_ids:
 						raise osv.except_osv(_('Warning !'), _('Heat No. is required for Pattern %s !!')%(foundry_line_item.pattern_id.name))

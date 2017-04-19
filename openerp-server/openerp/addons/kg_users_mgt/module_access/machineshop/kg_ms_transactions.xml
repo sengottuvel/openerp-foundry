@@ -509,5 +509,105 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
+		<record id="t_ms_packing_slip" model="ir.model.access">
+			<field name="model_id" ref="kg_packing_slip.model_kg_packing_slip"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Packing Slip</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_packing_default" model="ir.model.access">
+			<field name="model_id" ref="kg_packing_slip.model_ch_packing_default_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Packing Default details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_ch_packing_foundry_details" model="ir.model.access">
+			<field name="model_id" ref="kg_packing_slip.model_ch_packing_foundry_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Packing Foundry details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_ch_packing_ms_details" model="ir.model.access">
+			<field name="model_id" ref="kg_packing_slip.model_ch_packing_ms_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Packing MS details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_ch_packing_bot_details" model="ir.model.access">
+			<field name="model_id" ref="kg_packing_slip.model_ch_packing_bot_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Packing BOT details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_ch_packing_accessories" model="ir.model.access">
+			<field name="model_id" ref="kg_packing_slip.model_ch_packing_accessories"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Packing Accessories</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_ch_packing_accessories_foundry" model="ir.model.access">
+			<field name="model_id" ref="kg_packing_slip.model_ch_packing_accessories_foundry"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Packing Accessories Foundry</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_ch_packing_accessories_ms" model="ir.model.access">
+			<field name="model_id" ref="kg_packing_slip.model_ch_packing_accessories_ms"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Packing Accessories MS</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_ch_packing_accessories_bot" model="ir.model.access">
+			<field name="model_id" ref="kg_packing_slip.model_ch_packing_accessories_bot"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Packing Accessories BOT</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_ch_packing_checklist" model="ir.model.access">
+			<field name="model_id" ref="kg_packing_slip.model_ch_packing_checklist"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Packing Checklist</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
     </data>
 </openerp>

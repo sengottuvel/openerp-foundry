@@ -14,7 +14,7 @@
 			<![CDATA[select * from (
 
 
-(select '' as moc,description,value,'' as remarks,1 as type,
+(select '' as moc,description,value,'' as material_code,1 as type,
 DENSE_RANK() OVER (ORDER BY id asc) AS test
  from ch_packing_default_details where header_id = $P{slip_id}
 order by id)
@@ -25,7 +25,7 @@ union
 select *,7 as test from (
 
 
-(select moc.name as moc,pack_foun.description,pack_foun.qty::char as value,pack_foun.remarks,2 as type from ch_packing_foundry_details pack_foun
+(select moc.name as moc,pack_foun.description,pack_foun.qty::char as value,pack_foun.material_code,2 as type from ch_packing_foundry_details pack_foun
 left join kg_moc_master moc on (moc.id = pack_foun.moc_id)
 
 
@@ -35,7 +35,7 @@ order by pack_foun.id asc)
 
 union
 
-(select moc.name as moc,pack_ms.description,pack_ms.qty::char as value,pack_ms.remarks,3 as type from ch_packing_ms_details pack_ms
+(select moc.name as moc,pack_ms.description,pack_ms.qty::char as value,pack_ms.material_code,3 as type from ch_packing_ms_details pack_ms
 
 left join kg_moc_master moc on (moc.id = pack_ms.moc_id)
 where pack_ms.header_id = $P{slip_id}
@@ -43,14 +43,14 @@ order by pack_ms.id asc)
 
 union
 
-(select moc.name as moc,pack_bot.description,pack_bot.qty::char as value,pack_bot.remarks,4 as type from ch_packing_bot_details pack_bot
+(select moc.name as moc,pack_bot.description,pack_bot.qty::char as value,pack_bot.material_code,4 as type from ch_packing_bot_details pack_bot
 left join kg_moc_master moc on (moc.id = pack_bot.moc_id)
 where pack_bot.header_id = $P{slip_id}
 order by pack_bot.id asc)
 
 union
 
-(select moc.name as moc,acc_foun.description,acc_foun.qty::char as value,acc_foun.remarks,2 as type from ch_packing_accessories_foundry acc_foun
+(select moc.name as moc,acc_foun.description,acc_foun.qty::char as value,acc_foun.material_code,5 as type from ch_packing_accessories_foundry acc_foun
 
 left join kg_moc_master moc on (moc.id = acc_foun.moc_id)
 where acc_foun.header_id in (select id from ch_packing_accessories where header_id =$P{slip_id} )
@@ -58,14 +58,14 @@ order by acc_foun.id asc)
 
 union
 
-(select moc.name as moc,acc_ms.description,acc_ms.qty::char as value,acc_ms.remarks,3 as type from ch_packing_accessories_ms acc_ms
+(select moc.name as moc,acc_ms.description,acc_ms.qty::char as value,acc_ms.material_code,6 as type from ch_packing_accessories_ms acc_ms
 left join kg_moc_master moc on (moc.id = acc_ms.moc_id)
 where acc_ms.header_id in (select id from ch_packing_accessories where header_id =$P{slip_id} )
 order by acc_ms.id asc)
 
 union
 
-(select moc.name as moc,acc_bot.description,acc_bot.qty::char as value,acc_bot.remarks,4 as type from ch_packing_accessories_bot acc_bot
+(select moc.name as moc,acc_bot.description,acc_bot.qty::char as value,acc_bot.material_code,7 as type from ch_packing_accessories_bot acc_bot
 left join kg_moc_master moc on (moc.id = acc_bot.moc_id)
 where acc_bot.header_id in (select id from ch_packing_accessories where header_id =$P{slip_id})
 order by acc_bot.id asc
@@ -74,7 +74,7 @@ order by acc_bot.id asc
 union
 
 (select
-'' as moc,check_master.name as description,pack_check.value::char as value,pack_check.remarks,5 as type
+'' as moc,check_master.name as description,pack_check.value::char as value,'' as material_code,8 as type
 from ch_packing_checklist pack_check
 left join kg_packing_checklist check_master on (check_master.id = pack_check.checklist_id)
 where pack_check.header_id = $P{slip_id}
@@ -87,7 +87,7 @@ order by pack_check.id asc)
 		<field name="moc" class="java.lang.String"/>
 		<field name="description" class="java.lang.String"/>
 		<field name="value" class="java.lang.String"/>
-		<field name="remarks" class="java.lang.String"/>
+		<field name="material_code" class="java.lang.String"/>
 		<field name="type" class="java.lang.Integer"/>
 		<field name="test" class="java.lang.Long"/>
 	</subDataset>
@@ -195,7 +195,7 @@ select regexp_split_to_table($P{slip_id}, ',') as sam) as sam) limit 1]]>
 					<textElement textAlignment="Center">
 						<font size="10" isBold="true" isStrikeThrough="false"/>
 					</textElement>
-					<textFieldExpression><![CDATA["Remarks"]]></textFieldExpression>
+					<textFieldExpression><![CDATA["Material Code"]]></textFieldExpression>
 				</textField>
 				<textField>
 					<reportElement x="274" y="0" width="111" height="22"/>
@@ -278,14 +278,14 @@ select regexp_split_to_table($P{slip_id}, ',') as sam) as sam) limit 1]]>
 							</textField>
 							<textField isBlankWhenNull="true">
 								<reportElement x="597" y="0" width="155" height="20"/>
-								<box topPadding="2" leftPadding="2">
+								<box topPadding="2" leftPadding="2" rightPadding="2">
 									<topPen lineWidth="0.5"/>
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textElement/>
-								<textFieldExpression><![CDATA[$F{remarks}]]></textFieldExpression>
+								<textElement textAlignment="Right"/>
+								<textFieldExpression><![CDATA[$F{material_code}]]></textFieldExpression>
 							</textField>
 							<textField>
 								<reportElement x="274" y="0" width="111" height="20"/>
@@ -396,7 +396,7 @@ select regexp_split_to_table($P{slip_id}, ',') as sam) as sam) limit 1]]>
 					<reportElement x="0" y="0" width="751" height="572">
 						<printWhenExpression><![CDATA[(new Boolean(($F{state}.equals("draft"))))]]></printWhenExpression>
 					</reportElement>
-					<imageExpression><![CDATA["/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_packing_slip/images/Draft.jpg"]]></imageExpression>
+					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/kg_packing_slip/images/Draft.jpg"]]></imageExpression>
 				</image>
 			</frame>
 		</band>
@@ -432,7 +432,7 @@ select regexp_split_to_table($P{slip_id}, ',') as sam) as sam) limit 1]]>
 				<box>
 					<topPen lineWidth="0.5"/>
 				</box>
-				<imageExpression><![CDATA["/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
 			</image>
 		</band>
 	</title>
