@@ -57,7 +57,7 @@ class kg_employee_category(osv.osv):
 			
 		'name': fields.char('Name', size=128, required=True, select=True),	
 		'code': fields.char('Code', size=4, required=True),		
-		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
+		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled'),('revised','Revised')],'Status', readonly=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
@@ -89,7 +89,9 @@ class kg_employee_category(osv.osv):
 		'driver_batta':fields.float('Driver Batta(Per Day)'),	
 		'bonus_categ': fields.selection([('turn_over','Turn Over'),('attendance','Attendance'),('yrs_of_service','Year Of Service'),('not_applicable','Not Applicable')],'Bonus Category'),
 		'no_of_days_wage':fields.integer('No Of Days Wages'),
-		'sal_calc': fields.selection([('cal_days','Calendar Days'),('working_days','Working Days')],'Salary Calculation Days'),	
+		'sal_calc': fields.selection([('cal_days','Calendar Days'),('working_days','Working Days'),('week_days','Week Days')],'Salary Calculation Days'),	
+		'parent_id':fields.many2one('kg.employee.category','Parent ID'),
+		
 		## Child Tables Declaration		
 		
 		'line_id_1': fields.one2many('ch.special.incentive.policy', 'header_id_1','Special Incentive Policy'),
@@ -111,12 +113,6 @@ class kg_employee_category(osv.osv):
 		'entry_mode': 'manual',
 		
 	}
-	
-	_sql_constraints = [
-	
-		('name', 'unique(name)', 'Name must be unique per Category !!'),
-		('code', 'unique(code)', 'Code must be unique per Category !!'),
-	]
 	
 	### Basic Needs
 	
@@ -168,6 +164,15 @@ class kg_employee_category(osv.osv):
 	## Validations 
 	def val_negative(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
+		if rec.state != 'revised':
+			ser_name_dup = self.search(cr,uid,[('name','=',rec.name),('active','=',True),('id','!=',rec.id)])
+			if ser_name_dup:
+				raise osv.except_osv(_('Warning!'),
+					_('Category Name already exists !!'))
+			ser_code_dup = self.search(cr,uid,[('code','=',rec.code),('active','=',True),('id','!=',rec.id)])
+			if ser_code_dup:
+				raise osv.except_osv(_('Warning!'),
+					_('Category Code already exists !!'))
 		if rec.monthly_per_hrs <= 0:
 			raise osv.except_osv(_('Warning!'),
 						_('Negative Values and Zeros are not allowed in Monthly Permission Hours !!'))
@@ -254,6 +259,18 @@ class kg_employee_category(osv.osv):
 		return True
 								
 	## Module Requirement
+	
+	def revise_category (self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		vals = {
+				'active' : False,
+				'parent_id' : rec.id,
+				'state' : 'revised'
+				}			
+		copy_rec = self.copy(cr, uid,rec.id,vals, context) 
+		self.write(cr, uid, ids, {'state': 'draft'})
+		return True
+	
 
 	_constraints = [
 

@@ -8,13 +8,14 @@
 			<field name="name">Employee Category</field>
 			<field name="model">kg.employee.category</field>
 			<field name="arch" type="xml">
-				<form string="Employee Category" version="7.0">					
+				<form string="Employee Category" version="7.0" >					
 					<header>
 						<button name="entry_reject" type="object" string="Reject" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
 						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
-						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+						<button name="entry_draft" type="object" states="approved" string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="1"/>
+						<button name="revise_category" type="object" states="approved" string="Revise" class="oe_highlight" confirm="Are you sure to proceed ?"/>
 						
 					</header>
 						<group>
@@ -191,11 +192,13 @@
 		
 		 <!-- Audit Log Xml Data Start -->
 		
+
         <record id="division_kg_emp_categ" model="audittrail.rule">
             <field name="name">Audit Log Employee Category</field>
             <field name="object_id" eval="ref('kg_employee_category.model_kg_employee_category')"/>       
             <field name="state">subscribed</field>              
         </record>
+
         
         <!-- Audit Log Xml Data End-->
 		
