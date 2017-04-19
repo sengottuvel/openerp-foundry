@@ -192,6 +192,50 @@
 		
 		<!-- QAP Plan Master end -->
 		
+		<!-- Equipment master Start here -->
+		
+		<record id="m_ms_equipment_master" model="ir.model.access">
+			<field name="model_id" ref="kg_equipment_master.model_kg_equipment_master"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Equipment master</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="m_ms_equipment_master_gig" model="ir.model.access">
+			<field name="model_id" ref="kg_equipment_master.model_ch_equipment_gig"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Equipment master Gig</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="m_ms_equipment_master_cage" model="ir.model.access">
+			<field name="model_id" ref="kg_equipment_master.model_ch_equipment_cage"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Equipment master Cage</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="m_ms_equipment_master_dye" model="ir.model.access">
+			<field name="model_id" ref="kg_equipment_master.model_ch_equipment_dye"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Equipment master Dye</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Equipment master End here -->
+		
 	
     </data>
 </openerp>		
