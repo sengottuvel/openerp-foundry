@@ -1,0 +1,525 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="newwwwwwwwwww" language="groovy" pageWidth="792" pageHeight="612" orientation="Landscape" columnWidth="752" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<subDataset name="dataset1">
+		<parameter name="slip_id" class="java.lang.Integer">
+			<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+		</parameter>
+		<parameter name="pump_type" class="java.lang.String">
+			<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+		</parameter>
+		<queryString>
+			<![CDATA[select * from (
+
+
+(select '' as moc,description,value,'' as remarks,1 as type,
+DENSE_RANK() OVER (ORDER BY id asc) AS test
+ from ch_packing_default_details where header_id = $P{slip_id}
+order by id)
+
+union
+
+
+select *,7 as test from (
+
+
+(select moc.name as moc,pack_foun.description,pack_foun.qty::char as value,pack_foun.remarks,2 as type from ch_packing_foundry_details pack_foun
+left join kg_moc_master moc on (moc.id = pack_foun.moc_id)
+
+
+where pack_foun.header_id =$P{slip_id}
+
+order by pack_foun.id asc)
+
+union
+
+(select moc.name as moc,pack_ms.description,pack_ms.qty::char as value,pack_ms.remarks,3 as type from ch_packing_ms_details pack_ms
+
+left join kg_moc_master moc on (moc.id = pack_ms.moc_id)
+where pack_ms.header_id = $P{slip_id}
+order by pack_ms.id asc)
+
+union
+
+(select moc.name as moc,pack_bot.description,pack_bot.qty::char as value,pack_bot.remarks,4 as type from ch_packing_bot_details pack_bot
+left join kg_moc_master moc on (moc.id = pack_bot.moc_id)
+where pack_bot.header_id = $P{slip_id}
+order by pack_bot.id asc)
+
+union
+
+(select moc.name as moc,acc_foun.description,acc_foun.qty::char as value,acc_foun.remarks,2 as type from ch_packing_accessories_foundry acc_foun
+
+left join kg_moc_master moc on (moc.id = acc_foun.moc_id)
+where acc_foun.header_id in (select id from ch_packing_accessories where header_id =$P{slip_id} )
+order by acc_foun.id asc)
+
+union
+
+(select moc.name as moc,acc_ms.description,acc_ms.qty::char as value,acc_ms.remarks,3 as type from ch_packing_accessories_ms acc_ms
+left join kg_moc_master moc on (moc.id = acc_ms.moc_id)
+where acc_ms.header_id in (select id from ch_packing_accessories where header_id =$P{slip_id} )
+order by acc_ms.id asc)
+
+union
+
+(select moc.name as moc,acc_bot.description,acc_bot.qty::char as value,acc_bot.remarks,4 as type from ch_packing_accessories_bot acc_bot
+left join kg_moc_master moc on (moc.id = acc_bot.moc_id)
+where acc_bot.header_id in (select id from ch_packing_accessories where header_id =$P{slip_id})
+order by acc_bot.id asc
+)
+
+union
+
+(select
+'' as moc,check_master.name as description,pack_check.value::char as value,pack_check.remarks,5 as type
+from ch_packing_checklist pack_check
+left join kg_packing_checklist check_master on (check_master.id = pack_check.checklist_id)
+where pack_check.header_id = $P{slip_id}
+order by pack_check.id asc)
+
+) as a
+
+) b order by test,type]]>
+		</queryString>
+		<field name="moc" class="java.lang.String"/>
+		<field name="description" class="java.lang.String"/>
+		<field name="value" class="java.lang.String"/>
+		<field name="remarks" class="java.lang.String"/>
+		<field name="type" class="java.lang.Integer"/>
+		<field name="test" class="java.lang.Long"/>
+	</subDataset>
+	<parameter name="slip_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="printed_by" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select
+slip.id,
+case when ass.pump_serial_no is not null then ass.pump_serial_no else
+'' end as pump_serial_no ,
+slip.order_no,
+case
+when pump.type = 'horizontal' then 'Horizontal'
+when pump.type = 'vertical' then 'Vertical'
+else 'Others' end as pump_type,
+slip.box_no ,
+slip.state as state,
+to_char(slip.entry_date, 'DD-MM-YYYY') AS date,
+
+company.name as company_name,
+part.street as street1,
+part.street2 as street2,
+comp_city.name as city,
+part.zip as zip,
+to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS new_date
+ from kg_packing_slip slip
+left join res_company company on (company.id = slip.company_id)
+left join kg_pumpmodel_master pump on (pump.id = slip.pump_model_id)
+left join res_partner part on (part.id = company.partner_id)
+left join res_city comp_city on (comp_city.id = part.city_id)
+left join kg_assembly_inward ass on (ass.id = slip.assembly_id)
+
+where slip.id
+in (select sam::int from (
+select regexp_split_to_table($P{slip_id}, ',') as sam) as sam) limit 1]]>
+	</queryString>
+	<field name="id" class="java.lang.Integer"/>
+	<field name="pump_serial_no" class="java.lang.String"/>
+	<field name="order_no" class="java.lang.String"/>
+	<field name="pump_type" class="java.lang.String"/>
+	<field name="box_no" class="java.lang.String"/>
+	<field name="state" class="java.lang.String"/>
+	<field name="date" class="java.lang.String"/>
+	<field name="company_name" class="java.lang.String"/>
+	<field name="street1" class="java.lang.String"/>
+	<field name="street2" class="java.lang.String"/>
+	<field name="city" class="java.lang.String"/>
+	<field name="zip" class="java.lang.String"/>
+	<field name="new_date" class="java.lang.String"/>
+	<group name="Header_group">
+		<groupExpression><![CDATA[$F{id}]]></groupExpression>
+		<groupHeader>
+			<band height="22">
+				<textField>
+					<reportElement x="0" y="0" width="53" height="22"/>
+					<box topPadding="5" leftPadding="2" bottomPadding="2" rightPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true" isStrikeThrough="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA["S.No."]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="53" y="0" width="221" height="22"/>
+					<box topPadding="5" leftPadding="2" bottomPadding="2" rightPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true" isStrikeThrough="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Item description"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="482" y="0" width="115" height="22"/>
+					<box topPadding="5" leftPadding="2" bottomPadding="2" rightPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true" isStrikeThrough="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Qty / Value"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="597" y="0" width="155" height="22"/>
+					<box topPadding="5" leftPadding="2" bottomPadding="2" rightPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true" isStrikeThrough="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Remarks"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="274" y="0" width="111" height="22"/>
+					<box topPadding="5" leftPadding="2" bottomPadding="2" rightPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true" isStrikeThrough="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA["MOC"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="385" y="0" width="97" height="22"/>
+					<box topPadding="5" leftPadding="2" bottomPadding="2" rightPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true" isStrikeThrough="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Pump Type"]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="Details_group">
+		<groupExpression><![CDATA[$F{id}]]></groupExpression>
+		<groupHeader>
+			<band height="20">
+				<componentElement>
+					<reportElement x="0" y="0" width="752" height="20"/>
+					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+						<datasetRun subDataset="dataset1">
+							<datasetParameter name="slip_id">
+								<datasetParameterExpression><![CDATA[$F{id}]]></datasetParameterExpression>
+							</datasetParameter>
+							<datasetParameter name="pump_type">
+								<datasetParameterExpression><![CDATA[$F{pump_type}]]></datasetParameterExpression>
+							</datasetParameter>
+							<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+						<jr:listContents height="20" width="752">
+							<textField isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="53" height="20"/>
+								<box topPadding="2" leftPadding="2">
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center"/>
+								<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="53" y="0" width="221" height="20"/>
+								<box topPadding="2" leftPadding="2">
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement/>
+								<textFieldExpression><![CDATA[$F{description}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="482" y="0" width="115" height="20"/>
+								<box topPadding="2" leftPadding="2" rightPadding="2">
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right"/>
+								<textFieldExpression><![CDATA[$F{value}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="597" y="0" width="155" height="20"/>
+								<box topPadding="2" leftPadding="2">
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement/>
+								<textFieldExpression><![CDATA[$F{remarks}]]></textFieldExpression>
+							</textField>
+							<textField>
+								<reportElement x="274" y="0" width="111" height="20"/>
+								<box topPadding="2" leftPadding="2">
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement/>
+								<textFieldExpression><![CDATA[$F{moc}]]></textFieldExpression>
+							</textField>
+							<textField>
+								<reportElement x="385" y="0" width="97" height="20"/>
+								<box topPadding="2" leftPadding="2">
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement/>
+								<textFieldExpression><![CDATA[$P{pump_type}]]></textFieldExpression>
+							</textField>
+						</jr:listContents>
+					</jr:list>
+				</componentElement>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="Box Group">
+		<groupExpression><![CDATA[$F{id}]]></groupExpression>
+		<groupHeader>
+			<band height="130">
+				<textField>
+					<reportElement x="0" y="0" width="752" height="33"/>
+					<box topPadding="5" leftPadding="2" bottomPadding="2" rightPadding="2">
+						<pen lineWidth="0.25"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="16" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["BOX No. : "+" "+$F{box_no}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="33" width="752" height="77"/>
+					<box>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement/>
+					<textFieldExpression><![CDATA[]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="0" y="110" width="186" height="20"/>
+					<box topPadding="2" leftPadding="10">
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Prepared By"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="186" y="110" width="199" height="20"/>
+					<box topPadding="2">
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Production"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="385" y="110" width="177" height="20"/>
+					<box topPadding="2">
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Quality Control"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="562" y="110" width="190" height="20"/>
+					<box topPadding="2" rightPadding="15">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Shift Incharge"]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<background>
+		<band height="572" splitType="Stretch">
+			<frame>
+				<reportElement x="0" y="0" width="751" height="572"/>
+				<image>
+					<reportElement x="0" y="0" width="751" height="572">
+						<printWhenExpression><![CDATA[(new Boolean(($F{state}.equals("draft"))))]]></printWhenExpression>
+					</reportElement>
+					<imageExpression><![CDATA["/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/kg_packing_slip/images/Draft.jpg"]]></imageExpression>
+				</image>
+			</frame>
+		</band>
+	</background>
+	<title>
+		<band height="31" splitType="Stretch">
+			<textField>
+				<reportElement mode="Transparent" x="0" y="0" width="752" height="16"/>
+				<box topPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{company_name}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement mode="Transparent" x="0" y="16" width="752" height="15" isPrintWhenDetailOverflows="true"/>
+				<box topPadding="2" leftPadding="0">
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{street1}+$F{street2}+$F{city}+" - "+$F{zip}+"."]]></textFieldExpression>
+			</textField>
+			<image>
+				<reportElement x="211" y="0" width="95" height="31"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+				</box>
+				<imageExpression><![CDATA["/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
+			</image>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="46" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="752" height="23"/>
+				<box topPadding="5" leftPadding="2" bottomPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Packing checklist (Spare)"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="23" width="482" height="23"/>
+				<box topPadding="5" leftPadding="2" bottomPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["WO No. : "+" "+$F{order_no}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="482" y="23" width="270" height="23"/>
+				<box topPadding="5" leftPadding="2" bottomPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font size="10" isBold="false" isStrikeThrough="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Date :"+ " "+ $F{date}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<pageFooter>
+		<band height="54" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="34" width="274" height="20"/>
+				<box topPadding="3">
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{printed_by} + " "+ "/"  +" "+$F{new_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="274" y="34" width="87" height="20"/>
+				<box topPadding="3">
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="361" y="34" width="48" height="20"/>
+				<box topPadding="3">
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="409" y="34" width="342" height="20"/>
+				<box topPadding="3">
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

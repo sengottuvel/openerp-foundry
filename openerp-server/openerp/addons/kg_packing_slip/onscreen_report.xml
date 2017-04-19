@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <report auto="False" 
+				id="packing_slip_pump" 
+				model="kg.packing.slip" 
+				name="onscreen_packing_slip_pump_report"
+                rml="kg_packing_slip/report/kg_packing_slip_pump.jrxml" 
+                string="Packing checklist (Pump)" 
+                menu="True"
+                usage="default"
+                />
+		
+        <report auto="False" 
+				id="packing_slip_spare" 
+				model="kg.packing.slip" 
+				name="onscreen_packing_slip_spare_report"
+                rml="kg_packing_slip/report/kg_packing_slip_spare.jrxml" 
+                string="Packing checklist (Spare)" 
+                menu="True"
+                usage="default"
+                />
+		
+        
+    </data>
+</openerp>

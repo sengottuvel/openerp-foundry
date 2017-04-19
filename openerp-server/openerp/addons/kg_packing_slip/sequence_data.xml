@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+	
+		
+	<record forcecreate="1" id="seq_type_packing_slip" model="ir.sequence.type">	
+		<field name="name">KG Packing Slip</field>
+		<field name="code">kg.packing.slip</field>
+	</record>
+
+	<record forcecreate="1" id="seq_packing_slip" model="ir.sequence">
+	  <field name="name">KG Packing Slip</field>
+	  <field name="code">kg.packing.slip</field>
+	  <field name="padding" eval="3"/>
+	  <field name="prefix">PS/%(year)s/%(month)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+		
+	
+		
+</data>
+</openerp>

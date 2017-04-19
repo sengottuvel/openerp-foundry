@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+
+	<!-- Form View Start --> 
+
+		<record id="t_form_v_packing_slip" model="ir.ui.view">
+			<field name="name">Packing Slip Entry Form</field>
+			<field name="model">kg.packing.slip</field>
+			<field name="arch" type="xml">
+				<form string="Packing Slip" version="7.0" create="false">
+					<header>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight" confirm="Are you sure to proceed ?"/>
+					</header>
+					<group>
+						<group>
+							<field name="name" invisible="1" readonly="1"/>
+							<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="assembly_id" attrs="{'readonly': [('state','not in',['draft'])],'required': [('packing_type','=','pump')]}"
+								on_change="onchange_pump_serial(assembly_id,packing_type,order_line_id)"/>
+							<field name="pump_model_type"/>
+							<field name="note" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<button name="load_bom" type="object" string="Load Bom" attrs="{'invisible': [('state','not in',['draft'])]}"/>
+						</group>											
+						<group>
+							<field name="packing_type" attrs="{'readonly': [('state','not in',['draft'])]}" required="1"/>
+							<field name="order_line_id" string="WO No." required="1" attrs="{'readonly': [('state','not in',['draft'])]}" on_change="onchange_pump_serial(assembly_id,packing_type,order_line_id)"/>
+							<field name="box_no" required="1"  attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="state" style="width: 30%%" class="att_state_change"/>
+							
+						</group>					
+					</group>
+					
+					<notebook>
+						<page string="Default Item Details">
+							<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}">
+								<tree string="Default Item Details" create="false" delete="false" editable="top">
+								   <field name="description" readonly="1"/>
+								   <field name="packing_type" invisible="1"/>
+								   <field name="value" attrs="{'required': [('packing_type','=','pump')]}"/>
+								</tree>
+							</field>
+						</page>
+						<page string="Foundry Items">
+							<field name="line_ids_a" colspan="4" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}">
+								<tree string="Foundry Items" create="false" delete="false" editable="top">
+								   <field name="description" readonly="1"/>
+								   <field name="material_code" readonly="1"/>
+								   <field name="moc_id" readonly="1"/>
+								   <field name="qty" readonly="1"/>
+								   <field name="remarks" widget="char"/>
+								</tree>
+							</field>
+						</page>
+						<page string="MS Items">
+							<field name="line_ids_b" colspan="4" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}">
+								<tree string="MS Items" create="false" delete="false" editable="top">
+								   <field name="description" readonly="1"/>
+								   <field name="material_code" readonly="1"/>
+								   <field name="moc_id" readonly="1"/>
+								   <field name="qty" readonly="1"/>
+								   <field name="remarks" widget="char"/>
+								</tree>
+							</field>
+						</page>
+						<page string="BOT Items">
+							<field name="line_ids_c" colspan="4" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}">
+								<tree string="BOT Items" create="false" delete="false" editable="top">
+								   <field name="description" readonly="1"/>
+								   <field name="material_code" readonly="1"/>
+								   <field name="moc_id" readonly="1"/>
+								   <field name="qty" readonly="1"/>
+								   <field name="remarks" widget="char"/>
+								</tree>
+							</field>
+						</page>
+						<page string="Accessories">
+							<field name="line_ids_d" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}">
+								<tree string="Accessories Entry Tree" create="false" delete="false">
+									<field name="access_id" readonly="1" />
+									<field name="moc_id" readonly="1"/>
+									<field name="qty" readonly="1"/>
+								</tree>
+
+								<form string="Accessories Entry Form">
+									<group colspan="4">
+										<group>
+											<field name="access_id" readonly="1"/>
+											<field name="qty" readonly="1"/>
+										</group>
+										<group>
+											<field name="moc_id" readonly="1"/>
+											
+										</group>
+									</group>
+									
+
+									<notebook>
+										<page string = "Foundry Items">
+											<field name="line_ids" nolabel="1">
+												<tree string="Foundry Item Tree" editable="top" create="false" delete="false">
+													<field name="description" readonly="1"/>
+													<field name="material_code" readonly="1"/>
+													<field name="moc_id" readonly="1"/>
+													<field name="qty" readonly="1"/>
+													<field name="remarks" widget="char"/>
+												</tree>
+											</field>								
+										</page>
+										
+										<page string = "MS Items">
+											<field name="line_ids_a" nolabel="1">
+												<tree string="MS Items tree" editable="top" create="false" delete="false">
+													<field name="description" readonly="1"/>
+													<field name="material_code" readonly="1"/>
+													<field name="moc_id" readonly="1"/>
+													<field name="qty" readonly="1"/>
+													<field name="remarks" widget="char"/>
+												</tree>
+											</field>								
+										</page>
+										<page string = "BOT Items">
+											<field name="line_ids_b" nolabel="1">
+												<tree string="BOT Item" editable="top" create="false" delete="false">
+													<field name="description" readonly="1"/>
+													<field name="material_code" readonly="1"/>
+													<field name="moc_id" readonly="1"/>
+													<field name="qty" readonly="1"/>
+													<field name="remarks" widget="char"/>
+												</tree>
+											</field>								
+										</page>
+									</notebook> 
+								</form>
+
+							</field>
+						</page>
+						<page string="Other Checklist">
+							<field name="line_ids_e" colspan="4" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}">
+								<tree string="Checklist Items" editable="top">
+								   <field name="checklist_id" />
+								   <field name="value" />
+								   <field name="remarks" widget="char"/>
+								</tree>
+							</field>
+						</page>
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
+								<group>
+									<field name="user_id"/>
+									<field name="confirm_user_id" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="cancel_user_id" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="confirm_date" attrs="{'invisible':[('state','in',['draft'])]}"/>
+									<field name="cancel_date" attrs="{'invisible':[('state','not in',['cancel'])]}"/>
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_packing_slip" model="ir.ui.view">
+			<field name="name">Packing Slip Entry Tree</field>
+			<field name="model">kg.packing.slip</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';black:state == 'confirmed';" 
+					toolbar="True" string="Packing Slip Entry Tree">					
+					<field name="name" invisible="1"/>
+					<field name="entry_date"/>
+					<field name="order_line_id" string="WO No."/>
+					<field name="order_delivery_date"/>
+					<field name="order_category"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+		
+	<!-- Search View Start -->
+
+		<record id="t_search_v_packing_slip" model="ir.ui.view">
+            <field name="name">Packing Slip Entry Search</field>
+            <field name="model">kg.packing.slip</field>
+            <field name="arch" type="xml">
+                <search string="Packing Slip Entry Search">
+					<field name="order_line_id" string="WO No."  filter_domain="[('order_line_id','ilike',self)]" />
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>				
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_line_id'}"/>
+						<filter string="Order Category" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'order_category'}"/>
+                        <filter string="Status" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->
+	
+	<!-- Menu Action Start for Packing Slip -->
+		
+		<record id="tma_packing_slip" model="ir.actions.act_window">
+			<field name="name">Packing Slip</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.packing.slip</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="context">{}</field>
+			<field name="search_view_id" ref="t_search_v_packing_slip"/>
+			<field name="context">{"search_default_draft":1}</field>
+		</record>
+		
+		
+		 <record model="ir.actions.act_window.view" id="tma_packing_slip_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_packing_slip"/>
+            <field name="act_window_id" ref="tma_packing_slip"/>
+        </record>
+        
+        <record model="ir.actions.act_window.view" id="tma_packing_slip_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_packing_slip"/>
+            <field name="act_window_id" ref="tma_packing_slip"/>
+        </record>
+		
+	<!-- Menu Action End for Packing Slip -->
+	
+	<!-- Audit Log Xml Data Start -->
+		
+        <record id="audit_packing_slip" model="audittrail.rule">
+            <field name="name">Audit Log packing slip</field>
+            <field name="object_id" eval="ref('kg_packing_slip.model_kg_packing_slip')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End --> 
+     
+  
+		<menuitem action="tma_packing_slip" id="tam_packing_slip" parent="kg_part_qap.tpm_qap" sequence="8" />
+		
+	
+	<!-- Menu Item End -->
+	
+	
+	
+	</data>
+</openerp>
