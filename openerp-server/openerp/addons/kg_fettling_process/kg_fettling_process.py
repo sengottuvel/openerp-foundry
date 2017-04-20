@@ -843,8 +843,16 @@ class kg_fettling_inward(osv.osv):
 					if item.fettling_id.id > 0:						
 						print "FROM Stage>>>>>>>>>>>>>>>"
 						for i in entry.line_ids:							
+							com_test = [x.id for x in i.com_moc_stage_id]
+							first_test = [x.id for x in i.moc_stage_id]								
+							check_stage = set(com_test) - set(first_test)									
+							if check_stage:
+								raise osv.except_osv(_('Warning!'),
+									_('System no need allow to add additional stage in Completed Stage field !!'))
+							else:
+								pass										
 							if i.com_moc_stage_id:
-								s = [(6, 0, [x.id for x in i.com_moc_stage_id])]
+								s = [(6, 0, [x.id for x in i.com_moc_stage_id])]							
 								ss = [x.id for x in i.com_moc_stage_id]															
 								for x in ss:									
 									moc_stage_rec = self.pool.get('ch.fettling.process').browse(cr,uid,x)
@@ -903,8 +911,8 @@ class kg_fettling_inward(osv.osv):
 										'welding_by':done_by,'welding_contractor':contractor_id,'welding_accept_qty':accept_qty,'welding_weight':weight,'flag_sub_order':False})
 										self.pool.get('kg.fettling').welding_update(cr, uid, [fettling_id])
 									elif stage_name == 'FINISH GRINDING':
-										self.pool.get('kg.fettling').write(cr,uid,fettling_id,{'finish_grinding_shift_id':shift_id,
-										'finish_grinding_by':done_by,'finish_grinding_contractor':contractor_id,'finish_grinding_accept_qty':accept_qty,'finish_grinding_weight':weight,'flag_sub_order':False})
+										self.pool.get('kg.fettling').write(cr,uid,fettling_id,{
+										'finish_grinding_by':done_by,'finish_grinding_contractor':contractor_id,'finish_grinding_accept_qty':accept_qty,'finish_grinding_qty':accept_qty,'finish_grinding_weight':weight,'flag_sub_order':False})
 										self.pool.get('kg.fettling').finish_grinding_update(cr, uid, [fettling_id])
 									elif stage_name == 'RE SHOT BLASTING':
 										self.pool.get('kg.fettling').write(cr,uid,fettling_id,{

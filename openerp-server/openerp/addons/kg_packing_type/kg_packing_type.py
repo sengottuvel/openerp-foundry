@@ -71,6 +71,8 @@ class kg_packing_type(osv.osv):
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),	
 		
 		## Module Requirement Info	
+		'rate_cft': fields.float('Packing Closing Rate/CFT' ,required=True),
+		'rate_box': fields.float('SC WO Rate/Box' ,required=True),
 		
 		## Child Tables Declaration		
 				
@@ -162,9 +164,15 @@ class kg_packing_type(osv.osv):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_packing_type, self).write(cr, uid, ids, vals, context)
 		
-	
+	def _check_rate(self, cr, uid, ids, context=None):		
+		rec = self.browse(cr, uid, ids[0])			
+		if rec.rate_cft <= 0.00 or rec.rate_box <= 0.00:
+			return False					
+		return True
+		
 	_constraints = [
 	
+		(_check_rate,'System not allow to save Zero and Negative values in Rate field !!',['Rate']),
 		(_Validation, 'Special Character Not Allowed !!!', ['Check Name']),		
 		(_name_validate, 'Packing name must be unique !!', ['name']),			
 	]

@@ -19,10 +19,12 @@
 					<group>
 						<group>						
 							<field name="name" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>							
+							<field name="rate_cft" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>							
 							<field name="modify" invisible = "1"/>
 							<field name="notes" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>				
 						</group>
-						<group>							
+						<group>	
+							<field name="rate_box" attrs="{'readonly': [('state','in',['approved','reject','cancel'])]}"/>								
 							<field name="state" style="width: 30%%" class="att_state_change"/>								
 						</group>
 					</group>						
@@ -74,6 +76,8 @@
 						;black:state == 'approved';gray:state == 'reject';gray:state == 'cancel'" 
 								toolbar="True" string="Packing Type Master Tree">					
 					<field name="name"/>
+					<field name="rate_cft"/>
+					<field name="rate_box"/>
 					<field name="state"/>
 				</tree>
 			</field>
