@@ -470,7 +470,7 @@ class kg_department_issue(osv.osv):
 					pass
 			else:
 				pass
-			self.write(cr,uid,issue_record.id,{'state': 'done','approved_date':time.strftime('%Y-%m-%d %H:%M:%S')}
+			self.write(cr,uid,issue_record.id,{'state': 'done','approved_date':time.strftime('%Y-%m-%d %H:%M:%S')})
 		return True
 	
 	def issue_item_approval(self,cr,uid,issue_line_ids,context=None):
