@@ -275,13 +275,13 @@
 		
 		 <!-- Audit Log Xml Data Start -->
 		
-<!--
+
         <record id="division_model" model="audittrail.rule">
             <field name="name">Audit Log Master</field>
             <field name="object_id" eval="ref('kg_contract.model_hr_contract')"/>       
             <field name="state">subscribed</field>              
         </record>
--->
+
         
         <!-- Audit Log Xml Data End-->
 
