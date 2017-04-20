@@ -663,9 +663,11 @@
 		
 	<!-- Menu Item Starts Here -->
 	
-	<menuitem action="tma_fettling_wo" id="tam_fettling_workorder" parent="kg_fettling.tpm_fettling_process" sequence="21"/>
-	<menuitem action="tma_fettling_dc" id="tam_fettling_dc" parent="kg_fettling.tpm_fettling_process" sequence="22"/>
-	<menuitem action="tma_fettling_inward" id="tam_fettling_inward" parent="kg_fettling.tpm_fettling_process" sequence="23"/>
+	<menuitem name="Fettling SC Process" id="tpm_fettling_sc_process" parent = "kg_stock_inward.tpm_transactions" sequence="2"/>
+	
+	<menuitem action="tma_fettling_wo" id="tam_fettling_workorder" parent="tpm_fettling_sc_process" sequence="0"/>
+	<menuitem action="tma_fettling_dc" id="tam_fettling_dc" parent="tpm_fettling_sc_process" sequence="1"/>
+	<menuitem action="tma_fettling_inward" id="tam_fettling_inward" parent="tpm_fettling_sc_process" sequence="2"/>
 	
 	
 	</data>

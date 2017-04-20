@@ -470,7 +470,7 @@
 		
 		<!-- Menu Action End-->
 
-		<menuitem action="tma_fettling_sc_invoice" id="tam_fettling_sc_invoice" parent="kg_fettling.tpm_fettling_process" sequence="24"/>	
+		<menuitem action="tma_fettling_sc_invoice" id="tam_fettling_sc_invoice" parent="kg_fettling_process.tpm_fettling_sc_process" sequence="3"/>	
 		
 		<menuitem id="tam_fettling_sc_invoice_ack" name="Fettling Invoice" parent="kg_customer_advance.mpm_accounts_advance" sequence="4" action="tma_fettling_sc_invoice_ack" />	
 
