@@ -101,6 +101,7 @@
 									<field name="payment_mode" required="1" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
 									<field name="bank_id" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'required':[('payment_mode','=','bank')]}"/>
 									<field name="sal_acc_no" class="numberonly" attrs="{'readonly': [('state','in',['approved','reject','cancel'])],'required':[('payment_mode','=','bank')]}"/>
+									<field name="account_id" attrs="{'invisible':[('payment_mode','!=','bank')]}" readonly="1"/>
 								</group>
 <!--
 								<group string="General" invisible="1">
@@ -274,11 +275,13 @@
 		
 		 <!-- Audit Log Xml Data Start -->
 		
+<!--
         <record id="division_model" model="audittrail.rule">
             <field name="name">Audit Log Master</field>
             <field name="object_id" eval="ref('kg_contract.model_hr_contract')"/>       
             <field name="state">subscribed</field>              
         </record>
+-->
         
         <!-- Audit Log Xml Data End-->
 

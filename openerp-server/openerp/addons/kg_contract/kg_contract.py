@@ -108,6 +108,7 @@ class kg_contract(osv.osv):
 		'rot_interval':fields.selection([('every_monday','Every Monday'),('month_1st','Month 1st')],'Rotational Interval'),
 		'emp_categ_id':fields.many2one('kg.employee.category','Category'),
 		'division_id':fields.many2one('kg.division.master','Division'),
+		'account_id':fields.many2one('account.account','Account'),
 			
 		
 		## Child Tables Declaration		
@@ -115,9 +116,13 @@ class kg_contract(osv.osv):
 		'line_id_shift':fields.one2many('ch.contract.shift','header_id_shift','Line Id Shift'),	
 		'line_id_inc':fields.one2many('ch.con.special.incentive.policy','header_id_inc','Line Id inc'),	
 		'line_id_pre_salary':fields.one2many('ch.kg.contract.pre.salary','header_id_pre_salary','Line Id Pre Salary'),	
+		
+		###### Child for history tracking ###############
 		'line_id_his':fields.one2many('ch.kg.contract.his','header_id_his','Line Id contract History'),
 		'line_id_salary_his':fields.one2many('ch.kg.contract.salary.his','header_id_salary_his','Line Id Salary History'),	
 		'line_id_pre_salary_his':fields.one2many('ch.kg.contract.pre.salary.his','header_id_pre_salary_his','Line Id Pre Salary History'),		
+		'line_id_inc_his':fields.one2many('ch.con.special.incentive.policy.his','header_id_inc_his','Line Id incentive history'),		
+		'line_id_shift_his':fields.one2many('ch.contract.shift.his','header_id_shift_his','Line Id con Shift History'),		
 				
 	}
 	
@@ -394,7 +399,31 @@ class kg_contract(osv.osv):
 				else:
 					gross_amt = rec.gross_salary
 					
-				self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S'),'gross_salary':gross_amt,'increament_amt':0})
+		#### Account Creation For employee while approving the contract ######	
+				
+				internal_type = note = account_payable_id =  ''
+				entry_mode = 'auto'
+				account_payable_id = ''
+				ac_obj = self.pool.get('account.account')
+				old_acc_ids = ac_obj.search(cr,uid,[('master_id','=',rec.id)])
+				if old_acc_ids:
+					old_acc_rec = ac_obj.browse(cr,uid,old_acc_ids[0])
+					ac_obj.write(cr,uid,old_acc_rec.id,{'name': rec.employee_id.name})
+				acc_ids = ac_obj.search(cr,uid,[('name','=',rec.employee_id.name)])
+				ac_type = ''
+				if not acc_ids:
+					if rec.payment_mode == 'bank':
+						ac_type_ids = self.pool.get('account.account.type').search(cr,uid,[('name','=','Asset')])
+						if ac_type_ids:
+							ac_type_rec = self.pool.get('account.account.type').browse(cr,uid,ac_type_ids[0])
+							ac_type = ac_type_rec.id
+						internal_type = 'payable'
+						note = 'New Employee Added'
+						account_payable_id = ac_obj.account_creation(cr,uid,rec.employee_id.name,ac_type,rec.id,entry_mode,internal_type,note,context=context)
+				self.pool.get('hr.employee').write(cr,uid,rec.employee_id.id,{'account_id':account_payable_id})
+				self.write(cr, uid, ids, {'state': 'approved','ap_rej_user_id': uid, 'ap_rej_date': time.strftime('%Y-%m-%d %H:%M:%S'),'gross_salary':gross_amt,'increament_amt':0,'account_id':account_payable_id})
+				
+		#### Account Creation For employee while approving the contract ######
 				
 				leave_alloc_ids = leave_alloc_obj.search(cr,uid,[('employee_id','=',rec.employee_id.id)])
 				if leave_alloc_ids:
@@ -586,14 +615,15 @@ class ch_kg_contract_pre_salary(osv.osv):
 				
 ch_kg_contract_pre_salary()
 
-##History Tracking starts###
+###################### History Tracking starts #####################################
 
 class ch_kg_contract_his(osv.osv):
+	
 	_name='ch.kg.contract.his'
 	_columns = {
 	### Basic Info
 
-		'code': fields.char('Code', size=4, required=False),		
+		'code': fields.char('Code'),		
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
@@ -615,7 +645,7 @@ class ch_kg_contract_his(osv.osv):
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),
 		
 		## Module Requirement Info
-		'designation': fields.char('Designation', size=128, readonly=False),
+		'designation': fields.char('Designation', readonly=False),
 		'department_id': fields.many2one('hr.department', 'Department ', readonly=True),
 		'join_date': fields.date('Join Date', readonly=False),
 		'gross_salary':fields.float('Gross Salary', help="Please Enter the Gross salary per month."),
@@ -624,19 +654,33 @@ class ch_kg_contract_his(osv.osv):
 		'increament_amt':fields.float('Increment Amount'),
 		'payment_mode': fields.selection([('cheque','CHEQUE'),('bank','BANK'),('cash','CASH')], 'Payment Mode'),
 		'bank_id': fields.many2one('res.bank','Bank Name'),
-		'sal_acc_no': fields.char('Salary Account No', size=32),
+		'sal_acc_no': fields.char('Salary Account No'),
 		'ot_status': fields.boolean('OT Applicable'),
 		'pt_status': fields.boolean('PT Applicable'),
-		'pan_no': fields.char('PAN NO', size=32),
-		'pf_status': fields.boolean('PF Applicable', size=32),
-		'esi_status': fields.boolean('ESI Applicable', size=32),
+		'pan_no': fields.char('PAN NO'),
+		'pf_status': fields.boolean('PF Applicable'),
+		'esi_status': fields.boolean('ESI Applicable'),
 		'pf_eff_date': fields.date('PF Effective From'),
 		'esi_eff_date': fields.date('ESI Effective From'),
-		'pf_acc_no': fields.char('PF NO', size=32),
-		'esi_acc_no': fields.char('ESI NO', size=32),
+		'pf_acc_no': fields.char('PF NO'),
+		'esi_acc_no': fields.char('ESI NO'),
 		'employee_id': fields.integer('Employee_id'),
 		'header_id_his':fields.many2one('hr.contract','Header Id contract History',invisible=True),
 		'state': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'state', readonly=True),
+		
+		'dep_id':fields.many2one('kg.depmaster','Department'),
+		'job_id': fields.many2one('hr.job', 'Job Title'),
+		'emp_categ_id': fields.many2one('kg.employee.category', 'Employee Category'),
+		'division_id':fields.many2one('kg.division.master','Division'),
+		'account_id':fields.many2one('account.account','Account'),
+		'rotation':fields.boolean('Rotation Shift Applicable'),
+		'driver_bata_app':fields.boolean('Driver Bata Applicable'),
+		'shift_id': fields.many2one('kg.shift.master', 'Current Shift'),
+		'driver_batta': fields.float('Driver Batta(Per Day)'),
+		'rot_interval':fields.selection([('every_monday','Every Monday'),('month_1st','Month 1st')],'Rotational Interval'),
+		'bonus_applicable': fields.boolean('Bonus Applicable'),
+		'special_incentive': fields.boolean('Special Incentive'),
+		'vda_status': fields.boolean('VDA Applicable'),
 	}
 	
 	_defaults ={
@@ -658,20 +702,32 @@ class ch_kg_contract_salary_his(osv.osv):
 
 ch_kg_contract_salary_his()
 
-class ch_kg_contract_pre_salary_his(osv.osv):
+class ch_con_special_incentive_policy_his(osv.osv):
 	
-	_name = 'ch.kg.contract.pre.salary.his'
+	_name = 'ch.con.special.incentive.policy.his'
 	
 	_columns = {
-		'header_id_pre_salary_his':fields.many2one('hr.contract','Header Id Pre Salary History',invisible=True),
-		'gross_salary':fields.float('Gross Salary',readonly=True),
-		'updated_by':fields.many2one('res.users','Updated By',readonly=True),
-		'updated_date':fields.date('Updated Date',readonly=True),
-		'increament_amt':fields.float('Increment Amount',readonly=True),
-		'mob_allowance':fields.float('Mobile Allowance',readonly=True)
+		'header_id_inc_his':fields.many2one('hr.contract','Header Id Pre Incentive History',invisible=True),
+		'start_value': fields.float('Starting Value(In Crores)'),	
+		'end_value': fields.float('Ending Value(In Crores)'),	
+		'type': fields.selection([('fixed','Fixed'),('per_cr_fixed','Per Crore - Fixed'),('percentage','Percentage')],'Type'),	
+		'incentive_value': fields.float('Value'),	
+		'leave_consider': fields.integer('Leave Consideration(days)'),
+		
 				}
 				
-ch_kg_contract_pre_salary_his()
+ch_con_special_incentive_policy_his()
+
+class ch_contract_shift_his(osv.osv):
+	_name='ch.contract.shift.his'
+
+	_columns = {
+		'header_id_shift_his':fields.many2one('hr.contract','Header Id Shift',invisible= True),
+		'shift_id':fields.many2one('kg.shift.master','Shift Master'),
+		'sequence':fields.integer('kg.shift.master','Shift Master'),
+	}
+ch_contract_shift_his()
+###################### History Tracking Ends #####################################
 	
 	
 

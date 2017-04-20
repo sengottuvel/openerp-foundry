@@ -202,10 +202,20 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
 		</record>
 		
-		<record id="kg_hr_contract_pre_salary_history" model="ir.model.access">
-			<field name="model_id" ref="kg_contract.model_ch_kg_contract_pre_salary_his"/>
+		<record id="kg_hr_contract_special_incentive_history" model="ir.model.access">
+			<field name="model_id" ref="kg_contract.model_ch_con_special_incentive_policy_his"/>
 			<field eval="1" name="perm_read"/>
-			<field name="name">Employee Contracts Previous Salary History</field>
+			<field name="name">Employee Contracts Special Incentive History</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
+		</record>
+		
+		<record id="kg_hr_contract_shift_history" model="ir.model.access">
+			<field name="model_id" ref="kg_contract.model_ch_contract_shift_his"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Employee Contracts shift History</field>
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
