@@ -143,6 +143,7 @@ class kg_employee(osv.osv):
 		'pan_no':fields.char('Pan No',size=12),
 		'division_id':fields.many2one('kg.division.master','Division'),
 		'nature_of_job_id':fields.many2one('kg.job.nature','Nature Of Job'),
+		'account_id':fields.many2one('account.account','Account'),
 		
 		## Child Tables Declaration	
 			
@@ -151,11 +152,13 @@ class kg_employee(osv.osv):
 		'line_id_ref_emp':fields.one2many('ch.kg.employee.ref.emp','header_id_ref_emp','Line Id Ref Emp'),
 		'line_id_ref_train_cer':fields.one2many('ch.kg.employee.train.cer','header_id_ref_train_cer','Line Id Ref Train_Cer'),
 		
-		'line_id_his':fields.one2many('ch.kg.employee.his','header_id_his','Line Id History'),	
+		#### Childs for History Tracking ########
 		
+		'line_id_his':fields.one2many('ch.kg.employee.his','header_id_his','Line Id History'),	
 		'line_id_ref_his':fields.one2many('ch.kg.employee.ref.his','header_id_ref_his','Line Id Ref History'),	
 		'line_id_ref_edu_his':fields.one2many('ch.kg.employee.ref.edu.his','header_id_ref_edu_his','Line Id Ref Edu History'),	
 		'line_id_ref_emp_his':fields.one2many('ch.kg.employee.ref.emp.his','header_id_ref_emp_his','Line Id Ref Emp History'),	
+		'line_id_ref_emp_train_his':fields.one2many('ch.kg.employee.train.cer.his','header_id_ref_train_cer_his','Line Id Ref Emp Training History'),	
 
 	
 	}
@@ -292,22 +295,30 @@ class kg_employee(osv.osv):
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
 		
 	def write(self, cr, uid, ids, vals, context=None):
-		#~ rec = self.browse(cr,uid,ids[0])
-		#~ vals['header_id_his'] = ids[0]
-		#~ vals['update_date'] = time.strftime('%Y-%m-%d %H:%M:%S')
-		#~ vals['update_user_id'] = uid
-		#~ search_rec = self.pool.get('ch.kg.employee.his')
-		#~ search_rec.create(cr,uid,vals)
-		a=vals.keys()
-		b=vals.items()
-		c=[]
-		for i in a:
-			print "++++++++++++++++++++++++++++++",i
-			aa=i+','
-		print "()())()()()()()()())",aa
-		print"333333333333333333333333333333333333333333",b
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid,'line_id_his':[(0,0,vals)]})
 		return super(kg_employee, self).write(cr, uid, ids, vals, context)
+		#~ rec = self.browse(cr,uid,ids[0])
+		#~ vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		#~ res = super(kg_employee, self).write(cr, uid, ids, vals, context)
+		#~ print"333333333333333333333333333333333333333333",vals
+		#~ new_vals = vals
+		#~ 
+		#~ new_vals['header_id_his'] = ids[0]
+		#~ new_vals['update_date'] = time.strftime('%Y-%m-%d %H:%M:%S')
+		#~ new_vals['update_user_id'] = uid
+		#~ search_rec = self.pool.get('ch.kg.employee.his')
+		#~ search_rec.create(cr,uid,new_vals)
+		#~ a=vals.keys()
+		#~ b=vals.items()
+		#~ c=[]
+		#~ for i in a:
+			#~ print "++++++++++++++++++++++++++++++",i
+			#~ aa=i+','
+		#~ print "()())()()()()()()())",aa
+		#~ print"333333333333333333333333333333333333333333",b
+		#~ print "valsssssssssssssssssssssss",vals
+		#~ print "valsssssssssssssssssssssss",new_vals
+		#~ return res
 		
 	###Validataions###
 	
@@ -392,7 +403,7 @@ class ch_kg_employee_ref(osv.osv):
 				'contact_no':fields.char('Contact Number',required = True,size=15),
 				'relation_ship':fields.char('Relation Ship',required = True),
 				'designation':fields.char('Designation',),
-				'address':fields.text('Address',required = True)
+				'address':fields.text('Address',required = True),
 			}
 
 ch_kg_employee_ref()	
@@ -505,7 +516,7 @@ class ch_kg_employee_train_cer (osv.osv):
 	
 ch_kg_employee_train_cer()
 
-##History Tracking starts###
+###################### History Tracking starts #####################################
 
 class ch_kg_employee_his(osv.osv):
 	
@@ -515,8 +526,10 @@ class ch_kg_employee_his(osv.osv):
 	
 			### Basic Info
 		'header_id_his':fields.many2one('hr.employee','Header Id'),
-		'code': fields.char('Code', size=4, required=False),		
-		'status': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled')],'Status', readonly=True),
+			
+		'name': fields.char('Name'),		
+		'code': fields.char('Code'),		
+		'status': fields.selection([('draft','Draft'),('confirmed','WFA'),('approved','Approved'),('reject','Rejected'),('cancel','Cancelled'),('relieve','Relieve In-Progress'),('resigned','Resigned')],'Status', readonly=True),
 		'notes': fields.text('Notes'),
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
@@ -548,42 +561,57 @@ class ch_kg_employee_his(osv.osv):
 				],'Commission Status', ),
 		'releaving_date':fields.date('Releaving Date'),
 		'releaving_reason':fields.text('Reason for Leaving'),
-		'father_name': fields.char('Father Name', size=128),
-		'mother_name': fields.char('Mother Name', size=128),
-		'father_occ': fields.char('Father Occupation',size=128),
-		'mother_occ': fields.char('Mother Occupation', size=128),
-		'pre_add': fields.char('Present Address', size=256, ),
-		'pre_city': fields.char('City', size=128, ),
-		'pre_state_id': fields.many2one('res.country.state', 'State', ),
+		'father_name': fields.char('Father Name'),
+		'mother_name': fields.char('Mother Name'),
+		'father_occ': fields.char('Father Occupation'),
+		'mother_occ': fields.char('Mother Occupation'),
+		'pre_add': fields.char('Present Address'),
+		'pre_city': fields.many2one('res.city', 'City'),
+		'pre_state_id': fields.many2one('res.country.state', 'State' ),
 		'pre_country_id': fields.many2one('res.country', 'Country', ),
-		'pre_pin_code': fields.integer('Postal Code',size=8),
-		'pre_phone_no': fields.char('Phone Number',size=15),
+		'pre_pin_code': fields.integer('Postal Code'),
+		'pre_phone_no': fields.char('Phone Number'),
 		'same_pre_add': fields.boolean('Same as Present Address'),
-		'permanent_add': fields.char('Permanent Address', size=256,),
-		'city_id': fields.char('City', size=128,),
+		'permanent_add': fields.char('Permanent Address'),
+		'city_id': fields.many2one('res.city', 'City', ),
 		'state_id': fields.many2one('res.country.state', 'State',),
 		'country_id': fields.many2one('res.country', 'Country',),
-		'pin_code': fields.integer('Postal Code',size=8),
-		'phone_no': fields.char('Phone Number',size=15),
+		'pin_code': fields.integer('Postal Code'),
+		'phone_no': fields.char('Phone Number'),
 		'ann_date': fields.date('Anniversery Date'),
 		'wife_hus_name': fields.char('Wife/Husband Name'),
 		'adhar_data': fields.binary('Adhar Copy'),
 		'pan_data': fields.binary('Pan Copy'),
 		'license_data': fields.binary('License Copy'),
 		'voter_data': fields.binary('Voter Copy'),
-		'name': fields.char('Employee Name'),
-		'work_location': fields.char('Work Location'),
-		'work_phone': fields.char('Work Phone'),
-		'mobile_phone': fields.char('Mobile Phone'),
-		'department_id': fields.many2one('hr.department', 'Department', readonly=True),
-		'job_id': fields.many2one('hr.job', 'Designation', readonly=True),
-		'marital': fields.char('Marital Status', readonly=True),
-		'gender': fields.char('Gender', readonly=True),
-		'children': fields.integer('Children', readonly=True),
-		'remaining_leaves': fields.integer('Remaining Leaves', readonly=True),
-		'identification_id': fields.char('Adhar ID', readonly=True),
-		'bank_account_id': fields.char('bank name', readonly=True),
+		'sample_data': fields.char('Voter Copy'),
+		'sample_data1': fields.char('Voter Copy'),
+		'sample_data2': fields.char('Voter Copy'),
+		'sample_data3': fields.char('Voter Copy'),
+		'sample_data4': fields.char('Voter Copy'),
+		'sample_data5': fields.char('Voter Copy'),
+		'sample_data6': fields.char('Voter Copy'),
+		
+		'att_code': fields.char('Attendance Code'),
+		'join_mode': fields.selection([('new','New'),('rejoin','Re-Join')],'Joining Mode'),
+		'mode_of_att': fields.selection([('manual','Manual'),('electronic','Electronic'),('both','Both')],'Mode of Attendance'),
+		'personal_email': fields.char('Personal Email'),
+		'emp_categ_id':fields.many2one('kg.employee.category','Category'),
+		'bank_acc_no': fields.char('Bank Account No'),
 		'children_1': fields.integer('Children',),
+		'nationality': fields.char('Nationality',),
+		'wrk_address': fields.char('Working Address',),
+		'dep_id':fields.many2one('kg.depmaster','Department'),
+		'pan_no':fields.char('Pan No'),
+		'division_id':fields.many2one('kg.division.master','Division'),
+		'nature_of_job_id':fields.many2one('kg.job.nature','Nature Of Job'),
+		'account_id':fields.many2one('account.account','Account'),
+		
+		'work_email': fields.char('Work Email'),
+		'passport_id': fields.char('Passport'),
+		'otherid': fields.char('Other Id'),
+		'birthday': fields.date('Date of Birth'),
+		'place_of_birth': fields.char('Place of Birth'),
 	}
 	
 	_defaults = {
@@ -605,11 +633,12 @@ class ch_kg_employee_ref_his(osv.osv):
 	
 				'header_id_ref_his' : fields.many2one('hr.employee','Header ID Ref History'),
 				'name':fields.char('Name'),
-				'contact_no':fields.char('Contact Number',size=15),
+				'contact_no':fields.char('Contact Number'),
 				'relation_ship':fields.char('Relation Ship'),
 				'designation':fields.char('Designation'),
 				'address':fields.text('Address')
 			}
+			
 
 ch_kg_employee_ref_his()
 
@@ -620,11 +649,11 @@ class ch_kg_employee_ref_edu_his(osv.osv):
 	_columns = {
 	
 	'header_id_ref_edu_his':fields.many2one('hr.employee','Header ID Ref Edu History'),
-	'ug_degree': fields.char('Graduation/Degree', size=128),
-	'ug_study': fields.char('Field Of Study', size=128 ),
-	'ug_grade': fields.char('Grade', size=128),
-	'ug_institute': fields.char('Institute', size=128),
-	'ug_uni': fields.char('University', size=128),
+	'ug_degree': fields.char('Graduation/Degree'),
+	'ug_study': fields.char('Field Of Study'),
+	'ug_grade': fields.char('Grade'),
+	'ug_institute': fields.char('Institute'),
+	'ug_uni': fields.char('University'),
 	'ug_date': fields.date('Provision Date'),
 	
 	}
@@ -638,10 +667,10 @@ class ch_kg_employee_ref_emp_his(osv.osv):
 	_columns = {
 	
 	'header_id_ref_emp_his':fields.many2one('hr.employee','Header ID Ref Emp History'),
-	'work_exp': fields.char('Experience', size=128),
-	'cmp_name': fields.char('Company', size=128),
-	'position': fields.char('Position', size=128),
-	'spec': fields.char('Specialization', size=128),
+	'work_exp': fields.char('Experience (Y / M / D)'),
+	'cmp_name': fields.char('Company'),
+	'position': fields.char('Position'),
+	'spec': fields.char('Specialization'),
 	'from_date': fields.date('From Date'),
 	'to_date': fields.date('To Date'),
 	
@@ -649,6 +678,21 @@ class ch_kg_employee_ref_emp_his(osv.osv):
 
 ch_kg_employee_ref_emp_his()
 
-##History Tracking Ends###
+class ch_kg_employee_train_cer_his (osv.osv):
+	
+	_name = 'ch.kg.employee.train.cer.his'
+	
+	_columns = {
+		'header_id_ref_train_cer_his':fields.many2one('hr.employee','Header ID Ref Training History'),
+		'description':fields.char('Description'),
+		'completion_date':fields.date('Completion Date'),
+		'conducted_by':fields.char('Conducted By'),
+	
+	}
+	
+	
+ch_kg_employee_train_cer_his()
+
+###################### History Tracking starts #####################################
 
 

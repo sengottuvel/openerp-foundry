@@ -38,7 +38,7 @@
 								<field name="join_date" required="1" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
 								<field name="code" class="aplhanum_expect" string="Code" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
 								<field name="att_code" class="aplhanum_expect" attrs="{'required':[('mode_of_att','in',('electronic','both'))],'invisible':[('mode_of_att','not in',('electronic','both'))],'readonly': [('status','in',['approved','reject','cancel'])]}"/>
-								<field name="emp_categ_id" required="1"/>
+								<field name="emp_categ_id" required="1" domain="[('active','=',True)]"/>
 								<field name="nature_of_job_id" required="0"/>
 								<field name="status" style="width: 30%%" class="att_state_change"/>
 							</group>
@@ -133,6 +133,7 @@
 					</field>
 					<field name="work_location" position="replace">
 						<field name="work_location" class="aplhanum_expect" string="Location" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="1"/>
+						<field name="account_id" readonly="1"/>
 					</field>
 					<field name="department_id" position="replace">
 						<field name="department_id" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}" required="0" invisible="1"/>
