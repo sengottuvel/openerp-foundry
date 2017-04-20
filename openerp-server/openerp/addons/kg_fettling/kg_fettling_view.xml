@@ -3016,6 +3016,9 @@
 					<field name="pattern_name"/>
 					<field name="moc_id"/>
 					<field name="location"/>
+					<field name="pour_qty" sum="Total Qty"/>
+					<field name="inward_accept_qty" string="Fettling Accepted Qty" sum="Total Accepted Qty"/>
+					<field name="stage_id"/>
 					
 				</tree>
 			</field>

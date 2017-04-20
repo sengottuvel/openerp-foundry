@@ -402,6 +402,7 @@ class kg_fettling(osv.osv):
 		'allocation_reject_remarks_id': fields.many2one('kg.rejection.master', 'Rejection Remarks'),
 		
 		'ms_state': fields.selection([('created','Created'),('not_created','Not Created')],'MS Status'),
+		'flag_sub_order': fields.boolean('Sub Work Order'),
 
 		
 	
