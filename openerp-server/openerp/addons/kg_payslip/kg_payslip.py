@@ -334,6 +334,7 @@ class kg_payslip(osv.osv):
 					if con_line_ids.amt_type == 'percentage':
 						comp_amt = (((con_ids_1.gross_salary * con_line_ids.salary_amt)/100)/calulation_days)
 					else:
+						print "calculation daysssssssssssssssssssssssss",calulation_days
 						comp_amt = (con_line_ids.salary_amt/calulation_days)
 						
 					mon_sal = (comp_amt*salary_days)
