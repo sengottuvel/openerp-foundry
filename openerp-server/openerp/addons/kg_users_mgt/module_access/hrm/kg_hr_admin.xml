@@ -756,7 +756,7 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
 		</record>
 		
-		<record id="m_accounts_account_master_asss" model="ir.model.access">
+		<record id="m_accounts_account_creation" model="ir.model.access">
 			<field name="model_id" ref="account.model_account_account"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">Account Master</field>
@@ -766,7 +766,7 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'HR_Admin')]"/>
 		</record>
 		
-		<record id="m_accounts_account_type_ass" model="ir.model.access">
+		<record id="m_accounts_account_type_creation" model="ir.model.access">
 			<field name="model_id" ref="account.model_account_account_type"/>
 			<field eval="1" name="perm_read"/>
 			<field name="name">Account Type</field>
