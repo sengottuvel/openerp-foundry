@@ -1928,9 +1928,20 @@ class kg_schedule(osv.osv):
 								
 								ms_raw_obj = self.pool.get('ch.ms.raw.material')
 								ms_raw_rec = ms_raw_obj.browse(cr, uid, bot_indent_item['bot_item'])
+								
+								if bot_indent_item['type'] == 'foun'
 
-								bot_order_obj = self.pool.get('ch.order.bot.details')
-								bot_order_rec = bot_order_obj.browse(cr, uid, bot_indent_item['order_bot_id'])
+									bot_order_obj = self.pool.get('ch.order.bot.details')
+									bot_order_rec = bot_order_obj.browse(cr, uid, bot_indent_item['order_bot_id'])
+									ms_bot_id = bot_order_rec.bot_id.id
+									fns_item_name = bot_order_rec.bot_id.code
+								
+								if bot_indent_item['type'] == 'acc'
+
+									bot_order_obj = self.pool.get('ch.wo.accessories.bot')
+									bot_order_rec = bot_order_obj.browse(cr, uid, bot_indent_item['order_bot_id']) 
+									ms_bot_id = bot_order_rec.ms_id.id
+									fns_item_name = bot_order_rec.ms_id.code
 								
 								if bot_indent_item['type'] == 'foun':
 									indent_qty = bot_indent_item['indent_qty']/order_line_rec.qty
@@ -1944,8 +1955,8 @@ class kg_schedule(osv.osv):
 									'qty': indent_qty,
 									'pending_qty': indent_qty,
 									'issue_pending_qty': indent_qty,
-									'ms_bot_id':bot_order_rec.bot_id.id,
-									'fns_item_name':bot_order_rec.bot_id.code,
+									'ms_bot_id':ms_bot_id,
+									'fns_item_name':fns_item_name,
 									'brand_id':bot_order_rec.brand_id.id,
 									'moc_id': bot_indent_item['moc_id']
 								}
