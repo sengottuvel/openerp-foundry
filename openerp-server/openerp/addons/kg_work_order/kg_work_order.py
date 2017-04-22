@@ -1799,7 +1799,7 @@ class ch_work_order_details(osv.osv):
 							
 							print "length---------------------------->>>>",length
 							if length > 0:
-								ms_bom_qty = round(length,0)
+								ms_bom_qty = length
 							else:
 								ms_bom_qty = 0
 							print "ms_bom_qty---------------------------->>>>",ms_bom_qty
