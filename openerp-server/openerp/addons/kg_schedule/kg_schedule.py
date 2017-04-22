@@ -1936,7 +1936,7 @@ class kg_schedule(osv.osv):
 									indent_qty = bot_indent_item['indent_qty']/order_line_rec.qty
 								else:
 									indent_qty = bot_indent_item['indent_qty']
-								
+								print "bot_order_rec",bot_order_rec
 								bot_dep_indent_line_vals = {
 									'indent_id':indent_id,
 									'product_id':bot_indent_item['product_id'],
