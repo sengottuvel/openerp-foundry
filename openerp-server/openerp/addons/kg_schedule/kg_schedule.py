@@ -38,7 +38,7 @@ class kg_schedule(osv.osv):
 		### Header Details ####
 		'name': fields.char('Schedule No', size=128,select=True,required=True),
 		'entry_date': fields.date('Schedule Date',required=True),
-		'division_id': fields.many2one('kg.division.master','Division',readonly=True,required=True,domain="[('state','=','approved'), ('active','=','t')]"),
+		'division_id': fields.many2one('kg.division.master','Division',required=True,domain="[('state','=','approved'), ('active','=','t')]"),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location',required=True),
 		'note': fields.text('Notes'),
 		'remarks': fields.text('Remarks'),
