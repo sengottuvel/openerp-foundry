@@ -189,7 +189,7 @@ case when pump_crm.specific_gravity > 0 then round(cast(pump_crm.specific_gravit
 case when pump_crm.temperature_in_c is not null then pump_crm.temperature_in_c::text else '-' end as temperature_in_c,
 case when pump_crm.capacity_in_liquid > 0 then pump_crm.capacity_in_liquid::text else '-' end as capacity_in_m3hr,
 case when pump_crm.head_in_liquid > 0 then round(cast(pump_crm.head_in_liquid as numeric),2)::text else '-' end as head_in_m,
-case when pump_crm.efficiency_in > 0 then pump_crm.efficiency_in::text else '-' end as efficiency,
+case when pump_crm.efficiency_in > 0 then round(cast(pump_crm.efficiency_in as numeric),2)::text else '-' end as efficiency,
 case when pump_crm.motor_kw > 0 then round(cast(pump_crm.motor_kw as numeric),2)::text else '-' end as motor_kw,
 case when brand_motor.name is not null then brand_motor.name::text else '-' end as motor_make,
 
@@ -1527,7 +1527,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font size="8" isBold="false" isItalic="false"/>
 					</textElement>
-					<text><![CDATA[Bush Bearing Lubrication]]></text>
+					<text><![CDATA[Bush Bearing]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="574" width="258" height="16"/>
