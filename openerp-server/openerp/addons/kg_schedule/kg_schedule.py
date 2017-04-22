@@ -1935,6 +1935,7 @@ class kg_schedule(osv.osv):
 									bot_order_rec = bot_order_obj.browse(cr, uid, bot_indent_item['order_bot_id'])
 									ms_bot_id = bot_order_rec.bot_id.id
 									fns_item_name = bot_order_rec.bot_id.code
+									brand_id = bot_order_rec.brand_id.id
 								
 								if bot_indent_item['type'] == 'acc':
 
@@ -1942,6 +1943,7 @@ class kg_schedule(osv.osv):
 									bot_order_rec = bot_order_obj.browse(cr, uid, bot_indent_item['order_bot_id']) 
 									ms_bot_id = bot_order_rec.ms_id.id
 									fns_item_name = bot_order_rec.ms_id.code
+									brand_id = False
 								
 								if bot_indent_item['type'] == 'foun':
 									indent_qty = bot_indent_item['indent_qty']/order_line_rec.qty
@@ -1957,7 +1959,7 @@ class kg_schedule(osv.osv):
 									'issue_pending_qty': indent_qty,
 									'ms_bot_id':ms_bot_id,
 									'fns_item_name':fns_item_name,
-									'brand_id':bot_order_rec.brand_id.id,
+									'brand_id':brand_id,
 									'moc_id': bot_indent_item['moc_id']
 								}
 								
