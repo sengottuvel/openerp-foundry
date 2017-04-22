@@ -1929,14 +1929,14 @@ class kg_schedule(osv.osv):
 								ms_raw_obj = self.pool.get('ch.ms.raw.material')
 								ms_raw_rec = ms_raw_obj.browse(cr, uid, bot_indent_item['bot_item'])
 								
-								if bot_indent_item['type'] == 'foun'
+								if bot_indent_item['type'] == 'foun':
 
 									bot_order_obj = self.pool.get('ch.order.bot.details')
 									bot_order_rec = bot_order_obj.browse(cr, uid, bot_indent_item['order_bot_id'])
 									ms_bot_id = bot_order_rec.bot_id.id
 									fns_item_name = bot_order_rec.bot_id.code
 								
-								if bot_indent_item['type'] == 'acc'
+								if bot_indent_item['type'] == 'acc':
 
 									bot_order_obj = self.pool.get('ch.wo.accessories.bot')
 									bot_order_rec = bot_order_obj.browse(cr, uid, bot_indent_item['order_bot_id']) 
