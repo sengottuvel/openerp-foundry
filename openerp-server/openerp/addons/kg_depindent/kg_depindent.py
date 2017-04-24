@@ -387,6 +387,9 @@ class kg_depindent_line(osv.osv):
 	'ms_bot_id': fields.many2one('kg.machine.shop', 'MS/BOT Item'),
 	'fns_item_name': fields.char('Foundry/MS/BOT', size=128),
 	'position_id': fields.many2one('kg.position.number', string='Position No'),
+	'length': fields.float('Length'),
+	'breadth': fields.float('Breadth'),
+	'flag_dynamic_length': fields.boolean('Dynamic Length'), 
 	
 	}
 	
@@ -395,7 +398,7 @@ class kg_depindent_line(osv.osv):
 		'line_state': 'noprocess',
 		'name': 'Dep.Indent.Line',
 		'line_date': lambda * a: time.strftime('%Y-%m-%d'),
-		
+		'flag_dynamic_length': False
 	}
 		
 	def onchange_moc(self, cr, uid, ids, moc_id_temp):
@@ -404,6 +407,11 @@ class kg_depindent_line(osv.osv):
 			rate_rec = self.pool.get('ch.brandmoc.rate.details').browse(cr,uid,moc_id_temp)
 			value = {'moc_id': rate_rec.moc_id.id}
 		return {'value': value}
+		
+	def confirm_indent_line(self, cr, uid, ids, context=None):
+		entry_rec = self.browse(cr,uid,ids[0])
+		self.write(cr, uid, ids,{'pending_qty': entry_rec.qty, 'issue_pending_qty' : entry_rec.qty, 'po_qty' : entry_rec.qty})
+		return True
 		
 kg_depindent_line()	
 
@@ -417,7 +425,8 @@ class ch_depindent_wo(osv.osv):
 
 	'header_id': fields.many2one('kg.depindent.line', 'Dept Indent Line', required=True, ondelete='cascade'),
 	'wo_id': fields.char('WO', required=True),
-	'w_order_id': fields.many2one('kg.work.order','WO',required=True, domain="[('state','=','confirmed')]"),
+	#~ 'w_order_id': fields.many2one('kg.work.order','WO',required=True, domain="[('state','=','confirmed')]"),
+	'w_order_id': fields.related('w_order_line_id','header_id', type='many2one', string='WO', store=True),
 	'w_order_line_id': fields.many2one('ch.work.order.details','WO',required=True),
 	'qty': fields.float('Indent Qty', required=True),
 	
