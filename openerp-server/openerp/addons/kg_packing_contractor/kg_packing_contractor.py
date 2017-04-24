@@ -632,7 +632,8 @@ class ch_packing_inward_line(osv.osv):
 		'flag_invoice': False,		
 	}
 	
-	def onchange_qty(self, cr, uid, ids, qty,inward_qty):		
+	def onchange_qty(self, cr, uid, ids, qty,inward_qty):
+		rejected_qty = 0.00		
 		if qty:			
 			rejected_qty = inward_qty - qty
 		return {'value': {'reject_qty':rejected_qty}}
