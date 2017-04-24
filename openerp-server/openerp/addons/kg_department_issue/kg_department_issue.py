@@ -575,11 +575,11 @@ class kg_department_issue(osv.osv):
 					for i in val:
 						lot_rec = lot_obj.browse(cr, uid, i)
 						tot += lot_rec.pending_qty
-					if tot < line_ids.issue_qty:
-						raise osv.except_osv(_('Stock not available !!'),
-							_('Associated GRN have less Qty compare to issue Qty for Product %s.'%(line_ids.product_id.name)))
-					else:
-						pass
+					#~ if tot < line_ids.issue_qty:
+						#~ raise osv.except_osv(_('Stock not available !!'),
+							#~ _('Associated GRN have less Qty compare to issue Qty for Product %s.'%(line_ids.product_id.name)))
+					#~ else:
+						#~ pass
 					### Updation Issue Pending Qty in Department Issue ###
 					if issue_record.issue_type == 'material':
 						dep_line_obj = self.pool.get('kg.depindent.line')   
