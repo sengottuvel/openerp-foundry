@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>	
+	
+	<!-- Form DC View Start -->
+
+		<record id="t_form_v_drawing_dc" model="ir.ui.view">
+			<field name="name">Drawing DC Form</field>
+			<field name="model">kg.drawing.dc</field>
+			<field name="arch" type="xml">
+				<form string="Drawing DC" version="7.0">
+					<header>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>						
+					</header>
+					<group>
+						<group>
+							<field name="name"/>
+							<field name="entry_type" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="contractor_id" on_change="onchange_contractor(contractor_id)" attrs="{'required':[('entry_type','=','sc')],'invisible':[('entry_type','=','internal')],'readonly': [('state','not in',['draft'])]}"/>
+							<field name="division_id" attrs="{'required':[('entry_type','=','internal')],'invisible':[('entry_type','=','sc')],'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="phone" readonly="1" attrs="{'invisible':[('entry_type','=','internal')]}"/>							
+							<field name="annexure_no" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>																				
+						</group>											
+						<group>
+							<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="annexure_date" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="contact_person" readonly="1" attrs="{'invisible':[('entry_type','=','internal')]}"/>														
+							<field name="vehicle_detail" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}" required="1"/>						
+							<field name="entry_mode" invisible="1"/>	
+							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
+						</group>					
+					</group>					
+					<notebook>
+						<page string="Drawing details">
+							<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
+								<tree string = "Drawing details" editable="top">
+									<field name="position_id" on_change="onchange_item(position_id)"/>
+									<field name="drawing_no" readonly="1"/>
+									<field name="item_code" readonly="1"/>															
+									<field name="item_name" readonly="1"/>															
+									<field name="qty" required="1"/>															
+									<field name="remarks" widget="char"/>
+								</tree>
+							</field>
+						</page>
+						<page string="Equipment details">
+							<field colspan="4" name="line_ids_a" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
+								<tree string = "Equipment details Items" editable="top">
+									<field name="equ_id" on_change="onchange_item(equ_id)"/>
+									<field name="equ_name" readonly="1"/>
+									<field name="qty" required="1"/>															
+									<field name="remarks" widget="char"/>
+								</tree>
+							</field>
+						</page>						
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
+								<group>
+									<field name="user_id"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_drawing_dc" model="ir.ui.view">
+			<field name="name">Drawing DC Tree</field>
+			<field name="model">kg.drawing.dc</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';black:state == 'confirmed';gray:state == 'cancel'" 
+						toolbar="True" string="Drawing DC Tree">					
+					<field name="name"/>
+					<field name="entry_date"/>					
+					<field name="entry_type"/>					
+					<field name="division_id"/>					
+					<field name="contractor_id"/>	
+					<field name="state"/>					
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Search View Start -->
+
+		<record id="t_search_v_drawing_dc" model="ir.ui.view">
+            <field name="name">Drawing DC Search</field>
+            <field name="model">kg.drawing.dc</field>
+            <field name="arch" type="xml">
+                <search string="Drawing DC Search">
+					
+					<field name="name" string="DC No."  filter_domain="[('name','ilike',self)]" />
+					<field name="contractor_id" string="Contractor Name"  filter_domain="[('contractor_id','ilike',self)]" />					
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>					
+					<filter icon="terp-check" name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>				
+				
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="DC No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'name'}"/>						
+						<filter string="Contractor" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'contractor_id'}"/>
+						<filter string="State" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>						
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+		
+		<!-- Menu Action Start -->
+		
+		
+		<record id="tma_drawing_dc" model="ir.actions.act_window">
+			<field name="name">Drawing DC</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.drawing.dc</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="search_view_id" ref="t_search_v_drawing_dc"/>
+			
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_drawing_dc_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_drawing_dc"/>
+            <field name="act_window_id" ref="tma_drawing_dc"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_drawing_dc_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_drawing_dc"/>
+            <field name="act_window_id" ref="tma_drawing_dc"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start -->
+		
+        <record id="audit_drawing_dc" model="audittrail.rule">
+            <field name="name">Audit Subcontract DC</field>
+            <field name="object_id" eval="ref('kg_drawing_process.model_kg_drawing_dc')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+         <record id="audit_drawing_dc_drawing" model="audittrail.rule">
+            <field name="name">Audit Subcontract DC Drawing</field>
+            <field name="object_id" eval="ref('kg_drawing_process.model_ch_drawing_details')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+         <record id="audit_drawing_dc_equ" model="audittrail.rule">
+            <field name="name">Audit Subcontract DC Equ</field>
+            <field name="object_id" eval="ref('kg_drawing_process.model_ch_equipment_details')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->	
+    
+    
+    
+     <!-- Drawing Inward Starts Here -->
+	
+	<!-- Form Inward View Start -->
+
+		<record id="t_form_v_drawing_inward" model="ir.ui.view">
+			<field name="name">Drawing Inward Form</field>
+			<field name="model">kg.drawing.inward</field>
+			<field name="arch" type="xml">
+				<form string="Drawing Inward" version="7.0">
+					<header>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>						
+					</header>
+					<group>
+						<group>
+							<field name="name"/>
+							<field name="entry_type" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="contractor_id" on_change="onchange_contractor(contractor_id)" attrs="{'required':[('entry_type','=','sc')],'invisible':[('entry_type','=','internal')],'readonly': [('state','not in',['draft'])]}"/>
+							<field name="division_id" attrs="{'required':[('entry_type','=','internal')],'invisible':[('entry_type','=','sc')],'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="phone" readonly="1" attrs="{'invisible':[('entry_type','=','internal')]}"/>																			
+						</group>											
+						<group>
+							<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>							
+							<field name="contact_person" readonly="1" attrs="{'invisible':[('entry_type','=','internal')]}"/>	
+							<field name="dc_sc_ids" attrs="{'required':[('entry_type','=','sc')],'invisible':[('entry_type','=','internal')],'readonly': [('state','not in',['draft'])]}"  widget="many2many_tags"/>																	
+							<field name="dc_internal_ids" attrs="{'required':[('entry_type','=','internal')],'invisible':[('entry_type','=','sc')],'readonly': [('state','not in',['draft'])]}"  widget="many2many_tags"/>																	
+							<field name="entry_mode" invisible="1"/>	
+							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
+						</group>					
+					</group>					
+					<button name="update_line_items" class="proceed_button" type='object' string="List" attrs="{'invisible': [('state','not in',['draft'])]}"/>
+					<notebook>
+						<page string="Drawing details">
+							<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
+								<tree string = "Drawing details" editable="bottom" create="false">
+									<field name="position_id" readonly="1"/>
+									<field name="drawing_no" readonly="1"/>
+									<field name="item_code" readonly="1"/>															
+									<field name="item_name" readonly="1"/>															
+									<field name="dc_qty" readonly="1"/>															
+									<field name="qty" required="1"/>															
+									<field name="remarks" widget="char"/>
+								</tree>
+							</field>
+						</page>
+						<page string="Equipment details">
+							<field colspan="4" name="line_ids_a" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
+								<tree string = "Equipment details Items" editable="bottom" create="false">
+									<field name="equ_id" readonly="1"/>
+									<field name="equ_name" readonly="1"/>
+									<field name="dc_qty" readonly="1"/>															
+									<field name="qty" required="1"/>															
+									<field name="remarks" widget="char"/>
+								</tree>
+							</field>
+						</page>								
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
+								<group>
+									<field name="user_id"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_drawing_inward" model="ir.ui.view">
+			<field name="name">Drawing Inward Tree</field>
+			<field name="model">kg.drawing.inward</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';black:state == 'confirmed';gray:state == 'cancel'" 
+						toolbar="True" string="Drawing Inward Tree">					
+					<field name="name"/>
+					<field name="entry_date"/>							
+					<field name="contractor_id"/>	
+					<field name="state"/>					
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->	
+	
+	
+	<!-- Search View Start -->
+
+		<record id="t_search_v_drawing_inward" model="ir.ui.view">
+            <field name="name">Drawing Inward Search</field>
+            <field name="model">kg.drawing.inward</field>
+            <field name="arch" type="xml">
+                <search string="Drawing Inward Search">
+					
+					<field name="name" string="Inward No."  filter_domain="[('name','ilike',self)]" />
+					<field name="contractor_id" string="Contractor Name"  filter_domain="[('contractor_id','ilike',self)]" />					
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>					
+					<filter icon="terp-check" name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>				
+				
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="Inward No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'name'}"/>						
+						<filter string="Contractor" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'contractor_id'}"/>
+						<filter string="State" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>						
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+		
+		<!-- Menu Action Start -->
+		
+		
+		<record id="tma_drawing_inward" model="ir.actions.act_window">
+			<field name="name">Drawing Inward</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.drawing.inward</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="search_view_id" ref="t_search_v_drawing_inward"/>
+			
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_drawing_inward_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_drawing_inward"/>
+            <field name="act_window_id" ref="tma_drawing_inward"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_drawing_inward_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_drawing_inward"/>
+            <field name="act_window_id" ref="tma_drawing_inward"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start -->
+		
+        <record id="audit_drawing_inward" model="audittrail.rule">
+            <field name="name">Audit Subcontract Inward</field>
+            <field name="object_id" eval="ref('kg_drawing_process.model_kg_drawing_inward')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+         <record id="audit_drawing_inward_drawing" model="audittrail.rule">
+            <field name="name">Audit Subcontract Inward Drawing</field>
+            <field name="object_id" eval="ref('kg_drawing_process.model_ch_inward_drawing_details')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+         <record id="audit_drawing_inward_equ" model="audittrail.rule">
+            <field name="name">Audit Subcontract Inward Equ</field>
+            <field name="object_id" eval="ref('kg_drawing_process.model_ch_inward_equipment_details')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->	   
+    
+    
+	<!-- Parent Master Menu -->
+		<menuitem name="Drawing" id="mpm_drawing" sequence="55"/>
+            
+		<!-- Planning Masters Menu -->
+		<menuitem name="Subcontract Process" id="mpm_sub_drawing_process" parent = "mpm_drawing" sequence="1"/>
+		
+	<!-- Menu Item Starts Here -->
+	
+	<menuitem action="tma_drawing_dc" id="tam_drawing_dc" parent="mpm_sub_drawing_process" sequence="0"/>
+	<menuitem action="tma_drawing_inward" id="tam_drawing_inward" parent="mpm_sub_drawing_process" sequence="1"/>
+	
+	
+	</data>
+</openerp>

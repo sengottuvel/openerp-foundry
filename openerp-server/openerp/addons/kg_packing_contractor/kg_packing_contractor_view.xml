@@ -1,0 +1,559 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+	
+	
+	<!-- Packing WO Starts Here -->
+	
+	<!-- Form View Start -->
+
+		<record id="t_form_v_packing_wo" model="ir.ui.view">
+			<field name="name">Packing WO Form</field>
+			<field name="model">kg.packing.workorder</field>
+			<field name="arch" type="xml">
+				<form string="Packing WO" version="7.0">
+					<header>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>
+						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight"/>
+						<button name="approve_dc" type="object" string="Approve &amp; DC" states="confirmed" class="oe_highlight"/>
+					</header>
+					<group>
+						<group>
+							<field name="name"/>
+							<field name="contractor_id" on_change="onchange_contractor(contractor_id)" required="1"  attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="phone" readonly="1"/>
+							<field name="wo_value" readonly="1"/>								
+						</group>											
+						<group>
+							<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="contact_person" readonly="1"/>
+							<field name="billing_type" invisible="1"/>
+							<field name="delivery_date" options="{'datepicker':{'maxDate': 185}}" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="flag_spl_approve" invisible="1"/>
+							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
+						</group>					
+					</group>
+					<notebook>
+						<page string="Work Order Details">
+							<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}" >
+								<tree string = "Work Order Items" editable="top">
+									<field name="packing_id" required="1" on_change="onchange_rate(packing_id)"/>
+									<field name="rate" readonly="1"/>
+									<field name="qty" required="1"/>																		
+									<field name="amount" readonly="1"/>
+									<field name="remarks" widget="char"/>																	
+								</tree>								
+							</field>
+						</page>						
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
+								<group>
+									<field name="user_id"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_packing_wo" model="ir.ui.view">
+			<field name="name">Packing WO Tree</field>
+			<field name="model">kg.packing.workorder</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';black:state == 'confirmed'
+						;black:state == 'confirmed_dc';gray:state == 'cancel'" 
+						toolbar="True" string="Packing WO Tree">					
+					<field name="name"/>
+					<field name="entry_date"/>
+					<field name="contractor_id"/>					
+					<field name="wo_value"/>
+					<field name="delivery_date"/>
+					<field name="state"/>					
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Packing Subcontract WO Line Tree View Start -->
+		
+		<record id="t_tree_v_packing_wo_line" model="ir.ui.view">
+			<field name="name">Subcontract Packing Line Tree</field>
+			<field name="model">ch.packing.wo.line</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Packing Subcontract WO Line Tree">				
+					<field name="header_id"/>
+					<field name="packing_id"/>
+					<field name="rate"/>					
+					<field name="qty"/>
+					<field name="amount"/>								
+					<field name="pending_qty"/>
+					<field name="remarks"/>					
+				</tree>
+			</field>
+		</record>
+		
+	<!--Packing Subcontract WO Line Tree View End -->
+	
+	
+	<!-- Search View Start -->
+
+		<record id="t_search_v_packing_wo" model="ir.ui.view">
+            <field name="name">Packing WO Search</field>
+            <field name="model">kg.packing.workorder</field>
+            <field name="arch" type="xml">
+                <search string="Packing WO Search">
+					
+					<field name="name" string="WO No."  filter_domain="[('name','ilike',self)]" />
+					<field name="contractor_id" string="Contractor Name"  filter_domain="[('contractor_id','ilike',self)]" />					
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>					
+					<filter icon="terp-check" name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>				
+				
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'name'}"/>
+						<filter string="Delivery Date" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'delivery_date'}"/>
+						<filter string="Contractor" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'contractor_id'}"/>
+						<filter string="State" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>						
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+		
+		<!-- Menu Action Start -->
+		
+		
+		<record id="tma_packing_wo" model="ir.actions.act_window">
+			<field name="name">Packing WO</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.packing.workorder</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="search_view_id" ref="t_search_v_packing_wo"/>			
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_packing_wo_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_packing_wo"/>
+            <field name="act_window_id" ref="tma_packing_wo"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_packing_wo_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_packing_wo"/>
+            <field name="act_window_id" ref="tma_packing_wo"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start -->
+		
+        <record id="audit_packing_wo" model="audittrail.rule">
+            <field name="name">Audit Subcontract WO</field>
+            <field name="object_id" eval="ref('kg_packing_contractor.model_kg_packing_workorder')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->	 
+    
+    
+    <!-- Packing DC Starts Here -->
+	
+	<!-- Form DC View Start -->
+
+		<record id="t_form_v_packing_dc" model="ir.ui.view">
+			<field name="name">Packing DC Form</field>
+			<field name="model">kg.packing.dc</field>
+			<field name="arch" type="xml">
+				<form string="Packing DC" version="7.0">
+					<header>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>						
+					</header>
+					<group>
+						<group>
+							<field name="name"/>
+							<field name="contractor_id" on_change="onchange_contractor(contractor_id)" required="1"  attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="phone" readonly="1"/>
+							<field name="division_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+							<field name="annexure_no" required="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>
+																				
+						</group>											
+						<group>
+							<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="annexure_date" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="contact_person" readonly="1"/>												
+							<field name="vehicle_detail" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}" required="1"/>						
+							<field name="entry_mode" invisible="1"/>	
+							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
+						</group>					
+					</group>
+					<notebook>
+						<page string="DC Details">
+							<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
+								<tree string = "DC Details Items" editable="bottom" create="false">
+									<field name="sub_wo_id" readonly="1"/>
+									<field name="packing_id" readonly="1"/>
+									<field name="entry_mode" invisible="1"/>
+									<field name="qty" required="1" attrs="{'readonly': [('entry_mode','=','auto')]}"/>																	
+									<field name="remarks" widget="char"/>
+								</tree>
+							</field>
+						</page>
+						<page string="Select Items" attrs="{'invisible': [('entry_mode','=','auto')]}">
+							<field name="dc_sub_line_ids" attrs="{'readonly': [('state','not in',['draft'])]}">
+								<tree string="Work Order Line Items" create="false">
+									<field name="packing_id"/>
+									<field name="rate"/>
+									<field name="qty"/>									
+									<field name="pending_qty"/>
+									<field name="remarks"/>																	
+								</tree>
+							</field>
+							<button name="update_line_items" class="proceed_button" type='object' string="Proceed" attrs="{'invisible': [('state','not in',['draft'])]}"/>
+						</page>
+						
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
+								<group>
+									<field name="user_id"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_packing_dc" model="ir.ui.view">
+			<field name="name">Packing DC Tree</field>
+			<field name="model">kg.packing.dc</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';black:state == 'confirmed';gray:state == 'cancel'" 
+						toolbar="True" string="Packing WO Tree">					
+					<field name="name"/>
+					<field name="entry_date"/>					
+					<field name="sub_wo_no"/>					
+					<field name="contractor_id"/>	
+					<field name="state"/>					
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- DC Line Tree View Start -->
+		
+	<record id="t_tree_v_packing_dc_line" model="ir.ui.view">
+		<field name="name">Packing Subcontract DC Line Tree</field>
+		<field name="model">ch.packing.dc.line</field>
+		<field eval="8" name="priority"/>
+		<field name="arch" type="xml">
+			<tree toolbar="True" string="Packing Subcontract DC Line Tree">				
+				<field name="sub_wo_id"/>
+				<field name="packing_id"/>
+				<field name="qty"/>					
+				<field name="pending_qty"/>
+				<field name="remarks"/>									
+			</tree>
+		</field>
+	</record>
+		
+	<!-- Tree View End -->
+	
+	
+	<!-- Search View Start -->
+
+		<record id="t_search_v_packing_dc" model="ir.ui.view">
+            <field name="name">Packing DC Search</field>
+            <field name="model">kg.packing.dc</field>
+            <field name="arch" type="xml">
+                <search string="Packing DC Search">					
+					<field name="name" string="DC No."  filter_domain="[('name','ilike',self)]" />
+					<field name="contractor_id" string="Contractor Name"  filter_domain="[('contractor_id','ilike',self)]" />					
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>					
+					<filter icon="terp-check" name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>			
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="DC No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'name'}"/>						
+						<filter string="Contractor" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'contractor_id'}"/>
+						<filter string="State" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>						
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+		
+		<!-- Menu Action Start -->
+		
+		
+		<record id="tma_packing_dc" model="ir.actions.act_window">
+			<field name="name">Packing DC</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.packing.dc</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="search_view_id" ref="t_search_v_packing_dc"/>			
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_packing_dc_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_packing_dc"/>
+            <field name="act_window_id" ref="tma_packing_dc"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_packing_dc_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_packing_dc"/>
+            <field name="act_window_id" ref="tma_packing_dc"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start -->
+		
+        <record id="audit_packing_dc" model="audittrail.rule">
+            <field name="name">Audit Subcontract DC</field>
+            <field name="object_id" eval="ref('kg_packing_contractor.model_kg_packing_dc')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->	
+    
+    
+     <!-- Packing Inward Starts Here -->
+	
+	<!-- Form Inward View Start -->
+
+		<record id="t_form_v_packing_inward" model="ir.ui.view">
+			<field name="name">Packing Inward Form</field>
+			<field name="model">kg.packing.inward</field>
+			<field name="arch" type="xml">
+				<form string="Packing Inward" version="7.0">
+					<header>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>						
+					</header>
+					<group>
+						<group>
+							<field name="name"/>
+							<field name="contractor_id" on_change="onchange_contractor(contractor_id)" required="1"  attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="phone" readonly="1"/>
+							<field name="division_id" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}"/>						
+																				
+						</group>											
+						<group>
+							<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="contact_person" readonly="1"/>																	
+							<field name="entry_mode" invisible="1"/>	
+							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
+						</group>					
+					</group>
+					<notebook>
+						<page string="Inward Details">
+							<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','in',['confirmed','cancel'])]}">
+								<tree string = "Inward Details Items" editable="bottom" create="false">
+									<field name="sub_wo_id" readonly="1"/>
+									<field name="packing_id" readonly="1"/>
+									<field name="inward_qty" readonly="1"/>
+									<field name="qty" required="1" on_change="onchange_qty(qty,inward_qty)"/>
+									<field name="reject_qty" readonly="1"/>
+									<field name="entry_mode" invisible="1"/>																
+									<field name="remarks" widget="char"/>
+								</tree>
+							</field>
+						</page>
+						<page string="Select Items" attrs="{'invisible': [('entry_mode','=','auto')]}">
+							<field name="inward_sub_line_ids" attrs="{'readonly': [('state','not in',['draft'])]}">
+								<tree string="DC Line Items" create="false">									
+									<field name="packing_id"/>									
+									<field name="qty" />
+									<field name="pending_qty" />									
+								</tree>
+							</field>
+							<button name="update_line_items" class="proceed_button" type='object' string="Proceed" attrs="{'invisible': [('state','not in',['draft'])]}"/>
+						</page>						
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
+								<group>
+									<field name="user_id"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_packing_inward" model="ir.ui.view">
+			<field name="name">Packing Inward Tree</field>
+			<field name="model">kg.packing.inward</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';black:state == 'confirmed';gray:state == 'cancel'" 
+						toolbar="True" string="Packing Inward Tree">					
+					<field name="name"/>
+					<field name="entry_date"/>							
+					<field name="contractor_id"/>	
+					<field name="state"/>					
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Inward Line Tree View Start -->
+		
+	<record id="t_tree_v_packing_inward_line" model="ir.ui.view">
+		<field name="name">Packing Subcontract Inward Line Tree</field>
+		<field name="model">ch.packing.inward.line</field>
+		<field eval="8" name="priority"/>
+		<field name="arch" type="xml">
+			<tree toolbar="True" string="Packing Subcontract Inward Line Tree">				
+				<field name="packing_id"/>
+				<field name="inward_qty"/>					
+				<field name="qty"/>
+				<field name="reject_qty"/>									
+			</tree>
+		</field>
+	</record>
+		
+	<!-- Tree View End -->
+	
+	
+	<!-- Search View Start -->
+
+		<record id="t_search_v_packing_inward" model="ir.ui.view">
+            <field name="name">Packing Inward Search</field>
+            <field name="model">kg.packing.inward</field>
+            <field name="arch" type="xml">
+                <search string="Packing Inward Search">
+					
+					<field name="name" string="Inward No."  filter_domain="[('name','ilike',self)]" />
+					<field name="contractor_id" string="Contractor Name"  filter_domain="[('contractor_id','ilike',self)]" />					
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>					
+					<filter icon="terp-check" name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>				
+				
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="Inward No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'name'}"/>						
+						<filter string="Contractor" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'contractor_id'}"/>
+						<filter string="State" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>						
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+		
+		<!-- Menu Action Start -->
+		
+		
+		<record id="tma_packing_inward" model="ir.actions.act_window">
+			<field name="name">Packing Inward</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.packing.inward</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="search_view_id" ref="t_search_v_packing_inward"/>
+			
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_packing_inward_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_packing_inward"/>
+            <field name="act_window_id" ref="tma_packing_inward"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_packing_inward_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_packing_inward"/>
+            <field name="act_window_id" ref="tma_packing_inward"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start -->
+		
+        <record id="audit_packing_inward" model="audittrail.rule">
+            <field name="name">Audit Subcontract Inward</field>
+            <field name="object_id" eval="ref('kg_packing_contractor.model_kg_packing_inward')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+    <!-- Audit Log Xml Data End-->	      
+    
+   
+		
+	<!-- Menu Item Starts Here -->
+	
+	<menuitem name="Packing SC Process" id="tpm_packing_sc_process" parent="kg_operation_master.mpm_crm" sequence="9"/>
+	
+	<menuitem action="tma_packing_wo" id="tam_packing_workorder" parent="tpm_packing_sc_process" sequence="0"/>	
+	<menuitem action="tma_packing_dc" id="tam_packing_dc" parent="tpm_packing_sc_process" sequence="1"/>	
+	<menuitem action="tma_packing_inward" id="tam_packing_inward" parent="tpm_packing_sc_process" sequence="2"/>	
+	
+	</data>
+</openerp>

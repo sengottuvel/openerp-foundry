@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>		
+	
+		<report string="DC Print Copy"
+        model="kg.packing.dc"
+        auto="True"
+        name="onscreen_packing_print_report"
+        rml="kg_packing_contractor/report/kg_packing_dc_onscreen_report.jrxml"
+        id="packing_jasper_report_menu" 
+        menu="True"
+        header="False"
+        />
+		
+	</data>
+</openerp>

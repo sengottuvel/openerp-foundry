@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+	
+	<!-- Work Order Name process --> 
+		
+	<record forcecreate="1" id="seq_type_packing_workoreder" model="ir.sequence.type">	
+		<field name="name">KG Packing Work Order</field>
+		<field name="code">kg.packing.workorder</field>
+	</record>
+
+	<record forcecreate="1" id="seq_packing_workoreder" model="ir.sequence">
+	  <field name="name">KG Packing Work Order</field>
+	  <field name="code">kg.packing.workorder</field>
+	  <field name="padding" eval="5"/>
+	  <field name="prefix">P/SC/%(year)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- DC Name process --> 
+	
+	<record forcecreate="1" id="seq_type_packing_dc" model="ir.sequence.type">	
+		<field name="name">KG Packing DC</field>
+		<field name="code">kg.packing.dc</field>
+	</record>
+
+	<record forcecreate="1" id="seq_packing_dc" model="ir.sequence">
+	  <field name="name">KG Packing DC</field>
+	  <field name="code">kg.packing.dc</field>
+	  <field name="padding" eval="5"/>
+	  <field name="prefix">P/DC/%(year)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Inward Name process --> 
+	
+	<record forcecreate="1" id="seq_type_packing_inward" model="ir.sequence.type">	
+		<field name="name">KG Packing Inward</field>
+		<field name="code">kg.packing.sc.inward</field>
+	</record>
+
+	<record forcecreate="1" id="seq_packing_inward" model="ir.sequence">
+	  <field name="name">KG Packing Inward</field>
+	  <field name="code">kg.packing.sc.inward</field>
+	  <field name="padding" eval="5"/>
+	  <field name="prefix">P/INWARD/%(year)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+		
+	
+		
+</data>
+</openerp>

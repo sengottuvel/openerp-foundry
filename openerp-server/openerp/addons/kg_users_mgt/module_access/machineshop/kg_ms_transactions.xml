@@ -609,5 +609,134 @@
 			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
 		</record>
 		
+		
+		<!-- Drawing Process Start here -->
+		
+		<record id="t_ms_drawing_dc" model="ir.model.access">
+			<field name="model_id" ref="kg_drawing_process.model_kg_drawing_dc"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Drawing DC</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_ch_drawing_details" model="ir.model.access">
+			<field name="model_id" ref="kg_drawing_process.model_ch_drawing_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Drawing DC Drawing</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_equipment_details" model="ir.model.access">
+			<field name="model_id" ref="kg_drawing_process.model_ch_equipment_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Drawing DC Equ</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_drawing_inward" model="ir.model.access">
+			<field name="model_id" ref="kg_drawing_process.model_kg_drawing_inward"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Drawing Inward</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_inward_drawing_details" model="ir.model.access">
+			<field name="model_id" ref="kg_drawing_process.model_ch_inward_drawing_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Drawing Inward Drawing</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_inward_equipment_details" model="ir.model.access">
+			<field name="model_id" ref="kg_drawing_process.model_ch_inward_equipment_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Drawing Inward Equ</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Drawing Process End here -->
+		
+		<!-- Packing SC Process Start here -->
+		
+		<record id="t_ms_packing_workorder" model="ir.model.access">
+			<field name="model_id" ref="kg_packing_contractor.model_kg_packing_workorder"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Packing Work Order</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_packing_workorder_line" model="ir.model.access">
+			<field name="model_id" ref="kg_packing_contractor.model_ch_packing_wo_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Packing Work Order Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_packing_dc" model="ir.model.access">
+			<field name="model_id" ref="kg_packing_contractor.model_kg_packing_dc"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Packing DC</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_packing_dc_line" model="ir.model.access">
+			<field name="model_id" ref="kg_packing_contractor.model_ch_packing_dc_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Packing DC Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_packing_inward" model="ir.model.access">
+			<field name="model_id" ref="kg_packing_contractor.model_kg_packing_inward"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Packing Inward</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_packing_inward_line" model="ir.model.access">
+			<field name="model_id" ref="kg_packing_contractor.model_ch_packing_inward_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Packing Inward Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Packing SC Process End here -->
+		
     </data>
 </openerp>

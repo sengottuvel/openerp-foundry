@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+	
+	
+	
+	<!-- DC Name process --> 
+	
+	<record forcecreate="1" id="seq_type_drawing_dc" model="ir.sequence.type">	
+		<field name="name">KG drawing DC</field>
+		<field name="code">kg.drawing.dc</field>
+	</record>
+
+	<record forcecreate="1" id="seq_drawing_dc" model="ir.sequence">
+	  <field name="name">KG drawing DC</field>
+	  <field name="code">kg.drawing.dc</field>
+	  <field name="padding" eval="5"/>
+	  <field name="prefix">DC/%(year)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	<!-- Inward Name process --> 
+	
+	<record forcecreate="1" id="seq_type_drawing_inward" model="ir.sequence.type">	
+		<field name="name">KG drawing Inward</field>
+		<field name="code">kg.drawing.inward</field>
+	</record>
+
+	<record forcecreate="1" id="seq_drawing_inward" model="ir.sequence">
+	  <field name="name">KG drawing Inward</field>
+	  <field name="code">kg.drawing.inward</field>
+	  <field name="padding" eval="5"/>
+	  <field name="prefix">INWARD/%(year)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+		
+</data>
+</openerp>
