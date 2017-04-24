@@ -1800,8 +1800,10 @@ class ch_work_order_details(osv.osv):
 							print "length---------------------------->>>>",length
 							if length > 0:
 								ms_bom_qty = length
+								flag_dynamic_length = True
 							else:
 								ms_bom_qty = 0
+								flag_dynamic_length = False
 							print "ms_bom_qty---------------------------->>>>",ms_bom_qty
 							print "qty---------------------------->>>>",qty
 							if qty == 0:
@@ -1829,7 +1831,8 @@ class ch_work_order_details(osv.osv):
 								'flag_standard':flag_standard,
 								'entry_mode':'auto',
 								'order_category':	order_category,
-								'moc_id': moc_id
+								'moc_id': moc_id,
+								'flag_dynamic_length': flag_dynamic_length
 										  
 								})
 						
@@ -2259,12 +2262,14 @@ class ch_order_machineshop_details(osv.osv):
 		'wo_prime_cost': fields.float('WO PC'),
 		'mar_prime_cost': fields.float('Marketing PC'),
 		'material_code': fields.char('Material Code'),
+		'flag_dynamic_length': fields.boolean('Dynamic Length'),
 	
 	}  
 	
 	_defaults = {
 		
 		'entry_mode':'manual', 
+		'flag_dynamic_length':False, 
 		
 	}
 	
@@ -2315,6 +2320,7 @@ class ch_order_bot_details(osv.osv):
 		'mar_prime_cost': fields.float('Marketing PC'),
 		'material_code': fields.char('Material Code'),
 		
+		
 	
 	}
 	
@@ -2322,6 +2328,7 @@ class ch_order_bot_details(osv.osv):
 		
 		'entry_mode':'manual',
 		'flag_is_bearing': False,
+		
 		
 		
 	}
@@ -2531,6 +2538,7 @@ class ch_wo_accessories_ms(osv.osv):
 		'wo_prime_cost': fields.float('WO PC'),
 		'indent_qty': fields.integer('Indent Creation Qty'),
 		'material_code': fields.char('Material Code'),
+		'flag_dynamic_length': fields.boolean('Dynamic Length'), 
 		
 	}
 	
@@ -2539,6 +2547,7 @@ class ch_wo_accessories_ms(osv.osv):
 		
 		'is_applicable':False,
 		'load_bom':False,
+		'flag_dynamic_length':False,
 		
 	}
 	

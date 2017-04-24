@@ -1794,6 +1794,14 @@ class kg_schedule(osv.osv):
 									
 									print "sssssssssssssssssssssssssssssssssvvvvvvvvvvvv",indent_qty,ms_order_rec.indent_qty
 									if indent_qty > 0:
+										if ms_order_rec.flag_dynamic_length == True:
+											pending_qty = 0
+											issue_pending_qty = 0
+											flag_dynamic_length = True
+										else:
+											pending_qty = indent_qty/order_line_rec.qty
+											issue_pending_qty = indent_qty/order_line_rec.qty
+											flag_dynamic_length = False
 									
 										ms_dep_indent_line_vals = {
 											'indent_id':indent_id,
@@ -1809,7 +1817,8 @@ class kg_schedule(osv.osv):
 											'position_id': ms_indent_item['position_id'],
 											'moc_id': ms_indent_item['moc_id'],
 											'length': length,
-											'breadth': ms_raw_rec.breadth
+											'breadth': ms_raw_rec.breadth,
+											'flag_dynamic_length': flag_dynamic_length
 										}
 
 										indent_line_id = dep_indent_line_obj.create(cr, uid, ms_dep_indent_line_vals)
