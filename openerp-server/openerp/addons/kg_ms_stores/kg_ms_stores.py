@@ -400,6 +400,8 @@ class kg_ms_stores(osv.osv):
 					cr.execute(''' select id as order_ms_id,qty as bom_qty from ch_order_machineshop_details  where header_id = %s and id = %s ''',
 					[ms_item['order_line_id'],ms_item['order_ms_line_id']])
 					ms_item_qty = cr.dictfetchone()
+					print "ms_item['order_line_id']",ms_item['order_line_id']
+					print "ms_item['order_ms_line_id']",ms_item['order_ms_line_id']
 					print "ms_item['ms_qty']",ms_item['ms_qty']
 					print "ms_item_qty",ms_item_qty
 					if ms_item['ms_qty'] == ms_item_qty['bom_qty']:
