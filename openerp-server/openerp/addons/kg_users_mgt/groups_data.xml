@@ -245,6 +245,7 @@
 			ref('kg_menus.ipm_purchase_indent_menu'),
 			ref('kg_purchase_indent.iam_pruchase_indent'),
 			ref('kg_depindent.iam_depindent_line'),
+			ref('kg_depindent.tam_dynamic_depindent_line'),
 			ref('kg_purchase_indent.iam_pruchase_indent_line'),
 			
 			ref('kg_menus.ppm_master_menu'),
