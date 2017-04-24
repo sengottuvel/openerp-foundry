@@ -400,22 +400,20 @@ class kg_ms_stores(osv.osv):
 					cr.execute(''' select id as order_ms_id,qty as bom_qty from ch_order_machineshop_details  where header_id = %s and id = %s ''',
 					[ms_item['order_line_id'],ms_item['order_ms_line_id']])
 					ms_item_qty = cr.dictfetchone()
-					print "ms_item['order_line_id']",ms_item['order_line_id']
-					print "ms_item['order_ms_line_id']",ms_item['order_ms_line_id']
-					print "ms_item['ms_qty']",ms_item['ms_qty']
-					print "ms_item_qty",ms_item_qty
-					if ms_item['ms_qty'] == ms_item_qty['bom_qty']:
-						
-						assembly_list.append({
-						'order_line_id':ms_item['order_line_id'],
-						'order_id':ms_item['order_id'],
-						'pump_model_id': ms_item['pump_model_id'],
-						'moc_construction_id': ms_item['moc_construction_id'],
-						'order_ms_id': ms_item_qty['order_ms_id'],
-						'pattern_id': '',
-						'order_bom_id': '',
-						'type': 'ms'
-						})
+					
+					if ms_item_qty != None:
+						if ms_item['ms_qty'] == ms_item_qty['bom_qty']:
+							
+							assembly_list.append({
+							'order_line_id':ms_item['order_line_id'],
+							'order_id':ms_item['order_id'],
+							'pump_model_id': ms_item['pump_model_id'],
+							'moc_construction_id': ms_item['moc_construction_id'],
+							'order_ms_id': ms_item_qty['order_ms_id'],
+							'pattern_id': '',
+							'order_bom_id': '',
+							'type': 'ms'
+							})
 			
 			print "assembly_list-----------------------",assembly_list
 			if assembly_list:
