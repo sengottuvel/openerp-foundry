@@ -135,7 +135,8 @@ class kg_department_issue(osv.osv):
 							print "item.issue_qty",item.issue_qty
 							print "indent_rec.qty",indent_rec.qty
 							print "indent_rec.cutting_qty",indent_rec.cutting_qty
-							qty = item.issue_qty / (indent_rec.qty/indent_rec.cutting_qty)
+							print "indent_rec.cutting_qty",indent_rec.cutting_qty
+							qty = (item.issue_qty*100) / ((round(indent_rec.qty,2)*100)/(indent_rec.cutting_qty*100))
 							print"qtyqty",qty
 							number_dec = str(qty-int(qty))[1:]
 							print"number_decnumber_dec",number_dec
