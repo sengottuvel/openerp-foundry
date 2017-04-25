@@ -14,6 +14,7 @@ case when (ROW_NUMBER()OVER(PARTITION By ch_work.id)=COUNT(ch_work.id)OVER(PARTI
 	 else ''
 	end
  else '' end as brkneed,
+to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS new_date,
 
 count(*) OVER (),
 row_number() OVER (),
@@ -53,6 +54,7 @@ else
 work_order.id in (select  id from kg_work_order) end order by ch_work.order_no]]>
 	</queryString>
 	<field name="brkneed" class="java.lang.String"/>
+	<field name="new_date" class="java.lang.String"/>
 	<field name="count" class="java.lang.Long"/>
 	<field name="row_number" class="java.lang.Long"/>
 	<field name="new_row_number" class="java.lang.Long"/>
@@ -425,7 +427,7 @@ work_order.id in (select  id from kg_work_order) end order by ch_work.order_no]]
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{printed_by} + " "+ "/"  +" "+$P{print_date}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{printed_by} + " "+ "/"  +" "+$F{new_date}]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report" isBlankWhenNull="true">
 				<reportElement stretchType="RelativeToTallestObject" x="370" y="14" width="184" height="20"/>
