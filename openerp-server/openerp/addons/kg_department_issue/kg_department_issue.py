@@ -522,7 +522,7 @@ class kg_department_issue(osv.osv):
 			#~ if line_ids.wo_state == 'accept':
 			if line_ids.issue_qty > 0:
 				
-				if issue_record.issue_type == 'from_indent':
+				if issue_record.dep_issue_type == 'from_indent':
 					self.pool.get('kg.department.issue.line').write(cr,uid,line_ids.id,{'state':'done'})
 					## MS store inward process
 					if line_ids.issue_id.department_id.name == 'DP2':
@@ -537,6 +537,7 @@ class kg_department_issue(osv.osv):
 					
 					## BOT store inward process
 					if line_ids.issue_id.department_id.name == 'DP3':
+						
 						ms_obj = self.pool.get('kg.ms.stores').search(cr,uid,[('order_line_id','=',line_ids.w_order_line_id.id),('item_code','=',line_ids.ms_bot_id.code),('moc_id','=',line_ids.wo_moc_id.id),
 																			('accept_state','=','pending'),('ms_type','=','bot_item')])
 						print"ms_objms_objms_objms_obj",ms_obj
