@@ -1799,7 +1799,7 @@ class ch_work_order_details(osv.osv):
 							
 							print "length---------------------------->>>>",length
 							if length > 0:
-								ms_bom_qty = length
+								ms_bom_qty = round(length,2)
 								flag_dynamic_length = True
 							else:
 								ms_bom_qty = 0

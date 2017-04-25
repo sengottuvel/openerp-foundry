@@ -584,6 +584,9 @@ class kg_packing(osv.osv):
 		'inner_breadth': fields.float('Inner Breadth'),
 		'inner_height': fields.float('Inner Height'),
 		'closing_cft': fields.float('Closing CFT'),
+		'ps_attach1': fields.binary('Attachment 1'),
+		'ps_attach2': fields.binary('Attachment 2'),
+		'ps_attach3': fields.binary('Attachment 3'),
 	}
 	
 		

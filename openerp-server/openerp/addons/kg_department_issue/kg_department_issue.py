@@ -131,6 +131,11 @@ class kg_department_issue(osv.osv):
 					if item.indent_qty > 0 and item.indent_line_id:
 						indent_rec = self.pool.get('kg.depindent.line').browse(cr,uid,item.indent_line_id.id)
 						if indent_rec.cutting_qty != indent_rec.qty:
+							print "indent_rec.id",indent_rec.id
+							print "line.product_id",line.product_id.name
+							print "item.issue_qty",item.issue_qty
+							print "indent_rec.qty",indent_rec.qty
+							print "indent_rec.cutting_qty",indent_rec.cutting_qty
 							qty = (item.issue_qty*100) / ((round(indent_rec.qty,2)*100)/(indent_rec.cutting_qty*100))
 							number_dec = str(qty-int(qty))[1:]
 							number_dec = float(number_dec)

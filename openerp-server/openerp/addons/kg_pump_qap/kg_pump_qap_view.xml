@@ -737,6 +737,15 @@
 								<field name="photos_attach" attrs="{'readonly': [('packing_state','=','completed')]}"/>
 							</group>					
 						</group>
+						<group string="Packing Slip">
+							<group>
+								<field name="ps_attach1" attrs="{'readonly': [('packing_state','=','completed')]}"/>
+								<field name="ps_attach3" attrs="{'readonly': [('packing_state','=','completed')]}"/>
+							</group>											
+							<group>
+								<field name="ps_attach2" attrs="{'readonly': [('packing_state','=','completed')]}"/>
+							</group>					
+						</group>
 						<group string="WO Details">
 							<group>
 								<field name="order_no"/>
