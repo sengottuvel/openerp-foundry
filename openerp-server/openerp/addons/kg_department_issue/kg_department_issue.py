@@ -125,7 +125,7 @@ class kg_department_issue(osv.osv):
 	
 	def _dp2_qty_validation(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
-		if rec.dep_issue_type == 'from_indent' and rec.department_id.name == 'DP2':
+		if rec.dep_issue_type == 'from_indent' and rec.department_id.name == 'DP2' and rec.state != 'draft':
 			if rec.issue_line_ids:
 				for item in rec.issue_line_ids:
 					if item.indent_qty > 0 and item.indent_line_id:
