@@ -147,7 +147,7 @@ class kg_po_grn(osv.osv):
 					domain="[('state','=','approved'),('order_line.pending_qty','>','0'),('grn_flag','=',False),('partner_id','=',supplier_id),('order_line.line_state','!=','cancel'),('division','=',division)]",
 					readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}), 
 		'po_name': fields.char('PO NO',readonly=True),
-		'order_no': fields.char('No',readonly=True),
+		'order_no': fields.char('PO/SO.No.',readonly=True),
 		'order_date': fields.char('Date',readonly=True),
 		'pos_date': fields.char('PO Date',readonly=True),
 		'po_date':fields.date('PO Date',readonly=True),
