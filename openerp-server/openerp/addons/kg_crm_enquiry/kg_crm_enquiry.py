@@ -2017,7 +2017,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 										'is_applicable': False,
 										'flag_is_bearing': is_bearing,
 										'purpose_categ': purpose_categ,
-										#~ 'position_id': item.position_id.id,
+										'position_id': item.position_id.id,
 										#~ 'remarks': item.remarks,
 										})
 					print"bot_valsbot_vals",bot_vals
@@ -2122,7 +2122,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 										'is_applicable': True,
 										'flag_is_bearing': bot_rec.is_bearing,
 										'purpose_categ': purpose_categ,
-										#~ 'position_id': item.position_id.id,
+										'position_id': item.position_id.id,
 										#~ 'remarks': item.remarks,
 										})
 						print"bot_valsbot_vals",bot_vals

@@ -603,6 +603,7 @@
 									<field name="line_ids_b" nolabel="1">
 										<tree string="BOT Item" editable="top" create="false" delete="false">
 											<field name="is_applicable"/>
+											<field name="position_id" readonly="1"/>
 											<field name="ms_id" readonly="1"/>
 											<field name="name" readonly="1"/>
 											<field name="material_code"/>
