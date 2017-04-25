@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+	
+		
+	<record forcecreate="1" id="seq_type_packing_invoice" model="ir.sequence.type">	
+		<field name="name">KG Packing Invoice</field>
+		<field name="code">kg.packing.invoice</field>
+	</record>
+
+	<record forcecreate="1" id="seq_packing_invoice" model="ir.sequence">
+	  <field name="name">KG Packing Invoice</field>
+	  <field name="code">kg.packing.invoice</field>
+	  <field name="padding" eval="5"/>
+	  <field name="prefix">INVOICE/%(year)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+		
+	
+		
+</data>
+</openerp>
