@@ -257,7 +257,7 @@
 									<field name="position_id"/>
 									<field name="material_code"/>
 									<field name="qty" required="1" on_change="onchange_qty(qty)"/>
-									<field name="indent_qty" invisible="1"/>
+									<field name="indent_qty" invisible="0"/>
 									<field name="unit_price"/>
 									<field name="mar_prime_cost" readonly="1" invisible="0"/>
 									<field name="wo_prime_cost" readonly="1"/>
