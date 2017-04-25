@@ -131,12 +131,16 @@ class kg_department_issue(osv.osv):
 					if item.indent_qty > 0 and item.indent_line_id:
 						indent_rec = self.pool.get('kg.depindent.line').browse(cr,uid,item.indent_line_id.id)
 						if indent_rec.cutting_qty != indent_rec.qty:
+							print "indent_rec.id",indent_rec.id
 							print "item.issue_qty",item.issue_qty
 							print "indent_rec.qty",indent_rec.qty
 							print "indent_rec.cutting_qty",indent_rec.cutting_qty
 							qty = item.issue_qty / (indent_rec.qty/indent_rec.cutting_qty)
+							print"qtyqty",qty
 							number_dec = str(qty-int(qty))[1:]
+							print"number_decnumber_dec",number_dec
 							number_dec = float(number_dec)
+							print"number_decnumber_decnumber_dec",number_dec
 							if number_dec > 0.00:
 								raise osv.except_osv(_('Warning!'),
 									_('System not allow to issue %s. Insufficient MS Qty"'%(item.product_id.name)))
@@ -163,9 +167,9 @@ class kg_department_issue(osv.osv):
 			state = 'confirmed'
 		return {'value':{'products_flag':product_flag,'state':state}}
 	
-	#~ def write(self, cr, uid, ids, vals, context=None):		
-		#~ vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
-		#~ return super(kg_department_issue, self).write(cr, uid, ids, vals, context)
+	def write(self, cr, uid, ids, vals, context=None):		
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(kg_department_issue, self).write(cr, uid, ids, vals, context)
 	
 	def entry_reject(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr,uid,ids[0])
