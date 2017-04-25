@@ -163,9 +163,9 @@ class kg_department_issue(osv.osv):
 			state = 'confirmed'
 		return {'value':{'products_flag':product_flag,'state':state}}
 	
-	def write(self, cr, uid, ids, vals, context=None):		
-		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
-		return super(kg_department_issue, self).write(cr, uid, ids, vals, context)
+	#~ def write(self, cr, uid, ids, vals, context=None):		
+		#~ vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		#~ return super(kg_department_issue, self).write(cr, uid, ids, vals, context)
 	
 	def entry_reject(self, cr, uid, ids, context=None):		
 		rec = self.browse(cr,uid,ids[0])
