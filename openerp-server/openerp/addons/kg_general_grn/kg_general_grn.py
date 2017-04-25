@@ -395,17 +395,18 @@ class kg_general_grn(osv.osv):
 					product_uom = line.product_id.uom_id.id
 					po_coeff = line.product_id.po_uom_coeff
 					product_qty = line.grn_qty * po_coeff
-					price_unit = line.price_subtotal / product_qty
+					price_unit = line.price_subtotal / product_qty or 1
 				elif line.uom_id.id == line.product_id.uom_id.id:
 					product_uom = line.product_id.uom_id.id
 					product_qty = line.grn_qty
-					price_unit = line.price_subtotal / product_qty
+					price_unit = line.price_subtotal / product_qty or 1
 				
 				stock_move_obj.create(cr,uid,
 					{
 					'general_grn_id':line.id,
 					'product_id': line.product_id.id,
 					'brand_id':line.brand_id.id,
+					'moc_id':line.moc_id.id,
 					'name':line.product_id.name,
 					'product_qty': product_qty,
 					'po_to_stock_qty':product_qty,
@@ -447,11 +448,11 @@ class kg_general_grn(osv.osv):
 							product_uom = line.product_id.uom_id.id
 							po_coeff = line.product_id.po_uom_coeff
 							product_qty = exp.product_qty * po_coeff
-							price_unit = line.price_subtotal / product_qty
+							price_unit = line.price_subtotal / product_qty or 1
 						elif line.uom_id.id == line.product_id.uom_id.id:
 							product_uom = line.product_id.uom_id.id
 							product_qty = exp.product_qty
-							price_unit = line.price_subtotal / product_qty
+							price_unit = line.price_subtotal / product_qty or 1
 						lot_obj.create(cr,uid,
 							{
 							'grn_no':line.grn_id.name,
@@ -476,11 +477,11 @@ class kg_general_grn(osv.osv):
 						product_uom = line.product_id.uom_id.id
 						po_coeff = line.product_id.po_uom_coeff
 						product_qty = line.grn_qty * po_coeff
-						price_unit =  line.price_subtotal / product_qty
+						price_unit =  line.price_subtotal / product_qty or 1
 					elif line.uom_id.id == line.product_id.uom_id.id:
 						product_uom = line.product_id.uom_id.id
 						product_qty = line.grn_qty
-						price_unit = line.price_subtotal / product_qty
+						price_unit = line.price_subtotal / product_qty or 1
 								
 					lot_obj.create(cr,uid,
 
