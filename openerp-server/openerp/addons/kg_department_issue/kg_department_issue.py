@@ -539,10 +539,12 @@ class kg_department_issue(osv.osv):
 					if line_ids.issue_id.department_id.name == 'DP3':
 						ms_obj = self.pool.get('kg.ms.stores').search(cr,uid,[('order_line_id','=',line_ids.w_order_line_id.id),('item_code','=',line_ids.ms_bot_id.code),('moc_id','=',line_ids.wo_moc_id.id),
 																			('accept_state','=','pending'),('ms_type','=','bot_item')])
+						print"ms_objms_objms_objms_obj",ms_obj
 						if ms_obj:
 							ms_rec = self.pool.get('kg.ms.stores').browse(cr,uid,ms_obj[0])
+							print"ms_recms_recms_recms_rec",ms_rec.id
 							self.pool.get('kg.ms.stores').write(cr,uid,ms_rec.id,{'accept_state':'waiting'})
-					
+				stop
 				stock_move_obj.create(cr,uid,
 				{
 				'dept_issue_id':issue_record.id,
