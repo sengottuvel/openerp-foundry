@@ -394,7 +394,7 @@ class kg_general_grn(osv.osv):
 				if line.uom_id.id != line.product_id.uom_po_id.id:
 					product_uom = line.product_id.uom_id.id
 					po_coeff = line.product_id.po_uom_coeff
-					print"line.product_id",product_id.name
+					print"line.product_id",line.product_id.name
 					print"line.grn_qty",line.grn_qty
 					print"line.product_id.po_uom_coeff",line.product_id.po_uom_coeff
 					print"po_coeff",po_coeff
