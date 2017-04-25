@@ -131,17 +131,9 @@ class kg_department_issue(osv.osv):
 					if item.indent_qty > 0 and item.indent_line_id:
 						indent_rec = self.pool.get('kg.depindent.line').browse(cr,uid,item.indent_line_id.id)
 						if indent_rec.cutting_qty != indent_rec.qty:
-							print "indent_rec.id",indent_rec.id
-							print "item.issue_qty",item.issue_qty
-							print "indent_rec.qty",indent_rec.qty
-							print "indent_rec.cutting_qty",indent_rec.cutting_qty
-							print "indent_rec.cutting_qty",indent_rec.cutting_qty
 							qty = (item.issue_qty*100) / ((round(indent_rec.qty,2)*100)/(indent_rec.cutting_qty*100))
-							print"qtyqty",qty
 							number_dec = str(qty-int(qty))[1:]
-							print"number_decnumber_dec",number_dec
 							number_dec = float(number_dec)
-							print"number_decnumber_decnumber_dec",number_dec
 							if number_dec > 0.00:
 								raise osv.except_osv(_('Warning!'),
 									_('System not allow to issue %s. Insufficient MS Qty"'%(item.product_id.name)))
@@ -414,9 +406,9 @@ class kg_department_issue(osv.osv):
 								stock_tot += lot_rec.reserved_qty
 								po_tot += lot_rec.po_qty
 								uom = lot_rec.product_uom.name
-							#~ if stock_tot < dep_issue_line_rec.issue_qty:
-								#~ raise osv.except_osv(_('Stock not available !!'),
-									#~ _('Associated GRN have less Qty compare to issue Qty for Product %s.'%(item.product_id.name)))
+							if stock_tot < dep_issue_line_rec.issue_qty:
+								raise osv.except_osv(_('Stock not available !!'),
+									_('Associated GRN have less Qty compare to issue Qty for Product %s.'%(item.product_id.name)))
 							
 							sql = """ select lot_id from kg_department_issue_details where grn_id=%s""" %(item.id)
 							cr.execute(sql)
@@ -583,11 +575,11 @@ class kg_department_issue(osv.osv):
 					for i in val:
 						lot_rec = lot_obj.browse(cr, uid, i)
 						tot += lot_rec.pending_qty
-					#~ if tot < line_ids.issue_qty:
-						#~ raise osv.except_osv(_('Stock not available !!'),
-							#~ _('Associated GRN have less Qty compare to issue Qty for Product %s.'%(line_ids.product_id.name)))
-					#~ else:
-						#~ pass
+					if tot < line_ids.issue_qty:
+						raise osv.except_osv(_('Stock not available !!'),
+							_('Associated GRN have less Qty compare to issue Qty for Product %s.'%(line_ids.product_id.name)))
+					else:
+						pass
 					### Updation Issue Pending Qty in Department Issue ###
 					if issue_record.issue_type == 'material':
 						dep_line_obj = self.pool.get('kg.depindent.line')   

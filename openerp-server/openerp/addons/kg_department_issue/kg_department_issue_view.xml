@@ -666,7 +666,7 @@
             <field name="res_model">kg.department.issue.line</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
-            <field name="domain">[('state','=','confirmed'),('issue_id.department_id.name','=','DP2')]</field>
+            <field name="domain">[('state','=','confirmed'),('issue_id.department_id.name','=','DP2'),('issue_id.state','=','approve')]</field>
             <field name="context">{'search_default_group_w_order_line_id':1}</field>
             <field name="search_view_id" ref="t_search_v_issue_line"/>
         </record>
@@ -691,7 +691,7 @@
             <field name="res_model">kg.department.issue.line</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
-            <field name="domain">[('state','=','confirmed'),('issue_id.department_id.name','=','DP3')]</field>
+            <field name="domain">[('state','=','confirmed'),('issue_id.department_id.name','=','DP3'),('issue_id.state','=','approve')]</field>
             <field name="context">{'search_default_group_w_order_line_id':1}</field>
             <field name="search_view_id" ref="t_search_v_issue_line"/>
         </record>
