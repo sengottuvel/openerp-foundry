@@ -302,7 +302,7 @@ class kg_ms_stores(osv.osv):
 						left join kg_machineshop ms_item on ms_item.id = ms_store.ms_id
 
 						where ms_store.ms_type = 'foundry_item' and ms_store.state = 'in_store' and ms_store.accept_state = 'received'
-						and foundry_assembly_id = 0 and foundry_assembly_line_id = 0
+						and ms_store.foundry_assembly_id = 0 and ms_store.foundry_assembly_line_id = 0
 
 						group by 1,2,3,4,5,6
 
@@ -337,6 +337,7 @@ class kg_ms_stores(osv.osv):
 						'type': 'foundry'
 						})
 			
+			stop
 			### Select MS Items group by Work Order ###
 			cr.execute(''' select 
 
