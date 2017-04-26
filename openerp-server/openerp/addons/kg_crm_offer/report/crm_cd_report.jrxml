@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="cd_report" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
-	<property name="ireport.zoom" value="1.1"/>
+	<property name="ireport.zoom" value="1.6105100000000014"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.y" value="48"/>
 	<subDataset name="dataset1">
 		<parameter name="offer_id" class="java.lang.Integer"/>
 		<queryString>
@@ -6588,7 +6588,7 @@ where off.id = $P{offer_id}]]>
 		<groupHeader>
 			<band height="14">
 				<componentElement>
-					<reportElement x="-12" y="0" width="825" height="14"/>
+					<reportElement x="-12" y="0" width="825" height="14" isRemoveLineWhenBlank="true"/>
 					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 						<datasetRun subDataset="dataset1">
 							<datasetParameter name="offer_id">
@@ -6598,7 +6598,7 @@ where off.id = $P{offer_id}]]>
 						</datasetRun>
 						<jr:listContents height="14" width="825">
 							<textField isBlankWhenNull="true">
-								<reportElement x="140" y="0" width="47" height="14"/>
+								<reportElement x="140" y="0" width="47" height="14" isRemoveLineWhenBlank="true"/>
 								<box topPadding="2" leftPadding="0" rightPadding="2">
 									<topPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -6610,7 +6610,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{net_amount}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="206" y="0" width="43" height="14"/>
+								<reportElement x="206" y="0" width="43" height="14" isRemoveLineWhenBlank="true"/>
 								<box topPadding="2" leftPadding="0" bottomPadding="0" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -6621,7 +6621,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{basic_cpo_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="268" y="0" width="38" height="14"/>
+								<reportElement x="268" y="0" width="38" height="14" isRemoveLineWhenBlank="true"/>
 								<box topPadding="2" rightPadding="1">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -6632,7 +6632,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{cust_dis_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="306" y="0" width="46" height="14"/>
+								<reportElement x="306" y="0" width="46" height="14" isRemoveLineWhenBlank="true"/>
 								<box topPadding="2" leftPadding="0" rightPadding="1">
 									<topPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -6644,7 +6644,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{book_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="371" y="0" width="36" height="14"/>
+								<reportElement x="371" y="0" width="36" height="14" isRemoveLineWhenBlank="true"/>
 								<box topPadding="2" leftPadding="0" rightPadding="1">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -6655,7 +6655,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{spl_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="426" y="0" width="34" height="14"/>
+								<reportElement x="426" y="0" width="34" height="14" isRemoveLineWhenBlank="true"/>
 								<box topPadding="2" rightPadding="1">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -6666,7 +6666,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{pf_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="477" y="0" width="34" height="14"/>
+								<reportElement x="477" y="0" width="34" height="14" isRemoveLineWhenBlank="true"/>
 								<box topPadding="2" rightPadding="1">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -6677,7 +6677,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{freight_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="528" y="0" width="34" height="14"/>
+								<reportElement x="528" y="0" width="34" height="14" isRemoveLineWhenBlank="true"/>
 								<box topPadding="2" rightPadding="1">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -6688,7 +6688,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{insurance_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="562" y="0" width="50" height="14"/>
+								<reportElement x="562" y="0" width="50" height="14" isRemoveLineWhenBlank="true"/>
 								<box topPadding="2" leftPadding="0" rightPadding="2">
 									<topPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -6700,7 +6700,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{dealer_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="639" y="0" width="48" height="14"/>
+								<reportElement x="639" y="0" width="48" height="14" isRemoveLineWhenBlank="true"/>
 								<box topPadding="2" leftPadding="0" rightPadding="2">
 									<topPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -6712,7 +6712,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{les_dealer_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="687" y="0" width="48" height="14"/>
+								<reportElement x="687" y="0" width="48" height="14" isRemoveLineWhenBlank="true"/>
 								<box topPadding="2" leftPadding="0" rightPadding="2">
 									<topPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -6724,7 +6724,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{works_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="187" y="0" width="19" height="14"/>
+								<reportElement x="187" y="0" width="19" height="14" isRemoveLineWhenBlank="true"/>
 								<box topPadding="2">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -6736,7 +6736,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{avg_basic_cpo}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="249" y="0" width="19" height="14"/>
+								<reportElement x="249" y="0" width="19" height="14" isRemoveLineWhenBlank="true"/>
 								<box topPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -6747,7 +6747,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{avg_cust_dis}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="352" y="0" width="19" height="14"/>
+								<reportElement x="352" y="0" width="19" height="14" isRemoveLineWhenBlank="true"/>
 								<box topPadding="2">
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
@@ -6759,7 +6759,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{avg_spl_dis}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="407" y="0" width="19" height="14"/>
+								<reportElement x="407" y="0" width="19" height="14" isRemoveLineWhenBlank="true"/>
 								<box topPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -6770,7 +6770,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{avg_pf_dis}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="460" y="0" width="17" height="14"/>
+								<reportElement x="460" y="0" width="17" height="14" isRemoveLineWhenBlank="true"/>
 								<box topPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -6781,7 +6781,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{avg_freight_dis}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="511" y="0" width="17" height="14"/>
+								<reportElement x="511" y="0" width="17" height="14" isRemoveLineWhenBlank="true"/>
 								<box topPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -6792,7 +6792,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{avg_ins_dis}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="612" y="0" width="27" height="14"/>
+								<reportElement x="612" y="0" width="27" height="14" isRemoveLineWhenBlank="true"/>
 								<box topPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -6803,7 +6803,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{avg_deal_dis}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="735" y="0" width="48" height="14"/>
+								<reportElement x="735" y="0" width="48" height="14" isRemoveLineWhenBlank="true"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -6814,7 +6814,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{prime_cost}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="783" y="0" width="42" height="14"/>
+								<reportElement x="783" y="0" width="42" height="14" isRemoveLineWhenBlank="true"/>
 								<box topPadding="2" rightPadding="0">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -6824,22 +6824,22 @@ where off.id = $P{offer_id}]]>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{ratio}]]></textFieldExpression>
 							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="140" height="14" isRemoveLineWhenBlank="true"/>
+								<box topPadding="2" leftPadding="0" rightPadding="2">
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font size="10"/>
+								</textElement>
+								<textFieldExpression><![CDATA["Pump"]]></textFieldExpression>
+							</textField>
 						</jr:listContents>
 					</jr:list>
 				</componentElement>
-				<textField>
-					<reportElement x="-12" y="0" width="140" height="14"/>
-					<box topPadding="2" leftPadding="2">
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.5"/>
-						<bottomPen lineWidth="0.5"/>
-						<rightPen lineWidth="0.5"/>
-					</box>
-					<textElement textAlignment="Center">
-						<font size="10"/>
-					</textElement>
-					<textFieldExpression><![CDATA["Pump"]]></textFieldExpression>
-				</textField>
 			</band>
 		</groupHeader>
 	</group>
@@ -7122,7 +7122,7 @@ where off.id = $P{offer_id}]]>
 									<rightPen lineWidth="0.5"/>
 								</box>
 								<textElement textAlignment="Center">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA["Accessories"]]></textFieldExpression>
 							</textField>
@@ -7151,6 +7151,7 @@ where off.id = $P{offer_id}]]>
 							<textField isBlankWhenNull="true">
 								<reportElement x="187" y="0" width="19" height="14"/>
 								<box topPadding="2">
+									<topPen lineWidth="0.0"/>
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
@@ -7559,7 +7560,7 @@ where off.id = $P{offer_id}]]>
 					<textFieldExpression><![CDATA["Description"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="128" y="17" width="154" height="17"/>
+					<reportElement x="128" y="17" width="109" height="17"/>
 					<box topPadding="2">
 						<bottomPen lineWidth="0.5"/>
 						<rightPen lineWidth="0.5"/>
@@ -7568,7 +7569,7 @@ where off.id = $P{offer_id}]]>
 					<textFieldExpression><![CDATA["Basic Value (Book Value)"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="282" y="17" width="34" height="17"/>
+					<reportElement x="237" y="17" width="57" height="17"/>
 					<box topPadding="2">
 						<bottomPen lineWidth="0.5"/>
 						<rightPen lineWidth="0.5"/>
@@ -7577,7 +7578,7 @@ where off.id = $P{offer_id}]]>
 					<textFieldExpression><![CDATA["P&F"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="316" y="17" width="46" height="17"/>
+					<reportElement x="294" y="17" width="46" height="17"/>
 					<box topPadding="2">
 						<bottomPen lineWidth="0.5"/>
 						<rightPen lineWidth="0.5"/>
@@ -7586,7 +7587,7 @@ where off.id = $P{offer_id}]]>
 					<textFieldExpression><![CDATA["ED"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="362" y="17" width="50" height="17"/>
+					<reportElement x="340" y="17" width="55" height="17"/>
 					<box topPadding="2">
 						<bottomPen lineWidth="0.5"/>
 						<rightPen lineWidth="0.5"/>
@@ -7595,7 +7596,7 @@ where off.id = $P{offer_id}]]>
 					<textFieldExpression><![CDATA["Tax"]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="412" y="17" width="87" height="17"/>
+					<reportElement x="395" y="17" width="104" height="17"/>
 					<box topPadding="2">
 						<bottomPen lineWidth="0.5"/>
 						<rightPen lineWidth="0.5"/>
@@ -7645,7 +7646,7 @@ where off.id = $P{offer_id}]]>
 					<textFieldExpression><![CDATA["Nett To SAM"]]></textFieldExpression>
 				</textField>
 				<componentElement>
-					<reportElement x="-12" y="34" width="825" height="14"/>
+					<reportElement x="-12" y="34" width="825" height="14" isRemoveLineWhenBlank="true"/>
 					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 						<datasetRun subDataset="dataset5">
 							<datasetParameter name="offer_id">
@@ -7655,7 +7656,7 @@ where off.id = $P{offer_id}]]>
 						</datasetRun>
 						<jr:listContents height="14" width="825">
 							<textField isBlankWhenNull="true">
-								<reportElement x="140" y="0" width="154" height="14"/>
+								<reportElement x="140" y="0" width="109" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -7666,7 +7667,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{book_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="294" y="0" width="34" height="14"/>
+								<reportElement x="249" y="0" width="57" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -7677,7 +7678,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{pf_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="328" y="0" width="46" height="14"/>
+								<reportElement x="306" y="0" width="46" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -7688,7 +7689,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{ed_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="374" y="0" width="50" height="14"/>
+								<reportElement x="352" y="0" width="55" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -7699,7 +7700,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{tax}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="424" y="0" width="87" height="14"/>
+								<reportElement x="407" y="0" width="104" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -7731,21 +7732,21 @@ where off.id = $P{offer_id}]]>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{nett_sam}]]></textFieldExpression>
 							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="140" height="14"/>
+								<box topPadding="2" rightPadding="2">
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font size="10"/>
+								</textElement>
+								<textFieldExpression><![CDATA["Pump"]]></textFieldExpression>
+							</textField>
 						</jr:listContents>
 					</jr:list>
 				</componentElement>
-				<textField>
-					<reportElement x="-12" y="34" width="140" height="14"/>
-					<box topPadding="2">
-						<leftPen lineWidth="0.5"/>
-						<bottomPen lineWidth="0.5"/>
-						<rightPen lineWidth="0.5"/>
-					</box>
-					<textElement textAlignment="Center">
-						<font size="10"/>
-					</textElement>
-					<textFieldExpression><![CDATA["Pump"]]></textFieldExpression>
-				</textField>
 			</band>
 		</groupHeader>
 	</group>
@@ -7776,7 +7777,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA["Spare"]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="140" y="0" width="154" height="14"/>
+								<reportElement x="140" y="0" width="109" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -7787,7 +7788,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{book_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="294" y="0" width="34" height="14"/>
+								<reportElement x="249" y="0" width="57" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -7798,7 +7799,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{pf_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="328" y="0" width="46" height="14"/>
+								<reportElement x="306" y="0" width="46" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -7809,7 +7810,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{ed_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="374" y="0" width="50" height="14"/>
+								<reportElement x="352" y="0" width="55" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -7820,7 +7821,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{tax}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="424" y="0" width="87" height="14"/>
+								<reportElement x="407" y="0" width="104" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -7880,12 +7881,12 @@ where off.id = $P{offer_id}]]>
 									<rightPen lineWidth="0.5"/>
 								</box>
 								<textElement textAlignment="Center">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA["Accessories"]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="140" y="0" width="154" height="14"/>
+								<reportElement x="140" y="0" width="109" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -7896,7 +7897,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{book_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="294" y="0" width="34" height="14"/>
+								<reportElement x="249" y="0" width="57" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -7907,7 +7908,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{pf_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="328" y="0" width="46" height="14"/>
+								<reportElement x="306" y="0" width="46" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -7918,7 +7919,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{ed_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="374" y="0" width="50" height="14"/>
+								<reportElement x="352" y="0" width="55" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -7929,7 +7930,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{tax}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="424" y="0" width="87" height="14"/>
+								<reportElement x="407" y="0" width="104" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -7982,7 +7983,7 @@ where off.id = $P{offer_id}]]>
 						</datasetRun>
 						<jr:listContents height="14" width="685">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="154" height="14"/>
+								<reportElement x="0" y="0" width="109" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -7993,7 +7994,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{book_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="154" y="0" width="34" height="14"/>
+								<reportElement x="109" y="0" width="57" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -8004,7 +8005,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{pf_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="188" y="0" width="46" height="14"/>
+								<reportElement x="166" y="0" width="46" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -8015,7 +8016,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{ed_val}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="234" y="0" width="50" height="14"/>
+								<reportElement x="212" y="0" width="55" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -8026,7 +8027,7 @@ where off.id = $P{offer_id}]]>
 								<textFieldExpression><![CDATA[$F{tax}]]></textFieldExpression>
 							</textField>
 							<textField isBlankWhenNull="true">
-								<reportElement x="284" y="0" width="87" height="14"/>
+								<reportElement x="267" y="0" width="104" height="14"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
