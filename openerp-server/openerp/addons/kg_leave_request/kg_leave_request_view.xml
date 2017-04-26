@@ -13,7 +13,7 @@
 					<button string="Approve" name="validate" type="workflow" groups="base.group_hr_user" class="oe_highlight" position="replace">
 						<button name="entry_reject" type="object" string="Reject"  class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('status','in',['draft','approved','cancel','reject'])]}"/>
 						<button name="entry_approve" type="object" string="Approve"  class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('status','in',['draft','approved','cancel','reject'])]}"/>
-						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('modify','=','no')]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="0"/>
+						<button name="entry_cancel" type="object" string="Cancel" attrs="{'invisible':[('status','in',['draft','confirmed','cancel','reject'])]}" class="oe_highlight" confirm="Are you sure to proceed ?" invisible="0"/>
 						<button name="entry_confirm" type="object" string="Confirm"  class="oe_highlight" attrs="{'invisible':[('status','in',['approved','confirmed','cancel','reject'])]}" invisible="0"/>
 						<button name="entry_draft" type="object"  string="Set To Draft" class="oe_highlight" confirm="Are you sure to proceed ?" attrs="{'invisible':[('status','in',['draft','confirmed','approved','reject'])]}"/>
 					</button>

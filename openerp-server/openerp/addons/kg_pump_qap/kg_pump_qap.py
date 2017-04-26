@@ -176,7 +176,7 @@ class kg_pump_qap(osv.osv):
 		if rec.di_state == 'pending':
 			### Hrdro static pressure from marketing Enquiry ###
 			if rec.order_line_id.pump_offer_line_id > 0:
-				market_enquiry_rec = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,rec.order_line_rec.pump_offer_line_id)
+				market_enquiry_rec = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,rec.order_line_id.pump_offer_line_id)
 				if market_enquiry_rec:
 					hs_pressure = market_enquiry_rec.hydrostatic_test_pressure
 				else:

@@ -371,7 +371,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{wo_ref}]]></textFieldExpression>
 				</textField>
@@ -384,7 +384,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.0"/>
 					</box>
 					<textElement textAlignment="Right" verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
+						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[WORK ORDER REF:]]></text>
 				</staticText>
@@ -397,7 +397,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{pump_type}]]></textFieldExpression>
 				</textField>
@@ -410,7 +410,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.0"/>
 					</box>
 					<textElement textAlignment="Right" verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
+						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Pump Type :]]></text>
 				</staticText>
@@ -431,7 +431,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
+						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Customer :]]></text>
 				</staticText>
@@ -444,7 +444,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
+						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Dealer : --]]></text>
 				</staticText>
@@ -457,7 +457,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[""]]></textFieldExpression>
 				</textField>
@@ -470,7 +470,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Order Date : "+$F{order_date}]]></textFieldExpression>
 				</textField>
@@ -483,7 +483,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Due Date : "+$F{due_date}]]></textFieldExpression>
 				</textField>
@@ -496,7 +496,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.0"/>
 					</box>
 					<textElement textAlignment="Right" verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
+						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[CATEGORY :]]></text>
 				</staticText>
@@ -509,7 +509,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{order_priority}]]></textFieldExpression>
 				</textField>
@@ -522,7 +522,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[ED Clearance: ]]></text>
 				</staticText>
@@ -535,7 +535,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Inspection: ]]></text>
 				</staticText>
@@ -548,7 +548,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
+						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[TECHNICAL SPECIFICATION :]]></text>
 				</staticText>
@@ -561,7 +561,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
+						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[CPO Ref / Dealer Po Ref : --]]></text>
 				</staticText>
@@ -574,7 +574,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
+						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Penalty: ]]></text>
 				</staticText>
@@ -587,7 +587,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Road permit: ]]></text>
 				</staticText>
@@ -600,7 +600,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Drg. Appr.: ]]></text>
 				</staticText>
@@ -613,7 +613,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{wo_ref}]]></textFieldExpression>
 				</textField>
@@ -624,7 +624,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
+						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[W.O Ref]]></text>
 				</staticText>
@@ -637,7 +637,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
+						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Model]]></text>
 				</staticText>
@@ -650,7 +650,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Description]]></text>
 				</staticText>
@@ -663,7 +663,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Tag No.]]></text>
 				</staticText>
@@ -676,7 +676,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Quantity in Nos.]]></text>
 				</staticText>
@@ -689,7 +689,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Size in mm]]></text>
 				</staticText>
@@ -702,7 +702,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Flange standard]]></text>
 				</staticText>
@@ -715,7 +715,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Liquid handled]]></text>
 				</staticText>
@@ -728,7 +728,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Specific Gravity ]]></text>
 				</staticText>
@@ -741,7 +741,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[PH Value]]></text>
 				</staticText>
@@ -754,7 +754,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Temperature in °C ]]></text>
 				</staticText>
@@ -767,7 +767,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
+						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Capacity in m3/Hr]]></text>
 				</staticText>
@@ -780,7 +780,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
+						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Total Head in m]]></text>
 				</staticText>
@@ -793,7 +793,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Efficiency  %]]></text>
 				</staticText>
@@ -806,7 +806,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
+						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[BKW]]></text>
 				</staticText>
@@ -819,7 +819,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Motor KW ]]></text>
 				</staticText>
@@ -832,7 +832,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Motor Make & Frame Size]]></text>
 				</staticText>
@@ -845,7 +845,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Speed - RPM (P/M)]]></text>
 				</staticText>
@@ -858,7 +858,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Type of Drive]]></text>
 				</staticText>
@@ -871,7 +871,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
+						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Type of Lubrication]]></text>
 				</staticText>
@@ -884,7 +884,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[NPSH R/A -mts]]></text>
 				</staticText>
@@ -897,7 +897,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Shaft Sealing / Seal Make / Seal Type]]></text>
 				</staticText>
@@ -910,7 +910,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Face Combination / API Plan ]]></text>
 				</staticText>
@@ -923,7 +923,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Shut off head in M]]></text>
 				</staticText>
@@ -936,7 +936,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Impeller Dia in MM(Max/Rated/Min)]]></text>
 				</staticText>
@@ -949,7 +949,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="true" isItalic="false"/>
+						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Hydro Test Pressure in Bar ]]></text>
 				</staticText>
@@ -962,7 +962,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{model}]]></textFieldExpression>
 				</textField>
@@ -975,7 +975,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="false"/>
+						<font size="10" isBold="false"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{tag_no}]]></textFieldExpression>
 				</textField>
@@ -988,7 +988,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="false"/>
+						<font size="10" isBold="false"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{description}]]></textFieldExpression>
 				</textField>
@@ -1001,7 +1001,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{qty}]]></textFieldExpression>
 				</textField>
@@ -1014,7 +1014,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="false"/>
+						<font size="10" isBold="false"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{size}]]></textFieldExpression>
 				</textField>
@@ -1027,7 +1027,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="false"/>
+						<font size="10" isBold="false"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{flange_standard}]]></textFieldExpression>
 				</textField>
@@ -1040,7 +1040,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{liquid_handled}]]></textFieldExpression>
 				</textField>
@@ -1053,7 +1053,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{ph_value}]]></textFieldExpression>
 				</textField>
@@ -1066,7 +1066,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="false"/>
+						<font size="10" isBold="false"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{specific_gravity}]]></textFieldExpression>
 				</textField>
@@ -1079,7 +1079,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="false"/>
+						<font size="10" isBold="false"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{temperature_in_c}]]></textFieldExpression>
 				</textField>
@@ -1092,7 +1092,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{capacity_in_m3hr}]]></textFieldExpression>
 				</textField>
@@ -1105,7 +1105,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{head_in_m}]]></textFieldExpression>
 				</textField>
@@ -1118,7 +1118,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{efficiency}]]></textFieldExpression>
 				</textField>
@@ -1131,7 +1131,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{bkw}]]></textFieldExpression>
 				</textField>
@@ -1144,7 +1144,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{motor_kw}]]></textFieldExpression>
 				</textField>
@@ -1157,7 +1157,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{motor_make}+" / "+$F{motor_power}]]></textFieldExpression>
 				</textField>
@@ -1170,7 +1170,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{speed_pump}+" /  "+$F{speed_motor}]]></textFieldExpression>
 				</textField>
@@ -1183,7 +1183,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{type_of_drive}]]></textFieldExpression>
 				</textField>
@@ -1196,7 +1196,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{lubrication_type}]]></textFieldExpression>
 				</textField>
@@ -1209,7 +1209,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{npsh_r_m}]]></textFieldExpression>
 				</textField>
@@ -1222,7 +1222,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{shaft_sealing}+" / "+$F{mech_seal_make}+" / "+$F{seal_type}]]></textFieldExpression>
 				</textField>
@@ -1235,7 +1235,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{face_combination}+" / "+$F{api_plan}]]></textFieldExpression>
 				</textField>
@@ -1248,7 +1248,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{shut_off_head}]]></textFieldExpression>
 				</textField>
@@ -1261,7 +1261,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{impeller_dia_max}+" / "+$F{impeller_dia_rated}+" / "+$F{impeller_dia_min}]]></textFieldExpression>
 				</textField>
@@ -1274,7 +1274,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{hydrostatic_test_pressure}]]></textFieldExpression>
 				</textField>
@@ -1287,7 +1287,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{customer_name}]]></textFieldExpression>
 				</textField>
@@ -1304,7 +1304,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{l_d_clause}]]></textFieldExpression>
 				</textField>
@@ -1317,7 +1317,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{inspection}]]></textFieldExpression>
 				</textField>
@@ -1330,7 +1330,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{drawing_approval}]]></textFieldExpression>
 				</textField>
@@ -1343,7 +1343,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{road_permit}]]></textFieldExpression>
 				</textField>
@@ -1356,7 +1356,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{excise_duty}]]></textFieldExpression>
 				</textField>
@@ -1369,7 +1369,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Consistency In %]]></text>
 				</staticText>
@@ -1382,7 +1382,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{consistency}]]></textFieldExpression>
 				</textField>
@@ -1395,7 +1395,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Old supply ref]]></text>
 				</staticText>
@@ -1408,7 +1408,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{wo_name}]]></textFieldExpression>
 				</textField>
@@ -1421,7 +1421,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[QAP:]]></text>
 				</staticText>
@@ -1434,7 +1434,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{qap}]]></textFieldExpression>
 				</textField>
@@ -1447,7 +1447,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Solid Concentration by weight %]]></text>
 				</staticText>
@@ -1460,7 +1460,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{solid_concen}]]></textFieldExpression>
 				</textField>
@@ -1473,7 +1473,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Solid Concentration by volume %]]></text>
 				</staticText>
@@ -1486,7 +1486,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{solid_concen_vol}]]></textFieldExpression>
 				</textField>
@@ -1499,7 +1499,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{viscosity_crt_factor}]]></textFieldExpression>
 				</textField>
@@ -1512,7 +1512,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Viscosity correction factors]]></text>
 				</staticText>
@@ -1525,7 +1525,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Bush Bearing]]></text>
 				</staticText>
@@ -1538,7 +1538,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{bush_bearing}]]></textFieldExpression>
 				</textField>
@@ -1551,7 +1551,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Suction Condition]]></text>
 				</staticText>
@@ -1564,7 +1564,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{suction_condition}]]></textFieldExpression>
 				</textField>
@@ -1577,7 +1577,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{setting_height}]]></textFieldExpression>
 				</textField>
@@ -1590,7 +1590,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font size="8" isBold="false" isItalic="false"/>
+						<font size="10" isBold="false" isItalic="false"/>
 					</textElement>
 					<text><![CDATA[Setting Height]]></text>
 				</staticText>
@@ -1610,7 +1610,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Material:"]]></textFieldExpression>
 				</textField>
@@ -1623,7 +1623,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 				</textField>
 			</band>
@@ -1652,7 +1652,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 									<rightPen lineWidth="0.75"/>
 								</box>
 								<textElement>
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{mat}]]></textFieldExpression>
 							</textField>
@@ -1665,7 +1665,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 									<rightPen lineWidth="0.75"/>
 								</box>
 								<textElement>
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{moc}]]></textFieldExpression>
 							</textField>
@@ -1695,7 +1695,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Spares"]]></textFieldExpression>
 				</textField>
@@ -1708,7 +1708,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Pump Model"]]></textFieldExpression>
 				</textField>
@@ -1721,7 +1721,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Part Name"]]></textFieldExpression>
 				</textField>
@@ -1734,7 +1734,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Quantity"]]></textFieldExpression>
 				</textField>
@@ -1747,7 +1747,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Remarks"]]></textFieldExpression>
 				</textField>
@@ -1781,7 +1781,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 									<rightPen lineWidth="0.75"/>
 								</box>
 								<textElement textAlignment="Center">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{pump_model}]]></textFieldExpression>
 							</textField>
@@ -1794,7 +1794,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 									<rightPen lineWidth="0.75"/>
 								</box>
 								<textElement textAlignment="Center">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{pattern_name}]]></textFieldExpression>
 							</textField>
@@ -1807,7 +1807,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 									<rightPen lineWidth="0.75"/>
 								</box>
 								<textElement textAlignment="Center">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{qty}+" Nos"]]></textFieldExpression>
 							</textField>
@@ -1820,7 +1820,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 									<rightPen lineWidth="0.75"/>
 								</box>
 								<textElement textAlignment="Center">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{oth_spec}]]></textFieldExpression>
 							</textField>
@@ -1844,7 +1844,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Accessories"]]></textFieldExpression>
 				</textField>
@@ -1857,7 +1857,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Item"]]></textFieldExpression>
 				</textField>
@@ -1870,7 +1870,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Yes/No"]]></textFieldExpression>
 				</textField>
@@ -1883,7 +1883,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Remarks"]]></textFieldExpression>
 				</textField>
@@ -1914,7 +1914,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 									<rightPen lineWidth="0.75"/>
 								</box>
 								<textElement textAlignment="Center">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
 							</textField>
@@ -1927,7 +1927,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 									<rightPen lineWidth="0.75"/>
 								</box>
 								<textElement textAlignment="Center">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{yes}]]></textFieldExpression>
 							</textField>
@@ -1940,7 +1940,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 									<rightPen lineWidth="0.75"/>
 								</box>
 								<textElement textAlignment="Center">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{oth_spec}]]></textFieldExpression>
 							</textField>
@@ -1963,7 +1963,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement>
-						<font size="8"/>
+						<font size="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{remarks}]]></textFieldExpression>
 				</textField>
@@ -1976,7 +1976,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Special Remarks"]]></textFieldExpression>
 				</textField>
@@ -1989,7 +1989,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Bottom">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Production"]]></textFieldExpression>
 				</textField>
@@ -2002,7 +2002,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Bottom">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Planning"]]></textFieldExpression>
 				</textField>
@@ -2015,7 +2015,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Bottom">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Design"]]></textFieldExpression>
 				</textField>
@@ -2028,7 +2028,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Bottom">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["QCD"]]></textFieldExpression>
 				</textField>
@@ -2041,7 +2041,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Bottom">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Testing"]]></textFieldExpression>
 				</textField>
@@ -2054,7 +2054,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Bottom">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Matl.Dept"]]></textFieldExpression>
 				</textField>
@@ -2067,7 +2067,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Bottom">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["File"]]></textFieldExpression>
 				</textField>
@@ -2080,7 +2080,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Bottom">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["MKD"]]></textFieldExpression>
 				</textField>
@@ -2093,7 +2093,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Bottom">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 				</textField>
 				<textField isBlankWhenNull="true">
@@ -2105,7 +2105,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Bottom">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 				</textField>
 				<textField isBlankWhenNull="true">
@@ -2117,7 +2117,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Bottom">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 				</textField>
 				<textField isBlankWhenNull="true">
@@ -2129,7 +2129,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Bottom">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 				</textField>
 				<textField isBlankWhenNull="true">
@@ -2141,7 +2141,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Bottom">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 				</textField>
 				<textField isBlankWhenNull="true">
@@ -2153,7 +2153,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Bottom">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 				</textField>
 				<textField isBlankWhenNull="true">
@@ -2165,7 +2165,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Bottom">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 				</textField>
 				<textField isBlankWhenNull="true">
@@ -2177,7 +2177,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Bottom">
-						<font size="8" isBold="true"/>
+						<font size="10" isBold="true"/>
 					</textElement>
 				</textField>
 			</band>
@@ -2194,7 +2194,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 					<topPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Right">
-					<font size="8"/>
+					<font size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
 			</textField>
@@ -2204,7 +2204,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 					<topPen lineWidth="0.5"/>
 				</box>
 				<textElement>
-					<font size="8"/>
+					<font size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{printed_by} + " "+ "/"  +" "+$P{print_date}]]></textFieldExpression>
 			</textField>
@@ -2214,7 +2214,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 					<topPen lineWidth="0.5"/>
 				</box>
 				<textElement>
-					<font size="8"/>
+					<font size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
@@ -2224,7 +2224,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 					<topPen lineWidth="0.5"/>
 				</box>
 				<textElement>
-					<font size="8"/>
+					<font size="10"/>
 				</textElement>
 			</textField>
 		</band>

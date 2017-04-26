@@ -135,8 +135,38 @@ class kg_leave_request(osv.osv):
 	
 	def entry_cancel(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
-		if rec.cancel_remark:
-			self.write(cr, uid, ids, {'status': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+		if rec.cancel_remark :
+			today = date.today()
+			start_date = datetime(today.year, today.month, 1)
+			end_date = datetime(today.year, today.month, calendar.mdays[today.month])
+			if datetime.strptime(rec.from_date, "%Y-%m-%d") >= start_date and datetime.strptime(rec.to_date, "%Y-%m-%d") <= end_date:
+
+				##### Back updating the daily attendance ######
+				
+				daily_att_rec = self.pool.get('ch.daily.attendance')
+				daily_att = daily_att_rec.search(cr,uid,[('employee_id','=',rec.employee_id.id),('date','>=',rec.from_date),('date','<=',rec.to_date)])
+				if daily_att:
+					for daily_ids in daily_att:
+						daily_rec = daily_att_rec.browse(cr,uid,daily_ids)
+						wk_hrss = str(daily_rec.wk_time) .replace(':', '.')
+						if float(wk_hrss) < 08.00:
+							daily_att_rec.write(cr,uid,daily_rec.id,{'status':'absent'})
+						else:	
+							pass
+				else:
+					pass
+					
+				##### Back updating the Leave Allocation ######
+				
+				leave_allocation = self.pool.get('kg.leave.allocation')
+				leave_allocation_line = self.pool.get('ch.leave.allocation')
+				leave_alloc = leave_allocation_line.search(cr,uid,[('header_id_1','=',rec.leave_allow_id.id),('leave_type_id','=',rec.holiday_status_id.id)])
+				leave_alloc_rec = leave_allocation_line.browse(cr,uid,leave_alloc[0])
+				leave_allocation_line.write(cr,uid,leave_alloc_rec.id,{'used_days':(leave_alloc_rec.used_days - rec.number_of_days_temp),'balc_days':(leave_alloc_rec.balc_days + rec.number_of_days_temp)})
+				self.write(cr, uid, ids, {'status': 'cancel','cancel_user_id': uid, 'cancel_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			else:
+				raise osv.except_osv(_('Warning !!'),
+				_('Cancellation is allowed for this month only !!'))
 		else:
 			raise osv.except_osv(_('Cancel remark is must !!'),
 				_('Enter the remarks in Cancel remarks field !!'))
@@ -181,6 +211,9 @@ class kg_leave_request(osv.osv):
 					else:
 						raise osv.except_osv(_('No of days are exceeding !! '),
 							_('Balance %s for this employee is %s!!')%(leave_rec.leave_type_id.name,leave_rec.balc_days))
+				else:
+					raise osv.except_osv(_('Warning'),
+					_('%s is not allocated for the this employee !!'%(rec.holiday_status_id.name)))
 		elif rec.holiday_status_id.id == 8 or rec.holiday_status_id.id == 31:
 			pass
 		else:
