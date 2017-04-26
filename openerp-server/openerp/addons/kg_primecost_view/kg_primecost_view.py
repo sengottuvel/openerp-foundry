@@ -954,7 +954,7 @@ class kg_primecost_view(osv.osv):
 					cr.execute(''' 
 								
 								-- Bed Assembly ----
-								select id,bot_id,qty,header_id as bom_id
+								select id,bot_id,qty,position_id,header_id as bom_id
 								from ch_bot_details
 								where header_id =
 								(
@@ -970,7 +970,7 @@ class kg_primecost_view(osv.osv):
 								union all
 
 								--- Motor Assembly ---
-								select id,bot_id,qty,header_id as bom_id
+								select id,bot_id,qty,position_id,header_id as bom_id
 								from ch_bot_details
 								where header_id =
 								(
@@ -987,7 +987,7 @@ class kg_primecost_view(osv.osv):
 
 								-- Column Pipe ------
 
-								select id,bot_id,qty,header_id as bom_id
+								select id,bot_id,qty,position_id,header_id as bom_id
 								from ch_bot_details
 								where header_id =
 								(
@@ -1009,7 +1009,7 @@ class kg_primecost_view(osv.osv):
 
 								-- Delivery Pipe ------
 
-								select id,bot_id,qty,header_id as bom_id
+								select id,bot_id,qty,position_id,header_id as bom_id
 								from ch_bot_details
 								where header_id =  
 								(
@@ -1032,7 +1032,7 @@ class kg_primecost_view(osv.osv):
 
 								-- Lubrication ------
 
-								select id,bot_id,qty,header_id as bom_id
+								select id,bot_id,qty,position_id,header_id as bom_id
 								from ch_bot_details
 								where header_id =
 								(
@@ -1055,7 +1055,7 @@ class kg_primecost_view(osv.osv):
 									
 								-- Base Plate --
 								
-								select id,bot_id,qty,header_id as bom_id
+								select id,bot_id,qty,position_id,header_id as bom_id
 								from ch_bot_details
 								where header_id =
 								(
@@ -1102,6 +1102,7 @@ class kg_primecost_view(osv.osv):
 							#~ 'entry_mode':'auto',
 							#~ 'order_category':	order_category,
 							'bot_id': vertical_bot_details['bot_id'],
+							'position_id': vertical_bot_details['position_id'] or False,
 							'qty': vertical_bot_qty * qty,
 							'load_bom': True,
 							'is_applicable': True,
