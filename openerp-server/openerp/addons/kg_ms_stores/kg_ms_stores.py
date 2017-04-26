@@ -426,8 +426,9 @@ class kg_ms_stores(osv.osv):
 						select count(id) from ch_order_machineshop_details where header_id = %s and flag_applicable = 't') as order_count """ %(ass_header_item['order_line_id'],ass_header_item['order_line_id']))
 					order_items_count = cr.fetchone()
 					print "order_items_count",order_items_count
-					stop
+					
 					if len(completion_list) == order_items_count[0]:
+						print "ass_header_item['order_line_id']ass_header_item['order_line_id']",ass_header_item['order_line_id']
 						assembly_id = assembly_obj.search(cr, uid, [
 						('order_id','=',ass_header_item['order_id']),
 						('order_line_id','=',ass_header_item['order_line_id']),
@@ -488,7 +489,7 @@ class kg_ms_stores(osv.osv):
 							store_ids = self.search(cr,uid,[('order_line_id','=',ass_header_item['order_line_id']),('state','=','in_store')])
 							for store_item in store_ids:
 								self.write(cr, uid,store_item,{'state':'sent_to_ass'})	
-							
+				stop			
 				for assembly_item in assembly_list:
 					assembly_ids = assembly_obj.search(cr, uid, [
 					('order_id','=',assembly_item['order_id']),
