@@ -1983,7 +1983,7 @@ class ch_work_order_details(osv.osv):
 								'bot_line_id': vertical_bot_details['id'],
 								'bom_id': vertical_bot_details['bom_id'],							
 								'bot_id': vertical_bot_details['bot_id'],
-								'position_id': vertical_bot_details['position_id'],
+								'position_id': vertical_bot_details['position_id'] or False,
 								'qty': vertical_bot_qty,
 								'flag_applicable' : applicable,
 								'flag_standard':flag_standard,
