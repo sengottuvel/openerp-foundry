@@ -1763,6 +1763,8 @@ class kg_schedule(osv.osv):
 											length = ms_raw_rec.length
 										else:
 											length = ms_order_rec.length
+											if length == 0:
+												length = ms_raw_rec.length
 										
 									elif ms_indent_item['type'] == 'acc':
 										ms_acc_obj = self.pool.get('ch.wo.accessories.ms')

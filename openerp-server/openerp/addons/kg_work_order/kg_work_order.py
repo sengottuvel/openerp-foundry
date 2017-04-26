@@ -1844,7 +1844,7 @@ class ch_work_order_details(osv.osv):
 						cr.execute(''' 
 									
 									-- Bed Assembly ----
-									select id,bot_id,qty,header_id as bom_id
+									select id,bot_id,position_id,qty,header_id as bom_id
 									from ch_bot_details
 									where header_id =
 									(
@@ -1861,7 +1861,7 @@ class ch_work_order_details(osv.osv):
 
 
 									--- Motor Assembly ---
-									select id,bot_id,qty,header_id as bom_id
+									select id,bot_id,position_id,qty,header_id as bom_id
 									from ch_bot_details
 									where header_id =
 									(
@@ -1879,7 +1879,7 @@ class ch_work_order_details(osv.osv):
 
 									-- Column Pipe ------
 
-									select id,bot_id,qty,header_id as bom_id
+									select id,bot_id,position_id,qty,header_id as bom_id
 									from ch_bot_details
 									where header_id =
 									(
@@ -1902,7 +1902,7 @@ class ch_work_order_details(osv.osv):
 
 									-- Delivery Pipe ------
 
-									select id,bot_id,qty,header_id as bom_id
+									select id,bot_id,position_id,qty,header_id as bom_id
 									from ch_bot_details
 									where header_id =  
 									(
@@ -1926,7 +1926,7 @@ class ch_work_order_details(osv.osv):
 
 									-- Lubrication ------
 
-									select id,bot_id,qty,header_id as bom_id
+									select id,bot_id,position_id,qty,header_id as bom_id
 									from ch_bot_details
 									where header_id =
 									(
@@ -1983,6 +1983,7 @@ class ch_work_order_details(osv.osv):
 								'bot_line_id': vertical_bot_details['id'],
 								'bom_id': vertical_bot_details['bom_id'],							
 								'bot_id': vertical_bot_details['bot_id'],
+								'position_id': vertical_bot_details['position_id'],
 								'qty': vertical_bot_qty,
 								'flag_applicable' : applicable,
 								'flag_standard':flag_standard,
