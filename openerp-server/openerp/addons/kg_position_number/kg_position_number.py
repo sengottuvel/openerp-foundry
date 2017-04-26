@@ -56,6 +56,7 @@ class kg_position_number(osv.osv):
 		'remark': fields.text('Approve/Reject'),
 		'cancel_remark': fields.text('Cancel'),
 		'position_type': fields.selection([('new','NEW'),('copy','COPY')],'Type',required=True),
+		'item_type': fields.selection([('pattern','Pattern'),('ms','MS'),('bot','BOT')],'Item Type',required=True),
 		'position_no': fields.many2one('kg.position.number','Source Position',domain="[('active','=',True),('state','=','approved')]"),
 		'line_ids': fields.one2many('ch.kg.position.number','header_id','Operation Configuration',readonly=False,states={'approved':[('readonly',True)]}),
 		'copy_flag':fields.boolean('Copy Flag'),
@@ -91,7 +92,7 @@ class kg_position_number(osv.osv):
 		'state': 'draft',
 		'user_id': lambda obj, cr, uid, context: uid,
 		'crt_date': lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),	
-		'position_type': 'new',
+		'position_type': 'new',		
 		'copy_flag' : False,
 		'modify': 'yes',
 		
