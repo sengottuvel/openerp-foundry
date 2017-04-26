@@ -295,6 +295,9 @@ class kg_payslip(osv.osv):
 				salary_days = val5[0]
 				####### OT Calculation if OT applicable for the employee in the contract########
 				con_src = con_obj.search(cr,uid,[('employee_id','=',emp_id),('state','=','approved')])
+				if not con_src:
+					raise osv.except_osv(_('Warning'),
+							_('Contract is not approved for %s'%(slip_rec.employee_id.name)))
 				con_rec = con_obj.browse(cr,uid,con_src[0])
 				if con_rec.ot_status:
 					salary_days = salary_days + ot_days
@@ -833,18 +836,30 @@ class kg_payslip(osv.osv):
 							else:
 								att_ins = emp_categ_rec.attnd_insentive_female
 							if att_ins != 0.00:
-								self.pool.get('hr.payslip.line').create(cr,uid,
-										{
-											'name':'100% Attendance Bonus',
-											'code':'ATTB',
-											'category_id':8,
-											'quantity':1,
-											'amount':att_ins,
-											'salary_rule_id':1,
-											'employee_id':emp_id,
-											'contract_id':con_ids[0],
-											'slip_id':slip_rec.id,
-										},context = None)
+								self.pool.get('ch.other.salary.comp').create(cr,uid,
+									{
+										'name':'100% Attendance Bonus',
+										'code':'ATTB',
+										'category_id':8,
+										'quantity':1,
+										'amount':att_ins,
+										'salary_rule_id':1,
+										'employee_id':emp_id,
+										'contract_id':con_ids[0],
+										'slip_id':slip_rec.id,
+									},context = None)
+								#~ self.pool.get('hr.payslip.line').create(cr,uid,
+										#~ {
+											#~ 'name':'100% Attendance Bonus',
+											#~ 'code':'ATTB',
+											#~ 'category_id':8,
+											#~ 'quantity':1,
+											#~ 'amount':att_ins,
+											#~ 'salary_rule_id':1,
+											#~ 'employee_id':emp_id,
+											#~ 'contract_id':con_ids[0],
+											#~ 'slip_id':slip_rec.id,
+										#~ },context = None)
 							else:
 								pass
 					else:
