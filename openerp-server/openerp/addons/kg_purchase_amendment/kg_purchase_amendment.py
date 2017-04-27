@@ -177,7 +177,7 @@ class kg_purchase_amendment(osv.osv):
 		'quot_ref_no_amend':fields.char('Amend Your Quot. Ref.',readonly=False,states={'approved':[('readonly',True)]}),
 		'partner_id_amend':fields.many2one('res.partner', 'Amend Supplier',readonly=False,states={'approved':[('readonly',True)]}),
 		'add_text_amend': fields.text('Amend Address',readonly=False,states={'approved':[('readonly',True)]}),
-		'price_amend':fields.selection([('inclusive','Inclusive of all Taxes and Duties')], 'Amend Price',readonly=False,states={'approved':[('readonly',True)]}),
+		'price_amend':fields.selection([('inclusive','Inclusive of all Taxes and Duties'),('exclusive','Exclusive')], 'Amend Price',readonly=False,states={'approved':[('readonly',True)]}),
 		'delivery_address_amend':fields.text('Amend Delivery Address'),
 		'bill_type_amend': fields.selection([('cash','Cash'),('credit','Credit'),('advance','Advance')], 'Amend Payment Mode',readonly=False,states={'approved':[('readonly',True)]}),
 		'payment_mode_amend': fields.many2one('kg.payment.master','Amend Payment Term',readonly=False,states={'approved':[('readonly',True)]}),
