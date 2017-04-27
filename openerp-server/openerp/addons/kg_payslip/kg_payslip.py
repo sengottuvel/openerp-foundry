@@ -633,12 +633,7 @@ class kg_payslip(osv.osv):
 											turn_over_per = (turn_over_amt*inc_ids.incentive_value)/100
 											incent_amt = ((turn_over_per)/calulation_days)*salary_days
 										else:
-											print "*********inc_ids.incentive_value************",inc_ids.incentive_value
-											print "*********working_days************",calulation_days
-											print "*********worked_days************",salary_days
-											
 											incent_amt = ((inc_ids.incentive_value)/calulation_days)*salary_days
-										print "*********incent_amtincent_amtincent_amtincent_amtincent_amt************",incent_amt
 										self.pool.get('hr.payslip.line').create(cr,uid,
 												{
 													'name':'Incentive',
@@ -1202,7 +1197,7 @@ class kg_payslip(osv.osv):
 		sql_1 = """ delete from ch_other_salary_comp where slip_id=%s """%(slip_rec.id)
 		cr.execute(sql_1)
 		sql_parent = """ update hr_payslip set tot_deduction=null ,con_cross_amt=null,cross_amt =null,tot_paid_days =null,tot_allowance=null,
-		round_val=null where id =%s """%(slip_rec.id)
+		round_val=null,othr_sal_amt=null where id =%s """%(slip_rec.id)
 		cr.execute(sql_parent)
 		
 		slip_rec.write({'state': 'draft'})		
