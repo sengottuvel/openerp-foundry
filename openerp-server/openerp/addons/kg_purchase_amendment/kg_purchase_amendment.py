@@ -123,7 +123,7 @@ class kg_purchase_amendment(osv.osv):
 		'value1':fields.float('Value1', readonly=True),
 		'value2':fields.float('Value2', readonly=True),
 		'bill_type': fields.selection([('cash','Cash'),('credit','Credit'),('advance','Advance')], 'Payment Mode', readonly=True),
-		'price':fields.selection([('inclusive','Inclusive of all Taxes and Duties')], 'Price', readonly=True),
+		'price':fields.selection([('inclusive','Inclusive of all Taxes and Duties'),('exclusive','Exclusive')], 'Price', readonly=True),
 		'payment_mode': fields.many2one('kg.payment.master','Payment Term', readonly=True),
 		'advance_amt': fields.float('Advance Amount(%)',readonly=True),
 		'delivery_mode': fields.many2one('kg.delivery.master', 'Delivery Term', readonly=True),
