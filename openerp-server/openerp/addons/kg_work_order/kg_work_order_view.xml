@@ -176,7 +176,7 @@
 							<field name="inspection" attrs="{'readonly': [('flag_load_bom','!=',False)],'invisible': [('order_category','=','access')]}"/>
 							
 							<field name="unit_price"  attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
-							<field name="flag_standard"  attrs="{'readonly': [('flag_load_bom','!=',False)], 'required': [('pump_model_type','=','vertical')]}"/>
+							<field name="flag_standard"  attrs="{'readonly': [('flag_load_bom','!=',False)]}"/>
 							<field name="state" invisible="1"/>
 							<field name="flag_cancel" invisible="1"/>
 							<!--<field name="cancel_remark" attrs="{'invisible': [('flag_cancel','=',False)], 'readonly': [('state','in',['cancel'])]}"/>
