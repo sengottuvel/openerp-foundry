@@ -525,18 +525,32 @@ class kg_payslip(osv.osv):
 								categ_ids = 2
 							elif all_ded_rec.allow_type == 'DED':
 								categ_ids = 4
-							self.pool.get('hr.payslip.line').create(cr,uid,
-								{
-									'name':all_ded_rec.pay_type.name,
-									'code':all_ded_rec.pay_type.code,
-									'category_id':categ_ids,
-									'quantity':1,
-									'amount':all_ded_line_rec.amount,
-									'salary_rule_id':1,
-									'employee_id':emp_id,
-									'contract_id':con_ids[0],
-									'slip_id':slip_rec.id,
-								},context = None)
+							if all_ded_rec.pay_type.appears_on_payslip is True:
+								self.pool.get('hr.payslip.line').create(cr,uid,
+									{
+										'name':all_ded_rec.pay_type.name,
+										'code':all_ded_rec.pay_type.code,
+										'category_id':categ_ids,
+										'quantity':1,
+										'amount':all_ded_line_rec.amount,
+										'salary_rule_id':1,
+										'employee_id':emp_id,
+										'contract_id':con_ids[0],
+										'slip_id':slip_rec.id,
+									},context = None)
+							else:
+								self.pool.get('ch.other.salary.comp').create(cr,uid,
+									{
+										'name':all_ded_rec.pay_type.name,
+										'code':all_ded_rec.pay_type.code,
+										'category_id':categ_ids,
+										'quantity':1,
+										'amount':all_ded_line_rec.amount,
+										'salary_rule_id':1,
+										'employee_id':emp_id,
+										'contract_id':con_ids[0],
+										'slip_id':slip_rec.id,
+									},context = None)
 							
 
 				#### Creation of the allowance or deduction per month for the employee ####
