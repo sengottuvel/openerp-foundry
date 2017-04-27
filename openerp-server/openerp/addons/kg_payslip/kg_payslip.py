@@ -638,7 +638,7 @@ class kg_payslip(osv.osv):
 											print "*********worked_days************",salary_days
 											
 											incent_amt = ((inc_ids.incentive_value)/calulation_days)*salary_days
-											print "*********incent_amtincent_amtincent_amtincent_amtincent_amt************",incent_amt
+										print "*********incent_amtincent_amtincent_amtincent_amtincent_amt************",incent_amt
 										self.pool.get('hr.payslip.line').create(cr,uid,
 												{
 													'name':'Incentive',
