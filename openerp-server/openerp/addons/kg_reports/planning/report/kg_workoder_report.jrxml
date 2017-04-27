@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Workorder_print" pageWidth="605" pageHeight="842" columnWidth="565" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="156"/>
+	<property name="ireport.y" value="558"/>
 	<subDataset name="Spare dataset">
 		<parameter name="header_id" class="java.lang.Integer"/>
 		<parameter name="category" class="java.lang.String"/>
@@ -102,7 +102,9 @@ from ch_wo_accessories wo_access
 left join kg_accessories_master access on access.id = wo_access.access_id
 left join ch_work_order_details wo_line on wo_line.id = wo_access.header_id
 
-where wo_access.header_id = $P{header_id}]]>
+where wo_access.header_id = $P{header_id}
+
+order by wo_access.id asc]]>
 		</queryString>
 		<field name="name" class="java.lang.String"/>
 		<field name="yes" class="java.lang.String"/>
@@ -119,6 +121,7 @@ where wo_access.header_id = $P{header_id}]]>
 	</parameter>
 	<queryString>
 		<![CDATA[select
+to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS new_date,
 wo_line.id as id,
 wo.order_category as order_category,
 case
@@ -300,6 +303,7 @@ left join kg_qap_plan qap on qap.id = pump_crm.qap_plan_id
 where wo_line.id in (select order_id from m2m_work_order_print_report_details
 where foundry_wiz_id = $P{wiz_id})]]>
 	</queryString>
+	<field name="new_date" class="java.lang.String"/>
 	<field name="id" class="java.lang.Integer"/>
 	<field name="order_category" class="java.lang.String"/>
 	<field name="drawing_approval" class="java.lang.String"/>
@@ -418,7 +422,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 					<reportElement mode="Transparent" x="-1" y="0" width="565" height="31"/>
 					<box topPadding="13"/>
 					<textElement textAlignment="Center">
-						<font fontName="Serif" size="8" isBold="true"/>
+						<font fontName="Serif" size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{company_name}]]></textFieldExpression>
 				</textField>
@@ -2206,7 +2210,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 				<textElement>
 					<font size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{printed_by} + " "+ "/"  +" "+$P{print_date}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{printed_by} + " "+ "/"  +" "+$F{new_date}]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
 				<reportElement x="331" y="0" width="48" height="20"/>
