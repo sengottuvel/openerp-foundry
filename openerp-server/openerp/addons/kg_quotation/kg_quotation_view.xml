@@ -53,8 +53,10 @@
 									<field name="quotation_qty" required="1" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
 									<field name="state" invisible="1" readonly="1"/>
 									<field name="due_date" required="1"/>
+									<field name="brand_id" required="1"/>
+									<field name="moc_id_temp" on_change="onchange_moc(moc_id_temp)" required="1"/>
 									<field name="remarks"/>
-									<field name="brand_id"/>
+									<field name="moc_id" invisible="1"/>
 								</tree>
 								<form string="Quotation Lines" create="false">
 									<field name="purchase_requisition_id" invisible="1"/>
@@ -307,12 +309,16 @@
 						<field name="line_ids" nolabel="1" colspan="2" >
 						   <tree string="RFQ Lines" create="false" delete="false" >
 								<field name="product_name"/>
+								<field name="brand_id"/>
+								<field name="moc_id_temp"/>
 								<field name="uom"/>
 								<field name="quotation_qty" string="Qty"/>
 								<field name="product_id" invisible="1"/>
 						   </tree>
 						   <form string="RFQ Lines">
 								<field name="product_id"/>
+								<field name="brand_id"/>
+								<field name="moc_id_temp"/>
 								<field name="uom"/>
 								<field name="quotation_qty"/>
 								<field name="state" invisible="1"/>
@@ -613,6 +619,7 @@
 						<tree string="Purchase Indent Lines" create="false" editable="bottom">
 							<field name="product_id" />
 							<field name="brand_id" />
+							<field name="moc_id_temp" />
 							<field name="product_uom_id" string="UOM" />
 							<field name="requested_qty" invisible="1"/>
 							<field name="quotation_qty" />

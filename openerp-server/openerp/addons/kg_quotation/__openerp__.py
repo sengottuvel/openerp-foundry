@@ -11,7 +11,7 @@
     'category': 'Kg_Quotation',
     'website': 'http://www.openerp.com',
     'depends' : ['base', 'product', 'purchase','purchase_requisition','kg_purchase_indent'],
-    'data': ['kg_quotation_view.xml',
+    'data': ['kg_quotation_view.xml','quotation_report.xml',
 			],
 	#'css': ['static/src/css/state.css'],
     'auto_install': False,

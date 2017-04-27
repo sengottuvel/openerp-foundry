@@ -170,8 +170,8 @@ class kg_rfq_vendor_selection(osv.osv):
 					
 					pi_line_obj.write(cr, uid, pi_lines['requisition_id'], {'src_type':'fromquote'})
 					name = 'name'
-					cr.execute(''' insert into kg_rfq_vendor_selection_line (create_date,create_uid,name,state,purchase_requisition_id,header_id,quotation_qty,product_uom_id,purchase_requisition_line_id,product_id,requested_qty,product_name,due_date)
-					values(now(),%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''',[uid,name, 'draft',tree.requisition_id.id,quote.id,tree.product_qty,tree.product_uom_id.id,tree.id,tree.product_id.id,tree.product_qty,tree.product_id.name_template,rec.quote_submission_date])
+					cr.execute(''' insert into kg_rfq_vendor_selection_line (create_date,create_uid,name,state,purchase_requisition_id,header_id,quotation_qty,product_uom_id,purchase_requisition_line_id,product_id,brand_id,moc_id_temp,moc_id,requested_qty,product_name,due_date)
+					values(now(),%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''',[uid,name, 'draft',tree.requisition_id.id,quote.id,tree.product_qty,tree.product_uom_id.id,tree.id,tree.product_id.id,tree.brand_id.id,tree.moc_id_temp.id,tree.moc_id.id,tree.product_qty,tree.product_id.name_template,rec.quote_submission_date])
 			self.write(cr,uid,ids,{'line_flag':True})
 		return True
 
@@ -250,6 +250,9 @@ class kg_rfq_vendor_selection(osv.osv):
 									'user_id': custom.user_id.id,
 									'product_id': rfq_pi_rec.product_id.id,
 									'product_name': rfq_pi_rec.product_name,
+									'brand_id': rfq_pi_rec.brand_id.id,
+									'moc_id_temp': rfq_pi_rec.moc_id_temp.id,
+									'moc_id': rfq_pi_rec.moc_id.id,
 									'product_uom_id': rfq_pi_rec.product_uom_id.id,
 									'requested_qty': rfq_pi_rec.requested_qty,
 									'quotation_qty': rfq_pi_rec.quotation_qty,
@@ -345,6 +348,8 @@ class kg_rfq_vendor_selection_line(osv.osv):
 		'vendor_ids': fields.one2many('kg.rfq.vendor.list', 'header_id', 'Vendors' ),
 		'due_date': fields.date('Due Date'),
 		'brand_id': fields.many2one('kg.brand.master','Brand'),
+		'moc_id': fields.many2one('kg.moc.master','MOC'),
+		'moc_id_temp': fields.many2one('ch.brandmoc.rate.details','MOC',domain="[('brand_id','=',brand_id),('header_id.product_id','=',product_id),('header_id.state','in',('draft','confirmed','approved'))]"),
 		'revised_flag': fields.boolean('Revised Button Flag'),
 		
 	}
@@ -359,7 +364,14 @@ class kg_rfq_vendor_selection_line(osv.osv):
 	
 	def create(self, cr, uid, vals, context=None):
 		return super(kg_rfq_vendor_selection_line, self).create(cr, uid, vals, context=context)
-		
+	
+	def onchange_moc(self, cr, uid, ids, moc_id_temp):
+		value = {'moc_id':''}
+		if moc_id_temp:
+			rate_rec = self.pool.get('ch.brandmoc.rate.details').browse(cr,uid,moc_id_temp)
+			value = {'moc_id': rate_rec.moc_id.id}
+		return {'value': value}
+	
 kg_rfq_vendor_selection_line()
 
 class kg_quotation_requisition_header(osv.osv):
@@ -612,6 +624,8 @@ class kg_quote_pi_line(osv.osv):
 		'partner_name': fields.related('partner_id','name',type='char', string="Vendor Name", size=200, store=True),
 		'vendors_price':fields.float('Unit Price',required=True),
 		'brand_id': fields.many2one('kg.brand.master','Brand', readonly=True),
+		'moc_id': fields.many2one('kg.moc.master','MOC',readonly=True),
+		'moc_id_temp': fields.many2one('ch.brandmoc.rate.details','MOC',domain="[('brand_id','=',brand_id),('header_id.product_id','=',product_id),('header_id.state','in',('draft','confirmed','approved'))]",readonly=True),
 		'del_date': fields.date('Delivery Date', readonly=True),
 		'ven_del_date': fields.date('Vendor Delivery Date'),
 		'vendors_value': fields.function(_value_calculation,  string='Delivery Charges', multi="sums", help="The amount without tax", type='float',store=True,track_visibility='always'),
@@ -924,52 +938,57 @@ class kg_quotation_entry_header(osv.osv):
 					rec_ven = rfq_ven_list_obj.browse(cr,uid,rfq_ven_list_ids[0])
 					vendor_1_id = d_sorted_by_value[0][0]
 					quote_pi_line_ids = quote_pi_line_obj.search(cr, uid, [('rfq_no_id','=',entry.rfq_no_id.id),('product_id','=',rec_lin.product_id.id),('partner_id','=',vendor_1_id)])
-					quote_pi_line_rec = quote_pi_line_obj.browse(cr,uid,quote_pi_line_ids[0])
-					vendor_1 = quote_pi_line_rec.partner_name
-					ven_1_flag = True
-					ven_1_qty = quote_pi_line_rec.quotation_qty
-					ven_1_price = quote_pi_line_rec.vendors_price
-					ven_1_val = quote_pi_line_rec.vendors_value
+					if quote_pi_line_ids:
+						quote_pi_line_rec = quote_pi_line_obj.browse(cr,uid,quote_pi_line_ids[0])
+						vendor_1 = quote_pi_line_rec.partner_name
+						ven_1_flag = True
+						ven_1_qty = quote_pi_line_rec.quotation_qty
+						ven_1_price = quote_pi_line_rec.vendors_price
+						ven_1_val = quote_pi_line_rec.vendors_value
 				if (d_len-(d_len-indx_1))==1:
 					rec_ven = rfq_ven_list_obj.browse(cr,uid,rfq_ven_list_ids[1])
 					vendor_2_id = d_sorted_by_value[1][0]
 					quote_pi_line_ids = quote_pi_line_obj.search(cr, uid, [('rfq_no_id','=',entry.rfq_no_id.id),('product_id','=',rec_lin.product_id.id),('partner_id','=',vendor_2_id)])
-					quote_pi_line_rec = quote_pi_line_obj.browse(cr,uid,quote_pi_line_ids[0])
-					vendor_2 = quote_pi_line_rec.partner_name
-					ven_2_flag = True
-					ven_2_qty = quote_pi_line_rec.quotation_qty
-					ven_2_price = quote_pi_line_rec.vendors_price
-					ven_2_val = quote_pi_line_rec.vendors_value
+					if quote_pi_line_ids:
+						quote_pi_line_rec = quote_pi_line_obj.browse(cr,uid,quote_pi_line_ids[0])
+						vendor_2 = quote_pi_line_rec.partner_name
+						ven_2_flag = True
+						ven_2_qty = quote_pi_line_rec.quotation_qty
+						ven_2_price = quote_pi_line_rec.vendors_price
+						ven_2_val = quote_pi_line_rec.vendors_value
 				if (d_len-(d_len-indx_2))==2:
 					rec_ven = rfq_ven_list_obj.browse(cr,uid,rfq_ven_list_ids[2])
 					vendor_3_id = d_sorted_by_value[2][0]
 					quote_pi_line_ids = quote_pi_line_obj.search(cr, uid, [('rfq_no_id','=',entry.rfq_no_id.id),('product_id','=',rec_lin.product_id.id),('partner_id','=',vendor_3_id)])
-					quote_pi_line_rec = quote_pi_line_obj.browse(cr,uid,quote_pi_line_ids[0])
-					vendor_3 = quote_pi_line_rec.partner_name
-					ven_3_flag = True
-					ven_3_qty = quote_pi_line_rec.quotation_qty
-					ven_3_price = quote_pi_line_rec.vendors_price
-					ven_3_val = quote_pi_line_rec.vendors_value
+					if quote_pi_line_ids:
+						quote_pi_line_rec = quote_pi_line_obj.browse(cr,uid,quote_pi_line_ids[0])
+						vendor_3 = quote_pi_line_rec.partner_name
+						ven_3_flag = True
+						ven_3_qty = quote_pi_line_rec.quotation_qty
+						ven_3_price = quote_pi_line_rec.vendors_price
+						ven_3_val = quote_pi_line_rec.vendors_value
 				if (d_len-(d_len-indx_3))==3:
 					rec_ven = rfq_ven_list_obj.browse(cr,uid,rfq_ven_list_ids[3])
 					vendor_4_id = d_sorted_by_value[3][0]
 					quote_pi_line_ids = quote_pi_line_obj.search(cr, uid, [('rfq_no_id','=',entry.rfq_no_id.id),('product_id','=',rec_lin.product_id.id),('partner_id','=',vendor_4_id)])
-					quote_pi_line_rec = quote_pi_line_obj.browse(cr,uid,quote_pi_line_ids[0])
-					vendor_4 = quote_pi_line_rec.partner_name
-					ven_4_flag = True
-					ven_4_qty = quote_pi_line_rec.quotation_qty
-					ven_4_price = quote_pi_line_rec.vendors_price
-					ven_4_val = quote_pi_line_rec.vendors_value
+					if quote_pi_line_ids:
+						quote_pi_line_rec = quote_pi_line_obj.browse(cr,uid,quote_pi_line_ids[0])
+						vendor_4 = quote_pi_line_rec.partner_name
+						ven_4_flag = True
+						ven_4_qty = quote_pi_line_rec.quotation_qty
+						ven_4_price = quote_pi_line_rec.vendors_price
+						ven_4_val = quote_pi_line_rec.vendors_value
 				if (d_len-(d_len-indx_4))==4:
 					rec_ven = rfq_ven_list_obj.browse(cr,uid,rfq_ven_list_ids[4])
 					vendor_5_id = d_sorted_by_value[4][0]
 					quote_pi_line_ids = quote_pi_line_obj.search(cr, uid, [('rfq_no_id','=',entry.rfq_no_id.id),('product_id','=',rec_lin.product_id.id),('partner_id','=',vendor_5_id)])
-					quote_pi_line_rec = quote_pi_line_obj.browse(cr,uid,quote_pi_line_ids[0])
-					vendor_5 = quote_pi_line_rec.partner_name
-					ven_5_flag = True
-					ven_5_qty = quote_pi_line_rec.quotation_qty
-					ven_5_price = quote_pi_line_rec.vendors_price
-					ven_5_val = quote_pi_line_rec.vendors_value
+					if quote_pi_line_ids:
+						quote_pi_line_rec = quote_pi_line_obj.browse(cr,uid,quote_pi_line_ids[0])
+						vendor_5 = quote_pi_line_rec.partner_name
+						ven_5_flag = True
+						ven_5_qty = quote_pi_line_rec.quotation_qty
+						ven_5_price = quote_pi_line_rec.vendors_price
+						ven_5_val = quote_pi_line_rec.vendors_value
 				self.write(cr, uid, ids, 
 					{
 					'rfq_date' : entry.rfq_date,
@@ -997,6 +1016,9 @@ class kg_quotation_entry_header(osv.osv):
 					'rfq_no_line_id':rec_lin.id,
 					'product_id': rec_lin.product_id.id,
 					'product_name': rec_lin.product_name,
+					'brand_id': rec_lin.brand_id.id,
+					'moc_id_temp': rec_lin.moc_id_temp.id,
+					'moc_id': rec_lin.moc_id.id,
 					'vendor_1_id': vendor_1_id,
 					'vendor_2_id': vendor_2_id,
 					'vendor_3_id': vendor_3_id,
@@ -1340,6 +1362,9 @@ class kg_quotation_entry_lines(osv.osv):
 		'rfq_no_line_id':fields.many2one('kg.rfq.vendor.selection.line', 'RFQ', readonly=True),
 		'product_id':fields.many2one('product.product', 'ProductDetails', readonly=True),
 		'product_name': fields.related('product_id', 'name', type='char', string='Product Name', readonly=True, store=True, size=300),
+		'brand_id': fields.many2one('kg.brand.master','Brand', readonly=True),
+		'moc_id': fields.many2one('kg.moc.master','MOC',readonly=True),
+		'moc_id_temp': fields.many2one('ch.brandmoc.rate.details','MOC',domain="[('brand_id','=',brand_id),('header_id.product_id','=',product_id),('header_id.state','in',('draft','confirmed','approved'))]",readonly=True),
 		'uom': fields.related('product_id', 'uom_id', type='many2one', relation='product.uom', string='UOM', readonly=True, store=True),'vendor_1_id': fields.many2one('res.partner', 'Vendor 1' , readonly=True),
 		'vendor_1_select':fields.boolean('Select'),
 		'vendor_1_quantity':fields.float('Qty', readonly=True, digits=(16,3)),

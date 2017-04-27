@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+		
+		<report string="Comparison Copy"
+				model="kg.quotation.entry.header"
+				auto="True"
+				name="onscreen_quotation_comparision_report"
+				rml="kg_quotation/report/onscreen_quotation_comparision_report.jrxml"
+				id="quotation_comparision_jasper_report_menu" 
+				menu="True"
+				header="False"
+				/>
+        
+    </data>
+</openerp>

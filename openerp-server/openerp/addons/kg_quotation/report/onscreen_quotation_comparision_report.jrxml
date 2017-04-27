@@ -1,0 +1,1216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="onscreen_quotation_comparision_report" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.1000000000000005"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="style1" isItalic="false" isUnderline="false" isStrikeThrough="false">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{vendor_1_rate} == $F{min_value}]]></conditionExpression>
+			<style forecolor="#000000" isBold="true"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{vendor_1_rate} != $F{min_value}]]></conditionExpression>
+			<style forecolor="#000000" isBold="false"/>
+		</conditionalStyle>
+	</style>
+	<style name="style2" isItalic="false" isUnderline="false" isStrikeThrough="false">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{vendor_2_rate} == $F{min_value}]]></conditionExpression>
+			<style forecolor="#000000" isBold="true"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{vendor_2_rate} != $F{min_value}]]></conditionExpression>
+			<style forecolor="#000000" isBold="false"/>
+		</conditionalStyle>
+	</style>
+	<style name="style3" isItalic="false" isUnderline="false" isStrikeThrough="false">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{vendor_3_rate} == $F{min_value}]]></conditionExpression>
+			<style forecolor="#000000" isBold="true"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{vendor_3_rate} != $F{min_value}]]></conditionExpression>
+			<style forecolor="#000000" isBold="false"/>
+		</conditionalStyle>
+	</style>
+	<style name="style4" isItalic="false" isUnderline="false" isStrikeThrough="false">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{vendor_4_rate} == $F{min_value}]]></conditionExpression>
+			<style forecolor="#000000" isBold="true"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{vendor_4_rate} != $F{min_value}]]></conditionExpression>
+			<style forecolor="#000000" isBold="false"/>
+		</conditionalStyle>
+	</style>
+	<subDataset name="product_details">
+		<parameter name="comparision_id" class="java.lang.Integer"/>
+		<queryString>
+			<![CDATA[select
+
+prod.name_template as product,
+brand.name as brand,
+moc.name as moc,
+uom.name as uom,
+entry_line.quotation_qty as qty,
+
+round(LEAST(NULLIF(entry_line.vendor_1_price_input,0),NULLIF(entry_line.vendor_2_price_input,0),NULLIF(entry_line.vendor_3_price_input,0)
+,NULLIF(entry_line.vendor_4_price_input,0),NULLIF(entry_line.vendor_5_price_input,0)
+),2) as min_value,
+
+round(entry_line.vendor_1_price_input,2) as vendor_1_rate,
+round(entry_line.vendor_2_price_input,2) as vendor_2_rate,
+round(entry_line.vendor_3_price_input,2) as vendor_3_rate,
+round(entry_line.vendor_4_price_input,2) as vendor_4_rate,
+round(entry_line.vendor_5_price_input,2) as vendor_5_rate,
+round(entry_line.vendor_1_value,2) as vendor_1_value,
+round(entry_line.vendor_2_value,2) as vendor_2_value,
+round(entry_line.vendor_3_value,2) as vendor_3_value,
+round(entry_line.vendor_4_value,2) as vendor_4_value,
+round(entry_line.vendor_5_value,2) as vendor_5_value
+
+from kg_quotation_entry_lines entry_line
+
+left join product_product prod on(prod.id=entry_line.product_id)
+left join product_uom uom on(uom.id=entry_line.uom)
+left join kg_brand_master brand on(brand.id=entry_line.brand_id)
+left join kg_moc_master moc on(moc.id=entry_line.moc_id)
+
+where entry_line.header_id = $P{comparision_id}]]>
+		</queryString>
+		<field name="product" class="java.lang.String"/>
+		<field name="brand" class="java.lang.String"/>
+		<field name="moc" class="java.lang.String"/>
+		<field name="uom" class="java.lang.String"/>
+		<field name="qty" class="java.math.BigDecimal"/>
+		<field name="min_value" class="java.math.BigDecimal"/>
+		<field name="vendor_1_rate" class="java.math.BigDecimal"/>
+		<field name="vendor_2_rate" class="java.math.BigDecimal"/>
+		<field name="vendor_3_rate" class="java.math.BigDecimal"/>
+		<field name="vendor_4_rate" class="java.math.BigDecimal"/>
+		<field name="vendor_5_rate" class="java.math.BigDecimal"/>
+		<field name="vendor_1_value" class="java.math.BigDecimal"/>
+		<field name="vendor_2_value" class="java.math.BigDecimal"/>
+		<field name="vendor_3_value" class="java.math.BigDecimal"/>
+		<field name="vendor_4_value" class="java.math.BigDecimal"/>
+		<field name="vendor_5_value" class="java.math.BigDecimal"/>
+	</subDataset>
+	<subDataset name="product_total">
+		<parameter name="comparision_id" class="java.lang.Integer"/>
+		<queryString>
+			<![CDATA[select
+
+round(sum(entry_line.vendor_1_value),2) as vendor_1_value,
+round(sum(entry_line.vendor_2_value),2) as vendor_2_value,
+round(sum(entry_line.vendor_3_value),2) as vendor_3_value,
+round(sum(entry_line.vendor_4_value),2) as vendor_4_value,
+round(sum(entry_line.vendor_5_value),2) as vendor_5_value
+
+from kg_quotation_entry_lines entry_line
+
+where entry_line.header_id = $P{comparision_id}]]>
+		</queryString>
+		<field name="vendor_1_value" class="java.math.BigDecimal"/>
+		<field name="vendor_2_value" class="java.math.BigDecimal"/>
+		<field name="vendor_3_value" class="java.math.BigDecimal"/>
+		<field name="vendor_4_value" class="java.math.BigDecimal"/>
+		<field name="vendor_5_value" class="java.math.BigDecimal"/>
+	</subDataset>
+	<subDataset name="ref_details">
+		<parameter name="comparision_id" class="java.lang.Integer"/>
+		<queryString>
+			<![CDATA[select
+
+(case when entry_header.vendor_reference_no_vendor_1 is not null then entry_header.vendor_reference_no_vendor_1
+else '-' end) as vendor_ref_no_1,
+(case when entry_header.vendor_reference_no_vendor_2 is not null then entry_header.vendor_reference_no_vendor_2
+else '-' end) as vendor_ref_no_2,
+(case when entry_header.vendor_reference_no_vendor_3 is not null then entry_header.vendor_reference_no_vendor_3
+else '-' end) as vendor_ref_no_3,
+(case when entry_header.vendor_reference_no_vendor_4 is not null then entry_header.vendor_reference_no_vendor_4
+else '-' end) as vendor_ref_no_4,
+(case when entry_header.vendor_reference_no_vendor_5 is not null then entry_header.vendor_reference_no_vendor_5
+else '-' end) as vendor_ref_no_5,
+(case when entry_header.vendor_reference_date_vendor_1 is not null then to_char(entry_header.vendor_reference_date_vendor_1, 'dd/mm/yyyy')
+else '-' end) as vendor_ref_date_1,
+(case when entry_header.vendor_reference_date_vendor_2 is not null then to_char(entry_header.vendor_reference_date_vendor_2, 'dd/mm/yyyy')
+else '-' end) as vendor_ref_date_2,
+(case when entry_header.vendor_reference_date_vendor_3 is not null then to_char(entry_header.vendor_reference_date_vendor_3, 'dd/mm/yyyy')
+else '-' end) as vendor_ref_date_3,
+(case when entry_header.vendor_reference_date_vendor_4 is not null then to_char(entry_header.vendor_reference_date_vendor_4, 'dd/mm/yyyy')
+else '-' end) as vendor_ref_date_4,
+(case when entry_header.vendor_reference_date_vendor_5 is not null then to_char(entry_header.vendor_reference_date_vendor_5, 'dd/mm/yyyy')
+else '-' end) as vendor_ref_date_5,
+entry_header.quotation_validity_vendor_1 as quotation_validity_1,
+entry_header.quotation_validity_vendor_2 as quotation_validity_2,
+entry_header.quotation_validity_vendor_3 as quotation_validity_3,
+entry_header.quotation_validity_vendor_4 as quotation_validity_4,
+entry_header.quotation_validity_vendor_5 as quotation_validity_5,
+
+(case when entry_header.enquiry_type_vendor_1 = 'phone' then 'Phone' when entry_header.enquiry_type_vendor_1 = 'email' then 'Email'
+when entry_header.enquiry_type_vendor_1 = 'fax' then 'Fax' when entry_header.enquiry_type_vendor_1 = 'others' then 'Others'
+else '-' end) as enquiry_type_vendor_1,
+(case when entry_header.enquiry_type_vendor_2 = 'phone' then 'Phone' when entry_header.enquiry_type_vendor_2 = 'email' then 'Email'
+when entry_header.enquiry_type_vendor_2 = 'fax' then 'Fax' when entry_header.enquiry_type_vendor_2 = 'others' then 'Others'
+else '-' end) as enquiry_type_vendor_2,
+(case when entry_header.enquiry_type_vendor_3 = 'phone' then 'Phone' when entry_header.enquiry_type_vendor_3 = 'email' then 'Email'
+when entry_header.enquiry_type_vendor_3 = 'fax' then 'Fax' when entry_header.enquiry_type_vendor_3 = 'others' then 'Others'
+else '-' end) as enquiry_type_vendor_3,
+(case when entry_header.enquiry_type_vendor_4 = 'phone' then 'Phone' when entry_header.enquiry_type_vendor_4 = 'email' then 'Email'
+when entry_header.enquiry_type_vendor_4 = 'fax' then 'Fax' when entry_header.enquiry_type_vendor_4 = 'others' then 'Others'
+else '-' end) as enquiry_type_vendor_4,
+(case when entry_header.enquiry_type_vendor_5 = 'phone' then 'Phone' when entry_header.enquiry_type_vendor_5 = 'email' then 'Email'
+when entry_header.enquiry_type_vendor_5 = 'fax' then 'Fax' when entry_header.enquiry_type_vendor_5 = 'others' then 'Others'
+else '-' end) as enquiry_type_vendor_5
+
+from kg_quotation_entry_header entry_header
+
+where entry_header.id = $P{comparision_id}]]>
+		</queryString>
+		<field name="vendor_ref_no_1" class="java.lang.String"/>
+		<field name="vendor_ref_no_2" class="java.lang.String"/>
+		<field name="vendor_ref_no_3" class="java.lang.String"/>
+		<field name="vendor_ref_no_4" class="java.lang.String"/>
+		<field name="vendor_ref_no_5" class="java.lang.String"/>
+		<field name="vendor_ref_date_1" class="java.lang.String"/>
+		<field name="vendor_ref_date_2" class="java.lang.String"/>
+		<field name="vendor_ref_date_3" class="java.lang.String"/>
+		<field name="vendor_ref_date_4" class="java.lang.String"/>
+		<field name="vendor_ref_date_5" class="java.lang.String"/>
+		<field name="quotation_validity_1" class="java.lang.Integer"/>
+		<field name="quotation_validity_2" class="java.lang.Integer"/>
+		<field name="quotation_validity_3" class="java.lang.Integer"/>
+		<field name="quotation_validity_4" class="java.lang.Integer"/>
+		<field name="quotation_validity_5" class="java.lang.Integer"/>
+		<field name="enquiry_type_vendor_1" class="java.lang.String"/>
+		<field name="enquiry_type_vendor_2" class="java.lang.String"/>
+		<field name="enquiry_type_vendor_3" class="java.lang.String"/>
+		<field name="enquiry_type_vendor_4" class="java.lang.String"/>
+		<field name="enquiry_type_vendor_5" class="java.lang.String"/>
+	</subDataset>
+	<parameter name="comparision_id" class="java.lang.Integer"/>
+	<parameter name="printed_by" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select
+
+to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS new_date,
+
+entry_header.id  as comparision_id,
+
+company.name as company,
+(CASE WHEN comppart.street is null THEN '' ELSE comppart.street end) as comp_street,
+(CASE WHEN comppart.street2 is null THEN '' ELSE comppart.street2 end) as comp_street2,
+(CASE WHEN compcity.name is null THEN '' ELSE compcity.name end) as comp_city,
+(CASE WHEN compstate.name is null THEN '' ELSE compstate.name end) as comp_state,
+(CASE WHEN comppart.zip is null THEN '' ELSE comppart.zip end) as comp_zip,
+
+to_char(entry_header.rfq_date, 'dd/mm/yyyy') as rfq_date,
+to_char(entry_header.comparision_date, 'dd/mm/yyyy') as comparision_date,
+
+entry_header.vendor_1_name as vendor_1_name,
+entry_header.vendor_2_name as vendor_2_name,
+entry_header.vendor_3_name as vendor_3_name,
+entry_header.vendor_4_name as vendor_4_name,
+entry_header.vendor_5_name as vendor_5_name,
+
+(case when entry_header.vendor_1_freight is not null then entry_header.vendor_1_freight else '-' end) as vendor_1_freight,
+(case when entry_header.vendor_1_tax is not null then entry_header.vendor_1_tax else '-' end) as vendor_1_tax,
+(case when entry_header.vendor_1_others is not null then entry_header.vendor_1_others else '-' end) as vendor_1_others,
+(case when entry_header.vendor_2_freight is not null then entry_header.vendor_2_freight else '-' end) as vendor_2_freight,
+(case when entry_header.vendor_2_tax is not null then entry_header.vendor_2_tax else '-' end) as vendor_2_tax,
+(case when entry_header.vendor_2_others is not null then entry_header.vendor_2_others else '-' end) as vendor_2_others,
+(case when entry_header.vendor_3_freight is not null then entry_header.vendor_3_freight else '-' end) as vendor_3_freight,
+(case when entry_header.vendor_3_tax is not null then entry_header.vendor_3_tax else '-' end) as vendor_3_tax,
+(case when entry_header.vendor_3_others is not null then entry_header.vendor_3_others else '-' end) as vendor_3_others,
+(case when entry_header.vendor_4_freight is not null then entry_header.vendor_4_freight else '-' end) as vendor_4_freight,
+(case when entry_header.vendor_4_tax is not null then entry_header.vendor_4_tax else '-' end) as vendor_4_tax,
+(case when entry_header.vendor_4_others is not null then entry_header.vendor_4_others else '-' end) as vendor_4_others,
+(case when entry_header.vendor_5_freight is not null then entry_header.vendor_5_freight else '-' end) as vendor_5_freight,
+(case when entry_header.vendor_5_tax is not null then entry_header.vendor_5_tax else '-' end) as vendor_5_tax,
+(case when entry_header.vendor_5_others is not null then entry_header.vendor_5_others else '-' end) as vendor_5_others,
+
+(case when entry_header.comparison_remarks is not null then entry_header.comparison_remarks
+else ' ' end) as remarks
+
+from kg_quotation_entry_header entry_header
+
+left join res_company company on(company.id=entry_header.company_id)
+left join res_partner comppart on(comppart.id=company.partner_id)
+left join res_country_state compstate on(compstate.id=comppart.state_id)
+left join res_city compcity on(compcity.id=comppart.city_id)
+
+where entry_header.id = $P{comparision_id}]]>
+	</queryString>
+	<field name="new_date" class="java.lang.String"/>
+	<field name="comparision_id" class="java.lang.Integer"/>
+	<field name="company" class="java.lang.String"/>
+	<field name="comp_street" class="java.lang.String"/>
+	<field name="comp_street2" class="java.lang.String"/>
+	<field name="comp_city" class="java.lang.String"/>
+	<field name="comp_state" class="java.lang.String"/>
+	<field name="comp_zip" class="java.lang.String"/>
+	<field name="rfq_date" class="java.lang.String"/>
+	<field name="comparision_date" class="java.lang.String"/>
+	<field name="vendor_1_name" class="java.lang.String"/>
+	<field name="vendor_2_name" class="java.lang.String"/>
+	<field name="vendor_3_name" class="java.lang.String"/>
+	<field name="vendor_4_name" class="java.lang.String"/>
+	<field name="vendor_5_name" class="java.lang.String"/>
+	<field name="vendor_1_freight" class="java.lang.String"/>
+	<field name="vendor_1_tax" class="java.lang.String"/>
+	<field name="vendor_1_others" class="java.lang.String"/>
+	<field name="vendor_2_freight" class="java.lang.String"/>
+	<field name="vendor_2_tax" class="java.lang.String"/>
+	<field name="vendor_2_others" class="java.lang.String"/>
+	<field name="vendor_3_freight" class="java.lang.String"/>
+	<field name="vendor_3_tax" class="java.lang.String"/>
+	<field name="vendor_3_others" class="java.lang.String"/>
+	<field name="vendor_4_freight" class="java.lang.String"/>
+	<field name="vendor_4_tax" class="java.lang.String"/>
+	<field name="vendor_4_others" class="java.lang.String"/>
+	<field name="vendor_5_freight" class="java.lang.String"/>
+	<field name="vendor_5_tax" class="java.lang.String"/>
+	<field name="vendor_5_others" class="java.lang.String"/>
+	<field name="remarks" class="java.lang.String"/>
+	<group name="Product_Details">
+		<groupExpression><![CDATA[$F{comparision_id}]]></groupExpression>
+		<groupHeader>
+			<band height="30">
+				<componentElement>
+					<reportElement x="0" y="15" width="802" height="15"/>
+					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+						<datasetRun subDataset="product_details">
+							<datasetParameter name="comparision_id">
+								<datasetParameterExpression><![CDATA[$P{comparision_id}]]></datasetParameterExpression>
+							</datasetParameter>
+							<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+						<jr:listContents height="15" width="802">
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="16" y="0" width="153" height="15"/>
+								<box topPadding="2" leftPadding="1">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement/>
+								<textFieldExpression><![CDATA[$F{product}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="0" y="0" width="16" height="15"/>
+								<box topPadding="2" leftPadding="1">
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center"/>
+								<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="268" y="0" width="50" height="15"/>
+								<box topPadding="2" leftPadding="1">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center"/>
+								<textFieldExpression><![CDATA[$F{uom}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="318" y="0" width="48" height="15"/>
+								<box topPadding="2" rightPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right"/>
+								<textFieldExpression><![CDATA[$F{qty}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement style="style1" positionType="Float" stretchType="RelativeToTallestObject" x="401" y="0" width="42" height="15"/>
+								<box topPadding="2" rightPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right"/>
+								<textFieldExpression><![CDATA[$F{vendor_1_rate}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="443" y="0" width="58" height="15"/>
+								<box topPadding="2" rightPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right"/>
+								<textFieldExpression><![CDATA[$F{vendor_1_value}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement style="style2" positionType="Float" stretchType="RelativeToTallestObject" x="501" y="0" width="42" height="15"/>
+								<box topPadding="2" rightPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right"/>
+								<textFieldExpression><![CDATA[$F{vendor_2_rate}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="543" y="0" width="58" height="15"/>
+								<box topPadding="2" rightPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right"/>
+								<textFieldExpression><![CDATA[$F{vendor_2_value}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement style="style3" positionType="Float" stretchType="RelativeToTallestObject" x="601" y="0" width="42" height="15"/>
+								<box topPadding="2" rightPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right"/>
+								<textFieldExpression><![CDATA[$F{vendor_3_rate}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="643" y="0" width="58" height="15"/>
+								<box topPadding="2" rightPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right"/>
+								<textFieldExpression><![CDATA[$F{vendor_3_value}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement style="style4" positionType="Float" stretchType="RelativeToTallestObject" x="701" y="0" width="42" height="15"/>
+								<box topPadding="2" rightPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right"/>
+								<textFieldExpression><![CDATA[$F{vendor_4_rate}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="743" y="0" width="58" height="15"/>
+								<box topPadding="2" rightPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right"/>
+								<textFieldExpression><![CDATA[$F{vendor_4_value}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="366" y="0" width="35" height="15"/>
+								<box topPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right"/>
+								<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="168" y="0" width="51" height="15"/>
+								<box topPadding="2" leftPadding="1">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement/>
+								<textFieldExpression><![CDATA[$F{brand}]]></textFieldExpression>
+							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="219" y="0" width="49" height="15"/>
+								<box topPadding="2" leftPadding="1">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement/>
+								<textFieldExpression><![CDATA[$F{moc}]]></textFieldExpression>
+							</textField>
+						</jr:listContents>
+					</jr:list>
+				</componentElement>
+				<staticText>
+					<reportElement x="0" y="0" width="16" height="15"/>
+					<box topPadding="2">
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<text><![CDATA[Sl.]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="16" y="0" width="153" height="15"/>
+					<box topPadding="2" leftPadding="1">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<text><![CDATA[Product Details]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="268" y="0" width="50" height="15"/>
+					<box topPadding="2">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<text><![CDATA[UOM]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="316" y="0" width="50" height="15"/>
+					<box topPadding="2" rightPadding="2">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<text><![CDATA[QTY]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="366" y="0" width="35" height="15"/>
+					<box topPadding="2" rightPadding="2">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right"/>
+					<text><![CDATA[VAT%]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="401" y="0" width="42" height="15"/>
+					<box topPadding="2" rightPadding="2">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<text><![CDATA[Rate]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="443" y="0" width="58" height="15"/>
+					<box topPadding="2" rightPadding="2">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<text><![CDATA[Value]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="543" y="0" width="58" height="15"/>
+					<box topPadding="2" rightPadding="2">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<text><![CDATA[Value]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="501" y="0" width="42" height="15"/>
+					<box topPadding="2" rightPadding="2">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<text><![CDATA[Rate]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="643" y="0" width="58" height="15"/>
+					<box topPadding="2" rightPadding="2">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<text><![CDATA[Value]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="601" y="0" width="42" height="15"/>
+					<box topPadding="2" rightPadding="2">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<text><![CDATA[Rate]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="743" y="0" width="58" height="15"/>
+					<box topPadding="2" rightPadding="2">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<text><![CDATA[Value]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="701" y="0" width="42" height="15"/>
+					<box topPadding="2" rightPadding="2">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<text><![CDATA[Rate]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="169" y="0" width="50" height="15"/>
+					<box topPadding="2" leftPadding="1">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<text><![CDATA[Brand]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="219" y="0" width="49" height="15"/>
+					<box topPadding="2" leftPadding="1">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<text><![CDATA[MOC]]></text>
+				</staticText>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="Product_Total">
+		<groupExpression><![CDATA[$F{comparision_id}]]></groupExpression>
+		<groupHeader>
+			<band height="216">
+				<componentElement>
+					<reportElement x="302" y="0" width="500" height="32"/>
+					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+						<datasetRun subDataset="product_total">
+							<datasetParameter name="comparision_id">
+								<datasetParameterExpression><![CDATA[$P{comparision_id}]]></datasetParameterExpression>
+							</datasetParameter>
+							<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+						<jr:listContents height="32" width="500">
+							<textField isBlankWhenNull="true">
+								<reportElement x="99" y="0" width="100" height="16"/>
+								<box topPadding="2" rightPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right"/>
+								<textFieldExpression><![CDATA[$F{vendor_1_value}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="199" y="0" width="100" height="16"/>
+								<box topPadding="2" rightPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right"/>
+								<textFieldExpression><![CDATA[$F{vendor_2_value}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="299" y="0" width="100" height="16"/>
+								<box topPadding="2" rightPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right"/>
+								<textFieldExpression><![CDATA[$F{vendor_3_value}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="399" y="0" width="100" height="16"/>
+								<box topPadding="2" rightPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right"/>
+								<textFieldExpression><![CDATA[$F{vendor_4_value}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="99" y="16" width="100" height="16"/>
+								<box topPadding="2" rightPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right"/>
+								<textFieldExpression><![CDATA[$F{vendor_1_value}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="199" y="16" width="100" height="16"/>
+								<box topPadding="2" rightPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right"/>
+								<textFieldExpression><![CDATA[$F{vendor_2_value}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="299" y="16" width="100" height="16"/>
+								<box topPadding="2" rightPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right"/>
+								<textFieldExpression><![CDATA[$F{vendor_3_value}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="399" y="16" width="100" height="16"/>
+								<box topPadding="2" rightPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right"/>
+								<textFieldExpression><![CDATA[$F{vendor_4_value}]]></textFieldExpression>
+							</textField>
+						</jr:listContents>
+					</jr:list>
+				</componentElement>
+				<staticText>
+					<reportElement x="0" y="0" width="401" height="16"/>
+					<box topPadding="3" rightPadding="2">
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="9" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Total Value]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="16" width="401" height="16"/>
+					<box topPadding="3" rightPadding="2">
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="9" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Net Amount]]></text>
+				</staticText>
+				<componentElement>
+					<reportElement x="302" y="32" width="500" height="64"/>
+					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+						<datasetRun subDataset="ref_details">
+							<datasetParameter name="comparision_id">
+								<datasetParameterExpression><![CDATA[$P{comparision_id}]]></datasetParameterExpression>
+							</datasetParameter>
+							<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+						<jr:listContents height="64" width="500">
+							<textField isBlankWhenNull="true">
+								<reportElement x="99" y="0" width="100" height="16"/>
+								<box topPadding="2" leftPadding="1">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center"/>
+								<textFieldExpression><![CDATA[$F{vendor_ref_no_1}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="99" y="16" width="100" height="16"/>
+								<box topPadding="2" leftPadding="1">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center"/>
+								<textFieldExpression><![CDATA[$F{vendor_ref_date_1}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="99" y="32" width="100" height="16"/>
+								<box topPadding="2" leftPadding="1">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center"/>
+								<textFieldExpression><![CDATA[$F{quotation_validity_1}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="99" y="48" width="100" height="16"/>
+								<box topPadding="2" leftPadding="1">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center"/>
+								<textFieldExpression><![CDATA[$F{enquiry_type_vendor_1}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="199" y="0" width="100" height="16"/>
+								<box topPadding="2" leftPadding="1">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center"/>
+								<textFieldExpression><![CDATA[$F{vendor_ref_no_2}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="199" y="16" width="100" height="16"/>
+								<box topPadding="2" leftPadding="1">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center"/>
+								<textFieldExpression><![CDATA[$F{vendor_ref_date_2}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="199" y="32" width="100" height="16"/>
+								<box topPadding="2" leftPadding="1">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center"/>
+								<textFieldExpression><![CDATA[$F{quotation_validity_2}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="199" y="48" width="100" height="16"/>
+								<box topPadding="2" leftPadding="1">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center"/>
+								<textFieldExpression><![CDATA[$F{enquiry_type_vendor_2}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="299" y="0" width="100" height="16"/>
+								<box topPadding="2" leftPadding="1">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center"/>
+								<textFieldExpression><![CDATA[$F{vendor_ref_no_3}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="299" y="16" width="100" height="16"/>
+								<box topPadding="2" leftPadding="1">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center"/>
+								<textFieldExpression><![CDATA[$F{vendor_ref_date_3}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="299" y="32" width="100" height="16"/>
+								<box topPadding="2" leftPadding="1">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center"/>
+								<textFieldExpression><![CDATA[$F{quotation_validity_3}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="299" y="48" width="100" height="16"/>
+								<box topPadding="2" leftPadding="1">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center"/>
+								<textFieldExpression><![CDATA[$F{enquiry_type_vendor_3}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="399" y="1" width="100" height="15"/>
+								<box topPadding="2" leftPadding="1">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center"/>
+								<textFieldExpression><![CDATA[$F{vendor_ref_no_4}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="399" y="16" width="100" height="16"/>
+								<box topPadding="2" leftPadding="1">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center"/>
+								<textFieldExpression><![CDATA[$F{vendor_ref_date_4}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="399" y="32" width="100" height="16"/>
+								<box topPadding="2" leftPadding="1">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center"/>
+								<textFieldExpression><![CDATA[$F{quotation_validity_4}]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="true">
+								<reportElement x="399" y="48" width="100" height="16"/>
+								<box topPadding="2" leftPadding="1">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center"/>
+								<textFieldExpression><![CDATA[$F{enquiry_type_vendor_4}]]></textFieldExpression>
+							</textField>
+						</jr:listContents>
+					</jr:list>
+				</componentElement>
+				<staticText>
+					<reportElement x="0" y="32" width="401" height="16"/>
+					<box topPadding="3" rightPadding="2">
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="9" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Vendor Refernce No.]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="48" width="401" height="16"/>
+					<box topPadding="3" rightPadding="2">
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="9" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Vendor Refernce Date]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="64" width="401" height="16"/>
+					<box topPadding="3" rightPadding="2">
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="9" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Quotation Validity in Days]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="80" width="401" height="16"/>
+					<box topPadding="3" rightPadding="2">
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="9" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Enquiry Type]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="0" y="148" width="802" height="20"/>
+					<box topPadding="2" leftPadding="2"/>
+					<textElement/>
+					<textFieldExpression><![CDATA["Comparison Remarks" + $F{remarks}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="0" y="196" width="100" height="20"/>
+					<box topPadding="2" leftPadding="1"/>
+					<textElement textAlignment="Center"/>
+					<text><![CDATA[Prepared By]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="354" y="196" width="100" height="20"/>
+					<box topPadding="2" leftPadding="1"/>
+					<textElement textAlignment="Center"/>
+					<text><![CDATA[Checked By]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="702" y="196" width="100" height="20"/>
+					<box topPadding="2" leftPadding="1"/>
+					<textElement textAlignment="Center"/>
+					<text><![CDATA[Approved By]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="96" width="801" height="13"/>
+					<box topPadding="1" leftPadding="1">
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Terms and Condition]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="109" width="401" height="13"/>
+					<box topPadding="1" leftPadding="1">
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font isBold="false"/>
+					</textElement>
+					<text><![CDATA[Freight]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="122" width="401" height="13"/>
+					<box topPadding="1" leftPadding="1">
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font isBold="false"/>
+					</textElement>
+					<text><![CDATA[Tax]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="135" width="401" height="13"/>
+					<box topPadding="1" leftPadding="1">
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font isBold="false"/>
+					</textElement>
+					<text><![CDATA[Others]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement x="401" y="109" width="100" height="13"/>
+					<box topPadding="1" leftPadding="1">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{vendor_1_freight}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="401" y="122" width="100" height="13"/>
+					<box topPadding="1" leftPadding="1">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{vendor_1_tax}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="401" y="135" width="100" height="13"/>
+					<box topPadding="1" leftPadding="1">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{vendor_1_others}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="501" y="109" width="100" height="13"/>
+					<box topPadding="1" leftPadding="1">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{vendor_2_freight}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="501" y="122" width="100" height="13"/>
+					<box topPadding="1" leftPadding="1">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{vendor_2_tax}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="501" y="135" width="100" height="13"/>
+					<box topPadding="1" leftPadding="1">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{vendor_2_others}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="601" y="109" width="100" height="13"/>
+					<box topPadding="1" leftPadding="1">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{vendor_3_freight}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="601" y="122" width="100" height="13"/>
+					<box topPadding="1" leftPadding="1">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{vendor_3_tax}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="601" y="135" width="100" height="13"/>
+					<box topPadding="1" leftPadding="1">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{vendor_3_others}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="701" y="109" width="100" height="13"/>
+					<box topPadding="1" leftPadding="1">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{vendor_4_freight}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="701" y="122" width="100" height="13"/>
+					<box topPadding="1" leftPadding="1">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{vendor_4_tax}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="701" y="135" width="100" height="13"/>
+					<box topPadding="1" leftPadding="1">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$F{vendor_4_others}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="63" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="802" height="17"/>
+				<box topPadding="2" leftPadding="2"/>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{company}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="17" width="802" height="15"/>
+				<box topPadding="2" leftPadding="2"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{comp_street}+$F{comp_street2}+$F{comp_city}+$F{comp_state}+' - '+$F{comp_zip}+'.']]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="219" y="32" width="354" height="16"/>
+				<box topPadding="2"/>
+				<textElement textAlignment="Center">
+					<font isBold="true" isUnderline="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["QUOTATION COMPARISON REPORT"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="559" y="48" width="243" height="15"/>
+				<box topPadding="2" leftPadding="2" rightPadding="2"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["RFQ Date : " + $F{rfq_date}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="48" width="330" height="15"/>
+				<box topPadding="2" leftPadding="2"/>
+				<textElement/>
+				<textFieldExpression><![CDATA["Comparison Date : " + $F{comparision_date}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="17" splitType="Stretch">
+			<staticText>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="0" y="0" width="401" height="17"/>
+				<box topPadding="2" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Vendors:]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="401" y="0" width="100" height="17"/>
+				<box topPadding="3">
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{vendor_1_name}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="501" y="0" width="100" height="17"/>
+				<box topPadding="3">
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{vendor_2_name}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="601" y="0" width="100" height="17"/>
+				<box topPadding="3">
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{vendor_3_name}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="701" y="0" width="100" height="17"/>
+				<box topPadding="3">
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{vendor_4_name}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<pageFooter>
+		<band height="15" splitType="Stretch">
+			<textField evaluationTime="Report">
+				<reportElement x="371" y="0" width="412" height="15"/>
+				<box topPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="291" y="0" width="80" height="15"/>
+				<box topPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="291" height="15"/>
+				<box topPadding="1" leftPadding="1">
+					<topPen lineWidth="0.25"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{printed_by} +" " + " / "+" " + $F{new_date}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>
