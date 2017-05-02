@@ -179,6 +179,7 @@ class kg_depmaster(osv.osv):
 		return True
 	
 	def entry_draft(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
 		if rec.state == 'approved':
 			self.write(cr, uid, ids, {'state': 'draft'})
 		return True
