@@ -93,6 +93,7 @@
 											<field name="end_value"/>
 											<field name="type"/>
 											<field name="incentive_value"/>
+											<field name="base_amt"/>
 											<field name="leave_consider"/>
 										</tree>
 									</field>
@@ -111,6 +112,7 @@
 								<group string="Validations">
 									<field name="bonus_applicable" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
 									<field name="special_incentive" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
+									<field name="spl_inc" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
 									<field name="ot_status" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>
 									<field name="pt_status" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>						
 									<field name="driver_bata_app" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}"/>						

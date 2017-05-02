@@ -97,7 +97,8 @@ class kg_contract(osv.osv):
 		'esi_acc_no': fields.char('ESI NO', size=17),
 		'job_id': fields.many2one('hr.job', 'Designation', readonly=True),
 		'bonus_applicable': fields.boolean('Bonus Applicable'),
-		'special_incentive': fields.boolean('Special Incentive'),
+		'special_incentive': fields.boolean('Incentive'),
+		'spl_inc': fields.boolean('Special Incentive'),
 		'emp_categ_id': fields.many2one('kg.employee.category', 'Employee Category'),
 		'rotation':fields.boolean('Rotation Shift Applicable'),
 		'driver_bata_app':fields.boolean('Driver Bata Applicable'),
@@ -499,6 +500,7 @@ class ch_con_special_incentive_policy(osv.osv):
 		'end_value': fields.float('Ending Value(In Crores)'),	
 		'type': fields.selection([('fixed','Fixed'),('per_cr_fixed','Per Crore - Fixed'),('percentage','Percentage')],'Type'),	
 		'incentive_value': fields.float('Value'),	
+		'base_amt': fields.float('Base Amount'),	
 		'leave_consider': fields.integer('Leave Consideration(days)'),	
 		}	
 		

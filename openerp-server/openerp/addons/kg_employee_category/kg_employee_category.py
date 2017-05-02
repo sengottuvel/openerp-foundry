@@ -292,6 +292,7 @@ class ch_special_incentive_policy(osv.osv):
 		'end_value': fields.float('Ending Value(In Crores)'),	
 		'type': fields.selection([('fixed','Fixed'),('per_cr_fixed','Per Crore - Fixed'),('percentage','Percentage')],'Type'),	
 		'incentive_value': fields.float('Value'),	
+		'base_amt': fields.float('Base Amount'),	
 		'leave_consider': fields.integer('Leave Consideration(days)'),	
 		}	
 		
