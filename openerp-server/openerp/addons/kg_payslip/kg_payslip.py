@@ -654,8 +654,8 @@ class kg_payslip(osv.osv):
 													'slip_id':slip_rec.id,
 												},context = None)
 					else:
-					raise osv.except_osv(_('Warning'),
-						_('Turn Over is not fixed for last month for Incentive Calculation !!'))
+						raise osv.except_osv(_('Warning'),
+							_('Turn Over is not fixed for last month for Incentive Calculation !!'))
 						######### Incentive Calculation ###########
 						######### Special Incentive Calculation ###########
 				if con_ids_1.spl_inc:
