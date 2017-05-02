@@ -623,17 +623,21 @@ class kg_payslip(osv.osv):
 									print "incentive_idsincentive_idsincentive_idsincentive_idsincentive_ids",incentive_ids
 									print "turn_over_amtturn_over_amtturn_over_amt",turn_over_amt
 									inc_ids = self.pool.get('ch.incentive.policy').browse(cr,uid,incentive_ids)
+									if emp_categ_rec.id == 15:
+										calculation_days = working_days
+									else:
+										calculation_days = calulation_days
 									if turn_over_amt >= inc_ids.start_value and turn_over_amt <= inc_ids.end_value:
 										if inc_ids.type == 'per_lhk_fixed':
 											print "*********inc_ids.incentive_value************",inc_ids.incentive_value
-											print "*********working_days************",calulation_days
+											print "*********working_days************",calculation_days
 											print "*********worked_days************",worked_days
-											incent_amt = ((turn_over_amt*inc_ids.incentive_value)/calulation_days)*salary_days
+											incent_amt = ((turn_over_amt*inc_ids.incentive_value)/calculation_days)*salary_days
 										elif inc_ids.type == 'percentage':
 											turn_over_per = (turn_over_amt*inc_ids.incentive_value)/100
-											incent_amt = ((turn_over_per)/calulation_days)*salary_days
+											incent_amt = ((turn_over_per)/calculation_days)*salary_days
 										else:
-											incent_amt = ((inc_ids.incentive_value)/calulation_days)*salary_days
+											incent_amt = ((inc_ids.incentive_value)/calculation_days)*salary_days
 										self.pool.get('hr.payslip.line').create(cr,uid,
 												{
 													'name':'Incentive',
