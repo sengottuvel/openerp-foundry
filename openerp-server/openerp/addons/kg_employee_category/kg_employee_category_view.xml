@@ -52,7 +52,6 @@
 									<field name="end_value" required="1"/>
 									<field name="type" required="1"/>
 									<field name="incentive_value" required="1"/>
-									<field name="base_amt" required="1"/>
 									<field name="leave_consider" required="1"/>
 								</tree>					
 							</field>
@@ -64,6 +63,7 @@
 									<field name="end_value" required="1"/>
 									<field name="type" required="1"/>
 									<field name="incentive_value" required="1"/>
+									<field name="base_amt" required="1"/>
 									<field name="leave_consider" required="1"/>
 								</tree>					
 							</field>
