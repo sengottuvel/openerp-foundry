@@ -263,7 +263,9 @@ class kg_employee(osv.osv):
 							'start_value':j.start_value,
 							'end_value':j.end_value,
 							'type':j.type,
+							'criteria':j.criteria,
 							'incentive_value':j.incentive_value,
+							'base_amt':j.base_amt,
 							'leave_consider':j.leave_consider,
 
 							}
