@@ -1187,11 +1187,20 @@ class kg_payslip(osv.osv):
 				
 				serc_othr_sal_comp = self.pool.get('ch.other.salary.comp').search(cr,uid,[('slip_id','=',slip_rec.id)])
 				if serc_othr_sal_comp:
+					serc_incs_othr_sal_ids = self.pool.get('ch.other.salary.comp').search(cr,uid,[('slip_id','=',slip_rec.id),('category_id','=',7)])
+					if serc_incs_othr_sal_ids:
+						max_inc_othr_id = max(serc_incs_othr_sal_ids)
+						print "------------------------------max id----------------------------------",max(serc_incs_othr_sal_ids)
+						othr_sal_rec_inc = self.pool.get('ch.other.salary.comp').browse(cr,uid,max_inc_othr_id)
+						print "------------------------------max incentive----------------------------------",othr_sal_rec_inc.amount
+						sp_othr_inc_amt = othr_sal_rec_inc.amount
+					else:
+						sp_othr_inc_amt = 0.00
 					net_othr_sal_amt = 0.00	
 					for payslip_othr_sal in serc_othr_sal_comp:
 						payslip_othr_line_rec = self.pool.get('ch.other.salary.comp').browse(cr,uid,payslip_othr_sal)
 						net_othr_sal_amt += payslip_othr_line_rec.amount
-					self.write(cr, uid, slip_rec.id, {'othr_sal_amt': net_othr_sal_amt})
+					self.write(cr, uid, slip_rec.id, {'othr_sal_amt': net_othr_sal_amt+sp_othr_inc_amt})
 				
 				#### Creation of the other salary component amount in the parent ####
 				

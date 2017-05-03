@@ -252,7 +252,7 @@
                                     <field name="code"/>
                                     <field name="category_id"/>
                                     <field name="sequence" invisible="1"/>
-                                    <field name="quantity"/>
+                                    <field name="quantity" invisible="1"/>
                                     <field name="rate" invisible="1"/>
                                     <field name="amount"/>
                                     <field name="total" invisible="1"/>
@@ -263,7 +263,7 @@
                                         <field name="code"/>
                                         <field name="category_id"/>
                                         <field name="sequence"/>
-                                        <field name="quantity"/>
+                                        <field name="quantity" invisible="1"/>
                                         <field name="rate"/>
                                         <field name="amount"/>
                                         <field name="total"/>
