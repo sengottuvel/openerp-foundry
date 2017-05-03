@@ -1185,7 +1185,7 @@ class kg_payslip(osv.osv):
 				
 				#### Creation of the other salary component amount in the parent ####
 				
-				serc_othr_sal_comp = self.pool.get('ch.other.salary.comp').search(cr,uid,[('slip_id','=',slip_rec.id)])
+				serc_othr_sal_comp = self.pool.get('ch.other.salary.comp').search(cr,uid,[('slip_id','=',slip_rec.id),('category_id','!=',7)])
 				if serc_othr_sal_comp:
 					serc_incs_othr_sal_ids = self.pool.get('ch.other.salary.comp').search(cr,uid,[('slip_id','=',slip_rec.id),('category_id','=',7)])
 					if serc_incs_othr_sal_ids:
