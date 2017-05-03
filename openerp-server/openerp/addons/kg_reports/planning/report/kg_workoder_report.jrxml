@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Workorder_print" pageWidth="605" pageHeight="842" columnWidth="565" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
-	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="558"/>
+	<property name="ireport.y" value="750"/>
 	<subDataset name="Spare dataset">
 		<parameter name="header_id" class="java.lang.Integer"/>
 		<parameter name="category" class="java.lang.String"/>
@@ -280,7 +280,8 @@ else
 case when pump_crm.setting_height > 0 then pump_crm.setting_height::text else '-' end as setting_height,
 case when pump_crm.solid_concen > 0 then pump_crm.solid_concen::text else '-' end as solid_concen,
 case when pump_crm.solid_concen_vol > 0 then pump_crm.solid_concen_vol::text else '-' end as solid_concen_vol,
-case when pump_crm.viscosity_crt_factor > 0 then pump_crm.viscosity_crt_factor::text else '-' end as viscosity_crt_factor
+case when pump_crm.viscosity_crt_factor > 0 then pump_crm.viscosity_crt_factor::text else '-' end as viscosity_crt_factor,
+pump_crm.pre_suppliy_ref as supply_ref
 
 
 
@@ -362,6 +363,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 	<field name="solid_concen" class="java.lang.String"/>
 	<field name="solid_concen_vol" class="java.lang.String"/>
 	<field name="viscosity_crt_factor" class="java.lang.String"/>
+	<field name="supply_ref" class="java.lang.String"/>
 	<group name="WO Group" isStartNewPage="true">
 		<groupExpression><![CDATA[$F{id}]]></groupExpression>
 		<groupHeader>
@@ -1414,7 +1416,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
 						<font size="10"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{wo_name}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{supply_ref}]]></textFieldExpression>
 				</textField>
 				<staticText>
 					<reportElement mode="Transparent" x="399" y="137" width="54" height="18" isRemoveLineWhenBlank="true"/>
@@ -1616,7 +1618,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 					<textElement verticalAlignment="Middle">
 						<font size="10" isBold="true"/>
 					</textElement>
-					<textFieldExpression><![CDATA["Material:"]]></textFieldExpression>
+					<textFieldExpression><![CDATA["Material: "]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
 					<reportElement mode="Transparent" x="307" y="0" width="258" height="15"/>
