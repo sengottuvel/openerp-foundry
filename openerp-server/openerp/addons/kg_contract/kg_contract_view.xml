@@ -89,12 +89,12 @@
 								<group colspan="5" string="Special Incentive">
 									<field name = "line_id_inc" nolabel="1" attrs="{'readonly':[('state','in',['approved','cancel','reject'])]}">
 										<tree string="Special Incentive" editable="bottom">
-											<field name="start_value"/>
-											<field name="end_value"/>
-											<field name="type"/>
-											<field name="incentive_value"/>
-											<field name="base_amt"/>
-											<field name="leave_consider"/>
+											<field name="start_value" required='1'/>
+											<field name="end_value" required='1'/>
+											<field name="type" required='1'/>
+											<field name="incentive_value" required='1'/>
+											<field name="base_amt" required='1'/>
+											<field name="leave_consider" required='1'/>
 										</tree>
 									</field>
 								</group>
