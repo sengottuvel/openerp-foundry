@@ -770,7 +770,7 @@ class kg_payslip(osv.osv):
 										else:
 											self.pool.get('ch.other.salary.comp').create(cr,uid,
 													{
-														'name':get_spl_inc_rc.name + '( ' + con_incs.start_value + 'to' + con_incs.end_value + ')' ,
+														'name':get_spl_inc_rc.name + '( ' + str(con_incs.start_value) + 'to' + str(con_incs.end_value) + ')' ,
 														'code':get_spl_inc_rc.code,
 														'category_id':7,
 														'quantity':1,
