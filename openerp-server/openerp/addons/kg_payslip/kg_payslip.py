@@ -718,7 +718,8 @@ class kg_payslip(osv.osv):
 									else:
 										final_amt = (con_incs.base_amt/calulation_days)* wor_days
 									if con_incs.criteria == 'non-hierarchy':
-										final_amt=(((con_incs.base_amt /100)*con_incs.incentive_value)/calulation_days)* wor_days
+										turn_ovr_per = laks*100
+										final_amt=(((con_incs.base_amt /100)*turn_ovr_per)/calulation_days)* wor_days
 									print "------------------------------spcial componenet ssssssssssssssssssss--------------------------------------------------",get_spl_inc
 								if get_spl_inc:
 									get_spl_inc_rc = self.pool.get('hr.salary.rule').browse(cr,uid,get_spl_inc[0])

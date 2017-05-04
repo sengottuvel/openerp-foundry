@@ -93,7 +93,7 @@
 											<field name="end_value" required='1'/>
 											<field name="type" required='1'/>
 											<field name="criteria" required='1'/>
-											<field name="incentive_value" required='1'/>
+											<field name="incentive_value" attrs="{'required':[('criteria','=','non-hierarchy')]}"/>
 											<field name="base_amt" required='1'/>
 											<field name="leave_consider" required='1'/>
 										</tree>
