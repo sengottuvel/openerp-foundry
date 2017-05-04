@@ -737,6 +737,7 @@ class kg_payslip(osv.osv):
 													'employee_id':emp_id,
 													'contract_id':con_ids[0],
 													'slip_id':slip_rec.id,
+													'spc_criteria':con_incs.criteria,
 												},context = None)
 											
 										else:
@@ -752,6 +753,7 @@ class kg_payslip(osv.osv):
 													'employee_id':emp_id,
 													'contract_id':con_ids[0],
 													'slip_id':slip_rec.id,
+													'spc_criteria':con_incs.criteria,
 												},context = None)
 											
 									else:
@@ -768,6 +770,7 @@ class kg_payslip(osv.osv):
 														'employee_id':emp_id,
 														'contract_id':con_ids[0],
 														'slip_id':slip_rec.id,
+														'spc_criteria':con_incs.criteria,
 													},context = None)
 											
 										else:
@@ -783,6 +786,7 @@ class kg_payslip(osv.osv):
 														'employee_id':emp_id,
 														'contract_id':con_ids[0],
 														'slip_id':slip_rec.id,
+														'spc_criteria':con_incs.criteria,
 													},context = None)
 										
 					else:
@@ -1144,13 +1148,26 @@ class kg_payslip(osv.osv):
 				
 				#### Creation of the total allowance and updating the total allowance field in parent ####
 				
-				serc_chil_ids = self.pool.get('hr.payslip.line').search(cr,uid,[('slip_id','=',slip_rec.id),('category_id','in',(2,8,7))])
-				print "serc_chil_idsserc_chil_idsserc_chil_idsserc_chil_idsserc_chil_ids",serc_chil_ids
+				serc_chil_ids = self.pool.get('hr.payslip.line').search(cr,uid,[('slip_id','=',slip_rec.id),('category_id','in',(2,8,7)),('code','!=','SPI')])
+				serc_incs_ids = self.pool.get('hr.payslip.line').search(cr,uid,[('slip_id','=',slip_rec.id),('code','=','SPI'),('spc_criteria','=','hierarchy')])
+				nonhr_incs_ids = self.pool.get('hr.payslip.line').search(cr,uid,[('slip_id','=',slip_rec.id),('code','=','SPI'),('spc_criteria','=','non-hierarchy')])
+				if serc_incs_ids:
+					max_inc_id = max(serc_incs_ids)
+					sal_rec_inc = self.pool.get('hr.payslip.line').browse(cr,uid,max_inc_id)
+					sp_inc_amt = sal_rec_inc.amount
+				else:
+					sp_inc_amt = 0.00
+				if nonhr_incs_ids:
+					nnhr_inc_amt = 0.00
+					for nonhr_inc_ids in nonhr_incs_ids:
+						nnhr_rec_inc = self.pool.get('hr.payslip.line').browse(cr,uid,nonhr_inc_ids)
+						nnhr_inc_amt += nnhr_rec_inc.amount
+					sp_inc_amt = sp_inc_amt + nnhr_inc_amt
 				tot_allow_amt = 0.00
 				for payslip_line_ids_all in serc_chil_ids:
 					payslip_line_rec = self.pool.get('hr.payslip.line').browse(cr,uid,payslip_line_ids_all)
 					tot_allow_amt += payslip_line_rec.amount
-				self.write(cr, uid, slip_rec.id, {'tot_allowance': tot_allow_amt})
+				self.write(cr, uid, slip_rec.id, {'tot_allowance': tot_allow_amt + sp_inc_amt})
 				
 				#### Creation of the total allowance and updating the total allowance field in parent ####
 				
@@ -1179,13 +1196,27 @@ class kg_payslip(osv.osv):
 				
 				#### Creation of the other salary component amount in the parent ####
 				
-				serc_othr_sal_comp = self.pool.get('ch.other.salary.comp').search(cr,uid,[('slip_id','=',slip_rec.id)])
+				serc_othr_sal_comp = self.pool.get('ch.other.salary.comp').search(cr,uid,[('slip_id','=',slip_rec.id),('code','!=','SPI')])
 				if serc_othr_sal_comp:
+					serc_incs_othr_sal_ids = self.pool.get('ch.other.salary.comp').search(cr,uid,[('slip_id','=',slip_rec.id),('code','=','SPI'),('spc_criteria','=','hierarchy')])
+					nonhr_incs_othr_sal_ids = self.pool.get('ch.other.salary.comp').search(cr,uid,[('slip_id','=',slip_rec.id),('code','=','SPI'),('spc_criteria','=','non-hierarchy')])
+					if serc_incs_othr_sal_ids:
+						max_inc_othr_id = max(serc_incs_othr_sal_ids)
+						othr_sal_rec_inc = self.pool.get('ch.other.salary.comp').browse(cr,uid,max_inc_othr_id)
+						sp_othr_inc_amt = othr_sal_rec_inc.amount
+					else:
+						sp_othr_inc_amt = 0.00
+					if nonhr_incs_othr_sal_ids:
+						nnhr_amt = 0.00
+						for nonhr_ids in nonhr_incs_othr_sal_ids:
+							nnhr_othr_sal_rec_inc = self.pool.get('ch.other.salary.comp').browse(cr,uid,nonhr_ids)
+							nnhr_amt += nnhr_othr_sal_rec_inc.amount
+						sp_othr_inc_amt = sp_othr_inc_amt + nnhr_amt
 					net_othr_sal_amt = 0.00	
 					for payslip_othr_sal in serc_othr_sal_comp:
 						payslip_othr_line_rec = self.pool.get('ch.other.salary.comp').browse(cr,uid,payslip_othr_sal)
 						net_othr_sal_amt += payslip_othr_line_rec.amount
-					self.write(cr, uid, slip_rec.id, {'othr_sal_amt': net_othr_sal_amt})
+					self.write(cr, uid, slip_rec.id, {'othr_sal_amt': net_othr_sal_amt + sp_othr_inc_amt})
 				
 				#### Creation of the other salary component amount in the parent ####
 				
@@ -1503,6 +1534,7 @@ class ch_salary_slip(osv.osv):
 	_columns = {
 	
 	'cum_ded_id': fields.many2one('kg.advance.deduction','Cumulative Deduction', readonly=True),
+	'spc_criteria':fields.char('Special Incentive Criteria'),
 		
 	}
 ch_salary_slip()
@@ -1534,6 +1566,7 @@ class ch_other_salary_comp(osv.osv):
 	'total': fields.function(_calculate_total, method=True, type='float', string='Total', digits_compute=dp.get_precision('Payroll'),store=True ),
 	'cum_ded_id': fields.many2one('kg.advance.deduction','Cumulative Deduction', readonly=True),
 	'category_id':fields.many2one('hr.salary.rule.category', 'Category', required=False),
+	'spc_criteria':fields.char('Special Incentive Criteria'),
 		
 	}
 	
