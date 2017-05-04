@@ -724,71 +724,33 @@ class kg_payslip(osv.osv):
 								if get_spl_inc:
 									get_spl_inc_rc = self.pool.get('hr.salary.rule').browse(cr,uid,get_spl_inc[0])
 									if get_spl_inc_rc.appears_on_payslip is True:
-										if spec_amount_1 != 0.00:
-											self.pool.get('hr.payslip.line').create(cr,uid,
-												{
-													'name':get_spl_inc_rc.name + ' ( ' + str(con_incs.start_value) + ' to ' + str(con_incs.end_value) + ' )' + ' Crs',
-													'code':get_spl_inc_rc.code,
-													'category_id':7,
-													'quantity':1,
-													#~ 'amount':((spec_amount_1+spec_rec.salary_amt)/calulation_days)* wor_days,
-													'amount':final_amt,
-													'salary_rule_id':1,
-													'employee_id':emp_id,
-													'contract_id':con_ids[0],
-													'slip_id':slip_rec.id,
-													'spc_criteria':con_incs.criteria,
-												},context = None)
-											
-										else:
-											self.pool.get('hr.payslip.line').create(cr,uid,
-												{
-													'name':get_spl_inc_rc.name + ' ( ' + str(con_incs.start_value) + ' to ' + str(con_incs.end_value) + ' )' + ' Crs',
-													'code':get_spl_inc_rc.code,
-													'category_id':7,
-													'quantity':1,
-													#~ 'amount':(spec_rec.salary_amt/calulation_days)* wor_days,
-													'amount':final_amt,
-													'salary_rule_id':1,
-													'employee_id':emp_id,
-													'contract_id':con_ids[0],
-													'slip_id':slip_rec.id,
-													'spc_criteria':con_incs.criteria,
-												},context = None)
-											
+										self.pool.get('hr.payslip.line').create(cr,uid,
+											{
+												'name':get_spl_inc_rc.name + ' ( ' + str(con_incs.start_value) + ' to ' + str(con_incs.end_value) + ' )' + ' Crs',
+												'code':get_spl_inc_rc.code,
+												'category_id':7,
+												'quantity':1,
+												'amount':final_amt,
+												'salary_rule_id':1,
+												'employee_id':emp_id,
+												'contract_id':con_ids[0],
+												'slip_id':slip_rec.id,
+												'spc_criteria':con_incs.criteria,
+											},context = None)
 									else:
-										if spec_amount_1 != 0.00:
-											self.pool.get('ch.other.salary.comp').create(cr,uid,
-													{
-														'name':get_spl_inc_rc.name + ' ( ' + str(con_incs.start_value) + ' to ' + str(con_incs.end_value) + ' )' + ' Crs',
-														'code':get_spl_inc_rc.code,
-														'category_id':7,
-														'quantity':1,
-														#~ 'amount':((spec_amount_1+spec_rec.salary_amt)/calulation_days)* wor_days,
-														'amount':final_amt,
-														'salary_rule_id':1,
-														'employee_id':emp_id,
-														'contract_id':con_ids[0],
-														'slip_id':slip_rec.id,
-														'spc_criteria':con_incs.criteria,
-													},context = None)
-											
-										else:
-											self.pool.get('ch.other.salary.comp').create(cr,uid,
-													{
-														'name':get_spl_inc_rc.name + '( ' + str(con_incs.start_value) + 'to' + str(con_incs.end_value) + ')' + ' Crs',
-														'code':get_spl_inc_rc.code,
-														'category_id':7,
-														'quantity':1,
-														#~ 'amount':(spec_rec.salary_amt/calulation_days)* wor_days,
-														'amount':final_amt,
-														'salary_rule_id':1,
-														'employee_id':emp_id,
-														'contract_id':con_ids[0],
-														'slip_id':slip_rec.id,
-														'spc_criteria':con_incs.criteria,
-													},context = None)
-										
+										self.pool.get('ch.other.salary.comp').create(cr,uid,
+												{
+													'name':get_spl_inc_rc.name + ' ( ' + str(con_incs.start_value) + ' to ' + str(con_incs.end_value) + ' )' + ' Crs',
+													'code':get_spl_inc_rc.code,
+													'category_id':7,
+													'quantity':1,
+													'amount':final_amt,
+													'salary_rule_id':1,
+													'employee_id':emp_id,
+													'contract_id':con_ids[0],
+													'slip_id':slip_rec.id,
+													'spc_criteria':con_incs.criteria,
+												},context = None)	
 					else:
 						raise osv.except_osv(_('Warning'),
 							_('Turn Over is not fixed for last month for Special Incentive Calculation !!'))				
