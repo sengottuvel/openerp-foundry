@@ -772,5 +772,69 @@
 		
 		<!-- Packing Invoice End here -->
 		
+		<!-- Drawing indent -->
+		
+		<record id="t_ms_drawing_indent" model="ir.model.access">
+			<field name="model_id" ref="kg_drawing_indent.model_kg_drawing_indent"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Drawing Indent</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_ch_drawing_indent_line" model="ir.model.access">
+			<field name="model_id" ref="kg_drawing_indent.model_ch_drawing_indent_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Drawing Indent Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<!-- Drawing Issue -->
+		
+		<record id="t_ms_drawing_issue" model="ir.model.access">
+			<field name="model_id" ref="kg_drawing_issue.model_kg_drawing_issue"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Drawing Issue</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_ch_drawing_issue_line" model="ir.model.access">
+			<field name="model_id" ref="kg_drawing_issue.model_ch_drawing_issue_line"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Drawing Issue Line</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_kg_spare_assembly_inward" model="ir.model.access">
+			<field name="model_id" ref="kg_assembly.model_kg_spare_assembly"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Spare Assembly Inward</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
+		<record id="t_ms_ch_spare_assembly_details" model="ir.model.access">
+			<field name="model_id" ref="kg_assembly.model_ch_spare_assembly_details"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">Spare Assembly details</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'Planning Admin')]"/>
+		</record>
+		
     </data>
 </openerp>

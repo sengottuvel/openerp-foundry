@@ -130,6 +130,7 @@
 			ref('kg_ms_operations.tam_ms_operation12'),
 			ref('kg_assembly.tpm_assembly_process'),
 			ref('kg_assembly.tam_assembly_inward'),
+			ref('kg_assembly.tam_spare_assembly_inward'),
 			ref('kg_assembly.tam_pump_data'),
 			ref('kg_assembly.wam_assembly_inward'),
 			ref('kg_assembly.tam_performance_testing'),
@@ -178,6 +179,12 @@
 			ref('kg_sale_invoice.menu_sale_parent'),
 			ref('kg_sale_invoice.kg_draft_bill_menu'),
 			ref('kg_sale_invoice.kg_draft_bill_menus'),
+			
+			
+			ref('kg_drawing_process.mpm_drawing'),
+            ref('kg_drawing_indent.mpm_inhouse_drawing_process'),
+            ref('kg_drawing_indent.tam_drawing_indent'),
+            ref('kg_drawing_issue.tam_drawing_issue'),
 		   
 			
 			
