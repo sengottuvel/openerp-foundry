@@ -15,8 +15,9 @@
 					<button name="userwise_summary_list_scheduler_mail" string="UserWise Summary" type="object" class="oe_highlight"/>							
 					<button name="opening_stock_entry_creation" string="Opening Stock" type="object" class="oe_highlight"/>
 					<button name="opening_stock_mail_creation" string="Open Stock Mail" type="object" class="oe_highlight"/>
+					<button name="auto_purchase_indent" string="Auto Indent" type="object" class="oe_highlight"/>
 				</header>			
-								   
+					
 				</form>
 			</field> 
 		</record>
