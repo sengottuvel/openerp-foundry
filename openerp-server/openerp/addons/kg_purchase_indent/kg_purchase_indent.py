@@ -280,24 +280,25 @@ class kg_purchase_indent(osv.osv):
 	def _check_line(self, cr, uid, ids, context=None):
 		tot = 0.0
 		for pi in self.browse(cr,uid,ids):
-			if not pi.kg_depindent_lines:
-				if not pi.line_ids:
-					raise osv.except_osv(_('Warning!'),
-						_('You can not save this Purchase Indent with out Item Details!'))
-				for line in pi.line_ids:
-					tot += line.product_qty
-				if tot <= 0.0:
-					raise osv.except_osv(_('Warning!'),
-						_('You can not save this Purchase Indent with Zero Qty!'))
-			elif pi.kg_depindent_lines and pi.state != 'draft':
-				if not pi.line_ids:
-					raise osv.except_osv(_('Warning!'),
-						_('You can not save this Purchase Indent with out Item Details!'))
-				for line in pi.line_ids:
-					tot += line.product_qty
-				if tot <= 0.0:			
-					raise osv.except_osv(_('Warning!'),
-						_('You can not save this Purchase Indent with Zero Qty!'))
+			if pi.entry_mode == 'manual':
+				if not pi.kg_depindent_lines:
+					if not pi.line_ids:
+						raise osv.except_osv(_('Warning!'),
+							_('You can not save this Purchase Indent with out Item Details!'))
+					for line in pi.line_ids:
+						tot += line.product_qty
+					if tot <= 0.0:
+						raise osv.except_osv(_('Warning!'),
+							_('You can not save this Purchase Indent with Zero Qty!'))
+				elif pi.kg_depindent_lines and pi.state != 'draft':
+					if not pi.line_ids:
+						raise osv.except_osv(_('Warning!'),
+							_('You can not save this Purchase Indent with out Item Details!'))
+					for line in pi.line_ids:
+						tot += line.product_qty
+					if tot <= 0.0:			
+						raise osv.except_osv(_('Warning!'),
+							_('You can not save this Purchase Indent with Zero Qty!'))
 			return True
 			
 	_constraints = [
