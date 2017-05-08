@@ -39,7 +39,7 @@ class kg_part_qap(osv.osv):
 	
 		## Basic Info
 				
-		'name': fields.char('DB Reference No.', size=12,select=True,readonly=True),
+		'name': fields.char('DB Reference No.'),
 		'entry_date': fields.date('Date',required=True),		
 		'note': fields.text('Notes'),
 		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('cancel','Cancelled')],'Status', readonly=True),
@@ -79,8 +79,10 @@ class kg_part_qap(osv.osv):
 		'item_code': fields.char('Item Code', readonly=True,required=True),
 		'item_name': fields.char('Item Name', readonly=True,required=True),
 		'moc_id': fields.many2one('kg.moc.master','MOC', readonly=True,required=True),
-		'assembly_id': fields.many2one('kg.assembly.inward','Assembly', readonly=True,required=True),
-		'assembly_foundry_id': fields.many2one('ch.assembly.bom.details','Assembly Foundry', readonly=True,required=True),
+		'assembly_id': fields.many2one('kg.assembly.inward','Assembly', readonly=True),
+		'assembly_foundry_id': fields.many2one('ch.assembly.bom.details','Assembly Foundry', readonly=True),
+		'spare_assembly_id': fields.many2one('kg.spare.assembly','Spare Assembly', readonly=True),
+		'spare_assembly_line_id': fields.many2one('ch.spare.assembly.details','Spare Assembly line', readonly=True),
 		'oth_spec': fields.related('assembly_foundry_id','add_spec', type='text', string='WO Remarks', store=True, readonly=True),
 	
 		
@@ -100,6 +102,7 @@ class kg_part_qap(osv.osv):
 		'flag_db_customer_specific': fields.boolean('Customer Specific'),
 		'db_state': fields.selection([('pending','Pending'),('completed','Completed')],'DB State'),
 		'db_flag': fields.boolean('DB Staus in Pattern'),
+		
 		
 		## Hydro Static Test ##
 		
@@ -838,12 +841,12 @@ class kg_part_qap(osv.osv):
 				and db_actual_unbal_weight BETWEEN db_min_weight AND db_max_weight and db_actual_unbal_weight <= db_max_weight ''',[rec.id])
 		actual_weight = cr.fetchone()
 		print "actual_weight",actual_weight
-		if actual_weight == None:
-			raise osv.except_osv(_('Warning !!'),
-				_('Actual weight should be with in Min and Max weight. !!'))
-		if rec.db_actual_unbal_weight <= 0:
-			raise osv.except_osv(_('Warning !!'),
-				_('Actual weight should be greater than zero. !!'))
+		#~ if actual_weight == None:
+			#~ raise osv.except_osv(_('Warning !!'),
+				#~ _('Actual weight should be with in Min and Max weight. !!'))
+		#~ if rec.db_actual_unbal_weight <= 0:
+			#~ raise osv.except_osv(_('Warning !!'),
+				#~ _('Actual weight should be greater than zero. !!'))
 		if rec.db_state == 'pending':
 			if rec.db_result == 'reject':
 				### Rejection Process Function Calling ###

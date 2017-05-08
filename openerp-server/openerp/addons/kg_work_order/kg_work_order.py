@@ -13,6 +13,7 @@ dt_time = time.strftime('%m/%d/%Y %H:%M:%S')
 ORDER_PRIORITY = [
    ('normal','Normal'),
    ('emergency','Emergency')
+   
 ]
 
 ORDER_CATEGORY = [
@@ -78,7 +79,7 @@ class kg_work_order(osv.osv):
 		'order_priority': fields.selection(ORDER_PRIORITY,'Priority'),
 		'delivery_date': fields.date('Delivery Date',required=True),
 		'order_value': fields.function(_get_order_value, string='WO Value', method=True, store=True, type='float'),
-		'order_category': fields.selection(ORDER_CATEGORY,'Purpose'),
+		'order_category': fields.selection(ORDER_CATEGORY,'Category'),
 		'partner_id': fields.many2one('res.partner','Customer'),
 		'progress_state': fields.selection([
 		('mould_com','Moulding Completed'),
@@ -344,9 +345,260 @@ class kg_work_order(osv.osv):
 				
 				for item in entry.line_ids:
 					
+					### Drawing Indent Creation ###
+					indent_foundry = 1
+					indent_ms = 1
+					indent_bot = 1
+
+					### For Foundry Items ###
 					
+					
+					
+					cr.execute(""" select foundry.id as order_bom_id,foundry.position_id,pattern.name as item_code,
+							foundry.pattern_name as item_name,'foun' as type
+							from ch_order_bom_details foundry
+							left join kg_pattern_master pattern on pattern.id = foundry.pattern_id
+							where foundry.header_id = %s  and foundry.flag_applicable = 't'
+							and foundry.flag_pattern_check = 't' 
+							
+							union
+							
+							select foundry.id as order_bom_id,foundry.position_id,pattern.name as item_code,
+							foundry.pattern_name as item_name,'foun' as type
+							from ch_order_bom_details foundry
+							left join kg_pattern_master pattern on pattern.id = foundry.pattern_id
+							where foundry.header_id = %s  and foundry.flag_applicable = 't'
+							and foundry.flag_pattern_check = 'f' 
+							and foundry.position_id not in 
+							(select position_id from ch_drawing_indent_line)
+							
+							union
+							
+							
+							select foundry_acc.id as order_bom_id,foundry_acc.position_id,pattern.name as item_code,
+							foundry_acc.pattern_name as item_name,'foun_acc' as type
+							from ch_wo_accessories_foundry foundry_acc
+							left join kg_pattern_master pattern on pattern.id = foundry_acc.pattern_id
+							where foundry_acc.header_id = %s  and foundry_acc.is_applicable = 't'
+							and foundry_acc.position_id not in 
+							(select position_id from ch_drawing_indent_line)
+
+						 """%(item.id,item.id,item.id))
+					draw_foundry_items = cr.dictfetchall();
+					print "draw_foundry_items",draw_foundry_items
+					
+					for foundry_indent_item in draw_foundry_items:
+						
+						if indent_foundry == 1:
+							
+							dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP15')])
+					
+							location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
+							
+							seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.drawing.indent')])
+							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry.entry_date))
+							seq_name = cr.fetchone();
+
+							draw_indent_obj = self.pool.get('kg.drawing.indent')
+							
+							draw_indent_vals = {
+								'name': seq_name[0],
+								'entry_mode': 'auto',
+								'division_id': entry.division_id.id,
+								'dep_id': dep_id[0],
+								'order_line_id': item.id,
+								'pump_model_type': item.pump_model_type,
+								'state': 'confirmed'
+							}
+							
+							foundry_indent_id = draw_indent_obj.create(cr,uid,draw_indent_vals)
+							
+							indent_foundry = indent_foundry + 1
+							
+						if foundry_indent_id:
+							
+							if foundry_indent_item['type'] == 'foun':
+								order_foundry_id = foundry_indent_item['order_bom_id']
+								order_foundry_acc_id = False
+							if foundry_indent_item['type'] == 'foun_acc':
+								order_foundry_id = False
+								order_foundry_acc_id = foundry_indent_item['order_bom_id']
+							
+							draw_indent_line_obj = self.pool.get('ch.drawing.indent.line')
+							
+							print "order_foundry_id",order_foundry_id
+							print "order_foundry_acc_id",order_foundry_acc_id
+							
+							foundry_indent_line_vals = {
+							
+								'header_id': foundry_indent_id,
+								'order_foundry_id': order_foundry_id,
+								'order_foundry_acc_id': order_foundry_acc_id,
+								'position_id': foundry_indent_item['position_id'],
+								'item_code': foundry_indent_item['item_code'],
+								'item_name': foundry_indent_item['item_name'],
+							}
+							
+							draw_indent_line_obj.create(cr,uid,foundry_indent_line_vals)
+							
+							
+					### For MS Items ###
+					
+					cr.execute(""" select ms.id as order_bom_id,ms.position_id,ms_master.code as item_code,
+							ms.name as item_name,'ms' as type
+							from ch_order_machineshop_details ms
+							left join kg_machine_shop ms_master on ms_master.id = ms.ms_id
+							where ms.header_id = %s  and ms.flag_applicable = 't'
+							and ms.position_id not in 
+							(select position_id from ch_drawing_indent_line)
+							
+							union
+							
+							select ms_acc.id as order_bom_id,ms_acc.position_id,ms_acc_master.code as item_code,
+							ms_acc.name as item_name,'ms_acc' as type
+							from ch_wo_accessories_ms ms_acc
+							left join kg_machine_shop ms_acc_master on ms_acc_master.id = ms_acc.ms_id
+							where ms_acc.header_id = %s  and ms_acc.is_applicable = 't'
+							and ms_acc.position_id not in 
+							(select position_id from ch_drawing_indent_line)
+
+						 """%(item.id,item.id))
+					draw_ms_items = cr.dictfetchall();
+					print "draw_ms_items",draw_ms_items
+					
+					for ms_indent_item in draw_ms_items:
+						
+						if indent_ms == 1:
+							
+							dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP2')])
+					
+							location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
+							
+							seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.drawing.indent')])
+							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry.entry_date))
+							seq_name = cr.fetchone();
+
+							draw_indent_obj = self.pool.get('kg.drawing.indent')
+							
+							draw_indent_vals = {
+								'name': seq_name[0],
+								'entry_mode': 'auto',
+								'division_id': entry.division_id.id,
+								'dep_id': dep_id[0],
+								'order_line_id': item.id,
+								'pump_model_type': item.pump_model_type,
+								'state': 'confirmed'
+							}
+							
+							ms_indent_id = draw_indent_obj.create(cr,uid,draw_indent_vals)
+							
+							indent_ms = indent_ms + 1
+							
+						if ms_indent_id:
+							
+							if ms_indent_item['type'] == 'ms':
+								order_ms_id = ms_indent_item['order_bom_id']
+								order_ms_acc_id = False
+							if ms_indent_item['type'] == 'ms_acc':
+								order_ms_id = False
+								order_ms_acc_id = ms_indent_item['order_bom_id']
+							
+							draw_indent_line_obj = self.pool.get('ch.drawing.indent.line')
+							
+							ms_indent_line_vals = {
+							
+								'header_id': ms_indent_id,
+								'order_ms_id': order_ms_id,
+								'order_ms_acc_id': order_ms_acc_id,
+								'position_id': ms_indent_item['position_id'],
+								'item_code': ms_indent_item['item_code'],
+								'item_name': ms_indent_item['item_name'],
+							}
+							
+							draw_indent_line_obj.create(cr,uid,ms_indent_line_vals)
+							
+							
+					### For BOT Items ###
+					
+					cr.execute(""" select bot.id as order_bom_id,bot.position_id,bot_master.code as item_code,
+							bot.item_name as item_name,'bot' as type
+							from ch_order_bot_details bot
+							left join kg_machine_shop bot_master on bot_master.id = bot.bot_id
+							where bot.header_id = %s  and bot.flag_applicable = 't'
+							and bot.position_id not in 
+							(select position_id from ch_drawing_indent_line)
+														
+							union
+							
+							select bot_acc.id as order_bom_id,bot_acc.position_id,bot_acc_master.code as item_code,
+							bot_acc.item_name as item_name,'bot_acc' as type
+							from ch_wo_accessories_bot bot_acc
+							left join kg_machine_shop bot_acc_master on bot_acc_master.id = bot_acc.ms_id
+							where bot_acc.header_id = %s  and bot_acc.is_applicable = 't'
+							and bot_acc.position_id not in 
+							(select position_id from ch_drawing_indent_line)
+
+						 """%(item.id,item.id))
+					draw_bot_items = cr.dictfetchall();
+					print "draw_ms_items",draw_bot_items
+					
+					for bot_indent_item in draw_bot_items:
+						
+						if indent_bot == 1:
+							
+							dep_id = self.pool.get('kg.depmaster').search(cr, uid, [('name','=','DP3')])
+					
+							location = self.pool.get('kg.depmaster').browse(cr, uid, dep_id[0], context=context)
+							
+							seq_id = self.pool.get('ir.sequence').search(cr,uid,[('code','=','kg.drawing.indent')])
+							seq_rec = self.pool.get('ir.sequence').browse(cr,uid,seq_id[0])
+							cr.execute("""select generatesequenceno(%s,'%s','%s') """%(seq_id[0],seq_rec.code,entry.entry_date))
+							seq_name = cr.fetchone();
+
+							draw_indent_obj = self.pool.get('kg.drawing.indent')
+							
+							draw_indent_vals = {
+								'name': seq_name[0],
+								'entry_mode': 'auto',
+								'division_id': entry.division_id.id,
+								'dep_id': dep_id[0],
+								'order_line_id': item.id,
+								'pump_model_type': item.pump_model_type,
+								'state': 'confirmed'
+							}
+							
+							bot_indent_id = draw_indent_obj.create(cr,uid,draw_indent_vals)
+							
+							indent_bot = indent_bot + 1
+							
+						if bot_indent_id:
+							
+							if bot_indent_item['type'] == 'bot':
+								order_bot_id = bot_indent_item['order_bom_id']
+								order_bot_acc_id = False
+							if bot_indent_item['type'] == 'bot_acc':
+								order_bot_id = False
+								order_bot_acc_id = bot_indent_item['order_bom_id']
+							
+							draw_indent_line_obj = self.pool.get('ch.drawing.indent.line')
+							
+							bot_indent_line_vals = {
+							
+								'header_id': bot_indent_id,
+								'order_bot_id': order_bot_id,
+								'order_bot_acc_id': order_bot_acc_id,
+								'position_id': bot_indent_item['position_id'],
+								'item_code': bot_indent_item['item_code'],
+								'item_name': bot_indent_item['item_name'],
+							}
+							
+							draw_indent_line_obj.create(cr,uid,bot_indent_line_vals)
+
 					for foundry_item in item.line_ids:
 						
+					
 						### Trimming dia creation ###
 						if foundry_item.pattern_id.need_dynamic_balancing == True and foundry_item.flag_applicable == True:
 							trim_dia_obj = self.pool.get('kg.trimming.dia')
@@ -1163,8 +1415,8 @@ class ch_work_order_details(osv.osv):
 						
 						'bot_line_id': bom_bot_details['id'],
 						'bom_id': bom_bot_details['bom_id'],							
+						'position_id': bom_bot_details['position_id'],							
 						'bot_id': bom_bot_details['bot_id'],
-						'position_id': bom_bot_details['position_id'],
 						'qty': bom_bot_qty,
 						'flag_applicable' : applicable,
 						'flag_standard':flag_standard,
@@ -1190,6 +1442,12 @@ class ch_work_order_details(osv.osv):
 							limitation = 'upto_3000'
 						if setting_height >= 3000:
 							limitation = 'above_3000'
+							
+						### For Base Plate ###
+						if setting_height < 3000:
+							base_limitation = 'upto_2999'
+						if setting_height >= 3000:
+							base_limitation = 'above_3000'
 
 						cr.execute('''
 						
@@ -1366,13 +1624,39 @@ class ch_work_order_details(osv.osv):
 							( select vo_id from ch_vo_mapping
 							where rpm = %s and header_id = %s))
 							and active='t'
+							)
+							
+							union all
+							
+							-- Base Plate --
+									
+							select bom.id,
+							bom.header_id,
+							bom.pattern_id,
+							bom.pattern_name,
+							bom.qty, 
+							bom.pos_no,
+							bom.position_id,
+							pattern.pcs_weight, 
+							pattern.ci_weight,
+							pattern.nonferous_weight
+
+							from ch_bom_line as bom
+
+							LEFT JOIN kg_pattern_master pattern on pattern.id = bom.pattern_id
+
+							where bom.header_id = 
+							(
+							select id from kg_bom 
+							where id = (select partlist_id from ch_base_plate
+							where limitation = %s and header_id = (select id from kg_bom where pump_model_id = %s and active='t'))
+							and active='t'
 							) 
-							
-							
+
 							  ''',[limitation,shaft_sealing,rpm,pump_model_id,motor_power,rpm,pump_model_id,
 							  bush_bearing,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,delivery_pipe_size,
 							  setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,lubrication,setting_height,setting_height,
-							  rpm,pump_model_id,rpm,pump_model_id])
+							  rpm,pump_model_id,rpm,pump_model_id,base_limitation,pump_model_id])
 						vertical_foundry_details = cr.dictfetchall()
 						
 						if order_category in ('pump','spare') :
@@ -1429,7 +1713,8 @@ class ch_work_order_details(osv.osv):
 									'weight': wgt or 0.00,								  
 									'pos_no': vertical_foundry['pos_no'],
 									'position_id': vertical_foundry['position_id'],			  
-									'qty' : bom_qty,		   
+									'qty' : bom_qty,				   
+									'indent_qty' : bom_qty,				   
 									'schedule_qty' : bom_qty,				  
 									'production_qty' : 0,				   
 									'flag_applicable' : applicable,
@@ -1559,12 +1844,23 @@ class ch_work_order_details(osv.osv):
 									and active='t'
 									) 
 									
+									union all
+									-- Base Plate --
 									
+									select id,pos_no,position_id,ms_id,name,qty,header_id as bom_id
+									from ch_machineshop_details
+									where header_id = 
+									(
+									select id from kg_bom 
+									where id = (select partlist_id from ch_base_plate 
+									where limitation = %s and header_id = (select id from kg_bom where pump_model_id = %s and active='t') )
+									and active='t'
+									) 
 
 							  ''',[limitation,shaft_sealing,rpm,pump_model_id,motor_power,rpm,pump_model_id,
 							  bush_bearing,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,delivery_pipe_size,
 							  setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,lubrication,setting_height,setting_height,
-							  rpm,pump_model_id,rpm,pump_model_id])
+							  rpm,pump_model_id,rpm,pump_model_id,base_limitation,pump_model_id])
 						vertical_ms_details = cr.dictfetchall()
 						for vertical_ms_details in vertical_ms_details:
 							
@@ -1826,7 +2122,7 @@ class ch_work_order_details(osv.osv):
 								'ms_id': vertical_ms_details['ms_id'],
 								'name': vertical_ms_details['name'],
 								'qty': qty * vertical_ms_details['qty'],
-								'indent_qty':qty * vertical_ms_details['qty'],		 
+								'indent_qty': qty * vertical_ms_details['qty'],
 								'length': vertical_ms_qty,
 								'flag_applicable' : applicable,
 								'flag_standard':flag_standard,
@@ -1834,6 +2130,7 @@ class ch_work_order_details(osv.osv):
 								'order_category':	order_category,
 								'moc_id': moc_id,
 								'flag_dynamic_length': flag_dynamic_length
+								
 										  
 								})
 						
@@ -1945,12 +2242,26 @@ class ch_work_order_details(osv.osv):
 									and active='t'
 									) 
 									
+									union all
+									
+									-- Base Plate --
+									
+									select id,bot_id,position_id,qty,header_id as bom_id
+									from ch_bot_details
+									where header_id =
+									(
+									select id from kg_bom 
+									where id = (select partlist_id from ch_base_plate 
+									where limitation = %s and header_id = (select id from kg_bom where pump_model_id = %s and active='t') )
+									and active='t'
+									) 
+									
 									
 
 							  ''',[limitation,shaft_sealing,rpm,pump_model_id,motor_power,rpm,pump_model_id,
 							  bush_bearing,setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,delivery_pipe_size,
 							  setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,lubrication,setting_height,setting_height,
-							  rpm,pump_model_id,rpm,pump_model_id])
+							  rpm,pump_model_id,rpm,pump_model_id,base_limitation,pump_model_id])
 						vertical_bot_details = cr.dictfetchall()
 						
 						for vertical_bot_details in vertical_bot_details:
@@ -1983,7 +2294,7 @@ class ch_work_order_details(osv.osv):
 								'bot_line_id': vertical_bot_details['id'],
 								'bom_id': vertical_bot_details['bom_id'],							
 								'bot_id': vertical_bot_details['bot_id'],
-								'position_id': vertical_bot_details['position_id'] or False,
+								'position_id': vertical_bot_details['position_id'] or False,	
 								'qty': vertical_bot_qty,
 								'flag_applicable' : applicable,
 								'flag_standard':flag_standard,
@@ -2264,7 +2575,7 @@ class ch_order_machineshop_details(osv.osv):
 		'wo_prime_cost': fields.float('WO PC'),
 		'mar_prime_cost': fields.float('Marketing PC'),
 		'material_code': fields.char('Material Code'),
-		'flag_dynamic_length': fields.boolean('Dynamic Length'),
+		'flag_dynamic_length': fields.boolean('Dynamic Length'), 
 	
 	}  
 	
@@ -2322,7 +2633,6 @@ class ch_order_bot_details(osv.osv):
 		'mar_prime_cost': fields.float('Marketing PC'),
 		'material_code': fields.char('Material Code'),
 		
-		
 	
 	}
 	
@@ -2330,7 +2640,6 @@ class ch_order_bot_details(osv.osv):
 		
 		'entry_mode':'manual',
 		'flag_is_bearing': False,
-		
 		
 		
 	}

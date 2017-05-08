@@ -18,8 +18,9 @@
 							<field name="name" invisible="1" readonly="1"/>
 							<field name="entry_date" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
 							<field name="qap_plan_id" readonly="1"/>
-							<field name="pump_serial_no" required="1" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
-							<field name="time_taken" required="1" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+							<field name="pump_serial_no" 
+								attrs="{'readonly': [('state','not in',['waiting','re_process'])],'required': ['|',('order_category','!=','spare'),('flag_not_applicable','!=',True)]}"/>
+							<field name="time_taken" attrs="{'readonly': [('state','not in',['waiting','re_process'])],'required': [('flag_not_applicable','!=',True)]}"/>
 							<field name="remarks" string="Remarks" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
 						</group>											
 						<group>
@@ -27,38 +28,41 @@
 							<field name="order_line_id" string="WO No." readonly="1"/>
 							<field name="pump_model_id" readonly="1"/>
 							<field name="moc_construction_id" readonly="1"/>
+							<field name="flag_not_applicable" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}" />
 							<field name="state" style="width: 30%%" class="att_state_change"/>
 							<field name="entry_mode" invisible="1"/>
 							<field name="flag_data_bank" invisible="1"/>
+							<field name="order_category" invisible="1"/>
+							
 						</group>					
 					</group>
 					<group>
 						<group string="Bed Assembly">
-							<field name="bed_assembly_state" required="1" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+							<field name="bed_assembly_state" attrs="{'readonly': [('state','not in',['waiting','re_process'])],'required': [('flag_not_applicable','!=',True)]}"/>
 							<field name="bed_assembly_date" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
 							<field name="bed_assembly_shift_id" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
 							<field name="bed_assembly_done_by" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
 						</group>											
 						<group string="Rotating Assembly">
-							<field name="rotate_assembly_state" required="1" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+							<field name="rotate_assembly_state"  attrs="{'readonly': [('state','not in',['waiting','re_process'])],'required': [('flag_not_applicable','!=',True)]}"/>
 							<field name="rotate_assembly_date" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
 							<field name="rotate_assembly_shift_id" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
 							<field name="rotate_assembly_done_by" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
 						</group>					
 						<group string="Run Out test for Impellar">
-							<field name="runout_test_state" required="1" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+							<field name="runout_test_state" attrs="{'readonly': [('state','not in',['waiting','re_process'])],'required': [('flag_not_applicable','!=',True)]}"/>
 							<field name="runout_test_date" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
 							<field name="runout_test_shift_id" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
 							<field name="runout_test_done_by" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
 						</group>					
 						<group string="Mech.Seal Assembly">
-							<field name="mech_assembly_state" required="1" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+							<field name="mech_assembly_state"  attrs="{'readonly': [('state','not in',['waiting','re_process'])],'required': [('flag_not_applicable','!=',True)]}"/>
 							<field name="mech_assembly_date" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
 							<field name="mech_assembly_shift_id" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
 							<field name="mech_assembly_done_by" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
 						</group>					
 						<group string="Full Assembly">
-							<field name="full_assembly_state" required="1" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
+							<field name="full_assembly_state" attrs="{'readonly': [('state','not in',['waiting','re_process'])],'required': [('flag_not_applicable','!=',True)]}"/>
 							<field name="full_assembly_date" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
 							<field name="full_assembly_shift_id" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
 							<field name="full_assembly_done_by" attrs="{'readonly': [('state','not in',['waiting','re_process'])]}"/>
@@ -789,6 +793,169 @@
 	</record>
 	
 	<!-- Sequence Number Setting Ends Here -->
+	
+	
+	
+	
+	<!-- Form Spare Assembly Inward View Start -->
+
+		<record id="t_form_v_spare_assembly_inward" model="ir.ui.view">
+			<field name="name">Spare Assembly Inward Form</field>
+			<field name="model">kg.spare.assembly</field>
+			<field name="arch" type="xml">
+				<form string="Spare Assembly Inward" version="7.0">
+					<header>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>						
+						<button name="entry_approve" type="object" string="Approve" states="confirmed" class="oe_highlight"/>						
+					</header>
+					<group>
+						<group>
+							<field name="name" attrs="{'readonly': [('state','not in',['draft'])]}" required="1"/>		
+							<field name="order_line_id" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"
+								on_change="onchange_order_line_id(order_line_id)"/>					
+							<field name="order_category" readonly="1" required="1"/>	
+							<field name="qap_plan_id" readonly="1" required="1"/>		
+									
+						</group>											
+						<group>
+							<field name="entry_date" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="pump_model_id" readonly="1" required="1"/>
+							<field name="moc_construction_id" readonly="1" required="1"/>	
+							<field name="delivery_date" readonly="1" required="1"/>											
+										
+							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
+						</group>				
+					</group>
+					<group>
+						<button name="update_list" type="object" string="List" states="draft" class="oe_highlight"/>	
+					</group>				
+					<notebook>
+						<page string="Component details">
+							<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}">
+								<tree string = "Spare Assembly details" editable="top" create="false">
+									<field name="item_code" readonly="1"/>															
+									<field name="item_name" readonly="1"/>
+									<field name="position_id" on_change="onchange_item(position_id)" readonly="1"/>
+									<field name="moc_id" readonly="1"/>												
+									<field name="qty" required="1" readonly="1"/>															
+									<field name="add_spec" widget="char" readonly="1"/>
+									<field name="remarks" widget="char"/>
+								</tree>
+							</field>
+						</page>										
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
+								<group>
+									<field name="user_id"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_spare_assembly_inward" model="ir.ui.view">
+			<field name="name">Spare Assembly Inward Tree</field>
+			<field name="model">kg.spare.assembly</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';black:state == 'confirmed';gray:state == 'cancel'" 
+						toolbar="True" string="Spare Assembly Inward Tree">					
+					<field name="name"/>
+					<field name="entry_date"/>					
+					<field name="order_line_id"/>					
+					<field name="qap_plan_id"/>							
+					<field name="state"/>					
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Search View Start -->
+
+		<record id="t_search_v_spare_assembly_inward" model="ir.ui.view">
+            <field name="name">Spare Assembly Inward Search</field>
+            <field name="model">kg.spare.assembly</field>
+            <field name="arch" type="xml">
+                <search string="Spare Assembly Inward Search">
+					
+					<field name="name" string="No."  filter_domain="[('name','ilike',self)]" />									
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>					
+					<filter icon="terp-check" name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>				
+				
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'name'}"/>							
+						<filter string="State" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>						
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+		
+		<!-- Menu Action Start -->
+		
+		
+		<record id="tma_spare_assembly_inward" model="ir.actions.act_window">
+			<field name="name">Spare Assembly Inward</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.spare.assembly</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="search_view_id" ref="t_search_v_spare_assembly_inward"/>
+			
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_spare_assembly_inward_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_spare_assembly_inward"/>
+            <field name="act_window_id" ref="tma_spare_assembly_inward"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_spare_assembly_inward_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_spare_assembly_inward"/>
+            <field name="act_window_id" ref="tma_spare_assembly_inward"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start -->
+		
+        <record id="audit_spare_assembly_inward" model="audittrail.rule">
+            <field name="name">Audit Subcontract Spare Assembly Inward</field>
+            <field name="object_id" eval="ref('kg_assembly.model_kg_spare_assembly')"/>       
+            <field name="state">subscribed</field>              
+        </record>      
+        
+        
+    <!-- Audit Log Xml Data End-->	
+    
+	
+	
+	
         
 	<!-- Menu Item Start -->
 	
@@ -801,6 +968,8 @@
 		<menuitem action="tma_pump_data" id="tam_pump_data" parent="tpm_assembly_process" sequence="3" />
 		
 		<menuitem action="tma_performance_testing" id="tam_performance_testing" parent="tpm_assembly_process" sequence="4" />
+		
+		<menuitem action="tma_spare_assembly_inward" id="tam_spare_assembly_inward" parent="tpm_assembly_process" sequence="5" />
 		
 	
 	<!-- Menu Item End -->

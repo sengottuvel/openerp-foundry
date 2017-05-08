@@ -71,14 +71,16 @@ class kg_pump_qap(osv.osv):
 		'order_no': fields.related('order_line_id','order_no', type='char', string='WO No.', store=True, readonly=True,required=True),
 		'order_category': fields.related('order_line_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Order Category', store=True, readonly=True,required=True),
 		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model',readonly=True),
-		'pump_serial_no': fields.char('Pump Serial No.',required=True,readonly=True),
+		'pump_serial_no': fields.char('Pump Serial No.',readonly=True),
 		'moc_construction_id': fields.many2one('kg.moc.construction','MOC Construction', readonly=True,required=True),
 		'test_state': fields.selection([('di','Dimensional Inspection'),('hs','Hydro Static Test'),('pt','Performance Testing')],'Test State'),
 		'assembly_id': fields.many2one('kg.assembly.inward','Assembly'),
+		'spare_assembly_id': fields.many2one('kg.spare.assembly','Assembly reference No.'),
+		
 		
 		## Dimensional Inspection ##
 		
-		'di_date': fields.date('Date',required=True),
+		'di_date': fields.date('Date'),
 		'di_shift_id': fields.many2one('kg.shift.master','Shift'),
 		'di_operator': fields.char('Operator'),
 		'di_verified_by': fields.char('Verified By'),
@@ -90,11 +92,12 @@ class kg_pump_qap(osv.osv):
 		'di_state': fields.selection([('pending','Pending'),('completed','Completed')],'DI State'),
 		'overall_dim': fields.selection([('pump_ass','Pump Assembly'),('casing','Casing'),
 				('casing_cover','Casing cover'),('impeller','Impeller'),('shaft','Shaft'),('sleeve','Sleeve')],'Over all dimension'),
+		'flag_di_not_applicable': fields.boolean('Not applicable'),
 
 		
 		## Hydro Static Test (After Assembly) ##
 		
-		'hs_date': fields.date('Date',required=True),	
+		'hs_date': fields.date('Date'),	
 		'hs_pressure': fields.float('Hydro static test pressure' ),
 		'hs_testing_time':fields.selection([('15','15'),('30','30'),('45','45'),('60','60'),('75','75'),('90','90'),('105','105'),('120','120')],
 					'Testing time (Mins)'),
@@ -111,11 +114,12 @@ class kg_pump_qap(osv.osv):
 		'flag_hs_customer_specific': fields.boolean('Customer Specific'),
 		'hs_state': fields.selection([('pending','Pending'),('completed','Completed')],'HS State'),
 		'flag_sent_for_inspection': fields.boolean('Sent for Inspection'),
+		'flag_hs_not_applicable': fields.boolean('Not applicable'),
 
 		
 		## Performance Testing ##
 		
-		'pt_date': fields.date('Date',required=True),
+		'pt_date': fields.date('Date'),
 		'pt_shift_id': fields.many2one('kg.shift.master','Shift'),
 		'pt_operator': fields.char('Operator'),
 		'pt_verified_by': fields.char('Verified By'),
@@ -127,6 +131,7 @@ class kg_pump_qap(osv.osv):
 		'mechanical_attach': fields.binary('Mechanical'),
 		'pt_state': fields.selection([('pending','Pending'),('completed','Completed')],'PT State'),
 		'pt_remarks': fields.text('Remarks'),
+		'flag_pt_not_applicable': fields.boolean('Not applicable'),
 
 	
 				
@@ -148,7 +153,10 @@ class kg_pump_qap(osv.osv):
 		'flag_email': False,		
 		'flag_spl_approve': False,
 		'overall_dim': 'pump_ass',
-		'flag_sent_for_inspection': False
+		'flag_sent_for_inspection': False,
+		'flag_di_not_applicable': False,
+		'flag_hs_not_applicable': False,
+		'flag_pt_not_applicable': False,
 		
 	}
 	
@@ -170,9 +178,9 @@ class kg_pump_qap(osv.osv):
 			and actual_weight BETWEEN min_weight AND max_weight and actual_weight <= max_weight ''',[rec.id])
 		actual_weight = cr.fetchone()
 		print "actual_weight",actual_weight
-		if actual_weight == None:
-			raise osv.except_osv(_('Warning !!'),
-				_('Actual weight should be with in Min and Max weight. !!'))
+		#~ if actual_weight == None:
+			#~ raise osv.except_osv(_('Warning !!'),
+				#~ _('Actual weight should be with in Min and Max weight. !!'))
 		if rec.di_state == 'pending':
 			### Hrdro static pressure from marketing Enquiry ###
 			if rec.order_line_id.pump_offer_line_id > 0:
@@ -191,10 +199,10 @@ class kg_pump_qap(osv.osv):
 	def hs_update(self,cr,uid,ids,context=None):
 		rec = self.browse(cr,uid,ids[0])
 		### Actual weight checking ###
-		if rec.hs_actual_unbal_weight <= 0:
+		if rec.hs_actual_unbal_weight <= 0 and rec.flag_hs_not_applicable != True:
 			raise osv.except_osv(_('Warning !!'),
 				_('Actual weight should be greater than zero. !!'))	
-		if rec.hs_pressure <= 0:
+		if rec.hs_pressure <= 0 and rec.flag_hs_not_applicable != True:
 			raise osv.except_osv(_('Warning !!'),
 				_('Test Pressure should be greater than zero. !!'))	
 		### Sequence Number Generation  ###

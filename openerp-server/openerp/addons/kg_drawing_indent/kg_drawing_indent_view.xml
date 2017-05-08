@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>	
+	
+	<!-- Form Drawing Indent View Start -->
+
+		<record id="t_form_v_drawing_indent" model="ir.ui.view">
+			<field name="name">Drawing Indent Form</field>
+			<field name="model">kg.drawing.indent</field>
+			<field name="arch" type="xml">
+				<form string="Drawing Indent" version="7.0">
+					<header>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>						
+					</header>
+					<group>
+						<group>
+							<field name="name" required="0" readonly="1"/>
+							<field name="division_id" required="1" readonly="1"/>
+							<field name="order_line_id" on_change="onchange_order_line_id(order_line_id)" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>							
+							<field name="note" attrs="{'readonly': [('state','not in',['draft'])]}"/>																				
+						</group>											
+						<group>
+							<field name="entry_date" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="dep_id" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="pump_model_type" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>														
+							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
+						</group>					
+					</group>					
+					<notebook>
+						<page string="Indent details">
+							<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}">
+								<tree string = "Drawing Indent details" editable="top">
+									<field name="position_id" required="1" on_change="onchange_position_id(position_id)"/>
+									<field name="item_code" required="1" readonly="1"/>															
+									<field name="item_name" required="1" readonly="1"/>															
+									<field name="commit_date" />															
+									<field name="remarks" widget="char"/>
+								</tree>
+							</field>
+						</page>					
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
+								<group>
+									<field name="user_id"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_drawing_indent" model="ir.ui.view">
+			<field name="name">Drawing Indent Tree</field>
+			<field name="model">kg.drawing.indent</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';black:state == 'confirmed';gray:state == 'cancel'" 
+						toolbar="True" string="Drawing Indent Tree">					
+					<field name="name"/>
+					<field name="entry_date"/>					
+					<field name="dep_id"/>					
+					<field name="order_line_id"/>	
+					<field name="state"/>					
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Child Tree View Start -->
+		
+		<record id="t_tree_v_drawing_indent_line" model="ir.ui.view">
+			<field name="name">Drawing Indent line Tree</field>
+			<field name="model">ch.drawing.indent.line</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree toolbar="True" string="Drawing Indent Tree">					
+					<field name="order_line_id"/>
+					<field name="pump_model_type"/>
+					<field name="position_id"/>
+					<field name="item_code"/>															
+					<field name="item_name"/>															
+					<field name="commit_date" />															
+					<field name="remarks"/>				
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Search View Start -->
+
+		<record id="t_search_v_drawing_indent" model="ir.ui.view">
+            <field name="name">Drawing Indent Search</field>
+            <field name="model">kg.drawing.indent</field>
+            <field name="arch" type="xml">
+                <search string="Drawing Indent Search">
+					
+					<field name="name" string="Indent No."  filter_domain="[('name','ilike',self)]" />
+					<field name="dep_id" string="Department"  filter_domain="[('dep_id','ilike',self)]" />					
+					<field name="order_line_id" string="WO No."  filter_domain="[('order_line_id','ilike',self)]" />					
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>					
+					<filter icon="terp-check" name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>				
+				
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="Indent No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'name'}"/>						
+						<filter string="Department" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'dep_id'}"/>
+						<filter string="WO No." icon="terp-gtk-select-all" domain="[]" context="{'order_line_id':'order_line_id'}"/>
+						<filter string="State" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>						
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+		
+		<!-- Menu Action Start -->
+		
+		
+		<record id="tma_drawing_indent" model="ir.actions.act_window">
+			<field name="name">Drawing Indent</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.drawing.indent</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="search_view_id" ref="t_search_v_drawing_indent"/>
+			
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_drawing_indent_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_drawing_indent"/>
+            <field name="act_window_id" ref="tma_drawing_indent"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_drawing_indent_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_drawing_indent"/>
+            <field name="act_window_id" ref="tma_drawing_indent"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start -->
+		
+        <record id="audit_drawing_indent" model="audittrail.rule">
+            <field name="name">Audit Drawing Indent</field>
+            <field name="object_id" eval="ref('kg_drawing_indent.model_kg_drawing_indent')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+         <record id="audit_drawing_indent_line" model="audittrail.rule">
+            <field name="name">Audit Subcontract Drawing Indent Line</field>
+            <field name="object_id" eval="ref('kg_drawing_indent.model_ch_drawing_indent_line')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+   
+        
+    <!-- Audit Log Xml Data End-->	
+    
+    
+    
+	<!-- Parent Master Menu -->
+		 
+		<!-- Drawing Masters Menu -->
+		<menuitem name="Inhouse Process" id="mpm_inhouse_drawing_process" parent = "kg_drawing_process.mpm_drawing" sequence="0"/>
+		
+	<!-- Menu Item Starts Here -->
+	
+	<menuitem action="tma_drawing_indent" id="tam_drawing_indent" parent="mpm_inhouse_drawing_process" sequence="0"/>
+	
+	
+	
+	</data>
+</openerp>

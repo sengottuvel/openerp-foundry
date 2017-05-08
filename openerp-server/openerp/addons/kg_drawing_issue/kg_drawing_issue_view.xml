@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>	
+	
+	<!-- Form Drawing Issue View Start -->
+
+		<record id="t_form_v_drawing_issue" model="ir.ui.view">
+			<field name="name">Drawing Issue Form</field>
+			<field name="model">kg.drawing.issue</field>
+			<field name="arch" type="xml">
+				<form string="Drawing Issue" version="7.0">
+					<header>
+						<button name="entry_confirm" type="object" string="Confirm" states="draft" class="oe_highlight"/>						
+					</header>
+					<group>
+						<group>
+							<field name="name" required="0"/>
+							<field name="issue_mode" invisible="1"/>
+							<field name="flag_issue" invisible="1"/>
+							<field name="note" attrs="{'readonly': [('state','not in',['draft'])]}"/>																				
+						</group>											
+						<group>
+							<field name="entry_date" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="dep_id" required="1" attrs="{'readonly': [('state','not in',['draft'])]}"/>
+							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>
+						</group>					
+					</group>					
+					<notebook>
+						<page string="Issue details" attrs="{'invisible': [('issue_mode','!=','direct'),('flag_issue','!=',True)]}">
+							<field colspan="4" name="line_ids" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}"
+								>
+								<tree string = "Drawing Issue details" editable="top">
+									<field name="order_line_id" required="1" readonly="1"/>
+									<field name="pump_model_type" required="1" readonly="1"/>
+									<field name="position_id" required="1" readonly="1"/>
+									<field name="item_code" required="1" readonly="1"/>															
+									<field name="item_name" required="1" readonly="1"/>															
+									<field name="drawing_no" required="1"/>											
+									<field name="qty" required="1"/>															
+									<field name="remarks" widget="char"/>
+									<field name="drawing_copy" filename="filename"/>
+									<field name="filename" invisible="1"/>
+								</tree>
+							</field>
+						</page>
+						<page string="Select Indent Items" attrs="{'invisible': [('issue_mode','=','direct')]}">
+							<field name="indent_line_ids" attrs="{'readonly': [('state','in',['confirmed'])]}">
+								<tree string = "Indent Items" create="false">
+									<field name="order_line_id"/>
+									<field name="pump_model_type"/>
+									<field name="position_id"/>
+									<field name="item_code" />															
+									<field name="item_name"/>															
+									<field name="commit_date"/>															
+								</tree>
+							</field>
+							<button name="update_line_items" type='object' string="Proceed" attrs="{'invisible': [('state','in',['confirmed'])]}"/>
+						</page>				
+						<page string="Entry Info">
+							<group>
+								<field name="company_id"/>
+							</group>
+							<group>
+								<field name="active"/>
+							</group>
+							<group>
+								<group>
+									<field name="user_id"/>
+									<field name="update_user_id"/>
+								</group>
+								<group>
+									<field name="crt_date"/>
+									<field name="update_date"/>
+								</group>
+							</group>
+						</page>
+					</notebook>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+		
+	
+	<!-- Tree View Start -->
+		
+		<record id="t_tree_v_drawing_issue" model="ir.ui.view">
+			<field name="name">Drawing Issue Tree</field>
+			<field name="model">kg.drawing.issue</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';black:state == 'confirmed';gray:state == 'cancel'" 
+						toolbar="True" string="Drawing Issue Tree">					
+					<field name="name"/>
+					<field name="entry_date"/>					
+					<field name="dep_id"/>					
+					<field name="state"/>					
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Search View Start -->
+
+		<record id="t_search_v_drawing_issue" model="ir.ui.view">
+            <field name="name">Drawing Issue Search</field>
+            <field name="model">kg.drawing.issue</field>
+            <field name="arch" type="xml">
+                <search string="Drawing Issue Search">
+					
+					<field name="name" string="Issue No."  filter_domain="[('name','ilike',self)]" />
+					<field name="dep_id" string="Department"  filter_domain="[('dep_id','ilike',self)]" />					
+					
+					<filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+					<filter icon="terp-check" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>					
+					<filter icon="terp-check" name="cancel" string="Cancelled" domain="[('state','=','cancel')]"/>				
+				
+					<separator/>
+                    <group expand="0" string="Group By...">
+						<filter string="Issue No." icon="terp-gtk-select-all" domain="[]" context="{'group_by':'name'}"/>						
+						<filter string="Department" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'dep_id'}"/>
+						
+						<filter string="State" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'state'}"/>						
+					</group>
+                </search>
+			</field>
+		</record>
+		
+	<!-- Search View End -->		
+			
+		
+		<!-- Menu Action Start -->
+		
+		
+		<record id="tma_drawing_issue" model="ir.actions.act_window">
+			<field name="name">Drawing Issue</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.drawing.issue</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="search_view_id" ref="t_search_v_drawing_issue"/>
+			
+		</record>
+		
+		 <record model="ir.actions.act_window.view" id="tma_drawing_issue_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="t_tree_v_drawing_issue"/>
+            <field name="act_window_id" ref="tma_drawing_issue"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="tma_drawing_issue_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="t_form_v_drawing_issue"/>
+            <field name="act_window_id" ref="tma_drawing_issue"/>
+        </record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- Audit Log Xml Data Start -->
+		
+        <record id="audit_drawing_issue" model="audittrail.rule">
+            <field name="name">Audit Drawing Issue</field>
+            <field name="object_id" eval="ref('kg_drawing_issue.model_kg_drawing_issue')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+        
+         <record id="audit_drawing_issue_line" model="audittrail.rule">
+            <field name="name">Audit Subcontract Drawing issue Line</field>
+            <field name="object_id" eval="ref('kg_drawing_issue.model_ch_drawing_issue_line')"/>       
+            <field name="state">subscribed</field>              
+        </record>
+   
+        
+    <!-- Audit Log Xml Data End-->	
+    
+    
+    
+
+	<!-- Menu Item Starts Here -->
+	
+	<menuitem action="tma_drawing_issue" id="tam_drawing_issue" parent="kg_drawing_indent.mpm_inhouse_drawing_process" sequence="1"/>
+	
+	
+	
+	</data>
+</openerp>

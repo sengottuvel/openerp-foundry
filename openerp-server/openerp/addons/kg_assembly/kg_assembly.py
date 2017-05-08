@@ -44,7 +44,7 @@ class kg_assembly_inward(osv.osv):
 	
 		### Header Details ####
 		'name': fields.char('Inward No.', size=128,select=True),
-		'entry_date': fields.date('Inward Date',required=True),
+		'entry_date': fields.date('Inward Date'),
 		'note': fields.text('Notes'),
 		'remarks': fields.text('Remarks'),
 		'cancel_remark': fields.text('Cancel Remarks'),
@@ -74,7 +74,7 @@ class kg_assembly_inward(osv.osv):
 		'line_ids_a': fields.one2many('ch.assembly.machineshop.details', 'header_id', "Machine Shop Details"),
 		'line_ids_b': fields.one2many('ch.assembly.bot.details', 'header_id', "BOT Details"),
 		
-		'qap_plan_id': fields.many2one('kg.qap.plan', 'QAP Standard',readonly=True,required=True),
+		'qap_plan_id': fields.many2one('kg.qap.plan', 'QAP Standard',readonly=True),
 		'pump_serial_no': fields.char('Pump Serial No.'),
 		'time_taken': fields.float('Time Taken'),
 		
@@ -106,6 +106,7 @@ class kg_assembly_inward(osv.osv):
 		'rfi_date': fields.date('RFI Date'),
 		'partner_id': fields.many2one('res.partner','Customer'),
 		'flag_data_bank': fields.boolean('Is Data WO'),
+		'flag_not_applicable': fields.boolean('Not applicable'),
 		
 		
 		### Entry Info ####
@@ -142,6 +143,7 @@ class kg_assembly_inward(osv.osv):
 		'division_id':_get_default_division,
 		'entry_mode': 'manual',
 		'rfi_date' : lambda * a: time.strftime('%Y-%m-%d'),
+		'flag_not_applicable' : False
 	
 	}
 	
@@ -1097,6 +1099,352 @@ class ch_test_bot_details(osv.osv):
 	
 
 ch_test_bot_details()
+
+
+class kg_spare_assembly(osv.osv):
+
+	_name = "kg.spare.assembly"
+	_description = "Spare Assembly"
+	_order = "entry_date desc"		
+		
+	_columns = {
+
+		
+		## Basic Info
+		'name': fields.char('Assembly reference No.', size=128,select=True),
+		'entry_date': fields.date('Date',required=True),		
+		'note': fields.text('Notes'),
+		'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('approve','Approved'),('cancel','Cancelled')],'Status', readonly=True),
+		'entry_mode': fields.selection([('auto','Auto'),('manual','Manual')],'Entry Mode', readonly=True),
+		'flag_sms': fields.boolean('SMS Notification'),
+		'flag_email': fields.boolean('Email Notification'),
+		'flag_spl_approve': fields.boolean('Special Approval'),
+		
+		## Entry Info
+		
+		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),	
+		'active': fields.boolean('Active'),
+		'crt_date': fields.datetime('Created Date',readonly=True),
+		'user_id': fields.many2one('res.users', 'Created By', readonly=True),		
+		'confirm_date': fields.datetime('Confirmed Date', readonly=True),
+		'confirm_user_id': fields.many2one('res.users', 'Confirmed By', readonly=True),				
+		'approve_date': fields.datetime('Approved Date', readonly=True),
+		'approve_user_id': fields.many2one('res.users', 'Approved By', readonly=True),				
+		'cancel_date': fields.datetime('Cancelled Date', readonly=True),
+		'cancel_user_id': fields.many2one('res.users', 'Cancelled By', readonly=True),
+		'update_date': fields.datetime('Last Updated Date', readonly=True),
+		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),	
+		
+		## Module Requirement Info
+		'order_line_id': fields.many2one('ch.work.order.details','WO. No.',required=True,domain="[('order_category','=','spare')]"),
+		'delivery_date': fields.date('Delivery date'),
+		'qap_plan_id': fields.many2one('kg.qap.plan', 'QAP Standard',required=True),
+		'moc_construction_id':fields.many2one('kg.moc.construction','MOC Construction Code',domain="[('active','=','t')]"),
+		'pump_model_id': fields.many2one('kg.pumpmodel.master','Pump Model', required=True,domain="[('active','=','t')]"),		
+		'order_category': fields.related('order_line_id','order_category', type='selection', selection=ORDER_CATEGORY, string='Category', store=True, readonly=True),
+		
+		## Child Tables Declaration	
+			
+		'line_ids': fields.one2many('ch.spare.assembly.details','header_id','Spare Assembly details'),  	
+		
+		
+	}
+	
+	_defaults = {
+	
+		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_spare_assembly', context=c),
+		'entry_date' : lambda * a: time.strftime('%Y-%m-%d'),		
+		'user_id': lambda obj, cr, uid, context: uid,
+		'crt_date':lambda * a: time.strftime('%Y-%m-%d %H:%M:%S'),
+		'active': True,		
+		'state': 'draft',		
+		'entry_mode': 'manual',
+			
+	}
+	
+	def onchange_order_line_id(self, cr, uid, ids, order_line_id):
+		value = {}
+		if order_line_id:
+			order_line_rec = self.pool.get('ch.work.order.details').browse(cr, uid, order_line_id)
+			
+			value = {	'pump_model_id':order_line_rec.pump_model_id.id,
+						'order_category':order_line_rec.order_category,  
+						'moc_construction_id':order_line_rec.moc_construction_id.id,  
+						'qap_plan_id':order_line_rec.qap_plan_id.id,  
+						'delivery_date':order_line_rec.delivery_date,  
+					}
+		return {'value': value }
+		
+	def update_list(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
+		
+		### Checking bot items completed for that WO ##
+		
+		cr.execute(""" select id from kg_ms_stores where ms_type = 'bot_item'
+
+			and order_line_id = %s and state = 'in_store' and accept_state = 'pending' """%(entry.order_line_id.id))
+		bot_item = cr.fetchone()
+		print "bot_itembot_item",bot_item
+		if bot_item != None:
+			raise osv.except_osv(_('Warning!'),
+						_('BOT item Issue is pending to receive !!'))
+						
+		else:
+			### Load finished Items ###
+			cr.execute(""" delete from ch_spare_assembly_details where header_id = %s """%(ids[0]))
+			
+			cr.execute(""" select id,ms_type,position_id,moc_id,item_code,item_name,qty,oth_spec from kg_ms_stores where
+				order_line_id = %s and state = 'in_store' and accept_state = 'received'
+				order by ms_type """%(entry.order_line_id.id))
+			finished_items = cr.dictfetchall()
+			for item in finished_items:
+				
+				spare_ass_vals = {
+					'header_id': entry.id,
+					'ms_type': item['ms_type'],
+					'ms_store_id': item['id'],
+					'position_id': item['position_id'] or False,
+					'moc_id': item['moc_id'],
+					'item_code':item['item_code'],
+					'item_name':item['item_name'],				
+					'qty': item['qty'],		
+					'add_spec': item['oth_spec'],			
+				}
+				ass_line_obj = self.pool.get('ch.spare.assembly.details')
+				ass_line_id = ass_line_obj.create(cr, uid, spare_ass_vals)
+												
+		self.write(cr, uid, ids, {'update_user_id': uid, 'update_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+							
+		return True	
+	
+	
+	def entry_confirm(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
+		if entry.state == 'draft':
+			### Dynamic Balancing and Pre Hydro Static Test Creation for Pattern ###
+			for line_item in entry.line_ids:
+				if line_item.ms_type == 'foundry_item':
+					qap_dynamic_bal_id = self.pool.get('ch.dynamic.balancing').search(cr,uid,[('header_id','=',entry.qap_plan_id.id),
+						('pattern_id','=',line_item.ms_store_id.pattern_id.id)])
+					if qap_dynamic_bal_id:
+						qap_dynamic_bal_rec = self.pool.get('ch.dynamic.balancing').browse(cr,uid,qap_dynamic_bal_id[0])
+						print "qap_dynamic_bal_rec",qap_dynamic_bal_rec
+						min_weight = qap_dynamic_bal_rec.min_weight
+						max_weight = qap_dynamic_bal_rec.max_weight
+					else:
+						min_weight = 0.00
+						max_weight = 0.00
+						
+					### Hrdro static pressure from marketing Enquiry ###
+					if entry.order_line_id.pump_offer_line_id > 0:
+						market_enquiry_rec = self.pool.get('ch.kg.crm.pumpmodel').browse(cr,uid,entry.order_line_id.pump_offer_line_id)
+						if market_enquiry_rec:
+							hs_pressure = market_enquiry_rec.hydrostatic_test_pressure
+						else:
+							hs_pressure = 0.00
+					else:
+						hs_pressure = 0.00
+					
+					db_flag = False
+					hs_flag = False
+					if line_item.ms_store_id.pattern_id.need_dynamic_balancing == True:
+						db_flag = True
+					if line_item.ms_store_id.pattern_id.need_hydro_test == True:
+						hs_flag = True
+						
+					print "db_flag",db_flag
+					print "hs_flag",hs_flag
+						
+					if db_flag == True or hs_flag == True:
+						
+						part_qap_vals = {
+							
+							'qap_plan_id': entry.qap_plan_id.id,
+							'order_id': entry.order_line_id.header_id.id,
+							'order_line_id': entry.order_line_id.id,
+							'order_no': entry.order_line_id.order_no,
+							'order_category': entry.order_line_id.order_category,
+							'pattern_id': line_item.ms_store_id.pattern_id.id,
+							'pattern_name': line_item.ms_store_id.pattern_id.pattern_name,
+							'item_code': line_item.item_code,
+							'item_name': line_item.item_name,
+							'moc_id': line_item.moc_id.id,
+							'db_min_weight': min_weight,
+							'db_max_weight': max_weight,
+							'spare_assembly_id': entry.id,
+							'spare_assembly_line_id': line_item.id,
+							#~ 'order_bom_id': line_item.ms_store_id.ms_id.order_bomline_id.id,
+							'hs_pressure': hs_pressure,
+							'db_flag':db_flag,
+							'hs_flag':hs_flag,
+							
+							
+						}
+						
+						part_qap_id = self.pool.get('kg.part.qap').create(cr, uid, part_qap_vals)
+						
+				### Updation in Store ###
+				self.pool.get('kg.ms.stores').write(cr,uid,line_item.ms_store_id.id,{'state':'sent_to_ass'})
+													
+			self.write(cr, uid, ids, {'state': 'confirmed','confirm_user_id': uid, 'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+							
+		return True	
+		
+	def entry_approve(self,cr,uid,ids,context=None):
+		entry = self.browse(cr,uid,ids[0])
+		if entry.state == 'confirmed':
+		
+			### Checking Test process Remaining ###
+			cr.execute(''' select id from kg_part_qap where spare_assembly_id = %s and order_id=%s and order_line_id =%s
+				and db_state = 'pending' and db_flag='t' ''',[ids[0],entry.order_line_id.header_id.id,entry.order_line_id.id])
+			db_test_process_rem = cr.fetchone()
+			
+			cr.execute(''' select id from kg_part_qap where spare_assembly_id = %s and order_id=%s and order_line_id =%s
+				and hs_state='pending' and hs_flag='t' ''',[ids[0],entry.order_line_id.header_id.id,entry.order_line_id.id])
+			hs_test_process_rem = cr.fetchone()
+			
+			if db_test_process_rem == None and hs_test_process_rem == None:
+				#### Updating pump serial number in Part qap ###
+				cr.execute(''' update kg_part_qap set pump_serial_no = %s where spare_assembly_id = %s ''',[entry.name,ids[0]])
+				### Dimensional Inspection Creation ###
+				pump_qap_header_vals = {
+				
+					'qap_plan_id': entry.qap_plan_id.id,
+					'order_id': entry.order_line_id.header_id.id,
+					'order_line_id':  entry.order_line_id.id,
+					'order_no': entry.order_line_id.order_no,
+					'order_category': entry.order_category,
+					'pump_model_id': entry.pump_model_id.id,
+					'spare_assembly_id': entry.id,
+					'moc_construction_id': entry.order_line_id.moc_construction_id.id,
+					'test_state':'di',
+					'di_state': 'pending',
+					'assembly_id': ids[0]
+				}
+				print "pump_qap_header_vals",pump_qap_header_vals
+				pump_qap_id = self.pool.get('kg.pump.qap').create(cr, uid, pump_qap_header_vals)
+				
+				dim_inspection_id = self.pool.get('ch.dimentional.inspection').search(cr,uid,[('pump_model_id','=',entry.pump_model_id.id)])
+				if dim_inspection_id:
+					dim_inspection_rec = self.pool.get('ch.dimentional.inspection').browse(cr,uid,dim_inspection_id[0])
+					for dim_item in dim_inspection_rec.line_ids:
+						print "dim_item",dim_item
+						pump_dimension_vals = {
+							'header_id': pump_qap_id, 		
+							'dimentional_details': dim_item.dimentional_details,
+							'min_weight': dim_item.min_weight,
+							'max_weight': dim_item.max_weight,	
+						}
+						pump_dimension_id = self.pool.get('ch.pump.dimentional.details').create(cr, uid, pump_dimension_vals)
+						
+				self.write(cr, uid, ids, {'state': 'approve','approve_user_id': uid, 'approve_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+			else:
+				raise osv.except_osv(_('Warning !!'),
+				_('Test process remaining !!'))		
+			
+		return True
+		
+	
+	def unlink(self,cr,uid,ids,context=None):
+		unlink_ids = []		
+		for rec in self.browse(cr,uid,ids):	
+			if rec.state not in ('draft'):				
+				raise osv.except_osv(_('Warning!'),
+						_('You can not delete this entry !!'))
+			else:
+				unlink_ids.append(rec.id)
+		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)	
+		
+	def create(self, cr, uid, vals, context=None):
+		return super(kg_spare_assembly, self).create(cr, uid, vals, context=context)
+		
+	def write(self, cr, uid, ids, vals, context=None):
+		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
+		return super(kg_spare_assembly, self).write(cr, uid, ids, vals, context)
+		
+	def _future_entry_date_check(self,cr,uid,ids,context=None):
+		rec = self.browse(cr,uid,ids[0])
+		today = date.today()
+		today = str(today)
+		today = datetime.strptime(today, '%Y-%m-%d')
+		entry_date = rec.entry_date
+		entry_date = str(entry_date)
+		entry_date = datetime.strptime(entry_date, '%Y-%m-%d')
+		
+		if entry_date > today:
+			return False	
+		return True
+		
+	_constraints = [			
+		
+		(_future_entry_date_check, 'System not allow to save with future date. !!',['']),
+		
+	   ]	
+	
+kg_spare_assembly()
+
+
+
+class ch_spare_assembly_details(osv.osv):
+	
+	_name = "ch.spare.assembly.details"
+	_description = "Spare Assembly Details Line"
+	
+	_columns = {
+		
+		'header_id': fields.many2one('kg.spare.assembly','Spare Assembly Entry', required=True, ondelete='cascade'),
+		'ms_type': fields.selection([('foundry_item','Foundry Item'),('ms_item','MS Item'),('bot_item','BOT Item')], 'Item Type',readonly=True),
+		'ms_store_id': fields.many2one('kg.ms.stores','Store',domain="[('active','=','t')]"),		
+		'position_id': fields.many2one('kg.position.number','Position No.',domain="[('state','=','approved')]"),	
+		'moc_id': fields.many2one('kg.moc.master','MOC',domain="[('active','=','t')]"),		
+		'item_code':fields.char('Item Code'),
+		'item_name':fields.char('Item Name'),				
+		'qty': fields.integer('Quantity', required=True),		
+		'add_spec': fields.text('Others Specification'),					
+		'remarks': fields.text('Remarks'),					
+	}	
+	
+	def onchange_item(self, cr, uid, ids, position_id, context=None):
+		
+		value = {'item_code': '','item_name':''}
+		if position_id:
+			pos_rec = self.pool.get('kg.position.number').browse(cr, uid, position_id, context=context)			
+			if pos_rec.pattern_id:
+				item_name = pos_rec.pattern_id.name
+				item_code = pos_rec.pattern_name
+			elif pos_rec.ms_id:
+				item_name = pos_rec.ms_id.name
+				item_code = pos_rec.ms_code
+			elif pos_rec.bot_id:
+				item_name = pos_rec.bot_id.name
+				item_code = pos_rec.bot_code
+			value = {'item_code': item_code,'item_name':item_name}
+		else:
+			pass			
+		return {'value': value}	
+	
+		
+	def _position_validate(self, cr, uid,ids, context=None):
+		rec = self.browse(cr,uid,ids[0])
+		res = True
+		if rec.position_id:					
+			cr.execute(""" select position_id from ch_spare_assembly_details where position_id  = '%s' and header_id =%s 				
+			""" %(rec.position_id.id,rec.header_id.id))
+			data = cr.dictfetchall()			
+			if len(data) > 1:
+				res = False
+			else:
+				res = True				
+		return res
+	
+		
+	_constraints = [						
+		#~ (_position_validate, 'Please Check Position No should be unique!!!',['Position No.']),			
+	   ]
+	
+
+ch_spare_assembly_details()	
+
 
 
 

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+	
+	
+	
+	<!-- Drawing Indent Name process --> 
+	
+	<record forcecreate="1" id="seq_type_drawing_issue" model="ir.sequence.type">	
+		<field name="name">KG drawing Issue</field>
+		<field name="code">kg.drawing.issue</field>
+	</record>
+
+	<record forcecreate="1" id="seq_drawing_issue" model="ir.sequence">
+	  <field name="name">KG drawing Issue</field>
+	  <field name="code">kg.drawing.issue</field>
+	  <field name="padding" eval="5"/>
+	  <field name="prefix">DIssue/%(year)s/</field>
+	  <field name="reset_sequence">fiscal_reset</field>
+	</record>
+	
+	
+	
+		
+</data>
+</openerp>

@@ -35,6 +35,7 @@
 						<page string="Default Item Details">
 							<field name="line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}">
 								<tree string="Default Item Details" create="false" delete="false" editable="top">
+								   <field name="flag_is_applicable"/>
 								   <field name="description" readonly="1"/>
 								   <field name="packing_type" invisible="1"/>
 								   <field name="value" attrs="{'required': [('packing_type','=','pump')]}"/>
@@ -44,10 +45,11 @@
 						<page string="Foundry Items">
 							<field name="line_ids_a" colspan="4" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}">
 								<tree string="Foundry Items" create="false" delete="false" editable="top">
+								   <field name="flag_is_applicable"/>
 								   <field name="description" readonly="1"/>
 								   <field name="material_code" readonly="1"/>
 								   <field name="moc_id" readonly="1"/>
-								   <field name="qty" readonly="1"/>
+								   <field name="qty" required="1"/>
 								   <field name="remarks" widget="char"/>
 								</tree>
 							</field>
@@ -55,10 +57,11 @@
 						<page string="MS Items">
 							<field name="line_ids_b" colspan="4" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}">
 								<tree string="MS Items" create="false" delete="false" editable="top">
+								   <field name="flag_is_applicable"/>
 								   <field name="description" readonly="1"/>
 								   <field name="material_code" readonly="1"/>
 								   <field name="moc_id" readonly="1"/>
-								   <field name="qty" readonly="1"/>
+								   <field name="qty" required="1"/>
 								   <field name="remarks" widget="char"/>
 								</tree>
 							</field>
@@ -66,10 +69,11 @@
 						<page string="BOT Items">
 							<field name="line_ids_c" colspan="4" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}">
 								<tree string="BOT Items" create="false" delete="false" editable="top">
+								   <field name="flag_is_applicable"/>
 								   <field name="description" readonly="1"/>
 								   <field name="material_code" readonly="1"/>
 								   <field name="moc_id" readonly="1"/>
-								   <field name="qty" readonly="1"/>
+								   <field name="qty" required="1"/>
 								   <field name="remarks" widget="char"/>
 								</tree>
 							</field>
@@ -99,10 +103,11 @@
 										<page string = "Foundry Items">
 											<field name="line_ids" nolabel="1">
 												<tree string="Foundry Item Tree" editable="top" create="false" delete="false">
+													<field name="flag_is_applicable"/>
 													<field name="description" readonly="1"/>
 													<field name="material_code" readonly="1"/>
 													<field name="moc_id" readonly="1"/>
-													<field name="qty" readonly="1"/>
+													<field name="qty" required="1"/>
 													<field name="remarks" widget="char"/>
 												</tree>
 											</field>								
@@ -111,10 +116,11 @@
 										<page string = "MS Items">
 											<field name="line_ids_a" nolabel="1">
 												<tree string="MS Items tree" editable="top" create="false" delete="false">
+													<field name="flag_is_applicable"/>
 													<field name="description" readonly="1"/>
 													<field name="material_code" readonly="1"/>
 													<field name="moc_id" readonly="1"/>
-													<field name="qty" readonly="1"/>
+													<field name="qty" required="1"/>
 													<field name="remarks" widget="char"/>
 												</tree>
 											</field>								
@@ -122,10 +128,11 @@
 										<page string = "BOT Items">
 											<field name="line_ids_b" nolabel="1">
 												<tree string="BOT Item" editable="top" create="false" delete="false">
+													<field name="flag_is_applicable"/>
 													<field name="description" readonly="1"/>
 													<field name="material_code" readonly="1"/>
 													<field name="moc_id" readonly="1"/>
-													<field name="qty" readonly="1"/>
+													<field name="qty" required="1"/>
 													<field name="remarks" widget="char"/>
 												</tree>
 											</field>								
@@ -138,8 +145,9 @@
 						<page string="Other Checklist">
 							<field name="line_ids_e" colspan="4" nolabel="1" attrs="{'readonly': [('state','not in',['draft'])]}">
 								<tree string="Checklist Items" editable="top">
+								   <field name="flag_is_applicable"/>
 								   <field name="checklist_id" required="1"/>
-								   <field name="value" />
+								   <field name="value"/>
 								   <field name="remarks" widget="char"/>
 								</tree>
 							</field>

@@ -381,8 +381,15 @@ class ch_packing_default_details(osv.osv):
 		'packing_type': fields.related('header_id','packing_type', type='selection',selection=[('pump','Pump'),('spare','Spare'),('access','Accessories')], string='Type', store=True, readonly=True),
 		'description': fields.char('Item Description'),
 		'value': fields.char('Value/Qty'),
-
+		'flag_is_applicable': fields.boolean('Is applicable'),
+		
 	
+	}
+	
+	_defaults = {
+	
+		'flag_is_applicable': False,
+		
 	}
 	
 	def default_get(self, cr, uid, fields, context=None):
@@ -405,12 +412,20 @@ class ch_packing_foundry_details(osv.osv):
 		'order_bom_id': fields.many2one('ch.order.bom.details','Foundry Item'),
 		'description': fields.related('order_bom_id','pattern_name', type='char', string='Item Description', store=True, readonly=True),
 		'moc_id': fields.related('order_bom_id','moc_id', type='many2one',relation='kg.moc.master', string='MOC', store=True, readonly=True),
-		'qty': fields.related('order_bom_id','qty', type='integer', string='Value/Qty', store=True, readonly=True),
+		'qty': fields.integer('Value/Qty'),
 		'material_code': fields.related('order_bom_id','material_code', type='char', string='Material Code', store=True, readonly=True),
 		'remarks': fields.text('Remarks'),
+		'flag_is_applicable': fields.boolean('Is applicable'),
 		
 	
 	}
+	
+	_defaults = {
+	
+		'flag_is_applicable': False,
+		
+	}
+	
 	
 	def default_get(self, cr, uid, fields, context=None):
 		return context
@@ -430,11 +445,18 @@ class ch_packing_ms_details(osv.osv):
 		'order_bom_id': fields.many2one('ch.order.machineshop.details','MS Item'),
 		'description': fields.related('order_bom_id','name', type='char', string='Item Description', store=True, readonly=True),
 		'moc_id': fields.related('order_bom_id','moc_id', type='many2one',relation='kg.moc.master', string='MOC', store=True, readonly=True),
-		'qty': fields.related('order_bom_id','qty', type='integer', string='Value/Qty', store=True, readonly=True),
+		'qty': fields.integer('Value/Qty'),
 		'material_code': fields.related('order_bom_id','material_code', type='char', string='Material Code', store=True, readonly=True),
 		'remarks': fields.text('Remarks'),
+		'flag_is_applicable': fields.boolean('Is applicable'),
 		
 	
+	}
+	
+	_defaults = {
+	
+		'flag_is_applicable': False,
+		
 	}
 	
 	def default_get(self, cr, uid, fields, context=None):
@@ -455,12 +477,21 @@ class ch_packing_bot_details(osv.osv):
 		'order_bom_id': fields.many2one('ch.order.bot.details','BOT Item'),
 		'description': fields.related('order_bom_id','item_name', type='char', string='Item Description', store=True, readonly=True),
 		'moc_id': fields.related('order_bom_id','moc_id', type='many2one',relation='kg.moc.master', string='MOC', store=True, readonly=True),
-		'qty': fields.related('order_bom_id','qty', type='integer', string='Value/Qty', store=True, readonly=True),
+		'qty': fields.integer('Value/Qty'),
 		'material_code': fields.related('order_bom_id','material_code', type='char', string='Material Code', store=True, readonly=True),
 		'remarks': fields.text('Remarks'),
+		'flag_is_applicable': fields.boolean('Is applicable'),
 		
 	
 	}
+	
+	_defaults = {
+	
+		'flag_is_applicable': False,
+		
+	}
+		
+	
 	
 	def default_get(self, cr, uid, fields, context=None):
 		return context
@@ -482,7 +513,7 @@ class ch_packing_accessories(osv.osv):
 		'wo_access_id':fields.many2one('ch.wo.accessories', 'WO Accessories Id'),
 		'access_id': fields.related('wo_access_id','access_id', type='many2one',relation='kg.accessories.master', string='Accessories', store=True, readonly=True),
 		'moc_id': fields.related('wo_access_id','moc_id', type='many2one',relation='kg.moc.master', string='MOC', store=True, readonly=True),
-		'qty': fields.related('wo_access_id','qty', type='integer', string='Qty', store=True, readonly=True),
+		'qty': fields.related('wo_access_id','qty', type='integer', string='Qty', store=True),
 		
 		'line_ids': fields.one2many('ch.packing.accessories.foundry', 'header_id', 'Accessories Foundry'),
 		'line_ids_a': fields.one2many('ch.packing.accessories.ms', 'header_id', 'Accessories MS'),
@@ -516,9 +547,17 @@ class ch_packing_accessories_foundry(osv.osv):
 		'order_bom_id': fields.many2one('ch.wo.accessories.foundry','Foundry Item'),
 		'description': fields.related('order_bom_id','pattern_name', type='char', string='Item Description', store=True, readonly=True),
 		'moc_id': fields.related('order_bom_id','moc_id', type='many2one',relation='kg.moc.master', string='MOC', store=True, readonly=True),
-		'qty': fields.related('order_bom_id','qty', type='integer', string='Value/Qty', store=True, readonly=True),
+		'qty': fields.integer('Value/Qty'),
 		'material_code': fields.related('order_bom_id','material_code', type='char', string='Material Code', store=True, readonly=True),
 		'remarks': fields.text('Remarks'),
+		'flag_is_applicable': fields.boolean('Is applicable'),
+		
+	
+	}
+	
+	_defaults = {
+	
+		'flag_is_applicable': False,
 		
 	}
 	
@@ -537,9 +576,17 @@ class ch_packing_accessories_ms(osv.osv):
 		'order_bom_id': fields.many2one('ch.wo.accessories.ms','MS Item'),
 		'description': fields.related('order_bom_id','name', type='char', string='Item Description', store=True, readonly=True),
 		'moc_id': fields.related('order_bom_id','moc_id', type='many2one',relation='kg.moc.master', string='MOC', store=True, readonly=True),
-		'qty': fields.related('order_bom_id','qty', type='integer', string='Value/Qty', store=True, readonly=True),
+		'qty': fields.integer('Value/Qty'),
 		'material_code': fields.related('order_bom_id','material_code', type='char', string='Material Code', store=True, readonly=True),
 		'remarks': fields.text('Remarks'),
+		'flag_is_applicable': fields.boolean('Is applicable'),
+		
+	
+	}
+	
+	_defaults = {
+	
+		'flag_is_applicable': False,
 		
 	}
 
@@ -557,9 +604,17 @@ class ch_packing_accessories_bot(osv.osv):
 		'order_bom_id': fields.many2one('ch.wo.accessories.bot','BOT Item'),
 		'description': fields.related('order_bom_id','item_name', type='char', string='Item Description', store=True, readonly=True),
 		'moc_id': fields.related('order_bom_id','moc_id', type='many2one',relation='kg.moc.master', string='MOC', store=True, readonly=True),
-		'qty': fields.related('order_bom_id','qty', type='integer', string='Value/Qty', store=True, readonly=True),
+		'qty': fields.integer('Value/Qty'),
 		'material_code': fields.related('order_bom_id','material_code', type='char', string='Material Code', store=True, readonly=True),
 		'remarks': fields.text('Remarks'),
+		'flag_is_applicable': fields.boolean('Is applicable'),
+		
+	
+	}
+	
+	_defaults = {
+	
+		'flag_is_applicable': False,
 		
 	}
 	
@@ -578,6 +633,14 @@ class ch_packing_checklist(osv.osv):
 		'checklist_id': fields.many2one('kg.packing.checklist','Item Description'),
 		'value': fields.char('Value/Qty'),
 		'remarks': fields.text('Remarks'),
+		'flag_is_applicable': fields.boolean('Is applicable'),
+		
+	
+	}
+	
+	_defaults = {
+	
+		'flag_is_applicable': False,
 		
 	}
 	

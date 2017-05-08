@@ -169,10 +169,12 @@ class kg_ms_stores(osv.osv):
 				left join kg_machineshop ms_item on ms_item.id = ms_store.ms_id
 
 				where ms_store.ms_type = 'foundry_item' and ms_store.state = 'in_store' and ms_store.accept_state = 'received'
-				and ms_store.foundry_assembly_id > 0 and ms_store.foundry_assembly_line_id > 0
+				and ms_store.foundry_assembly_id > 0 and ms_store.foundry_assembly_line_id > 0 
+				and order_line.order_category = 'pump'
 
 				group by 1,2,3,4,5,6,7,8 ''')
 			reprocess_foundry_details = cr.dictfetchall()
+			print "reprocess_foundry_details",reprocess_foundry_details
 			for reprocess_item in reprocess_foundry_details:
 		
 				assembly_id = assembly_obj.search(cr, uid, [
@@ -182,6 +184,7 @@ class kg_ms_stores(osv.osv):
 				('moc_construction_id','=',reprocess_item['moc_construction_id']),
 				('id','=',reprocess_item['foundry_assembly_id'])
 				])
+				print "sdzfffffffffffffffffffffffffffccccfff",assembly_id
 				if assembly_id:
 					assembly_foundry_id = assembly_foundry_obj.search(cr, uid, [
 						('order_bom_id','=',reprocess_item['order_bomline_id']),
@@ -220,10 +223,11 @@ class kg_ms_stores(osv.osv):
 					left join kg_machineshop ms_item on ms_item.id = ms_store.ms_id
 
 					where ms_store.ms_type = 'ms_item' and ms_store.state = 'in_store' and ms_store.accept_state = 'received'
-					and ms_store.ms_assembly_id > 0 and ms_store.ms_assembly_line_id > 0
+					and ms_store.ms_assembly_id > 0 and ms_store.ms_assembly_line_id > 0 and order_line.order_category = 'pump'
 
 					group by 1,2,3,4,5,6,7,8,9 ''')
 			reprocess_ms_details = cr.dictfetchall()
+			print "reprocess_ms_details",reprocess_ms_details
 			
 			for reprocess_item in reprocess_ms_details:
 		
@@ -242,10 +246,14 @@ class kg_ms_stores(osv.osv):
 						('header_id','=',reprocess_item['ms_assembly_id']),
 						('id','=',reprocess_item['ms_assembly_line_id'])
 						])
+					print "assembly_ms_idassembly_ms_id",assembly_ms_id
 					
 					if assembly_ms_id:
 						assembly_ms_rec = assembly_ms_obj.browse(cr, uid,assembly_ms_id[0])
-						
+						print "reprocess_item['ms_qty']",reprocess_item['ms_qty']
+						print "ssembly_ms_rec.order_ms_qty",assembly_ms_rec.order_ms_qty
+						print "reprocess_item['ms_assembly_id']",reprocess_item['ms_assembly_id']
+						print "ccccccccccccccccccccccccccccccccccccc"
 						assembly_ms_obj.write(cr,uid,reprocess_item['ms_assembly_line_id'],{'state':'waiting'})
 						cr.execute(""" update kg_assembly_inward set state = 'waiting' where 
 							id in (select header_id from ch_assembly_machineshop_details where state != 're_process' and header_id = %s) 
@@ -269,10 +277,11 @@ class kg_ms_stores(osv.osv):
 				left join kg_machineshop ms_item on ms_item.id = ms_store.ms_id
 
 				where ms_store.ms_type = 'foundry_item' and ms_store.state = 'in_store' and ms_store.accept_state = 'received'
-				and foundry_assembly_id = 0 and foundry_assembly_line_id = 0
+				and foundry_assembly_id = 0 and foundry_assembly_line_id = 0 and order_line.order_category = 'pump'
 
 				group by 1,2,3,4,5,6 ''')
 			foundry_details = cr.dictfetchall()
+			print "foundry_details----------------",foundry_details
 			for foundry_item in foundry_details:
 				
 				### Check all the foundry items fully completed ###
@@ -294,7 +303,7 @@ class kg_ms_stores(osv.osv):
 						left join kg_machineshop ms_item on ms_item.id = ms_store.ms_id
 
 						where ms_store.ms_type = 'foundry_item' and ms_store.state = 'in_store' and ms_store.accept_state = 'received'
-						and ms_store.foundry_assembly_id = 0 and ms_store.foundry_assembly_line_id = 0
+						and foundry_assembly_id = 0 and foundry_assembly_line_id = 0 and order_line.order_category = 'pump'
 
 						group by 1,2,3,4,5,6
 
@@ -329,7 +338,6 @@ class kg_ms_stores(osv.osv):
 						'type': 'foundry'
 						})
 			
-			
 			### Select MS Items group by Work Order ###
 			cr.execute(''' select 
 
@@ -348,7 +356,7 @@ class kg_ms_stores(osv.osv):
 					left join kg_machineshop ms_item on ms_item.id = ms_store.ms_id
 
 					where ms_store.ms_type = 'ms_item' and ms_store.state = 'in_store' and ms_store.accept_state = 'received'
-					and ms_store.ms_assembly_id = 0 and ms_store.ms_assembly_line_id = 0
+					and ms_store.ms_assembly_id = 0 and ms_store.ms_assembly_line_id = 0 and order_line.order_category = 'pump'
 
 					group by 1,2,3,4,5,6,7
 					''')
@@ -374,7 +382,7 @@ class kg_ms_stores(osv.osv):
 							left join kg_machineshop ms_item on ms_item.id = ms_store.ms_id
 
 							where ms_store.ms_type = 'ms_item' and ms_store.state = 'in_store' and ms_store.accept_state = 'received'
-							and ms_store.ms_assembly_id = 0 and ms_store.ms_assembly_line_id = 0
+							and ms_store.ms_assembly_id = 0 and ms_store.ms_assembly_line_id = 0 and order_line.order_category = 'pump'
 
 							group by 1,2,3,4,5,6,7
 
@@ -394,26 +402,25 @@ class kg_ms_stores(osv.osv):
 					[ms_item['order_line_id'],ms_item['order_ms_line_id']])
 					ms_item_qty = cr.dictfetchone()
 					
-					if ms_item_qty != None:
-						if ms_item['ms_qty'] == ms_item_qty['bom_qty']:
-							
-							assembly_list.append({
-							'order_line_id':ms_item['order_line_id'],
-							'order_id':ms_item['order_id'],
-							'pump_model_id': ms_item['pump_model_id'],
-							'moc_construction_id': ms_item['moc_construction_id'],
-							'order_ms_id': ms_item_qty['order_ms_id'],
-							'pattern_id': '',
-							'order_bom_id': '',
-							'type': 'ms'
-							})
+					if ms_item['ms_qty'] == ms_item_qty['bom_qty']:
+						
+						assembly_list.append({
+						'order_line_id':ms_item['order_line_id'],
+						'order_id':ms_item['order_id'],
+						'pump_model_id': ms_item['pump_model_id'],
+						'moc_construction_id': ms_item['moc_construction_id'],
+						'order_ms_id': ms_item_qty['order_ms_id'],
+						'pattern_id': '',
+						'order_bom_id': '',
+						'type': 'ms'
+						})
 			
+			print "assembly_list-----------------------",assembly_list
 			if assembly_list:
 				groupby_orderid = {v['order_line_id']:v for v in assembly_list}.values()
 				
 				
 				final_assembly_header_list = groupby_orderid
-				print "final_assembly_header_listfinal_assembly_header_list",final_assembly_header_list
 				for ass_header_item in final_assembly_header_list:
 					
 					completion_list = [element for element in assembly_list if element['order_line_id'] == ass_header_item['order_line_id']]
@@ -428,7 +435,6 @@ class kg_ms_stores(osv.osv):
 					print "order_items_count",order_items_count
 					
 					if len(completion_list) == order_items_count[0]:
-						print "ass_header_item['order_line_id']ass_header_item['order_line_id']",ass_header_item['order_line_id']
 						assembly_id = assembly_obj.search(cr, uid, [
 						('order_id','=',ass_header_item['order_id']),
 						('order_line_id','=',ass_header_item['order_line_id']),
@@ -485,10 +491,10 @@ class kg_ms_stores(osv.osv):
 											}
 											assembly_bot_id = assembly_bot_obj.create(cr, uid, ass_bot_vals)	
 								
-									### State Updation in store ###
-									store_ids = self.search(cr,uid,[('order_line_id','=',ass_header_item['order_line_id']),('state','=','in_store')])
-									for store_item in store_ids:
-										self.write(cr, uid,store_item,{'state':'sent_to_ass'})	
+							### State Updation in store ###
+							store_ids = self.search(cr,uid,[('order_line_id','=',ass_header_item['order_line_id']),('state','=','in_store')])
+							for store_item in store_ids:
+								self.write(cr, uid,store_item,{'state':'sent_to_ass'})	
 							
 				for assembly_item in assembly_list:
 					assembly_ids = assembly_obj.search(cr, uid, [
@@ -628,7 +634,7 @@ class kg_ms_stores(osv.osv):
 
 				where ms_store.ms_type = 'foundry_item' and ms_store.state = 'in_store' and ms_store.accept_state = 'received' and 
 				ms_store.order_line_id = %s and ms_store.pump_model_id = %s
-				and ms_store.foundry_assembly_id > 0 and ms_store.foundry_assembly_line_id > 0
+				and ms_store.foundry_assembly_id > 0 and ms_store.foundry_assembly_line_id > 0 and order_line.order_category = 'pump'
 
 				group by 1,2,3,4,5,6,7,8 ''',[order_line_id,pump_model_id])
 			reprocess_foundry_details = cr.dictfetchall()
@@ -684,7 +690,7 @@ class kg_ms_stores(osv.osv):
 
 					where ms_store.ms_type = 'ms_item' and ms_store.state = 'in_store' and ms_store.accept_state = 'received' and 
 					ms_store.order_line_id = %s and ms_store.pump_model_id = %s
-					and ms_store.ms_assembly_id > 0 and ms_store.ms_assembly_line_id > 0
+					and ms_store.ms_assembly_id > 0 and ms_store.ms_assembly_line_id > 0 and order_line.order_category = 'pump'
 
 					group by 1,2,3,4,5,6,7,8,9 ''',[order_line_id,pump_model_id])
 			reprocess_ms_details = cr.dictfetchall()
@@ -734,8 +740,8 @@ class kg_ms_stores(osv.osv):
 
 				where ms_store.ms_type = 'foundry_item' and ms_store.state = 'in_store' and ms_store.accept_state = 'received' and 
 				ms_store.order_line_id = %s and ms_store.pump_model_id = %s
-				and ms_store.foundry_assembly_id = 0 and ms_store.foundry_assembly_line_id = 0
-				
+				and ms_store.foundry_assembly_id = 0 and ms_store.foundry_assembly_line_id = 0 and order_line.order_category = 'pump'
+				 
 				group by 1,2,3,4,5,6 ''',[order_line_id,pump_model_id])
 			foundry_details = cr.dictfetchall()
 			
@@ -760,7 +766,7 @@ class kg_ms_stores(osv.osv):
 
 						where ms_store.ms_type = 'foundry_item' and ms_store.state = 'in_store' and ms_store.accept_state = 'received' and
 						ms_store.order_line_id = %s and ms_store.pump_model_id = %s
-						and ms_store.foundry_assembly_id = 0 and ms_store.foundry_assembly_line_id = 0
+						and ms_store.foundry_assembly_id = 0 and ms_store.foundry_assembly_line_id = 0 and order_line.order_category = 'pump'
 
 						group by 1,2,3,4,5,6
 
@@ -809,7 +815,7 @@ class kg_ms_stores(osv.osv):
 
 					where ms_store.ms_type = 'ms_item' and ms_store.state = 'in_store' and ms_store.accept_state = 'received' and
 					ms_store.order_line_id = %s and ms_store.pump_model_id = %s
-					and ms_store.ms_assembly_id = 0 and ms_store.ms_assembly_line_id = 0
+					and ms_store.ms_assembly_id = 0 and ms_store.ms_assembly_line_id = 0 and order_line.order_category = 'pump'
 
 					group by 1,2,3,4,5,6,7
 					''',[order_line_id,pump_model_id])
@@ -836,7 +842,7 @@ class kg_ms_stores(osv.osv):
 
 							where ms_store.ms_type = 'ms_item' and ms_store.state = 'in_store' and ms_store.accept_state = 'received' and
 							ms_store.order_line_id = %s and ms_store.pump_model_id = %s
-							and ms_store.ms_assembly_id = 0 and ms_store.ms_assembly_line_id = 0
+							and ms_store.ms_assembly_id = 0 and ms_store.ms_assembly_line_id = 0 and order_line.order_category = 'pump'
 
 							group by 1,2,3,4,5,6,7
 

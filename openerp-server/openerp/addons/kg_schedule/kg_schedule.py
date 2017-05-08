@@ -38,7 +38,7 @@ class kg_schedule(osv.osv):
 		### Header Details ####
 		'name': fields.char('Schedule No', size=128,select=True,required=True),
 		'entry_date': fields.date('Schedule Date',required=True),
-		'division_id': fields.many2one('kg.division.master','Division',required=True,domain="[('active','=','t')]"),
+		'division_id': fields.many2one('kg.division.master','Division',required=True,domain="[('state','=','approved'), ('active','=','t')]"),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD')],'Location',required=True),
 		'note': fields.text('Notes'),
 		'remarks': fields.text('Remarks'),
@@ -1501,7 +1501,7 @@ class kg_schedule(osv.osv):
 								'bot_id': bot_rec.id,
 								'moc_id': order_bot_item['moc_id'],
 								'ms_type': 'bot_item',
-								'qty': 1,
+								'qty': order_bot_item['bot_qty'],
 								'state': 'in_store',
 								'accept_state': 'pending',
 
@@ -1796,6 +1796,7 @@ class kg_schedule(osv.osv):
 									
 									print "sssssssssssssssssssssssssssssssssvvvvvvvvvvvv",indent_qty,ms_order_rec.indent_qty
 									if indent_qty > 0:
+										
 										if ms_order_rec.flag_dynamic_length == True:
 											pending_qty = 0
 											issue_pending_qty = 0
@@ -1810,8 +1811,8 @@ class kg_schedule(osv.osv):
 											'product_id':ms_indent_item['product_id'],
 											'uom':ms_indent_item['uom'],
 											'qty':indent_qty/order_line_rec.qty,
-											'pending_qty':indent_qty/order_line_rec.qty,
-											'issue_pending_qty':indent_qty/order_line_rec.qty,
+											'pending_qty':pending_qty,
+											'issue_pending_qty':issue_pending_qty,
 											'cutting_qty': cutting_qty,
 											'ms_bot_id':ms_raw_rec.header_id.id,
 											'fns_item_name':ms_raw_rec.header_id.code,
@@ -1939,7 +1940,7 @@ class kg_schedule(osv.osv):
 								
 								ms_raw_obj = self.pool.get('ch.ms.raw.material')
 								ms_raw_rec = ms_raw_obj.browse(cr, uid, bot_indent_item['bot_item'])
-								
+
 								if bot_indent_item['type'] == 'foun':
 
 									bot_order_obj = self.pool.get('ch.order.bot.details')
