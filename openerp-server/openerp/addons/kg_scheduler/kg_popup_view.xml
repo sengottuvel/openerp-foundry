@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+	
+	<!-- Form View Start -->
+	
+		<record id="t_form_v_popup" model="ir.ui.view">
+			<field name="name">Popup Form</field>
+			<field name="model">kg.popup</field>
+			<field name="arch" type="xml">
+				<form string="Popup" version="7.0">
+					<header>
+						<button name="get_product_expiry_reminder_data" type="object" string="Product Expiry" class="oe_highlight" invisible="1"/>
+					</header>
+						<group>
+							<group>
+								<field name="name" widget = "product_expiry_reminder" required="1" invisible="1"/>
+							</group>
+							<group>
+							</group>
+						</group>
+				</form>
+			</field>
+		</record>
+		
+	<!-- Form View End -->
+	
+	<!-- Tree View Start -->
+	
+		<record id="t_tree_v_popup" model="ir.ui.view">
+			<field name="name">Popup Tree</field>
+			<field name="model">kg.popup</field>
+			<field eval="8" name="priority"/>
+			<field name="arch" type="xml">
+				<tree string="Popup">
+					<field name="name"/>
+				</tree>
+			</field>
+		</record>
+		
+	<!-- Tree View End -->
+	
+	<!-- Menu Action Start-->
+		
+		<record id="tma_popup" model="ir.actions.act_window">
+			<field name="name">Popup</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kg.popup</field>
+			<field name="view_type">form</field>
+			<field name="context">{}</field>
+			<field name="view_id" ref="t_form_v_popup"/>
+			<field name="context">{}</field>
+		</record>
+		
+	<!-- Menu Action End-->
+	
+	<!-- <menuitem id="tam_popup" name="Popup" parent="kg_menus.spm_mail_menu" sequence="3" action="tma_popup" /> -->
+	
+	<!-- Parent Menu -->
+		<menuitem name="Popup" id="tpm_popup" sequence="1"/>
+		
+		<menuitem name="Popup" parent="tpm_popup" id="tpm_popup_menu" sequence="1"/>
+		
+		<menuitem id="tam_popup" name="Popup" parent="tpm_popup_menu" sequence="1" action="tma_popup" />
+		
+	</data>
+</openerp>

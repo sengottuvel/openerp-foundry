@@ -23,7 +23,10 @@
     'author': 'Karthikeyan',
     'category': 'KG Scheduler',
     'depends' : ['base'],
-    'data': ['kg_scheduler_view.xml'],
+    'data': ['kg_scheduler_view.xml','kg_popup_view.xml'],
+    'js': ['static/src/js/product_expiry_reminder.js'],
+    'qweb': ['static/src/xml/product_expiry_reminder.xml'],
+    'css' : ['static/src/css/product_expiry_reminder.css'],
     'auto_install': False,
     'installable': True,
 }

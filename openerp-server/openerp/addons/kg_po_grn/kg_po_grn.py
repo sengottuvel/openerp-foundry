@@ -147,7 +147,7 @@ class kg_po_grn(osv.osv):
 					domain="[('state','=','approved'),('order_line.pending_qty','>','0'),('grn_flag','=',False),('partner_id','=',supplier_id),('order_line.line_state','!=','cancel'),('division','=',division)]",
 					readonly=True, states={'item_load':[('readonly',False)],'draft':[('readonly',False)],'confirmed':[('readonly',False)]}), 
 		'po_name': fields.char('PO NO',readonly=True),
-		'order_no': fields.char('PO/SO.No.',readonly=True),
+		'order_no': fields.char('No',readonly=True),
 		'order_date': fields.char('Date',readonly=True),
 		'pos_date': fields.char('PO Date',readonly=True),
 		'po_date':fields.date('PO Date',readonly=True),
@@ -657,6 +657,20 @@ class kg_po_grn(osv.osv):
 			for line in grn_entry.line_ids:
 				if line.inward_type.id == False:
 					raise osv.except_osv(_('Warning!'), _('Kindly Give Inward Type for %s !!' %(line.product_id.name)))
+				
+				# Expiry date validation start
+				
+				if line.product_id.flag_expiry_alert == True:
+					if not line.po_exp_id:
+						raise osv.except_osv(_('Warning!'),
+							_('System should not be accept without S/N Details!'))
+					for item in line.exp_batch_id:
+						if not item.exp_date:
+							raise osv.except_osv(_('Warning!'),
+								_('%s Kindly mention expiry date for this S/N %s '%(line.product_id.name,item.batch_no)))
+				
+				# Expiry date validation end
+				
 				if line.billing_type == 'cost':
 					if grn_entry.grn_type == 'from_po':
 						po_obj.write(cr,uid,line.po_line_id.order_id.id, {'grn_flag': True})
@@ -834,6 +848,20 @@ class kg_po_grn(osv.osv):
 				if line.po_grn_qty > line.recvd_qty:
 					raise osv.except_osv(_('Warning!'),
 						_('Accepted qty should not be greater than Received qty!'))
+			
+				# Expiry date validation start
+				
+				if line.product_id.flag_expiry_alert == True:
+					if not line.po_exp_id:
+						raise osv.except_osv(_('Warning!'),
+							_('System should not be accept without S/N Details!'))
+					for item in line.po_exp_id:
+						if not item.exp_date:
+							raise osv.except_osv(_('Warning!'),
+								_('%s Kindly mention expiry date for this S/N %s '%(line.product_id.name,item.batch_no)))
+				
+				# Expiry date validation end
+				
 				line_id = line.id
 				brand = []
 				if line.brand_id:
@@ -1028,6 +1056,7 @@ class kg_po_grn(osv.osv):
 						'po_id':grn_entry.po_id.id,
 						'product_id': line.product_id.id,
 						'brand_id': line.brand_id.id,
+						'moc_id': line.moc_id.id,
 						'name':line.product_id.name,
 						'product_qty': product_qty,
 						'po_to_stock_qty':product_qty,
@@ -1107,6 +1136,7 @@ class kg_po_grn(osv.osv):
 						'so_id':grn_entry.so_id.id,
 						'product_id': line.product_id.id,
 						'brand_id': line.brand_id.id,
+						'moc_id': line.moc_id.id,
 						'name':line.product_id.name,
 						'product_qty': product_qty,
 						'po_to_stock_qty':product_qty,
@@ -1169,6 +1199,7 @@ class kg_po_grn(osv.osv):
 						'gp_id':line.gp_line_id.gate_id.id,
 						'product_id': line.product_id.id,
 						'brand_id': line.brand_id.id,
+						'moc_id': line.moc_id.id,
 						'name':line.product_id.name,
 						'product_qty': line.po_grn_qty,
 						'po_to_stock_qty':line.po_grn_qty,

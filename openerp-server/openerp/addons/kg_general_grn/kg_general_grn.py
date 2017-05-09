@@ -271,6 +271,20 @@ class kg_general_grn(osv.osv):
 			for line in grn_entry.grn_line:
 				if line.inward_type.id == False:
 					raise osv.except_osv(_('Warning!'), _('Kindly Give Inward Type for %s !!' %(line.product_id.name)))
+				
+				# Expiry date validation start
+				
+				if line.product_id.flag_expiry_alert == True:
+					if not line.exp_batch_id:
+						raise osv.except_osv(_('Warning!'),
+							_('System should not be accept without S/N Details!'))
+					for item in line.exp_batch_id:
+						if not item.exp_date:
+							raise osv.except_osv(_('Warning!'),
+								_('%s Kindly mention expiry date for this S/N %s '%(line.product_id.name,item.batch_no)))
+				
+				# Expiry date validation end
+				
 				product_id = line.product_id.id
 				pro_rec = self.pool.get('product.product').browse(cr, uid, product_id)
 				if pro_rec.expiry == True:
@@ -368,6 +382,20 @@ class kg_general_grn(osv.osv):
 				if line.grn_qty > line.recvd_qty:
 					raise osv.except_osv(_('Warning!'),
 						_('Accepted qty should not be greater than Received qty!'))
+				
+				# Expiry date validation start
+				
+				if line.product_id.flag_expiry_alert == True:
+					if not line.exp_batch_id:
+						raise osv.except_osv(_('Warning!'),
+							_('System should not be accept without S/N Details!'))
+					for item in line.exp_batch_id:
+						if not item.exp_date:
+							raise osv.except_osv(_('Warning!'),
+								_('%s Kindly mention expiry date for this S/N %s '%(line.product_id.name,item.batch_no)))
+				
+				# Expiry date validation end
+				
 				# This code will create General GRN to Stock Move
 				brand = []
 				if line.brand_id:

@@ -270,7 +270,7 @@
 				
 		
 		<!-- Scheduler Menu -->
-		<menuitem id="spm_scheduler" name="Scheduler" sequence="0" />
+		<menuitem id="spm_scheduler" name="Scheduler" sequence="2" />
 		
 			<!-- Scheduler sub Menu -->
 			<menuitem id="spm_mail_menu" name="Mail Settings" parent="spm_scheduler" sequence="1" />
