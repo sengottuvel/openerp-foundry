@@ -68,7 +68,7 @@
 			<field name="entry_mode" on_change="onchange_entry_mode(entry_mode,pi_flag)" invisible="1"/>
 			</field>
 			
-			<xpath expr = "//page[@string='Indent Item Details']" position="after" >
+			<xpath expr = "//page[@string='Indent Item Details']" autofocus="True" position="after" >
 				<page string="Select Pending Indent" attrs="{'invisible':[('indent_type','!=','fromdi')]}">
 					<field name="kg_depindent_lines">
 						<tree string = "Dep Indent" editable="bottom">

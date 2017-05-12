@@ -48,7 +48,7 @@
 						</group>
 					</group>
 					<notebook>
-						<page string="Products" attrs="{'invisible': [('products_flag','=',False)]}" >
+						<page string="Products" autofocus="True" attrs="{'invisible': [('products_flag','=',False)]}" >
 						<field name="issue_line_ids" colspan="4" nolabel="1" context="{'issue_type':issue_type,'dep_issue_type':dep_issue_type,'wo_state':'accept','state':'draft'}">
 							<form string="Entry Tree">					
 								<group string="Product Details" colspan="4">
@@ -392,7 +392,7 @@
 						</group>
 					</group>
 					<notebook>
-					<page string="Products" attrs="{'invisible': [('products_flag','=',False)]}" >
+					<page string="Products" autofocus="True" attrs="{'invisible': [('products_flag','=',False)]}" >
 						<field name="issue_line_ids" colspan="4" nolabel="1" context="{'issue_type':issue_type,'wo_state':'accept','state':'draft'}">
 							<tree string="Product History" editable="bottom" create="false" delete="false">
 									<field name="product_id" string="Item Name" on_change="onchange_product_id(product_id)" readonly="1"/>
