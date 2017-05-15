@@ -271,20 +271,20 @@ class kg_work_order(osv.osv):
 							_('Delivery Date should not be less than current date for Pump Model %s !!')%(item.pump_model_id.name))
 							
 				
-				if item.order_category != 'access':
-					if not item.line_ids:
-						raise osv.except_osv(_('Warning!'),
-									_('Specify BOM Details for Pump Model %s !!')%(item.pump_model_id.name))
-					
-				else:
-					cr.execute(''' select id from ch_order_bom_details where flag_applicable = 't' and header_id = %s ''',[item.id])	  
-					bom_check_id = cr.fetchone()
-					
-					if item.order_category != 'access':
-						if item.line_ids: 
-							if bom_check_id == None:
-								raise osv.except_osv(_('Warning!'),
-										_('Kindly enable BOM Details for Pump Model %s!!')%(item.pump_model_id.name))
+				#~ if item.order_category != 'access':
+					#~ if not item.line_ids:
+						#~ raise osv.except_osv(_('Warning!'),
+									#~ _('Specify BOM Details for Pump Model %s !!')%(item.pump_model_id.name))
+					#~ 
+				#~ else:
+					#~ cr.execute(''' select id from ch_order_bom_details where flag_applicable = 't' and header_id = %s ''',[item.id])	  
+					#~ bom_check_id = cr.fetchone()
+					#~ 
+					#~ if item.order_category != 'access':
+						#~ if item.line_ids: 
+							#~ if bom_check_id == None:
+								#~ raise osv.except_osv(_('Warning!'),
+										#~ _('Kindly enable BOM Details for Pump Model %s!!')%(item.pump_model_id.name))
 					
 				
 				cr.execute(''' select id from ch_order_bom_details where flag_applicable = 't' and moc_id is null and header_id = %s ''',[item.id])	   
@@ -2405,7 +2405,7 @@ class ch_work_order_details(osv.osv):
 		(_check_unit_price, 'System not allow to save with zero and less than zero Unit Price .!!',['Unit Price']),
 		#~ (_check_line_duplicates, 'Work Order Details are duplicate. Kindly check !! ', ['']),
 		(_check_line_items, 'Work Order Detail cannot be created after confirmation !! ', ['']),
-		(_check_flag_applicable, 'Kindly select atleast one Foundry Item for spare !! ', ['']),
+		#~ (_check_flag_applicable, 'Kindly select atleast one Foundry Item for spare !! ', ['']),
 	   
 		
 	   ]
