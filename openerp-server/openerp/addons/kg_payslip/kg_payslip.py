@@ -717,7 +717,7 @@ class kg_payslip(osv.osv):
 										final_amt =  ((spec_amount_1+con_incs.base_amt)/calulation_days)* wor_days
 									else:
 										final_amt = (con_incs.base_amt/calulation_days)* wor_days
-									if con_incs.criteria == 'non-hierarchy':
+									if con_incs.start_value <= turn_over_amt and con_incs.criteria == 'non-hierarchy':
 										turn_ovr_per = laks*100
 										final_amt=(((con_incs.base_amt /100)*turn_ovr_per)/calulation_days)* wor_days
 									print "------------------------------spcial componenet ssssssssssssssssssss--------------------------------------------------",get_spl_inc
