@@ -28,7 +28,8 @@
 		<field name="is_company" position="replace">
 		<field name="is_company" invisible="1"/>
 		
-		<field name="tin_no" attrs = "{'required':[('group_flag','!=',True),('tin_flag','=',False)],'readonly':[('partner_state','=','approve')]}" placeholder="TIN Number"/>
+<!--	<field name="tin_no" attrs = "{'required':[('group_flag','!=',True),('tin_flag','=',False)],'readonly':[('partner_state','=','approve')]}" placeholder="TIN Number"/>-->
+		<field name="tin_no" attrs = "{'readonly':[('partner_state','=','approve')]}" placeholder="TIN Number"/>
 		</field>
 		
 		<field name="mobile" position="before">
