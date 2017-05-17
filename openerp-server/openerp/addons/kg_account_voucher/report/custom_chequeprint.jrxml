@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="custom_chequeprint" language="groovy" pageWidth="595" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="585" leftMargin="0" rightMargin="10" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="1.4641000000000015"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="cheque_id" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select to_char(entry_date::date,'ddmmyyyy') as voucher_date,
+
+substring(CAST(to_char(entry_date::date,'ddmmyyyy') as CHAR(8)), 1, 1) as d1,
+substring(CAST(to_char(entry_date::date,'ddmmyyyy') as CHAR(8)), 2, 1) as d2,
+substring(CAST(to_char(entry_date::date,'ddmmyyyy') as CHAR(8)), 3, 1) as m1,
+substring(CAST(to_char(entry_date::date,'ddmmyyyy') as CHAR(8)), 4, 1) as m2,
+substring(CAST(to_char(entry_date::date,'ddmmyyyy') as CHAR(8)), 5, 1) as y1,
+substring(CAST(to_char(entry_date::date,'ddmmyyyy') as CHAR(8)), 6, 1) as y2,
+substring(CAST(to_char(entry_date::date,'ddmmyyyy') as CHAR(8)), 7, 1) as y3,
+substring(CAST(to_char(entry_date::date,'ddmmyyyy') as CHAR(8)), 8, 1) as y4,
+cheque_in_favor as cheque_in_favor,
+trim(TO_CHAR(voucher_amt::float, '999G999G99G999G99G99G990D99')) AS voucher_amt,
+f_amount_to_words(voucher_amt,1)  as AMOUNT_IN_WORDS
+
+from
+account_voucher
+
+where
+
+state='posted' and sub_mode='cheque' and default_type = 'payment' and voucher_amt > 0.00 and payment_mode = 'bank' and
+id in (select sam::int from (
+select regexp_split_to_table($P{cheque_id}, ',') as sam) as sam)]]>
+	</queryString>
+	<field name="voucher_date" class="java.lang.String"/>
+	<field name="d1" class="java.lang.String"/>
+	<field name="d2" class="java.lang.String"/>
+	<field name="m1" class="java.lang.String"/>
+	<field name="m2" class="java.lang.String"/>
+	<field name="y1" class="java.lang.String"/>
+	<field name="y2" class="java.lang.String"/>
+	<field name="y3" class="java.lang.String"/>
+	<field name="y4" class="java.lang.String"/>
+	<field name="cheque_in_favor" class="java.lang.String"/>
+	<field name="voucher_amt" class="java.lang.String"/>
+	<field name="amount_in_words" class="java.lang.String"/>
+	<group name="ChequeDetails">
+		<groupExpression><![CDATA[]]></groupExpression>
+		<groupHeader>
+			<band height="237">
+				<textField isBlankWhenNull="true">
+					<reportElement x="28" y="33" width="399" height="25"/>
+					<textElement verticalAlignment="Middle">
+						<font fontName="SansSerif" size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cheque_in_favor}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="427" y="80" width="122" height="25"/>
+					<box leftPadding="20"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="SansSerif" size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{voucher_amt}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" x="44" y="58" width="383" height="50" isRemoveLineWhenBlank="true" forecolor="#000000"/>
+					<box topPadding="4" leftPadding="3"/>
+					<textElement verticalAlignment="Top" rotation="None" markup="none">
+						<font fontName="SansSerif" size="14" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{amount_in_words}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="431" y="0" width="18" height="27"/>
+					<box topPadding="0" bottomPadding="1"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="SansSerif" size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{d1}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="449" y="0" width="15" height="27"/>
+					<box bottomPadding="1"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="SansSerif" size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{d2}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="464" y="0" width="13" height="27"/>
+					<box bottomPadding="1"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="SansSerif" size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{m1}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="477" y="0" width="17" height="27"/>
+					<box bottomPadding="1"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="SansSerif" size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{m2}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="494" y="0" width="14" height="27"/>
+					<box leftPadding="5" bottomPadding="1"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="SansSerif" size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{y1}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="508" y="0" width="18" height="27"/>
+					<box leftPadding="8" bottomPadding="1"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="SansSerif" size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{y2}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="526" y="0" width="19" height="27"/>
+					<box leftPadding="3" bottomPadding="1"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="SansSerif" size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{y3}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="545" y="0" width="16" height="27"/>
+					<box leftPadding="2" bottomPadding="1"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="SansSerif" size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{y4}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="ChequeDetails2">
+		<groupExpression><![CDATA[]]></groupExpression>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<noData>
+		<band height="28">
+			<staticText>
+				<reportElement x="106" y="8" width="343" height="20"/>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Draft,receipt,other than bank record cannot be printed]]></text>
+			</staticText>
+		</band>
+	</noData>
+</jasperReport>

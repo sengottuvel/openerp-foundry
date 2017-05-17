@@ -709,14 +709,17 @@ class kg_payslip(osv.osv):
 											spec_amount_2 = ((((con_incs.base_amt/100)*con_incs.incentive_value) / 100) * laks) * 100 
 											spec_amount = spec_amount_2
 											print "________mid value_____________",spec_amount_2
-									print"************spec_amount",spec_amount
-									print"************spec_amount",spec_amount_2
-									spec_amount_1 += spec_amount
-									print "_______whole_____________",spec_amount_1
+										print"************spec_amount",spec_amount
+										print"************spec_amount",spec_amount_2
+										spec_amount_1 += spec_amount
+									else:
+										spec_amount_1 =0.00
+										print "_______whole_____________",spec_amount_1
 									if spec_amount_1 != 0.00:
 										final_amt =  ((spec_amount_1+con_incs.base_amt)/calulation_days)* wor_days
 									else:
 										final_amt = (con_incs.base_amt/calulation_days)* wor_days
+										final_amt = 0.00
 									if con_incs.start_value <= turn_over_amt and con_incs.criteria == 'non-hierarchy':
 										turn_ovr_per = laks*100
 										final_amt=(((con_incs.base_amt /100)*turn_ovr_per)/calulation_days)* wor_days
@@ -724,21 +727,8 @@ class kg_payslip(osv.osv):
 								if get_spl_inc:
 									get_spl_inc_rc = self.pool.get('hr.salary.rule').browse(cr,uid,get_spl_inc[0])
 									if get_spl_inc_rc.appears_on_payslip is True:
-										self.pool.get('hr.payslip.line').create(cr,uid,
-											{
-												'name':get_spl_inc_rc.name + ' ( ' + str(con_incs.start_value) + ' to ' + str(con_incs.end_value) + ' )' + ' Crs',
-												'code':get_spl_inc_rc.code,
-												'category_id':7,
-												'quantity':1,
-												'amount':final_amt,
-												'salary_rule_id':1,
-												'employee_id':emp_id,
-												'contract_id':con_ids[0],
-												'slip_id':slip_rec.id,
-												'spc_criteria':con_incs.criteria,
-											},context = None)
-									else:
-										self.pool.get('ch.other.salary.comp').create(cr,uid,
+										if spec_amount_1 != 0.00:
+											self.pool.get('hr.payslip.line').create(cr,uid,
 												{
 													'name':get_spl_inc_rc.name + ' ( ' + str(con_incs.start_value) + ' to ' + str(con_incs.end_value) + ' )' + ' Crs',
 													'code':get_spl_inc_rc.code,
@@ -750,7 +740,26 @@ class kg_payslip(osv.osv):
 													'contract_id':con_ids[0],
 													'slip_id':slip_rec.id,
 													'spc_criteria':con_incs.criteria,
-												},context = None)	
+												},context = None)
+										else:
+											pass
+									else:
+										if spec_amount_1 != 0.00:
+											self.pool.get('ch.other.salary.comp').create(cr,uid,
+													{
+														'name':get_spl_inc_rc.name + ' ( ' + str(con_incs.start_value) + ' to ' + str(con_incs.end_value) + ' )' + ' Crs',
+														'code':get_spl_inc_rc.code,
+														'category_id':7,
+														'quantity':1,
+														'amount':final_amt,
+														'salary_rule_id':1,
+														'employee_id':emp_id,
+														'contract_id':con_ids[0],
+														'slip_id':slip_rec.id,
+														'spc_criteria':con_incs.criteria,
+													},context = None)	
+										else:
+											pass
 					else:
 						raise osv.except_osv(_('Warning'),
 							_('Turn Over is not fixed for last month for Special Incentive Calculation !!'))				

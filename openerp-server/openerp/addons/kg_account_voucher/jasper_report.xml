@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>     
+
+
+		<report string="Cheque Print"
+        model="account.voucher"
+        auto="True"
+        name="onscreen_custom_cheque_print"
+        rml="kg_account_voucher/report/custom_chequeprint.jrxml"
+        id="cheque_jasper_report_menu" 
+        menu="True"
+        header="False"
+        />
+
+
+    </data>
+</openerp>
