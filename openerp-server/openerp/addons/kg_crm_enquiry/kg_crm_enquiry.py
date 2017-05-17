@@ -31,7 +31,7 @@ class kg_crm_enquiry(osv.osv):
 		
 		## Basic Info
 		
-		'name': fields.char('Enquiry No.', size=128,select=True),
+		'name': fields.char('Enquiry No.', size=128,select=True), 
 		'offer_date': fields.date('Enquiry Date',required=True,readonly=True, states={'draft':[('readonly',False)]}),
 		'note': fields.char('Notes',readonly=True, states={'draft':[('readonly',False)]}),
 		'service_det': fields.char('Service Details'),
