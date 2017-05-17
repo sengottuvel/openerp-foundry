@@ -31,7 +31,7 @@ class kg_crm_enquiry(osv.osv):
 		
 		## Basic Info
 		
-		'name': fields.char('Enquiry No.', size=128,select=True), 
+		'name': fields.char('Enquiry No.', size=128,select=True),
 		'offer_date': fields.date('Enquiry Date',required=True,readonly=True, states={'draft':[('readonly',False)]}),
 		'note': fields.char('Notes',readonly=True, states={'draft':[('readonly',False)]}),
 		'service_det': fields.char('Service Details'),
@@ -1509,7 +1509,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 										('dbbtb','Double Balanced Back to Back'),('ts','Tandem Seal'),
 										('dc','Double Cartridge'),('drsu','Dry Running - Single Unbalanced'),
 										('mbi','Metallic Bellow Inside'),('tbs','Teflon Bellow Seal-Outside Mounted Dry Running')],'Seal Type'),
-		'face_combination': fields.selection([('c_vs_sic','C VS SIC'),('sic_vs_sic','SIC VS SIC'),('c_vs_sic','SIC VS SIC / C VS SIC'),('gft_vs_ceramic','GFT VS CERAMIC')],'Face Combination'),
+		'face_combination': fields.selection([('c_vs_sic','C VS SIC'),('sic_vs_sic','SIC VS SIC'),('c_vs_sic','SIC VS SIC / C VS SIC'),('gft_vs_ceramic','GFT VS CERAMIC'),('corbon_tc','CORBON / TC')],'Face Combination'),
 		'gland_plate': fields.char('Gland Plate'),
 		'api_plan': fields.char('API Plan'),
 		
