@@ -242,6 +242,17 @@ class kg_work_order(osv.osv):
 	def mkt_approve(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'draft':
+			
+			# Customer TIN No validation start
+			if entry.partner_id.tin_no:
+				if len(str(entry.partner_id.tin_no)) == 11 and entry.partner_id.tin_no.isdigit() == True:
+					pass
+				else:
+					raise osv.except_osv(_('Warning!'),_('TIN No. should contain 11 digit numerics. Else system not allow to save.!'))
+			else:
+				raise osv.except_osv(_('Warning!'),_('Update TIN no. in Customer master and Proceed for approval!'))
+			# Customer TIN No validation end
+			
 			self.write(cr,uid,ids,{'state':'mkt_approved','design_flag':True})
 		return True
 		
