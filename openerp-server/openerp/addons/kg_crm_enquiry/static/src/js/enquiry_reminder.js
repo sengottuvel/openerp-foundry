@@ -14,7 +14,7 @@ var QWeb = instance.web.qweb;
         },
         start: function (ids) {
 			var self = this;
-			var model= new instance.web.Model("kg.popup")
+			var model= new instance.web.Model("kg.crm.enquiry")
 			model.call("get_enquiry_reminder_data",[ids]).then(function (i) {
 				var title="<div class='grad3'><center><font color='white'>Enquiry Reminders</font></center></div>"
 				var body="<div class='sub'>"+
