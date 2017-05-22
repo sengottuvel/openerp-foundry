@@ -56,6 +56,7 @@ class kg_crm_enquiry(osv.osv):
 		'industry_id': fields.many2one('kg.industry.master','Sector',readonly=True, states={'draft':[('readonly',False)]}),
 		'expected_value': fields.float('Expected Value',readonly=True, states={'draft':[('readonly',False)]}),
 		'del_date': fields.date('Expected Delivery Date',readonly=True, states={'draft':[('readonly',False)]}),
+		'reminder_date': fields.date('Reminder Date',readonly=True, states={'draft':[('readonly',False)]}),
 		'purpose': fields.selection(PURPOSE_SELECTION,'Purpose',readonly=True, states={'draft':[('readonly',False)]}),
 		'capacity': fields.float('Capacity'),
 		'head': fields.float('Head'),
@@ -78,11 +79,13 @@ class kg_crm_enquiry(osv.osv):
 		'transmision': fields.selection([('cpl','Coupling'),('belt','Belt Drive'),('fc','Fluid Coupling'),('gear_box','Gear Box'),('fc_gear_box','Fluid Coupling With Gear Box')],'Transmision', required=True),
 		'acces': fields.selection([('yes','Yes'),('no','No')],'Accessories'),
 		'flag_data_bank': fields.boolean('Is Data WO',readonly=True, states={'draft':[('readonly',False)]}),
+		'enq_status': fields.selection([('on_hold','On Hold'),('closed','Closed'),('to_be_follow','To be Followed')],'Enquiry Status',readonly=True, states={'draft':[('readonly',False)]}),
 		
 		## Child Tables Declaration
 		
 		'line_ids': fields.one2many('ch.kg.crm.enquiry', 'header_id', "Child Enquiry"),
 		'ch_line_ids': fields.one2many('ch.kg.crm.pumpmodel', 'header_id', "Pump/Spare Details",readonly=True, states={'draft':[('readonly',False)]}),
+		'ch_line_ids_a': fields.one2many('ch.crm.enq.remark', 'header_id', "Remarks",readonly=True, states={'draft':[('readonly',False)]}),
 		
 		### Entry Info ####
 		
@@ -116,6 +119,7 @@ class kg_crm_enquiry(osv.osv):
 		'revision': 0,
 		'wo_flag': False,
 		'flag_data_bank': False,
+		'enq_status': 'to_be_follow',
 		#~ 'division_id':_get_default_division,
 		#~ 'due_date' : lambda * a: time.strftime('%Y-%m-%d'),
 		
@@ -246,6 +250,13 @@ class kg_crm_enquiry(osv.osv):
 		if entry.entry_mode == 'manual':
 			if not entry.ch_line_ids:
 				return False
+		if entry.enq_status in ('on_hold','closed'):
+			if not entry.ch_line_ids_a:
+				raise osv.except_osv(_('Warning!'),_('You cannot save without Remarks'))
+			for item in entry.ch_line_ids_a:
+				name_special_char = ''.join(c for c in item.remarks if c in '!@#$%^~*{}?+/=')
+				if name_special_char:
+					raise osv.except_osv(_('Warning!'),_('Special Character Not Allowed in Remarks!'))
 		return True
 	
 	def _Validation(self, cr, uid, ids, context=None):
@@ -377,6 +388,21 @@ class kg_crm_enquiry(osv.osv):
 					  'target'   : 'current',
 					  'url'	  : url
 			   }
+	
+	def get_enquiry_reminder_data(self,cr,uid,ids,context=None):
+		enq_data = []
+		cr.execute("""select
+					(case when enq.name is not null then enq.name else ' ' end) as enq_no,
+					cust.name as customer,
+					to_char(enq.reminder_date, 'dd/mm/yyyy') as reminder_date
+					
+					from kg_crm_enquiry enq
+					
+					left join res_partner cust on(cust.id=enq.customer_id)
+					where enq.reminder_date = current_date and enq.enq_status = 'to_be_follow' """)
+		enq_data = cr.fetchall();
+		print"enq_dataenq_data",enq_data
+		return enq_data
 	
 	def _prime_cost_calculation(self,cr,uid,item_type,pattern_id,ms_id,bot_id,moc_const_id,moc_id,brand_id,context=None):
 		prime_cost = 0.00
@@ -1611,7 +1637,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 	def _check_access(self, cr, uid, ids, context=None):
 		rec = self.browse(cr, uid, ids[0])
 		if rec.acces == 'yes' and not rec.line_ids_access_a:
-			if rec.purpose_categ in ('pump','spare'):
+			if rec.purpose_categ in ('pump','spare','pump_spare','access'):
 				raise osv.except_osv(_('Warning!'),
 					_('%s You cannot save without accessories'%(rec.pump_id.name)))
 		return True
@@ -1621,7 +1647,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		if rec.acces == 'yes' and rec.line_ids_access_a:
 			for item in rec.line_ids_access_a:
 				if item.qty == 0:
-					if rec.purpose_categ in ('pump','spare'):
+					if rec.purpose_categ in ('pump','spare','pump_spare','access'):
 						raise osv.except_osv(_('Warning!'),
 							_('%s %s You cannot save with zero qty'%(rec.pump_id.name,item.access_id.name)))
 		return True
@@ -2822,7 +2848,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 					cr.execute(''' 
 								
 								-- Bed Assembly ----
-								select id,bot_id,qty,position_id,header_id as bom_id
+								select id,bot_id,position_id,qty,header_id as bom_id
 								from ch_bot_details
 								where header_id =
 								(
@@ -3851,3 +3877,19 @@ class ch_crm_access_bot(osv.osv):
 		return {'value': value}
 	
 ch_crm_access_bot()
+
+class ch_crm_enq_remark(osv.osv):
+	
+	_name = "ch.crm.enq.remark"
+	_description = "Ch CRM Enq Remark"
+	
+	_columns = {
+		
+		## Basic Info
+		
+		'header_id':fields.many2one('kg.crm.enquiry', 'Enqiry No.', ondelete='cascade'),
+		'remarks':fields.text('Remarks'),
+		
+	}
+	
+ch_crm_enq_remark()
