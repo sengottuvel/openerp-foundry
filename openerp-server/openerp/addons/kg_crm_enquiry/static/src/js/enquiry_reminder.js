@@ -26,7 +26,7 @@ var QWeb = instance.web.qweb;
 					//To perform only if it contains to display as pop
 					var body_1 = ''
 					for(var m=0;m<n;m++) {
-						body_1 += "<tr><td>"+i[m][0]+"</td><td>"+i[m][1]+"</td><td>"+i[m][2]+"</td><td>"+i[m][3]+"</td><td>"+i[m][4]+"</td><td>"+i[m][5]+"</td></tr>"
+						body_1 += "<tr><td>"+i[m][0]+"</td><td>"+i[m][1]+"</td></tr>"
 					}
 					body_1 += "</table>"+
 								"</div>"
