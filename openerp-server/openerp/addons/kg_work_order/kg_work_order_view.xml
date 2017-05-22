@@ -221,6 +221,7 @@
 								<tree string="BOM Details" editable="bottom" colors="red:mar_prime_cost &lt; wo_prime_cost;" >
 								   <field name="order_category" invisible="1"/>
 								   <field name="flag_applicable"/>
+								   <field name="sequence_no" attrs="{'required': [('order_category','=','spare'),('flag_applicable','!=',False)],'readonly': [('order_category','!=','spare')]}"/>
 								   <field name="pattern_id"/>
 								   <field name="pattern_name" readonly="1"/>
 								   <field name="position_id"/>
@@ -253,6 +254,7 @@
 								<tree string="Order Machine Shop Details Entry Tree" editable="bottom" colors="red:mar_prime_cost &lt; wo_prime_cost;">
 									<field name="order_category" invisible="1"/>
 									<field name="flag_applicable"/>
+									<field name="sequence_no" attrs="{'required': [('order_category','=','spare'),('flag_applicable','!=',False)],'readonly': [('order_category','!=','spare')]}"/>
 									<field name="ms_id"/>		
 									<field name="name" readonly="1"/>
 									<field name="position_id"/>
@@ -278,6 +280,7 @@
 								<tree string="Order BOT Details Entry Tree" editable="bottom" colors="red:mar_prime_cost &lt; wo_prime_cost;">	
 									<field name="order_category" invisible="1"/>
 									<field name="flag_applicable"/>
+									<field name="sequence_no" attrs="{'required': [('order_category','=','spare'),('flag_applicable','!=',False)],'readonly': [('order_category','!=','spare')]}"/>
 									<field name="bot_id" on_change="onchange_bot(bot_id)"/>	
 									<field name="item_name" readonly="1"/>
 									<field name="position_id"/>

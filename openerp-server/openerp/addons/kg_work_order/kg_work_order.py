@@ -2469,6 +2469,8 @@ class ch_order_bom_details(osv.osv):
 		'mar_prime_cost': fields.float('Marketing PC'),
 		'flag_trimming_dia': fields.boolean('Trimming Dia'),
 		'material_code': fields.char('Material Code'),
+		
+		'sequence_no': fields.integer('Sequence No.'),
 	
 	}
 	
@@ -2587,6 +2589,8 @@ class ch_order_machineshop_details(osv.osv):
 		'mar_prime_cost': fields.float('Marketing PC'),
 		'material_code': fields.char('Material Code'),
 		'flag_dynamic_length': fields.boolean('Dynamic Length'), 
+		
+		'sequence_no': fields.integer('Sequence No.'),
 	
 	}  
 	
@@ -2643,6 +2647,8 @@ class ch_order_bot_details(osv.osv):
 		'wo_prime_cost': fields.float('WO PC'),
 		'mar_prime_cost': fields.float('Marketing PC'),
 		'material_code': fields.char('Material Code'),
+		
+		'sequence_no': fields.integer('Sequence No.'),
 		
 	
 	}
