@@ -110,6 +110,7 @@ class kg_crm_offer(osv.osv):
 		'industry_id': fields.many2one('kg.industry.master','Sector'),
 		'expected_value': fields.float('Expected Value'),
 		'del_date': fields.date('Expected Del Date'),
+		'reminder_date': fields.date('Reminder Date',readonly=True, states={'draft':[('readonly',False)]}),
 		'purpose': fields.selection(PURPOSE_SELECTION,'Purpose'),
 		'chemical_id': fields.many2one('kg.chemical.master','Chemical',domain=[('purpose','=','general')]),
 		'pump_id': fields.many2one('kg.pumpmodel.master','Pump Name'),
@@ -144,6 +145,7 @@ class kg_crm_offer(osv.osv):
 		'o_insurance_in_ex': fields.selection([('inclusive','Inclusive'),('exclusive','Exclusive')],'Insurance',readonly=True, states={'draft':[('readonly',False)]}),
 		'o_customer_discount': fields.float('Customer Discount(%)',readonly=True, states={'draft':[('readonly',False)]}),
 		'o_tax': fields.float('Tax(%)',readonly=True, states={'draft':[('readonly',False)]}),
+		'off_status': fields.selection([('on_hold','On Hold'),('closed','Closed'),('to_be_follow','To be Followed')],'Offer Status',readonly=False,states={'wo_created':[('readonly',True)],'wo_released':[('readonly',True)]}),
 		
 		# Pump Offer Fields
 		'pump_tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),	
@@ -188,8 +190,9 @@ class kg_crm_offer(osv.osv):
 		'line_accessories_ids': fields.one2many('ch.accessories.offer', 'header_id', "Accessories Offer"),
 		'line_supervision_ids': fields.one2many('ch.supervision.offer', 'header_id', "Supervision Charge"),
 		'line_term_ids': fields.one2many('ch.term.offer', 'header_id', "Term Offer"),
+		'line_remark_ids': fields.one2many('ch.crm.off.remark', 'header_id', "Remarks",readonly=True, states={'draft':[('readonly',False)]}),
 		
-		### Entry Info ####
+		## Entry Info
 		
 		'active': fields.boolean('Active'),
 		'company_id': fields.many2one('res.company', 'Company Name',readonly=True),
@@ -202,7 +205,7 @@ class kg_crm_offer(osv.osv):
 		'update_date': fields.datetime('Last Updated Date', readonly=True),
 		'update_user_id': fields.many2one('res.users', 'Last Updated By', readonly=True),	   
 		
-		# Offer Copy 
+		## Offer Copy 
 		
 		'rep_data':fields.binary("Offer Copy",readonly=True),
 		'term_data':fields.binary("Terms Copy",readonly=True),
@@ -210,7 +213,7 @@ class kg_crm_offer(osv.osv):
 	}
 	
 	_defaults = {
-	
+		
 		'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg_crm_offer', context=c),
 		'enquiry_date': lambda * a: time.strftime('%Y-%m-%d'),
 		'offer_date': lambda * a: time.strftime('%Y-%m-%d'),
@@ -228,6 +231,7 @@ class kg_crm_offer(osv.osv):
 		'revision': 0,
 		'is_zero_offer': False,
 		'flag_data_bank': False,
+		'off_status': 'to_be_follow',
 		
 	}
 	
@@ -249,8 +253,14 @@ class kg_crm_offer(osv.osv):
 		rec = self.browse(cr, uid, ids[0])
 		if rec.line_supervision_ids:
 			if len(rec.line_supervision_ids) > 1:
-				raise osv.except_osv(_('Warning!'),
-					_('Supervision more than one not allowed!!'))
+				raise osv.except_osv(_('Warning!'),_('Supervision more than one not allowed!!'))
+		if rec.off_status in ('on_hold','closed'):
+			if not rec.line_remark_ids:
+				raise osv.except_osv(_('Warning!'),_('You cannot save without Remarks'))
+			for item in rec.line_remark_ids:
+				name_special_char = ''.join(c for c in item.remarks if c in '!@#$%^~*{}?+/=')
+				if name_special_char:
+					raise osv.except_osv(_('Warning!'),_('Special Character Not Allowed in Remarks!'))
 		return True
 		
 	def _exceed_discount(self, cr, uid, ids, context=None):		
@@ -328,7 +338,24 @@ class kg_crm_offer(osv.osv):
 		(_supervision, 'Supervision more than one not allowed!', ['']),
 		(_exceed_discount, 'Discount more than confirgured not allowed!', ['']),
 		]
-			
+	
+	def get_offer_reminder_data(self,cr,uid,ids,context=None):
+		off_data = []
+		cr.execute("""select
+					(case when enq.name is not null then enq.name else ' ' end) as enq_no,
+					(case when offer.name is not null then offer.name else ' ' end) as offer_no,
+					cust.name as customer,
+					to_char(offer.reminder_date, 'dd/mm/yyyy') as reminder_date
+
+					from kg_crm_offer offer
+
+					left join kg_crm_enquiry enq on(enq.id=offer.enquiry_id)
+					left join res_partner cust on(cust.id=offer.customer_id)
+					where offer.reminder_date = current_date and offer.off_status = 'to_be_follow' """)
+		off_data = cr.fetchall();
+		print"off_dataoff_data",off_data
+		return off_data
+	
 	def send_by_email(self, cr, uid, ids, context=None):
 		'''
 		This function opens a window to compose an email, with the edi purchase template message loaded by default
@@ -363,17 +390,16 @@ class kg_crm_offer(osv.osv):
 			'target': 'new',
 			'context': ctx,
 		}
-		
+	
 	def unlink(self,cr,uid,ids,context=None):
 		unlink_ids = []	 
 		for rec in self.browse(cr,uid,ids): 
 			if rec.state != 'draft':			
-				raise osv.except_osv(_('Warning!'),
-						_('You can not delete this entry !!'))
+				raise osv.except_osv(_('Warning!'),_('You can not delete this entry !!'))
 			else:
 				unlink_ids.append(rec.id)
 		return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
-		
+	
 	def write(self, cr, uid, ids, vals, context=None):
 		vals.update({'update_date': time.strftime('%Y-%m-%d %H:%M:%S'),'update_user_id':uid})
 		return super(kg_crm_offer, self).write(cr, uid, ids, vals, context)
@@ -437,7 +463,7 @@ class kg_crm_offer(osv.osv):
 										'confirm_date': time.strftime('%Y-%m-%d %H:%M:%S')
 									})
 		return True
-		
+	
 	def entry_wfa_md(self,cr,uid,ids,context=None):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state == 'moved_to_offer':
@@ -453,8 +479,7 @@ class kg_crm_offer(osv.osv):
 				if user_rec.special_approval == True:
 					self.write(cr, uid, ids, {'state': 'approved_md'})
 				else:
-					raise osv.except_osv(_('Warning'),
-						_('It should be approved by special approver'))
+					raise osv.except_osv(_('Warning'),_('It should be approved by special approver'))
 		return True
 	
 	def entry_reject_md(self,cr,uid,ids,context=None):
@@ -473,8 +498,7 @@ class kg_crm_offer(osv.osv):
 				#~ wo_id = wo_obj.search(cr,uid,[('offer_id','=',entry.id),('state','not in',('draft','cancel'))])
 				wo_id = wo_obj.search(cr,uid,[('offer_no','=',entry.name),('state','not in',('draft','cancel'))])
 				if wo_id:
-					raise osv.except_osv(_('Warning!'),
-						_('You can not delete this entry because WO confirmed!'))
+					raise osv.except_osv(_('Warning!'),_('You can not delete this entry because WO confirmed!'))
 			
 			if entry.wo_flag == False:
 				revision = entry.revision + 1
@@ -509,13 +533,11 @@ class kg_crm_offer(osv.osv):
 		entry = self.browse(cr,uid,ids[0])
 		if entry.state in ('moved_to_offer','approved_md') and entry.revision == 0 and entry.purpose not in ('in_development'):
 			if not entry.customer_po_no:
-				raise osv.except_osv(_('Warning!'),
-					_('Update Customer PO No.'))
+				raise osv.except_osv(_('Warning!'),_('Update Customer PO No.'))
 			if entry.ref_mode == 'dealer':
 				if not entry.dealer_po_no:
-					raise osv.except_osv(_('Warning!'),
-						_('Update Dealer PO No.'))
-
+					raise osv.except_osv(_('Warning!'),_('Update Dealer PO No.'))
+			
 			wo_id = self.pool.get('kg.work.order').create(cr,uid,{'order_category': entry.purpose,
 																  'name': '',
 																  'order_priority': '',
@@ -2764,3 +2786,19 @@ class kg_mail_compose_message(osv.osv):
 		return True
 	
 kg_mail_compose_message()
+
+class ch_crm_off_remark(osv.osv):
+	
+	_name = "ch.crm.off.remark"
+	_description = "Ch CRM Off Remark"
+	
+	_columns = {
+		
+		## Basic Info
+		
+		'header_id':fields.many2one('kg.crm.offer', 'Offer No.', ondelete='cascade'),
+		'remarks':fields.text('Remarks'),
+		
+	}
+	
+ch_crm_off_remark()

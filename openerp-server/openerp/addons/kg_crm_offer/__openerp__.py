@@ -13,7 +13,9 @@
     'data': [
 				'kg_crm_offer_view.xml','jasper_report.xml',
 			],
-    'css': ['static/src/css/state.css'], 
+    'js': ['static/src/js/offer_reminder.js'],
+    'qweb': ['static/src/xml/offer_reminder.xml'],
+    'css' : ['static/src/css/offer_reminder.css'],
     'auto_install': False,
     'installable': True,
     

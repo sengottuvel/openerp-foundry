@@ -41,7 +41,7 @@
 							</group>											
 							<group>
 								<field name="enquiry_id" readonly="1" invisible="1"/>
-								<field name="enquiry_no" readonly="1"/>
+								<field name="enquiry_no" readonly="1" widget = "offer_reminder"/>
 								<field name="enquiry_date" readonly="1"/>
 								<field name="due_date" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
 								<field name="del_date" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
@@ -51,6 +51,8 @@
 								<field name="excise_duty"/>	
 								<field name="drawing_approval"/>	
 								<field name="l_d_clause"/>	
+								<field name="off_status"/>
+								<field name="reminder_date" attrs="{'invisible': [('off_status','!=','to_be_follow')]}" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
 								<field name="state" style="width: 30%%" class="att_state_change" readonly="1"/>
 								<field name="rep_data" readonly="1" width="100" filename="offer_copy"/>
 								<field name="term_data" readonly="1" width="100" filename="term_copy"/>
@@ -70,8 +72,8 @@
 								<label for="o_p_f" string="P&amp;F"/>
 								<div>
 									<div class="address_format">
-										<field name="o_p_f" style="width: 18%%"/>
-										<field name="o_p_f_in_ex" style="width: 16%%" attrs="{'required': [('o_p_f','>',0)]}"/>
+										<field name="o_p_f" style="width: 20%%"/>
+										<field name="o_p_f_in_ex" style="width: 18%%" attrs="{'required': [('o_p_f','>',0)]}"/>
 									</div>
 								</div>
 							</group>
@@ -81,15 +83,15 @@
 								<label for="o_freight" string="Freight"/>
 								<div>
 									<div class="address_format">
-										<field name="o_freight" style="width: 19%%"/>
-										<field name="o_freight_in_ex" style="width: 17%%" attrs="{'required': [('o_freight','>',0)]}"/>
+										<field name="o_freight" style="width: 21%%"/>
+										<field name="o_freight_in_ex" style="width: 19%%" attrs="{'required': [('o_freight','>',0)]}"/>
 									</div>
 								</div>
 								<label for="o_insurance" string="Insurance"/>
 								<div>
 									<div class="address_format">
-										<field name="o_insurance" style="width: 19%%"/>
-										<field name="o_insurance_in_ex" style="width: 17%%" attrs="{'required': [('o_insurance','>',0)]}"/>
+										<field name="o_insurance" style="width: 21%%"/>
+										<field name="o_insurance_in_ex" style="width: 19%%" attrs="{'required': [('o_insurance','>',0)]}"/>
 									</div>
 								</div>
 								<field name="o_customer_discount"/>
@@ -270,6 +272,13 @@
 								<tree string="Term History" editable="top">
 									<field name="term_id" required="1" on_change="onchange_term(term_id)"/>
 									<field name="term" required="1"/>
+								</tree>
+							</field>
+						</group>
+						<group string="Remarks" attrs="{'invisible': [('off_status','not in',('on_hold','closed'))],'required': [('enq_status','in',('on_hold','closed'))]}">
+							<field name="line_remark_ids" colspan="4" nolabel="1" widget="one2many_selectable">
+								<tree string="Term History" editable="top">
+									<field name="remarks" required="1"/>
 								</tree>
 							</field>
 						</group>
