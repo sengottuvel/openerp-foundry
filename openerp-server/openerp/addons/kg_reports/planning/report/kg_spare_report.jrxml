@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Workorder_print" pageWidth="842" pageHeight="605" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="0.8857805000000005"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="99"/>
+	<property name="ireport.y" value="277"/>
 	<subDataset name="dataset2">
 		<parameter name="header_id" class="java.lang.Integer"/>
 		<queryString>
@@ -26,7 +26,10 @@
 	<subDataset name="dataset3">
 		<parameter name="header_id" class="java.lang.Integer"/>
 		<queryString>
-			<![CDATA[SELECT
+			<![CDATA[SELECT company_name,date,wo_no,pump_type,trimming_dia,flange_name,pattern_check,position_no,drawing_no,mtl_form,material_code,pattern_no,csd_no,pattern_name,moc_name,weight_kg,qty,uom,sequence_no,
+ case when ((row_number() OVER (PARTITION by sequence_no)) = 1 ) then sequence_no else null end as ref_seq_no,
+remarks from (
+SELECT
 company.name as company_name,
 to_char(CURRENT_DATE::date,'dd-mm-YYYY') as date,
 work_order.order_no as wo_no,
@@ -56,6 +59,7 @@ moc.name as moc_name,
 trim(TO_CHAR(ch_bom.weight::float, '999G999G99G999G99G99G990D99'))  as weight_kg,
 ch_bom.qty as qty,
 'Nos' as uom,
+ch_bom.sequence_no as sequence_no,
 ch_bom.add_spec as remarks
 
 FROM ch_work_order_details work_order
@@ -91,7 +95,7 @@ else position_num.drawing_no end as drawing_no,
 case
 when ch_machineshop.material_code is null then '-'
 else ch_machineshop.material_code end as material_code,
-'-' as pattern_no,
+machine.code as pattern_no,
 case
 when machine.csd_code is null then '-'
 else machine.csd_code end as csd_no,
@@ -102,6 +106,7 @@ trim(TO_CHAR('0.00'::float, '999G999G99G999G99G99G990D99'))  as weight_kg,
 
 ch_machineshop.qty as qty,
 'Nos' as uom,
+ch_machineshop.sequence_no as sequence_no,
 ch_machineshop.remarks as remarks
 
 FROM ch_work_order_details work_order
@@ -137,8 +142,7 @@ flange.name as flange_name,
 case
 when ch_bot.material_code is null then '-'
 else ch_bot.material_code end as material_code,
-
-'-' as pattern_no,
+machine.code as pattern_no,
 case
 when machine.csd_code is null then '-'
 else machine.csd_code end as csd_no,
@@ -149,6 +153,7 @@ trim(TO_CHAR('0.00'::float, '999G999G99G999G99G99G990D99'))  as weight_kg,
 
 ch_bot.qty as qty,
 'Nos' as uom,
+ch_bot.sequence_no as sequence_no,
 ch_bot.remarks as remarks
 
 FROM ch_work_order_details work_order
@@ -165,7 +170,8 @@ where ch_bot.flag_applicable = True and
 
 work_order.id = $P{header_id}
 
-order by wo_no]]>
+order by sequence_no
+) as sample]]>
 		</queryString>
 		<field name="company_name" class="java.lang.String"/>
 		<field name="date" class="java.lang.String"/>
@@ -185,6 +191,8 @@ order by wo_no]]>
 		<field name="weight_kg" class="java.lang.String"/>
 		<field name="qty" class="java.lang.Integer"/>
 		<field name="uom" class="java.lang.String"/>
+		<field name="sequence_no" class="java.lang.Integer"/>
+		<field name="ref_seq_no" class="java.lang.Integer"/>
 		<field name="remarks" class="java.lang.String"/>
 	</subDataset>
 	<parameter name="type" class="java.lang.Integer"/>
@@ -548,7 +556,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 				</textField>
 				<image>
 					<reportElement x="87" y="1" width="69" height="31"/>
-					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
+					<imageExpression><![CDATA["/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
 				</image>
 				<staticText>
 					<reportElement mode="Transparent" x="421" y="115" width="224" height="21" isRemoveLineWhenBlank="true"/>
@@ -1074,35 +1082,28 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA["DT:"]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true">
-					<reportElement stretchType="RelativeToTallestObject" x="569" y="80" width="63" height="20"/>
+					<reportElement stretchType="RelativeToTallestObject" x="520" y="80" width="112" height="20"/>
 					<textElement textAlignment="Center">
 						<font size="10" isBold="true"/>
 					</textElement>
-					<textFieldExpression><![CDATA["PAT.NO"]]></textFieldExpression>
+					<textFieldExpression><![CDATA["PAT.NO/Size"]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true">
-					<reportElement stretchType="RelativeToTallestObject" x="133" y="80" width="118" height="20"/>
+					<reportElement stretchType="RelativeToTallestObject" x="133" y="80" width="140" height="20"/>
 					<textElement textAlignment="Center">
 						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["PART NAME"]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true">
-					<reportElement stretchType="RelativeToTallestObject" x="455" y="80" width="114" height="20"/>
+					<reportElement stretchType="RelativeToTallestObject" x="406" y="80" width="114" height="20"/>
 					<textElement textAlignment="Center">
 						<font size="10" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA["MOC"]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true">
-					<reportElement stretchType="RelativeToTallestObject" x="407" y="80" width="48" height="20"/>
-					<textElement textAlignment="Center">
-						<font size="10" isBold="true"/>
-					</textElement>
-					<textFieldExpression><![CDATA["Weight in KG"]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true">
-					<reportElement stretchType="RelativeToTallestObject" x="251" y="80" width="30" height="20"/>
+					<reportElement stretchType="RelativeToTallestObject" x="273" y="80" width="59" height="20"/>
 					<textElement textAlignment="Center">
 						<font size="10" isBold="true"/>
 					</textElement>
@@ -1151,13 +1152,6 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textFieldExpression><![CDATA["MTL. Form"]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true">
-					<reportElement stretchType="RelativeToTallestObject" x="281" y="80" width="49" height="20"/>
-					<textElement textAlignment="Center">
-						<font size="10" isBold="true"/>
-					</textElement>
-					<textFieldExpression><![CDATA["Drawing No."]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true">
 					<reportElement stretchType="RelativeToTallestObject" x="1" y="80" width="33" height="20"/>
 					<textElement textAlignment="Center">
 						<font size="10" isBold="true"/>
@@ -1204,7 +1198,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<textFieldExpression><![CDATA[$F{position_no}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="569" y="0" width="63" height="20"/>
+								<reportElement stretchType="RelativeToTallestObject" x="520" y="0" width="112" height="20"/>
 								<box topPadding="3"/>
 								<textElement textAlignment="Center">
 									<font size="10"/>
@@ -1212,7 +1206,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<textFieldExpression><![CDATA[$F{pattern_no}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="133" y="0" width="118" height="20" isPrintWhenDetailOverflows="true"/>
+								<reportElement stretchType="RelativeToTallestObject" x="133" y="0" width="140" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="3"/>
 								<textElement textAlignment="Center">
 									<font size="10"/>
@@ -1220,7 +1214,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<textFieldExpression><![CDATA[$F{pattern_name}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="251" y="0" width="30" height="20" isPrintWhenDetailOverflows="true"/>
+								<reportElement stretchType="RelativeToTallestObject" x="273" y="0" width="59" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="3"/>
 								<textElement textAlignment="Center">
 									<font size="10"/>
@@ -1228,15 +1222,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<textFieldExpression><![CDATA[$F{qty}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="407" y="0" width="48" height="20" isPrintWhenDetailOverflows="true"/>
-								<box topPadding="3"/>
-								<textElement textAlignment="Center">
-									<font size="10"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$F{weight_kg}]]></textFieldExpression>
-							</textField>
-							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="455" y="0" width="114" height="20" isPrintWhenDetailOverflows="true"/>
+								<reportElement stretchType="RelativeToTallestObject" x="406" y="0" width="114" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="3"/>
 								<textElement textAlignment="Center">
 									<font size="10"/>
@@ -1260,15 +1246,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<textFieldExpression><![CDATA[$F{material_code}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="281" y="0" width="49" height="20" isPrintWhenDetailOverflows="true"/>
-								<box topPadding="3"/>
-								<textElement textAlignment="Center">
-									<font size="10"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$F{drawing_no}]]></textFieldExpression>
-							</textField>
-							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToTallestObject" x="332" y="0" width="74" height="20" isPrintWhenDetailOverflows="true"/>
+								<reportElement stretchType="RelativeToTallestObject" x="330" y="0" width="77" height="20" isPrintWhenDetailOverflows="true"/>
 								<box topPadding="3"/>
 								<textElement textAlignment="Center">
 									<font size="10"/>
@@ -1281,7 +1259,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 								<textElement textAlignment="Center">
 									<font size="10"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{ref_seq_no}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 								<reportElement stretchType="RelativeToTallestObject" x="34" y="0" width="53" height="20" isPrintWhenDetailOverflows="true"/>
