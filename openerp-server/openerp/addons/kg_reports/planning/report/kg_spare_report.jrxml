@@ -556,7 +556,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 				</textField>
 				<image>
 					<reportElement x="87" y="1" width="69" height="31"/>
-					<imageExpression><![CDATA["/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
+					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
 				</image>
 				<staticText>
 					<reportElement mode="Transparent" x="421" y="115" width="224" height="21" isRemoveLineWhenBlank="true"/>
