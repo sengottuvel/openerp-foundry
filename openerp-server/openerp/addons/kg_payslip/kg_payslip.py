@@ -839,6 +839,43 @@ class kg_payslip(osv.osv):
 				
 				#### Creation of Marketing Incentive for the employee ####
 				
+				#### Creation of Marketing Special Incentive for the employee ####
+				
+				mar_spl_inc_id = self.pool.get('ch.kg.contract.salary').search(cr,uid,[('header_id_salary','=',con_ids[0]),('salary_type','=',43)])
+				mar_spl_inc_pay_id = self.pool.get('hr.payslip.line').search(cr,uid,[('code','=','SPLINCMKG'),('slip_id','=',slip_rec.id)])
+				mar_spl_inc_pay_id_othr = self.pool.get('ch.other.salary.comp').search(cr,uid,[('code','=','SPLINCMKG'),('slip_id','=',slip_rec.id)])
+				if mar_spl_inc_id:
+					mar_spl_inc_rec = self.pool.get('ch.kg.contract.salary').browse(cr,uid,mar_spl_inc_id[0])
+					print "Marketing Special Incentive in Contract Master ",mar_spl_inc_rec.salary_amt
+					cal_days = salary_days - leave_days
+					if (absent+leave_days) >= 2:
+						wor_days =  cal_days + 2
+						print "Leave Exceeded",wor_days
+					else:
+						wor_days = salary_days + absent
+						print "Leaves within consideration",wor_days
+					mar_spl_inc_val = (mar_spl_inc_rec.salary_amt/calulation_days)*wor_days
+					print "Net Marketing Special Incentive value(Calculated)",mar_spl_inc_val
+					if mar_spl_inc_pay_id:
+						mar_spl_inc_pay_rec = self.pool.get('hr.payslip.line').browse(cr,uid,mar_spl_inc_pay_id[0])
+						self.pool.get('hr.payslip.line').write(cr,uid,mar_spl_inc_pay_rec.id,
+											{
+												'amount':mar_spl_inc_val,
+											})
+					elif mar_spl_inc_pay_id_othr:
+						print "********************************"
+						mar_spl_inc_pay_rec_othr = self.pool.get('ch.other.salary.comp').browse(cr,uid,mar_spl_inc_pay_id_othr[0])
+						self.pool.get('ch.other.salary.comp').write(cr,uid,mar_spl_inc_pay_rec_othr.id,
+											{
+												'amount':mar_spl_inc_val,
+											})
+					else:
+						pass
+				else:
+					pass
+				
+				#### Creation of Marketing Special Incentive for the employee ####
+				
 				#### Creation of Incentive for the employee ####	
 				
 				#### Creation of attendance bonus ##########
