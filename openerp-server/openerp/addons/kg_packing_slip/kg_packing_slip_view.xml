@@ -49,6 +49,8 @@
 								   <field name="description" readonly="1"/>
 								   <field name="material_code" readonly="1"/>
 								   <field name="moc_id" readonly="1"/>
+								   <field name="total_qty" readonly="1"/>
+								   <field name="packed_qty" readonly="1"/>
 								   <field name="qty" required="1"/>
 								   <field name="remarks" widget="char"/>
 								</tree>
@@ -61,6 +63,8 @@
 								   <field name="description" readonly="1"/>
 								   <field name="material_code" readonly="1"/>
 								   <field name="moc_id" readonly="1"/>
+								   <field name="total_qty" readonly="1"/>
+								   <field name="packed_qty" readonly="1"/>
 								   <field name="qty" required="1"/>
 								   <field name="remarks" widget="char"/>
 								</tree>
@@ -73,6 +77,8 @@
 								   <field name="description" readonly="1"/>
 								   <field name="material_code" readonly="1"/>
 								   <field name="moc_id" readonly="1"/>
+								   <field name="total_qty" readonly="1"/>
+								   <field name="packed_qty" readonly="1"/>
 								   <field name="qty" required="1"/>
 								   <field name="remarks" widget="char"/>
 								</tree>
@@ -107,6 +113,8 @@
 													<field name="description" readonly="1"/>
 													<field name="material_code" readonly="1"/>
 													<field name="moc_id" readonly="1"/>
+													<field name="total_qty" readonly="1"/>
+													<field name="packed_qty" readonly="1"/>
 													<field name="qty" required="1"/>
 													<field name="remarks" widget="char"/>
 												</tree>
@@ -120,6 +128,8 @@
 													<field name="description" readonly="1"/>
 													<field name="material_code" readonly="1"/>
 													<field name="moc_id" readonly="1"/>
+													<field name="total_qty" readonly="1"/>
+													<field name="packed_qty" readonly="1"/>
 													<field name="qty" required="1"/>
 													<field name="remarks" widget="char"/>
 												</tree>
@@ -132,6 +142,8 @@
 													<field name="description" readonly="1"/>
 													<field name="material_code" readonly="1"/>
 													<field name="moc_id" readonly="1"/>
+													<field name="total_qty" readonly="1"/>
+													<field name="packed_qty" readonly="1"/>
 													<field name="qty" required="1"/>
 													<field name="remarks" widget="char"/>
 												</tree>

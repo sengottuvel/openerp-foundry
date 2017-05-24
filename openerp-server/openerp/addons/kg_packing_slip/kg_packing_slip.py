@@ -243,41 +243,105 @@ class kg_packing_slip(osv.osv):
 		cr.execute(''' select id,pattern_name,moc_id,material_code,qty from ch_order_bom_details where flag_applicable = 't' and header_id=%s ''',[order_line_id])
 		foundry_items = cr.dictfetchall()
 		for foundry_item in foundry_items:
-			self.pool.get('ch.packing.foundry.details').create(cr,uid,{
-			'header_id': entry_rec.id,
-			'order_line_id':order_line_id,
-			'order_bom_id':foundry_item['id'],
-			'description': foundry_item['pattern_name'],
-			'moc_id': foundry_item['moc_id'],
-			'material_code': foundry_item['material_code'] or '',
-			'qty': foundry_item['qty'],
-			})
+			### Checking the packed qty ###
+			cr.execute(''' select sum(qty) as packed_qty from ch_packing_foundry_details 
+				where order_line_id = %s and order_bom_id=%s and header_id != %s ''',[order_line_id,foundry_item['id'],entry_rec.id])
+			packed_qty = cr.fetchone()
+			print "packed_qty",packed_qty
+			
+			if packed_qty[0] != None:
+				print "ssssssssssssssssssssssss"
+				if packed_qty[0] < foundry_item['qty']:
+					self.pool.get('ch.packing.foundry.details').create(cr,uid,{
+					'header_id': entry_rec.id,
+					'order_line_id':order_line_id,
+					'order_bom_id':foundry_item['id'],
+					'description': foundry_item['pattern_name'],
+					'moc_id': foundry_item['moc_id'],
+					'material_code': foundry_item['material_code'] or '',
+					'total_qty': foundry_item['qty'],
+					'packed_qty': packed_qty[0]
+					})
+			if packed_qty[0] == None:
+				print "dddddddddddddddddddddddddddd"
+				self.pool.get('ch.packing.foundry.details').create(cr,uid,{
+				'header_id': entry_rec.id,
+				'order_line_id':order_line_id,
+				'order_bom_id':foundry_item['id'],
+				'description': foundry_item['pattern_name'],
+				'moc_id': foundry_item['moc_id'],
+				'material_code': foundry_item['material_code'] or '',
+				'total_qty': foundry_item['qty'],
+				})
+		#stop		
 		### Loading MS Items ###
 		cr.execute(''' select id,name,moc_id,material_code,qty from ch_order_machineshop_details where flag_applicable = 't' and header_id=%s ''',[order_line_id])
 		ms_items = cr.dictfetchall()
 		for ms_item in ms_items:
-			self.pool.get('ch.packing.ms.details').create(cr,uid,{
-			'header_id': entry_rec.id,
-			'order_line_id':order_line_id,
-			'order_bom_id':ms_item['id'],
-			'description': ms_item['name'],
-			'moc_id': ms_item['moc_id'],
-			'material_code': ms_item['material_code'] or '',
-			'qty': ms_item['qty'],
-			})
+			### Checking the packed qty ###
+			cr.execute(''' select sum(qty) as packed_qty from ch_packing_ms_details 
+				where order_line_id = %s and order_bom_id=%s and header_id != %s ''',[order_line_id,ms_item['id'],entry_rec.id])
+			packed_qty = cr.fetchone()
+			print "packed_qty",packed_qty
+			if packed_qty[0] != None:
+				print "ssssssssssssssssssssssss"
+				if packed_qty[0] < ms_item['qty']:
+					self.pool.get('ch.packing.ms.details').create(cr,uid,{
+					'header_id': entry_rec.id,
+					'order_line_id':order_line_id,
+					'order_bom_id':ms_item['id'],
+					'description': ms_item['name'],
+					'moc_id': ms_item['moc_id'],
+					'material_code': ms_item['material_code'] or '',
+					'total_qty': ms_item['qty'],
+					'packed_qty': packed_qty[0]
+					})
+			if packed_qty[0] == None:
+				self.pool.get('ch.packing.ms.details').create(cr,uid,{
+					'header_id': entry_rec.id,
+					'order_line_id':order_line_id,
+					'order_bom_id':ms_item['id'],
+					'description': ms_item['name'],
+					'moc_id': ms_item['moc_id'],
+					'material_code': ms_item['material_code'] or '',
+					'total_qty': ms_item['qty'],
+					})
 		### Loading BOT Items ###
 		cr.execute(''' select id,item_name,moc_id,material_code,qty from ch_order_bot_details where flag_applicable = 't' and header_id=%s ''',[order_line_id])
 		bot_items = cr.dictfetchall()
 		for bot_item in bot_items:
-			self.pool.get('ch.packing.bot.details').create(cr,uid,{
-			'header_id': entry_rec.id,
-			'order_line_id':order_line_id,
-			'order_bom_id':bot_item['id'],
-			'description': bot_item['item_name'],
-			'moc_id': bot_item['moc_id'],
-			'material_code': bot_item['material_code'] or '',
-			'qty': bot_item['qty'],
-			})
+			
+			### Checking the packed qty ###
+			cr.execute(''' select sum(qty) as packed_qty from ch_packing_bot_details 
+				where order_line_id = %s and order_bom_id=%s and header_id != %s ''',[order_line_id,bot_item['id'],entry_rec.id])
+			packed_qty = cr.fetchone()
+			print "packed_qty",packed_qty
+			if packed_qty[0] != None:
+				print "ssssssssssssssssssssssss"
+				if packed_qty[0] < bot_item['qty']:
+					self.pool.get('ch.packing.bot.details').create(cr,uid,{
+					'header_id': entry_rec.id,
+					'order_line_id':order_line_id,
+					'order_bom_id':bot_item['id'],
+					'description': bot_item['item_name'],
+					'moc_id': bot_item['moc_id'],
+					'material_code': bot_item['material_code'] or '',
+					'total_qty': bot_item['qty'],
+					'packed_qty': packed_qty[0]
+					
+					})
+					
+			if packed_qty[0] == None:
+				self.pool.get('ch.packing.bot.details').create(cr,uid,{
+					'header_id': entry_rec.id,
+					'order_line_id':order_line_id,
+					'order_bom_id':bot_item['id'],
+					'description': bot_item['item_name'],
+					'moc_id': bot_item['moc_id'],
+					'material_code': bot_item['material_code'] or '',
+					'total_qty': bot_item['qty'],
+					
+					})
 			
 		### Loading Accessories Items ###
 		cr.execute(''' select id,access_id,moc_id,qty from ch_wo_accessories where header_id=%s ''',[order_line_id])
@@ -298,38 +362,94 @@ class kg_packing_slip(osv.osv):
 			cr.execute(''' select id,pattern_name,moc_id,material_code,qty from ch_wo_accessories_foundry where is_applicable = 't' and header_id=%s ''',[acc_item['id']])
 			foundry_items = cr.dictfetchall()
 			for foundry_item in foundry_items:
-				self.pool.get('ch.packing.accessories.foundry').create(cr,uid,{
-				'header_id': acc_id,
-				'order_bom_id':foundry_item['id'],
-				'description': foundry_item['pattern_name'],
-				'moc_id': foundry_item['moc_id'],
-				'material_code': foundry_item['material_code'] or '',
-				'qty': foundry_item['qty'],
-				})
+				### Checking the packed qty ###
+				cr.execute(''' select sum(qty) as packed_qty from ch_packing_accessories_foundry 
+					where order_line_id = %s and order_bom_id=%s and header_id != %s ''',[order_line_id,foundry_item['id'],entry_rec.id])
+				packed_qty = cr.fetchone()
+				print "packed_qty",packed_qty
+				if packed_qty[0] != None:
+					print "ssssssssssssssssssssssss"
+					if packed_qty[0] < foundry_item['qty']:
+						self.pool.get('ch.packing.accessories.foundry').create(cr,uid,{
+						'header_id': acc_id,
+						'order_bom_id':foundry_item['id'],
+						'description': foundry_item['pattern_name'],
+						'moc_id': foundry_item['moc_id'],
+						'material_code': foundry_item['material_code'] or '',
+						'total_qty': foundry_item['qty'],
+						'packed_qty': packed_qty[0]
+						})
+				if packed_qty[0] == None:
+					self.pool.get('ch.packing.accessories.foundry').create(cr,uid,{
+						'header_id': acc_id,
+						'order_bom_id':foundry_item['id'],
+						'description': foundry_item['pattern_name'],
+						'moc_id': foundry_item['moc_id'],
+						'material_code': foundry_item['material_code'] or '',
+						'total_qty': foundry_item['qty'],
+						})
+					
 			### Loading MS Items ###
 			cr.execute('''  select id,name,moc_id,material_code,qty from ch_wo_accessories_ms   where is_applicable = 't' and header_id=%s ''',[acc_item['id']])
 			ms_items = cr.dictfetchall()
 			for ms_item in ms_items:
-				self.pool.get('ch.packing.accessories.ms').create(cr,uid,{
-				'header_id': acc_id,
-				'order_bom_id':ms_item['id'],
-				'description': ms_item['name'],
-				'moc_id': ms_item['moc_id'],
-				'material_code': ms_item['material_code'] or '',
-				'qty': ms_item['qty'],
-				})
+				### Checking the packed qty ###
+				cr.execute(''' select sum(qty) as packed_qty from ch_packing_accessories_ms
+					where order_line_id = %s and order_bom_id=%s and header_id != %s ''',[order_line_id,ms_item['id'],entry_rec.id])
+				packed_qty = cr.fetchone()
+				print "packed_qty",packed_qty
+				if packed_qty[0] != None:
+					print "ssssssssssssssssssssssss"
+					if packed_qty[0] < ms_item['qty']:
+						self.pool.get('ch.packing.accessories.ms').create(cr,uid,{
+						'header_id': acc_id,
+						'order_bom_id':ms_item['id'],
+						'description': ms_item['name'],
+						'moc_id': ms_item['moc_id'],
+						'material_code': ms_item['material_code'] or '',
+						'total_qty': ms_item['qty'],
+						'packed_qty': packed_qty[0]
+						})
+				if packed_qty[0] == None:
+					self.pool.get('ch.packing.accessories.ms').create(cr,uid,{
+						'header_id': acc_id,
+						'order_bom_id':ms_item['id'],
+						'description': ms_item['name'],
+						'moc_id': ms_item['moc_id'],
+						'material_code': ms_item['material_code'] or '',
+						'total_qty': ms_item['qty'],
+						})
 			### Loading BOT Items ###
 			cr.execute(''' select id,item_name,moc_id,material_code,qty from ch_wo_accessories_bot where is_applicable = 't' and header_id=%s ''',[acc_item['id']])
 			bot_items = cr.dictfetchall()
 			for bot_item in bot_items:
-				self.pool.get('ch.packing.accessories.bot').create(cr,uid,{
-				'header_id': acc_id,
-				'order_bom_id':bot_item['id'],
-				'description': bot_item['item_name'],
-				'moc_id': bot_item['moc_id'],
-				'material_code': bot_item['material_code'] or '',
-				'qty': bot_item['qty'],
-				})
+				### Checking the packed qty ###
+				cr.execute(''' select sum(qty) as packed_qty from ch_packing_accessories_bot
+					where order_line_id = %s and order_bom_id=%s and header_id != %s ''',[order_line_id,bot_item['id'],entry_rec.id])
+				packed_qty = cr.fetchone()
+				print "packed_qty",packed_qty
+				
+				if packed_qty[0] != None:
+					print "ssssssssssssssssssssssss"
+					if packed_qty[0] < bot_item['qty']:
+						self.pool.get('ch.packing.accessories.bot').create(cr,uid,{
+						'header_id': acc_id,
+						'order_bom_id':bot_item['id'],
+						'description': bot_item['item_name'],
+						'moc_id': bot_item['moc_id'],
+						'material_code': bot_item['material_code'] or '',
+						'total_qty': bot_item['qty'],
+						'packed_qty': packed_qty[0]
+						})
+				if packed_qty[0] == None:
+					self.pool.get('ch.packing.accessories.bot').create(cr,uid,{
+						'header_id': acc_id,
+						'order_bom_id':bot_item['id'],
+						'description': bot_item['item_name'],
+						'moc_id': bot_item['moc_id'],
+						'material_code': bot_item['material_code'] or '',
+						'total_qty': bot_item['qty'],
+						})
 		return True
 		
 		
@@ -416,6 +536,8 @@ class ch_packing_foundry_details(osv.osv):
 		'material_code': fields.related('order_bom_id','material_code', type='char', string='Material Code', store=True, readonly=True),
 		'remarks': fields.text('Remarks'),
 		'flag_is_applicable': fields.boolean('Is applicable'),
+		'total_qty': fields.integer('Total Qty'),
+		'packed_qty': fields.integer('Packed Qty'),
 		
 	
 	}
@@ -429,6 +551,30 @@ class ch_packing_foundry_details(osv.osv):
 	
 	def default_get(self, cr, uid, fields, context=None):
 		return context
+		
+	def _check_qty(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.flag_is_applicable == True:
+			if rec.qty <= 0.00:
+				return False
+			if rec.qty > rec.total_qty:
+				return False
+			
+		return True
+		
+	def _check_flag_applicable(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.flag_is_applicable == False and rec.qty > 0.00:
+			return False
+			
+		return True
+	
+	_constraints = [
+	
+		(_check_qty,'Kindly check the qty in Foundry Details !',['Qty']),
+		(_check_flag_applicable,'Kindly Check Is applicable provision for qty greater than zero !',['Qty']),
+		
+	]
 		
 	
 ch_packing_foundry_details()
@@ -449,6 +595,8 @@ class ch_packing_ms_details(osv.osv):
 		'material_code': fields.related('order_bom_id','material_code', type='char', string='Material Code', store=True, readonly=True),
 		'remarks': fields.text('Remarks'),
 		'flag_is_applicable': fields.boolean('Is applicable'),
+		'total_qty': fields.integer('Total Qty'),
+		'packed_qty': fields.integer('Packed Qty'),
 		
 	
 	}
@@ -461,6 +609,30 @@ class ch_packing_ms_details(osv.osv):
 	
 	def default_get(self, cr, uid, fields, context=None):
 		return context
+		
+	def _check_qty(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.flag_is_applicable == True:
+			if rec.qty <= 0.00:
+				return False
+			if rec.qty > rec.total_qty:
+				return False
+		
+		return True
+		
+	def _check_flag_applicable(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.flag_is_applicable == False and rec.qty > 0.00:
+			return False
+			
+		return True
+	
+	_constraints = [
+	
+		(_check_qty,'Kindly check the qty in MS Details !',['Qty']),
+		(_check_flag_applicable,'Kindly Check Is applicable provision for qty greater than zero !',['Qty']),
+		
+	]
 		
 	
 ch_packing_ms_details()
@@ -481,6 +653,8 @@ class ch_packing_bot_details(osv.osv):
 		'material_code': fields.related('order_bom_id','material_code', type='char', string='Material Code', store=True, readonly=True),
 		'remarks': fields.text('Remarks'),
 		'flag_is_applicable': fields.boolean('Is applicable'),
+		'total_qty': fields.integer('Total Qty'),
+		'packed_qty': fields.integer('Packed Qty'),
 		
 	
 	}
@@ -495,6 +669,30 @@ class ch_packing_bot_details(osv.osv):
 	
 	def default_get(self, cr, uid, fields, context=None):
 		return context
+		
+	def _check_qty(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.flag_is_applicable == True:
+			if rec.qty <= 0.00:
+				return False
+			if rec.qty > rec.total_qty:
+				return False
+		
+		return True
+		
+	def _check_flag_applicable(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.flag_is_applicable == False and rec.qty > 0.00:
+			return False
+			
+		return True
+	
+	_constraints = [
+	
+		(_check_qty,'Kindly check the qty in BOT Details !',['Qty']),
+		(_check_flag_applicable,'Kindly Check Is applicable provision for qty greater than zero !',['Qty']),
+		
+	]
 		
 	
 ch_packing_ms_details()
@@ -551,6 +749,8 @@ class ch_packing_accessories_foundry(osv.osv):
 		'material_code': fields.related('order_bom_id','material_code', type='char', string='Material Code', store=True, readonly=True),
 		'remarks': fields.text('Remarks'),
 		'flag_is_applicable': fields.boolean('Is applicable'),
+		'total_qty': fields.integer('Total Qty'),
+		'packed_qty': fields.integer('Packed Qty'),
 		
 	
 	}
@@ -560,6 +760,30 @@ class ch_packing_accessories_foundry(osv.osv):
 		'flag_is_applicable': False,
 		
 	}
+	
+	def _check_qty(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.flag_is_applicable == True:
+			if rec.qty <= 0.00:
+				return False
+			if rec.qty > rec.total_qty:
+				return False
+		
+		return True
+		
+	def _check_flag_applicable(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.flag_is_applicable == False and rec.qty > 0.00:
+			return False
+			
+		return True
+	
+	_constraints = [
+	
+		(_check_qty,'Kindly check the qty in Foundry Details !',['Qty']),
+		(_check_flag_applicable,'Kindly Check Is applicable provision for qty greater than zero !',['Qty']),
+		
+	]
 	
 ch_packing_accessories_foundry()
 
@@ -580,6 +804,8 @@ class ch_packing_accessories_ms(osv.osv):
 		'material_code': fields.related('order_bom_id','material_code', type='char', string='Material Code', store=True, readonly=True),
 		'remarks': fields.text('Remarks'),
 		'flag_is_applicable': fields.boolean('Is applicable'),
+		'total_qty': fields.integer('Total Qty'),
+		'packed_qty': fields.integer('Packed Qty'),
 		
 	
 	}
@@ -589,6 +815,30 @@ class ch_packing_accessories_ms(osv.osv):
 		'flag_is_applicable': False,
 		
 	}
+	
+	def _check_qty(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.flag_is_applicable == True:
+			if rec.qty <= 0.00:
+				return False
+			if rec.qty > rec.total_qty:
+				return False
+		
+		return True
+		
+	def _check_flag_applicable(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.flag_is_applicable == False and rec.qty > 0.00:
+			return False
+			
+		return True
+	
+	_constraints = [
+	
+		(_check_qty,'Kindly check the qty in MS Details !',['Qty']),
+		(_check_flag_applicable,'Kindly Check Is applicable provision for qty greater than zero !',['Qty']),
+		
+	]
 
 ch_packing_accessories_ms()
 
@@ -608,6 +858,8 @@ class ch_packing_accessories_bot(osv.osv):
 		'material_code': fields.related('order_bom_id','material_code', type='char', string='Material Code', store=True, readonly=True),
 		'remarks': fields.text('Remarks'),
 		'flag_is_applicable': fields.boolean('Is applicable'),
+		'total_qty': fields.integer('Total Qty'),
+		'packed_qty': fields.integer('Packed Qty'),
 		
 	
 	}
@@ -617,6 +869,30 @@ class ch_packing_accessories_bot(osv.osv):
 		'flag_is_applicable': False,
 		
 	}
+	
+	def _check_qty(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.flag_is_applicable == True:
+			if rec.qty <= 0.00:
+				return False
+			if rec.qty > rec.total_qty:
+				return False
+		
+		return True
+		
+	def _check_flag_applicable(self, cr, uid, ids, context=None):
+		rec = self.browse(cr, uid, ids[0])
+		if rec.flag_is_applicable == False and rec.qty > 0.00:
+			return False
+			
+		return True
+	
+	_constraints = [
+	
+		(_check_qty,'Kindly check the qty in BOT Details !',['Qty']),
+		(_check_flag_applicable,'Kindly Check Is applicable provision for qty greater than zero !',['Qty']),
+		
+	]
 	
 ch_packing_accessories_bot()
 
