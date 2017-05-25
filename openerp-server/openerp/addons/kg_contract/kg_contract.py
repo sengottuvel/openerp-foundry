@@ -110,6 +110,7 @@ class kg_contract(osv.osv):
 		'emp_categ_id':fields.many2one('kg.employee.category','Category'),
 		'division_id':fields.many2one('kg.division.master','Division'),
 		'account_id':fields.many2one('account.account','Account'),
+		'uan_no':fields.char('UAN No',size=12),
 			
 		
 		## Child Tables Declaration		
@@ -217,6 +218,11 @@ class kg_contract(osv.osv):
 				raise osv.except_osv(_('Warning!'),
 							_('Driver Batta should not be zero or less than zero as driver batta is applicable !!'))
 				return False
+		#~ if rec.pf_status:
+			#~ if rec.uan_no <= 0:
+				#~ raise osv.except_osv(_('Warning!'),
+							#~ _('UAN Should not be Zero !!'))
+				#~ return False
 		return True
 	
 	def _salary_brk_validation(self,cr,uid,ids,context = None):
@@ -684,6 +690,7 @@ class ch_kg_contract_his(osv.osv):
 		'bonus_applicable': fields.boolean('Bonus Applicable'),
 		'special_incentive': fields.boolean('Special Incentive'),
 		'vda_status': fields.boolean('VDA Applicable'),
+		'uan_no':fields.char('UAN No'),
 	}
 	
 	_defaults ={

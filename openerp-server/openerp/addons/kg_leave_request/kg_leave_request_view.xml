@@ -24,7 +24,7 @@
 								<field name="employee_id" required="1" on_change="onchange_employee_id(employee_id,code,emp_categ_id,division_id)" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
 								<field name="emp_categ_id" attrs="{'readonly': [('status','in',['approved','done','reject','cancel'])]}" readonly="1"/>
 								<field name="holiday_status_id" required="1" on_change="onchange_leave_type(holiday_status_id)" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
-								<field name="in_time" widget="float_time" attrs="{'required':[('holiday_status_name','=','On Duty')],'invisible':[('holiday_status_name','!=','On Duty')],'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+								<field name="in_time" widget="float_time" attrs="{'required':[('holiday_status_name','in',('On Duty','Permission'))],'invisible':[('holiday_status_name','not in',('On Duty','Permission'))],'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="from_date" required="1" string="From" options="{'datepicker':{'maxDate': null,'minDate':-5}}" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
 								<field name="number_of_days" required="1" string="No of Days" invisible="1"/>
 								<field name="modify" invisible="1"/>
@@ -34,9 +34,9 @@
 								<field name="division_id" attrs="{'readonly': [('status','in',['approved','done','reject','cancel'])]}" readonly="1"/>
 								<field name="holiday_type" string="Mode" invisible="1"/>
 								<field name="holiday_status_name" invisible="1"/>
-								<field name="permission_hrs" attrs="{'required':[('holiday_status_name','=','Permission')],'invisible':[('holiday_status_name','!=','Permission')],'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+								<field name="permission_hrs"  readonly= '1' attrs="{'required':[('holiday_status_name','=','Permission')],'invisible':[('holiday_status_name','!=','Permission')],'readonly': [('status','in',['approved','reject','cancel'])]}"/>
 								<field name="number_of_days_temp" required="1" string="No of Days" readonly="1"/>
-								<field name="out_time" widget="float_time" attrs="{'required':[('holiday_status_name','=','On Duty')],'invisible':[('holiday_status_name','!=','On Duty')],'readonly': [('status','in',['approved','reject','cancel'])]}"/>
+								<field name="out_time" on_change="onchange_out_time(in_time,out_time,permission_hrs)" widget="float_time" attrs="{'required':[('holiday_status_name','in',('On Duty','Permission'))],'invisible':[('holiday_status_name','not in',('On Duty','Permission'))],'readonly': [('state','in',['approved','reject','cancel'])]}"/>
 								<field name="to_date" required="1" string="To" on_change = "onchange_to_date(to_date,from_date)" options="{'datepicker':{'maxDate': null,'minDate':-5}}" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
 								<field name="approved_by" required="1" attrs="{'readonly': [('status','in',['approved','reject','cancel'])]}"/>
 								<field name="status" style="width: 30%%" class="att_state_change" />

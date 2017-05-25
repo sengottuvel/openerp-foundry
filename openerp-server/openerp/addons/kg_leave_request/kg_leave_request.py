@@ -396,6 +396,19 @@ class kg_leave_request(osv.osv):
 				}
 				
 		return {'value': value}
+		
+	def onchange_out_time(self, cr, uid, ids, in_time,out_time, context=None):
+		value = {'in_time':'','out_time':'','permission_hrs':''}
+		in_time = float(str(in_time) .replace(':', '.'))
+		out_time = float(str(out_time) .replace(':', '.'))
+		pr_hrs = out_time - in_time
+		print "*************************************",pr_hrs
+		if pr_hrs < 0:
+			shf_tme = -(pr_hrs)
+		value = {
+				'permission_hrs': pr_hrs,
+				}
+		return {'value': value}
         
 	
 	
