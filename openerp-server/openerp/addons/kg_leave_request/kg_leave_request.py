@@ -404,9 +404,9 @@ class kg_leave_request(osv.osv):
 		pr_hrs = out_time - in_time
 		print "*************************************",pr_hrs
 		if pr_hrs < 0:
-			shf_tme = -(pr_hrs)
+			pr_tme = -(pr_hrs)
 		value = {
-				'permission_hrs': pr_hrs,
+				'permission_hrs': pr_tme,
 				}
 		return {'value': value}
         
