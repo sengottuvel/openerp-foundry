@@ -90,6 +90,7 @@ class kg_primecost_view(osv.osv):
 		'bush_bearing': fields.selection([('grease','Grease'),('cft_self','CFT'),('cut_less_rubber','Cut less Rubber')],'Bush Bearing'),
 		'bush_bearing_lubrication':fields.selection([('grease','Grease'),('external','External'),('self','Self'),('ex_pressure','External Under Pressure')], 'Bush Bearing Lubrication'),
 		'motor_kw': fields.float('Motor KW'),
+		'moc_construction_name': fields.char('MOC Construction Name',readonly=True),
 		
 		## Child Tables Declaration 
 		
@@ -163,6 +164,13 @@ class kg_primecost_view(osv.osv):
 			#~ (_check_lineitems, 'System not allow to save with empty Details !!',['']),
 			
        ]
+	
+	def onchange_moc_const(self, cr, uid, ids, moc_const_id):
+		value = {'moc_construction_name':''}
+		if moc_const_id:
+			moc_rec = self.pool.get('kg.moc.construction').browse(cr,uid,moc_const_id)
+			value = {'moc_construction_name':moc_rec.name}
+		return {'value': value}
 	
 	def onchange_bom(self, cr, uid, ids, load_bom,pump_id,moc_const_id,qty,speed_in_rpm,rpm,setting_height,shaft_sealing,motor_power,bush_bearing,del_pipe_size,bush_bearing_lubrication):
 		delivery_pipe_size = del_pipe_size

@@ -31,6 +31,7 @@
 							<group>
 								<field name="entry_date" attrs="{'readonly': [('load_bom','=',True)]}"/>
 								<field name="moc_const_id" attrs="{'readonly': [('load_bom','=',True)]}" required="1"/>
+								<field name="moc_construction_name"/>
 								<field name="motor_power" attrs="{'required': [('pump_model_type','=','vertical')]}"/>
 								<field name="del_pipe_size" attrs="{'required': [('pump_model_type','=','vertical')]}"/>
 								<field name="bush_bearing" attrs="{'required': [('pump_model_type','=','vertical')]}"/>

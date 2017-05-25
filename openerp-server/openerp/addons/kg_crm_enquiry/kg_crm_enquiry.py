@@ -1526,6 +1526,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'operation_range': fields.char('Operation Range'),
 		'primemover_categ': fields.selection([('engine','ENGINE'),('motor','MOTOR'),('vfd','VFD')],'Primemover Category'),
 		'moc_const_id':fields.many2one('kg.moc.construction', 'MOC Construction'),
+		'moc_construction_name': fields.char('MOC Construction Name',readonly=True),
 		'spare_moc_const_id':fields.many2one('kg.moc.construction', 'MOC Construction'),
 		'mech_seal_make':fields.many2one('kg.brand.master', 'Mech. Seal Make'),
 		'seal_type': fields.selection([('sums','Single Unbalanced Multiple Spring'),('suss','Single Unbalanced Single Spring'),
@@ -1855,7 +1856,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 								'flag_standard':flag_standard,
 								
 								})
-		return {'value': {'line_ids_moc_a': moc_const_vals}}
+		return {'value': {'line_ids_moc_a': moc_const_vals,'moc_construction_name':moc_const_rec.name}}
 	
 	def onchange_load_bom(self, cr, uid, ids, load_bom,pump_id,wo_line_id,purpose_categ,moc_const_id,qty,
 		motor_power,del_pipe_size,shaft_sealing,setting_height,motor_kw,bush_bearing_lubrication,push_bearing,speed_in_rpm,rpm):
