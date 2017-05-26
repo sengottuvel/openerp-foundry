@@ -91,12 +91,9 @@ class kg_drawing_dc(osv.osv):
 			if entry.annexure_no <= 0:
 				raise osv.except_osv(_('Warning!'),
 					_('System not allow to Annexure 17 No. Zero and negative values!!'))			
-			if len(entry.line_ids) == 0:
+			if len(entry.line_ids) == 0 and len(entry.line_ids_a) == 0:
 				raise osv.except_osv(_('Warning!'),
-					_('System not allow to without Drawing details line items !!'))	
-			if len(entry.line_ids_a) == 0:
-				raise osv.except_osv(_('Warning!'),
-					_('System not allow to without Equipment details line items !!'))				
+					_('System not allow to without Drawing or Equipment details line items !!'))					
 			if special_char:
 				raise osv.except_osv(_('Vehicle Detail'),
 					_('Special Character Not Allowed !!!'))						
