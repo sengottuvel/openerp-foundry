@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Workorder_print" pageWidth="605" pageHeight="842" columnWidth="565" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="750"/>
+	<property name="ireport.y" value="580"/>
 	<subDataset name="Spare dataset">
 		<parameter name="header_id" class="java.lang.Integer"/>
 		<parameter name="category" class="java.lang.String"/>
@@ -281,7 +281,8 @@ case when pump_crm.setting_height > 0 then pump_crm.setting_height::text else '-
 case when pump_crm.solid_concen > 0 then pump_crm.solid_concen::text else '-' end as solid_concen,
 case when pump_crm.solid_concen_vol > 0 then pump_crm.solid_concen_vol::text else '-' end as solid_concen_vol,
 case when pump_crm.viscosity_crt_factor > 0 then pump_crm.viscosity_crt_factor::text else '-' end as viscosity_crt_factor,
-pump_crm.pre_suppliy_ref as supply_ref
+pump_crm.pre_suppliy_ref as supply_ref,
+dealer.name as dealer_name
 
 
 
@@ -291,10 +292,12 @@ from ch_work_order_details wo_line
 
 left join kg_pumpmodel_master pump on pump.id = wo_line.pump_model_id
 left join ch_kg_crm_pumpmodel pump_crm on pump_crm.id = wo_line.enquiry_line_id
+left join kg_crm_enquiry enq on enq.id = pump_crm.header_id
 left join ch_work_order_details pump_crm_wo_line on pump_crm.wo_line_id = pump_crm_wo_line.id
 left join kg_fluid_master liquid on liquid.id = pump_crm.fluid_id
 left join kg_work_order wo on wo.id = wo_line.header_id
 left join res_partner cust on cust.id = wo.partner_id
+left join res_partner dealer on dealer.id = enq.dealer_id
 left join res_company comp on comp.id = wo.company_id
 left join kg_brand_master brand_mech on brand_mech.id = pump_crm.mech_seal_make
 left join kg_brand_master brand_motor on brand_motor.id = pump_crm.motor_make
@@ -364,6 +367,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 	<field name="solid_concen_vol" class="java.lang.String"/>
 	<field name="viscosity_crt_factor" class="java.lang.String"/>
 	<field name="supply_ref" class="java.lang.String"/>
+	<field name="dealer_name" class="java.lang.String"/>
 	<group name="WO Group" isStartNewPage="true">
 		<groupExpression><![CDATA[$F{id}]]></groupExpression>
 		<groupHeader>
@@ -442,7 +446,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 					<text><![CDATA[Customer :]]></text>
 				</staticText>
 				<staticText>
-					<reportElement mode="Transparent" x="397" y="52" width="168" height="21" isRemoveLineWhenBlank="true"/>
+					<reportElement mode="Transparent" x="397" y="52" width="56" height="21" isRemoveLineWhenBlank="true"/>
 					<box leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
@@ -452,7 +456,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 					<textElement verticalAlignment="Middle">
 						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
-					<text><![CDATA[Dealer : --]]></text>
+					<text><![CDATA[Dealer :]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="73" width="243" height="21"/>
@@ -879,7 +883,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font size="10" isBold="true" isItalic="false"/>
 					</textElement>
-					<text><![CDATA[Type of Lubrication]]></text>
+					<text><![CDATA[Bush Bearing Lubrication]]></text>
 				</staticText>
 				<staticText>
 					<reportElement mode="Transparent" x="0" y="590" width="307" height="16" isRemoveLineWhenBlank="true"/>
@@ -1600,6 +1604,19 @@ where foundry_wiz_id = $P{wiz_id})]]>
 					</textElement>
 					<text><![CDATA[Setting Height]]></text>
 				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="453" y="52" width="112" height="21"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.75"/>
+						<leftPen lineWidth="0.75"/>
+						<bottomPen lineWidth="0.75"/>
+						<rightPen lineWidth="0.75"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{dealer_name}]]></textFieldExpression>
+				</textField>
 			</band>
 		</groupHeader>
 	</group>
