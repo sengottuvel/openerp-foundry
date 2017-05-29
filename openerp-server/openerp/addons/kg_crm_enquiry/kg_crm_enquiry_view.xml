@@ -288,7 +288,7 @@
 						<field name="qap_plan_id"/>
 						<field name="ph_value"/>
 <!--	Vertical Specification added start	-->
-						<field name="motor_power" attrs="{'required':[('pump_model_type','=','vertical')]}"/>
+						<field name="motor_power" attrs="{'required':[('pump_model_type','=','vertical')],'invisible':[('pump_model_type','!=','vertical')]}"/>
 						
 <!--	Vertical Specification end	-->
 						<field name="del_pipe_size" attrs="{'required':[('pump_model_type','=','vertical')]}"/>
@@ -371,6 +371,7 @@
 -->
 						<field name="type_of_drive"/>
 						<field name="primemover_id" on_change="onchange_primemover(primemover_id)"/>
+						<field name="framesize"/>
 						<field name="operation_range"/>
 						<field name="motor_make"/>
 						<field name="motor_type"/>

@@ -1503,7 +1503,8 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		'spare_qap_plan_id': fields.many2one('kg.qap.plan', 'QAP Standard'),
 		'ph_value': fields.char('PH Value'),
 		'motor_power': fields.selection([('90','90'),('100','100'),('112','112'),('132','132'),('160','160'),('180','180'),('200','200'),('225','225'),
-				('250','250'),('280','280'),('315','315'),('315_l','315L')],'Motor Frame size'),
+				('250','250'),('280','280'),('315','315'),('315_l','315L')],'Motor Frame size(vertical)'),
+		'framesize': fields.char('Motor Frame Size',readonly=True),
 		'insulation': fields.char('Insulation'),
 		'protection': fields.char('Protection'),
 		'voltage': fields.char('Voltage'),
@@ -2983,7 +2984,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 								moc_id = False
 						else:
 							moc_id = False
-							
+						
 						vertical_bot_qty = vertical_bot_details['qty']
 						bot_obj = self.pool.get('kg.machine.shop')
 						bot_rec = bot_obj.browse(cr, uid, vertical_bot_details['bot_id'])
@@ -3115,10 +3116,10 @@ class ch_kg_crm_pumpmodel(osv.osv):
 		#~ return {'value': value}
 	
 	def onchange_primemover(self, cr, uid, ids, primemover_id, context=None):
-		value = {'frequency':'','motor_kw': '','speed_in_motor': '','engine_kw':''}
+		value = {'frequency':'','motor_kw': '','speed_in_motor': '','engine_kw':'','framesize':''}
 		if primemover_id:
 			prime_rec = self.pool.get('kg.primemover.master').browse(cr, uid, primemover_id, context=context)
-			value = {'frequency': prime_rec.frequency,'motor_kw': prime_rec.power_kw,'speed_in_motor': prime_rec.speed,'engine_kw': prime_rec.power_kw}
+			value = {'frequency': prime_rec.frequency,'motor_kw': prime_rec.power_kw,'speed_in_motor': prime_rec.speed,'engine_kw': prime_rec.power_kw,'framesize':prime_rec.framesize}
 		return {'value': value}
 	
 	def onchange_liquid(self, cr, uid, ids, fluid_id, context=None):

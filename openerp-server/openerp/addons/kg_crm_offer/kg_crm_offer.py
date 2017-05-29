@@ -58,7 +58,11 @@ class kg_crm_offer(osv.osv):
 			res[order.id]['pump_net_amount'] = pump_net_amount
 			res[order.id]['spare_net_amount'] = spare_net_amount
 			res[order.id]['access_net_amount'] = access_net_amount
+			print"pump_net_amount",pump_net_amount
+			print"access_net_amount",access_net_amount
 			res[order.id]['offer_net_amount'] = pump_net_amount + spare_net_amount + access_net_amount
+			print"res[order.id]['offer_net_amount']--------------",res[order.id]['offer_net_amount']
+			
 			res[order.id]['supervision_amount'] = supervision_amount
 			
 		return res
@@ -87,6 +91,7 @@ class kg_crm_offer(osv.osv):
 		'customer_id': fields.related('enquiry_id','customer_id', type='many2one', relation="res.partner", string='Customer Name', store=True),
 		'del_date': fields.date('Expected Delivery Date',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
 		'due_date': fields.date('Due Date',readonly=True,states={'draft':[('readonly',False)],'moved_to_offer':[('readonly',False)]}),
+		'md_approved_date': fields.date('MD Approved Date',readonly=True),
 		'service_det': fields.char('Service Details'),
 		'location': fields.selection([('ipd','IPD'),('ppd','PPD'),('export','Export')],'Location'),
 		'offer_copy': fields.char('Offer Copy'),
@@ -336,7 +341,7 @@ class kg_crm_offer(osv.osv):
 	_constraints = [
 		(_spl_name, 'Special Character Not Allowed!', ['']),
 		(_supervision, 'Supervision more than one not allowed!', ['']),
-		(_exceed_discount, 'Discount more than confirgured not allowed!', ['']),
+		#~ (_exceed_discount, 'Discount more than confirgured not allowed!', ['']),
 		]
 	
 	def get_offer_reminder_data(self,cr,uid,ids,context=None):
@@ -477,7 +482,7 @@ class kg_crm_offer(osv.osv):
 			if user_obj:
 				user_rec = self.pool.get('res.users').browse(cr,uid,user_obj[0])
 				if user_rec.special_approval == True:
-					self.write(cr, uid, ids, {'state': 'approved_md'})
+					self.write(cr, uid, ids, {'state': 'approved_md','md_approved_date':time.strftime('%Y-%m-%d')})
 				else:
 					raise osv.except_osv(_('Warning'),_('It should be approved by special approver'))
 		return True
