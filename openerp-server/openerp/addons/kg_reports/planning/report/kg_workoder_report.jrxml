@@ -1606,14 +1606,14 @@ where foundry_wiz_id = $P{wiz_id})]]>
 				</staticText>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="453" y="52" width="112" height="21"/>
-					<box leftPadding="2">
+					<box topPadding="2" leftPadding="2">
 						<topPen lineWidth="0.75"/>
 						<leftPen lineWidth="0.75"/>
 						<bottomPen lineWidth="0.75"/>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="10"/>
+						<font size="8"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{dealer_name}]]></textFieldExpression>
 				</textField>
