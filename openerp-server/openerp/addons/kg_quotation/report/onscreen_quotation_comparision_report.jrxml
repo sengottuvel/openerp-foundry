@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="onscreen_quotation_comparision_report" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.1000000000000005"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.y" value="57"/>
 	<style name="style1" isItalic="false" isUnderline="false" isStrikeThrough="false">
 		<conditionalStyle>
 			<conditionExpression><![CDATA[$F{vendor_1_rate} == $F{min_value}]]></conditionExpression>
@@ -67,7 +67,12 @@ round(entry_line.vendor_1_value,2) as vendor_1_value,
 round(entry_line.vendor_2_value,2) as vendor_2_value,
 round(entry_line.vendor_3_value,2) as vendor_3_value,
 round(entry_line.vendor_4_value,2) as vendor_4_value,
-round(entry_line.vendor_5_value,2) as vendor_5_value
+round(entry_line.vendor_5_value,2) as vendor_5_value,
+(select poline.price_unit from purchase_order_line poline
+join purchase_order po on(po.id = poline.order_id)
+where poline.product_id = prod.id and
+poline.brand_id = brand.id and poline.moc_id = moc.id
+order by po.approved_date desc limit 1) as last_po_price
 
 from kg_quotation_entry_lines entry_line
 
@@ -94,6 +99,7 @@ where entry_line.header_id = $P{comparision_id}]]>
 		<field name="vendor_3_value" class="java.math.BigDecimal"/>
 		<field name="vendor_4_value" class="java.math.BigDecimal"/>
 		<field name="vendor_5_value" class="java.math.BigDecimal"/>
+		<field name="last_po_price" class="java.math.BigDecimal"/>
 	</subDataset>
 	<subDataset name="product_total">
 		<parameter name="comparision_id" class="java.lang.Integer"/>
@@ -306,7 +312,7 @@ where entry_header.id = $P{comparision_id}]]>
 								<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="268" y="0" width="50" height="15"/>
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="268" y="0" width="34" height="15"/>
 								<box topPadding="2" leftPadding="1">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -315,7 +321,7 @@ where entry_header.id = $P{comparision_id}]]>
 								<textFieldExpression><![CDATA[$F{uom}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="318" y="0" width="48" height="15"/>
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="302" y="0" width="39" height="15"/>
 								<box topPadding="2" rightPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -396,7 +402,7 @@ where entry_header.id = $P{comparision_id}]]>
 								<textFieldExpression><![CDATA[$F{vendor_4_value}]]></textFieldExpression>
 							</textField>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="366" y="0" width="35" height="15"/>
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="341" y="0" width="25" height="15"/>
 								<box topPadding="2">
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
@@ -422,6 +428,15 @@ where entry_header.id = $P{comparision_id}]]>
 								<textElement/>
 								<textFieldExpression><![CDATA[$F{moc}]]></textFieldExpression>
 							</textField>
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="366" y="0" width="35" height="15"/>
+								<box topPadding="2" rightPadding="2">
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right"/>
+								<textFieldExpression><![CDATA[$F{last_po_price}]]></textFieldExpression>
+							</textField>
 						</jr:listContents>
 					</jr:list>
 				</componentElement>
@@ -445,7 +460,7 @@ where entry_header.id = $P{comparision_id}]]>
 					<text><![CDATA[Product Details]]></text>
 				</staticText>
 				<staticText>
-					<reportElement x="268" y="0" width="50" height="15"/>
+					<reportElement x="268" y="0" width="34" height="15"/>
 					<box topPadding="2">
 						<bottomPen lineWidth="0.5"/>
 						<rightPen lineWidth="0.5"/>
@@ -454,7 +469,7 @@ where entry_header.id = $P{comparision_id}]]>
 					<text><![CDATA[UOM]]></text>
 				</staticText>
 				<staticText>
-					<reportElement x="316" y="0" width="50" height="15"/>
+					<reportElement x="302" y="0" width="39" height="15"/>
 					<box topPadding="2" rightPadding="2">
 						<bottomPen lineWidth="0.5"/>
 						<rightPen lineWidth="0.5"/>
@@ -463,12 +478,12 @@ where entry_header.id = $P{comparision_id}]]>
 					<text><![CDATA[QTY]]></text>
 				</staticText>
 				<staticText>
-					<reportElement x="366" y="0" width="35" height="15"/>
+					<reportElement x="341" y="0" width="25" height="15"/>
 					<box topPadding="2" rightPadding="2">
 						<bottomPen lineWidth="0.5"/>
 						<rightPen lineWidth="0.5"/>
 					</box>
-					<textElement textAlignment="Right"/>
+					<textElement textAlignment="Center"/>
 					<text><![CDATA[VAT%]]></text>
 				</staticText>
 				<staticText>
@@ -560,6 +575,15 @@ where entry_header.id = $P{comparision_id}]]>
 					</box>
 					<textElement textAlignment="Center"/>
 					<text><![CDATA[MOC]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="366" y="0" width="35" height="15"/>
+					<box topPadding="2" rightPadding="2">
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center"/>
+					<text><![CDATA[LPO]]></text>
 				</staticText>
 			</band>
 		</groupHeader>

@@ -2991,7 +2991,6 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
 							moc_changed_flag = True
 							moc_name = moc_rec.name
-						print"vertical_bot_qty",vertical_bot_qty
 						if vertical_bot_qty:
 							vertical_bot_qty = vertical_bot_qty
 						else:
