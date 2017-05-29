@@ -239,7 +239,14 @@ class kg_pump_qap(osv.osv):
 		if rec.pt_state == 'pending':
 			### Painting Creation
 			
-			if rec.pt_result == 'accept':
+			if rec.flag_pt_not_applicable == True:
+				painting = 'yes'
+			if rec.flag_pt_not_applicable == False and rec.pt_result == 'accept':
+				painting = 'yes'
+			if rec.flag_pt_not_applicable == False and rec.pt_result != 'accept':
+				painting = 'no'
+			
+			if painting == 'yes':
 				qap_painting_id = self.pool.get('ch.painting').search(cr,uid,[('header_id','=',rec.qap_plan_id.id)])
 				if qap_painting_id:
 					qap_painting_rec = self.pool.get('ch.painting').browse(cr,uid,qap_painting_id[0])
