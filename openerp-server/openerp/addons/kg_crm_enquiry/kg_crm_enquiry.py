@@ -2992,7 +2992,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 					print "pump_model_id",pump_model_id
 					print "base_limitation",base_limitation
 					print "pump_model_id",pump_model_id
-					stop
+					
 					for vertical_bot_details in vertical_bot_details:
 						
 						### Loading MOC from MOC Construction
