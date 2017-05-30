@@ -151,6 +151,7 @@ class kg_crm_offer(osv.osv):
 		'o_customer_discount': fields.float('Customer Discount(%)',readonly=True, states={'draft':[('readonly',False)]}),
 		'o_tax': fields.float('Tax(%)',readonly=True, states={'draft':[('readonly',False)]}),
 		'off_status': fields.selection([('on_hold','On Hold'),('closed','Closed'),('to_be_follow','To be Followed')],'Offer Status',readonly=False,states={'wo_created':[('readonly',True)],'wo_released':[('readonly',True)]}),
+		'dummy_flag': fields.boolean('Dummy Flag'),
 		
 		# Pump Offer Fields
 		'pump_tot_price': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total Price',multi="sums",store=True),	
@@ -427,7 +428,7 @@ class kg_crm_offer(osv.osv):
 					obj = self.pool.get('ch.accessories.offer')
 					line_ids = entry.line_accessories_ids
 					self.update_to_all(cr,uid,entry,obj,line_ids)
-				
+			self.write(cr,uid,ids,{'dummy_flag':True})
 		return True
 	
 	def update_to_all(self,cr,uid,entry,obj,line_ids,context=None):
