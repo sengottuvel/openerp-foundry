@@ -2966,7 +2966,33 @@ class ch_kg_crm_pumpmodel(osv.osv):
 						  setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,lubrication,setting_height,setting_height,
 						  rpm,pump_model_id,rpm,pump_model_id,base_limitation,pump_model_id])
 					vertical_bot_details = cr.dictfetchall()
-					
+					print "limitation",limitation
+					print "shaft_sealing",shaft_sealing
+					print "rpm",rpm
+					print "pump_model_id",pump_model_id
+					print "motor_power",motor_power
+					print "rpm",rpm
+					print "pump_model_id",pump_model_id
+					print "bush_bearing",bush_bearing
+					print "setting_height",setting_height
+					print "setting_height",setting_height
+					print "rpm",rpm
+					print "pump_model_id",pump_model_id
+					print "delivery_pipe_size",delivery_pipe_size
+					print "setting_height",setting_height
+					print "setting_height",setting_height
+					print "rpm",rpm
+					print "pump_model_id",pump_model_id
+					print "lubrication",lubrication
+					print "setting_height",setting_height
+					print "setting_height",setting_height
+					print "rpm",rpm
+					print "pump_model_id",pump_model_id
+					print "rpm",rpm
+					print "pump_model_id",pump_model_id
+					print "base_limitation",base_limitation
+					print "pump_model_id",pump_model_id
+					stop
 					for vertical_bot_details in vertical_bot_details:
 						
 						### Loading MOC from MOC Construction
