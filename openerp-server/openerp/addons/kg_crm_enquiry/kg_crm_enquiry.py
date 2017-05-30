@@ -2985,7 +2985,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 						else:
 							moc_id = False
 						
-						vertical_bot_qty = vertical_bot_details['qty']
+						
 						bot_obj = self.pool.get('kg.machine.shop')
 						bot_rec = bot_obj.browse(cr, uid, vertical_bot_details['bot_id'])
 						if moc_id:
