@@ -2966,32 +2966,6 @@ class ch_kg_crm_pumpmodel(osv.osv):
 						  setting_height,setting_height,rpm,pump_model_id,rpm,pump_model_id,lubrication,setting_height,setting_height,
 						  rpm,pump_model_id,rpm,pump_model_id,base_limitation,pump_model_id])
 					vertical_bot_details = cr.dictfetchall()
-					print "limitation",limitation
-					print "shaft_sealing",shaft_sealing
-					print "rpm",rpm
-					print "pump_model_id",pump_model_id
-					print "motor_power",motor_power
-					print "rpm",rpm
-					print "pump_model_id",pump_model_id
-					print "bush_bearing",bush_bearing
-					print "setting_height",setting_height
-					print "setting_height",setting_height
-					print "rpm",rpm
-					print "pump_model_id",pump_model_id
-					print "delivery_pipe_size",delivery_pipe_size
-					print "setting_height",setting_height
-					print "setting_height",setting_height
-					print "rpm",rpm
-					print "pump_model_id",pump_model_id
-					print "lubrication",lubrication
-					print "setting_height",setting_height
-					print "setting_height",setting_height
-					print "rpm",rpm
-					print "pump_model_id",pump_model_id
-					print "rpm",rpm
-					print "pump_model_id",pump_model_id
-					print "base_limitation",base_limitation
-					print "pump_model_id",pump_model_id
 					
 					for vertical_bot_details in vertical_bot_details:
 						
@@ -3011,18 +2985,17 @@ class ch_kg_crm_pumpmodel(osv.osv):
 						else:
 							moc_id = False
 						
-						
+						vertical_bot_qty = vertical_bot_details['qty']
 						bot_obj = self.pool.get('kg.machine.shop')
 						bot_rec = bot_obj.browse(cr, uid, vertical_bot_details['bot_id'])
 						if moc_id:
 							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
 							moc_changed_flag = True
 							moc_name = moc_rec.name
-						if qty == 0:
-							vertical_bot_qty = vertical_bot_details['qty'] or 0
-						if qty > 0:
-							print"vertical_bot_details['qty']vertical_bot_details['qty']",vertical_bot_details['qty'],type(vertical_bot_details['qty'])
-							vertical_bot_qty = qty * (vertical_bot_details['qty'] or 0)
+						if vertical_bot_qty:
+							vertical_bot_qty = vertical_bot_qty
+						else:
+							vertical_bot_qty = 0
 						bot_vals.append({
 							
 							#~ 'bot_line_id': vertical_bot_details['id'],
@@ -3033,7 +3006,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							#~ 'order_category':	order_category,
 							'ms_id': vertical_bot_details['bot_id'],
 							'position_id': vertical_bot_details['position_id'] or False,
-							'qty': vertical_bot_qty,
+							'qty': vertical_bot_qty * qty,
 							'load_bom': True,
 							'is_applicable': True,
 							'active': True,
