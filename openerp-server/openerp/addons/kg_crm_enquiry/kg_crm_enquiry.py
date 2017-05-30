@@ -2992,10 +2992,10 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							moc_rec = self.pool.get('kg.moc.master').browse(cr,uid,moc_id)
 							moc_changed_flag = True
 							moc_name = moc_rec.name
-						if vertical_bot_qty:
-							vertical_bot_qty = vertical_bot_qty
-						else:
-							vertical_bot_qty = 0
+						if qty == 0:
+							vertical_bot_qty = vertical_bot_details['qty']
+						if qty > 0:
+							vertical_bot_qty = qty * vertical_bot_details['qty']
 						bot_vals.append({
 							
 							#~ 'bot_line_id': vertical_bot_details['id'],
@@ -3006,7 +3006,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 							#~ 'order_category':	order_category,
 							'ms_id': vertical_bot_details['bot_id'],
 							'position_id': vertical_bot_details['position_id'] or False,
-							'qty': vertical_bot_qty * qty,
+							'qty': vertical_bot_qty,
 							'load_bom': True,
 							'is_applicable': True,
 							'active': True,
