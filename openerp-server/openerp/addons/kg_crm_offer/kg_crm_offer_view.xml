@@ -41,7 +41,7 @@
 							</group>											
 							<group>
 								<field name="enquiry_id" readonly="1" invisible="1"/>
-								<field name="enquiry_no" readonly="1" widget = "offer_reminder"/>
+								<field name="enquiry_no" readonly="1"/>
 								<field name="enquiry_date" readonly="1"/>
 								<field name="due_date" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>
 								<field name="del_date" options="{'datepicker':{'minDate': 0,'maxDate': null,}}"/>

@@ -54,7 +54,7 @@
 								<field name="state" style="width: 30%%" class="att_state_change"/>
 								<field name="drive" invisible="1"/>
 								<field name="transmision" invisible="1"/>
-								<field name="acces" invisible="1" widget = "enquiry_reminder"/>
+								<field name="acces" invisible="1"/>
 								<field name="revision" invisible="1"/>
 							</group>	
 						</group>
