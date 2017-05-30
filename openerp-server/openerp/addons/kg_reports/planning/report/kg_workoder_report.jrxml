@@ -282,7 +282,8 @@ case when pump_crm.solid_concen > 0 then pump_crm.solid_concen::text else '-' en
 case when pump_crm.solid_concen_vol > 0 then pump_crm.solid_concen_vol::text else '-' end as solid_concen_vol,
 case when pump_crm.viscosity_crt_factor > 0 then pump_crm.viscosity_crt_factor::text else '-' end as viscosity_crt_factor,
 pump_crm.pre_suppliy_ref as supply_ref,
-dealer.name as dealer_name
+dealer.name as dealer_name,
+coalesce(pump_crm.framesize,'-') as framesize
 
 
 
@@ -1169,7 +1170,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
 						<font size="10"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{motor_make}+" / "+$F{motor_power}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{motor_make}+" / "+$F{framesize}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="307" y="526" width="258" height="16"/>
