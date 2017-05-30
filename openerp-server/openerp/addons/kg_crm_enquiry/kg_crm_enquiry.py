@@ -2850,7 +2850,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 					cr.execute(''' 
 								
 								-- Bed Assembly ----
-								select id,bot_id,position_id,qty,header_id as bom_id
+								select id,bot_id,qty,position_id,header_id as bom_id
 								from ch_bot_details
 								where header_id =
 								(

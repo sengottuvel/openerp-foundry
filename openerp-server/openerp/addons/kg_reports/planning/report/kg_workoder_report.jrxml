@@ -369,6 +369,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 	<field name="viscosity_crt_factor" class="java.lang.String"/>
 	<field name="supply_ref" class="java.lang.String"/>
 	<field name="dealer_name" class="java.lang.String"/>
+	<field name="framesize" class="java.lang.String"/>
 	<group name="WO Group" isStartNewPage="true">
 		<groupExpression><![CDATA[$F{id}]]></groupExpression>
 		<groupHeader>
