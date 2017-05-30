@@ -2266,6 +2266,11 @@ instance.web.form.FieldChar = instance.web.form.AbstractField.extend(instance.we
     },
     initialize_content: function() {
         this.setupFocus(this.$('input'));
+        var myString = $('body').find('.append_percentage').text();
+	var lastChar = myString.substr(myString.length -3);
+	if(lastChar !== '(%)'){
+		$('body').find('.append_percentage').append('(%)');
+	}
     },
     store_dom_value: function () {
         if (!this.get('effective_readonly')
