@@ -2995,6 +2995,7 @@ class ch_kg_crm_pumpmodel(osv.osv):
 						if qty == 0:
 							vertical_bot_qty = vertical_bot_details['qty'] or 0
 						if qty > 0:
+							print"vertical_bot_details['qty']vertical_bot_details['qty']",vertical_bot_details['qty'],type(vertical_bot_details['qty'])
 							vertical_bot_qty = qty * (vertical_bot_details['qty'] or 0)
 						bot_vals.append({
 							
