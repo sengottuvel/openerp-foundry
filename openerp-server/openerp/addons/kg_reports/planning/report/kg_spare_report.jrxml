@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Workorder_print" pageWidth="842" pageHeight="605" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="0.8857805000000005"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.y" value="96"/>
 	<subDataset name="dataset2">
 		<parameter name="header_id" class="java.lang.Integer"/>
 		<queryString>
@@ -346,7 +346,8 @@ wo_line.note as remarks,
 to_char(CURRENT_DATE::date,'dd-mm-YYYY') as date,
 to_char(CURRENT_TIMESTAMP, 'DD-MM-YYYY HH12:MI:SS AM') AS new_Date,
 pump_crm.s_no as serial_no,
-dealer.name as delear
+dealer.name as delear,
+coalesce(pump_crm.framesize,'-') as framesize
 
 from ch_work_order_details wo_line
 left join kg_pumpmodel_master pump on pump.id = wo_line.pump_model_id
@@ -419,6 +420,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 	<field name="new_date" class="java.lang.String"/>
 	<field name="serial_no" class="java.lang.String"/>
 	<field name="delear" class="java.lang.String"/>
+	<field name="framesize" class="java.lang.String"/>
 	<group name="WO Group Header" isStartNewPage="true">
 		<groupExpression><![CDATA[$F{id}]]></groupExpression>
 		<groupHeader>
@@ -563,7 +565,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 				</textField>
 				<image>
 					<reportElement x="87" y="1" width="69" height="31"/>
-					<imageExpression><![CDATA["/OpenERP/Sam_Turbo/openerp-foundry/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
+					<imageExpression><![CDATA["/OPENERP/Sam_Turbo/sam_turbo_dev/openerp-server/openerp/addons/web/static/src/img/th_sampumps.jpg"]]></imageExpression>
 				</image>
 				<staticText>
 					<reportElement mode="Transparent" x="421" y="115" width="224" height="21" isRemoveLineWhenBlank="true"/>
@@ -862,7 +864,7 @@ and wo_line.order_category ='spare' order by wo_line.order_no]]>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
 						<font size="10"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{motor_make}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{motor_make}+" / "+$F{framesize}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Transparent" x="421" y="264" width="382" height="16"/>
