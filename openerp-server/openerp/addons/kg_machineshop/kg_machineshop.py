@@ -564,7 +564,8 @@ class kg_id_commitment(osv.osv):
 		'bot_status': fields.char('BOT Status'),
 		'hydro_status': fields.date('Hydro Status'),
 		'testing_status': fields.date('Testing status'),
-		'painting_status': fields.date('Painting status'),		
+		'painting_status': fields.date('Painting status'),
+		
 		
 		
 		### Entry Info ####

@@ -568,12 +568,12 @@
 							<field name="location" readonly="1"/>
 							<field name="pump_model_id" readonly="1"/>
 							<field name="inspection" readonly="1"/>
-							<field name="cc_date"/>
-							<field name="rm_date"/>							
+							<field name="cc_date" readonly="1"/>
+							<field name="rm_date" readonly="1"/>							
 							<field name="ms_material_date"/>
-							<field name="in_house_date"/>
-							<field name="in_house_com_date"/>
-							<field name="id_date"/>						
+							<field name="in_house_date" />
+							<field name="in_house_com_date" readonly="1"/>
+							<field name="id_date" readonly="1"/>						
 							<field name="hydro_status"/>						
 							<field name="acc_commit_date" />
 							<field name="rfd_date" />
@@ -589,18 +589,18 @@
 							<field name="packing_type" readonly="1"/>
 							<field name="spc_remarks" readonly="1"/>
 							<field name="bot_status"/>
-							<field name="pouring_date" />							
+							<field name="pouring_date" readonly="1"/>							
 							<field name="ms_material_status" />
 							<field name="sub_con_date" />
-							<field name="sub_comple_date" />
-							<field name="accessories" />
+							<field name="sub_comple_date" readonly="1"/>
+							<field name="accessories" readonly="1"/>
 							<field name="testing_status" />
 							<field name="painting_status" />
 							<field name="id_commitment_date" />
 							<field name="despatch_date" />
 							<field name="acc_material_status" />							
 							<field name="state" readonly="1" style="width: 30%%" class="att_state_change"/>	
-						</group>				
+						</group>					
 					</group>
 					<group string='Remarks' attrs="{'invisible':[('state','=','draft')]}">
 						<group>	

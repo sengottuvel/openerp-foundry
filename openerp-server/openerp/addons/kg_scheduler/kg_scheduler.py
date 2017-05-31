@@ -520,4 +520,38 @@ class kg_scheduler(osv.osv):
 	
 	## Minimum stock qty atuo indent creation process end
 	
+	
+	def auto_scheduler_pouring_date(self,cr,uid,ids=0,context = None):		
+		cr.execute("""select auto_scheduler_foundry('Pouring_Date')""")
+		data = cr.fetchall();
+		print "data<<<<<<<<<", data
+		return True
+	
+	def auto_scheduler_cc_date(self,cr,uid,ids=0,context = None):		
+		cr.execute("""select auto_scheduler_foundry('CC_Date')""")
+		data = cr.fetchall();
+		print "data<<<<<<<<<", data
+		return True
+	
+	def auto_scheduler_id_date(self,cr,uid,ids=0,context = None):		
+		cr.execute("""select auto_scheduler_foundry('ID_Date')""")
+		data = cr.fetchall();
+		print "data<<<<<<<<<", data
+		return True
+	def auto_scheduler_in_house_date(self,cr,uid,ids=0,context = None):		
+		cr.execute("""select auto_scheduler_foundry('inhouse_Date')""")
+		data = cr.fetchall();
+		print "data<<<<<<<<<", data
+		return True
+	def auto_scheduler_sc_wo_date(self,cr,uid,ids=0,context = None):		
+		cr.execute("""select auto_scheduler_foundry('sc_wo_Date')""")
+		data = cr.fetchall();
+		print "data<<<<<<<<<", data
+		return True
+	def auto_scheduler_rm_date(self,cr,uid,ids=0,context = None):		
+		cr.execute("""select auto_scheduler_foundry('RM_Date')""")
+		data = cr.fetchall();
+		print "data<<<<<<<<<", data
+		return True
+	
 kg_scheduler()

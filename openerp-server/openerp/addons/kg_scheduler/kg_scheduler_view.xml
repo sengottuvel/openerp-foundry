@@ -16,7 +16,16 @@
 					<button name="opening_stock_entry_creation" string="Opening Stock" type="object" class="oe_highlight"/>
 					<button name="opening_stock_mail_creation" string="Open Stock Mail" type="object" class="oe_highlight"/>
 					<button name="auto_purchase_indent" string="Auto Indent" type="object" class="oe_highlight"/>
-				</header>			
+				</header>	
+				<group>
+					<button name="auto_scheduler_pouring_date" string="Pouring Date" type="object" class="oe_highlight"/>
+					<button name="auto_scheduler_cc_date" string="CC Date" type="object" class="oe_highlight"/>
+					<button name="auto_scheduler_id_date" string="ID Date" type="object" class="oe_highlight"/>
+					<button name="auto_scheduler_in_house_date" string="IN House Date" type="object" class="oe_highlight"/>
+					<button name="auto_scheduler_sc_wo_date" string="SUB Completed Date" type="object" class="oe_highlight"/>
+					<button name="auto_scheduler_rm_date" string="RM Date" type="object" class="oe_highlight"/>
+				
+				</group>		
 					
 				</form>
 			</field> 
