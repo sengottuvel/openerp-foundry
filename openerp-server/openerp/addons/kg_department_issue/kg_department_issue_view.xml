@@ -119,7 +119,7 @@
 							
 						</field>	
 					</page>
-					<page string="Select Indent" attrs="{'invisible': ['|',('dep_issue_type','=','direct'),('issue_type','in',('service'))]}">
+					<page string="Select Indent" autofocus="True" attrs="{'invisible': ['|',('dep_issue_type','=','direct'),('issue_type','not in',('material'))]}">
 						<field name="kg_dep_indent_line" colspan="4" nolabel="1"  >
 							<tree string = "Dep Indent" editable="bottom">
 								<field name="indent_id" readonly="1"/>
@@ -132,7 +132,7 @@
 						</field>
 						<button name="update_depindent_to_issue" type='object' states="draft,confirmed" string="Save Record"/>
 					</page>
-					<page string="Select Indent" attrs="{'invisible': ['|',('dep_issue_type','=','direct'),('issue_type','in',('material'))]}">
+					<page string="Select Indent" autofocus="True" attrs="{'invisible': ['|',('dep_issue_type','=','direct'),('issue_type','not in',('service'))]}">
 						<field name="kg_service_indent_line" colspan="4" nolabel="1"  >
 								<tree string = "Service Indent" editable="bottom">
 									<field name="service_id" readonly="1"/>

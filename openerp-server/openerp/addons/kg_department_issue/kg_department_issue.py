@@ -108,7 +108,7 @@ class kg_department_issue(osv.osv):
 		'active': True,
 		'confirm_flag': False,
 		'approve_flag': False,
-		#'save_flag': False,
+		#'save_flag': False, 
 		'issue_return': False,
 		'company_id' : lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'kg.department.issue', context=c),
 		'user_id': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).id ,
@@ -243,6 +243,15 @@ class kg_department_issue(osv.osv):
 				for key,group in enumerate(groups):
 					#~ qty = sum(map(lambda x:float(x.issue_pending_qty),group)) #TODO: qty
 					qty = map(lambda x:float(x.issue_pending_qty),group)[0]
+					cutting_qty = 0
+					if obj.department_id.name == 'DP2':
+						if group[0].qty == group[0].cutting_qty:
+							cutting_qty = qty
+						elif group[0].qty != group[0].cutting_qty:
+							cutting_qty = group[0].issue_pending_qty / (group[0].qty/group[0].cutting_qty)
+						else:
+							cutting_qty = qty
+					
 					depindent_line_ids = map(lambda x:x.id,group)
 					prod_browse = group[0].product_id
 					ms_bot_id = group[0].ms_bot_id.id
@@ -268,8 +277,8 @@ class kg_department_issue(osv.osv):
 						'product_id':prod_browse.id,
 						'brand_id':brand_id,
 						'uom_id':uom,
-						'issue_qty':qty,
-						'issue_qty_2':qty,
+						'issue_qty':cutting_qty,
+						'issue_qty_2':cutting_qty,
 						'indent_qty':qty,
 						'name':prod_browse.name,
 						'location_id':main_location,
@@ -524,28 +533,26 @@ class kg_department_issue(osv.osv):
 				
 				if issue_record.dep_issue_type == 'from_indent':
 					self.pool.get('kg.department.issue.line').write(cr,uid,line_ids.id,{'state':'done'})
-					## MS store inward process
-					if line_ids.issue_id.department_id.name == 'DP2':
-						ms_obj = self.pool.get('kg.machineshop').search(cr,uid,[('order_line_id','=',line_ids.w_order_line_id.id),('ms_id','=',line_ids.ms_bot_id.id),('state','=','raw_pending')])
-						if ms_obj:
-							ms_rec = self.pool.get('kg.machineshop').browse(cr,uid,ms_obj[0])
-							self.pool.get('kg.machineshop').write(cr,uid,ms_rec.id,{'state':'accept'})
-						cr.execute(""" update kg_ms_operations set reject_state = 'issued' where id in (
-							select id from kg_ms_operations where state = 'reject' 
-							and order_line_id = %s and reject_state = 'not_issued' and ms_type = 'ms_item'
-							and item_code = '%s' and moc_id = %s limit 1) """%(line_ids.w_order_line_id.id,line_ids.ms_bot_id.code,line_ids.wo_moc_id.id))
-					
-					## BOT store inward process
-					if line_ids.issue_id.department_id.name == 'DP3':
+					if line_ids.w_order_line_id:
+						## MS store inward process
+						if line_ids.issue_id.department_id.name == 'DP2':
+							ms_obj = self.pool.get('kg.machineshop').search(cr,uid,[('order_line_id','=',line_ids.w_order_line_id.id),('ms_id','=',line_ids.ms_bot_id.id),('state','=','raw_pending')])
+							if ms_obj:
+								ms_rec = self.pool.get('kg.machineshop').browse(cr,uid,ms_obj[0])
+								self.pool.get('kg.machineshop').write(cr,uid,ms_rec.id,{'state':'accept'})
+							cr.execute(""" update kg_ms_operations set reject_state = 'issued' where id in (
+								select id from kg_ms_operations where state = 'reject' 
+								and order_line_id = %s and reject_state = 'not_issued' and ms_type = 'ms_item'
+								and item_code = '%s' and moc_id = %s limit 1) """%(line_ids.w_order_line_id.id,line_ids.ms_bot_id.code,line_ids.wo_moc_id.id))
 						
-						ms_obj = self.pool.get('kg.ms.stores').search(cr,uid,[('order_line_id','=',line_ids.w_order_line_id.id),('item_code','=',line_ids.ms_bot_id.code),('moc_id','=',line_ids.wo_moc_id.id),
-																			('accept_state','=','pending'),('ms_type','=','bot_item')])
-						print"ms_objms_objms_objms_obj",ms_obj
-						if ms_obj:
-							ms_rec = self.pool.get('kg.ms.stores').browse(cr,uid,ms_obj[0])
-							print"ms_recms_recms_recms_rec",ms_rec.id
-							self.pool.get('kg.ms.stores').write(cr,uid,ms_rec.id,{'accept_state':'waiting'})
-				
+						## BOT store inward process
+						if line_ids.issue_id.department_id.name == 'DP3':
+							ms_obj = self.pool.get('kg.ms.stores').search(cr,uid,[('order_line_id','=',line_ids.w_order_line_id.id),('item_code','=',line_ids.ms_bot_id.code),('moc_id','=',line_ids.wo_moc_id.id),
+																				('accept_state','=','pending'),('ms_type','=','bot_item')])
+							if ms_obj:
+								ms_rec = self.pool.get('kg.ms.stores').browse(cr,uid,ms_obj[0])
+								self.pool.get('kg.ms.stores').write(cr,uid,ms_rec.id,{'accept_state':'waiting'})
+					
 				stock_move_obj.create(cr,uid,
 				{
 				'dept_issue_id':issue_record.id,
@@ -605,6 +612,13 @@ class kg_department_issue(osv.osv):
 							if indent_uom != move_uom:
 								if issue_used_qty <= issue_pending_qty:
 									pending_depindent_qty = issue_pending_qty - (issue_used_qty * product_record.po_uom_coeff)
+									if issue_record.department_id.name == 'DP2':
+										if bro_record.qty == bro_record.cutting_qty:
+											pending_depindent_qty = pending_depindent_qty
+										elif bro_record.qty != bro_record.cutting_qty:
+											pending_depindent_qty = issue_pending_qty - (((bro_record.qty/bro_record.cutting_qty) * issue_qty) * product_record.po_uom_coeff)
+										else:
+											pending_depindent_qty = pending_depindent_qty
 									sql = """ update kg_depindent_line set issue_pending_qty=%s where id = %s"""%(pending_depindent_qty,bro_record.id)
 									cr.execute(sql)
 									break
@@ -615,10 +629,17 @@ class kg_department_issue(osv.osv):
 									sql = """ update kg_depindent_line set issue_pending_qty=%s where id = %s"""%(pending_depindent_qty,bro_record.id)
 									cr.execute(sql)
 									if remain_qty < 0:
-										break		   
+										break
 							else:
 								if issue_used_qty <= issue_pending_qty:
 									pending_depindent_qty =  issue_pending_qty - issue_used_qty
+									if issue_record.department_id.name == 'DP2':
+										if bro_record.qty == bro_record.cutting_qty:
+											pending_depindent_qty = pending_depindent_qty
+										elif bro_record.qty != bro_record.cutting_qty:
+											pending_depindent_qty = issue_pending_qty - ((bro_record.qty/bro_record.cutting_qty) * issue_qty)
+										else:
+											pending_depindent_qty = pending_depindent_qty
 									sql = """ update kg_depindent_line set issue_pending_qty=%s where id = %s"""%(pending_depindent_qty,bro_record.id)
 									cr.execute(sql)
 									break
@@ -629,7 +650,8 @@ class kg_department_issue(osv.osv):
 									sql = """ update kg_depindent_line set issue_pending_qty=%s where id = %s"""%(pending_depindent_qty,bro_record.id)
 									cr.execute(sql)
 									if remain_qty < 0:
-										break	  
+										break
+					
 					if issue_record.issue_type == 'service':
 						serviceind_line_obj = self.pool.get('kg.service.indent.line')   
 						self.write(cr, uid, ids, {'state': 'done'})
