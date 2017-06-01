@@ -130,21 +130,13 @@ class kg_department_issue(osv.osv):
 				for item in rec.issue_line_ids:
 					if item.indent_qty > 0 and item.indent_line_id:
 						indent_rec = self.pool.get('kg.depindent.line').browse(cr,uid,item.indent_line_id.id)
-						print"indent_recindent_rec",indent_rec.id
 						if indent_rec.cutting_qty != indent_rec.qty:
-							print"round(item.issue_qty,2)round(item.issue_qty,2)",round(item.issue_qty,2)
-							print"round(indent_rec.qty,2)round(indent_rec.qty,2)",round(indent_rec.qty,2)
-							print"indent_rec.cutting_qty*100indent_rec.cutting_qty*100",indent_rec.cutting_qty*100
 							#~ qty = (round(item.issue_qty,2)*100) / ((round(indent_rec.qty,2)*100)/(indent_rec.cutting_qty*100))
 							qty = (indent_rec.qty/indent_rec.cutting_qty) * item.issue_qty
-							print"qtyqtyqty",qty
 							number_dec = str(qty-int(qty))[1:]
-							print"number_decnumber_dec",number_dec
 							number_dec = float(number_dec)
-							print"number_decnumber_decnumber_decnumber_dec",number_dec
 							if number_dec > 0.00:
-								raise osv.except_osv(_('Warning!'),
-									_('System not allow to issue %s. Insufficient MS Qty"'%(item.product_id.name)))
+								raise osv.except_osv(_('Warning!'),_('System not allow to issue %s. Insufficient MS Qty"'%(item.product_id.name)))
 							else:
 								pass
 		return True
