@@ -1616,7 +1616,7 @@ where foundry_wiz_id = $P{wiz_id})]]>
 						<rightPen lineWidth="0.75"/>
 					</box>
 					<textElement verticalAlignment="Middle">
-						<font size="8"/>
+						<font size="7"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{dealer_name}]]></textFieldExpression>
 				</textField>
